@@ -1,0 +1,16 @@
+#!/bin/env python2
+
+import ROOT
+import sys
+from gna import dispatch
+
+if __name__ == "__main__":
+    argv = sys.argv
+    sys.argv = [argv[0]]
+
+    ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
+    ROOT.gSystem.Load('libGlobalNuAnalysis2.so')
+
+    sys.argv = argv
+
+    dispatch.run()

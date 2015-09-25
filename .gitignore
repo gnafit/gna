@@ -1,0 +1,16 @@
+build/
+*~
+\#*
+*.pyc
+.\#*
+*.aux
+*.pda
+*.toc
+*.log
+*.fdb*
+*.out
+*.pdf
+*.blg
+*.snm
+*.nav
+*.o
