@@ -276,7 +276,7 @@ namespace TransformationTypes {
   }
 
   inline Handle Accessor::operator[](const std::string &name) const {
-    TR_DPRINTF("accessing %s on %p", name.c_str(), m_parent);
+    TR_DPRINTF("accessing %s on %p", name.c_str(), (void*)m_parent);
     return Handle(m_parent->getEntry(name));
   }
 
@@ -374,11 +374,40 @@ private:
   std::list<std::tuple<size_t, MemFunction>> m_memFuncs;
   std::list<std::tuple<size_t, MemTypesFunction>> m_memTypesFuncs;
 
-  void bindMemFunction(size_t idx, MemFunction);
-  void bindMemTypesFunction(size_t idx, MemTypesFunction);
-  void unbindMemFunction(size_t idx);
-  void unbindMemTypesFunction(size_t idx);
-  void rebindMemFunctions();
+  void bindMemFunction(size_t idx, MemFunction func) {
+    unbindMemFunction(idx);
+    m_memFuncs.emplace_back(idx, func);
+    using namespace std::placeholders;
+    baseobj()->m_entries[idx].fun = std::bind(func, obj(), _1, _2);
+  }
+  void bindMemTypesFunction(size_t idx, MemTypesFunction func) {
+    unbindMemTypesFunction(idx);
+    m_memTypesFuncs.emplace_back(idx, func);
+    using namespace std::placeholders;
+    baseobj()->m_entries[idx].typefun = std::bind(func, obj(), _1, _2);
+  }
+  void unbindMemFunction(size_t idx) {
+    auto &lst = m_memFuncs;
+    lst.remove_if([idx](const std::tuple<size_t, MemFunction> &f) {
+        return std::get<0>(f) == idx;
+      });
+  }
+  void unbindMemTypesFunction(size_t idx) {
+    auto &lst = m_memTypesFuncs;
+    lst.remove_if([idx](const std::tuple<size_t, MemTypesFunction> &f) {
+        return std::get<0>(f) == idx;
+      });
+  }
+  void rebindMemFunctions() {
+    using namespace std::placeholders;
+    auto &entries = baseobj()->m_entries;
+    for (const auto &f: m_memFuncs) {
+      entries[std::get<0>(f)].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+    }
+    for (const auto &f: m_memTypesFuncs) {
+      entries[std::get<0>(f)].typefun = std::bind(std::get<1>(f), obj(), _1, _2);
+    }
+  }
 };
 
 #endif // TRANSFORMATIONBASE_H

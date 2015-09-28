@@ -3,6 +3,7 @@ import sys
 import os
 import os.path
 from pkgutil import iter_modules
+from gna.env import env
 
 def arggroups(argv):
     breaks = [i+1 for i, arg in enumerate(argv[1:], 1) if arg == '--']
@@ -49,7 +50,10 @@ def run():
             msg = 'unknown module %s' % name
             raise Exception(msg)
         cmdcls, cmdopts = loadcmdclass(modules, name, group)
-        runlist.append((cmdcls, cmdopts))
+        obj = cmdcls(cmdopts)
+        obj.env = env
+        obj.init()
+        runlist.append(obj)
 
-    for cmdcls, cmdopts in runlist:
-        cmdcls(cmdopts).run()
+    for obj in runlist:
+        obj.run()

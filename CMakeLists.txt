@@ -13,13 +13,20 @@ set (SOURCES
   core/Parametrized.cc
   core/GNAObject.cc
   core/PredictionSet.cc
+  core/UncertainParameter.cc
+  core/ParametersGroup.cc
+  neutrino/OscProb2nu.cc
   )
 
 set (HEADERS
+  GNAObject.hh
+  UncertainParameter.hh
   PredictionSet.hh
+  PointSet.hh
+  OscProb2nu.hh
   )
   
-include_directories(core/)
+include_directories(core/ neutrino/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)

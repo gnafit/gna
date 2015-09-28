@@ -123,11 +123,11 @@ bool Source::connect(Sink *newsink) {
   if (!TransformationTypes::isCompatible(newsink, this)) {
     return false;
   }
-  TR_DPRINTF("connecting source `%s'[%p] to sink `%s'[%p]", name.c_str(), this,
-             newsink->name.c_str(), newsink);
+  TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
   sink->entry->tainted.subscribe(entry->taintedsrcs);
   newsink->sources.push_back(this);
+  newsink->entry->evaluateTypes();
   entry->evaluateTypes();
   return true;
 }
@@ -203,45 +203,4 @@ void Entry::evaluateTypes() {
 
 void Entry::updateTypes() {
   evaluateTypes();
-}
-
-template <typename Derived>
-void Transformation<Derived>::bindMemFunction(size_t idx, MemFunction func) {
-  unbindMemFunction(idx);
-  m_memFuncs.emplace_back(idx, func);
-}
-
-template <typename Derived>
-void Transformation<Derived>::bindMemTypesFunction(size_t idx,
-                                                   MemTypesFunction func) {
-  unbindMemTypesFunction(idx);
-  m_memTypesFuncs.emplace_back(idx, func);
-}
-
-template <typename Derived>
-void Transformation<Derived>::unbindMemFunction(size_t idx) {
-  auto &lst = m_memFuncs;
-  lst.remove_if([idx](const std::tuple<size_t, MemFunction> &f) {
-      return std::get<0>(f) == idx;
-    });
-}
-
-template <typename Derived>
-void Transformation<Derived>::unbindMemTypesFunction(size_t idx) {
-  auto &lst = m_memTypesFuncs;
-  lst.remove_if([idx](const std::tuple<size_t, MemTypesFunction> &f) {
-      return std::get<0>(f) == idx;
-    });
-}
-
-template <typename Derived>
-void Transformation<Derived>::rebindMemFunctions() {
-  using namespace std::placeholders;
-  auto &entries = baseobj()->m_entries;
-  for (const auto &f: m_memFuncs) {
-    entries[std::get<0>(f)].fun = std::bind(std::get<1>(f), obj(), _1, _2);
-  }
-  for (const auto &f: m_memTypesFuncs) {
-    entries[std::get<0>(f)].typefun = std::bind(std::get<1>(f), obj(), _1, _2);
-  }
 }

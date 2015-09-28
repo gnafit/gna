@@ -22,6 +22,22 @@
 #pragma link C++ class GNAObject::Variables+;
 #pragma link C++ class GNAObject::Evaluables+;
 
+#pragma link C++ class ExpressionsProvider+;
+
+#pragma link C++ class ParameterWrapper+;
+#pragma link C++ class Uncertain+;
+#pragma link C++ class GaussianValue+;
+#pragma link C++ class Parameter+;
+#pragma link C++ class GaussianParameter+;
+#pragma link C++ class UniformAngleParameter+;
+#pragma link C++ typedef LimitsPair;
+#pragma link C++ class std::vector<LimitsPair>+;
+
 #pragma link C++ class PredictionSet+;
+#pragma link C++ class PointSet+;
+
+#pragma link C++ class OscillationExpressions+;
+
+#pragma link C++ class OscProb2nu+;
 
 #endif

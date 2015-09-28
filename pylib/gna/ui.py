@@ -7,3 +7,9 @@ class basecmd(object):
 
     def __init__(self, args):
         self.opts = args
+
+    def init(self):
+        pass
+
+    def run(self):
+        pass
