@@ -20,12 +20,7 @@ public:
 
   void update() const;
   const double *data() const;
-
-  const Data<const double> &view() const;
 protected:
-  Status build(Arguments args, Returns rets);
-  Status buildTypes(ArgumentTypes args, ReturnTypes rets);
-
   Handle m_transform;
 
   ClassDef(PredictionSet, 1);

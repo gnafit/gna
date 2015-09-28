@@ -40,10 +40,10 @@ public:
   Variables variables;
   Evaluables evaluables;
 protected:
-  typedef TransformationTypes::Arguments Arguments;
-  typedef TransformationTypes::Returns Returns;
-  typedef TransformationTypes::ArgumentTypes ArgumentTypes;
-  typedef TransformationTypes::ReturnTypes ReturnTypes;
+  typedef TransformationTypes::Args Args;
+  typedef TransformationTypes::Rets Rets;
+  typedef TransformationTypes::Atypes Atypes;
+  typedef TransformationTypes::Rtypes Rtypes;
   typedef TransformationTypes::Function Function;
   typedef TransformationTypes::TypesFunction TypesFunction;
   typedef TransformationTypes::Channel Channel;

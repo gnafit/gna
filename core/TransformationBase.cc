@@ -13,24 +13,15 @@ using TransformationTypes::InputHandle;
 using TransformationTypes::OutputHandle;
 using TransformationTypes::Handle;
 
-using TransformationTypes::ArgumentTypes;
+using TransformationTypes::Atypes;
 
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
 
-using TransformationTypes::Function;
-using TransformationTypes::TypesFunction;
-
-Entry::Entry(const std::string &name,
-             const std::vector<Channel> &inputs,
-             const std::vector<Channel> &outputs,
-             Function fun, TypesFunction typefun,
-             const Base *parent)
-  : name(name), sources(inputs.size()), sinks(outputs.size()),
-    fun(fun), typefun(typefun), parent(parent)
+Entry::Entry(const std::string &name, const Base *parent)
+  : name(name), parent(parent)
 {
   taintedsrcs.subscribe(tainted);
-  initSourcesSinks(inputs, outputs);
 }
 
 Entry::Entry(const Entry &other, const Base *parent)
@@ -51,14 +42,12 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
 InputHandle Entry::addSource(const Channel &input) {
   Source *s = new Source(input, this);
   sources.push_back(s);
-  updateTypes();
   return InputHandle(*s);
 }
 
 OutputHandle Entry::addSink(const Channel &output) {
   Sink *s = new Sink(output, this);
   sinks.push_back(s);
-  updateTypes();
   return OutputHandle(*s);
 }
 
@@ -89,7 +78,7 @@ void Handle::dump() const {
       std::cerr << "connected to ";
       std::cerr << s.sink->entry->name << "/" << s.sink->name << ", ";
       std::cerr << "type: ";
-      s.sink->data.type.dump();
+      s.sink->data->type.dump();
     } else {
       std::cerr << "not connected" << std::endl;
     }
@@ -100,7 +89,7 @@ void Handle::dump() const {
     std::cerr << "      " << i++ << ": " << s.name << ", ";
     std::cerr << s.sources.size() << " consumers";
     std::cerr << ", type: ";
-    s.data.type.dump();
+    s.data->type.dump();
   }
 }
 
@@ -121,25 +110,6 @@ void Base::copyEntries(const Base &other) {
   std::transform(other.m_entries.begin(), other.m_entries.end(),
                  std::back_inserter(m_entries),
                  [this](const Entry &e) { return new Entry{e, this}; });
-}
-
-TypesFunction Base::passTypesFunction(const std::string &name,
-                                      const std::vector<Channel> &inputs,
-                                      const std::vector<Channel> &outputs) {
-  static auto passtypes = [](ArgumentTypes args, ReturnTypes rets) -> Status {
-    if (rets.size() > 0) {
-      for (size_t i = 0; i < args.size(); ++i) {
-        rets[i] = args[i];
-      }
-    }
-    return Status::Success;
-  };
-  if (outputs.size() > 0 && outputs.size() != inputs.size()) {
-    throw std::runtime_error(
-      (format("Transformation: nargs != nrets number for `%1%'") % name).str()
-      );
-  }
-  return passtypes;
 }
 
 bool Source::connect(Sink *newsink) {
@@ -170,24 +140,10 @@ bool TransformationTypes::isCompatible(const Channel *sink,
   return true;
 }
 
-size_t Base::addEntry(const std::string &name,
-                      const std::vector<Channel> &inputs,
-                      const std::vector<Channel> &outputs,
-                      Function fun, TypesFunction typefun) {
+size_t Base::addEntry(const std::string &name) {
   size_t idx = m_entries.size();
-  Entry *e = new Entry{name, inputs, outputs, fun, typefun, this};
+  Entry *e = new Entry(name, this);
   m_entries.push_back(e);
-  TR_DPRINTF("added entry `%s', idx = %lu", name.c_str(), idx);
-#ifdef TRANSFORMATION_DEBUG
-  for (const auto &s: m_entries.back().sources) {
-    TR_DPRINTF("source `%s'", s.name.c_str());
-  }
-  for (const auto &s: m_entries.back().sinks) {
-    TR_DPRINTF("sink `%s'", s.name.c_str());
-    s.data.type.dump();
-  }
-#endif // TRANSFORMATION_DEBUG
-  e->evaluateTypes();
   return idx;
 }
 
@@ -203,19 +159,33 @@ Entry &Base::getEntry(const std::string &name) {
 }
 
 void Entry::evaluateTypes() {
-  ArgumentTypes args(this);
-  ReturnTypes rets(this);
-  Status st = typefun(args, rets);
+  Atypes args(this);
+  Rtypes rets(this);
+  Status st = Status::Undefined;
+  if (!typefun) {
+    if (rets.size() > 0) {
+      if (sinks.size() != sources.size()) {
+        throw std::runtime_error(
+          (format("Transformation: nargs != nrets for `%1%'") % name).str()
+          );
+      }
+      for (size_t i = 0; i < args.size(); ++i) {
+        rets[i] = args[i];
+      }
+    }
+    st = Status::Success;
+  } else {
+    st = typefun(args, rets);
+  }
   std::set<Entry*> deps;
   if (st == Status::Success) {
     for (size_t i = 0; i < sinks.size(); ++i) {
-      if (sinks[i].data.type == rets[i]) {
+      if (sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
-      sinks[i].data.type = rets[i];
-      sinks[i].data.allocate();
+      sinks[i].data.reset(new Data<double>(rets[i]));
 #ifdef TRANSFORMATION_DEBUG
-      sinks[i].data.type.dump();
+      sinks[i].data->type.dump();
 #endif // TRANSFORMATION_DEBUG
       for (Source *depsrc: sinks[i].sources) {
         deps.insert(depsrc->entry);
@@ -236,18 +206,42 @@ void Entry::updateTypes() {
 }
 
 template <typename Derived>
+void Transformation<Derived>::bindMemFunction(size_t idx, MemFunction func) {
+  unbindMemFunction(idx);
+  m_memFuncs.emplace_back(idx, func);
+}
+
+template <typename Derived>
+void Transformation<Derived>::bindMemTypesFunction(size_t idx,
+                                                   MemTypesFunction func) {
+  unbindMemTypesFunction(idx);
+  m_memTypesFuncs.emplace_back(idx, func);
+}
+
+template <typename Derived>
+void Transformation<Derived>::unbindMemFunction(size_t idx) {
+  auto &lst = m_memFuncs;
+  lst.remove_if([idx](const std::tuple<size_t, MemFunction> &f) {
+      return std::get<0>(f) == idx;
+    });
+}
+
+template <typename Derived>
+void Transformation<Derived>::unbindMemTypesFunction(size_t idx) {
+  auto &lst = m_memTypesFuncs;
+  lst.remove_if([idx](const std::tuple<size_t, MemTypesFunction> &f) {
+      return std::get<0>(f) == idx;
+    });
+}
+
+template <typename Derived>
 void Transformation<Derived>::rebindMemFunctions() {
   using namespace std::placeholders;
-  size_t idx;
-  MemFunction mfun;
-  MemTypesFunction mtypefun;
-  for (const auto &funs: m_memfuns) {
-    std::tie(idx, mfun, mtypefun) = funs;
-    if (mfun) {
-      baseobj()->m_entries[idx].fun = std::bind(mfun, obj(), _1, _2);
-    }
-    if (mtypefun) {
-      baseobj()->m_entries[idx].typefun = std::bind(mtypefun, obj(), _1, _2);
-    }
+  auto &entries = baseobj()->m_entries;
+  for (const auto &f: m_memFuncs) {
+    entries[std::get<0>(f)].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+  }
+  for (const auto &f: m_memTypesFuncs) {
+    entries[std::get<0>(f)].typefun = std::bind(std::get<1>(f), obj(), _1, _2);
   }
 }

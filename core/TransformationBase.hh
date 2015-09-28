@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <functional>
 #include <type_traits>
 
@@ -31,12 +32,12 @@ namespace TransformationTypes {
     DataType channeltype;
   };
 
-  class Entry;
+  struct Entry;
   struct Source;
   struct Sink: public Channel, public boost::noncopyable {
     Sink(const Channel &chan, Entry *entry);
 
-    Data<double> data;
+    std::unique_ptr<Data<double>> data;
     taintflag tainted;
     std::vector<Source*> sources;
     Entry *entry;
@@ -48,7 +49,7 @@ namespace TransformationTypes {
       { }
     bool connect(Sink *newsink);
     bool materialized() const {
-      return sink && sink->data.defined();
+      return sink && sink->data && sink->data->defined();
     }
     const Sink *sink;
     Entry *entry;
@@ -92,24 +93,19 @@ namespace TransformationTypes {
     return in.m_source->connect(m_sink);
   }
 
-  struct Arguments;
-  struct Returns;
-  struct ArgumentTypes;
-  struct ReturnTypes;
-  typedef std::function<Status(Arguments, Returns)> Function;
-  typedef std::function<Status(ArgumentTypes, ReturnTypes)> TypesFunction;
+  struct Args;
+  struct Rets;
+  struct Atypes;
+  struct Rtypes;
+  typedef std::function<Status(Args, Rets)> Function;
+  typedef std::function<Status(Atypes, Rtypes)> TypesFunction;
 
   class Base;
 
   typedef boost::ptr_vector<Source> SourcesContainer;
   typedef boost::ptr_vector<Sink> SinksContainer;
-  class Entry: public boost::noncopyable {
-  public:
-    Entry(const std::string &name,
-          const std::vector<Channel> &inputs,
-          const std::vector<Channel> &outputs,
-          Function fun, TypesFunction typefun,
-          const Base *parent);
+  struct Entry: public boost::noncopyable {
+    Entry(const std::string &name, const Base *parent);
     Entry(const Entry &other, const Base *parent);
 
     InputHandle addSource(const Channel &input);
@@ -124,7 +120,7 @@ namespace TransformationTypes {
       if (sinks[i].tainted) {
         update();
       }
-      return sinks[i].data;
+      return *sinks[i].data;
     }
 
     std::string name;
@@ -162,47 +158,47 @@ namespace TransformationTypes {
     Entry *m_entry;
   };
 
-  struct Arguments {
-    Arguments(const Entry *e): m_entry(e) { }
-    const Data<const double> &operator[](int i) const {
+  struct Args {
+    Args(const Entry *e): m_entry(e) { }
+    const Data<double> &operator[](int i) const {
       const Source &src = m_entry->sources[i];
       if (src.sink->tainted) {
         src.sink->entry->update();
       }
-      return src.sink->data.view();
+      return *src.sink->data;
     }
     size_t size() const { return m_entry->sources.size(); }
   private:
     const Entry *m_entry;
   };
 
-  struct Returns {
+  struct Rets {
   public:
-    Returns(const Entry *e): m_entry(e) { }
-    const Data<double> &operator[](int i) const {
-      return m_entry->sinks[i].data;
+    Rets(const Entry *e): m_entry(e) { }
+    Data<double> &operator[](int i) const {
+      return *m_entry->sinks[i].data;
     }
     size_t size() const { return m_entry->sinks.size(); }
   private:
     const Entry *m_entry;
   };
 
-  struct ArgumentTypes {
-    ArgumentTypes(const Entry *e): m_entry(e) { }
+  struct Atypes {
+    Atypes(const Entry *e): m_entry(e) { }
     const DataType &operator[](int i) const {
       if (!m_entry->sources[i].materialized()) {
         return DataType::undefined();
       }
-      return m_entry->sources[i].sink->data.type;
+      return m_entry->sources[i].sink->data->type;
     }
     size_t size() const { return m_entry->sources.size(); }
   private:
     const Entry *m_entry;
   };
 
-  struct ReturnTypes {
+  struct Rtypes {
   public:
-    ReturnTypes(const Entry *e)
+    Rtypes(const Entry *e)
       : m_types(new std::vector<DataType>(e->sinks.size()))
       { }
     DataType &operator[](int i) {
@@ -220,16 +216,14 @@ namespace TransformationTypes {
   }
 
   inline Status Entry::evaluate() {
-    Arguments args(this);
-    Returns rets(this);
-    return fun(args, rets);
+    return fun(Args(this), Rets(this));
   }
 
   inline void Entry::update() {
     Status status = evaluate();
     for (auto &sink: sinks) {
       sink.tainted = false;
-      sink.data.status = status;
+      sink.data->status = status;
     }
     tainted = false;
   }
@@ -248,6 +242,8 @@ namespace TransformationTypes {
   class Base {
     template <typename T>
     friend class ::Transformation;
+    template <typename T>
+    friend class Initializer;
     friend class TransformationDescriptor;
     friend class Accessor;
   public:
@@ -257,24 +253,10 @@ namespace TransformationTypes {
     Base(): t_(*this) { }
     bool connectChannel(Source &source, Base *sinkobj, Sink &sink);
     bool compatible(const Channel *sink, const Channel *source) const;
+    Entry &getEntry(size_t idx) {
+      return m_entries[idx];
+    }
     Entry &getEntry(const std::string &name);
-    TypesFunction passTypesFunction(const std::string &name,
-                                    const std::vector<Channel> &inputs,
-                                    const std::vector<Channel> &outputs);
-
-    void transformation_(const std::string &name,
-                         const std::vector<Channel> &inputs,
-                         const std::vector<Channel> &outputs,
-                         Function fun, TypesFunction typefun) {
-      addEntry(name, inputs, outputs, fun, typefun);
-    }
-    void transformation_(const std::string &name,
-                         const std::vector<Channel> &inputs,
-                         const std::vector<Channel> &outputs,
-                         Function fun) {
-      auto typefun = passTypesFunction(name, inputs, outputs);
-      addEntry(name, inputs, outputs, fun, typefun);
-    }
     InputHandle input_(const std::string &name, const Channel &input) {
       return getEntry(name).addSource(input);
     }
@@ -284,16 +266,13 @@ namespace TransformationTypes {
 
     Accessor t_;
   private:
-    size_t addEntry(const std::string &name,
-                    const std::vector<Channel> &inputs,
-                    const std::vector<Channel> &outputs,
-                    Function fun, TypesFunction typefun);
+    size_t addEntry(const std::string &name);
     boost::ptr_vector<Entry> m_entries;
     void copyEntries(const Base &other);
   };
 
   inline Handle Accessor::operator[](int idx) const {
-    return Handle(m_parent->m_entries[idx]);
+    return Handle(m_parent->getEntry(idx));
   }
 
   inline Handle Accessor::operator[](const std::string &name) const {
@@ -306,6 +285,52 @@ namespace TransformationTypes {
   }
 
   bool isCompatible(const Channel *sink, const Channel *source);
+
+  template <typename T>
+  class Initializer {
+  public:
+    typedef std::function<Status(T*,
+                                 TransformationTypes::Args,
+                                 TransformationTypes::Rets)> MemFunction;
+    typedef std::function<Status(T*,
+                                 TransformationTypes::Atypes,
+                                 TransformationTypes::Rtypes)> MemTypesFunction;
+
+    Initializer(Transformation<T> *obj, size_t idx)
+      : m_obj(obj), m_idx(idx) { }
+    Initializer<T> input(const std::string &name, const DataType &dt) {
+      getEntry().addSource({name, dt});
+      return *this;
+    }
+    Initializer<T> output(const std::string &name, const DataType &dt) {
+      getEntry().addSink({name, dt});
+      return *this;
+    }
+    Initializer<T> func(Function func) {
+      m_obj->unbindMemFunction(m_idx);
+      getEntry().fun = func;
+      return *this;
+    }
+    Initializer<T> func(MemFunction func) {
+      m_obj->bindMemFunction(m_idx, func);
+      return *this;
+    }
+    Initializer<T> types(TypesFunction func) {
+      m_obj->unbindMemTypesFunction(m_idx);
+      getEntry().typefun = func;
+      return *this;
+    }
+    Initializer<T> types(MemTypesFunction func) {
+      m_obj->bindMemTypesFunction(m_idx, func);
+      return *this;
+    }
+  protected:
+    Entry &getEntry() {
+      return m_obj->baseobj()->getEntry(m_idx);
+    }
+    Transformation<T> *m_obj;
+    size_t m_idx;
+  };
 }
 
 template <typename Derived>
@@ -313,53 +338,28 @@ class Transformation {
 public:
   Transformation() { }
   Transformation(const Transformation<Derived> &other)
-    : m_memfuns(other.m_memfuns)
+    : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
   {
     rebindMemFunctions();
   }
 
   Transformation<Derived> &operator=(const Transformation<Derived> &other) {
-    m_memfuns = other.m_memfuns;
+    m_memFuncs = other.m_memFuncs;
+    m_memTypesFuncs = other.m_memTypesFuncs;
     rebindMemFunctions();
     return *this;
   }
 protected:
-  typedef std::function<
-    Status(Derived*,
-           TransformationTypes::Arguments,
-           TransformationTypes::Returns)
-    > MemFunction;
-  typedef std::function<
-    Status(Derived*,
-           TransformationTypes::ArgumentTypes,
-           TransformationTypes::ReturnTypes)
-    > MemTypesFunction;
+  friend class TransformationTypes::Initializer<Derived>;
+  typedef typename TransformationTypes::Initializer<Derived> Initializer;
+  typedef typename Initializer::MemFunction MemFunction;
+  typedef typename Initializer::MemTypesFunction MemTypesFunction;
 
-  typedef std::tuple<
-    size_t, MemFunction, MemTypesFunction
-    > MemFunsTuple;
-
-  void transformation_(const std::string &name,
-                       const std::vector<TransformationTypes::Channel> &inputs,
-                       const std::vector<TransformationTypes::Channel> &outputs,
-                       MemFunction mfun, MemTypesFunction mtypefun) {
-    using namespace std::placeholders;
-    auto fun = std::bind(mfun, obj(), _1, _2);
-    auto typefun = std::bind(mtypefun, obj(), _1, _2);
-    size_t idx = baseobj()->addEntry(name, inputs, outputs, fun, typefun);
-    m_memfuns.push_back(std::make_tuple(idx, mfun, mtypefun));
+  TransformationTypes::Initializer<Derived>
+  transformation_(const std::string &name) {
+    auto idx = baseobj()->addEntry(name);
+    return TransformationTypes::Initializer<Derived>(this, idx);
   }
-  void transformation_(const std::string &name,
-                       const std::vector<TransformationTypes::Channel> &inputs,
-                       const std::vector<TransformationTypes::Channel> &outputs,
-                       MemFunction mfun) {
-    using namespace std::placeholders;
-    auto fun = std::bind(mfun, obj(), _1, _2);
-    auto typefun = baseobj()->passTypesFunction(name, inputs, outputs);
-    size_t idx = baseobj()->addEntry(name, inputs, outputs, fun, typefun);
-    m_memfuns.push_back(std::make_tuple(idx, mfun, MemTypesFunction()));
-  }
-  std::vector<MemFunsTuple> m_memfuns;
 private:
   Derived *obj() { return static_cast<Derived*>(this); }
   const Derived *obj() const { return static_cast<const Derived*>(this); }
@@ -371,6 +371,13 @@ private:
     return static_cast<const TransformationTypes::Base*>(obj());
   }
 
+  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;
+  std::list<std::tuple<size_t, MemTypesFunction>> m_memTypesFuncs;
+
+  void bindMemFunction(size_t idx, MemFunction);
+  void bindMemTypesFunction(size_t idx, MemTypesFunction);
+  void unbindMemFunction(size_t idx);
+  void unbindMemTypesFunction(size_t idx);
   void rebindMemFunctions();
 };
 
