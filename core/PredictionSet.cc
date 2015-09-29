@@ -24,7 +24,6 @@ PredictionSet::PredictionSet() {
         }
         return Status::Success;
       });
-
   m_transform = t_["prediction"];
 }
 

@@ -37,6 +37,7 @@ class parameters(object):
         self._exprobjects = []
         self.evaluables = {}
         self.resolver = parresolver(self)
+        self.parameters = {}
 
     def define(self, name, **kwargs):
         ptype = kwargs.get('type', 'gaussian')
@@ -79,6 +80,8 @@ class parameters(object):
             else:
                 raise Exception( "parameter `%s': no central value" % name)
         param.reset()
+        assert name not in self.parameters
+        self.parameters[name] = param
         self.resolver.addparameter(param)
         return param
 
@@ -94,6 +97,9 @@ class parameters(object):
 
     def resolve(self, obj, **kwargs):
         return self.resolver.resolve(obj, **kwargs)
+
+    def __getitem__(self, name):
+        return self.parameters[name]
 
 class parresolver(object):
     def __init__(self, pars):

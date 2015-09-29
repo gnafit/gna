@@ -40,4 +40,6 @@
 
 #pragma link C++ class OscProb2nu+;
 
+#pragma link C++ class GaussLegendre+;
+
 #endif

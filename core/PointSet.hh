@@ -40,4 +40,4 @@ protected:
   ClassDef(PointSet, 1);
 };
 
-#endif // PREDICTIONSET_H
+#endif // POINTSET_H

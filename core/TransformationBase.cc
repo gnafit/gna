@@ -19,14 +19,14 @@ using TransformationTypes::Entry;
 using TransformationTypes::Base;
 
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), parent(parent)
+  : name(name), parent(parent), initializing(0)
 {
   taintedsrcs.subscribe(tainted);
 }
 
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefun(), parent(parent)
+    fun(), typefun(), parent(parent), initializing(0)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -140,9 +140,8 @@ bool TransformationTypes::isCompatible(const Channel *sink,
   return true;
 }
 
-size_t Base::addEntry(const std::string &name) {
+size_t Base::addEntry(Entry *e) {
   size_t idx = m_entries.size();
-  Entry *e = new Entry(name, this);
   m_entries.push_back(e);
   return idx;
 }

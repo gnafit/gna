@@ -13,13 +13,12 @@ class test(basecmd):
 
         oscprob = ROOT.OscProb2nu()
         prediction = ROOT.PredictionSet()
-        points = np.array([1,2,3,4,5], dtype=float)
-        pointset = ROOT.PointSet(points, len(points))
-
-        points = np.array([1,2,3,4,5], dtype=float)
-        pointset2 = ROOT.PointSet(points, len(points))
-
-        pointset["points"].outputs[0].connect(oscprob["prob"].inputs[0])
-        prediction.add(oscprob["prob"].outputs[0])
-        prediction.add(pointset2["points"].outputs[0])
-        print np.frombuffer(prediction.data(), dtype=float, count=10)
+        edges = np.array([1e-3, 2e-3, 3e-3, 4e-3, 5e-3], dtype=float)
+        orders = np.array([5]*(len(edges)-1), dtype=int)
+        integrator = ROOT.GaussLegendre(edges, orders, len(orders))
+        oscprob["prob"].inputs[0].connect(integrator["points"].outputs[0])
+        integrator["hist"].inputs[0].connect(oscprob["prob"].outputs[0])
+        prediction.add(integrator["hist"].outputs[0])
+        print np.frombuffer(prediction.data(), dtype=float, count=4)
+        pars['SinSq12'].set(0)
+        print np.frombuffer(prediction.data(), dtype=float, count=4)

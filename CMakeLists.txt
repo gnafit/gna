@@ -16,6 +16,7 @@ set (SOURCES
   core/UncertainParameter.cc
   core/ParametersGroup.cc
   neutrino/OscProb2nu.cc
+  integrator/GaussLegendre.cc
   )
 
 set (HEADERS
@@ -24,9 +25,10 @@ set (HEADERS
   PredictionSet.hh
   PointSet.hh
   OscProb2nu.hh
+  GaussLegendre.hh
   )
   
-include_directories(core/ neutrino/)
+include_directories(core/ neutrino/ integrator/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)
@@ -44,6 +46,9 @@ if(Boost_FOUND)
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
+
+find_Package( GSL REQUIRED )
+include_directories(${GSL_INCLUDE_DIR})
 
 find_package(ROOT)
 include_directories(${ROOT_INCLUDE_DIR})

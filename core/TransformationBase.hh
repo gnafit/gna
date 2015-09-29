@@ -131,6 +131,7 @@ namespace TransformationTypes {
     taintflag tainted;
     taintflag taintedsrcs;
     const Base *parent;
+    int initializing;
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
@@ -266,7 +267,7 @@ namespace TransformationTypes {
 
     Accessor t_;
   private:
-    size_t addEntry(const std::string &name);
+    size_t addEntry(Entry *e);
     boost::ptr_vector<Entry> m_entries;
     void copyEntries(const Base &other);
   };
@@ -296,40 +297,75 @@ namespace TransformationTypes {
                                  TransformationTypes::Atypes,
                                  TransformationTypes::Rtypes)> MemTypesFunction;
 
-    Initializer(Transformation<T> *obj, size_t idx)
-      : m_obj(obj), m_idx(idx) { }
+    Initializer(Transformation<T> *obj, const std::string &name)
+      : m_entry(new Entry(name, obj->baseobj())), m_obj(obj),
+        m_nosubscribe(false)
+    {
+      m_entry->initializing++;
+    }
+    ~Initializer() {
+      if (!m_entry) {
+        return;
+      }
+      m_entry->initializing--;
+      if (std::uncaught_exception()) {
+        return;
+      }
+      if (m_entry->initializing == 0) {
+        add();
+      }
+    }
+    void add() {
+      m_entry->initializing = 0;
+      if (!m_nosubscribe) {
+        m_obj->obj()->subscribe(m_entry->tainted);
+      }
+      size_t idx = m_obj->baseobj()->addEntry(m_entry);
+      m_entry = nullptr;
+      m_obj->addMemFunctions(idx, m_mfunc, m_mtfunc);
+    }
     Initializer<T> input(const std::string &name, const DataType &dt) {
-      getEntry().addSource({name, dt});
+      m_entry->addSource({name, dt});
       return *this;
     }
     Initializer<T> output(const std::string &name, const DataType &dt) {
-      getEntry().addSink({name, dt});
+      m_entry->addSink({name, dt});
       return *this;
     }
     Initializer<T> func(Function func) {
-      m_obj->unbindMemFunction(m_idx);
-      getEntry().fun = func;
+      m_mfunc = nullptr;
+      m_entry->fun = func;
       return *this;
     }
     Initializer<T> func(MemFunction func) {
-      m_obj->bindMemFunction(m_idx, func);
+      using namespace std::placeholders;
+      m_mfunc = func;
+      m_entry->fun = std::bind(func, m_obj->obj(), _1, _2);
       return *this;
     }
     Initializer<T> types(TypesFunction func) {
-      m_obj->unbindMemTypesFunction(m_idx);
-      getEntry().typefun = func;
+      m_mtfunc = nullptr;
+      m_entry->typefun = func;
       return *this;
     }
     Initializer<T> types(MemTypesFunction func) {
-      m_obj->bindMemTypesFunction(m_idx, func);
+      using namespace std::placeholders;
+      m_mtfunc = func;
+      m_entry->typefun = std::bind(func, m_obj->obj(), _1, _2);
+      return *this;
+    }
+    Initializer<T> dont_subscribe() {
+      m_nosubscribe = true;
       return *this;
     }
   protected:
-    Entry &getEntry() {
-      return m_obj->baseobj()->getEntry(m_idx);
-    }
+    Entry *m_entry;
     Transformation<T> *m_obj;
-    size_t m_idx;
+
+    MemFunction m_mfunc;
+    MemTypesFunction m_mtfunc;
+
+    bool m_nosubscribe;
   };
 }
 
@@ -338,14 +374,13 @@ class Transformation {
 public:
   Transformation() { }
   Transformation(const Transformation<Derived> &other)
-    : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
+    : m_memFuncs(other.m_memFuncs)
   {
     rebindMemFunctions();
   }
 
   Transformation<Derived> &operator=(const Transformation<Derived> &other) {
     m_memFuncs = other.m_memFuncs;
-    m_memTypesFuncs = other.m_memTypesFuncs;
     rebindMemFunctions();
     return *this;
   }
@@ -357,8 +392,7 @@ protected:
 
   TransformationTypes::Initializer<Derived>
   transformation_(const std::string &name) {
-    auto idx = baseobj()->addEntry(name);
-    return TransformationTypes::Initializer<Derived>(this, idx);
+    return TransformationTypes::Initializer<Derived>(this, name);
   }
 private:
   Derived *obj() { return static_cast<Derived*>(this); }
@@ -371,41 +405,24 @@ private:
     return static_cast<const TransformationTypes::Base*>(obj());
   }
 
-  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;
-  std::list<std::tuple<size_t, MemTypesFunction>> m_memTypesFuncs;
+  std::list<std::tuple<size_t, MemFunction, MemTypesFunction>> m_memFuncs;
 
-  void bindMemFunction(size_t idx, MemFunction func) {
-    unbindMemFunction(idx);
-    m_memFuncs.emplace_back(idx, func);
-    using namespace std::placeholders;
-    baseobj()->m_entries[idx].fun = std::bind(func, obj(), _1, _2);
-  }
-  void bindMemTypesFunction(size_t idx, MemTypesFunction func) {
-    unbindMemTypesFunction(idx);
-    m_memTypesFuncs.emplace_back(idx, func);
-    using namespace std::placeholders;
-    baseobj()->m_entries[idx].typefun = std::bind(func, obj(), _1, _2);
-  }
-  void unbindMemFunction(size_t idx) {
-    auto &lst = m_memFuncs;
-    lst.remove_if([idx](const std::tuple<size_t, MemFunction> &f) {
-        return std::get<0>(f) == idx;
-      });
-  }
-  void unbindMemTypesFunction(size_t idx) {
-    auto &lst = m_memTypesFuncs;
-    lst.remove_if([idx](const std::tuple<size_t, MemTypesFunction> &f) {
-        return std::get<0>(f) == idx;
-      });
+  void addMemFunctions(size_t idx, MemFunction func, MemTypesFunction tfunc) {
+    if (func || tfunc) {
+      m_memFuncs.emplace_back(idx, func, tfunc);
+    }
   }
   void rebindMemFunctions() {
     using namespace std::placeholders;
     auto &entries = baseobj()->m_entries;
     for (const auto &f: m_memFuncs) {
-      entries[std::get<0>(f)].fun = std::bind(std::get<1>(f), obj(), _1, _2);
-    }
-    for (const auto &f: m_memTypesFuncs) {
-      entries[std::get<0>(f)].typefun = std::bind(std::get<1>(f), obj(), _1, _2);
+      auto idx = std::get<0>(f);
+      if (std::get<1>(f)) {
+        entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+      }
+      if (std::get<2>(f)) {
+        entries[idx].typefun = std::bind(std::get<2>(f), obj(), _1, _2);
+      }
     }
   }
 };
