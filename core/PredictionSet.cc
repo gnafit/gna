@@ -38,7 +38,7 @@ PredictionSet &PredictionSet::operator=(const PredictionSet &/* other */) {
 }
 
 void PredictionSet::add(const OutputDescriptor &out) {
-  out.connect(input_("prediction", out.channel()));
+  t_["prediction"].input(out.channel()).connect(out);
 }
 
 size_t PredictionSet::size() const {

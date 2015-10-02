@@ -13,10 +13,11 @@
 #include "Parameters.hh"
 #include "Data.hh"
 
+#define TRANSFORMATION_DEBUG
+
 #ifdef TRANSFORMATION_DEBUG
 #define TR_DPRINTF(...) do {                    \
   fprintf(stderr, __VA_ARGS__);                 \
-  fprintf(stderr, "\n");                        \
 } while (0)
 
 #else
@@ -146,6 +147,12 @@ namespace TransformationTypes {
     const std::string &name() const { return m_entry->name; }
     std::vector<InputHandle> inputs() const;
     std::vector<OutputHandle> outputs() const;
+    InputHandle input(const Channel &input) {
+      return m_entry->addSource(input);
+    }
+    OutputHandle output(const Channel &output) {
+      return m_entry->addSink(output);
+    }
 
     const Data<double> &operator[](int i) const { return m_entry->data(i); }
 
@@ -202,9 +209,7 @@ namespace TransformationTypes {
     Rtypes(const Entry *e)
       : m_types(new std::vector<DataType>(e->sinks.size()))
       { }
-    DataType &operator[](int i) {
-      return (*m_types)[i];
-    }
+    DataType &operator[](int i);
     size_t size() const { return m_types->size(); }
   protected:
     std::shared_ptr<std::vector<DataType> > m_types;
@@ -258,12 +263,6 @@ namespace TransformationTypes {
       return m_entries[idx];
     }
     Entry &getEntry(const std::string &name);
-    InputHandle input_(const std::string &name, const Channel &input) {
-      return getEntry(name).addSource(input);
-    }
-    OutputHandle output_(const std::string &name, const Channel &output) {
-      return getEntry(name).addSink(output);
-    }
 
     Accessor t_;
   private:
@@ -277,7 +276,7 @@ namespace TransformationTypes {
   }
 
   inline Handle Accessor::operator[](const std::string &name) const {
-    TR_DPRINTF("accessing %s on %p", name.c_str(), (void*)m_parent);
+    TR_DPRINTF("accessing %s on %p\n", name.c_str(), (void*)m_parent);
     return Handle(m_parent->getEntry(name));
   }
 

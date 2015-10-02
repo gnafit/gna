@@ -14,6 +14,7 @@ using TransformationTypes::OutputHandle;
 using TransformationTypes::Handle;
 
 using TransformationTypes::Atypes;
+using TransformationTypes::Rtypes;
 
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
@@ -123,7 +124,7 @@ bool Source::connect(Sink *newsink) {
   if (!TransformationTypes::isCompatible(newsink, this)) {
     return false;
   }
-  TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
+  TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
   sink->entry->tainted.subscribe(entry->taintedsrcs);
   newsink->sources.push_back(this);
@@ -161,7 +162,9 @@ void Entry::evaluateTypes() {
   Atypes args(this);
   Rtypes rets(this);
   Status st = Status::Undefined;
+  TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   if (!typefun) {
+    TR_DPRINTF("no typefun, copying\n");
     if (rets.size() > 0) {
       if (sinks.size() != sources.size()) {
         throw std::runtime_error(
@@ -174,15 +177,18 @@ void Entry::evaluateTypes() {
     }
     st = Status::Success;
   } else {
+    TR_DPRINTF("calling typefun\n");
     st = typefun(args, rets);
   }
   std::set<Entry*> deps;
   if (st == Status::Success) {
+    TR_DPRINTF("types[%s]: success\n", name.c_str());
     for (size_t i = 0; i < sinks.size(); ++i) {
       if (sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
       sinks[i].data.reset(new Data<double>(rets[i]));
+      TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
 #ifdef TRANSFORMATION_DEBUG
       sinks[i].data->type.dump();
 #endif // TRANSFORMATION_DEBUG
@@ -191,9 +197,12 @@ void Entry::evaluateTypes() {
       }
     }
   } else if (st == Status::Failed) {
+    TR_DPRINTF("types[%s]: failed\n", name.c_str());
     throw std::runtime_error(
       (format("Transformation: type updates failed for `%1%'") % name).str()
       );
+  } else if (st == Status::Undefined){
+    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   for (Entry *dep: deps) {
     dep->evaluateTypes();
@@ -202,4 +211,13 @@ void Entry::evaluateTypes() {
 
 void Entry::updateTypes() {
   evaluateTypes();
+}
+
+DataType &Rtypes::operator[](int i) {
+  if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
+    throw std::runtime_error(
+      (format("invalid access to return type %1%, nsinks: %2%")
+              % i % m_types->size()).str());
+  }
+  return (*m_types)[i];
 }

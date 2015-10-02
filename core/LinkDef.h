@@ -34,12 +34,17 @@
 #pragma link C++ class std::vector<LimitsPair>+;
 
 #pragma link C++ class PredictionSet+;
+#pragma link C++ class Product+;
 #pragma link C++ class PointSet+;
 
 #pragma link C++ class OscillationExpressions+;
 
 #pragma link C++ class OscProb2nu+;
+#pragma link C++ class IbdInteraction+;
+#pragma link C++ class IbdZeroOrder+;
+#pragma link C++ class IbdFirstOrder+;
 
 #pragma link C++ class GaussLegendre+;
+#pragma link C++ class GaussLegendre2d+;
 
 #endif

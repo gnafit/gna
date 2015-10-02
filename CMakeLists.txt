@@ -12,20 +12,30 @@ set (SOURCES
   core/Transformation.cc
   core/Parametrized.cc
   core/GNAObject.cc
-  core/PredictionSet.cc
   core/UncertainParameter.cc
   core/ParametersGroup.cc
+  core/PredictionSet.cc
+  core/Product.cc
   neutrino/OscProb2nu.cc
+  neutrino/IbdInteraction.cc
+  neutrino/IbdZeroOrder.cc
+  neutrino/IbdFirstOrder.cc
   integrator/GaussLegendre.cc
+  integrator/GaussLegendre2d.cc
   )
 
 set (HEADERS
   GNAObject.hh
   UncertainParameter.hh
   PredictionSet.hh
+  Product.hh
   PointSet.hh
   OscProb2nu.hh
+  IbdInteraction.hh
+  IbdZeroOrder.hh
+  IbdFirstOrder.hh
   GaussLegendre.hh
+  GaussLegendre2d.hh
   )
   
 include_directories(core/ neutrino/ integrator/)

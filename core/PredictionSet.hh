@@ -1,9 +1,6 @@
 #ifndef PREDICTIONSET_H
 #define PREDICTIONSET_H
 
-#include <vector>
-#include <list>
-
 #include "GNAObject.hh"
 
 class PredictionSet: public GNAObject,
