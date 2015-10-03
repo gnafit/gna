@@ -24,15 +24,13 @@ public:
 protected:
   void init() {
     transformation_("points")
-      .output("points", DataType().points().size(m_points.size()))
+      .output("points", DataType().points().shape(m_points.size()))
       .types([](PointSet *obj, Atypes /*args*/, Rtypes rets) {
-          rets[0] = DataType().points().size(obj->points().size());
-          return Status::Success;
+          rets[0] = DataType().points().shape(obj->points().size());
         })
       .func([](PointSet *obj, Args /*args*/, Rets rets) {
           auto &pts = obj->points();
           rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&pts[0], pts.size());
-          return Status::Success;
         });
   }
   std::vector<double> m_points;

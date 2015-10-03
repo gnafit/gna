@@ -4,15 +4,15 @@ PredictionSet::PredictionSet() {
   transformation_("prediction")
     .output("prediction", DataType().points().any())
     .types([](Atypes args, Rtypes rets) {
+        if (args.size() == 0) {
+          throw rets.error(rets[0]);
+        }
         if (args.size() > 0) {
           size_t size = 0;
           for (size_t i = 0; i < args.size(); ++i) {
-            size += args[i].size;
+            size += args[i].size();
           }
-          rets[0] = DataType().points().size(size);
-          return Status::Success;
-        } else {
-          return Status::Undefined;
+          rets[0] = DataType().points().shape(size);
         }
       })
     .func([](Args args, Rets rets) {
@@ -22,7 +22,6 @@ PredictionSet::PredictionSet() {
           auto &arg = args[i];
           buf = std::copy(arg.x.data(), arg.x.data()+arg.x.size(), buf);
         }
-        return Status::Success;
       });
   m_transform = t_["prediction"];
 }
@@ -42,7 +41,7 @@ void PredictionSet::add(const OutputDescriptor &out) {
 }
 
 size_t PredictionSet::size() const {
-  return m_transform[0].type.size;
+  return m_transform[0].type.size();
 }
 
 void PredictionSet::update() const {

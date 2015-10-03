@@ -30,7 +30,7 @@ void GaussLegendre::init() {
     gsl_integration_glfixed_table_free(t);
   }
   transformation_("points")
-    .output("x", DataType().points().size(m_points.size()))
+    .output("x", DataType().points().shape(m_points.size()))
     .types(&GaussLegendre::pointsTypes)
     .func(&GaussLegendre::points);
   transformation_("hist")
@@ -40,28 +40,24 @@ void GaussLegendre::init() {
     .func(&GaussLegendre::hist);
 }
 
-Status GaussLegendre::pointsTypes(Atypes /*args*/, Rtypes rets) {
-  rets[0] = DataType().points().size(m_points.size());
-  return Status::Success;
+void GaussLegendre::pointsTypes(Atypes /*args*/, Rtypes rets) {
+  rets[0] = DataType().points().shape(m_points.size());
 }
 
-Status GaussLegendre::points(Args /*args*/, Rets rets) {
+void GaussLegendre::points(Args /*args*/, Rets rets) {
   rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&m_points[0], m_points.size());
-  return Status::Success;
 }
 
-Status GaussLegendre::histTypes(Atypes /*args*/, Rtypes rets) {
+void GaussLegendre::histTypes(Atypes /*args*/, Rtypes rets) {
   rets[0] = DataType().hist().bins(m_orders.size()).edges(m_edges);
-  return Status::Success;
 }
 
-Status GaussLegendre::hist(Args args, Rets rets) {
-  auto prod = (args[0].x * m_weights).eval();
+void GaussLegendre::hist(Args args, Rets rets) {
+  ArrayXd prod = args[0].x*m_weights;
   auto *data = prod.data();
   for (size_t i = 0; i < m_orders.size(); ++i) {
     size_t n = m_orders[i];
     rets[0].x(i) = std::accumulate(data, data+n, 0.0);
     data += n;
   }
-  return Status::Success;
 }

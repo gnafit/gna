@@ -8,6 +8,7 @@
 #include <functional>
 #include <algorithm>
 #include <limits>
+#include <stdexcept>
 
 #include <Eigen/Dense>
 
@@ -41,8 +42,14 @@ struct DataType {
     return undefined;
   }
 
+  size_t size() const {
+    return std::accumulate(shape.begin(), shape.end(), 1,
+                           std::multiplies<size_t>());
+  }
+
   DataKind kind = DataKind::Undefined;
-  size_t size;
+  std::vector<size_t> shape;
+
   std::vector<double> edges = {};
   std::pair<double, double> bounds = {
     -std::numeric_limits<double>::infinity(),
@@ -63,14 +70,28 @@ public:
   template <typename U>
   typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
   operator==(const DataType::Points<U> &other) const {
-    if (m_type.size != other.m_type.size) {
+    if (m_type.shape != other.m_type.shape) {
       return false;
     }
     return true;
   }
 
   void dump() const {
-    fprintf(stderr, "size == %lu\n", size());
+    switch (shape().size()) {
+    case 0:
+      fprintf(stderr, "shape == empty\n");
+      break;
+    case 1:
+      fprintf(stderr, "shape == (%lu)\n", shape()[0]);
+      break;
+    case 2:
+      fprintf(stderr, "shape == (%lu, %lu)\n", shape()[0], shape()[1]);
+      break;
+    default:
+      fprintf(stderr, "shape == WTF(%lu)?\n", shape().size());
+      assert(shape().size() < 3);
+      break;
+    }
   }
 
   DataType::Points<T> &any() {
@@ -80,12 +101,16 @@ public:
     return m_type.kind == DataKind::Points;
   }
 
-  DataType::Points<T> &size(size_t size) {
-    m_type.size = size;
+  DataType::Points<T> &shape(size_t shape0) {
+    m_type.shape = std::vector<size_t>{shape0};
     return setKind();
   }
-  size_t size() const {
-    return m_type.size;
+  DataType::Points<T> &shape(size_t shape0, size_t shape1) {
+    m_type.shape = std::vector<size_t>{shape0, shape1};
+    return setKind();
+  }
+  const std::vector<size_t> &shape() const {
+    return m_type.shape;
   }
 
   DataType::Points<T> &bounds(double min, double max) {
@@ -146,7 +171,7 @@ public:
   template <typename U>
   typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
   operator==(const DataType::Hist<U> &other) const {
-    if (m_type.size != other.m_type.size) {
+    if (m_type.shape != other.m_type.shape) {
       return false;
     }
     if (m_type.edges != other.m_type.edges) {
@@ -156,7 +181,7 @@ public:
   }
 
   void dump() const {
-    fprintf(stderr, ", size == [%lu]", m_type.size);
+    fprintf(stderr, ", bins == [%lu]", m_type.shape[0]);
     fprintf(stderr, ", Edges[%lu]", edges().size());
     fprintf(stderr, "\n");
   }
@@ -168,12 +193,12 @@ public:
     return m_type.kind == DataKind::Hist;
   }
 
-  DataType::Hist<T> &bins(int nbins) {
-    m_type.size = nbins;
+  DataType::Hist<T> &bins(size_t nbins) {
+    m_type.shape = std::vector<size_t>{nbins};
     return setKind();
   }
   int bins() const {
-    return m_type.size;
+    return m_type.shape[0];
   }
 
   DataType::Hist<T> &edges(const std::vector<double> &edges) {
@@ -247,6 +272,9 @@ inline void DataType::dump() const {
 
 template <typename T>
 class Data {
+  typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
+  typedef Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> ArrayXXT;
+  typedef Eigen::Map<ArrayXXT> View2d;
 public:
   Data(const DataType &dt)
     : type(dt), status(Status::Undefined)
@@ -257,9 +285,24 @@ public:
   bool defined() const { return type.defined(); }
   void allocate();
 
+  Eigen::Map<ArrayXXT> as2d() {
+    check2d();
+    return Eigen::Map<ArrayXXT>(x.data(), type.shape[0], type.shape[1]);
+  }
+  Eigen::Map<const ArrayXXT> as2d() const {
+    check2d();
+    return Eigen::Map<const ArrayXXT>(x.data(), type.shape[0], type.shape[1]);
+  }
+
   const DataType type;
-  Eigen::Array<T, Eigen::Dynamic, 1> x;
+  ArrayXT x;
   Status status;
+protected:
+  void check2d() const {
+    if (type.shape.size() != 2) {
+      throw std::runtime_error("2d view on 1d shape");
+    }
+  }
 };
 
 template <typename T>
@@ -267,7 +310,7 @@ inline void Data<T>::allocate() {
   if (type.kind == DataKind::Undefined) {
     return;
   }
-  x.resize(type.size);
+  x.resize(type.size());
 }
 
 #endif // DATA_H

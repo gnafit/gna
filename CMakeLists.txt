@@ -67,4 +67,4 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lMathMore -lPyROOT)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl)

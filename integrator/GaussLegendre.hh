@@ -27,11 +27,11 @@ public:
 protected:
   void init();
 
-  Status pointsTypes(Atypes args, Rtypes rets);
-  Status points(Args args, Rets rets);
+  void pointsTypes(Atypes args, Rtypes rets);
+  void points(Args args, Rets rets);
 
-  Status histTypes(Atypes args, Rtypes rets);
-  Status hist(Args args, Rets rets);
+  void histTypes(Atypes args, Rtypes rets);
+  void hist(Args args, Rets rets);
 
   std::vector<double> m_edges;
   std::vector<int> m_orders;

@@ -8,8 +8,8 @@ class IbdZeroOrder: public IbdInteraction,
 public:
   IbdZeroOrder();
 protected:
-  Status calcEnu(Args args, Rets rets);
-  Status calcXsec(Args args, Rets rets);
+  void calcEnu(Args args, Rets rets);
+  void calcXsec(Args args, Rets rets);
 private:
   ClassDef(IbdZeroOrder, 1);
 };

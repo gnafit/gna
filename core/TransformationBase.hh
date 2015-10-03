@@ -98,8 +98,8 @@ namespace TransformationTypes {
   struct Rets;
   struct Atypes;
   struct Rtypes;
-  typedef std::function<Status(Args, Rets)> Function;
-  typedef std::function<Status(Atypes, Rtypes)> TypesFunction;
+  typedef std::function<void(Args, Rets)> Function;
+  typedef std::function<void(Atypes, Rtypes)> TypesFunction;
 
   class Base;
 
@@ -112,7 +112,7 @@ namespace TransformationTypes {
     InputHandle addSource(const Channel &input);
     OutputHandle addSink(const Channel &output);
 
-    Status evaluate();
+    void evaluate();
     void update();
     void evaluateTypes();
     void updateTypes();
@@ -128,7 +128,7 @@ namespace TransformationTypes {
     SourcesContainer sources;
     SinksContainer sinks;
     Function fun;
-    TypesFunction typefun;
+    std::vector<TypesFunction> typefuns;
     taintflag tainted;
     taintflag taintedsrcs;
     const Base *parent;
@@ -182,38 +182,72 @@ namespace TransformationTypes {
 
   struct Rets {
   public:
+    class Error {
+    public:
+      Error(const Sink *s) : sink(s) { }
+      const Sink *sink;
+    };
     Rets(const Entry *e): m_entry(e) { }
     Data<double> &operator[](int i) const {
       return *m_entry->sinks[i].data;
     }
     size_t size() const { return m_entry->sinks.size(); }
+    Error error(const Data<double> &data);
   private:
     const Entry *m_entry;
   };
 
   struct Atypes {
+    class Undefined {
+    public:
+      Undefined(const Source *s) : source(s) { }
+      const Source *source;
+    };
     Atypes(const Entry *e): m_entry(e) { }
     const DataType &operator[](int i) const {
       if (!m_entry->sources[i].materialized()) {
-        return DataType::undefined();
+        throw Undefined(&m_entry->sources[i]);
       }
       return m_entry->sources[i].sink->data->type;
     }
     size_t size() const { return m_entry->sources.size(); }
+
+    static void passAll(Atypes args, Rtypes rets);
+    template <size_t Arg, size_t Ret = Arg>
+    static void pass(Atypes args, Rtypes rets);
+    static void ifSame(Atypes args, Rtypes rets);
   private:
     const Entry *m_entry;
   };
 
   struct Rtypes {
   public:
+    class Error {
+    public:
+      Error(const Sink *s) : sink(s) { }
+      const Sink *sink;
+    };
     Rtypes(const Entry *e)
-      : m_types(new std::vector<DataType>(e->sinks.size()))
+      : m_entry(e), m_types(new std::vector<DataType>(e->sinks.size()))
       { }
     DataType &operator[](int i);
     size_t size() const { return m_types->size(); }
+    Error error(const DataType &dt);
   protected:
+    const Entry *m_entry;
     std::shared_ptr<std::vector<DataType> > m_types;
   };
+
+  template <size_t Arg, size_t Ret>
+  inline void Atypes::pass(Atypes args, Rtypes rets) {
+    if (Arg >= args.size()) {
+      throw std::runtime_error("Transformation: invalid Arg index");
+    }
+    if (Ret >= rets.size()) {
+      throw std::runtime_error("Transformation: invalid Ret index");
+    }
+    rets[Ret] = args[Arg];
+  }
 
   inline Sink::Sink(const Channel &chan, Entry *entry)
     : Channel(chan), entry(entry)
@@ -221,12 +255,17 @@ namespace TransformationTypes {
     entry->tainted.subscribe(tainted);
   }
 
-  inline Status Entry::evaluate() {
+  inline void Entry::evaluate() {
     return fun(Args(this), Rets(this));
   }
 
   inline void Entry::update() {
-    Status status = evaluate();
+    Status status = Status::Success;
+    try {
+      evaluate();
+    } catch (Rets::Error) {
+      status = Status::Failed;
+    }
     for (auto &sink: sinks) {
       sink.tainted = false;
       sink.data->status = status;
@@ -289,12 +328,12 @@ namespace TransformationTypes {
   template <typename T>
   class Initializer {
   public:
-    typedef std::function<Status(T*,
-                                 TransformationTypes::Args,
-                                 TransformationTypes::Rets)> MemFunction;
-    typedef std::function<Status(T*,
-                                 TransformationTypes::Atypes,
-                                 TransformationTypes::Rtypes)> MemTypesFunction;
+    typedef std::function<void(T*,
+                               TransformationTypes::Args,
+                               TransformationTypes::Rets)> MemFunction;
+    typedef std::function<void(T*,
+                               TransformationTypes::Atypes,
+                               TransformationTypes::Rtypes)> MemTypesFunction;
 
     Initializer(Transformation<T> *obj, const std::string &name)
       : m_entry(new Entry(name, obj->baseobj())), m_obj(obj),
@@ -315,13 +354,21 @@ namespace TransformationTypes {
       }
     }
     void add() {
+      if (m_entry->typefuns.empty()) {
+        m_entry->typefuns.push_back(Atypes::passAll);
+      }
       m_entry->initializing = 0;
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
       size_t idx = m_obj->baseobj()->addEntry(m_entry);
       m_entry = nullptr;
-      m_obj->addMemFunctions(idx, m_mfunc, m_mtfunc);
+      if (m_mfunc) {
+        m_obj->addMemFunction(idx, m_mfunc);
+      }
+      for (const auto &f: m_mtfuncs) {
+        m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
+      }
     }
     Initializer<T> input(const std::string &name, const DataType &dt) {
       m_entry->addSource({name, dt});
@@ -343,14 +390,26 @@ namespace TransformationTypes {
       return *this;
     }
     Initializer<T> types(TypesFunction func) {
-      m_mtfunc = nullptr;
-      m_entry->typefun = func;
+      m_entry->typefuns.push_back(func);
       return *this;
     }
     Initializer<T> types(MemTypesFunction func) {
       using namespace std::placeholders;
-      m_mtfunc = func;
-      m_entry->typefun = std::bind(func, m_obj->obj(), _1, _2);
+      m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
+      m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1, _2));
+      return *this;
+    }
+    template <typename FuncA, typename FuncB>
+    Initializer<T> types(FuncA func1, FuncB func2) {
+      types(func1);
+      types(func2);
+      return *this;
+    }
+    template <typename FuncA, typename FuncB, typename FuncC>
+    Initializer<T> types(FuncA func1, FuncB func2, FuncC func3) {
+      types(func1);
+      types(func2);
+      types(func3);
       return *this;
     }
     Initializer<T> dont_subscribe() {
@@ -362,7 +421,7 @@ namespace TransformationTypes {
     Transformation<T> *m_obj;
 
     MemFunction m_mfunc;
-    MemTypesFunction m_mtfunc;
+    std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs;
 
     bool m_nosubscribe;
   };
@@ -404,24 +463,26 @@ private:
     return static_cast<const TransformationTypes::Base*>(obj());
   }
 
-  std::list<std::tuple<size_t, MemFunction, MemTypesFunction>> m_memFuncs;
+  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;
+  std::list<std::tuple<size_t, size_t, MemTypesFunction>> m_memTypesFuncs;
 
-  void addMemFunctions(size_t idx, MemFunction func, MemTypesFunction tfunc) {
-    if (func || tfunc) {
-      m_memFuncs.emplace_back(idx, func, tfunc);
-    }
+  void addMemFunction(size_t idx, MemFunction func) {
+    m_memFuncs.emplace_back(idx, func);
+  }
+  void addMemTypesFunction(size_t idx, size_t fidx, MemTypesFunction func) {
+    m_memTypesFuncs.emplace_back(idx, fidx, func);
   }
   void rebindMemFunctions() {
     using namespace std::placeholders;
     auto &entries = baseobj()->m_entries;
     for (const auto &f: m_memFuncs) {
       auto idx = std::get<0>(f);
-      if (std::get<1>(f)) {
-        entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
-      }
-      if (std::get<2>(f)) {
-        entries[idx].typefun = std::bind(std::get<2>(f), obj(), _1, _2);
-      }
+      entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+    }
+    for (const auto &f: m_memTypesFuncs) {
+      auto idx = std::get<0>(f);
+      auto fidx = std::get<1>(f);
+      entries[idx].typefuns[fidx] = std::bind(std::get<2>(f), obj(), _1, _2);
     }
   }
 };

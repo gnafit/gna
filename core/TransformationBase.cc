@@ -13,6 +13,7 @@ using TransformationTypes::InputHandle;
 using TransformationTypes::OutputHandle;
 using TransformationTypes::Handle;
 
+using TransformationTypes::Rets;
 using TransformationTypes::Atypes;
 using TransformationTypes::Rtypes;
 
@@ -27,7 +28,7 @@ Entry::Entry(const std::string &name, const Base *parent)
 
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefun(), parent(parent), initializing(0)
+    fun(), typefuns(), parent(parent), initializing(0)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -161,24 +162,16 @@ Entry &Base::getEntry(const std::string &name) {
 void Entry::evaluateTypes() {
   Atypes args(this);
   Rtypes rets(this);
-  Status st = Status::Undefined;
+  Status st = Status::Success;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
-  if (!typefun) {
-    TR_DPRINTF("no typefun, copying\n");
-    if (rets.size() > 0) {
-      if (sinks.size() != sources.size()) {
-        throw std::runtime_error(
-          (format("Transformation: nargs != nrets for `%1%'") % name).str()
-          );
-      }
-      for (size_t i = 0; i < args.size(); ++i) {
-        rets[i] = args[i];
-      }
+  try {
+    for (auto &typefun: typefuns) {
+      typefun(args, rets);
     }
-    st = Status::Success;
-  } else {
-    TR_DPRINTF("calling typefun\n");
-    st = typefun(args, rets);
+  } catch (Rtypes::Error) {
+    st = Status::Failed;
+  } catch (Atypes::Undefined) {
+    st = Status::Undefined;
   }
   std::set<Entry*> deps;
   if (st == Status::Success) {
@@ -213,6 +206,23 @@ void Entry::updateTypes() {
   evaluateTypes();
 }
 
+void Atypes::passAll(Atypes args, Rtypes rets) {
+  if (args.size() != rets.size()) {
+    throw std::runtime_error("Transformation: nargs != nrets");
+  }
+  for (size_t i = 0; i < args.size(); ++i) {
+    rets[i] = args[i];
+  }
+}
+
+void Atypes::ifSame(Atypes args, Rtypes rets) {
+  for (size_t i = 1; i < args.size(); ++i) {
+    if (args[i] != args[0]) {
+      throw rets.error(rets[0]);
+    }
+  }
+}
+
 DataType &Rtypes::operator[](int i) {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
@@ -220,4 +230,24 @@ DataType &Rtypes::operator[](int i) {
               % i % m_types->size()).str());
   }
   return (*m_types)[i];
+}
+
+Rets::Error Rets::error(const Data<double> &data) {
+  const Sink *sink = nullptr;
+  for (size_t i = 0; i < m_entry->sinks.size(); ++i) {
+    if (m_entry->sinks[i].data.get() == &data) {
+      sink = &m_entry->sinks[i];
+    }
+  }
+  return Error(sink);
+}
+
+Rtypes::Error Rtypes::error(const DataType &dt) {
+  const Sink *sink = nullptr;
+  for (size_t i = 0; i < m_types->size(); ++i) {
+    if (&(*m_types)[i] == &dt) {
+      sink = &m_entry->sinks[i];
+    }
+  }
+  return Error(sink);
 }

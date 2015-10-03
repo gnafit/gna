@@ -13,7 +13,6 @@ OscProb2nu::OscProb2nu()
     .output("prob", DataType().points().any())
     .func([](OscProb2nu *obj, Args args, Rets rets) {
         obj->probability(args[0].x, rets[0].x);
-        return Status::Success;
       });
 }
 

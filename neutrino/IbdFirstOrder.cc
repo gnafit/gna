@@ -19,28 +19,21 @@ IbdFirstOrder::IbdFirstOrder()
     .input("Ee", DataType().points().any())
     .input("ctheta", DataType().points().any())
     .types([](Atypes args, Rtypes rets) {
-        rets[0] = DataType().points().size(args[0].size*args[1].size);
-        return Status::Success;
+        rets[0] = DataType().points().shape(args[0].size(), args[1].size());
       })
     .output("Enu", DataType().points().any())
     .func(&IbdFirstOrder::calc_Enu);
   transformation_("xsec")
     .input("Enu", DataType().points().any())
     .input("ctheta", DataType().points().any())
-    .types([](Atypes args, Rtypes rets) {
-        rets[0] = args[0];
-        return Status::Success;
-      })
+    .types(Atypes::pass<0>)
     .output("xsec", DataType().points().any())
     .func(&IbdFirstOrder::calc_Xsec);
   transformation_("jacobian")
     .input("Enu", DataType().points().any())
     .input("Ee", DataType().points().any())
     .input("ctheta", DataType().points().any())
-    .types([](Atypes args, Rtypes rets) {
-        rets[0] = args[0];
-        return Status::Success;
-      })
+    .types(Atypes::pass<0>)
     .output("jacobian", DataType().points().any())
     .func(&IbdFirstOrder::calc_dEnu_wrt_Ee);
   PDGVariables *p = m_pdg;
@@ -57,7 +50,7 @@ IbdFirstOrder::IbdFirstOrder()
   }
 }
 
-Status IbdFirstOrder::calc_Enu(Args args, Rets rets) {
+void IbdFirstOrder::calc_Enu(Args args, Rets rets) {
   const auto &Ee = args[0].x;
   const auto &ctheta = args[1].x;
 
@@ -66,7 +59,6 @@ Status IbdFirstOrder::calc_Enu(Args args, Rets rets) {
   ArrayXd Ee0 = Ee + m_DeltaNP + (m_DeltaNP*m_DeltaNP - ElectronMass2)/(2*m_NucleonMass);
   ArrayXXd corr = 1.0/(1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r);
   Map<ArrayXXd, Aligned>(rets[0].x.data(), Ee.size(), ctheta.size()) = corr.colwise()*Ee0;
-  return Status::Success;
 }
 
 double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
@@ -96,41 +88,26 @@ double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
   return sigma1a + sigma1b;
 }
 
-Status IbdFirstOrder::calc_Xsec(Args args, Rets rets) {
-  std::cerr << "starting\n";
-  size_t shape[2];
-  shape[1] = args[1].x.size();
-  std::cerr << "args[1]\n";
-  shape[0] = args[0].x.size() / shape[1];
-  std::cerr << "args[0]\n";
-  Map<const ArrayXXd, Aligned> Eneu(args[0].x.data(), shape[0], shape[1]);
+void IbdFirstOrder::calc_Xsec(Args args, Rets rets) {
+  const auto Eneu = args[0].as2d();
   const auto &ctheta = args[1].x;
-  Map<ArrayXXd, Aligned> xsec(rets[0].x.data(), shape[0], shape[1]);
+  auto xsec = rets[0].as2d();
 
-  std::cerr << "shape " << shape[0] << " " << shape[1] << "\n";
-  std::cerr << "sizes " << Eneu.size() << " " << ctheta.size() << "\n";
-  for (int i = 0; i < Eneu.size(); ++i) {
-    for (int j = 0; j < ctheta.size(); ++j) {
-      xsec(i, j) = Xsec(Eneu(i), ctheta(j));
+  for (int i = 0; i < Eneu.rows(); ++i) {
+    for (int j = 0; j < Eneu.cols(); ++j) {
+      xsec(i, j) = Xsec(Eneu(i, j), ctheta(j));
     }
   }
-
-  return Status::Success;
 }
 
-Status IbdFirstOrder::calc_dEnu_wrt_Ee(Args args, Rets rets) {
-  size_t shape[2];
-  shape[1] = args[2].x.size();
-  shape[0] = args[1].x.size() / shape[1];
-  Map<const ArrayXXd, Aligned> Enu(args[0].x.data(), shape[0], shape[1]);
+void IbdFirstOrder::calc_dEnu_wrt_Ee(Args args, Rets rets) {
+  const auto Enu = args[0].as2d();
   const auto &Ee = args[1].x;
   const auto &ctheta = args[2].x;
-  Map<ArrayXXd, Aligned> jacobian(rets[0].x.data(), shape[0], shape[1]);
+  auto jacobian = rets[0].as2d();
 
   ArrayXd Ve = (1.0 - ElectronMass2 / (Ee*Ee)).sqrt();
   ArrayXXd Vectheta = (Ve.matrix()*ctheta.matrix().transpose()).array();
-  ArrayXXd Ve_per_ctheta = (Ve.inverse().matrix()*ctheta.matrix().transpose()).array();
-  jacobian = (m_pdg->ProtonMass + (1.0-Ve_per_ctheta)*Enu )/( m_pdg->ProtonMass - (1-Vectheta).colwise()*Ee );
-
-  return Status::Success;
+  ArrayXXd ctheta_per_Ve = (Ve.inverse().matrix()*ctheta.matrix().transpose()).array();
+  jacobian = (m_pdg->ProtonMass + (1.0-ctheta_per_Ve)*Enu )/( m_pdg->ProtonMass - (1-Vectheta).colwise()*Ee );
 }
