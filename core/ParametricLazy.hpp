@@ -66,13 +66,7 @@ namespace ParametricLazyOps {
   struct is_terminal<variable<T> > : mpl::true_ { };
 
   template <typename T>
-  struct is_terminal<freevar<T> > : mpl::true_ { };
-
-  template <typename T>
   struct is_terminal<dependant<T> > : mpl::true_ { };
-
-  template <typename T>
-  struct is_terminal<functional<T> > : mpl::true_ { };
 
   BOOST_PROTO_DEFINE_OPERATORS(is_terminal, parametric_domain)
 
@@ -95,9 +89,7 @@ inline std::ostream &operator<<(std::ostream &sout, type<ValueType> const &v) { 
 
 DEFINE_OUTPUT_OPERATOR(parameter)
 DEFINE_OUTPUT_OPERATOR(variable)
-DEFINE_OUTPUT_OPERATOR(freevar)
 DEFINE_OUTPUT_OPERATOR(dependant)
-DEFINE_OUTPUT_OPERATOR(functional)
 #undef DEFINE_OUTPUT_OPERATOR
 
 struct ParametricExpression
@@ -112,8 +104,6 @@ struct ParametersTransform
   : proto::or_<proto::when<proto::terminal<parameter<proto::_> >, fusion::cons<proto::_value, proto::_state>(proto::_value, proto::_state)>,
                proto::when<proto::terminal<variable<proto::_> >, fusion::cons<proto::_value, proto::_state>(proto::_value, proto::_state)>,
 	       proto::when<proto::terminal<dependant<proto::_> >, fusion::cons<proto::_value, proto::_state>(proto::_value, proto::_state)>,
-	       proto::when<proto::terminal<freevar<proto::_> >, fusion::cons<proto::_value, proto::_state>(proto::_value, proto::_state)>,
-	       proto::when<proto::terminal<functional<proto::_> >, fusion::cons<proto::_value, proto::_state>(proto::_value, proto::_state)>,
 	       proto::when<proto::terminal<proto::_>, proto::_state>,
 	       proto::when<proto::binary_expr<proto::_, proto::_, proto::_>, ParametersTransform(proto::_left, ParametersTransform(proto::_right, proto::_state))>
 	       >
@@ -121,7 +111,7 @@ struct ParametersTransform
 
 template <typename ReturnType, typename Expr, bool Free>
 class DependantEvaluable {
-  typedef typename boost::mpl::if_c<Free, functional<ReturnType>, dependant<ReturnType> >::type evaluable_type;
+  typedef dependant<ReturnType> evaluable_type;
 
 public:
   static evaluable_type get(Expr const &e) {
@@ -165,16 +155,6 @@ dependant<double> mkdep_impl(const Expr &expr) {
 template <typename Expr>
 dependant<double> mkdep(const Expr &expr) {
   return mkdep_impl(expr);
-}
-
-template <typename Expr>
-functional<double> mkfunc_impl(const Expr &expr) {
-  return DependantEvaluable<double, Expr, true>::get(expr);
-}
-
-template <typename Expr>
-functional<double> mkfunc(const Expr &expr) {
-  return mkfunc_impl(expr);
 }
 
 #define PROTIFY(x) (proto::as_child<parametric_domain>(x))

@@ -170,6 +170,13 @@ inline void references::replace(changeable o, changeable n) {
 }
 
 template <typename ValueType>
+class variable;
+
+template <>
+class variable<void>: public changeable {
+};
+
+template <typename ValueType>
 class variable: public changeable {
 public:
   operator const ValueType&() const {
@@ -203,9 +210,34 @@ protected:
 };
 
 template <typename ValueType>
-class independant: public variable<ValueType> {
+class parameter;
+
+template <>
+class parameter<void>: public variable<void> {
+};
+
+template <typename ValueType>
+class parameter: public variable<ValueType> {
   typedef variable<ValueType> base_type;
 public:
+  parameter() : base_type() {
+    base_type::m_data.raw = new inconstant_data<ValueType>;
+  }
+  parameter(const parameter<ValueType> &other)
+    : base_type(other) { }
+  static parameter<ValueType> null() {
+    return parameter<ValueType>(base_type::null());
+  }
+  parameter(const char *name)
+    : parameter() {
+    base_type::data().name = name;
+  }
+  parameter(std::initializer_list<const char*> name)
+    : base_type(*name.begin()) { }
+  parameter<ValueType>& operator=(ValueType v) {
+    set(v);
+    return *this;
+  }
   void set(ValueType v) {
     DPRINTF("setting to %e", v);
     auto &d = base_type::data();
@@ -216,59 +248,8 @@ public:
     d.tainted = false;
   }
 protected:
-  independant() : base_type() {
-    base_type::m_data.raw = new inconstant_data<ValueType>;
-  }
-  independant(const char *name) : independant() {
-    base_type::data().name = name;
-    DPRINTF("constructed independant");
-  }
-  independant(const base_type &other)
-    : base_type(other) { }
-  independant(const independant<ValueType> &other)
-    : base_type(other) { }
-  static independant<ValueType> null() {
-    return independant<ValueType>(base_type::null());
-  }
-};
-
-template <typename ValueType>
-class parameter: public independant<ValueType> {
-  typedef independant<ValueType> base_type;
-public:
-  parameter(const parameter<ValueType> &other)
-    : base_type(other) { }
-  static parameter<ValueType> null() {
-    return parameter<ValueType>(base_type::null());
-  }
-  parameter(const char *name = nullptr)
-    : base_type(name) { }
-  parameter(std::initializer_list<const char*> name)
-    : base_type(*name.begin()) { }
-  parameter<ValueType>& operator=(ValueType v) {
-    base_type::set(v);
-    return *this;
-  }
-protected:
   parameter(const base_type &other)
     : base_type(other) { }
-};
-
-template <typename ValueType>
-class freevar: public independant<ValueType> {
-  typedef independant<ValueType> base_type;
-public:
-  freevar(const freevar<ValueType> &other)
-    : base_type(other) { }
-  static freevar<ValueType> null() {
-    return freevar<ValueType>(base_type::null());
-  }
-  freevar(const char *name = nullptr)
-    : base_type(name) { }
-  freevar<ValueType>& operator=(ValueType v) {
-    base_type::set(v);
-    return *this;
-  }
 };
 
 template <typename ValueType>
@@ -315,31 +296,6 @@ public:
     : base_type(name) { base_type::init(f, deps); }
 protected:
   dependant(const base_type &other)
-    : base_type(other) { }
-};
-
-template <typename ValueType>
-class functional: public evaluable<ValueType> {
-  typedef evaluable<ValueType> base_type;
-public:
-  functional(const functional<ValueType> &other)
-    : base_type(other) { }
-  static functional<ValueType> null() {
-    return functional<ValueType>(base_type::null());
-  }
-  functional()
-    : base_type(base_type::null()) { }
-  functional(std::function<ValueType()> f,
-             std::initializer_list<changeable> deps,
-             const char *name = nullptr)
-    : base_type(name) { base_type::init(f, deps); }
-  template <typename T>
-  functional(std::function<ValueType()> f,
-             std::vector<T> deps,
-             const char *name = nullptr)
-    : base_type(name) { base_type::init(f, deps); }
-protected:
-  functional(const base_type &other)
     : base_type(other) { }
 };
 
