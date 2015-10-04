@@ -25,6 +25,9 @@ public:
   variable<double> SinSq13;
   variable<double> SinSq23;
   variable<double> Delta;
+  variable<double> Theta12;
+  variable<double> Theta13;
+  variable<double> Theta23;
 
 protected:
   Fields fields() {
@@ -37,28 +40,43 @@ protected:
       {"Alpha", &Alpha},
       {"SinSq12", &SinSq12},
       {"SinSq13", &SinSq13},
+      {"SinSq23", &SinSq23},
       {"Delta", &Delta},
+      {"Theta12", &Theta12},
+      {"Theta13", &Theta13},
+      {"Theta23", &Theta23},
     };
     return allvars;
   }
   ExpressionsList expressions() {
+    using std::sqrt;
+    using std::asin;
+    using std::sin;
+    using std::pow;
+
     auto ret = ExpressionsList{
       {&DeltaMSq13, {&DeltaMSq23, &Alpha, &DeltaMSq12},
-       [&]() -> double {
+       [&]() {
          return DeltaMSq23 + Alpha*DeltaMSq12;
        }},
       {&DeltaMSq23, {&DeltaMSq13, &Alpha, &DeltaMSq12},
-       [&]() -> double {
+       [&]() {
          return DeltaMSq13 - Alpha*DeltaMSq12;
        }},
       {&DeltaMSq23, {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12},
-       [&]() -> double {
+       [&]() {
          return DeltaMSqEE + Alpha*(SinSq12 - 1)*DeltaMSq12;
        }},
       {&DeltaMSqEE, {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12},
-       [&]() -> double {
+       [&]() {
          return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
        }},
+      {&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); }},
+      {&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); }},
+      {&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); }},
+      {&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); }},
+      {&Theta23, {&SinSq23}, [&]() { return asin(sqrt(SinSq23)); }},
+      {&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); }},
     };
     return ret;
   }
