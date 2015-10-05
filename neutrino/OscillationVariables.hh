@@ -9,7 +9,7 @@
 class OscillationVariables: public ParametersGroup {
 public:
   OscillationVariables(GNAObject *parent)
-    : ParametersGroup(parent, fields(), expressions())
+    : ParametersGroup(parent, fields())
     { }
   OscillationVariables(GNAObject *parent, std::vector<std::string> params)
     : OscillationVariables(parent)
@@ -31,54 +31,52 @@ public:
 
 protected:
   Fields fields() {
-    Fields allvars = {
-      {"DeltaMSq12", &DeltaMSq12},
-      {"DeltaMSq13", &DeltaMSq13},
-      {"DeltaMSq23", &DeltaMSq23},
-      {"DeltaMSqEE", &DeltaMSqEE},
-      {"DeltaMSqMM", &DeltaMSqMM},
-      {"Alpha", &Alpha},
-      {"SinSq12", &SinSq12},
-      {"SinSq13", &SinSq13},
-      {"SinSq23", &SinSq23},
-      {"Delta", &Delta},
-      {"Theta12", &Theta12},
-      {"Theta13", &Theta13},
-      {"Theta23", &Theta23},
-    };
-    return allvars;
+    return Fields()
+      .add(&DeltaMSq12, "DeltaMSq12")
+      .add(&DeltaMSq13, "DeltaMSq13")
+      .add(&DeltaMSq23, "DeltaMSq23")
+      .add(&DeltaMSqEE, "DeltaMSqEE")
+      .add(&DeltaMSqMM, "DeltaMSqMM")
+      .add(&Alpha, "Alpha")
+      .add(&SinSq12, "SinSq12")
+      .add(&SinSq13, "SinSq13")
+      .add(&SinSq23, "SinSq23")
+      .add(&Delta, "Delta")
+      .add(&Theta12, "Theta12")
+      .add(&Theta13, "Theta13")
+      .add(&Theta23, "Theta23")
+    ;
   }
-  ExpressionsList expressions() {
+  virtual void setExpressions(ExpressionsProvider &provider) {
     using std::sqrt;
     using std::asin;
     using std::sin;
     using std::pow;
 
-    auto ret = ExpressionsList{
-      {&DeltaMSq13, {&DeltaMSq23, &Alpha, &DeltaMSq12},
-       [&]() {
-         return DeltaMSq23 + Alpha*DeltaMSq12;
-       }},
-      {&DeltaMSq23, {&DeltaMSq13, &Alpha, &DeltaMSq12},
-       [&]() {
-         return DeltaMSq13 - Alpha*DeltaMSq12;
-       }},
-      {&DeltaMSq23, {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12},
-       [&]() {
-         return DeltaMSqEE + Alpha*(SinSq12 - 1)*DeltaMSq12;
-       }},
-      {&DeltaMSqEE, {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12},
-       [&]() {
-         return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
-       }},
-      {&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); }},
-      {&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); }},
-      {&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); }},
-      {&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); }},
-      {&Theta23, {&SinSq23}, [&]() { return asin(sqrt(SinSq23)); }},
-      {&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); }},
-    };
-    return ret;
+    provider
+      .add(&DeltaMSq13,
+           {&DeltaMSq23, &Alpha, &DeltaMSq12}, [&]() {
+             return DeltaMSq23 + Alpha*DeltaMSq12;
+           })
+      .add(&DeltaMSq23,
+           {&DeltaMSq13, &Alpha, &DeltaMSq12}, [&]() {
+             return DeltaMSq13 - Alpha*DeltaMSq12;
+           })
+      .add(&DeltaMSq23,
+           {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
+             return DeltaMSqEE + Alpha*(SinSq12 - 1)*DeltaMSq12;
+           })
+      .add(&DeltaMSqEE,
+           {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
+             return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
+           })
+      .add(&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); })
+      .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
+      .add(&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); })
+      .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); })
+      .add(&Theta23, {&SinSq23}, [&]() { return asin(sqrt(SinSq23)); })
+      .add(&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); })
+      ;
   }
 };
 

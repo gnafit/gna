@@ -13,7 +13,7 @@
 #include "Parameters.hh"
 #include "Data.hh"
 
-#define TRANSFORMATION_DEBUG
+// #define TRANSFORMATION_DEBUG
 
 #ifdef TRANSFORMATION_DEBUG
 #define TR_DPRINTF(...) do {                    \

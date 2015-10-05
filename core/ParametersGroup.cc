@@ -7,13 +7,12 @@ using boost::format;
 
 #include "ParametersGroup.hh"
 
-ParametersGroup::ParametersGroup(GNAObject *parent, const Fields &fields,
-                                 const ExpressionsList &exprs)
-  : m_parent(parent), m_fields(fields), m_exprs(exprs)
+ParametersGroup::ParametersGroup(GNAObject *parent, const Fields &fields)
+  : m_parent(parent), m_fields(fields)
 {
 }
 
-void ParametersGroup::initFields(const List &params) {
+void ParametersGroup::initFields(const std::vector<std::string> &params) {
   for (auto pname: params) {
     variable_(pname);
   }
@@ -29,7 +28,7 @@ void ParametersGroup::checkField(const std::string &name) {
 
 const std::string &ParametersGroup::fieldName(Field field) const {
   for (const auto &pair: m_fields) {
-    if (pair.second == field) {
+    if (std::get<0>(pair.second) == field) {
       return pair.first;
     }
   }
@@ -38,34 +37,16 @@ const std::string &ParametersGroup::fieldName(Field field) const {
     );
 }
 
-ParametersGroup::Handle ParametersGroup::variable_(const std::string &name) {
-  checkField(name);
-  if (m_fields[name]->isnull()) {
-    return m_parent->variable_(m_fields[name], name);
-  } else {
-    return m_parent->getByField(m_fields[name]);
-  }
-}
-
 void ParametersGroup::dump() {
   for (const auto &pair: m_fields) {
+    Field field = std::get<0>(pair.second);
     fprintf(stderr, "variable %s[%p]: %p\n",
-            pair.first.c_str(), (void*)pair.second, pair.second->rawdata());
+            pair.first.c_str(), (void*)field, field->rawdata());
   }
 }
 
 ExpressionsProvider::ExpressionsProvider(ParametersGroup *pgroup)
   : m_pgroup(pgroup)
 {
-  auto &exprs = pgroup->m_exprs;
-  for (size_t i = 0; i < exprs.size(); ++i) {
-    const ParametersGroup::Expression &expr = exprs[i];
-    std::string name = pgroup->fieldName(expr.dest);
-    std::vector<changeable> deps;
-    for (ParametersGroup::Field f: expr.sources) {
-      pgroup->variable_(pgroup->fieldName(f));
-      deps.push_back(*f);
-    }
-    evaluable_(pgroup->fieldName(expr.dest), expr.func, deps);
-  }
+  pgroup->setExpressions(*this);
 }

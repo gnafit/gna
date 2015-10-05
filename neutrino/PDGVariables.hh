@@ -9,7 +9,7 @@
 class PDGVariables: public ParametersGroup {
 public:
   PDGVariables(GNAObject *parent)
-    : ParametersGroup(parent, fields(), {}) { }
+    : ParametersGroup(parent, fields()) { }
   PDGVariables(GNAObject *parent, std::vector<std::string> params)
     : PDGVariables(parent)
     { initFields(params); }
@@ -20,13 +20,12 @@ public:
   variable<double> ElectronMass;
 protected:
   Fields fields() {
-    Fields allvars = {
-      {"NeutronLifeTime", &NeutronLifeTime},
-      {"ProtonMass", &ProtonMass},
-      {"NeutronMass", &NeutronMass},
-      {"ElectronMass", &ElectronMass},
-    };
-    return allvars;
+    return Fields()
+      .add(&NeutronLifeTime, "NeutronLifeTime")
+      .add(&ProtonMass, "ProtonMass")
+      .add(&NeutronMass, "NeutronMass")
+      .add(&ElectronMass, "ElectronMass")
+    ;
   }
 };
 

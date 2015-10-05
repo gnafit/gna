@@ -29,6 +29,8 @@ struct inconstant_data: public inconstant_header {
   std::function<ValueType()> func;
 };
 
+// #define DEBUG_PARAMETERS
+
 #ifdef DEBUG_PARAMETERS
 #define DPRINTF(...) do {                                               \
     const changeable &c = *static_cast<const changeable*>(this);        \
@@ -174,10 +176,14 @@ class variable;
 
 template <>
 class variable<void>: public changeable {
+public:
+  static variable<void> null() {
+    return variable<void>();
+  }
 };
 
 template <typename ValueType>
-class variable: public changeable {
+class variable: public variable<void> {
 public:
   operator const ValueType&() const {
     update();
@@ -186,9 +192,10 @@ public:
   variable() {
     m_data.raw = nullptr;
   }
-  variable(const variable<ValueType> &other) {
-    m_data.raw = other.m_data.raw;
-  }
+  variable(const variable<ValueType> &other)
+    : variable<void>(other) { }
+  explicit variable(const variable<void> &other)
+    : variable<void>(other) { }
   static variable<ValueType> null() {
     return variable<ValueType>();
   }
@@ -214,6 +221,16 @@ class parameter;
 
 template <>
 class parameter<void>: public variable<void> {
+public:
+  template <typename T>
+  parameter(const parameter<T> &other)
+    : variable<void>(other) { }
+  static parameter<void> null() {
+    return parameter<void>();
+  }
+protected:
+  parameter()
+    : variable<void>() { }
 };
 
 template <typename ValueType>
@@ -253,6 +270,22 @@ protected:
 };
 
 template <typename ValueType>
+class evaluable;
+
+template <>
+class evaluable<void>: public variable<void> {
+public:
+  template <typename T>
+  evaluable(const evaluable<T> &other)
+    : variable<void>(other) { }
+  static evaluable<void> null() {
+    return evaluable<void>();
+  }
+protected:
+  evaluable() : variable<void>() { }
+};
+
+template <typename ValueType>
 class evaluable: public variable<ValueType> {
   typedef variable<ValueType> base_type;
 protected:
@@ -272,6 +305,22 @@ protected:
   static evaluable<ValueType> null() {
     return evaluable<ValueType>(base_type::null());
   }
+};
+
+template <typename ValueType>
+class dependant;
+
+template <>
+class dependant<void>: public evaluable<void> {
+public:
+  template <typename T>
+  dependant(const dependant<T> &other)
+    : evaluable<void>(other) { }
+  static dependant<void> null() {
+    return dependant<void>();
+  }
+protected:
+  dependant() : evaluable<void>() { }
 };
 
 template <typename ValueType>
