@@ -24,14 +24,13 @@
 
 #pragma link C++ class ExpressionsProvider+;
 
-#pragma link C++ class ParameterWrapper+;
-#pragma link C++ class Uncertain+;
-#pragma link C++ class GaussianValue+;
-#pragma link C++ class Parameter+;
-#pragma link C++ class GaussianParameter+;
-#pragma link C++ class UniformAngleParameter+;
-#pragma link C++ typedef LimitsPair;
-#pragma link C++ class std::vector<LimitsPair>+;
+#pragma link C++ class ParameterWrapper<double>+;
+#pragma link C++ class Uncertain<double>+;
+#pragma link C++ class GaussianValue<double>+;
+#pragma link C++ class Parameter<double>+;
+#pragma link C++ class GaussianParameter<double>+;
+#pragma link C++ class UniformAngleParameter<double>+;
+#pragma link C++ class std::vector<std::pair<double, double>>+;
 
 #pragma link C++ class PredictionSet+;
 #pragma link C++ class Product+;

@@ -3,7 +3,7 @@ import ROOT
 class DiscreteParameter(object):
     def __init__(self, name, variants):
         self.default = None
-        self._variable = ROOT.ParameterWrapper(name)
+        self._variable = ROOT.ParameterWrapper("double")(name)
         self._name = name
         self._variants = variants
         self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
@@ -42,7 +42,7 @@ class parameters(object):
     def define(self, name, **kwargs):
         ptype = kwargs.get('type', 'gaussian')
         if ptype == 'gaussian':
-            param = ROOT.GaussianParameter(name)
+            param = ROOT.GaussianParameter("double")(name)
             if 'limits' in kwargs:
                 upper, lower = kwargs['limits']
                 param.addLimits(param.cast(upper), param.cast(lower))
@@ -74,7 +74,7 @@ class parameters(object):
             if 'default' in kwargs:
                 param.default = kwargs['default']
         elif ptype == 'uniformangle':
-            param = ROOT.UniformAngleParameter(name)
+            param = ROOT.UniformAngleParameter("double")(name)
             if 'central' in kwargs:
                 param.setCentral(param.cast(kwargs['central']))
             else:
@@ -86,7 +86,7 @@ class parameters(object):
         return param
 
     def _evaluable(self, name, var):
-        evaluable = ROOT.GaussianValue(name, var)
+        evaluable = ROOT.GaussianValue("double")(name, var)
         self.evaluables[name] = evaluable
         self.resolver.addevaluable(evaluable)
 
@@ -207,7 +207,7 @@ class parresolver(object):
             else:
                 msg = "unbound variable %s on %r" % (v.name, obj)
                 if not v.required():
-                    msg += ", defaulted to %r" % v.defvalue()
+                    msg += ", optional"
                     print msg
                 else:
                     raise Exception(msg)

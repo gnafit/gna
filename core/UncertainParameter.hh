@@ -7,25 +7,30 @@
 
 #include <TObject.h>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/math/constants/constants.hpp>
+
 #include "Parameters.hh"
 
+template <typename T>
 class ParameterWrapper: public TObject {
 public:
   ParameterWrapper(const std::string &name)
     : m_var(name.c_str()) { }
-  ParameterWrapper(parameter<double> &pvar)
+  ParameterWrapper(parameter<void> &pvar)
     : m_var(pvar) { }
 
-  double value() const { return m_var; }
-  void set(double value) { m_var = value; }
+  T value() const { return m_var; }
+  void set(T value) { m_var = value; }
 
-  const variable<double> &getVariable() const { return m_var; }
+  const variable<T> &getVariable() const { return m_var; }
 protected:
-  parameter<double> m_var;
+  parameter<T> m_var;
 
   ClassDef(ParameterWrapper, 0);
 };
 
+template <typename T>
 class Uncertain: public TObject {
 public:
   Uncertain(const std::string &name)
@@ -33,117 +38,152 @@ public:
   virtual ~Uncertain() { }
 
   const std::string &name() const { return m_name; }
-  virtual double value() = 0;
-  virtual double central() = 0;
-  virtual void setCentral(double value) = 0;
-  virtual double sigma() = 0;
-  virtual void setSigma(double sigma) = 0;
+  virtual T value() = 0;
+  virtual T central() = 0;
+  virtual void setCentral(T value) = 0;
+  virtual T sigma() = 0;
+  virtual void setSigma(T sigma) = 0;
 protected:
   std::string m_name;
 
   ClassDef(Uncertain, 0);
 };
 
-typedef std::pair<double, double> LimitsPair;
-
-class Parameter: public Uncertain {
+template <typename T>
+class Parameter: public Uncertain<T> {
 public:
   Parameter(const std::string &name)
-    : Uncertain(name) { }
+    : Uncertain<T>(name) { }
 
-  virtual void set(double value) = 0;
-  virtual double relativeValue(double diff) = 0;
-  virtual void relativeShift(double diff) { set(relativeValue(diff)); }
+  virtual void set(T value) = 0;
+  virtual T relativeValue(T diff) = 0;
+  virtual void relativeShift(T diff) { set(relativeValue(diff)); }
 
-  virtual double cast(const std::string &v) const;
-  virtual double cast(const double &v) const { return v; }
+  virtual T cast(const std::string &v) const;
+  virtual T cast(const T &v) const { return v; }
 
-  virtual void addLimits(double min, double max)
+  virtual void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
-  virtual const std::vector<LimitsPair> &limits() const
+  virtual const std::vector<std::pair<T, T>> &limits() const
     { return m_limits; }
 
+  using Uncertain<T>::central;
   virtual void reset() { set(central()); }
 protected:
-  std::vector<LimitsPair> m_limits;
+  std::vector<std::pair<T, T>> m_limits;
 
   ClassDef(Parameter, 0);
 };
 
-class GaussianParameter: public Parameter {
+template <typename T>
+T Parameter<T>::cast(const std::string &v) const {
+  return boost::lexical_cast<T>(v);
+}
+
+template <typename T>
+class GaussianParameter: public Parameter<T> {
 public:
   GaussianParameter(const std::string &name)
-    : Parameter(name), m_var(name.c_str()) { }
-  GaussianParameter(const std::string &name, parameter<double> pvar)
-    : Parameter(name), m_var(pvar) { }
+    : Parameter<T>(name), m_var(name.c_str()) { }
+  GaussianParameter(const std::string &name, parameter<void> pvar)
+    : Parameter<T>(name), m_var(pvar) { }
 
-  double value() { return m_var;}
-  double central() { return m_central; }
-  void setCentral(double value) { m_central = value; }
-  double sigma() { return m_sigma; }
-  void setSigma(double sigma) { m_sigma = sigma; }
-  void set(double value) { m_var = value;}
-  double relativeValue(double diff) { return value() + diff*m_sigma; }
+  T value() { return m_var;}
+  T central() { return m_central; }
+  void setCentral(T value) { m_central = value; }
+  T sigma() { return m_sigma; }
+  void setSigma(T sigma) { m_sigma = sigma; }
+  void set(T value) { m_var = value;}
+  T relativeValue(T diff) { return value() + diff*m_sigma; }
 
-  const variable<double> &getVariable() const { return m_var; }
+  const variable<T> &getVariable() const { return m_var; }
 protected:
-  parameter<double> m_var;
-  double m_central;
-  double m_sigma;
+  parameter<T> m_var;
+  T m_central;
+  T m_sigma;
 
   ClassDef(GaussianParameter, 0);
 };
 
-class GaussianValue: public Uncertain {
+template <typename T>
+class GaussianValue: public Uncertain<T> {
 public:
-  GaussianValue(const std::string &name, variable<double> var)
-    : Uncertain(name), m_var(var) { }
+  GaussianValue(const std::string &name, variable<void> var)
+    : Uncertain<T>(name), m_var(var) { }
 
-  double value() { return m_var; }
-  double central() { return m_central; }
-  void setCentral(double value) { m_central = value; }
-  double sigma() { return m_sigma; }
-  void setSigma(double sigma) { m_sigma = sigma; }
+  T value() { return m_var; }
+  T central() { return m_central; }
+  void setCentral(T value) { m_central = value; }
+  T sigma() { return m_sigma; }
+  void setSigma(T sigma) { m_sigma = sigma; }
 
-  const variable<double> &getVariable() const { return m_var; }
+  const variable<T> &getVariable() const { return m_var; }
 protected:
-  variable<double> m_var;
-  double m_central;
-  double m_sigma;
+  variable<T> m_var;
+  T m_central;
+  T m_sigma;
 
   ClassDef(GaussianValue, 0);
 };
 
-class UniformAngleParameter: public Parameter {
+template <typename T>
+class UniformAngleParameter: public Parameter<T> {
 public:
   UniformAngleParameter(const std::string &name)
-    : Parameter(name), m_var(name.c_str()) {
-    m_sigma = std::numeric_limits<double>::infinity();
+    : Parameter<T>(name), m_var(name.c_str()) {
+    m_sigma = std::numeric_limits<T>::infinity();
   }
-  UniformAngleParameter(const std::string &name, parameter<double> pvar)
-    : Parameter(name), m_var(pvar) {
-    m_sigma = std::numeric_limits<double>::infinity();
-  }
-
-  void set(double value);
-  double value() { return m_var; }
-  double central() { return m_central; }
-  void setCentral(double value) { m_central = value; }
-  double sigma() { return m_sigma; }
-  void setSigma(double sigma) { m_sigma = sigma; }
-  double cast(const std::string &v) const;
-
-  virtual double relativeValue(double diff) {
-    return diff*std::numeric_limits<double>::infinity();
+  UniformAngleParameter(const std::string &name, parameter<void> pvar)
+    : Parameter<T>(name), m_var(pvar) {
+    m_sigma = std::numeric_limits<T>::infinity();
   }
 
-  const variable<double> &getVariable() const { return m_var; }
+  void set(T value);
+  T value() { return m_var; }
+  T central() { return m_central; }
+  void setCentral(T value) { m_central = value; }
+  T sigma() { return m_sigma; }
+  void setSigma(T sigma) { m_sigma = sigma; }
+  T cast(const std::string &v) const;
+
+  virtual T relativeValue(T diff) {
+    return diff*std::numeric_limits<T>::infinity();
+  }
+
+  const variable<T> &getVariable() const { return m_var; }
 protected:
-  parameter<double> m_var;
-  double m_central;
-  double m_sigma;
+  parameter<T> m_var;
+  T m_central;
+  T m_sigma;
 
   ClassDef(UniformAngleParameter, 0);
 };
+
+template <typename T>
+inline void UniformAngleParameter<T>::set(T value) {
+  const double pi = boost::math::constants::pi<T>();
+
+  T v = value - static_cast<int>(value/pi)*2*pi;
+  if (v > pi) {
+    v -= 2*pi;
+  }
+  m_var = v;
+}
+
+template <typename T>
+inline T UniformAngleParameter<T>::cast(const std::string &v) const {
+  try {
+    return boost::lexical_cast<T>(v);
+  } catch (const boost::bad_lexical_cast&) {
+  }
+  const double pi = boost::math::constants::pi<T>();
+  size_t pipos = v.find("pi");
+  if (pipos == std::string::npos) {
+    throw std::runtime_error("invalid uniform angle value");
+  }
+  T a = boost::lexical_cast<T>(v.substr(0, pipos));
+  T b = boost::lexical_cast<T>(v.substr(pipos+2));
+  return a*pi/b;
+}
 
 #endif // UNCERTAINPARAMETER_H

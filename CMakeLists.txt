@@ -30,6 +30,7 @@ set (HEADERS
   PredictionSet.hh
   Product.hh
   PointSet.hh
+  OscillationVariables.hh
   OscProb2nu.hh
   IbdInteraction.hh
   IbdZeroOrder.hh

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <functional>
+#include <typeinfo>
+#include <stdexcept>
 
 class changeable;
 struct references {
@@ -21,10 +23,14 @@ struct inconstant_header {
   references emitters;
   bool tainted = true;
   std::function<void()> changed;
+  const std::type_info *type = nullptr;
 };
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
+  inconstant_data() {
+    type = &typeid(ValueType);
+  }
   ValueType value;
   std::function<ValueType()> func;
 };
@@ -180,6 +186,16 @@ public:
   static variable<void> null() {
     return variable<void>();
   }
+  const std::type_info *type() const {
+    return m_data.hdr->type;
+  }
+  template <typename T>
+  bool istype() {
+    return (type()->hash_code() == typeid(T).hash_code());
+  }
+  bool sametype(const variable<void> &other) {
+    return (type()->hash_code() == other.type()->hash_code());
+  }
 };
 
 template <typename ValueType>
@@ -195,7 +211,11 @@ public:
   variable(const variable<ValueType> &other)
     : variable<void>(other) { }
   explicit variable(const variable<void> &other)
-    : variable<void>(other) { }
+    : variable<void>(other) {
+    if (!this->sametype(other)) {
+      throw std::runtime_error("bad variable conversion");
+    }
+  }
   static variable<ValueType> null() {
     return variable<ValueType>();
   }

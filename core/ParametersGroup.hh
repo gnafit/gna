@@ -70,7 +70,7 @@ public:
     std::string name = m_pgroup->fieldName(field);
     std::vector<changeable> deps;
     for (ParametersGroup::Field f: sources) {
-      m_pgroup->variable_(m_pgroup->fieldName(f));
+      m_pgroup->variable_(m_pgroup->fieldName(f)).required(false);
       deps.push_back(*f);
     }
     evaluable_(name, std::function<T()>(func), deps);

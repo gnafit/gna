@@ -11,6 +11,8 @@
 
 #include <boost/format.hpp>
 
+#include <boost/core/demangle.hpp>
+
 #include "TObject.h"
 
 #include "Parameters.hh"
@@ -55,6 +57,10 @@ namespace ParametrizedTypes {
     VariableHandle(const VariableHandle<void> &other)
       : VariableHandle(*other.m_entry) { }
     const std::string &name() const { return m_entry->name; }
+    VariableHandle<void> required(bool req) {
+      m_entry->required = req;
+      return *this;
+    }
     void dump() const;
   protected:
     void bind(variable<void> var) { m_entry->bind(var); }
@@ -93,6 +99,10 @@ namespace ParametrizedTypes {
       : BaseClass(other) { }
     explicit VariableHandle(const VariableHandle<void> &other)
       : BaseClass(other) { }
+    VariableHandle<T> required(bool req) {
+      m_entry->required = req;
+      return *this;
+    }
     VariableHandle<T> &defvalue(const T& defvalue);
     void bind(variable<T> var) { m_entry->bind(var); }
     parameter<T> claim() {
@@ -273,6 +283,9 @@ public:
     return BaseClass::m_entry->state == ParametrizedTypes::Entry::State::Free;
   }
   bool required() const { return BaseClass::m_entry->required; }
+  std::string typeName() const {
+    return boost::core::demangle(BaseClass::m_entry->var.type()->name());
+  }
 
   std::string name;
 
@@ -303,6 +316,9 @@ public:
   }
 
   variable<void> &get() { return BaseClass::m_entry->dep; }
+  std::string typeName() const {
+    return boost::core::demangle(BaseClass::m_entry->dep.type()->name());
+  }
 
   const std::string name;
   const Sources sources;
