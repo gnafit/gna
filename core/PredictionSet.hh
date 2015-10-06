@@ -12,7 +12,13 @@ public:
 
   PredictionSet &operator=(const PredictionSet &other);
 
-  void add(const OutputDescriptor &data);
+  void append(const TransformationDescriptor &obj) {
+    append(obj.outputs.single());
+  }
+  void append(const TransformationDescriptor::Outputs &outs) {
+    append(outs.single());
+  }
+  void append(const OutputDescriptor &data);
   size_t size() const;
 
   void update() const;

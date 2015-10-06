@@ -202,8 +202,7 @@ template <typename ValueType>
 class variable: public variable<void> {
 public:
   operator const ValueType&() const {
-    update();
-    return data().value;
+    return value();
   }
   variable() {
     m_data.raw = nullptr;
@@ -218,6 +217,10 @@ public:
   }
   static variable<ValueType> null() {
     return variable<ValueType>();
+  }
+  const ValueType &value() const {
+    update();
+    return data().value;
   }
 protected:
   inline inconstant_data<ValueType> &data() const {

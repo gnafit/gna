@@ -15,7 +15,6 @@ protected:
 
   dependant<double> ElectronMass2, NeutronMass2, ProtonMass2;
   dependant<double> DeltaNPE_tilded;
-  dependant<double> NeutronLifeTimeMeV;
   dependant<double> y2;
 
   ClassDef(IbdFirstOrder, 1);

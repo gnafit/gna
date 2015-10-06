@@ -12,6 +12,6 @@ Product::Product() {
       });
 }
 
-void Product::add(const OutputDescriptor &out) {
+void Product::multiply(const OutputDescriptor &out) {
   t_["product"].input(out.channel()).connect(out);
 }

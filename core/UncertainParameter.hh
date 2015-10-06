@@ -145,6 +145,7 @@ public:
   T sigma() { return m_sigma; }
   void setSigma(T sigma) { m_sigma = sigma; }
   T cast(const std::string &v) const;
+  T cast(const T &v) const { return v; }
 
   virtual T relativeValue(T diff) {
     return diff*std::numeric_limits<T>::infinity();

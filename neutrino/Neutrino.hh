@@ -4,13 +4,13 @@
 #include <TObject.h>
 
 namespace Particles {
-  struct Neutrino: public TObject {
+  class Neutrino: public TObject {
   public:
     enum Kind {
-      Particle = 1, Antiparticle = 2,
+      Particle = 1, Antiparticle = -1,
     };
     enum Flavor {
-      Electron = 1, Muon = 2, Tau = 3,
+      Electron = 0, Muon, Tau,
     };
     Kind kind;
     Flavor flavor;

@@ -9,7 +9,13 @@ public:
   TransformationDef(Product)
   Product();
 
-  void add(const OutputDescriptor &data);
+  void multiply(const TransformationDescriptor &obj) {
+    multiply(obj.outputs.single());
+  }
+  void multiply(const TransformationDescriptor::Outputs &outs) {
+    multiply(outs.single());
+  }
+  void multiply(const OutputDescriptor &data);
   size_t size() const;
 
   ClassDef(Product, 1);

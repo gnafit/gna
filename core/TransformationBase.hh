@@ -48,7 +48,7 @@ namespace TransformationTypes {
     Source(const Channel &chan, Entry *entry)
       : Channel(chan), sink(nullptr), entry(entry)
       { }
-    bool connect(Sink *newsink);
+    void connect(Sink *newsink);
     bool materialized() const {
       return sink && sink->data && sink->data->defined();
     }
@@ -64,7 +64,7 @@ namespace TransformationTypes {
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
     static InputHandle invalid(const std::string name);
 
-    bool connect(const OutputHandle &out) const;
+    void connect(const OutputHandle &out) const;
 
     const std::string &name() const { return m_source->name; }
   protected:
@@ -78,7 +78,6 @@ namespace TransformationTypes {
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
     static OutputHandle invalid(const std::string name);
 
-    bool connect(const InputHandle &out) const;
     const TransformationTypes::Channel &channel() const { return *m_sink; }
 
     const std::string &name() const { return m_sink->name; }
@@ -86,12 +85,8 @@ namespace TransformationTypes {
     TransformationTypes::Sink *m_sink;
   };
 
-  inline bool InputHandle::connect(const OutputHandle &out) const {
+  inline void InputHandle::connect(const OutputHandle &out) const {
     return m_source->connect(out.m_sink);
-  }
-
-  inline bool OutputHandle::connect(const InputHandle &in) const {
-    return in.m_source->connect(m_sink);
   }
 
   struct Args;
@@ -296,7 +291,7 @@ namespace TransformationTypes {
     Base &operator=(const Base &other);
   protected:
     Base(): t_(*this) { }
-    bool connectChannel(Source &source, Base *sinkobj, Sink &sink);
+    void connectChannel(Source &source, Base *sinkobj, Sink &sink);
     bool compatible(const Channel *sink, const Channel *source) const;
     Entry &getEntry(size_t idx) {
       return m_entries[idx];
@@ -411,6 +406,17 @@ namespace TransformationTypes {
       types(func2);
       types(func3);
       return *this;
+    }
+    template <typename Changeable>
+    Initializer<T> depends(Changeable v) {
+      v.subscribe(m_entry->tainted);
+      m_nosubscribe = true;
+      return *this;
+    }
+    template <typename Changeable, typename... Rest>
+    Initializer<T> depends(Changeable v, Rest... rest) {
+      depends(v);
+      return depends(rest...);
     }
     Initializer<T> dont_subscribe() {
       m_nosubscribe = true;

@@ -5,6 +5,8 @@
 using boost::format;
 
 #include "Transformation.hh"
+#include "Exceptions.hh"
+
 using TransformationTypes::Channel;
 using TransformationTypes::Source;
 using TransformationTypes::Sink;
@@ -114,7 +116,7 @@ void Base::copyEntries(const Base &other) {
                  [this](const Entry &e) { return new Entry{e, this}; });
 }
 
-bool Source::connect(Sink *newsink) {
+void Source::connect(Sink *newsink) {
   if (sink) {
     throw std::runtime_error(
       (format("Transformation: source `%1' is already connected to sink `%2%,"
@@ -123,7 +125,7 @@ bool Source::connect(Sink *newsink) {
       );
   }
   if (!TransformationTypes::isCompatible(newsink, this)) {
-    return false;
+    throw std::runtime_error("Transformation: connecting incompatible types");
   }
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
@@ -131,7 +133,6 @@ bool Source::connect(Sink *newsink) {
   newsink->sources.push_back(this);
   newsink->entry->evaluateTypes();
   entry->evaluateTypes();
-  return true;
 }
 
 bool TransformationTypes::isCompatible(const Channel *sink,
@@ -154,9 +155,7 @@ Entry &Base::getEntry(const std::string &name) {
       return e;
     }
   }
-  throw std::runtime_error(
-    (format("Transformation: can't find entry `%1%'") % name).str()
-    );
+  throw KeyError(name, "transformation");
 }
 
 void Entry::evaluateTypes() {

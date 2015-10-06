@@ -17,6 +17,7 @@ set (SOURCES
   core/PredictionSet.cc
   core/Product.cc
   neutrino/OscProb2nu.cc
+  neutrino/OscProbPMNS.cc
   neutrino/IbdInteraction.cc
   neutrino/IbdZeroOrder.cc
   neutrino/IbdFirstOrder.cc
@@ -25,13 +26,17 @@ set (SOURCES
   )
 
 set (HEADERS
+  Exceptions.hh
+  Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
   PredictionSet.hh
   Product.hh
   PointSet.hh
   OscillationVariables.hh
+  PMNSVariables.hh
   OscProb2nu.hh
+  OscProbPMNS.hh
   IbdInteraction.hh
   IbdZeroOrder.hh
   IbdFirstOrder.hh

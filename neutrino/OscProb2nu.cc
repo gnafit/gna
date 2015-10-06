@@ -1,6 +1,12 @@
+#include <TMath.h>
+
 #include "OscProb2nu.hh"
 
 using namespace Eigen;
+
+static double km2MeV(double km) {
+  return km*1E-3*TMath::Qe()/(TMath::Hbar()*TMath::C());
+}
 
 OscProb2nu::OscProb2nu()
   : m_param(new OscillationVariables(this))
@@ -20,5 +26,5 @@ template <typename DerivedA, typename DerivedB>
 void OscProb2nu::probability(const ArrayBase<DerivedA> &Enu,
                              ArrayBase<DerivedB> &ret) {
   auto w = 4.0*m_param->SinSq12*(1.0-m_param->SinSq12);
-  ret = 1.0-w*sin(1.27*1e3*m_param->DeltaMSq12*m_L/Enu).square();
+  ret = 1.0-w*sin(m_param->DeltaMSq12*km2MeV(m_L)/4.0/Enu).square();
 }

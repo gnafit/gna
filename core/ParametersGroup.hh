@@ -49,6 +49,10 @@ public:
       return VariableHandle<T>(m_parent->getByField(field));
     }
   }
+  template <typename T>
+  ParametrizedTypes::VariableHandle<T> variable_(variable<T> *field) {
+    return variable_<T>(fieldName(field));
+  }
 protected:
   void initFields(const std::vector<std::string> &params);
   void checkField(const std::string &name);

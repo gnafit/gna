@@ -6,8 +6,11 @@
 
 #include "TObject.h"
 
+class SimpleDictBase: public TObject {
+};
+
 template <typename T, typename Container>
-class SimpleDict: public TObject {
+class SimpleDict: public SimpleDictBase {
 public:
   SimpleDict(Container &container): m_container(&container) { }
 
@@ -15,10 +18,13 @@ public:
     return m_container->size();
   }
 
-  T at(int i) {
+  T at(int i) const {
     return T(m_container->at(i));
   }
-  T operator[](int i) {
+  T operator[](int i) const {
+    if (i >= size()) {
+      return T::invalid(i);
+    }
     return at(i);
   }
   T operator[](const std::string &name) const {

@@ -2,7 +2,7 @@
 #define TRANSFORMATION_H
 
 #include <string>
-
+#include <iostream>
 #include "TObject.h"
 
 #include "TransformationBase.hh"
@@ -19,10 +19,32 @@ public:
   typedef TransformationTypes::Handle BaseClass;
 
   typedef TransformationTypes::SourcesContainer SourcesContainer;
-  typedef SimpleDict<InputDescriptor, SourcesContainer> Inputs;
+  typedef SimpleDict<InputDescriptor, SourcesContainer> InputsBase;
+  class Inputs;
 
   typedef TransformationTypes::SinksContainer SinksContainer;
-  typedef SimpleDict<OutputDescriptor, SinksContainer> Outputs;
+  typedef SimpleDict<OutputDescriptor, SinksContainer> OutputsBase;
+  class Outputs;
+
+  class Inputs: public InputsBase {
+  public:
+    Inputs(SourcesContainer &container)
+      : InputsBase(container) { }
+    void operator()(const Outputs &other) const;
+    void operator()(const TransformationDescriptor &other) const;
+
+    ClassDef(Inputs, 0);
+  };
+
+  class Outputs: public OutputsBase {
+  public:
+    Outputs(SinksContainer &container)
+      : OutputsBase(container) { }
+
+    OutputDescriptor single() const;
+
+    ClassDef(Outputs, 0);
+  };
 
   TransformationDescriptor(const BaseClass &other)
     : Handle(other), name(BaseClass::name()),
@@ -57,9 +79,22 @@ public:
   InputDescriptor(TransformationTypes::Source &source)
     : InputDescriptor(BaseClass(source))
     { }
+  static InputDescriptor invalid(int index);
   static InputDescriptor invalid(const std::string name);
 
-  bool connect(const OutputDescriptor &out) const;
+  void operator()(const TransformationDescriptor &obj) const {
+    connect(obj);
+  }
+  void operator()(const TransformationDescriptor::Outputs &outs) const {
+    connect(outs);
+  }
+  void operator()(const OutputDescriptor &out) const {
+    connect(out);
+  }
+
+  void connect(const TransformationDescriptor &obj) const;
+  void connect(const TransformationDescriptor::Outputs &outs) const;
+  void connect(const OutputDescriptor &out) const;
 
   const std::string name;
 
@@ -80,21 +115,12 @@ public:
   OutputDescriptor(TransformationTypes::Sink &sink)
     : OutputDescriptor(BaseClass(sink))
     { }
+  static OutputDescriptor invalid(int index);
   static OutputDescriptor invalid(const std::string name);
-
-  bool connect(const InputDescriptor &in) const;
 
   const std::string name;
 
   ClassDef(OutputDescriptor, 0);
 };
-
-inline bool InputDescriptor::connect(const OutputDescriptor &out) const {
-  return BaseClass::connect(out);
-}
-
-inline bool OutputDescriptor::connect(const InputDescriptor &in) const {
-  return BaseClass::connect(in);
-}
 
 #endif // TRANSFORMATION_H

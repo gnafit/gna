@@ -21,7 +21,7 @@ public:
   }
   GaussLegendre2d(const double *xedges, const size_t *xorders, size_t xcnt,
                 double ymin, double ymax, int yorder)
-    : m_xedges(xcnt), m_xorders(xcnt),
+    : m_xedges(xcnt+1), m_xorders(xcnt),
       m_ymin(ymin), m_ymax(ymax), m_yorder(yorder)
   {
     std::copy(xedges, xedges+xcnt+1, m_xedges.begin());

@@ -36,7 +36,7 @@ PredictionSet &PredictionSet::operator=(const PredictionSet &/* other */) {
   return *this;
 }
 
-void PredictionSet::add(const OutputDescriptor &out) {
+void PredictionSet::append(const OutputDescriptor &out) {
   t_["prediction"].input(out.channel()).connect(out);
 }
 

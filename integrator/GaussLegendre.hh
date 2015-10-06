@@ -18,7 +18,7 @@ public:
     init();
   }
   GaussLegendre(const double *edges, const size_t *orders, size_t cnt)
-    : m_edges(cnt), m_orders(cnt)
+    : m_edges(cnt+1), m_orders(cnt)
   {
     std::copy(edges, edges+cnt+1, m_edges.begin());
     std::copy(orders, orders+cnt, m_orders.begin());

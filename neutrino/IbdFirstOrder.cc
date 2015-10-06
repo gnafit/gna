@@ -44,8 +44,6 @@ IbdFirstOrder::IbdFirstOrder()
     NeutronMass2 = mkdep(Pow(p->NeutronMass, 2));
     ProtonMass2 = mkdep(Pow(p->ProtonMass, 2));
 
-    DeltaNPE_tilded = mkdep((NeutronMass2-ProtonMass2-ElectronMass2)/p->ProtonMass*0.5);
-    NeutronLifeTimeMeV = mkdep(p->NeutronLifeTime/(1.E-6*TMath::Hbar()/TMath::Qe()));
     y2 = mkdep((Pow(m_DeltaNP, 2)-ElectronMass2)*0.5);
   }
 }
@@ -55,10 +53,10 @@ void IbdFirstOrder::calc_Enu(Args args, Rets rets) {
   const auto &ctheta = args[1].x;
 
   ArrayXd r = Ee / m_pdg->ProtonMass;
-  ArrayXd Ve = (1.0 - ElectronMass2 / (Ee*Ee)).sqrt();
-  ArrayXd Ee0 = Ee + m_DeltaNP + (m_DeltaNP*m_DeltaNP - ElectronMass2)/(2*m_NucleonMass);
-  ArrayXXd corr = 1.0/(1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r);
-  Map<ArrayXXd, Aligned>(rets[0].x.data(), Ee.size(), ctheta.size()) = corr.colwise()*Ee0;
+  ArrayXd Ve = (1.0 - ElectronMass2 / Ee.square()).sqrt();
+  ArrayXd Ee0 = Ee + (NeutronMass2-ProtonMass2-ElectronMass2)/m_pdg->ProtonMass*0.5;
+  ArrayXXd corr = (1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r).inverse();
+  rets[0].as2d() = corr.colwise()*Ee0;
 }
 
 double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
@@ -68,7 +66,7 @@ double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
   double ve0 = pe0 / Ee0;
   double ElectronMass5 = ElectronMass2 * ElectronMass2 * m_pdg->ElectronMass;
   double sigma0 = 2.* pi * pi /
-    (PhaseFactor*(fsq+3.*gsq)*ElectronMass5*m_pdg->NeutronLifeTime);
+    (PhaseFactor*(fsq+3.*gsq)*ElectronMass5*m_pdg->NeutronLifeTime/(1.E-6*TMath::Hbar()/TMath::Qe()));
 
   double Ee1 = Ee0 * ( 1.0 - Eneu/m_NucleonMass * ( 1.0 - ve0*ctheta ) ) - y2/m_NucleonMass;
   if (Ee1 <= m_pdg->ElectronMass) return 0.0;
