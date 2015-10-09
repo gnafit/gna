@@ -23,7 +23,7 @@ IbdZeroOrder::IbdZeroOrder()
 }
 
 void IbdZeroOrder::calcEnu(Args args, Rets rets) {
-  rets[0].x = args[0].x - m_DeltaNP;
+  rets[0].x = args[0].x + m_DeltaNP;
 }
 
 void IbdZeroOrder::calcXsec(Args args, Rets rets) {

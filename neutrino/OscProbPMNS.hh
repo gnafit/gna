@@ -12,7 +12,7 @@ class OscProbPMNS: public GNAObject,
                    public Transformation<OscProbPMNS> {
 public:
   TransformationDef(OscProbPMNS)
-  OscProbPMNS(Particles::Neutrino from, Particles::Neutrino to);
+  OscProbPMNS(Neutrino from, Neutrino to);
 
   template <int I, int J>
   void calcComponent(Args args, Rets rets);

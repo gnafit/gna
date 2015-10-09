@@ -2,6 +2,18 @@ from gna.ui import basecmd
 import ROOT
 import numpy as np
 import physlib
+from gna import data
+from matplotlib import pyplot as plt
+
+def loadspectrum(fname):
+    Es, ys = data.load(fname).T
+    return ROOT.LinearInterpolator(len(Es), Es.copy(), ys.copy())
+
+def vec(lst):
+    v = ROOT.vector("std::string")()
+    for s in lst:
+        v.push_back(s)
+    return v
 
 class test(basecmd):
     def run(self):
@@ -20,7 +32,7 @@ class test(basecmd):
 
         pars.define('Delta', type='uniformangle', central=0.0)
 
-        pars.define('L', central=2, sigma=0)
+        pars.define('L', central=52, sigma=0)
 
         pdg = physlib.pdg[2012]
         pars.define("NeutronLifeTime", central=pdg['neutron_lifetime'],
@@ -29,46 +41,81 @@ class test(basecmd):
         pars.define("NeutronMass", central=pdg['NeutronMass'], sigma=0)
         pars.define("ElectronMass", central=pdg['ElectronMass'], sigma=0)
 
+        spectra = {
+            'Pu239': ('Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',  0.60),
+            'Pu241': ('Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',  0.07),
+            'U235':  ('Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',   0.27),
+            'U238':  ('Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat', 0.06),
+        }
+        for isoname, (fname, weight) in spectra.iteritems():
+            pars.define("weight_{0}".format(isoname), central=weight, sigma=0)
+
+        pars.define("Eres_a", central=0.0, sigma=0)
+        pars.define("Eres_b", central=0.03, sigma=0)
+        pars.define("Eres_c", central=0.0, sigma=0)
+
         expressions = []
         expressions.append(ROOT.OscillationExpressions())
         expressions.append(ROOT.PMNSExpressions())
 
-        edges = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], dtype=float)
+        edges = np.linspace(0, 10, 500)
         orders = np.array([5]*(len(edges)-1), dtype=int)
 
         prediction = ROOT.PredictionSet()
         integrator = ROOT.GaussLegendre(edges, orders, len(orders))
-        events = ROOT.Product()
         ibd = ROOT.IbdZeroOrder()
         ibd.Enu.inputs(integrator.points)
         ibd.xsec.inputs(integrator.points)
-        events.multiply(ibd.xsec)
-        oscprob = ROOT.OscProb2nu()
-        oscprob.prob.inputs(ibd.Enu)
-        events.multiply(oscprob.prob)
-        integrator.hist.inputs(events.product)
-        prediction.append(integrator.hist)
-        ibd0 = np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
+        spectrum = ROOT.WeightedSum(vec(spectra.keys()))
+        for isoname, (fname, weight) in spectra.iteritems():
+            isotope = loadspectrum(fname)
+            isotope.f.inputs(ibd.Enu)
+            spectrum.sum[isoname](isotope.f)
+        oscprob = ROOT.OscProbPMNS(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+        components = {}
+        for compname in oscprob.transformations:
+            if not compname.startswith('comp'):
+                continue
+            events = ROOT.Product()
+            events.multiply(spectrum.sum)
+            events.multiply(ibd.xsec)
+            oscprob[compname].inputs(ibd.Enu)
+            events.multiply(oscprob[compname])
+            oscprob.probsum.inputs[compname](events.product)
+            components[compname] = events.product
+        if 'comp0' in oscprob.probsum.inputs:
+            events = ROOT.Product()
+            events.multiply(spectrum.sum)
+            events.multiply(ibd.xsec)
+            oscprob.probsum.comp0(events.product)
+        integrator.hist.inputs(oscprob.probsum)
+        eres = ROOT.EnergyResolution()
+        eres.smear.inputs(integrator.hist)
+        prediction.append(eres.smear)
+        ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
+        plt.plot((edges[:-1] + edges[1:])/2, ibd0)
+        plt.show()
         print ibd0
 
-        prediction = ROOT.PredictionSet()
-        integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
-        events = ROOT.Product()
-        ibd = ROOT.IbdFirstOrder()
-        ibd.Enu.inputs(integrator.points)
-        ibd.xsec.Enu(ibd.Enu)
-        ibd.xsec.ctheta(integrator.points.y)
-        events.multiply(ibd.xsec)
-        ibd.jacobian.Enu(ibd.Enu)
-        ibd.jacobian.Ee(integrator.points.x)
-        ibd.jacobian.ctheta(integrator.points.y)
-        events.multiply(ibd.jacobian)
-        oscprob = ROOT.OscProb2nu()
-        oscprob.prob.inputs(ibd.Enu)
-        events.multiply(oscprob.prob)
-        integrator.hist.inputs(events.product)
-        prediction.append(integrator.hist)
-        ibd1 = np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
-        print ibd1
+        return
+        # prediction = ROOT.PredictionSet()
+        # integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
+        # events = ROOT.Product()
+        # ibd = ROOT.IbdFirstOrder()
+        # ibd.Enu.inputs(integrator.points)
+        # ibd.xsec.Enu(ibd.Enu)
+        # ibd.xsec.ctheta(integrator.points.y)
+        # events.multiply(ibd.xsec)
+        # ibd.jacobian.Enu(ibd.Enu)
+        # ibd.jacobian.Ee(integrator.points.x)
+        # ibd.jacobian.ctheta(integrator.points.y)
+        # events.multiply(ibd.jacobian)
+        # oscprob = ROOT.OscProb2nu()
+        # oscprob.prob.inputs(ibd.Enu)
+        # events.multiply(oscprob.prob)
+        # integrator.hist.inputs(events.product)
+        # prediction.append(integrator.hist)
+        # ibd1 = np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
+        # print ibd1
 
         print ibd1/ibd0

@@ -26,6 +26,7 @@
 #pragma link C++ class GNAObject;
 #pragma link C++ class GNAObject::Variables+;
 #pragma link C++ class GNAObject::Evaluables+;
+#pragma link C++ class GNAObject::Transformations+;
 
 #pragma link C++ class ExpressionsProvider+;
 
@@ -41,8 +42,12 @@
 
 #pragma link C++ class PredictionSet+;
 #pragma link C++ class Product+;
+#pragma link C++ class WeightedSum+;
 #pragma link C++ class PointSet+;
+#pragma link C++ class Histogram+;
+#pragma link C++ class LinearInterpolator+;
 
+#pragma link C++ class Neutrino+;
 #pragma link C++ class OscillationExpressions+;
 #pragma link C++ class PMNSExpressions+;
 
@@ -54,5 +59,7 @@
 
 #pragma link C++ class GaussLegendre+;
 #pragma link C++ class GaussLegendre2d+;
+
+#pragma link C++ class EnergyResolution+;
 
 #endif

@@ -37,15 +37,28 @@ def patchSimpleDict(cls):
         for i in range(self.size()):
             yield self.at(i)
 
-    def iternames(self):
+    def values(self):
+        return list(itervalues(self))
+
+    def iterkeys(self):
         for i in range(self.size()):
             yield self.at(i).name
+
+    def __contains__(self, key):
+        return key in keys(self)
+
+    def keys(self):
+        return list(iterkeys(self))
+
+    def iteritems(self):
+        for i in range(self.size()):
+            yield self.at(i).name, self.at(i)
 
     def __len__(self):
         return self.size()
 
     def __iter__(self):
-        return self.itervalues()
+        return self.iterkeys()
 
     def __getattr__(self, attr):
         try:
@@ -53,11 +66,22 @@ def patchSimpleDict(cls):
         except KeyError:
             raise AttributeError(attr)
 
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
     cls.itervalues = itervalues
-    cls.iternames = iternames
+    cls.values = values
+    cls.iterkeys = iterkeys
+    cls.keys = keys
+    cls.iteritems = iteritems
+    cls.__contains__ = __contains__
     cls.__len__ = __len__
     cls.__iter__ = __iter__
     cls.__getattr__ = __getattr__
+    cls.get = get
 
 def patchVariableDescriptor(cls):
     origclaim = cls.claim
@@ -77,7 +101,19 @@ def patchTransformationDescriptor(cls):
             return out
         raise AttributeError(attr)
 
+    def __getitem__(self, attr):
+        inp = self.inputs.get(attr)
+        out = self.inputs.get(attr)
+        if inp and out:
+            raise Exception("{} is both input and output".format(attr))
+        if inp:
+            return inp
+        if out:
+            return out
+        raise KeyError(attr)
+
     cls.__getattr__ = __getattr__
+    cls.__getitem__ = __getattr__
 
 def setup(ROOT):
     ROOT.UserExceptions.update({
@@ -88,6 +124,7 @@ def setup(ROOT):
     simpledicts = [
         ROOT.GNAObject.Variables,
         ROOT.GNAObject.Evaluables,
+        ROOT.GNAObject.Transformations,
         ROOT.TransformationDescriptor.Inputs,
         ROOT.TransformationDescriptor.Outputs,
         ROOT.EvaluableDescriptor.Sources,

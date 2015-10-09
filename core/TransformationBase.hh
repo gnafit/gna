@@ -27,6 +27,7 @@
 template <typename T>
 class Transformation;
 
+class GNAObject;
 namespace TransformationTypes {
   struct Channel {
     std::string name;
@@ -132,7 +133,8 @@ namespace TransformationTypes {
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
   };
-
+  typedef boost::ptr_vector<Entry> Container;
+  
   class Handle {
   public:
     Handle(): m_entry(nullptr) { }
@@ -286,6 +288,7 @@ namespace TransformationTypes {
     friend class Initializer;
     friend class TransformationDescriptor;
     friend class Accessor;
+    friend class ::GNAObject;
   public:
     Base(const Base &other);
     Base &operator=(const Base &other);

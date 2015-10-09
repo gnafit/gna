@@ -47,12 +47,12 @@ protected:
     using std::exp;
     provider
       .add(&V[0][0], {&Theta12, &Theta13}, [&]() {
-          return cos(Theta12)*sin(Theta13);
+          return cos(Theta12)*cos(Theta13);
         })
       .add(&V[0][1], {&Theta12, &Theta13}, [&]() {
           return sin(Theta12)*cos(Theta13);
         })
-      .add(&V[0][2], {&Theta12, &Theta13, &Delta}, [&]() {
+      .add(&V[0][2], {&Theta13, &Delta}, [&]() {
           auto phase = exp(-std::complex<double>(0, Delta));
           return sin(Theta13)*phase;
         })

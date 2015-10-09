@@ -6,7 +6,6 @@
 #include "PMNSVariables.hh"
 
 using namespace Eigen;
-using namespace Particles;
 
 static double km2MeV(double km) {
   return km*1E-3*TMath::Qe()/(TMath::Hbar()*TMath::C());
@@ -15,6 +14,9 @@ static double km2MeV(double km) {
 OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   : m_param(new OscillationVariables(this)), m_pmns(new PMNSVariables(this))
 {
+  if (from.kind != to.kind) {
+    throw std::runtime_error("particle-antiparticle oscillations");
+  }
   m_alpha = from.flavor;
   m_beta = to.flavor;
 
@@ -23,8 +25,8 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   m_param->variable_("DeltaMSq13");
   m_param->variable_("DeltaMSq23");
   for (size_t i = 0; i < m_pmns->Nnu; ++i) {
-    m_pmns->variable_(&m_pmns->V[from.kind][i]);
-    m_pmns->variable_(&m_pmns->V[to.kind][i]);
+    m_pmns->variable_(&m_pmns->V[m_alpha][i]);
+    m_pmns->variable_(&m_pmns->V[m_beta][i]);
   }
   transformation_("comp12")
     .input("Enu", DataType().points().any())
@@ -50,16 +52,16 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .func(&OscProbPMNS::calcComponentCP);
   }
   auto probsum = transformation_("probsum")
-    .input("", DataType().points().any())
     .input("comp12", DataType().points().any())
     .input("comp13", DataType().points().any())
     .input("comp23", DataType().points().any())
+    .output("probsum", DataType().points().any())
     .types(Atypes::pass<0>)
     .func(&OscProbPMNS::calcSum);
   if (from.flavor != to.flavor) {
-    probsum.input("compJ", DataType().points().any());
+    probsum.input("compCP", DataType().points().any());
   } else {
-    probsum.input("compNoOscill", DataType().points().any());
+    probsum.input("comp0", DataType().points().any());
   }
 }
 
@@ -88,16 +90,16 @@ void OscProbPMNS::calcComponentCP(Args args, Rets rets) {
 
 template <int I, int J>
 double OscProbPMNS::weight() const {
-  return -4.0*real(
-    m_pmns->V[m_alpha][I].value()*
-    m_pmns->V[m_beta][J].value()*
-    std::conj(m_pmns->V[m_alpha][J].value())*
-    std::conj(m_pmns->V[m_beta][I].value())
+  return -4.0*std::real(
+    m_pmns->V[m_alpha][I-1].value()*
+    m_pmns->V[m_beta][J-1].value()*
+    std::conj(m_pmns->V[m_alpha][J-1].value())*
+    std::conj(m_pmns->V[m_beta][I-1].value())
   );
 }
 
 double OscProbPMNS::weightCP() const {
-  return 8.0*imag(
+  return 8.0*std::imag(
     m_pmns->V[m_alpha][0].value()*
     m_pmns->V[m_beta][1].value()*
     std::conj(m_pmns->V[m_alpha][1].value())*
@@ -112,6 +114,6 @@ void OscProbPMNS::calcSum(Args args, Rets rets) {
   if (m_alpha == m_beta) {
     rets[0].x += args[3].x;
   } else {
-    rets[0].x += 8.0*weightCP()*args[3].x;
+    rets[0].x += weightCP()*args[3].x;
   }
 }

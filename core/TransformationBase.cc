@@ -119,8 +119,8 @@ void Base::copyEntries(const Base &other) {
 void Source::connect(Sink *newsink) {
   if (sink) {
     throw std::runtime_error(
-      (format("Transformation: source `%1' is already connected to sink `%2%,"
-              "won't connect to `%3'") % name % sink->name % newsink->name)
+      (format("Transformation: source `%1%' is already connected to sink `%2%',"
+              " won't connect to `%3%'") % name % sink->name % newsink->name)
        .str()
       );
   }

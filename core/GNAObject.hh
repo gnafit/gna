@@ -12,19 +12,23 @@ class GNAObject: public TObject,
 public:
   typedef ParametrizedTypes::VariablesContainer VariablesContainer;
   typedef ParametrizedTypes::EvaluablesContainer EvaluablesContainer;
+  typedef TransformationTypes::Container TransformationsContainer;
   typedef SimpleDict<VariableDescriptor, VariablesContainer> Variables;
   typedef SimpleDict<EvaluableDescriptor, EvaluablesContainer> Evaluables;
-
+  typedef SimpleDict<TransformationDescriptor,
+                     TransformationsContainer> Transformations;
   GNAObject()
     : TObject(), ParametrizedTypes::Base(), TransformationTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
-      evaluables(m_eventries)
+      evaluables(m_eventries),
+      transformations(TransformationTypes::Base::m_entries)
     { }
   GNAObject(const GNAObject &other)
     : TObject(other), ParametrizedTypes::Base(other),
       TransformationTypes::Base(other),
       variables(ParametrizedTypes::Base::m_entries),
-      evaluables(m_eventries)
+      evaluables(m_eventries),
+      transformations(TransformationTypes::Base::m_entries)
     { }
 
   void subscribe(taintflag flag) {
@@ -39,6 +43,7 @@ public:
 
   Variables variables;
   Evaluables evaluables;
+  Transformations transformations;
 protected:
   typedef TransformationTypes::Args Args;
   typedef TransformationTypes::Rets Rets;

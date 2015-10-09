@@ -16,6 +16,8 @@ set (SOURCES
   core/ParametersGroup.cc
   core/PredictionSet.cc
   core/Product.cc
+  core/WeightedSum.cc
+  core/LinearInterpolator.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/IbdInteraction.cc
@@ -23,6 +25,7 @@ set (SOURCES
   neutrino/IbdFirstOrder.cc
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
+  detector/EnergyResolution.cc
   )
 
 set (HEADERS
@@ -32,7 +35,11 @@ set (HEADERS
   UncertainParameter.hh
   PredictionSet.hh
   Product.hh
+  WeightedSum.hh
   PointSet.hh
+  Histogram.hh
+  LinearInterpolator.hh
+  Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
   OscProb2nu.hh
@@ -42,9 +49,10 @@ set (HEADERS
   IbdFirstOrder.hh
   GaussLegendre.hh
   GaussLegendre2d.hh
+  EnergyResolution.hh
   )
   
-include_directories(core/ neutrino/ integrator/)
+include_directories(core/ neutrino/ integrator/ detector/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)

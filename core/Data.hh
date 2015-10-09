@@ -67,9 +67,7 @@ public:
 
   operator T() const { return m_type; }
 
-  template <typename U>
-  typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-  operator==(const DataType::Points<U> &other) const {
+  bool operator==(const DataType::Points<T> &other) const {
     if (m_type.shape != other.m_type.shape) {
       return false;
     }
@@ -168,9 +166,7 @@ public:
 
   operator T() const { return m_type; }
 
-  template <typename U>
-  typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-  operator==(const DataType::Hist<U> &other) const {
+  bool operator==(const DataType::Hist<T> &other) const {
     if (m_type.shape != other.m_type.shape) {
       return false;
     }
@@ -203,10 +199,8 @@ public:
 
   DataType::Hist<T> &edges(const std::vector<double> &edges) {
     m_type.edges = edges;
-    return setKind();
+    return bins(edges.size()-1);
   }
-  template <typename U=T,
-            typename = typename std::enable_if<!std::is_const<U>::value>::type>
   std::vector<double> &edges() {
     return m_type.edges;
   }

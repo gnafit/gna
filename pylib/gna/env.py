@@ -4,12 +4,14 @@ from gna.parameters import parameters
 class _environment(object):
     def __init__(self):
         self.pars = parameters()
+        self.objs = []
     def register(self, obj, **kwargs):
         if len(obj.evaluables):
             self.pars.addexpressions(obj, bindings=kwargs.get("bindings", {}))
         if not kwargs.pop('bind', True):
             return obj
         self.pars.resolve(obj, **kwargs)
+        self.objs.append(obj)
         return obj
 
 class _environments(defaultdict):

@@ -92,7 +92,7 @@ class parameters(object):
 
     def addexpressions(self, obj, bindings={}):
         self._exprobjects.append(obj)
-        for expr in obj.evaluables:
+        for expr in obj.evaluables.itervalues():
             self.resolver.addexpression(obj, expr, bindings=bindings)
 
     def resolve(self, obj, **kwargs):
@@ -123,7 +123,7 @@ class parresolver(object):
     def addexpression(self, obj, expr, bindings={}):
         if expr.name not in self._expressions:
             self._expressions[expr.name] = []
-        deps = [bindings.get(name, name) for name in expr.sources.iternames()]
+        deps = [bindings.get(name, name) for name in expr.sources]
         self._expressions[expr.name].append((obj, expr, deps))
 
     def getpath(self, name, seen, known):
@@ -175,7 +175,7 @@ class parresolver(object):
             obj, expr, deps = self._expressions[name][idx]
             varnames = []
             bindings = {}
-            for src, dep in zip(expr.sources, deps):
+            for src, dep in zip(expr.sources.itervalues(), deps):
                 if self._isparameter(dep):
                     bindings[src.name] = dep
                 varnames.append(src.name)
@@ -187,7 +187,7 @@ class parresolver(object):
     def resolveobject(self, obj, freevars=(), resolve=True,
                       varnames=None, bindings={}):
         bound = set()
-        for v in obj.variables:
+        for v in obj.variables.itervalues():
             if v.name in freevars:
                 continue
             if varnames is not None:
@@ -202,6 +202,7 @@ class parresolver(object):
             else:
                 param = binding
             if param is not None:
+                print "binding", param.name(), "on", obj
                 v.bind(param.getVariable())
                 bound.add(v.name)
             else:

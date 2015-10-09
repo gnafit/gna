@@ -20,16 +20,15 @@ public:
     std::copy(points, points+cnt, m_points.begin());
     init();
   }
-  const std::vector<double> &points() const { return m_points; }
 protected:
   void init() {
     transformation_("points")
       .output("points", DataType().points().shape(m_points.size()))
       .types([](PointSet *obj, Atypes /*args*/, Rtypes rets) {
-          rets[0] = DataType().points().shape(obj->points().size());
+          rets[0] = DataType().points().shape(obj->m_points.size());
         })
       .func([](PointSet *obj, Args /*args*/, Rets rets) {
-          auto &pts = obj->points();
+          auto &pts = obj->m_points;
           rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&pts[0], pts.size());
         });
   }
