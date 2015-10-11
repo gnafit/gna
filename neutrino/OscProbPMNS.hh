@@ -30,8 +30,6 @@ protected:
   std::unique_ptr<PMNSVariables> m_pmns;
 
   int m_alpha, m_beta;
-
-  ClassDef(OscProbPMNS, 1);
 };
 
 #endif // OSCPROBPMNS_H

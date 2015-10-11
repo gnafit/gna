@@ -5,15 +5,13 @@
 #include <limits>
 #include <utility>
 
-#include <TObject.h>
-
 #include <boost/lexical_cast.hpp>
 #include <boost/math/constants/constants.hpp>
 
 #include "Parameters.hh"
 
 template <typename T>
-class ParameterWrapper: public TObject {
+class ParameterWrapper {
 public:
   ParameterWrapper(const std::string &name)
     : m_var(name.c_str()) { }
@@ -26,12 +24,10 @@ public:
   const variable<T> &getVariable() const { return m_var; }
 protected:
   parameter<T> m_var;
-
-  ClassDef(ParameterWrapper, 0);
 };
 
 template <typename T>
-class Uncertain: public TObject {
+class Uncertain {
 public:
   Uncertain(const std::string &name)
     : m_name(name) { }
@@ -45,8 +41,6 @@ public:
   virtual void setSigma(T sigma) = 0;
 protected:
   std::string m_name;
-
-  ClassDef(Uncertain, 0);
 };
 
 template <typename T>
@@ -71,8 +65,6 @@ public:
   virtual void reset() { set(central()); }
 protected:
   std::vector<std::pair<T, T>> m_limits;
-
-  ClassDef(Parameter, 0);
 };
 
 template <typename T>
@@ -101,8 +93,6 @@ protected:
   parameter<T> m_var;
   T m_central;
   T m_sigma;
-
-  ClassDef(GaussianParameter, 0);
 };
 
 template <typename T>
@@ -122,8 +112,6 @@ protected:
   variable<T> m_var;
   T m_central;
   T m_sigma;
-
-  ClassDef(GaussianValue, 0);
 };
 
 template <typename T>
@@ -156,8 +144,6 @@ protected:
   parameter<T> m_var;
   T m_central;
   T m_sigma;
-
-  ClassDef(UniformAngleParameter, 0);
 };
 
 template <typename T>

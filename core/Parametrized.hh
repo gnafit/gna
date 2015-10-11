@@ -13,8 +13,6 @@
 
 #include <boost/core/demangle.hpp>
 
-#include "TObject.h"
-
 #include "Parameters.hh"
 #include "SimpleDict.hh"
 
@@ -258,8 +256,7 @@ namespace ParametrizedTypes {
   }
 }
 
-class VariableDescriptor: public TObject,
-                          public ParametrizedTypes::VariableHandle<void> {
+class VariableDescriptor: public ParametrizedTypes::VariableHandle<void> {
 public:
   typedef ParametrizedTypes::VariableHandle<void> BaseClass;
 
@@ -289,11 +286,9 @@ public:
 
   std::string name;
 
-  ClassDef(VariableDescriptor, 0);
 };
 
-class EvaluableDescriptor: public TObject,
-                           public ParametrizedTypes::EvaluableHandle<void> {
+class EvaluableDescriptor: public ParametrizedTypes::EvaluableHandle<void> {
 public:
   typedef ParametrizedTypes::EvaluableHandle<void> BaseClass;
 
@@ -322,8 +317,6 @@ public:
 
   const std::string name;
   const Sources sources;
-
-  ClassDef(EvaluableDescriptor, 0);
 };
 
 #endif // PARAMETRIZED_H

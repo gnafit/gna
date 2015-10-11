@@ -18,8 +18,6 @@ public:
 protected:
   variable<double> m_L;
   std::unique_ptr<OscillationVariables> m_param;
-
-  ClassDef(OscProb2nu, 1);
 };
 
 #endif // OSCPROB2NU_H

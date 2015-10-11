@@ -27,8 +27,6 @@ protected:
   const double gsq = g*g;
   const double fsq = f*f;
   const double f2sq = f2*f2;
-
-  ClassDef(IbdInteraction, 1);
 };
 
 #endif // IBDINTERACTION_H

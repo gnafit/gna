@@ -37,8 +37,6 @@ protected:
   std::vector<int> m_orders;
   std::vector<double> m_points;
   Eigen::ArrayXd m_weights;
-
-  ClassDef(GaussLegendre, 1);
 };
 
 #endif // GAUSSLEGENDRE_H

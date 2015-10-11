@@ -13,8 +13,6 @@ public:
   WeightedSum(const std::vector<std::string> &labels);
 protected:
   std::vector<variable<double>> m_vars;
-
-  ClassDef(WeightedSum, 1);
 };
 
 #endif // WEIGHTEDSUM_H

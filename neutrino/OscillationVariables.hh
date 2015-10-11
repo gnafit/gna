@@ -85,8 +85,6 @@ public:
   OscillationExpressions()
     : ExpressionsProvider(new OscillationVariables(this))
     { }
-
-  ClassDef(OscillationExpressions, 0);
 };
 
 #endif // OSCILLATIONVARIABLES_H

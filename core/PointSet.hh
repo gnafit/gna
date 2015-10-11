@@ -33,8 +33,6 @@ protected:
         });
   }
   std::vector<double> m_points;
-
-  ClassDef(PointSet, 1);
 };
 
 #endif // POINTSET_H

@@ -28,8 +28,6 @@ protected:
   }
   std::vector<double> m_edges;
   std::vector<double> m_data;
-
-  ClassDef(Histogram, 1);
 };
 
 #endif // HISTOGRAM_H

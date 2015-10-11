@@ -95,8 +95,6 @@ public:
   PMNSExpressions()
     : ExpressionsProvider(new PMNSVariables(this))
     { }
-
-  ClassDef(PMNSExpressions, 0);
 };
 
 #endif // PMNSVARIABLES_H

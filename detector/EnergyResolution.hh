@@ -26,8 +26,6 @@ private:
   std::vector<double> m_rescache;
   std::vector<int> m_cacheidx;
   std::vector<int> m_startidx;
-
-  ClassDef(EnergyResolution, 0);
 };
 
 #endif // ENERGYRESOLUTION_H

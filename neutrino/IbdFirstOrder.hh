@@ -16,8 +16,6 @@ protected:
   dependant<double> ElectronMass2, NeutronMass2, ProtonMass2;
   dependant<double> DeltaNPE_tilded;
   dependant<double> y2;
-
-  ClassDef(IbdFirstOrder, 1);
 };
 
 #endif // IBDFIRSTORDER_H

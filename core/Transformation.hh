@@ -3,7 +3,6 @@
 
 #include <string>
 #include <iostream>
-#include "TObject.h"
 
 #include "TransformationBase.hh"
 #include "SimpleDict.hh"
@@ -15,8 +14,7 @@ class GNASingleObject;
 
 class InputDescriptor;
 class OutputDescriptor;
-class TransformationDescriptor: public TObject,
-                                public TransformationTypes::Handle {
+class TransformationDescriptor: public TransformationTypes::Handle {
 public:
   typedef TransformationTypes::Handle BaseClass;
 
@@ -35,8 +33,6 @@ public:
     void operator()(const Outputs &other) const;
     void operator()(const TransformationDescriptor &other) const;
     void operator()(GNASingleObject &obj) const;
-
-    ClassDef(Inputs, 0);
   };
 
   class Outputs: public OutputsBase {
@@ -45,8 +41,6 @@ public:
       : OutputsBase(container) { }
 
     OutputDescriptor single() const;
-
-    ClassDef(Outputs, 0);
   };
 
   TransformationDescriptor(const BaseClass &other)
@@ -64,12 +58,9 @@ public:
   const std::string name;
   const Inputs inputs;
   const Outputs outputs;
-
-  ClassDef(TransformationDescriptor, 0);
 };
 
-class InputDescriptor: public TObject,
-                       public TransformationTypes::InputHandle {
+class InputDescriptor: public TransformationTypes::InputHandle {
 public:
   typedef TransformationTypes::InputHandle BaseClass;
 
@@ -104,12 +95,9 @@ public:
   void connect(const OutputDescriptor &out) const;
 
   const std::string name;
-
-  ClassDef(InputDescriptor, 0);
 };
 
-class OutputDescriptor: public TObject,
-                        public TransformationTypes::OutputHandle {
+class OutputDescriptor: public TransformationTypes::OutputHandle {
 public:
   typedef TransformationTypes::OutputHandle BaseClass;
 
@@ -126,8 +114,6 @@ public:
   static OutputDescriptor invalid(const std::string name);
 
   const std::string name;
-
-  ClassDef(OutputDescriptor, 0);
 };
 
 #endif // TRANSFORMATION_H

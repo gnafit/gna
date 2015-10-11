@@ -84,8 +84,6 @@ protected:
   ExpressionsProvider(ParametersGroup *pgroup);
 
   ParametersGroup *m_pgroup;
-
-  ClassDef(ExpressionsProvider, 0);
 };
 
 #endif // PARAMETERSGROUP_H

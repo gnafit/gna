@@ -47,8 +47,6 @@ protected:
 
   std::vector<double> m_ypoints;
   Eigen::ArrayXd m_yweights;
-
-  ClassDef(GaussLegendre2d, 1);
 };
 
 #endif // GAUSSLEGENDRE2D_H

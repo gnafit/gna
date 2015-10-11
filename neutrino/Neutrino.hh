@@ -1,9 +1,7 @@
 #ifndef NEUTRINO_H
 #define NEUTRINO_H
 
-#include <TObject.h>
-
-class Neutrino: public TObject {
+class Neutrino {
 public:
   enum Kind {
     Particle = 1, Antiparticle = -1,
@@ -48,8 +46,6 @@ public:
   static Neutrino amu() { return Neutrino{Antiparticle, Muon}; }
   static Neutrino tau() { return Neutrino{Particle, Tau}; }
   static Neutrino atau() { return Neutrino{Antiparticle, Tau}; }
-
-  ClassDef(Neutrino, 0);
 };
 
 #endif // NEUTRINO_H

@@ -135,19 +135,19 @@ def setup(ROOT):
     patchVariableDescriptor(ROOT.VariableDescriptor)
     patchTransformationDescriptor(ROOT.TransformationDescriptor)
 
+    GNAObject = ROOT.GNAObject
     def patchcls(cls):
         if not isinstance(cls, ROOT.PyRootType):
             return cls
+        if cls.__name__.endswith('_meta'):
+            return cls
+        if issubclass(cls, GNAObject):
+            return wrapGNAclass(cls)
         if 'Class' not in cls.__dict__:
             t = cls.__class__
-            f = lambda s, n, old=t.__getattribute__: patchcls(s, old(s, n))
-            t.__getattribute__ = f
+            origgetattr = cls.__getattribute__
+            t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))
             return cls
-        try:
-            if cls.Class().InheritsFrom("GNAObject"):
-                return wrapGNAclass(cls)
-        except AttributeError:
-            pass
         return cls
 
     t = type(ROOT)

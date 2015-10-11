@@ -29,8 +29,6 @@ protected:
   std::vector<double> m_ys;
   std::vector<size_t> m_index;
   double m_minbinsize;
-
-  ClassDef(LinearInterpolator, 1);
 };
 
 #endif // LINEARINTERPOLATOR_H

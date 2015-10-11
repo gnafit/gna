@@ -4,9 +4,9 @@
 #include <vector>
 #include <algorithm>
 
-#include "TObject.h"
-
-class SimpleDictBase: public TObject {
+class SimpleDictBase {
+public:
+  virtual ~SimpleDictBase() { }
 };
 
 template <typename T, typename Container>
@@ -39,8 +39,6 @@ public:
   }
 private:
   Container *m_container;
-
-  ClassDef(SimpleDict, 0);
 };
 
 #endif // SIMPLEDICT_H

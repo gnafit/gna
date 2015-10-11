@@ -28,8 +28,6 @@ public:
   const double *data() const;
 protected:
   Handle m_transform;
-
-  ClassDef(PredictionSet, 1);
 };
 
 #endif // PREDICTIONSET_H

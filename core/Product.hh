@@ -20,8 +20,6 @@ public:
   }
   void multiply(const OutputDescriptor &data);
   size_t size() const;
-
-  ClassDef(Product, 1);
 };
 
 #endif // PRODUCT_H

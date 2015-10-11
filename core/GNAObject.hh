@@ -1,13 +1,10 @@
 #ifndef GNAOBJECT_H
 #define GNAOBJECT_H
 
-#include "TObject.h"
-
 #include "Parametrized.hh"
 #include "Transformation.hh"
 
-class GNAObject: public TObject,
-                 public ParametrizedTypes::Base,
+class GNAObject: public ParametrizedTypes::Base,
                  public TransformationTypes::Base {
 public:
   typedef ParametrizedTypes::VariablesContainer VariablesContainer;
@@ -18,13 +15,13 @@ public:
   typedef SimpleDict<TransformationDescriptor,
                      TransformationsContainer> Transformations;
   GNAObject()
-    : TObject(), ParametrizedTypes::Base(), TransformationTypes::Base(),
+    : ParametrizedTypes::Base(), TransformationTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
       transformations(TransformationTypes::Base::m_entries)
     { }
   GNAObject(const GNAObject &other)
-    : TObject(other), ParametrizedTypes::Base(other),
+    : ParametrizedTypes::Base(other),
       TransformationTypes::Base(other),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
@@ -51,7 +48,7 @@ public:
 protected:
   class SingleTransformation { };
   GNAObject(SingleTransformation)
-    : TObject(), ParametrizedTypes::Base(), TransformationTypes::Base(1),
+    : ParametrizedTypes::Base(), TransformationTypes::Base(1),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
       transformations(TransformationTypes::Base::m_entries)
@@ -67,8 +64,6 @@ protected:
   typedef TransformationTypes::Entry Entry;
   typedef TransformationTypes::Accessor Accessor;
   typedef TransformationTypes::Handle Handle;
-
-  ClassDef(GNAObject, 0);
 };
 
 class GNASingleObject: public GNAObject {
@@ -79,7 +74,6 @@ public:
   GNASingleObject(const GNASingleObject &other)
     : GNAObject(other)
   { }
-  ClassDef(GNASingleObject, 0);
 };
 
 #endif // GNAOBJECT_H

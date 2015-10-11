@@ -10,8 +10,6 @@ public:
 protected:
   void calcEnu(Args args, Rets rets);
   void calcXsec(Args args, Rets rets);
-private:
-  ClassDef(IbdZeroOrder, 1);
 };
 
 #endif // IBDZEROORDER_H
