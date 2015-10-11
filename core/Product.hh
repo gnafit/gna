@@ -6,7 +6,6 @@
 class Product: public GNASingleObject,
                public Transformation<Product> {
 public:
-  TransformationDef(Product)
   Product();
 
   void multiply(GNASingleObject &obj) {

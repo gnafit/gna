@@ -9,12 +9,11 @@
 class LinearInterpolator: public GNAObject,
                           public Transformation<LinearInterpolator> {
 public:
-  TransformationDef(LinearInterpolator)
   LinearInterpolator(int size, const double *xs, const double *ys)
     : m_xs(xs, xs+size), m_ys(ys, ys+size)
   {
     indexBins();
-    transformation_("f")
+    transformation_(this, "f")
       .input("x", DataType().points().any())
       .output("y", DataType().points().any())
       .types(Atypes::pass<0>)

@@ -8,8 +8,6 @@
 class EnergyResolution: public GNAObject,
                         public Transformation<EnergyResolution> {
 public:
-  TransformationDef(EnergyResolution)
-
   EnergyResolution();
 
 private:

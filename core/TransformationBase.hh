@@ -282,6 +282,8 @@ namespace TransformationTypes {
     Base *m_parent;
   };
 
+  template <typename T>
+  class Initializer;
   class Base {
     template <typename T>
     friend class ::Transformation;
@@ -304,6 +306,11 @@ namespace TransformationTypes {
       return m_entries[idx];
     }
     Entry &getEntry(const std::string &name);
+
+    template <typename T>
+    Initializer<T> transformation_(T *obj, const std::string &name) {
+      return Initializer<T>(obj, name);
+    }
 
     Accessor t_;
   private:
@@ -462,17 +469,11 @@ public:
     rebindMemFunctions();
     return *this;
   }
-protected:
+private:
   friend class TransformationTypes::Initializer<Derived>;
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
   typedef typename Initializer::MemFunction MemFunction;
   typedef typename Initializer::MemTypesFunction MemTypesFunction;
-
-  TransformationTypes::Initializer<Derived>
-  transformation_(const std::string &name) {
-    return TransformationTypes::Initializer<Derived>(this, name);
-  }
-private:
   Derived *obj() { return static_cast<Derived*>(this); }
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 

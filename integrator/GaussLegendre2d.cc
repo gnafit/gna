@@ -39,12 +39,12 @@ void GaussLegendre2d::init() {
   }
   gsl_integration_glfixed_table_free(t);
 
-  transformation_("points")
+  transformation_(this, "points")
     .output("x", DataType().points().shape(m_xpoints.size()))
     .output("y", DataType().points().shape(m_ypoints.size()))
     .types(&GaussLegendre2d::pointsTypes)
     .func(&GaussLegendre2d::points);
-  transformation_("hist")
+  transformation_(this, "hist")
     .input("f", DataType().points().any())
     .output("hist", DataType().hist().any())
     .types(&GaussLegendre2d::histTypes)

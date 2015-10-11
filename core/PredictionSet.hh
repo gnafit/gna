@@ -6,7 +6,6 @@
 class PredictionSet: public GNAObject,
                      public Transformation<PredictionSet> {
 public:
-  TransformationDef(PredictionSet)
   PredictionSet();
   PredictionSet(const PredictionSet &other);
 

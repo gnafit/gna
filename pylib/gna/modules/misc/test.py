@@ -62,10 +62,14 @@ class test(basecmd):
         orders = np.array([5]*(len(edges)-1), dtype=int)
 
         prediction = ROOT.PredictionSet()
-        integrator = ROOT.GaussLegendre(edges, orders, len(orders))
-        ibd = ROOT.IbdZeroOrder()
+        integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
+        ibd = ROOT.IbdFirstOrder()
         ibd.Enu.inputs(integrator.points)
-        ibd.xsec.inputs(integrator.points)
+        ibd.xsec.Enu(ibd.Enu)
+        ibd.xsec.ctheta(integrator.points.y)
+        ibd.jacobian.Enu(ibd.Enu)
+        ibd.jacobian.Ee(integrator.points.x)
+        ibd.jacobian.ctheta(integrator.points.y)
         spectrum = ROOT.WeightedSum(vec(spectra.keys()))
         for isoname, (fname, weight) in spectra.iteritems():
             isotope = loadspectrum(fname)
@@ -81,7 +85,7 @@ class test(basecmd):
             events.multiply(ibd.xsec)
             oscprob[compname].inputs(ibd.Enu)
             events.multiply(oscprob[compname])
-            oscprob.probsum.inputs[compname](events.product)
+            oscprob.probsum.inputs[compname](events)
             components[compname] = events.product
         if 'comp0' in oscprob.probsum.inputs:
             events = ROOT.Product()
@@ -92,7 +96,14 @@ class test(basecmd):
         eres = ROOT.EnergyResolution()
         eres.smear.inputs(integrator.hist)
         prediction.append(eres.smear)
+        import time
+        t = time.time()
         ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
+        print time.time() - t
+        pars["SinSq13"].set(0.1)
+        t = time.time()
+        ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
+        print time.time() - t
         plt.plot((edges[:-1] + edges[1:])/2, ibd0)
         plt.show()
         print ibd0
@@ -101,14 +112,6 @@ class test(basecmd):
         # prediction = ROOT.PredictionSet()
         # integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         # events = ROOT.Product()
-        # ibd = ROOT.IbdFirstOrder()
-        # ibd.Enu.inputs(integrator.points)
-        # ibd.xsec.Enu(ibd.Enu)
-        # ibd.xsec.ctheta(integrator.points.y)
-        # events.multiply(ibd.xsec)
-        # ibd.jacobian.Enu(ibd.Enu)
-        # ibd.jacobian.Ee(integrator.points.x)
-        # ibd.jacobian.ctheta(integrator.points.y)
         # events.multiply(ibd.jacobian)
         # oscprob = ROOT.OscProb2nu()
         # oscprob.prob.inputs(ibd.Enu)

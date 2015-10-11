@@ -6,7 +6,7 @@ WeightedSum::WeightedSum(const std::vector<std::string> &labels) {
   if (labels.empty()) {
     return;
   }
-  auto sum = transformation_("sum")
+  auto sum = transformation_(this, "sum")
     .output("sum", DataType().points().any())
     .types(Atypes::ifSame, Atypes::pass<0>)
     .func([] (WeightedSum *obj, Args args, Rets rets) {

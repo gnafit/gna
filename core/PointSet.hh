@@ -8,7 +8,6 @@
 class PointSet: public GNAObject,
                 public Transformation<PointSet> {
 public:
-  TransformationDef(PointSet)
   PointSet(const std::vector<double> &points)
     : m_points(points)
   {
@@ -22,7 +21,7 @@ public:
   }
 protected:
   void init() {
-    transformation_("points")
+    transformation_(this, "points")
       .output("points", DataType().points().shape(m_points.size()))
       .types([](PointSet *obj, Atypes /*args*/, Rtypes rets) {
           rets[0] = DataType().points().shape(obj->m_points.size());

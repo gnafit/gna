@@ -10,7 +10,6 @@
 class GaussLegendre2d: public GNAObject,
                        public Transformation<GaussLegendre2d> {
 public:
-  TransformationDef(GaussLegendre2d)
   GaussLegendre2d(const std::vector<double> &xedges,
                   const std::vector<int> &xorders,
                   double ymin, double ymax, int yorder)

@@ -28,30 +28,30 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
     m_pmns->variable_(&m_pmns->V[m_alpha][i]);
     m_pmns->variable_(&m_pmns->V[m_beta][i]);
   }
-  transformation_("comp12")
+  transformation_(this, "comp12")
     .input("Enu", DataType().points().any())
     .output("comp", DataType().points().any())
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>);
-  transformation_("comp13")
+  transformation_(this, "comp13")
     .input("Enu", DataType().points().any())
     .output("comp", DataType().points().any())
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>);
-  transformation_("comp23")
+  transformation_(this, "comp23")
     .input("Enu", DataType().points().any())
     .output("comp", DataType().points().any())
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>);
   if (from.flavor != to.flavor) {
-    transformation_("compCP")
+    transformation_(this, "compCP")
       .input("Enu", DataType().points().any())
       .output("comp", DataType().points().any())
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
   }
-  auto probsum = transformation_("probsum")
+  auto probsum = transformation_(this, "probsum")
     .input("comp12", DataType().points().any())
     .input("comp13", DataType().points().any())
     .input("comp23", DataType().points().any())

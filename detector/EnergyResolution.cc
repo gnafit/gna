@@ -11,7 +11,7 @@ EnergyResolution::EnergyResolution() {
   callback_([this] { fillCache(); });
 
   using namespace std::placeholders;
-  transformation_("smear")
+  transformation_(this, "smear")
     .input("Nvis", DataType().hist().any())
     .output("Nrec", DataType().hist().any())
     .types(Atypes::pass<0>,

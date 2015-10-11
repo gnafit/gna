@@ -9,7 +9,6 @@
 class OscProb2nu: public GNAObject,
                   public Transformation<OscProb2nu> {
 public:
-  TransformationDef(OscProb2nu)
   OscProb2nu();
 
   template <typename DerivedA, typename DerivedB>

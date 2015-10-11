@@ -7,9 +7,6 @@
 #include "TransformationBase.hh"
 #include "SimpleDict.hh"
 
-#define TransformationDef(classname)                            \
-  using Transformation<classname>::transformation_;
-
 class GNASingleObject;
 
 class InputDescriptor;

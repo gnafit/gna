@@ -11,7 +11,6 @@ class PMNSVariables;
 class OscProbPMNS: public GNAObject,
                    public Transformation<OscProbPMNS> {
 public:
-  TransformationDef(OscProbPMNS)
   OscProbPMNS(Neutrino from, Neutrino to);
 
   template <int I, int J>

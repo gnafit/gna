@@ -1,7 +1,7 @@
 #include "PredictionSet.hh"
 
 PredictionSet::PredictionSet() {
-  transformation_("prediction")
+  transformation_(this, "prediction")
     .output("prediction", DataType().points().any())
     .types([](Atypes args, Rtypes rets) {
         if (args.size() == 0) {

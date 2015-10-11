@@ -1,7 +1,7 @@
 #include "Product.hh"
 
 Product::Product() {
-  transformation_("product")
+  transformation_(this, "product")
     .output("product", DataType().points().any())
     .types(Atypes::ifSame, Atypes::pass<0>)
     .func([](Args args, Rets rets) {

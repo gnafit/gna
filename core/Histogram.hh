@@ -8,7 +8,6 @@
 class Histogram: public GNAObject,
                  public Transformation<Histogram> {
 public:
-  TransformationDef(Histogram)
   Histogram(size_t nbins, const double *edges, const double *data)
     : m_edges(edges, edges+nbins+1), m_data(data, data+nbins)
   { }
@@ -16,7 +15,7 @@ public:
   const std::vector<double> &data() const { return m_data; }
 protected:
   void init() {
-    transformation_("hist")
+    transformation_(this, "hist")
       .output("hist", DataType().hist().edges(m_edges))
       .types([](Histogram *obj, Atypes /*args*/, Rtypes rets) {
           rets[0] = DataType().hist().edges(obj->edges());
