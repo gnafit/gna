@@ -35,6 +35,10 @@ public:
     ParametrizedTypes::Base::subscribe_(flag);
   }
 
+  TransformationDescriptor operator[](size_t idx) {
+    return TransformationDescriptor(TransformationTypes::Base::getEntry(idx));
+  }
+
   TransformationDescriptor operator[](const std::string &name) {
     return TransformationDescriptor(TransformationTypes::Base::getEntry(name));
   }
@@ -45,6 +49,14 @@ public:
   Evaluables evaluables;
   Transformations transformations;
 protected:
+  class SingleTransformation { };
+  GNAObject(SingleTransformation)
+    : TObject(), ParametrizedTypes::Base(), TransformationTypes::Base(1),
+      variables(ParametrizedTypes::Base::m_entries),
+      evaluables(m_eventries),
+      transformations(TransformationTypes::Base::m_entries)
+  { }
+
   typedef TransformationTypes::Args Args;
   typedef TransformationTypes::Rets Rets;
   typedef TransformationTypes::Atypes Atypes;
@@ -57,6 +69,17 @@ protected:
   typedef TransformationTypes::Handle Handle;
 
   ClassDef(GNAObject, 0);
+};
+
+class GNASingleObject: public GNAObject {
+public:
+  GNASingleObject()
+    : GNAObject(SingleTransformation())
+  { }
+  GNASingleObject(const GNASingleObject &other)
+    : GNAObject(other)
+  { }
+  ClassDef(GNASingleObject, 0);
 };
 
 #endif // GNAOBJECT_H

@@ -12,6 +12,9 @@ public:
 
   PredictionSet &operator=(const PredictionSet &other);
 
+  void append(GNASingleObject &obj) {
+    append(obj[0].outputs.single());
+  }
   void append(const TransformationDescriptor &obj) {
     append(obj.outputs.single());
   }

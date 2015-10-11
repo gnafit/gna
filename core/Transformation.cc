@@ -5,6 +5,7 @@ using boost::format;
 
 #include "Transformation.hh"
 #include "Exceptions.hh"
+#include "GNAObject.hh"
 
 using std::string;
 
@@ -41,6 +42,14 @@ void Inputs::operator()(const Outputs &outputs) const {
 
 void Inputs::operator()(const TransformationDescriptor &other) const {
   connect(*this, other.outputs);
+}
+
+void Inputs::operator()(GNASingleObject &obj) const {
+  connect(*this, obj[0].outputs);
+}
+
+void InputDescriptor::connect(GNASingleObject &obj) const {
+  ::connect(*this, obj[0].outputs);
 }
 
 void InputDescriptor::connect(const TransformationDescriptor &obj) const {

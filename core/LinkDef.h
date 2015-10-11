@@ -27,6 +27,7 @@
 #pragma link C++ class GNAObject::Variables+;
 #pragma link C++ class GNAObject::Evaluables+;
 #pragma link C++ class GNAObject::Transformations+;
+#pragma link C++ class GNASingleObject;
 
 #pragma link C++ class ExpressionsProvider+;
 

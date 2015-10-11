@@ -9,6 +9,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/optional.hpp>
 
 #include "Parameters.hh"
 #include "Data.hh"
@@ -294,6 +295,9 @@ namespace TransformationTypes {
     Base &operator=(const Base &other);
   protected:
     Base(): t_(*this) { }
+    Base(size_t maxentries): Base() {
+      m_maxEntries = maxentries;
+    }
     void connectChannel(Source &source, Base *sinkobj, Sink &sink);
     bool compatible(const Channel *sink, const Channel *source) const;
     Entry &getEntry(size_t idx) {
@@ -305,6 +309,7 @@ namespace TransformationTypes {
   private:
     size_t addEntry(Entry *e);
     boost::ptr_vector<Entry> m_entries;
+    boost::optional<size_t> m_maxEntries;
     void copyEntries(const Base &other);
   };
 
@@ -345,6 +350,7 @@ namespace TransformationTypes {
       }
       m_entry->initializing--;
       if (std::uncaught_exception()) {
+        delete m_entry;
         return;
       }
       if (m_entry->initializing == 0) {
@@ -352,6 +358,11 @@ namespace TransformationTypes {
       }
     }
     void add() {
+      auto *baseobj = m_obj->baseobj();
+      if (baseobj->m_maxEntries &&
+          baseobj->m_entries.size()+1 > baseobj->m_maxEntries) {
+        throw std::runtime_error("too much transformations");
+      }
       if (m_entry->typefuns.empty()) {
         m_entry->typefuns.push_back(Atypes::passAll);
       }
@@ -359,7 +370,7 @@ namespace TransformationTypes {
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
-      size_t idx = m_obj->baseobj()->addEntry(m_entry);
+      size_t idx = baseobj->addEntry(m_entry);
       m_entry = nullptr;
       if (m_mfunc) {
         m_obj->addMemFunction(idx, m_mfunc);

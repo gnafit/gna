@@ -3,12 +3,15 @@
 
 #include "GNAObject.hh"
 
-class Product: public GNAObject,
+class Product: public GNASingleObject,
                public Transformation<Product> {
 public:
   TransformationDef(Product)
   Product();
 
+  void multiply(GNASingleObject &obj) {
+    multiply(obj[0].outputs.single());
+  }
   void multiply(const TransformationDescriptor &obj) {
     multiply(obj.outputs.single());
   }
