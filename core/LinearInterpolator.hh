@@ -6,7 +6,7 @@
 
 #include "GNAObject.hh"
 
-class LinearInterpolator: public GNAObject,
+class LinearInterpolator: public GNASingleObject,
                           public Transformation<LinearInterpolator> {
 public:
   LinearInterpolator(int size, const double *xs, const double *ys)

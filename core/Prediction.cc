@@ -1,6 +1,6 @@
-#include "PredictionSet.hh"
+#include "Prediction.hh"
 
-PredictionSet::PredictionSet() {
+Prediction::Prediction() {
   transformation_(this, "prediction")
     .output("prediction", DataType().points().any())
     .types([](Atypes args, Rtypes rets) {
@@ -26,28 +26,28 @@ PredictionSet::PredictionSet() {
   m_transform = t_["prediction"];
 }
 
-PredictionSet::PredictionSet(const PredictionSet &/* other */)
+Prediction::Prediction(const Prediction &/* other */)
   : m_transform(t_["prediction"])
 {
 }
 
-PredictionSet &PredictionSet::operator=(const PredictionSet &/* other */) {
+Prediction &Prediction::operator=(const Prediction &/* other */) {
   m_transform = t_["prediction"];
   return *this;
 }
 
-void PredictionSet::append(const OutputDescriptor &out) {
+void Prediction::append(const OutputDescriptor &out) {
   t_["prediction"].input(out.channel()).connect(out);
 }
 
-size_t PredictionSet::size() const {
+size_t Prediction::size() const {
   return m_transform[0].type.size();
 }
 
-void PredictionSet::update() const {
+void Prediction::update() const {
   m_transform.update(0);
 }
 
-const double *PredictionSet::data() const {
+const double *Prediction::data() const {
   return m_transform[0].x.data();
 }

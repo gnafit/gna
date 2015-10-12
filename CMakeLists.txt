@@ -14,7 +14,7 @@ set (SOURCES
   core/GNAObject.cc
   core/UncertainParameter.cc
   core/ParametersGroup.cc
-  core/PredictionSet.cc
+  core/Prediction.cc
   core/Product.cc
   core/WeightedSum.cc
   core/LinearInterpolator.cc
@@ -33,10 +33,10 @@ set (HEADERS
   Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
-  PredictionSet.hh
+  Prediction.hh
   Product.hh
   WeightedSum.hh
-  PointSet.hh
+  Points.hh
   Histogram.hh
   LinearInterpolator.hh
   Neutrino.hh

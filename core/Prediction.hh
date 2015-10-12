@@ -1,15 +1,15 @@
-#ifndef PREDICTIONSET_H
-#define PREDICTIONSET_H
+#ifndef PREDICTION_H
+#define PREDICTION_H
 
 #include "GNAObject.hh"
 
-class PredictionSet: public GNAObject,
-                     public Transformation<PredictionSet> {
+class Prediction: public GNASingleObject,
+                  public Transformation<Prediction> {
 public:
-  PredictionSet();
-  PredictionSet(const PredictionSet &other);
+  Prediction();
+  Prediction(const Prediction &other);
 
-  PredictionSet &operator=(const PredictionSet &other);
+  Prediction &operator=(const Prediction &other);
 
   void append(GNASingleObject &obj) {
     append(obj[0].outputs.single());
@@ -29,4 +29,4 @@ protected:
   Handle m_transform;
 };
 
-#endif // PREDICTIONSET_H
+#endif // PREDICTION_H

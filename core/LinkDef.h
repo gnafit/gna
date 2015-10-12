@@ -41,7 +41,7 @@
 #pragma link C++ class UniformAngleParameter<double>-;
 #pragma link C++ class std::vector<std::pair<double, double>>-;
 
-#pragma link C++ class PredictionSet-;
+#pragma link C++ class Prediction-;
 #pragma link C++ class Product-;
 #pragma link C++ class WeightedSum-;
 #pragma link C++ class PointSet-;

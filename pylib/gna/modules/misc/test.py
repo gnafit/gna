@@ -60,7 +60,7 @@ class test(basecmd):
         edges = np.linspace(0, 10, 500)
         orders = np.array([5]*(len(edges)-1), dtype=int)
 
-        prediction = ROOT.PredictionSet()
+        prediction = ROOT.Prediction()
         integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         ibd = ROOT.IbdFirstOrder()
         ibd.Enu.inputs(integrator.points)
@@ -80,7 +80,7 @@ class test(basecmd):
             if not compname.startswith('comp'):
                 continue
             events = ROOT.Product()
-            events.multiply(spectrum.sum)
+            events.multiply(spectrum)
             events.multiply(ibd.xsec)
             oscprob[compname].inputs(ibd.Enu)
             events.multiply(oscprob[compname])
@@ -88,9 +88,9 @@ class test(basecmd):
             components[compname] = events.product
         if 'comp0' in oscprob.probsum.inputs:
             events = ROOT.Product()
-            events.multiply(spectrum.sum)
+            events.multiply(spectrum)
             events.multiply(ibd.xsec)
-            oscprob.probsum.comp0(events.product)
+            oscprob.probsum.comp0(events)
         integrator.hist.inputs(oscprob.probsum)
         eres = ROOT.EnergyResolution(ns="eres")
         eres.smear.inputs(integrator.hist)
@@ -108,7 +108,7 @@ class test(basecmd):
         print ibd0
 
         return
-        # prediction = ROOT.PredictionSet()
+        # prediction = ROOT.Prediction()
         # integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         # events = ROOT.Product()
         # events.multiply(ibd.jacobian)

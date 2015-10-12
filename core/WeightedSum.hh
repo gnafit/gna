@@ -6,7 +6,7 @@
 
 #include "GNAObject.hh"
 
-class WeightedSum: public GNAObject,
+class WeightedSum: public GNASingleObject,
                    public Transformation<WeightedSum> {
 public:
   WeightedSum(const std::vector<std::string> &labels);
