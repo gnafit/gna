@@ -19,12 +19,13 @@ def wrapGNAclass(cls):
             bind = kwargs.pop('bind', True)
             freevars = kwargs.pop('freevars', ())
             bindings = kwargs.pop('bindings', {})
+            ns = kwargs.pop('ns', None)
             if kwargs:
                 msg = "unknown keywords %s in constructor of %r"
                 msg = msg % (', '.join(kwargs.keys()), self)
                 raise Exception(msg)
             env.current.register(self, bind=bind, freevars=freevars,
-                                 bindings=bindings)
+                                 bindings=bindings, ns=ns)
         def __getattr__(self, attr):
             try:
                 return self[attr]

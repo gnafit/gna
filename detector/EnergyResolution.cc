@@ -5,9 +5,9 @@
 const double pi = boost::math::constants::pi<double>();
 
 EnergyResolution::EnergyResolution() {
-  variable_(&m_a, "Eres_a");
-  variable_(&m_b, "Eres_b");
-  variable_(&m_c, "Eres_c");
+  variable_(&m_a, "a");
+  variable_(&m_b, "b");
+  variable_(&m_c, "c");
   callback_([this] { fillCache(); });
 
   using namespace std::placeholders;

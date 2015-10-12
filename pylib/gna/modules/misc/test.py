@@ -18,28 +18,27 @@ def vec(lst):
 class test(basecmd):
     def run(self):
         env = self.env.default
-        pars = env.pars
-        pars.define('SinSq12', central=0.307, sigma=0.017, limits=(0, 1))
-        pars.define('SinSq13', central=0.0214, sigma=0.002, limits=(0, 1))
-        pars.define('SinSq23', central=0.42, sigma=0.08, limits=(0, 1))
+        env.defparameter('SinSq12', central=0.307, sigma=0.017, limits=(0, 1))
+        env.defparameter('SinSq13', central=0.0214, sigma=0.002, limits=(0, 1))
+        env.defparameter('SinSq23', central=0.42, sigma=0.08, limits=(0, 1))
 
-        pars.define('DeltaMSq12', central=7.54e-5, sigma=0.24e-5,
-                    limits=(0, 0.1))
-        pars.define('DeltaMSqEE', central=2.44e-3, sigma=0.10e-3,
-                    limits=(0, 0.1))
-        pars.define('Alpha', type='discrete', default='normal',
-                    variants={'normal': 1.0, 'inverted': -1.0})
+        env.defparameter('DeltaMSq12', central=7.54e-5, sigma=0.24e-5,
+                         limits=(0, 0.1))
+        env.defparameter('DeltaMSqEE', central=2.44e-3, sigma=0.10e-3,
+                         limits=(0, 0.1))
+        env.defparameter('Alpha', type='discrete', default='normal',
+                         variants={'normal': 1.0, 'inverted': -1.0})
 
-        pars.define('Delta', type='uniformangle', central=0.0)
+        env.defparameter('Delta', type='uniformangle', central=0.0)
 
-        pars.define('L', central=52, sigma=0)
+        env.defparameter('L', central=52, sigma=0)
 
         pdg = physlib.pdg[2012]
-        pars.define("NeutronLifeTime", central=pdg['neutron_lifetime'],
-                    sigma=0)
-        pars.define("ProtonMass", central=pdg['ProtonMass'], sigma=0)
-        pars.define("NeutronMass", central=pdg['NeutronMass'], sigma=0)
-        pars.define("ElectronMass", central=pdg['ElectronMass'], sigma=0)
+        env.defparameter("NeutronLifeTime", central=pdg['neutron_lifetime'],
+                         sigma=0)
+        env.defparameter("ProtonMass", central=pdg['ProtonMass'], sigma=0)
+        env.defparameter("NeutronMass", central=pdg['NeutronMass'], sigma=0)
+        env.defparameter("ElectronMass", central=pdg['ElectronMass'], sigma=0)
 
         spectra = {
             'Pu239': ('Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',  0.60),
@@ -48,11 +47,11 @@ class test(basecmd):
             'U238':  ('Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat', 0.06),
         }
         for isoname, (fname, weight) in spectra.iteritems():
-            pars.define("weight_{0}".format(isoname), central=weight, sigma=0)
-
-        pars.define("Eres_a", central=0.0, sigma=0)
-        pars.define("Eres_b", central=0.03, sigma=0)
-        pars.define("Eres_c", central=0.0, sigma=0)
+            env.defparameter("weight_{0}".format(isoname), central=weight, sigma=0)
+        with env.ns("eres"):
+            env.defparameter("a", central=0.0, sigma=0)
+            env.defparameter("b", central=0.03, sigma=0)
+            env.defparameter("c", central=0.0, sigma=0)
 
         expressions = []
         expressions.append(ROOT.OscillationExpressions())
@@ -93,14 +92,14 @@ class test(basecmd):
             events.multiply(ibd.xsec)
             oscprob.probsum.comp0(events.product)
         integrator.hist.inputs(oscprob.probsum)
-        eres = ROOT.EnergyResolution()
+        eres = ROOT.EnergyResolution(ns="eres")
         eres.smear.inputs(integrator.hist)
         prediction.append(eres.smear)
         import time
         t = time.time()
         ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
         print time.time() - t
-        pars["SinSq13"].set(0.1)
+        env.pars["SinSq13"].set(0.1)
         t = time.time()
         ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
         print time.time() - t
