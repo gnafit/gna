@@ -1,0 +1,43 @@
+#include <boost/math/constants/constants.hpp>
+
+#include <TMath.h>
+
+#include "ReactorNorm.hh"
+
+const double pi = boost::math::constants::pi<double>();
+
+ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
+  : m_ePerFission(isonames.size())
+{
+  variable_(&m_thermalPower, "ThermalPower");
+  for (size_t i = 0; i < isonames.size(); ++i) {
+    variable_(&m_ePerFission[i], "EnergyPerFission_"+isonames[i]);
+  }
+  variable_(&m_targetProtons, "TargetProtons");
+  variable_(&m_L, "L");
+  auto norm = transformation_(this, "isotopes")
+    .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+        for (size_t i = 0; i < rets.size(); ++i) {
+          rets[i] = DataType().points().shape(1);
+        }
+      })
+    .func(&ReactorNorm::calcIsotopeNorms)
+  ;
+  for (const std::string &isoname: isonames) {
+    norm.input("fission_fraction_"+isoname, DataType().points().any());
+    norm.output("norm_"+isoname, DataType().points().any());
+  }
+  norm.input("livetime", DataType().points().any());
+  norm.input("power_rate", DataType().points().any());
+}
+
+void ReactorNorm::calcIsotopeNorms(Args args, Rets rets) {
+  const auto &livetime = args[rets.size()+0].x;
+  const auto &power_rate = args[rets.size()+1].x;
+  static double conversionFactor = 1.0e-7/TMath::Qe();
+  auto distanceWeight = (conversionFactor / (4*pi*std::pow(m_L, 2)));
+  auto coeff = m_targetProtons*m_thermalPower*distanceWeight;
+  for (size_t i = 0; i < rets.size(); ++i) {
+    rets[i].x[0] = (coeff*livetime*power_rate*args[i].x/m_ePerFission[i]).sum();
+  }
+}

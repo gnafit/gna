@@ -15,7 +15,21 @@ def vec(lst):
         v.push_back(s)
     return v
 
+spectra = {
+    'Pu239': ('Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',  0.60),
+    'Pu241': ('Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',  0.07),
+    'U235':  ('Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',   0.27),
+    'U238':  ('Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat', 0.06),
+}
+isotopes = spectra.keys()
+
 class test(basecmd):
+    def setupreactor(self):
+        env.defparameter('NominalThermalPower', central=2.0, sigma=0.01)
+
+        for isoname in spectra.iteritems():
+            env.defparameter("weight_{0}".format(isoname), central=weight, sigma=0)
+
     def run(self):
         env = self.env.default
         env.defparameter('SinSq12', central=0.307, sigma=0.017, limits=(0, 1))
@@ -40,14 +54,6 @@ class test(basecmd):
         env.defparameter("NeutronMass", central=pdg['NeutronMass'], sigma=0)
         env.defparameter("ElectronMass", central=pdg['ElectronMass'], sigma=0)
 
-        spectra = {
-            'Pu239': ('Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',  0.60),
-            'Pu241': ('Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',  0.07),
-            'U235':  ('Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',   0.27),
-            'U238':  ('Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat', 0.06),
-        }
-        for isoname, (fname, weight) in spectra.iteritems():
-            env.defparameter("weight_{0}".format(isoname), central=weight, sigma=0)
         with env.ns("eres"):
             env.defparameter("a", central=0.0, sigma=0)
             env.defparameter("b", central=0.03, sigma=0)
@@ -99,13 +105,13 @@ class test(basecmd):
         t = time.time()
         ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
         print time.time() - t
-        env.pars["SinSq13"].set(0.1)
+        env.pars["DeltaMSqEE"].set(2e-3)
         t = time.time()
         ibd0 = 1e25*np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
         print time.time() - t
         plt.plot((edges[:-1] + edges[1:])/2, ibd0)
         plt.show()
-        print ibd0
+        # print ibd0
 
         return
         # prediction = ROOT.Prediction()

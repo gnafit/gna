@@ -6,6 +6,8 @@
 #include <typeinfo>
 #include <stdexcept>
 
+#include <boost/core/demangle.hpp>
+
 class changeable;
 struct references {
   bool has(changeable obj) const;
@@ -188,6 +190,9 @@ public:
   }
   const std::type_info *type() const {
     return m_data.hdr->type;
+  }
+  std::string typeName() const {
+    return boost::core::demangle(type()->name());
   }
   template <typename T>
   bool istype() {

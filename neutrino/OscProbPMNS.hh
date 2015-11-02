@@ -8,7 +8,26 @@
 
 class OscillationVariables;
 class PMNSVariables;
-class OscProbPMNS: public GNAObject,
+class OscProbPMNSBase: public GNAObject,
+                       public Transformation<OscProbPMNSBase> {
+protected:
+  OscProbPMNSBase(Neutrino from, Neutrino to);
+
+  void calcSum(Args args, Rets rets);
+
+  template <int I, int J>
+  double DeltaMSq() const;
+  template <int I, int J>
+  double weight() const;
+  double weightCP() const;
+
+  std::unique_ptr<OscillationVariables> m_param;
+  std::unique_ptr<PMNSVariables> m_pmns;
+
+  int m_alpha, m_beta;
+};
+
+class OscProbPMNS: public OscProbPMNSBase,
                    public Transformation<OscProbPMNS> {
 public:
   OscProbPMNS(Neutrino from, Neutrino to);
@@ -16,19 +35,21 @@ public:
   template <int I, int J>
   void calcComponent(Args args, Rets rets);
   void calcComponentCP(Args args, Rets rets);
-  void calcSum(Args args, Rets rets);
 protected:
-  template <int I, int J>
-  double DeltaMSq() const;
-  template <int I, int J>
-  double weight() const;
-  double weightCP() const;
-
   variable<double> m_L;
-  std::unique_ptr<OscillationVariables> m_param;
-  std::unique_ptr<PMNSVariables> m_pmns;
+};
 
-  int m_alpha, m_beta;
+class OscProbPMNSMult: public OscProbPMNSBase,
+                       public Transformation<OscProbPMNSMult> {
+public:
+  OscProbPMNSMult(Neutrino from, Neutrino to);
+
+  template <int I, int J>
+  void calcComponent(Args args, Rets rets);
+protected:
+  variable<double> m_Lavg;
+
+  variable<std::array<double, 3>> m_weights;
 };
 
 #endif // OSCPROBPMNS_H

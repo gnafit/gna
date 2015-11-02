@@ -89,7 +89,7 @@ class resolver(object):
         except KeyError:
             return None, None
         missings = []
-        for i, (obj, expr, deps) in enumerate(cands):
+        for i, (obj, expr, deps, ns) in enumerate(cands):
             missing = [x for x in deps
                        if x not in known and not self.isbound(x)]
             if not missing:
@@ -137,7 +137,7 @@ class resolver(object):
         if path is None:
             return None
         for name, idx in reversed(path):
-            obj, expr, deps = self.nsview.getexpressions(name)[idx]
+            obj, expr, deps, ns = self.nsview.getexpressions(name)[idx]
             varnames = []
             bindings = {}
             for src, dep in zip(expr.sources.itervalues(), deps):
@@ -145,12 +145,12 @@ class resolver(object):
                     bindings[src.name] = dep
                 varnames.append(src.name)
             self.resolveobject(obj, varnames=varnames, resolve=False,
-                               bindings=bindings)
-            self.env.addevaluable(name, expr.get())
+                               bindings=[bindings])
+            self.env.addevaluable(ns, name, expr.get())
         return self.nsview.getevaluable(varname)
 
     def resolveobject(self, obj, freevars=(), resolve=True,
-                      varnames=None, bindings={}):
+                      varnames=None, bindings=[]):
         bound = set()
         for v in obj.variables.itervalues():
             if v.name in freevars:
@@ -161,7 +161,7 @@ class resolver(object):
             if not v.isFree():
                 continue
             found = False
-            binding = bindings.get(v.name, v.name)
+            binding = next((bs[v.name] for bs in reversed(bindings) if v.name in bs), v.name)
             if not self.isbound(binding):
                 param = self.findbinding(obj, binding, resolve=resolve)
             else:

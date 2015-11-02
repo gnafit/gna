@@ -386,11 +386,13 @@ namespace TransformationTypes {
         m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
       }
     }
-    Initializer<T> input(const std::string &name, const DataType &dt) {
+    Initializer<T> input(const std::string &name,
+                         const DataType &dt = DataType()) {
       m_entry->addSource({name, dt});
       return *this;
     }
-    Initializer<T> output(const std::string &name, const DataType &dt) {
+    Initializer<T> output(const std::string &name,
+                          const DataType &dt = DataType()) {
       m_entry->addSink({name, dt});
       return *this;
     }

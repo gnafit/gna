@@ -16,6 +16,7 @@ set (SOURCES
   core/ParametersGroup.cc
   core/Prediction.cc
   core/Product.cc
+  core/Sum.cc
   core/WeightedSum.cc
   core/LinearInterpolator.cc
   neutrino/OscProb2nu.cc
@@ -23,6 +24,8 @@ set (SOURCES
   neutrino/IbdInteraction.cc
   neutrino/IbdZeroOrder.cc
   neutrino/IbdFirstOrder.cc
+  neutrino/ReactorNorm.cc
+  neutrino/ReactorGroup.cc
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
@@ -35,6 +38,7 @@ set (HEADERS
   UncertainParameter.hh
   Prediction.hh
   Product.hh
+  Sum.hh
   WeightedSum.hh
   Points.hh
   Histogram.hh
@@ -47,6 +51,8 @@ set (HEADERS
   IbdInteraction.hh
   IbdZeroOrder.hh
   IbdFirstOrder.hh
+  ReactorNorm.hh
+  ReactorGroup.hh
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh

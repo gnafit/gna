@@ -1,4 +1,5 @@
 from gna.env import env
+import numpy as np
 
 def hygienic(decorator):
     def new_decorator(original):
@@ -25,7 +26,7 @@ def wrapGNAclass(cls):
                 msg = msg % (', '.join(kwargs.keys()), self)
                 raise Exception(msg)
             env.current.register(self, bind=bind, freevars=freevars,
-                                 bindings=bindings, ns=ns)
+                                 bindings=bindings)
         def __getattr__(self, attr):
             try:
                 return self[attr]
@@ -116,6 +117,18 @@ def patchTransformationDescriptor(cls):
     cls.__getattr__ = __getattr__
     cls.__getitem__ = __getattr__
 
+@hygienic
+def wrapPoints(cls):
+    class WrappedClass(cls):
+        def __init__(self, *args, **kwargs):
+            if len(args) == 1:
+                arr = args[0]
+                if isinstance(arr, np.ndarray) or isinstance(arr, list):
+                    arr = np.ascontiguousarray(args[0], dtype=np.float64)
+                    return super(WrappedClass, self).__init__(arr, len(arr), **kwargs)
+                super(WrappedClass, self).__init__(*args, **kwargs)
+    return WrappedClass
+
 def setup(ROOT):
     ROOT.UserExceptions.update({
         "KeyError": KeyError,
@@ -143,7 +156,10 @@ def setup(ROOT):
         if cls.__name__.endswith('_meta'):
             return cls
         if issubclass(cls, GNAObject):
-            return wrapGNAclass(cls)
+            wrapped = wrapGNAclass(cls)
+            if cls.__name__ == 'Points':
+                wrapped = wrapPoints(wrapped)
+            return wrapped
         if 'Class' not in cls.__dict__:
             t = cls.__class__
             origgetattr = cls.__getattribute__

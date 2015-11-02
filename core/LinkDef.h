@@ -34,8 +34,10 @@
 #pragma link C++ class ParameterWrapper<double>-;
 #pragma link C++ class Uncertain<double>-;
 #pragma link C++ class Uncertain<std::complex<double>>-;
+#pragma link C++ class Uncertain<std::array<double,3>>-;
 #pragma link C++ class GaussianValue<double>-;
 #pragma link C++ class GaussianValue<std::complex<double>>-;
+#pragma link C++ class GaussianValue<std::array<double,3>>-;
 #pragma link C++ class Parameter<double>-;
 #pragma link C++ class GaussianParameter<double>-;
 #pragma link C++ class UniformAngleParameter<double>-;
@@ -43,8 +45,9 @@
 
 #pragma link C++ class Prediction-;
 #pragma link C++ class Product-;
+#pragma link C++ class Sum-;
 #pragma link C++ class WeightedSum-;
-#pragma link C++ class PointSet-;
+#pragma link C++ class Points-;
 #pragma link C++ class Histogram-;
 #pragma link C++ class LinearInterpolator-;
 
@@ -62,5 +65,8 @@
 #pragma link C++ class GaussLegendre2d-;
 
 #pragma link C++ class EnergyResolution-;
+
+#pragma link C++ class ReactorNorm-;
+#pragma link C++ class ReactorGroup-;
 
 #endif

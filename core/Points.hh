@@ -5,7 +5,7 @@
 
 #include "GNAObject.hh"
 
-class Points: public GNAObject,
+class Points: public GNASingleObject,
               public Transformation<Points> {
 public:
   Points(const std::vector<double> &points)

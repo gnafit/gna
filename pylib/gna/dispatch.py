@@ -51,7 +51,7 @@ def run():
             raise Exception(msg)
         cmdcls, cmdopts = loadcmdclass(modules, name, group)
         obj = cmdcls(cmdopts)
-        obj.env = env
+        obj.env = env.default
         obj.init()
         runlist.append(obj)
 

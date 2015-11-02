@@ -91,9 +91,14 @@ void IbdFirstOrder::calc_Xsec(Args args, Rets rets) {
   const auto &ctheta = args[1].x;
   auto xsec = rets[0].as2d();
 
+  const double MeV2J = 1.E6 * TMath::Qe();
+  const double J2MeV = 1./MeV2J;
+
+  const double MeV2cm = pow(TMath::Hbar()*TMath::C()*J2MeV, 2) * 1.E4;
+
   for (int i = 0; i < Eneu.rows(); ++i) {
     for (int j = 0; j < Eneu.cols(); ++j) {
-      xsec(i, j) = Xsec(Eneu(i, j), ctheta(j));
+      xsec(i, j) = MeV2cm * Xsec(Eneu(i, j), ctheta(j));
     }
   }
 }

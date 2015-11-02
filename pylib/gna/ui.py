@@ -13,3 +13,6 @@ class basecmd(object):
 
     def run(self):
         pass
+
+class experimentcmd(basecmd):
+    pass

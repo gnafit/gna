@@ -11,8 +11,6 @@
 
 #include <boost/format.hpp>
 
-#include <boost/core/demangle.hpp>
-
 #include "Parameters.hh"
 #include "SimpleDict.hh"
 
@@ -39,7 +37,7 @@ namespace ParametrizedTypes {
     variable<void> var;
     State state;
     void *claimer;
-    std::vector<variable<void>*> fields;
+    variable<void> *field;
     const Base *parent;
   };
 
@@ -175,13 +173,14 @@ namespace ParametrizedTypes {
       Entry *e = new Entry(parameter<T>(name.c_str()), name, this);
       m_entries.push_back(e);
       e->par.subscribe(m_taintflag);
+      e->field = &e->var;
       return VariableHandle<T>(*e);
     }
     template <typename T>
     VariableHandle<T> variable_(variable<T> *field, const std::string &name) {
       auto handle = variable_<T>(name);
       field->assign(handle.m_entry->par);
-      handle.m_entry->fields.push_back(field);
+      handle.m_entry->field = field;
       return handle;
     }
 
@@ -191,13 +190,13 @@ namespace ParametrizedTypes {
       return m_callbacks.back();
     }
     template <typename T>
-    EvaluableHandle<T> evaluable_(const std::string &name,
-                                  std::function<T()> func,
-                                  const std::vector<int> &sources);
+    dependant<T> evaluable_(const std::string &name,
+                            std::function<T()> func,
+                            const std::vector<int> &sources);
     template <typename T>
-    EvaluableHandle<T> evaluable_(const std::string &name,
-                                  std::function<T()> func,
-                                  const std::vector<changeable> &sources);
+    dependant<T> evaluable_(const std::string &name,
+                            std::function<T()> func,
+                            const std::vector<changeable> &sources);
 
     taintflag m_taintflag;
   private:
@@ -212,47 +211,23 @@ namespace ParametrizedTypes {
   };
 
   template <typename T>
-  inline EvaluableHandle<T>
-  Base::evaluable_(const std::string &name,
-                   std::function<T()> func,
-                   const std::vector<int> &sources)
-  {
-    std::vector<changeable> deps;
-    SourcesContainer depentries;
-    for (int varid: sources) {
-      Entry &e = m_entries[varid];
-      deps.push_back(e.var);
-      depentries.push_back(&e);
-    }
-    dependant<T> dep = dependant<T>(func, deps, name.c_str());
-    m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
-    return EvaluableHandle<T>(m_eventries.back());
-  }
-
-  template <typename T>
-  inline EvaluableHandle<T>
+  inline dependant<T>
   Base::evaluable_(const std::string &name,
                    std::function<T()> func,
                    const std::vector<changeable> &sources)
   {
-    std::vector<int> srcs;
+    SourcesContainer depentries;
     for (changeable chdep: sources) {
       size_t i;
       for (i = 0; i < m_entries.size(); ++i) {
         if (m_entries[i].var.is(chdep)) {
-          break;
+          depentries.push_back(&m_entries[i]);
         }
       }
-      if (i < m_entries.size()) {
-        srcs.push_back(i);
-      } else {
-        throw std::runtime_error(
-          (boost::format("evaluable `%1%': unknown dependancy `%1%'")
-           % name % chdep.name()).str()
-          );
-      }
     }
-    return evaluable_(name, func, srcs);
+    dependant<T> dep = dependant<T>(func, sources, name.c_str());
+    m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
+    return dep;
   }
 }
 
@@ -281,7 +256,7 @@ public:
   }
   bool required() const { return BaseClass::m_entry->required; }
   std::string typeName() const {
-    return boost::core::demangle(BaseClass::m_entry->var.type()->name());
+    return BaseClass::m_entry->var.typeName();
   }
 
   std::string name;
@@ -312,7 +287,7 @@ public:
 
   variable<void> &get() { return BaseClass::m_entry->dep; }
   std::string typeName() const {
-    return boost::core::demangle(BaseClass::m_entry->dep.type()->name());
+    return BaseClass::m_entry->dep.typeName();
   }
 
   const std::string name;

@@ -137,6 +137,12 @@ void Source::connect(Sink *newsink) {
 
 bool TransformationTypes::isCompatible(const Channel *sink,
                                        const Channel *source) {
+  if (!sink->channeltype.defined()) {
+    return true;
+  }
+  if (!source->channeltype.defined()) {
+    return true;
+  }
   if (source->channeltype.kind != sink->channeltype.kind) {
     return false;
   }

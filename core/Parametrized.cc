@@ -31,7 +31,7 @@ void Entry::bind(variable<void> newvar) {
       );
   }
   var.replace(newvar);
-  for (variable<void> *field: fields) {
+  if (field != &var) {
     field->assign(newvar);
   }
   state = Entry::State::Bound;
@@ -115,10 +115,7 @@ Entry &Base::getEntry(const std::string &name) {
 
 VariableHandle<void> Base::getByField(const variable<void> *field) {
   for (auto &e: m_entries) {
-    if (e.fields.empty()) {
-      continue;
-    }
-    if (e.fields[0] == field) {
+    if (e.field == field) {
       return VariableHandle<void>(e);
     }
   }

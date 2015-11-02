@@ -1,23 +1,41 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 from gna import parameters
+from contextlib import contextmanager
 import ROOT
 
 class namespace(object):
     def __init__(self, env):
-        self.objs = []
         self.vars = []
         self.namespaces = defaultdict(lambda: namespace(env))
         self.parameters = {}
         self.evaluables = {}
-        self.expressions = defaultdict(list)
+        self.expressions = {}
+        self.predictions = {}
         self.env = env
-        self.oldns = None
 
-    def getns(self, parts):
+    def __call__(self, *args):
+        return self.ns(*args)
+
+    def __getitem__(self, name):
+        for container in (self.parameters, self.evaluables):
+            try:
+                return container[name]
+            except KeyError:
+                pass
+
+    def __contains__(self, name):
+        return name in self.parameters or name in self.evaluables
+
+    def ns(self, parts):
+        if isinstance(parts, str):
+            return self.ns(parts.split('.'))
         if len(parts) > 0:
-            return self.namespaces[parts[0]].getns(parts[1:])
+            return self.namespaces[parts[0]].ns(parts[1:])
         else:
             return self
+
+    def defparameter(self, name, **kwargs):
+        return self.env.defparameter(self, name, **kwargs)
 
     def getparameter(self, name):
         return self.parameters[name]
@@ -32,16 +50,19 @@ class namespace(object):
         return set(self.parameters.keys()).union(self.evaluables.keys())
 
     def __enter__(self):
-        self.oldns = self.env.currentns
-        self.env.setns(self)
+        self.env.nsview.ref([self])
 
     def __exit__(self, type, value, tb):
-        self.env.setns(self.oldns)
-        self.oldns = None
+        self.env.nsview.deref([self])
+
+    def addprediction(self, name, output):
+        self.predictions[name] = output
 
 def foreachns(f):
     def wrapped(self, name):
-        for ns in self.nses:
+        for ns, refs in self.nses.iteritems():
+            if not refs > 0:
+                continue
             try:
                 return f(ns, name)
             except KeyError:
@@ -50,8 +71,14 @@ def foreachns(f):
     return wrapped
 
 class nsview(object):
-    def __init__(self, nses):
-        self.nses = nses
+    def __init__(self):
+        self.nses = Counter()
+
+    def ref(self, nses):
+        self.nses.update(nses)
+
+    def deref(self, nses):
+        self.nses.subtract(nses)
 
     @foreachns
     def getparameter(ns, name):
@@ -73,13 +100,28 @@ class parametersview(object):
         self.env = env
 
     def __getitem__(self, name):
-        return self.env.currentview.getparameter(name)
+        return self.env.nsview.getparameter(name)
+
+    @contextmanager
+    def update(self, newvalues):
+        oldvalues = {}
+        for p, v in newvalues.iteritems():
+            if isinstance(p, str):
+                p = self[p]
+            oldvalues[p] = p.value()
+            p.set(v)
+        yield
+        for p, v in oldvalues.iteritems():
+            p.set(v)
 
 class _environment(object):
     def __init__(self):
+        self.objs = []
         self.pars = parametersview(self)
         self.globalns = namespace(self)
-        self.setns(self.globalns)
+        self.nsview = nsview()
+        self.nsview.ref([self.globalns])
+        self._bindings = []
 
     def setns(self, ns):
         self.currentns = ns
@@ -92,48 +134,61 @@ class _environment(object):
             return nsview([self.globalns])
 
     def register(self, obj, **kwargs):
-        ns = self.ns(kwargs.pop('ns', None))
-        ns.objs.append(obj)
+        self.objs.append(obj)
+        ns = kwargs.pop('ns', self.globalns)
+        bindings = self._bindings+[kwargs.pop("bindings", {})]
         if len(obj.evaluables):
-            self.addexpressions(obj, bindings=kwargs.get("bindings", {}))
+            self.addexpressions(obj, ns=ns, bindings=bindings)
         if not kwargs.pop('bind', True):
             return obj
         if isinstance(obj, ROOT.ExpressionsProvider):
             return obj
-        resolver = parameters.resolver(self, self.view(ns))
-        resolver.resolveobject(obj, **kwargs)
+        resolver = parameters.resolver(self, self.nsview)
+        resolver.resolveobject(obj, bindings=bindings,
+                               freevars=kwargs.pop('freevars', []))
         return obj
 
-    def ns(self, ns=None):
-        if not ns:
-            return self.currentns
+    def ns(self, ns):
         if isinstance(ns, namespace):
             return ns
-        parts = ns.split('.')
-        if parts[0]:
-            return self.currentns.getns(parts)
+        elif isinstance(ns, str):
+            return self.globalns.ns(ns)
         else:
-            return self.globalns.getns(parts)
+            raise Exception("unknown object %r passed to ns()" % ns)
 
-    def defparameter(self, name, **kwargs):
-        ns = self.ns()
+    @contextmanager
+    def bind(self, **bindings):
+        self._bindings.append(bindings)
+        yield
+        self._bindings.pop()
+
+    def defparameter(self, *args, **kwargs):
+        if len(args) == 1:
+            ns, name = self.globalns, args[0]
+        elif len(args) == 2:
+            ns, name = args
+        else:
+            raise TypeError("defparameter() takes 1 or 2 arguments"
+                            "({0} given)".format(len(args)))
         assert name not in ns.parameters
         param = parameters.makeparameter(name, **kwargs)
         ns.parameters[name] = param
         return param
 
-    def addevaluable(self, name, var):
-        evaluable = ROOT.GaussianValue("double")(name, var)
-        self.ns().evaluables[name] = evaluable
+    def addevaluable(self, ns, name, var):
+        evaluable = ROOT.GaussianValue(var.typeName())(name, var)
+        ns.evaluables[name] = evaluable
         return evaluable
 
-    def addexpression(self, obj, expr, bindings={}):
-        deps = [bindings.get(name, name) for name in expr.sources]
-        self.ns().expressions[expr.name].append((obj, expr, deps))
+    def addexpression(self, obj, expr, ns, bindings=[]):
+        deps = [next((bs[name] for bs in bindings if name in bs), name)
+                for name in expr.sources]
+        entry = (obj, expr, deps, ns)
+        ns.expressions.setdefault(expr.name, []).append(entry)
 
-    def addexpressions(self, obj, bindings={}):
+    def addexpressions(self, obj, ns, bindings=[]):
         for expr in obj.evaluables.itervalues():
-            self.addexpression(obj, expr, bindings=bindings)
+            self.addexpression(obj, expr, ns, bindings=bindings)
 
 class _environments(defaultdict):
     current = None
