@@ -144,7 +144,8 @@ class observablesview(object):
 class _environment(object):
     def __init__(self):
         self.objs = []
-        self.pars = parametersview(self)
+        self.parameters = parametersview(self)
+        self.pars = self.parameters
         self.observables = observablesview(self)
         self.predictions = {}
         self.covmats = {}
@@ -189,6 +190,7 @@ class _environment(object):
 
     def iternstree(self):
         return self.globalns.iternstree(nspath='')
+
     @contextmanager
     def bind(self, **bindings):
         self._bindings.append(bindings)
@@ -231,6 +233,33 @@ class _environment(object):
 
     def adddata(self, name, data):
         self.data[name] = data
+
+    def gettype(self, objtype):
+        types = {
+            'prediction': 'predictions',
+            'observable': 'observables',
+            'data': 'data',
+            'covmat': 'covmats',
+            'parameter': 'parameters',
+        }
+        matches = [k for k in types if k.startswith(objtype)]
+        if len(matches) > 1:
+            msg = "ambigous type specifier {0}, candidates: {1}"
+            raise Exception(msg.format(objtype, ', '.join(matches)))
+        elif not matches:
+            msg = "unknown type specifier {0}"
+            raise Exception(msg.format(objtype))
+        else:
+            return types[matches[0]]
+
+    def get(self, objspec):
+        objtype, objpath = objspec.split(":", 1)
+        objtype = self.gettype(objtype)
+        if '/' in objpath:
+            nspath, objname = objpath.rsplit("/", 1)
+            return getattr(self.ns(nspath), objtype)[objname]
+        else:
+            return getattr(self, objtype)[objpath]
 
 class _environments(defaultdict):
     current = None

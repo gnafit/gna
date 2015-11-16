@@ -23,14 +23,13 @@ using TransformationTypes::Entry;
 using TransformationTypes::Base;
 
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), parent(parent), initializing(0)
+  : name(name), parent(parent), initializing(0), frozen(false)
 {
-  taintedsrcs.subscribe(tainted);
 }
 
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), parent(parent), initializing(0)
+    fun(), typefuns(), parent(parent), initializing(0), frozen(false)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -129,7 +128,7 @@ void Source::connect(Sink *newsink) {
   }
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
-  sink->entry->tainted.subscribe(entry->taintedsrcs);
+  sink->entry->tainted.subscribe(entry->tainted);
   newsink->sources.push_back(this);
   newsink->entry->evaluateTypes();
   entry->evaluateTypes();

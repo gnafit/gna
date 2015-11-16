@@ -8,6 +8,9 @@ void Covmat::calculateCov(Args args, Rets rets) {
     // cov.matrix().selfadjointView<Eigen::Upper>().rankUpdate(args[i].x.matrix());
     cov.matrix() += args[i].x.matrix()*args[i].x.matrix().transpose();
   }
+  if (m_fixed) {
+    rets.freeze();
+  }
 }
 
 void Covmat::calculateInv(Args args, Rets rets) {
@@ -21,7 +24,6 @@ void Covmat::rank1(const OutputDescriptor &out) {
 size_t Covmat::ndim() const {
   return t_["cov"][0].type.shape[0];
 }
-
 
 size_t Covmat::size() const {
   return t_["cov"][0].type.size();

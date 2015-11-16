@@ -41,7 +41,6 @@ namespace TransformationTypes {
     Sink(const Channel &chan, Entry *entry);
 
     std::unique_ptr<Data<double>> data;
-    taintflag tainted;
     std::vector<Source*> sources;
     Entry *entry;
   };
@@ -114,12 +113,19 @@ namespace TransformationTypes {
     void evaluateTypes();
     void updateTypes();
 
-    const Data<double> &data(int i) {
-      if (sinks[i].tainted) {
+    void touch() {
+      if (tainted && !frozen) {
         update();
       }
+    }
+
+    const Data<double> &data(int i) {
+      touch();
       return *sinks[i].data;
     }
+
+    void freeze() { frozen = true; }
+    void unfreeze() { frozen = false; }
 
     std::string name;
     SourcesContainer sources;
@@ -127,9 +133,9 @@ namespace TransformationTypes {
     Function fun;
     std::vector<TypesFunction> typefuns;
     taintflag tainted;
-    taintflag taintedsrcs;
     const Base *parent;
     int initializing;
+    bool frozen;
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
@@ -168,9 +174,7 @@ namespace TransformationTypes {
     Args(const Entry *e): m_entry(e) { }
     const Data<double> &operator[](int i) const {
       const Source &src = m_entry->sources[i];
-      if (src.sink->tainted) {
-        src.sink->entry->update();
-      }
+      src.sink->entry->touch();
       return *src.sink->data;
     }
     size_t size() const { return m_entry->sources.size(); }
@@ -185,14 +189,16 @@ namespace TransformationTypes {
       Error(const Sink *s) : sink(s) { }
       const Sink *sink;
     };
-    Rets(const Entry *e): m_entry(e) { }
+    Rets(Entry *e): m_entry(e) { }
     Data<double> &operator[](int i) const {
       return *m_entry->sinks[i].data;
     }
     size_t size() const { return m_entry->sinks.size(); }
     Error error(const Data<double> &data);
+    void freeze()  { m_entry->freeze(); }
+    void unfreeze()  { m_entry->unfreeze(); }
   private:
-    const Entry *m_entry;
+    Entry *m_entry;
   };
 
   struct Atypes {
@@ -250,7 +256,6 @@ namespace TransformationTypes {
   inline Sink::Sink(const Channel &chan, Entry *entry)
     : Channel(chan), entry(entry)
   {
-    entry->tainted.subscribe(tainted);
   }
 
   inline void Entry::evaluate() {
@@ -265,7 +270,6 @@ namespace TransformationTypes {
       status = Status::Failed;
     }
     for (auto &sink: sinks) {
-      sink.tainted = false;
       sink.data->status = status;
     }
     tainted = false;

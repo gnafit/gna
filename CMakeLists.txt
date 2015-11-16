@@ -49,6 +49,7 @@ set (HEADERS
   Derivative.hh
   Covmat.hh
   Chi2.hh
+  Minimizable.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh

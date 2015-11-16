@@ -2,9 +2,11 @@
 #define CHI2_H
 
 #include "GNAObject.hh"
+#include "FitMeasure.hh"
 
 class Chi2: public GNASingleObject,
-            public Transformation<Chi2> {
+            public Transformation<Chi2>,
+            public FitMeasure {
 public:
   Chi2() {
     transformation_(this, "chi2")
@@ -34,7 +36,7 @@ public:
   }
   void calculateChi2(Args args, Rets rets);
 
-  double value() {
+  virtual double value() override {
     return m_transform[0].x[0];
   }
 protected:

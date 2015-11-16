@@ -6,7 +6,9 @@
 class Covmat: public GNAObject,
               public Transformation<Covmat> {
 public:
-  Covmat() {
+  Covmat()
+    : m_fixed(false)
+  {
     transformation_(this, "cov")
       .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
           rets[0] = DataType().points().shape(args[0].size(), args[0].size());
@@ -41,6 +43,10 @@ public:
 
   void update() const;
   const double *data() const;
+
+  void setFixed(bool fixed) { m_fixed = fixed; }
+protected:
+  bool m_fixed;
 };
 
 #endif // COVMAT_H
