@@ -21,6 +21,7 @@ public:
     append(outs.single());
   }
   void append(const OutputDescriptor &data);
+
   size_t size() const;
 
   void update() const;

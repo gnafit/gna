@@ -2,7 +2,7 @@ from gna.ui import basecmd
 import physlib
 import ROOT
 
-class oscillations(basecmd):
+class cmd(basecmd):
     def init(self):
         env = self.env
 

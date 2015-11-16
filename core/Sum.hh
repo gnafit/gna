@@ -18,7 +18,6 @@ public:
     add(outs.single());
   }
   void add(const OutputDescriptor &data);
-  size_t size() const;
 };
 
 #endif // SUM_H

@@ -60,10 +60,16 @@ class detector(object):
         self.ns.defparameter("b", central=0.03, sigma=0)
         self.ns.defparameter("c", central=0.0, sigma=0)
 
-class juno(experimentcmd):
+class cmd(experimentcmd):
     @classmethod
     def initparser(self, parser):
-        pass
+        parser.add_argument('--erange', type=float, nargs=2,
+                            default=[1.0, 10.0],
+                            metavar=('E_MIN', 'E_MAX'),
+                            help='energy range')
+        parser.add_argument('--nbins', type=int,
+                            default=200,
+                            help='number of bins')
 
     def makespectra(self):
         res = {}
@@ -160,7 +166,7 @@ class juno(experimentcmd):
             self.env.defparameter("EnergyPerFission_{0}".format(isoname),
                                   central=e[0], sigma=e[1])
 
-        edges = np.linspace(1, 10, 400)
+        edges = np.linspace(self.opts.erange[0], self.opts.erange[1], self.opts.nbins+1)
         orders = np.array([10]*(len(edges)-1), dtype=int)
 
         self.isospectra = self.makespectra()
@@ -214,22 +220,4 @@ class juno(experimentcmd):
         ibd.jacobian.Ee(integrator.points.x)
         ibd.jacobian.ctheta(integrator.points.y)
 
-        self.ns.addprediction("spectrum", self.detectors[0].oscprob.probsum)
-
-        with self.detectors[0].ns:
-            eres = ROOT.EnergyResolution()
-            eres.smear.inputs(self.detectors[0].oscprob.probsum)
-
-        prediction = ROOT.Prediction()
-        prediction.append(eres.smear)
-        for b in np.linspace(0, 0.05, 5):
-            with self.detectors[0].ns, self.env.pars.update({
-                    'b': b
-                    #self.reactors[0].ns["ThermalPower"]: p*self.reactors[0].ns["ThermalPower"].value()
-            }):
-                data = np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
-                from matplotlib import pyplot as plt
-                plt.plot((edges[:-1] + edges[1:])/2, data)
-        plt.show()
-        print np.frombuffer(prediction.data(), dtype=float, count=prediction.size()).copy()
-        #print self.detectors[0].oscprob.probsum.outputs[0].edges()
+        self.ns.addobservable("spectrum", self.detectors[0].oscprob.probsum)

@@ -10,7 +10,7 @@ class namespace(object):
         self.parameters = {}
         self.evaluables = {}
         self.expressions = {}
-        self.predictions = {}
+        self.observables = {}
         self.env = env
 
     def __call__(self, *args):
@@ -55,8 +55,19 @@ class namespace(object):
     def __exit__(self, type, value, tb):
         self.env.nsview.deref([self])
 
-    def addprediction(self, name, output):
-        self.predictions[name] = output
+    def addobservable(self, name, output):
+        self.observables[name] = output
+
+    def iternstree(self, nspath=None):
+        if nspath:
+            yield (nspath, self)
+            subprefix = nspath+'.'
+        else:
+            yield ('', self)
+            subprefix = ''
+        for name, subns in self.namespaces.iteritems():
+            for x in subns.iternstree(nspath=subprefix+name):
+                yield x
 
 def foreachns(f):
     def wrapped(self, name):
@@ -114,10 +125,29 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
+class observablesview(object):
+    def __init__(self, env):
+        self.env = env
+
+    def iterpaths(self):
+        for nspath, ns in self.env.iternstree():
+            for name, prediction in ns.observables.iteritems():
+                yield '/'.join([nspath, name])
+
+    def fromspec(self, spec):
+        ret = []
+        for path in spec.split('+'):
+            nspath, name = path.split('/')
+            ret.append(self.env.ns(nspath).observables[name])
+        return ret
+
 class _environment(object):
     def __init__(self):
         self.objs = []
         self.pars = parametersview(self)
+        self.observables = observablesview(self)
+        self.predictions = {}
+        self.covmats = {}
         self.globalns = namespace(self)
         self.nsview = nsview()
         self.nsview.ref([self.globalns])
@@ -156,6 +186,8 @@ class _environment(object):
         else:
             raise Exception("unknown object %r passed to ns()" % ns)
 
+    def iternstree(self):
+        return self.globalns.iternstree(nspath='')
     @contextmanager
     def bind(self, **bindings):
         self._bindings.append(bindings)
@@ -189,6 +221,12 @@ class _environment(object):
     def addexpressions(self, obj, ns, bindings=[]):
         for expr in obj.evaluables.itervalues():
             self.addexpression(obj, expr, ns, bindings=bindings)
+
+    def addprediction(self, name, prediction):
+        self.predictions[name] = prediction
+
+    def addcovmat(self, name, covmat):
+        self.covmats[name] = covmat
 
 class _environments(defaultdict):
     current = None

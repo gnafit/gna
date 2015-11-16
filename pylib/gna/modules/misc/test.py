@@ -23,7 +23,7 @@ spectra = {
 }
 isotopes = spectra.keys()
 
-class test(basecmd):
+class cmd(basecmd):
     def setupreactor(self):
         env.defparameter('NominalThermalPower', central=2.0, sigma=0.01)
 

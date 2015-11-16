@@ -19,6 +19,8 @@ set (SOURCES
   core/Sum.cc
   core/WeightedSum.cc
   core/LinearInterpolator.cc
+  core/Derivative.cc
+  core/Covmat.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/IbdInteraction.cc
@@ -43,6 +45,8 @@ set (HEADERS
   Points.hh
   Histogram.hh
   LinearInterpolator.hh
+  Derivative.hh
+  Covmat.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
