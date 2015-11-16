@@ -21,6 +21,7 @@ set (SOURCES
   core/LinearInterpolator.cc
   core/Derivative.cc
   core/Covmat.cc
+  core/Chi2.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/IbdInteraction.cc
@@ -47,6 +48,7 @@ set (HEADERS
   LinearInterpolator.hh
   Derivative.hh
   Covmat.hh
+  Chi2.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh

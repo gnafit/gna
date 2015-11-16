@@ -148,6 +148,7 @@ class _environment(object):
         self.observables = observablesview(self)
         self.predictions = {}
         self.covmats = {}
+        self.data = {}
         self.globalns = namespace(self)
         self.nsview = nsview()
         self.nsview.ref([self.globalns])
@@ -227,6 +228,9 @@ class _environment(object):
 
     def addcovmat(self, name, covmat):
         self.covmats[name] = covmat
+
+    def adddata(self, name, data):
+        self.data[name] = data
 
 class _environments(defaultdict):
     current = None

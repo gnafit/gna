@@ -2,7 +2,6 @@ from gna.ui import basecmd
 import ROOT
 import argparse
 import numpy as np
-from matplotlib import pyplot as plt
 
 class CovmatAppendAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -22,7 +21,6 @@ class cmd(basecmd):
                             metavar='NAME',
                             help='print prediction NAME')
 
-
     def init(self):
         for name, predname, pars in self.opts.add:
             prediction = self.env.predictions[predname]
@@ -32,6 +30,7 @@ class cmd(basecmd):
                 der = ROOT.Derivative(self.env.pars[parname])
                 der.derivative.inputs(prediction)
                 covmat.rank1(der)
+            covmat.inv.cov(covmat.cov)
             self.env.addcovmat(name, covmat)
             print 'Covmat', name, 'for', predname, 'wrt', ', '.join(pars)
 

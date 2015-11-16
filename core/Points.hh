@@ -19,6 +19,13 @@ public:
     std::copy(points, points+cnt, m_points.begin());
     init();
   }
+
+  size_t size() const {
+    return m_points.size();
+  }
+  const double *data() const {
+    return &m_points[0];
+  }
 protected:
   void init() {
     transformation_(this, "points")

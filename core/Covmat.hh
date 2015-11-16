@@ -3,7 +3,7 @@
 
 #include "GNAObject.hh"
 
-class Covmat: public GNASingleObject,
+class Covmat: public GNAObject,
               public Transformation<Covmat> {
 public:
   Covmat() {
@@ -15,8 +15,15 @@ public:
       .input("stat")
       .output("cov")
     ;
+    transformation_(this, "inv")
+      .types(Atypes::pass<0>)
+      .func(&Covmat::calculateInv)
+      .input("cov")
+      .output("inv")
+      ;
   }
   void calculateCov(Args args, Rets rets);
+  void calculateInv(Args args, Rets rets);
 
   void rank1(GNASingleObject &obj) {
     rank1(obj[0].outputs.single());
