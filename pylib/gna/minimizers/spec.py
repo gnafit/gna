@@ -91,7 +91,7 @@ def load(env, minimizer, spec):
                 minimizer.pars.index(par)
             except ValueError:
                 msg = "no parameter {0} in minimizer"
-                raise MinimizerSpecError(par.name())
+                raise MinimizerSpecError(msg.format(par.name()))
         elif isinstance(k, int):
             try:
                 par = minimizer.pars[k]

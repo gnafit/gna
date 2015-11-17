@@ -71,9 +71,30 @@ class Minuit(ROOT.TMinuitMinimizer):
 
         self._reset = False
 
+    def evalstatistic(self):
+        wall = time.time()
+        clock = time.clock()
+        value = self._statistic()
+        clock = time.clock() - clock
+        wall = time.time() - wall
+
+        x = [par.value() for par in self.pars]
+        resultdict = {
+            'x': np.array(x),
+            'errors': np.zeros_like(x),
+            'success': True,
+            'fun': value,
+            'nfev': 1,
+            'maxcv': 0.0,
+            'wall': wall,
+            'cpu': clock,
+        }
+        self.result = Namespace(**resultdict)
+        return self.result
+
     def fit(self):
         if not self.pars:
-            return self._statistic()
+            return self.evalstatistic()
 
         if self._reset:
             self.setuppars()
