@@ -150,6 +150,9 @@ class _environment(object):
         self.predictions = {}
         self.covmats = {}
         self.data = {}
+        self.minimizers = {}
+        self.statistics = {}
+
         self.globalns = namespace(self)
         self.nsview = nsview()
         self.nsview.ref([self.globalns])
@@ -234,6 +237,12 @@ class _environment(object):
     def adddata(self, name, data):
         self.data[name] = data
 
+    def addstatistic(self, name, statistic):
+        self.statistics[name] = statistic
+
+    def addminimizer(self, name, minimizer):
+        self.minimizers[name] = minimizer
+
     def gettype(self, objtype):
         types = {
             'prediction': 'predictions',
@@ -241,6 +250,8 @@ class _environment(object):
             'data': 'data',
             'covmat': 'covmats',
             'parameter': 'parameters',
+            'statistic': 'statistics',
+            'minimizer': 'mizimizers',
         }
         matches = [k for k in types if k.startswith(objtype)]
         if len(matches) > 1:

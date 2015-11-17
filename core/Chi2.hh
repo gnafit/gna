@@ -2,11 +2,11 @@
 #define CHI2_H
 
 #include "GNAObject.hh"
-#include "FitMeasure.hh"
+#include "Statistic.hh"
 
 class Chi2: public GNASingleObject,
             public Transformation<Chi2>,
-            public FitMeasure {
+            public Statistic {
 public:
   Chi2() {
     transformation_(this, "chi2")

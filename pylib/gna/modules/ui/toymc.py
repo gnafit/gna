@@ -16,7 +16,7 @@ class cmd(basecmd):
         for name, predname in self.opts.add:
             prediction = self.env.predictions[predname]
             buf = np.frombuffer(prediction.data(), count=prediction.size())
-            data = ROOT.Points(buf)
+            data = ROOT.Points(np.random.normal(buf, buf**0.5))
             self.env.adddata(name, data)
             print 'Asimov', name, 'for', predname
 

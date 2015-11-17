@@ -5,6 +5,7 @@ import numpy as np
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser):
+        parser.add_argument('name')
         parser.add_argument('prediction')
         parser.add_argument('data')
         parser.add_argument('covmat')
@@ -19,4 +20,4 @@ class cmd(basecmd):
         chi2.chi2.data(data)
         chi2.chi2.invcov(covmat.inv)
 
-        print 'chi2:', chi2.value()
+        self.env.addstatistic(self.opts.name, chi2)

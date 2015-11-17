@@ -3,13 +3,13 @@
 
 #include "Math/IFunction.h"
 
-#include "FitMeasure.hh"
+#include "Statistic.hh"
 #include "UncertainParameter.hh"
 
 class Minimizable: public ROOT::Math::IMultiGenFunction {
 public:
-  Minimizable(FitMeasure *measure)
-    : m_measure(measure)
+  Minimizable(Statistic *statistic)
+    : m_statistic(statistic)
   {
   }
 public:
@@ -17,7 +17,7 @@ public:
     m_pars.push_back(par);
   }
   ROOT::Math::IMultiGenFunction *Clone() const override {
-    Minimizable *clone = new Minimizable(m_measure);
+    Minimizable *clone = new Minimizable(m_statistic);
     for (auto par: m_pars) {
       clone->addParameter(par);
     }
@@ -30,10 +30,10 @@ public:
     for (size_t i = 0; i < m_pars.size(); ++i) {
       m_pars[i]->set(x[i]);
     }
-    return m_measure->value();
+    return m_statistic->value();
   }
 protected:
-  FitMeasure *m_measure;
+  Statistic *m_statistic;
   std::vector<Parameter<double>*> m_pars;
 };
 

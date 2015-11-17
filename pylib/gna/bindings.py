@@ -117,6 +117,11 @@ def patchTransformationDescriptor(cls):
     cls.__getattr__ = __getattr__
     cls.__getitem__ = __getattr__
 
+def patchStatistic(cls):
+    def __call__(self):
+        return self.value()
+    cls.__call__ = __call__
+
 @hygienic
 def wrapPoints(cls):
     class WrappedClass(cls):
@@ -148,6 +153,8 @@ def setup(ROOT):
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
     patchTransformationDescriptor(ROOT.TransformationDescriptor)
+
+    patchStatistic(ROOT.Statistic)
 
     GNAObject = ROOT.GNAObject
     def patchcls(cls):
