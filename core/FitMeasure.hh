@@ -3,6 +3,7 @@
 
 class FitMeasure {
 public:
+  virtual ~FitMeasure() { }
   virtual double value() = 0;
 };
 
