@@ -8,16 +8,7 @@ class Product: public GNASingleObject,
 public:
   Product();
 
-  void multiply(GNASingleObject &obj) {
-    multiply(obj[0].outputs.single());
-  }
-  void multiply(const TransformationDescriptor &obj) {
-    multiply(obj.outputs.single());
-  }
-  void multiply(const TransformationDescriptor::Outputs &outs) {
-    multiply(outs.single());
-  }
-  void multiply(const OutputDescriptor &data);
+  void multiply(SingleOutput &data);
   size_t size() const;
 };
 

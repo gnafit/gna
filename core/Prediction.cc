@@ -36,8 +36,8 @@ Prediction &Prediction::operator=(const Prediction &/* other */) {
   return *this;
 }
 
-void Prediction::append(const OutputDescriptor &out) {
-  t_["prediction"].input(out.channel()).connect(out);
+void Prediction::append(SingleOutput &data) {
+  t_["prediction"].input(data);
 }
 
 size_t Prediction::size() const {

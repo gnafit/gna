@@ -11,16 +11,7 @@ public:
 
   Prediction &operator=(const Prediction &other);
 
-  void append(GNASingleObject &obj) {
-    append(obj[0].outputs.single());
-  }
-  void append(const TransformationDescriptor &obj) {
-    append(obj.outputs.single());
-  }
-  void append(const TransformationDescriptor::Outputs &outs) {
-    append(outs.single());
-  }
-  void append(const OutputDescriptor &data);
+  void append(SingleOutput &data);
 
   size_t size() const;
 

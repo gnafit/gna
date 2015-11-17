@@ -70,6 +70,10 @@ std::vector<OutputHandle> Handle::outputs() const {
   return ret;
 }
 
+InputHandle Handle::input(SingleOutput &output) {
+  return input(output.single());
+}
+
 void Handle::dump() const {
   std::cerr << m_entry->name;
   std::cerr << std::endl;

@@ -8,16 +8,7 @@ class Sum: public GNASingleObject,
 public:
   Sum();
 
-  void add(GNASingleObject &obj) {
-    add(obj[0].outputs.single());
-  }
-  void add(const TransformationDescriptor &obj) {
-    add(obj.outputs.single());
-  }
-  void add(const TransformationDescriptor::Outputs &outs) {
-    add(outs.single());
-  }
-  void add(const OutputDescriptor &data);
+  void add(SingleOutput &data);
 };
 
 #endif // SUM_H

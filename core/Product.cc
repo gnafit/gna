@@ -35,6 +35,6 @@ Product::Product() {
       });
 }
 
-void Product::multiply(const OutputDescriptor &out) {
-  t_["product"].input(out.channel()).connect(out);
+void Product::multiply(SingleOutput &out) {
+  t_["product"].input(out);
 }

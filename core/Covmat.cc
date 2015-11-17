@@ -17,8 +17,8 @@ void Covmat::calculateInv(Args args, Rets rets) {
   rets[0].as2d().matrix() = args[0].as2d().matrix().inverse();
 }
 
-void Covmat::rank1(const OutputDescriptor &out) {
-  t_["cov"].input(out.channel()).connect(out);
+void Covmat::rank1(SingleOutput &out) {
+  t_["cov"].input(out);
 }
 
 size_t Covmat::ndim() const {

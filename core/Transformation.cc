@@ -23,13 +23,21 @@ void connect(const Inputs &inputs, const Outputs &outputs) {
   }
 }
 
-Output Outputs::single() const {
+TransformationTypes::OutputHandle Outputs::single() const {
   if (size() > 1) {
     throw std::runtime_error("too much outputs for one input");
   } else if (size() < 1) {
     throw std::runtime_error("no outputs");
   }
   return at(0);
+}
+
+TransformationTypes::OutputHandle Outputs::single() {
+  return static_cast<const Outputs*>(this)->single();
+}
+
+TransformationTypes::OutputHandle TransformationDescriptor::single() {
+  return outputs.single();
 }
 
 void connect(const Input &input, const Outputs &outputs) {

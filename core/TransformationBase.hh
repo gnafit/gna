@@ -29,6 +29,7 @@ template <typename T>
 class Transformation;
 
 class GNAObject;
+class SingleOutput;
 namespace TransformationTypes {
   struct Channel {
     std::string name;
@@ -154,6 +155,12 @@ namespace TransformationTypes {
     InputHandle input(const Channel &input) {
       return m_entry->addSource(input);
     }
+    InputHandle input(OutputHandle output) {
+      InputHandle inp = m_entry->addSource(output.channel());
+      inp.connect(output);
+      return inp;
+    }
+    InputHandle input(SingleOutput &output);
     OutputHandle output(const Channel &output) {
       return m_entry->addSink(output);
     }
@@ -512,6 +519,12 @@ private:
       entries[idx].typefuns[fidx] = std::bind(std::get<2>(f), obj(), _1, _2);
     }
   }
+};
+
+class SingleOutput {
+public:
+  virtual ~SingleOutput() { }
+  virtual TransformationTypes::OutputHandle single() = 0;
 };
 
 #endif // TRANSFORMATIONBASE_H

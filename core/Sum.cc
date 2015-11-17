@@ -12,6 +12,6 @@ Sum::Sum() {
       });
 }
 
-void Sum::add(const OutputDescriptor &out) {
-  t_["sum"].input(out.channel()).connect(out);
+void Sum::add(SingleOutput &out) {
+  t_["sum"].input(out);
 }

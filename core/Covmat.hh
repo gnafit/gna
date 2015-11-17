@@ -27,16 +27,8 @@ public:
   void calculateCov(Args args, Rets rets);
   void calculateInv(Args args, Rets rets);
 
-  void rank1(GNASingleObject &obj) {
-    rank1(obj[0].outputs.single());
-  }
-  void rank1(const TransformationDescriptor &obj) {
-    rank1(obj.outputs.single());
-  }
-  void rank1(const TransformationDescriptor::Outputs &outs) {
-    rank1(outs.single());
-  }
-  void rank1(const OutputDescriptor &single);
+  void rank1(SingleOutput &data);
+  // void rank1(SingleOutput &out);
 
   size_t ndim() const;
   size_t size() const;

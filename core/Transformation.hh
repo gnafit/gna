@@ -11,7 +11,9 @@ class GNASingleObject;
 
 class InputDescriptor;
 class OutputDescriptor;
-class TransformationDescriptor: public TransformationTypes::Handle {
+
+class TransformationDescriptor: public TransformationTypes::Handle,
+                                public SingleOutput {
 public:
   typedef TransformationTypes::Handle BaseClass;
 
@@ -32,12 +34,14 @@ public:
     void operator()(GNASingleObject &obj) const;
   };
 
-  class Outputs: public OutputsBase {
+  class Outputs: public OutputsBase,
+                 public SingleOutput {
   public:
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }
 
-    OutputDescriptor single() const;
+    TransformationTypes::OutputHandle single() override;
+    TransformationTypes::OutputHandle single() const;
   };
 
   TransformationDescriptor(const BaseClass &other)
@@ -55,6 +59,8 @@ public:
   const std::string name;
   const Inputs inputs;
   const Outputs outputs;
+
+  TransformationTypes::OutputHandle single() override;
 };
 
 class InputDescriptor: public TransformationTypes::InputHandle {
@@ -94,7 +100,8 @@ public:
   const std::string name;
 };
 
-class OutputDescriptor: public TransformationTypes::OutputHandle {
+class OutputDescriptor: public TransformationTypes::OutputHandle,
+                        public SingleOutput {
 public:
   typedef TransformationTypes::OutputHandle BaseClass;
 
@@ -109,6 +116,8 @@ public:
     { }
   static OutputDescriptor invalid(int index);
   static OutputDescriptor invalid(const std::string name);
+
+  TransformationTypes::OutputHandle single() override { return *this; }
 
   const std::string name;
 };

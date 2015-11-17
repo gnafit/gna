@@ -66,7 +66,8 @@ protected:
   typedef TransformationTypes::Handle Handle;
 };
 
-class GNASingleObject: public GNAObject {
+class GNASingleObject: public GNAObject,
+                       public SingleOutput {
 public:
   GNASingleObject()
     : GNAObject(SingleTransformation())
@@ -74,6 +75,10 @@ public:
   GNASingleObject(const GNASingleObject &other)
     : GNAObject(other)
   { }
+
+  TransformationTypes::OutputHandle single() override {
+    return (*this)[0].outputs.single();
+  }
 };
 
 #endif // GNAOBJECT_H
