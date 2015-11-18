@@ -1,4 +1,4 @@
-from gna.ui import experimentcmd
+from gna.exp import baseexp
 from gna import data
 import ROOT
 import numpy as np
@@ -60,7 +60,7 @@ class detector(object):
         self.ns.defparameter("b", central=0.03, sigma=0)
         self.ns.defparameter("c", central=0.0, sigma=0)
 
-class cmd(experimentcmd):
+class exp(baseexp):
     @classmethod
     def initparser(self, parser):
         parser.add_argument('--erange', type=float, nargs=2,

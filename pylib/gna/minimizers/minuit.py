@@ -2,7 +2,7 @@ import ROOT
 from argparse import Namespace
 import numpy as np
 import time
-from gna.minimizers import spec
+import spec
 
 class Minuit(ROOT.TMinuitMinimizer):
     def __init__(self, statistic, pars=[]):

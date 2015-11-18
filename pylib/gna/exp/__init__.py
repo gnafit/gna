@@ -1,6 +1,4 @@
-import argparse
-
-class basecmd(object):
+class baseexp(object):
     @classmethod
     def initparser(cls, parser):
         pass
@@ -13,6 +11,3 @@ class basecmd(object):
 
     def run(self):
         pass
-
-class experimentcmd(basecmd):
-    pass

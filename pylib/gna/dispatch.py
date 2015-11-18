@@ -1,14 +1,9 @@
 import argparse
 import sys
-import os
 import os.path
 from pkgutil import iter_modules
 from gna.env import env
-
-moduletypes = {
-    'experiments': 'exp',
-    'data': 'data',
-}
+import gna.ui
 
 def arggroups(argv):
     breaks = [i+1 for i, arg in enumerate(argv[1:], 1) if arg == '--']
@@ -16,26 +11,9 @@ def arggroups(argv):
         yield argv[start:end]
 
 def getmodules():
-    miscmodules = {}
-    allmodules = {None: miscmodules}
-    basedir = os.path.join(os.path.dirname(__file__), "modules")
-    for subdir in os.listdir(basedir):
-        dpath = os.path.join(basedir, subdir)
-        if not os.path.isdir(dpath):
-            continue
-        if os.path.exists(os.path.join(dpath, "__init__.py")):
-            continue
-        modules = {name: loader for loader, name, _ in iter_modules([dpath])}
-
-        if subdir in moduletypes:
-            allmodules[moduletypes[subdir]] = modules
-        else:
-            conflicts = set(modules.keys()).intersection(miscmodules.keys())
-            if conflicts:
-                msg = "conflicting modules: {0}".format(', '.join(conflicts))
-                raise Exception(msg)
-            miscmodules.update(modules)
-    return allmodules
+    pkgpath = os.path.dirname(gna.ui.__file__)
+    modules = {name: loader for loader, name, _ in iter_modules([pkgpath])}
+    return modules
 
 def loadcmdclass(modules, name, args):
     loader = modules[name]
@@ -50,17 +28,11 @@ def loadcmdclass(modules, name, args):
     return cls, opts
 
 def run():
-    allmodules = getmodules()
+    modules = getmodules()
     runlist = []
     for group in arggroups(sys.argv):
         if not group:
             continue
-        mtype = group[0]
-        if mtype in allmodules:
-            modules = allmodules[mtype]
-            group = group[1:]
-        else:
-            modules = allmodules[None]
         name = group[0]
         if name not in modules:
             msg = 'unknown module %s' % name
