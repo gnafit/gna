@@ -1,11 +1,10 @@
-from gna.ui import basecmd
+from gna.ui import basecmd, set_typed
 
 class cmd(basecmd):
     @classmethod
-    def initparser(cls, parser):
-        parser.add_argument('minimizer')
+    def initparser(cls, parser, env):
+        parser.add_argument('minimizer', action=set_typed(env.parts.minimizer))
 
     def init(self):
-        minimizer = self.env.minimizers[self.opts.minimizer]
-        print minimizer.fit()
+        print self.opts.minimizer.fit()
 

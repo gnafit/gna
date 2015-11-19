@@ -9,7 +9,7 @@ expmodules = {name: loader for loader, name, _ in iter_modules([path])}
 
 class cmd(basecmd):
     @classmethod
-    def initparser(cls, parser):
+    def initparser(cls, parser, env):
         parser.add_argument('experiment', choices=expmodules.keys())
         parser.add_argument('expargs', nargs=argparse.REMAINDER)
 
@@ -22,10 +22,4 @@ class cmd(basecmd):
         expcls.initparser(parser)
         expopts = parser.parse_args(self.opts.expargs)
 
-        self.exp = expcls(expopts)
-        self.exp.env = self.env
-
-        return self.exp.init()
-
-    def run(self):
-        return self.exp.run()
+        expcls(self.env, expopts)

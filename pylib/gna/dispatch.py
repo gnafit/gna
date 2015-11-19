@@ -5,6 +5,18 @@ from pkgutil import iter_modules
 from gna.env import env
 import gna.ui
 
+class LazyNamespace(argparse.Namespace):
+    def __getattribute__(self, name):
+        attr = super(LazyNamespace, self).__getattribute__(name)
+        try:
+            call = isinstance(attr, gna.ui.lazyproperty)
+        except TypeError:
+            call = False
+        if call:
+            attr = attr.f()
+            setattr(self, name, attr)
+        return attr
+
 def arggroups(argv):
     breaks = [i+1 for i, arg in enumerate(argv[1:], 1) if arg == '--']
     for start, end in zip([1]+breaks, [i-1 for i in breaks]+[len(argv)]):
@@ -22,8 +34,8 @@ def loadcmdclass(modules, name, args):
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    cls.initparser(subparsers.add_parser(name))
-    opts = parser.parse_args(args)
+    cls.initparser(subparsers.add_parser(name), env.default)
+    opts = parser.parse_args(args, namespace=LazyNamespace())
 
     return cls, opts
 
@@ -38,8 +50,7 @@ def run():
             msg = 'unknown module %s' % name
             raise Exception(msg)
         cmdcls, cmdopts = loadcmdclass(modules, name, group)
-        obj = cmdcls(cmdopts)
-        obj.env = env.default
+        obj = cmdcls(env.default, cmdopts)
         obj.init()
         runlist.append(obj)
 

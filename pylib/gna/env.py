@@ -125,33 +125,39 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
-class observablesview(object):
-    def __init__(self, env):
-        self.env = env
+class PartNotFoundError(BaseException):
+    def __init__(self, parttype):
+        self.parttype = parttype
 
-    def iterpaths(self):
-        for nspath, ns in self.env.iternstree():
-            for name, prediction in ns.observables.iteritems():
-                yield '/'.join([nspath, name])
+class envpart(dict):
+    def __init__(self, parttype):
+        self.parttype = parttype
+        super(envpart, self).__init__()
 
-    def fromspec(self, spec):
-        ret = []
-        for path in spec.split('+'):
-            nspath, name = path.split('/')
-            ret.append(self.env.ns(nspath).observables[name])
-        return ret
+    def __hash__(self):
+        return hash(self.parttype)
+
+    def __call__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise PartNotFoundError(self.parttype)
+
+class envparts(object):
+    def __init__(self):
+        self.storage = {}
+
+    def __getattr__(self, parttype):
+        if not parttype in self.storage:
+            self.storage[parttype] = envpart(parttype)
+        return self.storage[parttype]
 
 class _environment(object):
     def __init__(self):
         self.objs = []
         self.parameters = parametersview(self)
         self.pars = self.parameters
-        self.observables = observablesview(self)
-        self.predictions = {}
-        self.covmats = {}
-        self.data = {}
-        self.minimizers = {}
-        self.statistics = {}
+        self.parts = envparts()
 
         self.globalns = namespace(self)
         self.nsview = nsview()
@@ -228,31 +234,8 @@ class _environment(object):
         for expr in obj.evaluables.itervalues():
             self.addexpression(obj, expr, ns, bindings=bindings)
 
-    def addprediction(self, name, prediction):
-        self.predictions[name] = prediction
-
-    def addcovmat(self, name, covmat):
-        self.covmats[name] = covmat
-
-    def adddata(self, name, data):
-        self.data[name] = data
-
-    def addstatistic(self, name, statistic):
-        self.statistics[name] = statistic
-
-    def addminimizer(self, name, minimizer):
-        self.minimizers[name] = minimizer
-
     def gettype(self, objtype):
-        types = {
-            'prediction': 'predictions',
-            'observable': 'observables',
-            'data': 'data',
-            'covmat': 'covmats',
-            'parameter': 'parameters',
-            'statistic': 'statistics',
-            'minimizer': 'mizimizers',
-        }
+        types = self.parts.storage
         matches = [k for k in types if k.startswith(objtype)]
         if len(matches) > 1:
             msg = "ambigous type specifier {0}, candidates: {1}"
@@ -265,12 +248,7 @@ class _environment(object):
 
     def get(self, objspec):
         objtype, objpath = objspec.split(":", 1)
-        objtype = self.gettype(objtype)
-        if '/' in objpath:
-            nspath, objname = objpath.rsplit("/", 1)
-            return getattr(self.ns(nspath), objtype)[objname]
-        else:
-            return getattr(self, objtype)[objpath]
+        return self.gettype(objtype)[objpath]
 
 class _environments(defaultdict):
     current = None

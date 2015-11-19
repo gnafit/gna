@@ -1,26 +1,26 @@
-from gna.ui import basecmd
+from gna.ui import basecmd, append_typed
 import ROOT
 import numpy as np
 
 class cmd(basecmd):
     @classmethod
-    def initparser(cls, parser):
-        parser.add_argument('-a', '--add', nargs=2, action='append', default=[],
+    def initparser(cls, parser, env):
+        parser.add_argument('-a', '--add', nargs=2, default=[],
                             metavar=('NAME', 'PREDICTION'),
+                            action=append_typed(str, env.parts.prediction),
                             help='set data NAME to Asimov from prediction PREDICTION')
         parser.add_argument('-p', '--print', action='append', default=[],
                             metavar='NAME',
+                            type=env.parts.data,
                             help='print data NAME')
 
     def init(self):
-        for name, predname in self.opts.add:
-            prediction = self.env.predictions[predname]
+        for name, prediction in self.opts.add:
             buf = np.frombuffer(prediction.data(), count=prediction.size())
             data = ROOT.Points(np.random.normal(buf, buf**0.5))
-            self.env.adddata(name, data)
-            print 'Asimov', name, 'for', predname
+            self.env.parts.data[name] = data
+            print 'Asimov', name
 
-        for name in getattr(self.opts, 'print'):
-            data = self.env.data[name]
+        for data in getattr(self.opts, 'print'):
             print name
             print np.frombuffer(data.data(), count=data.size())

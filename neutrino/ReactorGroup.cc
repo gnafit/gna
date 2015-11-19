@@ -35,7 +35,7 @@ ReactorGroup::ReactorGroup(size_t count)
     }, deps);
   deps.push_back(m_Lavg);
   evaluable_<std::array<double, 3>>("weights", [this]() {
-      std::array<double, 3> ret = {0.0, 0.0, 0.0};
+      std::array<double, 3> ret{{0.0, 0.0, 0.0}};
       double sum = 0.0;
       for (size_t i = 0; i < m_Ls.size(); ++i) {
         double lambda = m_Ls[i]/m_Lavg - 1;

@@ -4,20 +4,16 @@ import numpy as np
 
 class cmd(basecmd):
     @classmethod
-    def initparser(cls, parser):
+    def initparser(cls, parser, env):
         parser.add_argument('name')
-        parser.add_argument('prediction')
-        parser.add_argument('data')
-        parser.add_argument('covmat')
+        parser.add_argument('prediction', type=env.parts.prediction)
+        parser.add_argument('data', type=env.parts.data)
+        parser.add_argument('covmat', type=env.parts.covmat)
 
     def init(self):
-        prediction = self.env.predictions[self.opts.prediction]
-        data = self.env.data[self.opts.data]
-        covmat = self.env.covmats[self.opts.covmat]
-
         chi2 = ROOT.Chi2()
-        chi2.chi2.prediction(prediction)
-        chi2.chi2.data(data)
-        chi2.chi2.invcov(covmat.inv)
+        chi2.chi2.prediction(self.opts.prediction)
+        chi2.chi2.data(self.opts.data)
+        chi2.chi2.invcov(self.opts.covmat.inv)
 
-        self.env.addstatistic(self.opts.name, chi2)
+        self.env.parts.statistic[self.opts.name] = chi2

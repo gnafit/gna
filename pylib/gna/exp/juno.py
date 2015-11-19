@@ -159,7 +159,10 @@ class exp(baseexp):
         detectors.append(detector(ns, name='AD1', location=0.0, protons=1.42e33))
         return detectors
 
-    def init(self):
+    def __init__(self, env, opts):
+        self.env = env
+        self.opts = opts
+
         self.ns = self.env.ns('juno')
 
         for isoname, e in eperfission.iteritems():
