@@ -2,7 +2,7 @@
 
 #include "GNAObject.hh"
 
-void GNAObject::dump() {
+void GNAObject::dumpObj() {
   std::cerr << "GNAObject " << (void*)this << ", ";
   std::cerr << "type: " << typeid(*this).name() << std::endl;
 

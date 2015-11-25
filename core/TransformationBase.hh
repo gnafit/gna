@@ -83,6 +83,9 @@ namespace TransformationTypes {
     const TransformationTypes::Channel &channel() const { return *m_sink; }
 
     const std::string &name() const { return m_sink->name; }
+
+    bool check() const;
+    void dump() const;
   private:
     TransformationTypes::Sink *m_sink;
   };
@@ -128,6 +131,9 @@ namespace TransformationTypes {
     void freeze() { frozen = true; }
     void unfreeze() { frozen = false; }
 
+    bool check() const;
+    void dump(size_t level = 0) const;
+
     std::string name;
     SourcesContainer sources;
     SinksContainer sinks;
@@ -164,6 +170,7 @@ namespace TransformationTypes {
     OutputHandle output(const Channel &output) {
       return m_entry->addSink(output);
     }
+    OutputHandle output(SingleOutput &output);
 
     const Data<double> &operator[](int i) const { return m_entry->data(i); }
 
@@ -172,7 +179,9 @@ namespace TransformationTypes {
 
     taintflag tainted() { return m_entry->tainted; }
 
-    void dump() const;
+    bool check() const { return m_entry->check(); }
+    void dump() const { m_entry->dump(0); }
+    void dumpObj() const;
   protected:
     Entry *m_entry;
   };

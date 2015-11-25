@@ -26,7 +26,7 @@ def wrapGNAclass(cls):
                 msg = msg % (', '.join(kwargs.keys()), self)
                 raise Exception(msg)
             env.current.register(self, bind=bind, freevars=freevars,
-                                 bindings=bindings)
+                                 ns=ns, bindings=bindings)
         def __getattr__(self, attr):
             try:
                 return self[attr]

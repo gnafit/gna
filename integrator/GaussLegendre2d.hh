@@ -27,6 +27,8 @@ public:
     std::copy(xorders, xorders+xcnt, m_xorders.begin());
     init();
   }
+
+  void addfunction(SingleOutput &out);
 protected:
   void init();
 

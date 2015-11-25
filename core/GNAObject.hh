@@ -40,7 +40,8 @@ public:
     return TransformationDescriptor(TransformationTypes::Base::getEntry(name));
   }
 
-  void dump();
+  bool check();
+  void dumpObj();
 
   Variables variables;
   Evaluables evaluables;
@@ -78,6 +79,12 @@ public:
 
   TransformationTypes::OutputHandle single() override {
     return (*this)[0].outputs.single();
+  }
+  bool check() {
+    return (*this)[0].check();
+  }
+  void dump() {
+    (*this)[0].dump();
   }
 };
 

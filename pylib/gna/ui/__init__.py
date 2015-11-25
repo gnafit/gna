@@ -35,7 +35,7 @@ def append_typed(*types, **kwargs):
                     return f(v)
                 except PartNotFoundError, e:
                     msg = "no {0} named {1!r}"
-                    raise argparse.ArgumentError(self, msg.format(e.parttype, v))
+                    raise argparse.ArgumentError(self, msg.format(e.parttype, e.partname))
 
             def resolvetypes(fs, vs):
                 res = [gettyped(f, v) for f, v in zip(fs, vs)]

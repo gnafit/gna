@@ -54,6 +54,37 @@ OutputHandle Entry::addSink(const Channel &output) {
   return OutputHandle(*s);
 }
 
+bool Entry::check() const {
+  for (const Source &s: sources) {
+    if (!s.materialized()) {
+      return false;
+    }
+  }
+  for (const Source &s: sources) {
+    if (!s.sink->entry->check()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void Entry::dump(size_t level) const {
+  std::string spacing = std::string(level*2, ' ');
+  std::cerr << spacing << "Transformation " << name << std::endl;
+  if (sources.empty()) {
+    std::cerr << spacing << "no inputs" << std::endl;
+  }
+  for (const Source &s: sources) {
+    std::cerr << spacing << "Input " << s.name;
+    if (!s.sink) {
+      std::cerr << " NOT CONNECTED" << std::endl;
+    } else {
+      std::cerr << " connected to " << s.sink->name << std::endl;
+      s.sink->entry->dump(level+1);
+    }
+  }
+}
+
 std::vector<InputHandle> Handle::inputs() const {
   std::vector<InputHandle> ret;
   auto &sources = m_entry->sources;
@@ -74,7 +105,11 @@ InputHandle Handle::input(SingleOutput &output) {
   return input(output.single());
 }
 
-void Handle::dump() const {
+OutputHandle Handle::output(SingleOutput &out) {
+  return output(out.single().channel());
+}
+
+void Handle::dumpObj() const {
   std::cerr << m_entry->name;
   std::cerr << std::endl;
   std::cerr << "    sources (" << m_entry->sources.size() << "):" << std::endl;
@@ -258,4 +293,12 @@ Rtypes::Error Rtypes::error(const DataType &dt) {
     }
   }
   return Error(sink);
+}
+
+bool OutputHandle::check() const {
+  return m_sink->entry->check();
+}
+
+void OutputHandle::dump() const {
+  return m_sink->entry->dump(0);
 }

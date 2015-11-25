@@ -1,17 +1,35 @@
-from collections import defaultdict, Counter
-from gna import parameters
+from collections import defaultdict, deque
+import parameters
+import parresolver
 from contextlib import contextmanager
 import ROOT
 
+class namespacedict(defaultdict):
+    def __init__(self, env, ns):
+        super(namespacedict, self).__init__()
+        self.env = env
+        self.ns = ns
+
+    def __missing__(self, key):
+        value = namespace(self.env, self.ns, key)
+        self[key] = value
+        return value
+
 class namespace(object):
-    def __init__(self, env):
-        self.vars = []
-        self.namespaces = defaultdict(lambda: namespace(env))
+    def __init__(self, env, parent, name):
+        self.objs = []
+        self.namespaces = namespacedict(env, self)
+
+        self.aliases = {}
         self.parameters = {}
         self.evaluables = {}
+
         self.expressions = {}
+
         self.observables = {}
         self.env = env
+        self.parent = parent
+        self.name = name
 
     def __call__(self, *args):
         return self.ns(*args)
@@ -34,8 +52,19 @@ class namespace(object):
         else:
             return self
 
+    def defalias(self, name, target):
+        assert name not in self.aliases
+        self.aliases[name] = target
+        return target
+
     def defparameter(self, name, **kwargs):
-        return self.env.defparameter(self, name, **kwargs)
+        assert name not in self.parameters
+        param = parameters.makeparameter(self, name, **kwargs)
+        self.parameters[name] = param
+        return param
+
+    def getalias(self, name):
+        return self.aliases[name]
 
     def getparameter(self, name):
         return self.parameters[name]
@@ -50,13 +79,17 @@ class namespace(object):
         return set(self.parameters.keys()).union(self.evaluables.keys())
 
     def __enter__(self):
-        self.env.nsview.ref([self])
+        self.env.nsview.add([self])
 
     def __exit__(self, type, value, tb):
-        self.env.nsview.deref([self])
+        self.env.nsview.remove([self])
 
     def addobservable(self, name, output):
-        self.observables[name] = output
+        if output.check():
+            self.observables[name] = output
+        else:
+            print "observation", name, "is invalid"
+            output.dump()
 
     def iternstree(self, nspath=None):
         if nspath:
@@ -69,11 +102,17 @@ class namespace(object):
             for x in subns.iternstree(nspath=subprefix+name):
                 yield x
 
+    def path(self):
+        if not self.parent:
+            return self.name
+        return '.'.join([self.parent.path(), self.name])
+
+    def ref(self, name):
+        return '.'.join([self.path(), name])
+
 def foreachns(f):
     def wrapped(self, name):
-        for ns, refs in self.nses.iteritems():
-            if not refs > 0:
-                continue
+        for ns in self.nses:
             try:
                 return f(ns, name)
             except KeyError:
@@ -83,13 +122,18 @@ def foreachns(f):
 
 class nsview(object):
     def __init__(self):
-        self.nses = Counter()
+        self.nses = deque()
 
-    def ref(self, nses):
-        self.nses.update(nses)
+    def add(self, nses):
+        self.nses.extendleft(nses)
 
-    def deref(self, nses):
-        self.nses.subtract(nses)
+    def remove(self, nses):
+        for ns in nses:
+            self.nses.remove(ns)
+
+    @foreachns
+    def getalias(ns, name):
+        return ns.getalias(name)
 
     @foreachns
     def getparameter(ns, name):
@@ -111,7 +155,11 @@ class parametersview(object):
         self.env = env
 
     def __getitem__(self, name):
-        return self.env.nsview.getparameter(name)
+        if '.' in name:
+            nspath, name = name.rsplit('.', 1)
+            return self.env.ns(nspath)[name]
+        else:
+            return self.env.nsview.getparameter(name)
 
     @contextmanager
     def update(self, newvalues):
@@ -126,8 +174,9 @@ class parametersview(object):
             p.set(v)
 
 class PartNotFoundError(BaseException):
-    def __init__(self, parttype):
+    def __init__(self, parttype, partname):
         self.parttype = parttype
+        self.partname = partname
 
 class envpart(dict):
     def __init__(self, parttype):
@@ -141,7 +190,7 @@ class envpart(dict):
         try:
             return self[name]
         except KeyError:
-            raise PartNotFoundError(self.parttype)
+            raise PartNotFoundError(self.parttype, name)
 
 class envparts(object):
     def __init__(self):
@@ -154,19 +203,15 @@ class envparts(object):
 
 class _environment(object):
     def __init__(self):
-        self.objs = []
+        self._bindings = []
+
+        self.globalns = namespace(self, None, '')
+        self.nsview = nsview()
+        self.nsview.add([self.globalns])
+
         self.parameters = parametersview(self)
         self.pars = self.parameters
         self.parts = envparts()
-
-        self.globalns = namespace(self)
-        self.nsview = nsview()
-        self.nsview.ref([self.globalns])
-        self._bindings = []
-
-    def setns(self, ns):
-        self.currentns = ns
-        self.currentview = nsview([ns, self.globalns])
 
     def view(self, ns):
         if ns != self.globalns:
@@ -175,8 +220,10 @@ class _environment(object):
             return nsview([self.globalns])
 
     def register(self, obj, **kwargs):
-        self.objs.append(obj)
-        ns = kwargs.pop('ns', self.globalns)
+        ns = kwargs.pop('ns')
+        if not ns:
+            ns = self.globalns
+        ns.objs.append(obj)
         bindings = self._bindings+[kwargs.pop("bindings", {})]
         if len(obj.evaluables):
             self.addexpressions(obj, ns=ns, bindings=bindings)
@@ -184,7 +231,7 @@ class _environment(object):
             return obj
         if isinstance(obj, ROOT.ExpressionsProvider):
             return obj
-        resolver = parameters.resolver(self, self.nsview)
+        resolver = parresolver.resolver(self, self.nsview)
         resolver.resolveobject(obj, bindings=bindings,
                                freevars=kwargs.pop('freevars', []))
         return obj
@@ -206,21 +253,9 @@ class _environment(object):
         yield
         self._bindings.pop()
 
-    def defparameter(self, *args, **kwargs):
-        if len(args) == 1:
-            ns, name = self.globalns, args[0]
-        elif len(args) == 2:
-            ns, name = args
-        else:
-            raise TypeError("defparameter() takes 1 or 2 arguments"
-                            "({0} given)".format(len(args)))
-        assert name not in ns.parameters
-        param = parameters.makeparameter(name, **kwargs)
-        ns.parameters[name] = param
-        return param
-
     def addevaluable(self, ns, name, var):
         evaluable = ROOT.GaussianValue(var.typeName())(name, var)
+        evaluable.ns = ns
         ns.evaluables[name] = evaluable
         return evaluable
 

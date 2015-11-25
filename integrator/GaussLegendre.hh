@@ -23,6 +23,8 @@ public:
     std::copy(orders, orders+cnt, m_orders.begin());
     init();
   }
+
+  void addfunction(SingleOutput &out);
 protected:
   void init();
 

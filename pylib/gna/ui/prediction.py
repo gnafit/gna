@@ -1,6 +1,7 @@
 from gna.ui import basecmd, append_typed
 import ROOT
 import numpy as np
+from gna.env import PartNotFoundError
 
 class cmd(basecmd):
     @classmethod
@@ -9,7 +10,10 @@ class cmd(basecmd):
             ret = []
             for path in spec.split('+'):
                 nspath, name = path.split('/')
-                ret.append(env.ns(nspath).observables[name])
+                try:
+                    ret.append(env.ns(nspath).observables[name])
+                except KeyError:
+                    raise PartNotFoundError("observable", path)
             return ret
 
         parser.add_argument('-l', '--list-observables', action='store_true',

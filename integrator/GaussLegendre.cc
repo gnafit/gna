@@ -34,8 +34,6 @@ void GaussLegendre::init() {
     .types(&GaussLegendre::pointsTypes)
     .func(&GaussLegendre::points);
   transformation_(this, "hist")
-    .input("f", DataType().points().any())
-    .output("hist", DataType().hist().any())
     .types(&GaussLegendre::histTypes)
     .func(&GaussLegendre::hist);
 }
@@ -48,16 +46,25 @@ void GaussLegendre::points(Args /*args*/, Rets rets) {
   rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&m_points[0], m_points.size());
 }
 
+void GaussLegendre::addfunction(SingleOutput &out) {
+  t_["hist"].input(out);
+  t_["hist"].output(out);
+}
+
 void GaussLegendre::histTypes(Atypes /*args*/, Rtypes rets) {
-  rets[0] = DataType().hist().bins(m_orders.size()).edges(m_edges);
+  for (size_t k = 0; k < rets.size(); ++k) {
+    rets[k] = DataType().hist().bins(m_orders.size()).edges(m_edges);
+  }
 }
 
 void GaussLegendre::hist(Args args, Rets rets) {
-  ArrayXd prod = args[0].x*m_weights;
-  auto *data = prod.data();
-  for (size_t i = 0; i < m_orders.size(); ++i) {
-    size_t n = m_orders[i];
-    rets[0].x(i) = std::accumulate(data, data+n, 0.0);
-    data += n;
+  for (size_t k = 0; k < rets.size(); ++k) {
+    ArrayXd prod = args[k].x*m_weights;
+    auto *data = prod.data();
+    for (size_t i = 0; i < m_orders.size(); ++i) {
+      size_t n = m_orders[i];
+      rets[k].x(i) = std::accumulate(data, data+n, 0.0);
+      data += n;
+    }
   }
 }
