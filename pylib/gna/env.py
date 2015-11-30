@@ -1,4 +1,4 @@
-from collections import defaultdict, deque
+from collections import defaultdict, deque, Mapping
 import parameters
 import parresolver
 from contextlib import contextmanager
@@ -15,74 +15,78 @@ class namespacedict(defaultdict):
         self[key] = value
         return value
 
-class namespace(object):
+class entrydict(dict):
+    def __init__(self, ns):
+        self.ns = ns
+
+class namespace(Mapping):
     def __init__(self, env, parent, name):
-        self.objs = []
-        self.namespaces = namespacedict(env, self)
-
-        self.aliases = {}
-        self.parameters = {}
-        self.evaluables = {}
-
-        self.expressions = {}
-
-        self.observables = {}
         self.env = env
-        self.parent = parent
+
         self.name = name
-
-    def __call__(self, *args):
-        return self.ns(*args)
-
-    def __getitem__(self, name):
-        for container in (self.parameters, self.evaluables):
-            try:
-                return container[name]
-            except KeyError:
-                pass
-
-    def __contains__(self, name):
-        return name in self.parameters or name in self.evaluables
-
-    def ns(self, parts):
-        if isinstance(parts, str):
-            return self.ns(parts.split('.'))
-        if len(parts) > 0:
-            return self.namespaces[parts[0]].ns(parts[1:])
+        self.parent = parent
+        if parent is not None:
+            self.path = '.'.join([parent.path, name])
         else:
-            return self
+            self.path = name
 
-    def defalias(self, name, target):
-        assert name not in self.aliases
-        self.aliases[name] = target
-        return target
+        self.storage = defaultdict(lambda: entrydict(self))
+        self.rules = []
+        self.namespaces = namespacedict(env, self)
+        self.observables = {}
 
-    def defparameter(self, name, **kwargs):
-        assert name not in self.parameters
-        param = parameters.makeparameter(self, name, **kwargs)
-        self.parameters[name] = param
-        return param
+        self.objs = []
 
-    def getalias(self, name):
-        return self.aliases[name]
+    def __nonzero__(self):
+        return True
 
-    def getparameter(self, name):
-        return self.parameters[name]
-
-    def getevaluable(self, name):
-        return self.evaluables[name]
-
-    def getexpressions(self, name):
-        return self.expressions[name]
-
-    def names(self):
-        return set(self.parameters.keys()).union(self.evaluables.keys())
+    def __repr__(self):
+        return "<namespace path='{0}'>".format(self.path)
 
     def __enter__(self):
         self.env.nsview.add([self])
 
     def __exit__(self, type, value, tb):
         self.env.nsview.remove([self])
+
+    def __call__(self, nsname):
+        if isinstance(nsname, basestring):
+            parts = nsname.split('.')
+        else:
+            parts = nsname
+        if not parts:
+            return self
+        return self.namespaces[parts[0]](parts[1:])
+
+    def __getitem__(self, name):
+        entry = self.storage[name]
+        for t in ('alias', 'parameter', 'evaluable'):
+            if t in entry:
+                return entry[t]
+        else:
+            raise KeyError(name)
+
+    def __iter__(self):
+        return self.storage.iterkeys()
+
+    def __len__(self):
+        return len(self.storage)
+
+    def getentry(self, name):
+        if name not in self.storage:
+            raise KeyError(name)
+        return self.storage[name]
+
+    def defparameter(self, name, **kwargs):
+        target = self.matchrule(name)
+        entry = self.storage[name]
+        if not target:
+            target = kwargs.pop('target', None)
+        if target:
+            entry['alias'] = target
+        else:
+            param = parameters.makeparameter(self, name, **kwargs)
+            entry['parameter'] = param
 
     def addobservable(self, name, output):
         if output.check():
@@ -91,34 +95,31 @@ class namespace(object):
             print "observation", name, "is invalid"
             output.dump()
 
-    def iternstree(self, nspath=None):
-        if nspath:
-            yield (nspath, self)
-            subprefix = nspath+'.'
-        else:
-            yield ('', self)
-            subprefix = ''
+    def addexpression(self, obj, expr, bindings=[]):
+        deps = [next((bs[name] for bs in bindings if name in bs), name)
+                for name in expr.sources]
+        entry = (obj, expr, deps)
+        self.storage[expr.name].setdefault('expressions', []).append(entry)
+
+    def addevaluable(self, name, var):
+        evaluable = ROOT.GaussianValue(var.typeName())(name, var)
+        evaluable.ns = self
+        self.storage[name]['evaluable'] = evaluable
+        return evaluable
+
+    def iternstree(self):
+        yield self
         for name, subns in self.namespaces.iteritems():
-            for x in subns.iternstree(nspath=subprefix+name):
+            for x in subns.iternstree():
                 yield x
 
-    def path(self):
-        if not self.parent:
-            return self.name
-        return '.'.join([self.parent.path(), self.name])
-
     def ref(self, name):
-        return '.'.join([self.path(), name])
+        return '.'.join([self.path, name])
 
-def foreachns(f):
-    def wrapped(self, name):
-        for ns in self.nses:
-            try:
-                return f(ns, name)
-            except KeyError:
-                pass
-        raise KeyError(name)
-    return wrapped
+    def matchrule(self, name):
+        for pattern, target in self.rules:
+            if not pattern or pattern(name):
+                return target
 
 class nsview(object):
     def __init__(self):
@@ -131,21 +132,13 @@ class nsview(object):
         for ns in nses:
             self.nses.remove(ns)
 
-    @foreachns
-    def getalias(ns, name):
-        return ns.getalias(name)
-
-    @foreachns
-    def getparameter(ns, name):
-        return ns.getparameter(name)
-
-    @foreachns
-    def getevaluable(ns, name):
-        return ns.getevaluable(name)
-
-    @foreachns
-    def getexpressions(ns, name):
-        return ns.getexpressions(name)
+    def getentry(self, name):
+        for ns in self.nses:
+            try:
+                return ns.getentry(name)
+            except KeyError:
+                pass
+        raise KeyError(name)
 
     def names(self):
         return set.union(*[ns.names() for ns in self.nses])
@@ -159,7 +152,7 @@ class parametersview(object):
             nspath, name = name.rsplit('.', 1)
             return self.env.ns(nspath)[name]
         else:
-            return self.env.nsview.getparameter(name)
+            return self.env.nsview.getentry(name)['parameter']
 
     @contextmanager
     def update(self, newvalues):
@@ -225,8 +218,8 @@ class _environment(object):
             ns = self.globalns
         ns.objs.append(obj)
         bindings = self._bindings+[kwargs.pop("bindings", {})]
-        if len(obj.evaluables):
-            self.addexpressions(obj, ns=ns, bindings=bindings)
+        for expr in obj.evaluables.itervalues():
+            ns.addexpression(obj, expr, bindings=bindings)
         if not kwargs.pop('bind', True):
             return obj
         if isinstance(obj, ROOT.ExpressionsProvider):
@@ -240,34 +233,17 @@ class _environment(object):
         if isinstance(ns, namespace):
             return ns
         elif isinstance(ns, str):
-            return self.globalns.ns(ns)
+            return self.globalns(ns)
         else:
             raise Exception("unknown object %r passed to ns()" % ns)
 
     def iternstree(self):
-        return self.globalns.iternstree(nspath='')
+        return self.globalns.iternstree()
 
-    @contextmanager
     def bind(self, **bindings):
         self._bindings.append(bindings)
         yield
         self._bindings.pop()
-
-    def addevaluable(self, ns, name, var):
-        evaluable = ROOT.GaussianValue(var.typeName())(name, var)
-        evaluable.ns = ns
-        ns.evaluables[name] = evaluable
-        return evaluable
-
-    def addexpression(self, obj, expr, ns, bindings=[]):
-        deps = [next((bs[name] for bs in bindings if name in bs), name)
-                for name in expr.sources]
-        entry = (obj, expr, deps, ns)
-        ns.expressions.setdefault(expr.name, []).append(entry)
-
-    def addexpressions(self, obj, ns, bindings=[]):
-        for expr in obj.evaluables.itervalues():
-            self.addexpression(obj, expr, ns, bindings=bindings)
 
     def gettype(self, objtype):
         types = self.parts.storage

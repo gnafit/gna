@@ -73,14 +73,4 @@ class exp(baseexp):
 
         gna.exp.reactor.setupcomponents(self.ns, self.reactors, self.detectors, Enu)
         for detector in self.detectors:
-            with self.ns("oscillation"):
-                detector.oscprob = ROOT.OscProbPMNS(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(),
-                                                    freevars=['L'])
-            integrated = {}
-            for compname in detector.components:
-                integrated[compname] = compfactory(compname, detector.components[compname])
-                self.ns.addobservable('_'.join([detector.name, compname]), integrated[compname].hist)
-                detector.oscprob.probsum[compname](integrated[compname].hist)
-            detector.integrated = integrated
-
-        self.ns.addobservable("spectrum", self.detectors[0].oscprob.probsum)
+            gna.exp.reactor.setupobservations(self.ns, detector, compfactory)

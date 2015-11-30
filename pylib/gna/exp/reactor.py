@@ -54,8 +54,8 @@ class reactorgroup(object):
             bindings["P_{0}".format(i)] = reactor.ns["ThermalPower"]
         ROOT.ReactorGroup(len(self.reactors), ns=pair_ns, bindings=bindings)
 
-        pair_ns.defalias("L", pair_ns.ref("Lavg"))
-        pair_ns.defalias("ThermalPower", pair_ns.ref("Pavg"))
+        pair_ns.defparameter("L", target=pair_ns.ref("Lavg"))
+        pair_ns.defparameter("ThermalPower", target=pair_ns.ref("Pavg"))
 
     def makeoscprob(self):
         return ROOT.OscProbPMNSMult(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
@@ -73,9 +73,9 @@ class detector(object):
 
         self.components = defaultdict(ROOT.Sum)
 
-        self.ns.defparameter("a", central=0.0, sigma=0)
-        self.ns.defparameter("b", central=0.03, sigma=0)
-        self.ns.defparameter("c", central=0.0, sigma=0)
+        self.ns("eres").defparameter("a", central=0.0, sigma=0)
+        self.ns("eres").defparameter("b", central=0.03, sigma=0)
+        self.ns("eres").defparameter("c", central=0.0, sigma=0)
 
 def makedetectors(ns, common, data):
     return [detector(ns, **dict(common.items(), **x)) for x in data]
@@ -124,7 +124,7 @@ def makenorm(ns, reactor, detector):
     return norm
 
 def oscflux(ns, react, detector):
-    with ns("pairs")(react.name)(detector.name), react.ns, detector.ns, ns("oscillation"):
+    with ns("oscillation"), detector.ns, react.ns, ns("pairs")(react.name)(detector.name):
         norm = makenorm(ns, react, detector)
         oscprob = react.makeoscprob()
     return norm, oscprob
@@ -209,6 +209,21 @@ def init(ns, edges, orders, ibdtype):
         return component(integrator, eventsparts+[inp])
 
     return ibd.Enu, integratecomp
+
+def setupobservations(ns, detector, compfactory):
+    with ns("oscillation"):
+        detector.oscprob = ROOT.OscProbPMNS(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(),
+                                            freevars=['L'])
+    integrated = {}
+    for compname in detector.components:
+        integrated[compname] = compfactory(compname, detector.components[compname])
+        detector.oscprob.probsum[compname](integrated[compname].hist)
+    detector.integrated = integrated
+    ns.addobservable("{0}_noeffects".format(detector.name), detector.oscprob.probsum)
+    with detector.ns("eres"):
+        detector.eres = ROOT.EnergyResolution()
+    detector.eres.smear.inputs(detector.oscprob.probsum)
+    ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
 def defparameters(ns):
     gna.parameters.ibd.defparameters(ns("ibd"))

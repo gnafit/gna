@@ -47,7 +47,7 @@ def makeparameter(ns, name, **kwargs):
             msg = "parameter `%s': no central value" % name
             raise Exception(msg)
         if 'relsigma' in kwargs:
-            rs = kwargs['relsigma']
+            rs = float(kwargs['relsigma'])
             sigma = param.central()*rs
             if 'sigma' in kwargs and sigma != kwargs['sigma']:
                 msg = ("parameter `%s': conflicting relative (%g*%g=%g)"
@@ -57,7 +57,7 @@ def makeparameter(ns, name, **kwargs):
                 raise Exception(msg)
             param.setSigma(sigma)
         elif 'sigma' in kwargs:
-            param.setSigma(kwargs['sigma'])
+            param.setSigma(param.cast(kwargs['sigma']))
         else:
             msg = "parameter `%s': no sigma value" % name
             raise Exception(msg)

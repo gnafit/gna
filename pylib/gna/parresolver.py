@@ -6,49 +6,56 @@ class resolver(object):
     def isbound(self, p):
         return not isinstance(p, str)
 
-    def findpath(self, name, seen, known):
+    def findpath(self, ns, name, resolving, known):
+        entry = ns.getentry(name)
+        if entry.get('parameter') is not None:
+            return []
+        if entry.get('alias'):
+            if not isinstance(dep, basestring) or '.' in dep:
+                return []
+            return self.findpath(ns, entry.get('alias'), resolving, known)
         try:
-            cands = self.nsview.getexpressions(name)
+            exprs = entry['expressions']
         except KeyError:
-            return None, None
+            return None
         missings = []
-        for i, (obj, expr, deps, ns) in enumerate(cands):
-            missing = [x for x in deps
-                       if x not in known and not self.isbound(x)]
+        for idx, (obj, expr, deps) in enumerate(exprs):
+            missing = []
+            for dep in deps:
+                if dep in known:
+                    continue
+                if not isinstance(dep, basestring) or '.' in dep:
+                    continue
+                missing.append(dep)
             if not missing:
-                return [(name, i)], set([name])
-            missings.append((missing, known))
-        minrank = None
-        for i, (missing, lknown) in enumerate(missings):
-            cknown = set()
-            cpaths = [(name, i)]
-            for x in missing:
-                if x in seen:
+                known.add(name)
+                return [(name, idx)]
+            missings.append(missing)
+
+        res = (None, None)
+        for idx, missing in enumerate(missings):
+            cknown = set(known)
+            cpaths = []
+            for dep in missing:
+                if dep in resolving:
                     break
-                deppath, newknown = self.getpath(x, seen+[x], lknown)
+                deppath = self.findpath(ns, dep, resolving.union([dep]), cknown)
                 if deppath is None:
                     break
-                cknown.update(newknown)
                 cpaths.extend(deppath)
             else:
-                rank = len(cpaths)
-                if minrank is None or minrank > rank:
-                    minrank = rank
-                    minknown = cknown
-                    minpaths = cpaths
-        if minrank is not None:
-            return minpaths, minknown
-        else:
-            return None, None
-
-    def getpath(self, name, seen, known):
-        path, newknown = self.findpath(name, seen, known)
-        return path
+                cpaths.append((name, idx))
+                rank = -len(cpaths)
+                if res[0] is not None:
+                    res = min(res, (rank, cpaths), key=itemgetter(0))
+                else:
+                    res = (rank, cpaths)
+        return res[1]
 
     def findbinding(self, bindings, varname, resolve, ns=None):
         if '.' in varname:
             nspath, name = varname.rsplit('.', 1)
-            ns = self.env.ns(nspath)
+            ns = self.env.ns(nspath.lstrip('.'))
             varname = name
         if ns is None:
             try:
@@ -62,25 +69,23 @@ class resolver(object):
                     return binding
         else:
             nsview = ns
-        try:
-            return self.findbinding(bindings, nsview.getalias(varname), resolve, ns=ns)
-        except KeyError:
-            pass
-        try:
-            return nsview.getparameter(varname)
-        except KeyError:
-            pass
-        try:
-            return nsview.getevaluable(varname)
-        except KeyError:
-            pass
+        entry = nsview.getentry(varname)
+        v = entry.get('alias')
+        if v is not None:
+            return self.findbinding(bindings, v, resolve, ns=ns)
+        v = entry.get('parameter')
+        if v is not None:
+            return v
+        v = entry.get('evaluable')
+        if v is not None:
+            return v
         if not resolve:
             return None
-        path = self.getpath(varname, [varname], nsview.names())
+        path = self.findpath(entry.ns, varname, set([varname]), set())
         if path is None:
             return None
         for name, idx in reversed(path):
-            obj, expr, deps, ns = self.nsview.getexpressions(name)[idx]
+            obj, expr, deps = entry.ns.getentry(name)['expressions'][idx]
             varnames = []
             bindings = {}
             for src, dep in zip(expr.sources.itervalues(), deps):
@@ -89,8 +94,8 @@ class resolver(object):
                 varnames.append(src.name)
             self.resolveobject(obj, varnames=varnames, resolve=False,
                                bindings=[bindings])
-            self.env.addevaluable(ns, name, expr.get())
-        return self.nsview.getevaluable(varname)
+            entry.ns.addevaluable(name, expr.get())
+        return self.nsview.getentry(varname)['evaluable']
 
     def resolveobject(self, obj, freevars=(), resolve=True,
                       varnames=None, bindings=[]):
@@ -106,7 +111,7 @@ class resolver(object):
             found = False
             param = self.findbinding(bindings, v.name, resolve)
             if param is not None:
-                print "binding", v.name, 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path(), param.name()])
+                print "binding", v.name, 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
                 v.bind(param.getVariable())
                 bound.add(v.name)
             else:

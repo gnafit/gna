@@ -29,9 +29,9 @@ class cmd(basecmd):
 
     def init(self):
         if self.opts.list_observables:
-            for nspath, ns in self.env.iternstree():
+            for ns in self.env.iternstree():
                 for name, prediction in ns.observables.iteritems():
-                    path = '/'.join([nspath, name])
+                    path = '/'.join([ns.path, name])
                     print 'Observable', path
 
         for name, observables in self.opts.add:
