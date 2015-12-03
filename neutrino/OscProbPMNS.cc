@@ -88,13 +88,12 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
     .input("comp12")
     .input("comp13")
     .input("comp23")
+    .input("comp0")
     .output("probsum")
     .types(Atypes::pass<0>)
     .func(&OscProbPMNS::calcSum);
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
-  } else {
-    probsum.input("comp0");
   }
 }
 
@@ -116,10 +115,13 @@ void OscProbPMNS::calcSum(Args args, Rets rets) {
   rets[0].x = 2.0*weight<1,2>()*args[0].x;
   rets[0].x+= 2.0*weight<1,3>()*args[1].x;
   rets[0].x+= 2.0*weight<2,3>()*args[2].x;
+  double coeff0 = 2.0*(-weight<1,2>()-weight<1,3>()-weight<2,3>());
   if (m_alpha == m_beta) {
-    rets[0].x += 2.0*(0.5-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
-  } else {
-    rets[0].x += 8.0*weightCP()*args[3].x;
+    coeff0 += 1.0;
+  }
+  rets[0].x += coeff0*args[3].x;
+  if (m_alpha != m_beta) {
+    rets[0].x += 8.0*weightCP()*args[4].x;
   }
 }
 

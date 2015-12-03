@@ -77,7 +77,7 @@ void OscProbPMNSDecoh::calcComponent(Args args, Rets rets) {
   ArrayXd phi_dd = Ld.unaryExpr([this](double y) { return std::atan2(m_L*km, y); });
   ArrayXd phi_d = -1.e0/rd2*rc2*rd+0.5*phi_dd;
   ArrayXd D2 = 0.5*(DeltaMSq<I,J>()*eV2/4/m_sigma/Enu.square()/MeV/MeV).square();
-  ArrayXd F = rd2.sqrt().sqrt()*exp(-1./rd2*rc2-D2);
+  ArrayXd F = 1.0/rd2.sqrt().sqrt()*exp(-1./rd2*rc2-D2);
   rets[0].x = 1.e0 - F*cos(phi_st+phi_d);
 }
 
@@ -93,7 +93,7 @@ void OscProbPMNSDecoh::calcComponentCP(Args args, Rets rets) {
   ArrayXd phi_dd = Ld.unaryExpr([this](double y) { return std::atan2(m_L*km, y); });
   ArrayXd phi_d = -1.e0/rd2*rc2*rd+0.5*phi_dd;
   ArrayXd D2 = 0.5*(DeltaMSq<I,J>()*eV2/4/m_sigma/Enu.square()/MeV/MeV).square();
-  ArrayXd F = rd2.sqrt().sqrt()*exp(-1./rd2*rc2-D2);
+  ArrayXd F = 1.0/rd2.sqrt().sqrt()*exp(-1./rd2*rc2-D2);
   rets[0].x = F*sin(phi_st+phi_d);
 }
 
