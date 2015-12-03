@@ -14,8 +14,8 @@ public:
   {
     indexBins();
     transformation_(this, "f")
-      .input("x", DataType().points().any())
-      .output("y", DataType().points().any())
+      .input("x")
+      .output("y")
       .types(Atypes::pass<0>)
       .func(&LinearInterpolator::interpolate)
     ;

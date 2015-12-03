@@ -16,25 +16,25 @@ using namespace Eigen;
 IbdFirstOrder::IbdFirstOrder()
 {
   transformation_(this, "Enu")
-    .input("Ee", DataType().points().any())
-    .input("ctheta", DataType().points().any())
+    .input("Ee")
+    .input("ctheta")
     .types([](Atypes args, Rtypes rets) {
         rets[0] = DataType().points().shape(args[0].size(), args[1].size());
       })
-    .output("Enu", DataType().points().any())
+    .output("Enu")
     .func(&IbdFirstOrder::calc_Enu);
   transformation_(this, "xsec")
-    .input("Enu", DataType().points().any())
-    .input("ctheta", DataType().points().any())
+    .input("Enu")
+    .input("ctheta")
     .types(Atypes::pass<0>)
-    .output("xsec", DataType().points().any())
+    .output("xsec")
     .func(&IbdFirstOrder::calc_Xsec);
   transformation_(this, "jacobian")
-    .input("Enu", DataType().points().any())
-    .input("Ee", DataType().points().any())
-    .input("ctheta", DataType().points().any())
+    .input("Enu")
+    .input("Ee")
+    .input("ctheta")
     .types(Atypes::pass<0>)
-    .output("jacobian", DataType().points().any())
+    .output("jacobian")
     .func(&IbdFirstOrder::calc_dEnu_wrt_Ee);
   PDGVariables *p = m_pdg;
   {

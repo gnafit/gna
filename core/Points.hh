@@ -29,7 +29,7 @@ public:
 protected:
   void init() {
     transformation_(this, "points")
-      .output("points", DataType().points().shape(m_points.size()))
+      .output("points")
       .types([](Points *obj, Atypes /*args*/, Rtypes rets) {
           rets[0] = DataType().points().shape(obj->m_points.size());
         })

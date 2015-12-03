@@ -13,12 +13,12 @@ const double pi = boost::math::constants::pi<double>();
 IbdZeroOrder::IbdZeroOrder()
 {
   transformation_(this, "Enu")
-    .input("Ee", DataType().points().any())
-    .output("Enu", DataType().points().any())
+    .input("Ee")
+    .output("Enu")
     .func(&IbdZeroOrder::calcEnu);
   transformation_(this, "xsec")
-    .input("Ee", DataType().points().any())
-    .output("xsec", DataType().points().any())
+    .input("Ee")
+    .output("xsec")
     .func(&IbdZeroOrder::calcXsec);
 }
 

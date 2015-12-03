@@ -16,7 +16,7 @@ public:
 protected:
   void init() {
     transformation_(this, "hist")
-      .output("hist", DataType().hist().edges(m_edges))
+      .output("hist")
       .types([](Histogram *obj, Atypes /*args*/, Rtypes rets) {
           rets[0] = DataType().hist().edges(obj->edges());
         })

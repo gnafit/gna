@@ -2,7 +2,7 @@
 
 Prediction::Prediction() {
   transformation_(this, "prediction")
-    .output("prediction", DataType().points().any())
+    .output("prediction")
     .types([](Atypes args, Rtypes rets) {
         if (args.size() == 0) {
           throw rets.error(rets[0]);

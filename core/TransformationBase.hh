@@ -31,31 +31,40 @@ class Transformation;
 class GNAObject;
 class SingleOutput;
 namespace TransformationTypes {
-  struct Channel {
-    std::string name;
-    DataType channeltype;
-  };
-
   struct Entry;
   struct Source;
-  struct Sink: public Channel, public boost::noncopyable {
-    Sink(const Channel &chan, Entry *entry);
 
+  struct TypePattern {
+    DataType dt;
+  };
+
+  struct Sink: public boost::noncopyable {
+    Sink(const std::string &name, Entry *entry)
+      : name(name), entry(entry) { }
+    Sink(const Sink &other, Entry *entry)
+      : name(other.name), typepattern(other.typepattern), entry(entry) { }
+
+    std::string name;
+    TypePattern typepattern;
     std::unique_ptr<Data<double>> data;
     std::vector<Source*> sources;
     Entry *entry;
   };
 
   class OutputHandle;
-  struct Source: public Channel, public boost::noncopyable {
-    Source(const Channel &chan, Entry *entry)
-      : Channel(chan), sink(nullptr), entry(entry)
-      { }
+  struct Source: public boost::noncopyable {
+    Source(const std::string &name, Entry *entry)
+      : name(name), entry(entry) { }
+    Source(const Source &other, Entry *entry)
+      : name(other.name), typepattern(other.typepattern), entry(entry) { }
+
     void connect(Sink *newsink);
     bool materialized() const {
       return sink && sink->data;
     }
-    const Sink *sink;
+    std::string name;
+    TypePattern typepattern;
+    const Sink *sink = nullptr;
     Entry *entry;
   };
 
@@ -108,8 +117,6 @@ namespace TransformationTypes {
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
     static OutputHandle invalid(const std::string name);
 
-    const TransformationTypes::Channel &channel() const { return *m_sink; }
-
     const std::string &name() const { return m_sink->name; }
 
     bool check() const;
@@ -137,8 +144,8 @@ namespace TransformationTypes {
     Entry(const std::string &name, const Base *parent);
     Entry(const Entry &other, const Base *parent);
 
-    InputHandle addSource(const Channel &input);
-    OutputHandle addSink(const Channel &output);
+    InputHandle addSource(const std::string &name);
+    OutputHandle addSink(const std::string &name);
 
     void evaluate();
     void update();
@@ -176,7 +183,7 @@ namespace TransformationTypes {
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
   };
   typedef boost::ptr_vector<Entry> Container;
-  
+
   class Handle {
   public:
     Handle(): m_entry(nullptr) { }
@@ -186,17 +193,17 @@ namespace TransformationTypes {
     const std::string &name() const { return m_entry->name; }
     std::vector<InputHandle> inputs() const;
     std::vector<OutputHandle> outputs() const;
-    InputHandle input(const Channel &input) {
-      return m_entry->addSource(input);
+    InputHandle input(const std::string &name) {
+      return m_entry->addSource(name);
     }
     InputHandle input(OutputHandle output) {
-      InputHandle inp = m_entry->addSource(output.channel());
+      InputHandle inp = m_entry->addSource(output.name());
       inp.connect(output);
       return inp;
     }
     InputHandle input(SingleOutput &output);
-    OutputHandle output(const Channel &output) {
-      return m_entry->addSink(output);
+    OutputHandle output(const std::string &name) {
+      return m_entry->addSink(name);
     }
     OutputHandle output(SingleOutput &output);
 
@@ -290,11 +297,6 @@ namespace TransformationTypes {
     rets[Ret] = args[Arg];
   }
 
-  inline Sink::Sink(const Channel &chan, Entry *entry)
-    : Channel(chan), entry(entry)
-  {
-  }
-
   inline void Entry::evaluate() {
     return fun(Args(this), Rets(this));
   }
@@ -341,8 +343,7 @@ namespace TransformationTypes {
     Base(size_t maxentries): Base() {
       m_maxEntries = maxentries;
     }
-    void connectChannel(Source &source, Base *sinkobj, Sink &sink);
-    bool compatible(const Channel *sink, const Channel *source) const;
+    void connect(Source &source, Base *sinkobj, Sink &sink);
     Entry &getEntry(size_t idx) {
       return m_entries[idx];
     }
@@ -373,8 +374,6 @@ namespace TransformationTypes {
   inline size_t Accessor::size() const {
     return m_parent->m_entries.size();
   }
-
-  bool isCompatible(const Channel *sink, const Channel *source);
 
   template <typename T>
   class Initializer {
@@ -427,14 +426,12 @@ namespace TransformationTypes {
         m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
       }
     }
-    Initializer<T> input(const std::string &name,
-                         const DataType &dt = DataType()) {
-      m_entry->addSource({name, dt});
+    Initializer<T> input(const std::string &name) {
+      m_entry->addSource(name);
       return *this;
     }
-    Initializer<T> output(const std::string &name,
-                          const DataType &dt = DataType()) {
-      m_entry->addSink({name, dt});
+    Initializer<T> output(const std::string &name) {
+      m_entry->addSink(name);
       return *this;
     }
     Initializer<T> func(Function func) {

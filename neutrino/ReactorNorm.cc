@@ -24,11 +24,11 @@ ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
     .func(&ReactorNorm::calcIsotopeNorms)
   ;
   for (const std::string &isoname: isonames) {
-    norm.input("fission_fraction_"+isoname, DataType().points().any());
-    norm.output("norm_"+isoname, DataType().points().any());
+    norm.input("fission_fraction_"+isoname);
+    norm.output("norm_"+isoname);
   }
-  norm.input("livetime", DataType().points().any());
-  norm.input("power_rate", DataType().points().any());
+  norm.input("livetime");
+  norm.input("power_rate");
 }
 
 void ReactorNorm::calcIsotopeNorms(Args args, Rets rets) {

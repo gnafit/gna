@@ -2,7 +2,7 @@
 
 Sum::Sum() {
   transformation_(this, "sum")
-    .output("sum", DataType().points().any())
+    .output("sum")
     .types(Atypes::ifSame, Atypes::pass<0>)
     .func([](Args args, Rets rets) {
         rets[0].x = args[0].x;

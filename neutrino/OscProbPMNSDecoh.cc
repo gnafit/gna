@@ -14,36 +14,36 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
   variable_(&m_sigma, "sigma");
 
   transformation_(this, "comp12")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L,m_sigma, m_param->DeltaMSq12)
     .func(&OscProbPMNSDecoh::calcComponent<1,2>);
   transformation_(this, "comp13")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L, m_sigma,m_param->DeltaMSq13)
     .func(&OscProbPMNSDecoh::calcComponent<1,3>);
   transformation_(this, "comp23")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L, m_sigma,m_param->DeltaMSq23)
     .func(&OscProbPMNSDecoh::calcComponent<2,3>);
   if (m_alpha != m_beta) {
     transformation_(this, "compCP12")
-      .input("Enu", DataType().points().any())
-      .output("comp", DataType().points().any())
+      .input("Enu")
+      .output("comp")
       .depends(m_L,m_sigma)
       .depends(m_param->DeltaMSq12)
       .func(&OscProbPMNSDecoh::calcComponentCP<1,2>);
   	transformation_(this, "compCP13")
-      .input("Enu", DataType().points().any())
-      .output("comp", DataType().points().any())
+      .input("Enu")
+      .output("comp")
       .depends(m_L,m_sigma)
       .depends(m_param->DeltaMSq13)
       .func(&OscProbPMNSDecoh::calcComponentCP<1,3>);
     transformation_(this, "compCP23")
-      .input("Enu", DataType().points().any())
-      .output("comp", DataType().points().any())
+      .input("Enu")
+      .output("comp")
       .depends(m_L,m_sigma)
       .depends(m_param->DeltaMSq23)
       .func(&OscProbPMNSDecoh::calcComponentCP<2,3>);

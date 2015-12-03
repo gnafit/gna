@@ -22,5 +22,5 @@ protected:
   variable<double> m_sigma; 		
 };
 
-#endif // OSCPROBPMNS_H
+#endif // OSCPROBPMNSDECOH_H
 

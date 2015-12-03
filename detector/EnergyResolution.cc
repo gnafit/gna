@@ -12,8 +12,8 @@ EnergyResolution::EnergyResolution() {
 
   using namespace std::placeholders;
   transformation_(this, "smear")
-    .input("Nvis", DataType().hist().any())
-    .output("Nrec", DataType().hist().any())
+    .input("Nvis")
+    .output("Nrec")
     .types(Atypes::pass<0>,
            [](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
              obj->m_datatype = args[0];

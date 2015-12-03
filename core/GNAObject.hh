@@ -61,7 +61,6 @@ protected:
   typedef TransformationTypes::Rtypes Rtypes;
   typedef TransformationTypes::Function Function;
   typedef TransformationTypes::TypesFunction TypesFunction;
-  typedef TransformationTypes::Channel Channel;
   typedef TransformationTypes::Entry Entry;
   typedef TransformationTypes::Accessor Accessor;
   typedef TransformationTypes::Handle Handle;

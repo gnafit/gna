@@ -7,7 +7,6 @@ using boost::format;
 #include "Transformation.hh"
 #include "Exceptions.hh"
 
-using TransformationTypes::Channel;
 using TransformationTypes::Source;
 using TransformationTypes::Sink;
 
@@ -64,19 +63,19 @@ Entry::Entry(const Entry &other, const Base *parent)
 template <typename InsT, typename OutsT>
 void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
   std::transform(inputs.begin(), inputs.end(), std::back_inserter(sources),
-                 [this](const Channel &c) { return new Source{c, this}; });
+                 [this](const Source &s) { return new Source{s, this}; });
   std::transform(outputs.begin(), outputs.end(), std::back_inserter(sinks),
-                 [this](const Channel &c) { return new Sink{c, this}; });
+                 [this](const Sink &s) { return new Sink{s, this}; });
 }
 
-InputHandle Entry::addSource(const Channel &input) {
-  Source *s = new Source(input, this);
+InputHandle Entry::addSource(const std::string &name) {
+  Source *s = new Source(name, this);
   sources.push_back(s);
   return InputHandle(*s);
 }
 
-OutputHandle Entry::addSink(const Channel &output) {
-  Sink *s = new Sink(output, this);
+OutputHandle Entry::addSink(const std::string &name) {
+  Sink *s = new Sink(name, this);
   sinks.push_back(s);
   return OutputHandle(*s);
 }
@@ -133,7 +132,7 @@ InputHandle Handle::input(SingleOutput &output) {
 }
 
 OutputHandle Handle::output(SingleOutput &out) {
-  return output(out.single().channel());
+  return output(out.single().name());
 }
 
 void Handle::dumpObj() const {
@@ -189,7 +188,7 @@ void Source::connect(Sink *newsink) {
        .str()
       );
   }
-  if (!TransformationTypes::isCompatible(newsink, this)) {
+  if (false) {
     throw std::runtime_error("Transformation: connecting incompatible types");
   }
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
@@ -198,20 +197,6 @@ void Source::connect(Sink *newsink) {
   newsink->sources.push_back(this);
   newsink->entry->evaluateTypes();
   entry->evaluateTypes();
-}
-
-bool TransformationTypes::isCompatible(const Channel *sink,
-                                       const Channel *source) {
-  if (!sink->channeltype.defined()) {
-    return true;
-  }
-  if (!source->channeltype.defined()) {
-    return true;
-  }
-  if (source->channeltype.kind != sink->channeltype.kind) {
-    return false;
-  }
-  return true;
 }
 
 size_t Base::addEntry(Entry *e) {

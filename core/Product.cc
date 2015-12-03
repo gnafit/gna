@@ -2,7 +2,7 @@
 
 Product::Product() {
   transformation_(this, "product")
-    .output("product", DataType().points().any())
+    .output("product")
     .types([](Atypes args, Rtypes rets) {
         DataType dtsingle = DataType().points().shape(1);
         DataType dt = dtsingle;

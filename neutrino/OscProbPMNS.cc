@@ -62,24 +62,24 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
 {
   variable_(&m_L, "L");
   transformation_(this, "comp12")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>);
   transformation_(this, "comp13")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>);
   transformation_(this, "comp23")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>);
   if (m_alpha != m_beta) {
     transformation_(this, "compCP")
-      .input("Enu", DataType().points().any())
-      .output("comp", DataType().points().any())
+      .input("Enu")
+      .output("comp")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
@@ -133,18 +133,18 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
   variable_(&m_weights, "weights");
 
   transformation_(this, "comp12")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_Lavg, m_param->DeltaMSq12)
     .func(&OscProbPMNSMult::calcComponent<1,2>);
   transformation_(this, "comp13")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_Lavg, m_param->DeltaMSq13)
     .func(&OscProbPMNSMult::calcComponent<1,3>);
   transformation_(this, "comp23")
-    .input("Enu", DataType().points().any())
-    .output("comp", DataType().points().any())
+    .input("Enu")
+    .output("comp")
     .depends(m_Lavg, m_param->DeltaMSq23)
     .func(&OscProbPMNSMult::calcComponent<2,3>);
   transformation_(this, "probsum")
