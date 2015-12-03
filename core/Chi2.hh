@@ -12,7 +12,7 @@ public:
     transformation_(this, "chi2")
       .input("prediction")
       .input("data")
-      .input("invcov")
+      .input("L")
       .output("chi2")
       .types([](Atypes args, Rtypes rets) {
           if (args[0].shape.size() != 1) {

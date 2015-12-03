@@ -11,6 +11,10 @@ using TransformationTypes::Channel;
 using TransformationTypes::Source;
 using TransformationTypes::Sink;
 
+using TransformationTypes::SinkTypeError;
+using TransformationTypes::SourceTypeError;
+using TransformationTypes::CalculationError;
+
 using TransformationTypes::InputHandle;
 using TransformationTypes::OutputHandle;
 using TransformationTypes::Handle;
@@ -21,6 +25,29 @@ using TransformationTypes::Rtypes;
 
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
+
+template <typename T>
+std::string errorMessage(const std::string &type, const T *s,
+                         const std::string &msg) {
+  std::string name = s ? s->name : "unspecified";
+  std::string message = msg.empty() ? "error" : msg;
+  return (boost::format("%3% %1%: %2%") % name % message % type).str();
+}
+
+SinkTypeError::SinkTypeError(const Sink *s, const std::string &message)
+  : TypeError(errorMessage("sink", s, message)),
+    sink(s)
+{ }
+
+SourceTypeError::SourceTypeError(const Source *s, const std::string &message)
+  : TypeError(errorMessage("source", s, message)),
+    source(s)
+{ }
+
+CalculationError::CalculationError(const Sink *s, const std::string &message)
+  : std::runtime_error(errorMessage("result", s, message)),
+    sink(s)
+{ }
 
 Entry::Entry(const std::string &name, const Base *parent)
   : name(name), parent(parent), initializing(0), frozen(false)
@@ -211,9 +238,9 @@ void Entry::evaluateTypes() {
     for (auto &typefun: typefuns) {
       typefun(args, rets);
     }
-  } catch (Rtypes::Error) {
+  } catch (const TypeError&) {
     st = Status::Failed;
-  } catch (Atypes::Undefined) {
+  } catch (const Atypes::Undefined&) {
     st = Status::Undefined;
   }
   std::set<Entry*> deps;
@@ -223,7 +250,10 @@ void Entry::evaluateTypes() {
       if (sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
-      sinks[i].data.reset(new Data<double>(rets[i]));
+      sinks[i].data.reset();
+      if (rets[i].defined()) {
+        sinks[i].data.reset(new Data<double>(rets[i], rets[i].buffer));
+      }
       TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
 #ifdef TRANSFORMATION_DEBUG
       sinks[i].data->type.dump();
@@ -275,24 +305,37 @@ DataType &Rtypes::operator[](int i) {
   return (*m_types)[i];
 }
 
-Rets::Error Rets::error(const Data<double> &data) {
+CalculationError Rets::error(const Data<double> &data,  const std::string &message) {
   const Sink *sink = nullptr;
   for (size_t i = 0; i < m_entry->sinks.size(); ++i) {
     if (m_entry->sinks[i].data.get() == &data) {
       sink = &m_entry->sinks[i];
+      break;
     }
   }
-  return Error(sink);
+  return CalculationError(sink, message);
 }
 
-Rtypes::Error Rtypes::error(const DataType &dt) {
+SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
+  const Source *source = nullptr;
+  for (size_t i = 0; i < m_entry->sources.size(); ++i) {
+    if (&m_entry->sources[i].sink->data->type == &dt) {
+      source = &m_entry->sources[i];
+      break;
+    }
+  }
+  return SourceTypeError(source, message);
+}
+
+SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
   const Sink *sink = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
     if (&(*m_types)[i] == &dt) {
       sink = &m_entry->sinks[i];
+      break;
     }
   }
-  return Error(sink);
+  return SinkTypeError(sink, message);
 }
 
 bool OutputHandle::check() const {

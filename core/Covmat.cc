@@ -1,12 +1,12 @@
 #include "Covmat.hh"
 
 void Covmat::calculateCov(Args args, Rets rets) {
-  auto cov = rets[0].as2d();
+  auto &cov = rets[0].mat;
   cov.setZero();
-  cov.matrix().diagonal() = args[0].x.matrix();
+  cov.diagonal() = args[0].vec;
   for (size_t i = 1; i < args.size(); ++i) {
     // cov.matrix().selfadjointView<Eigen::Upper>().rankUpdate(args[i].x.matrix());
-    cov.matrix() += args[i].x.matrix()*args[i].x.matrix().transpose();
+    cov += args[i].vec*args[i].vec.transpose();
   }
   if (m_fixed) {
     rets.freeze();
@@ -14,7 +14,22 @@ void Covmat::calculateCov(Args args, Rets rets) {
 }
 
 void Covmat::calculateInv(Args args, Rets rets) {
-  rets[0].as2d().matrix() = args[0].as2d().matrix().inverse();
+  rets[0].mat = args[0].mat.inverse();
+}
+
+void Covmat::prepareCholesky(Atypes args, Rtypes rets) {
+  if (args[0].shape.size() != 2) {
+    throw args.error(args[0], "Cholesky decomposition of non-2d data");
+  }
+  if (args[0].shape[0] != args[0].shape[1]) {
+    throw args.error(args[0], "Cholesky decomposition of non-square matrix");
+  }
+  m_llt = LLT(args[0].shape[0]);
+  rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
+}
+
+void Covmat::calculateCholesky(Args args, Rets rets) {
+  m_llt.compute(args[0].mat);
 }
 
 void Covmat::rank1(SingleOutput &out) {

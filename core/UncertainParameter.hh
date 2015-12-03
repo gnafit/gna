@@ -4,6 +4,7 @@
 #include <string>
 #include <limits>
 #include <utility>
+#include <map>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -63,13 +64,27 @@ public:
 
   using Uncertain<T>::central;
   virtual void reset() { set(central()); }
+  // virtual T covariance(Parameter<T> *other);
+  virtual void setCorrelation(Parameter<T> *other, double correlation);
 protected:
   std::vector<std::pair<T, T>> m_limits;
+  std::map<Parameter<T>*, double> m_correlations;
 };
 
 template <typename T>
 T Parameter<T>::cast(const std::string &v) const {
   return boost::lexical_cast<T>(v);
+}
+
+template <typename T>
+void Parameter<T>::setCorrelation(Parameter<T> *other, double correlation) {
+  if (this == other) {
+    throw std::runtime_error("can't set self-correlation");
+  }
+  if (this - other > static_cast<ptrdiff_t>(0)) {
+    return other->setCorrelation(this, correlation);
+  }
+  m_correlations[other] = correlation;
 }
 
 template <typename T>

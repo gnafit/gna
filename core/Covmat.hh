@@ -23,9 +23,18 @@ public:
       .input("cov")
       .output("inv")
       ;
+    transformation_(this, "cholesky")
+      .types(Atypes::pass<0>, &Covmat::prepareCholesky)
+      .func(&Covmat::calculateCholesky)
+      .input("cov")
+      .output("L")
+    ;
   }
   void calculateCov(Args args, Rets rets);
   void calculateInv(Args args, Rets rets);
+
+  void prepareCholesky(Atypes args, Rtypes rets);
+  void calculateCholesky(Args args, Rets rets);
 
   void rank1(SingleOutput &data);
   // void rank1(SingleOutput &out);
@@ -38,7 +47,15 @@ public:
 
   void setFixed(bool fixed) { m_fixed = fixed; }
 protected:
+  class LLT: public Eigen::LLT<Eigen::MatrixXd> {
+  public:
+    LLT(): Eigen::LLT<Eigen::MatrixXd>() { }
+    LLT(size_t size): Eigen::LLT<Eigen::MatrixXd>(size) { }
+    Eigen::MatrixXd &matrixRef() { return this->m_matrix; }
+  };
+
   bool m_fixed;
+  LLT m_llt;
 };
 
 #endif // COVMAT_H

@@ -3,6 +3,7 @@
 using namespace Eigen;
 
 void Chi2::calculateChi2(Args args, Rets rets) {
-  MatrixXd diff = (args[0].x - args[1].x).matrix();
-  rets[0].x = diff.transpose() * args[2].as2d().matrix() * diff;
+  VectorXd diff = args[0].vec - args[1].vec;
+  args[2].mat.triangularView<Eigen::Lower>().solveInPlace(diff);
+  rets[0].arr(0) = diff.array().square().sum();
 }

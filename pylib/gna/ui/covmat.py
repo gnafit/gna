@@ -26,7 +26,7 @@ class cmd(basecmd):
         for name, diag in self.opts.add:
             covmat = ROOT.Covmat()
             covmat.cov.stat.connect(diag)
-            covmat.inv.cov(covmat.cov)
+            covmat.cholesky.cov(covmat.cov)
             self.env.parts.covmat[name] = covmat
             print 'Covmat', name, 'from', diag
 

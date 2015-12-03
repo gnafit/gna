@@ -237,6 +237,13 @@ class _environment(object):
         else:
             raise Exception("unknown object %r passed to ns()" % ns)
 
+    def defparameter(self, name, **kwargs):
+        if '.' in name:
+            nsname, name = name.rsplit('.', 1)
+            return self.ns(nsname).defparameter(name, **kwargs)
+        else:
+            return self.globalns.defparameter(name, **kwargs)
+
     def iternstree(self):
         return self.globalns.iternstree()
 

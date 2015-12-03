@@ -15,7 +15,21 @@ class cmd(basecmd):
                             metavar=('NS', 'PARS'),
                             default=[])
         parser.add_argument('--define', action='append', nargs='+',
-                            metavar=('NAME ARG', 'ARG'),
+                            metavar=('PAR ARG', 'ARG'),
+                            default=[])
+
+        parser.add_argument('--sigma', action='append', nargs=2,
+                            metavar=('PAR', 'SIGMA'),
+                            default=[])
+        parser.add_argument('--central', action='append', nargs=2,
+                            metavar=('PAR', 'CENTRAL'),
+                            default=[])
+        parser.add_argument('--value', action='append', nargs=2,
+                            metavar=('PAR', 'VALUE'),
+                            default=[])
+
+        parser.add_argument('--correlation', action='append', nargs=3,
+                            metavar=('PAR1', 'PAR2', 'CORR'),
                             default=[])
 
     def init(self):
@@ -32,8 +46,16 @@ class cmd(basecmd):
         for define in self.opts.define:
             name, kwargs = define[0], define[1:]
             kwargs = dict(kw.split('=', 1) for kw in kwargs)
-            if '.' in name:
-                nsname, name = name.rsplit('.', 1)
-                self.env.ns(nsname).defparameter(name, **kwargs)
-            else:
-                self.env.globalns.defparameter(name, **kwargs)
+            self.env.defparameter(name, **kwargs)
+
+        for name, sigma in self.opts.sigma:
+            self.env.parameters[name].setSigma(sigma)
+
+        for name, central in self.opts.central:
+            self.env.parameters[name].setCentral(central)
+
+        for name, value in self.opts.value:
+            self.env.parameters[name].set(value)
+
+        for name1, name2, corr in self.opts.correlation:
+            self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))

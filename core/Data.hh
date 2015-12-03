@@ -47,6 +47,9 @@ struct DataType {
                            std::multiplies<size_t>());
   }
 
+  bool preallocated() { return buffer != nullptr; }
+  void preallocated(double *buf) { buffer = buf; }
+
   DataKind kind = DataKind::Undefined;
   std::vector<size_t> shape;
 
@@ -55,6 +58,8 @@ struct DataType {
     -std::numeric_limits<double>::infinity(),
     std::numeric_limits<double>::infinity()
   };
+
+  double *buffer = nullptr;
 };
 
 template <typename T>
@@ -267,44 +272,44 @@ inline void DataType::dump() const {
 template <typename T>
 class Data {
   typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
+  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> VectorXT;
+
   typedef Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> ArrayXXT;
-  typedef Eigen::Map<ArrayXXT> View2d;
+  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> MatrixXT;
 public:
-  Data(const DataType &dt)
-    : type(dt), status(Status::Undefined)
+  Data(const DataType &dt, T *buf)
+    : type(dt)
   {
-    allocate();
-  }
+    if (!buf) {
+      allocated.reset(new T[dt.size()]);
+      buf = allocated.get();
+    }
+    buffer = buf;
+    if (dt.shape.size() == 1) {
+      new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]);
+      new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]);
+    } else if (dt.shape.size() == 2) {
+      new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]*dt.shape[1]);
+      new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]*dt.shape[1]);
 
-  bool defined() const { return type.defined(); }
-  void allocate();
-
-  Eigen::Map<ArrayXXT> as2d() {
-    check2d();
-    return Eigen::Map<ArrayXXT>(x.data(), type.shape[0], type.shape[1]);
-  }
-  Eigen::Map<const ArrayXXT> as2d() const {
-    check2d();
-    return Eigen::Map<const ArrayXXT>(x.data(), type.shape[0], type.shape[1]);
+      new (&arr2d) Eigen::Map<ArrayXXT>(buf, dt.shape[0], dt.shape[1]);
+      new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
+    }
   }
 
   const DataType type;
-  ArrayXT x;
-  Status status;
-protected:
-  void check2d() const {
-    if (type.shape.size() != 2) {
-      throw std::runtime_error("2d view on 1d shape");
-    }
-  }
-};
+  Status state{Status::Undefined};
 
-template <typename T>
-inline void Data<T>::allocate() {
-  if (type.kind == DataKind::Undefined) {
-    return;
-  }
-  x.resize(type.size());
-}
+  T *buffer{nullptr};
+  std::unique_ptr<T> allocated{nullptr};
+
+  Eigen::Map<ArrayXT> arr{nullptr, 0};
+  Eigen::Map<VectorXT> vec{nullptr, 0};
+
+  Eigen::Map<ArrayXXT> arr2d{nullptr, 0, 0};
+  Eigen::Map<MatrixXT> mat{nullptr, 0, 0};
+
+  Eigen::Map<ArrayXT> &x = arr;
+};
 
 #endif // DATA_H

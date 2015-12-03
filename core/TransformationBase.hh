@@ -45,6 +45,7 @@ namespace TransformationTypes {
     std::vector<Source*> sources;
     Entry *entry;
   };
+
   class OutputHandle;
   struct Source: public Channel, public boost::noncopyable {
     Source(const Channel &chan, Entry *entry)
@@ -52,10 +53,37 @@ namespace TransformationTypes {
       { }
     void connect(Sink *newsink);
     bool materialized() const {
-      return sink && sink->data && sink->data->defined();
+      return sink && sink->data;
     }
     const Sink *sink;
     Entry *entry;
+  };
+
+  class TypeError: public std::runtime_error {
+  public:
+    TypeError(const std::string &message)
+      : std::runtime_error(message) { }
+  };
+
+  class SinkTypeError: public TypeError {
+  public:
+    SinkTypeError(const Sink *s, const std::string &message);
+
+    const Sink *sink;
+  };
+
+  class SourceTypeError: public TypeError {
+  public:
+    SourceTypeError(const Source *s, const std::string &message);
+
+    const Source *source;
+  };
+
+  class CalculationError: public std::runtime_error {
+  public:
+    CalculationError(const Sink *s, const std::string &message);
+
+    const Sink *sink;
   };
 
   class OutputHandle;
@@ -200,17 +228,12 @@ namespace TransformationTypes {
 
   struct Rets {
   public:
-    class Error {
-    public:
-      Error(const Sink *s) : sink(s) { }
-      const Sink *sink;
-    };
     Rets(Entry *e): m_entry(e) { }
     Data<double> &operator[](int i) const {
       return *m_entry->sinks[i].data;
     }
     size_t size() const { return m_entry->sinks.size(); }
-    Error error(const Data<double> &data);
+    CalculationError error(const Data<double> &data, const std::string &message = "");
     void freeze()  { m_entry->freeze(); }
     void unfreeze()  { m_entry->unfreeze(); }
   private:
@@ -236,23 +259,21 @@ namespace TransformationTypes {
     template <size_t Arg, size_t Ret = Arg>
     static void pass(Atypes args, Rtypes rets);
     static void ifSame(Atypes args, Rtypes rets);
+
+    SourceTypeError error(const DataType &dt, const std::string &message = "");
   private:
     const Entry *m_entry;
   };
 
   struct Rtypes {
   public:
-    class Error {
-    public:
-      Error(const Sink *s) : sink(s) { }
-      const Sink *sink;
-    };
     Rtypes(const Entry *e)
       : m_entry(e), m_types(new std::vector<DataType>(e->sinks.size()))
       { }
     DataType &operator[](int i);
     size_t size() const { return m_types->size(); }
-    Error error(const DataType &dt);
+
+    SinkTypeError error(const DataType &dt, const std::string &message = "");
   protected:
     const Entry *m_entry;
     std::shared_ptr<std::vector<DataType> > m_types;
@@ -282,11 +303,11 @@ namespace TransformationTypes {
     Status status = Status::Success;
     try {
       evaluate();
-    } catch (Rets::Error) {
+    } catch (const SinkTypeError&) {
       status = Status::Failed;
     }
     for (auto &sink: sinks) {
-      sink.data->status = status;
+      sink.data->state = status;
     }
     tainted = false;
   }
