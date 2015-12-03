@@ -13,8 +13,6 @@ class OscProbPMNSBase: public GNAObject,
 protected:
   OscProbPMNSBase(Neutrino from, Neutrino to);
 
-  void calcSum(Args args, Rets rets);
-
   template <int I, int J>
   double DeltaMSq() const;
   template <int I, int J>
@@ -35,6 +33,7 @@ public:
   template <int I, int J>
   void calcComponent(Args args, Rets rets);
   void calcComponentCP(Args args, Rets rets);
+  void calcSum(Args args, Rets rets);
 protected:
   variable<double> m_L;
 };
@@ -46,6 +45,7 @@ public:
 
   template <int I, int J>
   void calcComponent(Args args, Rets rets);
+  void calcSum(Args args, Rets rets);
 protected:
   variable<double> m_Lavg;
 

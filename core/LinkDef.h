@@ -57,6 +57,7 @@
 
 #pragma link C++ class OscProb2nu-;
 #pragma link C++ class OscProbPMNS-;
+#pragma link C++ class OscProbPMNSDecoh-;
 #pragma link C++ class IbdInteraction-;
 #pragma link C++ class IbdZeroOrder-;
 #pragma link C++ class IbdFirstOrder-;

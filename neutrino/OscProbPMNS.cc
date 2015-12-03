@@ -27,19 +27,6 @@ OscProbPMNSBase::OscProbPMNSBase(Neutrino from, Neutrino to)
   m_param->variable_("DeltaMSq12");
   m_param->variable_("DeltaMSq13");
   m_param->variable_("DeltaMSq23");
-
-  auto probsum = transformation_(this, "probsum")
-    .input("comp12")
-    .input("comp13")
-    .input("comp23")
-    .output("probsum")
-    .types(Atypes::pass<0>)
-    .func(&OscProbPMNS::calcSum);
-  if (from.flavor != to.flavor) {
-    probsum.input("compCP");
-  } else {
-    probsum.input("comp0");
-  }
 }
 
 template <>
@@ -53,7 +40,7 @@ double OscProbPMNSBase::DeltaMSq<2,3>() const { return m_param->DeltaMSq23; }
 
 template <int I, int J>
 double OscProbPMNSBase::weight() const {
-  return 2.0*std::real(
+  return std::real(
     m_pmns->V[m_alpha][I-1].value()*
     m_pmns->V[m_beta][J-1].value()*
     std::conj(m_pmns->V[m_alpha][J-1].value())*
@@ -62,23 +49,12 @@ double OscProbPMNSBase::weight() const {
 }
 
 double OscProbPMNSBase::weightCP() const {
-  return 8.0*std::imag(
+  return std::imag(
     m_pmns->V[m_alpha][0].value()*
     m_pmns->V[m_beta][1].value()*
     std::conj(m_pmns->V[m_alpha][1].value())*
     std::conj(m_pmns->V[m_beta][0].value())
     );
-}
-
-void OscProbPMNSBase::calcSum(Args args, Rets rets) {
-  rets[0].x = weight<1,2>()*args[0].x;
-  rets[0].x+= weight<1,3>()*args[1].x;
-  rets[0].x+= weight<2,3>()*args[2].x;
-  if (m_alpha == m_beta) {
-    rets[0].x += (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
-  } else {
-    rets[0].x += weightCP()*args[3].x;
-  }
 }
 
 OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
@@ -108,6 +84,18 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
   }
+  auto probsum = transformation_(this, "probsum")
+    .input("comp12")
+    .input("comp13")
+    .input("comp23")
+    .output("probsum")
+    .types(Atypes::pass<0>)
+    .func(&OscProbPMNS::calcSum);
+  if (from.flavor != to.flavor) {
+    probsum.input("compCP");
+  } else {
+    probsum.input("comp0");
+  }
 }
 
 template <int I, int J>
@@ -122,6 +110,17 @@ void OscProbPMNS::calcComponentCP(Args args, Rets rets) {
   rets[0].x = sin(DeltaMSq<1,2>()*tmp);
   rets[0].x*= sin(DeltaMSq<1,3>()*tmp);
   rets[0].x*= sin(DeltaMSq<2,3>()*tmp);
+}
+
+void OscProbPMNS::calcSum(Args args, Rets rets) {
+  rets[0].x = 2.0*weight<1,2>()*args[0].x;
+  rets[0].x+= 2.0*weight<1,3>()*args[1].x;
+  rets[0].x+= 2.0*weight<2,3>()*args[2].x;
+  if (m_alpha == m_beta) {
+    rets[0].x += 2.0*(0.5-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
+  } else {
+    rets[0].x += 8.0*weightCP()*args[3].x;
+  }
 }
 
 OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
@@ -148,6 +147,14 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
     .output("comp", DataType().points().any())
     .depends(m_Lavg, m_param->DeltaMSq23)
     .func(&OscProbPMNSMult::calcComponent<2,3>);
+  transformation_(this, "probsum")
+    .input("comp12")
+    .input("comp13")
+    .input("comp23")
+    .input("comp0")
+    .output("probsum")
+    .types(Atypes::pass<0>)
+    .func(&OscProbPMNSMult::calcSum);
 }
 
 template <int I, int J>
@@ -162,3 +169,11 @@ void OscProbPMNSMult::calcComponent(Args args, Rets rets) {
   ArrayXd b = 1.0 - 2.0/3.0*s3*phi2;
   rets[0].x = a*cos(2.0*b*phi);
 }
+
+void OscProbPMNSMult::calcSum(Args args, Rets rets) {
+  rets[0].x = weight<1,2>()*args[0].x;
+  rets[0].x+= weight<1,3>()*args[1].x;
+  rets[0].x+= weight<2,3>()*args[2].x;
+  rets[0].x += (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
+}
+

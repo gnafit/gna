@@ -24,6 +24,7 @@ set (SOURCES
   core/Chi2.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
+  neutrino/OscProbPMNSDecoh.cc
   neutrino/IbdInteraction.cc
   neutrino/IbdZeroOrder.cc
   neutrino/IbdFirstOrder.cc
@@ -55,6 +56,7 @@ set (HEADERS
   PMNSVariables.hh
   OscProb2nu.hh
   OscProbPMNS.hh
+  OscProbPMNSDecoh.hh
   IbdInteraction.hh
   IbdZeroOrder.hh
   IbdFirstOrder.hh
