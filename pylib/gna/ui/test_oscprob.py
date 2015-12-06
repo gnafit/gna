@@ -31,23 +31,20 @@ class cmd(basecmd):
         'decoh': ROOT.OscProbPMNSDecoh,
       }
       oscprobs = {}
-      predictions = {}
       data = {}
       for name, cls in oscprob_classes.iteritems():
           oscprob = cls(from_neutrino, to_neutrino)
           try:
             comp0 = ROOT.Points(np.ones_like(Enu_arr))
             oscprob.probsum['comp0'](comp0)
-          except AttributeError:
+          except KeyError:
             pass
           for compname in (x for x in oscprob.transformations if x.startswith('comp')):
             oscprob[compname].inputs(Enu)
             oscprob.probsum[compname](oscprob[compname])
           self.ns.addobservable('probability_{0}'.format(name),oscprob.probsum)
           oscprobs[name] = oscprob
-          predictions[name] = ROOT.Prediction()
-          predictions[name].append(oscprob.probsum)
-          data[name] = np.frombuffer(predictions[name].data(), count=predictions[name].size())
+          data[name] = oscprob.probsum
 
       data_stand, data_decoh = data['standard'], data['decoh']
 
@@ -57,12 +54,10 @@ class cmd(basecmd):
       nu_names = ['nu_e', 'nu_mu', 'nu_tau']
       filename = 'oscprob_'+nu_names[from_neutrino.flavor]+'_'+nu_names[to_neutrino.flavor]+'.pdf'
       self.open_pdf(filename,oscprobs['standard'].__class__.__name__)
-      predictions['standard'].update()
-      plt.plot(Enu_arr,data_stand,label=r"$P_{PW}$", linewidth=3)
+      plt.plot(Enu_arr,data_stand.data(),label=r"$P_{PW}$", linewidth=3)
       for sigma in sigma_arr:
         self.ns["sigma"].set(sigma)
-        predictions['decoh'].update()
-        plt.plot(Enu_arr,data_decoh,label=r"$\sigma={0}$".format(sigma))
+        plt.plot(Enu_arr,data_decoh.data(),label=r"$\sigma={0}$".format(sigma))
       #plt.show()
       nu_tex = [r"$\nu_e$",r"$\nu_\mu$",r"$\nu_\tau$"]
       self.close_pdf('E, [MeV]',r'$P($'+nu_tex[from_neutrino.flavor]+r'$\to$'+nu_tex[to_neutrino.flavor]+r'$)$')
@@ -79,4 +74,4 @@ class cmd(basecmd):
     plt.legend(loc=3)
     plt.savefig(self.pp,format='pdf')
     self.pp.close()
-    
+

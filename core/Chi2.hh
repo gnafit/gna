@@ -11,7 +11,7 @@ public:
   Chi2() {
     transformation_(this, "chi2")
       .input("prediction")
-      .input("data")
+      .input("observation")
       .input("L")
       .output("chi2")
       .types([](Atypes args, Rtypes rets) {

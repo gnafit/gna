@@ -13,7 +13,7 @@ class cmd(basecmd):
     def init(self):
         chi2 = ROOT.Chi2()
         chi2.chi2.prediction(self.opts.prediction)
-        chi2.chi2.data(self.opts.data)
+        chi2.chi2.observation(self.opts.data)
         chi2.chi2.L(self.opts.covmat.cholesky)
 
         self.env.parts.statistic[self.opts.name] = chi2

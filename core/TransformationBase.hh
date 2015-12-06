@@ -121,6 +121,10 @@ namespace TransformationTypes {
 
     bool check() const;
     void dump() const;
+
+    const double *data() const;
+    const double *view() const { return m_sink->data->x.data(); }
+    const DataType &datatype() const { return m_sink->data->type; }
   private:
     TransformationTypes::Sink *m_sink;
   };
@@ -183,6 +187,11 @@ namespace TransformationTypes {
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
   };
   typedef boost::ptr_vector<Entry> Container;
+
+  inline const double *OutputHandle::data() const {
+    m_sink->entry->touch();
+    return view();
+  }
 
   class Handle {
   public:
@@ -552,6 +561,9 @@ class SingleOutput {
 public:
   virtual ~SingleOutput() { }
   virtual TransformationTypes::OutputHandle single() = 0;
+  const double *data() { return single().data(); }
+  const double *view() { return single().view(); }
+  const DataType &datatype() { return single().datatype(); }
 };
 
 #endif // TRANSFORMATIONBASE_H

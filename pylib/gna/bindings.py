@@ -85,6 +85,22 @@ def patchSimpleDict(cls):
     cls.__getattr__ = __getattr__
     cls.get = get
 
+def patchDataProvider(cls):
+    origdata = cls.data
+    origview = cls.view
+    def data(self):
+        buf = origdata(self)
+        datatype = self.datatype()
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+    cls.data = data
+
+    origview = cls.view
+    def view(self):
+        buf = origview(self)
+        datatype = self.datatype()
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+    cls.view = view
+
 def patchVariableDescriptor(cls):
     origclaim = cls.claim
     def wrappedclaim(self):
@@ -105,7 +121,7 @@ def patchTransformationDescriptor(cls):
 
     def __getitem__(self, attr):
         inp = self.inputs.get(attr)
-        out = self.inputs.get(attr)
+        out = self.outputs.get(attr)
         if inp and out:
             raise Exception("{} is both input and output".format(attr))
         if inp:
@@ -115,7 +131,7 @@ def patchTransformationDescriptor(cls):
         raise KeyError(attr)
 
     cls.__getattr__ = __getattr__
-    cls.__getitem__ = __getattr__
+    cls.__getitem__ = __getitem__
 
 def patchStatistic(cls):
     def __call__(self):
@@ -155,6 +171,13 @@ def setup(ROOT):
     patchTransformationDescriptor(ROOT.TransformationDescriptor)
 
     patchStatistic(ROOT.Statistic)
+
+    dataproviders = [
+        ROOT.OutputDescriptor,
+        ROOT.SingleOutput,
+    ]
+    for cls in dataproviders:
+        patchDataProvider(cls)
 
     GNAObject = ROOT.GNAObject
     def patchcls(cls):

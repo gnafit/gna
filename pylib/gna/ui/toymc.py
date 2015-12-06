@@ -16,11 +16,11 @@ class cmd(basecmd):
 
     def init(self):
         for name, prediction in self.opts.add:
-            buf = np.frombuffer(prediction.data(), count=prediction.size())
+            buf = prediction.data()
             data = ROOT.Points(np.random.normal(buf, buf**0.5))
             self.env.parts.data[name] = data
             print 'Asimov', name
 
         for data in getattr(self.opts, 'print'):
             print name
-            print np.frombuffer(data.data(), count=data.size())
+            print data.data()

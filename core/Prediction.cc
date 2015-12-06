@@ -48,6 +48,3 @@ void Prediction::update() const {
   m_transform.update(0);
 }
 
-const double *Prediction::data() const {
-  return m_transform[0].x.data();
-}

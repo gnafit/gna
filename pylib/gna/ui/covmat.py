@@ -41,4 +41,4 @@ class cmd(basecmd):
             covmat.setFixed(True)
 
         for covmat in getattr(self.opts, 'print'):
-            print np.frombuffer(covmat.data(), count=covmat.size()).reshape((covmat.ndim(), covmat.ndim()))
+            print covmat.data()

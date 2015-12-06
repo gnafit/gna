@@ -42,5 +42,5 @@ class cmd(basecmd):
             print 'Prediction', name, 'size:', prediction.size()
 
         for prediction in getattr(self.opts, 'print'):
-            print np.frombuffer(prediction.data(), count=prediction.size())
+            print prediciton.data()
 

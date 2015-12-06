@@ -16,7 +16,6 @@ public:
   size_t size() const;
 
   void update() const;
-  const double *data() const;
 protected:
   Handle m_transform;
 };
