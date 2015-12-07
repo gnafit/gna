@@ -9,7 +9,7 @@ class exp(baseexp):
         parser.add_argument('--ns', default='juno')
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
         parser.add_argument('--erange', type=float, nargs=2,
-                            default=[1.0, 10.0],
+                            default=[1.0, 8.0],
                             metavar=('E_MIN', 'E_MAX'),
                             help='energy range')
         parser.add_argument('--nbins', type=int,

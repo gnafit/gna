@@ -6,6 +6,8 @@
 #include "Statistic.hh"
 #include "UncertainParameter.hh"
 
+#include <iostream>
+
 class Minimizable: public ROOT::Math::IMultiGenFunction {
 public:
   Minimizable(Statistic *statistic)
@@ -30,7 +32,8 @@ public:
     for (size_t i = 0; i < m_pars.size(); ++i) {
       m_pars[i]->set(x[i]);
     }
-    return m_statistic->value();
+    double ret = m_statistic->value();
+    return ret;
   }
 protected:
   Statistic *m_statistic;

@@ -62,7 +62,7 @@ class reactorgroup(object):
 
 class detector(object):
     def __init__(self, ns, name, location, protons, livetime):
-        self.ns = ns(name)
+        self.ns = ns("detectors")(name)
         self.name = name
         self.location = location
 

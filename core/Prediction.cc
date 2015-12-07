@@ -6,8 +6,9 @@ Prediction::Prediction() {
     .types([](Atypes args, Rtypes rets) {
         if (args.size() == 0) {
           throw rets.error(rets[0]);
-        }
-        if (args.size() > 0) {
+        } else if (args.size() == 1) {
+          rets[0] = args[0];
+        } else {
           size_t size = 0;
           for (size_t i = 0; i < args.size(); ++i) {
             size += args[i].size();

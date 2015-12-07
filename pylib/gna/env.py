@@ -166,6 +166,17 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
+    @contextmanager
+    def save(self, params):
+        oldvalues = {}
+        for p in params:
+            if isinstance(p, str):
+                p = self[p]
+            oldvalues[p] = p.value()
+        yield
+        for p, v in oldvalues.iteritems():
+            p.set(v)
+
 class PartNotFoundError(BaseException):
     def __init__(self, parttype, partname):
         self.parttype = parttype

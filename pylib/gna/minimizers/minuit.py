@@ -36,6 +36,14 @@ class Minuit(ROOT.TMinuitMinimizer):
         self._spec = spec.merge({}, newspec)
         self._reset = True
 
+    @property
+    def tolerance(self):
+        return self.Tolerance()
+
+    @tolerance.setter
+    def tolerance(self, tolerance):
+        self.SetTolerance(tolerance)
+
     def addpars(self, pars):
         self.pars.extend(pars)
         self._reset = True
@@ -53,7 +61,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         elif (vmin, vmax) == (float('-inf'), float('+inf')):
             self.SetVariable(i, par.name(), value, step)
         elif vmax == float('+inf'):
-            self.SetUpperLimitedVariable(i, par.name(), value, step, vmin)
+            self.SetLowerLimitedVariable(i, par.name(), value, step, vmin)
         elif vmin == float('-inf'):
             self.SetUpperLimitedVariable(i, par.name(), value, step, vmax)
         else:
@@ -70,6 +78,26 @@ class Minuit(ROOT.TMinuitMinimizer):
             self.setuppar(i, par, spec.get(par, {}))
 
         self._reset = False
+
+    def affects(self, par):
+        if par not in self.pars:
+            return False
+        spec = self.spec.get(par, {})
+        fixed = spec.get('fixed', False)
+        if not fixed:
+            return True
+        if 'value' in spec:
+            return True
+        return False
+
+    def freepars(self):
+        res = []
+        for par in self.pars:
+            spec = self.spec.get(par, {})
+            if spec.get('fixed', False):
+                continue
+            res.append(par)
+        return res
 
     def evalstatistic(self):
         wall = time.time()
@@ -98,6 +126,8 @@ class Minuit(ROOT.TMinuitMinimizer):
 
         if self._reset:
             self.setuppars()
+        else:
+            self.SetFunction(self._minimizable)
 
         wall = time.time()
         clock = time.clock()

@@ -63,7 +63,7 @@ def append_typed(*types, **kwargs):
                     except ValueError:
                         msg = 'qualified name expected, got {0}'
                         raise argparse.ArgumentError(self, msg.format(v))
-                    allowed = [t.parttype for t in f.types]
+                    allowed = [getattr(t, 'parttype', None) or t.__name__ for t in f.types]
                     prefix = _expandprefix(prefix, allowed)
                     funcs.append(f.types[allowed.index(prefix)])
                     newvalues.append(name)

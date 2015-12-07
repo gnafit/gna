@@ -52,10 +52,12 @@ class cmd(basecmd):
             self.env.parameters[name].setSigma(sigma)
 
         for name, central in self.opts.central:
-            self.env.parameters[name].setCentral(central)
+            p = self.env.parameters[name]
+            p.setCentral(p.cast(central))
 
         for name, value in self.opts.value:
-            self.env.parameters[name].set(value)
+            p = self.env.parameters[name]
+            p.set(p.cast(value))
 
         for name1, name2, corr in self.opts.correlation:
             self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
