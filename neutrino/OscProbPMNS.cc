@@ -63,23 +63,23 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   variable_(&m_L, "L");
   transformation_(this, "comp12")
     .input("Enu")
-    .output("comp")
+    .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>);
   transformation_(this, "comp13")
     .input("Enu")
-    .output("comp")
+    .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>);
   transformation_(this, "comp23")
     .input("Enu")
-    .output("comp")
+    .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>);
   if (m_alpha != m_beta) {
     transformation_(this, "compCP")
       .input("Enu")
-      .output("comp")
+      .output("compCP")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
@@ -136,17 +136,17 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
 
   transformation_(this, "comp12")
     .input("Enu")
-    .output("comp")
+    .output("comp12")
     .depends(m_Lavg, m_param->DeltaMSq12)
     .func(&OscProbPMNSMult::calcComponent<1,2>);
   transformation_(this, "comp13")
     .input("Enu")
-    .output("comp")
+    .output("comp13")
     .depends(m_Lavg, m_param->DeltaMSq13)
     .func(&OscProbPMNSMult::calcComponent<1,3>);
   transformation_(this, "comp23")
     .input("Enu")
-    .output("comp")
+    .output("comp23")
     .depends(m_Lavg, m_param->DeltaMSq23)
     .func(&OscProbPMNSMult::calcComponent<2,3>);
   transformation_(this, "probsum")
@@ -178,4 +178,3 @@ void OscProbPMNSMult::calcSum(Args args, Rets rets) {
   rets[0].x+= weight<2,3>()*args[2].x;
   rets[0].x += (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
 }
-

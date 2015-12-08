@@ -136,14 +136,17 @@ def makecomponents(isotopes, norm, oscprob):
         subflux.multiply(isotope.spectrum)
         subflux.multiply(norm.isotopes['norm_{0}'.format(isotope.name)])
         normedflux.add(subflux)
-    components = {
-        'comp0': normedflux,
-    }
-    for compname in (x for x in oscprob.transformations if x.startswith('comp')):
-        oscflux = ROOT.Product()
-        oscflux.multiply(normedflux)
-        oscflux.multiply(oscprob[compname])
-        components[compname] = oscflux
+    components = dict.fromkeys(oscprob.probsum.inputs)
+    components['comp0'] = normedflux
+    for tfname, tf in oscprob.transformations.iteritems():
+        for outname in tf.outputs:
+            if outname not in components:
+                continue
+            if components[outname]:
+                raise Exception("overriden component: {0}".format(outname))
+            components[outname] = ROOT.Product()
+            components[outname].multiply(normedflux)
+            components[outname].multiply(tf[outname])
     return components
 
 def setupcomponents(ns, reactors, detectors, Enu):
