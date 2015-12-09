@@ -278,6 +278,8 @@ namespace TransformationTypes {
     static void ifSameShape(Atypes args, Rtypes rets);
 
     SourceTypeError error(const DataType &dt, const std::string &message = "");
+
+    const std::string &name() const { return m_entry->name; }
   private:
     const Entry *m_entry;
   };
@@ -291,6 +293,8 @@ namespace TransformationTypes {
     size_t size() const { return m_types->size(); }
 
     SinkTypeError error(const DataType &dt, const std::string &message = "");
+
+    const std::string &name() const { return m_entry->name; }
   protected:
     const Entry *m_entry;
     std::shared_ptr<std::vector<DataType> > m_types;

@@ -196,8 +196,14 @@ void Source::connect(Sink *newsink) {
   sink = newsink;
   sink->entry->tainted.subscribe(entry->tainted);
   newsink->sources.push_back(this);
-  newsink->entry->evaluateTypes();
-  entry->evaluateTypes();
+  try {
+    newsink->entry->evaluateTypes();
+    entry->evaluateTypes();
+  } catch (const std::exception &exc) {
+    std::cerr << "exception in types calculation (bazzeg ROOT): ";
+    std::cerr << exc.what() << "\n";
+    std::terminate();
+  }
 }
 
 size_t Base::addEntry(Entry *e) {
@@ -263,11 +269,17 @@ void Entry::updateTypes() {
 }
 
 void Atypes::passAll(Atypes args, Rtypes rets) {
-  if (args.size() != rets.size()) {
-    throw std::runtime_error("Transformation: nargs != nrets");
-  }
-  for (size_t i = 0; i < args.size(); ++i) {
-    rets[i] = args[i];
+  if (args.size() == 1) {
+    for (size_t i = 0; i < rets.size(); ++i) {
+      rets[i] = args[0];
+    }
+  } else if (args.size() != rets.size()) {
+    auto fmt = format("Transformation %1%: nargs != nrets");
+    throw std::runtime_error((fmt % args.name()).str());
+  } else {
+    for (size_t i = 0; i < args.size(); ++i) {
+      rets[i] = args[i];
+    }
   }
 }
 

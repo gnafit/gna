@@ -184,10 +184,7 @@ def setupcomponents(ns, opts, reactors, detectors, Enu):
             norm, oscprob = oscflux(ns, react, detector)
             for tfname, tf in oscprob.transformations.iteritems():
                 if 'Enu' in tf.inputs:
-                    print tfname, tf, Enu.outputs.keys(), tf.inputs.keys()
-                    tf.dump()
-                    Enu.dump()
-                    oscprob[tfname].inputs(Enu)
+                    tf.inputs(Enu)
             for compname, comp in makecomponents(rgroup[0].isotopes, norm, oscprob).iteritems():
                 detector.components[compname].add(comp)
 
