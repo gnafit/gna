@@ -8,6 +8,7 @@ class exp(baseexp):
     def initparser(self, parser):
         parser.add_argument('--ns', default='juno')
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
+        parser.add_argument('--oscprob', choices=['standard', 'decoh'], default='standard')
         parser.add_argument('--erange', type=float, nargs=2,
                             default=[1.0, 8.0],
                             metavar=('E_MIN', 'E_MAX'),
@@ -43,7 +44,7 @@ class exp(baseexp):
             {'name': 'DYB', 'location': 215.0, 'power': 17.4},
             {'name': 'HZ', 'location': 265.0, 'power': 17.4},
         ]
-        return gna.exp.reactor.makereactors(self.ns, common, data)
+        return gna.exp.reactor.makereactors(self.ns, self.opts, common, data)
 
     def makedetectors(self):
         common = {
@@ -71,6 +72,6 @@ class exp(baseexp):
         for isotope in self.isotopes:
             isotope.spectrum.f.inputs(Enu)
 
-        gna.exp.reactor.setupcomponents(self.ns, self.reactors, self.detectors, Enu)
+        gna.exp.reactor.setupcomponents(self.ns, self.opts, self.reactors, self.detectors, Enu)
         for detector in self.detectors:
             gna.exp.reactor.setupobservations(self.ns, detector, compfactory)

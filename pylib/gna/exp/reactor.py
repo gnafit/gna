@@ -6,11 +6,12 @@ import gna.parameters.ibd
 import gna.parameters.oscillation
 
 class reactor(object):
-    def __init__(self, ns, name, location, power, power_rate,
+    def __init__(self, ns, opts, name, location, power, power_rate,
                  isotopes, fission_fractions):
         self.ns = ns("reactors")(name)
         self.name = name
         self.location = location
+        self.opts = opts
 
         self.power = power
         self.ns.defparameter("ThermalPower", central=power, sigma=0)
@@ -20,7 +21,7 @@ class reactor(object):
         self.isotopes = isotopes
         self.fission_fractions = {isoname: ROOT.Points(frac)
                                   for isoname, frac in fission_fractions.iteritems()}
-
+      
     def calcdistance(self, detector):
         return np.sqrt(np.sum((self.location - detector.location)**2))
 
@@ -30,10 +31,16 @@ class reactor(object):
         pair_ns.defparameter("L", central=dist, sigma=0)
 
     def makeoscprob(self):
-        return ROOT.OscProbPMNS(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+        if self.opts.oscprob == 'standard':
+          return ROOT.OscProbPMNS(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+        elif self.opts.oscprob == 'decoh':
+          return ROOT.OscProbPMNSDecoh(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+        else:
+          raise Exception('unknown oscprob %r'%self.opts.oscprob)
+        
 
-def makereactors(ns, common, data):
-    return [reactor(ns, **dict(common.items(), **x)) for x in data]
+def makereactors(ns, opts, common, data):
+    return [reactor(ns, opts, **dict(common.items(), **x)) for x in data]
 
 class reactorgroup(object):
     def __init__(self, ns, name, reactors):
@@ -149,7 +156,7 @@ def makecomponents(isotopes, norm, oscprob):
             components[outname].multiply(tf[outname])
     return components
 
-def setupcomponents(ns, reactors, detectors, Enu):
+def setupcomponents(ns, opts, reactors, detectors, Enu):
     for detector in detectors:
         for reactor in reactors:
             reactor.initdistance(ns, detector)
@@ -158,20 +165,29 @@ def setupcomponents(ns, reactors, detectors, Enu):
         groups = [[]]
         for reactor in sorted(reactors, key=lambda r: r.calcdistance(detector)):
             groups[-1].append(reactor)
+            if opts.oscprob != "standard":
+                groups.append([])
+                continue
             L = np.array([r.calcdistance(detector) for r in groups[-1]])
             P = np.array([r.power for r in groups[-1]])
             Lavg = sum(P/L)/sum(P/L**2)
             if not all(abs(L/Lavg-1) < 1e-2):
                 groups.append([groups[-1].pop()])
         for rgroup in groups:
-            if len(rgroup) == 1:
+            if not rgroup:
+                continue
+            elif len(rgroup) == 1:
                 react = rgroup[0]
             else:
                 react = reactorgroup(ns, '_'.join(r.name for r in rgroup), rgroup)
                 react.initdistance(ns, detector)
             norm, oscprob = oscflux(ns, react, detector)
-            for compname in (x for x in oscprob.transformations if x.startswith('comp')):
-                oscprob[compname].inputs(Enu)
+            for tfname, tf in oscprob.transformations.iteritems():
+                if 'Enu' in tf.inputs:
+                    print tfname, tf, Enu.outputs.keys(), tf.inputs.keys()
+                    tf.dump()
+                    Enu.dump()
+                    oscprob[tfname].inputs(Enu)
             for compname, comp in makecomponents(rgroup[0].isotopes, norm, oscprob).iteritems():
                 detector.components[compname].add(comp)
 
@@ -231,6 +247,7 @@ def setupobservations(ns, detector, compfactory):
 def defparameters(ns):
     gna.parameters.ibd.defparameters(ns("ibd"))
     gna.parameters.oscillation.defparameters(ns("oscillation"))
+    
     for isoname, (central, sigma) in isotope.eperfission.iteritems():
         isons = ns("isotopes")(isoname)
         isons.defparameter("EnergyPerFission", central=central, sigma=sigma)

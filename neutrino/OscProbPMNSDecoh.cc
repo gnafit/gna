@@ -11,7 +11,7 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
   : OscProbPMNSBase(from, to)
 {
   variable_(&m_L, "L");
-  variable_(&m_sigma, "sigma");
+  variable_(&m_sigma, "SigmaDecohRel");
 
   transformation_(this, "comp12")
     .input("Enu")

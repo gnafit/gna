@@ -71,7 +71,10 @@ class cmd(basecmd):
   def close_pdf(self,x_title,y_title):
     self.ax.set_xlabel(x_title, size='x-large')
     self.ax.set_ylabel(y_title, size='x-large')
-    plt.legend(loc=3)
+    self.ax.set_xscale('log')
+    plt.legend(loc=4).get_frame().set_alpha(0.6)
+    
+    
     plt.savefig(self.pp,format='pdf')
     self.pp.close()
 

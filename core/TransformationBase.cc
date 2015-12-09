@@ -182,6 +182,7 @@ void Base::copyEntries(const Base &other) {
 
 void Source::connect(Sink *newsink) {
   if (sink) {
+    std::cerr << this << " " << name << " " << sink->entry->name << "\n";
     throw std::runtime_error(
       (format("Transformation: source `%1%' is already connected to sink `%2%',"
               " won't connect to `%3%'") % name % sink->name % newsink->name)

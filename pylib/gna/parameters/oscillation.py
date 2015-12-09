@@ -13,7 +13,7 @@ def defparameters(ns):
                     variants={'normal': 1.0, 'inverted': -1.0})
 
     ns.defparameter('Delta', type='uniformangle', central=0.0)
-
+    ns.defparameter("SigmaDecohRel", central=1.e-5, sigma=0)
     with ns:
         ROOT.OscillationExpressions(ns=ns)
         ROOT.PMNSExpressions(ns=ns)
