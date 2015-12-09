@@ -34,14 +34,17 @@ class cmd(basecmd):
       data = {}
       for name, cls in oscprob_classes.iteritems():
           oscprob = cls(from_neutrino, to_neutrino)
-          try:
-            comp0 = ROOT.Points(np.ones_like(Enu_arr))
-            oscprob.probsum['comp0'](comp0)
-          except KeyError:
-            pass
-          for compname in (x for x in oscprob.transformations if x.startswith('comp')):
-            oscprob[compname].inputs(Enu)
-            oscprob.probsum[compname](oscprob[compname])
+          for compname in oscprob.probsum.inputs.keys():
+            if compname != 'comp0':
+              for tname, tf in oscprob.transformations.iteritems():
+                if compname in tf.outputs:
+                  oscprob.probsum[compname](tf[compname])
+                  break
+            else:
+              oscprob.probsum[compname](ROOT.Points(np.ones_like(Enu_arr)))
+          for tf in oscprob.transformations.itervalues():
+            if 'Enu' in tf.inputs:
+              tf.inputs.Enu(Enu)
           self.ns.addobservable('probability_{0}'.format(name),oscprob.probsum)
           oscprobs[name] = oscprob
           data[name] = oscprob.probsum
