@@ -10,7 +10,7 @@ public:
     : m_fixed(false)
   {
     transformation_(this, "cov")
-      .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+      .types(Atypes::ifSameShape, [](Atypes args, Rtypes rets) {
           rets[0] = DataType().points().shape(args[0].size(), args[0].size());
         })
       .func(&Covmat::calculateCov)

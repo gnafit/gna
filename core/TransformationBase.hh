@@ -275,6 +275,7 @@ namespace TransformationTypes {
     template <size_t Arg, size_t Ret = Arg>
     static void pass(Atypes args, Rtypes rets);
     static void ifSame(Atypes args, Rtypes rets);
+    static void ifSameShape(Atypes args, Rtypes rets);
 
     SourceTypeError error(const DataType &dt, const std::string &message = "");
   private:

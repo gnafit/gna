@@ -217,19 +217,23 @@ Entry &Base::getEntry(const std::string &name) {
 void Entry::evaluateTypes() {
   Atypes args(this);
   Rtypes rets(this);
-  Status st = Status::Success;
+  bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
       typefun(args, rets);
     }
-  } catch (const TypeError&) {
-    st = Status::Failed;
+    success = true;
+  } catch (const TypeError &exc) {
+    TR_DPRINTF("types[%s]: failed\n", name.c_str());
+    throw std::runtime_error(
+      (format("Transformation: type updates failed for `%1%': %2%") % name % exc.what()).str()
+      );
   } catch (const Atypes::Undefined&) {
-    st = Status::Undefined;
+    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   std::set<Entry*> deps;
-  if (st == Status::Success) {
+  if (success) {
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     for (size_t i = 0; i < sinks.size(); ++i) {
       if (sinks[i].data && sinks[i].data->type == rets[i]) {
@@ -247,13 +251,6 @@ void Entry::evaluateTypes() {
         deps.insert(depsrc->entry);
       }
     }
-  } else if (st == Status::Failed) {
-    TR_DPRINTF("types[%s]: failed\n", name.c_str());
-    throw std::runtime_error(
-      (format("Transformation: type updates failed for `%1%'") % name).str()
-      );
-  } else if (st == Status::Undefined){
-    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   for (Entry *dep: deps) {
     dep->evaluateTypes();
@@ -276,7 +273,15 @@ void Atypes::passAll(Atypes args, Rtypes rets) {
 void Atypes::ifSame(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
-      throw rets.error(rets[0]);
+      throw args.error(args[i], "inputs should have same type");
+    }
+  }
+}
+
+void Atypes::ifSameShape(Atypes args, Rtypes rets) {
+  for (size_t i = 1; i < args.size(); ++i) {
+    if (args[i].shape != args[0].shape) {
+      throw args.error(args[i], "inputs should have same shape");
     }
   }
 }
