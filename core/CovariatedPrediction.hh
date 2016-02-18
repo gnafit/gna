@@ -5,7 +5,6 @@
 
 #include "GNAObject.hh"
 #include "UncertainParameter.hh"
-#include "Covariance.hh"
 
 class CovariatedPrediction: public GNAObject,
                             public Transformation<CovariatedPrediction> {
@@ -66,7 +65,6 @@ protected:
 
   Handle m_transform;
 
-  const Covariance *m_covariance;
   std::vector<OutputDescriptor> m_inputs;
 
   std::vector<CovarianceAction> m_covactions;

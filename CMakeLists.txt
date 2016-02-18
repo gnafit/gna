@@ -21,7 +21,6 @@ set (SOURCES
   core/WeightedSum.cc
   core/LinearInterpolator.cc
   core/Derivative.cc
-  core/Covariance.cc
   core/Covmat.cc
   core/Chi2.cc
   neutrino/OscProb2nu.cc
