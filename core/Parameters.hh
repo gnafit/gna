@@ -5,6 +5,9 @@
 #include <functional>
 #include <typeinfo>
 #include <stdexcept>
+#include <set>
+#include <deque>
+#include <cstring>
 
 #include <boost/core/demangle.hpp>
 
@@ -14,6 +17,7 @@ struct references {
   void add(changeable obj);
   void resize(size_t newsize);
   void replace(changeable o, changeable n);
+  void remove(changeable obj);
 
   changeable *objs = nullptr;
   size_t cnt = 0;
@@ -61,8 +65,15 @@ public:
     hdr->observers.add(d);
     d.m_data.hdr->emitters.add(*this);
   }
+  void unsubscribe(changeable d) {
+    m_data.hdr->observers.remove(d);
+    d.m_data.hdr->emitters.remove(*this);
+  }
   const void *rawdata() const {
     return m_data.raw;
+  }
+  const void *rawptr() const {
+    return rawdata();
   }
   const char *name() const {
     return m_data.hdr->name;
@@ -84,6 +95,25 @@ public:
       DPRINTF("calling changed callback");
       m_data.hdr->changed();
     }
+  }
+  bool depends(changeable other) const {
+    std::deque<changeable> queue;
+    std::set<const void*> visited;
+    queue.push_back(*this);
+    while (!queue.empty()) {
+      changeable x = queue.front();
+      queue.pop_front();
+      references &ems = x.m_data.hdr->emitters;
+      if (ems.has(other)) {
+        return true;
+      }
+      if (visited.insert(x.rawptr()).second) {
+        for (size_t i = 0; i < ems.cnt; ++i) {
+          queue.push_back(ems.objs[i]);
+        }
+      }
+    }
+    return false;
   }
   void replace(changeable other) {
     if (this->is(other)) {
@@ -179,6 +209,22 @@ inline void references::replace(changeable o, changeable n) {
   }
 }
 
+inline void references::remove(changeable d) {
+  if (cnt == 0) {
+    return;
+  }
+  size_t i = 0;
+  for (i = 0; i < cnt; ++i) {
+    if (objs[i] == d) {
+      break;
+    }
+  }
+  if (cnt > i+1) {
+    std::memmove(objs+i, objs+i+1, cnt-(i+1));
+  }
+  cnt--;
+}
+
 template <typename ValueType>
 class variable;
 
@@ -270,6 +316,8 @@ public:
   }
   parameter(const parameter<ValueType> &other)
     : base_type(other) { }
+  explicit parameter(const parameter<void> &other)
+    : variable<ValueType>(other) { }
   static parameter<ValueType> null() {
     return parameter<ValueType>(base_type::null());
   }

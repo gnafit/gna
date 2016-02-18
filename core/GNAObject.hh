@@ -40,7 +40,6 @@ public:
     return TransformationDescriptor(TransformationTypes::Base::getEntry(name));
   }
 
-  bool check();
   void dumpObj();
 
   Variables variables;

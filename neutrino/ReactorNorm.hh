@@ -6,6 +6,14 @@
 
 #include "GNAObject.hh"
 
+class ReactorNormAbsolute: public GNAObject,
+                           public Transformation<ReactorNormAbsolute> {
+public:
+  ReactorNormAbsolute(const std::vector<std::string> &isonames);
+protected:
+  variable<double> m_norm;
+};
+
 class ReactorNorm: public GNAObject,
                    public Transformation<ReactorNorm> {
 public:

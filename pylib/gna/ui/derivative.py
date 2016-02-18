@@ -8,7 +8,7 @@ class cmd(basecmd):
         parser.add_argument('--reldelta', type=float, default=1.0/(65536*16))
         parser.add_argument('-a', '--add', nargs=3, default=[],
                             metavar=('NAME', 'PREDICTION', 'PAR'),
-                            action=append_typed(str, env.parts.prediction, str)
+                            action=append_typed(str, env.parts.prediction, str),
                             help='add prediction NAME for derivative of PREDICTION wrt PAR')
 
     def init(self):
@@ -16,5 +16,5 @@ class cmd(basecmd):
             der = ROOT.Derivative(self.env.pars[parname], self.opts.reldelta)
             der.derivative.inputs(prediction)
             out = ROOT.Prediction()
-            out.append(der)
+            out.add(der)
             self.env.parts.prediction[name] = out

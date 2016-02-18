@@ -1,26 +1,14 @@
-from gna.exp import baseexp
-import gna.exp.reactor
+from gna.exp.reactor import ReactorExperimentModel, Reactor, Detector
 import numpy as np
 import ROOT
 
-class exp(baseexp):
-    @classmethod
-    def initparser(self, parser):
-        parser.add_argument('--ns', default='juno')
-        parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
-        parser.add_argument('--oscprob', choices=['standard', 'decoh'], default='standard')
-        parser.add_argument('--erange', type=float, nargs=2,
-                            default=[1.0, 8.0],
-                            metavar=('E_MIN', 'E_MAX'),
-                            help='energy range')
-        parser.add_argument('--nbins', type=int,
-                            default=200,
-                            help='number of bins')
+class exp(ReactorExperimentModel):
+    name = 'juno'
 
     def makereactors(self):
         common = {
             'power_rate': [1.0],
-            'isotopes': self.isotopes,
+            'isotopes': ReactorExperimentModel.makeisotopes(self.ns),
             'fission_fractions': {
                 'Pu239': [0.60],
                 'Pu241': [0.07],
@@ -44,34 +32,14 @@ class exp(baseexp):
             {'name': 'DYB', 'location': 215.0, 'power': 17.4},
             {'name': 'HZ', 'location': 265.0, 'power': 17.4},
         ]
-        return gna.exp.reactor.makereactors(self.ns, self.opts, common, data)
+        return [Reactor(self.ns, **dict(common.items(), **x)) for x in data]
 
     def makedetectors(self):
-        common = {
-            'livetime': [6*365*24*60*60.0],
-        }
-        data = [
-            {'name': 'AD1', 'location': .0, 'protons': 1.42e33},
-        ]
-        return gna.exp.reactor.makedetectors(self.ns, common, data)
-
-    def __init__(self, env, opts):
-        self.opts = opts
-        self.ns = env.ns(opts.ns)
-        gna.exp.reactor.defparameters(self.ns)
-
-        edges = np.linspace(opts.erange[0], opts.erange[1], opts.nbins+1)
-        orders = np.array([10]*(len(edges)-1), dtype=int)
-
-        Enu, compfactory = gna.exp.reactor.init(self.ns, edges, orders, opts.ibd)
-
-        self.isotopes = gna.exp.reactor.makeisotopes(self.ns)
-        self.reactors = self.makereactors()
-        self.detectors = self.makedetectors()
-
-        for isotope in self.isotopes:
-            isotope.spectrum.f.inputs(Enu)
-
-        gna.exp.reactor.setupcomponents(self.ns, self.opts, self.reactors, self.detectors, Enu)
-        for detector in self.detectors:
-            gna.exp.reactor.setupobservations(self.ns, detector, compfactory)
+        detector = Detector(
+            self.ns,
+            name='AD1',
+            location=0,
+            protons=1.42e33,
+            livetime=[6*365*24*60*60.0]
+        )
+        return [detector]

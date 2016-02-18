@@ -19,7 +19,7 @@ class cmd(basecmd):
         expcls = getattr(expmodule, 'exp')
 
         parser = argparse.ArgumentParser()
-        expcls.initparser(parser)
+        expcls.initparser(parser, self.env)
         expopts = parser.parse_args(self.opts.expargs)
 
         expcls(self.env, expopts)

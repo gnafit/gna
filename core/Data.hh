@@ -112,6 +112,10 @@ public:
     m_type.shape = std::vector<size_t>{shape0, shape1};
     return setKind();
   }
+  DataType::Points<T> &shape(std::vector<size_t> shape) {
+    m_type.shape = shape;
+    return setKind();
+  }
   const std::vector<size_t> &shape() const {
     return m_type.shape;
   }

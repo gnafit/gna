@@ -11,7 +11,10 @@ public:
 
   Prediction &operator=(const Prediction &other);
 
-  void append(SingleOutput &data);
+  void append(SingleOutput &out);
+
+  void calculateTypes(Atypes args, Rtypes rets);
+  void calculatePrediction(Args args, Rets rets);
 
   size_t size() const;
 

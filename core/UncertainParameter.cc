@@ -4,8 +4,5 @@
 using boost::format;
 
 #include <stdexcept>
-#include <cstring>
-#include <cstdlib>
 
 #include "UncertainParameter.hh"
-

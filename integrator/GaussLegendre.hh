@@ -9,6 +9,7 @@
 
 class GaussLegendre: public GNAObject,
                      public Transformation<GaussLegendre> {
+  friend class GaussLegendreHist;
 public:
   GaussLegendre(const std::vector<double> &edges,
                 const std::vector<int> &orders)
@@ -23,21 +24,22 @@ public:
     std::copy(orders, orders+cnt, m_orders.begin());
     init();
   }
-
-  void addfunction(SingleOutput &out);
 protected:
   void init();
 
-  void pointsTypes(Atypes args, Rtypes rets);
-  void points(Args args, Rets rets);
-
-  void histTypes(Atypes args, Rtypes rets);
-  void hist(Args args, Rets rets);
-
   std::vector<double> m_edges;
   std::vector<int> m_orders;
-  std::vector<double> m_points;
+  Eigen::ArrayXd m_points;
   Eigen::ArrayXd m_weights;
+};
+
+class GaussLegendreHist: public GNAObject,
+                         public Transformation<GaussLegendreHist> {
+public:
+  GaussLegendreHist(const GaussLegendre *base);
+protected:
+
+  const GaussLegendre *m_base;
 };
 
 #endif // GAUSSLEGENDRE_H

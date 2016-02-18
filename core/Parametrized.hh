@@ -236,13 +236,13 @@ public:
   typedef ParametrizedTypes::VariableHandle<void> BaseClass;
 
   VariableDescriptor(const BaseClass &other)
-    : BaseClass(other), name(BaseClass::name())
+    : BaseClass(other)
   { }
   VariableDescriptor(const VariableDescriptor &other)
-    : BaseClass(other), name(BaseClass::name())
+    : BaseClass(other)
   { }
   VariableDescriptor(ParametrizedTypes::Entry &entry)
-    : BaseClass(entry), name(BaseClass::name())
+    : BaseClass(entry)
   { }
   static VariableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
@@ -259,8 +259,6 @@ public:
     return BaseClass::m_entry->var.typeName();
   }
 
-  std::string name;
-
 };
 
 class EvaluableDescriptor: public ParametrizedTypes::EvaluableHandle<void> {
@@ -271,7 +269,7 @@ public:
   typedef SimpleDict<VariableDescriptor, SourcesContainer> Sources;
 
   EvaluableDescriptor(const BaseClass &other)
-    : BaseClass(other), name(BaseClass::name()),
+    : BaseClass(other),
       sources(BaseClass::m_entry->sources)
   { }
   EvaluableDescriptor(const EvaluableDescriptor &other)
@@ -290,7 +288,6 @@ public:
     return BaseClass::m_entry->dep.typeName();
   }
 
-  const std::string name;
   const Sources sources;
 };
 

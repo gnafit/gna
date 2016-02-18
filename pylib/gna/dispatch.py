@@ -34,14 +34,13 @@ def loadcmdclass(modules, name, args):
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    cls.initparser(subparsers.add_parser(name), env.default)
+    cls.initparser(subparsers.add_parser(name), env)
     opts = parser.parse_args(args, namespace=LazyNamespace())
 
     return cls, opts
 
 def run():
     modules = getmodules()
-    runlist = []
     for group in arggroups(sys.argv):
         if not group:
             continue
@@ -50,9 +49,6 @@ def run():
             msg = 'unknown module %s' % name
             raise Exception(msg)
         cmdcls, cmdopts = loadcmdclass(modules, name, group)
-        obj = cmdcls(env.default, cmdopts)
+        obj = cmdcls(env, cmdopts)
         obj.init()
-        runlist.append(obj)
-
-    for obj in runlist:
         obj.run()

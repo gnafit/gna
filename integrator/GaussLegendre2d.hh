@@ -9,6 +9,7 @@
 
 class GaussLegendre2d: public GNAObject,
                        public Transformation<GaussLegendre2d> {
+  friend class GaussLegendre2dHist;
 public:
   GaussLegendre2d(const std::vector<double> &xedges,
                   const std::vector<int> &xorders,
@@ -27,8 +28,6 @@ public:
     std::copy(xorders, xorders+xcnt, m_xorders.begin());
     init();
   }
-
-  void addfunction(SingleOutput &out);
 protected:
   void init();
 
@@ -48,6 +47,14 @@ protected:
 
   std::vector<double> m_ypoints;
   Eigen::ArrayXd m_yweights;
+};
+
+class GaussLegendre2dHist: public GNAObject,
+                           public Transformation<GaussLegendre2dHist> {
+public:
+  GaussLegendre2dHist(const GaussLegendre2d *base);
+protected:
+  const GaussLegendre2d *m_base;
 };
 
 #endif // GAUSSLEGENDRE2D_H

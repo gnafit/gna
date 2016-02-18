@@ -15,11 +15,13 @@ set (SOURCES
   core/UncertainParameter.cc
   core/ParametersGroup.cc
   core/Prediction.cc
+  core/CovariatedPrediction.cc
   core/Product.cc
   core/Sum.cc
   core/WeightedSum.cc
   core/LinearInterpolator.cc
   core/Derivative.cc
+  core/Covariance.cc
   core/Covmat.cc
   core/Chi2.cc
   neutrino/OscProb2nu.cc
@@ -41,6 +43,7 @@ set (HEADERS
   GNAObject.hh
   UncertainParameter.hh
   Prediction.hh
+  CovariatedPrediction.hh
   Product.hh
   Sum.hh
   WeightedSum.hh

@@ -6,6 +6,27 @@
 
 const double pi = boost::math::constants::pi<double>();
 
+ReactorNormAbsolute::ReactorNormAbsolute(const std::vector<std::string> &isonames)
+{
+  variable_(&m_norm, "Norm");
+  auto norm = transformation_(this, "isotopes")
+    .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+        for (size_t i = 0; i < rets.size(); ++i) {
+          rets[i] = DataType().points().shape(1);
+        }
+      })
+    .func([](ReactorNormAbsolute *obj, Args args, Rets rets) {
+        for (size_t i = 0; i < rets.size(); ++i) {
+          rets[i].x[0] = obj->m_norm*args[i].x.sum();
+        }
+      })
+  ;
+  for (const std::string &isoname: isonames) {
+    norm.input("fission_fraction_"+isoname);
+    norm.output("norm_"+isoname);
+  }
+}
+
 ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
   : m_ePerFission(isonames.size())
 {

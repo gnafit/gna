@@ -10,6 +10,7 @@
 #include <boost/math/constants/constants.hpp>
 
 #include "Parameters.hh"
+#include "GNAObject.hh"
 
 template <typename T>
 class ParameterWrapper {
@@ -28,137 +29,98 @@ protected:
 };
 
 template <typename T>
-class Uncertain {
+class Uncertain: public GNAObject,
+                 public Transformation<Uncertain<T>>
+{
 public:
   Uncertain(const std::string &name)
-    : m_name(name) { }
+    : m_varhandle(variable_(&m_var, name)), m_name(name)
+  { }
+  Uncertain(const std::string &name, variable<void> var)
+    : Uncertain(name)
+  { m_varhandle.bind(variable<T>(var)); }
+
   virtual ~Uncertain() { }
 
   const std::string &name() const { return m_name; }
-  virtual T value() = 0;
-  virtual T central() = 0;
-  virtual void setCentral(T value) = 0;
-  virtual T sigma() = 0;
-  virtual void setSigma(T sigma) = 0;
+  virtual T value() { return m_var.value(); }
+  virtual T central() { return m_central; }
+  virtual void setCentral(T value) { m_central = value; }
+  virtual T sigma() { return m_sigma; }
+  virtual void setSigma(T sigma) { m_sigma = sigma; }
+  virtual const variable<T> &getVariable() { return m_var; }
 protected:
+  variable<T> m_var;
+  ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
+  T m_central;
+  T m_sigma;
 };
+
+template <>
+inline Uncertain<double>::Uncertain(const std::string &name)
+  : m_varhandle(variable_(&m_var, name)), m_name(name)
+{
+  transformation_(this, name)
+    .output(name)
+    .types([](Atypes, Rtypes rets) {
+        rets[0] = DataType().points().shape(1);
+      })
+    .func([](Uncertain<double> *obj, Args, Rets rets) {
+        rets[0].arr(0) = obj->m_var.value();
+      })
+    ;
+}
 
 template <typename T>
 class Parameter: public Uncertain<T> {
 public:
   Parameter(const std::string &name)
-    : Uncertain<T>(name) { }
+    : Uncertain<T>(name)
+    { m_par = this->m_varhandle.claim(); }
 
-  virtual void set(T value) = 0;
-  virtual T relativeValue(T diff) = 0;
-  virtual void relativeShift(T diff) { set(relativeValue(diff)); }
+  virtual void set(T value)
+    { m_par = value; }
+  virtual T relativeValue(T diff)
+    { return this->value() + diff*this->m_sigma; }
+  virtual void relativeShift(T diff)
+    { set(relativeValue(diff)); }
 
-  virtual T cast(const std::string &v) const;
-  virtual T cast(const T &v) const { return v; }
+  virtual T cast(const std::string &v) const
+    { return boost::lexical_cast<T>(v); }
+  virtual T cast(const T &v) const
+    { return v; }
 
   virtual void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
   virtual const std::vector<std::pair<T, T>> &limits() const
     { return m_limits; }
 
-  using Uncertain<T>::central;
-  virtual void reset() { set(central()); }
-  // virtual T covariance(Parameter<T> *other);
-  virtual void setCorrelation(Parameter<T> *other, double correlation);
+  virtual void reset() { set(this->central()); }
+  bool influences(SingleOutput &out) {
+    return out.single().depends(this->getVariable());
+  }
 protected:
   std::vector<std::pair<T, T>> m_limits;
-  std::map<Parameter<T>*, double> m_correlations;
+  parameter<T> m_par;
 };
-
-template <typename T>
-T Parameter<T>::cast(const std::string &v) const {
-  return boost::lexical_cast<T>(v);
-}
-
-template <typename T>
-void Parameter<T>::setCorrelation(Parameter<T> *other, double correlation) {
-  if (this == other) {
-    throw std::runtime_error("can't set self-correlation");
-  }
-  if (this - other > static_cast<ptrdiff_t>(0)) {
-    return other->setCorrelation(this, correlation);
-  }
-  m_correlations[other] = correlation;
-}
 
 template <typename T>
 class GaussianParameter: public Parameter<T> {
 public:
   GaussianParameter(const std::string &name)
-    : Parameter<T>(name), m_var(name.c_str()) { }
-  GaussianParameter(const std::string &name, parameter<void> pvar)
-    : Parameter<T>(name), m_var(pvar) { }
-
-  T value() { return m_var;}
-  T central() { return m_central; }
-  void setCentral(T value) { m_central = value; }
-  T sigma() { return m_sigma; }
-  void setSigma(T sigma) { m_sigma = sigma; }
-  void set(T value) { m_var = value;}
-  T relativeValue(T diff) { return value() + diff*m_sigma; }
-
-  const variable<T> &getVariable() const { return m_var; }
-protected:
-  parameter<T> m_var;
-  T m_central;
-  T m_sigma;
-};
-
-template <typename T>
-class GaussianValue: public Uncertain<T> {
-public:
-  GaussianValue(const std::string &name, variable<void> var)
-    : Uncertain<T>(name), m_var(var) { }
-
-  T value() { return m_var; }
-  T central() { return m_central; }
-  void setCentral(T value) { m_central = value; }
-  T sigma() { return m_sigma; }
-  void setSigma(T sigma) { m_sigma = sigma; }
-
-  const variable<T> &getVariable() const { return m_var; }
-protected:
-  variable<T> m_var;
-  T m_central;
-  T m_sigma;
+    : Parameter<T>(name) { }
 };
 
 template <typename T>
 class UniformAngleParameter: public Parameter<T> {
 public:
   UniformAngleParameter(const std::string &name)
-    : Parameter<T>(name), m_var(name.c_str()) {
-    m_sigma = std::numeric_limits<T>::infinity();
-  }
-  UniformAngleParameter(const std::string &name, parameter<void> pvar)
-    : Parameter<T>(name), m_var(pvar) {
-    m_sigma = std::numeric_limits<T>::infinity();
-  }
-
-  void set(T value);
-  T value() { return m_var; }
-  T central() { return m_central; }
-  void setCentral(T value) { m_central = value; }
-  T sigma() { return m_sigma; }
-  void setSigma(T sigma) { m_sigma = sigma; }
-  T cast(const std::string &v) const;
-  T cast(const T &v) const { return v; }
-
-  virtual T relativeValue(T diff) {
-    return diff*std::numeric_limits<T>::infinity();
-  }
-
-  const variable<T> &getVariable() const { return m_var; }
-protected:
-  parameter<T> m_var;
-  T m_central;
-  T m_sigma;
+    : Parameter<T>(name)
+    { this->m_sigma = std::numeric_limits<T>::infinity(); }
+  void set(T value) override;
+  T cast(const std::string &v) const override;
+  T cast(const T &v) const override { return Parameter<T>::cast(v); }
 };
 
 template <typename T>
@@ -169,7 +131,7 @@ inline void UniformAngleParameter<T>::set(T value) {
   if (v > pi) {
     v -= 2*pi;
   }
-  m_var = v;
+  Parameter<T>::set(v);
 }
 
 template <typename T>

@@ -31,40 +31,33 @@ void GaussLegendre::init() {
   }
   transformation_(this, "points")
     .output("x")
-    .types(&GaussLegendre::pointsTypes)
-    .func(&GaussLegendre::points);
+    .types([](GaussLegendre *obj, Atypes, Rtypes rets) {
+        rets[0] = DataType().points().shape(obj->m_points.size());
+      })
+    .func([](GaussLegendre *obj, Args, Rets rets) {
+        rets[0].x = obj->m_points;
+      })
+    ;
+}
+
+GaussLegendreHist::GaussLegendreHist(const GaussLegendre *base)
+  : m_base(base)
+{
   transformation_(this, "hist")
-    .types(&GaussLegendre::histTypes)
-    .func(&GaussLegendre::hist);
-}
-
-void GaussLegendre::pointsTypes(Atypes /*args*/, Rtypes rets) {
-  rets[0] = DataType().points().shape(m_points.size());
-}
-
-void GaussLegendre::points(Args /*args*/, Rets rets) {
-  rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&m_points[0], m_points.size());
-}
-
-void GaussLegendre::addfunction(SingleOutput &out) {
-  t_["hist"].input(out);
-  t_["hist"].output(out);
-}
-
-void GaussLegendre::histTypes(Atypes /*args*/, Rtypes rets) {
-  for (size_t k = 0; k < rets.size(); ++k) {
-    rets[k] = DataType().hist().bins(m_orders.size()).edges(m_edges);
-  }
-}
-
-void GaussLegendre::hist(Args args, Rets rets) {
-  for (size_t k = 0; k < rets.size(); ++k) {
-    ArrayXd prod = args[k].x*m_weights;
-    auto *data = prod.data();
-    for (size_t i = 0; i < m_orders.size(); ++i) {
-      size_t n = m_orders[i];
-      rets[k].x(i) = std::accumulate(data, data+n, 0.0);
-      data += n;
-    }
-  }
+    .input("f")
+    .output("hist")
+    .types(Atypes::ifSame, [](GaussLegendreHist *obj, Atypes, Rtypes rets) {
+        rets[0] = DataType().hist().bins(obj->m_base->m_orders.size()).edges(obj->m_base->m_edges);
+      })
+    .func([](GaussLegendreHist *obj, Args args, Rets rets) {
+        ArrayXd prod = args[0].x*obj->m_base->m_weights;
+        auto *data = prod.data();
+        const auto &orders = obj->m_base->m_orders;
+        for (size_t i = 0; i < orders.size(); ++i) {
+          size_t n = orders[i];
+          rets[0].x(i) = std::accumulate(data, data+n, 0.0);
+          data += n;
+        }
+      })
+    ;  
 }

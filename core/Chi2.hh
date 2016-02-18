@@ -10,30 +10,16 @@ class Chi2: public GNASingleObject,
 public:
   Chi2() {
     transformation_(this, "chi2")
-      .input("prediction")
-      .input("observation")
-      .input("L")
       .output("chi2")
-      .types([](Atypes args, Rtypes rets) {
-          if (args[0].shape.size() != 1) {
-            throw rets.error(rets[0]);
-          }
-          if (args[1].shape != args[0].shape) {
-            throw rets.error(rets[0]);
-          }
-          if (args[2].shape.size() != 2 ||
-              args[2].shape[0] != args[2].shape[1]) {
-            throw rets.error(rets[0]);
-          }
-          if (args[2].shape[0] != args[0].shape[0]) {
-            throw rets.error(rets[0]);
-          }
-          rets[0] = DataType().points().shape(1);
-        })
+      .types(&Chi2::checkTypes)
       .func(&Chi2::calculateChi2)
     ;
     m_transform = t_["chi2"];
   }
+
+  void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
+
+  void checkTypes(Atypes args, Rtypes rets);
   void calculateChi2(Args args, Rets rets);
 
   virtual double value() override {

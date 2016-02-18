@@ -14,7 +14,7 @@ class cmd(basecmd):
 
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
-                            action=append_typed(qualified(env.parts.prediction, observable)))
+                            action=append_typed(observable))
 
     def run(self):
         ax = plt.gca()

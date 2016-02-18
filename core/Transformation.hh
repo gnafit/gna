@@ -45,7 +45,7 @@ public:
   };
 
   TransformationDescriptor(const BaseClass &other)
-    : Handle(other), name(BaseClass::name()),
+    : Handle(other),
       inputs(m_entry->sources),
       outputs(m_entry->sinks)
     { }
@@ -56,7 +56,6 @@ public:
     : TransformationDescriptor(BaseClass(entry))
     { }
 
-  const std::string name;
   const Inputs inputs;
   const Outputs outputs;
 
@@ -68,7 +67,7 @@ public:
   typedef TransformationTypes::InputHandle BaseClass;
 
   InputDescriptor(const BaseClass &other)
-    : BaseClass(other), name(BaseClass::name())
+    : BaseClass(other)
     { }
   InputDescriptor(const InputDescriptor &other)
     : InputDescriptor(BaseClass(other))
@@ -96,8 +95,6 @@ public:
   void connect(const TransformationDescriptor &obj) const;
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
-
-  const std::string name;
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandle,
@@ -106,7 +103,7 @@ public:
   typedef TransformationTypes::OutputHandle BaseClass;
 
   OutputDescriptor(const BaseClass &other)
-    : BaseClass(other), name(BaseClass::name())
+    : BaseClass(other)
     { }
   OutputDescriptor(const OutputDescriptor &other)
     : OutputDescriptor(BaseClass(other))
@@ -118,8 +115,6 @@ public:
   static OutputDescriptor invalid(const std::string name);
 
   TransformationTypes::OutputHandle single() override { return *this; }
-
-  const std::string name;
 };
 
 #endif // TRANSFORMATION_H

@@ -1,5 +1,6 @@
 from gna.env import env
 import numpy as np
+import ROOT
 
 def hygienic(decorator):
     def new_decorator(original):
@@ -25,8 +26,8 @@ def wrapGNAclass(cls):
                 msg = "unknown keywords %s in constructor of %r"
                 msg = msg % (', '.join(kwargs.keys()), self)
                 raise Exception(msg)
-            env.current.register(self, bind=bind, freevars=freevars,
-                                 ns=ns, bindings=bindings)
+            env.register(self, bind=bind, freevars=freevars,
+                         ns=ns, bindings=bindings)
         def __getattr__(self, attr):
             try:
                 return self[attr]
@@ -44,7 +45,7 @@ def patchSimpleDict(cls):
 
     def iterkeys(self):
         for i in range(self.size()):
-            yield self.at(i).name
+            yield self.at(i).name()
 
     def __contains__(self, key):
         return key in keys(self)
@@ -54,7 +55,7 @@ def patchSimpleDict(cls):
 
     def iteritems(self):
         for i in range(self.size()):
-            yield self.at(i).name, self.at(i)
+            yield self.at(i).name(), self.at(i)
 
     def __len__(self):
         return self.size()
@@ -138,6 +139,14 @@ def patchStatistic(cls):
         return self.value()
     cls.__call__ = __call__
 
+def patchDescriptor(cls):
+    def __hash__(self):
+        return self.hash()
+    def __eq__(self, other):
+        return self.hash() == other.hash()
+    cls.__hash__ = __hash__
+    cls.__eq__ = __eq__
+    
 @hygienic
 def wrapPoints(cls):
     class WrappedClass(cls):
@@ -145,8 +154,12 @@ def wrapPoints(cls):
             if len(args) == 1:
                 arr = args[0]
                 if isinstance(arr, np.ndarray) or isinstance(arr, list):
-                    arr = np.ascontiguousarray(args[0], dtype=np.float64)
-                    return super(WrappedClass, self).__init__(arr, len(arr), **kwargs)
+                    shape = np.array(arr).shape
+                    arr = np.ascontiguousarray(arr, dtype=np.float64)
+                    shapevec = ROOT.vector("size_t")()
+                    for x in shape:
+                        shapevec.push_back(x)
+                    return super(WrappedClass, self).__init__(arr, shapevec, **kwargs)
                 super(WrappedClass, self).__init__(*args, **kwargs)
     return WrappedClass
 
@@ -171,6 +184,9 @@ def setup(ROOT):
     patchTransformationDescriptor(ROOT.TransformationDescriptor)
 
     patchStatistic(ROOT.Statistic)
+
+    patchDescriptor(ROOT.InputDescriptor)
+    patchDescriptor(ROOT.OutputDescriptor)
 
     dataproviders = [
         ROOT.OutputDescriptor,

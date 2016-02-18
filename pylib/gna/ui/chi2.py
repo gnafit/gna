@@ -6,14 +6,12 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('name')
-        parser.add_argument('prediction', type=env.parts.prediction)
-        parser.add_argument('data', type=env.parts.data)
-        parser.add_argument('covmat', type=env.parts.covmat)
+        parser.add_argument('inputs', type=env.parts.inputs)
 
     def init(self):
         chi2 = ROOT.Chi2()
-        chi2.chi2.prediction(self.opts.prediction)
-        chi2.chi2.observation(self.opts.data)
-        chi2.chi2.L(self.opts.covmat.cholesky)
+        for block in self.opts.inputs:
+            chi2.add(block.theory, block.data, block.cov)
 
         self.env.parts.statistic[self.opts.name] = chi2
+        print chi2.value()

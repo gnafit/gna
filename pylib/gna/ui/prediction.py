@@ -1,46 +1,34 @@
-from gna.ui import basecmd, append_typed
+from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
 from gna.env import PartNotFoundError
+from itertools import chain
+from gna.dataset import Dataset
 
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        def observablespec(spec):
-            ret = []
-            for path in spec.split('+'):
-                nspath, name = path.split('/')
-                try:
-                    ret.append(env.ns(nspath).observables[name])
-                except KeyError:
-                    raise PartNotFoundError("observable", path)
-            return ret
+        parser.add_argument('-d', '--datasets', nargs='+', required=True,
+                            metavar='DATASET')
+        parser.add_argument('-p', '--parameters', nargs='+', default=[],
+                            metavar='PAR',
+                            help='paremeters for covmatrix')
+        parser.add_argument('-n', '--name', required=True)
+        parser.add_argument('-o', '--observables', nargs='+', required=True,
+                            metavar='OBSERVABLE')
 
-        parser.add_argument('-l', '--list-observables', action='store_true',
-                            help='display all available observables')
-        parser.add_argument('-a', '--add', nargs=2, default=[],
-                            metavar=('NAME', 'OBSSPEC'),
-                            action=append_typed(str, observablespec),
-                            help='add prediction NAME for observables specified by OBSSPEC (o1[+o2+[...]])')
-        parser.add_argument('-p', '--print', action='append', default=[],
-                            metavar='NAME',
-                            type=env.parts.prediction,
-                            help='print prediction NAME')
-
-    def init(self):
-        if self.opts.list_observables:
-            for ns in self.env.iternstree():
-                for name, prediction in ns.observables.iteritems():
-                    path = '/'.join([ns.path, name])
-                    print 'Observable', path
-
-        for name, observables in self.opts.add:
-            prediction = ROOT.Prediction()
-            for obs in observables:
-                prediction.append(obs)
-            self.env.parts.prediction[name] = prediction
-            print 'Prediction', name, 'size:', prediction.size()
-
-        for prediction in getattr(self.opts, 'print'):
-            print prediciton.data()
-
+    def run(self):
+        datasets = [self.env.parts.dataset[dsname]
+                    for dsname in self.opts.datasets]
+        dataset = Dataset(name=self.opts.name+'_dataset',
+                          desc=None,
+                          bases=datasets)
+        parameters = [self.env.pars[pname] for pname in self.opts.parameters]
+        observables = []
+        for path in self.opts.observables:
+            nspath, name = path.split('/')
+            observables.append(self.env.ns(nspath).observables[name])
+        
+        blocks = dataset.makeblocks(observables, parameters)
+        self.env.parts.prediction[name] = blocks
+        print blocks

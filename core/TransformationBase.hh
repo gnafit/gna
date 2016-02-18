@@ -34,18 +34,13 @@ namespace TransformationTypes {
   struct Entry;
   struct Source;
 
-  struct TypePattern {
-    DataType dt;
-  };
-
   struct Sink: public boost::noncopyable {
     Sink(const std::string &name, Entry *entry)
       : name(name), entry(entry) { }
     Sink(const Sink &other, Entry *entry)
-      : name(other.name), typepattern(other.typepattern), entry(entry) { }
+      : name(other.name), entry(entry) { }
 
     std::string name;
-    TypePattern typepattern;
     std::unique_ptr<Data<double>> data;
     std::vector<Source*> sources;
     Entry *entry;
@@ -56,14 +51,13 @@ namespace TransformationTypes {
     Source(const std::string &name, Entry *entry)
       : name(name), entry(entry) { }
     Source(const Source &other, Entry *entry)
-      : name(other.name), typepattern(other.typepattern), entry(entry) { }
+      : name(other.name), entry(entry) { }
 
     void connect(Sink *newsink);
     bool materialized() const {
       return sink && sink->data;
     }
     std::string name;
-    TypePattern typepattern;
     const Sink *sink = nullptr;
     Entry *entry;
   };
@@ -90,9 +84,9 @@ namespace TransformationTypes {
 
   class CalculationError: public std::runtime_error {
   public:
-    CalculationError(const Sink *s, const std::string &message);
+    CalculationError(const Entry *e, const std::string &message);
 
-    const Sink *sink;
+    const Entry *entry;
   };
 
   class OutputHandle;
@@ -106,6 +100,9 @@ namespace TransformationTypes {
     void connect(const OutputHandle &out) const;
 
     const std::string &name() const { return m_source->name; }
+
+    const void *rawptr() const { return static_cast<const void*>(m_source); }
+    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }
   protected:
     TransformationTypes::Source *m_source;
   };
@@ -125,6 +122,10 @@ namespace TransformationTypes {
     const double *data() const;
     const double *view() const { return m_sink->data->x.data(); }
     const DataType &datatype() const { return m_sink->data->type; }
+
+    const void *rawptr() const { return static_cast<const void*>(m_sink); }
+    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }
+    bool depends(changeable x) const;
   private:
     TransformationTypes::Sink *m_sink;
   };
@@ -156,16 +157,8 @@ namespace TransformationTypes {
     void evaluateTypes();
     void updateTypes();
 
-    void touch() {
-      if (tainted && !frozen) {
-        update();
-      }
-    }
-
-    const Data<double> &data(int i) {
-      touch();
-      return *sinks[i].data;
-    }
+    void touch();
+    const Data<double> &data(int i);
 
     void freeze() { frozen = true; }
     void unfreeze() { frozen = false; }
@@ -182,6 +175,7 @@ namespace TransformationTypes {
     const Base *parent;
     int initializing;
     bool frozen;
+    bool usable;
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
@@ -191,6 +185,10 @@ namespace TransformationTypes {
   inline const double *OutputHandle::data() const {
     m_sink->entry->touch();
     return view();
+  }
+
+  inline bool OutputHandle::depends(changeable x) const {
+    return m_sink->entry->tainted.depends(x);
   }
 
   class Handle {
@@ -204,11 +202,6 @@ namespace TransformationTypes {
     std::vector<OutputHandle> outputs() const;
     InputHandle input(const std::string &name) {
       return m_entry->addSource(name);
-    }
-    InputHandle input(OutputHandle output) {
-      InputHandle inp = m_entry->addSource(output.name());
-      inp.connect(output);
-      return inp;
     }
     InputHandle input(SingleOutput &output);
     OutputHandle output(const std::string &name) {
@@ -232,11 +225,7 @@ namespace TransformationTypes {
 
   struct Args {
     Args(const Entry *e): m_entry(e) { }
-    const Data<double> &operator[](int i) const {
-      const Source &src = m_entry->sources[i];
-      src.sink->entry->touch();
-      return *src.sink->data;
-    }
+    const Data<double> &operator[](int i) const;
     size_t size() const { return m_entry->sources.size(); }
   private:
     const Entry *m_entry;
@@ -245,11 +234,9 @@ namespace TransformationTypes {
   struct Rets {
   public:
     Rets(Entry *e): m_entry(e) { }
-    Data<double> &operator[](int i) const {
-      return *m_entry->sinks[i].data;
-    }
+    Data<double> &operator[](int i) const;
     size_t size() const { return m_entry->sinks.size(); }
-    CalculationError error(const Data<double> &data, const std::string &message = "");
+    CalculationError error(const std::string &message = "");
     void freeze()  { m_entry->freeze(); }
     void unfreeze()  { m_entry->unfreeze(); }
   private:
@@ -259,15 +246,18 @@ namespace TransformationTypes {
   struct Atypes {
     class Undefined {
     public:
-      Undefined(const Source *s) : source(s) { }
+      Undefined(const Source *s = nullptr) : source(s) { }
       const Source *source;
     };
     Atypes(const Entry *e): m_entry(e) { }
-    const DataType &operator[](int i) const {
+    const Sink *sink(int i) const {
       if (!m_entry->sources[i].materialized()) {
         throw Undefined(&m_entry->sources[i]);
       }
-      return m_entry->sources[i].sink->data->type;
+      return m_entry->sources[i].sink;
+    }
+    const DataType &operator[](int i) const {
+      return sink(i)->data->type;
     }
     size_t size() const { return m_entry->sources.size(); }
 
@@ -280,6 +270,8 @@ namespace TransformationTypes {
     SourceTypeError error(const DataType &dt, const std::string &message = "");
 
     const std::string &name() const { return m_entry->name; }
+
+    Undefined undefined() { return Undefined(); }
   private:
     const Entry *m_entry;
   };
@@ -311,23 +303,6 @@ namespace TransformationTypes {
     rets[Ret] = args[Arg];
   }
 
-  inline void Entry::evaluate() {
-    return fun(Args(this), Rets(this));
-  }
-
-  inline void Entry::update() {
-    Status status = Status::Success;
-    try {
-      evaluate();
-    } catch (const SinkTypeError&) {
-      status = Status::Failed;
-    }
-    for (auto &sink: sinks) {
-      sink.data->state = status;
-    }
-    tainted = false;
-  }
-
   class Accessor {
   public:
     Accessor() { }
@@ -341,7 +316,7 @@ namespace TransformationTypes {
 
   template <typename T>
   class Initializer;
-  class Base {
+  class Base: public boost::noncopyable {
     template <typename T>
     friend class ::Transformation;
     template <typename T>

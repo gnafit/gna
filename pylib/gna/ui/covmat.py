@@ -6,14 +6,11 @@ import numpy as np
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
+        parser.add_argument('name')
         parser.add_argument('-a', '--add', nargs=2, default=[],
                             metavar=('NAME', 'DIAGONAL'),
                             action=append_typed(str, qualified(env.parts.prediction, env.parts.data)),
                             help='add statistical covariance matrix NAME from DIAGONAL')
-        parser.add_argument('-s', '--systematics', nargs='+', default=[],
-                            metavar=('NAME PREDICTION PAR', 'PAR'),
-                            action=append_typed(str, env.parts.prediction, at_least(1, str)),
-                            help='add to covariance matrix NAME systematics of PREDICTION wrt PARs')
         parser.add_argument('-f', '--fix', default=[],
                             action=append_typed(env.parts.covmat, lazy=True),
                             help='fix covariance matrix NAME')
@@ -30,12 +27,6 @@ class cmd(basecmd):
             self.env.parts.covmat[name] = covmat
             print 'Covmat', name, 'from', diag
 
-        for name, prediction, pars in self.opts.systematics:
-            covmat = self.env.parts.covmat[name]
-            for parname in pars:
-                der = ROOT.Derivative(self.env.pars[parname])
-                der.derivative.inputs(prediction)
-                covmat.rank1(der)
 
         for covmat in self.opts.fix:
             covmat.setFixed(True)

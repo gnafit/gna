@@ -18,6 +18,7 @@ using TransformationTypes::InputHandle;
 using TransformationTypes::OutputHandle;
 using TransformationTypes::Handle;
 
+using TransformationTypes::Args;
 using TransformationTypes::Rets;
 using TransformationTypes::Atypes;
 using TransformationTypes::Rtypes;
@@ -28,9 +29,12 @@ using TransformationTypes::Base;
 template <typename T>
 std::string errorMessage(const std::string &type, const T *s,
                          const std::string &msg) {
-  std::string name = s ? s->name : "unspecified";
-  std::string message = msg.empty() ? "error" : msg;
-  return (boost::format("%3% %1%: %2%") % name % message % type).str();
+  std::string name;
+  if (s) {
+    name = std::string(" ")+s->name;
+  }
+  std::string message = msg.empty() ? "unspecified error" : msg;
+  return (boost::format("%2%%1%: %3%") % name % type % message).str();
 }
 
 SinkTypeError::SinkTypeError(const Sink *s, const std::string &message)
@@ -43,9 +47,9 @@ SourceTypeError::SourceTypeError(const Source *s, const std::string &message)
     source(s)
 { }
 
-CalculationError::CalculationError(const Sink *s, const std::string &message)
-  : std::runtime_error(errorMessage("result", s, message)),
-    sink(s)
+CalculationError::CalculationError(const Entry *e, const std::string &message)
+  : std::runtime_error(errorMessage("transformation", e, message)),
+    entry(e)
 { }
 
 Entry::Entry(const std::string &name, const Base *parent)
@@ -94,6 +98,23 @@ bool Entry::check() const {
   return true;
 }
 
+void Entry::evaluate() {
+  return fun(Args(this), Rets(this));
+}
+
+void Entry::update() {
+  Status status = Status::Success;
+  try {
+    evaluate();
+    tainted = false;
+  } catch (const SinkTypeError&) {
+    status = Status::Failed;
+  }
+  for (auto &sink: sinks) {
+    sink.data->state = status;
+  }
+}
+
 void Entry::dump(size_t level) const {
   std::string spacing = std::string(level*2, ' ');
   std::cerr << spacing << "Transformation " << name << std::endl;
@@ -128,7 +149,10 @@ std::vector<OutputHandle> Handle::outputs() const {
 }
 
 InputHandle Handle::input(SingleOutput &output) {
-  return input(output.single());
+  OutputHandle outhandle = output.single();
+  InputHandle inp = m_entry->addSource(outhandle.name());
+  inp.connect(outhandle);
+  return inp;
 }
 
 OutputHandle Handle::output(SingleOutput &out) {
@@ -239,8 +263,8 @@ void Entry::evaluateTypes() {
   } catch (const Atypes::Undefined&) {
     TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
-  std::set<Entry*> deps;
   if (success) {
+    std::set<Entry*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     for (size_t i = 0; i < sinks.size(); ++i) {
       if (sinks[i].data && sinks[i].data->type == rets[i]) {
@@ -258,14 +282,34 @@ void Entry::evaluateTypes() {
         deps.insert(depsrc->entry);
       }
     }
-  }
-  for (Entry *dep: deps) {
-    dep->evaluateTypes();
+    for (Entry *dep: deps) {
+      dep->evaluateTypes();
+    }
   }
 }
 
 void Entry::updateTypes() {
   evaluateTypes();
+}
+
+void Entry::touch() {
+  if (tainted && !frozen) {
+    update();
+  }
+}
+
+const Data<double> &Entry::data(int i) {
+  if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
+    auto fmt = format("invalid sink idx %1%, have %2% sinks");
+    throw CalculationError(this, (fmt % i % sinks.size()).str());
+  }
+  const Sink &sink = sinks[i];
+  if (!sink.data) {
+    auto fmt = format("sink %1% (%2%) have no type");
+    throw CalculationError(this, (fmt % i % sink.name).str());
+  }
+  touch();
+  return *sink.data;
 }
 
 void Atypes::passAll(Atypes args, Rtypes rets) {
@@ -308,15 +352,32 @@ DataType &Rtypes::operator[](int i) {
   return (*m_types)[i];
 }
 
-CalculationError Rets::error(const Data<double> &data,  const std::string &message) {
-  const Sink *sink = nullptr;
-  for (size_t i = 0; i < m_entry->sinks.size(); ++i) {
-    if (m_entry->sinks[i].data.get() == &data) {
-      sink = &m_entry->sinks[i];
-      break;
-    }
+const Data<double> &Args::operator[](int i) const {
+  if (i < 0 or static_cast<size_t>(i) > m_entry->sources.size()) {
+    auto fmt = format("invalid arg idx %1%, have %2% args");
+    throw CalculationError(m_entry, (fmt % i % m_entry->sources.size()).str());
   }
-  return CalculationError(sink, message);
+  const Source &src = m_entry->sources[i];
+  if (!src.materialized()) {
+    auto fmt = format("arg %1% (%2%) have no type on evaluatien");
+    throw CalculationError(m_entry, (fmt % i % src.name).str());
+  }
+  src.sink->entry->touch();
+  return *src.sink->data;
+}
+
+Data<double> &Rets::operator[](int i) const {
+  if (i < 0 or static_cast<size_t>(i) > m_entry->sinks.size()) {
+    auto fmt = format("invalid ret idx %1%, have %2% rets");
+    throw CalculationError(m_entry, (fmt % i % m_entry->sinks.size()).str());
+  }
+  auto &data = m_entry->sinks[i].data;
+  if (!data) {
+    auto fmt = format("ret %1% (%2%) have no type on evaluatien");
+    throw CalculationError(m_entry, (fmt % i % m_entry->sinks[i].name).str());
+  }
+
+  return *m_entry->sinks[i].data;
 }
 
 SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {

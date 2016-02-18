@@ -42,47 +42,42 @@ void GaussLegendre2d::init() {
   transformation_(this, "points")
     .output("x")
     .output("y")
-    .types(&GaussLegendre2d::pointsTypes)
-    .func(&GaussLegendre2d::points);
+    .types([](GaussLegendre2d *obj, Atypes, Rtypes rets) {
+        rets[0] = DataType().points().shape(obj->m_xpoints.size());
+        rets[1] = DataType().points().shape(obj->m_ypoints.size());
+      })
+    .func([](GaussLegendre2d *obj, Args, Rets rets) {
+        rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_xpoints[0], obj->m_xpoints.size());
+        rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_ypoints[0], obj->m_ypoints.size());
+      })
+    ;
+}
+
+GaussLegendre2dHist::GaussLegendre2dHist(const GaussLegendre2d *base)
+  : m_base(base)
+{
   transformation_(this, "hist")
-    .types(&GaussLegendre2d::histTypes)
-    .func(&GaussLegendre2d::hist);
+    .input("f")
+    .output("hist")
+    .types(Atypes::ifSame, [](GaussLegendre2dHist *obj, Atypes, Rtypes rets) {
+        rets[0] = DataType().hist().bins(obj->m_base->m_xorders.size()).edges(obj->m_base->m_xedges);
+      })
+    .func([](GaussLegendre2dHist *obj, Args args, Rets rets) {
+        size_t shape[2];
+        shape[0] = obj->m_base->m_xpoints.size();
+        shape[1] = obj->m_base->m_ypoints.size();
+        for (size_t k = 0; k < rets.size(); ++k) {
+          Map<const ArrayXXd, Aligned> pts(args[k].x.data(), shape[0], shape[1]);
+          auto &xw = obj->m_base->m_xweights, &yw = obj->m_base->m_yweights;
+          ArrayXd prod = (pts.rowwise()*yw.transpose()).rowwise().sum()*xw;
+          auto *data = prod.data();
+          for (size_t i = 0; i < obj->m_base->m_xorders.size(); ++i) {
+            size_t n = obj->m_base->m_xorders[i];
+            rets[k].x(i) = std::accumulate(data, data+n, 0.0);
+            data += n;
+          }
+        }
+      })
+    ;  
 }
 
-void GaussLegendre2d::pointsTypes(Atypes /*args*/, Rtypes rets) {
-  rets[0] = DataType().points().shape(m_xpoints.size());
-  rets[1] = DataType().points().shape(m_ypoints.size());
-}
-
-void GaussLegendre2d::points(Args /*args*/, Rets rets) {
-  rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&m_xpoints[0], m_xpoints.size());
-  rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&m_ypoints[0], m_ypoints.size());
-}
-
-void GaussLegendre2d::addfunction(SingleOutput &out) {
-  t_["hist"].input(out);
-  t_["hist"].output(out);
-}
-
-void GaussLegendre2d::histTypes(Atypes /*args*/, Rtypes rets) {
-  for (size_t k = 0; k < rets.size(); ++k) {
-    rets[k] = DataType().hist().bins(m_xorders.size()).edges(m_xedges);
-  }
-}
-
-void GaussLegendre2d::hist(Args args, Rets rets) {
-  size_t shape[2];
-  shape[0] = m_xpoints.size();
-  shape[1] = m_ypoints.size();
-  for (size_t k = 0; k < rets.size(); ++k) {
-    Map<const ArrayXXd, Aligned> pts(args[k].x.data(), shape[0], shape[1]);
-    auto &xw = m_xweights, &yw = m_yweights;
-    ArrayXd prod = (pts.rowwise()*yw.transpose()).rowwise().sum()*xw;
-    auto *data = prod.data();
-    for (size_t i = 0; i < m_xorders.size(); ++i) {
-      size_t n = m_xorders[i];
-      rets[k].x(i) = std::accumulate(data, data+n, 0.0);
-      data += n;
-    }
-  }
-}

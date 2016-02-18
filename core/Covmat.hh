@@ -37,7 +37,6 @@ public:
   void calculateCholesky(Args args, Rets rets);
 
   void rank1(SingleOutput &data);
-  // void rank1(SingleOutput &out);
 
   size_t ndim() const;
   size_t size() const;
