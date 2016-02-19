@@ -9,7 +9,7 @@
 #include <deque>
 #include <cstring>
 
-#include <boost/core/demangle.hpp>
+#include "demangle.hpp"
 
 class changeable;
 struct references {
