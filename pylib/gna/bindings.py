@@ -64,15 +64,15 @@ def patchSimpleDict(cls):
         return self.iterkeys()
 
     def __getattr__(self, attr):
-        try:
+        if attr in self:
             return self[attr]
-        except KeyError:
+        else:
             raise AttributeError(attr)
 
     def get(self, key, default=None):
-        try:
+        if key in self:
             return self[key]
-        except KeyError:
+        else:
             return default
 
     cls.itervalues = itervalues
