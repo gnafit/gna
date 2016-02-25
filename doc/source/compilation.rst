@@ -14,6 +14,7 @@ You must have the following libraries installed prior to compilation:
 * `scipy <http://www.scipy.org/>`_
 * `matplotlib <http://matplotlib.org/>`_
 * `PyYAML <http://pyyaml.org/>`_
+* `IPython <http://ipython.org/>`_
 
 You also need Python 2.7, not very old `CMake
 <http://www.cmake.org/>`_ and modern C++11 compiler (GCC or
@@ -27,9 +28,9 @@ procedure::
 
 If the build was successfull, you can run the program::
 
-  $ cd ..
   $ export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
   $ export PYTHONPATH=$PWD/../pylib:$PYTHONPATH
+  $ cd ..
   $ python2 gna
 
 If everything went fine, no output will be produced. Incremental

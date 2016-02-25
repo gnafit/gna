@@ -89,6 +89,9 @@ To make that code usable you need:
   files, we would add it to ``SOURCES`` list; since we have only
   header, we add only header to the ``HEADERS`` list;
 - add new directory ``examples/`` to the ``include_directories``;
+- modify `core/LinkDef.h` adding the following line::
+    #pragma link C++ class GaussianPeakWithBackground-;
+
 - recompile: ``make -C build``.
 
 To actually use the computational module we have to create a Python

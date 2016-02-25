@@ -19,7 +19,7 @@ class Dataset(object):
         self.covariate(obs, obs, error)
 
     def covariate(self, obs1, obs2, cov):
-        if not issubclass(type(cov), ROOT.PyRootType):
+        if not isinstance(type(cov), ROOT.PyRootType):
             cov = ROOT.Points(cov)
         self.covariance[frozenset([obs1, obs2])].append(cov)
 
@@ -66,6 +66,8 @@ class Dataset(object):
         datas = [self.data.get(obs) for obs in obsblock]
         if any(data is None for data in datas):
             return None
+        if len(datas) == 1:
+            return datas[0]
         merged = np.hstack([np.ravel(data) for data in datas])
         return ROOT.Points(merged)
             

@@ -8,6 +8,7 @@ import gna.parameters.ibd
 import gna.parameters.oscillation
 import itertools
 from gna.exp import baseexp
+from gna.env import env
 
 class Reactor(object):
     def __init__(self, ns, name, location, fission_fractions,
@@ -44,9 +45,9 @@ class ReactorGroup(object):
         self.name = name
         self.reactors = reactors
 
+        self.power = 1
         self.power_rate = reactors[0].power_rate
 
-        self.isotopes = reactors[0].isotopes
         self.fission_fractions = reactors[0].fission_fractions
 
     def initdistance(self, ns, detector):
@@ -61,10 +62,13 @@ class ReactorGroup(object):
         pair_ns.defparameter("ThermalPower", target=pair_ns.ref("Pavg"))
 
 class Detector(object):
-    def __init__(self, ns, name, location,
-                 protons=None, livetime=None):
+    def __init__(self, ns, name, edges, location,
+                 orders=None, protons=None, livetime=None):
         self.ns = ns("detectors")(name)
         self.name = name
+        self.edges = edges
+        self.orders = orders
+
         self.location = location
 
         if protons is not None:
@@ -81,9 +85,9 @@ class Detector(object):
         self.components = defaultdict(ROOT.Sum)
         self.hists = dict()
 
-        self.ns("eres").defparameter("Eres_a", central=0.0, sigma=0)
-        self.ns("eres").defparameter("Eres_b", central=0.03, sigma=0)
-        self.ns("eres").defparameter("Eres_c", central=0.0, sigma=0)
+        self.ns("eres").reqparameter("Eres_a", central=0.0, sigma=0)
+        self.ns("eres").reqparameter("Eres_b", central=0.03, sigma=0)
+        self.ns("eres").reqparameter("Eres_c", central=0.0, sigma=0)
 
 class Isotope(object):
     spectrumfiles = {
@@ -122,14 +126,14 @@ class LazyConnector(object):
                     inp.connect(out)
                 self.inputs[inpname].clear()
 
-    def add(self, name, io):
+    def add(self, ioid, io):
         if isinstance(io, ROOT.OutputDescriptor):
-            self.outputs[name] = io
+            self.outputs[ioid] = io
         elif isinstance(io, ROOT.InputDescriptor):
             if io in self.allinputs:
                 return
             self.allinputs.add(io)
-            self.inputs[name].add(io)
+            self.inputs[ioid].add(io)
         self._connect()
 
 class ReactorExperimentModel(baseexp):
@@ -140,46 +144,43 @@ class ReactorExperimentModel(baseexp):
                 'standard': ROOT.OscProbPMNS,
                 'decoh': ROOT.OscProbPMNSDecoh,
             }[name]
-        parser.add_argument('--ns')
+        parser.add_argument('--name', required=True)
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
         parser.add_argument('--oscprob', choices=['standard', 'decoh'],
                             type=OscProb, default='standard')
-        parser.add_argument('--erange', type=float, nargs=2,
-                            default=[1.0, 8.0],
-                            metavar=('E_MIN', 'E_MAX'),
-                            help='energy range')
-        parser.add_argument('--nbins', type=int,
-                            default=200,
-                            help='number of bins')
-        parser.add_argument('--integration-order', type=int, default=10)
+        parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'),
+                            action='append', default=[])
+        parser.add_argument('--integration-order', type=int, default=4)
 
     def __init__(self, opts, name=None, ns=None, reactors=None, detectors=None):
         super(ReactorExperimentModel, self).__init__(opts)
         self._oscprobs = {}
+        self._isotopes = defaultdict(list)
         self.connector = LazyConnector()
 
         self.name = name
 
-        self.ns = ns or env.ns(opts.ns or self.name)
+        self.ns = ns or env.ns(opts.name)
         self.reqparameters(self.ns)
 
-        self.reactors = self.makereactors(reactors)
-        self.detectors = self.makedetectors(detectors)
+        self.detectors = detectors or self.makedetectors()
+        for binopt in self.opts.binning:
+            for det in self.detectors:
+                if det.name == binopt[0]:
+                    break
+            else:
+                raise Exception("can't find detecter {}".format(binopt[0]))
+            det.edges = np.linspace(float(binopt[1]), float(binopt[2]), int(binopt[3]))
+        for det in self.detectors:
+            if det.orders is None:
+                det.orders = np.full(len(det.edges)-1, self.opts.integration_order, int)
+                print det.edges, det.orders
 
-        for reactor in self.reactors:
-            reactor.isotopes = [Isotope(self.ns, isoname) for isoname in reactor.fission_fractions]
-
+        self.reactors = reactors or self.makereactors()
         self.linkpairs(self.reactors, self.detectors)
 
-        for reactor in self.reactors:
-            for isotope in reactor.isotopes:
-                self.connector.add('Enu', isotope.spectrum.f.inputs.x)
-
-        edges = np.linspace(opts.erange[0], opts.erange[1], opts.nbins+1)
-        orders = np.array([10]*(len(edges)-1), dtype=int)
-        self.setibd(edges, orders, opts.ibd)
-
         for detector in self.detectors:
+            self.setibd(detector, opts.ibd)
             self.setupobservations(detector)
 
     def _getoscprobcls(self, reactor, detector):
@@ -243,15 +244,15 @@ class ReactorExperimentModel(baseexp):
 
         if normtype == 'calc':
             bindings = {}
-            for isotope in reactor.isotopes:
-                bindings["EnergyPerFission_{0}".format(isotope.name)] = self.ns("isotopes")(isotope.name)["EnergyPerFission"]
-            norm = ROOT.ReactorNorm(vec(iso.name for iso in reactor.isotopes), bindings=bindings)
+            for isoname in reactor.fission_fractions:
+                bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
+            norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
             norm.isotopes.livetime(detector.livetime)
             norm.isotopes.power_rate(reactor.power_rate)
             for isoname, frac in reactor.fission_fractions.iteritems():
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](frac)
         elif normtype == 'manual':
-            norm = ROOT.ReactorNormAbsolute(vec(iso.name for iso in reactor.isotopes))
+            norm = ROOT.ReactorNormAbsolute(vec(reactor.fission_fractions.keys()))
             for isoname, frac in reactor.fission_fractions.iteritems():
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](frac)
         return norm
@@ -272,7 +273,11 @@ class ReactorExperimentModel(baseexp):
                         oscprob = oscprobcls(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
 
                 normedflux = ROOT.Sum()
-                for isotope in rgroup.isotopes:
+
+                for isoname in rgroup.fission_fractions.keys():
+                    isotope = Isotope(self.ns, isoname)
+                    self._isotopes[(detector, rgroup)].append(isotope)
+                    self.connector.add((detector, 'Enu'), isotope.spectrum.f.inputs.x)
                     subflux = ROOT.Product()
                     subflux.multiply(isotope.spectrum)
                     subflux.multiply(norm.isotopes['norm_{0}'.format(isotope.name)])
@@ -292,11 +297,13 @@ class ReactorExperimentModel(baseexp):
                             raise Exception("overriden component {}".format(compname))
                         compnames.remove(compname)
                         if 'Enu' in osccomps.inputs:
-                            self.connector.add('Enu', osccomps.inputs.Enu)
+                            self.connector.add((detector, 'Enu'), osccomps.inputs.Enu)
                 if compnames:
                     raise Exception("components not found: {}".format(compnames))
 
-    def setibd(self, edges, orders, ibdtype):
+    def setibd(self, detector, ibdtype):
+        edges = detector.edges
+        orders = detector.orders
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
@@ -320,7 +327,7 @@ class ReactorExperimentModel(baseexp):
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
 
-        self.connector.add('Enu', ibd.Enu.Enu)
+        self.connector.add((detector, 'Enu'), ibd.Enu.Enu)
         for detector in self.detectors:
             for compid, comp in detector.components.iteritems():
                 product = ROOT.Product()
@@ -340,13 +347,12 @@ class ReactorExperimentModel(baseexp):
                                      freevars=['L'])
             oscprobs[oscprobcls] = oscprob
 
-        probsums = []
         for compid, hist in detector.hists.iteritems():
             oscprob = oscprobs[compid[0]]
             oscprob.probsum[compid[1]](hist.hist)
             self.ns.addobservable("{0}_{1}".format(detector.name, compid[1]), hist.hist)
-            probsums.append(oscprob.probsum)
-        if len(probsums) > 1:
+        probsums = [oscprob.probsum for oscprob in oscprobs.values()]
+        if len(oscprobs) > 1:
             finalsum = ROOT.Sum()
             for probsum in probsums:
                 finalsum.add(probsum)
@@ -356,7 +362,7 @@ class ReactorExperimentModel(baseexp):
         with detector.ns("eres"):
             detector.eres = ROOT.EnergyResolution()
         detector.eres.smear.inputs(finalsum)
-        self.ns.addobservable("{0}".format(detector.name), finalsum)
+        self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
     @classmethod
     def reqparameters(cls, ns):
@@ -370,9 +376,3 @@ class ReactorExperimentModel(baseexp):
     @classmethod
     def makeisotopes(cls, ns):
         return [Isotope(ns, isoname) for isoname in Isotope.spectrumfiles]
-
-    def makereactors(self, reactors):
-        return reactors
-
-    def makedetectors(self, detectors):
-        return detectors

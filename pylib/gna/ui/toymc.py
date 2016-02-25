@@ -20,7 +20,7 @@ class cmd(basecmd):
             # data = ROOT.Points(np.random.normal(buf, buf**0.5))
             data = ROOT.Points(buf.copy())
             self.env.parts.data[name] = data
-            print 'Asimov', name
+9b            print 'Asimov', name
 
         for data in getattr(self.opts, 'print'):
             print name

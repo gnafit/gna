@@ -14,4 +14,3 @@ class cmd(basecmd):
             chi2.add(block.theory, block.data, block.cov)
 
         self.env.parts.statistic[self.opts.name] = chi2
-        print chi2.value()
