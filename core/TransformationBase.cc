@@ -267,7 +267,7 @@ void Entry::evaluateTypes() {
     std::set<Entry*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     for (size_t i = 0; i < sinks.size(); ++i) {
-      if (sinks[i].data && sinks[i].data->type == rets[i]) {
+      if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
       sinks[i].data.reset();
