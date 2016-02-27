@@ -33,7 +33,7 @@ protected:
   Eigen::ArrayXd m_weights;
 };
 
-class GaussLegendreHist: public GNAObject,
+class GaussLegendreHist: public GNASingleObject,
                          public Transformation<GaussLegendreHist> {
 public:
   GaussLegendreHist(const GaussLegendre *base);

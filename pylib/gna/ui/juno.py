@@ -4,10 +4,22 @@ from gna.exp.reactor import ReactorExperimentModel, Reactor, Detector
 import numpy as np
 import ROOT
 
-class juno(ReactorExperimentModel):
-    name = 'juno'
+class cmd(basecmd):
+    @classmethod
+    def initparser(cls, parser, env):
+        super(cmd, cls).initparser(parser, env)
+        ReactorExperimentModel.initparser(parser, env)
 
-    def makereactors(self):
+    def init(self):
+        common = {
+            'power_rate': [1.0],
+            'fission_fractions': {
+                'Pu239': [0.60],
+                'Pu241': [0.07],
+                'U235': [0.27],
+                'U238': [0.06],
+            }
+        }
         reactors_opts = [
             {'name': 'YJ1', 'location': 52.75, 'power': 2.9},
             {'name': 'YJ2', 'location': 52.84, 'power': 2.9},
@@ -27,35 +39,17 @@ class juno(ReactorExperimentModel):
 
         reactors = []
         for entry in reactors_opts:
-            entry.update({
-                'power_rate': [1.0],
-                'fission_fractions': {
-                    'Pu239': [0.60],
-                    'Pu241': [0.07],
-                    'U235': [0.27],
-                    'U238': [0.06],
-                }
-            })
-            reactors.append(Reactor(self.ns, **entry))
+            r = {}
+            r.update(common)
+            r.update(entry)
+            reactors.append(Reactor(**r))
 
-        return reactors
-
-    def makedetectors(self):
         detector = Detector(
-            self.ns,
             name='AD1',
             edges=np.linspace(1., 8., 100+1),
             location=0,
-            protons=1.42e33,
-            livetime=[0.8*5*365*24*60*60.0]
+            protons=0.8*1.42e33,
+            livetime=[5*365*24*60*60.0],
         )
-        return [detector]
 
-class cmd(basecmd):
-    @classmethod
-    def initparser(cls, parser, env):
-        super(cmd, cls).initparser(parser, env)
-        juno.initparser(parser, env)
-
-    def init(self):
-        juno(self.opts)
+        ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])

@@ -49,6 +49,7 @@ set (HEADERS
   Points.hh
   Histogram.hh
   LinearInterpolator.hh
+  FillLike.hh
   Derivative.hh
   Covmat.hh
   Chi2.hh
@@ -59,6 +60,7 @@ set (HEADERS
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProbPMNSDecoh.hh
+  EvisToEe.hh
   IbdInteraction.hh
   IbdZeroOrder.hh
   IbdFirstOrder.hh

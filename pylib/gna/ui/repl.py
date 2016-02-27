@@ -1,4 +1,7 @@
 from gna.ui import basecmd
+import numpy as np
+import ROOT
+from matplotlib import pyplot as plt
 
 class cmd(basecmd):
     def run(self):

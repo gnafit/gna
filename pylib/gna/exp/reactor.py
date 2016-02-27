@@ -10,38 +10,46 @@ import itertools
 from gna.exp import baseexp
 from gna.env import env
 
+spectrumfiles = {
+    'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
+    'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
+    'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
+    'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
+}
+eperfission = {
+    'Pu239': (209.99, 0.60),
+    'Pu241': (213.60, 0.65),
+    'U235': (201.92, 0.46),
+    'U238': (205.52, 0.96),
+}
+
 class Reactor(object):
-    def __init__(self, ns, name, location, fission_fractions,
+    def __init__(self, name, location, fission_fractions,
                  power=None, power_rate=None):
-        self.ns = ns("reactors")(name)
         self.name = name
         self.location = location
 
-        if power is not None:
-            self.power = power
-            self.ns.defparameter("ThermalPower", central=power, sigma=0)
-        else:
-            self.power = None
+        self.power = power
 
-        if power_rate is not None:
-            self.power_rate = ROOT.Points(power_rate)
-        else:
-            self.power_rate = None
+        self.power_rate = power_rate
 
-        self.fission_fractions = {isoname: ROOT.Points(frac)
+        self.fission_fractions = {isoname: frac
                                   for isoname, frac in fission_fractions.iteritems()}
 
+    def assign(self, ns):
+        self.ns = ns("reactors")(self.name)
+        self.ns.defparameter("ThermalPower", central=self.power, sigma=0)
+
     def calcdistance(self, detector):
-        return np.sqrt(np.sum((self.location - detector.location)**2))
+        return np.sqrt(np.sum((np.array(self.location) - np.array(detector.location))**2))
 
     def initdistance(self, ns, detector):
         dist = self.calcdistance(detector)
-        pair_ns = ns("pairs")(self.name)(detector.name)
+        pair_ns = detector.ns(self.name)
         pair_ns.defparameter("L", central=dist, sigma=0)
 
 class ReactorGroup(object):
-    def __init__(self, ns, name, reactors):
-        self.ns = ns("reactorgroups")(name)
+    def __init__(self, name, reactors):
         self.name = name
         self.reactors = reactors
 
@@ -50,11 +58,14 @@ class ReactorGroup(object):
 
         self.fission_fractions = reactors[0].fission_fractions
 
+    def assign(self, ns):
+        self.ns = ns("reactorgroups")(self.name)
+
     def initdistance(self, ns, detector):
-        pair_ns = ns("pairs")(self.name)(detector.name)
+        pair_ns = detector.ns(self.name)
         bindings = {}
         for i, reactor in enumerate(self.reactors):
-            bindings["L_{0}".format(i)] = ns("pairs")(reactor.name)(detector.name)["L"]
+            bindings["L_{0}".format(i)] = detector.ns(reactor.name)["L"]
             bindings["P_{0}".format(i)] = reactor.ns["ThermalPower"]
         ROOT.ReactorGroup(len(self.reactors), ns=pair_ns, bindings=bindings)
 
@@ -62,83 +73,45 @@ class ReactorGroup(object):
         pair_ns.defparameter("ThermalPower", target=pair_ns.ref("Pavg"))
 
 class Detector(object):
-    def __init__(self, ns, name, edges, location,
+    def __init__(self, name, edges, location,
                  orders=None, protons=None, livetime=None):
-        self.ns = ns("detectors")(name)
         self.name = name
         self.edges = edges
         self.orders = orders
 
         self.location = location
 
-        if protons is not None:
-            self.protons = protons
-            self.ns.defparameter("TargetProtons", central=protons, sigma=0)
-        else:
-            self.protons = None
+        self.protons = protons
 
-        if livetime is not None:
-            self.livetime = ROOT.Points(livetime)
-        else:
-            self.livetime = None
+        self.livetime = livetime
 
-        self.components = defaultdict(ROOT.Sum)
-        self.hists = dict()
+        self.unoscillated = None
+        self.components = defaultdict(lambda: defaultdict(ROOT.Sum))
+        self.intermediates = {}
+        self.hists = defaultdict(dict)
 
-        self.ns("eres").reqparameter("Eres_a", central=0.0, sigma=0)
-        self.ns("eres").reqparameter("Eres_b", central=0.03, sigma=0)
-        self.ns("eres").reqparameter("Eres_c", central=0.0, sigma=0)
+    def assign(self, ns):
+        self.ns = ns("detectors")(self.name)
+
+        if self.protons is not None:
+            self.ns.defparameter("TargetProtons", central=self.protons, sigma=0)
+
+        self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
+        self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
+        self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
 class Isotope(object):
-    spectrumfiles = {
-        'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
-        'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
-        'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
-        'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
-    }
-    eperfission = {
-        'Pu239': (209.99, 0.60),
-        'Pu241': (213.60, 0.65),
-        'U235': (201.92, 0.46),
-        'U238': (205.52, 0.96),
-    }
-
     def __init__(self, ns, name):
         self.ns = ns("isotopes")(name)
         self.name = name
 
-        self.Es, self.ys = np.loadtxt(datapath(self.spectrumfiles[name]), unpack=True)
+        self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy())
-
-        self.eperfission = self.eperfission[name]
-
-class LazyConnector(object):
-    def __init__(self):
-        self.inputs = defaultdict(set)
-        self.allinputs = set()
-        self.outputs = {}
-
-    def _connect(self):
-        for inpname in self.inputs:
-            out = self.outputs.get(inpname, None)
-            if out:
-                for inp in self.inputs[inpname]:
-                    inp.connect(out)
-                self.inputs[inpname].clear()
-
-    def add(self, ioid, io):
-        if isinstance(io, ROOT.OutputDescriptor):
-            self.outputs[ioid] = io
-        elif isinstance(io, ROOT.InputDescriptor):
-            if io in self.allinputs:
-                return
-            self.allinputs.add(io)
-            self.inputs[ioid].add(io)
-        self._connect()
 
 class ReactorExperimentModel(baseexp):
     @classmethod
     def initparser(self, parser, env):
+        """Initializes arguments parser with args common to all reactor experiments"""
         def OscProb(name):
             return {
                 'standard': ROOT.OscProbPMNS,
@@ -151,19 +124,26 @@ class ReactorExperimentModel(baseexp):
         parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'),
                             action='append', default=[])
         parser.add_argument('--integration-order', type=int, default=4)
+        parser.add_argument('--no-reactor-groups', action='store_true')
 
-    def __init__(self, opts, name=None, ns=None, reactors=None, detectors=None):
+    def __init__(self, opts, ns=None, reactors=None, detectors=None):
+        """Initialize a reactor experiment
+
+        opts -- object with parsed common arguments returned by argparse
+        ns -- namespace where experiment will create missing parameters, if is not provided ``opts.name`` will be used
+        reactors -- iterable over Reactor objects, self.makereactors() will be calledi if None
+        detectors -- iterable over Detector objects, self.makedetoctrs() will be calledi if None
+        """
         super(ReactorExperimentModel, self).__init__(opts)
         self._oscprobs = {}
         self._isotopes = defaultdict(list)
-        self.connector = LazyConnector()
-
-        self.name = name
+        self._Enu_inputs = defaultdict(set)
+        self.oscprobs_comps = defaultdict(dict)
 
         self.ns = ns or env.ns(opts.name)
         self.reqparameters(self.ns)
 
-        self.detectors = detectors or self.makedetectors()
+        self.detectors = list(detectors if detectors is not None else self.makedetectors())
         for binopt in self.opts.binning:
             for det in self.detectors:
                 if det.name == binopt[0]:
@@ -172,11 +152,14 @@ class ReactorExperimentModel(baseexp):
                 raise Exception("can't find detecter {}".format(binopt[0]))
             det.edges = np.linspace(float(binopt[1]), float(binopt[2]), int(binopt[3]))
         for det in self.detectors:
+            det.assign(self.ns)
             if det.orders is None:
                 det.orders = np.full(len(det.edges)-1, self.opts.integration_order, int)
-                print det.edges, det.orders
 
-        self.reactors = reactors or self.makereactors()
+        self.reactors = list(reactors if reactors is not None else self.makereactors())
+        for reactor in self.reactors:
+            reactor.assign(self.ns)
+
         self.linkpairs(self.reactors, self.detectors)
 
         for detector in self.detectors:
@@ -184,7 +167,7 @@ class ReactorExperimentModel(baseexp):
             self.setupobservations(detector)
 
     def _getoscprobcls(self, reactor, detector):
-        """Returns oscillation probability class for given (reactor,detector)"""
+        """Returns oscillation probability class for given (reactor, detector) pair"""
         if isinstance(reactor, ReactorGroup):
             return (ROOT.OscProbPMNSMult, ROOT.OscProbPMNS)
         keys = [frozenset([reactor, detector]), reactor, detector, None]
@@ -196,22 +179,29 @@ class ReactorExperimentModel(baseexp):
         return (ROOT.OscProbPMNS, ROOT.OscProbPMNS)
 
     def _getnormtype(self, reactor, detector):
+        """Returns normalization type applicable for given reactor and detector
+
+        if power, power rate, protons and livetime are previded, 'calc' is returned to calculate normalization
+        otherwise 'manual' is returned meaning that normalization should be done by the caller with external Norm parameters
+        """
         if all(x is not None for x in [reactor.power, reactor.power_rate, detector.protons, detector.livetime]):
             return 'calc'
         return 'manual'
 
     def groupreactors(self, reactors, detector, precision=1e-2):
-        """Merges some Reactors of reactors to ReactorGroup if they are close enough
+        """Merges some Reactors of reactors to ReactorGroup if their distances to detector are similar enough
 
-        Oscillation probability error order is precision**3
+        Faster approximated formula is used. Only reactors with standard OscProbPMNS formula are considered for grouping.
+        Approximation of the probability is of the order of order precision**3.
         """
-        groups = []
+        groups = [[reactor] for reactor in reactors]
         groupable = []
-        for reactor in reactors:
-            if self._getoscprobcls(reactor, detector)[0] is ROOT.OscProbPMNS and self._getnormtype(reactor, detector) == 'calc':
-                groupable.append(reactor)
-            else:
-                groups.append([reactor])
+        if not self.opts.no_reactor_groups:
+            for reactor in reactors:
+                if self._getoscprobcls(reactor, detector)[0] is ROOT.OscProbPMNS:
+                    if self._getnormtype(reactor, detector) == 'calc':
+                        groupable.append(reactor)
+                        groups.remove([reactor])
         if not groupable:
             return reactors
         groups.append([])
@@ -226,7 +216,8 @@ class ReactorExperimentModel(baseexp):
         cnt = 0
         for group in groups:
             if len(group) > 1:
-                rgroup = ReactorGroup(self.ns, "group{}".format(cnt), group)
+                rgroup = ReactorGroup("group{}".format(cnt), group)
+                rgroup.assign(self.ns)
                 rgroup.initdistance(self.ns, detector)
                 grouped.append(rgroup)
                 cnt += 1
@@ -235,7 +226,7 @@ class ReactorExperimentModel(baseexp):
         return grouped
 
     def normalization(self, reactor, detector, normtype):
-        """Returns normalization object for given reactor/detector pair"""
+        """Returns normalization object for given reactor/detector pair and norm type"""
         def vec(lst):
             v = ROOT.vector("std::string")()
             for s in lst:
@@ -247,10 +238,10 @@ class ReactorExperimentModel(baseexp):
             for isoname in reactor.fission_fractions:
                 bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
             norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
-            norm.isotopes.livetime(detector.livetime)
-            norm.isotopes.power_rate(reactor.power_rate)
+            norm.isotopes.livetime(ROOT.Points(detector.livetime))
+            norm.isotopes.power_rate(ROOT.Points(reactor.power_rate))
             for isoname, frac in reactor.fission_fractions.iteritems():
-                norm.isotopes['fission_fraction_{0}'.format(isoname)](frac)
+                norm.isotopes['fission_fraction_{0}'.format(isoname)](ROOT.Points(frac))
         elif normtype == 'manual':
             norm = ROOT.ReactorNormAbsolute(vec(reactor.fission_fractions.keys()))
             for isoname, frac in reactor.fission_fractions.iteritems():
@@ -258,13 +249,18 @@ class ReactorExperimentModel(baseexp):
         return norm
 
     def linkpairs(self, reactors, detectors):
+        """Setup oscillations and normalizations of all reactors and detectors.
+
+        Resulting components are stored in detector.components.
+        """
         for reactor, detector in itertools.product(reactors, detectors):
             reactor.initdistance(self.ns, detector)
 
         for detector in detectors:
+            detector.unoscillated = ROOT.Sum()
             grouped = self.groupreactors(reactors, detector)
             for rgroup in grouped:
-                pair_ns = self.ns("pairs")(rgroup.name)(detector.name)
+                pair_ns = detector.ns(rgroup.name)
                 normtype = self._getnormtype(rgroup, detector)
                 with detector.ns, rgroup.ns, pair_ns:
                     norm = self.normalization(rgroup, detector, normtype)
@@ -277,14 +273,24 @@ class ReactorExperimentModel(baseexp):
                 for isoname in rgroup.fission_fractions.keys():
                     isotope = Isotope(self.ns, isoname)
                     self._isotopes[(detector, rgroup)].append(isotope)
-                    self.connector.add((detector, 'Enu'), isotope.spectrum.f.inputs.x)
+                    self._Enu_inputs[detector].add(isotope.spectrum.f.inputs.x)
                     subflux = ROOT.Product()
                     subflux.multiply(isotope.spectrum)
-                    subflux.multiply(norm.isotopes['norm_{0}'.format(isotope.name)])
+                    subflux.multiply(norm.isotopes['norm_{0}'.format(isoname)])
+                    detector.intermediates['flux_{}'.format(isoname)] = subflux
                     normedflux.add(subflux)
+                detector.intermediates['flux'] = normedflux
+
                 compnames = set(oscprob.probsum.inputs)
-                detector.components[(weightscls, 'comp0')].add(normedflux)
-                compnames.remove('comp0')
+
+                detector.unoscillated.add(normedflux)
+                if 'comp0' in compnames:
+                    detector.components['rate'][(weightscls, 'comp0')].add(normedflux)
+                    ones = ROOT.FillLike(1.0)
+                    ones.fill.inputs(normedflux)
+                    detector.components['oscprob'][(weightscls, 'comp0')].add(ones)
+                    self.oscprobs_comps[(detector, rgroup)][(weightscls, 'comp0')] = ones
+                    compnames.remove('comp0')
                 for osccomps in oscprob.transformations.itervalues():
                     for compname, osccomp in osccomps.outputs.iteritems():
                         if compname not in compnames:
@@ -292,32 +298,45 @@ class ReactorExperimentModel(baseexp):
                         product = ROOT.Product()
                         product.multiply(normedflux)
                         product.multiply(osccomp)
-                        detector.components[(weightscls, compname)].add(product)
+                        detector.components['rate'][(weightscls, compname)].add(product)
+                        detector.components['oscprob'][(weightscls, compname)].add(osccomp)
+                        self.oscprobs_comps[(detector, rgroup)][(weightscls, compname)] = osccomp
                         if compname not in compnames:
                             raise Exception("overriden component {}".format(compname))
                         compnames.remove(compname)
                         if 'Enu' in osccomps.inputs:
-                            self.connector.add((detector, 'Enu'), osccomps.inputs.Enu)
+                            self._Enu_inputs[detector].add(osccomps.inputs.Enu)
                 if compnames:
                     raise Exception("components not found: {}".format(compnames))
 
     def setibd(self, detector, ibdtype):
-        edges = detector.edges
+        """Setup input energy values, integration and IBD calculation object for the given detector according to the ibdtype
+.
+        ibdtype may be 'zero' or 'first' for the corresponding order.
+        Resulting components are stored in detector.components.
+        """
+        Evis_edges = detector.edges
         orders = detector.orders
+        with self.ns("ibd"):
+            econv = ROOT.EvisToEe()
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(edges, orders, len(orders))
+            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             histcls = ROOT.GaussLegendreHist
-            ibd.xsec.inputs(integrator.points)
-            ibd.Enu.inputs(integrator.points)
+            econv.Ee.Evis(integrator.points)
+            ibd.xsec.Ee(econv.Ee.Ee)
+            ibd.Enu.Ee(econv.Ee.Ee)
             eventsparts = [ibd.xsec]
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             histcls = ROOT.GaussLegendre2dHist
-            ibd.Enu.inputs(integrator.points)
+            econv.Ee.Evis(integrator.points.x)
+            ibd.Enu.Ee(econv.Ee.Ee)
+            ibd.Enu.ctheta(integrator.points.y)
+            detector.intermediates['ctheta'] = integrator.points.y
             ibd.xsec.Enu(ibd.Enu)
             ibd.xsec.ctheta(integrator.points.y)
             ibd.jacobian.Enu(ibd.Enu)
@@ -327,19 +346,34 @@ class ReactorExperimentModel(baseexp):
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
 
-        self.connector.add((detector, 'Enu'), ibd.Enu.Enu)
-        for detector in self.detectors:
-            for compid, comp in detector.components.iteritems():
-                product = ROOT.Product()
-                for part in eventsparts:
-                    product.multiply(part)
-                product.multiply(comp)
-                detector.hists[compid] = histcls(integrator)
-                detector.hists[compid].hist.inputs(product)
+        detector.intermediates['Enu'] = ibd.Enu
+        detector.intermediates['xsec'] = ibd.xsec
+        for inp in self._Enu_inputs.get(detector, []):
+            inp.connect(ibd.Enu.Enu)
 
-    def setupobservations(self, detector):
+        for detector in self.detectors:
+            for resname, comps in detector.components.iteritems():
+                for compid, comp in comps.iteritems():
+                    res = None
+                    if resname == 'rate':
+                        res = ROOT.Product()
+                        res.multiply(comp)
+                        for part in eventsparts:
+                            res.multiply(part)
+                    elif resname == 'oscprob':
+                        res = comp
+                    detector.hists[resname][compid] = histcls(integrator)
+                    detector.hists[resname][compid].hist.inputs(res)
+            detector.unoscillated_hist = histcls(integrator)
+            res = ROOT.Product()
+            res.multiply(detector.unoscillated)
+            for part in eventsparts:
+                res.multiply(part)
+            detector.unoscillated_hist.hist.inputs(res)
+
+    def _sumcomponents(self, components):
         oscprobs = {}
-        for oscprobcls, compname in detector.components:
+        for oscprobcls, compname in components.iterkeys():
             if oscprobcls in oscprobs:
                 continue
             with self.ns("oscillation"):
@@ -347,32 +381,50 @@ class ReactorExperimentModel(baseexp):
                                      freevars=['L'])
             oscprobs[oscprobcls] = oscprob
 
-        for compid, hist in detector.hists.iteritems():
-            oscprob = oscprobs[compid[0]]
-            oscprob.probsum[compid[1]](hist.hist)
-            self.ns.addobservable("{0}_{1}".format(detector.name, compid[1]), hist.hist)
+        for compid, comp in components.iteritems():
+            oscprobs[compid[0]].probsum[compid[1]](comp)
+
         probsums = [oscprob.probsum for oscprob in oscprobs.values()]
-        if len(oscprobs) > 1:
+        if len(probsums) > 1:
             finalsum = ROOT.Sum()
             for probsum in probsums:
                 finalsum.add(probsum)
+            return finalsum
         else:
-            finalsum = probsums[0]
-        self.ns.addobservable("{0}_noeffects".format(detector.name), finalsum)
-        with detector.ns("eres"):
-            detector.eres = ROOT.EnergyResolution()
-        detector.eres.smear.inputs(finalsum)
-        self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
+            return probsums[0]
+
+    def setupobservations(self, detector):
+        """Sum over the components and setup the observables to namespace"""
+        self.ns.addobservable("{0}_unoscillated".format(detector.name), detector.unoscillated_hist.hist, export=False)
+
+        sums = {resname: self._sumcomponents(detector.hists[resname])
+                for resname in detector.hists}
+
+        if 'oscprob' in sums:
+            detector.intermediates["oscprob"] = sums['oscprob']
+        if 'rate' in sums:
+            finalsum = sums['rate']
+            self.ns.addobservable("{0}_noeffects".format(detector.name), finalsum, export=False)
+
+            with detector.ns:
+                detector.eres = ROOT.EnergyResolution()
+            detector.eres.smear.inputs(finalsum)
+            self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
+
+        det_ns = self.ns("detectors")(detector.name)
+        for name in detector.intermediates:
+            det_ns.addobservable(name, detector.intermediates[name], export=False)
+
+        for pair, comps in self.oscprobs_comps.iteritems():
+            pair_ns = det_ns(pair[1].name)
+            pair_ns.addobservable('oscprob', self._sumcomponents(comps), export=False)
 
     @classmethod
     def reqparameters(cls, ns):
+        """Setup the parameters"""
         gna.parameters.ibd.reqparameters(ns("ibd"))
         gna.parameters.oscillation.reqparameters(ns("oscillation"))
 
-        for isoname, (central, sigma) in Isotope.eperfission.iteritems():
+        for isoname, (central, sigma) in eperfission.iteritems():
             isons = ns("isotopes")(isoname)
             isons.reqparameter("EnergyPerFission", central=central, sigma=sigma)
-
-    @classmethod
-    def makeisotopes(cls, ns):
-        return [Isotope(ns, isoname) for isoname in Isotope.spectrumfiles]

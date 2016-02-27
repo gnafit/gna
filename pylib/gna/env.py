@@ -18,7 +18,6 @@ class namespacedict(defaultdict):
 def findname(name, curns):
     if '.' in name:
         nsname, name = name.rsplit('.', 1)
-        print nsname, name
         ns = env.ns(nsname)
     else:
         ns = curns
@@ -107,6 +106,7 @@ class namespace(Mapping):
 
         self.storage = {}
         self.observables = {}
+        self.observables_tags = defaultdict(set)
 
         self.rules = []
         self.namespaces = namespacedict(self)
@@ -181,12 +181,14 @@ class namespace(Mapping):
             pass
         return self.defparameter(name, **kwargs)
 
-    def addobservable(self, name, output):
+    def addobservable(self, name, output, export=True):
         if output.check():
             self.observables[name] = output
         else:
             print "observation", name, "is invalid"
             output.dump()
+        if not export:
+            self.observables_tags[name].add('internal')
 
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
@@ -203,11 +205,23 @@ class namespace(Mapping):
         self[name] = evaluable
         return evaluable
 
-    def iternstree(self):
+    def walknstree(self):
         yield self
         for name, subns in self.namespaces.iteritems():
-            for x in subns.iternstree():
+            for x in subns.walknstree():
                 yield x
+
+    def walkobservables(self, internal=False):
+        for ns in self.walknstree():
+            for name, val in ns.observables.iteritems():
+                if not internal and 'internal' in ns.observables_tags.get(name, {}):
+                    continue
+                yield '{}/{}'.format(ns.path, name), val
+
+    def walknames(self):
+        for ns in self.walknstree():
+            for name, val in ns.storage.iteritems():
+                yield '{}.{}'.format(ns.path, name), val
 
     def ref(self, name):
         return '.'.join([self.path, name])
@@ -388,7 +402,13 @@ class _environment(object):
             return types[matches[0]]
 
     def get(self, objspec):
-        objtype, objpath = objspec.split(":", 1)
-        return self.gettype(objtype)[objpath]
+        if ':' in objspec:
+            objtype, objpath = objspec.split(":", 1)
+            return self.gettype(objtype)[objpath]
+        elif '/' in objspec:
+            nspath, obsname = objspec.rsplit("/", 1)
+            return self.ns(nspath).observables[obsname]
+        else:
+            return findname(objspec, self.globalns)
 
 env = _environment()

@@ -49,7 +49,7 @@ protected:
   Eigen::ArrayXd m_yweights;
 };
 
-class GaussLegendre2dHist: public GNAObject,
+class GaussLegendre2dHist: public GNASingleObject,
                            public Transformation<GaussLegendre2dHist> {
 public:
   GaussLegendre2dHist(const GaussLegendre2d *base);
