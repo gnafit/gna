@@ -121,8 +121,9 @@ instatiation through kwargs. The folowing options are available for
   one).
 
 ``Detector`` has the following options:
+
 - ``name`` -- unique string identifier, please no spaces and
-  definetely no dots;
+  definetely no dots or slashes;
 - ``location`` -- coordinaties in the same format as in the
   ``Reactor``;
 - ``edges`` -- edges of the default binning, in MeV of visible energy;
@@ -285,4 +286,70 @@ If you don't like default binning, you can change it with
 ``--binning``. Four parameters should be passed -- detector name (here
 we have only ``AD1``), minimal, maximal values of the visible energy
 and bins count. Only uniform binning is supported in the interface,
-you can always extend it and pass arbitrary ``edges`` to the detector.
+you can always extend it and pass arbitrary ``edges`` to the
+``Detector`` during initialization.
+
+Of course there is also a number of parameters you can work with. You
+can see all the available values with::
+
+  In [4]: [name for name, value in self.env.ns('juno').walknames()]
+  Out[4]:
+  ['juno.isotopes.Pu239.EnergyPerFission',
+   'juno.isotopes.U238.EnergyPerFission',
+   'juno.isotopes.Pu241.EnergyPerFission',
+   'juno.isotopes.U235.EnergyPerFission',
+   ...
+
+Not all of them are really parameters you can change, some are values
+that depend on other values and gets recalculated on demand. For
+example, there are two values for larger square mass difference::
+
+
+  In [5]: self.env.get('juno.oscillation.DeltaMSqEE')
+  Out[5]: <ROOT.GaussianParameter<double> object at 0x55da98da7860>
+
+  In [6]: self.env.get('juno.oscillation.DeltaMSqEE')
+  Out[6]: 0.00234
+
+  In [7]: self.env.get('juno.oscillation.DeltaMSq23')
+  Out[7]: <ROOT.Uncertain<double> object at 0x55da99544580>
+
+  In [8]: self.env.get('juno.oscillation.DeltaMSq23').value()
+  Out[8]: 0.0022877478
+
+The ``DeltaMSqEE one`` is real independent parameter (hence the type,
+``GaussianParameter``), while the ``DeltaMSq23`` is just read only
+value (typed as ``Uncertain``). Their origin is also different:
+independent parameters are defined by the ``ns.reqparameter()`` or
+``ns.defparameter()`` calls, while the read-only values originate from
+evaluables defined in ``GNAObject``s. For example, there is class
+``OscillationExpressions`` which provides expressions to calculate
+values on base of others. Whenever an object requires a variable (by
+using ``GNAObject::variable_``) and there is no corresponding
+independent parameter available, the binding system will try to get
+it's value by using available iterables. In case of ``DeltaMSq23``,
+which is required by the oscillations probability class
+``OscProbPMNS``, the expression to get ``DeltaMSq23`` from
+``DeltaMSqEE``, ``Alpha``, ``SinSq12`` and ``DeltaMSq12`` was
+automatically used.
+
+You can't change ``Uncertain`` objects directly, there is even no
+``set()`` method. But if you change the independent parameters which
+they depend on, the values will be automatically updated::
+
+  In [9]: self.env.get('juno.oscillation.DeltaMSqEE').set(2.5e-3)
+
+  In [10]: self.env.get('juno.oscillation.DeltaMSq23').value()
+  Out[10]: 0.0024477478
+
+  In [11]: self.env.get('juno.oscillation.Alpha').set('inverted')
+
+  In [12]: self.env.get('juno.oscillation.DeltaMSq23').value()
+  Out[12]: 0.0025522522
+
+There is currently no user friendly way to switch the set of
+independent parameters. All you need to done is to ensure that they
+are created prior to first usage by computational object, and to do
+this, you can for example directly change
+``gna.parameters.oscillation`` or add rather some more nice command
+line arguments switches.
