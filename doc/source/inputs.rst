@@ -339,4 +339,4 @@ numpy array with numbers or computational graph output. All applicable
 covariations from the specified datasets will be used by
 ``analysis``. This is not well tested though, so expect a lot of
 surprises and debugging. The only usage is in the
-``gna.ui.oldreactors``, check it.
+``gna.ui.oldreactors``, please refer to it.
