@@ -44,7 +44,7 @@ class PointTree(object):
                 self._params.append(self.env.pars[param])
             else:
                 self._params.append(param)
-        self.root.attrs["params"] = [p.name() for p in params]
+        self.root.attrs["params"] = ['.'.join([p.ns.path, p.name()]) for p in params]
 
     def touch(self, node):
         path = self.path(node)

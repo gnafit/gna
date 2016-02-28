@@ -19,14 +19,11 @@ class cmd(basecmd):
                             metavar='OBSERVABLE')
 
     def run(self):
-        dataset = Dataset(name=self.opts.name+'_dataset',
-                          desc=None,
-                          bases=self.opts.datasets)
+        dataset = Dataset(bases=self.opts.datasets)
         parameters = [self.env.pars[pname] for pname in self.opts.parameters]
         observables = []
         for path in self.opts.observables:
-            nspath, name = path.split('/')
-            observables.append(self.env.ns(nspath).observables[name])
+            observables.append(self.env.get(path))
 
         blocks = dataset.makeblocks(observables, parameters)
-        self.env.parts.inputs[self.opts.name] = blocks
+        self.env.parts.analysis[self.opts.name] = blocks

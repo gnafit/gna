@@ -29,7 +29,7 @@ protected:
 };
 
 template <typename T>
-class Uncertain: public GNAObject,
+class Uncertain: public GNASingleObject,
                  public Transformation<Uncertain<T>>
 {
 public:
@@ -61,7 +61,7 @@ template <>
 inline Uncertain<double>::Uncertain(const std::string &name)
   : m_varhandle(variable_(&m_var, name)), m_name(name)
 {
-  transformation_(this, name)
+  transformation_(this, "value")
     .output(name)
     .types([](Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(1);

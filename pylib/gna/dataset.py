@@ -5,8 +5,7 @@ import numpy as np
 Block = namedtuple('Block', ('theory', 'data', 'cov'))
         
 class Dataset(object):
-    def __init__(self, name, desc=None, bases=[]):
-        self.name = name
+    def __init__(self, desc=None, bases=[]):
         self.desc = desc
         self.data = {}
         self.covariance = defaultdict(list)
@@ -15,13 +14,16 @@ class Dataset(object):
             self.covariance.update(base.covariance)
 
     def assign(self, obs, value, error):
-        self.data[obs] = value
+        self.data[obs] = self._pointize(value)
         self.covariate(obs, obs, error)
 
+    def _pointize(self, obj):
+        if not isinstance(type(obj), ROOT.PyRootType):
+            obj = ROOT.Points(obj)
+        return obj
+
     def covariate(self, obs1, obs2, cov):
-        if not isinstance(type(cov), ROOT.PyRootType):
-            cov = ROOT.Points(cov)
-        self.covariance[frozenset([obs1, obs2])].append(cov)
+        self.covariance[frozenset([obs1, obs2])].append(self._pointize(cov))
 
     def iscovariated(self, obs1, obs2, covparameters):
         if self.covariance.get(frozenset([obs1, obs2])):
@@ -79,7 +81,7 @@ class Dataset(object):
                 prediction.append(obs)
             self.assigncovariances(set(obsblock), prediction, covparameters)
             data = self.makedata(obsblock)
-            if not data:
+            if data is None:
                 raise Exception("no data constructed")
             prediction.cov.Lbase(prediction.covbase.L)
             blocks.append(Block(prediction.prediction, data, prediction.cov))

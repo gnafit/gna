@@ -114,7 +114,7 @@ class cmd(basecmd):
         parser.add_argument('--name', default='oldreactor')
 
     def run(self):
-        dataset = Dataset(self.opts.name, "old reactors world data")
+        dataset = Dataset("old reactors world data")
         self.env.parts.dataset[self.opts.name] = dataset
 
         ns = self.env.ns("common")
@@ -126,16 +126,16 @@ class cmd(basecmd):
             expns = self.env.ns(expname)
             expns.inherit(ns)
 
-            reactors = [Reactor(expns,
+            reactors = [Reactor(
                         name='reactor',
                         location=expdata.L/1e3,
                         fission_fractions={isoname: [frac] for isoname, frac in expdata.fission.iteritems()})]
-            detectors = [Detector(expns, name='AD1', location=0)]
+            detectors = [Detector(name='AD1', location=0)]
 
             expns.defparameter("Norm", central=1, sigma=0)
             with expns:
-                exp = ReactorExperimentModel(self.opts, expname, ns=expns, reactors=reactors, detectors=detectors)
-            expns["Norm"].set(1/expns.observables['AD1_comp0'].data()[0])
+                exp = ReactorExperimentModel(self.opts, ns=expns, reactors=reactors, detectors=detectors)
+            expns["Norm"].set(1/expns.observables['AD1_unoscillated'].data()[0])
             observables[expdata] = expns.observables['AD1']
 
         covariated = set()

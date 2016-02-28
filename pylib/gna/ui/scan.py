@@ -20,10 +20,8 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         PointSet.addargs(parser, env)
         parser.add_argument('--pullminimizer', action=set_typed(env.parts.minimizer))
-        parser.add_argument('--pullparams', nargs='+', type=str, default=[])
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('--samples', type=int, default=1000)
-        group.add_argument('--single', action='store_true')
+        group.add_argument('--samples', type=int, default=None)
         parser.add_argument('--output', type=str, required=True)
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--fcscan')
@@ -34,7 +32,7 @@ class cmd(basecmd):
                             metavar=('MINIMIZER'),
                             action=append_typed(env.parts.minimizer))
         parser.add_argument('--toymc', action=set_typed(env.parts.toymc))
-        parser.add_argument('--samples-type', choices=['static', 'grid'], required=True)
+        parser.add_argument('--toymc-type', choices=['static', 'grid'])
         parser.add_argument('--verbose', action='store_true')
 
     def makerandomizer(self, randdesc):
@@ -118,7 +116,7 @@ class cmd(basecmd):
 
     def makedata(self, nsamples):
         types = {}
-        if not self.opts.single:
+        if not self.single:
             types.update({
                 'ids': ((), 'i'),
             })
@@ -135,7 +133,7 @@ class cmd(basecmd):
             pars[self.paramidx[pname]] = v
         f.touch(path).attrs['parvalues'] = pars
         for name, data in datasets.iteritems():
-            if self.opts.single:
+            if self.single:
                 assert data.shape[0] == 1
                 data = data.reshape(data.shape[1:])
                 if name == 'chi2s':
@@ -206,11 +204,11 @@ class cmd(basecmd):
 
     def printfit(self, path, idx, chi2s=None):
         if chi2s is not None and self.opts.verbose:
-            if self.opts.single:
+            if self.single:
                 print path, ' '.join(chi2s.astype(str))
             else:
                 print path, idx, ' '.join(chi2s.astype(str))
-        if self.opts.single:
+        if self.single:
             return
         nprint = 1
         if self.nwait == nprint or chi2s is None:
@@ -225,8 +223,6 @@ class cmd(basecmd):
     def fcscan(self, pointset, getsampling, minimizers, outfile):
         for path, values in pointset.iterpathvalues():
             seed, nsamples = getsampling(path)
-            if self.opts.single:
-                nsamples = 1
 
             if self.toymc:
                 self.toymc.random = np.random.RandomState(seed)
@@ -249,8 +245,6 @@ class cmd(basecmd):
 
     def h0scan(self, pointset, getsampling, minimizers, outfile):
         seed, nsamples = getsampling(None)
-        if self.opts.single:
-            nsamples = 1
 
         if self.toymc:
             self.toymc.random = np.random.RandomState(seed)
@@ -296,12 +290,26 @@ class cmd(basecmd):
         outfile.attrs["seed"] = seed
 
     def run(self):
+        if self.opts.toymc:
+            if not self.opts.toymc_type:
+                raise Exception("pleas specify --toymc-type with --toymc")
+            samples_type = self.opts.toymc_type
+        else:
+            samples_type = 'grid'
+        if self.opts.samples is None:
+            self.opts.samples = 1
+            self.single = True
+        else:
+            self.single = False
         pointset, getsampling = self.points()
 
-        self.pullparams = [self.env.pars[pname] for pname in self.opts.pullparams]
-        if set(self.pullparams).intersection(pointset.params):
-            raise Exception("pull parameter {} on the grid".format(pname))
-        self.allparams = list(chain(pointset.params, self.pullparams))
+        allparams = set(pointset.params)
+        for minimizer in self.opts.minimizers:
+            common = set(pointset.params) & set(minimizer.pars)
+            if common:
+                raise Exception("minimization over grid parameters: {}".format(', '.join(p.name() for p in common)))
+            allparams.update(minimizer.pars)
+        self.allparams = allparams
         self.paramidx = {par: i for i, par in enumerate(self.allparams)}
 
         self.initminimizers(pointset)
@@ -315,9 +323,10 @@ class cmd(basecmd):
         self.tstarted = time.time()
         self.nwait = 0
         self.tlast = 0
-        if self.opts.samples_type == 'grid':
+        if samples_type == 'grid':
             self.fcscan(pointset, getsampling, minimizers, outfile)
-        elif self.opts.samples_type == 'static':
+        elif samples_type == 'static':
+            # broken...
             self.h0scan(pointset, getsampling, minimizers, outfile)
 
         return True

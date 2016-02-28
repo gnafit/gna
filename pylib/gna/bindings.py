@@ -160,7 +160,7 @@ def wrapPoints(cls):
                     for x in shape:
                         shapevec.push_back(x)
                     return super(WrappedClass, self).__init__(arr, shapevec, **kwargs)
-                super(WrappedClass, self).__init__(*args, **kwargs)
+            super(WrappedClass, self).__init__(*args, **kwargs)
     return WrappedClass
 
 def setup(ROOT):

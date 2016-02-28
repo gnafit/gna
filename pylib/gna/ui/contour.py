@@ -385,7 +385,10 @@ class cmd(basecmd):
         if ndim == 1:
             X = pvmap.data.grids[0]
             f = interp1d(X, pvmap.data)
-            x = bisect(lambda x: f(x)-pvlevel, X[0], X[-1])
+            try:
+                x = bisect(lambda x: f(x)-pvlevel, X[0], X[-1])
+            except ValueError:
+                return
             ax.axvline(x, color=color, linewidth=1, linestyle='--')
         elif ndim == 2:
             XX, YY = np.meshgrid(*reversed(pvmap.data.grids))
