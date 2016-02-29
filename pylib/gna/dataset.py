@@ -70,8 +70,10 @@ class Dataset(object):
             return None
         if len(datas) == 1:
             return datas[0]
-        merged = np.hstack([np.ravel(data) for data in datas])
-        return ROOT.Points(merged)
+        merged = ROOT.Prediction()
+        for data in datas:
+            merged.append(data)
+        return merged
             
     def makeblocks(self, observables, covparameters):
         blocks = []

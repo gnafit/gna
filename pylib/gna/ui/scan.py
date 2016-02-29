@@ -148,7 +148,7 @@ class cmd(basecmd):
             return
         for param, randomizer in self.randomizers.iteritems():
             param.set(randomizer(self.toymc.random))
-        self.toymc.make_toy()
+        self.toymc.nextSample()
 
     def dofits(self, minimizers, data, idx, sampleid, mask=repeat(True)):
         fitresults = [(None, None)]*len(minimizers)
@@ -157,7 +157,6 @@ class cmd(basecmd):
             if not enabled:
                 continue
             res = minimizer.fit()
-
             props = self.minprops[fitid]
 
             # minimizer.PrintResults()
@@ -210,7 +209,7 @@ class cmd(basecmd):
                 print path, idx, ' '.join(chi2s.astype(str))
         if self.single:
             return
-        nprint = 1
+        nprint = 50
         if self.nwait == nprint or chi2s is None:
             t = time.time()
             msg = "{} fits, {:.2f} s, path: {}"
@@ -225,7 +224,7 @@ class cmd(basecmd):
             seed, nsamples = getsampling(path)
 
             if self.toymc:
-                self.toymc.random = np.random.RandomState(seed)
+                self.toymc.seed(seed)
             data = self.makedata(nsamples)
             parvalues = dict(zip(pointset.params, values))
             with self.env.pars.update(parvalues):
@@ -247,13 +246,13 @@ class cmd(basecmd):
         seed, nsamples = getsampling(None)
 
         if self.toymc:
-            self.toymc.random = np.random.RandomState(seed)
+            self.toymc.seed(seed)
         sdata = self.makedata(nsamples)
         data = {}
         for path, values in pointset.iterpathvalues():
             data[path] = self.makedata(nsamples)
-        parvalues = self.computeparams([], [])
-        self.setminparams(envs, parvalues)
+        parvalues = self.computeparams({})
+        # self.setminparams(envs, parvalues)
 
         samplefitmask = np.array([not mprop.local for mprop in self.minprops])
         sampleresmask = np.hstack([(not props.local,)*props.nres
@@ -265,13 +264,13 @@ class cmd(basecmd):
         while idx < nsamples:
             self.maketoyprediction()
             sampleid += 1
-            self.setminparams(envs, parvalues)
+            # self.setminparams(envs, parvalues)
             if not self.dofits(minimizers, sdata, idx, sampleid,
                                mask=samplefitmask):
                 continue
             for path, values in pointset.iterpathvalues():
-                self.setminparams(envs, dict(zip(pointset.params, values)))
-                with ParametersReplacer(gridenv.pars.defaults, parvalues):
+                # self.setminparams(envs, dict(zip(pointset.params, values)))
+                with self.env.pars.update(parvalues):
                     if not self.dofits(minimizers, data[path], idx, sampleid,
                                        mask=np.logical_not(samplefitmask)):
                         break
@@ -305,9 +304,6 @@ class cmd(basecmd):
 
         allparams = set(pointset.params)
         for minimizer in self.opts.minimizers:
-            common = set(pointset.params) & set(minimizer.pars)
-            if common:
-                raise Exception("minimization over grid parameters: {}".format(', '.join(p.name() for p in common)))
             allparams.update(minimizer.pars)
         self.allparams = allparams
         self.paramidx = {par: i for i, par in enumerate(self.allparams)}
@@ -326,7 +322,6 @@ class cmd(basecmd):
         if samples_type == 'grid':
             self.fcscan(pointset, getsampling, minimizers, outfile)
         elif samples_type == 'static':
-            # broken...
             self.h0scan(pointset, getsampling, minimizers, outfile)
 
         return True

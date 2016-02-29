@@ -50,6 +50,9 @@
 #pragma link C++ class LinearInterpolator-;
 #pragma link C++ class FillLike-;
 
+#pragma link C++ class CovarianceToyMC-;
+#pragma link C++ class PoissonToyMC-;
+
 #pragma link C++ class Neutrino-;
 #pragma link C++ class OscillationExpressions-;
 #pragma link C++ class PMNSExpressions-;

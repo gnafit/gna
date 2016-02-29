@@ -307,18 +307,21 @@ class cmd(basecmd):
                 levels.add(pvlevel)
         pointsfile = None
         if self.opts.savepoints:
-            pointsfile = PointTree(self.opts.savepoints, "w")
+            pointsfile = PointTree(self.env, self.opts.savepoints, "w")
             pointsfile.params = self.params
         for plotdesc in self.opts.points:
-            plottype, rest = plotdesc[0], plotdesc[1:]
+            plottype, pvspec, rest = plotdesc[0], plotdesc[1], plotdesc[2:]
             pvmap = pvmaptypes[plottype](self)
-            for pvspec in rest:
-                pvlevel = self.parselevel(pvspec)
-                points = self.filterpoints(pvmap, pvlevel, (0.2, 1000))[0]
-                if pointsfile:
-                    for path in points[0]:
-                        pointsfile.touch(path)
-                self.plotpoints(ax, points[0])
+            if len(rest) > 1:
+                width = (float(rest[0]), float(rest[1]))
+            else:
+                width = (0.05, 0.05)
+            pvlevel = self.parselevel(pvspec)
+            points = self.filterpoints(pvmap, pvlevel, width)[0]
+            if pointsfile:
+                for path in points[0]:
+                    pointsfile.touch(path)
+            self.plotpoints(ax, points[0])
         if self.ndim == 1:
             plt.yticks(list(plt.yticks()[0]) + list(levels))
             labels = ['%g' % loc for loc in plt.yticks()[0]]

@@ -17,6 +17,7 @@ class cmd(basecmd):
         parser.add_argument('-n', '--name', required=True)
         parser.add_argument('-o', '--observables', nargs='+', required=True,
                             metavar='OBSERVABLE')
+        parser.add_argument('--toymc', choices=['covariance', 'poisson'])
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
@@ -26,4 +27,15 @@ class cmd(basecmd):
             observables.append(self.env.get(path))
 
         blocks = dataset.makeblocks(observables, parameters)
+
+        if self.opts.toymc:
+            if self.opts.toymc == 'covariance':
+                toymc = ROOT.CovarianceToyMC()
+            elif self.opts.toymc == 'poisson':
+                toymc = ROOT.PoissonToyMC()
+            for block in blocks:
+                toymc.add(block.theory, block.cov)
+            blocks = [block._replace(data=toymc_out)
+                      for (block, toymc_out) in zip(blocks, toymc.toymc.outputs.itervalues())]
+            self.env.parts.toymc[self.opts.name] = toymc
         self.env.parts.analysis[self.opts.name] = blocks

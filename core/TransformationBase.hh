@@ -214,6 +214,9 @@ namespace TransformationTypes {
     void update(int i) const { (void)m_entry->data(i); }
     void updateTypes() { m_entry->updateTypes(); }
 
+    void unfreeze() { m_entry->frozen = false; }
+
+    void taint() { m_entry->tainted.taint(); }
     taintflag tainted() { return m_entry->tainted; }
 
     bool check() const { return m_entry->check(); }

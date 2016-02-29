@@ -5,6 +5,19 @@ import numpy as np
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
+        parser.add_argument('name')
+        parser.add_argument('analysis', type=env.parts.analysis)
+
+    def init(self):
+        toymc = ROOT.CovarianceToyMC()
+b
+        for block in self.opts.analysis:
+            toymc.add(block.theory, block.cov)
+b
+        self.env.parts.statistic[self.opts.name] = chi2
+
+    @classmethod
+    def initparser(cls, parser, env):
         parser.add_argument('-a', '--add', nargs=2, default=[],
                             metavar=('NAME', 'PREDICTION'),
                             action=append_typed(str, env.parts.prediction),
@@ -20,7 +33,7 @@ class cmd(basecmd):
             # data = ROOT.Points(np.random.normal(buf, buf**0.5))
             data = ROOT.Points(buf.copy())
             self.env.parts.data[name] = data
-9b            print 'Asimov', name
+            print 'Asimov', name
 
         for data in getattr(self.opts, 'print'):
             print name

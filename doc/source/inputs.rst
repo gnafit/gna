@@ -288,7 +288,7 @@ the previous commands. Here are the commands for scanning with pull::
             -- analysis --name first_analysis --dataset peak_fakedata pulls --observables peak/spectrum peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.BackgroundRate \
-            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan.hdf5
+            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan_1d_pulls.hdf5
 
 and covariance::
 
@@ -298,7 +298,7 @@ and covariance::
             -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2  \
-            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan.hdf5
+            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan_1d_covariance.hdf5
   
 The plotting commands are also different because of different
 minimizators for global minimization::
@@ -309,8 +309,8 @@ minimizators for global minimization::
             -- dataset --name pulls --pull peak.BackgroundRate \
             -- analysis --name first_analysis --dataset peak_fakedata pulls --observables peak/spectrum peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
-            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.BackgroundRate \
-            -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
+            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu peak.BackgroundRate \
+            -- contour --chi2 /tmp/peak_scan_1d_pulls.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
 
 and::
 
@@ -319,8 +319,8 @@ and::
             -- script scripts/gaussianpeak_data \
             -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
-            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 \
-            -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
+            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
+            -- contour --chi2 /tmp/peak_scan_1d_covariance.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
 
 I'm so sorry that the command line is verbose, please fix it whenever
 possible.

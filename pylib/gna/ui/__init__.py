@@ -96,7 +96,7 @@ def set_typed(parttype):
                 setattr(namespace, self.dest, parttype(values))
             except PartNotFoundError, e:
                 msg = "no {0} named {1!r}"
-                raise argparse.ArgumentError(self, msg.format(e.parttype, v))
+                raise argparse.ArgumentError(self, msg.format(e.parttype, values))
 
     return SetTypedAction
 
