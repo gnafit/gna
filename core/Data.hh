@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
+#include <numeric>
 
 #include <Eigen/Dense>
 

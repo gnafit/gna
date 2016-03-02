@@ -1,3 +1,5 @@
+#include <array>
+
 #include <TMath.h>
 
 #include "OscProbPMNS.hh"

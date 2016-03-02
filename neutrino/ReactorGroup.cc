@@ -1,3 +1,5 @@
+#include <array>
+
 #include <boost/format.hpp>
 
 #include "ReactorGroup.hh"
