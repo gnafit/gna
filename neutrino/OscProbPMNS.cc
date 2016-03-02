@@ -163,7 +163,7 @@ template <int I, int J>
 void OscProbPMNSMult::calcComponent(Args args, Rets rets) {
   double s2 = m_weights.value()[0];
   double s3 = m_weights.value()[1];
-  double s4 = m_weights.value()[4];
+  double s4 = m_weights.value()[2];
   auto &Enu = args[0].x;
   ArrayXd phi = DeltaMSq<I,J>()*km2MeV(m_Lavg)/4.0*Enu.inverse();
   ArrayXd phi2 = phi.square();
