@@ -1,9 +1,10 @@
 #include <boost/math/constants/constants.hpp>
-
 #include "EnergyResolution.hh"
+#include "iostream"
 
-const double pi = boost::math::constants::pi<double>();
+constexpr double pi = boost::math::constants::pi<double>();
 
+/* TODO: reimplement it with some good matrix machinery, maybe Eigen? */
 EnergyResolution::EnergyResolution() {
   variable_(&m_a, "Eres_a");
   variable_(&m_b, "Eres_b");
@@ -23,7 +24,7 @@ EnergyResolution::EnergyResolution() {
 }
 
 double EnergyResolution::relativeSigma(double Etrue) {
-  return sqrt(pow(m_a, 2)+ pow(m_b, 2)/Etrue + pow(m_c, 2)/pow(Etrue, 2));
+  return sqrt(pow(m_a, 2)+ pow(m_b, 2)/Etrue + pow(m_c/Etrue, 2));
 }
 
 double EnergyResolution::resolution(double Etrue, double Erec) {
@@ -45,71 +46,89 @@ void EnergyResolution::fillCache() {
   std::vector<double> buf(m_size);
 
   int cachekey = 0;
-  for (size_t j = 0; j < m_size; ++j) {
-    double Etrue = (m_datatype.edges[j+1] + m_datatype.edges[j])/2;
-    double dEtrue = m_datatype.edges[j+1] - m_datatype.edges[j];
+  /* fill the cache matrix with probalilities for number of events to leak to other bins */
+  /* colums corressponds to reconstrucred energy and rows to true energy */
+  for (size_t etrue_row = 0; etrue_row < m_size; ++etrue_row) {
+    double Etrue = (m_datatype.edges[etrue_row+1] + m_datatype.edges[etrue_row])/2;
+    double dEtrue = m_datatype.edges[etrue_row+1] - m_datatype.edges[etrue_row];
 
     int startidx = -1;
     int endidx = -1;
-    for (size_t i = 0; i < m_size; ++i) {
-      double Erec = (m_datatype.edges[i+1] + m_datatype.edges[i])/2;
+    /* precalculating probabilities for events in given bin to leak to 
+     * neighbor bins  */
+    for (size_t erec_column = 0; erec_column < m_size; ++erec_column) {
+      double Erec = (m_datatype.edges[erec_column+1] + m_datatype.edges[erec_column])/2;
       double rEvents = dEtrue*resolution(Etrue, Erec);
 
       if (rEvents < 1E-10) {
         if (startidx >= 0) {
-          endidx = i;
-          break;
+           endidx = erec_column;
+           break;
         }
         continue;
       }
-      buf[i] = rEvents;
+      buf[erec_column] = rEvents;
       if (startidx < 0) {
-        startidx = i;
+        startidx = erec_column;
       }
     }
     if (endidx < 0) {
       endidx = m_size;
     }
+    /* after row is filled it's time to move it to cache */
     if (startidx >= 0) {
-      std::copy(&buf[startidx], &buf[endidx], &m_rescache[cachekey]);
-      m_cacheidx[j] = cachekey;
+      /* std::copy(&buf[startidx], &buf[endidx], &m_rescache[cachekey]);  */
+      std::copy(std::make_move_iterator(&buf[startidx]),
+                std::make_move_iterator(&buf[endidx]), 
+                &m_rescache[cachekey]); 
+
+      /* put the cachekey into index storage and update it to new value */
+      m_cacheidx[etrue_row] = cachekey;
       cachekey += endidx - startidx;
     } else {
-      m_cacheidx[j] = cachekey;
+       /* if no values cached cachekey remains the same  */
+     m_cacheidx[etrue_row] = cachekey;
     }
-    m_startidx[j] = startidx;
+    m_startidx[etrue_row] = startidx;
   }
+  /* nothing is stored at the end, huh? */
   m_cacheidx[m_size] = cachekey;
 }
 
+/* Apply precalculated cache and actually smear */
 void EnergyResolution::calcSmear(Args args, Rets rets) {
   const double *events_true = args[0].x.data();
   double *events_rec = rets[0].x.data();
 
   size_t insize = args[0].type.size();
   size_t outsize = rets[0].type.size();
+  /* assert(insize == outsize);  */
 
   std::copy(events_true, events_true + insize, events_rec);
   double loss = 0.0;
-  for (size_t j = 0; j < insize; ++j) {
-    double *cache = &m_rescache[m_cacheidx[j]];
-    int startidx = m_startidx[j];
-    int cnt = m_cacheidx[j+1] - m_cacheidx[j];
+  for (size_t etrue_row = 0; etrue_row < insize; ++etrue_row) {
+     /* get the cache line */
+    double *cache = &m_rescache[m_cacheidx[etrue_row]];
+    int startidx = m_startidx[etrue_row];
+     /* get number of valid cache entries for corresponding Etrue  */
+    int cnt = m_cacheidx[etrue_row+1] - m_cacheidx[etrue_row];
     for(int off = 0; off < cnt; ++off) {
-      size_t i = startidx + off;
-      if (i == j) {
+      /* current position in cache */
+      size_t erec_column = startidx + off;
+      if (erec_column == etrue_row) {
         continue;
       }
       double rEvents = cache[off];
-      double delta = rEvents*events_true[j];
+      double delta = rEvents*events_true[etrue_row];
 
-      events_rec[i] += delta;
-      int inv = 2*j - i;
+      events_rec[erec_column] += delta;
+      int inv = 2*etrue_row - erec_column;
+      /* if get outside the bins of histo then events are LOST */
       if (inv < 0 || (size_t)inv >= outsize) {
-        events_rec[j] -= delta;
+        events_rec[etrue_row] -= delta;
         loss += delta;
       }
-      events_rec[j] -= delta;
+      events_rec[etrue_row] -= delta;
     }
   }
 }
