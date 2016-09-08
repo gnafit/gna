@@ -36,6 +36,7 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
+  detector/C14_spectrum.cc
   )
 
 set (HEADERS
@@ -73,13 +74,15 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  C14_spectrum.hh
+  GaussianPeakWithBackground.hh
   )
   
-include_directories(core/ neutrino/ integrator/ detector/)
+include_directories(core/ neutrino/ integrator/ detector/ examples/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-deprecated-declarations -Wall -pedantic -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Wall -pedantic -Werror -pipe -O3")
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 
