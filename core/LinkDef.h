@@ -76,7 +76,7 @@
 #pragma link C++ class ReactorNorm-;
 #pragma link C++ class ReactorGroup-;
 #pragma link C++ class GaussianPeakWithBackground-;
-#pragma link C++ class C14_spectrum-;
+#pragma link C++ class C14Spectrum-;
 
 
 #endif

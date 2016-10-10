@@ -99,6 +99,7 @@ class Detector(object):
         self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
         self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
+        self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
 
 class Isotope(object):
     def __init__(self, ns, name):
@@ -125,6 +126,7 @@ class ReactorExperimentModel(baseexp):
                             action='append', default=[])
         parser.add_argument('--integration-order', type=int, default=4)
         parser.add_argument('--no-reactor-groups', action='store_true')
+        parser.add_argument('--with-C14', action='store_true')
 
     def __init__(self, opts, ns=None, reactors=None, detectors=None):
         """Initialize a reactor experiment
@@ -149,7 +151,7 @@ class ReactorExperimentModel(baseexp):
                 if det.name == binopt[0]:
                     break
             else:
-                raise Exception("can't find detecter {}".format(binopt[0]))
+                raise Exception("can't find detector {}".format(binopt[0]))
             det.edges = np.linspace(float(binopt[1]), float(binopt[2]), int(binopt[3]))
         for det in self.detectors:
             det.assign(self.ns)
@@ -309,9 +311,10 @@ class ReactorExperimentModel(baseexp):
                 if compnames:
                     raise Exception("components not found: {}".format(compnames))
 
+
+
     def setibd(self, detector, ibdtype):
-        """Setup input energy values, integration and IBD calculation object for the given detector according to the ibdtype
-.
+        """Setup input energy values, integration and IBD calculation object for the given detector according to the ibdtype .
         ibdtype may be 'zero' or 'first' for the corresponding order.
         Resulting components are stored in detector.components.
         """
@@ -343,6 +346,8 @@ class ReactorExperimentModel(baseexp):
             ibd.jacobian.Ee(integrator.points.x)
             ibd.jacobian.ctheta(integrator.points.y)
             eventsparts = [ibd.xsec, ibd.jacobian]
+
+
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
 
@@ -403,8 +408,23 @@ class ReactorExperimentModel(baseexp):
         if 'oscprob' in sums:
             detector.intermediates["oscprob"] = sums['oscprob']
         if 'rate' in sums:
-            finalsum = sums['rate']
-            self.ns.addobservable("{0}_noeffects".format(detector.name), finalsum, export=False)
+            inter_sum = sums['rate']
+            self.ns.addobservable("{0}_noeffects".format(detector.name),
+                    inter_sum, export=False)
+
+            if self.opts.with_C14:
+                with self.ns('ibd'):
+                    with detector.ns:
+                        detector.c14 = ROOT.C14Spectrum(8,6)
+                        detector.c14.smear.inputs(inter_sum)
+                        finalsum = detector.c14.smear
+
+                        self.ns.addobservable("{0}_c14".format(detector.name),
+                                finalsum, export=True)
+            else:
+                finalsum = inter_sum
+
+
 
             with detector.ns:
                 detector.eres = ROOT.EnergyResolution()

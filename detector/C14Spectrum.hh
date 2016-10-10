@@ -13,7 +13,7 @@ class C14Spectrum: public GNAObject,
                     public Transformation<C14Spectrum>
 {
     public:
-        C14Spectrum(int order);
+        C14Spectrum(int order, int n_pivots);
     private:
         ~C14Spectrum();
         inline double Fermi_function(double Ekin, double momentum, int Z, int A) const noexcept;
@@ -25,13 +25,16 @@ class C14Spectrum: public GNAObject,
 
 
         variable<double> m_rho, m_protons, m_e;
-        PDGVariables *m_pdg;
         /* dependant<double> m_e; */
 
         DataType m_datatype;
 
         GLTable* integr_table;
         int integration_order;
+        int n_pivots;
+
+        double coincidence_probab;
+        double stayed_in_bin;
 
         size_t m_size;
         std::vector<double> m_rescache;

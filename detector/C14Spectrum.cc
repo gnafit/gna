@@ -1,12 +1,12 @@
 #include "C14Spectrum.hh"
 
+#include "FakeGSLFunction.hh"
 #include "Units.hh"
 #include <cmath>
 #include <gsl/gsl_sf_gamma.h>
 #include <boost/math/constants/constants.hpp>
-#include "FakeGSLFunction.hh"
 #include <cassert>
-#include "ParametricLazy.hpp"
+#include <iostream>
 
 constexpr auto pi = boost::math::constants::pi<double>();
 constexpr auto alpha = 1./137.035989;
@@ -18,12 +18,15 @@ constexpr auto spectrum_end_point = 156.27 * 1e-3; /* MeV */
 constexpr auto spectrum_start_point = 0.; /* MeV */
 constexpr auto shape_factor = 1.24 ;   /* MeV^{-1} */
 constexpr auto integration_order = 6;
-/* constexpr auto MeV_to_keV = 1e3; */
+constexpr auto MeV_to_keV = 1e3; 
+constexpr auto keV_to_MeV = 1e-3; 
 constexpr auto coincidence_window = 300*ns;
 constexpr auto C14_half_life = 5730*year;
-constexpr auto H_to_C_ratio = 1.639;
+/* constexpr auto H_to_C_ratio = 1.639;    */
 
-C14Spectrum::C14Spectrum(int order): integration_order(order)
+
+
+C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_pivots(n_pivots), coincidence_probab(0.), stayed_in_bin(0.)
 {
    variable_(&m_rho, "rho_C14");
    variable_(&m_protons, "TargetProtons");
@@ -51,6 +54,7 @@ C14Spectrum::C14Spectrum(int order): integration_order(order)
 void C14Spectrum::fillCache()
 {
     m_size = m_datatype.hist().bins();
+    
     if (m_size == 0) return;
     
     m_rescache.resize(m_size*m_size);
@@ -58,67 +62,100 @@ void C14Spectrum::fillCache()
     m_startidx.resize(m_size);
     std::vector<double> buf(m_size);
 
-    static const auto norm = 1/IntegrateSpectrum(spectrum_start_point, spectrum_end_point);   
+    static const auto norm = 1./IntegrateSpectrum(spectrum_start_point, spectrum_end_point);   
 
 /* Linear alkybenzene's chemical formula is C_6 H_5 C_n H_{2n+1}
  * where n is integer between 10 and 13 (see JUNO Conceptual Design Report), so convesrion between number of
  * protons (only hydrogen) to number of C12s is a bit unclear.
  * Here for no particular reasons we use the median n = 11*/
 
-    auto convers_H_to_C12 = [&](const int n){ return (n+6)/(2*n+6)*m_protons; }; 
-    auto C14_nuclei_number = m_rho * convers_H_to_C12(11);
-    auto coincidence_prob = coincidence_window * C14_half_life * C14_nuclei_number ;
+    decltype(auto) convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); }; 
+    double C14_nuclei_number = m_rho * convers_H_to_C12(11);
+    auto coincidence_prob = (coincidence_window / C14_half_life) * C14_nuclei_number;
+    coincidence_probab = coincidence_prob;
+    /* std::cout << "coincidence_window " << coincidence_window << "\n"
+     *           << "C14_nuclei_number " << C14_nuclei_number << "\n"
+     *           [> << "c12 " << convers_H_to_C12(11.) << "\n" <]
+     *           << "Norm " << norm  << "\n" 
+     *           << "Rel concentration " << m_rho << "\n" 
+     *           << "Protons on target " << m_protons << "\n"
+     *           << "coincidence_prob " << coincidence_prob << std::endl; */
 
     int cachekey = 0;
+
+    auto bin_width = m_datatype.edges[1] - m_datatype.edges[0];
     
-    for (size_t etrue = 0; etrue < m_size; ++etrue)
-    {
-        double Etrue = (m_datatype.edges[etrue+1] + m_datatype.edges[etrue])/2;
+    auto pivot_width = bin_width/n_pivots;
+    
+    if (this->stayed_in_bin == 0.)
+    for (int pivot = 1; pivot <= n_pivots; ++pivot) {
+        auto Etrue_piv = m_datatype.edges[0] + (2*pivot-1)*pivot_width/2;
+        assert(Etrue_piv <= m_datatype.edges[1]); 
+        /* std::cout << "Bin width " << m_datatype.edges[1] - m_datatype.edges[0] << std::endl;
+         * std::cout << "Center of subbin " << (Etrue_piv - m_datatype.edges[0])*MeV_to_keV <<std::endl;
+         * std::cout << "Integrating from 0 to "<< (m_datatype.edges[1] - Etrue_piv)*MeV_to_keV << std::endl;  */
+        this->stayed_in_bin += norm  / n_pivots * IntegrateSpectrum(0, m_datatype.edges[1] - Etrue_piv); 
+    } 
 
-        int startidx = -1;
-        int endidx = -1;
+    for (size_t etrue = 0; etrue < m_size; ++etrue) {
+        int startidx{-1};
+        int endidx{-1};
 
-        /* check for how many bins do we spread events from a given one */
-        auto current_start = 0.; 
-        int bin_count = 0;
-
+        int bin_count{0};
         auto overall = 0.;
-        for (size_t erec = etrue + 1; erec < m_size; ++erec)
-        {
-            auto current_end = (m_datatype.edges[erec+1] + m_datatype.edges[erec])/2 - Etrue;
-            bool bin_fully_in_spectrum = (current_end < spectrum_end_point);
-            auto rEvents = bin_fully_in_spectrum ?
-                           coincidence_prob * norm * IntegrateSpectrum(current_start, current_end) : 
-                           coincidence_prob * norm * IntegrateSpectrum(current_start, spectrum_end_point);
+        /* std::cout << this->stayed_in_bin << std::endl; */
+        /* std::cout << "Bin width " << m_datatype.edges[etrue+1] - m_datatype.edges[etrue] << std::endl; */
 
-            current_start = current_end;
-            ++bin_count;
+        double prob_acc{0.};
+        for (size_t erec = etrue + 1; erec < m_size; ++erec) {
 
-            buf[erec] = rEvents;
-            overall +=  rEvents;
+
+            /* for current pivot in bin "etrue" compute the relative probability for event to be shifted to bin "erec" */
+            double rel_prob_sum{0.};
+            double pivot_to_bin{0.};
+            for (int pivot = 1; pivot <= n_pivots; ++pivot) {
+                auto Etrue_piv = m_datatype.edges[etrue] + (2*pivot-1)*pivot_width/2;
+                assert(Etrue_piv <= m_datatype.edges[etrue+1]);
+                if ((m_datatype.edges[erec] - Etrue_piv)> spectrum_end_point) continue;
+
+                auto current_start = m_datatype.edges[erec] - Etrue_piv;
+                bool bin_fully_in_spectrum = (m_datatype.edges[erec+1] - Etrue_piv) < spectrum_end_point;
+                auto current_end = bin_fully_in_spectrum ? (m_datatype.edges[erec+1] - Etrue_piv) : spectrum_end_point;
+                /* std::cout << "Current start " << current_start*MeV_to_keV << " end " << current_end*MeV_to_keV << std::endl;  */
+
+                if (current_start >= spectrum_end_point ) break;
+
+               rel_prob_sum +=  IntegrateSpectrum(current_start, current_end);
+               ++pivot_to_bin;
+               std::cout << Etrue_piv - m_datatype.edges[etrue] << std::endl;
+            }
 
             if (startidx < 0) startidx = etrue;
-
-            if (!bin_fully_in_spectrum)
-            {
-                endidx = startidx + bin_count;
-                break;
+            if (rel_prob_sum == 0.) {
+               endidx = startidx + bin_count;
+               break;
             }
-        }
+            /* std::cout << "Rel probability to transit to other bin " << rel_prob_sum; */
+            /* std::cout << "Probability " << rel_prob_sum * coincidence_prob * norm/n_pivots << std::endl; */
+            buf[erec] = rel_prob_sum * coincidence_prob * norm/(pivot_to_bin);
+            overall +=  rel_prob_sum * coincidence_prob * norm/(pivot_to_bin);
+            prob_acc += norm/(pivot_to_bin)*rel_prob_sum;
+            ++bin_count;
+  
+        } 
+        std::cout << "prob_acc " << prob_acc << "full prob" << prob_acc + this->stayed_in_bin<< std::endl;
         buf[etrue] = 1 - overall;
 
         if (endidx < 0) endidx = m_size;
 
-        if (startidx >= 0)
-        {
+        if (startidx >= 0) {
             std::copy(std::make_move_iterator(&buf[startidx]),
                       std::make_move_iterator(&buf[endidx]), 
                       &m_rescache[cachekey]); 
             m_cacheidx[etrue] = cachekey;
             cachekey += endidx - startidx;
         }
-        else
-        {
+        else {
             m_cacheidx[etrue] = cachekey;
         }
         m_startidx[etrue] = startidx;
@@ -138,24 +175,34 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
     assert(insize == outsize);
 
     std::copy(events_true, events_true + insize, events_rec);
+    double overall_moved = 0.;
+    double total_number = 0.;
+    std::cout << overall_moved << " " << total_number << std::endl;
 
     double loss = 0.0;
     for (size_t etrue = 0; etrue < insize; ++etrue)
     {
+        if (std::isnan(events_true[etrue])) continue;
+
         auto* cache = &m_rescache[m_cacheidx[etrue]];
         int startidx = m_startidx[etrue];
         int cnt = m_cacheidx[etrue + 1] - m_cacheidx[etrue];
-        for (int off = 0; off < cnt; ++off)
+        total_number += events_true[etrue];
+
+        for (int offset = 0; offset < cnt; ++offset)
         {
-            size_t erec = startidx + off;
-            if (erec == etrue)
-            {
+            size_t erec = startidx + offset;
+            if (erec == etrue) {
                 continue;
             }
-            auto rEvents = cache[off];
-            auto delta = rEvents*events_true[etrue];
+            auto rEvents = cache[offset];
+            auto delta = rEvents * events_true[etrue];
+            /* std::cout << "events_true["<<etrue<<"] " << events_true[etrue]
+             * << " rEvents " << rEvents 
+             * << " Delta " << delta << std::endl;   */
 
             events_rec[erec] += delta;
+            overall_moved += delta;
             int inv = 2*etrue - erec;
             if (inv < 0 || (size_t)inv >= outsize)
             {
@@ -166,12 +213,14 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
         }
         
     } 
+    std::cout << "overall_moved " << overall_moved << "\n" <<
+                 "how much we should move " << total_number * coincidence_probab * (1 - this->stayed_in_bin) << std::endl;
 
 
 }
 
 //--------------------------------------------------------------------------
- double C14Spectrum::Spectra(double Ekin) const  noexcept
+inline double C14Spectrum::Spectra(double Ekin) const  noexcept
 {
     assert(Ekin >= spectrum_start_point && Ekin <= spectrum_end_point);
 
@@ -181,7 +230,7 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
 } 
 
 
-inline double C14Spectrum::Fermi_function(double Ekin, double momentum, int Z, int A) const noexcept
+double C14Spectrum::Fermi_function(double Ekin, double momentum, int Z, int A) const noexcept
 {
 
     /* just using empirical formula for nuclear radius */
