@@ -415,7 +415,7 @@ class ReactorExperimentModel(baseexp):
             if self.opts.with_C14:
                 with self.ns('ibd'):
                     with detector.ns:
-                        detector.c14 = ROOT.C14Spectrum(8,6)
+                        detector.c14 = ROOT.C14Spectrum(8,5)
                         detector.c14.smear.inputs(inter_sum)
                         finalsum = detector.c14.smear
 

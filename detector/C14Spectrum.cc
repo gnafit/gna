@@ -26,7 +26,7 @@ constexpr auto C14_half_life = 5730*year;
 
 
 
-C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_pivots(n_pivots), coincidence_probab(0.), stayed_in_bin(0.)
+C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_pivots(n_pivots), coincidence_prob(0.), stayed_in_bin(0.)
 {
    variable_(&m_rho, "rho_C14");
    variable_(&m_protons, "TargetProtons");
@@ -71,20 +71,11 @@ void C14Spectrum::fillCache()
 
     decltype(auto) convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); }; 
     double C14_nuclei_number = m_rho * convers_H_to_C12(11);
-    auto coincidence_prob = (coincidence_window / C14_half_life) * C14_nuclei_number;
-    coincidence_probab = coincidence_prob;
-    /* std::cout << "coincidence_window " << coincidence_window << "\n"
-     *           << "C14_nuclei_number " << C14_nuclei_number << "\n"
-     *           [> << "c12 " << convers_H_to_C12(11.) << "\n" <]
-     *           << "Norm " << norm  << "\n" 
-     *           << "Rel concentration " << m_rho << "\n" 
-     *           << "Protons on target " << m_protons << "\n"
-     *           << "coincidence_prob " << coincidence_prob << std::endl; */
+    coincidence_prob = (coincidence_window / C14_half_life) * C14_nuclei_number;
 
     int cachekey = 0;
 
     auto bin_width = m_datatype.edges[1] - m_datatype.edges[0];
-    
     auto pivot_width = bin_width/n_pivots;
     
     if (this->stayed_in_bin == 0.)
@@ -103,9 +94,6 @@ void C14Spectrum::fillCache()
 
         int bin_count{0};
         auto overall = 0.;
-        /* std::cout << this->stayed_in_bin << std::endl; */
-        /* std::cout << "Bin width " << m_datatype.edges[etrue+1] - m_datatype.edges[etrue] << std::endl; */
-
         double prob_acc{0.};
         for (size_t erec = etrue + 1; erec < m_size; ++erec) {
 
@@ -127,7 +115,6 @@ void C14Spectrum::fillCache()
 
                rel_prob_sum +=  IntegrateSpectrum(current_start, current_end);
                ++pivot_to_bin;
-               std::cout << Etrue_piv - m_datatype.edges[etrue] << std::endl;
             }
 
             if (startidx < 0) startidx = etrue;
@@ -143,7 +130,6 @@ void C14Spectrum::fillCache()
             ++bin_count;
   
         } 
-        std::cout << "prob_acc " << prob_acc << "full prob" << prob_acc + this->stayed_in_bin<< std::endl;
         buf[etrue] = 1 - overall;
 
         if (endidx < 0) endidx = m_size;
@@ -173,11 +159,11 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
     size_t insize = args[0].type.size();
     size_t outsize = rets[0].type.size();
     assert(insize == outsize);
+    assert(false);
 
     std::copy(events_true, events_true + insize, events_rec);
     double overall_moved = 0.;
     double total_number = 0.;
-    std::cout << overall_moved << " " << total_number << std::endl;
 
     double loss = 0.0;
     for (size_t etrue = 0; etrue < insize; ++etrue)
@@ -214,7 +200,7 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
         
     } 
     std::cout << "overall_moved " << overall_moved << "\n" <<
-                 "how much we should move " << total_number * coincidence_probab * (1 - this->stayed_in_bin) << std::endl;
+                 "how much we should move " << total_number * coincidence_prob * (1 -  stayed_in_bin) << std::endl;
 
 
 }

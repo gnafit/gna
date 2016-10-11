@@ -33,7 +33,7 @@ class C14Spectrum: public GNAObject,
         int integration_order;
         int n_pivots;
 
-        double coincidence_probab;
+        double coincidence_prob;
         double stayed_in_bin;
 
         size_t m_size;

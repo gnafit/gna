@@ -4,6 +4,7 @@
 # Here we might collect some useful common things
 from math import  pow
 
+#  TODO: update to the latest PDG
 use_pdg_version = 2012
 
 pdg = {}
