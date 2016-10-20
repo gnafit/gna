@@ -76,10 +76,10 @@ void EnergyResolution::fillCache() {
     }
     /* after row is filled it's time to move it to cache */
     if (startidx >= 0) {
-      /* std::copy(&buf[startidx], &buf[endidx], &m_rescache[cachekey]);  */
-      std::copy(std::make_move_iterator(&buf[startidx]),
-                std::make_move_iterator(&buf[endidx]), 
-                &m_rescache[cachekey]); 
+      std::copy(&buf[startidx], &buf[endidx], &m_rescache[cachekey]);  
+      /* std::copy(std::make_move_iterator(&buf[startidx]),
+       *           std::make_move_iterator(&buf[endidx]), 
+       *           &m_rescache[cachekey]);  */
 
       /* put the cachekey into index storage and update it to new value */
       m_cacheidx[etrue] = cachekey;
@@ -106,6 +106,12 @@ void EnergyResolution::calcSmear(Args args, Rets rets) {
   std::copy(events_true, events_true + insize, events_rec);
   double loss = 0.0;
   for (size_t etrue = 0; etrue < insize; ++etrue) {
+
+    /* it is done in order to filter out NaN values */
+    auto cur_event_true = !std::isnan(events_true[etrue])? events_true[etrue] : 0. ;
+    if (std::isnan(events_true[etrue])){
+        /* std::cout << "Encountered NaN in input true vector in position " << etrue << std::endl; */
+    }
      /* get the cache line */
     double *cache = &m_rescache[m_cacheidx[etrue]];
     int startidx = m_startidx[etrue];
@@ -117,8 +123,12 @@ void EnergyResolution::calcSmear(Args args, Rets rets) {
       if (erec == etrue) {
         continue;
      }
+      if (std::isnan(events_rec[erec])){
+          /* std::cout << "Encountered NaN in output reconstructed vector in position " <<erec << std::endl; */
+          events_rec[erec] = 0.;
+      }
       double rEvents = cache[off];
-      double delta = rEvents*events_true[etrue];
+      double delta = rEvents*cur_event_true;
 
       events_rec[erec] += delta;
       int inv = 2*etrue - erec;

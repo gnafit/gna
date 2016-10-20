@@ -110,6 +110,13 @@ class Chi2ConfidenceMap(PValueMap):
         pvs = 1-scipy.stats.chi2.cdf(dchi2, len(dchi2.shape))
         return vmaparray(pvs, dchi2.grids)
 
+@pvaluemap("chi2min")
+class Chi2MinMap(PValueMap):
+    @property
+    def data(self):
+        dchi2 = self.dchi2('chi2min')
+        return vmaparray(dchi2, dchi2.grids)
+
 @pvaluemap("chi2upper")
 class Chi2UpperLimitMap(Chi2ConfidenceMap):
     @property

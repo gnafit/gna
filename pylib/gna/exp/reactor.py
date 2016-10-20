@@ -99,7 +99,8 @@ class Detector(object):
         self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
         self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
-        self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
+        #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
+
 
 class Isotope(object):
     def __init__(self, ns, name):
