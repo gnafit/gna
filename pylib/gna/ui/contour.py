@@ -72,6 +72,7 @@ vmaptypes = {
     'fcupper': estimatepvalue,
     'h0asimov': readchi2,
     'h1asimov': readchi2,
+    'chi2minplt': readchi2,
     'h0': estimatepvalue,
     'h1': estimatepvalue,
 }
@@ -110,7 +111,7 @@ class Chi2ConfidenceMap(PValueMap):
         pvs = 1-scipy.stats.chi2.cdf(dchi2, len(dchi2.shape))
         return vmaparray(pvs, dchi2.grids)
 
-@pvaluemap("chi2min")
+@pvaluemap("chi2minplt")
 class Chi2MinMap(PValueMap):
     @property
     def data(self):
