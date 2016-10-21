@@ -38,10 +38,16 @@ rebuild can be issued by::
 
   $ make -C build
 
-If there are errors about unresolved symbols with c++ abi tags during
+If there are errors about unresolved symbols with C++ ABI tags during
 linking or running, you may want to try to build with clang++. Remove
 the build directory and set::
 
   $ export CXX=clang++
 
-before starting the build procedure again.
+before starting the build procedure again. In case you are GCC 5.X compiler
+version you may use the following cmake command when generating the
+build files with your additional flags if needed::
+  $ cmake -DCMAKE_CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+  $ export CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
+Notice that if ABI mismatch encountered the ROOT is also have to be recompiled
+from scratch with compilation flags above
