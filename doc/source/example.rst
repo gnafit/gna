@@ -203,3 +203,7 @@ The final output of our computations is stored into namespace as an
 is no free inputs in the whole subgraph, leading to the provided
 output and will make it accessible for future use under the given name
 inside the namespace ``ns``.
+
+
+As an example try to implement the exponential background distribution with a
+Gaussian peak.

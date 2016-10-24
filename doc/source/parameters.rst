@@ -45,3 +45,4 @@ As you can see, we treat ``Mu`` of both peaks independently, while the
 background rate is really common and affects both peaks at the same
 time.
 
+As an example do it vice-versa.
