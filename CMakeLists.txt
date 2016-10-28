@@ -77,7 +77,7 @@ set (HEADERS
   EnergyResolution.hh
   # EnergyResolution_new.hh
   C14Spectrum.hh
-  GaussianPeakWithBackground.hh
+  # GaussianPeakWithBackground.hh
   )
   
 include_directories(core/ neutrino/ integrator/ detector/ examples/)

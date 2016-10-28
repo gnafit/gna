@@ -100,7 +100,7 @@ class PValueMap(object):
     def dchi2(self, statistic):
         chi2data = self.base.statistic(statistic)
         chi2map = self.base.readmap('chi2')
-        dchi2 = chi2map-chi2data
+        dchi2 = chi2map - chi2data
         return dchi2
 
 @pvaluemap("chi2ci")
@@ -209,6 +209,7 @@ class cmd(basecmd):
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
 
     def statistic(self, name):
+        print name
         if name in self.statistics:
             return self.statistics[name]
         if name == 'chi2min':
