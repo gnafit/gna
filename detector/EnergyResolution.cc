@@ -108,7 +108,7 @@ void EnergyResolution::calcSmear(Args args, Rets rets) {
   for (size_t etrue = 0; etrue < insize; ++etrue) {
 
     /* it is done in order to filter out NaN values */
-    auto cur_event_true = !std::isnan(events_true[etrue])? events_true[etrue] : 0. ;
+    auto cur_event_true = !std::isnan(events_true[etrue]) ? events_true[etrue] : 0. ;
     if (std::isnan(events_true[etrue])){
         /* std::cout << "Encountered NaN in input true vector in position " << etrue << std::endl; */
     }
