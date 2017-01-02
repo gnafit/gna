@@ -11,8 +11,8 @@ public:
   EnergyResolution();
 
 private:
-  double relativeSigma(double Etrue);
-  double resolution(double Etrue, double Erec);
+  double relativeSigma(double Etrue) const noexcept;
+  double resolution(double Etrue, double Erec) const noexcept;
   void fillCache();
   void calcSmear(Args args, Rets rets);
 
