@@ -4,8 +4,9 @@
 # Here we might collect some useful common things
 from math import  pow
 
-#  TODO: update to the latest PDG
-use_pdg_version = 2012
+#  TODO: how to correctly include hierarchy dependent \Delta m^2_{32} update?
+#  Before the MINOS 2011 was used
+use_pdg_version = 2016
 
 pdg = {}
 pdg[2010] = dict(
@@ -60,6 +61,28 @@ pdg[2013]   = dict( pdg[2012]
     , neutron_lifetimee = 0.9
 )
 pdg['live'] = dict( pdg[2013] )
+
+pdg[2016]  = dict( pdg[2013]
+    , NeutronMass = 939.565413
+    , ProtonMass  = 938.272081
+    , ElectronMass = 0.510998946
+    , neutron_lifetime = 880.2
+    , neutron_lifetimee = 1.0
+    , dmSq21 = 7.53e-5 #pdglive, 2013, Gando (KamLAND + solar + SBL + accelerator)
+    , dmSq21e = 0.18e-5
+    , sinSqtheta12 = 0.304
+    , sinSqtheta12e = 0.014 # the error in pdg is asymmetric, took the upper bound 
+    , sinSqtheta13 = 2.19e-2
+    , sinSqtheta13e = 0.12e-2
+    , dmSq32_normal = 2.44e-3 # pdglive, 2016, their own fit
+    , dmSq32_normal_e = 0.06e-3 
+    , dmSq32_inverted = 2.51e-3
+    , dmSq32_inverted_e = 0.06e-3
+    , sinSqtheta23_normal = 0.50 # pdglive, 2016, their own fit
+    , sinSqtheta23_normal_e = 0.05
+    , sinSqtheta23_inverted = 0.51
+    , sinSqtheta23_inverted_e = 0.05
+)
 
 class PhysicsConstants:
     def __init__(self, pdgver = use_pdg_version):
