@@ -79,7 +79,7 @@ include_directories(core/ neutrino/ integrator/ detector/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wno-deprecated-declarations -Wall -pedantic -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Wall -pedantic -Werror -O3 -pipe")
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 

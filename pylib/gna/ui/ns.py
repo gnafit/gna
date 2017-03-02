@@ -5,10 +5,10 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('--push', nargs='+', default=[],
                             metavar='NS',
-                            help='push namespaces NS to curent view')
+                            help='push namespaces NS to current view')
         parser.add_argument('--pop', nargs='+', default=[],
                             metavar='NS',
-                            help='push namespaces NS to curent view')
+                            help='push namespaces NS to current view')
         parser.add_argument('--route', nargs=2, action='append',
                             default=[])
         parser.add_argument('--loadset', action='append', nargs=2,
