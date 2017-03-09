@@ -2,8 +2,8 @@ Reactor experiments
 ======================
 
 The Gaussian peak example we have used before is a very simple
-experiment model. To include some real world experiments to analysis
-more work is to be done to implement the whole computational graph
+experiment model. To include some real life experiments into analysis
+more work have to be done to implement the whole computational graph
 leading to the experimentally observable values. The graph
 construction may be designed to be done partially, with separate
 modules defining or extending its parts. In the end you'll again have
@@ -24,7 +24,7 @@ following formula:
    \int dE_\nu \frac{dE}{dE_\nu}\sigma(E_\nu) P(E_\nu) \sum \limits_k
    n_k S_k(E_\nu)
 
-:math:`N_i` is the event number in the :math:`i`-th bin containting
+:math:`N_i` is the event number in the :math:`i`-th bin containing
 events with energies :math:`[E_i, E_{i+1}]`; :math:`E` and
 :math:`E_\nu` is the positron and neutrino energy;
 :math:`\sigma(E_\nu)` is the IBD cross section; :math:`P(E_\nu)` is
@@ -37,9 +37,9 @@ The vacuum oscillation probability has the following structure:
 .. math::
    P(E_\nu) = \sum_j w_j(\theta) P_j(\Delta m^2, E_\nu)
 
-where the mixing angle only dependant weights :math:`w_j` and mass
-difference dependant oscillatory terms :math:`P_j` are
-factorized. Since only the oscillatory terms are energy dependant,
+where the mixing angle only dependent weights :math:`w_j` and mass
+difference dependent oscillatory terms :math:`P_j` are
+factorized. Since only the oscillatory terms are energy dependent,
 when doing fits it's more computationally efficient to take the
 weights out of the integrals, making the recomputations a lot faster
 if only mixing angles are changed. The corresponding formula, which is
@@ -53,30 +53,30 @@ implemented in code is:
 The :math:`P_j(E_\nu)` functions and other derived :math:`j`-indexed
 functions are generally called *components*.
 
-The given formulae are only for the case of one reactor. If there are
+The given formula are only for the case of one reactor. If there are
 several of them, an additional summation inside the integral should be
 performed.
 
 All of that is implemented in the
 `gna.exp.reactor.ReactorExperimentModel` class. As the most basic
-usage you shuld just specify the properties of each detector and
+usage you should just specify the properties of each detector and
 reactor of the experiment. The class will create (unless not found in
 the currently available namespaces) parameters in the following
 namespaces (not the complete list, always check the code for the
 details):
 
-- ``ns.ibd``: parameters related to IBD crosssection, they are defined
+- ``ns.ibd``: parameters related to IBD cross section, they are defined
   in ``gna.parameters.ibd`` and are usually fixed;
 - ``ns.oscillation``: parameters of oscillations (mass square
   differences, squared sines of mixing angles, hierarchy (``Alpha`` --
   ``normal`` or numerically 1 for normal, ``inverted`` or -1 for
-  inverted), as defined in ``gna.parameters.oscillation``;
+  inverted), as defined in ``gna.parameters.oscillation``, :math:`\delta_{\text{CP}}`
+;
 - ``ns.detectors.detname``: parameters related to detector named
   ``detname``, namely: ``TargetProtons`` for protons number (check
   ``neutrino/ReactorNorm.cc``); ``Eres_a``, ``Eres_b``, ``Eres_c`` for
   the corresponding parameters of the resolution formula (check
-  ``detector/EnergyResolution.cc``) :math:``\delta_{\text{CP}}``
-- ``ns.reactors.rname``: parameters related to one reactor:
+  ``detector/EnergyResolution.cc``) - ``ns.reactors.rname``: parameters related to one reactor:
   ``ThermalPower`` for the nominal thermal power in GW,
   used in ``ReactorNorm``;
 - ``ns.detname.rname``: parameters related to detector/reactor pair,
@@ -98,15 +98,15 @@ arguments typical to a reactor experiment. In the ``init()`` we
 actually instantiate the ``ReactorExperimentModel``, providing just
 lists of reactors and detectors. All the results (observables) are
 stored internally in the ``env``, so the resulting object is not saved
-explicetely, but it of coure can be done if needed.
+explicitly, but it of course can be done if needed.
 
 Each reactor and detector is represented with a ``Reactor`` or ``Detector``
 object. They just hold configuration, that should be provided at
-instatiation through kwargs. The folowing options are available for
+instantiation through kwargs. The following options are available for
 ``Reactor``:
 
 - ``name`` -- unique string which will identify the reactor in
-  namespace, should not contain spaces and must not containt dots;
+  namespace, should not contain spaces and must not contain dots;
 - ``location`` -- coordinates, an ``np.array()``-able numeric
   expected; will be subtracted with the detectors locations and
   Euclidian norm will be taken; so a number or 3-dimensonal
@@ -114,7 +114,7 @@ instatiation through kwargs. The folowing options are available for
   Detectors);
 - ``power`` -- nominal thermal power of the reactor, in GW;
 - ``power_rate`` -- an array with actual power splitted by periods;
-  splitting is arbitrary but should be consistent accross all the
+  splitting is arbitrary but should be consistent across all the
   reactors and detectors;
 - ``fission_fractions`` -- a dict mapping from strings (isotope names)
   to array of fission rates by period (the same splitting as previous
@@ -154,7 +154,7 @@ We have used ``ns.walkobservables()`` function that returns iterable
 over (full path, observable) pairs. As for result, we have only one
 observable, spectrum in the only detector (check it with
 ``self.env.get('juno/AD1').data()``). This is the only histogram, that
-is intended for experimental analysis. But it is likely you'd like to
+is intended for experimental analysis. But it is likely that you want to
 take a look into intermediate results of the computations. The bad
 news there is no good generic way to navigate the computation
 graph and see every step of computation. The good news is it's not
@@ -162,8 +162,8 @@ hard to provide additional interesting outputs in the implementation
 experiment along with the main observable. Currently it's done by
 ``ns.addobservable(..., export=False)`` that just stores an additional
 flag, indicating that the observable is *internal* and should not be
-visible unless explicetly requested. To iterate over them too
-observables, let's type::
+visible unless explicitly requested. In order to iterate over them too use 
+the following snippet::
 
   In [3]: [path for path, obs in ns.walkobservables(internal=True)]
   Out[3]:
@@ -183,13 +183,13 @@ observables, let's type::
    'juno.detectors.AD1.DYB/oscprob']
 
 You can access all of them in the same way as other observables. For
-example, to plot the final observable spectrum with oscillations and
+example, to plot the final observable spectrum with oscillations 
 and unoscillated spectrum you can run the following command::
 
   $ python gna juno --name juno \
             -- spectrum --plot juno/AD1 --plot juno/AD1_unoscillated
 
-Not all of that outputs are histogram, most of them are not integrated
+Not all of that outputs are histograms, most of them are not integrated
 functions of neutrino energy::
 
   In [3]: [(path, obs.datatype().kind) for path, obs in ns.walkobservables(internal=True)]
@@ -209,7 +209,7 @@ functions of neutrino energy::
    ('juno.detectors.AD1.group0/oscprob', 1),
    ('juno.detectors.AD1.DYB/oscprob', 1)]
 
-Here we see the type of the data along the name. 2 means histogram, 1
+We see the type of the data here along with the name. 2 means histogram, 1
 -- just an array of points. You can access them their contents in the
 same way using ``ns.get(...).data()``, but you can't plot them with
 ``spectrum`` because they have no bins information. There is no
@@ -237,7 +237,7 @@ absolutely the same way.
 
 As you can see, we had requested values of both x and y axes from the
 system, instead of specifying the :math:`E_\nu` points as inputs to
-the cross section function. Unfortunately, there is even no way clear
+the cross section function. Unfortunately, there is even no clear
 way to get value of xsec in arbitrary points. That's drawback of the
 design, the calculating object is tightly bound to the outputs of
 another objects, that trying to feed something else to it will cause
@@ -249,7 +249,7 @@ limitation in a positive way: you can get only such a plots, that are
 *really* used in the final computation, thus making your papers more
 honest.
 
-The other consequence of that design, is that you don't always get the
+The other consequence of that design is that you don't always get the
 exact function you may be interested in. For example, let's try to run
 juno with the first order IBD::
 
@@ -275,12 +275,12 @@ get that ``ctheta`` values with::
 
 You can plot everything, for example, for :math:`\cos\theta = 0` by
 using ``Enu[:, 2]`` and ``xsec[:, 2]`` (because ``ctheta[2] == 0``),
-but suppose your integration code is more intellegent and uses
+but suppose your integration code is more intelligent and uses
 different number of ``ctheta`` points for each energy bin. The array
 in that case will likely be unshaped and to access it will be required
 to do more complicated values selection. That's one of the reason why
-there is no generic plotting command implemented, needs a bit of
-special care.
+there is no generic plotting command implemented, it needs a bit of
+a special care.
 
 If you don't like default binning, you can change it with
 ``--binning``. Four parameters should be passed -- detector name (here
@@ -300,7 +300,7 @@ can see all the available values with::
    'juno.isotopes.U235.EnergyPerFission',
    ...
 
-Not all of them are really parameters you can change, some are values
+Not all of them are really parameters that you can change, some are values
 that depend on other values and gets recalculated on demand. For
 example, there are two values for larger square mass difference::
 

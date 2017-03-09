@@ -18,12 +18,12 @@ With the first command (``ns``) we have defined new parameter with
 full path ``common.Mu``, central value 1 and absolute uncertainty
 0.1 and then activated the ``common`` namespace by using the
 ``--push`` option. Activation means that each name inside the
-``common`` namspace will be available during look ups, in particular
+``common`` namespace will be available during lookups, in particular
 during object binding. Since ``Mu`` parameter will be available during
 ``gaussianpeak`` execution, the corresponding ``ns.reqparameter``
 won't create any new parameter. In other words, there will be no
 ``peak1.Mu`` as before and ``common.Mu`` will be used by our
-observable instead. As a consequence, as we have alreade set its
+observable instead. As a consequence, as we have already set its
 central (and default) value to 1, if you'll plot the
 ``peak1.spectrum``, you'll see the peak without any additional ``ns --value``.
 

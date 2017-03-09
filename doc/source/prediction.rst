@@ -15,7 +15,7 @@ actual computation results with ``data()`` method, and its type with
           0.25,  0.25,  0.25,  0.25,  0.25,  0.25,  0.25,  0.25,  0.25,
           0.25,  0.25])
 
-The first command gives acess to the observable we defined in
+The first command gives access to the observable we defined in
 ``gaussianpeak.py`` as the last step -- we request the namespace
 ``peak1`` (as specified in ``--name`` of ``gaussianpeak`` command) from
 ``env`` (``self.env`` is set to the same global ``gna.ui.env``) and
@@ -40,7 +40,7 @@ the data is automatically updated after next call to ``data()`` and we
 see the changes.
 
 If you want to plot our histogram, you'd like to know the
-corresponding binning. The binning is a part of the Histogram datatype
+corresponding binning. The binning is a part of the Histogram ``datatype``
 and it's defined by the edges. You can access them with the following
 syntax::
 
@@ -56,9 +56,9 @@ syntax::
 
 Please note that the ``edges()`` method is implemented in ``C++`` and returns
 ``std::vector<double>``. Since (currently) no pythonization is done
-for it, you'll need to call ``np.array()`` explicitely to get a nice
-representation of the values. Having both the bin edgesand contents we
-can plot it with matplotlib::
+for it, you'll need to call ``np.array()`` explicitly to get a nice
+representation of the values. Having both the bin edges and contents we
+can plot it with ``matplotlib``::
 
   In [8]: from matplotlib import pyplot as plt
 
@@ -72,7 +72,7 @@ Alternatively you can get the similar plot from the command line::
   python ./gna gaussianpeak --name peak1 -- ns --value peak1.Mu 1 -- \
   spectrum --plot peak1/spectrum
 
-Here we have the set up the same theoretical model ``peak``, set up
+Here we have set up the same theoretical model ``peak``, set up
 the parameter ``Mu`` value to 1 with the ``ns`` command and finally
 used the ``spectrum`` command (which basically just plots a histogram
 of the given observable) to produce the plot. The ``peak1.Mu`` is the

@@ -16,7 +16,7 @@ The basic structure of the current design is the following:
   case with constant values a computation node (e.g. ``Points`` class)
   should be constructed; in more complicated cases some intermediate
   transformations may be performed (like unfolding, extrapolation,
-  etc) to get the data to analyse;
+  etc) to get the data to analyze;
 - experimental data and uncertainties are associated with a prediction
   and should have exactly the same shape; this is clearly targeted
   only to weighted least-squares analysis of binned counting data;
@@ -59,10 +59,10 @@ everything else default::
 
   In [4]: np.savez("/tmp/peakdata.npz", data=data)
 
-Here we generated average theoretical spectrum for the specified
+Here we generate average theoretical spectrum for the specified
 parameters and used ``np.random.poisson`` to make a Poisson random
 sample out of it (of course you'll get different values, since it's
-random). The data is saved in the npz file ``/tmp/peakdata.npz``,
+random). The data is saved in the .npz file ``/tmp/peakdata.npz``,
 which we'll load during analysis.
 
 Now we should forget about the parameters value, which we used to
@@ -97,12 +97,12 @@ our analysis with the following command::
   -- analysis --name first_analysis --datasets peak_fakedata --observables peak/spectrum
 
 The name of the analysis, which will be used later, is specified,
-along with the datasets, whose data and, uncertanties and covariance
-information will be used and finally the observables, we are going to
+along with the datasets, whose data, uncertainties and covariance
+information will be used and finally the observables that we are going to
 analyze.
 
 To turn the analysis into optimization problem, we need to use some
-statistic. The only implemented for now the chi-squared (weightet
+statistic. The only implemented for now the chi-squared (weighted
 least squares) statistic. To use it, the following command should be
 applied::
 
@@ -127,7 +127,7 @@ minimization process::
 
   -- fit first_analysis_minimizer
 
-Try to concatenate all thet commands into one string and run to get
+Try to concatenate all commands into one string and run to get
 the following result::
 
   Namespace(cpu=0.0068070000000002295, errors=array([ 11.56782544,   4.35315588]), fun=8.597269993657244, maxcv=0.01, nfev=35L, success=True, wall=0.006793022155761719, x=array([ 44.06893665,   5.1389115 ]))
@@ -201,12 +201,12 @@ minimum) and issue the following command::
   -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
 
 The first argument is a path to the chi2 values map, the second
-specifes what we are going to plot -- `'chi2ci`` means chi-squared
+specifies what we are going to plot -- `'chi2ci`` means chi-squared
 confidence interval and this corresponds to the p-value given by the
 :math:`\chi^2(n)` distribution. ``1s`` and ``2s`` means one and two
 sigma, this will be mapped to the p-value for the two-tailed Gaussian.
 
-The ``--show`` arguments asks matplotlib to show the plot on the
+The ``--show`` arguments asks ``matplotlib`` to show the plot on the
 screen. If you like the plot, you can save it to a file with the
 ``--output path`` argument
 
@@ -220,18 +220,18 @@ The pull parameters in the framework are handled just like any real
 experimental data -- the observable for them is the parameter value
 itself, the data is the central value and the uncertainty is sigma,
 specified in the parameter definition. Therefore, to add punishment
-terms to the fit, we need:
+terms to the fit, we need to:
 
-1. create a new dataset for pull parameters; there is short command
+1. Create a new dataset for pull parameters; there is short command
    for that (check the code)::
 
      -- dataset --name pulls --pull peak.BackgroundRate
 
    Here just add parameter added to the dataset ``pulls`` (the name is
    arbitrary), any number can be specified.
-2. add the created dataset to the ``--datasets`` argument of the
+2. Cdd the created dataset to the ``--datasets`` argument of the
    ``analysis`` command;
-3. add all the pull parameters to the ``--observations`` of the
+3. Add all the pull parameters to the ``--observations`` of the
    ``analysis`` command;
    
 Try to construct the command yourself. Or here is the complete one
@@ -258,7 +258,7 @@ our theoretical model is linear with respect to ``BackgroundRate``,
 the result should be exactly the same, as in the approach with pull
 terms. Let's try. What's required is just to add the parameter to the
 ``--parameters`` argument of ``analysis`` it from minimization, and
-dropping the the ``pulls`` dataset::
+dropping  the ``pulls`` dataset::
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -301,7 +301,7 @@ and covariance::
             -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan_1d_covariance.hdf5
   
 The plotting commands are also different because of different
-minimizators for global minimization::
+minimizers for global minimization::
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -326,7 +326,7 @@ I'm so sorry that the command line is verbose, please fix it whenever
 possible.
 
 And just a few words combined analysis. You can add as many datasets,
-observables and parameters as youf want, but this will clearly need
+observables and parameters as you want, but this will clearly need
 better interface than now. You can also add correlations between
 experiments inside one dataset, the API is very simple::
 

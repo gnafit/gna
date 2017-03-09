@@ -98,13 +98,13 @@ try to produce fcmap only in region where you expect your contour to
 be, for example by selecting the points of the standard chi-squared
 contour plus some margin. It can be done by saving the interesting
 points list to a file and giving it to the ``scan`` as input with the
-``--points`` argumunt. The points list may be produced by the
+``--points`` argument. The points list may be produced by the
 ``contour``. For example::
 
   contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show --points chi2ci 1s --savepoints /tmp/peak_points.hdf5
 
 The given command will save to the file ``/tmp/peak_points.hdf5`` the
-points aroind 1 sigma contour (check it in ``hdf-java``). The width of
+points around 1 sigma contour (check it in ``hdf-java``). The width of
 band around the contour may be controlled by two additional numbers
 to ``--points`` -- inside and outside width. They have no definite
 meaning, just larger value means wider band in the corresponding
@@ -113,12 +113,12 @@ generated, just pass its path to the ``scan`` instead of all the
 ``--grid``-s.
 
 Finally, you will definitely want to run the Feldman-Cousins scanning
-on a clustir utilizing a lot of CPU cores. You can efficiently split
+on a cluster utilizing a lot of CPU cores. You can efficiently split
 the tasks by the points utilizing the ``--pointsrange`` argument to
 the ``scan``. It takes up to three integer, which are interpreted as
 python indexing or slice: ``[a]``, ``[a:b]`` or ``[a:b:c]`` on the
-linarized list of all points in file, given by
-``--points``. Alternatively, you can specify inderesting points
+linearized list of all points in file, given by
+``--points``. Alternatively, you can specify interesting points
 directly by given several points path in form ``--pointspath path1
 path2 ...``, where path is just numerical values of parameters (in the
 same order as in the points file). The points file is still
