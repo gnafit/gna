@@ -12,6 +12,7 @@
 #include "demangle.hpp"
 
 class changeable;
+
 struct references {
   bool has(changeable obj) const;
   void add(changeable obj);
@@ -23,6 +24,7 @@ struct references {
   size_t cnt = 0;
   size_t bufsize = 0;
 };
+
 struct inconstant_header {
   const char *name = nullptr;
   references observers;
