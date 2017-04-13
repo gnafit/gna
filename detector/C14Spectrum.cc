@@ -199,8 +199,8 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
         }
         
     } 
-    std::cout << "overall_moved " << overall_moved << "\n" <<
-                 "how much we should move " << total_number * coincidence_prob * (1 -  stayed_in_bin) << std::endl;
+    /* std::cout << "overall_moved " << overall_moved << "\n" <<
+     *              "how much we should move " << total_number * coincidence_prob * (1 -  stayed_in_bin) << std::endl; */
 
 
 }
