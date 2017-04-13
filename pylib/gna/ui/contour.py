@@ -72,6 +72,7 @@ vmaptypes = {
     'fcupper': estimatepvalue,
     'h0asimov': readchi2,
     'h1asimov': readchi2,
+    'chi2minplt': readchi2,
     'h0': estimatepvalue,
     'h1': estimatepvalue,
 }
@@ -99,7 +100,7 @@ class PValueMap(object):
     def dchi2(self, statistic):
         chi2data = self.base.statistic(statistic)
         chi2map = self.base.readmap('chi2')
-        dchi2 = chi2map-chi2data
+        dchi2 = chi2map - chi2data
         return dchi2
 
 @pvaluemap("chi2ci")
@@ -109,6 +110,13 @@ class Chi2ConfidenceMap(PValueMap):
         dchi2 = self.dchi2('chi2min')
         pvs = 1-scipy.stats.chi2.cdf(dchi2, len(dchi2.shape))
         return vmaparray(pvs, dchi2.grids)
+
+@pvaluemap("chi2minplt")
+class Chi2MinMap(PValueMap):
+    @property
+    def data(self):
+        dchi2 = self.dchi2('chi2min')
+        return vmaparray(dchi2, dchi2.grids)
 
 @pvaluemap("chi2upper")
 class Chi2UpperLimitMap(Chi2ConfidenceMap):
@@ -201,6 +209,7 @@ class cmd(basecmd):
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
 
     def statistic(self, name):
+        print name
         if name in self.statistics:
             return self.statistics[name]
         if name == 'chi2min':
