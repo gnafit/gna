@@ -118,7 +118,7 @@ public:
     static std::vector<std::pair<Expr, evaluable_type*> > cached;
     for (std::pair<Expr, evaluable_type*> dep: cached) {
       if (memcmp(&dep.first, &e, sizeof(Expr)) == 0) {
-	  return*dep.second;
+	  return *dep.second;
 	}
     }
     std::vector<changeable> deps;

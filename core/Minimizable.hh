@@ -10,14 +10,13 @@
 
 class Minimizable: public ROOT::Math::IMultiGenFunction {
 public:
-  Minimizable(Statistic *statistic)
-    : m_statistic(statistic)
-  {
-  }
+  Minimizable(Statistic *statistic) : m_statistic(statistic) { }
+
 public:
   void addParameter(Parameter<double> *par) {
     m_pars.push_back(par);
   }
+
   ROOT::Math::IMultiGenFunction *Clone() const override {
     Minimizable *clone = new Minimizable(m_statistic);
     for (auto par: m_pars) {
@@ -25,9 +24,11 @@ public:
     }
     return clone;
   }
+
   unsigned int NDim() const override {
     return m_pars.size();
   }
+
   double DoEval(const double *x) const override {
     for (size_t i = 0; i < m_pars.size(); ++i) {
       m_pars[i]->set(x[i]);
@@ -35,6 +36,7 @@ public:
     double ret = m_statistic->value();
     return ret;
   }
+
 protected:
   Statistic *m_statistic;
   std::vector<Parameter<double>*> m_pars;

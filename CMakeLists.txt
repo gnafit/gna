@@ -79,7 +79,7 @@ include_directories(core/ neutrino/ integrator/ detector/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Wall -pedantic -Werror -O3 -pipe")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic  -O3 -pipe")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
