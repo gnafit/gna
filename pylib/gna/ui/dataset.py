@@ -16,10 +16,11 @@ class cmd(basecmd):
 
     def run(self):
         dataset = Dataset(desc=None)
-        for pullpath in self.opts.pull:
-            par = env.pars[pullpath]
-            dataset.assign(par, [par.central()], [par.sigma()**2])
-            print (par, [par.central()], [par.sigma()**2])
+        if self.opts.pull:
+            for pullpath in self.opts.pull:
+                par = env.pars[pullpath]
+                dataset.assign(par, [par.central()], [par.sigma()**2])
+                print (par, [par.central()], [par.sigma()**2])
         for theory_path, data_path in self.opts.asimov_data:
             dataset.assign(env.get(theory_path),
                            env.get(data_path),

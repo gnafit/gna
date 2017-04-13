@@ -8,7 +8,7 @@
 
 #include <iostream>
 
-const double pi = boost::math::constants::pi<double>();
+constexpr double pi = boost::math::constants::pi<double>();
 
 IbdZeroOrder::IbdZeroOrder()
 {

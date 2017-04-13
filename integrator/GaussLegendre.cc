@@ -15,7 +15,12 @@ void GaussLegendre::init() {
   }
   m_points.resize(npoints);
   m_weights.resize(npoints);
+  //k stands for a bin number
   size_t k = 0;
+
+  //simply allocates the weights and abscissae table of Gauss-Legendre n-point
+  //integration rule
+  //https://en.wikipedia.org/wiki/Gaussian_quadrature
   for (size_t i = 0; i < m_orders.size(); ++i) {
     size_t n = m_orders[i];
     auto *t = gsl_integration_glfixed_table_alloc(n);
@@ -23,12 +28,15 @@ void GaussLegendre::init() {
     double a = m_edges[i];
     double b = m_edges[i+1];
 
+    //actually provides the absc and weight. for interval [a,b] and store it
+    //to m_points and m_weights, 
     for (size_t j = 0; j < t->n; ++j) {
       gsl_integration_glfixed_point(a, b, j, &m_points[k], &m_weights[k], t);
       k++;
     }
     gsl_integration_glfixed_table_free(t);
   }
+  //return only points, WTF?
   transformation_(this, "points")
     .output("x")
     .types([](GaussLegendre *obj, Atypes, Rtypes rets) {

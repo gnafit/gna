@@ -26,6 +26,7 @@ template< typename F >
 
 /* Usage case :
  *  Class* ptr2 = this;
+<<<<<<< HEAD
  *  auto ptr = [=](double x)->double{return ptr2->foo(x);};
  *  gsl_function_pp<decltype(ptr)> Fp(ptr);     
  *  gsl_function *F = static_cast<gsl_function*>(&Fp);   */
