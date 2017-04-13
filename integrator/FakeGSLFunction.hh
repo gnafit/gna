@@ -2,6 +2,8 @@
 #define FakeGSLFunction_H
 
 #include <gsl/gsl_integration.h>
+// TODO: once C++17 is shipped with the compilers study the ability to use
+// std::invoke() for that problem. 
 
 /* The original problem was how to pass a class member function to GSL
  * integration routine, hopefully this will work.
