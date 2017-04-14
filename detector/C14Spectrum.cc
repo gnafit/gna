@@ -238,7 +238,7 @@ double C14Spectrum::IntegrateSpectrum(double from, double  to)
     assert((to - from) <= spectrum_end_point);
 
     auto ptr = [this](double x) {return this->Spectra(x);};
-    gsl_function_wrapper<decltype(ptr)> Fp(ptr);
+    gsl_function_pp<decltype(ptr)> Fp(ptr);
     auto F = static_cast<gsl_function>(Fp);
     return gsl_integration_glfixed(&F, from, to, integr_table);
     
