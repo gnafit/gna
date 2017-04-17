@@ -2,14 +2,6 @@ import ROOT
 from gna.env import env
 from physlib import pdg
 curpdg = pdg[2016]
-list_oscpar = [('sinSqtheta12', 'sinSqtheta12_e'),('dmSq21','dmSq21_e'),
-('sinSqtheta13', 'sinSqtheta13_e'),
-('sinSqtheta23_normal', 'sinSqtheta23_normal_e'),
-('dmSq32_normal','dmSq32_normal_e')]
-
-for param, param_err in list_oscpar:
-    print 'Parameter {0} = {1}, error {2} = {3}'.format(param, curpdg[param],
-            param_err, curpdg[param_err])
 
 
 # TODO: Add the way to automaticaly detect the current mass ordering and
