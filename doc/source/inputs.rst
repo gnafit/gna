@@ -43,7 +43,8 @@ number, let's set ``BackgroundRate`` to 10, ``Mu`` to 30 (just
 arbitrary numbers for illustration) and bin numbers to 10, leaving
 everything else default::
 
-  $ python ./gna gaussianpeak --name peak --nbins 10 -- ns --value peak.BackgroundRate 10 --value peak.Mu 30 -- repl
+  $ python ./gna gaussianpeak --name peak --nbins 10 -- ns --value peak.BackgroundRate 10 
+  --value peak.Mu 30 -- repl
   ...
   In [1]: self.env.get('peak/spectrum').data()
   Out[1]: 
@@ -71,7 +72,8 @@ just say that we theoretically estimated ``BackgroundRate`` to be 14
 with uncertainty of 30% and we want to find ``Mu`` by fitting. So, our
 command will start with the model initialization::
 
-  python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 -- gaussianpeak --name peak --nbins 10
+  python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 -- gaussianpeak
+  --name peak --nbins 10
   
 To load the data we can use repl or put the following commands to a file
 (for example ``scripts/gaussianpeak_data``):
@@ -115,7 +117,8 @@ corresponding analysis object to build statistic for
 We are going to minimize our statistic, so minimizer should be
 created::
 
- -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu peak.BackgroundRate
+ -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu
+ peak.BackgroundRate
 
 The arguments are the following: minimizer name, minimizer type (only
 ``minuit`` is implemented, check modules in the ``gna.minimizers``
@@ -130,7 +133,9 @@ minimization process::
 Try to concatenate all commands into one string and run to get
 the following result::
 
-  Namespace(cpu=0.0068070000000002295, errors=array([ 11.56782544,   4.35315588]), fun=8.597269993657244, maxcv=0.01, nfev=35L, success=True, wall=0.006793022155761719, x=array([ 44.06893665,   5.1389115 ]))
+  Namespace(cpu=0.0068070000000002295, errors=array([ 11.56782544,   4.35315588]),
+  fun=8.597269993657244, maxcv=0.01, nfev=35L, success=True,
+  wall=0.006793022155761719, x=array([ 44.06893665,   5.1389115 ]))
 
 This result is constructed directly from values returned by MINUIT,
 the most important here are the following fields:
@@ -158,7 +163,8 @@ No parameters left, but that's fine. This minimizer does not actually
 minimize anything just returning the statistic value in the current
 point, but we need it to pass to the ``scan`` command::
 
-  -- scan --grid peak.Mu 0 150 0.5 --grid peak.BackgroundRate 0 30 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan.hdf5
+  -- scan --grid peak.Mu 0 150 0.5 --grid peak.BackgroundRate 0 30 0.5 --minimizer
+  first_analysis_minimizer --verbose --output /tmp/peak_scan.hdf5
 
 First two arguments define the grids over two parameters. Few types of
 grids can be used::
@@ -198,7 +204,8 @@ Finally let's plot the contour. To do that you need to get back the
 minimizer with all parameters (it will be used to find the global
 minimum) and issue the following command::
 
-  -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
+  -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer
+  first_analysis_minimizer --show
 
 The first argument is a path to the chi2 values map, the second
 specifies what we are going to plot -- `'chi2ci`` means chi-squared
@@ -241,14 +248,18 @@ for reference::
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
             -- dataset --name pulls --pull peak.BackgroundRate \
-            -- analysis --name first_analysis --dataset peak_fakedata pulls --observables peak/spectrum peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata pulls \
+            --observables peak/spectrum peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
-            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu peak.BackgroundRate \
+            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
+               peak.BackgroundRate \
             -- fit first_analysis_minimizer
 
 It gives the following result::
 
-  Namespace(cpu=0.0049440000000000595, errors=array([ 11.54509995,   1.10426956]), fun=12.74075442086563, maxcv=0.01, nfev=31L, success=True, wall=0.004951953887939453, x=array([ 42.59368222,   5.75145748]))
+  Namespace(cpu=0.0049440000000000595, errors=array([ 11.54509995,   1.10426956]),
+  fun=12.74075442086563, maxcv=0.01, nfev=31L, success=True,
+  wall=0.004951953887939453, x=array([ 42.59368222,   5.75145748]))
 
 Just a bit better then the previous one, but that's expected since the
 uncertainty is just 30\%.
@@ -263,14 +274,17 @@ dropping  the ``pulls`` dataset::
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
-            -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata \
+            --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
             -- fit first_analysis_minimizer
 
 And the result is::
 
-  Namespace(cpu=0.005394999999998262, errors=array([ 11.54509989]), fun=12.740754420865585, maxcv=0.01, nfev=13L, success=True, wall=0.005403995513916016, x=array([ 42.59368211]))
+  Namespace(cpu=0.005394999999998262, errors=array([ 11.54509989]),
+  fun=12.740754420865585, maxcv=0.01, nfev=13L, success=True,
+  wall=0.005403995513916016, x=array([ 42.59368211]))
 
 They match exactly, as expected, so everything works fine. Of course
 if you have more than one nuisance parameters you can freely mix both
@@ -285,20 +299,24 @@ the previous commands. Here are the commands for scanning with pull::
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
             -- dataset --name pulls --pull peak.BackgroundRate \
-            -- analysis --name first_analysis --dataset peak_fakedata pulls --observables peak/spectrum peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata pulls \
+            --observables peak/spectrum peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.BackgroundRate \
-            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan_1d_pulls.hdf5
+            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer \
+            --verbose --output /tmp/peak_scan_1d_pulls.hdf5
 
 and covariance::
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
-            -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata \
+            --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2  \
-            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer --verbose --output /tmp/peak_scan_1d_covariance.hdf5
+            -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer \
+            --verbose --output /tmp/peak_scan_1d_covariance.hdf5
   
 The plotting commands are also different because of different
 minimizers for global minimization::
@@ -307,20 +325,25 @@ minimizers for global minimization::
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
             -- dataset --name pulls --pull peak.BackgroundRate \
-            -- analysis --name first_analysis --dataset peak_fakedata pulls --observables peak/spectrum peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata pulls \
+            --observables peak/spectrum peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
-            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu peak.BackgroundRate \
-            -- contour --chi2 /tmp/peak_scan_1d_pulls.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
+            -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
+               peak.BackgroundRate \
+            -- contour --chi2 /tmp/peak_scan_1d_pulls.hdf5 --plot chi2ci 1s 2s \
+            --minimizer first_analysis_minimizer --show
 
 and::
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
-            -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata \
+            --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
-            -- contour --chi2 /tmp/peak_scan_1d_covariance.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show
+            -- contour --chi2 /tmp/peak_scan_1d_covariance.hdf5 --plot chi2ci 1s 2s \
+            --minimizer first_analysis_minimizer --show
 
 I'm so sorry that the command line is verbose, please fix it whenever
 possible.

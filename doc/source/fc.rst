@@ -40,11 +40,14 @@ CovarianceToyMC::
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
             -- dataset --name pulls --pull peak.BackgroundRate \
-            -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate --toymc covariance \
+            -- analysis --name first_analysis --dataset peak_fakedata \
+            --observables peak/spectrum --parameters peak.BackgroundRate --toymc covariance \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer ongrid_minimizer minuit first_analysis_chi2 \
             -- minimizer global_minimizer minuit first_analysis_chi2 peak.Mu \
-            -- scan --output /tmp/peak_fc_covariance.hdf5 --grid peak.Mu 0 150 0.5 --toymc first_analysis --toymc-type grid --samples 10000 --minimizer ongrid_minimizer --minimizer global_minimizer
+            -- scan --output /tmp/peak_fc_covariance.hdf5 --grid peak.Mu 0 150 0.5 \
+            --toymc first_analysis --toymc-type grid --samples 10000 \
+            --minimizer ongrid_minimizer --minimizer global_minimizer
 
 Give it some time to finish its work. Then check it with ``hdf-java``
 or ``h5dump`` and you'll see the similar structure as for normal
@@ -63,10 +66,13 @@ previous part, let's run the plotting command::
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
-            -- analysis --name first_analysis --dataset peak_fakedata --observables peak/spectrum --parameters peak.BackgroundRate \
+            -- analysis --name first_analysis --dataset peak_fakedata \
+            --observables peak/spectrum --parameters peak.BackgroundRate \
             -- chi2 first_analysis_chi2 first_analysis \
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
-            -- contour --chi2 /tmp/peak_scan_1d_covariance.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --fc /tmp/peak_fcmap_covariance.hdf5 --plot fc 1s 2s --show
+            -- contour --chi2 /tmp/peak_scan_1d_covariance.hdf5 --plot chi2ci 1s 2s \
+            --minimizer first_analysis_minimizer --fc /tmp/peak_fcmap_covariance.hdf5 \
+            --plot fc 1s 2s --show
 
 In comparison to the previous plotting, we have just added ``--fc``
 with the path of the fcmap and options to ``--plot fc``. You should
@@ -86,7 +92,8 @@ format. It's passed to the ``minimizer`` command with ``-s``
 option. To limit ``peak.Mu`` in ``[0; 100]`` bounds, modify all
 minimizers with ``peak.Mu`` in the following way::
   
-  -- minimizer -s '{peak.Mu: {limits: [0, 100]}}' global_minimizer minuit first_analysis_chi2 peak.Mu
+  -- minimizer -s '{peak.Mu: {limits: [0, 100]}}' global_minimizer minuit \
+  first_analysis_chi2 peak.Mu
 
 Don't forget to check the details (and look for other possible
 options) in ``gna.minimizers.spec``.
@@ -101,7 +108,8 @@ points list to a file and giving it to the ``scan`` as input with the
 ``--points`` argument. The points list may be produced by the
 ``contour``. For example::
 
-  contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer first_analysis_minimizer --show --points chi2ci 1s --savepoints /tmp/peak_points.hdf5
+  contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer \
+  first_analysis_minimizer  --show --points chi2ci 1s --savepoints /tmp/peak_points.hdf5
 
 The given command will save to the file ``/tmp/peak_points.hdf5`` the
 points around 1 sigma contour (check it in ``hdf-java``). The width of
