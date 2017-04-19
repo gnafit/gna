@@ -42,6 +42,14 @@ If the build was successfull, you can run the program::
   $ cd ..
   $ python2 gna
 
+If one wants to use the code at MACOS X, there can be problem with loading
+dynamic library. Note that by default configuration of cmake with flag SHARED
+for building the shared library the `.dylib` file will be produced. As far as
+I understand ROOT can't load it directly, so the solution is to make a symlink
+into like that::  
+
+ $ ln -s $GNA_PATH/build/libGlobalNuAnalysis.dylib $ROOTSYS/lib/libGlobalNuAnalysis.so
+
 If everything is fine, no output will be produced.
 Incremental rebuild can be issued by::
 

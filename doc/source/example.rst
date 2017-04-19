@@ -10,7 +10,7 @@ which is Gaussian-shaped peak at :math:`E_0` with width
 background. The formula is   
 
 .. math::
-   \frac{d N}{d E} = b + \mu \frac{1}{\sqrt{2\pi w}}\exp{\frac{-(E-E_0)}{2w^2}}
+   \frac{d N}{d E} = b + \mu \frac{1}{\sqrt{2\pi w}}\exp{\frac{-(E-E_0)^2}{2w^2}}
 
 How can we implement this in the code? There are actually different
 ways, it's up to you which one to chose. The most simple and concise,
