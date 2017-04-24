@@ -10,7 +10,7 @@ from pylab import figure, subplot, legend, plot, show, clf
 class cmd(basecmd):
   def init(self):
     self.ns = self.env.ns("test_oscprob")
-    gna.parameters.oscillation.defparameters(self.ns)
+    gna.parameters.oscillation.reqparameters(self.ns)
     self.ns.defparameter("L", central=2, sigma=0)
     self.ns.defparameter("sigma", central=1.e-5, sigma=0)
     neutrinos = [ROOT.Neutrino.e(), ROOT.Neutrino.mu(), ROOT.Neutrino.tau()]
