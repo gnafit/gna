@@ -287,7 +287,6 @@ class PartNotFoundError(BaseException):
         self.parttype = parttype
         self.partname = partname
 
-# TODO: refactor with an ABC.Mapping
 class envpart(dict):
     def __init__(self, parttype):
         self.parttype = parttype
