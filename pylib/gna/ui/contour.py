@@ -1,21 +1,31 @@
 # coding: utf-8
 
 from gna.ui import basecmd, set_typed
-import numpy as np
+
 import argparse
-import scipy.stats
-from gna.pointtree import PointTree
-
 from matplotlib import pyplot as plt
-
-from scipy.interpolate import interp1d
-from scipy.optimize import bisect
-from scipy.special import erf
 
 import re
 from itertools import product
 
-from scipy.interpolate import griddata
+try:
+    import numpy as np
+except ImportError as er:
+    raise Exception("Numpy can't be imported")
+try:
+    import scipy.stats
+    from scipy.interpolate import interp1d
+    from scipy.optimize import bisect
+    from scipy.special import erf
+    from scipy.interpolate import griddata
+except ImportError as er:
+    raise Exception("Scipy module can't be imported")
+try:
+    from gna.pointtree import PointTree
+except ImportError as er:
+    raise Exception("PoinTree can't be imported")
+
+
 
 class vmaparray(np.ndarray):
     def __new__(cls, arr, grids):
@@ -100,6 +110,8 @@ class PValueMap(object):
     def dchi2(self, statistic):
         chi2data = self.base.statistic(statistic)
         chi2map = self.base.readmap('chi2')
+        print 'chi2map = {}'.format(chi2map)
+        print 'chi2data = {}'.format(chi2data)
         dchi2 = chi2map - chi2data
         return dchi2
 
@@ -223,6 +235,7 @@ class cmd(basecmd):
         assert res.success
         stat = res.fun
         self.statistics[name] = stat
+        print minimizer.pars, res.x
         self.statpoints[name] = dict(zip(minimizer.pars, res.x))
         return stat
 
@@ -305,8 +318,9 @@ class cmd(basecmd):
         colors = iter('bgrcmyk')
         for plotdesc in self.opts.plots:
             plottype, rest = plotdesc[0], plotdesc[1:]
+            print 'plottype = {0}, rest = {1}'.format(plottype, rest)
             pvmap = pvmaptypes[plottype](self)
-            print pvmap.data
+            print 'pvmap.data = {}'.format(pvmap.data)
             color = self.plotmap(ax, pvmap)
             if color is None:
                 color = next(colors)
