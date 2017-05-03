@@ -425,27 +425,28 @@ class ReactorExperimentModel(baseexp):
                     detector.hists[resname][compid].hist.inputs(res)
 
             # Below we construct backgrounds histos
-            bkg_summary = ROOT.Sum()
-            for bkg_name, bkg in detector.intermediates_bkg.iteritems():
-                prod = ROOT.Product()
-                prod.multiply(bkg)
-                unosc_bkg_name = 'unosc_' + bkg_name
-                for part in eventsparts:
-                    prod.multiply(part)
-                detector.back_hists[unosc_bkg_name] = histcls(integrator)
-                detector.back_hists[unosc_bkg_name].hist.inputs(prod)
+            if self.opts.backgrounds:
+                bkg_summary = ROOT.Sum()
+                for bkg_name, bkg in detector.intermediates_bkg.iteritems():
+                    prod = ROOT.Product()
+                    prod.multiply(bkg)
+                    unosc_bkg_name = 'unosc_' + bkg_name
+                    for part in eventsparts:
+                        prod.multiply(part)
+                    detector.back_hists[unosc_bkg_name] = histcls(integrator)
+                    detector.back_hists[unosc_bkg_name].hist.inputs(prod)
 
-                # normalize isotope flux now
-                iso_name = bkg_name.split('_')[-1]
-                with self.ns("geo_isotopes")(iso_name):
-                    norm_geo = ROOT.GeoNeutrinoFluxNormed(detector.livetime[0]/year)
-                norm_geo.flux_norm.flux(detector.back_hists[unosc_bkg_name].hist)
+                    # normalize isotope flux now
+                    iso_name = bkg_name.split('_')[-1]
+                    with self.ns("geo_isotopes")(iso_name):
+                        norm_geo = ROOT.GeoNeutrinoFluxNormed(detector.livetime[0]/year)
+                    norm_geo.flux_norm.flux(detector.back_hists[unosc_bkg_name].hist)
 
-                with self.ns("oscillation"):
-                    aver_oscprob = ROOT.OscProbAveraged(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
-                aver_oscprob.average_oscillations.inputs(norm_geo.flux_norm)
-                detector.back_hists['geo_'+iso_name] = norm_geo.flux_norm.normed_flux
-                bkg_summary.add(aver_oscprob.average_oscillations.flux_averaged_osc)
+                    with self.ns("oscillation"):
+                        aver_oscprob = ROOT.OscProbAveraged(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+                    aver_oscprob.average_oscillations.inputs(norm_geo.flux_norm)
+                    detector.back_hists['geo_'+iso_name] = norm_geo.flux_norm.normed_flux
+                    bkg_summary.add(aver_oscprob.average_oscillations.flux_averaged_osc)
 
 
 
@@ -457,11 +458,11 @@ class ReactorExperimentModel(baseexp):
                 res.multiply(part)
             detector.unoscillated_hist.hist.inputs(res)
             
-            detector.unoscillated_with_bkg = ROOT.Sum()
-            detector.unoscillated_with_bkg.add(bkg_summary)
-            detector.unoscillated_with_bkg.add(detector.unoscillated_hist)
-
-            detector.back_hists['sum_bkg'] = bkg_summary
+            if self.opts.backgrounds:
+                detector.unoscillated_with_bkg = ROOT.Sum()
+                detector.unoscillated_with_bkg.add(bkg_summary)
+                detector.unoscillated_with_bkg.add(detector.unoscillated_hist)
+                detector.back_hists['sum_bkg'] = bkg_summary
 
     def _sumcomponents(self, components):
         oscprobs = {}
@@ -489,8 +490,9 @@ class ReactorExperimentModel(baseexp):
         """Sum over the components and setup the observables to namespace"""
 
         self.ns.addobservable("{0}_unoscillated".format(detector.name), detector.unoscillated_hist.hist, export=False)
-        self.ns.addobservable("{0}_unoscillated_with_bkg".format(detector.name),
-                       detector.unoscillated_with_bkg, export=False)
+        if self.opts.backgrounds:
+            self.ns.addobservable("{0}_unoscillated_with_bkg".format(detector.name),
+                           detector.unoscillated_with_bkg, export=False)
 
         sums = {resname: self._sumcomponents(detector.hists[resname])
                 for resname in detector.hists}
@@ -501,7 +503,8 @@ class ReactorExperimentModel(baseexp):
             inter_sum = ROOT.Sum()
             sum_without_bkg = sums['rate']
             inter_sum.add(sum_without_bkg)
-            inter_sum.add(detector.back_hists['sum_bkg'])
+            if self.opts.backgrounds:
+                inter_sum.add(detector.back_hists['sum_bkg'])
             
             self.ns.addobservable("{0}_noeffects".format(detector.name), inter_sum, export=False)
 
