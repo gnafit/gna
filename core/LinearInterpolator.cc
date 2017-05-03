@@ -33,7 +33,11 @@ void LinearInterpolator::interpolate(Args args, Rets rets) {
   Eigen::ArrayXi idxes = ((xs - m_xs[0]) / m_minbinsize).cast<int>();
   for (int i = 0; i < idxes.size(); ++i) {
     if (idxes(i) < 0 || static_cast<size_t>(idxes(i)) >= m_index.size()) {
-      ys(i) = std::numeric_limits<double>::quiet_NaN();
+      if (m_status_on_fail == ReturnOnFail::UseZero) {
+          ys(i) = 0.;
+      } else {
+        ys(i) = std::numeric_limits<double>::quiet_NaN();
+      }
       continue;
     }
     size_t j;
@@ -54,8 +58,11 @@ void LinearInterpolator::interpolate(Args args, Rets rets) {
         j2 = j-1;
       }
       ys(i) = m_ys[j] + (m_ys[j2]-m_ys[j])/(m_xs[j2]-m_xs[j])*off;
-    } else {
+    } else if (m_status_on_fail == ReturnOnFail::UseNaN) {
       ys(i) = std::numeric_limits<double>::quiet_NaN();
+    }
+    else if (m_status_on_fail == ReturnOnFail::UseZero) {
+        ys(i) = 0.;
     }
   }
 }
