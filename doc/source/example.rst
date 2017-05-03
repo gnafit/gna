@@ -179,7 +179,7 @@ Those accessors are generally used to connect input and outputs:
 - the basic syntax is just ``__call__``: ``inp(out)`` will make
   ``out`` source of values for ``inp``. Alternatively, you can write
   ``inp.connect(out)``.
-- as a shorthand, as ``out`` you can pas not only object returned by
+- as a shorthand, as ``out`` you can pass not only object returned by
   ``obj.transformation.outputs.name`` but any single-outputed object:
   ``obj.transformation.outputs`` or ``obj.transformation`` if the
   transformation has only one output, or even ``obj`` itself it is

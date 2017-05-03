@@ -78,12 +78,12 @@ command will start with the model initialization::
 To load the data we can use repl or put the following commands to a file
 (for example ``scripts/gaussianpeak_data``):
 
-.. literalinclude:: examples/gaussianpeak_data
+.. literalinclude:: examples/gaussianpeak_data.py
    :language: py
    :linenos:
 
 Here we just read the data from the created npz file to variable ``x``
-(line 3), create a new dataset with given description (line 4), then
+(line 4), create a new dataset with given description (line 5), then
 assign ``x`` to be experimental values of the observable
 ``peak.spectrum``, and since the data is Poissonian, the same ``x``
 goes as the experimental uncertainty (:math:`\sigma^2`), third argumnet
