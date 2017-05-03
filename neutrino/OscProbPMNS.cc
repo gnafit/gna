@@ -59,6 +59,23 @@ double OscProbPMNSBase::weightCP() const {
     );
 }
 
+OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
+    OscProbPMNSBase(from, to)
+{
+    transformation_(this, "average_oscillations")
+        .input("flux")
+        .output("flux_averaged_osc")
+        .types(Atypes::pass<0>)
+        .func(&OscProbAveraged::CalcAverage);
+}
+
+void OscProbAveraged::CalcAverage(Args args, Rets rets) {
+    double aver_weight = 1.0 - 2.0*(weight<1,2>() + weight<1,3>() + weight<2,3>());
+    rets[0].x = aver_weight * args[0].x;
+
+}
+
+
 OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   : OscProbPMNSBase(from, to)
 {
@@ -178,5 +195,5 @@ void OscProbPMNSMult::calcSum(Args args, Rets rets) {
   rets[0].x = weight<1,2>()*args[0].x;
   rets[0].x+= weight<1,3>()*args[1].x;
   rets[0].x+= weight<2,3>()*args[2].x;
-  rets[0].x += (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
+  rets[0].x+= (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
 }

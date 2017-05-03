@@ -15,9 +15,12 @@ protected:
 
   template <int I, int J>
   double DeltaMSq() const;
+
   template <int I, int J>
   double weight() const;
+
   double weightCP() const;
+
 
   std::unique_ptr<OscillationVariables> m_param;
   std::unique_ptr<PMNSVariables> m_pmns;
@@ -36,6 +39,15 @@ public:
   void calcSum(Args args, Rets rets);
 protected:
   variable<double> m_L;
+};
+
+class OscProbAveraged: public OscProbPMNSBase,
+                           public Transformation<OscProbAveraged> {
+
+public:
+    OscProbAveraged(Neutrino from, Neutrino to);
+private:
+    void CalcAverage(Args args, Rets rets);
 };
 
 class OscProbPMNSMult: public OscProbPMNSBase,
