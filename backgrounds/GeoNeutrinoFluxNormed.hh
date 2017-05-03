@@ -37,7 +37,6 @@ protected:
       }
       const double total_events = std::accumulate(events + first_non_nan_idx, events + insize, 0.);
       
-      std::cout << "\n\n\ntotal events = " << total_events << std::endl;
       rets[0].x = (m_fluxnorm/total_events) * m_livetime_years * args[0].x;
 
   }
