@@ -418,41 +418,49 @@ namespace TransformationTypes {
         m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
       }
     }
+
     Initializer<T> input(const std::string &name) {
       m_entry->addSource(name);
       return *this;
     }
+
     Initializer<T> output(const std::string &name) {
       m_entry->addSink(name);
       return *this;
     }
+
     Initializer<T> func(Function func) {
       m_mfunc = nullptr;
       m_entry->fun = func;
       return *this;
     }
+
     Initializer<T> func(MemFunction func) {
       using namespace std::placeholders;
       m_mfunc = func;
       m_entry->fun = std::bind(func, m_obj->obj(), _1, _2);
       return *this;
     }
+
     Initializer<T> types(TypesFunction func) {
       m_entry->typefuns.push_back(func);
       return *this;
     }
+
     Initializer<T> types(MemTypesFunction func) {
       using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
       m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1, _2));
       return *this;
     }
+
     template <typename FuncA, typename FuncB>
     Initializer<T> types(FuncA func1, FuncB func2) {
       types(func1);
       types(func2);
       return *this;
     }
+
     template <typename FuncA, typename FuncB, typename FuncC>
     Initializer<T> types(FuncA func1, FuncB func2, FuncC func3) {
       types(func1);
@@ -460,21 +468,25 @@ namespace TransformationTypes {
       types(func3);
       return *this;
     }
+
     template <typename Changeable>
     Initializer<T> depends(Changeable v) {
       v.subscribe(m_entry->tainted);
       m_nosubscribe = true;
       return *this;
     }
+
     template <typename Changeable, typename... Rest>
     Initializer<T> depends(Changeable v, Rest... rest) {
       depends(v);
       return depends(rest...);
     }
+
     Initializer<T> dont_subscribe() {
       m_nosubscribe = true;
       return *this;
     }
+
   protected:
     Entry *m_entry;
     Transformation<T> *m_obj;
@@ -501,6 +513,7 @@ public:
     rebindMemFunctions();
     return *this;
   }
+
 private:
   friend class TransformationTypes::Initializer<Derived>;
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
@@ -512,6 +525,7 @@ private:
   TransformationTypes::Base *baseobj() {
     return static_cast<TransformationTypes::Base*>(obj());
   }
+
   const TransformationTypes::Base *baseobj() const {
     return static_cast<const TransformationTypes::Base*>(obj());
   }
@@ -522,9 +536,11 @@ private:
   void addMemFunction(size_t idx, MemFunction func) {
     m_memFuncs.emplace_back(idx, func);
   }
+
   void addMemTypesFunction(size_t idx, size_t fidx, MemTypesFunction func) {
     m_memTypesFuncs.emplace_back(idx, fidx, func);
   }
+  
   void rebindMemFunctions() {
     using namespace std::placeholders;
     auto &entries = baseobj()->m_entries;

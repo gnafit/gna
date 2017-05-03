@@ -203,6 +203,7 @@ public:
     m_type.shape = std::vector<size_t>{nbins};
     return setKind();
   }
+
   int bins() const {
     return m_type.shape[0];
   }

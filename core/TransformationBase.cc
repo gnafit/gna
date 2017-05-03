@@ -54,8 +54,7 @@ CalculationError::CalculationError(const Entry *e, const std::string &message)
 
 Entry::Entry(const std::string &name, const Base *parent)
   : name(name), parent(parent), initializing(0), frozen(false)
-{
-}
+{ }
 
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), sources(other.sources.size()), sinks(other.sinks.size()),
@@ -359,7 +358,7 @@ const Data<double> &Args::operator[](int i) const {
   }
   const Source &src = m_entry->sources[i];
   if (!src.materialized()) {
-    auto fmt = format("arg %1% (%2%) have no type on evaluatien");
+    auto fmt = format("arg %1% (%2%) have no type on evaluation");
     throw CalculationError(m_entry, (fmt % i % src.name).str());
   }
   src.sink->entry->touch();
@@ -373,7 +372,7 @@ Data<double> &Rets::operator[](int i) const {
   }
   auto &data = m_entry->sinks[i].data;
   if (!data) {
-    auto fmt = format("ret %1% (%2%) have no type on evaluatien");
+    auto fmt = format("ret %1% (%2%) have no type on evaluation");
     throw CalculationError(m_entry, (fmt % i % m_entry->sinks[i].name).str());
   }
 
