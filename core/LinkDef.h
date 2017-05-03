@@ -57,6 +57,7 @@
 #pragma link C++ class OscillationExpressions-;
 #pragma link C++ class PMNSExpressions-;
 
+#pragma link C++ class OscProbAveraged-;
 #pragma link C++ class OscProb2nu-;
 #pragma link C++ class OscProbPMNS-;
 #pragma link C++ class OscProbPMNSDecoh-;
@@ -77,6 +78,7 @@
 #pragma link C++ class ReactorGroup-;
 #pragma link C++ class GaussianPeakWithBackground-;
 #pragma link C++ class C14Spectrum-;
+#pragma link C++ class GeoNeutrinoFluxNormed-;
 
 
 #endif

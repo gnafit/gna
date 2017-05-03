@@ -40,6 +40,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  GeoNeutrinoFluxNormed.hh
   Exceptions.hh
   Transformation.hh
   GNAObject.hh
@@ -78,7 +79,7 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   )
   
-include_directories(core/ neutrino/ integrator/ detector/ examples/)
+include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 set(DICT    Dict.cc)
 
 set(CMAKE_BUILD_TYPE Release)
