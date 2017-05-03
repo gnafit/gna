@@ -10,17 +10,31 @@ import itertools
 from gna.exp import baseexp
 from gna.env import env
 
+
+year=365*24*60*60.0
+
 spectrumfiles = {
     'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
     'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
     'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
     'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
 }
+
 eperfission = {
     'Pu239': (209.99, 0.60),
     'Pu241': (213.60, 0.65),
     'U235': (201.92, 0.46),
     'U238': (205.52, 0.96),
+}
+
+geo_flux_files = {
+    'U238': 'AntineutrinoSpectrum_238U.knt',
+    'Th232': 'AntineutrinoSpectrum_232Th.knt',
+}        
+
+geo_flux_normalizations = {
+    'U238' : (2.7e3/5, 0.3),
+    'Th232': (0.8e3/5, 0.3),
 }
 
 class Reactor(object):
@@ -87,11 +101,15 @@ class Detector(object):
 
         self.unoscillated = None
         self.components = defaultdict(lambda: defaultdict(ROOT.Sum))
+        self.backgrounds = defaultdict(ROOT.Sum)
         self.intermediates = {}
+        self.intermediates_bkg = {}
         self.hists = defaultdict(dict)
+        self.back_hists = defaultdict(dict)
 
     def assign(self, ns):
         self.ns = ns("detectors")(self.name)
+        print "I am detector {0}, ns passed is {1}".format(self.name, self.ns)
 
         if self.protons is not None:
             self.ns.defparameter("TargetProtons", central=self.protons, sigma=0)
@@ -101,13 +119,27 @@ class Detector(object):
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
         #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
 
+class GeoNeutrinoIsotope(object):
+    def __init__(self, name):
+        self.name = name
+
+        try:
+            Es_keV, self.ys = np.loadtxt(datapath(geo_flux_files[name]), unpack=True, skiprows=5)
+        except FileNotFoundError:
+            raise Exception("Failed to load spectrum of {0} geo isotope from {1}".format(name, geo_flux_files[name]))
+        self.Es = Es_keV*1e-3
+        self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
 
 class Isotope(object):
     def __init__(self, ns, name):
         self.ns = ns("isotopes")(name)
         self.name = name
 
-        self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
+        try:
+            self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
+        except FileNotFoundError:
+            raise Exception("Failed to load spectrum of {0} reactor isotope from {1}".format(name, datapath(spectrumfiles[name])))
+
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy())
 
 class ReactorExperimentModel(baseexp):
@@ -121,6 +153,8 @@ class ReactorExperimentModel(baseexp):
             }[name]
         parser.add_argument('--name', required=True)
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
+        parser.add_argument('--backgrounds',choices=['geo'], action='append',
+                            default=[], help='Choose backgrounds you want to add')
         parser.add_argument('--oscprob', choices=['standard', 'decoh'],
                             type=OscProb, default='standard')
         parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'),
@@ -134,14 +168,15 @@ class ReactorExperimentModel(baseexp):
 
         opts -- object with parsed common arguments returned by argparse
         ns -- namespace where experiment will create missing parameters, if is not provided ``opts.name`` will be used
-        reactors -- iterable over Reactor objects, self.makereactors() will be calledi if None
-        detectors -- iterable over Detector objects, self.makedetoctrs() will be calledi if None
+        reactors -- iterable over Reactor objects, self.makereactors() will be called if None
+        detectors -- iterable over Detector objects, self.makedetoctrs() will be called if None
         """
         super(ReactorExperimentModel, self).__init__(opts)
         self._oscprobs = {}
         self._isotopes = defaultdict(list)
         self._Enu_inputs = defaultdict(set)
         self.oscprobs_comps = defaultdict(dict)
+        self._geo_isotopes = defaultdict(list)
 
         self.ns = ns or env.ns(opts.name)
         self.reqparameters(self.ns)
@@ -166,8 +201,24 @@ class ReactorExperimentModel(baseexp):
         self.linkpairs(self.reactors, self.detectors)
 
         for detector in self.detectors:
+            self.make_backgrounds(detector, opts.backgrounds)
             self.setibd(detector, opts.ibd)
             self.setupobservations(detector)
+
+    def make_backgrounds(self, detector, background_list):
+        """Produce backgrounds and store them to detector components,
+        currently only geoneutrino flux. Normalize it latter in makeibd"""
+
+        #  pass
+        for bkg in background_list:
+            if bkg == 'geo':
+                for iso_name in geo_flux_files.iterkeys():
+                    geo_isotope = GeoNeutrinoIsotope(iso_name)
+                    self._isotopes["geo_"+iso_name].append(geo_isotope)
+                    self._Enu_inputs[detector].add(geo_isotope.spectrum.f.inputs.x)
+                    detector.intermediates_bkg['geo_flux_{}'.format(iso_name)] = geo_isotope.spectrum
+
+
 
     def _getoscprobcls(self, reactor, detector):
         """Returns oscillation probability class for given (reactor, detector) pair"""
@@ -184,7 +235,7 @@ class ReactorExperimentModel(baseexp):
     def _getnormtype(self, reactor, detector):
         """Returns normalization type applicable for given reactor and detector
 
-        if power, power rate, protons and livetime are previded, 'calc' is returned to calculate normalization
+        if power, power rate, protons and livetime are provided, 'calc' is returned to calculate normalization
         otherwise 'manual' is returned meaning that normalization should be done by the caller with external Norm parameters
         """
         if all(x is not None for x in [reactor.power, reactor.power_rate, detector.protons, detector.livetime]):
@@ -284,6 +335,7 @@ class ReactorExperimentModel(baseexp):
                     normedflux.add(subflux)
                 detector.intermediates['flux'] = normedflux
 
+
                 compnames = set(oscprob.probsum.inputs)
 
                 detector.unoscillated.add(normedflux)
@@ -307,6 +359,7 @@ class ReactorExperimentModel(baseexp):
                         if compname not in compnames:
                             raise Exception("overriden component {}".format(compname))
                         compnames.remove(compname)
+
                         if 'Enu' in osccomps.inputs:
                             self._Enu_inputs[detector].add(osccomps.inputs.Enu)
                 if compnames:
@@ -318,6 +371,7 @@ class ReactorExperimentModel(baseexp):
         """Setup input energy values, integration and IBD calculation object for the given detector according to the ibdtype .
         ibdtype may be 'zero' or 'first' for the corresponding order.
         Resulting components are stored in detector.components.
+        The backgrounds histos are also constructed here for now.
         """
         Evis_edges = detector.edges
         orders = detector.orders
@@ -347,8 +401,6 @@ class ReactorExperimentModel(baseexp):
             ibd.jacobian.Ee(integrator.points.x)
             ibd.jacobian.ctheta(integrator.points.y)
             eventsparts = [ibd.xsec, ibd.jacobian]
-
-
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
 
@@ -356,6 +408,7 @@ class ReactorExperimentModel(baseexp):
         detector.intermediates['xsec'] = ibd.xsec
         for inp in self._Enu_inputs.get(detector, []):
             inp.connect(ibd.Enu.Enu)
+
 
         for detector in self.detectors:
             for resname, comps in detector.components.iteritems():
@@ -370,12 +423,45 @@ class ReactorExperimentModel(baseexp):
                         res = comp
                     detector.hists[resname][compid] = histcls(integrator)
                     detector.hists[resname][compid].hist.inputs(res)
+
+            # Below we construct backgrounds histos
+            bkg_summary = ROOT.Sum()
+            for bkg_name, bkg in detector.intermediates_bkg.iteritems():
+                prod = ROOT.Product()
+                prod.multiply(bkg)
+                unosc_bkg_name = 'unosc_' + bkg_name
+                for part in eventsparts:
+                    prod.multiply(part)
+                detector.back_hists[unosc_bkg_name] = histcls(integrator)
+                detector.back_hists[unosc_bkg_name].hist.inputs(prod)
+
+                # normalize isotope flux now
+                iso_name = bkg_name.split('_')[-1]
+                with self.ns("geo_isotopes")(iso_name):
+                    norm_geo = ROOT.GeoNeutrinoFluxNormed(detector.livetime[0]/year)
+                norm_geo.flux_norm.flux(detector.back_hists[unosc_bkg_name].hist)
+
+                with self.ns("oscillation"):
+                    aver_oscprob = ROOT.OscProbAveraged(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
+                aver_oscprob.average_oscillations.inputs(norm_geo.flux_norm)
+                detector.back_hists['geo_'+iso_name] = norm_geo.flux_norm.normed_flux
+                bkg_summary.add(aver_oscprob.average_oscillations.flux_averaged_osc)
+
+
+
+
             detector.unoscillated_hist = histcls(integrator)
             res = ROOT.Product()
             res.multiply(detector.unoscillated)
             for part in eventsparts:
                 res.multiply(part)
             detector.unoscillated_hist.hist.inputs(res)
+            
+            detector.unoscillated_with_bkg = ROOT.Sum()
+            detector.unoscillated_with_bkg.add(bkg_summary)
+            detector.unoscillated_with_bkg.add(detector.unoscillated_hist)
+
+            detector.back_hists['sum_bkg'] = bkg_summary
 
     def _sumcomponents(self, components):
         oscprobs = {}
@@ -401,7 +487,10 @@ class ReactorExperimentModel(baseexp):
 
     def setupobservations(self, detector):
         """Sum over the components and setup the observables to namespace"""
+
         self.ns.addobservable("{0}_unoscillated".format(detector.name), detector.unoscillated_hist.hist, export=False)
+        self.ns.addobservable("{0}_unoscillated_with_bkg".format(detector.name),
+                       detector.unoscillated_with_bkg, export=False)
 
         sums = {resname: self._sumcomponents(detector.hists[resname])
                 for resname in detector.hists}
@@ -409,23 +498,23 @@ class ReactorExperimentModel(baseexp):
         if 'oscprob' in sums:
             detector.intermediates["oscprob"] = sums['oscprob']
         if 'rate' in sums:
-            inter_sum = sums['rate']
-            self.ns.addobservable("{0}_noeffects".format(detector.name),
-                    inter_sum, export=False)
+            inter_sum = ROOT.Sum()
+            sum_without_bkg = sums['rate']
+            inter_sum.add(sum_without_bkg)
+            inter_sum.add(detector.back_hists['sum_bkg'])
+            
+            self.ns.addobservable("{0}_noeffects".format(detector.name), inter_sum, export=False)
 
             if self.opts.with_C14:
-                with self.ns('ibd'):
-                    with detector.ns:
-                        detector.c14 = ROOT.C14Spectrum(8,5)
-                        detector.c14.smear.inputs(inter_sum)
-                        finalsum = detector.c14.smear
+                with self.ns('ibd'), detector.ns:
+                    detector.c14 = ROOT.C14Spectrum(8,5)
+                    detector.c14.smear.inputs(inter_sum)
+                    finalsum = detector.c14.smear
 
-                        self.ns.addobservable("{0}_c14".format(detector.name),
-                                finalsum, export=True)
+                    self.ns.addobservable("{0}_c14".format(detector.name),
+                                          finalsum, export=True)
             else:
                 finalsum = inter_sum
-
-
 
             with detector.ns:
                 detector.eres = ROOT.EnergyResolution()
@@ -433,8 +522,12 @@ class ReactorExperimentModel(baseexp):
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
         det_ns = self.ns("detectors")(detector.name)
+
         for name in detector.intermediates:
             det_ns.addobservable(name, detector.intermediates[name], export=False)
+
+        for name, bkg in detector.back_hists.iteritems():
+            det_ns.addobservable("bkg_{}".format(name), bkg, export=False)
 
         for pair, comps in self.oscprobs_comps.iteritems():
             pair_ns = det_ns(pair[1].name)
@@ -449,3 +542,6 @@ class ReactorExperimentModel(baseexp):
         for isoname, (central, sigma) in eperfission.iteritems():
             isons = ns("isotopes")(isoname)
             isons.reqparameter("EnergyPerFission", central=central, sigma=sigma)
+        for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
+            geo_isons = ns("geo_isotopes")(geo_isoname)
+            geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
