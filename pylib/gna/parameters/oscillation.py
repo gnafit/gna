@@ -9,6 +9,8 @@ curpdg = pdg[2016]
 # given ordering
 # For a given moment all parameters are just set for normal ordering
 
+# DeltaMSqIJ = m^2_j - m^2_i
+
 def reqparameters(ns):
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
                       sigma=curpdg['sinSqtheta12_e'], limits=(0,1))
