@@ -110,8 +110,6 @@ class PValueMap(object):
     def dchi2(self, statistic):
         chi2data = self.base.statistic(statistic)
         chi2map = self.base.readmap('chi2')
-        print 'chi2map = {}'.format(chi2map)
-        print 'chi2data = {}'.format(chi2data)
         dchi2 = chi2map - chi2data
         return dchi2
 
@@ -219,6 +217,8 @@ class cmd(basecmd):
         parser.add_argument('--legend', nargs=2)
         parser.add_argument('--minimizer', action=set_typed(env.parts.minimizer))
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
+        parser.add_argument('--xlabel', default='', required=False)
+        parser.add_argument('--ylabel', default='', required=False)
 
     def statistic(self, name):
         print name
@@ -318,9 +318,7 @@ class cmd(basecmd):
         colors = iter('bgrcmyk')
         for plotdesc in self.opts.plots:
             plottype, rest = plotdesc[0], plotdesc[1:]
-            print 'plottype = {0}, rest = {1}'.format(plottype, rest)
             pvmap = pvmaptypes[plottype](self)
-            print 'pvmap.data = {}'.format(pvmap.data)
             color = self.plotmap(ax, pvmap)
             if color is None:
                 color = next(colors)
@@ -351,8 +349,10 @@ class cmd(basecmd):
             ticks, labels = plt.yticks(plt.yticks()[0], labels)
             for level in levels:
                 plt.axhline(level, linestyle='-.')
-            ax.set_xlabel(r'$\sigma_{rel}$', fontsize='xx-large')
-            ax.set_ylabel(r'p-value', fontsize='xx-large')
+            xlabel = r'{}'.format(self.opts.xlabel)
+            ylabel = r'{}'.format(self.opts.ylabel)
+            ax.set_xlabel(xlabel, fontsize='xx-large')
+            ax.set_ylabel(ylabel, fontsize='xx-large')
             ax.grid(False)
         elif self.ndim == 2:
             if self.statpoints.get('chi2min'):
