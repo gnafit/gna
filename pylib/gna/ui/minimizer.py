@@ -30,8 +30,6 @@ class cmd(basecmd):
                         par_from_ns.append(param)
 
             parameters.extend(par for par in par_from_ns if par not in parameters)
-            for _ in parameters:
-                print _.name()
 
 
         minimizer.addpars(parameters)
