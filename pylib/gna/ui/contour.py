@@ -118,7 +118,10 @@ class Chi2ConfidenceMap(PValueMap):
     @property
     def data(self):
         dchi2 = self.dchi2('chi2min')
+        #  print 'dchi2', dchi2
         pvs = 1-scipy.stats.chi2.cdf(dchi2, len(dchi2.shape))
+        #  print 'len', len(dchi2.shape)
+        #  print 'pvs', pvs
         return vmaparray(pvs, dchi2.grids)
 
 @pvaluemap("chi2minplt")
@@ -221,7 +224,7 @@ class cmd(basecmd):
         parser.add_argument('--ylabel', default='', required=False)
 
     def statistic(self, name):
-        print name
+        #  print name
         if name in self.statistics:
             return self.statistics[name]
         if name == 'chi2min':
@@ -257,6 +260,7 @@ class cmd(basecmd):
         points, vals = [], []
         with self.opentree(mapname) as tree:
             grids = tree.grids
+            #  print 'grids', grids
             vmap = emptymap(grids)
             for path, values, grp in tree.iterall():
                 points.append(values)
@@ -324,6 +328,8 @@ class cmd(basecmd):
                 color = next(colors)
             for pvspec in rest:
                 pvlevel = self.parselevel(pvspec)
+                #  print 'pvmap', pvmap.data
+                #  print 'pvlevel', pvlevel
                 self.plotlevel(ax, pvmap, pvlevel, color=color, pvspec=pvspec)
                 levels.add(pvlevel)
         pointsfile = None
@@ -355,13 +361,17 @@ class cmd(basecmd):
             ax.set_ylabel(ylabel, fontsize='xx-large')
             ax.grid(False)
         elif self.ndim == 2:
-            if self.statpoints.get('chi2min'):
-                xy = [self.statpoints['chi2min'][par] for par in reversed(self.params)]
-                self.fixaxes(xy)
-                print 'bestfit', xy[0], xy[1]
-                ax.plot(xy[0], xy[1], 'o')
+            #  if self.statpoints.get('chi2min'):
+                #  print self.params
+                #  print self.statpoints
+                #  for _ in reversed(self.params):
+                    #  print _
+                #  xy = [self.statpoints['chi2min'][par] for par in reversed(self.opts.minimizer.pars)]
+                #  self.fixaxes(xy)
+                #  print 'bestfit', xy[0], xy[1]
+                #  ax.plot(xy[0], xy[1], 'o')
 
-            ax.set_xlabel(r'$\sigma_{rel}$', fontsize='xx-large')
+            #  ax.set_xlabel(r'$\sigma_{rel}$', fontsize='xx-large')
             if 'dm31' in self.params:
                 if self.opts.dm32:
                     ax.set_ylabel(r'$\Delta m^2_{23}$', fontsize='xx-large')
