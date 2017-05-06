@@ -83,7 +83,7 @@ pdg[2016]  = dict( pdg[2013]
     , sinSqtheta23_inverted = 0.51
     , sinSqtheta23_inverted_e = 0.05
     , dmSqEE = 2.5e-3  # Daya Bay long oscillation paper
-    , dmSqEE_e = 0.12e-3
+    , dmSqEE_e = 0.8485e-3
 )
 
 class PhysicsConstants:

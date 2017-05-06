@@ -15,10 +15,10 @@ class cmd(basecmd):
             'power_rate': [1.0],
             'fission_fractions': {
                 'U235':  [0.60],
-                'Pu238': [0.27],
+                'Pu239': [0.27],
                 'U238':  [0.07],
                 'Pu241': [0.06],
-            }
+            },
         }
         reactors_opts = [
             {'name': 'YJ1', 'location': 52.75, 'power': 2.9},
