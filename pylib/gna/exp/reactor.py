@@ -143,20 +143,25 @@ class Isotope(object):
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy())
 
 class ReactorExperimentModel(baseexp):
+    oscprob_classes = {
+            'standard': ROOT.OscProbPMNS,
+            'decoh': ROOT.OscProbPMNSDecoh,
+            }
+
     @classmethod
     def initparser(self, parser, env):
         """Initializes arguments parser with args common to all reactor experiments"""
-        def OscProb(name):
-            return {
-                'standard': ROOT.OscProbPMNS,
-                'decoh': ROOT.OscProbPMNSDecoh,
-            }[name]
+        #  def OscProb(name):
+            #  return {
+                #  'standard': ROOT.OscProbPMNS,
+                #  'decoh': ROOT.OscProbPMNSDecoh,
+            #  }[name]
         parser.add_argument('--name', required=True)
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
         parser.add_argument('--backgrounds',choices=['geo'], action='append',
                             default=[], help='Choose backgrounds you want to add')
-        parser.add_argument('--oscprob', choices=['standard', 'decoh'],
-                            type=OscProb, default='standard')
+        parser.add_argument('--oscprob', choices=self.oscprob_classes.keys(),
+                            default='standard')
         parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'),
                             action='append', default=[])
         parser.add_argument('--integration-order', type=int, default=4)
@@ -173,6 +178,7 @@ class ReactorExperimentModel(baseexp):
         """
         super(ReactorExperimentModel, self).__init__(opts)
         self._oscprobs = {}
+        self._oscprobcls = self.oscprob_classes[self.opts.oscprob]
         self._isotopes = defaultdict(list)
         self._Enu_inputs = defaultdict(set)
         self.oscprobs_comps = defaultdict(dict)
@@ -230,7 +236,7 @@ class ReactorExperimentModel(baseexp):
                 return (self._oscprobs[key], self._oscprobs[key])
             except KeyError:
                 pass
-        return (ROOT.OscProbPMNS, ROOT.OscProbPMNS)
+        return (self._oscprobcls, self._oscprobcls)
 
     def _getnormtype(self, reactor, detector):
         """Returns normalization type applicable for given reactor and detector
