@@ -14,10 +14,10 @@ class cmd(basecmd):
         common = {
             'power_rate': [1.0],
             'fission_fractions': {
-                'Pu239': [0.60],
-                'Pu241': [0.07],
-                'U235': [0.27],
-                'U238': [0.06],
+                'U235':  [0.60],
+                'Pu238': [0.27],
+                'U238':  [0.07],
+                'Pu241': [0.06],
             }
         }
         reactors_opts = [
