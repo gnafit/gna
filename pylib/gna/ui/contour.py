@@ -207,6 +207,8 @@ class cmd(basecmd):
         parser.add_argument('-s', '--show', action='store_true')
         for maptype in vmaptypes:
             parser.add_argument('--'+maptype)
+        parser.add_argument('--no_shift', action='store_true', default=False,
+                            help='Shift the chi2 map by the value in data or not')
         parser.add_argument('--plot', dest='plots', nargs='+',
                             action='append', required=True)
         parser.add_argument('--points', dest='points', nargs='+',
@@ -236,7 +238,11 @@ class cmd(basecmd):
         res = minimizer.fit()
         minimizer.PrintResults()
         assert res.success
-        stat = res.fun
+
+        if not self.opts.no_shift:
+            stat = res.fun
+        else:
+            stat = 0.
         self.statistics[name] = stat
         print minimizer.pars, res.x
         self.statpoints[name] = dict(zip(minimizer.pars, res.x))

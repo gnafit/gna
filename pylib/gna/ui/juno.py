@@ -23,10 +23,6 @@ class cmd(basecmd):
         reactors_opts = [
             {'name': 'YJ1', 'location': 52.75, 'power': 2.9},
             {'name': 'YJ2', 'location': 52.84, 'power': 2.9},
-            {'name': 'YJ3', 'location': 52.42, 'power': 2.9},
-            {'name': 'YJ4', 'location': 52.51, 'power': 2.9},
-            {'name': 'YJ5', 'location': 52.12, 'power': 2.9},
-            {'name': 'YJ6', 'location': 52.21, 'power': 2.9},
 
             {'name': 'TS1', 'location': 52.76, 'power': 4.6},
             {'name': 'TS2', 'location': 52.63, 'power': 4.6},
@@ -48,8 +44,8 @@ class cmd(basecmd):
             name='AD1',
             edges=np.linspace(1., 10., 200+1),
             location=0,
-            protons=0.8*1.42e33, #TODO: is this detection efficiency of 80% ?
-            livetime=[5*365*24*60*60.0],
+            protons=0.8*1.42e33, 
+            livetime=[6*365*24*60*60.0],
         )
 
         ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])
