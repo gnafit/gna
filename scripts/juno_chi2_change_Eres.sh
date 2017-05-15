@@ -9,8 +9,9 @@ python gna -- ns --define common.Eres_b central=0.03 sigma=0.0 --push common \
 -- minimizer min minuit chi2 juno_nh.oscillation.DeltaMSqEE \
    juno_nh.oscillation.SinSq12 juno_nh.oscillation.SinSq13 \
 -- scan  --lingrid common.Eres_b 0.01 0.06 20 --minimizer min \
---verbose --output /tmp/out.hdf5 \
--- contour --chi2 /tmp/out.hdf5  --minimizer min --plot chi2minplt   --show
+   --verbose --output /tmp/out.hdf5 \
+-- contour --chi2 /tmp/out.hdf5  --minimizer min --plot chi2minplt \
+   --xlabel "E_res" --ylabel "\$\chi^2\$" --no_shift  --output chi2_Eres_change.pdf
 #--pullminimizer min
 # juno_nh.oscillation.DeltaMSqEE juno_nh.oscillation.SinSq12
 # juno_nh.oscillation.SinSq13 \

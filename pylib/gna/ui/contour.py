@@ -215,6 +215,7 @@ class cmd(basecmd):
                             action='append', required=False, default=[])
         parser.add_argument('--savepoints', dest='savepoints',
                             required=False)
+        parser.add_argument('--xlog', action='store_true', help='Use log scale over x-axis')
         parser.add_argument('--dm32', action='store_true')
         parser.add_argument('--ylim', type=float, nargs=2)
         parser.add_argument('--xlim', type=float, nargs=2)
@@ -365,6 +366,8 @@ class cmd(basecmd):
             ylabel = r'{}'.format(self.opts.ylabel)
             ax.set_xlabel(xlabel, fontsize='xx-large')
             ax.set_ylabel(ylabel, fontsize='xx-large')
+            if self.opts.xlog:
+                ax.semilogx()
             ax.grid(False)
         elif self.ndim == 2:
             #  if self.statpoints.get('chi2min'):
