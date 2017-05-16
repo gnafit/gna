@@ -26,8 +26,9 @@ def arggroups(argv):
 
 def getmodules():
     # pkgpath = os.path.dirname(gna.ui.__file__)
+    modules = {}
     for pkgpath in cfg.pkgpaths:
-        modules = {name: loader for loader, name, _ in iter_modules([pkgpath])}
+        modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
     return modules
 
 def loadcmdclass(modules, name, args):
