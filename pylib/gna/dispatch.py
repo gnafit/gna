@@ -4,6 +4,8 @@ import os.path
 from pkgutil import iter_modules
 from gna.env import env
 import gna.ui
+from gna.cfgloader import config
+cfg = config( './config/gna/gnacfg.py' )
 
 class LazyNamespace(argparse.Namespace):
     def __getattribute__(self, name):
@@ -23,8 +25,9 @@ def arggroups(argv):
         yield argv[start:end]
 
 def getmodules():
-    pkgpath = os.path.dirname(gna.ui.__file__)
-    modules = {name: loader for loader, name, _ in iter_modules([pkgpath])}
+    # pkgpath = os.path.dirname(gna.ui.__file__)
+    for pkgpath in cfg.pkgpaths:
+        modules = {name: loader for loader, name, _ in iter_modules([pkgpath])}
     return modules
 
 def loadcmdclass(modules, name, args):
@@ -44,7 +47,7 @@ def run():
     for group in arggroups(sys.argv):
         if not group:
             continue
-        name = group[0]
+        name = group[0] = group[0].replace('-', '_')
         if name not in modules:
             msg = 'unknown module %s' % name
             raise Exception(msg)
