@@ -9,8 +9,7 @@ if __name__ == "__main__":
     argv = sys.argv
     sys.argv = [argv[0]]
 
-    ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
-    ROOT.gSystem.Load('libGlobalNuAnalysis2.so')
+    import load
 
     sys.argv = argv
 
