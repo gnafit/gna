@@ -14,19 +14,19 @@ class cmd(basecmd):
             except KeyError:
                 raise PartNotFoundError("observable", path)
 
-        parser.add_argument('-dp', '--difference_plot', default=[],
+        parser.add_argument('-dp', '--difference-plot', default=[],
                             action=append_typed(observable),
                             help='Subtract two obs, they MUST have the same binning')
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
-        parser.add_argument('--plot_type', choices=['histo', 'bin_center'],
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center'],
                             default='bin_center', metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('-l', '--legend', action='append', default=[],
                             metavar=('Legend',),
                             help='Add legend to the plot, note that number of legends must match the number of plots')
-        parser.add_argument('--plot_kwargs', type=yaml.load,
+        parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
 
 
