@@ -52,6 +52,7 @@ set (HEADERS
   WeightedSum.hh
   Points.hh
   Histogram.hh
+  Identity.hh
   LinearInterpolator.hh
   FillLike.hh
   Derivative.hh
