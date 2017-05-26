@@ -1,8 +1,8 @@
-***Global Neutrino Analysis Toolkit***
+***Global Neutrino Analysis Toolkit. Training***
 
-For installation guidelines and documentation look at `doc/`: 
-> `cd doc/`
+We summarize here the exercises and results of their accomplishments
 
-> `make latexpdf`
+| Tasks | M.Dvorak | Chuping Cheng | 
+| ----- | -------- | ------------- | 
+| [Task 1](tasks/task1) | [x]   | OK|
 
-You will need TeX distribution and [`Sphinx`](http://www.sphinx-doc.org/en/stable/) installed for that.
