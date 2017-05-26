@@ -5,7 +5,8 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import pyplot as plt
 from pylab import figure, subplot, legend, plot, show, clf
-
+from matplotlib import rc
+rc('text',usetex=True)
 
 class cmd(basecmd):
   def init(self):
