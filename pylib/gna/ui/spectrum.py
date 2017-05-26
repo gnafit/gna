@@ -28,6 +28,7 @@ class cmd(basecmd):
                             help='Add legend to the plot, note that number of legends must match the number of plots')
         parser.add_argument('--plot_kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
+        parser.add_argument('--savefig', default='', help='Path to save figure')
 
 
     def run(self):
@@ -63,7 +64,10 @@ class cmd(basecmd):
         if show_legend:
             ax.legend(loc='best')
 
-        plt.show()
+        if self.opts.savefig:
+            plt.savefig(self.opts.savefig)
+        else:
+            plt.show()
 
     def make_bin_center(self, edges, data):
         return (edges[:-1] + edges[1:])/2, data
