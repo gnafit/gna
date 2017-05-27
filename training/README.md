@@ -1,4 +1,4 @@
-***Global Neutrino Analysis Toolkit. Training***
+# Global Neutrino Analysis Toolkit. Training
 
 We summarize here the exercises and results of their accomplishments. Here is the proposed algorithm.
 1. Tasks are stored in `training/tasks` folder. 
@@ -24,12 +24,12 @@ We summarize here the exercises and results of their accomplishments. Here is th
 
 | Tasks | M. Dvorak | Y.Cheng | T.Dohnal | Laura | 
 | ----- | :--------: | :-------------: | :------:| :------: |
-| [Task 1](tasks/Level1/task1) | :white_check_mark:   | :white_check_mark:| :white_check_mark:|  :negative_squared_cross_mark: |
+| [Task 1](/tasks/Level1/task1) | :white_check_mark:   | :white_check_mark:| :white_check_mark:|  :negative_squared_cross_mark: |
 
 ***Level2***
 
 | Tasks | M.Dvorak | Y.Cheng | 
 | ----- | :--------: | :-------------: | 
-| [Task 1](tasks/Level2/task1) | :white_check_mark: | :white_check_mark: |
+| [Task 1](/tasks/Level2/task1) | :white_check_mark: | :white_check_mark: |
 
 
