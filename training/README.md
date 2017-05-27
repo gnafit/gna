@@ -24,7 +24,7 @@ We summarize here the exercises and results of their accomplishments. Here is th
 
 | Tasks | M. Dvorak | Y.Cheng | T.Dohnal | Laura | 
 | ----- | :--------: | :-------------: | :------:| :------: |
-| [Task 1](/tasks/Level1/task1) | :white_check_mark:   | :white_check_mark:| :white_check_mark:|  :negative_squared_cross_mark: |
+| [Task 1](/training/tasks/Level1/task1.md) | :white_check_mark:   | :white_check_mark:| :white_check_mark:|  :negative_squared_cross_mark: |
 
 ***Level2***
 
