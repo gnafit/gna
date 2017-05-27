@@ -16,16 +16,20 @@ We summarize here the exercises and results of their accomplishments. Here is th
  * Level5. Know how to implement a physics case: cross-section,  oscillation probability, detector response in a robust and efficient way
 5. One should get a write access to ***gna*** reaching at least the Level4.
 
+ > Notations:
+  * Passed -- :white_check_mark:
+  * Not yet passed -- :negative_squared_cross_mark:
+
 ***Level1***
 
-| Tasks | M.Dvorak | Chuping Cheng | 
-| ----- | -------- | ------------- | 
-| [Task 1](tasks/Level1/task1) | [x]   | OK|
+| Tasks | M. Dvorak | Y.Cheng | T.Dohnal | Laura | 
+| ----- | :--------: | :-------------: | :------:| :------: |
+| [Task 1](tasks/Level1/task1) | :white_check_mark:   | :white_check_mark:| :white_check_mark:|  :negative_squared_cross_mark: |
 
 ***Level2***
 
-| Tasks | M.Dvorak | Chuping Cheng | 
-| ----- | -------- | ------------- | 
-| [Task 1](tasks/Level2/task1) | [x]   | OK|
+| Tasks | M.Dvorak | Y.Cheng | 
+| ----- | :--------: | :-------------: | 
+| [Task 1](tasks/Level2/task1) | :white_check_mark: | :white_check_mark: |
 
 
