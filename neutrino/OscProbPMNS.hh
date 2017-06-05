@@ -37,6 +37,7 @@ public:
   void calcComponent(Args args, Rets rets);
   void calcComponentCP(Args args, Rets rets);
   void calcSum(Args args, Rets rets);
+  void calcFullProb(Args args, Rets rets);
 protected:
   variable<double> m_L;
 };

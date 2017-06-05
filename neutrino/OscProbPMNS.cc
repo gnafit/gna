@@ -3,6 +3,7 @@
 #include <TMath.h>
 
 #include "OscProbPMNS.hh"
+#include <Eigen/Dense>
 
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
@@ -114,7 +115,44 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
   }
+
+  auto full_formula = transformation_(this, "full_osc_prob")
+      .input("Enu")
+      .output("oscprob")
+      .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
+      .types(Atypes::pass<0>)
+      .func(&OscProbPMNS::calcFullProb);
 }
+
+void OscProbPMNS::calcFullProb(Args args, Rets rets) {
+    auto& Enu = args[0].x;
+    ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
+    ArrayXd comp0(Enu);
+    comp0.setOnes();
+    ArrayXd comp12 = cos(DeltaMSq<1,2>()*tmp);
+    ArrayXd comp13 = cos(DeltaMSq<1,3>()*tmp);
+    ArrayXd comp23 = cos(DeltaMSq<2,3>()*tmp);
+    ArrayXd compCP(Enu);
+    compCP.setZero();
+    if (m_alpha != m_beta) {
+        compCP  = sin(DeltaMSq<1,2>()*tmp/2.);
+        compCP *= sin(DeltaMSq<1,3>()*tmp/2.);
+        compCP *= sin(DeltaMSq<2,3>()*tmp/2.);
+    }
+    rets[0].x  = 2.0*weight<1,2>()*comp12;
+    rets[0].x += 2.0*weight<1,3>()*comp13;
+    rets[0].x += 2.0*weight<2,3>()*comp23;
+    double coeff0 = - 2.0*(weight<1,2>() + weight<1,3>() + weight<2,3>());
+    if (m_alpha == m_beta) {
+      coeff0 += 1.0;
+    }
+    rets[0].x += coeff0*comp0;
+    if (m_alpha != m_beta) {
+      rets[0].x += 8.0*weightCP()*compCP;
+    }
+
+}
+
 
 template <int I, int J>
 void OscProbPMNS::calcComponent(Args args, Rets rets) {
