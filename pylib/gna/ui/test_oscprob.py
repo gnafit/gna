@@ -12,14 +12,28 @@ class cmd(basecmd):
   def init(self):
     self.ns = self.env.ns("test_oscprob")
     gna.parameters.oscillation.reqparameters(self.ns)
-    self.ns.defparameter("L", central=2, sigma=0)
+    self.ns.defparameter("L", central=1.8, sigma=0)
     self.ns.defparameter("sigma", central=1.e-5, sigma=0)
     neutrinos = [ROOT.Neutrino.e(), ROOT.Neutrino.mu(), ROOT.Neutrino.tau()]
-    L_arr = [2,800,12000]
-    Enu_arr = [np.linspace(1e-1, 10, 10000), np.linspace(1e2,1e4,10000)]
+    L_arr = [2.,800.,12000.]
+    Enu_arr = [np.linspace(1., 10., 100), np.linspace(1e2,1e4,10000)]
     self.make_prediction(ROOT.Neutrino.e(), ROOT.Neutrino.e(), Enu_arr[0], L_arr[0] )
     self.make_prediction(ROOT.Neutrino.mu(), ROOT.Neutrino.e(), Enu_arr[1], L_arr[1] )
     self.make_prediction(ROOT.Neutrino.mu(), ROOT.Neutrino.tau(), Enu_arr[1], L_arr[2] )
+    self.make_simple_prediction(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(), Enu_arr[0], L_arr[0])
+
+  def make_simple_prediction(self, from_nu, to_nu, Enu_arr, L):
+    Enu_p = ROOT.Points(Enu_arr)
+    self.ns['L'].set(2.)
+    with self.ns:
+        oscprob_full = ROOT.OscProbPMNS(from_nu, to_nu)
+        oscprob_full.full_osc_prob.inputs.Enu(Enu_p)
+        data_osc = oscprob_full.full_osc_prob.oscprob
+        data_osc.data()
+        print data_osc.data() 
+        plt.figure()
+        plt.plot(Enu_arr, data_osc.data())
+        plt.savefig('test.pdf')
 
     
     
@@ -49,6 +63,8 @@ class cmd(basecmd):
           self.ns.addobservable('probability_{0}'.format(name),oscprob.probsum)
           oscprobs[name] = oscprob
           data[name] = oscprob.probsum
+
+    
 
       data_stand, data_decoh = data['standard'], data['decoh']
 
