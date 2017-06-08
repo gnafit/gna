@@ -49,7 +49,8 @@ class cmd(basecmd):
             self.env.defparameter(name, **kwargs)
 
         for name, sigma in self.opts.sigma:
-            self.env.parameters[name].setSigma(sigma)
+            p = self.env.parameters[name]
+            p.setSigma(p.cast(sigma))
 
         for name, central in self.opts.central:
             p = self.env.parameters[name]
