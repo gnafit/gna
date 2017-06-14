@@ -21,15 +21,15 @@ class cmd(basecmd):
         # iterate over namespaces passed and extract parameters for minimization
         # TODO: Refactor to handle nested namespaces
         if self.opts.par_namespace:
-            par_from_ns = []
+            pars_from_ns = []
             for par_ns in self.opts.par_namespace:
                 for key in self.env.ns(par_ns).iterkeys():
                     par_name = par_ns + '.' + key
                     param = self.env.pars[par_name]
                     if isinstance(param, ROOT.GaussianParameter("double")):
-                        par_from_ns.append(param)
+                        pars_from_ns.append(param)
 
-            parameters.extend(par for par in par_from_ns if par not in parameters)
+            parameters.extend(par for par in pars_from_ns if par not in parameters)
 
 
         minimizer.addpars(parameters)

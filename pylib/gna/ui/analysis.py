@@ -22,9 +22,7 @@ class cmd(basecmd):
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
         parameters = [self.env.pars[pname] for pname in self.opts.parameters]
-        observables = []
-        for path in self.opts.observables:
-            observables.append(self.env.get(path))
+        observables = [self.env.get(path) for path in self.opts.observables]
 
         blocks = dataset.makeblocks(observables, parameters)
 
