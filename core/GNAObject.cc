@@ -1,10 +1,13 @@
 #include <iostream>
 
+#include <boost/type_index.hpp>
 #include "GNAObject.hh"
 
 void GNAObject::dumpObj() {
   std::cerr << "GNAObject " << (void*)this << ", ";
-  std::cerr << "type: " << typeid(*this).name() << std::endl;
+  std::cerr << "type: " << boost::typeindex::type_id<decltype(*this)>().pretty_name() << std::endl;
+  /* std::cerr << "type: " << typeid(*this).name() << std::endl; */
+  /* boost::typeindex::type_id<T>().pretty_name() */
 
   std::cerr << "variables (" << variables.size() << "):" << std::endl;
   for (size_t i = 0; i < variables.size(); ++i) {
