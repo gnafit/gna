@@ -52,7 +52,7 @@ class Reactor(object):
 
     def assign(self, ns):
         self.ns = ns("reactors")(self.name)
-        self.ns.defparameter("ThermalPower", central=self.power, sigma=0)
+        self.ns.reqparameter("ThermalPower", central=self.power, sigma=0)
 
     def calcdistance(self, detector):
         return np.sqrt(np.sum((np.array(self.location) - np.array(detector.location))**2))
@@ -60,7 +60,8 @@ class Reactor(object):
     def initdistance(self, ns, detector):
         dist = self.calcdistance(detector)
         pair_ns = detector.ns(self.name)
-        pair_ns.defparameter("L", central=dist, sigma=0)
+        pair_ns.reqparameter("L_{0}".format(self.name), central=dist, sigma=0)
+        pair_ns.defparameter("L", target=pair_ns.ref("L_{0}".format(self.name)))
 
 class ReactorGroup(object):
     def __init__(self, name, reactors):
