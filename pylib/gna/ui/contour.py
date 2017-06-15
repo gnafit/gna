@@ -221,6 +221,8 @@ class cmd(basecmd):
         parser.add_argument('--xlim', type=float, nargs=2)
         parser.add_argument('--labels', nargs='+')
         parser.add_argument('--legend', nargs=2)
+        parser.add_argument('--no-bestfit', action='store_false', 
+        help='Do not show best fit point with contour')
         parser.add_argument('--minimizer', action=set_typed(env.parts.minimizer))
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
         parser.add_argument('--xlabel', default='', required=False)
@@ -369,16 +371,13 @@ class cmd(basecmd):
             if self.opts.xlog:
                 ax.semilogx()
             ax.grid(False)
-        elif self.ndim == 2:
-            #  if self.statpoints.get('chi2min'):
-                #  print self.params
-                #  print self.statpoints
-                #  for _ in reversed(self.params):
-                    #  print _
-                #  xy = [self.statpoints['chi2min'][par] for par in reversed(self.opts.minimizer.pars)]
-                #  self.fixaxes(xy)
-                #  print 'bestfit', xy[0], xy[1]
-                #  ax.plot(xy[0], xy[1], 'o')
+        elif self.ndim == 2 and self.opts.no_bestfit:
+            if self.statpoints.get('chi2min'):
+               xy = [self.statpoints['chi2min'][par] for par in
+                       reversed(self.opts.minimizer.pars)]
+               #  self.fixaxes(xy)
+               print 'bestfit', xy[0], xy[1]
+               ax.plot(xy[0], xy[1], 'o', label='Best fit')
 
             #  ax.set_xlabel(r'$\sigma_{rel}$', fontsize='xx-large')
             if 'dm31' in self.params:
