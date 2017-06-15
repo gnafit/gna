@@ -71,9 +71,6 @@ protected:
            {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
              return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
            })
-      .add(&DeltaMSqEE, {&DeltaMSqMM, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
-              return DeltaMSqMM + Alpha*sin(2*Theta12) 
-                     - cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
       .add(&DeltaMSqMM, {&DeltaMSqEE, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
               return DeltaMSqEE - Alpha*sin(2*Theta12) 
                      + cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
