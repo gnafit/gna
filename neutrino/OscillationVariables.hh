@@ -52,7 +52,8 @@ protected:
     using std::asin;
     using std::sin;
     using std::pow;
-
+    /* Syntax is the following: parameter to compute, {fields that are needed
+     * for computation}, lambda that defines computation  */
     provider
       .add(&DeltaMSq13,
            {&DeltaMSq23, &Alpha, &DeltaMSq12}, [&]() {
@@ -70,6 +71,12 @@ protected:
            {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
              return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
            })
+      .add(&DeltaMSqEE, {&DeltaMSqMM, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
+              return DeltaMSqMM + Alpha*sin(2*Theta12) 
+                     - cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
+      .add(&DeltaMSqMM, {&DeltaMSqEE, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
+              return DeltaMSqEE - Alpha*sin(2*Theta12) 
+                     + cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
       .add(&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); })
       .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
       .add(&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); })
