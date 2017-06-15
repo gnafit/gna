@@ -8,7 +8,7 @@ class cmd(basecmd):
                             help='push namespaces NS to current view')
         parser.add_argument('--pop', nargs='+', default=[],
                             metavar='NS',
-                            help='push namespaces NS to current view')
+                            help='pop namespaces NS out of current view')
         parser.add_argument('--route', nargs=2, action='append',
                             default=[])
         parser.add_argument('--loadset', action='append', nargs=2,

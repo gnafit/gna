@@ -42,6 +42,7 @@ void Prediction::calculatePrediction(Args args, Rets rets) {
 
   for (size_t i = 0; i < args.size(); ++i) {
     const auto &arg = args[i];
+    /* std::copy returns an iterator to the last inserted element  */
     buf = std::copy(arg.x.data(), arg.x.data()+arg.type.size(), buf);
   }
 }
