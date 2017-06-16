@@ -3,7 +3,7 @@ from collections import defaultdict, namedtuple
 import numpy as np
 
 Block = namedtuple('Block', ('theory', 'data', 'cov'))
-        
+
 class Dataset(object):
     def __init__(self, desc=None, bases=[]):
         self.desc = desc
@@ -74,7 +74,7 @@ class Dataset(object):
         for data in datas:
             merged.append(data)
         return merged
-            
+
     def makeblocks(self, observables, covparameters):
         blocks = []
         for i, obsblock in enumerate(self.sortobservables(observables, covparameters)):

@@ -17,7 +17,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.addpars(pars)
 
         self.result = None
-        
+
     @property
     def statistic(self):
         return self._statistic
@@ -53,6 +53,8 @@ class Minuit(ROOT.TMinuitMinimizer):
         if isinstance(value, spec.dynamicvalue):
             value = value.value(par)
         step = parspec.get('step', par.sigma())
+        if step==0:
+            raise Exception( '"%s" initial step is undefined. Specify its sigma explicitly.' )
         vmin, vmax = parspec.get('limits', [float('-inf'), float('+inf')])
         fixed = parspec.get('fixed', False)
 

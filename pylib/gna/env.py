@@ -5,6 +5,8 @@ import ROOT
 
 env = None
 
+debug_output = False
+
 class namespacedict(defaultdict):
     def __init__(self, ns):
         super(namespacedict, self).__init__()
@@ -79,11 +81,12 @@ class ExpressionsEntry(object):
         for expr in path:
             v = expr.get()
         return v
-            
+
     def resolvepath(self, seen, known):
         minexpr, minpaths = None, None
         for expr in self.exprs:
-            print expr.expr.name(), seen
+            if debug_output:
+                print expr.expr.name(), seen
             paths = expr.resolvepath(seen, set(known))
             if paths is None:
                 continue
@@ -169,7 +172,7 @@ class namespace(Mapping):
             p = parameters.makeparameter(self, name, **kwargs)
         self[name] = p
         return p
-        
+
     def reqparameter(self, name, **kwargs):
         try:
             return self[name]
@@ -192,7 +195,8 @@ class namespace(Mapping):
 
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
-            print self.path, obj, expr.name()
+            if debug_output:
+                print self.path, obj, expr.name()
             name = expr.name()
             if name not in self.storage:
                 self.storage[name] = ExpressionsEntry(self)
@@ -248,10 +252,14 @@ class nsview(object):
                 return ns[name]
             except KeyError:
                 pass
-        print "can't find name {}".format(name)
-        print "names in view"
-        for ns in self.nses:
-            print '{}: {}'.format(ns.path, ', '.join(ns.storage))
+        if debug_output:
+            print "can't find name {}. Names in view: ".format(name),
+            if self.nses:
+                for ns in self.nses:
+                    print '"{}": "{}"'.format(ns.path, ', '.join(ns.storage)), ' ',
+                print ''
+            else:
+                'none'
         raise KeyError(name)
 
 class parametersview(object):
@@ -355,7 +363,8 @@ class _environment(object):
             if isinstance(param, ExpressionsEntry):
                 param = param.get()
             if param is not None:
-                print "binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
+                if debug_output:
+                    print "binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
                 v.bind(param.getVariable())
             else:
                 msg = "unable to bind variable %s of %r" % (v.name(), obj)
