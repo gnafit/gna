@@ -54,7 +54,7 @@ class Minuit(ROOT.TMinuitMinimizer):
             value = value.value(par)
         step = parspec.get('step', par.sigma())
         if step==0:
-            raise Exception( '"%s" initial step is undefined. Specify its sigma explicitly.' )
+            raise Exception( '"%s" initial step is undefined. Specify its sigma explicitly.'%par.name() )
         vmin, vmax = parspec.get('limits', [float('-inf'), float('+inf')])
         fixed = parspec.get('fixed', False)
 
