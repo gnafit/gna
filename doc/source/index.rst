@@ -15,4 +15,5 @@ Contents:
    reactor
    inputs
    fc
+   reference_guide
 
