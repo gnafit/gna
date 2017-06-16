@@ -16,3 +16,4 @@ build/
 *.o
 compile_commands.json
 .ycm_extra_conf.py
+doc/doxygen
