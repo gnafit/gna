@@ -85,7 +85,7 @@ class cmd(basecmd):
             self.edges_storage.append(edges_0)
 
 def edges_to_centers( edges, heights ):
-    return (edges[:-1] + edges[1:])/2, data, None
+    return (edges[:-1] + edges[1:])/2, heights, None
 
 def edges_to_histpoints( edges, heights ):
     zero_value =  0.0
