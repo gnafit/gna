@@ -1,6 +1,7 @@
 #ifndef ENERGYRESOLUTION_H
 #define ENERGYRESOLUTION_H
 
+#include <fstream>
 #include <vector>
 
 #include "GNAObject.hh"
@@ -9,6 +10,7 @@ class EnergyResolution: public GNAObject,
                         public Transformation<EnergyResolution> {
 public:
   EnergyResolution();
+  ~EnergyResolution();
 
 private:
   double relativeSigma(double Etrue) const noexcept;
@@ -24,6 +26,7 @@ private:
   std::vector<double> m_rescache;
   std::vector<int> m_cacheidx;
   std::vector<int> m_startidx;
+  std::ofstream m_bench_file;
 };
 
 #endif // ENERGYRESOLUTION_H

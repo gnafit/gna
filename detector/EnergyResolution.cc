@@ -1,5 +1,6 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergyResolution.hh"
+#include <chrono>
 
 constexpr double pi = boost::math::constants::pi<double>();
 
@@ -9,6 +10,8 @@ EnergyResolution::EnergyResolution() {
   variable_(&m_b, "Eres_b");
   variable_(&m_c, "Eres_c");
   callback_([this] { fillCache(); });
+
+  m_bench_file.open("bench_old.txt", std::ios::out);
 
   using namespace std::placeholders;
   transformation_(this, "smear")
@@ -96,6 +99,9 @@ void EnergyResolution::fillCache() {
 
 /* Apply precalculated cache and actually smear */
 void EnergyResolution::calcSmear(Args args, Rets rets) {
+  std::chrono::time_point<std::chrono::high_resolution_clock> start, finish;
+  start = std::chrono::high_resolution_clock::now();
+
   const double *events_true = args[0].x.data();
   double *events_rec = rets[0].x.data();
 
@@ -140,4 +146,11 @@ void EnergyResolution::calcSmear(Args args, Rets rets) {
       events_rec[etrue] -= delta;
     }
   }
+  finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> dur = (finish - start);
+  m_bench_file << dur.count()*1e6 << std::endl;
+}
+
+EnergyResolution::~EnergyResolution() {
+    m_bench_file.close();
 }

@@ -37,6 +37,7 @@ set (SOURCES
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
+  detector/EnergyResolutionWithSparse.cc
   )
 
 set (HEADERS
@@ -76,6 +77,7 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyResolutionWithSparse.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   )
