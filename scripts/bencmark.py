@@ -1,7 +1,16 @@
 #!/usr/bin/python
+
+from __future__ import print_function
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
+
+odir = 'output/17.06.19_eres_sparse/'
+try:
+    os.makedirs(odir)
+except:
+    pass
 
 par_range = np.linspace(0.01, 0.03, 500)
 # Collect execution time in files
@@ -18,9 +27,16 @@ joint.rename(columns={0:'Old', 1:'Sparse'}, inplace=True)
 
 fig, ax = plt.subplots()
 plt.xlim(0, 30)
-joint.plot.hist(ax=ax, alpha=0.5, stacked=True, bins=5000)
+joint.plot.hist(ax=ax, alpha=0.5, stacked=False, bins=5000)
 plt.legend()
 plt.xlabel('Time in microseconds')
 plt.title('Time of applying resolutions, 500 samples')
-plt.savefig('bench_resolution.pdf')
+plt.savefig(odir+'bench_resolution.pdf')
+
+print('Mean time:')
+print( joint.mean() )
+
+print()
+print('Median time:')
+print( joint.median() )
 

@@ -146,7 +146,7 @@ def patchDescriptor(cls):
         return self.hash() == other.hash()
     cls.__hash__ = __hash__
     cls.__eq__ = __eq__
-    
+
 @hygienic
 def wrapPoints(cls):
     class WrappedClass(cls):
