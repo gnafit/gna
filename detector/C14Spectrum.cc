@@ -69,7 +69,7 @@ void C14Spectrum::fillCache()
  * protons (only hydrogen) to number of C12s is a bit unclear.
  * Here for no particular reasons we use the median n = 11*/
 
-    decltype(auto) convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); }; 
+    auto convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); }; 
     double C14_nuclei_number = m_rho * convers_H_to_C12(11);
     coincidence_prob = (coincidence_window / C14_half_life) * C14_nuclei_number;
 
