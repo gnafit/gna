@@ -528,11 +528,8 @@ class ReactorExperimentModel(baseexp):
 
             with detector.ns:
                 detector.eres = ROOT.EnergyResolution()
-                detector.eres_sparse = ROOT.EnergyResolutionWithSparse()
             detector.eres.smear.inputs(finalsum)
-            detector.eres_sparse.smear.inputs(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
-            self.ns.addobservable("{0}_sparse".format(detector.name), detector.eres_sparse.smear)
 
         det_ns = self.ns("detectors")(detector.name)
 

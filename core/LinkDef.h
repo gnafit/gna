@@ -73,7 +73,6 @@
 #pragma link C++ class GaussLegendre2dHist-;
 
 #pragma link C++ class EnergyResolution-;
-#pragma link C++ class EnergyResolutionWithSparse-;
 
 #pragma link C++ class ReactorNormAbsolute-;
 #pragma link C++ class ReactorNorm-;
