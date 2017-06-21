@@ -94,7 +94,7 @@ The transformation gets invalidated when any of the transformations
 connected to it is invalidated or when a variable of the containing
 ``GNAObject`` gets invalidated (unless another behaviour is explicetely
 specified during the transformation initialization). 
- The computed results are reused making
+The computed results are reused making
 partial computation faster as long as it stays valid.
 
 There may be any number of transformation provided by a single
