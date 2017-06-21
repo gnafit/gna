@@ -1,11 +1,14 @@
 Reference guide
 ==================
 
+Transformations
+---------------
+
 Chi2 tranformation
-------------------
+~~~~~~~~~~~~~~~~~~
 
 Inputs
-~~~~~~
+^^^^^^
 
 1) Theory :math:`\mu`
 
@@ -16,12 +19,12 @@ Inputs
 #) Optionally :math:`\mu_2,x_2,L_2,\dots`
 
 Outputs
-~~~~~~~
+^^^^^^^
 
 1) Chi-squared value :math:`\chi^2`
 
 Implementation
-~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^
 
 For the covariance matrix :math:`V` (symmetric, positively defined), decomposed as
 
