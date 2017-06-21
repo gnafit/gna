@@ -4,7 +4,8 @@ Reference guide
 Chi2 tranformation
 ------------------
 
-Inputs:
+Inputs
+~~~~~~
 
 1) Theory :math:`\mu`
 
@@ -12,20 +13,22 @@ Inputs:
 
 3) Covariance matrix Cholesky decomposition :math:`L`
 
-#) repeat
+#) Optionally :math:`\mu_2,x_2,L_2,\dots`
 
-Outputs:
+Outputs
+~~~~~~~
 
 1) Chi-squared value :math:`\chi^2`
 
-Implements:
+Implementation
+~~~~~~~~~~~~~~
 
-For the positively defined covariance matrix :math:`V`, decomposed as
+For the covariance matrix :math:`V` (symmetric, positively defined), decomposed as
 
 .. math::
   V = L L^T,
 
-where :math:`L` is a lower triangular matrix returns the :math:`\chi^2` value:
+where :math:`L` is a lower triangular matrix the tranformation returns the :math:`\chi^2` value:
 
 .. math::
   \chi^2 = (x-\mu)^T V^{-1} (x - \mu).
