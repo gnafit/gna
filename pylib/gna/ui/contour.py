@@ -207,7 +207,7 @@ class cmd(basecmd):
         parser.add_argument('-s', '--show', action='store_true')
         for maptype in vmaptypes:
             parser.add_argument('--'+maptype)
-        parser.add_argument('--no_shift', action='store_true', default=False,
+        parser.add_argument('--no-shift', action='store_true', default=False,
                             help='Shift the chi2 map by the value in data or not')
         parser.add_argument('--plot', dest='plots', nargs='+',
                             action='append', required=True)
@@ -221,7 +221,7 @@ class cmd(basecmd):
         parser.add_argument('--xlim', type=float, nargs=2)
         parser.add_argument('--labels', nargs='+')
         parser.add_argument('--legend', nargs=2)
-        parser.add_argument('--no-bestfit', action='store_false', 
+        parser.add_argument('--no-bestfit', action='store_false',
         help='Do not show best fit point with contour')
         parser.add_argument('--minimizer', action=set_typed(env.parts.minimizer))
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
@@ -229,6 +229,9 @@ class cmd(basecmd):
         parser.add_argument('--ylabel', default='', required=False)
 
     def statistic(self, name):
+        if self.opts.no_shift:
+            return 0.0
+
         #  print name
         if name in self.statistics:
             return self.statistics[name]
@@ -241,15 +244,10 @@ class cmd(basecmd):
         res = minimizer.fit()
         minimizer.PrintResults()
         assert res.success
-
-        if not self.opts.no_shift:
-            stat = res.fun
-        else:
-            stat = 0.
-        self.statistics[name] = stat
+        self.statistics[name] = res.fun
         print minimizer.pars, res.x
         self.statpoints[name] = dict(zip(minimizer.pars, res.x))
-        return stat
+        return res.fun
 
     def opentree(self, mapname):
         fname = getattr(self.opts, mapname)
