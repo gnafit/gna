@@ -66,7 +66,9 @@ before starting the build procedure again.
 In case you have GCC 5.X compiler or newer
 version you may use the following cmake command when generating the
 build files with your additional flags if needed::
+
   $ export CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
   $ cmake -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+
 Notice that if ABI mismatch encountered, the ROOT is also have to be recompiled
 from scratch with compilation flags above -- ROOT branch 6.06 doesn't support GCC5 ABI, but ROOT 6.08 does.

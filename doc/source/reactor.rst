@@ -70,8 +70,7 @@ details):
 - ``ns.oscillation``: parameters of oscillations (mass square
   differences, squared sines of mixing angles, hierarchy (``Alpha`` --
   ``normal`` or numerically 1 for normal, ``inverted`` or -1 for
-  inverted), as defined in ``gna.parameters.oscillation``, :math:`\delta_{\text{CP}}`
-;
+  inverted), as defined in ``gna.parameters.oscillation``, :math:`\delta_{\text{CP}}` ;
 - ``ns.detectors.detname``: parameters related to detector named
   ``detname``, namely: ``TargetProtons`` for protons number (check
   ``neutrino/ReactorNorm.cc``); ``Eres_a``, ``Eres_b``, ``Eres_c`` for
