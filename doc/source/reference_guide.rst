@@ -4,43 +4,33 @@ Reference guide
 Transformations
 ---------------
 
-Chi2 tranformation
-~~~~~~~~~~~~~~~~~~
+.. toctree::
+   :maxdepth: 1
+   :glob:
 
-Inputs
-^^^^^^
+   transformations/*
 
-1) Theory :math:`\mu`
+.. Template
 
-2) Data :math:`x`
+   Identity transformation
+   ~~~~~~~~~~~~~~~~~~~~~~~
 
-3) Covariance matrix Cholesky decomposition :math:`L`
+   Description
+   ^^^^^^^^^^^
+   Short description
 
-#) Optionally :math:`\mu_2,x_2,L_2,\dots`
+   Inputs
+   ^^^^^^
 
-Outputs
-^^^^^^^
+   1) Input 1
 
-1) Chi-squared value :math:`\chi^2`
+   Outputs
+   ^^^^^^^
 
-Implementation
-^^^^^^^^^^^^^^
+   1) output 1
 
-For the covariance matrix :math:`V` (symmetric, positively defined), decomposed as
+   Implementation
+   ^^^^^^^^^^^^^^
 
-.. math::
-  V = L L^T,
-
-where :math:`L` is a lower triangular matrix the tranformation returns the :math:`\chi^2` value:
-
-.. math::
-  \chi^2 = (x-\mu)^T V^{-1} (x - \mu).
-
-The exact implementation follows:
-
-.. math::
-  y = L^{-1} (x-\mu),
-
-.. math::
-  \chi^2 = y^T y.
+   Implementation details, formulas, etc.
 
