@@ -93,7 +93,8 @@ computation chain, computation graph (which is acyclic and directed).
 The transformation gets invalidated when any of the transformations
 connected to it is invalidated or when a variable of the containing
 ``GNAObject`` gets invalidated (unless another behaviour is explicetely
-specified during the transformation initialization). The computed results are reused making partial computation faster as long as it stays valid.
+specified during the transformation initialization). The computed results are
+reused making partial computation faster as long as it stays valid.
 
 There may be any number of transformation provided by a single
 ``GNAObject``, they all will have its state as shared. If only one
@@ -108,7 +109,7 @@ directly, and ``Transformation<T>`` template class which should be
 inherited by each user of transformations with the class itself as
 ``T`` (CRTP is employed).
 
-The code cna be found in ``core/TransformationBase.hh`` and
+The code can be found in ``core/TransformationBase.hh`` and
 ``core/Transformation.hh``. The former is (at least was) intended to be
 used only by C++, while the latter to be exported to Python side with
 PyROOT. This was done with ROOT5 in mind, since ROOT6 is very good at

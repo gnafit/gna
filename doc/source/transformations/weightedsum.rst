@@ -23,15 +23,13 @@ All arrays are of the same size.
 Variables
 ^^^^^^^^^
 
-The transformation depends on :math:`N` variables defined with names starting with `weight_` and
-ending with relevant array's name.
+The transformation depends on :math:`N` weighting variables :math:`\omega_i` 
+defined with names starting with `weight_` and ending with relevant array's name.
 
 Outputs
 ^^^^^^^
 
 1) Weighted sum :math:`S`
-   
-
 
 Implementation
 ^^^^^^^^^^^^^^
