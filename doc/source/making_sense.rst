@@ -21,14 +21,18 @@ TransformationTypes namespace
 ..    SourcesContainer
 ..    TypesFunction
 
-Accessor : class
-    TBD
+Main classes
+""""""""""""
 
-Atypes* : class
+Accessor : class
+    * indirect acces to `Base` instance
+    * implements access to `Entry` by name or index (?)
+
+Atypes : class
 
 Base : class
-
-CalculationError : class
+    * base class for `GNAObject`
+    * contains list of `Entries`
 
 Handle : class
 
@@ -37,12 +41,6 @@ Initializer : class
 InputHandle : class
 
 OutputHandle : class
-
-SinkTypeError : class
-
-SourceTypeError : class
-
-TypeError : class
 
 Args : struct
 
@@ -62,3 +60,13 @@ SingleOutput : class
 
 Transformation : class
 
+Errors
+""""""
+
+TypeError : class
+
+CalculationError : class
+
+SinkTypeError : class
+
+SourceTypeError : class
