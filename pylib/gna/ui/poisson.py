@@ -12,7 +12,7 @@ class cmd(basecmd):
     def init(self):
         poisson = ROOT.Poisson(self.opts.ln_approx)
         for block in self.opts.analysis:
-            poisson.add(block.theory, block.data, block.cov)
+            poisson.add(block.theory, block.data)
 
 
         self.env.parts.statistic[self.opts.name] = poisson

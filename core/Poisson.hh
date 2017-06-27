@@ -21,7 +21,7 @@ public:
   
   
 
-  void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
+  void add(SingleOutput &theory, SingleOutput &data);
 
   void calcPoissonApprox(Args args, Rets rets);
 
