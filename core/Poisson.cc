@@ -42,7 +42,7 @@ double addOneInLnGamma(double in)
 	return TMath::LnGamma(in + 1);
 }
 
-double NonZeroAdd(double x)
+double lnFactorialApprox(double x)
 {
 	if (!(x == 0.0 || x == 1.0)) 
 	{	
@@ -51,7 +51,7 @@ double NonZeroAdd(double x)
 	else 		return 0;
 }
 
-void Poisson::calcPoissonTrue(Args args, Rets rets) {
+void Poisson::calcPoissonApprox(Args args, Rets rets) {
 
 /***************************************************************************
 *       Formula: log of Poisson
@@ -65,12 +65,12 @@ void Poisson::calcPoissonTrue(Args args, Rets rets) {
 	for (size_t i = 0; i < args.size(); i+=3) {
             rets[0].arr(0) += (args[i+0].arr.log() * args[i+1].arr
 		   	      - args[i+0].arr).sum();
- 	    rets[0].arr(0) -= (args[i+1].arr).unaryExpr(&NonZeroAdd).sum();
+ 	    rets[0].arr(0) -= (args[i+1].arr).unaryExpr(&lnFactorialApprox).sum();
 	}
 	rets[0].arr(0) *= -2;
 }
 
-void Poisson::calcPoissonFalse(Args args, Rets rets) {
+void Poisson::calcPoisson(Args args, Rets rets) {
 
 /***************************************************************************
 *       Formula: log of Poisson

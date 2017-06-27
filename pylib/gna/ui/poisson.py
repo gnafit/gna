@@ -7,7 +7,7 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('name')
         parser.add_argument('analysis', type=env.parts.analysis)
-        parser.add_argument('--ln_approx', action='store_true', default=False)
+        parser.add_argument('--ln-approx', action='store_true', default=False)
 
     def init(self):
         poisson = ROOT.Poisson(self.opts.ln_approx)

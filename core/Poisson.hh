@@ -14,7 +14,7 @@ public:
     transformation_(this, "poisson")
         .output("poisson")
         .types(&Poisson::checkTypes)
-        .func(ln_approx ? &Poisson::calcPoissonTrue : &Poisson::calcPoissonFalse)
+        .func(ln_approx ? &Poisson::calcPoissonApprox : &Poisson::calcPoisson)
       ;
     m_transform = t_["poisson"];
   }
@@ -23,9 +23,9 @@ public:
 
   void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
 
-  void calcPoissonTrue(Args args, Rets rets);
+  void calcPoissonApprox(Args args, Rets rets);
 
-  void calcPoissonFalse(Args args, Rets rets);
+  void calcPoisson(Args args, Rets rets);
 
   void checkTypes(Atypes args, Rtypes rets);
 

@@ -19,7 +19,7 @@ python ./gna \
 -- analysis --name asimov_analysis 	   --datasets asimov 	     --observables peak1/spectrum \
 -- analysis --name asimov_analysis1        --datasets asimov_data1   --observables peak1/spectrum \
  \
--- poisson  --ln_approx  chi2_asimov		  asimov_analysis \
+-- poisson  --ln-approx  chi2_asimov		  asimov_analysis \
 -- poisson    chi2_asimov1           asimov_analysis1 \
  \
 -- minimizer chi_min		     minuit chi2_asimov 	   peak1.Mu \
