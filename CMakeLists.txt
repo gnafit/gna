@@ -23,6 +23,7 @@ set (SOURCES
   core/Derivative.cc
   core/Covmat.cc
   core/Chi2.cc
+  core/Poisson.cc
   core/CovarianceToyMC.cc
   core/PoissonToyMC.cc
   neutrino/OscProb2nu.cc
@@ -58,6 +59,7 @@ set (HEADERS
   Derivative.hh
   Covmat.hh
   Chi2.hh
+  Poisson.hh
   CovarianceToyMC.hh
   PoissonToyMC.hh
   Minimizable.hh
