@@ -31,30 +31,45 @@ Undocumented classes
 
 .. _Initializer:
 
-Initializer : class template
-    * used to initialize transformation via CRTP chain
-    * created via GNAObject_::Base_::transformation\_
-    * creates Entry_ instance and assignes it to the caller
-
 .. _GNAObject:
 
 GNAObject : class
+    * Inherits TransformationBase_::Base_
 
-.. _GNASingleObject:
+      + carries list of Entry_ instances
 
-GNASingleObject : class
+      + has transformation_ member function used to initialize transformations
+
+    * Inherits ParametrizedBase::Base
+
+      + TBD
 
 .. _Transformation:
 
 Transformation : class template
     * blablabla (TBD)
     * contains
+
       + list of MemFunction_ instances
+
       + list of MemTypesFunction_ instances
+
     * CRTP_ base
     * requires ancestor to also inherit GNAObject_
 
 Also see Errors_
+
+GNAObject header
+^^^^^^^^^^^^^^^^
+
+.. _GNASingleObject:
+
+GNASingleObject : class
+    * Implements some shorcuts for GNAObject_ with only one output
+    * Inerits GNAObject_ and SingleOutput_
+
+
+.. _TransformationBase:
 
 TransformationBase header
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,6 +135,13 @@ Entry : struct
 
     * accessed via Handle_ class
     * named
+
+Initializer : class template
+    * used to initialize transformation via CRTP chain
+    * created via GNAObject_::Base_::transformation\_
+    * creates Entry_ instance and assignes it to the caller
+    * assigns inputs, outputs, types functions, etc
+
 
 Indirect access classes
 """""""""""""""""""""""
