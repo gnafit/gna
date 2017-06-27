@@ -7,14 +7,10 @@
 using namespace Eigen;
 
 
-void Poisson::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov, bool ln_approx) {
+void Poisson::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov) {
   t_["poisson"].input(theory);
   t_["poisson"].input(data);
   t_["poisson"].input(cov);
-  if (ln_approx)
-  {
-	approx = true;
-  }
 }
 
 
@@ -55,21 +51,7 @@ double NonZeroAdd(double x)
 	else 		return 0;
 }
 
-double NonZeroLog(double x)
-{
-	if (!(x == 0.0 || x == 1.0))
-	{
-		return std::log(x);
-	}
-	else
-	{
-                return 0;
-        }
-
-}
-
-
-void Poisson::calcPoisson(Args args, Rets rets) {
+void Poisson::calcPoissonTrue(Args args, Rets rets) {
 
 /***************************************************************************
 *       Formula: log of Poisson
@@ -80,27 +62,30 @@ void Poisson::calcPoisson(Args args, Rets rets) {
 ****************************************************************************/
 
 	rets[0].arr(0) = 0;
-	if (!approx)
-	{
-		for (size_t i = 0; i < args.size(); i+=3) {
-        	    rets[0].arr(0) += (args[i+0].vec.array().unaryExpr(&NonZeroLog) * args[i+1].vec.array()
-					- args[i+0].vec.array() 
-					- (args[i+1].vec.array()).unaryExpr(&addOneInLnGamma) )
-					.sum();
-		}
+	for (size_t i = 0; i < args.size(); i+=3) {
+            rets[0].arr(0) += (args[i+0].arr.log() * args[i+1].arr
+		   	      - args[i+0].arr).sum();
+ 	    rets[0].arr(0) -= (args[i+1].arr).unaryExpr(&NonZeroAdd).sum();
 	}
-	else
-	{
-
-		for (size_t i = 0; i < args.size(); i+=3) {
-            	    rets[0].arr(0) += (args[i+0].vec.array().unaryExpr(&NonZeroLog) * args[i+1].vec.array()
-					- args[i+0].vec.array()).sum();
- 		    rets[0].arr(0) -= (args[i+1].vec.array()).unaryExpr(&NonZeroAdd).sum();
-
-
-
-		}
-	}
-
 	rets[0].arr(0) *= -2;
 }
+
+void Poisson::calcPoissonFalse(Args args, Rets rets) {
+
+/***************************************************************************
+*       Formula: log of Poisson
+*
+*        -2 * ln(Poisson) =
+*               -2 * sum(data_i * log(theory_j) -  theory_j  - ln data_i! ) 
+*
+****************************************************************************/
+        rets[0].arr(0) = 0;
+	for (size_t i = 0; i < args.size(); i+=3) {
+            rets[0].arr(0) += (args[i+0].arr.log() * args[i+1].arr
+                            - args[i+0].arr
+                            - (args[i+1].arr).unaryExpr(&addOneInLnGamma) )
+                            .sum();
+        }
+        rets[0].arr(0) *= -2;
+}
+

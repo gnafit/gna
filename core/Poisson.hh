@@ -10,21 +10,23 @@ class Poisson: public GNASingleObject,
 	       public Statistic	 {
 public:
 
- Poisson() {
+ Poisson(bool ln_approx = false) {
     transformation_(this, "poisson")
-      .output("poisson")
-      .types(&Poisson::checkTypes)
-      .func(&Poisson::calcPoisson)
-    ;
+        .output("poisson")
+        .types(&Poisson::checkTypes)
+        .func(ln_approx ? &Poisson::calcPoissonTrue : &Poisson::calcPoissonFalse)
+      ;
     m_transform = t_["poisson"];
-    approx = false;
   }
-  bool approx;
+  
   
 
-  void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov, bool ln_approx = false);
+  void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
 
-  void calcPoisson(Args args, Rets rets);
+  void calcPoissonTrue(Args args, Rets rets);
+
+  void calcPoissonFalse(Args args, Rets rets);
+
   void checkTypes(Atypes args, Rtypes rets);
 
   virtual double value() override {
@@ -33,7 +35,6 @@ public:
 
 protected:
   Handle m_transform;
-  
 };
 
 #endif

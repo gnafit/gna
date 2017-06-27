@@ -10,9 +10,9 @@ class cmd(basecmd):
         parser.add_argument('--ln_approx', action='store_true', default=False)
 
     def init(self):
-        poisson = ROOT.Poisson()
+        poisson = ROOT.Poisson(self.opts.ln_approx)
         for block in self.opts.analysis:
-            poisson.add(block.theory, block.data, block.cov, self.opts.ln_approx)	# can be without 4th arg, default value is false
+            poisson.add(block.theory, block.data, block.cov)
 
 
         self.env.parts.statistic[self.opts.name] = poisson
