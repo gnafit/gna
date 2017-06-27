@@ -12,9 +12,7 @@ Inputs
 
 2) Data :math:`x` of size :math:`N`
 
-3) Covariance matrix (that is actually not used but it is necessary for universal interface)
-
-#) Optionally :math:`\mu_2,x_2,L_2,\dots` of sizes :math:`N_2,\dots`
+#) Optionally :math:`\mu_2,x_2,\dots` of sizes :math:`N_2,\dots`
 
 Outputs
 ^^^^^^^
@@ -27,12 +25,14 @@ Implementation
 Formula for Poisson likelihood:
 
 .. math::
-  L(x|\mu) = \frac {(\mu^{x}  e^{-\mu})}{x!} 
+  L(x|\mu) = \prod_{i=1}^{N} \frac {(\mu_i^{x_i}  e^{-\mu_i})}{x_i!} 
 
 In source code there is used the natural logarithm of :math:`P(x|\mu)`, so formula is
 
 .. math::
-  \log L(x|\mu) = x \log(\mu)  - \mu -  log(x!)
+  \log L(x|\mu) = \sum_{i=1}^{N} {(x_i \log(\mu_i)  - \mu_i -  log(x_i!))}
+
+where :math:`N` is a size vectors :math:`\mu` and :math:`x` 
 
 In the third part of this sum there is :math:`x!` - the function that increase so fast and can cause overflow. 
 
