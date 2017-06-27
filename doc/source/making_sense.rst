@@ -31,15 +31,28 @@ Undocumented classes
 
 .. _Initializer:
 
-Initializer : class
+Initializer : class template
+    * used to initialize transformation via CRTP chain
+    * created via GNAObject_::Base_::transformation\_
+    * creates Entry_ instance and assignes it to the caller
+
+.. _GNAObject:
+
+GNAObject : class
+
+.. _GNASingleObject:
+
+GNASingleObject : class
 
 .. _Transformation:
 
-Transformation : class
+Transformation : class template
     * blablabla (TBD)
     * contains
       + list of MemFunction_ instances
       + list of MemTypesFunction_ instances
+    * CRTP_ base
+    * requires ancestor to also inherit GNAObject_
 
 Also see Errors_
 
@@ -51,8 +64,7 @@ TransformationBase header
 SingleOutput : class
     * copmlements Base_ class
     * used for the cases when there is only one output
-    * parent to ``GNASingleObject``
-
+    * parent to GNASingleObject_
 
 TransformationTypes namespace (TransformationBase)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -63,10 +75,16 @@ Functions
 .. _MemFunction:
 
 MemFunction : std::function
+    * template
+    * (T* this, Args_, Rets_)
+    * an implementation of the particular transformation
 
 .. _MemTypesFunction:
 
 MemTypesFunction : std::function
+    * template
+    * (T*, Atypes_, Rtypes_)
+    * an transformation input/output types initialization and checking
 
 Main classes
 """"""""""""
@@ -74,10 +92,11 @@ Main classes
 .. _Base:
 
 Base : class
-    * base class for ``GNAObject``
+    * base class for GNAObject_
     * contains list of Entry_ instances
     * accessed via Accessor_ class
     * may be connected
+    * implements transformation\_ member function used to define any transformation (returns Initializer_ instance)
 
 .. _Entry:
 
