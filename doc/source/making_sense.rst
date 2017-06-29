@@ -95,6 +95,11 @@ references : struct
 Variables
 """""""""
 
+Questions:
+
+    * who unallocates memory, allocated via ``new inconstant_header`` or ``new inconstant_data``?
+
+
 .. _callback:
 
 callback : class
