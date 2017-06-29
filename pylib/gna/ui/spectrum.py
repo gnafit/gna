@@ -89,7 +89,7 @@ def edges_to_centers( edges, heights ):
 
 def edges_to_histpoints( edges, heights ):
     zero_value =  0.0
-    y = np.empty(len(data)*2+2)
+    y = np.empty(len(heights)*2+2)
     y[0], y[-1]=zero_value, zero_value
     y[1:-1] = np.vstack((heights, heights)).ravel(order='F')
     x = np.vstack((edges, edges)).ravel(order='F')
