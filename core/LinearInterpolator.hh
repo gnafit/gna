@@ -24,7 +24,6 @@ public:
       .func(&LinearInterpolator::interpolate) ;
 
    if (return_on_fail == "use_zero") {
-       std::cout << "\nI'm using zero for missing" << std::endl;
        m_status_on_fail = ReturnOnFail::UseZero;
    }
    else {

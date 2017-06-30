@@ -13,7 +13,6 @@ class GeoNeutrinoFluxNormed: public GNASingleObject,
                 public Transformation<GeoNeutrinoFluxNormed> {
 public:
   GeoNeutrinoFluxNormed(double livetime_years): m_livetime_years(livetime_years) {
-    std::cout << "\n\n\nI'm created" << std::endl;
     variable_(&m_fluxnorm, "FluxNorm");
     transformation_(this, "flux_norm")
       .input("flux")

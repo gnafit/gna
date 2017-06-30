@@ -110,7 +110,6 @@ class Detector(object):
 
     def assign(self, ns):
         self.ns = ns("detectors")(self.name)
-        print "I am detector {0}, ns passed is {1}".format(self.name, self.ns)
 
         if self.protons is not None:
             self.ns.defparameter("TargetProtons", central=self.protons, sigma=0)
@@ -141,7 +140,7 @@ class Isotope(object):
         except FileNotFoundError:
             raise Exception("Failed to load spectrum of {0} reactor isotope from {1}".format(name, datapath(spectrumfiles[name])))
 
-        self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy())
+        self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
 
 class ReactorExperimentModel(baseexp):
     oscprob_classes = {
