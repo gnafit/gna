@@ -39,6 +39,6 @@ class cmd(basecmd):
                 print data_poisson
                 dataset.assign(env.get(theory_path),
                                data_poisson,
-                               data_poisson)
+                               env.get(theory_path))
 
         self.env.parts.dataset[self.opts.name] = dataset
