@@ -224,11 +224,27 @@ Transformation : class template
     * CRTP_ base for GNAObject_
     * requires ancestor to also inherit GNAObject_
 
+..    * may rebind MemFunction_ instances to `TransformationBase::Entry`_ instances accordingly
+      * may rebind MemTypesFunction_ instances to `TransformationBase::Entry`_ instances accordingly
+
+
 TransformationTypes namespace (TransformationBase)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Functions
 """""""""
+
+.. _Function:
+
+Function : std::function
+    * (Args_, Rets_)
+    * an implementation of the particular transformation
+
+.. _TypesFunction:
+
+TypesFunction : std::function
+    * (Atypes_, Rtypes_)
+    * an transformation input/output types initialization and checking
 
 .. _MemFunction:
 
@@ -236,6 +252,7 @@ MemFunction : std::function
     * template
     * (T* this, Args_, Rets_)
     * an implementation of the particular transformation
+    * requires the object to be passed as the first argument (needs binding)
 
 .. _MemTypesFunction:
 
@@ -243,6 +260,7 @@ MemTypesFunction : std::function
     * template
     * (T*, Atypes_, Rtypes_)
     * an transformation input/output types initialization and checking
+    * requires the object to be passed as the first argument (needs binding)
 
 Main classes
 """"""""""""
