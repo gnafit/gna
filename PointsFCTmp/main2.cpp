@@ -5,7 +5,7 @@
 #include "Poraboloid.hh"
 #include <string>
 
-const int 	DIM0 = 201;	               // dataset dimensions
+const int 	DIM0 = 101;	               // dataset dimensions
 const int 	DIM1 = 101;
 
 using namespace Eigen;
@@ -17,7 +17,7 @@ int main()
 	double x;
 	MatrixXd bbb(DIM0, DIM1);
 	std::ifstream myfile;
-  	myfile.open ("workfile");
+  	myfile.open ("workfile_in_3_1");
 for (int i = 0; i < DIM0; i++)
 {
 	for(int j = 0; j < DIM1; j++)
@@ -33,9 +33,9 @@ for (int i = 0; i < DIM0; i++)
 	     0, 0, 0, 0;
 
 	Poraboloid t2(a);
-	t2.GetCrossSectionExtended(1, 1);
-  //      Poraboloid t(bbb, 1, 0.9);
-//	t.GetCrossSectionExtendedAutoDev(20, "out20_1_09.txt");
+//	t2.GetCrossSectionExtended(1, 1);
+        Poraboloid t(bbb, 1, 0.9);
+	t.GetCrossSectionExtendedAutoDev(100, "out100_1_09.txt");
 
 	//Poraboloid t2(bbb, 1, 0.9);
   //      t.GetCrossSectionExtendedAutoDev(80, "out80_1_09.txt");

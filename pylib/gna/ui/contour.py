@@ -76,7 +76,9 @@ def estimatepvalue(grp, obs):
     z = idx-1 + (obs-p)/(n-p)
     return 1.0 - z/len(dist)
 
-vmaptypes = {
+vmaptypes = {				
+    
+    'poisson': readchi2,
     'chi2': readchi2,
     'fc': estimatepvalue,
     'fcupper': estimatepvalue,
@@ -229,6 +231,9 @@ class cmd(basecmd):
         parser.add_argument('--ylabel', default='', required=False)
 
     def statistic(self, name):
+        if self.opts.no_shift:
+            return 0.0
+	    
         #  print name
         if name in self.statistics:
             return self.statistics[name]
@@ -242,10 +247,7 @@ class cmd(basecmd):
         minimizer.PrintResults()
         assert res.success
 
-        if not self.opts.no_shift:
-            stat = res.fun
-        else:
-            stat = 0.
+        stat = res.fun
         self.statistics[name] = stat
         print minimizer.pars, res.x
         self.statpoints[name] = dict(zip(minimizer.pars, res.x))

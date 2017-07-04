@@ -38,6 +38,8 @@ set (SOURCES
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
+  PointsFCTmp/Poraboloid.cc
+  PointsFCTmp/SpectrumCrossSection.cc
   )
 
 set (HEADERS
@@ -80,9 +82,11 @@ set (HEADERS
   EnergyResolution.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
+  Poraboloid.hh
+  SpectrumCrossSection.hh
   )
   
-include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/ PointsFCTmp)
 include(dev-tools)
 set(DICT    Dict.cc)
 
