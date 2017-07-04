@@ -14,6 +14,8 @@ class Poraboloid
 public:
 	Poraboloid(Eigen::MatrixXd& mat, int initDeviation = 1, double allowErr = 0.0) 
 		: PoraboloidMatrix(mat), InitialDeviation(initDeviation), AllowableError(allowErr) {
+		PMrows = mat.rows();
+		PMcols = mat.cols();
 		ComputeGradient();
 	}
 
@@ -34,25 +36,23 @@ public:
 	* \return Matrix contains values 0 or 1, where 1 means extended contour point
 	*
 	*/
-	MatrixXd GetCrossSectionExtended (double value, double deviation);
-
-	int ComputeCurrentDeviation(MatrixXd originalCrossSec);
+	MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomuted = false);
 
 	MatrixXd GetCrossSectionExtendedAutoDev (double value, string str);
 
 protected:
 
-	/**
-        *
-        * Computes dxPM and dyPM (components of gradient)
-        *
-        */
 	void ComputeGradient();
+	void ComputeCrossSectionOriginal(double value); 
+	int ComputeCurrentDeviation();
 
 	MatrixXd PoraboloidMatrix;      //!< Full values matrix (2D and unknown size NxM)
+	MatrixXd CrossSecOriginal; 	//!< Cross-section z=value, is not set at initial moment, can be recomputed
         MatrixXd dxPM, dyPM;            //!< Components of gradient for PoraboloidMatrix: sizes of [NxM-1] and [N-1xM]
         int InitialDeviation;           //!< Multiplier for deviation value, can be set at constructor, default is 1
 	double AllowableError;		//!< In cross-section z = value finding there is z = value+-AllowableError is found in fact 
+	int PMcols, PMrows;		//!< Size of PoraboloidMatrix, computed in constructor, can't be changed after
+
 };
 
 #endif /* PORABOLOID_H */

@@ -18,12 +18,17 @@ struct Cutter {
 
 
 MatrixXd Poraboloid::GetCrossSectionOriginal(double value) {
-	MatrixXd crossSec = PoraboloidMatrix;
-	crossSec = PoraboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
-	return crossSec;
+
+	return CrossSecOriginal;
+}
+ 
+void Poraboloid::ComputeCrossSectionOriginal(double value) {
+std::cout << "I am computed!!!" << std::endl; 
+	CrossSecOriginal = PoraboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
 
-MatrixXd Poraboloid::GetCrossSectionExtended(double value, double deviation) {
+MatrixXd Poraboloid::GetCrossSectionExtended(double value, double deviation, bool isCScomuted) {
+	if (!isCScomuted) ComputeCrossSectionOriginal(value);
 	SpectrumCrossSection crossSec(GetCrossSectionOriginal(value));
 std::cout << " deviation = " << deviation << std::endl;
 	crossSec.SetCorridor(deviation);
@@ -33,27 +38,19 @@ std::cout << " deviation = " << deviation << std::endl;
 
 
 void Poraboloid::ComputeGradient() {
-/*
+/**
 *
+* Computes dxPM and dyPM (components of gradient)
 * Gradient matrixes are the folowing:
-* dx - size [NxN-1], dy - size [N-1xN]
+* dx - size [NxM-1], dy - size [N-1xM]
 * as gradient is computed with the neighbour elements in matrix
 *
 */
-
-// TODO: delete file output
-
-	std::ofstream file1, file2;
-	file1.open("dxPM.txt");
-	file2.open("dyPM.txt");
-	dxPM = PoraboloidMatrix.rightCols(PoraboloidMatrix.cols()-1) - PoraboloidMatrix.leftCols(PoraboloidMatrix.cols()-1);  
-	dyPM = PoraboloidMatrix.bottomRows(PoraboloidMatrix.rows()-1) - PoraboloidMatrix.topRows(PoraboloidMatrix.rows()-1);
-	file1 << std::endl <<  "gradX = " << std::endl << dxPM << std::endl; 
-	file2 << std::endl <<  "gradY = " << std::endl << dyPM << std::endl;
-	file1.close(); file2.close();
+	dxPM = PoraboloidMatrix.rightCols(PMcols - 1) - PoraboloidMatrix.leftCols(PMcols - 1);  
+	dyPM = PoraboloidMatrix.bottomRows(PMrows - 1) - PoraboloidMatrix.topRows(PMrows - 1);
 }
 
-int Poraboloid::ComputeCurrentDeviation(MatrixXd originalCrossSec) {
+int Poraboloid::ComputeCurrentDeviation() {
 /**
 *
 *	- Compute non-zero elements in original cross-section
@@ -64,23 +61,25 @@ int Poraboloid::ComputeCurrentDeviation(MatrixXd originalCrossSec) {
 *	- Sum all this values and divide by the number of non-zero values to find the avarage value of contour's gradient
 *	- Product with multiplier InitialDeviation
 *
-*/	
-	int numOfNonZero = (originalCrossSec.array() != 0).count();
+*/
+
+	int rowsnum = PMrows - 1, colsnum = PMcols - 1;
+	int numOfNonZero = (CrossSecOriginal.array() != 0).count();
 std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
-	double  tmp =  ((dxPM.block(0, 0, dxPM.rows() - 1, dxPM.cols()).array() * 
-				originalCrossSec.block(0, 0, originalCrossSec.rows() - 1, originalCrossSec.cols() - 1).array()).square() + 
-			(dyPM.block(0, 0, dyPM.rows(), dyPM.cols() - 1).array() * 
-                		originalCrossSec.block(0, 0, originalCrossSec.rows() - 1, originalCrossSec.cols() - 1).array()).square())
+	double  tmp =  ((dxPM.block(0, 0, rowsnum, colsnum).array() * 
+				CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() + 
+			(dyPM.block(0, 0, rowsnum, colsnum).array() * 
+                		CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
 				.sqrt().sum() / numOfNonZero;
 	return std::ceil(tmp) * InitialDeviation;
 }
 
 MatrixXd Poraboloid::GetCrossSectionExtendedAutoDev (double value, string str) {
-	MatrixXd res = GetCrossSectionExtended(value, ComputeCurrentDeviation(GetCrossSectionOriginal(value)));
+	ComputeCrossSectionOriginal(value);
+	MatrixXd res = GetCrossSectionExtended(value, ComputeCurrentDeviation(), true);
 	std::ofstream file1;
         file1.open(str.c_str());
 	file1 << res;
 	file1.close();
-	/*TODO: Twice GetCrossSectionOriginal!!! Not optimal!!!*/
 	return res;
 }
