@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <Eigen/Core>
-#include <list>
+#include <vector>
 
 using namespace Eigen;
 
@@ -23,16 +23,17 @@ public:
 	void addPoints();
 
 	inline void SetCorridor(int val) { CorridorSize = val; }
-	inline std::list<Vector2d> GetInterestingPoints() { return InterestingPoints; }
+	inline Matrix2Xd GetInterestingPoints() { return InterestingPoints; }
 	inline MatrixXd GetModifiedCrossSection() { return CrossSectionModified; }
 
 
 protected:
+	void ShowFoundPoints();
 	void makeCorridor(int curr_x, int curr_y);
-	MatrixXd CrossSection;          //!< Original, shouldn't be modified.
-        MatrixXd CrossSectionModified;  //!< Output matrix, schould be modified. Zeros at the initial moment.
-        int CorridorSize;               //!< Deviation, zero at the initial moment.
-        std::list<Vector2d> InterestingPoints;  //!< List of found points
+	MatrixXd CrossSection;          			//!< Original, shouldn't be modified.
+        MatrixXd CrossSectionModified;  			//!< Output matrix, schould be modified. Zeros at the initial moment.
+        int CorridorSize;               			//!< Deviation, zero at the initial moment.
+        Matrix2Xd InterestingPoints;  				//!< List of found points
 
 };
 

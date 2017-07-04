@@ -1,5 +1,5 @@
 #include "SpectrumCrossSection.hh"
-#include <iterator>
+#include <fstream>
 
 using namespace Eigen;
 using namespace std;
@@ -10,25 +10,44 @@ void SpectrumCrossSection::makeCorridor(int curr_x, int curr_y) {
 		for (int j = curr_y - CorridorSize; j < curr_y + CorridorSize + 1; j++) {
 			if (j <  0 || j >= CrossSection.cols()) continue;
 			if (CrossSection(i, j) == 1.0) continue;
-			InterestingPoints.push_back(Vector2d(i, j));
+		/*	vector<int> tmp;
+			tmp.push_back(i);
+			tmp.push_back(j); 
+			InterestingPoints.push_back(tmp);*/
+			InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
+			InterestingPoints(0, InterestingPoints.cols() - 1) = i;
+			InterestingPoints(1, InterestingPoints.cols() - 1) = j;
 			CrossSectionModified(i, j) = 1.0;
-			//std::cout << " VECT " << std::endl << Vector2d(i, j); 
 		}
 	}
 
 }
 
 void SpectrumCrossSection::addPoints() {
-	//std::cout << std::endl << "CrossSection " << std::endl << CrossSection << std::endl;
-
+	InterestingPoints.resize(2, 0);
 	for(int i = 0; i < CrossSection.rows(); i++) {
 		for (int j = 0; j < CrossSection.cols(); j++) {
 			if (CrossSection(i, j) == 1.0) {
-				InterestingPoints.push_back(Vector2d(i, j));
+			/*	vector<int> tmp;
+				tmp.push_back(i);
+				tmp.push_back(j);
+	                        InterestingPoints.push_back(tmp);*/
+				InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
+	                        InterestingPoints(0, InterestingPoints.cols() - 1) = i;
+        	                InterestingPoints(1, InterestingPoints.cols() - 1) = j;
 				CrossSectionModified(i, j) = 1.0;
 				makeCorridor(i, j);
 			}
 		}
 	}
-	//std::cout << std::endl << "CrossSectionM " << std::endl << CrossSectionModified << std::endl;
+	ShowFoundPoints();
+}
+
+void SpectrumCrossSection::ShowFoundPoints() {
+ofstream file;
+file.open("points.txt");
+std::cout << "cols of InterestingPoints = " << InterestingPoints.cols() << std::endl;
+file << InterestingPoints << std::endl;
+file.close();
+
 }
