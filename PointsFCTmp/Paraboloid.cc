@@ -21,9 +21,9 @@ MatrixXd Paraboloid::GetCrossSectionOriginal(double value) {
 
 	return CrossSecOriginal;
 }
- 
+
 void Paraboloid::ComputeCrossSectionOriginal(double value) {
-std::cout << "I am computed!!!" << std::endl; 
+std::cout << "I am computed!!!" << std::endl;
 	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
 
@@ -46,7 +46,7 @@ void Paraboloid::ComputeGradient() {
 * as gradient is computed with the neighbour elements in matrix
 *
 */
-	dxPM = ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1);  
+	dxPM = ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1);
 	dyPM = ParaboloidMatrix.bottomRows(PMrows - 1) - ParaboloidMatrix.topRows(PMrows - 1);
 }
 
@@ -66,9 +66,9 @@ int Paraboloid::ComputeCurrentDeviation() {
 	int rowsnum = PMrows - 1, colsnum = PMcols - 1;
 	int numOfNonZero = (CrossSecOriginal.array() != 0).count();
 std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
-	double  tmp =  ((dxPM.block(0, 0, rowsnum, colsnum).array() * 
-				CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() + 
-			(dyPM.block(0, 0, rowsnum, colsnum).array() * 
+	double  tmp =  ((dxPM.block(0, 0, rowsnum, colsnum).array() *
+				CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
+			(dyPM.block(0, 0, rowsnum, colsnum).array() *
                 		CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
 				.sqrt().sum() / numOfNonZero;
 	return std::ceil(tmp) * InitialDeviation;

@@ -6,13 +6,11 @@
 #include <Eigen/Core>
 #include "SpectrumCrossSection.hh"
 #include <string>
-using namespace std;
-using namespace Eigen;
 
 class Paraboloid
 {
 public:
-	Paraboloid(Eigen::MatrixXd& mat, int initDeviation = 1, double allowErr = 0.0) 
+	Paraboloid(Eigen::MatrixXd& mat, int initDeviation = 1, double allowErr = 0.0)
 		: ParaboloidMatrix(mat), InitialDeviation(initDeviation), AllowableError(allowErr) {
 		PMrows = mat.rows();
 		PMcols = mat.cols();
@@ -26,7 +24,7 @@ public:
 	* \return Matrix contains values 0 or 1, where 1 means original contour point
 	*
 	*/
-	MatrixXd GetCrossSectionOriginal(double value);
+    Eigen::MatrixXd GetCrossSectionOriginal(double value);
 
 	/**
 	*
@@ -36,21 +34,21 @@ public:
 	* \return Matrix contains values 0 or 1, where 1 means extended contour point
 	*
 	*/
-	MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomuted = false);
+	Eigen::MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomuted = false);
 
-	MatrixXd GetCrossSectionExtendedAutoDev (double value, string str);
+	Eigen::MatrixXd GetCrossSectionExtendedAutoDev (double value, std::string str);
 
 protected:
 
 	void ComputeGradient();
-	void ComputeCrossSectionOriginal(double value); 
+	void ComputeCrossSectionOriginal(double value);
 	int ComputeCurrentDeviation();
 
-	MatrixXd ParaboloidMatrix;      //!< Full values matrix (2D and unknown size NxM)
-	MatrixXd CrossSecOriginal; 	//!< Cross-section z=value, is not set at initial moment, can be recomputed
-        MatrixXd dxPM, dyPM;            //!< Components of gradient for ParaboloidMatrix: sizes of [NxM-1] and [N-1xM]
+	Eigen::MatrixXd ParaboloidMatrix;      //!< Full values matrix (2D and unknown size NxM)
+	Eigen::MatrixXd CrossSecOriginal; 	//!< Cross-section z=value, is not set at initial moment, can be recomputed
+        Eigen::MatrixXd dxPM, dyPM;            //!< Components of gradient for ParaboloidMatrix: sizes of [NxM-1] and [N-1xM]
         int InitialDeviation;           //!< Multiplier for deviation value, can be set at constructor, default is 1
-	double AllowableError;		//!< In cross-section z = value finding there is z = value+-AllowableError is found in fact 
+	double AllowableError;		//!< In cross-section z = value finding there is z = value+-AllowableError is found in fact
 	int PMcols, PMrows;		//!< Size of ParaboloidMatrix, computed in constructor, can't be changed after
 
 };

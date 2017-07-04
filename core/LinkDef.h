@@ -81,5 +81,4 @@
 #pragma link C++ class C14Spectrum-;
 #pragma link C++ class GeoNeutrinoFluxNormed-;
 
-
 #endif
