@@ -1,4 +1,4 @@
-#include "Poraboloid.hh"
+#include "Paraboloid.hh"
 #include <Eigen/Core>
 #include <fstream>
 #include <cmath>
@@ -17,17 +17,17 @@ struct Cutter {
 };
 
 
-MatrixXd Poraboloid::GetCrossSectionOriginal(double value) {
+MatrixXd Paraboloid::GetCrossSectionOriginal(double value) {
 
 	return CrossSecOriginal;
 }
  
-void Poraboloid::ComputeCrossSectionOriginal(double value) {
+void Paraboloid::ComputeCrossSectionOriginal(double value) {
 std::cout << "I am computed!!!" << std::endl; 
-	CrossSecOriginal = PoraboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
+	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
 
-MatrixXd Poraboloid::GetCrossSectionExtended(double value, double deviation, bool isCScomuted) {
+MatrixXd Paraboloid::GetCrossSectionExtended(double value, double deviation, bool isCScomuted) {
 	if (!isCScomuted) ComputeCrossSectionOriginal(value);
 	SpectrumCrossSection crossSec(GetCrossSectionOriginal(value));
 std::cout << " deviation = " << deviation << std::endl;
@@ -37,7 +37,7 @@ std::cout << " deviation = " << deviation << std::endl;
 }
 
 
-void Poraboloid::ComputeGradient() {
+void Paraboloid::ComputeGradient() {
 /**
 *
 * Computes dxPM and dyPM (components of gradient)
@@ -46,11 +46,11 @@ void Poraboloid::ComputeGradient() {
 * as gradient is computed with the neighbour elements in matrix
 *
 */
-	dxPM = PoraboloidMatrix.rightCols(PMcols - 1) - PoraboloidMatrix.leftCols(PMcols - 1);  
-	dyPM = PoraboloidMatrix.bottomRows(PMrows - 1) - PoraboloidMatrix.topRows(PMrows - 1);
+	dxPM = ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1);  
+	dyPM = ParaboloidMatrix.bottomRows(PMrows - 1) - ParaboloidMatrix.topRows(PMrows - 1);
 }
 
-int Poraboloid::ComputeCurrentDeviation() {
+int Paraboloid::ComputeCurrentDeviation() {
 /**
 *
 *	- Compute non-zero elements in original cross-section
@@ -74,7 +74,7 @@ std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
 	return std::ceil(tmp) * InitialDeviation;
 }
 
-MatrixXd Poraboloid::GetCrossSectionExtendedAutoDev (double value, string str) {
+MatrixXd Paraboloid::GetCrossSectionExtendedAutoDev (double value, string str) {
 	ComputeCrossSectionOriginal(value);
 	MatrixXd res = GetCrossSectionExtended(value, ComputeCurrentDeviation(), true);
 	std::ofstream file1;

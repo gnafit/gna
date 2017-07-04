@@ -2,7 +2,7 @@
 #include <fstream>
 #include <Eigen/Core>
 #include "SpectrumCrossSection.hh"
-#include "Poraboloid.hh"
+#include "Paraboloid.hh"
 #include <string>
 
 const int 	DIM0 = 101;	               // dataset dimensions
@@ -32,15 +32,15 @@ for (int i = 0; i < DIM0; i++)
              2, 0, 2, 0,
 	     0, 0, 0, 0;
 
-	Poraboloid t2(a);
+	Paraboloid t2(a);
 //	t2.GetCrossSectionExtended(1, 1);
-        Poraboloid t(bbb, 1, 0.9);
+        Paraboloid t(bbb, 1, 0.9);
 	t.GetCrossSectionExtendedAutoDev(100, "out100_1_09.txt");
 
-	//Poraboloid t2(bbb, 1, 0.9);
+	//Paraboloid t2(bbb, 1, 0.9);
   //      t.GetCrossSectionExtendedAutoDev(80, "out80_1_09.txt");
 
-	//Poraboloid t3(bbb, 1, 0.9);
+	//Paraboloid t3(bbb, 1, 0.9);
 //        t.GetCrossSectionExtendedAutoDev(160, "out160_1_09.txt");
 
 //	t.GetCrossSectionExtended(20, 2);

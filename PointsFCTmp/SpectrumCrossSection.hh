@@ -4,19 +4,17 @@
 #include <cmath>
 #include <iostream>
 #include <Eigen/Core>
-#include <vector>
 
 using namespace Eigen;
-
 
 class SpectrumCrossSection
 {
 public:
 	/**
 	* Constructor: matrix NxM that contain 0 and 1 only is expected as input 
-	* \todo: check if there only 0 and 1
 	*/
 	SpectrumCrossSection(MatrixXd mat) : CrossSection(mat), CorridorSize(0) {
+		if (!checkInputOK()) std::cerr << "Incorrect input data: cross-section matrix must contain 0 and 1 only!";
 		CrossSectionModified = MatrixXd::Zero(CrossSection.rows(), CrossSection.cols());
 	}
 	
@@ -28,6 +26,7 @@ public:
 
 
 protected:
+	bool checkInputOK();
 	void ShowFoundPoints();
 	void makeCorridor(int curr_x, int curr_y);
 	MatrixXd CrossSection;          			//!< Original, shouldn't be modified.
