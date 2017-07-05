@@ -17,12 +17,12 @@ struct Cutter {
 };
 
 
-MatrixXd Paraboloid::GetCrossSectionOriginal(double value, bool isCScomuted) {
+MatrixXd Paraboloid::GetCrossSectionOriginal(double value, bool isCScomputed) {
 /**
 *
 * Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
 * \param[in] value The value for compute cross-section plane z = value
-* \param[in] isCScomuted It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
+* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
 * \return Matrix contains values 0 or 1, where 1 means original contour point
 *
 */
@@ -35,17 +35,17 @@ std::cout << "I am computed!!!" << std::endl;
 	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
 
-MatrixXd Paraboloid::GetCrossSectionExtended(double value, double deviation, bool isCScomuted) {
+MatrixXd Paraboloid::GetCrossSectionExtended(double value, double deviation, bool isCScomputed) {
 /**
 *
 * Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
 * \param[in] value The value for compute cross-section plane z = value
 * \param[in] deviation Deviation of the original contour
-* \param[in] isCScomuted It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
+* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
 * \return Matrix contains values 0 or 1, where 1 means extended contour point
 *
 */
-	SpectrumCrossSection crossSec(GetCrossSectionOriginal(value, isCScomuted));
+	SpectrumCrossSection crossSec(GetCrossSectionOriginal(value, isCScomputed));
 std::cout << " deviation = " << deviation << std::endl;
 	crossSec.SetCorridor(deviation);
         crossSec.addPoints();
@@ -58,7 +58,7 @@ void Paraboloid::ComputeGradient() {
 *
 * Computes dxPM and dyPM (components of gradient)
 * Gradient matrixes are the folowing
-* 	
+*
 *	- dx - size [NxM-1]
 *	- dy - size [N-1xM]
 *
@@ -72,7 +72,7 @@ void Paraboloid::ComputeGradient() {
 int Paraboloid::ComputeCurrentDeviation() {
 /**
 *
-* Algorithm: 
+* Algorithm:
 *	- Compute non-zero elements in original cross-section
 *	- For each element in matrixes compute respectivetly:
 *	  dx[i, j]*CrossSectionOriginal[i, j] and dy[i, j]*CrossSectionOriginal[i, j]
@@ -81,7 +81,7 @@ int Paraboloid::ComputeCurrentDeviation() {
 *	- Sum all this values and divide by the number of non-zero values to find the avarage value of contour's gradient
 *	- Product with multiplier InitialDeviation
 
-* \return Deviation from the original coutour - the number of points that will be included in extended contour. 
+* \return Deviation from the original coutour - the number of points that will be included in extended contour.
 *
 */
 

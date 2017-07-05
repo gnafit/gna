@@ -26,10 +26,10 @@ public:
 
 
 	// Returns cross-section z = value of ParaboloidMatrix
-	Eigen::MatrixXd GetCrossSectionOriginal(double value, bool isCScomuted = false);
+	Eigen::MatrixXd GetCrossSectionOriginal(double value, bool isCScomputed = false);
 
 	// Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
-	Eigen::MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomuted = false);
+	Eigen::MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomputed = false);
 
 	Eigen::MatrixXd GetCrossSectionExtendedAutoDev (double value, std::string str="");
 
