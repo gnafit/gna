@@ -18,8 +18,8 @@ public:
 
 	void addPoints();
 
-	inline void SetCorridor(int val) { CorridorSize = val; }
-	inline Eigen::Matrix2Xd GetInterestingPoints() { return InterestingPoints; }
+	inline void SetCorridor(int val) 		 { CorridorSize = val; }
+	inline Eigen::Matrix2Xd GetInterestingPoints()   { return InterestingPoints; }
 	inline Eigen::MatrixXd GetModifiedCrossSection() { return CrossSectionModified; }
 
 
@@ -27,10 +27,11 @@ protected:
 	bool checkInputOK();
 	void ShowFoundPoints();
 	void makeCorridor(int curr_x, int curr_y);
+
 	Eigen::MatrixXd CrossSection;          			//!< Original, shouldn't be modified.
         Eigen::MatrixXd CrossSectionModified;  			//!< Output matrix, schould be modified. Zeros at the initial moment.
         int CorridorSize;               			//!< Deviation, zero at the initial moment.
-        Eigen::Matrix2Xd InterestingPoints;  				//!< List of found points
+        Eigen::Matrix2Xd InterestingPoints;  			//!< Found points
 
 };
 
