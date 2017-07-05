@@ -77,9 +77,11 @@ std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
 MatrixXd Paraboloid::GetCrossSectionExtendedAutoDev (double value, string str) {
 	ComputeCrossSectionOriginal(value);
 	MatrixXd res = GetCrossSectionExtended(value, ComputeCurrentDeviation(), true);
-	std::ofstream file1;
+    if( !str.empty() ) {
+        std::ofstream file1;
         file1.open(str.c_str());
-	file1 << res;
-	file1.close();
+        file1 << res;
+        file1.close();
+    }
 	return res;
 }

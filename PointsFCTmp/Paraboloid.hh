@@ -17,6 +17,13 @@ public:
 		ComputeGradient();
 	}
 
+	Paraboloid(int rows, int columns, double* mat, int initDeviation = 1, double allowErr = 0.0)
+		: ParaboloidMatrix(Eigen::Map<Eigen::MatrixXd>(mat, rows, columns)), InitialDeviation(initDeviation), AllowableError(allowErr) {
+        PMrows = rows;
+        PMcols = columns;
+        ComputeGradient();
+	}
+
 	/**
 	*
 	* Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
@@ -36,7 +43,7 @@ public:
 	*/
 	Eigen::MatrixXd GetCrossSectionExtended (double value, double deviation, bool isCScomuted = false);
 
-	Eigen::MatrixXd GetCrossSectionExtendedAutoDev (double value, std::string str);
+	Eigen::MatrixXd GetCrossSectionExtendedAutoDev (double value, std::string str="");
 
 protected:
 
