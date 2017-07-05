@@ -5,6 +5,11 @@ using namespace Eigen;
 using namespace std;
 
 void SpectrumCrossSection::makeCorridor(int curr_x, int curr_y) {
+/**
+* Adds neighbour points to the InterestingPoints matrix for point (curr_x, curr_y)
+* \param[in] curr_x x-coordinate of the considered point
+* \param[in] curr_y y-coordinate of the considered point
+*/
 	for (int i = curr_x - CorridorSize; i < curr_x + CorridorSize + 1; i++) {
 		if (i < 0 || i >=  CrossSection.rows()) continue;
 		for (int j = curr_y - CorridorSize; j < curr_y + CorridorSize + 1; j++) {
@@ -20,6 +25,9 @@ void SpectrumCrossSection::makeCorridor(int curr_x, int curr_y) {
 }
 
 void SpectrumCrossSection::addPoints() {
+/**
+* Fills InterestingPoints matrix by extended contour points. 
+*/
 	InterestingPoints.resize(2, 0);
 	for(int i = 0; i < CrossSection.rows(); i++) {
 		for (int j = 0; j < CrossSection.cols(); j++) {
