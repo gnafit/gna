@@ -28,10 +28,8 @@ Output, return value, sink
 Connection, connect
     precedure of the connection between one `TransformationBase::Entry`_'s output to the other `TransformationBase::Entry`_'s input
 
-Undocumented classes
-^^^^^^^^^^^^^^^^^^^^
-
-.. _Initializer:
+GNAObject header
+^^^^^^^^^^^^^^^^
 
 .. _GNAObject:
 
@@ -44,12 +42,9 @@ GNAObject : class
 
     * Inherits `ParametrizedTypes::Base`_
 
-      + TBD
+      + carries list of `ParametrizedTypes::Entry`_ instances
 
-Also see Errors_
-
-GNAObject header
-^^^^^^^^^^^^^^^^
+      + has variable\_ member function used to define variables
 
 .. _GNASingleObject:
 
@@ -73,7 +68,6 @@ inconstant_data : struct template
     * elementary data item (usually double) with taint flag propagation
     * may handle a function pointer to calculate the data value
     * may handle a callback function to be called on data change
-    * TBD
 
 .. _inconstant_header:
 
@@ -83,7 +77,6 @@ inconstant_header : struct
         + list of taint signal emitters
         + list of taint signal observers
     * base for inconstant_data_
-    * TBD
 
 .. _references:
 
@@ -95,10 +88,11 @@ references : struct
 Variables
 """""""""
 
-Questions:
+Variables represent simple data types (double) with taintflag_ propagation feature.
+Variables within same namespace (python side) are distinguished by their name.
+Creating several variable_ or parameter_ instances with the same name will manage the same data.
 
-    * who unallocates memory, allocated via ``new inconstant_header`` or ``new inconstant_data``?
-
+Variables are mostly used on C++ side. On python side the Parameter, Uncertain, etc are used as accessors.
 
 .. _callback:
 
@@ -176,12 +170,20 @@ Base : class
     * contains list of `ParametrizedTypes::EvaluableEntry`_ instances
     * contains list of callback_ instances
     * implements variable\_ member function used to define variables
-    * TBD
+    * shares it's taintflag_ with all the entries
 
 .. _`ParametrizedTypes::Entry`:
 
 Entry : class
-    * TBD
+    * a class to access variable's value
+
+    * contains pointers to:
+
+      + parameter_ par — the parameter
+
+      + variable_ var — pointer to par (of the base class)
+
+      + variable_ field
 
 .. _`ParametrizedTypes::EvaluableEntry`:
 
@@ -297,6 +299,8 @@ Entry : struct
     * accessed via Handle_ class
     * named
 
+.. _Initializer:
+
 Initializer : class template
     * used to initialize transformation via CRTP chain
     * created via inherited `TransformationBase::Base`_::transformation\_
@@ -392,4 +396,55 @@ SinkTypeError : class
 .. _SourceTypeError:
 
 SourceTypeError : class
+
+UncertainParameter header
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The header contains variaous variable_ and parameter_ views, defined as transformations
+and used on python side.
+
+.. _GaussianParameter:
+
+GaussianParameter : class template
+    * a nickname for `Parameter (Uncertain)`_
+    * represents normally distributed variable with central value and sigma
+
+.. _`Parameter (Uncertain)`:
+
+Parameter : class template
+    * derives _Uncertain
+    * carries parameter_ instance for the variable_, i.e. may set it's value
+    * may:
+      + set parameter_'s value
+      + set parameter_'s value in terms of sigma relative to it's central position
+      + define limits (used for minimization)
+    * the class is used as an input for the minimization
+
+.. _ParameterWrapper:
+
+ParameterWrapper : class template
+    * a simple wrapper for the parameter_ class meant to use on python side
+    * has set and get methods
+
+.. _Uncertain:
+
+Uncertain : class template
+    * GNAObject_ represending a transformation with no inputs and one output
+    * output is connected with variable_ instance (connection is name based)
+    * carries also information about variable_'s central value and uncertainty (sigma)
+
+.. _UniformAngleParameter:
+
+UniformAngleParameter : class template
+    * derives Parameter_
+    * represents an angle in radiance defined in :math:`[-\pi, \pi)`
+
+
+ParametricLazy.hpp header
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Defines code for the evaluable_ creation based on math expressions.
+
+
+
 
