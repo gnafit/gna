@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Demonstrates the replace() function operation of the variable instance"""
+
 from __future__ import print_function
 from matplotlib import pyplot as plt
 import numpy as N
