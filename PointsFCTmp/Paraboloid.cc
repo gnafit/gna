@@ -23,7 +23,7 @@ void Paraboloid::ComputeCrossSectionOriginal(double value) {
 }
 
 
-void Paraboloid::ComputeGradient() {
+void Paraboloid::ComputeGradient(double xStep, double yStep) {
 /**
 *
 * Computes dxPM and dyPM (components of gradient)
@@ -35,8 +35,8 @@ void Paraboloid::ComputeGradient() {
 * as gradient is computed with the neighbour elements in matrix
 *
 */
-	dxPM = ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1);
-	dyPM = ParaboloidMatrix.bottomRows(PMrows - 1) - ParaboloidMatrix.topRows(PMrows - 1);
+	dxPM = (ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1)) / xStep;
+	dyPM = (ParaboloidMatrix.bottomRows(PMrows - 1) - ParaboloidMatrix.topRows(PMrows - 1)) / yStep;
 }
 
 int Paraboloid::ComputeCurrentDeviation() {
@@ -74,64 +74,60 @@ int Paraboloid::ComputeCurrentDeviation() {
 }
 
 void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double value, bool isCScomputed ) {
-        /**
-        *
-        * Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
-        * \param[in] CSOmatTarget The matrix where result will be written
-        * \param[in] value The value for compute cross-section plane z = value
-        * \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
-        *
-        */
-                if (! isCScomputed)  ComputeCrossSectionOriginal(value);
-
-              //  Eigen::MatrixBase<Derived>& C = const_cast< Eigen::MatrixBase<Derived>& >(CSOmatTarget);
-                CSOmatTarget = CrossSecOriginal;
-        }
+/**
+*
+* Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
+* \param[in] CSOmatTarget The matrix where result will be written
+* \param[in] value The value for compute cross-section plane z = value
+* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
+*
+*/
+        if (! isCScomputed)  ComputeCrossSectionOriginal(value);
+        CSOmatTarget = CrossSecOriginal;
+}
 
 
 void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
                                         double value, double deviation, bool isCScomputed) {
-        /**
-        *
-        * Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
-        * \param[in] CSEmatTarget The matrix where result will be written
-        * \param[in] value The value for compute cross-section plane z = value
-        * \param[in] deviation Deviation of the original contour
-        * \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
-        *
-        */
+/**
+*
+* Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
+* \param[in] CSEmatTarget The matrix where result will be written
+* \param[in] value The value for compute cross-section plane z = value
+* \param[in] deviation Deviation of the original contour
+* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
+*
+*/
 
-                Eigen::MatrixXd tmpMat;
-                GetCrossSectionOriginal(tmpMat, value, isCScomputed);
-               // SpectrumCrossSection crossSec(tmpMat);
-
-                std::cout << " deviation = " << deviation << std::endl;
-               // SetCorridor(deviation);
-                if (deviation != 0) addPoints(deviation);
-		else {
-			CSEmatTarget = MatrixXd::Zero(PMrows, PMcols);
-		}
-                GetModifiedCrossSection(CSEmatTarget);
-        }
+        Eigen::MatrixXd tmpMat;
+        GetCrossSectionOriginal(tmpMat, value, isCScomputed);
+        std::cout << " deviation = " << deviation << std::endl;
+        if (deviation != 0) addPoints(deviation);
+	else {
+		CSEmatTarget = MatrixXd::Zero(PMrows, PMcols);
+	}
+	GetModifiedCrossSection(CSEmatTarget);
+}
 
 
 void Paraboloid::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value) {
-        /**
-        *
-        * Returns cross-section z = value of ParaboloidMatrix (the plain contains contour) using value only. The deviation is computed automaticly and depends on gradient at contour points.
-        * \param[in] CSEADmatTarget The matrix where result will be written
-        * \param[in] value The value for compute cross-section plane z = value
-        *
-        */
-                ComputeCrossSectionOriginal(value);
-                GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
-        }
+/**
+*
+* Returns cross-section z = value of ParaboloidMatrix (the plain contains contour) using value only. The deviation is computed automaticly and depends on gradient at contour points.
+* \param[in] CSEADmatTarget The matrix where result will be written
+* \param[in] value The value for compute cross-section plane z = value
+*
+*/
+        ComputeCrossSectionOriginal(value);
+        GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
+}
 
 void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
 /**
 * Adds neighbour points to the InterestingPoints matrix for point (curr_x, curr_y)
 * \param[in] curr_x x-coordinate of the considered point
 * \param[in] curr_y y-coordinate of the considered point
+* \param[in] deviation Deviation from the original contour 
 */
 	for (int i = curr_x - deviation; i < curr_x + deviation + 1; i++) {
 		if (i < 0 || i >=  PMrows) continue;

@@ -45,7 +45,7 @@ def main( opts ):
     Z1 = 2.0*(X-3.0)*(X-3.0) + 5.0*(Y-1.0)*(Y-1.0) + 3.0*(X-3.0)*(Y-1.0)
     Z2 = 0.05*X*X*X + 0.1*Y*Y*Y + Z1
 
-    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), 1, 3., 0.5 )
+    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), 6. / xsize, 6. / ysize, 1, 1., 0.1 )
     masks = []
     for level in opts.levels:
 	mat = R.Eigen.MatrixXd( xsize, ysize )

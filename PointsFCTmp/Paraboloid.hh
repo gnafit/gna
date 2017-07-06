@@ -11,20 +11,22 @@ class Paraboloid
 public:
 
 	template <typename Derived>
-	Paraboloid(Eigen::MatrixBase<Derived> const & mat, int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
+	Paraboloid(Eigen::MatrixBase<Derived> const & mat, double xStep, double yStep, 
+		int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: ParaboloidMatrix(mat), InitialDeviation(initDeviation), GradientInfluence(gradInfl), AllowableError(allowErr) {
 		PMrows = mat.rows();
 		PMcols = mat.cols();
-		ComputeGradient();
+		ComputeGradient(xStep, yStep);
 		CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
 	}
 
-	Paraboloid(int rows, int columns, double* mat, int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
+	Paraboloid(int rows, int columns, double* mat, double xStep, double yStep, 
+		int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: ParaboloidMatrix(Eigen::Map<Eigen::MatrixXd>(mat, rows, columns)),
 		  InitialDeviation(initDeviation), GradientInfluence(gradInfl), AllowableError(allowErr) {
 	        PMrows = rows;
        		PMcols = columns;
-        	ComputeGradient();
+        	ComputeGradient(xStep, yStep);
 		CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
 	}
 
@@ -60,7 +62,7 @@ public:
 
 protected:
 
-	void ComputeGradient();
+	void ComputeGradient(double xStep, double yStep);
 	void addPoints(int deviation);
 	void ComputeCrossSectionOriginal(double value);
 	int ComputeCurrentDeviation();
