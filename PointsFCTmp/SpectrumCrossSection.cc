@@ -26,7 +26,7 @@ void SpectrumCrossSection::makeCorridor(int curr_x, int curr_y) {
 
 void SpectrumCrossSection::addPoints() {
 /**
-* Fills InterestingPoints matrix by extended contour points. 
+* Fills SpectrumCrossSection#InterestingPoints matrix by extended contour points. 
 */
 	InterestingPoints.resize(2, 0);
 	for(int i = 0; i < CrossSection.rows(); i++) {

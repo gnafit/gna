@@ -11,16 +11,37 @@ public:
 	/**
 	* Constructor: matrix NxM that contain 0 and 1 only is expected as input
 	*/
-	SpectrumCrossSection(Eigen::MatrixXd mat) : CrossSection(mat), CorridorSize(0) {
+	template <typename Derived>
+	SpectrumCrossSection(Eigen::MatrixBase<Derived> const & mat) : CrossSection(mat), CorridorSize(0) {
 		if (!checkInputOK()) std::cerr << "Incorrect input data: cross-section matrix must contain 0 and 1 only!";
 		CrossSectionModified = Eigen::MatrixXd::Zero(CrossSection.rows(), CrossSection.cols());
 	}
 
 	void addPoints();
 
+	/**
+	* Setter for SpectrumCrossSection#CorridorSize
+	*/
 	inline void SetCorridor(int val) 		 { CorridorSize = val; }
-	inline Eigen::Matrix2Xd GetInterestingPoints()   { return InterestingPoints; }
-	inline Eigen::MatrixXd GetModifiedCrossSection() { return CrossSectionModified; }
+
+	/**
+	* Getter for SpectrumCrossSection#InterestingPoints matrix
+	* \warning Should be computed at least once by addPoints() function before getting
+	* \return SpectrumCrossSection#InterestingPoints matrix
+	*/
+	template <typename Derived>
+	inline void GetInterestingPoints(Eigen::MatrixBase<Derived> const & IPTarget)   {  IPTarget = InterestingPoints; }
+	
+	/**
+	* Getter for SpectrumCrossSection#CrossSectionModified matrix
+	* \warning Should be computed at least once by addPoints() function before getting
+	* \return SpectrumCrossSection#CrossSectionModified matrix
+	*/
+	template <typename Derived>
+	inline void GetModifiedCrossSection(Eigen::MatrixBase<Derived> const & CSMTarget) { 
+		Eigen::MatrixBase<Derived>& C = const_cast< Eigen::MatrixBase<Derived>& >(CSMTarget);
+		C = CrossSectionModified; 
+	}
 
 
 protected:

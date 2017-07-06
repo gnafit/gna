@@ -16,6 +16,7 @@ int main()
 
 	double x;
 	MatrixXd bbb(DIM0, DIM1);
+	MatrixXd out;
 	std::ifstream myfile;
   	myfile.open ("workfile_in_3_1");
 for (int i = 0; i < DIM0; i++)
@@ -35,7 +36,7 @@ for (int i = 0; i < DIM0; i++)
 	Paraboloid t2(a);
 //	t2.GetCrossSectionExtended(1, 1);
         Paraboloid t(bbb, 1, 0.9);
-	t.GetCrossSectionExtendedAutoDev(100, "out100_1_09.txt");
+	t.GetCrossSectionExtendedAutoDev( out, 100);
 
 	//Paraboloid t2(bbb, 1, 0.9);
   //      t.GetCrossSectionExtendedAutoDev(80, "out80_1_09.txt");
