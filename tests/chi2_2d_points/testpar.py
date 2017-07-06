@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import numpy as N
+import numpy as N 
 import itertools as I
 from matplotlib import pyplot as plt
 R.GNAObject
@@ -36,24 +36,28 @@ def numpy_to_eigen( np ):
     return np.ravel( order='F' )
 
 def main( opts ):
-    x = N.linspace( -10., 10., 201, dtype='d' )
-    y = N.linspace( -10., 10., 201, dtype='d' )
+    xsize = 501;
+    ysize = 501;
+    x = N.linspace( -10., 10., xsize, dtype='d' )
+    y = N.linspace( -10., 10., ysize, dtype='d' )
     X, Y = N.meshgrid( x, y, indexing='ij' )
     Z = X**2 + Y**2
+    Z1 = 2.0*(X-3.0)*(X-3.0) + 5.0*(Y-1.0)*(Y-1.0) + 3.0*(X-3.0)*(Y-1.0)
+    Z2 = 0.1*X*X*X + 0.2*Y*Y*Y + 2.0*(X-3.0)*(X-3.0) + 5.0*(Y-1.0)*(Y-1.0) + 3.0*(X-3.0)*(Y-1.0)
 
-    p = R.Paraboloid( Z.shape[0], Z.shape[1], numpy_to_eigen( Z ), 1, 1.0 )
-
+    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), 1, 1.0 )
     masks = []
     for level in opts.levels:
-        csc = p.GetCrossSectionExtendedAutoDev( level )
-        csc = eigen_to_numpy( csc, 'bool' ).copy()
+	mat = R.Eigen.MatrixXd( xsize, ysize )
+        p.GetCrossSectionExtendedAutoDev( mat, level )
+        csc = eigen_to_numpy( mat, 'bool' ).copy()
         masks.append( csc )
 
         Zl=N.ma.array(Z, mask=~csc)
         Zvalues = Zl.compressed()
         print( 'Level %f (min/max): '%level, Zvalues.min(), Zvalues.max() )
 
-    plotl( X, Y, Z, levels=opts.levels, masks=masks )
+    plotl( X, Y, Z1, levels=opts.levels, masks=masks )
 
     if opts.output:
         plt.savefig( opts.output )

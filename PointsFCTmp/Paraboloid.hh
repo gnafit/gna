@@ -28,57 +28,14 @@ public:
 	}
 
 
-	template <typename Derived>
-	void GetCrossSectionOriginal(Eigen::MatrixBase<Derived> const & CSOmatTarget, double value, bool isCScomputed = false) {
-	/**
-	*
-	* Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
-	* \param[in] CSOmatTarget The matrix where result will be written
-	* \param[in] value The value for compute cross-section plane z = value
-	* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
-	*
-	*/
-       		if (! isCScomputed)  ComputeCrossSectionOriginal(value);
+	void GetCrossSectionOriginal(Eigen::MatrixXd & CSOmatTarget, double value, bool isCScomputed = false);
 
-  		Eigen::MatrixBase<Derived>& C = const_cast< Eigen::MatrixBase<Derived>& >(CSOmatTarget);
-		C = CrossSecOriginal;	
-	}
+	void GetCrossSectionExtended(Eigen::MatrixXd & CSEmatTarget, 
+					double value, double deviation, bool isCScomputed = false);
 
-	template <typename Derived>
-	void GetCrossSectionExtended (Eigen::MatrixBase<Derived> const & CSEmatTarget, 
-					double value, double deviation, bool isCScomputed = false) {
-	/**
-	*
-	* Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
-	* \param[in] CSEmatTarget The matrix where result will be written
-	* \param[in] value The value for compute cross-section plane z = value
-	* \param[in] deviation Deviation of the original contour
-	* \param[in] isCScomputed It is false if CrossSecOriginal is not computed yet. It is necessary to avoid computing twice and ensure that it is not rubbish in this matrix
-	*
-	*/
+	void GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value);
 
-        	Eigen::MatrixXd tmpMat;
-        	GetCrossSectionOriginal(tmpMat, value, isCScomputed);
-        	SpectrumCrossSection crossSec(tmpMat);
-
-		std::cout << " deviation = " << deviation << std::endl;
-        	crossSec.SetCorridor(deviation);
-        	crossSec.addPoints();
-        	crossSec.GetModifiedCrossSection(CSEmatTarget);
-	}
-
-	template <typename Derived>
-	void GetCrossSectionExtendedAutoDev (Eigen::MatrixBase<Derived> const & CSEADmatTarget, double value) {
-	/**
-	*
-	* Returns cross-section z = value of ParaboloidMatrix (the plain contains contour) using value only. The deviation is computed automaticly and depends on gradient at contour points.
-	* \param[in] CSEADmatTarget The matrix where result will be written
-	* \param[in] value The value for compute cross-section plane z = value
-	*
-	*/
-		ComputeCrossSectionOriginal(value);
-        	GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
-	}
+	void GetInterestingPoints(Eigen::MatrixXd& IPmatTarget, double value);
 
 protected:
 

@@ -29,21 +29,18 @@ public:
 	* \warning Should be computed at least once by addPoints() function before getting
 	* \return SpectrumCrossSection#InterestingPoints matrix
 	*/
-	template <typename Derived>
-	inline void GetInterestingPoints(Eigen::MatrixBase<Derived> const & IPTarget)   {  IPTarget = InterestingPoints; }
+	inline void GetInterestingPoints(Eigen::MatrixXd & IPTarget)   {  IPTarget = InterestingPoints; }
 	
 	/**
 	* Getter for SpectrumCrossSection#CrossSectionModified matrix
 	* \warning Should be computed at least once by addPoints() function before getting
 	* \return SpectrumCrossSection#CrossSectionModified matrix
 	*/
-	template <typename Derived>
-	inline void GetModifiedCrossSection(Eigen::MatrixBase<Derived> const & CSMTarget) { 
-		Eigen::MatrixBase<Derived>& C = const_cast< Eigen::MatrixBase<Derived>& >(CSMTarget);
-		C = CrossSectionModified; 
+	inline void GetModifiedCrossSection(Eigen::MatrixXd & CSMTarget) { 
+		CSMTarget = CrossSectionModified; 
 	}
 
-
+	
 protected:
 	bool checkInputOK();
 	void ShowFoundPoints();
