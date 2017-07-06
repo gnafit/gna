@@ -16,7 +16,7 @@ Inputs
 1. Average model vector :math:`\mu_1`.
 2. First model covariance matrix :math:`V_1` Cholesky decomposition :math:`L_1`.
 3. Average model vector :math:`\mu_2`.
-4. Second model covariance matrix :math:`V_2` Cholesky decomposition :math:`L_1`.
+4. Second model covariance matrix :math:`V_2` Cholesky decomposition :math:`L_2`.
 5. etc.
 6. etc.
 
