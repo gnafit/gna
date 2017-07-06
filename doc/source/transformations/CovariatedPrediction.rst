@@ -10,7 +10,8 @@ compound prediction and the full covariance matrix for it. The trasformations ar
 2) `Covbase transformation`_ calculates the predefined part of the block covariance matrix based on input covaraince matrices given as is.
 3) `Cov transformation`_ calculates the extra systematic part of the covariance matrix based on the known parameters uncertainties.
 
-The result is not the covariance matrix :math:`V` it self, but it's Cholesky decomposition :math:`L`.
+The result is not the covariance matrix :math:`V` it self, but it's Cholesky decomposition :math:`L` as needed
+by the Chi2 transformation.
 
 Prediction transformation
 ^^^^^^^^^^^^^^^^^^^^^^^^^
