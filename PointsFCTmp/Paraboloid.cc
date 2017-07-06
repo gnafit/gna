@@ -57,12 +57,19 @@ int Paraboloid::ComputeCurrentDeviation() {
 
 	int rowsnum = PMrows - 1, colsnum = PMcols - 1;
 	int numOfNonZero = (CrossSecOriginal.array() != 0).count();
+	if (numOfNonZero == 0) {
+		std::cerr << "No contour found on this level. If you are sure that it shold be here, try the following:" << std::endl 
+			  << "- make grid step smaller " << std::endl 
+			  << "- make tolerance higher" << std::endl;
+		return 0;
+	}
 	std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
 	double  tmp =  ((dxPM.block(0, 0, rowsnum, colsnum).array() *
 				CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
 			(dyPM.block(0, 0, rowsnum, colsnum).array() *
                 		CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
-				.sqrt().sum() / numOfNonZero;
+				.sqrt().sum() * GradientInfluence / numOfNonZero;
+        std::cout << "grad_len = "  << tmp << std::endl;
 	return std::ceil(tmp) * InitialDeviation;
 }
 
@@ -100,7 +107,10 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 
                 std::cout << " deviation = " << deviation << std::endl;
                // SetCorridor(deviation);
-                addPoints(deviation);
+                if (deviation != 0) addPoints(deviation);
+		else {
+			CSEmatTarget = MatrixXd::Zero(PMrows, PMcols);
+		}
                 GetModifiedCrossSection(CSEmatTarget);
         }
 

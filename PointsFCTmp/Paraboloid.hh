@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iostream>
 #include <Eigen/Core>
-#include "SpectrumCrossSection.hh"
 #include <string>
 
 class Paraboloid
@@ -12,17 +11,17 @@ class Paraboloid
 public:
 
 	template <typename Derived>
-	Paraboloid(Eigen::MatrixBase<Derived> const & mat, int initDeviation = 1, double allowErr = 0.0)
-		: ParaboloidMatrix(mat), InitialDeviation(initDeviation), AllowableError(allowErr) {
+	Paraboloid(Eigen::MatrixBase<Derived> const & mat, int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
+		: ParaboloidMatrix(mat), InitialDeviation(initDeviation), GradientInfluence(gradInfl), AllowableError(allowErr) {
 		PMrows = mat.rows();
 		PMcols = mat.cols();
 		ComputeGradient();
 		CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
 	}
 
-	Paraboloid(int rows, int columns, double* mat, int initDeviation = 1, double allowErr = 0.0)
+	Paraboloid(int rows, int columns, double* mat, int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: ParaboloidMatrix(Eigen::Map<Eigen::MatrixXd>(mat, rows, columns)),
-		  InitialDeviation(initDeviation), AllowableError(allowErr) {
+		  InitialDeviation(initDeviation), GradientInfluence(gradInfl), AllowableError(allowErr) {
 	        PMrows = rows;
        		PMcols = columns;
         	ComputeGradient();
@@ -74,6 +73,7 @@ protected:
 			dyPM;           	//!< y-omponents of gradient for ParaboloidMatrix size od [N-1xM]
         Eigen::Matrix2Xd InterestingPoints;  	//!< Found points
         int InitialDeviation;           	//!< Multiplier for deviation value, can be set at constructor, default is 1
+	double GradientInfluence;		//!< Multiplier for gradient component of deviation value, default is 1.0
 	double AllowableError;			//!< In cross-section z = value finding there is z = value+-AllowableError is found in fact
 	int PMcols, 				//!< The number of columns of ParaboloidMatrix, computed in constructor, can't be changed after
 	    PMrows;				//!< The number of rows of ParaboloidMatrix, computed in constructor, can't be changed after
