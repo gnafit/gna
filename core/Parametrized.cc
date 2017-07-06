@@ -31,6 +31,7 @@ void Entry::bind(variable<void> newvar) {
       );
   }
   var.replace(newvar);
+  par.replace(newvar);
   if (field != &var) {
     field->assign(newvar);
   }

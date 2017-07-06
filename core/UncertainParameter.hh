@@ -100,6 +100,8 @@ public:
   bool influences(SingleOutput &out) {
     return out.single().depends(this->getVariable());
   }
+
+  virtual const parameter<T> &getParameter() { return m_par; }
 protected:
   std::vector<std::pair<T, T>> m_limits;
   parameter<T> m_par;
