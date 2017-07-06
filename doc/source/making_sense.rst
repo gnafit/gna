@@ -34,6 +34,10 @@ GNAObject header
 .. _GNAObject:
 
 GNAObject : class
+    * Carries lists of:
+      + variable_ isntances via VariableDescriptor_
+      + evaluable_ isntances via EvaluableDescriptor_
+      + transformation instances via TransformationDescriptor_
     * Inherits `TransformationBase::Base`_
 
       + carries list of `TransformationBase::Entry`_ instances
@@ -111,7 +115,7 @@ changeable : class
 dependant : class template
     * inherits evaluable_
     * implements evaluable_, which value depends on other parameters
-    * usuall created via ``mkdep()`` function
+    * usuall created via `mkdep()`_ function
 
 .. _evaluable:
 
@@ -397,6 +401,28 @@ SinkTypeError : class
 
 SourceTypeError : class
 
+.. _`Transformation header`:
+
+Transformation header
+^^^^^^^^^^^^^^^^^^^^^
+
+.. _InputDescriptor:
+
+InputDescriptor : class
+    * a wrapper to the InputHandle_
+    * implements various forms of the `connect()` function
+
+.. _OutputDescriptor:
+
+OutputDescriptor : class
+    * a wrapper to the OutputHandle_
+
+.. _TransformationDescriptor:
+
+TransformationDescriptor : class
+    * a wrapper to the `TransformationBase::Entry`_
+    * carries also lists of InputDescriptor_ instances and OutputDescriptor_ instances
+
 UncertainParameter header
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -444,6 +470,12 @@ ParametricLazy.hpp header
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Defines code for the evaluable_ creation based on math expressions.
+
+.. _`mkdep()`:
+
+Defines `mkdep()` function which does the job.
+
+No additional reference for now (it's magic).
 
 
 
