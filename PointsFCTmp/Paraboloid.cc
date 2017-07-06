@@ -17,6 +17,7 @@ struct Cutter {
 };
 
 void Paraboloid::ComputeCrossSectionOriginal(double value) {
+	CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
 	std::cout << "I am computed!!!" << std::endl;
 	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
@@ -95,12 +96,12 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 
                 Eigen::MatrixXd tmpMat;
                 GetCrossSectionOriginal(tmpMat, value, isCScomputed);
-                SpectrumCrossSection crossSec(tmpMat);
+               // SpectrumCrossSection crossSec(tmpMat);
 
                 std::cout << " deviation = " << deviation << std::endl;
-                crossSec.SetCorridor(deviation);
-                crossSec.addPoints();
-                crossSec.GetModifiedCrossSection(CSEmatTarget);
+               // SetCorridor(deviation);
+                addPoints(deviation);
+                GetModifiedCrossSection(CSEmatTarget);
         }
 
 
@@ -115,4 +116,42 @@ void Paraboloid::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget,
                 ComputeCrossSectionOriginal(value);
                 GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
         }
+
+void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
+/**
+* Adds neighbour points to the InterestingPoints matrix for point (curr_x, curr_y)
+* \param[in] curr_x x-coordinate of the considered point
+* \param[in] curr_y y-coordinate of the considered point
+*/
+	for (int i = curr_x - deviation; i < curr_x + deviation + 1; i++) {
+		if (i < 0 || i >=  PMrows) continue;
+		for (int j = curr_y - deviation; j < curr_y + deviation + 1; j++) {
+			if (j <  0 || j >= PMcols) continue;
+			if (CrossSecOriginal(i, j) == 1.0) continue;
+			InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
+			InterestingPoints(0, InterestingPoints.cols() - 1) = i;
+			InterestingPoints(1, InterestingPoints.cols() - 1) = j;
+			CrossSectionModified(i, j) = 1.0;
+		}
+	}
+
+}
+
+void Paraboloid::addPoints(int deviation) {
+/**
+* Fills Paraboloid#InterestingPoints matrix by extended contour points. 
+*/
+	InterestingPoints.resize(2, 0);
+	for(int i = 0; i < PMrows; i++) {
+		for (int j = 0; j < PMcols; j++) {
+			if (CrossSecOriginal(i, j) == 1.0) {
+				InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
+	                        InterestingPoints(0, InterestingPoints.cols() - 1) = i;
+        	                InterestingPoints(1, InterestingPoints.cols() - 1) = j;
+				CrossSectionModified(i, j) = 1.0;
+				makeCorridor(i, j, deviation);
+			}
+		}
+	}
+}
 

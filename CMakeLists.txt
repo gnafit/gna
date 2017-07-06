@@ -39,7 +39,6 @@ set (SOURCES
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
   PointsFCTmp/Paraboloid.cc
-  PointsFCTmp/SpectrumCrossSection.cc
   )
 
 set (HEADERS
@@ -82,7 +81,6 @@ set (HEADERS
   EnergyResolution.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
-  SpectrumCrossSection.hh
   Paraboloid.hh
   )
 

@@ -58,6 +58,7 @@ def main( opts ):
         print( 'Level %f (min/max): '%level, Zvalues.min(), Zvalues.max() )
 
     plotl( X, Y, Z1, levels=opts.levels, masks=masks )
+    plt.contour( X, Y, Z2, opts.levels)
 
     if opts.output:
         plt.savefig( opts.output )
