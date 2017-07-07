@@ -69,6 +69,8 @@ The calculation of :math:`V` is implemented iteratively:
 .. math::
    V_i = V_{i-1} + D_i D_i^T, \quad i=1,2,\dots,
 
+where :math:`V_0=V_\text{stat}`.
+
 Inv transformation
 ^^^^^^^^^^^^^^^^^^
 
