@@ -58,6 +58,7 @@ set (HEADERS
   FillLike.hh
   Derivative.hh
   Covmat.hh
+  Cholesky.hh
   Chi2.hh
   Poisson.hh
   CovarianceToyMC.hh
