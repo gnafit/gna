@@ -96,3 +96,7 @@ Inputs
 Outputs
 """""""
 1) Lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
+
+**IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix 
+(use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
+may contain unmaintained non-zero elements.
