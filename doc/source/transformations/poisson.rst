@@ -27,7 +27,7 @@ Formula for Poisson likelihood:
 .. math::
   L(x|\mu) = \prod_{i=1}^{N} \frac {(\mu_i^{x_i}  e^{-\mu_i})}{x_i!} 
 
-In source code there is used the natural logarithm of :math:`P(x|\mu)`, so formula is
+In source code there is used the natural logarithm of :math:`L(x|\mu)`, so formula is
 
 .. math::
   \log L(x|\mu) = \sum_{i=1}^{N} {(x_i \log(\mu_i)  - \mu_i -  log(x_i!))}

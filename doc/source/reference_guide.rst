@@ -15,6 +15,7 @@ Transformations
 
    transformations/*
 
+
 .. Template
 
    Identity transformation
@@ -44,3 +45,12 @@ Transformations
 
    Implementation details, formulas, etc.
 
+
+Helper classes
+--------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   helperclasses/*
