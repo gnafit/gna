@@ -8,6 +8,7 @@ def hygienic(decorator):
         wrapped.__name__ = original.__name__
         wrapped.__doc__ = original.__doc__
         wrapped.__module__ = original.__module__
+        wrapped.__original__ = original
         return wrapped
     return new_decorator
 
@@ -92,15 +93,18 @@ def patchDataProvider(cls):
     def data(self):
         buf = origdata(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
     cls.data = data
+    cls.__data_raw__ = origdata
+    cls.__view_raw__ = origview
 
     origview = cls.view
     def view(self):
         buf = origview(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
     cls.view = view
+    cls.__view_raw__ = origview
 
 def patchVariableDescriptor(cls):
     origclaim = cls.claim
