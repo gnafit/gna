@@ -69,6 +69,8 @@ The calculation of :math:`V` is implemented iteratively:
 .. math::
    V_i = V_{i-1} + D_i D_i^T, \quad i=1,2,\dots,
 
+where :math:`V_0=V_\text{stat}`.
+
 Inv transformation
 ^^^^^^^^^^^^^^^^^^
 
@@ -94,3 +96,7 @@ Inputs
 Outputs
 """""""
 1) Lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
+
+**IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix 
+(use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
+may contain unmaintained non-zero elements.

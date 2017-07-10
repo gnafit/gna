@@ -71,6 +71,10 @@ Outputs
 
 1) Covariance matrix Cholesky decomposition :math:`L_\text{base}`: :math:`V_\text{base}=L_\text{base}L_\text{base}^T`.
 
+**IMPORTANT**: Be sure to use :math:`L_\text{base}` as lower triangular matrix
+(use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
+may contain unmaintained non-zero elements.
+
 Implementation
 """"""""""""""
 
@@ -114,6 +118,10 @@ Outputs
 """""""
 
 1) Full covariance matrix Cholesky decomposition :math:`L`: :math:`V=LL^T`.
+
+**IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix 
+(use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
+may contain unmaintained non-zero elements.
 
 Implementation
 """"""""""""""
