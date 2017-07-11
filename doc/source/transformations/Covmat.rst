@@ -29,19 +29,19 @@ Calculate the final covariance matrix based on:
 Inputs
 """"""
 
-1) Vector with statistical errors :math:`S`.
+1) ``'stat'`` — vector with statistical errors :math:`S`.
 2) Derivative (Jacobian) :math:`D_1` of the prediction :math:`\mu` over uncertain parameter :math:`\eta_1`.
 3) Derivative (Jacobian) :math:`D_i` of the prediction :math:`\mu` over uncertain parameter :math:`\eta_i`.
 4) etc.
 
 See ``Derivative`` transformation. Parameters :math:`\eta_i` are meant to be uncorrelated. (To be updated)
 
-Inputs are processed via ``rank`` method.
+Inputs (derivatives) are processed via ``rank1(data)`` method.
 
 Outputs
 """""""
 
-1) Full covariance matrix :math:`V`.
+1) ``'cov'`` — full covariance matrix :math:`V`.
 
 Outputs are frozen upon calculation.
 
@@ -78,11 +78,11 @@ Computes the inverse of a matrix.
 
 Inputs
 """"""
-1) Matrix :math:`V`.
+1) ``'cov'`` — matrix :math:`V`.
 
 Outputs
 """""""
-1) Matrix :math:`V^{-1}`.
+1) ``'inv'`` — matrix :math:`V^{-1}`.
 
 Cholesky transformation
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,11 +91,11 @@ Computes the Cholesky decomposition of the symmetric positive definite matrix ma
 
 Inputs
 """"""
-1) Matrix :math:`V`.
+1) ``'cov'`` — matrix :math:`V`.
 
 Outputs
 """""""
-1) Lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
+1) ``'L'`` — lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
 
 **IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix 
 (use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part

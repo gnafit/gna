@@ -19,11 +19,13 @@ Inputs
 4. Second model covariance matrix :math:`V_2` Cholesky decomposition :math:`L_2`.
 5. etc.
 6. etc.
+   
+Inputs are added via ``add(theory, cov)`` method.
 
 Outputs
 ^^^^^^^
 
-1. Output vector :math:`x` of size of concatination of :math:`\mu_i`.
+1. ``'toymc'`` — output vector :math:`x` of size of concatination of :math:`\mu_i`.
 
 Implementation
 ^^^^^^^^^^^^^^

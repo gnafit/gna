@@ -15,6 +15,14 @@ Transformations
 
    transformations/*
 
+Helper classes
+--------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   helperclasses/*
 
 .. Template
 
@@ -46,11 +54,3 @@ Transformations
    Implementation details, formulas, etc.
 
 
-Helper classes
---------------
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   helperclasses/*

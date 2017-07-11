@@ -29,12 +29,12 @@ Inputs
 2) Optional input vector :math:`m_2`.
 3) etc.
 
-Vectors :math:`m_i` are added via ``append`` method.
+Vectors :math:`m_i` are added via ``append(obs)`` method.
 
 Outputs
 """""""
 
-1) Prediction vector :math:`\mu`.
+1) ``'prediction'`` — Prediction vector :math:`\mu`.
 
 Implementation
 """"""""""""""
@@ -64,12 +64,12 @@ Inputs
    b) cross covariance matrix :math:`V_{ij}` for models :math:`m_i` :math:`m_j`.
 2) etc.
 
-Inputs are assigned via ``covariate`` method.
+Inputs are assigned via ``covariate(cov, obs1, n1, obs2, n2)`` method.
 
 Outputs
 """""""
 
-1) Covariance matrix Cholesky decomposition :math:`L_\text{base}`: :math:`V_\text{base}=L_\text{base}L_\text{base}^T`.
+1) ``'L'`` — covariance matrix Cholesky decomposition :math:`L_\text{base}`: :math:`V_\text{base}=L_\text{base}L_\text{base}^T`.
 
 **IMPORTANT**: Be sure to use :math:`L_\text{base}` as lower triangular matrix
 (use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
@@ -112,14 +112,14 @@ Inputs
 
 See ``Derivative`` transformation. Parameters :math:`\eta_i` are meant to be uncorrelated. (To be updated)
 
-Inputs are processed via ``rank`` method.
+Inputs are processed via ``rank1(vec)`` method.
 
 Outputs
 """""""
 
-1) Full covariance matrix Cholesky decomposition :math:`L`: :math:`V=LL^T`.
+1) ``'L'`` — full covariance matrix Cholesky decomposition :math:`L`: :math:`V=LL^T`.
 
-**IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix 
+**IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix
 (use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
 may contain unmaintained non-zero elements.
 

@@ -3,33 +3,33 @@ Weighted sum
 
 Description
 ^^^^^^^^^^^
-Calcualate weighted sum of arrays
+Calcualate weighted sum of arrays.
 
 Constructor arguments
 ^^^^^^^^^^^^^^^^^^^^^
-1) Vector of arrays' names of size :math:`N`
+1) Vector of arrays' names of size :math:`N`.
 
 Inputs
 ^^^^^^
 
-1) Array :math:`A_1`
+1) ``name1`` — Array :math:`A_1`.
 
-2) Array :math:`A_2`
+2) ``name2`` — :math:`A_2`.
 
-N) Array :math:`A_N`
+N) ``nameN`` — Array :math:`A_N`.
 
 All arrays are of the same size.
 
 Variables
 ^^^^^^^^^
 
-The transformation depends on :math:`N` weighting variables :math:`\omega_i` 
+The transformation depends on :math:`N` weighting variables :math:`\omega_i`
 defined with names starting with `weight_` and ending with relevant array's name.
 
 Outputs
 ^^^^^^^
 
-1) Weighted sum :math:`S`
+1) ``'sum'`` — weighted sum :math:`S`.
 
 Implementation
 ^^^^^^^^^^^^^^
