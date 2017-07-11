@@ -27,7 +27,7 @@ def plotl( title, step, X, Y, Z, **kwargs ):
     X=X[::step, ::step]
     Y=Y[::step, ::step]
     for level, mask, marker in zip(levels, masks, I.cycle( markers ) ):
-        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level )
+        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.05 )
 
     ax.legend( loc='upper right' )
     
@@ -48,7 +48,6 @@ def mask_to_points( mask ):
     return N.transpose(N.nonzero(mask))
 
 def main( opts ):
-#TODO: make as module
     xsize = int(opts.xlinspace[2])
     ysize = int(opts.ylinspace[2])
     x = N.linspace( opts.xlinspace[0], opts.xlinspace[1], xsize, dtype='d' )
@@ -57,7 +56,7 @@ def main( opts ):
     Z = X**2 + Y**2
     Z1 = 2.0*(X-3.0)*(X-3.0) + 5.0*(Y-1.0)*(Y-1.0) + 3.0*(X-3.0)*(Y-1.0)
     Z2 = 0.05*X*X*X + 0.1*Y*Y*Y + Z1
-    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), ( opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
+    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), (opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
     masks = []
     title='deviation = ' + str(opts.deviation) + ', gradient influence = ' + str(opts.gradinfluence) + ',\ntolerance = ' + str(opts.tolerance) + ', points sparseness = ' + str(opts.sparseness) 
     for level in opts.levels:
@@ -94,6 +93,4 @@ if __name__ == "__main__":
     parser.add_argument( '-ginf', '--gradinfluence', type=float, default=1., help='multiplier for gradient')
     parser.add_argument( '--xlinspace', nargs=3, default=[0.0, 10.0, 501], type=float, help='parameters: BEGIN END NUM_OF_STEPS')
     parser.add_argument( '--ylinspace', nargs=3, default=[0.0, 10.0, 501], type=float, help='parameters: BEGIN END NUM_OF_STEPS')
-
     main( parser.parse_args() )
-#TODO: add arguments for input in Paraboloid
