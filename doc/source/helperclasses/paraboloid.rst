@@ -45,7 +45,7 @@ Public:
 
 ``GetCrossSectionOriginal(Eigen::MatrixXd & CSOmatTarget, double value, bool isCScomputed)`` writes a cross-section :math:`z=value±allowErr` matrix without deviation to the ``CSOmatTarget`` matrix. Parameter ``isCScomputed`` helps to avoid compiting the same matrix twice.
 
-``GetCrossSectionExtended(Eigen::MatrixXd & CSEmatTarget, double value, double deviation, bool isCScomputed)`` writes a cross-section :math:`z=value±allowErr` matrix with the given deviation to the ``CSEmatTarget`` matrix. Parameter ``isCScomputed`` helps to avoid compiting the same matrix twice.
+``GetCrossSectionExtended(Eigen::MatrixXd & CSEmatTarget, double value, int deviation, bool isCScomputed)`` writes a cross-section :math:`z=value±allowErr` matrix with the given deviation to the ``CSEmatTarget`` matrix. Parameter ``isCScomputed`` helps to avoid compiting the same matrix twice.
 
 ``GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value)`` writes a cross-section :math:`z=value±allowErr` matrix with the deviation computed automaticly by ``ComputeCurrentDeviation()`` function to the ``CSEADmatTarget`` matrix.
 
