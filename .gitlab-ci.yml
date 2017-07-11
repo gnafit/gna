@@ -7,10 +7,9 @@ pages:
   - apk --no-cache add make
   - cd doc
   - make html
-  - mv build/html/ public
   artifacts:
     paths:
-    - public
+    - doc/build/html
   only:
   - ci_docs
 
