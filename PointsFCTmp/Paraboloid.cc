@@ -22,7 +22,6 @@ void Paraboloid::ComputeCrossSectionOriginal(double value) {
 	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
 }
 
-
 void Paraboloid::ComputeGradient(double xStep, double yStep) {
 /**
 *
@@ -49,7 +48,7 @@ int Paraboloid::ComputeCurrentDeviation() {
 *	  (this will leave only contour's gradient points)
 *	- Find the sqrt of sum of squares (to fing the length of gradient vector)
 *	- Sum all this values and divide by the number of non-zero values to find the avarage value of contour's gradient
-*	- Product with multiplier InitialDeviation
+*	- Product with multiplier GradientInfluence, ceil and product with InitialDeviation
 *
 * \return Deviation from the original coutour - the number of points that will be included in extended contour.
 *
@@ -88,7 +87,7 @@ void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double v
 
 
 void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
-                                        double value, double deviation, bool isCScomputed) {
+                                        double value, int deviation, bool isCScomputed) {
 /**
 *
 * Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
@@ -108,7 +107,6 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 	}
 	GetModifiedCrossSection(CSEmatTarget);
 }
-
 
 void Paraboloid::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value) {
 /**

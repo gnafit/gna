@@ -10,8 +10,8 @@ class Paraboloid
 {
 public:
 
-	template <typename Derived>
-	Paraboloid(Eigen::MatrixBase<Derived> const & mat, double xStep, double yStep, 
+	
+	Paraboloid(Eigen::MatrixXd & mat, double xStep, double yStep, 
 		int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: ParaboloidMatrix(mat), InitialDeviation(initDeviation), GradientInfluence(gradInfl), AllowableError(allowErr) {
 		PMrows = mat.rows();
@@ -30,18 +30,12 @@ public:
 		CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
 	}
 
-
 	void GetCrossSectionOriginal(Eigen::MatrixXd & CSOmatTarget, double value, bool isCScomputed = false);
 
 	void GetCrossSectionExtended(Eigen::MatrixXd & CSEmatTarget, 
-					double value, double deviation, bool isCScomputed = false);
+					double value, int deviation, bool isCScomputed = false);
 
 	void GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value);
-
-	/**
-	* Setter for Paraboloid#CorridorSize
-	*/
-	//inline void SetCorridor(int val) 		 { CorridorSize = val; }
 
 	/**
 	* Getter for Paraboloid#InterestingPoints matrix
