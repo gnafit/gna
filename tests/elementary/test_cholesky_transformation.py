@@ -47,16 +47,23 @@ cholesky = R.Cholesky()
 cholesky.cholesky.mat( points.points.points )
 
 res = cholesky.cholesky.L.data()
-res = N.tril( res )
+res = N.matrix(N.tril( res ))
 
 print( 'L' )
 print( res )
 
+mat_back = res*res.T
+
+print( 'Matrix (rec)' )
+print( mat_back )
+
 diff = chol - res
-print( 'Diff' )
+print( 'Diff L' )
 print( diff )
 
-print( ((diff<1.e-16).sum() and '\033[32mOK!' or '\033[31mFail!' ), '\033[0m' )
+diff1 = mat_back - mat
+print( 'Diff mat' )
+print( diff1 )
 
-import IPython
-IPython.embed()
+print( (((N.fabs(diff)+N.fabs(diff1))>1.e-12).sum() and '\033[31mFail!' or '\033[32mOK!' ), '\033[0m' )
+
