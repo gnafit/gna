@@ -30,7 +30,7 @@ import os
 # ones.
 extensions = ['sphinx.ext.mathjax', 'sphinxcontrib.plantuml']
 
-plantuml = 'java -jar /home/anna/Documents/plantuml.jar'
+plantuml = '/usr/bin/plantuml'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
