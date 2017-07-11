@@ -17,9 +17,9 @@ struct Cutter {
 };
 
 void Paraboloid::ComputeCrossSectionOriginal(double value) {
-	CrossSectionModified = Eigen::MatrixXd::Zero(PMrows, PMcols);
+	m_CrossSectionModified = Eigen::MatrixXd::Zero(m_PMrows, m_PMcols);
 	std::cout << "I am computed!!!" << std::endl;
-	CrossSecOriginal = ParaboloidMatrix.unaryExpr(Cutter<double>(value, AllowableError));
+	m_CrossSecOriginal = m_ParaboloidMatrix.unaryExpr(Cutter<double>(value, m_AllowableError));
 }
 
 void Paraboloid::ComputeGradient(double xStep, double yStep) {
@@ -34,8 +34,8 @@ void Paraboloid::ComputeGradient(double xStep, double yStep) {
 * as gradient is computed with the neighbour elements in matrix
 *
 */
-	dxPM = (ParaboloidMatrix.rightCols(PMcols - 1) - ParaboloidMatrix.leftCols(PMcols - 1)) / xStep;
-	dyPM = (ParaboloidMatrix.bottomRows(PMrows - 1) - ParaboloidMatrix.topRows(PMrows - 1)) / yStep;
+	m_dxPM = (m_ParaboloidMatrix.rightCols(m_PMcols - 1) - m_ParaboloidMatrix.leftCols(m_PMcols - 1)) / xStep;
+	m_dyPM = (m_ParaboloidMatrix.bottomRows(m_PMrows - 1) - m_ParaboloidMatrix.topRows(m_PMrows - 1)) / yStep;
 }
 
 int Paraboloid::ComputeCurrentDeviation() {
@@ -54,8 +54,8 @@ int Paraboloid::ComputeCurrentDeviation() {
 *
 */
 
-	int rowsnum = PMrows - 1, colsnum = PMcols - 1;
-	int numOfNonZero = (CrossSecOriginal.array() != 0).count();
+	int rowsnum = m_PMrows - 1, colsnum = m_PMcols - 1;
+	int numOfNonZero = (m_CrossSecOriginal.array() != 0).count();
 	if (numOfNonZero == 0) {
 		std::cerr << "No contour found on this level. If you are sure that it shold be here, try the following:" << std::endl 
 			  << "- make grid step smaller " << std::endl 
@@ -63,13 +63,13 @@ int Paraboloid::ComputeCurrentDeviation() {
 		return 0;
 	}
 	std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
-	double  tmp =  ((dxPM.block(0, 0, rowsnum, colsnum).array() *
-				CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
-			(dyPM.block(0, 0, rowsnum, colsnum).array() *
-                		CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
-				.sqrt().sum() * GradientInfluence / numOfNonZero;
+	double  tmp =  ((m_dxPM.block(0, 0, rowsnum, colsnum).array() *
+				m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
+			(m_dyPM.block(0, 0, rowsnum, colsnum).array() *
+                		m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
+				.sqrt().sum() * m_GradientInfluence / numOfNonZero;
         std::cout << "grad_len = "  << tmp << std::endl;
-	return std::ceil(tmp) * InitialDeviation;
+	return std::ceil(tmp) * m_InitialDeviation;
 }
 
 void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double value, bool isCScomputed ) {
@@ -82,7 +82,7 @@ void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double v
 *
 */
         if (! isCScomputed)  ComputeCrossSectionOriginal(value);
-        CSOmatTarget = CrossSecOriginal;
+        CSOmatTarget = m_CrossSecOriginal;
 }
 
 
@@ -103,7 +103,7 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
         std::cout << " deviation = " << deviation << std::endl;
         if (deviation != 0) addPoints(deviation);
 	else {
-		CSEmatTarget = MatrixXd::Zero(PMrows, PMcols);
+		CSEmatTarget = MatrixXd::Zero(m_PMrows, m_PMcols);
 	}
 	GetModifiedCrossSection(CSEmatTarget);
 }
@@ -128,14 +128,14 @@ void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
 * \param[in] deviation Deviation from the original contour 
 */
 	for (int i = curr_x - deviation; i < curr_x + deviation + 1; i++) {
-		if (i < 0 || i >=  PMrows) continue;
+		if (i < 0 || i >=  m_PMrows) continue;
 		for (int j = curr_y - deviation; j < curr_y + deviation + 1; j++) {
-			if (j <  0 || j >= PMcols) continue;
-			if (CrossSecOriginal(i, j) == 1.0) continue;
-			InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
-			InterestingPoints(0, InterestingPoints.cols() - 1) = i;
-			InterestingPoints(1, InterestingPoints.cols() - 1) = j;
-			CrossSectionModified(i, j) = 1.0;
+			if (j <  0 || j >= m_PMcols) continue;
+			if (m_CrossSecOriginal(i, j) == 1.0) continue;
+			m_InterestingPoints.conservativeResize(2, m_InterestingPoints.cols() + 1);
+			m_InterestingPoints(0, m_InterestingPoints.cols() - 1) = i;
+			m_InterestingPoints(1, m_InterestingPoints.cols() - 1) = j;
+			m_CrossSectionModified(i, j) = 1.0;
 		}
 	}
 
@@ -145,14 +145,14 @@ void Paraboloid::addPoints(int deviation) {
 /**
 * Fills Paraboloid#InterestingPoints matrix by extended contour points. 
 */
-	InterestingPoints.resize(2, 0);
-	for(int i = 0; i < PMrows; i++) {
-		for (int j = 0; j < PMcols; j++) {
-			if (CrossSecOriginal(i, j) == 1.0) {
-				InterestingPoints.conservativeResize(2, InterestingPoints.cols() + 1);
-	                        InterestingPoints(0, InterestingPoints.cols() - 1) = i;
-        	                InterestingPoints(1, InterestingPoints.cols() - 1) = j;
-				CrossSectionModified(i, j) = 1.0;
+	m_InterestingPoints.resize(2, 0);
+	for(int i = 0; i < m_PMrows; i++) {
+		for (int j = 0; j < m_PMcols; j++) {
+			if (m_CrossSecOriginal(i, j) == 1.0) {
+				m_InterestingPoints.conservativeResize(2, m_InterestingPoints.cols() + 1);
+	                        m_InterestingPoints(0, m_InterestingPoints.cols() - 1) = i;
+        	                m_InterestingPoints(1, m_InterestingPoints.cols() - 1) = j;
+				m_CrossSectionModified(i, j) = 1.0;
 				makeCorridor(i, j, deviation);
 			}
 		}
