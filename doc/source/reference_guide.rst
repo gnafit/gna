@@ -2,9 +2,11 @@ Reference guide
 ==================
 
 .. toctree::
+   :glob:
    :maxdepth: 1
 
    making_sense
+   cheatsheet/*
 
 Transformations
 ---------------
