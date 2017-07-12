@@ -27,8 +27,10 @@ def plotl( title, step, X, Y, Z, **kwargs ):
     X=X[::step, ::step]
     Y=Y[::step, ::step]
     for level, mask, marker in zip(levels, masks, I.cycle( markers ) ):
-        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.20 )
-
+        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.6, markeredgecolor='none' )
+        # there is a pdf bug for markers with transparency - visible gap between marker face and marker edge
+        # therefore the edge color is disabled
+    plt.subplots_adjust( top=0.87 )
     ax.legend( loc='upper right' )
 
 
@@ -72,7 +74,7 @@ def main( opts ):
 
     plotl( title, opts.sparseness, X, Y, Z1, levels=opts.levels, masks=masks )
 
-    plt.contour( X, Y, Z2, levels=opts.levels)
+    plt.contour( X, Y, Z2, linestyles='--', levels=opts.levels)
 
     if opts.output:
         plt.savefig( opts.output )
