@@ -10,6 +10,8 @@ import numpy as N
 from collections import defaultdict
 from inspect import getmro
 
+debug_converters = True
+
 # List all converters in dict: converters['from']['to']
 converters = defaultdict( dict )
 
@@ -24,16 +26,32 @@ def convert(obj, totype, **kwargs):
     convert( N.array([1, 2, 3]), R.vector('double') )
     convert( N.array([1, 2, 3]), R.vector, dtype='double' )
     """
-    bases = [ type(obj) ]
-    if hasattr(obj, '__bases__'):
-        bases += getmro( obj )
-    for base in bases:
-        converter = converters.get( base ).get( totype )
-        if converter: break
-        break
-    else:
-        assert False, 'Can not find converter to convert %s (bases: %s) to %s'%(str(type(obj)), str(bases), str(totype))
 
+    def msg( title ):
+        res = title+"'{0}' to convert '{1}' ({2}) to '{3}'".format(
+                      converter.__name__,
+                      type(obj).__name__,
+                      ', '.join([base.__name__ for base in bases]),
+                      str(totype.__name__)
+                    )
+        if kwargs:
+            res+=' [kwargs: %s]'%( str( kwargs ) )
+
+        return res
+
+    bases = list(getmro(type(obj)))
+    for base in bases:
+        bconverters = converters.get( base )
+        if not bconverters:
+            continue
+        converter = bconverters.get( totype )
+        if converter:
+            break
+    else:
+        raise Exception(msg('Can not find converter'))
+
+    if debug_converters:
+        print( msg( 'Using converter' ) )
     return converter( obj, **kwargs )
 
 def save_converter( from_type, to_type ):
@@ -65,3 +83,32 @@ def array_to_stdvector_size_t( array ):
 def array_to_stdvector_int( array ):
     """Convert an array to the std::vector<int>"""
     return array_to_stdvector( array, 'int' )
+
+def stdvector_to_array( vector, dtype ):
+    """Convert an std::vector to numpy.array"""
+    return N.array( vector, dtype=dtype )
+
+@save_converter( R.vector('int'), N.ndarray )
+def stdvector_to_array_int( vector ):
+    """Convert std::vector to array of int"""
+    return stdvector_to_array( vector, 'i' )
+
+@save_converter( R.vector('double'), N.ndarray )
+def stdvector_to_array_double( vector ):
+    """Convert std::vector to array of double"""
+    return stdvector_to_array( vector, 'd' )
+
+@save_converter( N.ndarray, R.Points )
+def array_to_Points( array ):
+    """Convert numpy array to Points"""
+    if len(array.shape)>2:
+        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
+    a = array.ravel( order='F' )
+    s = array_to_stdvector_size_t( array.shape )
+    return R.Points( a, s )
+
+@save_converter( N.matrixlib.defmatrix.matrix, R.Points )
+def matrix_to_Points( matrix ):
+    """Convert numpy matrix to Points"""
+    return array_to_Points( matrix.A )
+

@@ -168,6 +168,9 @@ def wrapPoints(cls):
     return WrappedClass
 
 def setup(ROOT):
+    if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
+        return
+    ROOT.__gna_patched__ = True
     ROOT.UserExceptions.update({
         "KeyError": KeyError,
         "IndexError": IndexError,
