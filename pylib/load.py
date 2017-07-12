@@ -7,3 +7,6 @@ ROOT.gSystem.Load('libGlobalNuAnalysis2.so')
 
 from gna import bindings
 bindings.setup(ROOT)
+
+import IPython
+IPython.embed()
