@@ -1,4 +1,4 @@
-#include "Paraboloid.hh"
+#include "GridFilter.hh"
 #include <Eigen/Core>
 #include <fstream>
 #include <cmath>
@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-//#define DEBUG_PARABOLOID
+//#define DEBUG_GRIDFILTER
 
 /**
 * The only one goal of creating this structure is to optimize matrix openation
@@ -18,15 +18,15 @@ struct Cutter {
   T v, e;
 };
 
-void Paraboloid::ComputeCrossSectionOriginal(double value) {
+void GridFilter::ComputeCrossSectionOriginal(double value) {
 	m_CrossSectionModified = Eigen::MatrixXd::Zero(m_PMrows, m_PMcols);
-    #ifdef DEBUG_PARABOLOID
+    #ifdef DEBUG_GRIDFILTER
 	std::cout << "I am computed!!!" << std::endl;
     #endif
 	m_CrossSecOriginal = m_ParaboloidMatrix.unaryExpr(Cutter<double>(value, m_AllowableError));
 }
 
-void Paraboloid::ComputeGradient(double xStep, double yStep) {
+void GridFilter::ComputeGradient(double xStep, double yStep) {
 /**
 *
 * Computes dxPM and dyPM (components of gradient)
@@ -42,7 +42,7 @@ void Paraboloid::ComputeGradient(double xStep, double yStep) {
 	m_dyPM = (m_ParaboloidMatrix.bottomRows(m_PMrows - 1) - m_ParaboloidMatrix.topRows(m_PMrows - 1)) / yStep;
 }
 
-int Paraboloid::ComputeCurrentDeviation() {
+int GridFilter::ComputeCurrentDeviation() {
 /**
 *
 * Algorithm:
@@ -66,7 +66,7 @@ int Paraboloid::ComputeCurrentDeviation() {
 			  << "- make tolerance higher" << std::endl;
 		return 0;
 	}
-    #ifdef DEBUG_PARABOLOID
+    #ifdef DEBUG_GRIDFILTER
 	std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
     #endif
 	double  tmp =  ((m_dxPM.block(0, 0, rowsnum, colsnum).array() *
@@ -74,13 +74,13 @@ int Paraboloid::ComputeCurrentDeviation() {
 			(m_dyPM.block(0, 0, rowsnum, colsnum).array() *
                 		m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
 				.sqrt().sum() * m_GradientInfluence / numOfNonZero;
-        #ifdef DEBUG_PARABOLOID
+        #ifdef DEBUG_GRIDFILTER
         std::cout << "grad_len = "  << tmp << std::endl;
         #endif
 	return std::ceil(tmp) * m_InitialDeviation;
 }
 
-void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double value, bool isCScomputed ) {
+void GridFilter::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double value, bool isCScomputed ) {
 /**
 *
 * Returns cross-section z = value of ParaboloidMatrix: the plain contains contour
@@ -94,7 +94,7 @@ void Paraboloid::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double v
 }
 
 
-void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
+void GridFilter::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
                                         double value, int deviation, bool isCScomputed) {
 /**
 *
@@ -108,7 +108,7 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 
         Eigen::MatrixXd tmpMat;
         GetCrossSectionOriginal(tmpMat, value, isCScomputed);
-        #ifdef DEBUG_PARABOLOID
+        #ifdef DEBUG_GRIDFILTER
         std::cout << " deviation = " << deviation << std::endl;
         #endif
         if (deviation != 0) addPoints(deviation);
@@ -118,7 +118,7 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 	GetModifiedCrossSection(CSEmatTarget);
 }
 
-void Paraboloid::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value) {
+void GridFilter::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value) {
 /**
 *
 * Returns cross-section z = value of ParaboloidMatrix (the plain contains contour) using value only. The deviation is computed automaticly and depends on gradient at contour points.
@@ -130,7 +130,7 @@ void Paraboloid::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget,
         GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
 }
 
-void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
+void GridFilter::makeCorridor(int curr_x, int curr_y, int deviation) {
 /**
 * Adds neighbour points to the InterestingPoints matrix for point (curr_x, curr_y)
 * \param[in] curr_x x-coordinate of the considered point
@@ -151,9 +151,9 @@ void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
 
 }
 
-void Paraboloid::addPoints(int deviation) {
+void GridFilter::addPoints(int deviation) {
 /**
-* Fills Paraboloid#InterestingPoints matrix by extended contour points.
+* Fills GridFilter#InterestingPoints matrix by extended contour points.
 */
 	m_InterestingPoints.resize(2, 0);
 	for(int i = 0; i < m_PMrows; i++) {

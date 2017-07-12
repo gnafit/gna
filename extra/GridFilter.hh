@@ -1,17 +1,17 @@
-#ifndef PARABOLOID_H
-#define PARABOLOID_H
+#ifndef GRIDFILTER_H
+#define GRIDFILTER_H
 
 #include <cmath>
 #include <iostream>
 #include <Eigen/Core>
 #include <string>
 
-class Paraboloid
+class GridFilter
 {
 public:
 
 	
-	Paraboloid(Eigen::MatrixXd & mat, double xStep, double yStep, 
+	GridFilter(const Eigen::MatrixXd & mat, double xStep, double yStep, 
 		int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: m_ParaboloidMatrix(mat), m_InitialDeviation(initDeviation), m_GradientInfluence(gradInfl), m_AllowableError(allowErr) {
 		m_PMrows = mat.rows();
@@ -20,7 +20,7 @@ public:
 		m_CrossSectionModified = Eigen::MatrixXd::Zero(m_PMrows, m_PMcols);
 	}
 
-	Paraboloid(int rows, int columns, double* mat, double xStep, double yStep, 
+	GridFilter(int rows, int columns, double* mat, double xStep, double yStep, 
 		int initDeviation = 1, double gradInfl = 1.0, double allowErr = 0.0)
 		: m_ParaboloidMatrix(Eigen::Map<Eigen::MatrixXd>(mat, rows, columns)),
 		  m_InitialDeviation(initDeviation), m_GradientInfluence(gradInfl), m_AllowableError(allowErr) {
@@ -38,16 +38,16 @@ public:
 	void GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value);
 
 	/**
-	* Getter for Paraboloid#InterestingPoints matrix
+	* Getter for GridFilter#InterestingPoints matrix
 	* \warning Should be computed at least once by addPoints() function before getting
 	* \return SpectrumCrossSection#InterestingPoints matrix
 	*/
 	inline void GetInterestingPoints(Eigen::MatrixXd & IPTarget)   {  IPTarget = m_InterestingPoints; }
 	
 	/**
-	* Getter for Paraboloid#CrossSectionModified matrix
+	* Getter for GridFilter#CrossSectionModified matrix
 	* \warning Should be computed at least once by addPoints() function before getting
-	* \return Paraboloid#CrossSectionModified matrix
+	* \return GridFilter#CrossSectionModified matrix
 	*/
 	inline void GetModifiedCrossSection(Eigen::MatrixXd & CSMTarget) { CSMTarget = m_CrossSectionModified; }
 
@@ -73,4 +73,4 @@ protected:
 
 };
 
-#endif /* PARABOLOID_H */
+#endif /* GRIDFILTER_H */

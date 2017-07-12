@@ -58,7 +58,7 @@ def main( opts ):
     Z = X**2 + Y**2
     Z1 = 2.0*(X-3.0)*(X-3.0) + 5.0*(Y-1.0)*(Y-1.0) + 3.0*(X-3.0)*(Y-1.0)
     Z2 = 0.05*X*X*X + 0.1*Y*Y*Y + Z1
-    p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), (opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
+    p = R.GridFilter(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), (opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
     masks = []
     title='deviation = ' + str(opts.deviation) + ', gradient influence = ' + str(opts.gradinfluence) + ',\ntolerance = ' + str(opts.tolerance) + ', points sparseness = ' + str(opts.sparseness)
     for level in opts.levels:
