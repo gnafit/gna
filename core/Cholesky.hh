@@ -41,10 +41,10 @@ protected:
  */
 void Cholesky::prepareCholesky(Atypes args, Rtypes rets) {
   if (args[0].shape.size() != 2) {
-    throw args.error(args[0], "Cholesky decomposition of non-2d data");
+    throw args.error(args[0], "Cholesky decomposition can't be performed on non-2d data");
   }
   if (args[0].shape[0] != args[0].shape[1]) {
-    throw args.error(args[0], "Cholesky decomposition of non-square matrix");
+    throw args.error(args[0], "Cholesky decomposition can't be performed with non-square matrix");
   }
   m_llt = LLT(args[0].shape[0]);
   rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
