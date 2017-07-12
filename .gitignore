@@ -18,4 +18,3 @@ compile_commands.json
 .ycm_extra_conf.py
 doc/doxygen
 .vimrc
-doc/doxygen.conf
