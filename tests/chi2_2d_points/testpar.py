@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import numpy as N 
+import numpy as N
 import itertools as I
 from matplotlib import pyplot as plt
 R.GNAObject
@@ -27,10 +27,10 @@ def plotl( title, step, X, Y, Z, **kwargs ):
     X=X[::step, ::step]
     Y=Y[::step, ::step]
     for level, mask, marker in zip(levels, masks, I.cycle( markers ) ):
-        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.05 )
+        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.20 )
 
     ax.legend( loc='upper right' )
-    
+
 
 def eigen_to_numpy( eigen, dtype ):
     return N.frombuffer( eigen.data(), dtype='d', count=eigen.size() ).reshape( eigen.rows(), eigen.cols(), order='F' ).astype(dtype)
@@ -58,7 +58,7 @@ def main( opts ):
     Z2 = 0.05*X*X*X + 0.1*Y*Y*Y + Z1
     p = R.Paraboloid(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), (opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
     masks = []
-    title='deviation = ' + str(opts.deviation) + ', gradient influence = ' + str(opts.gradinfluence) + ',\ntolerance = ' + str(opts.tolerance) + ', points sparseness = ' + str(opts.sparseness) 
+    title='deviation = ' + str(opts.deviation) + ', gradient influence = ' + str(opts.gradinfluence) + ',\ntolerance = ' + str(opts.tolerance) + ', points sparseness = ' + str(opts.sparseness)
     for level in opts.levels:
 	mat = R.Eigen.MatrixXd( xsize, ysize )
         p.GetCrossSectionExtendedAutoDev( mat, level )
@@ -71,7 +71,7 @@ def main( opts ):
             print( 'Level %f (min/max): '%level, Zvalues.min(), Zvalues.max() )
 
     plotl( title, opts.sparseness, X, Y, Z1, levels=opts.levels, masks=masks )
-    
+
     plt.contour( X, Y, Z2, levels=opts.levels)
 
     if opts.output:

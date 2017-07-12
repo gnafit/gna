@@ -6,6 +6,8 @@
 using namespace std;
 using namespace Eigen;
 
+//#define DEBUG_PARABOLOID
+
 /**
 * The only one goal of creating this structure is to optimize matrix openation
 */
@@ -18,7 +20,9 @@ struct Cutter {
 
 void Paraboloid::ComputeCrossSectionOriginal(double value) {
 	m_CrossSectionModified = Eigen::MatrixXd::Zero(m_PMrows, m_PMcols);
+    #ifdef DEBUG_PARABOLOID
 	std::cout << "I am computed!!!" << std::endl;
+    #endif
 	m_CrossSecOriginal = m_ParaboloidMatrix.unaryExpr(Cutter<double>(value, m_AllowableError));
 }
 
@@ -57,18 +61,22 @@ int Paraboloid::ComputeCurrentDeviation() {
 	int rowsnum = m_PMrows - 1, colsnum = m_PMcols - 1;
 	int numOfNonZero = (m_CrossSecOriginal.array() != 0).count();
 	if (numOfNonZero == 0) {
-		std::cerr << "No contour found on this level. If you are sure that it shold be here, try the following:" << std::endl 
-			  << "- make grid step smaller " << std::endl 
+		std::cerr << "No contour found on this level. If you are sure that it shold be here, try the following:" << std::endl
+			  << "- make grid step smaller " << std::endl
 			  << "- make tolerance higher" << std::endl;
 		return 0;
 	}
+    #ifdef DEBUG_PARABOLOID
 	std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
+    #endif
 	double  tmp =  ((m_dxPM.block(0, 0, rowsnum, colsnum).array() *
 				m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
 			(m_dyPM.block(0, 0, rowsnum, colsnum).array() *
                 		m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
 				.sqrt().sum() * m_GradientInfluence / numOfNonZero;
+        #ifdef DEBUG_PARABOLOID
         std::cout << "grad_len = "  << tmp << std::endl;
+        #endif
 	return std::ceil(tmp) * m_InitialDeviation;
 }
 
@@ -100,7 +108,9 @@ void Paraboloid::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
 
         Eigen::MatrixXd tmpMat;
         GetCrossSectionOriginal(tmpMat, value, isCScomputed);
+        #ifdef DEBUG_PARABOLOID
         std::cout << " deviation = " << deviation << std::endl;
+        #endif
         if (deviation != 0) addPoints(deviation);
 	else {
 		CSEmatTarget = MatrixXd::Zero(m_PMrows, m_PMcols);
@@ -125,7 +135,7 @@ void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
 * Adds neighbour points to the InterestingPoints matrix for point (curr_x, curr_y)
 * \param[in] curr_x x-coordinate of the considered point
 * \param[in] curr_y y-coordinate of the considered point
-* \param[in] deviation Deviation from the original contour 
+* \param[in] deviation Deviation from the original contour
 */
 	for (int i = curr_x - deviation; i < curr_x + deviation + 1; i++) {
 		if (i < 0 || i >=  m_PMrows) continue;
@@ -143,7 +153,7 @@ void Paraboloid::makeCorridor(int curr_x, int curr_y, int deviation) {
 
 void Paraboloid::addPoints(int deviation) {
 /**
-* Fills Paraboloid#InterestingPoints matrix by extended contour points. 
+* Fills Paraboloid#InterestingPoints matrix by extended contour points.
 */
 	m_InterestingPoints.resize(2, 0);
 	for(int i = 0; i < m_PMrows; i++) {
