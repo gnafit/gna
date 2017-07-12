@@ -6,26 +6,9 @@
 using namespace std;
 using namespace Eigen;
 
-//#define DEBUG_GRIDFILTER
-
-/**
-* The only one goal of creating this structure is to optimize matrix openation
-*/
-/*template<typename T>
-struct Cutter {
-  Cutter(const T& val, const T& err) : v(val), e(err) {}
-  const T operator()(const T& x) const { return std::abs(x - v) <= e ? 1.0 : 0.0; }
-  T v, e;
-};
-
-void GridFilter::ComputeCrossSectionOriginal(double value) {
-	m_CrossSectionModified = Eigen::MatrixXd::Zero(m_PMrows, m_PMcols);
-    #ifdef DEBUG_GRIDFILTER
-	std::cout << "I am computed!!!" << std::endl;
-    #endif
-	m_CrossSecOriginal = m_ParaboloidMatrix.unaryExpr(Cutter<double>(value, m_AllowableError));
-}
-*/
+#ifdef DEBUG
+#define DEBUG_GRIDFILTER
+#endif
 
 
 void GridFilter::ComputeCrossSectionOriginal(double value) {
