@@ -6,9 +6,9 @@
 using namespace std;
 using namespace Eigen;
 
-#ifdef DEBUG
-#define DEBUG_GRIDFILTER
-#endif
+//#ifdef DEBUG
+//#define DEBUG_GRIDFILTER
+//#endif
 
 
 void GridFilter::ComputeCrossSectionOriginal(double value) {
