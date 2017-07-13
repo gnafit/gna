@@ -163,16 +163,8 @@ def array_to_Points( array ):
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s )
 
-Datadouble = R.Data('double')
-VectorXd, MatrixXd, ArrayXd, ArrayXXd = Datadouble.VectorXT, Datadouble.MatrixXT, Datadouble.ArrayXT, Datadouble.ArrayXXT
-import IPython
-IPython.embed()
-@save_converter( N.ndarray,  )
+@save_converter( N.ndarray, R.Eigen.MatrixXd )
 def array_to_Points( array ):
-    """Convert numpy array to Points"""
-    if len(array.shape)>2:
-        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
-    a = array.ravel( order='F' )
-    s = array_to_stdvector_size_t( array.shape )
-    return R.Points( a, s )
+    """Convert numpy array to Eigen::MatrixXd"""
+    return R.Eigen.MatrixXd(R.Eigen.Map('Eigen::MatrixXd')( array.ravel( order='F' ), *array.shape ))
 

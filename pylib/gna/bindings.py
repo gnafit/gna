@@ -2,7 +2,7 @@ from gna.env import env
 import numpy as np
 import ROOT
 
-ignored_classes = [ 'Eigen' ]
+ignored_classes = [ 'Eigen', 'EigenHelpers']
 
 def hygienic(decorator):
     def new_decorator(original):

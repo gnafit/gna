@@ -83,6 +83,7 @@ set (HEADERS
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
+  EigenHelpers.hh
   )
 
 include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
