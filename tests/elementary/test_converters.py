@@ -9,6 +9,20 @@ from pprint import pprint
 
 print( 'List converters' )
 pprint(dict(converters))
+print()
+
+print( 'Try exception' )
+d = N.array([0])
+try:
+    convert( d, object, debug=True )
+except Exception as e:
+    print( 'Planned exception:', e )
+
+try:
+    convert( object(), object, debug=True )
+except Exception as e:
+    print( 'Planned exception:', e )
+print()
 
 print()
 print( 'Test guessing' )
@@ -50,8 +64,10 @@ print( 'Test auto' )
 for dtype in [ 'd', 'f', 'i' ]:
     a = N.arange(0.5, 12.5, dtype=dtype )
     print( 'From', a )
-    c = convert( a, 'stdvector' )
+    c = convert( a, 'stdvector', debug=True  )
     dump( c, 'to' )
+    b = convert( c, 'array', debug=True  )
+    dump( b, 'back' )
 
 print()
 print( 'Test base conversion and Points' )
@@ -67,8 +83,8 @@ i.dump()
 print()
 print( 'Test Eigen' )
 mat = N.matrix( N.arange(1, 13, dtype='d').reshape(3, 4) )
-em = convert( mat, R.Eigen.MatrixXd )
-matb = convert( em, 'matrix' )
+em = convert( mat, R.Eigen.MatrixXd, debug=True  )
+matb = convert( em, 'matrix', debug=True  )
 print( 'matrix' )
 print( mat )
 print( 'MatrixXd' )
@@ -78,8 +94,8 @@ print( mat )
 print()
 
 arr = N.array( N.arange(2, 14, dtype='d').reshape(3, 4) )
-em = convert( arr, R.Eigen.ArrayXXd )
-arrb = convert( em, 'array' )
+em = convert( arr, R.Eigen.ArrayXXd, debug=True  )
+arrb = convert( em, 'array', debug=True  )
 print( 'array 2d' )
 print( arr )
 print( 'ArrayXXd' )
@@ -89,8 +105,8 @@ print( arrb )
 print()
 
 arr = N.array( N.arange(3, 15, dtype='d') )
-em = convert( arr, R.Eigen.ArrayXd )
-arrb = convert( em, 'array' )
+em = convert( arr, R.Eigen.ArrayXd, debug=True  )
+arrb = convert( em, 'array', debug=True  )
 print( 'array' )
 print( arr )
 print( 'ArrayXd' )
@@ -99,8 +115,8 @@ print( 'arr back' )
 print( arrb )
 
 mat = N.matrix( N.arange(4, 16, dtype='d') ).T
-em = convert( mat, R.Eigen.VectorXd )
-matb = convert( em, 'matrix' )
+em = convert( mat, R.Eigen.VectorXd, debug=True  )
+matb = convert( em, 'matrix', debug=True  )
 print( 'vector', mat.shape[0], mat.shape[1] )
 print( mat )
 print( 'VectorXd', em.rows(), em.cols() )

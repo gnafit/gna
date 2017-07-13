@@ -42,13 +42,15 @@ def convert(obj, totype, debug=False, **kwargs):
     convert( N.array([1, 2, 3]), R.vector, dtype='double' )
     """
 
-    converter=None
-    def msg( title ):
-        res = title+"'{0}' to convert '{1}' ({2}) to '{3}'".format(
-                      converter.__name__,
+    def msg( title, converter=None ):
+        res = title
+        if converter:
+            res+= ' '+converter.__name__
+        typestr = type(totype) is str and totype or totype.__name__
+        res+=" to convert '{0}' ({1}) to '{2}'".format(
                       type(obj).__name__,
                       ', '.join([base.__name__ for base in bases]),
-                      str(totype.__name__)
+                      typestr
                     )
         if kwargs:
             res+=' [kwargs: %s]'%( str( kwargs ) )
@@ -72,7 +74,7 @@ def convert(obj, totype, debug=False, **kwargs):
         raise Exception(msg('Can not find converter'))
 
     if debug:
-        print( msg( 'Using converter' ) )
+        print( msg( 'Using converter', converter ) )
     return converter( obj, **kwargs )
 
 def save_converter( from_type, to_type ):
@@ -135,7 +137,7 @@ def array_to_stdvector_int( array ):
     """Convert an array to the std::vector<int>"""
     return array_to_stdvector( array, 'int' )
 
-def stdvector_to_array( vector, dtype ):
+def stdvector_to_array( vector, dtype=None ):
     """Convert an std::vector to numpy.array"""
     return N.array( vector, dtype=dtype )
 
@@ -148,6 +150,11 @@ def stdvector_to_array_int( vector ):
 def stdvector_to_array_double( vector ):
     """Convert std::vector to array of double"""
     return stdvector_to_array( vector, 'd' )
+
+@save_converter( R.vector('float'), N.ndarray )
+def stdvector_to_array_float( vector ):
+    """Convert std::vector to array of double"""
+    return stdvector_to_array( vector, 'f' )
 
 @save_converter( R.vector('size_t'), N.ndarray )
 def stdvector_to_array_double( vector ):
