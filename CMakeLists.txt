@@ -84,7 +84,7 @@ set (HEADERS
   GridFilter.hh
   )
 
-include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/ extra/)
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 include(dev-tools)
 set(DICT    Dict.cc)
 
