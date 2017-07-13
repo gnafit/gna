@@ -2,6 +2,8 @@ from gna.env import env
 import numpy as np
 import ROOT
 
+ignored_classes = [ 'Eigen' ]
+
 def hygienic(decorator):
     def new_decorator(original):
         wrapped = decorator(original)
@@ -213,7 +215,7 @@ def setup(ROOT):
             if cls.__name__ == 'Points':
                 wrapped = wrapPoints(wrapped)
             return wrapped
-        if 'Class' not in cls.__dict__:
+        if 'Class' not in cls.__dict__ and cls.__name__ not in ignored_classes:
             t = cls.__class__
             origgetattr = cls.__getattribute__
             t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))
