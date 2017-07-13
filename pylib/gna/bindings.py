@@ -2,6 +2,7 @@ from gna.env import env
 import numpy as np
 import ROOT
 
+# Protect the following classes/namespaces from being wrapped
 ignored_classes = [ 'Eigen', 'EigenHelpers']
 
 def hygienic(decorator):
