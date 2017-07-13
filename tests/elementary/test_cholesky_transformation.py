@@ -8,16 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from gna import bindings
-bindings.setup(R)
-# R.GNAObject
-
-def array_to_stdvector( array, dtype ):
-    """Convert an array to the std::vector<dtype>"""
-    ret = R.vector(dtype)( len( array ) )
-    for i, v in enumerate( array ):
-        ret[i] = v
-    return ret
+from converters import convert
 
 #
 # Create the matrix
@@ -38,10 +29,7 @@ print( 'L (numpy)' )
 print( chol )
 print()
 
-lmat = mat.A.ravel( order='F' )
-shape = array_to_stdvector(mat.shape, 'size_t')
-
-points = R.Points( lmat, shape )
+points = convert( mat, R.Points )
 cholesky = R.Cholesky()
 
 cholesky.cholesky.mat( points.points.points )
