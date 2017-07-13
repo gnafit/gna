@@ -187,7 +187,7 @@ def array_to_eigenvector( array ):
     """Convert numpy array to Eigen::MatrixXd"""
     if len(array.shape)!=2 or array.shape[1]!=1:
         raise Exception( 'Can not convert arrays with shape %s tor VectorXd'%( str(array.shape) ) )
-    return R.Eigen.VectorXd(R.Eigen.Map('Eigen::VectorXd')( array.ravel( order='F' ), array.shape[0] ))
+    return R.Eigen.MatrixXd(R.Eigen.Map('Eigen::MatrixXd')( array.ravel( order='F' ), *array.shape ))
 
 @save_converter( N.ndarray, R.Eigen.ArrayXd )
 def array_to_eigenarray( array ):
@@ -199,26 +199,24 @@ def array_to_eigenarray( array ):
 @save_converter( R.Eigen.MatrixXd, N.ndarray )
 @save_converter( R.Eigen.VectorXd, N.ndarray )
 @save_converter( R.Eigen.ArrayXXd, N.ndarray )
-@save_converter( R.Eigen.ArrayXd, N.ndarray )
-def eigenmatrix_to_array( array ):
+def eigen_to_array( array ):
     """Convert Eigen::MatrixXd/Eigen::VectorXd/Eigen::ArrayXXd to numpy array"""
     return N.frombuffer( array.data(), dtype='d', count=array.size() ).reshape( array.rows(), array.cols(), order='F' )
 
 @save_converter( R.Eigen.MatrixXd, N.matrixlib.defmatrix.matrix )
 @save_converter( R.Eigen.VectorXd, N.matrixlib.defmatrix.matrix )
 @save_converter( R.Eigen.ArrayXXd, N.matrixlib.defmatrix.matrix )
-@save_converter( R.Eigen.ArrayXd, N.matrixlib.defmatrix.matrix )
-def eigenmatrix_to_matrix( array ):
+def eigen_to_matrix( array ):
     """Convert Eigen::MatrixXd/Eigen::VectorXd/Eigen::ArrayXXd to numpy matrix"""
-    return N.matrix( eigenmatrix_to_array( array ) )
+    return N.matrix( eigen_to_array( array ) )
 
 @save_converter( R.Eigen.ArrayXd, N.ndarray )
-def eigenmatrix_to_array( array ):
+def eigenarray_to_array( array ):
     """Convert Eigen::ArrayXd to numpy array"""
     return N.frombuffer( array.data(), dtype='d', count=array.size() )
 
 @save_converter( R.Eigen.ArrayXd, N.matrixlib.defmatrix.matrix )
-def eigenmatrix_to_matrix( array ):
+def eigenarray_to_matrix( array ):
     """Convert Eigen::ArrayXd to numpy matrix"""
-    return N.matrix( eigenmatrix_to_array( array ) )
+    return N.matrix( eigenarray_to_array( array ) )
 
