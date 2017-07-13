@@ -38,6 +38,7 @@ set (SOURCES
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
+  extra/GridFilter.cc
   )
 
 set (HEADERS
@@ -81,9 +82,10 @@ set (HEADERS
   EnergyResolution.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
+  GridFilter.hh
   )
-  
-include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 include(dev-tools)
 set(DICT    Dict.cc)
 
