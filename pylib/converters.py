@@ -16,6 +16,7 @@ converters = defaultdict( dict )
 # Add nicknames for types
 nicknames = {
         R.vector:                     'stdvector',
+        R.Points:                     'points',
         R.Eigen.MatrixXd:             'eigenmatrix',
         R.Eigen.VectorXd:             'eigenvector',
         R.Eigen.ArrayXd:              'eigenarray',
