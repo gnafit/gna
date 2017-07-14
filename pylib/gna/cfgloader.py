@@ -6,12 +6,13 @@ from __future__ import print_function
 import runpy
 
 class config(object):
-    def __init__(self, filename=None, dic={}):
+    def __init__(self, filename=None, dic={}, **kwargs):
         self['@info']={'@loaded_from': filename}
+        self.__verbose__ = kwargs.pop( 'debug', False )
         if filename:
-            dic = self.__load__(filename, dictonly=True)
-
-        self.__import__(dic)
+            self.__load__(filename)
+        elif dic:
+            self.__import__(dic)
 
     def get(self, name, default=None):
         return self.__dict__.get(name, default)
@@ -23,7 +24,7 @@ class config(object):
         return self.__dict__.setdefault(key, value)
 
     def __contains__(self, name):
-        return self.__dict__.contains(name)
+        return self.__dict__.__contains__(name)
 
     def __setattr__(self, key, value):
         if type(value)==str:
@@ -43,7 +44,11 @@ class config(object):
         except:
             raise Exception( "Config file '%s' doesn't define key <%s>"%( self.__dict__['@info']['@loaded_from'], key ) )
 
-    def __load__(self, filename, dictonly=False):
+    def __load__(self, filename):
+        dic = self.__load_dic__(filename, dictonly=True)
+        self.__import__(dic)
+
+    def __load_dic__(self, filename, dictonly=False):
         print('Loading config file:', filename)
         dic =  runpy.run_path(filename, init_globals={}) # TODO: add predefined globals
 
@@ -56,6 +61,11 @@ class config(object):
         for k, v in sorted(dic.items()):
             if k.startswith('__'):
                 continue
+            if self.__verbose__:
+                if k in self:
+                    print( 'Reset', k, 'to', v )
+                else:
+                    print( 'Set', k, 'to', v )
             self.__setattr__(k, v)
 
     def __check_for_conflicts__(self, dic):
