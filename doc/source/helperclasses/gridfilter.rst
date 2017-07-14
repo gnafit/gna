@@ -1,4 +1,4 @@
-Paraboloid
+GridFilter
 ~~~~~~~~~~
 
 Description
@@ -18,9 +18,9 @@ Constructors
 ^^^^^^^^^^^^
 
 
-``Paraboloid(Eigen::MatrixXd & mat, double xStep, double yStep, int initDeviation, double gradInfl, double allowErr)``
+``GridFilter(const Eigen::MatrixXd & mat, double xStep, double yStep, int initDeviation, double gradInfl, double allowErr)``
 
-``Paraboloid(int rows, int columns, double* mat, double xStep, double yStep, int initDeviation, double gradInfl, double allowErr)``
+``GridFilter(int rows, int columns, double* mat, double xStep, double yStep, int initDeviation, double gradInfl, double allowErr)``
 
 where 
 
@@ -56,7 +56,7 @@ Public:
 Protected:
 ----------
 
-``ComputeGradient(double xStep, double yStep)`` computes gradients at every point for paraboloid matrix with the given grid step:
+``ComputeGradient(double xStep, double yStep)`` computes gradients at every point for function values matrix with the given grid step:
 
 .. math::
   \frac {f(x_i,y_i) - f(x_{i-1}, y_i)} {x_{i} - x_{i-1}},  \frac {f(x_i,y_i) - f(x_i, y_{i-1})} {y_{i} - y_{i-1}}
