@@ -1,6 +1,3 @@
-Cheat sheet
------------
-
 Compilation
 ^^^^^^^^^^^
 

@@ -1,6 +1,9 @@
 Reference guide
 ==================
 
+Cheat sheet
+-----------
+
 .. toctree::
    :glob:
    :maxdepth: 1
