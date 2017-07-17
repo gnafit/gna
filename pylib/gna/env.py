@@ -2,10 +2,9 @@ from collections import defaultdict, deque, Mapping
 import parameters
 from contextlib import contextmanager
 import ROOT
+from gna.config import cfg
 
 env = None
-
-debug_output = False
 
 class namespacedict(defaultdict):
     def __init__(self, ns):
@@ -85,7 +84,7 @@ class ExpressionsEntry(object):
     def resolvepath(self, seen, known):
         minexpr, minpaths = None, None
         for expr in self.exprs:
-            if debug_output:
+            if cfg.debug_bindings:
                 print expr.expr.name(), seen
             paths = expr.resolvepath(seen, set(known))
             if paths is None:
@@ -195,7 +194,7 @@ class namespace(Mapping):
 
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
-            if debug_output:
+            if cfg.debug_bindings:
                 print self.path, obj, expr.name()
             name = expr.name()
             if name not in self.storage:
@@ -252,7 +251,7 @@ class nsview(object):
                 return ns[name]
             except KeyError:
                 pass
-        if debug_output:
+        if cfg.debug_bindings:
             print "can't find name {}. Names in view: ".format(name),
             if self.nses:
                 for ns in self.nses:
@@ -363,7 +362,7 @@ class _environment(object):
             if isinstance(param, ExpressionsEntry):
                 param = param.get()
             if param is not None:
-                if debug_output:
+                if cfg.debug_bindings:
                     print "binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
                 v.bind(param.getVariable())
             else:
