@@ -43,6 +43,9 @@ class configurator_base(object):
 
     def __load__(self, filename, subst=[]):
         if subst:
+            if subst=='default':
+                subst = dict( key='location', values=['config', 'config_local'] )
+
             if type(subst) in [ list, tuple ]:
                 filenames = [ filename.format( s ) for s in subst ]
             elif type(subst) is dict:

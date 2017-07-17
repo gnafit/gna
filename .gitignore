@@ -17,3 +17,8 @@ build/
 compile_commands.json
 .ycm_extra_conf.py
 doc/doxygen
+config_local
+.gitignore
+.viminfo
+tags
+.cache
