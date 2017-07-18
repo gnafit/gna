@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-#define DEBUG_GRIDFILTER
+//#define DEBUG_GRIDFILTER
 
 void GridFilter::ComputeCrossSectionOriginal(double value) {
     auto lambda = [&value, this](double x){ return std::abs(x - value) <= m_AllowableError ? 1.0 : 0.0; };
@@ -138,7 +138,8 @@ void GridFilter::GetCrossSectionExtendedIrregular(Eigen::MatrixXd& CSEImatTarget
      *
      */
     ComputeCrossSectionOriginal(value);
-    GetCrossSectionExtended(CSEImatTarget, value, ComputeCurrentDeviation(), true, false);
+    ComputeAbsGradMatrix();
+    GetCrossSectionExtended(CSEImatTarget, value, 1, true, false);
 }
 
 void GridFilter::makeCorridor(int curr_x, int curr_y, int deviation) {
