@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-//#define DEBUG_GRIDFILTER
+#define DEBUG_GRIDFILTER
 
 void GridFilter::ComputeCrossSectionOriginal(double value) {
     auto lambda = [&value, this](double x){ return std::abs(x - value) <= m_AllowableError ? 1.0 : 0.0; };
@@ -33,6 +33,8 @@ void GridFilter::ComputeGradient(double xStep, double yStep) {
     m_dyPM = (m_ParaboloidMatrix.bottomRows(m_PMrows - 1) - m_ParaboloidMatrix.topRows(m_PMrows - 1)) / yStep;
 }
 
+
+
 int GridFilter::ComputeCurrentDeviation() {
     /**
      *
@@ -44,12 +46,11 @@ int GridFilter::ComputeCurrentDeviation() {
      *	- Find the sqrt of sum of squares (to fing the length of gradient vector)
      *	- Sum all this values and divide by the number of non-zero values to find the avarage value of contour's gradient
      *	- Product with multiplier GradientInfluence, ceil and product with InitialDeviation
-     *
+     * 
      * \return Deviation from the original coutour - the number of points that will be included in extended contour.
      *
      */
 
-    int rowsnum = m_PMrows - 1, colsnum = m_PMcols - 1;
     int numOfNonZero = (m_CrossSecOriginal.array() != 0).count();
     if (numOfNonZero == 0) {
         std::cerr << "No contour found on this level. If you are sure that it shold be here, try the following:" << std::endl
@@ -60,15 +61,22 @@ int GridFilter::ComputeCurrentDeviation() {
     #ifdef DEBUG_GRIDFILTER
     std::cout << "numOfNonZero = "  << numOfNonZero << std::endl;
     #endif
-    double  tmp =  ((m_dxPM.block(0, 0, rowsnum, colsnum).array() *
-                     m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
-                    (m_dyPM.block(0, 0, rowsnum, colsnum).array() *
-                     m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
-                    .sqrt().sum() * m_GradientInfluence / numOfNonZero;
+    ComputeAbsGradMatrix();
+    double  tmp =  m_AbsGrad.sum() / numOfNonZero;
     #ifdef DEBUG_GRIDFILTER
     std::cout << "grad_len = "  << tmp << std::endl;
     #endif
     return std::ceil(tmp) * m_InitialDeviation;
+}
+
+void GridFilter::ComputeAbsGradMatrix() {
+    int rowsnum = m_PMrows - 1, colsnum = m_PMcols - 1;
+    m_AbsGrad = ((m_dxPM.block(0, 0, rowsnum, colsnum).array() *
+                     m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square() +
+                    (m_dyPM.block(0, 0, rowsnum, colsnum).array() *
+                     m_CrossSecOriginal.block(0, 0, rowsnum, colsnum).array()).square())
+                    .sqrt() * m_GradientInfluence ;
+
 }
 
 void GridFilter::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double value, bool isCScomputed ) {
@@ -86,7 +94,7 @@ void GridFilter::GetCrossSectionOriginal(Eigen::MatrixXd& CSOmatTarget, double v
 
 
 void GridFilter::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
-                                         double value, int deviation, bool isCScomputed) {
+                                         double value, int deviation, bool isCScomputed, bool isDevConst) {
     /**
      *
      * Returns cross-section plane z = value of ParaboloidMatrix with the extended contour
@@ -102,7 +110,7 @@ void GridFilter::GetCrossSectionExtended(MatrixXd & CSEmatTarget,
     #ifdef DEBUG_GRIDFILTER
     std::cout << " deviation = " << deviation << std::endl;
     #endif
-    if (deviation != 0) addPoints(deviation);
+    if (deviation != 0) addPoints(deviation, isDevConst);
     else {
         CSEmatTarget = MatrixXd::Zero(m_PMrows, m_PMcols);
     }
@@ -119,6 +127,18 @@ void GridFilter::GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget,
      */
     ComputeCrossSectionOriginal(value);
     GetCrossSectionExtended(CSEADmatTarget, value, ComputeCurrentDeviation(), true);
+}
+
+void GridFilter::GetCrossSectionExtendedIrregular(Eigen::MatrixXd& CSEImatTarget, double value) {
+     /**
+     *
+     * Returns cross-section z = value of ParaboloidMatrix (the plain contains contour) using value only. The deviation is computed automaticly,  depends on gradient at contour points and not constant for the level.
+     * \param[in] CSEADmatTarget The matrix where result will be written
+     * \param[in] value The value for compute cross-section plane z = value
+     *
+     */
+    ComputeCrossSectionOriginal(value);
+    GetCrossSectionExtended(CSEImatTarget, value, ComputeCurrentDeviation(), true, false);
 }
 
 void GridFilter::makeCorridor(int curr_x, int curr_y, int deviation) {
@@ -142,14 +162,17 @@ void GridFilter::makeCorridor(int curr_x, int curr_y, int deviation) {
 
 }
 
-void GridFilter::addPoints(int deviation) {
+void GridFilter::addPoints(int dev, bool isDevConst) {
     /**
      * Fills GridFilter#InterestingPoints matrix by extended contour points.
      */
+    int deviation = 0;
+    if(isDevConst) deviation = dev;
     m_InterestingPoints.resize(2, 0);
     for(int i = 0; i < m_PMrows; i++) {
         for (int j = 0; j < m_PMcols; j++) {
             if (m_CrossSecOriginal(i, j) == 1.0) {
+                if(!isDevConst)  deviation = std::ceil(m_AbsGrad(i, j)) * m_InitialDeviation;
                 m_InterestingPoints.conservativeResize(2, m_InterestingPoints.cols() + 1);
                 m_InterestingPoints(0, m_InterestingPoints.cols() - 1) = i;
                 m_InterestingPoints(1, m_InterestingPoints.cols() - 1) = j;
