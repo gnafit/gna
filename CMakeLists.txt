@@ -101,6 +101,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 
+find_package( CUDA REQUIRED)
+message(STATUS "Cuda cublas libraries  : ${CUDA_CUBLAS_LIBRARIES}")
+
 find_package( Eigen3 REQUIRED)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
@@ -122,4 +125,4 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} -lPyROOT -lgsl)
