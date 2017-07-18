@@ -8,9 +8,6 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from gna import bindings
-bindings.setup(R)
-R.GNAObject
 
 def array_to_stdvector( array, dtype ):
     """Convert an array to the std::vector<dtype>"""
