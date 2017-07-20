@@ -1,0 +1,51 @@
+cmake_minimum_required(VERSION 2.8)
+
+#project(Wrapper)
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe -fPIC")
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/build/cuda/")
+
+#add_subdirectory(cuda/)
+
+
+#set(CMAKE_MODULE_PATH ../cmake)
+ # project(CNAtestCUDA)
+
+#find_package( CUDA REQUIRED)
+#message(STATUS "Cuda cublas libraries  : ${CUDA_CUBLAS_LIBRARIES}")
+#set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+
+#set(
+#    CUDA_NVCC_FLAGS
+#    ${CUDA_NVCC_FLAGS};
+#    -std=c++11 -Xcompiler -fPIC  -O3 -arch=compute_50 
+#)
+
+
+#include_directories(${CUDA_INCLUDE} ${CUDA_INCLUDE_DIRS})
+
+#set(LINK_DIRECTORIES
+#   ${CUDA_LIBRARIES}
+#)
+
+#cuda_compile(CNAtestCUDA_O cuda/test.cu)
+set(CNALIBNAME cnalib)
+#cuda_add_library(${CNALIBNAME} SHARED cuda/test.h ${CNAtestCUDA_O})
+#target_link_libraries(${CNALIBNAME} ${CUDA_LIBRARIES} )
+#install(TARGETS ${CNALIBNAME}  DESTINATION ./)
+
+
+#project(Wrapper)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe ")
+
+include_directories(cuda/)
+find_library(lib1_location cnalib ./build)
+message("Lib1 is at: ${lib1_location}")
+
+add_executable(wraprun wrapper.cpp)
+
+target_link_libraries(wraprun -L/home/anna/dubna3/gna/wrapper/build/libcnalib.so)
+
