@@ -86,6 +86,11 @@ set (HEADERS
   EigenHelpers.hh
   )
 
+set(SOURCES_STANDALONE standalone/LittleTest.cc)
+set(NAME_STANDALONE standalone_test)
+set(HEADERS_STANDALONE LittleTest.hh)
+include_directories(standalone)
+
 include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 include(dev-tools)
 set(DICT    Dict.cc)
@@ -122,4 +127,7 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)
+
+add_executable(${NAME_STANDALONE} ${SOURCES_STANDALONE})
+target_link_libraries(${NAME_STANDALONE} ${LIBNAME})
