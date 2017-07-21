@@ -84,9 +84,10 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh
+  test.h
   )
 
-include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
 include(dev-tools)
 set(DICT    Dict.cc)
 
@@ -94,7 +95,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe ")
 
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -104,7 +105,7 @@ list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 #find_package( CUDA REQUIRED)
 #message(STATUS "Cuda cublas libraries  : ${CUDA_CUBLAS_LIBRARIES}")
 #include_directories(SYSTEM ${CUDA_INCLUDE_DIRS})
-add_subdirectory(cuda)
+#add_subdirectory( cuda/ )
 
 find_package( Eigen3 REQUIRED)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
@@ -120,14 +121,25 @@ endif(Boost_FOUND)
 find_Package( GSL REQUIRED )
 include_directories(SYSTEM ${GSL_INCLUDE_DIR})
 
-set(CUDA_CUSTOM ${PROJECT_SOURCE_DIR}/cuda)
+#set(CUDA_CUSTOM ${PROJECT_SOURCE_DIR}/cuda)
 
 find_package(ROOT)
-include_directories(SYSTEM ${ROOT_INCLUDE_DIR} ${CUDA_CUSTOM})
+include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
 link_directories(${ROOT_LIBRARY_DIR})
+#link_directories( ${PROJECT_SOURCE_DIR}/build/cuda/)
+
+add_subdirectory(cuda/)
+
+#set(SRC wrapper.cxx)
+cmake_policy(SET CMP0015 NEW)
+link_directories(cuda/)
+
+#add_executable(wrapper ${SRC})
+
+#target_link_libraries(wrapper simp)
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-add_dependencies(${LIBNAME} GNAtestCUDA)
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES}  -lPyROOT -lgsl)
+#add_dependencies(${LIBNAME} CNAtestCUDA)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} -lPyROOT -lgsl simp)
