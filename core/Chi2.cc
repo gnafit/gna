@@ -1,6 +1,8 @@
 #include <boost/lexical_cast.hpp>
 
 #include "Chi2.hh"
+#include "test.h"
+#include "simp.h"
 
 using namespace Eigen;
 
@@ -35,6 +37,8 @@ void Chi2::checkTypes(Atypes args, Rtypes rets) {
 
 void Chi2::calculateChi2(Args args, Rets rets) {
   rets[0].arr(0) = 0;
+  std::cout << "I AM HERE!" << std::endl;
+  simpfun();
   for (size_t i = 0; i < args.size(); i+=3) {
     VectorXd diff = args[i+0].vec - args[i+1].vec;
     args[i+2].mat.triangularView<Eigen::Lower>().solveInPlace(diff);
