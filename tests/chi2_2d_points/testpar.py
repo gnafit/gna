@@ -27,7 +27,7 @@ def plotl( title, step, X, Y, Z, **kwargs ):
     X=X[::step, ::step]
     Y=Y[::step, ::step]
     for level, mask, marker in zip(levels, masks, I.cycle( markers ) ):
-        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.6, markeredgecolor='none' )
+        ax.plot( X[mask], Y[mask], marker, label='L=%g'%level, alpha=0.06, markeredgecolor='none' )
         # there is a pdf bug for markers with transparency - visible gap between marker face and marker edge
         # therefore the edge color is disabled
     plt.subplots_adjust( top=0.87 )
@@ -61,9 +61,14 @@ def main( opts ):
     p = R.GridFilter(Z1.shape[0], Z1.shape[1], numpy_to_eigen( Z1 ), (opts.xlinspace[1] - opts.xlinspace[0]) / xsize, (opts.ylinspace[1] - opts.ylinspace[0]) / ysize, opts.deviation, opts.gradinfluence, opts.tolerance )
     masks = []
     title='deviation = ' + str(opts.deviation) + ', gradient influence = ' + str(opts.gradinfluence) + ',\ntolerance = ' + str(opts.tolerance) + ', points sparseness = ' + str(opts.sparseness)
+    if opts.irregular:
+        title = title + ', irregular deviation'
     for level in opts.levels:
 	mat = R.Eigen.MatrixXd( xsize, ysize )
-        p.GetCrossSectionExtendedAutoDev( mat, level )
+        if opts.irregular:
+            p.GetCrossSectionExtendedIrregular( mat, level )
+        else:
+            p.GetCrossSectionExtendedAutoDev( mat, level )
         csc = eigen_to_numpy( mat, 'bool' ).copy()
         csc_sparse = csc[:: opts.sparseness, :: opts.sparseness]
         masks.append( csc_sparse )
@@ -87,6 +92,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument( '-s', '--show', action='store_true', help='show figures' )
+    parser.add_argument( '-irr', '--irregular', action='store_true' )
     parser.add_argument( '-l', '--levels', nargs='+', default=[1.0, 4.0, 9.0], type=float, help='levels to process')
     parser.add_argument( '-o', '--output', help='figure output' )
     parser.add_argument( '-sp', '--sparseness', type=int, default=1, help='points sparseness')
