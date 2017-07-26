@@ -11,5 +11,4 @@ pages:
     paths:
     - doc/build/html
   only:
-  - ci_docs
-
+  - master 
