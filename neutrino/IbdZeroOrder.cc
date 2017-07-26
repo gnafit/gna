@@ -34,7 +34,10 @@ void IbdZeroOrder::calcXsec(Args args, Rets rets) {
 
   const double MeV2cm = pow(TMath::Hbar()*TMath::C()*J2MeV, 2) * 1.E4;
 
-  auto pe = (Ee.square() - m_pdg->ElectronMass*m_pdg->ElectronMass).sqrt();
+  Eigen::ArrayXd pe = (Ee.square() - m_pdg->ElectronMass*m_pdg->ElectronMass).sqrt();
+/* Sanity check to null all possible nans */
+  std::transform(pe.data(), pe.data() + pe.size(), pe.data(),
+                [](double x){return (!std::isnan(x) ? x : 0.);});
   auto coeff = 2.*pi*pi /
     (std::pow(m_pdg->ElectronMass, 5) * PhaseFactor * m_pdg->NeutronLifeTime/(1.E-6*TMath::Hbar()/TMath::Qe()));
   rets[0].x = MeV2cm * coeff*Ee*pe;

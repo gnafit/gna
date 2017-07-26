@@ -1,6 +1,3 @@
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -pipe")
-
 if(NATIVE)
     message(STATUS "Using native set of CPU instructions")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -17,8 +14,6 @@ if(PARAM_DEBUG)
 endif()
 
 if(GRIDFILTER_DEBUG)
-    message(STATUS "Setting debug mode")
-    set(CMAKE_BUILD_TYPE Debug)
+    message(STATUS "Setting debug mode for GridFilter")
     add_definitions(-DDEBUG_GRIDFILTER)
 endif()
-

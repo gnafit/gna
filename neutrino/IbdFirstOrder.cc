@@ -54,6 +54,8 @@ void IbdFirstOrder::calc_Enu(Args args, Rets rets) {
 
   ArrayXd r = Ee / m_pdg->ProtonMass;
   ArrayXd Ve = (1.0 - ElectronMass2 / Ee.square()).sqrt();
+  std::transform(Ve.data(), Ve.data() + Ve.size(), Ve.data(),
+                [](double E){return (!std::isnan(E) ? E : 0.);});
   ArrayXd Ee0 = Ee + (NeutronMass2-ProtonMass2-ElectronMass2)/m_pdg->ProtonMass*0.5;
   ArrayXXd corr = (1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r).inverse();
   rets[0].arr2d = corr.colwise()*Ee0;

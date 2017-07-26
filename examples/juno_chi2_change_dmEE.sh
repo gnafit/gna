@@ -32,6 +32,6 @@ python gna \
 -- scan --lingrid juno_nh.oscillation.DeltaMSqEE  2.42e-3 2.58e-3 100 \
    --minimizer min_nh --verbose --output /tmp/out_nh.hdf5 \
 
-# -- contour --no_shift --chi2 /tmp/out_ih.hdf5  --minimizer min_ih --plot chi2minplt \
+# -- contour --no-shift --chi2 /tmp/out_ih.hdf5  --minimizer min_ih --plot chi2minplt \
    # --xlabel "\$\Delta m^2_{ee}\$" --ylabel "\$ \Delta \chi^2 \$"    --show
 
