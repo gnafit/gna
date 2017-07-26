@@ -12,7 +12,7 @@ python gna -- ns --define common.Eres_b central=0.03 sigma=0.0 --push common \
 -- scan  --lingrid common.rho_C14 1e-19 1e-16 40 --minimizer min \
    --verbose --output /tmp/out.hdf5 \
 -- contour --chi2 /tmp/out.hdf5  --minimizer min --plot chi2minplt \
-   --no_shift --xlog --xlabel "\$ \rho_{rel} \$" --ylabel "\$ \chi^2 \$" \
+   --no-shift --xlog --xlabel "\$ \rho_{rel} \$" --ylabel "\$ \chi^2 \$" \
    --output chi2_C14.pdf
 #--pullminimizer min
 # juno_nh.oscillation.DeltaMSqEE juno_nh.oscillation.SinSq12
