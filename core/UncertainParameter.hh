@@ -100,6 +100,8 @@ public:
   bool influences(SingleOutput &out) {
     return out.single().depends(this->getVariable());
   }
+
+  virtual const parameter<T> &getParameter() { return m_par; }
 protected:
   std::vector<std::pair<T, T>> m_limits;
   parameter<T> m_par;
@@ -127,9 +129,12 @@ template <typename T>
 inline void UniformAngleParameter<T>::set(T value) {
   const double pi = boost::math::constants::pi<T>();
 
-  T v = value - static_cast<int>(value/pi)*2*pi;
-  if (v > pi) {
+  T v = value - static_cast<int>(value/pi/2)*2*pi;
+  if (v >= pi) {
     v -= 2*pi;
+  }
+  else if (v<-pi){
+    v += 2*pi;
   }
   Parameter<T>::set(v);
 }

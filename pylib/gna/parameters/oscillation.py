@@ -33,7 +33,7 @@ def reqparameters(ns):
     ns.reqparameter('DeltaMSqEE', central=curpdg['dmSqEE'],
                       sigma=curpdg['dmSqEE_e'], limits=(0, 0.1))
     ns.reqparameter('Delta', type='uniformangle', central=0.0)
-    ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=0)
+    ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5)
 
     with ns:
         ROOT.OscillationExpressions(ns=ns)

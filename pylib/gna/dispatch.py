@@ -4,8 +4,7 @@ import os.path
 from pkgutil import iter_modules
 from gna.env import env
 import gna.ui
-from gna.cfgloader import config
-cfg = config( './config/gna/gnacfg.py' )
+from gna.config import cfg
 
 class LazyNamespace(argparse.Namespace):
     def __getattribute__(self, name):

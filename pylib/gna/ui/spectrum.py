@@ -14,25 +14,26 @@ class cmd(basecmd):
             except KeyError:
                 raise PartNotFoundError("observable", path)
 
-        parser.add_argument('-dp', '--difference_plot', default=[],
+        parser.add_argument('-dp', '--difference-plot', default=[],
                             action=append_typed(observable),
                             help='Subtract two obs, they MUST have the same binning')
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
-        parser.add_argument('--plot_type', choices=['histo', 'bin_center'],
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar'],
                             default='bin_center', metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('-l', '--legend', action='append', default=[],
                             metavar=('Legend',),
                             help='Add legend to the plot, note that number of legends must match the number of plots')
-        parser.add_argument('--plot_kwargs', type=yaml.load,
+        parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
         parser.add_argument('--savefig', default='', help='Path to save figure')
-
+        parser.add_argument('--nbar', type=int, default=1,
+                            help='Divide bar width by', metavar='NBAR')
 
     def run(self):
-        self.maps = {'bin_center': self.make_bin_center, 'histo': self.make_histo}
+        self.maps = {'bin_center': edges_to_centers, 'histo': edges_to_histpoints, 'bar': edges_to_barpoints}
 
         self.legends = self.opts.legend
         if self.legends:
@@ -58,8 +59,12 @@ class cmd(basecmd):
             if (edges.shape[0]-1,) != data.shape:
                 msg = "edges shape mismatch for 1d histogram: edges {0!r} vs values {1!r}"
                 raise Exception(msg.format((edges.shape,), data.shape))
-            x, y = self.maps[self.opts.plot_type](edges, data)
-            ax.plot(x, y, label=legend, **plot_kwargs)
+            x, y, w = self.maps[self.opts.plot_type](edges, data)
+            if self.opts.plot_type=='bar':
+                w/=self.opts.nbar
+                ax.bar(x, y, w, label=legend, **plot_kwargs)
+            else:
+                ax.plot(x, y, label=legend, **plot_kwargs)
 
         if show_legend:
             ax.legend(loc='best')
@@ -68,17 +73,6 @@ class cmd(basecmd):
             plt.savefig(self.opts.savefig)
         else:
             plt.show()
-
-    def make_bin_center(self, edges, data):
-        return (edges[:-1] + edges[1:])/2, data
-
-    def make_histo(self, edges, data):
-        zero_value =  0.0
-        y = np.empty(len(data)*2+2)
-        y[0], y[-1]=zero_value, zero_value
-        y[1:-1] = np.vstack((data, data)).ravel(order='F')
-        x = np.vstack((edges, edges)).ravel(order='F')
-        return x, y
 
     def make_diff(self):
             diff = self.opts.difference_plot
@@ -90,3 +84,16 @@ class cmd(basecmd):
                 raise Exception("You subtract histos with different binning")
             self.edges_storage.append(edges_0)
 
+def edges_to_centers( edges, heights ):
+    return (edges[:-1] + edges[1:])/2, heights, None
+
+def edges_to_histpoints( edges, heights ):
+    zero_value =  0.0
+    y = np.empty(len(heights)*2+2)
+    y[0], y[-1]=zero_value, zero_value
+    y[1:-1] = np.vstack((heights, heights)).ravel(order='F')
+    x = np.vstack((edges, edges)).ravel(order='F')
+    return x, y, None
+
+def edges_to_barpoints( edges, heights ):
+    return edges[:-1], heights, edges[1:]-edges[:-1]

@@ -5,6 +5,6 @@ python gna juno --name juno_nh --backgrounds geo --binning AD1 1 10 500 \
         -- ns --value juno_ih.oscillation.Alpha inverted \
               --value juno_ih.oscillation.DeltaMSqEE 0.00251722 \
         -- spectrum --plot juno_nh/AD1 -l NH --plot juno_ih/AD1 -l IH \
-           -dp juno_nh/AD1 -dp juno_ih/AD1 -l NH-IH --plot_type histo \
-           --plot_kwargs "{'linewidth': '1.2'}"
+           -dp juno_nh/AD1 -dp juno_ih/AD1 -l NH-IH --plot-type histo \
+           --plot-kwargs "{'linewidth': '1.2'}"
 

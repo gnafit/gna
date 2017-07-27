@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "GNAObject.hh"
+#include "Eigen/Sparse"
 
 class EnergyResolution: public GNAObject,
                         public Transformation<EnergyResolution> {
@@ -19,11 +20,10 @@ private:
   variable<double> m_a, m_b, m_c;
 
   DataType m_datatype;
+  
 
   size_t m_size;
-  std::vector<double> m_rescache;
-  std::vector<int> m_cacheidx;
-  std::vector<int> m_startidx;
+  Eigen::SparseMatrix<double> m_sparse_cache;
 };
 
 #endif // ENERGYRESOLUTION_H

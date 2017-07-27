@@ -2,12 +2,16 @@ from gna.env import env
 import numpy as np
 import ROOT
 
+# Protect the following classes/namespaces from being wrapped
+ignored_classes = [ 'Eigen', 'EigenHelpers']
+
 def hygienic(decorator):
     def new_decorator(original):
         wrapped = decorator(original)
         wrapped.__name__ = original.__name__
         wrapped.__doc__ = original.__doc__
         wrapped.__module__ = original.__module__
+        wrapped.__original__ = original
         return wrapped
     return new_decorator
 
@@ -92,15 +96,18 @@ def patchDataProvider(cls):
     def data(self):
         buf = origdata(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
     cls.data = data
+    cls.__data_raw__ = origdata
+    cls.__view_raw__ = origview
 
     origview = cls.view
     def view(self):
         buf = origview(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape)
+        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
     cls.view = view
+    cls.__view_raw__ = origview
 
 def patchVariableDescriptor(cls):
     origclaim = cls.claim
@@ -146,7 +153,7 @@ def patchDescriptor(cls):
         return self.hash() == other.hash()
     cls.__hash__ = __hash__
     cls.__eq__ = __eq__
-    
+
 @hygienic
 def wrapPoints(cls):
     class WrappedClass(cls):
@@ -164,6 +171,9 @@ def wrapPoints(cls):
     return WrappedClass
 
 def setup(ROOT):
+    if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
+        return
+    ROOT.__gna_patched__ = True
     ROOT.UserExceptions.update({
         "KeyError": KeyError,
         "IndexError": IndexError,
@@ -206,7 +216,7 @@ def setup(ROOT):
             if cls.__name__ == 'Points':
                 wrapped = wrapPoints(wrapped)
             return wrapped
-        if 'Class' not in cls.__dict__:
+        if 'Class' not in cls.__dict__ and cls.__name__ not in ignored_classes:
             t = cls.__class__
             origgetattr = cls.__getattribute__
             t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))

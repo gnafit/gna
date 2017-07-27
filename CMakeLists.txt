@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
@@ -23,6 +23,7 @@ set (SOURCES
   core/Derivative.cc
   core/Covmat.cc
   core/Chi2.cc
+  core/Poisson.cc
   core/CovarianceToyMC.cc
   core/PoissonToyMC.cc
   neutrino/OscProb2nu.cc
@@ -37,6 +38,7 @@ set (SOURCES
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
+  extra/GridFilter.cc
   )
 
 set (HEADERS
@@ -52,11 +54,14 @@ set (HEADERS
   WeightedSum.hh
   Points.hh
   Histogram.hh
+  Identity.hh
   LinearInterpolator.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh
+  Cholesky.hh
   Chi2.hh
+  Poisson.hh
   CovarianceToyMC.hh
   PoissonToyMC.hh
   Minimizable.hh
@@ -77,14 +82,26 @@ set (HEADERS
   EnergyResolution.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
+  GridFilter.hh
+  EigenHelpers.hh
   )
-  
-include_directories(core/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 set(DICT    Dict.cc)
 
-set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++14 -Wno-deprecated-declarations -Werror -Wall  -pedantic  -O3 -pipe")
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 11)
+message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+include(dev-tools)
+
+
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -101,7 +118,7 @@ else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
 
-find_Package( GSL REQUIRED )
+find_Package(GSL REQUIRED)
 include_directories(SYSTEM ${GSL_INCLUDE_DIR})
 
 find_package(ROOT)
@@ -111,4 +128,4 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)

@@ -11,7 +11,7 @@ class cmd(basecmd):
         parser.add_argument('type', choices=minimizers.keys())
         parser.add_argument('statistic', action=set_typed(env.parts.statistic))
         parser.add_argument('par', nargs='*')
-        parser.add_argument('--par_namespace', nargs='*')
+        parser.add_argument('--par-namespace', nargs='*')
 
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)

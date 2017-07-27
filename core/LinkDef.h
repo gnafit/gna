@@ -49,6 +49,7 @@
 #pragma link C++ class Histogram-;
 #pragma link C++ class LinearInterpolator-;
 #pragma link C++ class FillLike-;
+#pragma link C++ class Identity-;
 
 #pragma link C++ class CovarianceToyMC-;
 #pragma link C++ class PoissonToyMC-;
@@ -79,6 +80,5 @@
 #pragma link C++ class GaussianPeakWithBackground-;
 #pragma link C++ class C14Spectrum-;
 #pragma link C++ class GeoNeutrinoFluxNormed-;
-
 
 #endif

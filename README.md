@@ -1,4 +1,4 @@
-***Global Neutrino Analysis Toolkit***
+# Global Neutrino Analysis Toolkit
 
 For installation guidelines and documentation look at `doc/`: 
 > `cd doc/`
