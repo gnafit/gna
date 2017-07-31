@@ -226,13 +226,44 @@ namespace TransformationTypes {
     Entry *m_entry;
   };
 
-  struct Args {
+  class Args {
+  public:
     Args(const Entry *e): m_entry(e) { }
     const Data<double> &operator[](int i) const;
     size_t size() const { return m_entry->sources.size(); }
+    const Entry* getEntry() const { return m_entry; }
+   // template <typename T> class ArgIterator;
+    class ArgIterator;
   private:
     const Entry *m_entry;
   };
+
+/*is not finished*/
+ // template <typename T>
+  class Args::ArgIterator {
+  typedef double T;
+  typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
+  protected:
+    Args m_itData;
+    size_t m_dataSize;
+    int m_current;
+  public:
+    ArgIterator( Args itData, size_t dSize) : m_itData(itData), m_dataSize(dSize), m_current(0) {std::cout << "ctor size " << m_current << std::endl;}
+    ArgIterator( Args itData, size_t dSize, int pos) : m_itData(itData), m_dataSize(dSize), m_current(pos) {std::cout << "ctor size " << m_current << std::endl;}
+    ArgIterator& operator++() {
+      ++m_current;
+      std::cout << "current size " << m_current << std::endl;
+      return *this;
+    }
+    Args getData() const { return m_itData; }
+    ArgIterator begin() { return ArgIterator( m_itData, m_dataSize, 0); }
+    ArgIterator end() { return ArgIterator( m_itData, m_dataSize, m_dataSize - 1); }
+    bool operator!=(const ArgIterator& rhs) { return (m_current) != rhs.m_current ; }
+    bool operator==(const ArgIterator& rhs) {return (m_current) == rhs.m_current ; }
+    Eigen::Map<ArrayXT>  operator*() { return m_itData[m_current].x; }
+  };
+
+/* */
 
   struct Rets {
   public:
