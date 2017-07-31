@@ -3,10 +3,12 @@ Accessing calculated predictions
 
 Once you have constructed a computational chain, you can get access to
 actual computation results with ``data()`` method, and its type with
-``datatype()``. Let's try a few examples inside the REPL::
+``datatype()``. Let's try a few examples inside the REPL:
 
-  $ python ./gna gaussianpeak --name peak1 -- repl
-  ...
+.. code-block:: ipython
+
+  python ./gna gaussianpeak --name peak1 -- repl
+  
   In [1]: obs = self.env.ns('peak1').observables['spectrum']
 
   In [2]: obs.data()
@@ -24,7 +26,9 @@ line we get the data contained there -- just the contents of the
 histogram bins. They are all the same, as we have defined our default
 value of :math:`\mu` to be zero, so no peak, just flat
 background. Let's try to set :math:`\mu` to something more
-interesting::
+interesting:
+
+.. code-block:: ipython
 
   In [3]: self.env.ns("peak1")['Mu'].set(1)
 
@@ -42,7 +46,9 @@ see the changes.
 If you want to plot our histogram, you'd like to know the
 corresponding binning. The binning is a part of the Histogram ``datatype``
 and it's defined by the edges. You can access them with the following
-syntax::
+syntax:
+
+.. code-block:: ipython
 
   In [5]: import numpy as np
 
@@ -58,7 +64,9 @@ Please note that the ``edges()`` method is implemented in ``C++`` and returns
 ``std::vector<double>``. Since (currently) no pythonization is done
 for it, you'll need to call ``np.array()`` explicitly to get a nice
 representation of the values. Having both the bin edges and contents we
-can plot it with ``matplotlib``::
+can plot it with ``matplotlib``:
+
+.. code-block:: ipython
 
   In [8]: from matplotlib import pyplot as plt
 
@@ -67,7 +75,9 @@ can plot it with ``matplotlib``::
 
   In [10]: plt.show()
 
-Alternatively you can get the similar plot from the command line::
+Alternatively you can get the similar plot from the command line:
+
+.. code-block:: bash
 
   python ./gna gaussianpeak --name peak1 -- ns --value peak1.Mu 1 -- \
   spectrum --plot peak1/spectrum

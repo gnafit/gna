@@ -10,7 +10,7 @@ The following operations can be done:
 
 * Get cross-section :math:`z=value` with the given function value;
 
-* Get extended cross-section with the given function value and deviation from the original cross-section contour. Extended cross-section contains :math:`|z-value|  ≤  deviation` points;
+* Get extended cross-section with the given function value and deviation from the original cross-section contour. Extended cross-section contains :math:`|z-value| <=  deviation` points;
 
 * Get extended cross-section with the given function value where deviation is computed automaticly and depends on the gradient vector length at cross-section points.
 

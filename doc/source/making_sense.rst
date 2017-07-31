@@ -17,7 +17,7 @@ Glossary
 ^^^^^^^^
 
 Trasnformation, trasnformation node, calculation node, node
-    calculation unit with any number of inputs and at least one output
+    calculation unit with arbitrary number of inputs and at least one output
 
 Input, argument, source
     calculation node input data
@@ -26,7 +26,7 @@ Output, return value, sink
     calculation node output data
 
 Connection, connect
-    precedure of the connection between one `TransformationBase::Entry`_'s output to the other `TransformationBase::Entry`_'s input
+    procedure of the connection between one `TransformationBase::Entry`_'s output to the other `TransformationBase::Entry`_'s input
 
 GNAObject header
 ^^^^^^^^^^^^^^^^
@@ -54,7 +54,7 @@ GNAObject : class
 
 GNASingleObject : class
     * Implements some shorcuts for GNAObject_ with only one output
-    * Inerits GNAObject_ and SingleOutput_
+    * Inherits GNAObject_ and SingleOutput_
 
 .. _Parameters:
 
@@ -119,7 +119,7 @@ dependant : class template
 
 .. _evaluable:
 
-evaluable : class tempalte
+evaluable : class template
     * inherits variable_
     * a parameter, which value is evaluated with a function
 
@@ -283,7 +283,7 @@ Base : class
 .. _`TransformationBase::Entry`:
 
 Entry : struct
-    * base class fore the calculation node representation
+    * base class for the calculation node representation
     * has methods to:
 
       + add sources/sinks
@@ -298,7 +298,7 @@ Entry : struct
 
       + data
 
-      + taint flag
+      + taintflag
 
     * accessed via Handle_ class
     * named
@@ -388,18 +388,31 @@ Errors
 .. _TypeError:
 
 TypeError : class
+    * Base class for type errors
+    * Just pass a message to ``std::runtime_error`` constructor
 
 .. _CalculationError:
 
 CalculationError : class
+    * Can be throwed if transformation cannot be computed: invalid source and
+      etc..
+    * Appears only in ``operator[](int i)`` for ``Args, Rets`` and in
+      ``Entry::data(int i)``
+
 
 .. _SinkTypeError:
 
 SinkTypeError : class
+    * Inherits from TypeError
+    * Throwed when type function fails on constructing sink via
+      ``rets.error(message)``
 
 .. _SourceTypeError:
 
 SourceTypeError : class
+    * Inherits from TypeError
+    * Throwed when type function fails on constructing source via
+      ``args.error(message)``
 
 .. _`Transformation header`:
 

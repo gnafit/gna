@@ -2,9 +2,9 @@ Reactor experiments
 ======================
 
 The Gaussian peak example we have used before is a very simple
-experiment model. To include some real life experiments into analysis
-more work have to be done to implement the whole computational graph
-leading to the experimentally observable values. The graph
+experiment model. Inclusion of some real experiments into analysis
+requires implementation of the whole computational graphs
+producing experimentally observable values. The graph
 construction may be designed to be done partially, with separate
 modules defining or extending its parts. In the end you'll again have
 one (or more) observables, which will be later employed to comparison
@@ -21,37 +21,50 @@ following formula:
 
 .. math::
    N_i = \int\limits_{E_i}^{E_{i+1}} d E
-   \int dE_\nu \frac{dE}{dE_\nu}\sigma(E_\nu) P(E_\nu) \sum \limits_k
-   n_k S_k(E_\nu)
+   \int dE_{\bar{\nu}} \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_{ee}(E_{\bar{\nu}}) \sum \limits_k
+   n_k S_k(E_{\bar{\nu}})
 
 :math:`N_i` is the event number in the :math:`i`-th bin containing
 events with energies :math:`[E_i, E_{i+1}]`; :math:`E` and
-:math:`E_\nu` is the positron and neutrino energy;
-:math:`\sigma(E_\nu)` is the IBD cross section; :math:`P(E_\nu)` is
-the oscillation probability; :math:`S_k(E_\nu)` is the neutrino
+:math:`E_{\bar{\nu}}` are positron and neutrino energies;
+:math:`\sigma(E_{\bar{\nu}})` is the IBD cross section; :math:`P_{ee}(E_{\bar{\nu}})` is
+the oscillation probability; :math:`S_k(E_{\bar{\nu}})` is the antineutrino
 spectrum of the :math:`k`-th isotope with corresponding normalization
 :math:`n_k`.
 
-The vacuum oscillation probability has the following structure:
+The general vacuum oscillation probability can be represented in the following form:
 
 .. math::
-   P(E_\nu) = \sum_j w_j(\theta) P_j(\Delta m^2, E_\nu)
+   P(E_{\bar{\nu}}) = \sum_j w_j(\theta) P_j(\Delta m^2, E_{\bar{\nu}})
 
 where the mixing angle only dependent weights :math:`w_j` and mass
 difference dependent oscillatory terms :math:`P_j` are
 factorized. Since only the oscillatory terms are energy dependent,
 when doing fits it's more computationally efficient to take the
 weights out of the integrals, making the recomputations a lot faster
-if only mixing angles are changed. The corresponding formula, which is
-implemented in code is:
+if only mixing angles are changed.
+
+The :math:`P_j(E_{\bar{\nu}})` functions and other derived :math:`j`-indexed
+functions are generally called *components*.
+
+The corresponding formula for :math:`P_{ee}(E_{\bar{\nu}})` is:
+
+.. math::
+    P_{ee}(E_{\bar{\nu}}) = 1 - \cos^4 \theta_{13} \sin^2 2\theta_{12} \sin^2 \Delta_{21}
+                            - \sin^2 2\theta_{13} \cos^2 \theta_{12} \sin^2 \Delta_{31}
+                            - \sin^2 2\theta_{13} \sin^2 \theta_{12} \sin^2 \Delta_{32}
+
+where :math:`\Delta_{ij} = \dfrac{\Delta m^2_{ij} L}{4E}` and you can see what
+are :math:`w_j` and :math:`P_j`.
+
+The corresponding expression for number of events in a given bin, which is
+implemented in code reads:
 
 .. math::
    N_i = \sum_j w_j \int\limits_{E_i}^{E_{i+1}} d E
-   \int dE_\nu \frac{dE}{dE_\nu}\sigma(E_\nu) P_j(E_\nu) \sum \limits_k
-   n_k S_k(E_\nu)
+   \int dE_{\bar{\nu}} \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_j(E_{\bar{\nu}}) \sum \limits_k
+   n_k S_k(E_{\bar{\nu}})
 
-The :math:`P_j(E_\nu)` functions and other derived :math:`j`-indexed
-functions are generally called *components*.
 
 The given formula are only for the case of one reactor. If there are
 several of them, an additional summation inside the integral should be
@@ -60,22 +73,21 @@ performed.
 All of that is implemented in the
 `gna.exp.reactor.ReactorExperimentModel` class. As the most basic
 usage you should just specify the properties of each detector and
-reactor of the experiment. The class will create (unless not found in
-the currently available namespaces) parameters in the following
-namespaces (not the complete list, always check the code for the
-details):
+reactor of the experiment. The class checks the currently
+available namespaces for required parameters and creates missing parameters and
+set up computational graph. It is not a complete list of namespaces that will be created, *always check the code* for the details: 
 
-- ``ns.ibd``: parameters related to IBD cross section, they are defined
+- ``ns.ibd``: namespace for parameters related to the IBD cross sections, they are defined
   in ``gna.parameters.ibd`` and are usually fixed;
-- ``ns.oscillation``: parameters of oscillations (mass square
-  differences, squared sines of mixing angles, hierarchy (``Alpha`` --
+- ``ns.oscillation``: namespace for oscillations parameters (mass splittings,
+  squared sines of mixing angles, hierarchy (``Alpha`` --
   ``normal`` or numerically 1 for normal, ``inverted`` or -1 for
   inverted), as defined in ``gna.parameters.oscillation``, :math:`\delta_{\text{CP}}` ;
-- ``ns.detectors.detname``: parameters related to detector named
+- ``ns.detectors.detname``: namespace for parameters related to detector
   ``detname``, namely: ``TargetProtons`` for protons number (check
   ``neutrino/ReactorNorm.cc``); ``Eres_a``, ``Eres_b``, ``Eres_c`` for
-  the corresponding parameters of the resolution formula (check
-  ``detector/EnergyResolution.cc``) - ``ns.reactors.rname``: parameters related to one reactor:
+  the corresponding parameters of the resolution formula (check ``detector/EnergyResolution.cc``) ;
+- ``ns.reactors.rname``: parameters related to one reactor:
   ``ThermalPower`` for the nominal thermal power in GW,
   used in ``ReactorNorm``;
 - ``ns.detname.rname``: parameters related to detector/reactor pair,
@@ -95,7 +107,7 @@ In the ``initparser()`` classmethod we just call the corresponding
 methods in ``basecmd`` and ``ReactorExperimentModel`` to define the
 arguments typical to a reactor experiment. In the ``init()`` we
 actually instantiate the ``ReactorExperimentModel``, providing just
-lists of reactors and detectors. All the results (observables) are
+lists of reactors and detectors. All the results (``observables``) are
 stored internally in the ``env``, so the resulting object is not saved
 explicitly, but it of course can be done if needed.
 
@@ -107,10 +119,10 @@ instantiation through kwargs. The following options are available for
 - ``name`` -- unique string which will identify the reactor in
   namespace, should not contain spaces and must not contain dots;
 - ``location`` -- coordinates, an ``np.array()``-able numeric
-  expected; will be subtracted with the detectors locations and
-  Euclidian norm will be taken; so a number or 3-dimensonal
-  coordinates will work (but should be consistent with the ones of the
-  Detectors);
+  expected. It will be subtracted with the detectors locations and
+  Euclidian norm will be taken later. A number or 3-dimensonal
+  coordinates will work, but choose should be consistent with the ones of the
+  Detectors.
 - ``power`` -- nominal thermal power of the reactor, in GW;
 - ``power_rate`` -- an array with actual power splitted by periods;
   splitting is arbitrary but should be consistent across all the
@@ -137,14 +149,18 @@ to the detector are grouped into one *reactor group* by approximation,
 replacing several reactors into one group with effective baseline and
 power values. You can disable it with ``--no-reactor-groups``
 
-Let's run and explore! Create a juno instance and drop into repl::
+Let's run and explore! Create a juno instance and drop into repl:
 
-  $ python ./gna juno --name juno -- repl
-  ...
+.. code-block:: ipython
+
+  python ./gna juno --name juno -- repl
+  
   In [1]: ns = self.env.ns('juno')
 
 We named our instance of juno as ``juno``, so our first input to the
-repl gets ease access to its namespace. Now let's see what's there::
+repl gets ease access to its namespace. Now let's see what's there:
+
+.. code-block:: ipython
 
   In [2]: [path for path, obs in ns.walkobservables()]
   Out[2]: ['juno/AD1']
@@ -162,7 +178,9 @@ experiment along with the main observable. Currently it's done by
 ``ns.addobservable(..., export=False)`` that just stores an additional
 flag, indicating that the observable is *internal* and should not be
 visible unless explicitly requested. In order to iterate over them too use 
-the following snippet::
+the following snippet:
+
+.. code-block:: ipython
 
   In [3]: [path for path, obs in ns.walkobservables(internal=True)]
   Out[3]:
@@ -183,13 +201,17 @@ the following snippet::
 
 You can access all of them in the same way as other observables. For
 example, to plot the final observable spectrum with oscillations 
-and unoscillated spectrum you can run the following command::
+and unoscillated spectrum you can run the following command:
 
-  $ python gna juno --name juno \
+.. code-block:: bash
+
+  python gna juno --name juno \
             -- spectrum --plot juno/AD1 --plot juno/AD1_unoscillated
 
 Not all of that outputs are histograms, most of them are not integrated
-functions of neutrino energy::
+functions of neutrino energy:
+
+.. code-block:: ipython
 
   In [3]: [(path, obs.datatype().kind) for path, obs in ns.walkobservables(internal=True)]
   Out[3]:
@@ -216,7 +238,11 @@ command line command to plot them (although you can invent one) mainly
 because it's not easy to handle general case and plotting them via
 REPL or small ad hoc script is almost the same amount of typing
 with way more flexibility without worrying about uninteresting
-things. Let's plot something, for example, cross section::
+things. 
+
+Let's plot something, for example, cross section:
+
+.. code-block:: ipython
 
   In [3]: Enu = self.env.get('juno.detectors.AD1/Enu').data()
 
@@ -235,7 +261,7 @@ oscillations probability for each reactor (reactor group) pair in
 absolutely the same way.
 
 As you can see, we had requested values of both x and y axes from the
-system, instead of specifying the :math:`E_\nu` points as inputs to
+system, instead of specifying the :math:`E_{\bar{\nu}}` points as inputs to
 the cross section function. Unfortunately, there is even no clear
 way to get value of xsec in arbitrary points. That's drawback of the
 design, the calculating object is tightly bound to the outputs of
@@ -250,10 +276,12 @@ honest.
 
 The other consequence of that design is that you don't always get the
 exact function you may be interested in. For example, let's try to run
-juno with the first order IBD::
+juno with the first order IBD:
 
-  $ python ./gna juno --name juno --ibd first -- repl
-  ...
+.. code-block:: ipython
+   
+  python ./gna juno --name juno --ibd first -- repl
+  
   In [1]: Enu = self.env.get('juno.detectors.AD1/xsec').data()
 
   In [2]: Enu.shape
@@ -261,12 +289,14 @@ juno with the first order IBD::
 
 Now ``Enu`` (and others, that depends on ``Enu``, like ``xsec`` or
 ``oscprob``) is two dimensional array (while with default zero order
-IBD it was one dimensional, check it). That's because now :math:`Enu`
+IBD it was one dimensional, check it). That's because now :math:`E_\nu`
 depends not only on :math:`E_e` which (we have as input) but also on
 the :math:`\cos\theta` and the integration is two
 dimensional. Actually the integration over :math:`\cos\theta` is now
 hardcoded to be of the fifth order, hence the 5 in the shape. You can
-get that ``ctheta`` values with::
+get that ``ctheta`` values with:
+
+.. code-block:: ipython
 
   In [3]: self.env.get('juno.detectors.AD1/ctheta').data()
   Out[3]: array([-0.90617985, -0.53846931,  0.        ,  0.53846931,
@@ -276,10 +306,9 @@ You can plot everything, for example, for :math:`\cos\theta = 0` by
 using ``Enu[:, 2]`` and ``xsec[:, 2]`` (because ``ctheta[2] == 0``),
 but suppose your integration code is more intelligent and uses
 different number of ``ctheta`` points for each energy bin. The array
-in that case will likely be unshaped and to access it will be required
-to do more complicated values selection. That's one of the reason why
-there is no generic plotting command implemented, it needs a bit of
-a special care.
+in that case will likely be unshaped and to access it more complicated
+values selection will be required. That's one of the reasons why
+there is no generic plotting command implemented since it needs a special care.
 
 If you don't like default binning, you can change it with
 ``--binning``. Four parameters should be passed -- detector name (here
@@ -289,7 +318,9 @@ you can always extend it and pass arbitrary ``edges`` to the
 ``Detector`` during initialization.
 
 Of course there is also a number of parameters you can work with. You
-can see all the available values with::
+can see all the available values with:
+
+.. code-block:: ipython
 
   In [4]: [name for name, value in self.env.ns('juno').walknames()]
   Out[4]:
@@ -301,8 +332,9 @@ can see all the available values with::
 
 Not all of them are really parameters that you can change, some are values
 that depend on other values and gets recalculated on demand. For
-example, there are two values for larger square mass difference::
+example, there are two values for larger square mass difference:
 
+.. code-block:: ipython
 
   In [5]: self.env.get('juno.oscillation.DeltaMSqEE')
   Out[5]: <ROOT.GaussianParameter<double> object at 0x55da98da7860>
@@ -316,12 +348,12 @@ example, there are two values for larger square mass difference::
   In [8]: self.env.get('juno.oscillation.DeltaMSq23').value()
   Out[8]: 0.0022877478
 
-The ``DeltaMSqEE one`` is real independent parameter (hence the type,
+The ``DeltaMSqEE`` is the real independent parameter (hence the type,
 ``GaussianParameter``), while the ``DeltaMSq23`` is just read only
 value (typed as ``Uncertain``). Their origin is also different:
 independent parameters are defined by the ``ns.reqparameter()`` or
 ``ns.defparameter()`` calls, while the read-only values originate from
-evaluables defined in ``GNAObject``s. For example, there is class
+evaluables defined in ``GNAObject``\s. For example, there is class
 ``OscillationExpressions`` which provides expressions to calculate
 values on base of others. Whenever an object requires a variable (by
 using ``GNAObject::variable_``) and there is no corresponding
@@ -334,7 +366,9 @@ automatically used.
 
 You can't change ``Uncertain`` objects directly, there is even no
 ``set()`` method. But if you change the independent parameters which
-they depend on, the values will be automatically updated::
+they depend on, the values will be automatically updated:
+
+.. code-block:: ipython
 
   In [9]: self.env.get('juno.oscillation.DeltaMSqEE').set(2.5e-3)
 

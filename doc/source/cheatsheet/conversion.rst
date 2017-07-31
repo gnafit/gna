@@ -21,7 +21,7 @@ The following types are recognized:
 STD vector
 """"""""""
 
-.. table:: STD vector :math:`\leftrightarrow` numpy
+.. table::  **STD vector** :math:`\leftrightarrow` **numpy**
    :widths: 100 80
 
    +-----------------------------------------+------------------------------------------------------------+
@@ -31,7 +31,7 @@ STD vector
    +-----------------------------------------+------------------------------------------------------------+
    | ``convert(stdvec, 'array', dtype='i')`` | same as above with explicit data type (see numpy dtype)    |
    +-----------------------------------------+------------------------------------------------------------+
-   | ``convert(array, R.vector)``            | numpy array to std::vector (type is guessed)               |
+   | ``convert(array, ROOT.vector)``         | numpy array to std::vector (type is guessed)               |
    +-----------------------------------------+------------------------------------------------------------+
    | ``convert(array, 'stdvector')``         | same as above                                              |
    +-----------------------------------------+------------------------------------------------------------+
@@ -39,7 +39,7 @@ STD vector
 Eigen
 """""
 
-.. table:: numpy :math:`\rightarrow` Eigen
+.. table:: **numpy** :math:`\rightarrow` **Eigen**
    :widths: 100 80
 
    +-------------------------------------------+----------------------------------------------------------+
@@ -62,7 +62,7 @@ Eigen
 
 |
 
-.. table:: Eigen :math:`\rightarrow` numpy
+.. table:: **Eigen** :math:`\rightarrow` **numpy**
    :widths: 100 80
 
    +------------------------------------+-----------------------------------------------+
@@ -80,7 +80,7 @@ Eigen
 GNA types
 """""""""
 
-.. table:: numpy :math:`\rightarrow` GNA types
+.. table:: **numpy** :math:`\rightarrow` **GNA types**
    :widths: 100 80
 
    +---------------------------------+-----------------------------+
