@@ -29,6 +29,8 @@ class cmd(basecmd):
         parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
         parser.add_argument('--savefig', default='', help='Path to save figure')
+        parser.add_argument('--new-figure', action='store_true',
+                            help='Create new figure')
         parser.add_argument('--nbar', type=int, default=1,
                             help='Divide bar width by', metavar='NBAR')
 
@@ -52,6 +54,9 @@ class cmd(basecmd):
         while len(self.data_storage) > len(self.legends):
             print "Amount of data and amount of data doesn't match. Perhaps it is not what you want. Filling legend with empty strings"
             self.legends.append('')
+
+        if self.opts.new_figure:
+             plt.figure()
 
         ax = plt.gca()
 
