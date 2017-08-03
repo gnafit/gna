@@ -8,15 +8,17 @@ Calculates the :math:`\chi^2` value.
 Inputs
 ^^^^^^
 
-1) Theory :math:`\mu` of size :math:`N`.
+  1. Theory :math:`\mu` of size :math:`N`.
 
-2) Data :math:`x` of size :math:`N`.
+  2. Data :math:`x` of size :math:`N`.
 
-3) Covariance matrix Cholesky decomposition :math:`L` of size :math:`N\times N`.
+  3. Covariance matrix Cholesky_ decomposition :math:`L` of size :math:`N\times N`.
 
-#) Optionally :math:`\mu_2,x_2,L_2,\dots` of sizes :math:`N_2,\dots`.
+  #. Optionally :math:`\mu_2,x_2,L_2,\dots` of sizes :math:`N_2,\dots`.
 
 Inputs are added via ``add(theory, data, cov)`` method.
+
+.. _Cholesky: https://en.wikipedia.org/wiki/Cholesky_decomposition
 
 Outputs
 ^^^^^^^
