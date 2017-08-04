@@ -28,7 +28,7 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
     m_param->variable_("Theta13");
     m_param->variable_("Theta23");
 
-};
+}
 
 void OscProbMatter::calcOscProb(Args args, Rets rets) {
     using namespace ParametricLazyOps;
@@ -188,7 +188,7 @@ if (m_from.flavor == m_to.flavor) {
     // End of the COPY-PASTE
 
   rets[0].arr = res;
-  };
+} 
 
 
 
