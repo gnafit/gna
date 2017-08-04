@@ -72,53 +72,53 @@ void OscProbMatter::calcOscProb(Args args, Rets rets) {
 
     // XXX: COPY-PASTED SymPy output, replace it with generated include
 
-Eigen::ArrayXd tw2 = (1.0L/2.0L)*pow(d1, 2) + (1.0L/2.0L)*pow(d2, 2) + (1.0L/2.0L)*pow(d3, 2) + (3.0L/4.0L)*qe.pow(2) - 3.0L/2.0L*qe*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3);
-Eigen::ArrayXd w = (1.0L/3.0L)*sqrt(3)*tw2.sqrt();
-Eigen::ArrayXd dv3 = d1*d2*d3 - 1.0L/4.0L*qe.pow(3) + (3.0L/4.0L)*qe.pow(2)*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3) - 1.0L/4.0L*qe*(6*CosSq12*CosSq13*d2*d3 + 6*CosSq13*SinSq12*d1*d3 + 6*SinSq13*d1*d2 + pow(d1, 2) + pow(d2, 2) + pow(d3, 2));
-Eigen::ArrayXd tcos = ((1.0L/3.0L)*((3.0L/2.0L)*dv3*(tw2*w).inverse()).acos()).cos();
-Eigen::ArrayXd Em = -w*(tcos + sqrt(-3*pow(tcos, 2) + 3));
-Eigen::ArrayXd Ep = 2*tcos*w;
-Eigen::ArrayXd E0 = -Em - Ep;
-Eigen::ArrayXd tmp0 = d1*d2 + d1*d3 + d2*d3 - 3.0L/4.0L*qe.pow(2) + (3.0L/2.0L)*qe*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3);
-Eigen::ArrayXd sumxi0 = 3*Em.pow(2) + tmp0;
-Eigen::ArrayXd sumxi1 = 3*E0.pow(2) + tmp0;
-Eigen::ArrayXd sumxi2 = 3*Ep.pow(2) + tmp0;
+auto tw2 = (1.0L/2.0L)*pow(d1, 2) + (1.0L/2.0L)*pow(d2, 2) + (1.0L/2.0L)*pow(d3, 2) + (3.0L/4.0L)*qe.pow(2) - 3.0L/2.0L*qe*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3);
+auto w = (1.0L/3.0L)*sqrt(3)*tw2.sqrt();
+auto dv3 = d1*d2*d3 - 1.0L/4.0L*qe.pow(3) + (3.0L/4.0L)*qe.pow(2)*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3) - 1.0L/4.0L*qe*(6*CosSq12*CosSq13*d2*d3 + 6*CosSq13*SinSq12*d1*d3 + 6*SinSq13*d1*d2 + pow(d1, 2) + pow(d2, 2) + pow(d3, 2));
+auto tcos = ((1.0L/3.0L)*((3.0L/2.0L)*dv3*(tw2*w).inverse()).acos()).cos();
+auto Em = -w*(tcos + sqrt(-3*pow(tcos, 2) + 3));
+auto Ep = 2*tcos*w;
+auto E0 = -Em - Ep;
+auto tmp0 = d1*d2 + d1*d3 + d2*d3 - 3.0L/4.0L*qe.square() + (3.0L/2.0L)*qe*(CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3);
+auto sumxi0 = 3*Em.square() + tmp0;
+auto sumxi1 = 3*E0.square() + tmp0;
+auto sumxi2 = 3*Ep.square() + tmp0;
 double tmp1 = CosSq12*CosSq13*d1 + CosSq13*SinSq12*d2 + SinSq13*d3;
-Eigen::ArrayXd tmp2 = CosSq12*CosSq13*d2*d3 + CosSq13*SinSq12*d1*d3 + SinSq13*d1*d2 + (1.0L/4.0L)*qe.pow(2) + (1.0L/2.0L)*qe*(-CosSq12*CosSq13*d1 + CosSq12*CosSq13*d2 - CosSq13*d2 + CosSq13*d3 + d1 + d2);
-Eigen::ArrayXd xi0_0 = (Em.pow(2) - Em*qe + Em*tmp1 + tmp2)/sumxi0;
-Eigen::ArrayXd xi0_1 = (E0.pow(2) - E0*qe + E0*tmp1 + tmp2)/sumxi1;
-Eigen::ArrayXd xi0_2 = (pow(Ep, 2) - Ep*qe + Ep*tmp1 + tmp2)/sumxi2;
+Eigen::ArrayXd tmp2 = CosSq12*CosSq13*d2*d3 + CosSq13*SinSq12*d1*d3 + SinSq13*d1*d2 + (1.0L/4.0L)*qe.square() + (1.0L/2.0L)*qe*(-CosSq12*CosSq13*d1 + CosSq12*CosSq13*d2 - CosSq13*d2 + CosSq13*d3 + d1 + d2);
+Eigen::ArrayXd xi0_0 = (Em.square() - Em*qe + Em*tmp1 + tmp2)*sumxi0.inverse();
+Eigen::ArrayXd xi0_1 = (E0.square() - E0*qe + E0*tmp1 + tmp2)*sumxi1.inverse();
+Eigen::ArrayXd xi0_2 = (Ep.square() - Ep*qe + Ep*tmp1 + tmp2)*sumxi2.inverse();
 double tmp3 = 2*Cos12*Cos23*Sin12*Sin13*Sin23*d1*cos(deltacp) - 2*Cos12*Cos23*Sin12*Sin13*Sin23*d2*cos(deltacp) + CosSq12*CosSq23*d2 + CosSq12*SinSq13*SinSq23*d1 + CosSq13*SinSq23*d3 + CosSq23*SinSq12*d1 + SinSq12*SinSq13*SinSq23*d2;
-Eigen::ArrayXd tmp4 = CosSq13*SinSq23*d1*d2 + d1*d3*(-2*Cos12*Cos23*Sin12*Sin13*Sin23*cos(deltacp) + SinSq12*SinSq13*SinSq23 + SinSq12*SinSq23 - SinSq12 - SinSq23 + 1) + d2*d3*(2*Cos12*Cos23*Sin12*Sin13*Sin23*cos(deltacp) - SinSq12*SinSq13*SinSq23 - SinSq12*SinSq23 + SinSq12 + SinSq13*SinSq23) - 1.0L/2.0L*qe.pow(2) - 1.0L/2.0L*qe*(-4*Cos12*Cos23*Sin12*Sin13*Sin23*d1*cos(deltacp) + 4*Cos12*Cos23*Sin12*Sin13*Sin23*d2*cos(deltacp) - CosSq12*CosSq13*d1 + 2*CosSq12*CosSq23*SinSq13*d1 + 2*CosSq12*SinSq23*d2 + 2*CosSq13*CosSq23*d3 - CosSq13*SinSq12*d2 + 2*CosSq23*SinSq12*SinSq13*d2 + 2*SinSq12*SinSq23*d1 - SinSq13*d3);
-Eigen::ArrayXd xi1_0 = (Em.pow(2) + (1.0L/2.0L)*Em*qe + Em*tmp3 + tmp4)/sumxi0;
-Eigen::ArrayXd xi1_1 = (pow(E0, 2) + (1.0L/2.0L)*E0*qe + E0*tmp3 + tmp4)/sumxi1;
-Eigen::ArrayXd xi1_2 = (pow(Ep, 2) + (1.0L/2.0L)*Ep*qe + Ep*tmp3 + tmp4)/sumxi2;
+Eigen::ArrayXd tmp4 = CosSq13*SinSq23*d1*d2 + d1*d3*(-2*Cos12*Cos23*Sin12*Sin13*Sin23*cos(deltacp) + SinSq12*SinSq13*SinSq23 + SinSq12*SinSq23 - SinSq12 - SinSq23 + 1) + d2*d3*(2*Cos12*Cos23*Sin12*Sin13*Sin23*cos(deltacp) - SinSq12*SinSq13*SinSq23 - SinSq12*SinSq23 + SinSq12 + SinSq13*SinSq23) - 1.0L/2.0L*qe.square() - 1.0L/2.0L*qe*(-4*Cos12*Cos23*Sin12*Sin13*Sin23*d1*cos(deltacp) + 4*Cos12*Cos23*Sin12*Sin13*Sin23*d2*cos(deltacp) - CosSq12*CosSq13*d1 + 2*CosSq12*CosSq23*SinSq13*d1 + 2*CosSq12*SinSq23*d2 + 2*CosSq13*CosSq23*d3 - CosSq13*SinSq12*d2 + 2*CosSq23*SinSq12*SinSq13*d2 + 2*SinSq12*SinSq23*d1 - SinSq13*d3);
+Eigen::ArrayXd xi1_0 = (Em.square() + (1.0L/2.0L)*Em*qe + Em*tmp3 + tmp4)*sumxi0.inverse();
+Eigen::ArrayXd xi1_1 = (E0.square() + (1.0L/2.0L)*E0*qe + E0*tmp3 + tmp4)*sumxi1.inverse();
+Eigen::ArrayXd xi1_2 = (pow(Ep, 2) + (1.0L/2.0L)*Ep*qe + Ep*tmp3 + tmp4)*sumxi2.inverse();
 if (m_from.flavor == m_to.flavor) {
   if (m_from.flavor == Neutrino::Flavor::Muon) {
-      Eigen::ArrayXd pconst = pow(xi1_0, 2) + pow(xi1_1, 2) + pow(xi1_2, 2);
-      Eigen::ArrayXd p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi1_0*xi1_1).abs();
-      Eigen::ArrayXd p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi1_0*xi1_2).abs();
-      Eigen::ArrayXd p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi1_1*xi1_2).abs();
-      Eigen::ArrayXd poscill = p01 + p02 + p12;
+      auto pconst = xi1_0.square() + xi1_1.square() + xi1_2.square();
+      auto p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi1_0*xi1_1).abs();
+      auto p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi1_0*xi1_2).abs();
+      auto p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi1_1*xi1_2).abs();
+      auto poscill = p01 + p02 + p12;
       res = pconst + poscill;
   }
   if (m_from.flavor == Neutrino::Flavor::Electron) {
-      Eigen::ArrayXd pconst = pow(xi0_0, 2) + pow(xi0_1, 2) + pow(xi0_2, 2);
-      Eigen::ArrayXd p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi0_0*xi0_1).abs();
-      Eigen::ArrayXd p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi0_0*xi0_2).abs();
-      Eigen::ArrayXd p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi0_1*xi0_2).abs();
-      Eigen::ArrayXd poscill = p01 + p02 + p12;
-    res = pconst + poscill;
+      auto pconst = pow(xi0_0, 2) + pow(xi0_1, 2) + pow(xi0_2, 2);
+      auto p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi0_0*xi0_1).abs();
+      auto p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi0_0*xi0_2).abs();
+      auto p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi0_1*xi0_2).abs();
+      auto poscill = p01 + p02 + p12;
+      res = pconst + poscill;
   }
 } else {
-    Eigen::ArrayXd pconst = xi0_0*xi1_0 + xi0_1*xi1_1 + xi0_2*xi1_2;
+    auto pconst = xi0_0*xi1_0 + xi0_1*xi1_1 + xi0_2*xi1_2;
     double tmp5 = Cos13*(-Cos12*Cos23*Sin12*d1 + Cos12*Cos23*Sin12*d2 - CosSq12*Sin13*Sin23*d1*cos(deltacp) - Sin13*Sin23*SinSq12*d2*cos(deltacp) + Sin13*Sin23*d3*cos(deltacp));
     double tmp6 = Cos13*(-Cos12*d2*d3*(Cos12*Sin13*Sin23*cos(deltacp) + Cos23*Sin12) + Sin12*d1*d3*(Cos12*Cos23 - Sin12*Sin13*Sin23*cos(deltacp)) + Sin13*Sin23*d1*d2*cos(deltacp));
     double tmp7 = Cos13*Sin13*Sin23*(CosSq12*d1 + SinSq12*d2 - d3)*sin(deltacp);
     double tmp8 = Cos13*Sin13*Sin23*(CosSq12*d2*d3 + SinSq12*d1*d3 - d1*d2)*sin(deltacp);
     Eigen::ArrayXd B0re = Em*tmp5 - 1.0L/2.0L*qe*tmp5 + tmp6;
     Eigen::ArrayXd B0im = Em*tmp7 - 1.0L/2.0L*qe*tmp7 + tmp8;
-    Eigen::ArrayXd B0abs = sqrt(pow(B0im, 2) + pow(B0re, 2));
+    Eigen::ArrayXd B0abs = sqrt(B0im.square() + B0re.square());
     Eigen::ArrayXd cosPsi0 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd sinPsi0 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B0abs.size(); ++i) {
@@ -127,9 +127,10 @@ if (m_from.flavor == m_to.flavor) {
             sinPsi0(i) = B0im(i)/B0abs(i);
           }
     };
+
     Eigen::ArrayXd B1re = E0*tmp5 - 1.0L/2.0L*qe*tmp5 + tmp6;
     Eigen::ArrayXd B1im = E0*tmp7 - 1.0L/2.0L*qe*tmp7 + tmp8;
-    Eigen::ArrayXd B1abs = sqrt(pow(B1im, 2) + pow(B1re, 2));
+    Eigen::ArrayXd B1abs = sqrt(B1im.square() + B1re.square());
     Eigen::ArrayXd cosPsi1 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd sinPsi1 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B1abs.size(); ++i) {
@@ -140,7 +141,7 @@ if (m_from.flavor == m_to.flavor) {
     };
     Eigen::ArrayXd B2re = Ep*tmp5 - 1.0L/2.0L*qe*tmp5 + tmp6;
     Eigen::ArrayXd B2im = Ep*tmp7 - 1.0L/2.0L*qe*tmp7 + tmp8;
-    Eigen::ArrayXd B2abs = sqrt(pow(B2im, 2) + pow(B2re, 2));
+    Eigen::ArrayXd B2abs = sqrt(B2im.square() + B2re.square());
     Eigen::ArrayXd cosPsi2 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd sinPsi2 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B2abs.size(); ++i) {
@@ -180,7 +181,7 @@ if (m_from.flavor == m_to.flavor) {
     }
     p12 = -2*sqrt(xi0_1*xi0_2*xi1_1*xi1_2)*(fsign*(cosPsi1*sinPsi2 - cosPsi2*sinPsi1)*sin(phase12) + (cosPsi1*cosPsi2 + sinPsi1*sinPsi2)*cos(phase12));
 
-  Eigen::ArrayXd poscill = p01 + p02 + p12;
+  auto poscill = p01 + p02 + p12;
   res = pconst + poscill;
 }
 
