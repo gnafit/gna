@@ -34,6 +34,7 @@ set (SOURCES
   neutrino/IbdFirstOrder.cc
   neutrino/ReactorNorm.cc
   neutrino/ReactorGroup.cc
+  neutrino/OscProbMatterUniform.cc
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
@@ -71,6 +72,7 @@ set (HEADERS
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProbPMNSDecoh.hh
+  OscProbMatterUniform.hh
   EvisToEe.hh
   IbdInteraction.hh
   IbdZeroOrder.hh
