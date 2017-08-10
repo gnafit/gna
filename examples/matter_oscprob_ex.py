@@ -6,8 +6,8 @@ import gna.parameters.oscillation
 
 self.ns = self.env.ns("004")
 gna.parameters.oscillation.reqparameters(self.ns)
-self.ns.defparameter("L", central=810,sigma=0) #километры
-self.ns.defparameter("rho",central=2.7,sigma=0) #г/см3
+self.ns.defparameter("L", central=810,sigma=0) #kilometre
+self.ns.defparameter("rho",central=2.7,sigma=0) #g/cm3
 
 from_nu_a = ROOT.Neutrino.amu()
 to_nu_a = ROOT.Neutrino.ae()
@@ -15,23 +15,23 @@ to_nu_a = ROOT.Neutrino.ae()
 from_nu = ROOT.Neutrino.mu()
 to_nu = ROOT.Neutrino.e()
 
-E_arr = np.array(range(500, 6000, 50))  #энергия в МеV
+E_arr = np.array(range(500, 6000, 50))  #array energy (МеV)
 
 E = ROOT.Points(E_arr)
 
 
 with self.ns:
-    #нейтрино в материи
+    #Matter neutrino
     oscprob_m = ROOT.OscProbMatter(from_nu, to_nu)
     oscprob_m.oscprob.Enu(E)
     data_osc_m = oscprob_m.oscprob.oscprob
 
-    #антинейтрино в материи
+    #Matter antineutrino
     oscprob_ma = ROOT.OscProbMatter(from_nu_a, to_nu_a)
     oscprob_ma.oscprob.Enu(E)
     data_osc_ma = oscprob_ma.oscprob.oscprob
 
-    #нейтрино в вакууме (аналогично антинейтрино в вакууме)
+    #Vacuum neutrino (same antineutrino)
     oscprob = ROOT.OscProbPMNS(from_nu, to_nu)
     oscprob.full_osc_prob.inputs.Enu(E)
     data_osc = oscprob.full_osc_prob.oscprob
