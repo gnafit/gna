@@ -3,6 +3,7 @@
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
 #include "ParametricLazy.hpp"
+#include "TMath.h"
 
 OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
     : OscProbPMNSBase(from, to), m_from(from), m_to(to)
@@ -12,9 +13,9 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
     };
 
     variable_(&m_L, "L");
-    variable_(&m_rho, "rho");
+    variable_(&m_rho, "rho"); // g/cm3
     transformation_(this, "oscprob")
-        .input("Enu")
+        .input("Enu") // MeV
         .output("oscprob")
         .depends(m_L)
         .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
@@ -27,6 +28,8 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
     m_param->variable_("Theta12");
     m_param->variable_("Theta13");
     m_param->variable_("Theta23");
+    m_param->variable_("Alpha");
+    m_param->variable_("Delta");
 
 }
 
@@ -50,25 +53,47 @@ void OscProbMatter::calcOscProb(Args args, Rets rets) {
     double Cos13 = cos(m_param->Theta23);
     double CosSq13 = 1-SinSq13;
 
-
+    auto km2MeV = [](double km) {
+        return km*1E-3*TMath::Qe()/(TMath::Hbar()*TMath::C());
+    };
+    double L = km2MeV(m_L.value());
     auto& Enu = args[0].arr;
-    Eigen::ArrayXd E = Enu*1E6;
-    double m_qe = -2.0/3.0*7.63E-14*0.5*m_rho.value();
+    std::cout << Enu << std::endl;
+    std::cout << Sin12 << std::endl;
+    //Eigen::ArrayXd E = Enu*1E6; // домножили на 2!!!
+    Eigen::ArrayXd E = Enu;
+
+    double m_qe = -2.0/3.0*7.63E-8*0.5*m_rho.value();
+    std::cout << m_qe << std::endl;
 
 
-    Eigen::ArrayXd qe = (m_from.kind == Neutrino::Kind::Particle ? 2 : -2)*m_qe*Enu*1E6;
+    Eigen::ArrayXd qe = (m_from.kind == Neutrino::Kind::Particle ? 2 : -2)*m_qe*Enu;
+    //Eigen::ArrayXd qe = (m_from.kind == Neutrino::Kind::Particle ? 2 : -2)*m_qe*Enu;
 
+    std::cout << "qe " << qe << std::endl;
 
 
     double d1 = (-m_param->DeltaMSq12.value() - m_param->Alpha.value()*m_param->DeltaMSq13.value())/3;
+    std::cout << "d1 " << d1 << std::endl;
     double d2 = ( m_param->DeltaMSq12.value() - m_param->Alpha.value()*m_param->DeltaMSq23.value())/3;
+    std::cout << "d2 " << d2 << std::endl;
     double d3 = m_param->Alpha.value()*(m_param->DeltaMSq13.value() + m_param->DeltaMSq23.value())/3;
-
-    auto deltacp = (m_from.kind == Neutrino::Kind::Particle ? 1 : -1)*m_param->Delta.value();
+    std::cout << "d3 " << d3 << std::endl;
+    double deltacp;
+    if (m_from.kind == 1) {
+      deltacp = m_param->Delta.value();
+    } else if (m_from.kind == -1) {
+      deltacp = -1 * m_param->Delta.value();
+    } else {
+      throw std::runtime_error("Some not good stuff");
+    }
+    //double deltacp = (m_from.kind == Neutrino::Kind::Particle ? 1 : -1)*m_param->Delta.value();
+    std::cout << "deltacp " << deltacp << std::endl;
     const int fsign = (m_to.flavor - m_from.flavor < 0 ) ? -1 : 1;
+    std::cout << "fsign " << fsign  << std::endl;
 
 
-    Eigen::ArrayXd res = Eigen::ArrayXd::Zero(qe.size());
+    Eigen::ArrayXd res = Eigen::ArrayXd::Zero(Enu.size());
 
     // XXX: COPY-PASTED SymPy output, replace it with generated include
 
@@ -93,25 +118,30 @@ auto tmp4 = CosSq13*SinSq23*d1*d2 + d1*d3*(-2*Cos12*Cos23*Sin12*Sin13*Sin23*cos(
 Eigen::ArrayXd xi1_0 = (Em.square() + (1.0L/2.0L)*Em*qe + Em*tmp3 + tmp4)*sumxi0.inverse();
 Eigen::ArrayXd xi1_1 = (E0.square() + (1.0L/2.0L)*E0*qe + E0*tmp3 + tmp4)*sumxi1.inverse();
 Eigen::ArrayXd xi1_2 = (pow(Ep, 2) + (1.0L/2.0L)*Ep*qe + Ep*tmp3 + tmp4)*sumxi2.inverse();
+
+
 if (m_from.flavor == m_to.flavor) {
   if (m_from.flavor == Neutrino::Flavor::Muon) {
-      auto pconst = xi1_0.square() + xi1_1.square() + xi1_2.square();
-      auto p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi1_0*xi1_1).abs();
-      auto p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi1_0*xi1_2).abs();
-      auto p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi1_1*xi1_2).abs();
-      auto poscill = p01 + p02 + p12;
+      Eigen::ArrayXd pconst = xi1_0.square() + xi1_1.square() + xi1_2.square();
+      auto p01 = 2*((1.0L/2.0L)*L*(E0 - Em)/E).cos()*(xi1_0*xi1_1).abs();
+      auto p02 = 2*((1.0L/2.0L)*L*(Em - Ep)/E).cos()*(xi1_0*xi1_2).abs();
+      auto p12 = 2*((1.0L/2.0L)*L*(E0 - Ep)/E).cos()*(xi1_1*xi1_2).abs();
+      Eigen::ArrayXd poscill = p01 + p02 + p12;
       res = pconst + poscill;
+      std::cout << "Reault1 \n" << res << std::endl;
   }
   if (m_from.flavor == Neutrino::Flavor::Electron) {
-      auto pconst = pow(xi0_0, 2) + pow(xi0_1, 2) + pow(xi0_2, 2);
-      auto p01 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Em)/E).cos()*(xi0_0*xi0_1).abs();
-      auto p02 = 2*((1.0L/2.0L)*m_L.value()*(Em - Ep)/E).cos()*(xi0_0*xi0_2).abs();
-      auto p12 = 2*((1.0L/2.0L)*m_L.value()*(E0 - Ep)/E).cos()*(xi0_1*xi0_2).abs();
-      auto poscill = p01 + p02 + p12;
+      Eigen::ArrayXd pconst = pow(xi0_0, 2) + pow(xi0_1, 2) + pow(xi0_2, 2);
+      auto p01 = 2*((1.0L/2.0L)*L*(E0 - Em)/E).cos()*(xi0_0*xi0_1).abs();
+      auto p02 = 2*((1.0L/2.0L)*L*(Em - Ep)/E).cos()*(xi0_0*xi0_2).abs();
+      auto p12 = 2*((1.0L/2.0L)*L*(E0 - Ep)/E).cos()*(xi0_1*xi0_2).abs();
+      Eigen::ArrayXd poscill = p01 + p02 + p12;
       res = pconst + poscill;
+      std::cout << "Reault2 \n" << res << std::endl;
   }
 } else {
-    auto pconst = xi0_0*xi1_0 + xi0_1*xi1_1 + xi0_2*xi1_2;
+    Eigen::ArrayXd pconst = xi0_0*xi1_0 + xi0_1*xi1_1 + xi0_2*xi1_2;
+    std::cout << "pconst \n" << pconst << std::endl;
     double tmp5 = Cos13*(-Cos12*Cos23*Sin12*d1 + Cos12*Cos23*Sin12*d2 - CosSq12*Sin13*Sin23*d1*cos(deltacp) - Sin13*Sin23*SinSq12*d2*cos(deltacp) + Sin13*Sin23*d3*cos(deltacp));
     double tmp6 = Cos13*(-Cos12*d2*d3*(Cos12*Sin13*Sin23*cos(deltacp) + Cos23*Sin12) + Sin12*d1*d3*(Cos12*Cos23 - Sin12*Sin13*Sin23*cos(deltacp)) + Sin13*Sin23*d1*d2*cos(deltacp));
     double tmp7 = Cos13*Sin13*Sin23*(CosSq12*d1 + SinSq12*d2 - d3)*sin(deltacp);
@@ -127,6 +157,7 @@ if (m_from.flavor == m_to.flavor) {
             sinPsi0(i) = B0im(i)/B0abs(i);
           }
     };
+
 
     Eigen::ArrayXd B1re = E0*tmp5 - 1.0L/2.0L*qe*tmp5 + tmp6;
     Eigen::ArrayXd B1im = E0*tmp7 - 1.0L/2.0L*qe*tmp7 + tmp8;
@@ -149,46 +180,48 @@ if (m_from.flavor == m_to.flavor) {
             cosPsi2(i) = B2re(i)/B2abs(i);
             sinPsi2(i) = B2im(i)/B2abs(i);
           }
-    }
+    };
 
     Eigen::ArrayXd p01 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd E_tmp1 = (E0 - Em)/E;
     Eigen::ArrayXd phase01 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B2abs.size(); ++i) {
       if ((fabs(B0abs(i)) > 1E-10) && (fabs(B1abs(i)) > 1E-10)) {
-        phase01(i) = -1.0L/2.0L*m_L.value()*E_tmp1(i);
+        phase01(i) = -1.0L/2.0L*L*E_tmp1(i);
       }
     };
     p01 = -2*sqrt(xi0_0*xi0_1*xi1_0*xi1_1)*(fsign*(cosPsi0*sinPsi1 - cosPsi1*sinPsi0)*sin(phase01) + (cosPsi0*cosPsi1 + sinPsi0*sinPsi1)*cos(phase01));
+    std::cout << "p01 \n" << p01 << std::endl;
 
     Eigen::ArrayXd p02 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd E_tmp2 = (Em - Ep)/E;
     Eigen::ArrayXd phase02 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B2abs.size(); ++i) {
       if ((fabs(B0abs(i)) > 1E-10) && (fabs(B2abs(i)) > 1E-10)) {
-        phase02(i) = (1.0L/2.0L)*m_L.value()*E_tmp2(i);
+        phase02(i) = (1.0L/2.0L)*L*E_tmp2(i);
       }
     };
     p02 = 2*sqrt(xi0_0*xi0_2*xi1_0*xi1_2)*(fsign*(cosPsi0*sinPsi2 - cosPsi2*sinPsi0)*sin(phase02) + (cosPsi0*cosPsi2 + sinPsi0*sinPsi2)*cos(phase02));
+    std::cout << "p02 \n" << p02 << std::endl;
 
     Eigen::ArrayXd p12 = Eigen::ArrayXd::Zero(qe.size());
     Eigen::ArrayXd E_tmp12 = (E0 - Ep)/E;
     Eigen::ArrayXd phase12 = Eigen::ArrayXd::Zero(qe.size());
     for (auto i=0; i<B2abs.size(); ++i) {
       if ((fabs(B1abs(i)) > 1E-10) && (fabs(B2abs(i)) > 1E-10)) {
-          phase12(i) = (1.0L/2.0L)*m_L.value()*E_tmp12(i);
+          phase12(i) = (1.0L/2.0L)*L*E_tmp12(i);
       }
-    }
+    };
     p12 = -2*sqrt(xi0_1*xi0_2*xi1_1*xi1_2)*(fsign*(cosPsi1*sinPsi2 - cosPsi2*sinPsi1)*sin(phase12) + (cosPsi1*cosPsi2 + sinPsi1*sinPsi2)*cos(phase12));
+    std::cout << "p12 \n" << p12 << std::endl;
 
-  auto poscill = p01 + p02 + p12;
+  Eigen::ArrayXd poscill = p01 + p02 + p12;
+  std::cout << "poscill \n" << poscill << std::endl;
   res = pconst + poscill;
+  std::cout << "Result3 \n" << res << std::endl;
 }
 
     // End of the COPY-PASTE
 
-  rets[0].arr = res;
-} 
-
-
-
+  rets[0].x = res;
+}
