@@ -5,7 +5,7 @@ For installation guidelines and documentation look at `doc/`:
 
 > `make latexpdf` to get the PDF file.
 
-> `make html` to get static HTML pages, looks a better variant.
+> `make html` to get static HTML pages, it looks better and easier to navigate.
 
 > You can install ReadTheDocs Sphinx theme to get nicer HTML. Do the `pip install sphinx_rtd_theme` get it. Then Sphinx will automatically switch to it.
 
