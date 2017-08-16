@@ -3,7 +3,7 @@ Cholesky
 
 Description
 ^^^^^^^^^^^
-Computes the Cholesky_ decomposition of the symmetric positive definite matrix matrix.
+Computes the Cholesky_ decomposition of the symmetric positive definite  matrix.
 
 .. _Cholesky: https://en.wikipedia.org/wiki/Cholesky_decomposition
 
