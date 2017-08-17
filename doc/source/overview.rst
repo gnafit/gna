@@ -3,7 +3,9 @@ Overview
 
 The codebase consists of two parts. The code where computations are
 implemented is written in C++11 and is scattered in different
-top-level directories::
+top-level directories
+
+.. code-block:: bash
 
   core/
   neutrino/

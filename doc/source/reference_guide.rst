@@ -20,6 +20,15 @@ Transformations
 
    transformations/*
 
+Python modules
+---------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   python_modules/*
+
 Helper classes
 --------------
 

@@ -34,7 +34,9 @@ minimization. Finally, samples count to generate is specified with
 
 Here is the full command for one-dimensional (``BackgroundRate``
 uncertainty is taken into account in the covariance matrix) scan for
-CovarianceToyMC::
+CovarianceToyMC:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -56,12 +58,16 @@ corresponding to different random samples.
 
 The last step before the plotting is to generate so-called ``fcmap``
 which is basically just sorted list of :math:`\Delta \chi^2` values
-for quantile computation. The command is very simple::
+for quantile computation. The command is very simple:
+
+.. code-block:: bash
 
   python ./gna fcmap --fcscan /tmp/peak_fc_covariance.hdf5 --output /tmp/peak_fcmap_covariance.hdf5
 
 Assuming you have ``/tmp/peak_scan_1d_covariance.hdf5`` from the
-previous part, let's run the plotting command::
+previous part, let's run the plotting command:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -90,8 +96,10 @@ parameter influences the contour. To do that, you need to use so
 called minimizer spec -- a short description about parameters in YAML
 format. It's passed to the ``minimizer`` command with ``-s``
 option. To limit ``peak.Mu`` in ``[0; 100]`` bounds, modify all
-minimizers with ``peak.Mu`` in the following way::
+minimizers with ``peak.Mu`` in the following way:
   
+.. code-block:: bash
+
   -- minimizer -s '{peak.Mu: {limits: [0, 100]}}' global_minimizer minuit \
   first_analysis_chi2 peak.Mu
 
@@ -106,7 +114,9 @@ be, for example by selecting the points of the standard chi-squared
 contour plus some margin. It can be done by saving the interesting
 points list to a file and giving it to the ``scan`` as input with the
 ``--points`` argument. The points list may be produced by the
-``contour``. For example::
+``contour``. For example:
+
+.. code-block:: bash
 
   contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer \
   first_analysis_minimizer  --show --points chi2ci 1s --savepoints /tmp/peak_points.hdf5
@@ -132,8 +142,10 @@ path2 ...``, where path is just numerical values of parameters (in the
 same order as in the points file). The points file is still
 required. Finally, you can split by samples number. After you'll get a
 lot of splitted scan results, you should merge them into one file
-before processing with ``fcmap`` by using ``fcmerge``::
+before processing with ``fcmap`` by using ``fcmerge``:
 
+.. code-block:: bash
+   
   python ./gna fcmerge --fcscan fcfile1 fcfile2 ... --output mergedfile
 
 where ``fcfile``-s are partial scan outputs and ``mergedfile`` is the
