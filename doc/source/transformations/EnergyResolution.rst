@@ -37,7 +37,6 @@ That probability is given by:
 where :math:`\sigma(E_j)` is:
 
 .. math::
-    sigma(E_j) = E_j \sqrt{ a^2 + \frac{b^2}{E_j}  + left(\frac{c}{E_j}\right)^2}
-    sqrt(pow(m_a, 2)+ pow(m_b, 2)/Etrue + pow(m_c/Etrue, 2)),
+    sigma(E_j) = E_j \sqrt{ a^2 + \frac{b^2}{E_j}  + \left( \frac{c}{E_j}\right)^2}
 
 where a,b,c are resolution parameters.
