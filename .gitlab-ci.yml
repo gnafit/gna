@@ -2,7 +2,8 @@ image: alpine
 
 pages:
   script:
-  - apk --no-cache add py2-pip python-dev py2-ipython
+  - apk --no-cache add py2-pip python-dev 
+  - apk --no-cache add gcc
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
