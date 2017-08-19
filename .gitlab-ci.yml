@@ -6,6 +6,7 @@ pages:
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
+  - pip install ipython
   - apk --no-cache add make
   - cd doc
   - make html
