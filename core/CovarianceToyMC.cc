@@ -1,4 +1,5 @@
 #include "CovarianceToyMC.hh"
+#include <boost/format.hpp>
 
 CovarianceToyMC::CovarianceToyMC() {
   transformation_(this, "toymc")
@@ -9,8 +10,9 @@ CovarianceToyMC::CovarianceToyMC() {
 }
 
 void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
-  t_["toymc"].input(theory);
-  t_["toymc"].input(cov);
+  auto n = t_["toymc"].inputs().size()/2 + 1;
+  t_["toymc"].input((boost::format("theory_%1%")%n).str()).connect(theory.single());
+  t_["toymc"].input((boost::format("cov_%1%")%n).str()).connect(cov.single());
 }
 
 void CovarianceToyMC::nextSample() {
