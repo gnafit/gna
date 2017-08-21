@@ -10,6 +10,7 @@ We have already seen at least how to:
 Here we'll try some more examples. First, let's try to make the
 ``gaussianpeak`` model reuse existing ``Mu`` parameter, that will be
 in separate namespace which we'll call ``common``::
+
   python ./gna -- ns --define common.Mu central=1 sigma=0.01 \
                   --push common
                -- gaussianpeak --name peak1
@@ -32,6 +33,7 @@ some parameters shared between them. For example, if we have two
 different experiments, that are expecting to observe two different
 and independent peaks, but with exactly the same background rate, it
 makes sense to make the ``BackgroundRate`` parameter common::
+
   python ./gna -- ns --define common.BackgroundRate central=1 sigma=0.1 \
                   --push common
                -- gaussianpeak --name peak1

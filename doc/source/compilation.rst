@@ -19,54 +19,71 @@ You must have the following libraries installed prior to compilation:
 
 In case of Debian-like Linux distribution to install binary packages you can
 use the following command (tested in Ubuntu 16.04, depending on your distro
-packages can have different names)::
+packages can have different names):
 
-  $  sudo apt-get install libboost-all-dev hdf5-tools hdf5-helpers \
+.. code-block:: bash 
+
+    sudo apt-get install libboost-all-dev hdf5-tools hdf5-helpers \
                           hdfview libeigen3-dev libgsl-dev
 
 
 You also need Python 2.7, not very old `CMake
 <http://www.cmake.org/>`_ and modern C++11 compiler (GCC or
 clang). After all of that is installed, you can run the standard CMake
-procedure::
+procedure:
 
-  $ mkdir build
-  $ cd build
-  $ cmake ..
-  $ cmake --build . -- {flags for underlying build engine here}
+.. code-block:: bash
 
-If the build was successfull, you can run the program::
+   mkdir build
+   cd build
+   cmake ..
+   cmake --build . -- {flags for underlying build engine here}
 
-  $ export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
-  $ export PYTHONPATH=$PWD/../pylib:$PYTHONPATH
-  $ cd ..
-  $ python2 gna
+If the build was successfull, you can run the program:
+
+.. code-block:: bash
+
+   export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
+   export PYTHONPATH=$PWD/../pylib:$PYTHONPATH
+   cd ..
+   python2 gna
 
 If one wants to use the code at MACOS X, there can be problem with loading
 dynamic library. Note that by default configuration of cmake with flag SHARED
 for building the shared library the `.dylib` file will be produced. As far as
 I understand ROOT can't load it directly, so the solution is to make a symlink
-into like that::  
+into like that:  
 
- $ ln -s $GNA_PATH/build/libGlobalNuAnalysis.dylib $ROOTSYS/lib/libGlobalNuAnalysis.so
+.. code-block:: bash
+
+  ln -s $GNA_PATH/build/libGlobalNuAnalysis.dylib $ROOTSYS/lib/libGlobalNuAnalysis.so
 
 If everything is fine, no output will be produced.
-Incremental rebuild can be issued by::
+Incremental rebuild can be issued one of the commands:
 
-  $ make -C build
+.. code-block:: bash
+
+   make -C build
+   cmake --build build
 
 If there are errors with unresolved symbols with C++ ABI tags during
 linking or running, you may want to try to build with clang++. Remove
-the build directory and set::
+the build directory and set:
 
-  $ export CXX=clang++
+.. code-block:: zsh
+
+   export CXX=clang++
 
 before starting the build procedure again. 
 
 In case you have GCC 5.X compiler or newer
 version you may use the following cmake command when generating the
-build files with your additional flags if needed::
-  $ export CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
-  $ cmake -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+build files with your additional flags if needed:
+
+.. code-block:: bash
+
+   export CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0
+   cmake -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+
 Notice that if ABI mismatch encountered, the ROOT is also have to be recompiled
 from scratch with compilation flags above -- ROOT branch 6.06 doesn't support GCC5 ABI, but ROOT 6.08 does.

@@ -41,9 +41,11 @@ hypothetical data, which we'll get from predictions with known
 parameters and Poisson fluctuations. To get a significant event
 number, let's set ``BackgroundRate`` to 10, ``Mu`` to 30 (just
 arbitrary numbers for illustration) and bin numbers to 10, leaving
-everything else default::
+everything else default:
 
-  $ python ./gna gaussianpeak --name peak --nbins 10 -- ns --value peak.BackgroundRate 10 
+.. code-block:: ipython 
+
+   python ./gna gaussianpeak --name peak --nbins 10 -- ns --value peak.BackgroundRate 10 
   --value peak.Mu 30 -- repl
   ...
   In [1]: self.env.get('peak/spectrum').data()
@@ -70,7 +72,9 @@ Now we should forget about the parameters value, which we used to
 generate a sample and use our estimation. In our toy example we'll
 just say that we theoretically estimated ``BackgroundRate`` to be 14
 with uncertainty of 30% and we want to find ``Mu`` by fitting. So, our
-command will start with the model initialization::
+command will start with the model initialization:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 -- gaussianpeak
   --name peak --nbins 10
@@ -89,12 +93,16 @@ assign ``x`` to be experimental values of the observable
 goes as the experimental uncertainty (:math:`\sigma^2`), third argumnet
 of assign). Finally, the dataset is stored in ``env`` under the name
 ``peak_fakedata`` for later usage. Ths script should be executed by
-using the subcommand after ``gaussianpeak`` initialization::
+using the subcommand after ``gaussianpeak`` initialization:
+
+.. code-block:: bash
 
   -- script scripts/gaussianpeak_data
 
 Once we have created dataset and we are going to finalize inputs for
-our analysis with the following command::
+our analysis with the following command:
+
+.. code-block:: bash
 
   -- analysis --name first_analysis --datasets peak_fakedata --observables peak/spectrum
 
@@ -106,7 +114,9 @@ analyze.
 To turn the analysis into optimization problem, we need to use some
 statistic. The only implemented for now the chi-squared (weighted
 least squares) statistic. To use it, the following command should be
-applied::
+applied:
+
+.. code-block:: bash
 
   -- chi2 first_analysis_chi2 first_analysis
 
@@ -115,7 +125,9 @@ corresponding analysis object to build statistic for
 (``first_analysis``) are specified.
 
 We are going to minimize our statistic, so minimizer should be
-created::
+created:
+
+.. code-block:: bash
 
  -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu
  peak.BackgroundRate
@@ -126,12 +138,16 @@ package, then statistic for minimization and finally the list of
 parameters to minimize over. Here we do two-dimensional minimization
 over ``Mu`` and ``BackgroundRate``, all the other parameters are kept
 fixed in their default values. Now, the last command is to issue the
-minimization process::
+minimization process:
+
+.. code-block:: bash
 
   -- fit first_analysis_minimizer
 
 Try to concatenate all commands into one string and run to get
-the following result::
+the following result:
+
+.. code-block:: bash
 
   Namespace(cpu=0.0068070000000002295, errors=array([ 11.56782544,   4.35315588]),
   fun=8.597269993657244, maxcv=0.01, nfev=35L, success=True,
@@ -155,19 +171,25 @@ It's always useful (when possible) to see the profile of the statistic
 in form of the contour. To get one, we first need to scan the
 statistic values over a set of points (i. e. grid). In our example we
 can do two dimensional scan. First, we need to remove the parameters
-which we are going to use in grid from the ``minimizer`` command::
+which we are going to use in grid from the ``minimizer`` command:
+
+.. code-block:: bash
 
   -- minimizer first_analysis_minimizer minuit
 
 No parameters left, but that's fine. This minimizer does not actually
 minimize anything just returning the statistic value in the current
-point, but we need it to pass to the ``scan`` command::
+point, but we need it to pass to the ``scan`` command:
+
+.. code-block:: bash
 
   -- scan --grid peak.Mu 0 150 0.5 --grid peak.BackgroundRate 0 30 0.5 --minimizer
   first_analysis_minimizer --verbose --output /tmp/peak_scan.hdf5
 
 First two arguments define the grids over two parameters. Few types of
-grids can be used::
+grids can be used:
+
+.. code-block:: bash
 
   - ``--grid parameter initial-value points-count step-size`` --
     constant step grid specified by initial value, points count and
@@ -202,7 +224,9 @@ of the ``allparams`` root attribute). Just take a look and you'll see.
 
 Finally let's plot the contour. To do that you need to get back the
 minimizer with all parameters (it will be used to find the global
-minimum) and issue the following command::
+minimum) and issue the following command:
+
+.. code-block:: bash
 
   -- contour --chi2 /tmp/peak_scan.hdf5 --plot chi2ci 1s 2s --minimizer
   first_analysis_minimizer --show
@@ -230,20 +254,25 @@ specified in the parameter definition. Therefore, to add punishment
 terms to the fit, we need to:
 
 1. Create a new dataset for pull parameters; there is short command
-   for that (check the code)::
+   for that (check the code):
 
-     -- dataset --name pulls --pull peak.BackgroundRate
+.. code-block:: bash
+
+    -- dataset --name pulls --pull peak.BackgroundRate
 
    Here just add parameter added to the dataset ``pulls`` (the name is
    arbitrary), any number can be specified.
-2. Cdd the created dataset to the ``--datasets`` argument of the
-   ``analysis`` command;
+
+2. Add the created dataset to the ``--datasets`` argument of the ``analysis`` command;
+
 3. Add all the pull parameters to the ``--observations`` of the
    ``analysis`` command;
    
 Try to construct the command yourself. Or here is the complete one
-for reference::
+for reference:
 
+.. code-block:: bash
+   
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
             -- script scripts/gaussianpeak_data \
@@ -255,8 +284,10 @@ for reference::
                peak.BackgroundRate \
             -- fit first_analysis_minimizer
 
-It gives the following result::
+It gives the following result:
 
+.. code-block:: bash
+   
   Namespace(cpu=0.0049440000000000595, errors=array([ 11.54509995,   1.10426956]),
   fun=12.74075442086563, maxcv=0.01, nfev=31L, success=True,
   wall=0.004951953887939453, x=array([ 42.59368222,   5.75145748]))
@@ -269,7 +300,9 @@ our theoretical model is linear with respect to ``BackgroundRate``,
 the result should be exactly the same, as in the approach with pull
 terms. Let's try. What's required is just to add the parameter to the
 ``--parameters`` argument of ``analysis`` it from minimization, and
-dropping  the ``pulls`` dataset::
+dropping  the ``pulls`` dataset:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -280,7 +313,9 @@ dropping  the ``pulls`` dataset::
             -- minimizer first_analysis_minimizer minuit first_analysis_chi2 peak.Mu \
             -- fit first_analysis_minimizer
 
-And the result is::
+And the result is:
+
+.. code-block:: bash
 
   Namespace(cpu=0.005394999999998262, errors=array([ 11.54509989]),
   fun=12.740754420865585, maxcv=0.01, nfev=13L, success=True,
@@ -293,7 +328,9 @@ make sense.
 
 Let's do one-dimensional scans and plots for both
 approaches. Hopefully, you have an idea how to do it on the basis of
-the previous commands. Here are the commands for scanning with pull::
+the previous commands. Here are the commands for scanning with pull:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -306,7 +343,9 @@ the previous commands. Here are the commands for scanning with pull::
             -- scan --grid peak.Mu 0 150 0.5 --minimizer first_analysis_minimizer \
             --verbose --output /tmp/peak_scan_1d_pulls.hdf5
 
-and covariance::
+and covariance:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -319,7 +358,9 @@ and covariance::
             --verbose --output /tmp/peak_scan_1d_covariance.hdf5
   
 The plotting commands are also different because of different
-minimizers for global minimization::
+minimizers for global minimization:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -333,7 +374,9 @@ minimizers for global minimization::
             -- contour --chi2 /tmp/peak_scan_1d_pulls.hdf5 --plot chi2ci 1s 2s \
             --minimizer first_analysis_minimizer --show
 
-and::
+and:
+
+.. code-block:: bash
 
   python ./gna ns --define peak.BackgroundRate central=14 relsigma=0.3 \
             -- gaussianpeak --name peak --nbins 10 \
@@ -351,7 +394,9 @@ possible.
 And just a few words combined analysis. You can add as many datasets,
 observables and parameters as you want, but this will clearly need
 better interface than now. You can also add correlations between
-experiments inside one dataset, the API is very simple::
+experiments inside one dataset, the API is very simple:
+
+.. code-block:: bash
 
   dataset.covariate(observable1, observable2, covariation_matrix)
 

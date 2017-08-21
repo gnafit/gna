@@ -16,10 +16,10 @@ constexpr auto Z_nitrogen = 7;
 constexpr auto A_nitrogen = 14;
 constexpr auto spectrum_end_point = 156.27 * 1e-3; /* MeV */
 constexpr auto spectrum_start_point = 0.; /* MeV */
-constexpr auto shape_factor = 1.24 ;   /* MeV^{-1} */
-constexpr auto integration_order = 6;
-constexpr auto MeV_to_keV = 1e3; 
-constexpr auto keV_to_MeV = 1e-3; 
+/* constexpr auto shape_factor = 1.24 ;   [> MeV^{-1} <]
+ * constexpr auto integration_order = 6;
+ * constexpr auto MeV_to_keV = 1e3; 
+ * constexpr auto keV_to_MeV = 1e-3;  */
 constexpr auto coincidence_window = 300*ns;
 constexpr auto C14_half_life = 5730*year;
 /* constexpr auto H_to_C_ratio = 1.639;    */
@@ -154,12 +154,9 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
 {
     const double* events_true = args[0].x.data();
     double* events_rec = rets[0].x.data();
-    assert(events_rec != events_true);
 
     size_t insize = args[0].type.size();
     size_t outsize = rets[0].type.size();
-    assert(insize == outsize);
-    assert(false);
 
     std::copy(events_true, events_true + insize, events_rec);
     double overall_moved = 0.;
@@ -168,8 +165,6 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
     double loss = 0.0;
     for (size_t etrue = 0; etrue < insize; ++etrue)
     {
-        if (std::isnan(events_true[etrue])) continue;
-
         auto* cache = &m_rescache[m_cacheidx[etrue]];
         int startidx = m_startidx[etrue];
         int cnt = m_cacheidx[etrue + 1] - m_cacheidx[etrue];
@@ -183,9 +178,6 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
             }
             auto rEvents = cache[offset];
             auto delta = rEvents * events_true[etrue];
-            /* std::cout << "events_true["<<etrue<<"] " << events_true[etrue]
-             * << " rEvents " << rEvents 
-             * << " Delta " << delta << std::endl;   */
 
             events_rec[erec] += delta;
             overall_moved += delta;
@@ -199,9 +191,6 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
         }
         
     } 
-    /* std::cout << "overall_moved " << overall_moved << "\n" <<
-     *              "how much we should move " << total_number * coincidence_prob * (1 -  stayed_in_bin) << std::endl; */
-
 
 }
 
