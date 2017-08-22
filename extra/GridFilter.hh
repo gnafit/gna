@@ -31,11 +31,9 @@ public:
     void GetCrossSectionOriginal(Eigen::MatrixXd & CSOmatTarget, double value, bool isCScomputed = false);
 
     void GetCrossSectionExtended(Eigen::MatrixXd & CSEmatTarget,
-                                 double value, int deviation, bool isCScomputed = false, bool isDevConst = true);
+                                 double value, int deviation, bool isCScomputed = false);
 
     void GetCrossSectionExtendedAutoDev(Eigen::MatrixXd& CSEADmatTarget, double value);
-
-    void GetCrossSectionExtendedIrregular(Eigen::MatrixXd& CSEImatTarget, double value);
 
     /**
      * Getter for GridFilter#InterestingPoints matrix
@@ -54,16 +52,14 @@ public:
 protected:
 
     void ComputeGradient(double xStep, double yStep);
-    void addPoints(int deviation, bool isDevConst = true);
+    void addPoints(int deviation);
     void ComputeCrossSectionOriginal(double value);
     int ComputeCurrentDeviation();
     void makeCorridor(int curr_x, int curr_y, int deviation);
-    void ComputeAbsGradMatrix();
 
     Eigen::MatrixXd m_ParaboloidMatrix; //!< Full values matrix (2D and unknown size NxM)
     Eigen::MatrixXd m_CrossSecOriginal; //!< Cross-section z=value, is not set at initial moment, can be recomputed
     Eigen::MatrixXd m_CrossSectionModified;
-    Eigen::MatrixXd  m_AbsGrad;
     Eigen::MatrixXd m_dxPM,         //!< x-component of gradient for ParaboloidMatrix size of [NxM-1]
                     m_dyPM;         //!< y-omponents of gradient for ParaboloidMatrix size od [N-1xM]
     Eigen::Matrix2Xd m_InterestingPoints;   //!< Found points
