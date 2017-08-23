@@ -6,7 +6,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <cuda.h>
-
+#include "GNAcuMath.h"
 
 void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   cublasHandle_t handle;
@@ -70,34 +70,34 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   cudaFree(devOutMat);
 
 }
-
+/*
 int main() {
-  const int matSize = 5000;
+  const int matSize = 4096;
   double *InMat = new double[matSize*matSize];
   double *OutMat = new double[matSize*matSize];
   for(int i = 0; i < matSize; i++) {
     for (int j = 0; j < matSize; j++) {
       if (i == j){ OutMat [i+matSize*j] = 1.0;  InMat [i+matSize*j] = 2.0;}
       else {OutMat [i+matSize*j] = 0.0;  InMat [i+matSize*j] = 0.0;}
-/*      if (!(j >= 3/2 && i < 3/2)) { 
-         InMat[i+3*j] = 2.0;
-      } 
-      else { InMat[i+3*j] = 0.0; }
-*/    }
+//      if (!(j >= 3/2 && i < 3/2)) { 
+//         InMat[i+3*j] = 2.0;
+//      } 
+//      else { InMat[i+3*j] = 0.0; }
+    }
   }
    printf("OutMat:\n");
   //int matSize = 3;
-  /*for (int i = 0; i < matSize; i++) {
-    for (int j = 0; j < matSize; j++) {
-      printf("%lf ", OutMat[i + matSize*j]);
-    }
-    printf("\n");
-  }
-*/
+//  for (int i = 0; i < matSize; i++) {
+//    for (int j = 0; j < matSize; j++) {
+//      printf("%lf ", OutMat[i + matSize*j]);
+//    }
+//    printf("\n");
+//  }
+
   cuInverseMat(matSize, InMat, OutMat);
   return 0;
 }
-
+*/
 /*int cuInverseMatInPlace(int matSize, double* InvMat) {
 
 }*/

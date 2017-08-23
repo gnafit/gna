@@ -136,4 +136,4 @@ link_directories(cuda/)
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm simp)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm GNAcuMath)

@@ -1,8 +1,11 @@
 #include <boost/lexical_cast.hpp>
 
 #include "Chi2.hh"
-#include "test.h"
-#include "simp.h"
+//#include "test.h"
+//#include "simp.h"
+#include "GNAcuMath.h"
+#include <chrono>
+
 
 using namespace Eigen;
 
@@ -37,11 +40,62 @@ void Chi2::checkTypes(Atypes args, Rtypes rets) {
 
 void Chi2::calculateChi2(Args args, Rets rets) {
   rets[0].arr(0) = 0;
-  std::cout << "I AM HERE!" << std::endl;
-  simpfun();
-  for (size_t i = 0; i < args.size(); i+=3) {
-    VectorXd diff = args[i+0].vec - args[i+1].vec;
-    args[i+2].mat.triangularView<Eigen::Lower>().solveInPlace(diff);
-    rets[0].arr(0) += diff.array().square().sum();
+/*  typedef std::chrono::high_resolution_clock Time;
+  typedef std::chrono::milliseconds ms;
+  typedef std::chrono::duration<float> fsec;
+*/
+//  auto tfor1 = Time::now();
+ // std::cout << "calculateChi2 called! args.size() = " << args.size();
+  if (!InvMatCompFlag) {
+    InvMatCompFlag = true;
+    for (size_t i = 0; i < args.size(); i+=3) {
+      if (args[i+2].mat.rows() == 1) {
+//         std::cout << "SIZE = 1! ";
+         L.push_back(MatrixXd(
+                    args[i+2].mat.triangularView<Eigen::Lower>()
+                    .solve(MatrixXd::Identity(args[i+2].mat.rows(), args[i+2].mat.cols()))
+                          )
+                  );
+      }
+else {
+     // double * resMat = new double[args[i+2].mat.rows()*args[i+2].mat.rows()];
+      /*for (int ii = 0; ii < args[i+2].mat.rows(); ii++) {
+        for (int jj = 0; jj < args[i+2].mat.rows(); jj++) {
+          resMat[ii + args[i+2].mat.rows() * jj] = (ii == jj) ? 1.0 : 0.0;
+        }
+      }*/
+       double * resMat = MatrixXd(MatrixXd::Identity(args[i+2].mat.rows(), args[i+2].mat.cols())).data();
+      //std::cout << "args[i+2].mat.rows() = " << args[i+2].mat.rows() << std::endl;
+      cuInverseMat(args[i+2].mat.rows(), 
+                   MatrixXd(args[i+2].mat.triangularView<Eigen::Lower>()).data(), 
+                   resMat);
+      Map<MatrixXd> mat(resMat, args[i+2].mat.rows(), args[i+2].mat.rows());
+      L.push_back(mat);
+}
+/*
+      L.push_back(MatrixXd(
+                    args[i+2].mat.triangularView<Eigen::Lower>()
+                    .solve(MatrixXd::Identity(args[i+2].mat.rows(), args[i+2].mat.cols()))
+                          )
+                  );
+*/
+   //   std::cout << std::endl << " args[i+2].mat.rows = " <<  args[i+2].mat.rows() <<
+   //                             ", args[i+2].mat.cols = " << args[i+2].mat.cols() << std::endl;
+    }
   }
+  //auto tfor2 = Time::now();
+//  auto t0 = Time::now();
+  VectorXd diff;
+  for (size_t i = 0, li = 0; i < args.size(); i+=3, li++) {
+    diff = args[i+0].vec - args[i+1].vec;
+    rets[0].arr(0) += (L[li]*diff).array().square().sum();
+  }
+
+  auto t1 = Time::now();
+  fsec fs = t1 - t0;
+  ms d = std::chrono::duration_cast<ms>(fs);
+ // fsec fsfor = tfor2 - tfor1;
+  std::cout << " Time = " << fs.count() << "s" << std::endl; //, FOR time = " << fsfor.count() << "s" << std::endl;
+
+
 }
