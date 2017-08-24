@@ -40,6 +40,8 @@ namespace TransformationTypes {
     Sink(const Sink &other, Entry *entry)
       : name(other.name), entry(entry) { }
 
+    const size_t hash() const { return reinterpret_cast<size_t>(static_cast<const void*>(data.get())); }
+
     std::string name;
     std::unique_ptr<Data<double>> data;
     std::vector<Source*> sources;
@@ -57,6 +59,14 @@ namespace TransformationTypes {
     bool materialized() const {
       return sink && sink->data;
     }
+
+    const size_t hash() const {
+      if ( materialized() ) {
+        return sink->hash();
+      }
+      throw std::runtime_error("Source: Sink is not assigned");
+    }
+
     std::string name;
     const Sink *sink = nullptr;
     Entry *entry;
@@ -103,6 +113,8 @@ namespace TransformationTypes {
 
     const void *rawptr() const { return static_cast<const void*>(m_source); }
     const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }
+
+    const size_t data_hash() const { return m_source->hash(); }
   protected:
     TransformationTypes::Source *m_source;
   };

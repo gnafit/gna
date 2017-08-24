@@ -97,6 +97,8 @@ public:
   void connect(const TransformationDescriptor &obj) const;
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
+
+  TransformationTypes::Entry* parent() const { return m_source->entry; }
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandle,
