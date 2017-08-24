@@ -8,9 +8,11 @@ Description
 
 Calculates the exact 3-:math:`\nu` oscillation probabilities in vacuum using the expressions
 for the elements of the PMNS matrix. There a few options how it can be done:
+
     1. By splitting oscillation probability into energy dependant components
        (see JUNO docs) and summing the components with weights after
        integration is done. The following trasnformation are used:
+
         * ``comp12``, component related to :math:`\Delta m^2_{12}`;
         * ``comp13``, component related to :math:`\Delta m^2_{13}`;
         * ``comp23``, component related to :math:`\Delta m^2_{23}`;
