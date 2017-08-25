@@ -10,7 +10,7 @@
 class CovarianceToyMC: public GNASingleObject,
                        public Transformation<CovarianceToyMC> {
 public:
-  CovarianceToyMC();
+  CovarianceToyMC( bool autofreeze=true );
 
   void add(SingleOutput &theory, SingleOutput &cov);
   void nextSample();
@@ -23,6 +23,8 @@ protected:
   boost::variate_generator<
     boost::mt19937&, boost::normal_distribution<>
   > m_gen{m_rand, boost::normal_distribution<>()};
+
+  bool m_autofreeze;
 };
 
 #endif // COVARIANCETOYMC_H

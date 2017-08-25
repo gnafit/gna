@@ -1,7 +1,7 @@
 #include "NormalToyMC.hh"
 #include <boost/format.hpp>
 
-NormalToyMC::NormalToyMC() {
+NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_(this, "toymc")
     .output("toymc")
     .types(&NormalToyMC::calcTypes)
@@ -51,5 +51,7 @@ void NormalToyMC::calcToyMC(Args args, Rets rets) {
     }
     out = args[i+0].arr + args[i+1].arr*out;
   }
-  rets.freeze();
+
+  if(m_autofreeze)
+    rets.freeze();
 }

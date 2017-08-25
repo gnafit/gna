@@ -10,7 +10,7 @@
 class NormalToyMC: public GNASingleObject,
                    public Transformation<NormalToyMC> {
 public:
-  NormalToyMC();
+  NormalToyMC( bool autofreeze=true );
 
   void add(SingleOutput &theory, SingleOutput &sigma);
 
@@ -24,6 +24,7 @@ protected:
   boost::variate_generator<
     boost::mt19937&, boost::normal_distribution<>
   > m_gen{m_rand, boost::normal_distribution<>()};
+  bool m_autofreeze;
 };
 
 #endif // NORMALTOYMC_H

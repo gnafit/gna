@@ -1,7 +1,7 @@
 #include "CovarianceToyMC.hh"
 #include <boost/format.hpp>
 
-CovarianceToyMC::CovarianceToyMC() {
+CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_(this, "toymc")
     .output("toymc")
     .types(&CovarianceToyMC::calcTypes)
@@ -53,5 +53,6 @@ void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
     }
     out = args[i+0].vec + args[i+1].mat.triangularView<Eigen::Lower>()*out;
   }
-  rets.freeze();
+  if(m_autofreeze)
+    rets.freeze();
 }

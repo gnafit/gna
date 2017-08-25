@@ -1,6 +1,6 @@
 #include "PoissonToyMC.hh"
 
-PoissonToyMC::PoissonToyMC() {
+PoissonToyMC::PoissonToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_(this, "toymc")
     .output("toymc")
     .types(&PoissonToyMC::calcTypes)
@@ -38,5 +38,7 @@ void PoissonToyMC::calcToyMC(Args args, Rets rets) {
       out(j) = m_gen();
     }
   }
-  rets.freeze();
+
+  if(m_autofreeze)
+    rets.freeze();
 }
