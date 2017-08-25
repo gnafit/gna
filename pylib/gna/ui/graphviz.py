@@ -23,7 +23,7 @@ class cmd(basecmd):
     def init(self):
         head = self.opts.plot[0]
 
-        graph = plot_transformation( head )
+        graph = GNADot( head )
 
         if self.opts.output:
             print( 'Write graph to:', self.opts.output )
@@ -36,54 +36,60 @@ class cmd(basecmd):
             import sys
             graph.write( sys.stderr )
 
-def plot_transformation( obj ):
-    graph=G.AGraph( directed=True, label=obj.name() )
-    walk_back( obj.entry(), graph, set() )
-    return graph
-
 def uid( obj1, obj2=None ):
     if obj2:
         return '%s -> %s'%( uid( obj1), uid( obj2 ) )
 
     return obj1.__repr__().replace('*', '')
 
-def registered( id, register ):
-    if id in register:
-        return True
+class GNADot(object):
+    def __init__(self, transformation):
+        self.graph=G.AGraph( directed=True, label=transformation.name() )
+        self.register = set()
+        self.walk_back( transformation.entry() )
+        self.write = self.graph.write
 
-    register.add( id )
-    return False
+    def registered( self, *args ):
+        id = uid( *args )
+        if id in self.register:
+            return True
 
-def walk_back( entry, graph, register ):
-    id = uid( entry )
-    print( entry.name, id )
-    if registered( id, register ):
-        return
+        self.register.add( id )
+        return False
 
-    node = graph.add_node( uid(entry), label=entry.name )
-    walk_forward( entry, graph, register )
+    def walk_back( self, entry ):
+        if self.registered( entry ):
+            return
 
-    for i, source in enumerate(entry.sources):
-        assert source.materialized()
-        sink = source.sink
+        node = self.graph.add_node( uid(entry), label=entry.name )
+        self.walk_forward( entry )
 
-        if registered( uid( sink.entry, entry ), register ):
-            continue
-        graph.add_edge( uid(sink.entry), uid(entry), headlabel='%i: %s'%(i, source.name), taillabel=sink.name )
-
-        walk_back( sink.entry, graph, register )
-
-def walk_forward( entry, graph, register ):
-    for i, sink in enumerate( entry.sinks ):
-        if sink.sources.size()==0:
-            graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
-            graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', taillabel='%i: %s'%(i, sink.name), arrowhead='empty' )
-            continue
-
-        for source in sink.sources:
+        for i, source in enumerate(entry.sources):
             assert source.materialized()
+            sink = source.sink
 
-            if registered( uid( sink.entry, source.entry ), register ):
+            if self.registered( sink.entry, entry ):
                 continue
-            graph.add_edge( uid(sink.entry), uid(source.entry), headlabel='%s'%(source.name), taillabel='%i: %s'%(i, sink.name) )
+
+            self.graph.add_edge( uid(sink.entry), uid(entry), headlabel='%i: %s'%(i, source.name), taillabel=sink.name )
+
+            self.walk_back( sink.entry )
+
+    def walk_forward( self, entry ):
+        for i, sink in enumerate( entry.sinks ):
+            if sink.sources.size()==0:
+                self.graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
+                self.graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', taillabel='%i: %s'%(i, sink.name), arrowhead='empty' )
+                continue
+
+            for source in sink.sources:
+                assert source.materialized()
+
+                if self.registered( sink.entry, source.entry ):
+                    continue
+                self.graph.add_edge( uid(sink.entry), uid(source.entry), headlabel='%s'%(source.name), taillabel='%i: %s'%(i, sink.name) )
+
+                if not self.registered( source.entry ):
+                    node = self.graph.add_node( uid(source.entry), label=source.entry.name )
+                    self.walk_forward( source.entry )
 
