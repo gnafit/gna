@@ -186,6 +186,7 @@ class namespace(Mapping):
     def addobservable(self, name, output, export=True):
         if output.check():
             self.observables[name] = output
+            print 'Add observable:', '%s/%s'%(self.path, name)
         else:
             print "observation", name, "is invalid"
             output.dump()
