@@ -25,7 +25,6 @@ set (SOURCES
   core/Chi2.cc
   core/Poisson.cc
   core/CovarianceToyMC.cc
-  core/NormalToyMC.cc
   core/PoissonToyMC.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
@@ -70,7 +69,6 @@ set (HEADERS
   Chi2.hh
   Poisson.hh
   CovarianceToyMC.hh
-  NormalToyMC.hh
   PoissonToyMC.hh
   Minimizable.hh
   Neutrino.hh
