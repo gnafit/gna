@@ -85,11 +85,10 @@ set (HEADERS
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
-  EigenHelpers.hh
-  test.h
+  EigenHelpers.hh 
   )
 
-include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
+include_directories( core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -123,20 +122,31 @@ endif(Boost_FOUND)
 find_Package(GSL REQUIRED)
 include_directories(SYSTEM ${GSL_INCLUDE_DIR})
 
+cmake_policy(SET CMP0015 NEW)
+
+if(CUDA_SUPPORT)
+    find_package( CUDA REQUIRED)
+    if(NOT CUDA_MAT_SIZE_THRESHOLD)
+        set(CUDA_MAT_SIZE_THRESHOLD 200)
+    endif()
+    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
+    set(CUDA_ADD_LIBS)
+    IF (CUDA_FOUND)
+        add_subdirectory(cuda/)
+        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas GNAcuMath)
+        link_directories(cuda/)
+    ENDIF()
+endif()
+
+configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+include_directories( SYSTEM ${CMAKE_BINARY_DIR}/generated/ )
+#set (HEADERS ${HEADERS} ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+
 
 find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
 link_directories(${ROOT_LIBRARY_DIR})
 
-cmake_policy(SET CMP0015 NEW)
-
-find_package( CUDA )
-set(CUDA_ADD_LIBS)
-IF (CUDA_FOUND)
-    add_subdirectory(cuda/)
-    set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas GNAcuMath)
-    link_directories(cuda/)
-ENDIF()
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 

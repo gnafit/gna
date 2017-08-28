@@ -2,8 +2,10 @@
 
 #include "Chi2.hh"
 #include "GNAcuMath.h"
-#include <chrono>
 
+#if CUDA_SUPPORT == TRUE
+#include "config_vars.h"
+#endif
 
 using namespace Eigen;
 
@@ -41,7 +43,8 @@ void Chi2::calculateChi2(Args args, Rets rets) {
   if (!InvMatCompFlag) {
     InvMatCompFlag = true;
     for (size_t i = 0; i < args.size(); i+=3) {
-      if (args[i+2].mat.rows() == 1) {  // TODO: find opt threshold!
+#if CUDA_SUPPORT == TRUE
+      if (args[i+2].mat.rows() < CUDA_MAT_SIZE_THRESHOLD) {  // TODO: find opt threshold!
          MatrixXd tmp = MatrixXd::Identity(args[i+2].mat.rows(), args[i+2].mat.cols());
          args[i+2].mat.triangularView<Eigen::Lower>().solveInPlace(tmp);
          L.push_back(MatrixXd(tmp));
@@ -54,6 +57,11 @@ void Chi2::calculateChi2(Args args, Rets rets) {
         Map<MatrixXd> mat(resMat, args[i+2].mat.rows(), args[i+2].mat.rows());
         L.push_back(mat);
       }
+#else
+      MatrixXd tmp = MatrixXd::Identity(args[i+2].mat.rows(), args[i+2].mat.cols());
+      args[i+2].mat.triangularView<Eigen::Lower>().solveInPlace(tmp);
+      L.push_back(MatrixXd(tmp));
+#endif
     }
   }
   VectorXd diff;
@@ -61,12 +69,4 @@ void Chi2::calculateChi2(Args args, Rets rets) {
     diff = args[i+0].vec - args[i+1].vec;
     rets[0].arr(0) += (L[li]*diff).array().square().sum();
   }
-
-  auto t1 = Time::now();
-  fsec fs = t1 - t0;
-  ms d = std::chrono::duration_cast<ms>(fs);
-//  fsec fsfor = tfor2 - tfor1;
-  std::cout << " Time = " << fs.count() << "s" << std::endl; //, FOR time = " << fsfor.count() << "s" << std::endl;
-
-
 }
