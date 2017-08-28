@@ -128,12 +128,18 @@ find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
 link_directories(${ROOT_LIBRARY_DIR})
 
-add_subdirectory(cuda/)
-
 cmake_policy(SET CMP0015 NEW)
-link_directories(cuda/)
+
+find_package( CUDA )
+set(CUDA_ADD_LIBS)
+IF (CUDA_FOUND)
+    add_subdirectory(cuda/)
+    set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas GNAcuMath)
+    link_directories(cuda/)
+ENDIF()
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm GNAcuMath)
+
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl  -lm )

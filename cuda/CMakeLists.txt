@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
                                                                                                                                                                                                 
 set(CMAKE_MODULE_PATH cmake)
 
-find_package( CUDA REQUIRED)
+#find_package( CUDA REQUIRED)
 
 #set(CUDA_HOST_COMPILER "clang++")
 set(CUDA_SEPARABLE_COMPILATION ON)

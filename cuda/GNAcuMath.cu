@@ -24,6 +24,11 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   cublasHandle_t handle;
   cublasStatus_t ret;
   cudaError_t err;
+  
+  cudaStream_t stream1, stream2;
+  cudaStreamCreate ( &stream1);
+  cudaStreamCreate ( &stream2);
+
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
     exit(EXIT_FAILURE);
@@ -34,10 +39,10 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   cudaMalloc((void**)&devInMat,  matSize*matSize*sizeof(double));
   cudaMalloc((void**)&devOutMat,  matSize*matSize*sizeof(double));
 
-  GenIdentity<<<dim3(matSize/16 + 1, matSize/16 + 1), dim3(16,16)>>>(matSize, devOutMat);
-  cudaDeviceSynchronize();
+  GenIdentity<<<dim3(matSize/32 + 1, matSize/32 + 1), dim3(32,32), 0, stream2>>>(matSize, devOutMat);
+  //cudaDeviceSynchronize();
 
-  err = cudaMemcpyAsync(devInMat, InMat, matSize*matSize*sizeof(double), cudaMemcpyHostToDevice);
+  err = cudaMemcpyAsync(devInMat, InMat, matSize*matSize*sizeof(double), cudaMemcpyHostToDevice, stream1);
   if(err!=cudaSuccess) {
     exit(EXIT_FAILURE);
   }
@@ -54,7 +59,7 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
     exit(EXIT_FAILURE);
   }
 
-  err = cudaMemcpyAsync(OutMat, devOutMat, matSize*matSize*sizeof(double), cudaMemcpyDeviceToHost);
+  err = cudaMemcpyAsync(OutMat, devOutMat, matSize*matSize*sizeof(double), cudaMemcpyDeviceToHost, stream1);
 
   if(err!=cudaSuccess) {
     exit(EXIT_FAILURE);
