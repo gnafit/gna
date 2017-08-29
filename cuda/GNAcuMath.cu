@@ -61,6 +61,9 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
   if(err!=cudaSuccess) {
     exit(EXIT_FAILURE);
   }
+  cudaStreamDestroy(stream1);
+  cudaStreamDestroy(stream2);
+  cublasDestroy(handle);
   cudaFree(devA);
   cudaFree(devB);
   cudaFree(devC);
@@ -71,28 +74,29 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
 * cuBLAS linear system solver wrapper for GNA. A is lower triangular.
 */
 void cuSolveLowerLS(int m, int n, double* A, double* B) {
-printf("BEF fffff \n");
+//printf("BEF fffff \n");
 //  cudaSetDevice(0);
-printf("AF set dev \n");
+//printf("AF set dev \n");
 
   cublasHandle_t handle;
   cublasStatus_t ret;
   cudaError_t err;
-printf("BEF str\n");
+//printf("BEF str\n");
   cudaStream_t stream1, stream2;
   cudaStreamCreate ( &stream1);
   cudaStreamCreate ( &stream2);
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
+    printf("cublasCreate(&handle)");
     exit(EXIT_FAILURE);
   }
-printf("BEF cumalloc \n");
+//printf("BEF cumalloc \n");
   double* devA;
   double* devB;
   cudaMalloc((void**)&devA,  m*m*sizeof(double));
   cudaMalloc((void**)&devB,  m*n*sizeof(double));
-printf("AF cumalloc \n");
+//printf("AF cumalloc \n");
 
   cudaMemcpyAsync(devA, A, m*m*sizeof(double), cudaMemcpyHostToDevice, stream1);
   cudaMemcpyAsync(devB, B, m*n*sizeof(double), cudaMemcpyHostToDevice, stream2);
@@ -108,15 +112,20 @@ printf("AF cumalloc \n");
 
   cudaDeviceSynchronize();
   if(ret!=CUBLAS_STATUS_SUCCESS) {
+    printf("cublasDtrsm_v2");
     exit(EXIT_FAILURE);
   }
   
   err = cudaMemcpyAsync(B, devB, m*n*sizeof(double), cudaMemcpyDeviceToHost, stream1);
 
   if(err!=cudaSuccess) {
+    printf("cudaMemcpyAsync0");
     exit(EXIT_FAILURE);
   }
-
+  
+  cudaStreamDestroy(stream1);
+  cudaStreamDestroy(stream2); 
+  cublasDestroy(handle);
   cudaFree(devA);
   cudaFree(devB);
 }
@@ -173,7 +182,9 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   if(err!=cudaSuccess) {
     exit(EXIT_FAILURE);
   }
-
+  cudaStreamDestroy(stream1);
+  cudaStreamDestroy(stream2);
+  cublasDestroy(handle);
   cudaFree(devInMat);
   cudaFree(devOutMat);
 }
