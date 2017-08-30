@@ -87,3 +87,25 @@ build files with your additional flags if needed:
 
 Notice that if ABI mismatch encountered, the ROOT is also have to be recompiled
 from scratch with compilation flags above -- ROOT branch 6.06 doesn't support GCC5 ABI, but ROOT 6.08 does.
+
+Options
+~~~~~~~
+
+CUDA support
+^^^^^^^^^^^^
+
+GNA supports particulary porting of computations to GPGPU. `CUDA-enable NVIDIA GPU <https://developer.nvidia.com/cuda-gpus>`_ is necessary to use this option. To enable CUDA support in GNA NVIDIA Driver is have to be installed (v384 is tested).
+
+The following software have to be installed additionally:
+
+* `CUDA Toolkit <https://developer.nvidia.com/cuda-downloads>`_, at least 7.5
+* GCC 5.x, G++ 5.x (not higher)
+
+To build GNA with CUDA some variables have to be set:
+
+.. code-block:: bash
+
+    cmake -DCUDA_SUPPORT=TRUE -DCUDA_MAT_SIZE_THRESHOLD=<value> ..
+
+
+Setting of the threshold value can be skipped as it has default value.
