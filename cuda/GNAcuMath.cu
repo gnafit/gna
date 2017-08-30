@@ -1,3 +1,4 @@
+#define CUDA_API_PER_THREAD_DEFAULT_STREAM
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -10,7 +11,6 @@
 
 /**
   *  Generation of Identity matrix on GPU memory
-  *  TODO: find an optimal grid and block sizes!
   */
 __global__ void GenIdentity (int n, double * mat) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
@@ -29,9 +29,8 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
   cublasStatus_t ret;
   cudaError_t err;
 
-  cudaStream_t stream1, stream2;
+  cudaStream_t stream1;
   cudaStreamCreate ( &stream1);
-  cudaStreamCreate ( &stream2);
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
@@ -43,7 +42,7 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
   cudaMalloc((void**)&devC, m * n * sizeof(double));
   
   cudaMemcpyAsync(devA, InA, m * k * sizeof(double), cudaMemcpyHostToDevice, stream1);
-  cudaMemcpyAsync(devB, InB, k * n * sizeof(double), cudaMemcpyHostToDevice, stream2);
+  cudaMemcpyAsync(devB, InB, k * n * sizeof(double), cudaMemcpyHostToDevice, stream1);
   cudaMemset(devC, 0, m * n * sizeof(double));
   double alpha = 1, beta = 0;
   cudaDeviceSynchronize();  
@@ -62,7 +61,6 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
     exit(EXIT_FAILURE);
   }
   cudaStreamDestroy(stream1);
-  cudaStreamDestroy(stream2);
   cublasDestroy(handle);
   cudaFree(devA);
   cudaFree(devB);
@@ -74,32 +72,24 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
 * cuBLAS linear system solver wrapper for GNA. A is lower triangular.
 */
 void cuSolveLowerLS(int m, int n, double* A, double* B) {
-//printf("BEF fffff \n");
-//  cudaSetDevice(0);
-//printf("AF set dev \n");
-
   cublasHandle_t handle;
   cublasStatus_t ret;
   cudaError_t err;
-//printf("BEF str\n");
-  cudaStream_t stream1, stream2;
-  cudaStreamCreate ( &stream1);
-  cudaStreamCreate ( &stream2);
+  cudaStream_t stream1;
+  cudaStreamCreateWithFlags ( &stream1, cudaStreamNonBlocking);
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
     printf("cublasCreate(&handle)");
     exit(EXIT_FAILURE);
   }
-//printf("BEF cumalloc \n");
   double* devA;
   double* devB;
   cudaMalloc((void**)&devA,  m*m*sizeof(double));
   cudaMalloc((void**)&devB,  m*n*sizeof(double));
-//printf("AF cumalloc \n");
 
   cudaMemcpyAsync(devA, A, m*m*sizeof(double), cudaMemcpyHostToDevice, stream1);
-  cudaMemcpyAsync(devB, B, m*n*sizeof(double), cudaMemcpyHostToDevice, stream2);
+  cudaMemcpyAsync(devB, B, m*n*sizeof(double), cudaMemcpyHostToDevice, stream1);
   
   double alpha = 1.0;
 /**
@@ -124,7 +114,6 @@ void cuSolveLowerLS(int m, int n, double* A, double* B) {
   }
   
   cudaStreamDestroy(stream1);
-  cudaStreamDestroy(stream2); 
   cublasDestroy(handle);
   cudaFree(devA);
   cudaFree(devB);
@@ -187,70 +176,6 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
   cublasDestroy(handle);
   cudaFree(devInMat);
   cudaFree(devOutMat);
+  cudaDeviceReset();
 }
 
-/*int main () {
-  int m = 20, n = 25;
-  double* A = new double[m*m];
-  //double* B = new double[k*n];
-std::cout << "!!!!!!!!!!!!!!!!!!!!" << std::endl;
-  double* C = new double[m*n];
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      if (i == j) {
-        C[i + m*j] = i + j + 1;
-        //C[i + n*j] = 1;
-      }
-      else {
-       // if (j < n) A[i + n*j] = 0;
-        C[i + m*j] = 0;
-      }
-    }
-  }
-
-  for(int i = 0; i < m; i++) {
-    for (int j = 0; j < m; j++) {
-      if (i == j) A[i + j*m] = 1; else A[i + j*m] = 0;
-      std::cout << A[i + j*m] << " ";
-    }
-    std::cout << std::endl;
-  }
-std::cout << "BEFORE" <<std::endl;
-  cuSolveLowerLS(m, n, A, C);
-  //cuInverseMat(n, inM,  outM);
-std::cout << "AFTER" << std::endl;
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      std::cout << C[i + j*m] << " ";
-    }
-    std::cout << std::endl;
-  }
-  return 0; 
-}
-*/
-/*  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < k; j++) {
-      A[i+m*j] = 1.0;
-      std::cout << A[i+m*j] << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  for(int i = 0; i < k; i++) {
-    for (int j = 0; j < n; j++) {
-      B[i+j*k] = 1.0;
-      std::cout << B[i+j*k] << " ";
-    }
-    std::cout << std::endl;
-  }
-  cuMultiplyMat(m, n, k, A, B, C);
-  
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
-      std::cout << C[i+m*j] << " ";
-    }
-    std::cout << std::endl;
-  }
-  return 0;
-}
-*/

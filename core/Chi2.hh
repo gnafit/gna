@@ -3,6 +3,7 @@
 
 #include "GNAObject.hh"
 #include "Statistic.hh"
+#include "GNAcuMath.h"
 
 class Chi2: public GNASingleObject,
             public Transformation<Chi2>,
