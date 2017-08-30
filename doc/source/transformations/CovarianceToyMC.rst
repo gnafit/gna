@@ -50,7 +50,7 @@ One can define the variable :math:`z`:
    &x = Lz + \mu.
 
 Since the transition Jacobian :math:`|dx/dz|=|L|=\sqrt{|V|}` each :math:`z_i` is distributed
-normally with :math:`\sigma=1` and central value of :math:`0`.
+normally with :math:`\sigma=1` with central value of :math:`0`.
 
 The algorithm generates normal vector :math:`z` and transforms it to :math:`x=Lz + \mu`.
 
