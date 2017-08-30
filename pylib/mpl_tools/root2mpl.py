@@ -14,11 +14,12 @@ def plot_hist1( h, *args, **kwargs ):
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
     all other arguments passes as is.
 
-    if label=='@auto' replaces plot label with histogram title
+    Options:
+        autolabel=True guesses plot label with histogram's title
 
     returns pyplot.plot() result
     """
-    if kwargs.get( 'label', None )=='@auto':
+    if kwargs.pop( 'autolabel', None ):
         kwargs['label'] = h.GetTitle()
 
     lims=R2N.get_bin_edges_axis( h.GetXaxis() )
@@ -32,17 +33,16 @@ def bar_hist1( h, *args, **kwargs ):
     executes pyplot.bar(left, height, width, *args, **kwargs) with first two arguments overridden
     all other arguments passes as is.
 
-    if label=='@auto' replaces plot label with histogram title
-
     Options:
         divide=N - divide bin width by N
         shift=N  - shift bin left edge by N*width
+        autolabel=True guesses plot label with histogram's title
 
     returns pyplot.bar() result
     """
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
-    if kwargs.get( 'label', None )=='@auto':
+    if kwargs.pop( 'autolabel', None ):
         kwargs['label'] = h.GetTitle()
 
     height=R2N.get_buffer_hist1( h ).copy()
@@ -67,13 +67,14 @@ def errorbar_hist1( h, *args, **kwargs ):
     executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with first four arguments overridden
     all other arguments passes as is.
 
-    if label=='@auto' replaces plot label with histogram title
+    Options:
+        autolabel=True guesses plot label with histogram's title
 
     Uses histgram's errors if they are defined. Uses sqrt(N) otherwise.
 
     returns pyplot.errorbar() result
     """
-    if kwargs.get( 'label', None )=='@auto':
+    if kwargs.pop( 'autolabel', None ):
         kwargs['label'] = h.GetTitle()
 
     noyerr, mask, = [ kwargs.pop(x) if x in kwargs else None for x in ['noyerr', 'mask'] ]

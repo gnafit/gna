@@ -25,9 +25,9 @@ ax.set_xlabel( 'x axis' )
 ax.set_ylabel( 'y axis' )
 ax.set_title( 'Title' )
 
-h1.plot( label='@auto' )
-h2.plot( label='@auto' )
-h3.plot( label='@auto' )
+h1.plot( autolabel=True )
+h2.plot( autolabel=True )
+h3.plot( autolabel=True )
 
 ax.legend( loc='upper left' )
 ax.set_ylim( bottom=0.0 )
@@ -43,9 +43,9 @@ ax.set_xlabel( 'x axis' )
 ax.set_ylabel( 'y axis' )
 ax.set_title( 'Title' )
 
-h1.errorbar( label='@auto' )
-h2.errorbar( label='@auto' )
-h3.errorbar( label='@auto' )
+h1.errorbar( autolabel=True )
+h2.errorbar( autolabel=True )
+h3.errorbar( autolabel=True )
 
 ax.legend( loc='upper left' )
 
@@ -60,9 +60,9 @@ ax.set_xlabel( 'x axis' )
 ax.set_ylabel( 'y axis' )
 ax.set_title( 'Title' )
 
-h1.bar( label='@auto', alpha=0.5 )
-h2.bar( label='@auto', alpha=0.5 )
-h3.bar( label='@auto', alpha=0.5 )
+h1.bar( autolabel=True, alpha=0.5 )
+h2.bar( autolabel=True, alpha=0.5 )
+h3.bar( autolabel=True, alpha=0.5 )
 
 ax.legend( loc='upper left' )
 
@@ -77,9 +77,9 @@ ax.set_xlabel( 'x axis' )
 ax.set_ylabel( 'y axis' )
 ax.set_title( 'Title' )
 
-h1.bar( label='@auto', divide=3, shift=0 )
-h2.bar( label='@auto', divide=3, shift=1 )
-h3.bar( label='@auto', divide=3, shift=2 )
+h1.bar( autolabel=True, divide=3, shift=0 )
+h2.bar( autolabel=True, divide=3, shift=1 )
+h3.bar( autolabel=True, divide=3, shift=2 )
 
 ax.legend( loc='upper left' )
 
