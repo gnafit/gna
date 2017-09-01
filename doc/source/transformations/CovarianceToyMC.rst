@@ -10,6 +10,10 @@ Uses ``boost::mt19937`` random generator.
 The sample becomes frozen upon generation. One has to manually taint the transformation
 for the next sample by calling ``nextSample`` method.
 
+Warning! Be careful with generatining random numbers with high level of correlation.
+Presence of correlation coefficients of order of 0.9 will most likely cause the
+distribution width to be invalid. So test the generator prior the actual usage.
+
 Inputs
 ^^^^^^
 
