@@ -96,7 +96,7 @@ def plot(label, distr, opts):
         print( '  mean', k, distr[k].mean() )
         print( '  std', k, distr[k].std() )
 
-        ax.hist( distr[k], bins=100, range=(m-5*s, m+5*s) )
+        ax.hist( distr[k], bins=100, range=(m-5*s, m+5*s), histtype='stepfilled' )
         ax.axvline( m, linestyle='--', color='black' )
         ax.axvspan( m-s, m+s, facecolor='green', alpha=0.5, edgecolor='none' )
 
@@ -106,6 +106,7 @@ def plot(label, distr, opts):
         if label=='Poisson':
             s1 = m1**0.5
             s2 = m2**0.5
+
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
@@ -123,6 +124,28 @@ def plot(label, distr, opts):
         ax.axhline( m2, linestyle='--', color='black'  )
 
         savefig( opts.output, suffix=' %s %s %s'%(label, k1, k2) )
+
+        if label=='Poisson':
+            continue
+
+        fig = P.figure()
+        ax = P.subplot( 111 )
+        ax.minorticks_on()
+        # ax.grid()
+        ax.set_xlabel( k1 )
+        ax.set_ylabel( k2 )
+        ax.set_title( label )
+
+        cc = N.corrcoef( distr[k1], distr[k2] )
+        print( ' cor coef', k1, k2, cc[0,1])
+
+        c=ax.hexbin( distr[k1], distr[k2], gridsize=30, mincnt=1,
+                     linewidths=0.0, edgecolor='none' )
+        add_colorbar( c )
+        ax.axvline( m1, linestyle='--', color='black'  )
+        ax.axhline( m2, linestyle='--', color='black'  )
+
+        savefig( opts.output, suffix=' %s %s %s hex'%(label, k1, k2) )
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
