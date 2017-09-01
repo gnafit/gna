@@ -13,13 +13,18 @@ from mpl_tools.helpers import savefig, add_colorbar
 
 mu    = N.array( [ 1.0, 10.0, 100.0 ] )
 sigma = N.matrix( [ 1.0,  1.0, 10.0 ] )
-cor   = N.array( [ [ 1.0, 0.5, 0.9 ],
+cor   = N.array( [ [ 1.0, 0.5, 0.7 ],
                    [ 0.5, 1.0, 0.0 ],
-                   [ 0.9, 0.0, 1.0 ] ], dtype='d' )
+                   [ 0.7, 0.0, 1.0 ] ], dtype='d' )
 cov   = cor*(sigma.T*sigma).A
 
 print( 'Covariance' )
 print( cov )
+print()
+
+print( 'Correlation' )
+print( cor )
+print()
 
 mu_p = convert(mu, 'points')
 sigma_p = convert(sigma.A1, 'points')
@@ -75,6 +80,7 @@ def run(opts):
     savefig( opts.output, suffix='_cor' )
 
 def plot(label, distr, opts):
+    print( label )
     it = zip(['x', 'y', 'z'], mu, sigma.A1)
     for k, m, s in it:
         if label=='Poisson':
@@ -86,6 +92,9 @@ def plot(label, distr, opts):
         ax.set_xlabel( k )
         ax.set_ylabel( 'entries' )
         ax.set_title( label )
+
+        print( '  mean', k, distr[k].mean() )
+        print( '  std', k, distr[k].std() )
 
         ax.hist( distr[k], bins=100, range=(m-5*s, m+5*s) )
         ax.axvline( m, linestyle='--', color='black' )
@@ -104,6 +113,9 @@ def plot(label, distr, opts):
         ax.set_xlabel( k1 )
         ax.set_ylabel( k2 )
         ax.set_title( label )
+
+        cc = N.corrcoef( distr[k1], distr[k2] )
+        print( ' cor coef', k1, k2, cc[0,1])
 
         c,xe,ye,im=ax.hist2d( distr[k1], distr[k2], bins=100, cmin=0.5, range=[(m1-5*s1, m1+5*s1), (m2-5*s2, m2+5*s2)] )
         add_colorbar( im )
