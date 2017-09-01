@@ -33,8 +33,10 @@ void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
 
 void PoissonToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=1) {
+    auto &mean = args[i].vec;
     auto &out = rets[i].vec;
     for (int j = 0; j < out.size(); ++j) {
+      m_gen.distribution().param( boost::poisson_distribution<int>::param_type( mean(j) ) );
       out(j) = m_gen();
     }
   }

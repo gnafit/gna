@@ -18,6 +18,9 @@ cor   = N.array( [ [ 1.0, 0.5, 0.9 ],
                    [ 0.9, 0.0, 1.0 ] ], dtype='d' )
 cov   = cor*(sigma.T*sigma).A
 
+print( 'Covariance' )
+print( cov )
+
 mu_p = convert(mu, 'points')
 sigma_p = convert(sigma.A1, 'points')
 cov_p = convert(cov, 'points')
@@ -74,6 +77,8 @@ def run(opts):
 def plot(label, distr, opts):
     it = zip(['x', 'y', 'z'], mu, sigma.A1)
     for k, m, s in it:
+        if label=='Poisson':
+            s = m**0.5
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
@@ -84,14 +89,18 @@ def plot(label, distr, opts):
 
         ax.hist( distr[k], bins=100, range=(m-5*s, m+5*s) )
         ax.axvline( m, linestyle='--', color='black' )
+        ax.axvspan( m-s, m+s, facecolor='green', alpha=0.5, edgecolor='none' )
 
         savefig( opts.output, suffix=' %s %s'%(label, k) )
 
     for (k1, m1, s1), (k2, m2, s2) in I.combinations( it, 2 ):
+        if label=='Poisson':
+            s1 = m1**0.5
+            s2 = m2**0.5
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
-        ax.grid()
+        # ax.grid()
         ax.set_xlabel( k1 )
         ax.set_ylabel( k2 )
         ax.set_title( label )

@@ -20,9 +20,10 @@ protected:
   void calcToyMC(Args args, Rets rets);
 
   boost::mt19937 m_rand;
+  boost::poisson_distribution<int> m_distr;
   boost::variate_generator<
     boost::mt19937&, boost::poisson_distribution<int>
-  > m_gen{m_rand, boost::poisson_distribution<int>()};
+  > m_gen{m_rand, m_distr};
   bool m_autofreeze;
 };
 
