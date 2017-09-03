@@ -34,6 +34,7 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
+    printf("ERROR: unable to create cuBLAS handle!\n");
     exit(EXIT_FAILURE);
   }
   double* devA; double* devB; double* devC;
@@ -58,6 +59,7 @@ void cuMultiplyMat(int m, int n, int k, double* InA, double* InB, double* OutC) 
   err = cudaMemcpyAsync(OutC, devC, m * n * sizeof(double), cudaMemcpyDeviceToHost, stream1);
 
   if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from device to host! \n");
     exit(EXIT_FAILURE);
   }
   cudaStreamDestroy(stream1);
@@ -80,7 +82,7 @@ void cuSolveLowerLS(int m, int n, double* A, double* B) {
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
-    printf("cublasCreate(&handle)");
+    printf("ERROR: unable to create cuBLAS handle!\n");
     exit(EXIT_FAILURE);
   }
   double* devA;
@@ -102,14 +104,14 @@ void cuSolveLowerLS(int m, int n, double* A, double* B) {
 
   cudaDeviceSynchronize();
   if(ret!=CUBLAS_STATUS_SUCCESS) {
-    printf("cublasDtrsm_v2");
+    printf("ERROR: unable to solve linear system with cuBLAS! \n");
     exit(EXIT_FAILURE);
   }
   
   err = cudaMemcpyAsync(B, devB, m*n*sizeof(double), cudaMemcpyDeviceToHost, stream1);
 
   if(err!=cudaSuccess) {
-    printf("cudaMemcpyAsync0");
+    printf("ERROR: unable to copy memory from device to host! \n");
     exit(EXIT_FAILURE);
   }
   
@@ -137,6 +139,7 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
 
   ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
+    printf("ERROR: unable to create cuBLAS handle!\n");
     exit(EXIT_FAILURE);
   }
 
@@ -147,6 +150,7 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
 
   err = cudaMemcpyAsync(devInMat, InMat, copyableSize, cudaMemcpyHostToDevice, stream1);
   if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from host to device! \n");
     exit(EXIT_FAILURE);
   }
 
@@ -163,12 +167,14 @@ void cuInverseMat(int matSize, double* InMat, double* OutMat) {
 
   cudaDeviceSynchronize();
   if(ret!=CUBLAS_STATUS_SUCCESS) {
+    printf("ERROR: unable to invert matrix with cuBLAS! \n");
     exit(EXIT_FAILURE);
   }
 
   err = cudaMemcpyAsync(OutMat, devOutMat, copyableSize, cudaMemcpyDeviceToHost, stream1);
 
   if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from device to host! \n");
     exit(EXIT_FAILURE);
   }
   cudaStreamDestroy(stream1);

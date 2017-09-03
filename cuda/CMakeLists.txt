@@ -11,8 +11,10 @@ set(CMAKE_MODULE_PATH cmake)
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_50,code=sm_50 -std=c++11 -Xcompiler -fPIC)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_50,code=sm_50 -std=c++11 -Xcompiler -fPIC )
 
-cuda_add_library(GNAcuMath SHARED GNAcuMath.cu GNAcuMath.h)
-cuda_add_cublas_to_target(GNAcuMath)
+include_directories(extra/)
+
+cuda_add_library(cuGNA SHARED extra/GNAcuMath.cu extra/GNAcuMath.h)
+cuda_add_cublas_to_target(cuGNA)
 

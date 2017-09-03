@@ -7,41 +7,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
-set (SOURCES
-  core/TransformationBase.cc
-  core/Transformation.cc
-  core/Parametrized.cc
-  core/GNAObject.cc
-  core/UncertainParameter.cc
-  core/ParametersGroup.cc
-  core/Prediction.cc
-  core/CovariatedPrediction.cc
-  core/Product.cc
-  core/Sum.cc
-  core/WeightedSum.cc
-  core/LinearInterpolator.cc
-  core/Derivative.cc
-  core/Covmat.cc
-  core/Chi2.cc
-  core/Poisson.cc
-  core/CovarianceToyMC.cc
-  core/PoissonToyMC.cc
-  neutrino/OscProb2nu.cc
-  neutrino/OscProbPMNS.cc
-  neutrino/OscProbPMNSDecoh.cc
-  neutrino/IbdInteraction.cc
-  neutrino/IbdZeroOrder.cc
-  neutrino/IbdFirstOrder.cc
-  neutrino/ReactorNorm.cc
-  neutrino/ReactorGroup.cc
-  neutrino/OscProbMatterUniform.cc
-  integrator/GaussLegendre.cc
-  integrator/GaussLegendre2d.cc
-  detector/EnergyResolution.cc
-  detector/C14Spectrum.cc
-  extra/GridFilter.cc
-  )
-
 set (HEADERS
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
@@ -88,6 +53,11 @@ set (HEADERS
   EigenHelpers.hh 
   )
 
+set(SOURCES_STANDALONE standalone/LittleTest.cc)
+set(NAME_STANDALONE standalone_test)
+set(HEADERS_STANDALONE LittleTest.hh)
+include_directories(standalone)
+
 include_directories( core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
 set(DICT    Dict.cc)
 
@@ -126,30 +96,72 @@ cmake_policy(SET CMP0015 NEW)
 
 if(CUDA_SUPPORT)
     find_package( CUDA REQUIRED)
+    include_directories(cuda/extra/ cuda/core/)
+    set(LOCAL_CUDA_DIR "cuda/")
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
-        set(CUDA_MAT_SIZE_THRESHOLD 200)
+        set(CUDA_MAT_SIZE_THRESHOLD 100)
     endif()
     message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
     set(CUDA_ADD_LIBS)
     IF (CUDA_FOUND)
         add_subdirectory(cuda/)
-        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas GNAcuMath)
+        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
         link_directories(cuda/)
     ENDIF()
+else()
+    set(LOCAL_CUDA_DIR "")
 endif()
 
 configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 include_directories( SYSTEM ${CMAKE_BINARY_DIR}/generated/ )
-#set (HEADERS ${HEADERS} ${CMAKE_BINARY_DIR}/generated/config_vars.h)
-
 
 find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
 link_directories(${ROOT_LIBRARY_DIR})
 
 
+set (SOURCES
+  core/TransformationBase.cc
+  core/Transformation.cc
+  core/Parametrized.cc
+  core/GNAObject.cc
+  core/UncertainParameter.cc
+  core/ParametersGroup.cc
+  core/Prediction.cc
+  core/CovariatedPrediction.cc
+  core/Product.cc
+  core/Sum.cc
+  core/WeightedSum.cc
+  core/LinearInterpolator.cc
+  core/Derivative.cc
+  core/Covmat.cc
+  ${LOCAL_CUDA_DIR}/core/Chi2.cc
+  core/Poisson.cc
+  core/CovarianceToyMC.cc
+  core/PoissonToyMC.cc
+  neutrino/OscProb2nu.cc
+  neutrino/OscProbPMNS.cc
+  neutrino/OscProbPMNSDecoh.cc
+  neutrino/IbdInteraction.cc
+  neutrino/IbdZeroOrder.cc
+  neutrino/IbdFirstOrder.cc
+  neutrino/ReactorNorm.cc
+  neutrino/ReactorGroup.cc
+  neutrino/OscProbMatterUniform.cc
+  integrator/GaussLegendre.cc
+  integrator/GaussLegendre2d.cc
+  detector/EnergyResolution.cc
+  detector/C14Spectrum.cc
+  extra/GridFilter.cc
+  )
+
+
+
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl  -lm )
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl  -lgslcblas -lm )
+
+add_executable(${NAME_STANDALONE} ${SOURCES_STANDALONE})
+target_link_libraries(${NAME_STANDALONE} ${LIBNAME})
