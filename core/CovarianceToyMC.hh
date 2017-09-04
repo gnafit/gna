@@ -1,8 +1,7 @@
 #ifndef COVARIANCETOYMC_H
 #define COVARIANCETOYMC_H
 
-#include <boost/random.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include "Random.hh"
 #include <boost/random/normal_distribution.hpp>
 
 #include "GNAObject.hh"
@@ -19,10 +18,9 @@ protected:
   void calcTypes(Atypes args, Rtypes rets);
   void calcToyMC(Args args, Rets rets);
 
-  boost::mt19937 m_rand;
   boost::variate_generator<
     boost::mt19937&, boost::normal_distribution<>
-  > m_gen{m_rand, boost::normal_distribution<>()};
+  > m_gen{GNA::random_generator, boost::normal_distribution<>()};
 
   bool m_autofreeze;
 };

@@ -21,7 +21,7 @@ void CovarianceToyMC::nextSample() {
 }
 
 void CovarianceToyMC::seed(unsigned int s) {
-  m_rand.seed(s);
+  GNA::random_generator.seed(s);
   m_gen.distribution().reset();
 }
 
