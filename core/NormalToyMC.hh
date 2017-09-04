@@ -1,5 +1,5 @@
-#ifndef COVARIANCETOYMC_H
-#define COVARIANCETOYMC_H
+#ifndef NORMALTOYMC_H
+#define NORMALTOYMC_H
 
 #include <boost/random.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -7,12 +7,13 @@
 
 #include "GNAObject.hh"
 
-class CovarianceToyMC: public GNASingleObject,
-                       public Transformation<CovarianceToyMC> {
+class NormalToyMC: public GNASingleObject,
+                   public Transformation<NormalToyMC> {
 public:
-  CovarianceToyMC( bool autofreeze=true );
+  NormalToyMC( bool autofreeze=true );
 
-  void add(SingleOutput &theory, SingleOutput &cov);
+  void add(SingleOutput &theory, SingleOutput &sigma);
+
   void nextSample();
   void seed(unsigned int s);
 protected:
@@ -23,8 +24,7 @@ protected:
   boost::variate_generator<
     boost::mt19937&, boost::normal_distribution<>
   > m_gen{m_rand, boost::normal_distribution<>()};
-
   bool m_autofreeze;
 };
 
-#endif // COVARIANCETOYMC_H
+#endif // NORMALTOYMC_H

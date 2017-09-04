@@ -49,3 +49,32 @@ def add_colorbar( colormapable, **kwargs ):
         cbar.solids.set_rasterized( True )
     P.sca( ax )
     return cbar
+
+def savefig( name, *args, **kwargs ):
+    """Save fig and print output filename"""
+    if not name: return
+    if type(name)==list:
+        for n in name:
+            savefig( n, *args, **kwargs.copy() )
+        return
+
+    suffix = kwargs.pop( 'suffix', None )
+    addext = kwargs.pop( 'addext', [] )
+    if suffix:
+        from os.path import splitext
+        basename, ext = splitext( name )
+        name = basename+suffix+ext
+
+    P.savefig( name, *args, **kwargs )
+    print( 'Save figure', name )
+
+    if addext:
+        if not type( addext )==list:
+            addext = [ addext ]
+        from os import path
+        basename, extname = path.splitext( name )
+        for ext in addext:
+            name = '%s.%s'%( basename, ext )
+            print( 'Save figure', name )
+            P.savefig( name, *args, **kwargs )
+

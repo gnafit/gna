@@ -10,7 +10,7 @@
 class PoissonToyMC: public GNASingleObject,
                     public Transformation<PoissonToyMC> {
 public:
-  PoissonToyMC();
+  PoissonToyMC( bool autofreeze=true );
 
   void add(SingleOutput &theory, SingleOutput &cov);
   void nextSample();
@@ -23,6 +23,7 @@ protected:
   boost::variate_generator<
     boost::mt19937&, boost::poisson_distribution<int>
   > m_gen{m_rand, boost::poisson_distribution<int>()};
+  bool m_autofreeze;
 };
 
 #endif // POISSONTOYMC_H
