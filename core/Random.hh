@@ -1,12 +1,15 @@
 #ifndef RANDOM_H
 #define RANDOM_H 1
 
-#include <boost/random.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 namespace GNA
 {
-  static boost::mt19937 random_generator;
+  namespace random
+  {
+      static std::random_device device;
+      static std::mt19937       generator(device());
+  } /* random */
 } /* GNA */
 
 #endif

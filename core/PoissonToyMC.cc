@@ -17,11 +17,6 @@ void PoissonToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void PoissonToyMC::seed(unsigned int s) {
-  GNA::random_generator.seed(s);
-  m_gen.distribution().reset();
-}
-
 void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
   for (size_t i = 0; i < args.size(); i+=1) {
     if (args[i].shape.size() != 1) {
@@ -36,8 +31,8 @@ void PoissonToyMC::calcToyMC(Args args, Rets rets) {
     auto &mean = args[i].vec;
     auto &out = rets[i].vec;
     for (int j = 0; j < out.size(); ++j) {
-      m_gen.distribution().param( boost::poisson_distribution<int>::param_type( mean(j) ) );
-      out(j) = m_gen();
+      m_gen.param( std::poisson_distribution<>::param_type( mean(j) ) );
+      out(j) = m_gen( GNA::random::generator );
     }
   }
 
