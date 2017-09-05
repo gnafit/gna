@@ -35,15 +35,15 @@ r2 = test()
 R.GNA.Random.seed( 1 )
 r3 = test()
 
-print( 'Sample 1 (reset)' )
+print( 'Sample 1 (explicit reset)' )
 print( r1 )
 print()
 
-print( 'Sample 2 (reset)' )
+print( 'Sample 2 (explicit reset)' )
 print( r2 )
 print()
 
-print( 'Sample 3 (no reset)' )
+print( 'Sample 3 (implicit reset)' )
 print( r3 )
 print()
 
@@ -54,7 +54,7 @@ print( 'Equality: 1 and 2:', r12, r12 and '\033[32mOK!' or '\033[31mFAIL!', '\03
 print( r1==r2 )
 print()
 
-print( 'Equality: 2 and 3', r32 )
+print( 'Equality: 2 and 3', r32, r32 and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
 print( r3==r2 )
 print()
 

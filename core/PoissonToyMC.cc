@@ -6,6 +6,8 @@ PoissonToyMC::PoissonToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
     .types(&PoissonToyMC::calcTypes)
     .func(&PoissonToyMC::calcToyMC)
   ;
+
+  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
 }
 
 void PoissonToyMC::add(SingleOutput &theory) {
