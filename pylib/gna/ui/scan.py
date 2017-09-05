@@ -224,7 +224,9 @@ class cmd(basecmd):
             seed, nsamples = getsampling(path)
 
             if self.toymc:
-                self.toymc.seed(seed)
+                import ROOT as R
+                R.GNA.Random.seed( seed )
+                self.toymc.reset()
             data = self.makedata(nsamples)
             parvalues = dict(zip(pointset.params, values))
             with self.env.pars.update(parvalues):

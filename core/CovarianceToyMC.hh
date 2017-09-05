@@ -11,12 +11,13 @@ public:
 
   void add(SingleOutput &theory, SingleOutput &cov);
   void nextSample();
-  void seed(unsigned int s);
+
+  void reset() { m_distr.reset(); }
 protected:
   void calcTypes(Atypes args, Rtypes rets);
   void calcToyMC(Args args, Rets rets);
 
-  std::normal_distribution<> m_gen;
+  std::normal_distribution<> m_distr;
 
   bool m_autofreeze;
 };

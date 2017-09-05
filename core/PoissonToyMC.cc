@@ -8,7 +8,7 @@ PoissonToyMC::PoissonToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   ;
 }
 
-void PoissonToyMC::add(SingleOutput &theory, SingleOutput &cov) {
+void PoissonToyMC::add(SingleOutput &theory) {
   t_["toymc"].input(theory);
 }
 
@@ -31,8 +31,8 @@ void PoissonToyMC::calcToyMC(Args args, Rets rets) {
     auto &mean = args[i].vec;
     auto &out = rets[i].vec;
     for (int j = 0; j < out.size(); ++j) {
-      m_gen.param( std::poisson_distribution<>::param_type( mean(j) ) );
-      out(j) = m_gen( GNA::random::generator );
+      m_distr.param( std::poisson_distribution<>::param_type( mean(j) ) );
+      out(j) = m_distr( GNA::Random::gen() );
     }
   }
 

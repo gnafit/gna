@@ -42,7 +42,7 @@ void NormalToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].arr;
     for (int j = 0; j < out.size(); ++j) {
-      out(j) = m_gen( GNA::random::generator );
+      out(j) = m_distr( GNA::Random::gen() );
     }
     out = args[i+0].arr + args[i+1].arr*out;
   }

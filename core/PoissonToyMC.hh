@@ -9,14 +9,16 @@ class PoissonToyMC: public GNASingleObject,
 public:
   PoissonToyMC( bool autofreeze=true );
 
-  void add(SingleOutput &theory, SingleOutput &cov);
+  void add(SingleOutput &theory, SingleOutput &cov) { add( theory ); }
+  void add(SingleOutput &theory);
   void nextSample();
 
+  void reset() { m_distr.reset(); }
 protected:
   void calcTypes(Atypes args, Rtypes rets);
   void calcToyMC(Args args, Rets rets);
 
-  std::poisson_distribution<> m_gen;
+  std::poisson_distribution<> m_distr;
 
   bool m_autofreeze;
 };
