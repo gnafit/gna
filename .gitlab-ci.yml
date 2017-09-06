@@ -10,8 +10,9 @@ pages:
   - pip install ipython
   - cd doc
   - make html
+  - mv build/html/ public/
   artifacts:
     paths:
-    - doc/build/html
+    - public
   only:
   - master 
