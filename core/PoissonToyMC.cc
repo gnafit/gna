@@ -33,7 +33,6 @@ void PoissonToyMC::calcToyMC(Args args, Rets rets) {
     auto &mean = args[i].vec;
     auto &out = rets[i].vec;
     for (int j = 0; j < out.size(); ++j) {
-      /* m_distr.param( std::poisson_distribution<>::param_type( mean(j) ) ); */
         m_distr.param(decltype(m_distr)::param_type(mean(j)));
       out(j) = m_distr( GNA::Random::gen() );
     }
