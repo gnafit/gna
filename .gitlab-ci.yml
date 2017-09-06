@@ -14,6 +14,6 @@ pages:
   - mv build/html/ public/
   artifacts:
     paths:
-    - public
+    - doc/public
   only:
   - master 
