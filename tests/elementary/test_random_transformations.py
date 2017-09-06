@@ -67,6 +67,7 @@ def run(opts):
     c=ax.matshow( cov )
     add_colorbar( c )
     savefig( opts.output, suffix='_cov' )
+    P.close()
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -78,6 +79,7 @@ def run(opts):
     c = ax.matshow( cor )
     add_colorbar( c )
     savefig( opts.output, suffix='_cor' )
+    P.close()
 
 def plot(label, distr, opts):
     print( label )
@@ -101,6 +103,7 @@ def plot(label, distr, opts):
         ax.axvspan( m-s, m+s, facecolor='green', alpha=0.5, edgecolor='none' )
 
         savefig( opts.output, suffix=' %s %s'%(label, k) )
+        P.close()
 
     for (k1, m1, s1), (k2, m2, s2) in I.combinations( it, 2 ):
         if label=='Poisson':
@@ -124,6 +127,7 @@ def plot(label, distr, opts):
         ax.axhline( m2, linestyle='--', color='black'  )
 
         savefig( opts.output, suffix=' %s %s %s'%(label, k1, k2) )
+        P.close()
 
         if label=='Poisson':
             continue
@@ -146,6 +150,7 @@ def plot(label, distr, opts):
         ax.axhline( m2, linestyle='--', color='black'  )
 
         savefig( opts.output, suffix=' %s %s %s hex'%(label, k1, k2) )
+        P.close()
 
 if __name__ == "__main__":
     from argparse import ArgumentParser

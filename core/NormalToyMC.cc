@@ -7,6 +7,8 @@ NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
     .types(&NormalToyMC::calcTypes)
     .func(&NormalToyMC::calcToyMC)
   ;
+
+  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
 }
 
 void NormalToyMC::add(SingleOutput &theory, SingleOutput &sigma) {
@@ -18,11 +20,6 @@ void NormalToyMC::add(SingleOutput &theory, SingleOutput &sigma) {
 void NormalToyMC::nextSample() {
   t_["toymc"].unfreeze();
   t_["toymc"].taint();
-}
-
-void NormalToyMC::seed(unsigned int s) {
-  m_rand.seed(s);
-  m_gen.distribution().reset();
 }
 
 void NormalToyMC::calcTypes(Atypes args, Rtypes rets) {
@@ -47,7 +44,7 @@ void NormalToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].arr;
     for (int j = 0; j < out.size(); ++j) {
-      out(j) = m_gen();
+      out(j) = m_distr( GNA::Random::gen() );
     }
     out = args[i+0].arr + args[i+1].arr*out;
   }

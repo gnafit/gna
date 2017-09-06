@@ -7,6 +7,8 @@ CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze )
     .types(&CovarianceToyMC::calcTypes)
     .func(&CovarianceToyMC::calcToyMC)
   ;
+
+  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
 }
 
 void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
@@ -18,11 +20,6 @@ void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
 void CovarianceToyMC::nextSample() {
   t_["toymc"].unfreeze();
   t_["toymc"].taint();
-}
-
-void CovarianceToyMC::seed(unsigned int s) {
-  m_rand.seed(s);
-  m_gen.distribution().reset();
 }
 
 void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
@@ -49,7 +46,7 @@ void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].vec;
     for (int j = 0; j < out.size(); ++j) {
-      out(j) = m_gen();
+      out(j) = m_distr( GNA::Random::gen() );
     }
     out = args[i+0].vec + args[i+1].mat.triangularView<Eigen::Lower>()*out;
   }

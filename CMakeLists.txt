@@ -44,6 +44,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
   Transformation.hh
