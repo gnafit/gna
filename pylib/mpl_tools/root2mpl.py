@@ -194,7 +194,7 @@ def imshow_hist2( h, *args, **kwargs ):
 def graph_plot( g, *args, **kwargs ):
     """Plot TGraph using pyplot.plot"""
     x, y = R2N.get_buffers_graph( g )
-    return P.plot( x.copy(), y.copy(), *args, **kwargs )
+    return P.plot( x, y, *args, **kwargs )
 
 def errorbar_graph( g, *args, **kwargs ):
     """Plot TGraphErrors using pyplot.errorbar"""
@@ -215,6 +215,18 @@ def errorbar_graph_asymm( g, *args, **kwargs ):
     if ( ey==0.0 ).all(): ey = None
     return P.errorbar( x, y, ey, ex, *args, **kwargs )
 
+def spline_plot( spline, *args, **kwargs ):
+    """Plot TSpline using pyplot.plot"""
+    xmin = kwargs.pop( 'xmin', spline.GetXmin() )
+    xmax = kwargs.pop( 'xmax', spline.GetXmax() )
+    n    = kwargs.pop( 'n', spline.GetNp() )
+
+    x = N.linspace( xmin, xmax, n )
+    fcn = N.frompyfunc( spline.Eval, 1, 1 )
+    y = fcn( x )
+
+    return P.plot( x, y, *args, **kwargs )
+
 def bind():
     setattr( R.TH1, 'bar',      bar_hist1 )
     setattr( R.TH1, 'errorbar', errorbar_hist1 )
@@ -227,4 +239,6 @@ def bind():
     setattr( R.TGraph,            'plot',     graph_plot )
     setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
     setattr( R.TGraphAsymmErrors, 'errorbar', errorbar_graph_asymm )
+
+    setattr( R.TSpline, 'plot', spline_plot )
 
