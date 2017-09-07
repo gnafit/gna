@@ -46,6 +46,23 @@ def get_buffer_hist2( h, **kwargs ):
 
     return res
 
+def get_err_buffer_hist2( h, **kwargs ):
+    """Return histogram error buffer
+    if flows=False, exclude underflow and overflow
+    if mask=0.0 than bins with 0.0 content will be white, but not colored
+    NOTE: buf[biny][binx] is the right access signature
+    """
+    sw2 = h.GetSumw2()
+    if sw2.GetSize()==0: return None
+    nx, ny = h.GetNbinsX(), h.GetNbinsY()
+    buf = sw2.GetArray()
+    res = N.frombuffer( buf, N.dtype( buf.typecode ), (nx+2)*(ny+2) ).reshape( ( ny+2, nx+2 ) )
+
+    if not kwargs.pop( 'flows', False ):
+        res = res[1:ny+1,1:nx+1]
+
+    return res
+
 def get_bin_edges_axis( ax, type=False, rep=None ):
     """Get the array with bin edges for TAxis
     returns also whether the bins are fixed if type=True
@@ -89,11 +106,58 @@ def get_bin_widths_axis( ax ):
         return ( lims[1:] - lims[:-1] )
     return ax.GetBinWidth(1)
 
+def get_buffers_graph( g ):
+    """Get TGraph x and y buffers"""
+    npoints = g.GetN()
+    if npoints:
+        # return N.frombuffer(g.GetX(), dtype=N.double, count=npoints), \
+               # N.frombuffer(g.GetY(), dtype=N.double, count=npoints)
+        return N.array(g.GetX(), dtype=N.double), \
+               N.array(g.GetY(), dtype=N.double)
+
+    return None, None
+##end def function
+
+def get_err_buffers_graph( g ):
+    """Get TGraphErrors x and y error buffers"""
+    npoints = g.GetN()
+    if npoints:
+        # return N.frombuffer(g.GetEX(), dtype=N.double, count=npoints), \
+               # N.frombuffer(g.GetEY(), dtype=N.double, count=npoints)
+        return N.array(g.GetEX(), dtype=N.double), \
+               N.array(g.GetEY(), dtype=N.double)
+
+    return None, None
+##end def function
+
+def get_err_buffers_graph_asymm( g ):
+    """Get TGraphAsymError x and y error buffers"""
+    npoints = g.GetN()
+    if npoints:
+        return N.frombuffer(g.GetEXlow(),  dtype=N.double, count=npoints), \
+               N.frombuffer(g.GetEXhigh(), dtype=N.double, count=npoints), \
+               N.frombuffer(g.GetEYlow(),  dtype=N.double, count=npoints), \
+               N.frombuffer(g.GetEYhigh(), dtype=N.double, count=npoints)
+        # return N.array(g.GetEXlow(),  dtype=N.double), \
+               # N.array(g.GetEXhigh(), dtype=N.double), \
+               # N.array(g.GetEYlow(),  dtype=N.double), \
+               # N.array(g.GetEYhigh(), dtype=N.double)
+
+    return None, None, None, None
+##end def function
+
 def bind():
     """Bind functions to ROOT classes"""
     setattr( R.TH1, 'get_buffer',     get_buffer_hist1 )
     setattr( R.TH1, 'get_err_buffer', get_err_buffer_hist1 )
 
+    setattr( R.TH2, 'get_buffer',     get_buffer_hist2 )
+    setattr( R.TH2, 'get_err_buffer', get_err_buffer_hist2 )
+
     setattr( R.TAxis, 'get_bin_edges',  get_bin_edges_axis )
     setattr( R.TAxis, 'get_bin_edges',  get_bin_edges_axis )
     setattr( R.TAxis, 'get_bin_widths', get_bin_widths_axis )
+
+    setattr( R.TGraph,            'get_buffers',     get_buffers_graph )
+    setattr( R.TGraphErrors,      'get_err_buffers', get_err_buffers_graph )
+    setattr( R.TGraphAsymmErrors, 'get_err_buffers', get_err_buffers_graph_asymm )
