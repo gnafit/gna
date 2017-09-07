@@ -191,13 +191,40 @@ def imshow_hist2( h, *args, **kwargs ):
 
     return res
 
+def graph_plot( g, *args, **kwargs ):
+    """Plot TGraph using pyplot.plot"""
+    x, y = R2N.get_buffers_graph( g )
+    return P.plot( x.copy(), y.copy(), *args, **kwargs )
+
+def errorbar_graph( g, *args, **kwargs ):
+    """Plot TGraphErrors using pyplot.errorbar"""
+    x, y = R2N.get_buffers_graph( g )
+    ex, ey = R2N.get_err_buffers_graph( g )
+    if ( ex==0.0 ).all(): ex = None
+    if ( ey==0.0 ).all(): ey = None
+    return P.errorbar( x, y, ey, ex, *args, **kwargs )
+##end def
+
+def errorbar_graph_asymm( g, *args, **kwargs ):
+    """Plot TGraphErrors using pyplot.errorbar"""
+    x, y = R2N.get_buffers_graph( g )
+    exl, exh, eyl, eyh = R2N.get_err_buffers_graph_asymm( g )
+    ex = N.array( ( exl, exh ) )
+    ey = N.array( ( eyl, eyh ) )
+    if ( ex==0.0 ).all(): ex = None
+    if ( ey==0.0 ).all(): ey = None
+    return P.errorbar( x, y, ey, ex, *args, **kwargs )
+
 def bind():
-    setattr( R.TH1, 'bar', bar_hist1 )
+    setattr( R.TH1, 'bar',      bar_hist1 )
     setattr( R.TH1, 'errorbar', errorbar_hist1 )
-    setattr( R.TH1, 'plot', plot_hist1 )
+    setattr( R.TH1, 'plot',     plot_hist1 )
 
     setattr( R.TH2, 'pcolorfast', pcolorfast_hist2 )
     setattr( R.TH2, 'pcolormesh', pcolormesh_hist2 )
-    setattr( R.TH2, 'imshow', imshow_hist2 )
+    setattr( R.TH2, 'imshow',     imshow_hist2 )
 
+    setattr( R.TGraph,            'plot',     graph_plot )
+    setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
+    setattr( R.TGraphAsymmErrors, 'errorbar', errorbar_graph_asymm )
 
