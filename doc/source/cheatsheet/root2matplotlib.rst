@@ -49,3 +49,13 @@ For the detailed instructions refer to the matplotlib_ documentation and referen
    +-----------------------------------------+---------------------------------------------------------------------------------+
 
 ``colorbar`` and ``mask`` options may be applied to all above commands.
+
+.. table::  `TGraph`
+   :widths: 80 100
+
+   +-------------------------+--------------------------------------------------------------------------------------+
+   | ``graph.plot(...)``     | plot ``TGraph``/``TGraphErrors``/``TGraphAsymmErrors`` via ``plt.plot()``, no errors |
+   +-------------------------+--------------------------------------------------------------------------------------+
+   | ``graph.errorbar(...)`` | plot ``TGraphErrors``/``TGraphAsymmErrors`` via ``plt.errorbar()``                   |
+   +-------------------------+--------------------------------------------------------------------------------------+
+
