@@ -11,7 +11,7 @@ pages:
   - cd doc
   - make html
   - mkdir -p public
-  - mv -r build/html/ public/
+  - mv  build/html/ public/
   artifacts:
     paths:
     - doc/public
