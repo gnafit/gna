@@ -27,6 +27,6 @@ print( L('Overridden key: {logL2}') )
 print(L('{^logL1_label}, {logL1}'))
 print(L('{^logL2_label}, {logL2}'))
 
-print(L.w_unit('dm32'))
-print(L.w_unit('theta13'))
+print(L.u('dm32'))
+print(L.u('theta13'))
 

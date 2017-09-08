@@ -77,6 +77,7 @@ def main( opts ):
     mc_data.plot()
     mc_data.plot2()
     mc_data.plot_lcurve()
+    mc_data.plot_tau()
 
     P.show()
 
@@ -134,7 +135,10 @@ class SimDistr(object):
         assert self.errcode<10000
 
         self.lcurve = R.ROOTHelpers.ScanLcurve( self.unfold, 100, 0.01, 3.0 )
-        self.tau = R.ROOTHelpers.ScanTau( self.unfold, 100, 0.01, 3.0 )
+        self.tau={}
+        for i in [0, 2, 4, 5]:
+            res=R.ROOTHelpers.ScanTau( self.unfold, 100, 0.01, 3.0, i )
+            self.tau[i]=res
 
         self.hist_unfolded = self.unfold.GetOutput( "unfolded" )
         self.hist_folded   = self.unfold.GetFoldedOutput( "folded" )
@@ -176,42 +180,24 @@ class SimDistr(object):
         ax.legend()
         savefig( options.output, suffix='_%s_lcurve_sub'%self.label )
 
-    def plot_lcurve(self):
-        t, x, y = N.zeros( 1, dtype='d' ), N.zeros( 1, dtype='d' ), N.zeros( 1, dtype='d' )
-        self.lcurve.logtaux.GetKnot(self.lcurve.ret, t, x)
-        self.lcurve.logtauy.GetKnot(self.lcurve.ret, t, y)
-
-        fig = P.figure()
-        ax = P.subplot( 111 )
-        ax.minorticks_on()
-        ax.grid()
-        ax.set_xlabel( L('{^logL1_label}, {logL1}') )
-        ax.set_ylabel( L('{^logL2_label}, {logL2}') )
-        ax.set_title( 'L-curve' )
-
-        self.lcurve.lcurve.plot()
-        ax.plot( [x], [y], '*', label='choice' )
-
-        ax.legend( loc='upper right' )
-        savefig( options.output, suffix='_lcurve' )
-
+    def plot_tau(self):
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
         ax.grid()
         ax.set_xlabel( L('{logtau}') )
-        ax.set_ylabel( '' )
-        ax.set_title( '' )
+        # ax.set_ylabel( L('{avgcorr}') )
+        ax.set_title( 'Correlation' )
 
-        lx = self.lcurve.logtaux.plot( label=L('{logL1_label}') )
-        ly = self.lcurve.logtauy.plot( label=L('{logL2_label}') )
-        self.lcurve.logtauc.plot( label=r'curvature' )
-        ax.plot( [t], [x], '*', color=lx[0].get_color() )
-        ax.plot( [t], [y], '*', color=ly[0].get_color() )
-        ax.axvline( t, linestyle='--' )
+        for i, tau in self.tau.items():
+            l, = tau.scan.plot( label=L( '{scantau%i}'%i ) )
 
-        ax.legend()
-        savefig( options.output, suffix='_%s_lcurve_sub'%self.label )
+            t, y = N.zeros( 1, dtype='d' ), N.zeros( 1, dtype='d' )
+            tau.scan.GetKnot(tau.ret, t, y)
+            ax.plot( [t], [y], '*', color=l.get_color() )
+
+        ax.legend( loc='lower right' )
+        savefig( options.output, suffix='_%s_tau_%i'%(self.label, i) )
 
     def plot(self, ax=None):
         if ax:
