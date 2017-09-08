@@ -10,8 +10,8 @@ pages:
   - pip install ipython
   - cd doc
   - make html
-  - mkdir public
-  - mv build/html/ public/
+  - mkdir -p public
+  - mv -r build/html/ public/
   artifacts:
     paths:
     - doc/public
