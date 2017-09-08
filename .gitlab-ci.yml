@@ -13,7 +13,6 @@ pages:
   - cd ..
   - mkdir public/
   - cp -r doc/build/html/* public/
-  - ls public/
   artifacts:
     paths:
     - public
