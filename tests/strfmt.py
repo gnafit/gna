@@ -5,11 +5,10 @@ from __future__ import print_function
 from gna.labelfmt import formatter as L
 from gna import labelfmt
 
-labelfmt.labels['test'] = 'logL1'
-
-print( L('As is: {test}') )
-print( L('Capitalize: {^test}') )
-print( L('Indirect access to label for test: {$test}') )
+print( L('As is: {logL1_label}') )
+print( L('Capitalize: {^logL1_label}') )
+print( L('Indirect access to label: {$var}', var='logL1') )
+print( L('Capitalize indirect: {^$var}', var='logL1_label') )
 
 print( L('Unknown key: {unknown}') )
 

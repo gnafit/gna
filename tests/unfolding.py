@@ -15,7 +15,11 @@ from mpl_tools.helpers import savefig, add_colorbar
 from matplotlib.colors import LogNorm
 from gna.labelfmt import formatter as L
 
+options = None
 def main( opts ):
+    global options
+    options = opts
+
     V  = N.diag( [ 100., 0.1, 0.3 ] )
     mu = N.array( [ 50.0, 0.5, 0.5 ], dtype='d' )
     sigma_r = N.array( [ 0.2, 0.2, 0.2 ], dtype='d' )
@@ -144,14 +148,15 @@ class SimDistr(object):
         ax = P.subplot( 111 )
         ax.minorticks_on()
         ax.grid()
-        ax.set_xlabel( L('{__logL1_label}, {logL1}') )
-        ax.set_ylabel( L('{__logL2_label}, {logL2}') )
+        ax.set_xlabel( L('{^logL1_label}, {logL1}') )
+        ax.set_ylabel( L('{^logL2_label}, {logL2}') )
         ax.set_title( 'L-curve' )
 
         self.lcurve.lcurve.plot()
         ax.plot( [x], [y], '*', label='choice' )
 
         ax.legend( loc='upper right' )
+        savefig( options.output, suffix='_lcurve' )
 
         fig = P.figure()
         ax = P.subplot( 111 )
@@ -169,6 +174,7 @@ class SimDistr(object):
         ax.axvline( t, linestyle='--' )
 
         ax.legend()
+        savefig( options.output, suffix='_%s_lcurve_sub'%self.label )
 
     def plot(self, ax=None):
         if ax:
@@ -193,6 +199,7 @@ class SimDistr(object):
             # self.hist_folded.plot( label='Folded back' )
 
         ax.legend( loc='upper right' )
+        savefig( options.output, suffix='_%s_hist'%self.label )
 
     def plot2(self, ax2=None):
         if ax2:
@@ -210,6 +217,7 @@ class SimDistr(object):
         kwargs = dict()
         # kwargs['norm']=LogNorm( vmin=1 )
         self.hist2.pcolorfast( colorbar=True, mask=0.0, **kwargs )
+        savefig( options.output, suffix='_%s_hist2'%self.label )
 
         return ax2
 
@@ -230,6 +238,6 @@ if __name__ == '__main__':
     parser.add_argument('--erange', default=[ 10.0, 200.0, 19.0 ], nargs=3, type=float, help='energy bins', metavar=('emin', 'emax', 'nbins'))
     parser.add_argument('--nunfold', type=int, default=100, help='number of ToyMC unfolding samples')
     parser.add_argument('--ndata',   type=int, default=10,  help='number of ToyMC data samples')
-    parser.add_argument('-o' ,'--output')
+    parser.add_argument('-o' ,'--output', help='output filename')
 
     main( parser.parse_args() )
