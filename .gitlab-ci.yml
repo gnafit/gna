@@ -10,8 +10,12 @@ pages:
   - pip install ipython
   - cd doc
   - make html
+  - cd ..
+  - mkdir public/
+  - cp -r doc/build/html/* public/
+  - ls public/
   artifacts:
     paths:
-    - doc/build/html
+    - public
   only:
   - master 
