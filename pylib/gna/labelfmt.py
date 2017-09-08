@@ -20,13 +20,13 @@ class LFormatter(string.Formatter):
         if key in kwargs:
             return kwargs[key]
 
-        if key.startswith( '^' ):
-            return kwargs[key[1:]].capitalize()
-
         if key.startswith( '$' ):
             return self.get_value( labels[key[1:]], args, kwargs )
 
-        return key
+        if key.startswith( '^' ):
+            return self.get_value( key[1:], args, kwargs ).capitalize()
+
+        return '?'+key+'?'
 
     def __call__( self, s ):
         return self.format( s, **labels )

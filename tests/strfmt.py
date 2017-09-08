@@ -7,8 +7,11 @@ from gna import labelfmt
 
 labelfmt.labels['test'] = 'logL1'
 
-print( L('{^test}') ) # capitalize
-print( L('{$test}') ) # indirect access
+print( L('As is: {test}') )
+print( L('Capitalize: {^test}') )
+print( L('Indirect access to label for test: {$test}') )
+
+print( L('Unknown key: {unknown}') )
 
 print(L('{^logL1_label}, {logL1}'))
 print(L('{^logL2_label}, {logL2}'))
