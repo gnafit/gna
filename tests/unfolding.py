@@ -176,6 +176,43 @@ class SimDistr(object):
         ax.legend()
         savefig( options.output, suffix='_%s_lcurve_sub'%self.label )
 
+    def plot_lcurve(self):
+        t, x, y = N.zeros( 1, dtype='d' ), N.zeros( 1, dtype='d' ), N.zeros( 1, dtype='d' )
+        self.lcurve.logtaux.GetKnot(self.lcurve.ret, t, x)
+        self.lcurve.logtauy.GetKnot(self.lcurve.ret, t, y)
+
+        fig = P.figure()
+        ax = P.subplot( 111 )
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlabel( L('{^logL1_label}, {logL1}') )
+        ax.set_ylabel( L('{^logL2_label}, {logL2}') )
+        ax.set_title( 'L-curve' )
+
+        self.lcurve.lcurve.plot()
+        ax.plot( [x], [y], '*', label='choice' )
+
+        ax.legend( loc='upper right' )
+        savefig( options.output, suffix='_lcurve' )
+
+        fig = P.figure()
+        ax = P.subplot( 111 )
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlabel( L('{logtau}') )
+        ax.set_ylabel( '' )
+        ax.set_title( '' )
+
+        lx = self.lcurve.logtaux.plot( label=L('{logL1_label}') )
+        ly = self.lcurve.logtauy.plot( label=L('{logL2_label}') )
+        self.lcurve.logtauc.plot( label=r'curvature' )
+        ax.plot( [t], [x], '*', color=lx[0].get_color() )
+        ax.plot( [t], [y], '*', color=ly[0].get_color() )
+        ax.axvline( t, linestyle='--' )
+
+        ax.legend()
+        savefig( options.output, suffix='_%s_lcurve_sub'%self.label )
+
     def plot(self, ax=None):
         if ax:
             P.sca( ax )

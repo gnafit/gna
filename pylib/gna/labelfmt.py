@@ -16,8 +16,10 @@ class ndict(object):
         for i, d in enumerate(I.chain((kwargs,), reversed(self.dicts.values()))):
             if not d:
                 continue
+            # print( i, k )
             res = d.get(k, None)
-            if res:
+            if not res is None:
+                # print( '  ->', res )
                 return res
         return None
 
@@ -40,7 +42,7 @@ reg_dictionary( 'unfolding', labels )
 class LFormatter(string.Formatter):
     def get_value( self, key, args, kwargs ):
         res = dictionaries.get(key, kwargs)
-        if res:
+        if not res is None:
             return res
 
         if key.startswith( '$' ):
@@ -53,6 +55,16 @@ class LFormatter(string.Formatter):
 
     def __call__( self, s, **kwargs ):
         return self.format( s, **kwargs )
+
+    def w_unit( self, var, fmt='{var}, {unit}', **kwargs ):
+        label = self( '{%s}'%var, **kwargs )
+        if var.startswith( '^' ):
+            var = var[1:]
+        unit  = self( '{%s_unit}'%var, **kwargs )
+        if unit:
+            return fmt.format( var=label, unit=unit )
+
+        return label
 
 formatter = LFormatter()
 
