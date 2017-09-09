@@ -27,6 +27,14 @@ packages can have different names):
                           hdfview libeigen3-dev libgsl-dev
 
 
+In Fedora 26:
+
+.. code-block:: bash 
+
+    sudo yum install boost-devel hdf5-devel hdfview eigen3-devel \
+                     gsl-devel
+
+
 You also need Python 2.7, not very old `CMake
 <http://www.cmake.org/>`_ and modern C++11 compiler (GCC or
 clang). After all of that is installed, you can run the standard CMake
