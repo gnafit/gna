@@ -5,6 +5,39 @@ import string
 from collections import OrderedDict
 import itertools as I
 
+class LFormatter(string.Formatter):
+    def get_value( self, key, args, kwargs ):
+        if isinstance( key, (int, long) ):
+            return args[key]
+
+        res = dictionaries.get(key, kwargs)
+        if not res is None:
+            return res
+
+        if key.startswith( '$' ):
+            return self.get_value( dictionaries.get(key[1:], kwargs), args, kwargs )
+
+        if key.startswith( '^' ):
+            return (self.get_value( key[1:], args, kwargs )).capitalize()
+
+        return '?'+key+'?'
+
+    def __call__( self, s, *args, **kwargs ):
+        return self.format( s, *args, **kwargs )
+
+    def s( self, key, **kwargs ):
+        return self( '{%s}'%key, **kwargs )
+
+    def u( self, var, fmt='{var}, {unit}', **kwargs ):
+        label = self( '{%s}'%var, **kwargs )
+        if var.startswith( '^' ):
+            var = var[1:]
+        unit  = self( '{%s_unit}'%var, **kwargs )
+        if unit:
+            return fmt.format( var=label, unit=unit )
+
+        return label
+
 class ndict(object):
     def __init__(self, dicts=None):
         self.dicts = OrderedDict()
@@ -26,55 +59,22 @@ class ndict(object):
     def register( self, label, dict ):
         self.dicts[label] = dict
 
+formatter = LFormatter()
 dictionaries = ndict()
 def reg_dictionary( label, dict ):
     dictionaries.register(label, dict)
 
-labels = dict(
-    logL1_label = 'agreement to data',
-    logL1       = r'$\log L_1 = \log \chi^2$',
-    logL2_label = 'regularity',
-    logL2       = r'$\log L_2/\tau$',
-    logtau      = r'$\log \tau$',
-    scantau0    = 'average correlation',
-    scantau1    = 'maximal correlation',
-    scantau2    = 'average correlation (sys)',
-    scantau3    = 'maximal correlation (sys)',
-    scantau4    = 'average correlation (sqr)',
-    scantau5    = 'maximal correlation (sqr)',
-)
-reg_dictionary( 'unfolding', labels )
+def load_dictionaries( path ):
+    from os import listdir
+    from gna.configurator import configurator
+    for filename in listdir( path ):
+        if not filename.endswith('.py'):
+            continue
+        filepath = path+'/'+filename
+        cfg = configurator( filepath )
+        reg_dictionary( filename[:-2], cfg.dictionary )
 
-class LFormatter(string.Formatter):
-    def get_value( self, key, args, kwargs ):
-        res = dictionaries.get(key, kwargs)
-        if not res is None:
-            return res
+load_dictionaries( './config/dictionaries' )
 
-        if key.startswith( '$' ):
-            return self.get_value( dictionaries.get(key[1:], kwargs), args, kwargs )
-
-        if key.startswith( '^' ):
-            return (self.get_value( key[1:], args, kwargs )).capitalize()
-
-        return '?'+key+'?'
-
-    def __call__( self, s, **kwargs ):
-        return self.format( s, **kwargs )
-
-    def s( self, key, **kwargs ):
-        return self( '{%s}'%key, **kwargs )
-
-    def u( self, var, fmt='{var}, {unit}', **kwargs ):
-        label = self( '{%s}'%var, **kwargs )
-        if var.startswith( '^' ):
-            var = var[1:]
-        unit  = self( '{%s_unit}'%var, **kwargs )
-        if unit:
-            return fmt.format( var=label, unit=unit )
-
-        return label
-
-formatter = LFormatter()
 
 

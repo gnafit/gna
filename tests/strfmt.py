@@ -8,10 +8,6 @@ from gna import labelfmt
 
 mydict = dict(
         logL2='logL2 replaced',
-        dm32 = r'$\Delta m^2_{32}$',
-        dm32_unit = r'$\text{eV}^2$',
-        theta13 = r'$\sin^2 2\theta_13$',
-        theta13_unit = '',
         )
 reg_dictionary( 'unfolding_corrected', mydict )
 
@@ -27,6 +23,11 @@ print( L('Overridden key: {logL2}') )
 print(L('{^logL1_label}, {logL1}'))
 print(L('{^logL2_label}, {logL2}'))
 
+print(L('{0} {^logL2_label}', 'With positional args:'))
+
 print(L.u('dm32'))
 print(L.u('theta13'))
+
+print('By short key: ', end='')
+print(L.s('dm32'))
 
