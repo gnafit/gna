@@ -29,9 +29,15 @@ class LFormatter(string.Formatter):
         return self.format( s, *args, **kwargs )
 
     def s( self, key, **kwargs ):
+        return self.base( key, **kwargs )
+
+    def u( self, key, **kwargs ):
+        return self.unit( key, **kwargs )
+
+    def base( self, key, **kwargs ):
         return self( '{%s}'%key, **kwargs )
 
-    def u( self, var, offset=None, **kwargs ):
+    def unit( self, var, offset=None, **kwargs ):
         label = self( '{%s}'%var, **kwargs )
         if var.startswith( '^' ):
             var = var[1:]
