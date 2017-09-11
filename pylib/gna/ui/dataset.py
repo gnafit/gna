@@ -16,6 +16,8 @@ class cmd(basecmd):
         parser.add_argument('--asimov-poisson', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
                             default=[])
+        parser.add_argument('--error-type', choices=['pearson', 'neyman'],
+                default='pearson', help='The type of statistical errors to be used')
 
     def run(self):
         dataset = Dataset(desc=None)
@@ -27,18 +29,25 @@ class cmd(basecmd):
 
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
-                dataset.assign(env.get(theory_path),
-                               env.get(data_path),
-                               env.get(data_path))
+                if self.opts.error_type == 'neyman':
+                    dataset.assign(env.get(theory_path),
+                                   env.get(data_path),
+                                   env.get(data_path))
+                elif self.opts.error_type == 'pearson':
+                    dataset.assign(env.get(theory_path),
+                                   env.get(data_path),
+                                   env.get(theory_path))
 
         if self.opts.asimov_poisson:
             for theory_path, data_path in self.opts.asimov_poisson:
                 data_poisson = np.random.poisson(env.get(data_path).data())
-                print env.get(data_path).data()
-
-                print data_poisson
-                dataset.assign(env.get(theory_path),
-                               data_poisson,
-                               env.get(theory_path))
+                if self.opts.error_type == 'neymann':
+                    dataset.assign(env.get(theory_path),
+                                   data_poisson,
+                                   env.get(data_path))
+                elif self.opts.error_type == 'pearson':
+                    dataset.assign(env.get(theory_path),
+                                   data_poisson,
+                                   env.get(theory_path))
 
         self.env.parts.dataset[self.opts.name] = dataset
