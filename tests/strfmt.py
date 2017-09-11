@@ -25,9 +25,15 @@ print(L('{^logL2_label}, {logL2}'))
 
 print(L('{0} {^logL2_label}', 'With positional args:'))
 
-print(L.u('dm32'))
-print(L.u('theta13'))
-
 print('By short key: ', end='')
 print(L.s('dm32'))
+print()
+
+print( 'Units and labels:' )
+print('Name, unit, default offset:', L.u('dm32'))
+print('Name, unit, custom offset:', L.u('dm32', offset=-5))
+print('Name, unit, custom no offset:', L.u('dm32', offset=0))
+print('Name, no unit:', L.u('theta13'))
+print('Name, no unit, custom offset:', L.u('theta13', offset=-2))
+
 

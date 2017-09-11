@@ -5,6 +5,9 @@ import string
 from collections import OrderedDict
 import itertools as I
 
+from gna.configurator import configurator
+cfg = configurator( '{location}/gna/labels.py', subst='default', debug=False )
+
 class LFormatter(string.Formatter):
     def get_value( self, key, args, kwargs ):
         if isinstance( key, (int, long) ):
@@ -28,13 +31,23 @@ class LFormatter(string.Formatter):
     def s( self, key, **kwargs ):
         return self( '{%s}'%key, **kwargs )
 
-    def u( self, var, fmt='{var}, {unit}', **kwargs ):
+    def u( self, var, offset=None, **kwargs ):
         label = self( '{%s}'%var, **kwargs )
         if var.startswith( '^' ):
             var = var[1:]
         unit  = self( '{%s_unit}'%var, **kwargs )
+
+        power = cfg.common_offsets.get( var, None ) if offset is None else offset
+        if power:
+            offset = cfg.offset.format( power=power )
+
+            if unit:
+                return cfg.name_offset_unit.format( name=label, unit=unit, offset=offset )
+
+            return cfg.name_offset.format( name=label, offset=offset )
+
         if unit:
-            return fmt.format( var=label, unit=unit )
+            return cfg.name_unit.format( name=label, unit=unit )
 
         return label
 
