@@ -6,10 +6,7 @@ from gna.labelfmt import formatter as L
 from gna.labelfmt import reg_dictionary
 from gna import labelfmt
 
-mydict = dict(
-        mylabel = 'my label',
-        anotherlabel = 'another label'
-        )
+mydict = dict( mylabel = 'my text', anotherlabel = 'another text')
 reg_dictionary( 'mydict', mydict )
 
 print("Printing labels")
@@ -38,5 +35,4 @@ print()
 
 print('  name, no unit:', L.u('theta13'))
 print('  name, no unit, custom offset:', L.u('theta13', offset=-2))
-
 
