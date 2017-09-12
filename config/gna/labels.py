@@ -6,7 +6,7 @@ common_offsets = dict(
         dm21 = -5,
         )
 
-offset = r'$\times10^{{ {power} }}$'
+offset = r'$\times10^{{{power}}}$'
 
 name_offset_unit = '{name} {offset}, {unit}'
 name_offset = '{name} {offset}'

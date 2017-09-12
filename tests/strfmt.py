@@ -7,33 +7,36 @@ from gna.labelfmt import reg_dictionary
 from gna import labelfmt
 
 mydict = dict(
-        logL2='logL2 replaced',
+        mylabel = 'my label',
+        anotherlabel = 'another label'
         )
-reg_dictionary( 'unfolding_corrected', mydict )
+reg_dictionary( 'mydict', mydict )
 
-print( L('As is: {logL1_label}') )
-print( L('Capitalize: {^logL1_label}') )
-print( L('Indirect access to label: {$var}', var='logL1') )
-print( L('Capitalize indirect: {^$var}', var='logL1_label') )
+print("Printing labels")
+print( L('  my label: {mylabel}') )
+print( L('  two labels: {mylabel} and {anotherlabel}') )
+print( L('  unknown key representation: {unknown}') )
+print( L('  {1} {0} arguments: {mylabel}', 'positional', 'using'))
+print()
 
-print( L('Unknown key: {unknown}') )
+print("Simple acecss to labels")
+print('  by short key:', L.s('mylabel'))
+print('  by short key:', L.base('mylabel'))
+print()
 
-print( L('Overridden key: {logL2}') )
-
-print(L('{^logL1_label}, {logL1}'))
-print(L('{^logL2_label}, {logL2}'))
-
-print(L('{0} {^logL2_label}', 'With positional args:'))
-
-print('By short key: ', end='')
-print(L.s('dm32'))
+print("Simple modifications")
+print( L('  capitalize: {^mylabel}') )
+print( L('  indirect access to label from key "var": {$var}', var='mylabel') )
+print( L('  capitalize indirect: {^$var}', var='mylabel') )
 print()
 
 print( 'Units and labels:' )
-print('Name, unit, default offset:', L.u('dm32'))
-print('Name, unit, custom offset:', L.u('dm32', offset=-5))
-print('Name, unit, custom no offset:', L.u('dm32', offset=0))
-print('Name, no unit:', L.u('theta13'))
-print('Name, no unit, custom offset:', L.u('theta13', offset=-2))
+print('  name, unit, default offset:', L.u('dm32'))
+print('  name, unit, custom offset:', L.u('dm32', offset=-5))
+print('  name, unit, force no offset:', L.u('dm32', offset=0))
+print()
+
+print('  name, no unit:', L.u('theta13'))
+print('  name, no unit, custom offset:', L.u('theta13', offset=-2))
 
 
