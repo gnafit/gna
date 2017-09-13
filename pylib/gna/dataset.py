@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ROOT
 from collections import defaultdict, namedtuple
 import numpy as np
@@ -29,22 +30,22 @@ class Dataset(object):
         if self.covariance.get(frozenset([obs1, obs2])):
             return True
         for par in covparameters:
-            if par.affects(obs1) and par.affects(obs2):
+            if par.influences(obs1) and par.influences(obs2):
                 return True
         return False
 
     def sortobservables(self, observables, covparameters):
-        toprocess = list(observables)
+        to_process = list(observables)
         groups = [[]]
-        while toprocess:
-            for obs in toprocess:
+        while to_process:
+            for obs in to_process:
                 if not groups[-1] or any(self.iscovariated(obs, x, covparameters) for x in groups[-1]):
                     groups[-1].append(obs)
                     break
             else:
                 groups.append([])
                 continue
-            toprocess.remove(obs)
+            to_process.remove(obs)
         groups = [sorted(group, key=lambda t: observables.index(t)) for group in groups]
         return sorted(groups, key=lambda t: observables.index(t[0]))
 
@@ -65,6 +66,9 @@ class Dataset(object):
         prediction.finalize()
 
     def makedata(self, obsblock):
+        ''' Returns either observable itself or a concantenation of
+        values of observables
+        '''
         datas = [self.data.get(obs) for obs in obsblock]
         if any(data is None for data in datas):
             return None
