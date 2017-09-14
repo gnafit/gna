@@ -184,6 +184,7 @@ def imshow_hist2( h, *args, **kwargs ):
 
     buf = R2N.get_buffer_hist2( h,  mask=mask ).copy()
 
+    kwargs.setdefault( 'origin', 'lower' )
     res = P.imshow( buf, *args, extent=extent, **kwargs )
     if colorbar:
         cbar = helpers.add_colorbar( res )

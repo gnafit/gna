@@ -6,12 +6,13 @@ import ROOT as R
 from matplotlib import pyplot as P
 from mpl_tools import bindings
 
-xyg=R.TF2("xyg","xygaus", -10, 10, -10, 10)
-xyg.SetParameters(1, 0, 1, 0, 4)
+xyg=R.TF2("xyg","exp([0]*x)*exp([1]*y)", 0, 10, 0, 10)
+xyg.SetParameter(0, -1/2.)
+xyg.SetParameter(1, -1/8.)
 R.gDirectory.Add( xyg )
 
-h2 = R.TH2D( 'h2', 'gaus', 50, -5.0, 5.0, 100, -10.0, 10.0 )
-h2.FillRandom( 'xyg', 100000 )
+h2 = R.TH2D( 'h2', 'gaus', 50, 0, 10.0, 75, 0.0, 15.0 )
+h2.FillRandom( 'xyg', 1000000 )
 
 #
 # pcolorfast (as is)
