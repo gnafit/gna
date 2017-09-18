@@ -1,19 +1,19 @@
 #include <boost/lexical_cast.hpp>
 
-#include "Chi2.hh"
+#include "CuChi2.hh"
 #include "GNAcuMath.h"
 #include <chrono>
 #include "config_vars.h"
 
 using namespace Eigen;
 
-void Chi2::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov) {
-  t_["chi2"].input(theory);
-  t_["chi2"].input(data);
-  t_["chi2"].input(cov);
+void CuChi2::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov) {
+  t_["cuchi2"].input(theory);
+  t_["cuchi2"].input(data);
+  t_["cuchi2"].input(cov);
 }
 
-void Chi2::checkTypes(Atypes args, Rtypes rets) {
+void CuChi2::checkTypes(Atypes args, Rtypes rets) {
   if (args.size()%3 != 0) {
     throw args.undefined();
   }
@@ -36,7 +36,7 @@ void Chi2::checkTypes(Atypes args, Rtypes rets) {
   rets[0] = DataType().points().shape(1);
 }
 
-void Chi2::calculateChi2(Args args, Rets rets) {
+void CuChi2::calculateChi2(Args args, Rets rets) {
   rets[0].arr(0) = 0;
   if (!InvMatCompFlag) {
     InvMatCompFlag = true;

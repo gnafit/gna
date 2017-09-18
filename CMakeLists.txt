@@ -7,52 +7,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
-set (HEADERS
-  GeoNeutrinoFluxNormed.hh
-  Exceptions.hh
-  Transformation.hh
-  GNAObject.hh
-  UncertainParameter.hh
-  Prediction.hh
-  CovariatedPrediction.hh
-  Product.hh
-  Sum.hh
-  WeightedSum.hh
-  Points.hh
-  Histogram.hh
-  Identity.hh
-  LinearInterpolator.hh
-  FillLike.hh
-  Derivative.hh
-  Covmat.hh
-  Cholesky.hh
-  Chi2.hh
-  Poisson.hh
-  CovarianceToyMC.hh
-  PoissonToyMC.hh
-  Minimizable.hh
-  Neutrino.hh
-  OscillationVariables.hh
-  PMNSVariables.hh
-  OscProb2nu.hh
-  OscProbPMNS.hh
-  OscProbPMNSDecoh.hh
-  OscProbMatterUniform.hh
-  EvisToEe.hh
-  IbdInteraction.hh
-  IbdZeroOrder.hh
-  IbdFirstOrder.hh
-  ReactorNorm.hh
-  ReactorGroup.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
-  EnergyResolution.hh
-  C14Spectrum.hh
-  GaussianPeakWithBackground.hh
-  GridFilter.hh
-  EigenHelpers.hh 
-  )
-
 set(SOURCES_STANDALONE standalone/LittleTest.cc)
 set(NAME_STANDALONE standalone_test)
 set(HEADERS_STANDALONE LittleTest.hh)
@@ -97,7 +51,6 @@ cmake_policy(SET CMP0015 NEW)
 if(CUDA_SUPPORT)
     find_package( CUDA REQUIRED)
     include_directories(cuda/extra/ cuda/core/)
-    set(LOCAL_CUDA_DIR "cuda/")
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
         set(CUDA_MAT_SIZE_THRESHOLD 100)
     endif()
@@ -108,8 +61,15 @@ if(CUDA_SUPPORT)
         set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
         link_directories(cuda/)
     ENDIF()
+    set (CUSOURCES
+         cuda/core/CuChi2.cc
+        )
+    set (CUHEADERS
+         CuChi2.hh
+        )
 else()
-    set(LOCAL_CUDA_DIR "")
+    set(CUSOURCES "")
+    set(CUHEADERS "")
 endif()
 
 configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
@@ -119,6 +79,53 @@ find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
 link_directories(${ROOT_LIBRARY_DIR})
 
+
+set (HEADERS
+  GeoNeutrinoFluxNormed.hh
+  Exceptions.hh
+  Transformation.hh
+  GNAObject.hh
+  UncertainParameter.hh
+  Prediction.hh
+  CovariatedPrediction.hh
+  Product.hh
+  Sum.hh
+  WeightedSum.hh
+  Points.hh
+  Histogram.hh
+  Identity.hh
+  LinearInterpolator.hh
+  FillLike.hh
+  Derivative.hh
+  Covmat.hh
+  Cholesky.hh
+  Chi2.hh
+  Poisson.hh
+  CovarianceToyMC.hh
+  PoissonToyMC.hh
+  Minimizable.hh
+  Neutrino.hh
+  OscillationVariables.hh
+  PMNSVariables.hh
+  OscProb2nu.hh
+  OscProbPMNS.hh
+  OscProbPMNSDecoh.hh
+  OscProbMatterUniform.hh
+  EvisToEe.hh
+  IbdInteraction.hh
+  IbdZeroOrder.hh
+  IbdFirstOrder.hh
+  ReactorNorm.hh
+  ReactorGroup.hh
+  GaussLegendre.hh
+  GaussLegendre2d.hh
+  EnergyResolution.hh
+  C14Spectrum.hh
+  GaussianPeakWithBackground.hh
+  GridFilter.hh
+  EigenHelpers.hh
+  ${CUHEADERS}
+  )
 
 set (SOURCES
   core/TransformationBase.cc
@@ -135,7 +142,7 @@ set (SOURCES
   core/LinearInterpolator.cc
   core/Derivative.cc
   core/Covmat.cc
-  ${LOCAL_CUDA_DIR}/core/Chi2.cc
+  core/Chi2.cc
   core/Poisson.cc
   core/CovarianceToyMC.cc
   core/PoissonToyMC.cc
@@ -153,6 +160,7 @@ set (SOURCES
   detector/EnergyResolution.cc
   detector/C14Spectrum.cc
   extra/GridFilter.cc
+  ${CUSOURCES}
   )
 
 
