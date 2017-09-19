@@ -4,6 +4,7 @@ import numpy as np
 from gna.env import PartNotFoundError
 from itertools import chain
 from gna.dataset import Dataset
+from gna.parameter_loader import get_parameters 
 
 class cmd(basecmd):
     @classmethod
@@ -13,7 +14,7 @@ class cmd(basecmd):
                             metavar='DATASET')
         parser.add_argument('-p', '--parameters', nargs='+', default=[],
                             metavar='PAR',
-                            help='paremeters for covmatrix')
+                            help='paremeters for covariance matrix')
         parser.add_argument('-n', '--name', required=True)
         parser.add_argument('-o', '--observables', nargs='+', required=True,
                             metavar='OBSERVABLE')
@@ -21,7 +22,7 @@ class cmd(basecmd):
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
-        parameters = [self.env.pars[pname] for pname in self.opts.parameters]
+        parameters = get_parameters(self.opts.parameters)
         observables = [self.env.get(path) for path in self.opts.observables]
 
         blocks = dataset.makeblocks(observables, parameters)
