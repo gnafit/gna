@@ -4,12 +4,7 @@ from gna.config import cfg
 import ROOT
 
 def is_independent(par):
-    is_independent = (isinstance(par, ROOT.GaussianParameter("double"))
-                     or isinstance(par, ROOT.UniformAngleParameter("double")))
-    if is_independent:
-        return True
-    else:
-        return False
+    return isinstance(par, ROOT.Parameter("double"))
 
 def get_parameters(params):
     pars = []
