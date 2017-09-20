@@ -4,35 +4,21 @@ from gna.config import cfg
 import ROOT
 
 def is_independent(par):
-    is_independent = (isinstance(par, ROOT.GaussianParameter("double"))
-                     or isinstance(par, ROOT.UniformAngleParameter("double")))
-    if is_independent:
-        return True
-    else:
-        return False
+    return isinstance(par, ROOT.Parameter("double"))
 
 def get_parameters(params):
     pars = []
     for candidate in params:
         try:
-            pars.append(env.pars[candidate])
-        except KeyError:
-            if cfg.debug_par_fetching: 
-                print("Parameter {0} not found, trying to use it as a namespace".format(candidate))
             par_namespace = env.ns(candidate)
-            #check that there is something in namespace
-            try:
-                par_namespace.walknames().next()
-            except StopIteration:
-                raise KeyError("Parameter {} can't be found or used as namespace".format(candidate))
+            #checking that namespace is not empty
+            par_namespace.walknames().next()
             independent_pars  = [par for _, par in par_namespace.walknames()
                                  if is_independent(par)]
             pars.extend(independent_pars)
+        except StopIteration:
+            if cfg.debug_par_fetching:
+                print("{0} is not a namespace, trying to use it as a parameter".format(candidate))
+            pars.append(env.pars[candidate])
+
     return pars
-
-            
-
-
-            
-
-
