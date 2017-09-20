@@ -11,6 +11,7 @@ def get_parameters(params):
     for candidate in params:
         try:
             par_namespace = env.ns(candidate)
+            #checking that namespace is not empty
             par_namespace.walknames().next()
             independent_pars  = [par for _, par in par_namespace.walknames()
                                  if is_independent(par)]
