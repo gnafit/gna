@@ -1,15 +1,15 @@
-#ifndef ENERGYLEAK_H
-#define ENERGYLEAK_H
+#ifndef ENERGYSMEAR_H
+#define ENERGYSMEAR_H
 
 #include <vector>
 
 #include "GNAObject.hh"
 #include "Eigen/Sparse"
 
-class EnergyLeak: public GNAObject,
-                  public Transformation<EnergyLeak> {
+class EnergySmear: public GNAObject,
+                  public Transformation<EnergySmear> {
 public:
-  EnergyLeak( size_t n, double* mat_column_major, bool triangular=true );
+  EnergySmear( size_t n, double* mat_column_major, bool triangular=true );
 
   Eigen::MatrixXd& getMatrix() { return m_matrix; }
 private:
@@ -23,4 +23,4 @@ private:
   Eigen::MatrixXd m_matrix;
 };
 
-#endif // ENERGYLEAK_H
+#endif // ENERGYSMEAR_H
