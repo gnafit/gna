@@ -11,16 +11,16 @@ class EnergyResolution: public GNAObject,
 public:
   EnergyResolution();
 
-private:
   double relativeSigma(double Etrue) const noexcept;
   double resolution(double Etrue, double Erec) const noexcept;
+
+private:
   void fillCache();
   void calcSmear(Args args, Rets rets);
 
   variable<double> m_a, m_b, m_c;
 
   DataType m_datatype;
-  
 
   size_t m_size;
   Eigen::SparseMatrix<double> m_sparse_cache;
