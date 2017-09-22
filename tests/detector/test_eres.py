@@ -7,8 +7,9 @@ import numpy as N
 from load import ROOT as R
 from gna.env import env
 from gna.labelfmt import formatter as L
-from mpl_tools.helpers import savefig, plot_hist
+from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
+from converters import convert
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -76,6 +77,21 @@ y = fcn( x )
 
 ax.plot( x, y*100. )
 savefig( opts.output, suffix='_sigma' )
+
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( '' )
+ax.set_ylabel( '' )
+ax.set_title( 'Energy resolution convertsion matrix' )
+
+mat = convert(eres.getDenseMatrix(), 'matrix')
+mat = N.ma.array( mat, mask= mat==0.0 )
+c = ax.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
+add_colorbar( c )
+
+savefig( opts.output, suffix='_mat' )
 
 if opts.show:
     P.show()

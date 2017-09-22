@@ -14,6 +14,8 @@ public:
   double relativeSigma(double Etrue) const noexcept;
   double resolution(double Etrue, double Erec) const noexcept;
 
+  Eigen::SparseMatrix<double>& getMatrix()      { return m_sparse_cache; }
+  Eigen::MatrixXd              getDenseMatrix() { return m_sparse_cache; }
 private:
   void fillCache();
   void calcSmear(Args args, Rets rets);

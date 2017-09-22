@@ -1,6 +1,5 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergyResolution.hh"
-#include <chrono>
 
 constexpr double pi = boost::math::constants::pi<double>();
 
@@ -72,24 +71,9 @@ void EnergyResolution::fillCache() {
   m_sparse_cache.makeCompressed();
 }
 
-
 /* Apply precalculated cache and actually smear */
 void EnergyResolution::calcSmear(Args args, Rets rets) {
-/*   const double *events_true = args[0].x.data();
- *
- *   size_t insize = args[0].type.size();
- *   size_t outsize = rets[0].type.size(); */
-  assert(insize == outsize);
-  /* auto* events_true_sanitized = new double[insize]; */
-
-  /* std::transform(events_true, events_true + insize, &events_true_sanitized[0],
-   *               [](double event){return (!std::isnan(event) ? event : 0.);}); */
-
-
-
-  /* Eigen::Map<Eigen::VectorXd> mapped(events_true_sanitized, outsize); */
   rets[0].x = m_sparse_cache * args[0].vec;
-  /* delete[] events_true_sanitized; */
 }
 
 
