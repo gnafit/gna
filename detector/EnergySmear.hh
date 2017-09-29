@@ -6,10 +6,10 @@
 #include "GNAObject.hh"
 #include "Eigen/Sparse"
 
-class EnergySmear: public GNAObject,
-                  public Transformation<EnergySmear> {
+class EnergySmear: public GNASingleObject,
+                   public Transformation<EnergySmear> {
 public:
-  EnergySmear( size_t n, double* mat_column_major, bool triangular=true );
+  EnergySmear( size_t n, double* mat_column_major, bool triangular=false );
 
   Eigen::MatrixXd& getMatrix() { return m_matrix; }
 private:

@@ -33,14 +33,15 @@ def singularities( values, edges ):
     phist[indices] = 1.0
     return phist
 
-percent = 0.01
-env.defparameter( 'Eres_a',  central=0.016, relsigma=30*percent )
-env.defparameter( 'Eres_b',  central=0.081, relsigma=30*percent )
-env.defparameter( 'Eres_c',  central=0.026, relsigma=30*percent )
-
 binwidth=0.05
 edges = N.arange( 0.0, 12.0001, binwidth )
-efine = N.arange( edges[0], edges[-1]+1.e-5, 0.005 )
+
+n = 240
+mat = 0.0
+scales = N.geomspace( 1.0, 0.01, n )
+for i, scale in zip(range(n), scales):
+    mat += N.diag( N.full( n-i, scale ), i )
+mat = N.asfortranarray( mat )
 
 for eset in [
     [ [1.025], [3.025], [6.025], [9.025] ],
@@ -52,10 +53,10 @@ for eset in [
         phist = singularities( e, edges )
 
         hist = R.Histogram( phist.size, edges, phist )
-        eres = R.EnergyResolution()
-        eres.smear.Nvis( hist.hist )
+        esmear = R.EnergySmear( mat.shape[0], mat.ravel(), True )
+        esmear.smear.Nvis( hist.hist )
 
-        smeared = eres.smear.Nrec.data()
+        smeared = esmear.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
 
         # bars = P.bar( edges[:-1], phist, binwidth, align='edge' )
@@ -66,17 +67,9 @@ for eset in [
         if len(e)>1:
             color='green'
         for e in e:
-            ax.plot( efine, binwidth*norm.pdf( efine, loc=e, scale=eres.relativeSigma(e)*e ), linestyle='--', color=color )
+            ax.plot( efine, binwidth*norm.pdf( efine, loc=e, scale=esmear.relativeSigma(e)*e ), linestyle='--', color=color )
 
     savefig( opts.output, suffix='_test_%i'%i )
-
-ax = axes( 'Relative energy uncertainty', ylabel=L.u('eres_sigma_rel') )
-x = N.arange( 0.5, 12.0, 0.01 )
-fcn = N.frompyfunc( eres.relativeSigma, 1, 1 )
-y = fcn( x )
-
-ax.plot( x, y*100. )
-savefig( opts.output, suffix='_sigma' )
 
 fig = P.figure()
 ax = P.subplot( 111 )
@@ -84,9 +77,8 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( '' )
 ax.set_ylabel( '' )
-ax.set_title( 'Energy resolution convertsion matrix' )
+ax.set_title( 'Synthetic energy leak matrix' )
 
-mat = convert(eres.getDenseMatrix(), 'matrix')
 mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )

@@ -39,7 +39,7 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
-  detector/EnergyLeak.cc
+  detector/EnergySmear.cc
   detector/C14Spectrum.cc
   extra/GridFilter.cc
   )
@@ -86,7 +86,7 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
-  EnergyLeak.hh
+  EnergySmear.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
