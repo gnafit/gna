@@ -20,7 +20,7 @@ void EnergySmear::fillCache() {
 }
 
 void EnergySmear::calcSmearTriangular(Args args, Rets rets) {
-  rets[0].x = m_matrix.triangularView<Eigen::Lower>() * args[0].vec;
+  rets[0].x = m_matrix.triangularView<Eigen::Upper>() * args[0].vec;
 }
 
 void EnergySmear::calcSmear(Args args, Rets rets) {
