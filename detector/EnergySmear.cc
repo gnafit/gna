@@ -1,28 +1,33 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergySmear.hh"
 
-EnergySmear::EnergySmear(size_t n, double* mat_column_major, bool triangular) :
-m_size(n), m_matrix(Eigen::Map<Eigen::MatrixXd>(mat_column_major, n, n)) {
-  //callback_([this] { fillCache(); });
-
+EnergySmear::EnergySmear(bool triangular) {
   transformation_(this, "smear")
+      .input("SmearMatrix")
       .input("Ntrue")
       .output("Nvis")
-      .types(Atypes::pass<0>,
-         [](EnergySmear *obj, Atypes args, Rtypes /*rets*/) {
-           obj->m_datatype = args[0];
-           obj->fillCache();
+      .types(Atypes::pass<1,0>,
+         [](Atypes args, Rtypes /*rets*/) {
+           if (args[0].shape.size() != 2) {
+               throw args.error(args[0], "SmearMatrix is not matrix");
+           }
+           if (args[0].shape[0] != args[0].shape[1]) {
+               throw args.error(args[0], "SmearMatrix is not square");
+           }
+           if (args[1].shape.size() != 1) {
+               throw args.error(args[0], "Ntrue should be a vector");
+           }
+           if (args[0].shape[0] != args[1].shape[0]) {
+               throw args.error(args[0], "SmearMatrix is not consistent with data vector");
+           }
          })
        .func( triangular ? &EnergySmear::calcSmearTriangular : &EnergySmear::calcSmear );
 }
 
-void EnergySmear::fillCache() {
-}
-
 void EnergySmear::calcSmearTriangular(Args args, Rets rets) {
-  rets[0].x = m_matrix.triangularView<Eigen::Upper>() * args[0].vec;
+  rets[0].x = args[0].mat.triangularView<Eigen::Upper>() * args[1].vec;
 }
 
 void EnergySmear::calcSmear(Args args, Rets rets) {
-  rets[0].x = m_matrix * args[0].vec;
+  rets[0].x = args[0].mat * args[1].vec;
 }

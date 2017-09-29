@@ -58,6 +58,7 @@ for i in range(n):
     else:
         mat += N.diag( N.full( n-i, scale ), i )
 mat/=mat.sum( axis=0 )
+pmat = convert( mat, 'points' )
 
 for eset in [
     [ [1.025], [3.025], [6.025], [9.025] ],
@@ -69,7 +70,8 @@ for eset in [
         phist = singularities( e, edges )
 
         hist = R.Histogram( phist.size, edges, phist )
-        esmear = R.EnergySmear( mat.shape[0], mat.ravel( order='F' ), opts.triangular )
+        esmear = R.EnergySmear( opts.triangular )
+        esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )
 
         smeared = esmear.smear.Nvis.data()
@@ -90,7 +92,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Synthetic energy leak matrix' )
 
-mat = convert(esmear.getMatrix(), 'matrix')
+mat = pmat.points.points.data()
 mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
