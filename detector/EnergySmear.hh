@@ -11,8 +11,6 @@ public:
 private:
   void calcSmear(Args args, Rets rets);
   void calcSmearTriangular(Args args, Rets rets);
-
-  DataType m_datatype;
 };
 
 #endif // ENERGYSMEAR_H
