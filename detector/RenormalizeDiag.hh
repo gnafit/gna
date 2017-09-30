@@ -14,6 +14,8 @@ private:
 
   size_t m_ndiagonals;
   variable<double> m_diagscale;
+
+  bool m_lower_uninitialized{true};
 };
 
 #endif // RENORMALIZEDIAG_H

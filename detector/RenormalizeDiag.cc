@@ -22,7 +22,10 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool upper, const char* parname) 
 }
 
 void RenormalizeDiag::renormalizeUpper(Args args, Rets rets) {
-    rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
+    if( m_lower_uninitialized ) {
+        rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
+        m_lower_uninitialized=false;
+    }
     rets[0].mat.triangularView<Eigen::Upper>() = args[0].mat.triangularView<Eigen::Upper>();
     for (size_t i = 0; i < m_ndiagonals; ++i) {
         rets[0].mat.diagonal(i)*=m_diagscale;
