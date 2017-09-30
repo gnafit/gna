@@ -13,16 +13,16 @@ from converters import convert
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-# parser.add_argument( '-t', '--triangular', action='store_true', help='force transformation to account for upper triangular matrix' )
+parser.add_argument( '-t', '--triangular', action='store_true', help='force transformation to account for upper triangular matrix' )
 opts = parser.parse_args()
 
-env.defparameter( 'DiagScale',  central=1.0, relsigma=0.1 )
+env.defparameter( 'DiagScale',  central=2.0, relsigma=0.1 )
 
-mat = N.matrix( N.arange(9.0).reshape(3,3) )
+mat = N.matrix( N.arange(16.0).reshape(4,4) )
 print( mat )
 pmat = convert( mat, 'points' )
 
-rd = R.RenormalizeDiag()
+rd = R.RenormalizeDiag( 2, opts.triangular )
 rd.renorm.inmat( pmat.points )
 
 idt = R.Identity()
@@ -34,8 +34,17 @@ idt0.identity.source( pmat.points )
 idt.identity.target.data()
 idt0.identity.target.data()
 
-print( 'Input' )
+if opts.triangular:
+    print( 'Upper triangle mode' )
+
+print( 'Input (Eigen)' )
 idt0.dump()
 
-print( 'Output' )
+print( 'Output (Eigen)' )
 idt.dump()
+
+print( 'Output (python)' )
+m = N.matrix(idt.identity.target.data())
+print( m )
+print( 'Output colsum (python)' )
+print( m.sum( axis=0 ) )
