@@ -6,11 +6,11 @@
 class EnergySmear: public GNASingleObject,
                    public Transformation<EnergySmear> {
 public:
-  EnergySmear( bool triangular=false );
+  EnergySmear( bool upper=false );
 
 private:
   void calcSmear(Args args, Rets rets);
-  void calcSmearTriangular(Args args, Rets rets);
+  void calcSmearUpper(Args args, Rets rets);
 };
 
 #endif // ENERGYSMEAR_H

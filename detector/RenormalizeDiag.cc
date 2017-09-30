@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool utriangular, const char* parname) : m_ndiagonals(ndiag) {
+RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool upper, const char* parname) : m_ndiagonals(ndiag) {
   variable_(&m_diagscale, parname);
 
   transformation_(this, "renorm")
@@ -18,10 +18,10 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool utriangular, const char* par
                throw args.error(args[0], "SmearMatrix is not square");
            }
          })
-     .func( utriangular ? &RenormalizeDiag::renormalizeUtriangular : &RenormalizeDiag::renormalize );
+     .func( upper ? &RenormalizeDiag::renormalizeUpper : &RenormalizeDiag::renormalize );
 }
 
-void RenormalizeDiag::renormalizeUtriangular(Args args, Rets rets) {
+void RenormalizeDiag::renormalizeUpper(Args args, Rets rets) {
     rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
     rets[0].mat.triangularView<Eigen::Upper>() = args[0].mat.triangularView<Eigen::Upper>();
     for (size_t i = 0; i < m_ndiagonals; ++i) {
