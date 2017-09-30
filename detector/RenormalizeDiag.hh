@@ -6,7 +6,7 @@
 class RenormalizeDiag: public GNASingleObject,
                        public Transformation<RenormalizeDiag> {
 public:
-  RenormalizeDiag( size_t ndiag, bool triangular=false );
+  RenormalizeDiag( size_t ndiag, bool triangular=false, const char* parname="DiagScale" );
 
 private:
   void renormalize(Args args, Rets rets);
