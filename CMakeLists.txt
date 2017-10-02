@@ -39,6 +39,7 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
+  detector/EnergyNonlinearity.cc
   detector/EnergySmear.cc
   detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
@@ -87,6 +88,7 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyNonlinearity.hh
   EnergySmear.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
