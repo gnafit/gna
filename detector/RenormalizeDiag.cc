@@ -3,8 +3,8 @@
 #include <iostream>
 using namespace std;
 
-RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool upper, const char* parname) : m_ndiagonals(ndiag) {
-  variable_(&m_diagscale, parname);
+RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const char* parname) : m_ndiagonals(ndiag) {
+  variable_(&m_scale, parname);
 
   transformation_(this, "renorm")
       .input("inmat")
@@ -18,27 +18,52 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, bool upper, const char* parname) 
                throw args.error(args[0], "SmearMatrix is not square");
            }
          })
-     .func( upper ? &RenormalizeDiag::renormalizeUpper : &RenormalizeDiag::renormalize );
+     .func( mode==Mode::Upper ? ( target==Target::Offdiagonal ? &RenormalizeDiag::renormalizeOffdiagUpper
+                                                              : &RenormalizeDiag::renormalizeDiagUpper )
+                              : ( target==Target::Offdiagonal ? &RenormalizeDiag::renormalizeOffdiag
+                                                              : &RenormalizeDiag::renormalizeDiag) );
 }
 
-void RenormalizeDiag::renormalizeUpper(Args args, Rets rets) {
-    if( m_lower_uninitialized ) {
+void RenormalizeDiag::renormalizeOffdiagUpper(Args args, Rets rets) {
+    if ( m_lower_uninitialized ){
         rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
-        m_lower_uninitialized=false;
     }
-    rets[0].mat.triangularView<Eigen::Upper>() = args[0].mat.triangularView<Eigen::Upper>();
+    rets[0].mat.triangularView<Eigen::Upper>()=args[0].mat.triangularView<Eigen::Upper>();
+    rets[0].mat.triangularView<Eigen::Upper>()*=m_scale;;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)*=m_diagscale;
+        rets[0].mat.diagonal(i)=args[0].mat.diagonal(i);
     }
     rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum();
 }
 
-void RenormalizeDiag::renormalize(Args args, Rets rets) {
+void RenormalizeDiag::renormalizeDiagUpper(Args args, Rets rets) {
+    if ( m_lower_uninitialized ){
+        rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
+    }
+    rets[0].mat.triangularView<Eigen::Upper>() = args[0].mat.triangularView<Eigen::Upper>();
+    for (size_t i = 0; i < m_ndiagonals; ++i) {
+        rets[0].mat.diagonal(i)*=m_scale;
+    }
+    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum();
+}
+
+void RenormalizeDiag::renormalizeOffdiag(Args args, Rets rets) {
+    rets[0].arr = args[0].arr*m_scale;
+    for (size_t i = 0; i < m_ndiagonals; ++i) {
+        rets[0].mat.diagonal(i)=args[0].mat.diagonal(i);
+        if( i>0 ) {
+            rets[0].mat.diagonal(-i)=args[0].mat.diagonal(-i);
+        }
+    }
+    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum();
+}
+
+void RenormalizeDiag::renormalizeDiag(Args args, Rets rets) {
     rets[0].arr = args[0].arr;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)*=m_diagscale;
+        rets[0].mat.diagonal(i)*=m_scale;
         if( i>0 ) {
-            rets[0].mat.diagonal(-i)*=m_diagscale;
+            rets[0].mat.diagonal(-i)*=m_scale;
         }
     }
     rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum();

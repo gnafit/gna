@@ -15,7 +15,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
 parser.add_argument( '-s', '--show', action='store_true' )
-parser.add_argument( '-t', '--triangular', action='store_true', help='force transformation to account for upper triangular matrix' )
+parser.add_argument( '-u', '--upper', action='store_true', help='force transformation to account for upper triangular matrix' )
+parser.add_argument( '-O', '--offdiag', action='store_true', help='force transformation to account for upper triangular matrix' )
 opts = parser.parse_args()
 
 def axes( title, ylabel='' ):
@@ -47,7 +48,7 @@ for i in range(n):
         scale = 0.00005*(n-i)
     if i:
         mat += N.diag( N.full( n-i, scale ),  i )
-        if not opts.triangular:
+        if not opts.upper:
             mat += N.diag( N.full( n-i, scale ), -i )
     else:
         mat += N.diag( N.full( n-i, scale ), i )
@@ -59,14 +60,14 @@ phist = singularities( [ 1.025, 5.025, 9.025 ], edges )
 hist = R.Histogram( phist.size, edges, phist )
 
 ndiag = 4
-rd = R.RenormalizeDiag( ndiag, opts.triangular )
+rd = R.RenormalizeDiag( ndiag, int(opts.offdiag), int(opts.upper) )
 rd.renorm.inmat( pmat.points )
 
-esmear = R.EnergySmear( opts.triangular )
+esmear = R.EnergySmear( opts.upper )
 esmear.smear.inputs.SmearMatrix( rd.renorm )
 esmear.smear.inputs.Ntrue( hist.hist )
 
-for i, value in enumerate([ 1.0, 0.5, 2.0 ]):
+for i, value in enumerate([ 0.5, 1.0, 2.0 ]):
     par.set( value )
     smeared = esmear.smear.Nvis.data()
     print( 'Sum check for {} (diff): {}'.format( value, phist.sum()-smeared.sum() ) )

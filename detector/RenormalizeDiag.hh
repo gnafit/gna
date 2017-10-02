@@ -6,14 +6,25 @@
 class RenormalizeDiag: public GNASingleObject,
                        public Transformation<RenormalizeDiag> {
 public:
-  RenormalizeDiag( size_t ndiag=1, bool upper=false, const char* parname="DiagScale" );
+  enum Target {
+    Diagonal = 0,
+    Offdiagonal,
+  };
+  enum Mode {
+    Full = 0,
+    Upper,
+  };
+
+  RenormalizeDiag( size_t ndiag=1, Target target=Target::Diagonal, Mode mode=Mode::Upper, const char* parname="DiagScale" );
 
 private:
-  void renormalize(Args args, Rets rets);
-  void renormalizeUpper(Args args, Rets rets);
+  void renormalizeDiag(Args args, Rets rets);
+  void renormalizeDiagUpper(Args args, Rets rets);
+  void renormalizeOffdiag(Args args, Rets rets);
+  void renormalizeOffdiagUpper(Args args, Rets rets);
 
   size_t m_ndiagonals;
-  variable<double> m_diagscale;
+  variable<double> m_scale;
 
   bool m_lower_uninitialized{true};
 };
