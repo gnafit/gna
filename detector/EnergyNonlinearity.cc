@@ -1,4 +1,7 @@
 #include "EnergyNonlinearity.hh"
+#include <algorithm>
+
+//FIXME:
 #include <iostream>
 using namespace std;
 
@@ -44,98 +47,43 @@ void EnergyNonlinearity::calcSmear(Args args, Rets rets) {
 void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
   m_sparse_cache.setZero();
 
-  auto& edges_orig=args[0];
-  auto& edges_mod=args[1];
-  std::vector<int> bins( edges_mod.size() );
-  std::vector<double> widths( edges_mod.size()-1 );
+  auto n = args[0].arr.size();
+  auto* edges_orig = args[0].arr.data();
+  auto* edges_mod  = args[1].arr.data();
+  auto* end_orig = edges_orig+n;
+  auto* end_mod  = edges_mod+n;
 
-  double* b_edges_orig=edges_orig.data();
-  double* b_edges_mod=edges_m.data();
-  double* b_edges_orig_end=b_edges_orig+edges_orig.size();
-  double* b_edges_mod_end=b_edges_mod+edges_mod.size();
+  // Find first bin in modified edge higher than lowest original value: set it as current bin
+  auto* cur_bin = std::upper_bound( edges_mod, end_mod, edges_orig[0] );
+  auto i_bin = cur_bin - edges_mod;
+  if( cur_bin<end_mod ){
+    // Find current bin's projection to the original range
+    auto* cur_proj = std::lower_bound( edges_orig, end_orig, *cur_bin );
+    auto i_proj = cur_proj - edges_orig;
+    if ( cur_proj<end_orig ){
+      auto* next_bin = cur_bin+1;
+      // Iterate bins
+      while( cur_bin<end_mod ){
+        auto full_width = *next_bin - *cur_bin;
 
-  int i_orig(0);
-  for (int i_mod = 0; i_mod < edges_mod.size(); ++i_mod, ++b_edges_mod) {
-    if( *b_edges_mod < *b_edges_orig ) {
-      bins[i_mod]
+        auto* cur_edge = cur_bin;
+        // Iterate inner bin edges
+        while ( cur_edge!=next_bin ){
+          auto* next_edge = std::min( next_bin, cur_proj+1, [](decltype(cur_bin) a, decltype(cur_bin) b){ return *a<*b; } );
+
+          m_sparse_cache.insert(i_bin, i_proj) = ( *next_edge - *cur_edge )/full_width;
+
+          cur_edge = next_edge;
+          cur_proj++; i_proj++;
+        }
+
+        cur_proj--; i_proj--;
+        cur_bin++; i_bin++;
+        next_bin++;
+      }
     }
-
-
   }
-
-  //for(int i=0; i<m_size; i++){
-    //double le1 = edges_m(i);
-    //double ue1 = edges_m(i+1);
-    //if ( le1==0.0 || ue1==0.0 ) continue;
-
-    //if ( le1>ue1 ) std::swap( le1, ue1 );
-    //double width1 = ue1-le1;
-
-    //int lbin = hout->FindBin( le1 );
-    //int ubin = hout->FindBin( ue1 );
-    //if ( ubin==0 ){ // underflow
-      //continue;
-    //}
-    //double uei = edges( lbin )+width0;
-    //double remainder = 1.0;
-    //if ( lbin==m_size ) {
-      //continue;
-    //}
-    //if ( lbin<0 ) lbin=0;
-
-    ////printf( "Bin %i (%f, %f) to (%f, %f): ", i, hin->GetBinLowEdge(i+1), hin->GetBinLowEdge(i+2), le1, ue1 );
-    //while ( remainder>1.e-12 && le1<=ue1){
-      //if ( lbin==m_size ){ // overflow
-        //remainder=0.0;
-        //break;
-      //}
-      //double frac = width1>0.0 ? ( min( uei, ue1 ) - le1 )/width1 : remainder;
-      //m_sparse_cache.insert(lbin,i)=frac;
-
-      //le1=uei;
-      //uei+=width0;
-      //lbin++;
-      //remainder-=frac;
-    //}
 
   rets[0].mat = m_sparse_cache;
 }
-
-//void EnergyNonlinearity::fillCache() {
-  //m_size = m_datatype.hist().bins();
-  //if (m_size == 0) {
-    //return;
-  //}
-  //m_sparse_cache.resize(m_size, m_size);
-
-  //[> fill the cache matrix with probalilities for number of events to leak to other bins <]
-  //[> colums corressponds to reconstrucred energy and rows to true energy <]
-  //auto bin_center = [&](size_t index){ return (m_datatype.edges[index+1] + m_datatype.edges[index])/2; };
-  //for (size_t etrue = 0; etrue < m_size; ++etrue) {
-    //double Etrue = bin_center(etrue);
-    //double dEtrue = m_datatype.edges[etrue+1] - m_datatype.edges[etrue];
-
-    //bool right_edge_reached{false};
-    /* precalculating probabilities for events in given bin to leak to
-     * neighbor bins  */
-    //for (size_t erec = 0; erec < m_size; ++erec) {
-      //double Erec = bin_center(erec);
-      //double rEvents = dEtrue*resolution(Etrue, Erec);
-
-      //if (rEvents < 1E-10) {
-        //if (right_edge_reached) {
-           //break;
-        //}
-        //continue;
-      //}
-      //m_sparse_cache.insert(erec, etrue) = rEvents;
-      //if (!right_edge_reached) {
-        //right_edge_reached = true;
-      //}
-    //}
-  //}
-  //m_sparse_cache.makeCompressed();
-//}
-
-
 
