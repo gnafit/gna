@@ -50,8 +50,8 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
   auto n = args[0].arr.size();
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
-  auto* end_orig = edges_orig+n;
-  auto* end_mod  = edges_mod+n;
+  auto* end_orig = std::next(edges_orig, n);
+  auto* end_mod  = std::next(edges_mod, n);
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, edges_orig[0] );
@@ -61,7 +61,7 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
     auto* cur_proj = std::lower_bound( edges_orig, end_orig, *cur_bin );
     auto i_proj = cur_proj - edges_orig;
     if ( cur_proj<end_orig ){
-      auto* next_bin = cur_bin+1;
+      auto* next_bin = std::next(cur_bin);
       // Iterate bins
       while( cur_bin<end_mod ){
         auto full_width = *next_bin - *cur_bin;
@@ -69,17 +69,17 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
         auto* cur_edge = cur_bin;
         // Iterate inner bin edges
         while ( cur_edge!=next_bin ){
-          auto* next_edge = std::min( next_bin, cur_proj+1, [](decltype(cur_bin) a, decltype(cur_bin) b){ return *a<*b; } );
+          auto* next_edge = std::min( next_bin, std::next(cur_proj), [](auto a, auto b){ return *a<*b; } );
 
           m_sparse_cache.insert(i_bin, i_proj) = ( *next_edge - *cur_edge )/full_width;
 
           cur_edge = next_edge;
-          cur_proj++; i_proj++;
+          std::advance(cur_proj, 1); i_proj++;
         }
 
-        cur_proj--; i_proj--;
-        cur_bin++; i_bin++;
-        next_bin++;
+        std::advance(cur_proj, -1); i_proj--;
+        std::advance(cur_bin, 1); i_bin++;
+        std::advance(next_bin, 1);
       }
     }
   }
