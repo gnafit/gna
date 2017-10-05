@@ -60,10 +60,13 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
   auto* end_mod  = std::next(edges_mod, n-1);
 
   DEBUG("n=%li, matrix n=%li\n", n, m_size);
-  DEBUG("%13s%13s%14s%14s%8s %8s%8s\n", "curbin", "curproj", "curedge", "nextedge", "nextbin", "nextproj", "weight");
+  DEBUG("%13s%13s%14s%14s%8s %8s%8s%8s\n",
+        "curbin", "curproj", "curedge",
+        "nextedge", "nextbin", "nextproj",
+        "weight", "width");
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
-  auto* cur_bin = std::lower_bound( edges_mod, end_mod, edges_orig[0] );
+  auto* cur_bin = std::prev(std::lower_bound( edges_mod, end_mod, edges_orig[0] ));
   auto i_bin = cur_bin - edges_mod;
   if( cur_bin<end_mod ){
     // Find current bin's projection to the original range
@@ -86,16 +89,18 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
           bool next_mod = next_edge==next_bin;
           #endif
 
-          double f = ( *next_edge - *cur_edge )/full_width;
-          DEBUG("%7li%6.2f""%7li%6.2f"
-                 "%7li%s%6.3f""%7li%s%6.2f"
-                 "%8.2f%1s%8.2f""%8.3f %s\n",
-                 i_bin, *cur_bin, i_proj, *cur_proj,
-                 std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
-                 std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
-                 *next_bin, *next_bin==*std::next(cur_proj) ? "=":" ", *std::next(cur_proj),
-                 f, f==0.0 ? "*" : "" );
-          m_sparse_cache.insert(i_proj, i_bin) = f;
+          if (*cur_edge>=edges_orig[0]){
+            double f = ( *next_edge - *cur_edge )/full_width;
+            DEBUG("%7li%6.2f""%7li%6.2f"
+                   "%7li%s%6.3f""%7li%s%6.2f"
+                   "%8.2f%1s%8.2f""%8.3f%8.3f %s\n",
+                   i_bin, *cur_bin, i_proj, *cur_proj,
+                   std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
+                   std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
+                   *next_bin, *next_bin==*std::next(cur_proj) ? "=":" ", *std::next(cur_proj),
+                   f, full_width, f==0.0 ? "*" : "" );
+            m_sparse_cache.insert(i_proj, i_bin) = f;
+          }
 
           cur_edge = next_edge;
           std::advance(cur_proj, 1); i_proj++;
