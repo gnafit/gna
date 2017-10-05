@@ -56,8 +56,8 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
   auto n = args[0].arr.size();
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
-  auto* end_orig = std::next(edges_orig, n);
-  auto* end_mod  = std::next(edges_mod, n);
+  auto* end_orig = std::next(edges_orig, n-1);
+  auto* end_mod  = std::next(edges_mod, n-1);
 
   DEBUG("n=%li, matrix n=%li\n", n, m_size);
   DEBUG("%13s%13s%14s%14s%8s %8s%8s\n", "curbin", "curproj", "curedge", "nextedge", "nextbin", "nextproj", "weight");
@@ -95,14 +95,12 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
                  std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
                  *next_bin, *next_bin==*std::next(cur_proj) ? "=":" ", *std::next(cur_proj),
                  f, f==0.0 ? "*" : "" );
-          m_sparse_cache.insert(i_bin, i_proj) = f;
+          m_sparse_cache.insert(i_proj, i_bin) = f;
 
           cur_edge = next_edge;
-          printf("  stop %i\n", std::next(cur_proj)==end_orig);
           std::advance(cur_proj, 1); i_proj++;
           #ifdef DEBUG_ENL
           cur_mod = next_mod;
-          printf("  stop %i\n", cur_proj==end_orig);
           #endif
         }
         DEBUG("\n");

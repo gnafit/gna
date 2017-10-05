@@ -26,6 +26,7 @@ idy.identity.source(nl.matrix.Matrix)
 
 mat = idy.identity.target.data()
 print( mat )
+print( mat.sum( axis=0 ) )
 
 import IPython
 IPython.embed()
