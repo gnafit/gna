@@ -21,5 +21,11 @@ ntrue = R.Histogram( edges.size-1, edges, N.ones( edges.size-1 ) )
 nl = R.EnergyNonlinearity()
 nl.set( pedges, pedges_m, ntrue )
 
+idy = R.Identity()
+idy.identity.source(nl.matrix.Matrix)
+
+mat = idy.identity.target.data()
+print( mat )
+
 import IPython
 IPython.embed()
