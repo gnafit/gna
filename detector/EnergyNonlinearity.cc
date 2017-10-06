@@ -31,7 +31,7 @@ EnergyNonlinearity::EnergyNonlinearity( bool propagate_matrix ) : m_propagate_ma
            rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
          }
          else{
-           rets[0] = obj->m_datatype = DataType().points().shape( 1, 1 );
+           rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
          }
          })
        .func(&EnergyNonlinearity::calcMatrix);
