@@ -1,5 +1,5 @@
-Oscillation Probabilities:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Oscillation Probabilities
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Class OscProbPMNS
 ^^^^^^^^^^^^^^^^^

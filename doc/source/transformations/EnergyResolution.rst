@@ -9,12 +9,21 @@ Applies energy resolution to the histogram of events binned in
 Inputs
 ^^^^^^
 
-  1. One-dimensional histogram of number of events :math:`N_{\text{vis}}`.
+1. ``'smear.Nvis'`` — one-dimensional histogram of number of events :math:`N_{\text{vis}}`.
 
 Outputs
 ^^^^^^^
 
-1. One-dimensional smeared histo of number of events :math:`N_{\text{rec}}`
+1. ``'smear.Nrec'`` one-dimensional smeared histo of number of events :math:`N_{\text{rec}}`
+
+Variables
+^^^^^^^^^
+
+1. ``Eres_a`` — :math:`a`,
+1. ``Eres_b`` — :math:`b`,
+1. ``Eres_c`` — :math:`c`
+
+are the parameters of the energy resolution formula. See below.
 
 Implementation
 ^^^^^^^^^^^^^^
@@ -27,7 +36,7 @@ The smeared histo :math:`N_{\text{rec}}` and true :math:`N_{\text{vis}}` are con
 where :math:`N^{\text{rec}}_i` is a reconstructed number of events in a *i*-th
 bin, :math:`N^{\text{vis}}_j` is a true number of events in a *j*-th bin and
 :math:`V^{\text{res}}_{ij}` is a probability for events to flow from *j*-th to
-*i* bin. 
+*i* bin.
 
 That probability is given by:
 
@@ -37,6 +46,6 @@ That probability is given by:
 where :math:`\sigma(E_j)` is:
 
 .. math::
-    sigma(E_j) = E_j \sqrt{ a^2 + \frac{b^2}{E_j}  + \left( \frac{c}{E_j}\right)^2}
+    \sigma(E_j) = E_j \sqrt{ a^2 + \frac{b^2}{E_j}  + \left( \frac{c}{E_j}\right)^2}
 
-where a,b,c are resolution parameters.
+where :math:`a`, :math:`b`, :math:`c` are resolution parameters.

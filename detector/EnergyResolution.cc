@@ -9,9 +9,6 @@ EnergyResolution::EnergyResolution() {
   variable_(&m_c, "Eres_c");
   callback_([this] { fillCache(); });
 
-
-  using namespace std::placeholders;
-
   transformation_(this, "smear")
       .input("Nvis")
       .output("Nrec")
