@@ -1,7 +1,7 @@
 #include "EnergyNonlinearity.hh"
 #include <algorithm>
 
-//#define DEBUG_ENL
+#define DEBUG_ENL
 
 #ifdef DEBUG_ENL
 #define  DEBUG(...) do {                                      \
@@ -16,11 +16,8 @@ EnergyNonlinearity::EnergyNonlinearity( bool propagate_matrix ) : m_propagate_ma
       .input("FakeMatrix")
       .input("Ntrue")
       .output("Nvis")
-      .types(Atypes::pass<0>,
-         [](EnergyNonlinearity *obj, Atypes args, Rtypes /*rets*/) {
-           //obj->fillCache();
-         })
-       .func(&EnergyNonlinearity::calcSmear);
+      .types(Atypes::pass<1,0>)
+      .func(&EnergyNonlinearity::calcSmear);
 
   transformation_(this, "matrix")
       .input("Edges")
@@ -65,10 +62,6 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
   auto* end_mod  = std::next(edges_mod, n-1);
 
   DEBUG("n=%li, matrix n=%li\n", n, m_size);
-  DEBUG("%13s%13s%14s%14s%8s %8s%8s%8s\n",
-        "curbin", "curproj", "curedge",
-        "nextedge", "nextbin", "nextproj",
-        "weight", "width");
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );
@@ -83,10 +76,10 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
     if ( cur_proj<end_orig && cur_bin<end_mod ){
       auto* next_bin = std::next(cur_bin);
       // Iterate bins
-      while( cur_bin<end_mod ){
-        if( *next_bin>=m_range_max ) {
-          break;
-        }
+      #ifdef DEBUG_ENL
+      size_t iteration=0;
+      #endif
+      while( cur_bin<end_mod && *cur_bin<*end_orig && *next_bin<m_range_max ){
         auto full_width = *next_bin - *cur_bin;
 
         auto* cur_edge{cur_bin};
@@ -102,14 +95,26 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
           #endif
 
           double f = ( *next_edge - *cur_edge )/full_width;
-          DEBUG("%7li%6.2f""%7li%6.2f"
-                 "%7li%s%6.3f""%7li%s%6.2f"
+
+          #ifdef DEBUG_ENL
+          if ( ((iteration++)%20)==0 ) {
+          printf("\n%6s%13s%13s%14s%14s%8s %8s%8s%8s\n",
+                "it",
+                "curbin", "curproj", "curedge",
+                "nextedge", "nextbin", "nextproj",
+                "weight", "width");
+          }
+          printf("%6li"
+                 "%7li%6.2f""%7li%6.2f"
+                 "%7li%s%6.2f""%7li%s%6.2f"
                  "%8.2f%1s%8.2f""%8.3f%8.3f %s\n",
+                 iteration,
                  i_bin, *cur_bin, i_proj, *cur_proj,
                  std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
                  std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
                  *next_bin, *next_bin==*std::next(cur_proj) ? "=":" ", *std::next(cur_proj),
                  f, full_width, f==0.0 ? "*" : "" );
+          #endif
           m_sparse_cache.insert(i_proj, i_bin) = f;
 
           cur_edge = next_edge;
@@ -128,9 +133,7 @@ void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
       }
     }
   }
-  #ifdef DEBUG_ENL
-  printf("\n");
-  #endif
+  DEBUG("\n");
 
   if ( m_propagate_matrix )
     rets[0].mat = m_sparse_cache;

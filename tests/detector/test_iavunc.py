@@ -67,7 +67,7 @@ esmear = R.EnergySmear( opts.upper )
 esmear.smear.inputs.SmearMatrix( rd.renorm )
 esmear.smear.inputs.Ntrue( hist.hist )
 
-for i, value in enumerate([ 0.5, 1.0, 2.0 ]):
+for i, value in enumerate([ 1.0, 0.5, 2.0 ]):
     par.set( value )
     smeared = esmear.smear.Nvis.data()
     print( 'Sum check for {} (diff): {}'.format( value, phist.sum()-smeared.sum() ) )
