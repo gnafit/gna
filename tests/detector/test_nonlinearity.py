@@ -24,6 +24,7 @@ def singularities( values, edges ):
     return phist
 
 def nlfcn( edges ):
+    edges = N.asanyarray( edges )
     e1, e2 = 0.5, 2.0
     v1, v2 = 0.4, 1.1
     reg1 = edges<e1
@@ -32,8 +33,8 @@ def nlfcn( edges ):
 
     corr = N.zeros_like( edges )
     corr[reg1]=N.NaN
-    corr[reg2]=(edges[reg2]-edges[reg2][0])/(edges[reg2][-1]-edges[reg2][0])*(1.0-v1) + v1
-    corr[reg3]=(edges[reg3]-edges[reg3][0])/(edges[reg3][-1]-edges[reg3][0])*(v2-1.0) + 1.0
+    corr[reg2]=(edges[reg2]-e1)/(e2-e1)*(1.0-v1) + v1
+    corr[reg3]=(edges[reg3]-e2)/(12.0-e2)*(v2-1.0) + 1.0
 
     enew = N.zeros_like( edges )
     enew[reg1]=-2e100
@@ -73,7 +74,8 @@ ax.plot( [ edges[0], edges[-1] ], [ edges[0], edges[-1] ], '--' )
 savefig( opts.output, suffix='_energy' )
 
 pedges, pedges_m = convert( edges, 'points' ), convert( edges_m, 'points' )
-phist = singularities( [ 1.025, 3.025, 6.025, 9.025 ], edges )
+ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
+phist = singularities( ev, edges )
 hist = R.Histogram( phist.size, edges, phist )
 
 nl = R.EnergyNonlinearity()
@@ -92,6 +94,10 @@ ax.set_title( 'Non-linearity correction' )
 
 lines = plot_hist( edges, smeared )
 color = lines[0].get_color()
+_, ev_m = nlfcn(ev)
+heights = smeared[smeared>0.45]
+ax.vlines( ev,   0.0, heights, alpha=0.7, color='red', linestyle='--' )
+ax.vlines( ev_m, 0.0, heights, alpha=0.7, color='green', linestyle='--' )
 
 savefig( opts.output, suffix='_evis' )
 

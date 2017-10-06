@@ -1,7 +1,7 @@
 #include "EnergyNonlinearity.hh"
 #include <algorithm>
 
-#define DEBUG_ENL
+//#define DEBUG_ENL
 
 #ifdef DEBUG_ENL
 #define  DEBUG(...) do {                                      \
@@ -49,7 +49,8 @@ void EnergyNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_m
 }
 
 void EnergyNonlinearity::calcSmear(Args args, Rets rets) {
-  rets[0].x = m_sparse_cache * args[0].vec;
+  args[0]; // Needed to trigger updating
+  rets[0].x = m_sparse_cache * args[1].vec;
 }
 
 void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
