@@ -27,7 +27,7 @@ def rescale_to_matrix( edges_from, edges_to, **kwargs ):
     i1s = N.maximum( 0, idx[:-1] )
     i2s = N.minimum( idx[1:], edges_from.size-2 )
     for j, (i1, i2) in enumerate(zip(i1s, i2s)):
-        if i2<0 or i1>=edges_from.size: continue
+        if i2<0 or i1>=edges_from.size or edges_to[j]<-1.e100: continue
         for i in range( i1, i2+1 ):
             l1 = max( edges_to[j],   edges_from[i] )
             l2 = min( edges_to[j+1], edges_from[i+1] )
@@ -36,18 +36,18 @@ def rescale_to_matrix( edges_from, edges_to, **kwargs ):
 
     return mat
 
-edges   = N.array( [  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
-edges_m = N.array( [ -1.0, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
-matp = rescale_to_matrix( edges_m, edges, roundto=3 )
+edges   = N.array( [   -1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
+edges_m = N.array( [ -2e100, -0.9, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
+matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 
 pedges, pedges_m = convert( edges, 'points' ), convert( edges_m, 'points' )
 ntrue = R.Histogram( edges.size-1, edges, N.ones( edges.size-1 ) )
 
-nl = R.EnergyNonlinearity()
+nl = R.EnergyNonlinearity(True)
 nl.set( pedges, pedges_m, ntrue )
 
 idy = R.Identity()
-idy.identity.source(nl.matrix.Matrix)
+idy.identity.source(nl.matrix.FakeMatrix)
 
 mat = idy.identity.target.data()
 print( 'C++' )
@@ -60,8 +60,22 @@ print( matp )
 print( matp.sum( axis=0 ) )
 print()
 
+diff = mat-matp
 print( 'diff' )
-print( mat-matp )
+print( diff )
 
-import IPython
-IPython.embed()
+print()
+print( (diff==0.0).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( 'Source bins' )
+ax.set_ylabel( 'Target bins' )
+ax.set_title( 'Bin edges scale conversion matrix' )
+
+c = ax.matshow( N.ma.array(mat, mask=mat==0.0), extent=[edges[0], edges[-1], edges[-1], edges[0]] )
+add_colorbar( c )
+
+P.show()
