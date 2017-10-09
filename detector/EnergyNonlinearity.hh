@@ -11,8 +11,8 @@ class EnergyNonlinearity: public GNAObject,
 public:
   EnergyNonlinearity( bool propagate_matrix=false );
 
-  Eigen::SparseMatrix<double>& getMatrix()      { return m_sparse_cache; }
-  Eigen::MatrixXd              getDenseMatrix() { return m_sparse_cache; }
+  Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
+  Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }
 
   void set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue );
 
