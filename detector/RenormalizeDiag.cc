@@ -1,10 +1,16 @@
 #include "RenormalizeDiag.hh"
-
 #include <iostream>
+#include <boost/format.hpp>
 using namespace std;
+using boost::format;
 
 RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const char* parname) : m_ndiagonals(ndiag) {
   variable_(&m_scale, parname);
+
+  auto memberFun = dispatchFunction(target, mode);
+  if (memberFun == nullptr) {
+      throw std::runtime_error((format("Can't dispatch the function in RenormalizeDiag! Passed target %1 and mode %2") % target % mode).str());
+  }
 
   transformation_(this, "renorm")
       .input("inmat")
@@ -18,10 +24,40 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
                throw args.error(args[0], "SmearMatrix is not square");
            }
          })
-     .func( mode==Mode::Upper ? ( target==Target::Offdiagonal ? &RenormalizeDiag::renormalizeOffdiagUpper
-                                                              : &RenormalizeDiag::renormalizeDiagUpper )
-                              : ( target==Target::Offdiagonal ? &RenormalizeDiag::renormalizeOffdiag
-                                                              : &RenormalizeDiag::renormalizeDiag) );
+      .func(memberFun);
+}
+
+RenormalizeDiag::PointerToMember RenormalizeDiag::dispatchFunction(Target target, Mode mode) {
+  RenormalizeDiag::PointerToMember dispatched = nullptr;
+  switch (mode) {
+      case Mode::Upper: {
+          switch (target) {
+              case Target::Offdiagonal: {
+                  dispatched = &RenormalizeDiag::renormalizeOffdiagUpper;
+                  break;
+              };
+              case Target::Diagonal: {
+                  dispatched = &RenormalizeDiag::renormalizeDiagUpper;
+                  break;
+              };
+          }
+          break;
+      };
+      case Mode::Full: {
+          switch (target) { 
+              case Target::Offdiagonal: {
+                  dispatched = &RenormalizeDiag::renormalizeOffdiag;
+                  break;
+              };
+              case Target::Diagonal: {
+                  dispatched = &RenormalizeDiag::renormalizeDiag;
+                  break;
+             };
+          }
+          break;
+      };
+  }; 
+  return dispatched;
 }
 
 void RenormalizeDiag::renormalizeOffdiagUpper(Args args, Rets rets) {
