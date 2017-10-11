@@ -25,6 +25,7 @@ set (SOURCES
   core/Chi2.cc
   core/Poisson.cc
   core/CovarianceToyMC.cc
+  core/NormalToyMC.cc
   core/PoissonToyMC.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
@@ -34,6 +35,7 @@ set (SOURCES
   neutrino/IbdFirstOrder.cc
   neutrino/ReactorNorm.cc
   neutrino/ReactorGroup.cc
+  neutrino/OscProbMatterUniform.cc
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
@@ -42,6 +44,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
   Transformation.hh
@@ -63,6 +66,7 @@ set (HEADERS
   Chi2.hh
   Poisson.hh
   CovarianceToyMC.hh
+  NormalToyMC.hh
   PoissonToyMC.hh
   Minimizable.hh
   Neutrino.hh
@@ -71,6 +75,7 @@ set (HEADERS
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProbPMNSDecoh.hh
+  OscProbMatterUniform.hh
   EvisToEe.hh
   IbdInteraction.hh
   IbdZeroOrder.hh

@@ -22,11 +22,12 @@ public:
     return T(m_container->at(i));
   }
   T operator[](int i) const {
-    if (i >= size()) {
+    if (static_cast<size_t>(i) >= size()) {
       return T::invalid(i);
     }
     return at(i);
   }
+
   T operator[](const std::string &name) const {
     auto it = std::find_if(m_container->begin(), m_container->end(),
                            [&](typename Container::const_reference e) {

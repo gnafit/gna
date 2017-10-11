@@ -3,7 +3,7 @@ import numpy as np
 import ROOT
 
 # Protect the following classes/namespaces from being wrapped
-ignored_classes = [ 'Eigen', 'EigenHelpers']
+ignored_classes = [ 'Eigen', 'EigenHelpers', 'GNA' ]
 
 def hygienic(decorator):
     def new_decorator(original):

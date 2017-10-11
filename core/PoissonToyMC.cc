@@ -1,25 +1,22 @@
 #include "PoissonToyMC.hh"
 
-PoissonToyMC::PoissonToyMC() {
+PoissonToyMC::PoissonToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_(this, "toymc")
     .output("toymc")
     .types(&PoissonToyMC::calcTypes)
     .func(&PoissonToyMC::calcToyMC)
   ;
+
+  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
 }
 
-void PoissonToyMC::add(SingleOutput &theory, SingleOutput &cov) {
+void PoissonToyMC::add(SingleOutput &theory) {
   t_["toymc"].input(theory);
 }
 
 void PoissonToyMC::nextSample() {
   t_["toymc"].unfreeze();
   t_["toymc"].taint();
-}
-
-void PoissonToyMC::seed(unsigned int s) {
-  m_rand.seed(s);
-  m_gen.distribution().reset();
 }
 
 void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
@@ -33,10 +30,14 @@ void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
 
 void PoissonToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=1) {
+    auto &mean = args[i].vec;
     auto &out = rets[i].vec;
     for (int j = 0; j < out.size(); ++j) {
-      out(j) = m_gen();
+      m_distr.param(decltype(m_distr)::param_type(mean(j)));
+      out(j) = m_distr( GNA::Random::gen() );
     }
   }
-  rets.freeze();
+
+  if(m_autofreeze)
+    rets.freeze();
 }

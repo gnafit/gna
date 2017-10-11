@@ -1,5 +1,6 @@
 from gna.ui import basecmd, append_typed, qualified
 from matplotlib import pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml
 
@@ -28,7 +29,10 @@ class cmd(basecmd):
                             help='Add legend to the plot, note that number of legends must match the number of plots')
         parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
+        parser.add_argument('--drawgrid', action='store_true')
         parser.add_argument('--savefig', default='', help='Path to save figure')
+        parser.add_argument('--new-figure', action='store_true',
+                            help='Create new figure')
         parser.add_argument('--nbar', type=int, default=1,
                             help='Divide bar width by', metavar='NBAR')
 
@@ -53,7 +57,19 @@ class cmd(basecmd):
             print "Amount of data and amount of data doesn't match. Perhaps it is not what you want. Filling legend with empty strings"
             self.legends.append('')
 
+        if self.opts.new_figure:
+            plt.figure()
+        minorLocatorx = AutoMinorLocator()
+        minorLocatory = AutoMinorLocator()
         ax = plt.gca()
+        if self.opts.drawgrid:
+            ax.xaxis.set_minor_locator(minorLocatorx)
+            ax.yaxis.set_minor_locator(minorLocatory)
+            plt.tick_params(which='both', width=1)
+            plt.tick_params(which='major', length=7)
+            plt.tick_params(which='minor', length=4, color='k')
+            ax.grid(which = 'minor', alpha = 0.3)
+            ax.grid(which = 'major', alpha = 0.7)
 
         for data, edges, legend in zip(self.data_storage, self.edges_storage, self.legends):
             if (edges.shape[0]-1,) != data.shape:

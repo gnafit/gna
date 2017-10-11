@@ -5,6 +5,8 @@ from gna.ui import basecmd, set_typed
 import argparse
 from matplotlib import pyplot as plt
 
+from matplotlib.ticker import AutoMinorLocator
+
 import re
 from itertools import product
 
@@ -216,6 +218,7 @@ class cmd(basecmd):
         parser.add_argument('--savepoints', dest='savepoints',
                             required=False)
         parser.add_argument('--xlog', action='store_true', help='Use log scale over x-axis')
+        parser.add_argument('--drawgrid', action='store_true')
         parser.add_argument('--dm32', action='store_true')
         parser.add_argument('--ylim', type=float, nargs=2)
         parser.add_argument('--xlim', type=float, nargs=2)
@@ -324,7 +327,10 @@ class cmd(basecmd):
         if self.opts.labels:
             self.labels = iter(self.opts.labels)
 
+        minorLocatorx = AutoMinorLocator()
+        minorLocatory = AutoMinorLocator()
         ax = plt.gca()
+
         levels = set()
         colors = iter('bgrcmyk')
         for plotdesc in self.opts.plots:
@@ -390,6 +396,14 @@ class cmd(basecmd):
             ax.set_ylim(self.opts.ylim)
         if self.opts.xlim is not None:
             ax.set_xlim(self.opts.xlim)
+        if self.opts.drawgrid:
+            ax.xaxis.set_minor_locator(minorLocatorx)
+            ax.yaxis.set_minor_locator(minorLocatory)
+            plt.tick_params(which='both', width=1)
+            plt.tick_params(which='major', length=7)
+            plt.tick_params(which='minor', length=4, color='k')
+            ax.grid(which = 'minor', alpha = 0.3)
+            ax.grid(which = 'major', alpha = 0.7)
         if self.opts.legend:
             plt.legend(loc=' '.join(self.opts.legend))
         if self.opts.show:

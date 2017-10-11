@@ -2,14 +2,19 @@ image: alpine
 
 pages:
   script:
-  - apk --no-cache add py2-pip python-dev
+  - apk --no-cache add gcc make linux-headers musl-dev
+  - apk --no-cache add py2-pip python-dev 
   - pip install sphinx
   - pip install sphinx_rtd_theme
-  - apk --no-cache add make
+  - pip install sphinxcontrib-plantuml
+  - pip install ipython
   - cd doc
   - make html
+  - cd ..
+  - mkdir public/
+  - cp -r doc/build/html/* public/
   artifacts:
     paths:
-    - doc/build/html
+    - public
   only:
   - refguide 

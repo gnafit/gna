@@ -244,6 +244,11 @@ public:
   VariableDescriptor(ParametrizedTypes::Entry &entry)
     : BaseClass(entry)
   { }
+  static VariableDescriptor invalid(const int& idx) {
+      throw std::runtime_error(
+      (boost::format("Variable: invalid entry, idx == `%1%'") % idx).str());
+
+  };
   static VariableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
       (boost::format("Variable: invalid entry, name == `%1%'") % name).str());
