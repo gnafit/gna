@@ -15,18 +15,29 @@ class Dataset(object):
             self.covariance.update(base.covariance)
 
     def assign(self, obs, value, error):
+        """Given observable assign value that is going to serve as data and uncertainty to it.
+        """
         self.data[obs] = self._pointize(value)
         self.covariate(obs, obs, error)
 
     def _pointize(self, obj):
+        """Given object checks whether it is PyROOT type (perhaps better to
+        refactor it) and if not make a Points out of it. Use case -- turning
+        numpy array into points.
+        """
         if not isinstance(type(obj), ROOT.PyRootType):
             obj = ROOT.Points(obj)
         return obj
 
     def covariate(self, obs1, obs2, cov):
+        """ Given two observables and covariance between them, add covariate
+        into a stotage for covariances
+        """
         self.covariance[frozenset([obs1, obs2])].append(self._pointize(cov))
 
     def iscovariated(self, obs1, obs2, covparameters):
+        """Checks whether two observables are covariated or affected by covparameters
+        """
         if self.covariance.get(frozenset([obs1, obs2])):
             return True
         for par in covparameters:
@@ -35,6 +46,9 @@ class Dataset(object):
         return False
 
     def sortobservables(self, observables, covparameters):
+        """Splits observables into such a groups that observables that are
+        all covariated with respect to a covparameters 
+        """
         to_process = list(observables)
         groups = [[]]
         while to_process:
@@ -50,6 +64,11 @@ class Dataset(object):
         return sorted(groups, key=lambda t: observables.index(t[0]))
 
     def assigncovariances(self, observables, prediction, covparameters):
+        """Assign covariance for a given observable and add it to a
+        prediction. Checks for covariance that is already in the
+        self.covariance and than adds it computes derivatives of observable
+        with respect to all covparameters and put it into prediction
+        """
         for covkey, covs in self.covariance.iteritems():
             if len(covkey & observables) != len(covkey):
                 continue
@@ -66,9 +85,9 @@ class Dataset(object):
         prediction.finalize()
 
     def makedata(self, obsblock):
-        ''' Returns either observable itself or a concantenation of
+        """ Returns either observable itself or a concantenation of
         values of observables
-        '''
+        """
         datas = [self.data.get(obs) for obs in obsblock]
         if any(data is None for data in datas):
             return None
@@ -80,6 +99,12 @@ class Dataset(object):
         return merged
 
     def makeblocks(self, observables, covparameters):
+        """ Returns a list of blocks with theoretical prediction, data and
+        covariance matrix.
+
+        Accepts list of observables that would be used as theory and parameters for
+        what covariance matrix is going to be calculated.
+        """
         blocks = []
         for i, obsblock in enumerate(self.sortobservables(observables, covparameters)):
             prediction = ROOT.CovariatedPrediction()
