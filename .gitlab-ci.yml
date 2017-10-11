@@ -12,4 +12,4 @@ pages:
     paths:
     - doc/build/html
   only:
-  - master 
+  - refguide 
