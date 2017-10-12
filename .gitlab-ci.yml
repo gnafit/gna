@@ -1,8 +1,5 @@
 image: alpine
 
-services:
-  - hrektts/plantuml:latest
-
 pages:
   script:
   - apk --no-cache add gcc make linux-headers musl-dev
@@ -11,6 +8,7 @@ pages:
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
   - pip install ipython
+  - pip3 install compose_plantuml
 #  - apk add --update --no-cache graphviz ttf-freefont openjdk7
 #  - apk update && apk upgrade && apk add --no-cache bash git openssh
 #  - sudo apt-get install graphviz openjdk-7-jdk git-core maven
