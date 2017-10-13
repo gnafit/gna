@@ -12,12 +12,6 @@ pages:
   - apk --no-cache add openssl
   - wget https://sourceforge.net/projects/plantuml/files/latest/download -O /plantuml.jar
   - java -jar /plantuml.jar -testdot 
-#  - apk add --update --no-cache graphviz ttf-freefont openjdk7
-#  - apk update && apk upgrade && apk add --no-cache bash git openssh
-#  - sudo apt-get install graphviz openjdk-7-jdk git-core maven
-#  - git clone https://github.com/plantuml/plantuml-server.git
-#  - cd plantuml-server
-#  - mvn package
   - cd doc
   - make html
   - cd ..
@@ -27,4 +21,4 @@ pages:
     paths:
     - public
   only:
-  - refguide 
+  - master 
