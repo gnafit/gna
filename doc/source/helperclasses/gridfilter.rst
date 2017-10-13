@@ -4,8 +4,6 @@ GridFilter
 Description
 ^^^^^^^^^^^
 
-TEST WIL BE REVERTED
-
 Contais methods for working with cross-sections of the predetermined function. Function is represented as a matrix with values computed with the given grid.
 
 The following operations can be done:
