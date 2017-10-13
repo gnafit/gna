@@ -9,6 +9,7 @@ The conversion is done by means of ``converters`` module:
 
 Function ``convert(object, target_type)`` converts an object (usually an array) to the ``target_type``.
 The following types are recognized:
+
     + ``ROOT.vector`` or ``'stdvector'``
     + ``ROOT.Points`` or ``'points'``
     + ``ROOT.Eigen.MatrixXd`` or ``'eigenmatrix'``

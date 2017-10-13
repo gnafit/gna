@@ -35,9 +35,13 @@ GNAObject header
 
 GNAObject : class
     * Carries lists of:
+
       + variable_ isntances via VariableDescriptor_
+
       + evaluable_ isntances via EvaluableDescriptor_
+
       + transformation instances via TransformationDescriptor_
+
     * Inherits `TransformationBase::Base`_
 
       + carries list of `TransformationBase::Entry`_ instances
@@ -77,9 +81,13 @@ inconstant_data : struct template
 
 inconstant_header : struct
     * carries information to track dependencies:
+
         + taintflag_
+
         + list of taint signal emitters
+
         + list of taint signal observers
+
     * base for inconstant_data_
 
 .. _references:
@@ -380,6 +388,7 @@ Source : struct
 OutputHandle : class
     * limited indirect access to Sink_
     * may be:
+
       + checked if depends on changeable_ instance
 
 Errors
@@ -454,9 +463,13 @@ Parameter : class template
     * derives _Uncertain
     * carries parameter_ instance for the variable_, i.e. may set it's value
     * may:
+
       + set parameter_'s value
+
       + set parameter_'s value in terms of sigma relative to it's central position
+
       + define limits (used for minimization)
+
     * the class is used as an input for the minimization
 
 .. _ParameterWrapper:

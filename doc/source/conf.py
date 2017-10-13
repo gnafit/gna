@@ -32,7 +32,9 @@ extensions = ['sphinx.ext.mathjax', 'sphinxcontrib.plantuml',
               'IPython.sphinxext.ipython_console_highlighting',
               'IPython.sphinxext.ipython_directive']
 
-plantuml = '/usr/bin/plantuml'
+plantuml = 'java -Djava.awt.headless=true -jar /plantuml.jar'
+
+plantuml_output_format = 'svg'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
