@@ -11,7 +11,7 @@ pages:
   - apk update && apk add ca-certificates wget && update-ca-certificates
   - apk --no-cache add openssl
   - wget https://sourceforge.net/projects/plantuml/files/latest/download -O /plantuml.jar
-  - java -jar ~/plantuml.jar -testdot 
+  - java -jar /plantuml.jar -testdot 
 #  - apk add --update --no-cache graphviz ttf-freefont openjdk7
 #  - apk update && apk upgrade && apk add --no-cache bash git openssh
 #  - sudo apt-get install graphviz openjdk-7-jdk git-core maven
