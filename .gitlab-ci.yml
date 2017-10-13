@@ -3,13 +3,14 @@ image: alpine
 pages:
   script:
   - apk --no-cache add gcc make linux-headers musl-dev
-  - apk --no-cache add py2-pip python-dev graphviz 
+  - apk --no-cache add py2-pip python-dev graphviz plantuml 
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
   - pip install ipython
   - apk update && apk add ca-certificates && update-ca-certificates && apk add openssl
   - wget https://sourceforge.net/projects/plantuml/files/latest/download -O /plantuml.jar
+  - java -jar ~/plantuml.jar -testdot 
 #  - apk add --update --no-cache graphviz ttf-freefont openjdk7
 #  - apk update && apk upgrade && apk add --no-cache bash git openssh
 #  - sudo apt-get install graphviz openjdk-7-jdk git-core maven
