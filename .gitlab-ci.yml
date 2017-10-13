@@ -3,7 +3,7 @@ image: alpine
 pages:
   script:
   - apk --no-cache add gcc make linux-headers musl-dev
-  - apk --no-cache add py2-pip python-dev graphviz openjdk7 fontconfig
+  - apk --no-cache add py2-pip python-dev graphviz openjdk7 fontconfig ttf-dejavu
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
