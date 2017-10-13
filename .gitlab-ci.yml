@@ -3,7 +3,7 @@ image: alpine
 pages:
   script:
   - apk --no-cache add gcc make linux-headers musl-dev
-  - apk --no-cache add py2-pip python-dev graphviz plantuml 
+  - apk --no-cache add py2-pip python-dev graphviz  
   - pip install sphinx
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
