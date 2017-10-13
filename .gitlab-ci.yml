@@ -8,7 +8,8 @@ pages:
   - pip install sphinx_rtd_theme
   - pip install sphinxcontrib-plantuml
   - pip install ipython
-  - apk update && apk add ca-certificates && update-ca-certificates && apk add openssl
+  - apk update && apk add ca-certificates wget && update-ca-certificates
+  - apk --no-cache add openssl
   - wget https://sourceforge.net/projects/plantuml/files/latest/download -O /plantuml.jar
   - java -jar ~/plantuml.jar -testdot 
 #  - apk add --update --no-cache graphviz ttf-freefont openjdk7
