@@ -3,8 +3,7 @@ EnergyResolution
 
 Description
 ^^^^^^^^^^^
-Applies energy resolution to the histogram of events binned in
-:math:`E_{\text{vis}}`.
+Applies energy resolution to the histogram of events binned in :math:`E_{\text{vis}}`.
 
 Inputs
 ^^^^^^
