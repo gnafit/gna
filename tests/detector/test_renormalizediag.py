@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
+import constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-v', '--value', default=1.0, type=float, help='renorm value' )
@@ -31,7 +32,7 @@ print( mat.A.sum(axis=0) )
 print( 'Raw normalized matrix' )
 print( mat.A/mat.A.sum(axis=0) )
 
-pmat = convert( mat, 'points' )
+pmat = C.Points( mat )
 
 rd = R.RenormalizeDiag( opts.ndiag, int(opts.offdiag), int(opts.upper) )
 rd.renorm.inmat( pmat.points )

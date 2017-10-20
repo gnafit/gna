@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
+import constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -53,11 +54,11 @@ for i in range(n):
     else:
         mat += N.diag( N.full( n-i, scale ), i )
 mat/=mat.sum( axis=0 )
-pmat = convert( mat, 'points' )
+pmat = C.Points( mat )
 
 ax = axes( 'Energy leak impact' )
 phist = singularities( [ 1.025, 5.025, 9.025 ], edges )
-hist = R.Histogram( phist.size, edges, phist )
+hist = C.Histogram( edges, phist )
 
 ndiag = 4
 rd = R.RenormalizeDiag( ndiag, int(opts.offdiag), int(opts.upper) )

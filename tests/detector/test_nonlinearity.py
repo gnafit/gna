@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
+import constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -73,10 +74,10 @@ ax.plot( [ edges[0], edges[-1] ], [ edges[0], edges[-1] ], '--' )
 
 savefig( opts.output, suffix='_energy' )
 
-pedges, pedges_m = convert( edges, 'points' ), convert( edges_m, 'points' )
+pedges, pedges_m = C.Points( edges ), C.Points( edges_m )
 ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
 phist = singularities( ev, edges )
-hist = R.Histogram( phist.size, edges, phist )
+hist = C.Histogram( edges, phist )
 
 nl = R.HistNonlinearity()
 nl.set( pedges, pedges_m, hist )

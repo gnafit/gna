@@ -6,9 +6,16 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
+from converters import array_to_stdvector_size_t
 
 """Construct Points object from numpy array"""
-from converters import array_to_Points as Points
+def Points( array ):
+    """Convert numpy array to Points"""
+    if len(array.shape)>2:
+        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
+    a = N.asarray(array).ravel( order='F' )
+    s = array_to_stdvector_size_t( array.shape )
+    return R.Points( a, s )
 
 def Histogram( edges, data ):
     """Construct Histogram object from numpy arrays: edges and data"""

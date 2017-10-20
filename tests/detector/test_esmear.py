@@ -11,7 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
-from constructors import Histogram
+import constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -59,7 +59,7 @@ for i in range(n):
     else:
         mat += N.diag( N.full( n-i, scale ), i )
 mat/=mat.sum( axis=0 )
-pmat = convert( mat, 'points' )
+pmat = C.Points( mat )
 
 for eset in [
     [ [1.025], [3.025], [6.025], [9.025] ],
@@ -70,7 +70,7 @@ for eset in [
     for i, e in enumerate(eset):
         phist = singularities( e, edges )
 
-        hist = Histogram( edges, phist )
+        hist = C.Histogram( edges, phist )
         esmear = R.HistSmear( opts.triangular )
         esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )

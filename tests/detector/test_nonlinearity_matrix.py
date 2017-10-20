@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
+import constructors as C
 
 def rescale_to_matrix( edges_from, edges_to, **kwargs ):
     roundto = kwargs.pop( 'roundto', None )
@@ -40,8 +41,8 @@ edges   = N.array( [   -1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
 edges_m = N.array( [ -2e100, -0.9, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
 matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 
-pedges, pedges_m = convert( edges, 'points' ), convert( edges_m, 'points' )
-ntrue = R.Histogram( edges.size-1, edges, N.ones( edges.size-1 ) )
+pedges, pedges_m = C.Points( edges ), C.Points( edges_m )
+ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 
 nl = R.HistNonlinearity(True)
 nl.set( pedges, pedges_m, ntrue )

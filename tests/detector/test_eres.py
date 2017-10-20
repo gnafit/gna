@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
+import constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -51,7 +52,7 @@ for eset in [
     for i, e in enumerate(eset):
         phist = singularities( e, edges )
 
-        hist = R.Histogram( phist.size, edges, phist )
+        hist = C.Histogram( edges, phist )
         eres = R.EnergyResolution()
         eres.smear.Nvis( hist.hist )
 

@@ -10,6 +10,7 @@ import numpy as N
 from converters import convert
 import itertools as I
 from mpl_tools.helpers import savefig, add_colorbar
+import constructors as C
 
 mu    = N.array( [ 1.0, 10.0, 100.0 ] )
 sigma = N.matrix( [ 1.0,  1.0, 10.0 ] )
@@ -26,9 +27,9 @@ print( 'Correlation' )
 print( cor )
 print()
 
-mu_p = convert(mu, 'points')
-sigma_p = convert(sigma.A1, 'points')
-cov_p = convert(cov, 'points')
+mu_p = C.Points(mu)
+sigma_p = C.Points(sigma.A1)
+cov_p = C.Points(cov)
 
 chol = R.Cholesky()
 chol.cholesky.mat( cov_p )
