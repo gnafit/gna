@@ -9,11 +9,11 @@ Computes the Cholesky_ decomposition of the symmetric positive definite  matrix.
 
 Inputs
 ^^^^^^
-1) ``'mat'`` — matrix :math:`V`.
+1) ``'cholesky.mat'`` — matrix :math:`V`.
 
 Outputs
 ^^^^^^^
-1) ``'L'`` — lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
+1) ``'cholesky.L'`` — lower triangular matrix :math:`L`, such that :math:`V=LL^T`.
 
 **IMPORTANT**: Be sure to use :math:`L` **as lower triangular matrix**
 (use numpy.tril_ or `triangularView<Eigen::Lower>`_ ). 
