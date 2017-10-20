@@ -26,6 +26,16 @@ Arguments
 1. ``bool upper``. If true HistSmear_ will ensure that the matrix is upper diagonal. 
    Useful for the cases of energy leak type smearing.
 
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/detector/test_esmear.py -s
+   ./tests/detector/test_iavunc.py -s
+
 Implementation
 ^^^^^^^^^^^^^^
 

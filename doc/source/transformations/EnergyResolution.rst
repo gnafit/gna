@@ -24,6 +24,15 @@ Variables
 
 are the parameters of the energy resolution formula. See below.
 
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/detector/test_eres.py -s
+
 Implementation
 ^^^^^^^^^^^^^^
 

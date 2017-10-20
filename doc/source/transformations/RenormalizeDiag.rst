@@ -32,7 +32,7 @@ Arguments
 ^^^^^^^^^
 
 1. ``int ndiag`` — :math:`n` number of diagonals to treat as as diagonal:
-   
+
    1 — only diagonal itself
 
    2 — the diagonal itself, upper and lower diagonal
@@ -46,6 +46,16 @@ Arguments
    If ``Upper``, the matrix is treated as upper triangular matrix with appropriate optimizations.
 
 3. ``parname='DiagScale'`` — variable name.
+
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/detector/test_renormalizediag.py
+   ./tests/detector/test_iavunc.py -s
 
 Implementation
 ^^^^^^^^^^^^^^

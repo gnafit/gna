@@ -21,3 +21,12 @@ Upper triangular part may contain unmaintained non-zero elements.
 
 .. _triangularView<Eigen::Lower>: https://eigen.tuxfamily.org/dox/classEigen_1_1TriangularView.html
 .. _numpy.tril: https://docs.scipy.org/doc/numpy/reference/generated/numpy.tril.html
+
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/test_cholesky_transformation.py

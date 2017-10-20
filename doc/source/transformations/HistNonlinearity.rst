@@ -39,7 +39,7 @@ Use the following commands for the usage example and testing:
    ./tests/detector/test_nonlinearity.py -s
    ./tests/detector/test_nonlinearity_matrix.py -s
 
-.. _Matrix::
+.. _Matrix:
 
 Matrix transformation
 ^^^^^^^^^^^^^^^^^^^^^
