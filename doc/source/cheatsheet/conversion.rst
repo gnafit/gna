@@ -19,6 +19,8 @@ The following types are recognized:
     + ``numpy.ndarray`` or ``'array'``
     + ``numpy.matrixlib.defmatrix.matrix`` or ``'matrix'``
 
+For more complex conversions see also ``constructors`` module.
+
 STD vector
 """"""""""
 
@@ -92,7 +94,7 @@ GNA types
 
 
 Tests
-^^^^^
+"""""
 
 Use the following commands for the usage example and testing:
 
