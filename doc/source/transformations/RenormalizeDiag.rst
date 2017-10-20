@@ -42,7 +42,7 @@ Arguments
 2. ``Target target`` — ``RenormalizeDiag::Target::Diagonal`` (default) or ``RenormalizeDiag::Target::Offdiagonal``.
    Shows which part of the matrix to apply the scale to.
 
-2. ``Mode mode`` — ``Renormalize::Mode::Full`` (default) or ``RenormalizeDiag::Mode::Upper``.
+2. ``Mode mode`` — ``RenormalizeDiag::Mode::Full`` (default) or ``RenormalizeDiag::Mode::Upper``.
    If ``Upper``, the matrix is treated as upper triangular matrix with appropriate optimizations.
 
 3. ``parname='DiagScale'`` — variable name.
