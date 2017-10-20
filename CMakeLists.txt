@@ -66,6 +66,7 @@ if(CUDA_SUPPORT)
         )
     set (CUHEADERS
          CuChi2.hh
+         GNAcuOscProbFull.h
         )
 else()
     set(CUSOURCES "")
@@ -171,5 +172,5 @@ add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 
 target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl  -lgslcblas -lm )
 
-add_executable(${NAME_STANDALONE} ${SOURCES_STANDALONE})
-target_link_libraries(${NAME_STANDALONE} ${LIBNAME})
+#add_executable(${NAME_STANDALONE} ${SOURCES_STANDALONE})
+#target_link_libraries(${NAME_STANDALONE} ${LIBNAME})

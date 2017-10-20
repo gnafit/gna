@@ -13,8 +13,18 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_50,code=sm_50 -std=c++11 -Xcompiler -fPIC )
 
-include_directories(extra/)
+include_directories(extra/ core/)
 
-cuda_add_library(cuGNA SHARED extra/GNAcuMath.cu extra/GNAcuMath.h)
+set(CUSOURCES
+  extra/GNAcuMath.cu
+  extra/GNAcuOscProbFull.cu
+  )
+
+set(CUHEADERS 
+  extra/GNAcuMath.h
+  extra/GNAcuOscProbFull.h
+  )
+
+cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})
 cuda_add_cublas_to_target(cuGNA)
 
