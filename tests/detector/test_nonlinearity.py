@@ -78,7 +78,7 @@ ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
 phist = singularities( ev, edges )
 hist = R.Histogram( phist.size, edges, phist )
 
-nl = R.EnergyNonlinearity()
+nl = R.HistNonlinearity()
 nl.set( pedges, pedges_m, hist )
 
 smeared = nl.smear.Nvis.data()

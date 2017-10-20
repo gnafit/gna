@@ -63,7 +63,7 @@ ndiag = 4
 rd = R.RenormalizeDiag( ndiag, int(opts.offdiag), int(opts.upper) )
 rd.renorm.inmat( pmat.points )
 
-esmear = R.EnergySmear( opts.upper )
+esmear = R.HistSmear( opts.upper )
 esmear.smear.inputs.SmearMatrix( rd.renorm )
 esmear.smear.inputs.Ntrue( hist.hist )
 

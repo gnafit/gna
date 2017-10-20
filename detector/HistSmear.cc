@@ -1,7 +1,7 @@
 #include <boost/math/constants/constants.hpp>
-#include "EnergySmear.hh"
+#include "HistSmear.hh"
 
-EnergySmear::EnergySmear(bool upper) {
+HistSmear::HistSmear(bool upper) {
   transformation_(this, "smear")
       .input("SmearMatrix")
       .input("Ntrue")
@@ -21,13 +21,13 @@ EnergySmear::EnergySmear(bool upper) {
                throw args.error(args[0], "SmearMatrix is not consistent with data vector");
            }
          })
-       .func( upper ? &EnergySmear::calcSmearUpper : &EnergySmear::calcSmear );
+       .func( upper ? &HistSmear::calcSmearUpper : &HistSmear::calcSmear );
 }
 
-void EnergySmear::calcSmearUpper(Args args, Rets rets) {
+void HistSmear::calcSmearUpper(Args args, Rets rets) {
   rets[0].x = args[0].mat.triangularView<Eigen::Upper>() * args[1].vec;
 }
 
-void EnergySmear::calcSmear(Args args, Rets rets) {
+void HistSmear::calcSmear(Args args, Rets rets) {
   rets[0].x = args[0].mat * args[1].vec;
 }

@@ -3,10 +3,10 @@
 
 #include "GNAObject.hh"
 
-class EnergySmear: public GNASingleObject,
-                   public Transformation<EnergySmear> {
+class HistSmear: public GNASingleObject,
+                 public Transformation<HistSmear> {
 public:
-  EnergySmear( bool upper=false );
+  HistSmear( bool upper=false );
 
 private:
   void calcSmear(Args args, Rets rets);

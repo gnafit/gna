@@ -1,13 +1,13 @@
-EnergySmear
-~~~~~~~~~~~
+HistSmear
+~~~~~~~~~
 
 Description
 ^^^^^^^^^^^
-Applies energy smearing matrix to the histogram of events binned in :math:`E_{\text{vis}}`.
+Applies (energy) smearing matrix to the histogram of events binned in :math:`E_{\text{vis}}`.
 
-EnergySmear_ class may be used to implement, for example, Daya Bay IAV smearing. 
+HistSmear_ class may be used to implement, for example, Daya Bay IAV smearing. 
 The IAV uncertainty may be implemented by connecting the output of RenormalizeDiag transformation
-as the input to EnergySmear_.
+as the input to HistSmear_.
 
 Inputs
 ^^^^^^
@@ -23,7 +23,7 @@ Outputs
 Arguments
 ^^^^^^^^^
 
-1. ``bool upper``. If true EnergySmear_ will ensure that the matrix is upper diagonal. 
+1. ``bool upper``. If true HistSmear_ will ensure that the matrix is upper diagonal. 
    Useful for the cases of energy leak type smearing.
 
 Implementation

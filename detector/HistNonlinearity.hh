@@ -6,10 +6,10 @@
 #include "GNAObject.hh"
 #include "Eigen/Sparse"
 
-class EnergyNonlinearity: public GNAObject,
-                          public Transformation<EnergyNonlinearity> {
+class HistNonlinearity: public GNAObject,
+                        public Transformation<HistNonlinearity> {
 public:
-  EnergyNonlinearity( bool propagate_matrix=false );
+  HistNonlinearity( bool propagate_matrix=false );
 
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }

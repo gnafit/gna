@@ -1,4 +1,4 @@
-#include "EnergyNonlinearity.hh"
+#include "HistNonlinearity.hh"
 #include <algorithm>
 
 //#define DEBUG_ENL
@@ -11,20 +11,20 @@
 #define  DEBUG(...)
 #endif
 
-EnergyNonlinearity::EnergyNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
+HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
   transformation_(this, "smear")
       .input("FakeMatrix")
       .input("Ntrue")
       .output("Nvis")
       .types(Atypes::pass<1,0>)
-      .func(&EnergyNonlinearity::calcSmear);
+      .func(&HistNonlinearity::calcSmear);
 
   transformation_(this, "matrix")
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(Atypes::ifSame,
-         [](EnergyNonlinearity *obj, Atypes args, Rtypes rets) {
+         [](HistNonlinearity *obj, Atypes args, Rtypes rets) {
          obj->m_size = args[0].shape[0]-1;
          obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
          if( obj->m_propagate_matrix ){
@@ -34,12 +34,12 @@ EnergyNonlinearity::EnergyNonlinearity( bool propagate_matrix ) : m_propagate_ma
            rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
          }
          })
-       .func(&EnergyNonlinearity::calcMatrix);
+       .func(&HistNonlinearity::calcMatrix);
 }
 
-void EnergyNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
+void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
     if( m_initialized )
-        throw std::runtime_error("EnergyNonlinearity is already initialized");
+        throw std::runtime_error("HistNonlinearity is already initialized");
     m_initialized = true;
 
     t_["matrix"].inputs()[0].connect( bin_edges.single() );
@@ -48,12 +48,12 @@ void EnergyNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_m
     t_["smear"].inputs()[1].connect( ntrue.single() );
 }
 
-void EnergyNonlinearity::calcSmear(Args args, Rets rets) {
+void HistNonlinearity::calcSmear(Args args, Rets rets) {
   args[0]; // Needed to trigger updating
   rets[0].x = m_sparse_cache * args[1].vec;
 }
 
-void EnergyNonlinearity::calcMatrix(Args args, Rets rets) {
+void HistNonlinearity::calcMatrix(Args args, Rets rets) {
   m_sparse_cache.setZero();
 
   auto n = args[0].arr.size();

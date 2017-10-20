@@ -43,7 +43,7 @@ matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 pedges, pedges_m = convert( edges, 'points' ), convert( edges_m, 'points' )
 ntrue = R.Histogram( edges.size-1, edges, N.ones( edges.size-1 ) )
 
-nl = R.EnergyNonlinearity(True)
+nl = R.HistNonlinearity(True)
 nl.set( pedges, pedges_m, ntrue )
 
 idy = R.Identity()

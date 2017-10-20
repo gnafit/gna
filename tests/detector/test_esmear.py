@@ -70,7 +70,7 @@ for eset in [
         phist = singularities( e, edges )
 
         hist = R.Histogram( phist.size, edges, phist )
-        esmear = R.EnergySmear( opts.triangular )
+        esmear = R.HistSmear( opts.triangular )
         esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )
 
