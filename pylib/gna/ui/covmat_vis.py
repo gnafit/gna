@@ -1,8 +1,9 @@
-import matplotlib.pyplot as plt
 from gna.env import env
 from gna.ui import basecmd
 import ROOT
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 class cmd(basecmd):
     @classmethod
@@ -14,7 +15,8 @@ class cmd(basecmd):
         action_group.add_argument('--show', action='store_true',
                                   help='Show plot of covariance matrix')
         action_group.add_argument('--dump', help='File to dump covariance matrix')
-        parser.add_argument('--mask', action='store_true')
+        parser.add_argument('--mask', action='store_true',
+                             help="Mask zeros from covariance matrix")
         
 
     def init(self):
@@ -25,8 +27,10 @@ class cmd(basecmd):
         if self.opts.mask:
             covmat = np.ma.array(covmat, mask=(covmat == 0.)) 
 
-        plt.matshow(covmat)
-        plt.colorbar()
+        fig, ax = plt.subplots()
+        im = ax.imshow(covmat)
+        ax.minorticks_on()
+        cbar = fig.colorbar(im)
         plt.title("Covariance matrix")
         if self.opts.show:
             plt.show()
