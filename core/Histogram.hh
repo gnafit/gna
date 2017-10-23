@@ -5,14 +5,15 @@
 
 #include "GNAObject.hh"
 
-class Histogram: public GNAObject,
+class Histogram: public GNASingleObject,
                  public Transformation<Histogram> {
 public:
   Histogram(size_t nbins, const double *edges, const double *data)
     : m_edges(edges, edges+nbins+1), m_data(data, data+nbins)
-  { }
+  { init(); }
   const std::vector<double> &edges() const { return m_edges; }
   const std::vector<double> &data() const { return m_data; }
+
 protected:
   void init() {
     transformation_(this, "hist")

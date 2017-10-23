@@ -17,3 +17,8 @@ if(GRIDFILTER_DEBUG)
     message(STATUS "Setting debug mode for GridFilter")
     add_definitions(-DDEBUG_GRIDFILTER)
 endif()
+
+if(NONLINEARITY_DEBUG)
+    message(STATUS "Setting debug mode for EnergyNonlinearity")
+    add_definitions(-DDEBUG_ENL)
+endif()

@@ -1,5 +1,5 @@
-Oscillation Probabilities:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Oscillation Probabilities
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Class OscProbPMNS
 ^^^^^^^^^^^^^^^^^
@@ -24,6 +24,7 @@ for the elements of the PMNS matrix. There a few options how it can be done:
    
 Inputs
 ======
+
     1. ``comp...`` expects array of energy as inputs
     2. ``probsum`` expects all components + ``comp0`` which is typically
        normed flux of antineutrinos
@@ -33,6 +34,7 @@ Inputs
 
 Outputs
 =======
+
    1. ``comp...`` -- values of components
    2. ``probsum`` -- weighted sum of all components. In case of JUNO or Daya
       Bay those components would be a histograms with number of events.

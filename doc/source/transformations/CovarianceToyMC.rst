@@ -34,6 +34,15 @@ Outputs
 
 1. ``'toymc'`` — output vector :math:`x` of size of concatination of :math:`\mu_i`.
 
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/test_random_transformations.py -n 100000 -o output/random.pdf
+
 Implementation
 ^^^^^^^^^^^^^^
 
