@@ -5,7 +5,7 @@ Description
 ^^^^^^^^^^^
 Applies (energy) smearing matrix to the histogram of events binned in :math:`E_{\text{vis}}`.
 
-HistSmear_ class may be used to implement, for example, Daya Bay IAV smearing. 
+HistSmear_ class may be used to implement, for example, Daya Bay IAV smearing.
 The IAV uncertainty may be implemented by connecting the output of RenormalizeDiag transformation
 as the input to HistSmear_.
 
@@ -23,7 +23,7 @@ Outputs
 Arguments
 ^^^^^^^^^
 
-1. ``bool upper``. If true HistSmear_ will ensure that the matrix is upper diagonal. 
+1. ``bool upper``. If true HistSmear_ will ensure that the matrix is upper diagonal.
    Useful for the cases of energy leak type smearing.
 
 Tests
@@ -47,7 +47,7 @@ The smeared histo :math:`N_{\text{vis}}` and true :math:`N_{\text{true}}` are co
 where :math:`N^{\text{rec}}_i` is a reconstructed number of events in a *i*-th
 bin, :math:`N^{\text{vis}}_j` is a true number of events in a *j*-th bin and
 :math:`C_{ij}` is a probability for events to flow from *j*-th to
-*i* bin. 
+*i* bin.
 
 The matrix :math:`C` usually satisfies the following condition:
 
