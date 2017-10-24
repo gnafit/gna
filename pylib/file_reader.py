@@ -12,6 +12,11 @@ def read_object_root( filename, name, *args, **kwargs ):
     if not o:
         raise IOError( "Can not read object '%s' from file '%s'"%( name, filename ) )
 
+    fmt = kwargs.pop( 'convertto', None )
+    if fmt:
+        from converters import convert
+        return convert(o, fmt)
+
     return o
 
 def read_object_hdf5( filename, name, *args, **kwargs ):
