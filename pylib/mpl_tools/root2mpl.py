@@ -229,6 +229,32 @@ def spline_plot( spline, *args, **kwargs ):
 
     return P.plot( x, y, *args, **kwargs )
 
+def matshow_matrix( self, *args, **kwargs ):
+    """Plot TMatrixT using pyplot.matshow"""
+    mask = kwargs.pop( 'mask', None )
+    colorbar = kwargs.pop( 'colorbar', None )
+
+    buf = R2N.get_buffer_matrix( self, mask=mask )
+    res = P.matshow( buf )
+    if colorbar:
+        cbar = helpers.add_colorbar( res )
+        return res,cbar
+
+    return res
+
+def imshow_matrix( self, *args, **kwargs ):
+    """Plot TMatrixT using pyplot.imshow"""
+    mask = kwargs.pop( 'mask', None )
+    colorbar = kwargs.pop( 'colorbar', None )
+
+    buf = R2N.get_buffer_matrix( self, mask=mask )
+    res = P.imshow( buf )
+    if colorbar:
+        cbar = helpers.add_colorbar( res )
+        return res,cbar
+
+    return res
+
 def bind():
     setattr( R.TH1, 'bar',      bar_hist1 )
     setattr( R.TH1, 'errorbar', errorbar_hist1 )
@@ -237,6 +263,11 @@ def bind():
     setattr( R.TH2, 'pcolorfast', pcolorfast_hist2 )
     setattr( R.TH2, 'pcolormesh', pcolormesh_hist2 )
     setattr( R.TH2, 'imshow',     imshow_hist2 )
+
+    setattr( R.TMatrixD, 'matshow', matshow_matrix )
+    setattr( R.TMatrixF, 'matshow', matshow_matrix )
+    setattr( R.TMatrixD, 'imshow', imshow_matrix )
+    setattr( R.TMatrixF, 'imshow', imshow_matrix )
 
     setattr( R.TGraph,            'plot',     graph_plot )
     setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
