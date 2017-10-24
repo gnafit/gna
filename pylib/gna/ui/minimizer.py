@@ -18,7 +18,7 @@ class cmd(basecmd):
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)
 
-        loaded_parameters = get_parameters(self.opts.par, keep_fixed=False) 
+        loaded_parameters = get_parameters(self.opts.par) 
         statistic_parameters = []
         for par in loaded_parameters:
             if par.influences(self.opts.statistic):

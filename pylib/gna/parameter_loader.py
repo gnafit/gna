@@ -6,7 +6,7 @@ import ROOT
 def is_independent(par):
     return isinstance(par, ROOT.Parameter("double"))
 
-def get_parameters(params, keep_fixed=True):
+def get_parameters(params, drop_fixed=True):
     pars = []
     for candidate in params:
         try:
@@ -18,7 +18,7 @@ def get_parameters(params, keep_fixed=True):
             if cfg.debug_par_fetching:
                 print("{0} is not a namespace, trying to use it as a parameter".format(candidate))
             pars.append(env.pars[candidate])
-    if keep_fixed:
-        return pars
-    else:
+    if drop_fixed:
         return [par for par in pars if not par.isFixed()]
+    else:
+        return pars
