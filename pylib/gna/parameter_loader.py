@@ -20,8 +20,6 @@ def get_parameters(params, drop_fixed=True):
                 print("{0} is not a namespace, trying to use it as a parameter".format(candidate))
             pars.append(env.pars[candidate])
     if drop_fixed:
-        print(pars)
         return [par for par in pars if not par.isFixed()]
     else:
-        print(pars)
         return pars
