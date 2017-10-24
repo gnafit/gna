@@ -17,6 +17,8 @@ converters = defaultdict( dict )
 nicknames = {
         R.vector:                     'stdvector',
         R.Points:                     'points',
+        R.TMatrixD:                   'tmatrix',
+        R.TMatrixF:                   'tmatrix',
         R.Eigen.MatrixXd:             'eigenmatrix',
         R.Eigen.VectorXd:             'eigenvector',
         R.Eigen.ArrayXd:              'eigenarray',
@@ -204,6 +206,9 @@ def array_to_eigenarray( array ):
         raise Exception( 'Can not convert arrays with shape %s tor ArrayXd'%( str(array.shape) ) )
     return R.Eigen.ArrayXd(R.Eigen.Map('Eigen::ArrayXd')( array.ravel( order='F' ), array.shape[0] ))
 
+#
+# Eigen
+#
 @save_converter( R.Eigen.MatrixXd, N.ndarray )
 @save_converter( R.Eigen.VectorXd, N.ndarray )
 @save_converter( R.Eigen.ArrayXXd, N.ndarray )
@@ -227,4 +232,25 @@ def eigenarray_to_array( array ):
 def eigenarray_to_matrix( array ):
     """Convert Eigen::ArrayXd to numpy matrix"""
     return N.matrix( eigenarray_to_array( array ) )
+
+#
+# ROOT
+#
+@save_converter( R.TMatrixD, N.ndarray )
+@save_converter( R.TMatrixF, N.ndarray )
+def tmatrix_to_array( m ):
+    """Converto TMatrix* to numpy array"""
+    cbuf = m.GetMatrixArray()
+    return N.frombuffer( cbuf, N.dtype( cbuf.typecode ), m.GetNoElements() ).reshape( m.GetNrows(), m.GetNcols() )
+
+@save_converter( N.ndarray, R.TMatrixF )
+def array_to_tmatrixd( arr, **kwargs ):
+    """Converto numpy array to TMatrixF"""
+    return R.TMatrixF( arr.shape[0], arr.shape[1], N.asanyarray(arr, dtype='f').ravel() )
+
+@save_converter( N.ndarray, R.TMatrixD )
+def array_to_tmatrixd( arr, **kwargs ):
+    """Converto numpy array to TMatrixD"""
+    return R.TMatrixD( arr.shape[0], arr.shape[1], N.asanyarray(arr, dtype='d').ravel() )
+
 
