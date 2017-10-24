@@ -125,7 +125,7 @@ print( 'vec back' )
 print( matb )
 print()
 
-arr = N.array( N.arange(2, 14, dtype='d').reshape(3,4) )
+arr = N.array( N.arange(2, 14, dtype='f').reshape(3,4) )
 tm = convert( arr, R.TMatrixD, debug=True  )
 tmf = convert( arr, R.TMatrixF, debug=True  )
 tm1 = convert( arr, 'tmatrix', debug=True  )

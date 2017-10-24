@@ -17,8 +17,8 @@ converters = defaultdict( dict )
 nicknames = {
         R.vector:                     'stdvector',
         R.Points:                     'points',
-        R.TMatrixD:                   'tmatrix',
-        R.TMatrixF:                   'tmatrix',
+        R.TMatrixD:                   'tmatrixd',
+        R.TMatrixF:                   'tmatrixf',
         R.Eigen.MatrixXd:             'eigenmatrix',
         R.Eigen.VectorXd:             'eigenvector',
         R.Eigen.ArrayXd:              'eigenarray',
@@ -252,5 +252,16 @@ def array_to_tmatrixd( arr, **kwargs ):
 def array_to_tmatrixd( arr, **kwargs ):
     """Converto numpy array to TMatrixD"""
     return R.TMatrixD( arr.shape[0], arr.shape[1], N.asanyarray(arr, dtype='d').ravel() )
+
+@save_converter( N.ndarray, 'tmatrix' )
+def array_to_tmatrixd( arr, **kwargs ):
+    """Converto numpy array to TMatrixD"""
+    if arr.dtype==N.double:
+        cls = R.TMatrixD
+    elif arr.dtype==N.float32:
+        cls = R.TMatrixF
+    else:
+        raise Exception( 'Do not know how to convert %s to TMatrix'%( str(arr.dtype) ) )
+    return cls( arr.shape[0], arr.shape[1], arr.ravel() )
 
 
