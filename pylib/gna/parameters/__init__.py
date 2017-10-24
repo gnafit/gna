@@ -74,6 +74,8 @@ def makeparameter(ns, name, **kwargs):
             param.setCentral(param.cast(kwargs['central']))
         else:
             raise Exception( "parameter `%s': no central value" % name)
+    if 'fixed' in kwargs:
+        param.setFixed()
     param.reset()
     param.ns = ns
     return param

@@ -6,19 +6,19 @@ import ROOT
 def is_independent(par):
     return isinstance(par, ROOT.Parameter("double"))
 
-def get_parameters(params):
+def get_parameters(params, keep_fixed=True):
     pars = []
     for candidate in params:
         try:
             par_namespace = env.ns(candidate)
-            #checking that namespace is not empty
-            par_namespace.walknames().next()
             independent_pars  = [par for _, par in par_namespace.walknames()
                                  if is_independent(par)]
             pars.extend(independent_pars)
-        except StopIteration:
+        except AttributeError:
             if cfg.debug_par_fetching:
                 print("{0} is not a namespace, trying to use it as a parameter".format(candidate))
             pars.append(env.pars[candidate])
-
-    return pars
+    if keep_fixed:
+        return pars
+    else:
+        return [par for par in pars if not par.isFixed()]
