@@ -9,4 +9,7 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar
 
-detector_iav_from_file( 'output/iavMatrix_P14A_LS.root', 'iav_matrix' )
+esmear, transf = detector_iav_from_file( 'output/iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=4 )
+
+import IPython
+IPython.embed()
