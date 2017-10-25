@@ -59,6 +59,7 @@ def bar_hist1( h, *args, **kwargs ):
         width/=divide
         left+=width*shift
 
+    kwargs.setdefault( 'align', 'edge' )
     return P.bar( left, height, width, *args, **kwargs )
 
 def errorbar_hist1( h, *args, **kwargs ):

@@ -8,7 +8,7 @@ CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze )
     .func(&CovarianceToyMC::calcToyMC)
   ;
 
-  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
+  GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
 }
 
 void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {

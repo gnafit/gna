@@ -540,7 +540,7 @@ private:
   void addMemTypesFunction(size_t idx, size_t fidx, MemTypesFunction func) {
     m_memTypesFuncs.emplace_back(idx, fidx, func);
   }
-  
+
   void rebindMemFunctions() {
     using namespace std::placeholders;
     auto &entries = baseobj()->m_entries;

@@ -1,5 +1,5 @@
-Oscillation Probabilities:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Oscillation Probabilities
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Class OscProbPMNS
 ^^^^^^^^^^^^^^^^^
@@ -8,9 +8,11 @@ Description
 
 Calculates the exact 3-:math:`\nu` oscillation probabilities in vacuum using the expressions
 for the elements of the PMNS matrix. There a few options how it can be done:
+
     1. By splitting oscillation probability into energy dependant components
        (see JUNO docs) and summing the components with weights after
        integration is done. The following trasnformation are used:
+
         * ``comp12``, component related to :math:`\Delta m^2_{12}`;
         * ``comp13``, component related to :math:`\Delta m^2_{13}`;
         * ``comp23``, component related to :math:`\Delta m^2_{23}`;
@@ -22,6 +24,7 @@ for the elements of the PMNS matrix. There a few options how it can be done:
    
 Inputs
 ======
+
     1. ``comp...`` expects array of energy as inputs
     2. ``probsum`` expects all components + ``comp0`` which is typically
        normed flux of antineutrinos
@@ -31,6 +34,7 @@ Inputs
 
 Outputs
 =======
+
    1. ``comp...`` -- values of components
    2. ``probsum`` -- weighted sum of all components. In case of JUNO or Daya
       Bay those components would be a histograms with number of events.
