@@ -27,6 +27,8 @@ class cmd(basecmd):
         parser.add_argument('--value', action='append', nargs=2,
                             metavar=('PAR', 'VALUE'),
                             default=[])
+        parser.add_argument('--fix', action='append', nargs=1,
+                            metavar=('PAR'), default=[])
 
         parser.add_argument('--correlation', action='append', nargs=3,
                             metavar=('PAR1', 'PAR2', 'CORR'),
@@ -59,6 +61,10 @@ class cmd(basecmd):
         for name, value in self.opts.value:
             p = self.env.parameters[name]
             p.set(p.cast(value))
+
+        for name in self.opts.fix:
+            p = self.env.parameters[name[0]]
+            p.setFixed()
 
         for name1, name2, corr in self.opts.correlation:
             self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
