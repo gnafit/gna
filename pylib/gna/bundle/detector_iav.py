@@ -8,14 +8,20 @@ import constructors as C
 def detector_iav( mat, *args, **kwargs  ):
     """Assembles a chain for IAV detector effect using input matrix"""
     ndiag = kwargs.pop( 'ndiag', 1 )
+    parname = kwargs.pop( 'parname', None )
 
-    mat/=mat.sum( axis=0 )
+    norm = mat.sum( axis=0 )
+    norm[norm==0.0]=1.0
+    mat/=norm
 
     points = C.Points( mat )
-    renormdiag = R.RenormalizeDiag( ndiag, int(opts.offdiag), int(opts.upper) )
+    if parname:
+        renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname )
+    else:
+        renormdiag = R.RenormalizeDiag( ndiag, 1, 1 )
     renormdiag.renorm.inmat( points.points )
 
-    esmear = R.HistSmear( opts.upper )
+    esmear = R.HistSmear( True )
     esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
 
     return esmear, dict( points=points, renormdiag=renormdiag, esmear=esmear )
