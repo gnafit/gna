@@ -14,7 +14,7 @@ class cmd(basecmd):
                             metavar='DATASET')
         parser.add_argument('-p', '--parameters', nargs='+', default=[],
                             metavar='PAR',
-                            help='paremeters for covariance matrix')
+                            help='parameters for covariance matrix')
         parser.add_argument('-n', '--name', required=True)
         parser.add_argument('-o', '--observables', nargs='+', required=True,
                             metavar='OBSERVABLE')
