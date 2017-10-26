@@ -72,26 +72,26 @@ __global__ void cuFullProb (double DMSq12, double DMSq13, double DMSq13,
   }
 }
 
-void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize) {
+void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
 // TODO: avoid cublas
 
   const int blockSize = 16;
-  int alloc_size * sizeof(double);
+  int alloc_size = EnuSize * sizeof(double);
   cudaSetDevice(0);
-  cublasHandle_t handle;
-  cublasStatus_t ret;
+  //cublasHandle_t handle;
+  //cublasStatus_t ret;
   cudaError_t err;
 
   cudaStream_t stream1, stream2;
   cudaStreamCreate ( &stream1);
   cudaStreamCreate ( &stream2);
   
-  ret = cublasCreate(&handle);
+ /* ret = cublasCreate(&handle);
   if(ret!=CUBLAS_STATUS_SUCCESS){
     printf("ERROR: unable to create cuBLAS handle!\n");
     exit(EXIT_FAILURE);
   }
-
+*/
   /* Allocating device memory */
   double* devEnu; double* devTmp; double* devComp0;
   double* devComp12; double* devComp13; double* devComp23;
@@ -112,6 +112,7 @@ void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize) {
     exit(EXIT_FAILURE);
   }
   double km2 = km2Mev(L);
+// TODO: choose call grid parameters
   cuFullProb<<<1, alloc_size>>>(double DMSq12, double DMSq13, double DMSq13,
                    double weight12, double weight13, double weight23, double weightCP,
                    double km2, int EnuSi0ze, double* devEnu,
@@ -124,8 +125,10 @@ void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize) {
     printf("ERROR: unable to copy memory from host to device! \n");
     exit(EXIT_FAILURE);
   }
-
-
+  cudaFree(&devComp0);   cudaFree(&devCompCP);
+  cudaFree(&devComp12);  cudaFree(&devComp13);  cudaFree(&devComp23);
+  cudaFree(&devRet);     cudaFree(&devTmp);     cudaFree(&devEnu);
+  
 }
 
 void test (double* data) {
