@@ -31,7 +31,7 @@ __host__ __device__ double km2MeV(double km) {
 //TODO: avoid too mane args
 __global__ void cuFullProb (double DMSq12, double DMSq13, double DMSq13,
 			    double weight12, double weight13, double weight23, double weightCP,
-				double km2, int EnuSi0ze, double* devEnu, 
+				double km2, int EnuSize, double* devEnu, 
 				double* devTmp, double* devComp0, double* devCompCP, 
 				double* devComp12, double* devComp13, double* devComp23
 				double* ret, bool sameAB) {
@@ -72,7 +72,7 @@ __global__ void cuFullProb (double DMSq12, double DMSq13, double DMSq13,
   }
 }
 
-void calcCuFullProb (double L, double* Enu, int EnuSize) {
+void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize) {
 // TODO: avoid cublas
 
   const int blockSize = 16;
@@ -93,11 +93,9 @@ void calcCuFullProb (double L, double* Enu, int EnuSize) {
   }
 
   /* Allocating device memory */
-  double* devEnu;
-  double* devTmp;
-  double* devComp0;
+  double* devEnu; double* devTmp; double* devComp0;
   double* devComp12; double* devComp13; double* devComp23;
-  double* devCompCP;
+  double* devCompCP; double* devRet;
   cudaMalloc((void**)&devEnu, alloc_size);
 
   err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
@@ -107,13 +105,26 @@ void calcCuFullProb (double L, double* Enu, int EnuSize) {
   cudaMalloc((void**)&devComp13, alloc_size);
   cudaMalloc((void**)&devComp23, alloc_size);
   cudaMalloc((void**)&devCompCP, alloc_size);
+  cudaMalloc((void**)&devRet, alloc_size);
 
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from host to device! \n");
     exit(EXIT_FAILURE);
   }
-  
   double km2 = km2Mev(L);
+  cuFullProb<<<1, alloc_size>>>(double DMSq12, double DMSq13, double DMSq13,
+                   double weight12, double weight13, double weight23, double weightCP,
+                   double km2, int EnuSi0ze, double* devEnu,
+                   double* devTmp, double* devComp0, double* devCompCP,
+                   double* devComp12, double* devComp13, double* devComp23
+                   double* ret, bool sameAB);
+//  double* ret = new double[alloc_size];
+  err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
+  if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from host to device! \n");
+    exit(EXIT_FAILURE);
+  }
+
 
 }
 
