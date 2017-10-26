@@ -72,7 +72,9 @@ __global__ void fullProb (double DMSq12, double DMSq13, double DMSq23,
   }
 }
 
-void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
+void calcCuFullProb (double DMSq12, double DMSq13, double DMSq23,
+			double weight12, double weight13, double weight23, double weightCP, 
+			double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
 // TODO: avoid cublas
 
   const int blockSize = 16;
@@ -113,12 +115,12 @@ void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize, bool sameA
   }
   double km2 = km2MeV(L);
 // TODO: choose call grid parameters
-  fullProb<<<1, EnuSize>>>(double DMSq12, double DMSq13, double DMSq23,
-                   double weight12, double weight13, double weight23, double weightCP,
-                   double km2, int EnuSi0ze, double* devEnu,
-                   double* devTmp, double* devComp0, double* devCompCP,
-                   double* devComp12, double* devComp13, double* devComp23,
-                   double* ret, bool sameAB);
+  fullProb<<<1, EnuSize>>>(DMSq12, DMSq13, DMSq23,
+                   weight12, weight13, weight23, weightCP,
+                   km2, EnuSize, devEnu,
+                   devTmp, devComp0, devCompCP,
+                   devComp12,  devComp13, devComp23,
+                   ret, sameAB);
  
 //  TODO: Where we need to do sync?
   err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
