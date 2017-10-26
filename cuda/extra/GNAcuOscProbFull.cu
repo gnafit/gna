@@ -29,11 +29,11 @@ __host__ __device__ double km2MeV(double km) {
 }
 
 //TODO: avoid too mane args
-__global__ void cuFullProb (double DMSq12, double DMSq13, double DMSq13,
+__global__ void fullProb (double DMSq12, double DMSq13, double DMSq23,
 			    double weight12, double weight13, double weight23, double weightCP,
 				double km2, int EnuSize, double* devEnu, 
 				double* devTmp, double* devComp0, double* devCompCP, 
-				double* devComp12, double* devComp13, double* devComp23
+				double* devComp12, double* devComp13, double* devComp23,
 				double* ret, bool sameAB) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
 //  int y = blockDim.y*blockIdx.y + threadIdx.y;
@@ -42,8 +42,8 @@ __global__ void cuFullProb (double DMSq12, double DMSq13, double DMSq13,
   devComp0[x] = 1.0;
   devCompCP[x] = 0.0;
 // TODO: add sharing
-  double halfSin12, halfSin13, halfSin13,
-         halfCos12, halfCos13, halfCos13;
+  double halfSin12, halfSin13, halfSin23,
+         halfCos12, halfCos13, halfCos23;
 // TODO: add streams
   sincos(DMSq12 * devTmp[x] / 2.0, &halfSin12, &halfCos12);
   sincos(DMSq13 * devTmp[x] / 2.0, &halfSin13, &halfCos13);
@@ -111,15 +111,16 @@ void calcCuFullProb (double* ret, double L, double* Enu, int EnuSize, bool sameA
     printf("ERROR: unable to copy memory from host to device! \n");
     exit(EXIT_FAILURE);
   }
-  double km2 = km2Mev(L);
+  double km2 = km2MeV(L);
 // TODO: choose call grid parameters
-  cuFullProb<<<1, alloc_size>>>(double DMSq12, double DMSq13, double DMSq13,
+  fullProb<<<1, EnuSize>>>(double DMSq12, double DMSq13, double DMSq23,
                    double weight12, double weight13, double weight23, double weightCP,
                    double km2, int EnuSi0ze, double* devEnu,
                    double* devTmp, double* devComp0, double* devCompCP,
-                   double* devComp12, double* devComp13, double* devComp23
+                   double* devComp12, double* devComp13, double* devComp23,
                    double* ret, bool sameAB);
-//  double* ret = new double[alloc_size];
+ 
+//  TODO: Where we need to do sync?
   err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from host to device! \n");
