@@ -5,12 +5,16 @@
 #include <limits>
 #include <utility>
 #include <map>
+#include <unordered_map>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 #include <boost/math/constants/constants.hpp>
 
 #include "Parameters.hh"
 #include "GNAObject.hh"
+
+#define COVARIANCE_DEBUG
 
 template <typename T>
 class ParameterWrapper {
@@ -43,12 +47,12 @@ public:
   virtual ~Uncertain() { }
 
   const std::string &name() const { return m_name; }
-  virtual T value() { return m_var.value(); }
-  virtual T central() { return m_central; }
+  virtual T value() const { return m_var.value(); }
+  virtual T central() const { return m_central; }
   virtual void setCentral(T value) { m_central = value; }
-  virtual T sigma() { return m_sigma; }
+  virtual T sigma() const { return m_sigma; }
   virtual void setSigma(T sigma) { m_sigma = sigma; }
-  virtual const variable<T> &getVariable() { return m_var; }
+  virtual const variable<T> &getVariable() const { return m_var; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
@@ -72,12 +76,25 @@ inline Uncertain<double>::Uncertain(const std::string &name)
     ;
 }
 
+
+template <typename T>
+struct ParameterComparator {
+    bool operator()(const T& lhs, const T& rhs) const {
+        return lhs.value() < rhs.value();
+    };
+};
+
 template <typename T>
 class Parameter: public Uncertain<T> {
 public:
   Parameter(const std::string &name)
     : Uncertain<T>(name)
     { m_par = this->m_varhandle.claim(); }
+
+  static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values");
+
+  friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs)
+  { return (lhs.value() < rhs.value()) || (lhs.name() < rhs.name());};
 
   virtual void set(T value)
     { m_par = value; }
@@ -97,19 +114,54 @@ public:
     { return m_limits; }
 
   virtual void reset() { set(this->central()); }
-  bool influences(SingleOutput &out) {
+  bool influences(SingleOutput &out) const {
     return out.single().depends(this->getVariable());
   }
 
-  virtual bool isFixed() { return this->m_fixed; }
+  virtual bool isFixed() const { return this->m_fixed; }
   virtual void setFixed() { this->m_fixed = true; }
 
+  virtual bool isCovariated(const Parameter<T>& other) const {
+      auto it = m_covariances.find(other);
+      if (it == m_covariances.end()) { 
+          return false;
+      } else {
+          return true;
+      }
+  }
+
+  virtual void setCovariance(Parameter<T>& other, T cov) {
+    m_covariances[other] = cov;
+    other.updateCovariance(*this, cov);
+  }
+
+  virtual void updateCovariance(const Parameter<T>& other, T cov) {
+    m_covariances[other] = cov;
+  }
+
+  virtual T getCovariance(const Parameter<T>& other) {
+      auto search = m_covariances.find(other);
+      if (search != m_covariances.end()) {
+          return search->second;
+      } else {
+#ifdef COVARIANCE_DEBUG
+          auto msg = boost::format("Parameters %1% and %2% are not covariated"); 
+          std::cout << msg % this->name() % other.name() << std::endl;
+#endif
+          return static_cast<T>(0.);
+      }
+  }
+
   virtual const parameter<T> &getParameter() { return m_par; }
+
 protected:
   std::vector<std::pair<T, T>> m_limits;
+  using CovStorage = std::map<Parameter<T>, T>;
+  CovStorage m_covariances;
   parameter<T> m_par;
   bool m_fixed = false;
 };
+
 
 template <typename T>
 class GaussianParameter: public Parameter<T> {

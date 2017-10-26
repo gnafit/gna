@@ -30,6 +30,9 @@ class cmd(basecmd):
         parser.add_argument('--fix', action='append', nargs=1,
                             metavar=('PAR'), default=[])
 
+        parser.add_argument('--covariance', action='append', nargs=3,
+                            metavar=('PAR1', 'PAR2', 'COV'),
+                            default=[])
         parser.add_argument('--correlation', action='append', nargs=3,
                             metavar=('PAR1', 'PAR2', 'CORR'),
                             default=[])
@@ -65,6 +68,9 @@ class cmd(basecmd):
         for name in self.opts.fix:
             p = self.env.parameters[name[0]]
             p.setFixed()
+
+        for name1, name2, corr in self.opts.covariance:
+            self.env.parameters[name1].setCovariance(self.env.parameters[name2], float(corr))
 
         for name1, name2, corr in self.opts.correlation:
             self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
