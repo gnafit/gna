@@ -11,8 +11,13 @@
 #include <thrust/device_vector.h>
 #include "GNAcuOscProbFull.h"
 #include "math_functions.h"
-
+#include <iostream>
 //#include "Constants.h"
+
+
+const int blockSize = 16;
+const int gridSize = 16;
+
 
 
 __host__ __device__ __forceinline__  double Qe()       { return 1.602176462e-19; }
@@ -77,30 +82,24 @@ void calcCuFullProb(double DMSq12, double DMSq13, double DMSq23,
 			double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
 // TODO: avoid cublas
 
-  const int blockSize = 16;
+//  const int blockSize = 16;
   int alloc_size = EnuSize * sizeof(double);
   cudaSetDevice(0);
-  //cublasHandle_t handle;
-  //cublasStatus_t ret;
   cudaError_t err;
 
-  cudaStream_t stream1, stream2;
-  cudaStreamCreate ( &stream1);
-  cudaStreamCreate ( &stream2);
+  //cudaStream_t stream1, stream2;
+  //cudaStreamCreate ( &stream1);
+  //cudaStreamCreate ( &stream2);
   
- /* ret = cublasCreate(&handle);
-  if(ret!=CUBLAS_STATUS_SUCCESS){
-    printf("ERROR: unable to create cuBLAS handle!\n");
-    exit(EXIT_FAILURE);
-  }
-*/
   /* Allocating device memory */
   double* devEnu; double* devTmp; double* devComp0;
   double* devComp12; double* devComp13; double* devComp23;
   double* devCompCP; double* devRet;
+
   cudaMalloc((void**)&devEnu, alloc_size);
 
-  err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
+//  err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
+  err = cudaMemcpy(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice);
   cudaMalloc((void**)&devTmp, alloc_size);
   cudaMalloc((void**)&devComp0, alloc_size);
   cudaMalloc((void**)&devComp12, alloc_size);
@@ -111,26 +110,34 @@ void calcCuFullProb(double DMSq12, double DMSq13, double DMSq23,
 
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from host to device! \n");
+    if (err == cudaErrorInvalidValue)  printf("err: cudaErrorInvalidValue \n");
+    if (err == cudaErrorInvalidDevicePointer) printf("err:  cudaErrorInvalidDevicePointer \n");
+    if (err == cudaErrorInvalidMemcpyDirection) printf ("err:  cudaErrorInvalidMemcpyDirection \n");
     exit(EXIT_FAILURE);
   }
   double km2 = km2MeV(L);
 // TODO: choose call grid parameters
-  fullProb<<<1, EnuSize>>>(DMSq12, DMSq13, DMSq23,
+  cudaDeviceSynchronize();
+  fullProb<<<1, dim3(blockSize, blockSize, blockSize)>>>(DMSq12, DMSq13, DMSq23,
                    weight12, weight13, weight23, weightCP,
                    km2, EnuSize, devEnu,
                    devTmp, devComp0, devCompCP,
                    devComp12,  devComp13, devComp23,
                    ret, sameAB);
- 
-//  TODO: Where we need to do sync?
-  err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
+  cudaDeviceSynchronize(); 
+//  TODO: Where do we need to do sync?
+ // err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
+  double* tmp = (double*)malloc(EnuSize*sizeof(double));
+  err = cudaMemcpy(tmp, devRet, alloc_size, cudaMemcpyDeviceToHost);
+  
   if(err!=cudaSuccess) {
-    printf("ERROR: unable to copy memory from host to device! \n");
+    printf("ERROR: unable to copy memory from device to host! \n");
+    std::cout << "err is " << cudaGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE);
   }
-  cudaFree(&devComp0);   cudaFree(&devCompCP);
-  cudaFree(&devComp12);  cudaFree(&devComp13);  cudaFree(&devComp23);
-  cudaFree(&devRet);     cudaFree(&devTmp);     cudaFree(&devEnu);
+  cudaFree(devComp0);   cudaFree(devCompCP);
+  cudaFree(devComp12);  cudaFree(devComp13);  cudaFree(devComp23);
+  cudaFree(devRet);     cudaFree(devTmp);     cudaFree(devEnu);
   
 }
 
