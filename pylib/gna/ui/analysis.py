@@ -4,7 +4,7 @@ import numpy as np
 from gna.env import PartNotFoundError
 from itertools import chain
 from gna.dataset import Dataset
-from gna.parameter_loader import get_parameters 
+from gna.parameters.parameter_loader import get_parameters
 
 class cmd(basecmd):
     @classmethod

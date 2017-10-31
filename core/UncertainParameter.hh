@@ -52,7 +52,7 @@ public:
   virtual void setCentral(T value) { m_central = value; }
   virtual T sigma() const { return m_sigma; }
   virtual void setSigma(T sigma) { m_sigma = sigma; }
-  virtual const variable<T> &getVariable() const { return m_var; }
+  virtual const variable<T>& getVariable() const { return m_var; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
@@ -91,7 +91,7 @@ public:
     : Uncertain<T>(name)
     { m_par = this->m_varhandle.claim(); }
 
-  static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values");
+  static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values in Parameter template");
 
   friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs)
   { return (lhs.value() < rhs.value()) || (lhs.name() < rhs.name());};
@@ -131,6 +131,9 @@ public:
   }
 
   virtual void setCovariance(Parameter<T>& other, T cov) {
+    if ( &other == this) {
+        this->setSigma(std::sqrt(cov));
+    }
     m_covariances[other] = cov;
     other.updateCovariance(*this, cov);
   }
