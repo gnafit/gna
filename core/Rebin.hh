@@ -17,9 +17,10 @@ public:
 private:
   void calcMatrix(Atypes args, Rtypes rets);
   void calcSmear(Args args, Rets rets);
+  double round(double num);
 
   std::vector<double> m_new_edges;
-  int m_round_scale;
+  double m_round_scale;
 
   Eigen::SparseMatrix<double> m_sparse_cache;
 };
