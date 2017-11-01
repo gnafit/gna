@@ -8,7 +8,7 @@ using std::placeholders::_1;
 Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_scale{pow(10, rounding)} {
   std::transform( edges, edges+n, m_new_edges.begin(), std::bind(&Rebin::round, this, _1) );
 
-  transformation_(this, "smear")
+  transformation_(this, "rebin")
     .input("histin")
     .output("histout")
     .types(&Rebin::calcMatrix)
@@ -34,19 +34,23 @@ void Rebin::calcMatrix(Atypes args, Rtypes rets) {
   auto edge_new = m_new_edges.begin();
   auto edge_old = edges.begin();
   size_t iold{0};
-  for (size_t inew{0}; inew < m_new_edges.size(); ++inew,++edge_new) {
-    while(*edge_new<*edge_old) {
+  for (size_t inew{0}; inew < m_new_edges.size(); ++inew) {
+    printf("old %lu %.3f new %lu %.3f, diff %g\n", iold, *edge_old, inew, *edge_new, *edge_new-*edge_old);
+    while(*edge_old<*edge_new) {
       m_sparse_cache.insert(inew, iold) = 1.0;
+      printf("  old %lu %.3f new %lu %.3f, diff %g\n", iold, *edge_old, inew, *edge_new, *edge_new-*edge_old);
 
       ++edge_old;
       ++iold;
-      if(edge_old==edges.end()){
-        throw std::runtime_error("Bin edges are not consistent (outer)");
-      }
+      //if(edge_old==edges.end()){
+        //throw std::runtime_error("Bin edges are not consistent (outer)");
+      //}
     }
+    printf("old %lu %.3f new %lu %.3f, diff %g\n\n", iold, *edge_old, inew, *edge_new, *edge_new-*edge_old);
     if(*edge_new!=*edge_old){
       throw std::runtime_error("Bin edges are not consistent (inner)");
     }
+    ++edge_new;
   }
 }
 
