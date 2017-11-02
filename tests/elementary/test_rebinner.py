@@ -11,37 +11,59 @@ from converters import convert
 from argparse import ArgumentParser
 import constructors as C
 
-edges   = N.array( [ 0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8 ], dtype='d' )
-edges_m = N.array( [ 0.1, 1.2,      3.4, 4.5,           7.8 ], dtype='d' )
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-s', '--set', nargs=2, type=float, help='modify new edges', metavar=('index', 'value') )
+args = parser.parse_args()
+
+edges   = N.array( [ 0.0, 0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
+edges_m = N.array( [      0.1, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
+
+if args.set:
+    edges_m[int(args.set[0])]=args.set[1]
 
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
-print(8)
 rebin = R.Rebin( edges_m.size, edges_m, 3 )
-print(9)
 rebin.rebin.histin( ntrue )
-print(10)
 
 idy = R.Identity()
-print(11)
 idy.identity.source(rebin.rebin.histout)
-print(12)
 
 mat = convert(rebin.getDenseMatrix(), 'matrix')
-print(13)
 print( mat )
 
-# print()
-# print( (diff==0.0).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+prj = mat.sum(axis=0)
+print( ((prj==1.0) + (prj==0.0)).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
 
-# fig = P.figure()
-# ax = P.subplot( 111 )
-# ax.minorticks_on()
+#
+# Plot spectra
+#
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
 # ax.grid()
-# ax.set_xlabel( 'Source bins' )
-# ax.set_ylabel( 'Target bins' )
-# ax.set_title( 'Bin edges scale conversion matrix' )
+ax.set_xlabel( 'X axis' )
+ax.set_ylabel( 'Y axis' )
+ax.set_title( 'Rebinner' )
 
-# c = ax.matshow( N.ma.array(mat, mask=mat==0.0), extent=[edges[0], edges[-1], edges[-1], edges[0]] )
+ax.vlines( edges, 0.0, 4.0, linestyle='--', linewidth=0.5 )
+plot_hist( edges, ntrue.data(), label='before' )
+plot_hist( edges_m, rebin.rebin.histout.data(), label='after' )
+
+ax.legend( loc='upper left' )
+
+#
+# Plot matrix
+#
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+# ax.grid()
+ax.set_xlabel( 'Source bins' )
+ax.set_ylabel( 'Target bins' )
+ax.set_title( 'Rebinning matrix' )
+
+c = ax.matshow( N.ma.array(mat, mask=mat==0.0), extent=[edges[0], edges[-1], edges_m[-1], edges_m[0]] )
 # add_colorbar( c )
 
-# P.show()
+P.show()
