@@ -12,24 +12,27 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
   transformation_(this, "rebin")
     .input("histin")
     .output("histout")
-    .types(&Rebin::calcMatrix)
+    .types([](Rebin *obj, Atypes args, Rtypes rets){
+           if(args[0].kind!=DataKind::Hist){
+             throw std::runtime_error("Rebinner input should be a histogram");
+           }
+           rets[0]=DataType().hist().bins(obj->m_new_edges.size()-1).edges(obj->m_new_edges);
+           })
     .func(&Rebin::calcSmear);
 }
 
 void Rebin::calcSmear(Args args, Rets rets) {
+  if( !m_initialized ){
+      calcMatrix( args[0].type );
+  }
   rets[0].x = m_sparse_cache * args[0].vec;
 }
 
-void Rebin::calcMatrix(Atypes args, Rtypes rets) {
-  if(args[0].kind!=DataKind::Hist){
-    throw std::runtime_error("Input should be a histogram");
-  }
-  rets[0]=DataType().hist().bins(m_new_edges.size()-1).edges(m_new_edges);
+void Rebin::calcMatrix(const DataType& type) {
+  std::vector<double> edges(type.size()+1);
+  std::transform( type.edges.begin(), type.edges.end(), edges.begin(), std::bind(&Rebin::round, this, _1) );
 
-  std::vector<double> edges(args[0].size()+1);
-  std::transform( args[0].edges.begin(), args[0].edges.end(), edges.begin(), std::bind(&Rebin::round, this, _1) );
-
-  m_sparse_cache.resize( rets[0].size(), args[0].size() );
+  m_sparse_cache.resize( m_new_edges.size()-1, type.size() );
   m_sparse_cache.setZero();
 
   auto edge_new = m_new_edges.begin();

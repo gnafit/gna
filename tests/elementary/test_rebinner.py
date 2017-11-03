@@ -29,6 +29,9 @@ rebin.rebin.histin( ntrue )
 idy = R.Identity()
 idy.identity.source(rebin.rebin.histout)
 
+olddata = ntrue.data()
+newdata = rebin.rebin.histout.data()
+
 mat = convert(rebin.getDenseMatrix(), 'matrix')
 print( mat )
 
@@ -47,8 +50,8 @@ ax.set_ylabel( 'Y axis' )
 ax.set_title( 'Rebinner' )
 
 ax.vlines( edges, 0.0, 4.0, linestyle='--', linewidth=0.5 )
-plot_hist( edges, ntrue.data(), label='before' )
-plot_hist( edges_m, rebin.rebin.histout.data(), label='after' )
+plot_hist( edges, olddata, label='before' )
+plot_hist( edges_m, newdata, label='after' )
 
 ax.legend( loc='upper left' )
 
