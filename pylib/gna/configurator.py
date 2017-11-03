@@ -67,7 +67,7 @@ class configurator_base(object):
 
     def __load_dic__(self, filename, dictonly=False):
         print('Loading config file:', filename)
-        dic =  runpy.run_path(filename, init_globals={}) # TODO: add predefined globals
+        dic =  runpy.run_path(filename, init_globals={} ) # TODO: add predefined globals
 
         if dictonly:
             return dic
