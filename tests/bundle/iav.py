@@ -17,7 +17,7 @@ import numpy as N
 #
 parname = 'DiagScale'
 par = env.defparameter( parname,  central=1.0, relsigma=0.1 )
-esmear, transf = detector_iav_from_file( 'output/iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=4, parname=parname )
+esmear, _ = detector_iav_from_file( 'output/iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=1, parname=parname )
 
 #
 # Test bundle
@@ -53,7 +53,7 @@ print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 
 lines = plot_hist( edges, smeared, label='nominal' )
-lines = plot_hist( edges, smeared2, linewidth=1.0, label='s=2' )
+lines = plot_hist( edges, smeared2, linewidth=1.0, label='diag scale $s=2$' )
 
 ax.legend( loc='upper right' )
 

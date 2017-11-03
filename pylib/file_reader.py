@@ -2,7 +2,7 @@
 
 from os.path import splitext
 
-def read_object_root( filename, name, *args, **kwargs ):
+def read_object_root( filename, names, *args, **kwargs ):
     import ROOT as R
     f = R.TFile( filename, 'READ' )
     if f.IsZombie():
@@ -19,10 +19,10 @@ def read_object_root( filename, name, *args, **kwargs ):
 
     return o
 
-def read_object_hdf5( filename, name, *args, **kwargs ):
+def read_object_hdf5( filename, names, *args, **kwargs ):
     pass
 
-def read_object_npz( filename, name, *args, **kwargs ):
+def read_object_npz( filename, names, *args, **kwargs ):
     pass
 
 readers = {
