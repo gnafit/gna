@@ -20,17 +20,22 @@ const int gridSize = 16;
 
 
 
-__host__ __device__ __forceinline__  double Qe()       { return 1.602176462e-19; }
+__host__ __device__ __forceinline__ double Qe()       { return 1.602176462e-19; }
 // velocity of light
-__host__ __device__ __forceinline__  double C()        { return 2.99792458e8; }        // m s^-1
+__host__ __device__ __forceinline__ double C()        { return 2.99792458e8; }        // m s^-1
 // Planck's constant
-__host__ __device__ __forceinline__  double H()        { return 6.62606876e-34; }      // J s
+__host__ __device__ __forceinline__ double H()        { return 6.62606876e-34; }      // J s
 // h-bar (h over 2 pi)
-__host__ __device__ __forceinline__  double Hbar()     { return 1.054571596e-34; }     // J s
+__host__ __device__ __forceinline__ double Hbar()     { return 1.054571596e-34; }     // J s
 
 
 __host__ __device__ double km2MeV(double km) {
    return km * 1E-3 * Qe() / (Hbar() * C());
+}
+
+__global__ void fun(double* nothing, double* ret, int n) {
+  int x = blockDim.x*blockIdx.x + threadIdx.x;
+  if (x < n) ret[x] = 555;
 }
 
 //TODO: avoid too mane args
@@ -41,8 +46,11 @@ __global__ void fullProb (double DMSq12, double DMSq13, double DMSq23,
 				double* devComp12, double* devComp13, double* devComp23,
 				double* ret, bool sameAB) {
   int x = blockDim.x*blockIdx.x + threadIdx.x;
-//  int y = blockDim.y*blockIdx.y + threadIdx.y;
+  //int j = blockDim.y*blockIdx.y + threadIdx.y;
+  //int k = blockDim.z*blockIdx.z + threadIdx.z;
+  //int x = i * j * (k - 1) + i * (j - 1) +  k;
   if (x < 0 || x >= EnuSize) return;
+  
   devTmp[x] = km2 / 2.0 * (1.0 / devEnu[x]);
   devComp0[x] = 1.0;
   devCompCP[x] = 0.0;
@@ -75,18 +83,19 @@ __global__ void fullProb (double DMSq12, double DMSq13, double DMSq23,
   if (!sameAB) {
     ret[x] += 8.0 * weightCP * devCompCP[x];
   }
+/*if (x >= 0 && x < EnuSize)
+  ret[x] = 5555;*/
+
 }
 
 void calcCuFullProb(double DMSq12, double DMSq13, double DMSq23,
 			double weight12, double weight13, double weight23, double weightCP, 
 			double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
-// TODO: avoid cublas
-
 //  const int blockSize = 16;
   int alloc_size = EnuSize * sizeof(double);
   cudaSetDevice(0);
   cudaError_t err;
-
+std::cout << "EnuSize is " << EnuSize << std::endl;
   //cudaStream_t stream1, stream2;
   //cudaStreamCreate ( &stream1);
   //cudaStreamCreate ( &stream2);
@@ -110,30 +119,44 @@ void calcCuFullProb(double DMSq12, double DMSq13, double DMSq23,
 
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from host to device! \n");
-    if (err == cudaErrorInvalidValue)  printf("err: cudaErrorInvalidValue \n");
-    if (err == cudaErrorInvalidDevicePointer) printf("err:  cudaErrorInvalidDevicePointer \n");
-    if (err == cudaErrorInvalidMemcpyDirection) printf ("err:  cudaErrorInvalidMemcpyDirection \n");
+    std::cout << "err is " << cudaGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE);
   }
   double km2 = km2MeV(L);
+
+//  fun<<<EnuSize/blockSize + 1, blockSize>>>(devComp0, devEnu, EnuSize);
+  std::cout << "km2 = " << km2 << std::endl;
 // TODO: choose call grid parameters
-  cudaDeviceSynchronize();
-  fullProb<<<1, dim3(blockSize, blockSize, blockSize)>>>(DMSq12, DMSq13, DMSq23,
+//  cudaDeviceSynchronize();
+/*  fullProb<<<EnuSize/blockSize + 1, blockSize>>>(DMSq12, DMSq13, DMSq23,
+                   weight12, weight13, weight23, weightCP,
+                   L, EnuSize, devEnu,
+                   devTmp, devComp0, devCompCP,
+                   devComp12,  devComp13, devComp23,
+                   ret, sameAB);
+*/
+
+    fullProb<<<EnuSize/blockSize + 1, blockSize>>>(DMSq12, DMSq13, DMSq23,
                    weight12, weight13, weight23, weightCP,
                    km2, EnuSize, devEnu,
                    devTmp, devComp0, devCompCP,
                    devComp12,  devComp13, devComp23,
-                   ret, sameAB);
+                   devRet, sameAB);
+
   cudaDeviceSynchronize(); 
 //  TODO: Where do we need to do sync?
  // err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
   double* tmp = (double*)malloc(EnuSize*sizeof(double));
-  err = cudaMemcpy(tmp, devRet, alloc_size, cudaMemcpyDeviceToHost);
+  err = cudaMemcpy(ret, devRet, alloc_size, cudaMemcpyDeviceToHost);
   
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from device to host! \n");
     std::cout << "err is " << cudaGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE);
+  }
+
+  for (int i = 0; i < EnuSize; i++) {
+    std::cout << ret[i] << " ";
   }
   cudaFree(devComp0);   cudaFree(devCompCP);
   cudaFree(devComp12);  cudaFree(devComp13);  cudaFree(devComp23);
