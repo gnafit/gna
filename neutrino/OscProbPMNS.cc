@@ -8,6 +8,11 @@
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
 
+#ifdef GNA_CUDA_SUPPORT 
+#include "extra/GNAcuOscProbFull.h"
+#endif
+
+
 using namespace Eigen;
 
 static double km2MeV(double km) {
@@ -122,7 +127,29 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(Atypes::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
+
+#ifdef GNA_CUDA_SUPPORT
+  auto full_formula_gpu = transformation_(this, "full_osc_prob_gpu")
+      .input("Enu")
+      .output("oscprob")
+      .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
+      .types(Atypes::pass<0>)
+      .func(&OscProbPMNS::calcFullProbGpu);
+#endif
+
 }
+
+#ifdef GNA_CUDA_SUPPORT
+
+void OscProbPMNS::calcFullProbGpu(Args args, Rets rets) {
+  bool isABsame = (m_alpha == m_beta);
+  calcCuFullProb(DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
+                   weight<1,2>(), weight<1,3>(), weight<2,3>(), weightCP(),
+                   rets[0].x.data(), m_L, args[0].x.data(), args[0].x.rows(), isABsame);
+}
+
+#endif
+
 
 void OscProbPMNS::calcFullProb(Args args, Rets rets) {
     auto& Enu = args[0].x;

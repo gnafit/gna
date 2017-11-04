@@ -49,6 +49,7 @@ include_directories(SYSTEM ${GSL_INCLUDE_DIR})
 cmake_policy(SET CMP0015 NEW)
 
 if(CUDA_SUPPORT)
+    add_definitions( -DGNA_CUDA_SUPPORT )
     find_package( CUDA REQUIRED)
     include_directories(cuda/extra/ cuda/core/)
     if(NOT CUDA_MAT_SIZE_THRESHOLD)

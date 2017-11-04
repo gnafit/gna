@@ -38,6 +38,10 @@ public:
   void calcComponentCP(Args args, Rets rets);
   void calcSum(Args args, Rets rets);
   void calcFullProb(Args args, Rets rets);
+#ifdef GNA_CUDA_SUPPORT
+  void calcFullProbGpu(Args args, Rets rets);
+#endif
+
 protected:
   variable<double> m_L;
 };
