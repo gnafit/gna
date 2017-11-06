@@ -9,6 +9,7 @@ from gna.env import env
 from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
+from matplotlib import pyplot as P
 from converters import convert
 from argparse import ArgumentParser
 import constructors as C

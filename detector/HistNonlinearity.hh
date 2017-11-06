@@ -1,5 +1,5 @@
-#ifndef ENERGYNONLINEARITY_H
-#define ENERGYNONLINEARITY_H
+#ifndef HISTNONLINEARITY_H
+#define HISTNONLINEARITY_H
 
 #include <vector>
 
@@ -37,4 +37,4 @@ private:
   double m_range_max{+1.e+100};
 };
 
-#endif // ENERGYNONLINEARITY_H
+#endif // HISTNONLINEARITY_H

@@ -57,7 +57,7 @@ diagonal elements and thus is stored as a sparse matrix.
 Inputs
 """"""
 
-1. ``'matrix.Edges'`` —­the original bin edges. These edges will be also used to project the result to.
+1. ``'matrix.Edges'`` — ­the original bin edges. These edges will be also used to project the result to.
 2. ``'matrix.EdgesModified'`` — the modified bin edges of the same size as ``'matrix.Edges'``.
 
 Outputs
