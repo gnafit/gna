@@ -17,7 +17,7 @@ import numpy as N
 #
 parname = 'DiagScale'
 par = env.defparameter( parname,  central=1.0, relsigma=0.1 )
-esmear, _ = detector_iav_from_file( 'output/iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=1, parname=parname )
+esmear, _ = detector_iav_from_file( 'output/detector_iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=1, parname=parname )
 
 #
 # Test bundle

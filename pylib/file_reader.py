@@ -2,7 +2,7 @@
 
 from os.path import splitext
 
-def read_object_root( filename, names, *args, **kwargs ):
+def read_object_root( filename, name, *args, **kwargs ):
     import ROOT as R
     f = R.TFile( filename, 'READ' )
     if f.IsZombie():
