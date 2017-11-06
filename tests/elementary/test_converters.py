@@ -143,3 +143,8 @@ tm1.Print()
 print( 'arr back' )
 print( arrb )
 print( arrbf )
+
+arr = [ 'a', 'b', 'cde' ]
+vec = convert( arr, 'stdvector' )
+print( arr )
+print( [s for s in vec] )

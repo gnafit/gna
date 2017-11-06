@@ -37,7 +37,7 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
        .func(&HistNonlinearity::calcMatrix);
 }
 
-void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
+void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
     if( m_initialized )
         throw std::runtime_error("HistNonlinearity is already initialized");
     m_initialized = true;
@@ -45,6 +45,17 @@ void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_mod
     t_["matrix"].inputs()[0].connect( bin_edges.single() );
     t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
     t_["smear"].inputs()[0].connect( t_["matrix"].outputs()[0] );
+}
+
+void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
+    set( bin_edges, bin_edges_modified );
+    t_["smear"].inputs()[1].connect( ntrue.single() );
+}
+
+void HistNonlinearity::set( SingleOutput& ntrue ){
+    if( !m_initialized )
+        throw std::runtime_error("HistNonlinearity is not initialized");
+
     t_["smear"].inputs()[1].connect( ntrue.single() );
 }
 
@@ -72,7 +83,8 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
   auto i_bin = cur_bin - edges_mod;
   if( cur_bin<end_mod ){
     // Find current bin's projection to the original range
-    auto* cur_proj = std::prev(std::lower_bound( edges_orig, end_orig, *cur_bin ));
+    auto* cur_proj = std::lower_bound( edges_orig, end_orig, *cur_bin );
+    if (cur_proj!=edges_orig) cur_proj = std::prev(cur_proj);
     auto i_proj = cur_proj - edges_orig;
     if ( cur_proj<end_orig && cur_bin<end_mod ){
       auto* next_bin = std::next(cur_bin);

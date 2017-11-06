@@ -107,12 +107,23 @@ def get_cpp_type( array ):
     else:
         typemap = {
                 int: 'int',
-                float: 'double'
+                float: 'double',
+                str: 'std::string'
                 }
         atype = type( array[0] )
     ret = typemap.get( atype )
     if not ret:
         raise Exception( 'Do not know how to convert type '+atype )
+    return ret
+
+@save_converter( list, R.vector )
+def list_to_stdvector( lst, dtype='auto' ):
+    """Convert a list to the std::vector<dtype>"""
+    if dtype=='auto':
+        dtype = get_cpp_type( lst )
+    ret = R.vector(dtype)( len( lst ) )
+    for i, v in enumerate( lst ):
+        ret[i] = v
     return ret
 
 @save_converter( N.ndarray, R.vector )

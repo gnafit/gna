@@ -4,30 +4,58 @@ from __future__ import print_function
 import numpy as N
 from load import ROOT as R
 import constructors as C
-from mpl_tools.root2numpy get_buffers_graph
-from scipy.interp import interp1d
+from converters import convert
+from mpl_tools.root2numpy import get_buffers_graph
+from scipy.interpolate import interp1d
+from matplotlib import pyplot as P
 
-def detector_nl( mat, graphs, edges, *args, **kwargs  ):
+def detector_nl( graphs, edges, *args, **kwargs  ):
     """Assembles a chain for IAV detector effect using input matrix"""
-    parname = kwargs.pop( 'parnames', [] )
+    names = kwargs.pop( 'names' )
+    debug = kwargs.pop( 'debug', False )
+    threshold = kwargs.pop( 'threshold', None )
+    transf = dict( curves={}, inputs={} )
+    nonlin = transf['nonlinearity'] = R.HistNonlinearity( debug )
 
+    #
+    # Interpolate on the default binning
+    # (extrapolate as well)
+    #
+    transf['edges'] = edges
     newx = edges.data()
+    transf['inputs']['edges'] = newx
+    newy = []
+    for xy, name in zip(graphs, names):
+        f = interpolate( xy, newx, threshold=threshold, fill_value=nonlin.get_range_min()-1.e10 )
+        newy.append(f)
+        transf['inputs'][name] = f.copy()
 
-    # points = C.Points( mat )
-    # if parname:
-        # renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname )
-    # else:
-        # renormdiag = R.RenormalizeDiag( ndiag, 1, 1 )
-    # renormdiag.renorm.inmat( points.points )
+    #
+    # All curves but first are the corrections to the nominal
+    #
+    for f in newy[1:]:
+        f-=newy[0]
 
-    # esmear = R.HistSmear( True )
-    # esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
+    wsum = transf['sum'] = R.WeightedSum( convert(names, 'stdvector') )
+    for y, name in zip( newy, names ):
+        pts = C.Points( y )
+        transf['curves'][name] = pts
+        wsum.sum[name]( pts )
 
-    return esmear, dict( points=points, renormdiag=renormdiag, esmear=esmear )
+    newe = transf['newe'] = R.Product()
+    newe.multiply( edges )
+    newe.multiply( wsum.sum )
+    nonlin.set( edges, newe.product )
 
-def interpolate( (x, y), edges ):
-    fcn = interp1d( x, y, kind='linear' )
-    return fcn( edges )
+    return nonlin, transf
+
+def interpolate( (x, y), edges, threshold=None, fill_value=None ):
+    fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )
+    res = fcn( edges )
+    if not threshold is None:
+        res[edges<threshold] = fill_value
+
+    return res
 
 def detector_nl_from_file( filename, names, *args, **kwargs ):
     """Assembles a chain for NL detector effect using input curves from a file
@@ -42,4 +70,4 @@ def detector_nl_from_file( filename, names, *args, **kwargs ):
 
     graphs = [ get_buffers_graph(g) for g in graphs ]
 
-    return detector_nl( mat, graphs, *args, **kwargs )
+    return detector_nl( graphs, *args, names=names, **kwargs )
