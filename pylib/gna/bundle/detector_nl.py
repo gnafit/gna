@@ -13,7 +13,6 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     """Assembles a chain for IAV detector effect using input matrix"""
     names = kwargs.pop( 'names' )
     debug = kwargs.pop( 'debug', False )
-    threshold = kwargs.pop( 'threshold', None )
     transf = dict( curves={}, inputs={} )
     nonlin = transf['nonlinearity'] = R.HistNonlinearity( debug )
 
@@ -26,7 +25,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     transf['inputs']['edges'] = newx
     newy = []
     for xy, name in zip(graphs, names):
-        f = interpolate( xy, newx, threshold=threshold, fill_value=nonlin.get_range_min()-1.e10 )
+        f = interpolate( xy, newx )
         newy.append(f)
         transf['inputs'][name] = f.copy()
 
@@ -49,11 +48,9 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
 
     return nonlin, transf
 
-def interpolate( (x, y), edges, threshold=None, fill_value=None ):
+def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )
     res = fcn( edges )
-    if not threshold is None:
-        res[edges<threshold] = fill_value
 
     return res
 

@@ -37,7 +37,7 @@ ident = R.Identity()
 ident.identity.source( points.points )
 
 filename = 'output/detector_nl_consModel_450itr.root'
-nonlin, transf = detector_nl_from_file( filename, names, edges=ident.identity.target, debug=True, threshold=0.5 )
+nonlin, transf = detector_nl_from_file( filename, names, edges=ident.identity.target, debug=True)
 wsum = transf['sum']
 
 #

@@ -77,7 +77,8 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );
-  if( *cur_bin<edges_orig[0] ){
+  DEBUG("found curbin: %li -> %g\n", std::distance(edges_mod, cur_bin), *cur_bin);
+  if( *cur_bin<edges_orig[0] && cur_bin!=edges_mod ){
       cur_bin = std::prev(std::lower_bound( std::next(cur_bin), end_mod, edges_orig[0] ));
   }
   auto i_bin = cur_bin - edges_mod;
@@ -118,9 +119,9 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
                 "weight", "width");
           }
           printf("%6li"
-                 "%7li%6.2f""%7li%6.2f"
-                 "%7li%s%6.2f""%7li%s%6.2f"
-                 "%8.2f%1s%8.2f""%8.3f%8.3f %s\n",
+                 "%7li%6.2g""%7li%6.2g"
+                 "%7li%s%6.2g""%7li%s%6.2g"
+                 "%8.2g%1s%8.2g""%8.3f%8.3g %s\n",
                  iteration,
                  i_bin, *cur_bin, i_proj, *cur_proj,
                  std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
