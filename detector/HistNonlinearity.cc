@@ -37,7 +37,7 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
        .func(&HistNonlinearity::calcMatrix);
 }
 
-void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
+void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
     if( m_initialized )
         throw std::runtime_error("HistNonlinearity is already initialized");
     m_initialized = true;
@@ -45,6 +45,17 @@ void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_mod
     t_["matrix"].inputs()[0].connect( bin_edges.single() );
     t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
     t_["smear"].inputs()[0].connect( t_["matrix"].outputs()[0] );
+}
+
+void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
+    set( bin_edges, bin_edges_modified );
+    t_["smear"].inputs()[1].connect( ntrue.single() );
+}
+
+void HistNonlinearity::set( SingleOutput& ntrue ){
+    if( !m_initialized )
+        throw std::runtime_error("HistNonlinearity is not initialized");
+
     t_["smear"].inputs()[1].connect( ntrue.single() );
 }
 
@@ -66,13 +77,15 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );
-  if( *cur_bin<edges_orig[0] ){
+  DEBUG("found curbin: %li -> %g\n", std::distance(edges_mod, cur_bin), *cur_bin);
+  if( *cur_bin<edges_orig[0] && cur_bin!=edges_mod ){
       cur_bin = std::prev(std::lower_bound( std::next(cur_bin), end_mod, edges_orig[0] ));
   }
   auto i_bin = cur_bin - edges_mod;
   if( cur_bin<end_mod ){
     // Find current bin's projection to the original range
-    auto* cur_proj = std::prev(std::lower_bound( edges_orig, end_orig, *cur_bin ));
+    auto* cur_proj = std::lower_bound( edges_orig, end_orig, *cur_bin );
+    if (cur_proj!=edges_orig) cur_proj = std::prev(cur_proj);
     auto i_proj = cur_proj - edges_orig;
     if ( cur_proj<end_orig && cur_bin<end_mod ){
       auto* next_bin = std::next(cur_bin);
@@ -106,9 +119,9 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
                 "weight", "width");
           }
           printf("%6li"
-                 "%7li%6.2f""%7li%6.2f"
-                 "%7li%s%6.2f""%7li%s%6.2f"
-                 "%8.2f%1s%8.2f""%8.3f%8.3f %s\n",
+                 "%7li%6.2g""%7li%6.2g"
+                 "%7li%s%6.2g""%7li%s%6.2g"
+                 "%8.2g%1s%8.2g""%8.3f%8.3g %s\n",
                  iteration,
                  i_bin, *cur_bin, i_proj, *cur_proj,
                  std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,

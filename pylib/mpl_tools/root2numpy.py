@@ -28,7 +28,7 @@ def get_err_buffer_hist1( h, flows=False ):
 def get_buffer_hist2( h, **kwargs ):
     """Return histogram data buffer
     if flows=False, exclude underflow and overflow
-    if mask=0.0 than bins with 0.0 content will be white, but not colored
+    if mask==0.0 than bins with 0.0 content will be masked
     NOTE: buf[biny][binx] is the right access signature
     """
     nx, ny = h.GetNbinsX(), h.GetNbinsY()
@@ -49,7 +49,7 @@ def get_buffer_hist2( h, **kwargs ):
 def get_err_buffer_hist2( h, **kwargs ):
     """Return histogram error buffer
     if flows=False, exclude underflow and overflow
-    if mask=0.0 than bins with 0.0 content will be white, but not colored
+    if mask==0.0 than bins with 0.0 content will be masked
     NOTE: buf[biny][binx] is the right access signature
     """
     sw2 = h.GetSumw2()
@@ -116,7 +116,6 @@ def get_buffers_graph( g ):
                N.array(g.GetY(), dtype=N.double)
 
     return None, None
-##end def function
 
 def get_err_buffers_graph( g ):
     """Get TGraphErrors x and y error buffers"""
@@ -128,7 +127,6 @@ def get_err_buffers_graph( g ):
                N.array(g.GetEY(), dtype=N.double)
 
     return None, None
-##end def function
 
 def get_err_buffers_graph_asymm( g ):
     """Get TGraphAsymError x and y error buffers"""
@@ -144,7 +142,17 @@ def get_err_buffers_graph_asymm( g ):
                # N.array(g.GetEYhigh(), dtype=N.double)
 
     return None, None, None, None
-##end def function
+
+def get_buffer_matrix( m, **kwargs ):
+    """Get TMatrix buffer
+    if mask==0.0 than cells with 0.0 content will be masked
+    """
+    mask = kwargs.pop( 'mask', None )
+    cbuf = m.GetMatrixArray()
+    res = N.frombuffer( cbuf, N.dtype( cbuf.typecode ), m.GetNoElements() ).reshape( m.GetNrows(), m.GetNcols() )
+    if not mask is None:
+        res = N.ma.array( res, mask = res==mask )
+    return res
 
 def bind():
     """Bind functions to ROOT classes"""
@@ -161,3 +169,6 @@ def bind():
     setattr( R.TGraph,            'get_buffers',     get_buffers_graph )
     setattr( R.TGraphErrors,      'get_err_buffers', get_err_buffers_graph )
     setattr( R.TGraphAsymmErrors, 'get_err_buffers', get_err_buffers_graph_asymm )
+
+    setattr( R.TMatrixD, 'get_buffer', get_buffer_matrix )
+    setattr( R.TMatrixF, 'get_buffer', get_buffer_matrix )
