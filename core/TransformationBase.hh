@@ -454,6 +454,11 @@ namespace TransformationTypes {
       return *this;
     }
 
+    Initializer<T> finalize() {
+      m_entry->evaluateTypes();
+      return *this;
+    }
+
     template <typename FuncA, typename FuncB>
     Initializer<T> types(FuncA func1, FuncB func2) {
       types(func1);

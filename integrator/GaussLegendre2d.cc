@@ -50,6 +50,7 @@ void GaussLegendre2d::init() {
         rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_xpoints[0], obj->m_xpoints.size());
         rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_ypoints[0], obj->m_ypoints.size());
       })
+    .finalize()
     ;
 }
 
@@ -78,6 +79,6 @@ GaussLegendre2dHist::GaussLegendre2dHist(const GaussLegendre2d *base)
           }
         }
       })
-    ;  
+    ;
 }
 

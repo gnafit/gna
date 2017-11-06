@@ -16,10 +16,10 @@ public:
   Cholesky()
   {
     transformation_(this, "cholesky")
-      .types(Atypes::pass<0>, &Cholesky::prepareCholesky)
-      .func(&Cholesky::calculateCholesky)
       .input("mat")
       .output("L")
+      .types(Atypes::pass<0>, &Cholesky::prepareCholesky)
+      .func(&Cholesky::calculateCholesky)
     ;
   }
   void prepareCholesky(Atypes args, Rtypes rets);

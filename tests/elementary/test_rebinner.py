@@ -26,9 +26,6 @@ ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 rebin = R.Rebin( edges_m.size, edges_m, 3 )
 rebin.rebin.histin( ntrue )
 
-idy = R.Identity()
-idy.identity.source(rebin.rebin.histout)
-
 olddata = ntrue.data()
 newdata = rebin.rebin.histout.data()
 

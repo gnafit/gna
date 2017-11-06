@@ -48,10 +48,8 @@ ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 nl = R.HistNonlinearity(True)
 nl.set( pedges, pedges_m, ntrue )
 
-idy = R.Identity()
-idy.identity.source(nl.matrix.FakeMatrix)
 
-mat = idy.identity.target.data()
+mat = nl.matrix.FakeMatrix.data()
 print( 'C++' )
 print( mat )
 print( mat.sum( axis=0 ) )

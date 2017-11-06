@@ -35,11 +35,9 @@ edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
 points = C.Points(edges)
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
-ident = R.Identity()
-ident.identity.source( points.points )
 
 filename = 'output/detector_nl_consModel_450itr.root'
-nonlin, transf = detector_nl_from_file( filename, names, edges=ident.identity.target, debug=True)
+nonlin, transf = detector_nl_from_file( filename, names, edges=points.points, debug=True)
 corr_lsnl = transf['corr_lsnl']
 corr = transf['corr']
 

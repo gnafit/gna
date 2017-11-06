@@ -29,7 +29,7 @@ void GaussLegendre::init() {
     double b = m_edges[i+1];
 
     //actually provides the absc and weight. for interval [a,b] and store it
-    //to m_points and m_weights, 
+    //to m_points and m_weights,
     for (size_t j = 0; j < t->n; ++j) {
       gsl_integration_glfixed_point(a, b, j, &m_points[k], &m_weights[k], t);
       k++;
@@ -45,6 +45,7 @@ void GaussLegendre::init() {
     .func([](GaussLegendre *obj, Args, Rets rets) {
         rets[0].x = obj->m_points;
       })
+    .finalize()
     ;
 }
 
@@ -67,5 +68,5 @@ GaussLegendreHist::GaussLegendreHist(const GaussLegendre *base)
           data += n;
         }
       })
-    ;  
+    ;
 }

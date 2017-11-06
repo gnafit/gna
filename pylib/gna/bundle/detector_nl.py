@@ -16,6 +16,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     transf = dict( curves={}, inputs={} )
     nonlin = transf['nonlinearity'] = R.HistNonlinearity( debug )
 
+    print(1)
     #
     # Interpolate on the default binning
     # (extrapolate as well)
@@ -29,6 +30,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
         newy.append(f)
         transf['inputs'][name] = f.copy()
 
+    print(2)
     #
     # All curves but first are the corrections to the nominal
     #
@@ -41,6 +43,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
         transf['curves'][name] = pts
         corr_lsnl.sum[name]( pts )
 
+    print(3)
     corr = transf['corr'] = R.WeightedSum( convert(['escale'], 'stdvector') )
     corr.sum['escale']( corr_lsnl.sum )
 
@@ -48,6 +51,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     newe.multiply( edges )
     newe.multiply( corr.sum )
 
+    print(4)
     nonlin.set( edges, newe.product )
 
     return nonlin, transf
