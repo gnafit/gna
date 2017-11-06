@@ -35,15 +35,19 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     for f in newy[1:]:
         f-=newy[0]
 
-    wsum = transf['sum'] = R.WeightedSum( convert(names, 'stdvector') )
+    corr_lsnl = transf['corr_lsnl'] = R.WeightedSum( convert(names, 'stdvector') )
     for y, name in zip( newy, names ):
         pts = C.Points( y )
         transf['curves'][name] = pts
-        wsum.sum[name]( pts )
+        corr_lsnl.sum[name]( pts )
+
+    corr = transf['corr'] = R.WeightedSum( convert(['escale'], 'stdvector') )
+    corr.sum['escale']( corr_lsnl.sum )
 
     newe = transf['newe'] = R.Product()
     newe.multiply( edges )
-    newe.multiply( wsum.sum )
+    newe.multiply( corr.sum )
+
     nonlin.set( edges, newe.product )
 
     return nonlin, transf

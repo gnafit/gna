@@ -22,6 +22,8 @@ for name in names[1:]:
     par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
     pars.append( par )
 
+escale = env.defparameter( 'weight_escale', central=1.0, sigma=0.02*0.01 )
+
 def singularities( values, edges ):
     indices = N.digitize( values, edges )-1
     phist = N.zeros( edges.size-1 )
@@ -38,7 +40,8 @@ ident.identity.source( points.points )
 
 filename = 'output/detector_nl_consModel_450itr.root'
 nonlin, transf = detector_nl_from_file( filename, names, edges=ident.identity.target, debug=True)
-wsum = transf['sum']
+corr_lsnl = transf['corr_lsnl']
+corr = transf['corr']
 
 #
 # Plot curves:
@@ -58,16 +61,16 @@ for par, name in zip(pars, names):
         for par1, name1 in zip(pars[1:], names[1:]):
             par1.set( name==name1 and 1.0 or 0.0 )
 
-    f = wsum.sum.sum.data()
-    mask = f>=0.0
-    lines = ax.plot( edges[mask], f[mask], '-', label=name )
+    lines = ax.plot( edges, corr_lsnl.sum.sum.data(), '-', label=name )
     stride = 5
-    pf = transf['inputs'][name][::stride]
-    mask = pf>0.0
-    ax.plot( transf['inputs']['edges'][::stride][mask], pf[mask], 'o', markerfacecolor='none', color=lines[0].get_color() )
+    ax.plot( transf['inputs']['edges'][::stride], transf['inputs'][name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
 
 for par in pars[1:]:
     par.set(0.0)
+
+escale.set(1.1)
+ax.plot( edges, corr.sum.sum.data(), '--', label='escale=1.1' )
+escale.set(1.0)
 
 ax.legend( loc='lower right' )
 
@@ -113,7 +116,6 @@ c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
 newe = transf['newe'].product.data()
-mask = newe>=0.0
-ax1.plot( edges[mask], newe[mask], '--', color='white' )
+ax1.plot( edges, newe, '--', color='white' )
 
 P.show()
