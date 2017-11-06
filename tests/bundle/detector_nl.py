@@ -74,8 +74,7 @@ ax.legend( loc='lower right' )
 #
 # Test bundle
 #
-# nonlin.smear.Ntrue( hist.hist )
-nonlin.set( hist )
+nonlin.smear.Ntrue( hist.hist )
 
 #
 # Plot hists
