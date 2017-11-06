@@ -57,7 +57,7 @@ struct DataType {
   std::vector<double> edges = {};
   std::pair<double, double> bounds = {
     -std::numeric_limits<double>::infinity(),
-    std::numeric_limits<double>::infinity()
+     std::numeric_limits<double>::infinity()
   };
 
   double *buffer = nullptr;
