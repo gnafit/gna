@@ -39,11 +39,14 @@ void GaussLegendre::init() {
   //return only points, WTF?
   transformation_(this, "points")
     .output("x")
+    .output("xedges")
     .types([](GaussLegendre *obj, Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(obj->m_points.size());
+        rets[1] = DataType().points().shape(obj->m_edges.size());
       })
     .func([](GaussLegendre *obj, Args, Rets rets) {
         rets[0].x = obj->m_points;
+        rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_edges[0], obj->m_edges.size());
       })
     .finalize()
     ;

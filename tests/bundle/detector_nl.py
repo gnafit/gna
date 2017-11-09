@@ -7,11 +7,16 @@ R.GNAObject
 from gna.bundle.detector_nl import detector_nl_from_file
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
-from mpl_tools.helpers import add_colorbar, plot_hist
+from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
 import constructors as C
 from converters import convert
 import numpy as N
+
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-o', '--output' )
+opts=parser.parse_args()
 
 #
 # Initialize bundle
@@ -103,9 +108,9 @@ fig = P.figure()
 ax1 = P.subplot( 111 )
 ax1.minorticks_on()
 ax1.grid()
-ax1.set_xlabel( '' )
-ax1.set_ylabel( '' )
-ax1.set_title( '' )
+ax1.set_xlabel( 'Source bins' )
+ax1.set_ylabel( 'Target bins' )
+ax1.set_title( 'Daya Bay LSNL matrix' )
 mat = convert(nonlin.getDenseMatrix(), 'matrix')
 print( 'Col sum', mat.sum(axis=0) )
 
@@ -114,6 +119,8 @@ c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
 newe = transf['newe'].product.data()
-ax1.plot( edges, newe, '--', color='white' )
+ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
+
+savefig( opts.output, suffix='_matrix', dpi=300 )
 
 P.show()
