@@ -212,6 +212,10 @@ public:
     m_type.edges = edges;
     return bins(edges.size()-1);
   }
+  DataType::Hist<T> &edges(size_t n, double* edges) {
+    m_type.edges.assign(edges, edges+n);
+    return bins(n-1);
+  }
   std::vector<double> &edges() {
     return m_type.edges;
   }

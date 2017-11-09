@@ -16,7 +16,7 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
            if(args[0].kind!=DataKind::Hist){
              throw std::runtime_error("Rebinner input should be a histogram");
            }
-           rets[0]=DataType().hist().bins(obj->m_new_edges.size()-1).edges(obj->m_new_edges);
+           rets[0]=DataType().hist().edges(obj->m_new_edges);
            })
     .func(&Rebin::calcSmear);
 }
