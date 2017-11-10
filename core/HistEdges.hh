@@ -8,11 +8,8 @@
 class HistEdges: public GNASingleObject,
                  public Transformation<HistEdges> {
 public:
-  HistEdges() {};
-
-protected:
-  void init() {
-    transformation_(this, "hist")
+  HistEdges() {
+    transformation_(this, "histedges")
       .input("hist")
       .output("edges")
       .types(Atypes::ifHist<0>,
@@ -22,8 +19,9 @@ protected:
       .func([](Args args, Rets rets) {
             auto& edges = args[0].type.edges;
             rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
+            rets.freeze();
             });
-  }
+  };
 };
 
 #endif // HISTEDGES_H
