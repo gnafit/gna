@@ -61,6 +61,7 @@ set (HEADERS
   WeightedSum.hh
   Points.hh
   Histogram.hh
+  HistEdges.hh
   Identity.hh
   LinearInterpolator.hh
   FillLike.hh

@@ -269,6 +269,10 @@ namespace TransformationTypes {
     static void pass(Atypes args, Rtypes rets);
     static void ifSame(Atypes args, Rtypes rets);
     static void ifSameShape(Atypes args, Rtypes rets);
+    template <size_t Arg>
+    static void ifHist(Atypes args, Rtypes rets);
+    template <size_t Arg>
+    static void ifPoints(Atypes args, Rtypes rets);
 
     SourceTypeError error(const DataType &dt, const std::string &message = "");
 
@@ -304,6 +308,20 @@ namespace TransformationTypes {
       throw std::runtime_error("Transformation: invalid Ret index");
     }
     rets[Ret] = args[Arg];
+  }
+
+  template <size_t Arg>
+  inline void Atypes::ifHist(Atypes args, Rtypes rets) {
+    if (args[Arg].kind!=DataKind::Hist) {
+      throw std::runtime_error("Transformation: Arg should be a histogram");
+    }
+  }
+
+  template <size_t Arg>
+  inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
+    if (args[Arg].kind!=DataKind::Points) {
+      throw std::runtime_error("Transformation: Arg should be an array");
+    }
   }
 
   class Accessor {
