@@ -24,6 +24,9 @@ print( e )
 
 print( (edges==e).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
 
+import IPython
+IPython.embed()
+
 h2e1 = R.HistEdges()
 print('\033[32mPlanned exception (wrong type):\033[0m')
 h2e1.histedges.hist( h2e.histedges.edges )
