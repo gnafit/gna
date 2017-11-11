@@ -32,7 +32,8 @@ extensions = ['sphinx.ext.mathjax', 'sphinxcontrib.plantuml',
               'IPython.sphinxext.ipython_console_highlighting',
               'IPython.sphinxext.ipython_directive']
 
-plantuml = 'java -Djava.awt.headless=true -jar /plantuml.jar'
+# plantuml = 'java -Djava.awt.headless=true -jar /plantuml.jar'
+plantuml = 'plantuml'
 
 plantuml_output_format = 'svg'
 

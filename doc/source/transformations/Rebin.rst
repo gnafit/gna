@@ -1,5 +1,5 @@
-Rebin
-~~~~~
+Rebin transformation
+~~~~~~~~~~~~~~~~~~~~
 
 Description
 ^^^^^^^^^^^

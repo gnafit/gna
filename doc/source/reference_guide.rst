@@ -1,5 +1,5 @@
 Reference guide
-==================
+===============
 
 Cheat sheet
 -----------
@@ -10,15 +10,6 @@ Cheat sheet
 
    making_sense
    cheatsheet/*
-
-Transformations
----------------
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   transformations/*
 
 Python modules
 ---------------
@@ -37,6 +28,81 @@ Helper classes
    :glob:
 
    helperclasses/*
+
+Transformations
+---------------
+
+Basic types and actions
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/HistEdges.rst
+   transformations/Histogram.rst
+   transformations/Points.rst
+   transformations/Rebin.rst
+
+Linear algebra
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/Cholesky.rst
+   transformations/FillLike.rst
+   transformations/Identity.rst
+   transformations/RenormalizeDiag.rst
+   transformations/WeightedSum.rst
+
+Stats and calculus
+^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/Chi2.rst
+   transformations/CovarianceToyMC.rst
+   transformations/CovariatedPrediction.rst
+   transformations/Covmat.rst
+   transformations/Derivative.rst
+   transformations/NormalToyMC.rst
+   transformations/Poisson.rst
+
+Neutrino oscillations
+^^^^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/EvisToEe.rst
+   transformations/IbdFirstOrder.rst
+   transformations/IbdZeroOrder.rst
+   transformations/OscillationProbabilities.rst
+
+Detector related
+^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/EnergyResolution.rst
+   transformations/HistNonlinearity.rst
+   transformations/HistSmear.rst
+
+Complete list
+^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/*
 
 .. Template
 

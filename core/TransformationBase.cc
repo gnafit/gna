@@ -223,7 +223,7 @@ void Source::connect(Sink *newsink) {
     newsink->entry->evaluateTypes();
     entry->evaluateTypes();
   } catch (const std::exception &exc) {
-    std::cerr << "exception in types calculation (bazzeg ROOT): ";
+    std::cerr << "exception in types calculation: ";
     std::cerr << exc.what() << "\n";
     std::terminate();
   }
