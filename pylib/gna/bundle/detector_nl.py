@@ -8,26 +8,33 @@ from converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from scipy.interpolate import interp1d
 from matplotlib import pyplot as P
+from gna.env import env, namespace
 
 def detector_nl( graphs, edges, *args, **kwargs  ):
     """Assembles a chain for IAV detector effect using input matrix"""
+    gstorage = kwargs.pop( 'storage', None )
+    if gstorage:
+        storage = gstorage( 'nonlinearity' )
+    else:
+        storage = namespace( None, 'nonlinearity' )
+
     names = kwargs.pop( 'names' )
     debug = kwargs.pop( 'debug', False )
-    transf = dict( curves={}, inputs={} )
-    nonlin = transf['nonlinearity'] = R.HistNonlinearity( debug )
+    namespaces = kwargs.pop( 'namespaces', [] )
+    nonlin = storage['nonlinearity'] = R.HistNonlinearity( debug )
 
     #
-    # Interpolate on the default binning
+    # Interpolate curves on the default binning
     # (extrapolate as well)
     #
-    transf['edges'] = edges
+    storage['edges'] = edges
     newx = edges.data()
-    transf['inputs']['edges'] = newx
+    storage('inputs')['edges'] = newx
     newy = []
     for xy, name in zip(graphs, names):
         f = interpolate( xy, newx )
         newy.append(f)
-        transf['inputs'][name] = f.copy()
+        storage('inputs')[name] = f.copy()
 
     #
     # All curves but first are the corrections to the nominal
@@ -35,22 +42,35 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     for f in newy[1:]:
         f-=newy[0]
 
-    corr_lsnl = transf['corr_lsnl'] = R.WeightedSum( convert(names, 'stdvector') )
+    #
+    # Correlated part of the energy nonlinearity factor
+    # a weighted sum of input curves
+    #
+    corr_lsnl = storage['lsnl_factor'] = R.WeightedSum( convert(names, 'stdvector') )
     for y, name in zip( newy, names ):
         pts = C.Points( y )
-        transf['curves'][name] = pts
+        storage('curves')[name] = pts
         corr_lsnl.sum[name]( pts )
 
-    corr = transf['corr'] = R.WeightedSum( convert(['escale'], 'stdvector') )
-    corr.sum['escale']( corr_lsnl.sum )
+    for i, ns in enumerate(namespaces or [ env.globalns ]):
+        with ns:
+            #
+            # Uncorrelated between detectors part of the energy nonlinearity factor
+            # correlated part multiplicated by the scale factor
+            #
+            lname = 'escale_%i'%i
+            corr = storage(lname)['factor'] = R.WeightedSum( convert(['escale'], 'stdvector') )
+            corr.sum['escale']( corr_lsnl.sum )
 
-    newe = transf['newe'] = R.Product()
-    newe.multiply( edges )
-    newe.multiply( corr.sum )
+            #
+            # Finally, original bin edges multiplied by the correction factor
+            #
+            newe = storage(lname)['edges_mod'] = R.Product()
+            newe.multiply( edges )
+            newe.multiply( corr.sum )
+            nonlin.set( edges, newe.product )
 
-    nonlin.set( edges, newe.product )
-
-    return nonlin, transf
+    return nonlin, storage
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )

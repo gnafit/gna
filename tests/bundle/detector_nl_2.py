@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Test script for the detector_nl bundle with two detectors"""
+
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
@@ -27,7 +29,11 @@ for name in names[1:]:
     par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
     pars.append( par )
 
-escale = env.defparameter( 'weight_escale', central=1.0, sigma=0.02*0.01 )
+escale1 = env.defparameter( 'ad1.weight_escale', central=1.0, sigma=0.02*0.01 )
+escale2 = env.defparameter( 'ad2.weight_escale', central=1.0, sigma=0.02*0.01 )
+
+import IPython
+IPython.embed()
 
 def singularities( values, edges ):
     indices = N.digitize( values, edges )-1
