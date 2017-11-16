@@ -21,7 +21,6 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
     names = kwargs.pop( 'names' )
     debug = kwargs.pop( 'debug', False )
     namespaces = kwargs.pop( 'namespaces', [] )
-    nonlin = storage['nonlinearity'] = R.HistNonlinearity( debug )
 
     #
     # Interpolate curves on the default binning
@@ -52,25 +51,33 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
         storage('curves')[name] = pts
         corr_lsnl.sum[name]( pts )
 
+    output = []
+    labels = convert(['escale'], 'stdvector')
     for i, ns in enumerate(namespaces or [ env.globalns ]):
         with ns:
             #
             # Uncorrelated between detectors part of the energy nonlinearity factor
             # correlated part multiplicated by the scale factor
             #
-            lname = 'escale_%i'%i
-            corr = storage(lname)['factor'] = R.WeightedSum( convert(['escale'], 'stdvector') )
+            lstorage = storage('escale_%s'%ns.name)
+            corr = lstorage['factor'] = R.WeightedSum( labels, labels )
             corr.sum['escale']( corr_lsnl.sum )
 
             #
             # Finally, original bin edges multiplied by the correction factor
             #
-            newe = storage(lname)['edges_mod'] = R.Product()
+            newe = lstorage['edges_mod'] = R.Product()
             newe.multiply( edges )
             newe.multiply( corr.sum )
-            nonlin.set( edges, newe.product )
 
-    return nonlin, storage
+            #
+            # Construct the nonlinearity calss
+            #
+            nonlin = lstorage['nonlinearity'] = R.HistNonlinearity( debug )
+            nonlin.set( edges, newe.product )
+            output.append( nonlin )
+
+    return tuple(output), storage
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )
