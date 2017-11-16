@@ -27,7 +27,7 @@ for name in names[1:]:
     par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
     pars.append( par )
 
-escale = env.defparameter( 'weight_escale', central=1.0, sigma=0.02*0.01 )
+escale = env.defparameter( 'escale', central=1.0, sigma=0.02*0.01 )
 
 def singularities( values, edges ):
     indices = N.digitize( values, edges )-1
@@ -42,9 +42,9 @@ phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
 
 filename = 'output/detector_nl_consModel_450itr.root'
-nonlin, storage = detector_nl_from_file( filename, names, edges=points.points, debug=True)
+(nonlin,), storage = detector_nl_from_file( filename, names, edges=points.points, debug=True)
 corr_lsnl = storage['lsnl_factor']
-corr = storage('escale_0')['factor']
+corr = storage('escale')['factor']
 
 #
 # Plot curves:
@@ -118,7 +118,7 @@ mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
-newe = storage('escale_0')['edges_mod'].product.data()
+newe = storage('escale')['edges_mod'].product.data()
 ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
 
 savefig( opts.output, suffix='_matrix', dpi=300 )

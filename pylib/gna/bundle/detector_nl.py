@@ -20,7 +20,7 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
 
     names = kwargs.pop( 'names' )
     debug = kwargs.pop( 'debug', False )
-    namespaces = kwargs.pop( 'namespaces', [] )
+    namespaces = kwargs.pop( 'namespaces', [env.globalns] )
 
     #
     # Interpolate curves on the default binning
@@ -53,13 +53,13 @@ def detector_nl( graphs, edges, *args, **kwargs  ):
 
     output = []
     labels = convert(['escale'], 'stdvector')
-    for i, ns in enumerate(namespaces or [ env.globalns ]):
+    for i, ns in enumerate(namespaces):
         with ns:
             #
             # Uncorrelated between detectors part of the energy nonlinearity factor
             # correlated part multiplicated by the scale factor
             #
-            lstorage = storage('escale_%s'%ns.name)
+            lstorage = storage('escale_%s'%ns.name if ns.name else 'escale')
             corr = lstorage['factor'] = R.WeightedSum( labels, labels )
             corr.sum['escale']( corr_lsnl.sum )
 
