@@ -5,41 +5,121 @@ namespace elements are accessible throught both key access or member acess"""
 from __future__ import print_function
 import runpy
 from os import path
+from collections import OrderedDict
 
 class configurator_base(object):
-    __verbose__ = False
-    # def __init__(self):
-        # pass
+    def __init__(self):
+        super(configurator_base, self).__setattr__('__dict__', OrderedDict())
 
-    def get(self, name, default=None):
-        return self.__dict__.get(name, default)
+    def __repr__(self):
+        return 'configurator'+self.__dict__.__repr__()[11:]
 
-    def set(self, key, value):
-        self.__dict__[key] = value
+    def get(self, key, default=None):
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                return self.__dict__.get(key).get( rest, default )
 
-    def setdefault(self, key, value):
-        return self.__dict__.setdefault(key, value)
+        if isinstance( key, str ) and '.' in key:
+            return self.get(key.split('.'))
 
-    def __contains__(self, name):
-        return self.__dict__.__contains__(name)
-
-    def __setattr__(self, key, value):
-        if type(value)==str:
-            if value.startswith('load:'):
-                value = configurator(filename = value.replace('load:', ''))
-        self.__dict__[key] = value
-
-    def __setitem__(self, key, value):
-        if type(value)==str:
-            if value.startswith('load:'):
-                value = configurator(filename = value.replace('load:', ''))
-        self.__dict__[key] = value
+        return self.__dict__.get(key, default)
 
     def __getitem__(self, key):
-        try:
-            return self.__dict__[key]
-        except:
-            raise Exception( "Config file '%s' doesn't define key <%s>"%( self.__dict__['@info']['@loaded_from'], key ) )
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                return self.__dict__.__getitem__(key).__getitem__( rest, default )
+
+        if isinstance( key, str ) and '.' in key:
+            return self.__getitem__(key.split('.'))
+
+        return self.__dict__.__getitem__(key)
+
+    __getattr__ = __getitem__
+
+    def set(self, key, value):
+        if isinstance(value, str):
+            if value.startswith('load:'):
+                value = configurator(filename = value.replace('load:', ''))
+        elif isinstance(value, dict):
+            value = configurator(dic=value)
+
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                if not key in self.__dict__:
+                    cfg = self.__dict__[key]=configurator()
+                    return cfg.set( rest, value )
+                return self.__dict__.get(key).set( rest, value )
+
+        if isinstance( key, str ) and '.' in key:
+            return self.set( key.split('.'), value )
+
+        self.__dict__[key] = value
+
+    __setattr__ = set
+    __setitem__= set
+
+    def setdefault(self, key, value):
+        if isinstance(value, str):
+            if value.startswith('load:'):
+                value = configurator(filename = value.replace('load:', ''))
+        elif isinstance(value, dict):
+            value = configurator(dic=value)
+
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                if not key in self.__dict__:
+                    cfg = self.__dict__[key]=configurator()
+                    return cfg.setdefault( rest, default )
+                return self.__dict__.get(key).setdefault( rest, default )
+
+        if isinstance( key, str ):
+            if '.' in key:
+                return self.setdefault(key.split('.'), value)
+            else:
+                return self.__dict__.setdefault(key, value)
+
+        raise Exception( 'Unsupported key type', type(key) )
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def __contains__(self, key):
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                return self.__dict__.get(key).__contains__(rest)
+
+        if isinstance( key, str ):
+            if '.' in key:
+                return self.__contains__(key.split('.'))
+            else:
+                return self.__dict__.__contains__(key)
+
+        raise Exception( 'Unsupported key type', type(key) )
+
+    def __call__(self, key):
+        if isinstance( key, (list, tuple) ):
+            key, rest = key[0], key[1:]
+            if rest:
+                if not key in self.__dict__:
+                    cfg = self.__dict__[key]=configurator()
+                    return cfg.__call__( rest )
+                return self.__dict__.get(key).__call__(rest)
+
+        if isinstance( key, str ):
+            if '.' in key:
+                return self.__call__(key.split('.'))
+            else:
+                if self.__dict__.__contains__( key ):
+                    raise Exception( "Can not create nested configuration as the key '%s' already exists"%key )
+                value = self.__dict__[key] = configurator()
+                return value
+
+        raise Exception( 'Unsupported key type', type(key) )
 
     def __load__(self, filename, subst=[]):
         if subst:
@@ -58,8 +138,8 @@ class configurator_base(object):
         unimportant = False
         for filename in filenames:
             if unimportant and not path.isfile( filename ):
-                if self.__verbose__:
-                    print( 'Skipping nonexistent file', filename )
+                # if self['@info'].get('verbose', False):
+                    # print( 'Skipping nonexistent file', filename )
                 continue
             dic = self.__load_dic__(filename, dictonly=True)
             self.__import__(dic)
@@ -76,13 +156,13 @@ class configurator_base(object):
     def __import__(self, dic):
         self.__check_for_conflicts__(dic)
         for k, v in sorted(dic.items()):
-            if k.startswith('__'):
+            if isinstance(k, str) and k.startswith('__'):
                 continue
-            if self.__verbose__:
-                if k in self:
-                    print( 'Reset', k, 'to', v.__repr__() )
-                else:
-                    print( 'Set', k, 'to', v.__repr__() )
+            # if self['@info'].get('verbose', False):
+                # if k in self:
+                    # print( 'Reset', k, 'to', v.__repr__() )
+                # else:
+                    # print( 'Set', k, 'to', v.__repr__() )
             self.__setattr__(k, v)
 
     def __check_for_conflicts__(self, dic):
@@ -95,10 +175,11 @@ class configurator_base(object):
 
 class configurator(configurator_base):
     def __init__(self, filename=None, dic={}, **kwargs):
-        # super(configurator, self).__init__()
+        super(configurator, self).__init__()
 
-        self['@info']={'@loaded_from': filename}
-        self.__verbose__ = kwargs.pop( 'debug', False )
+        self.__dict__['@info']={}
+        self['@info']['@loaded_from']=filename
+        self['@info']['verbose'] = kwargs.pop( 'debug', False )
         if filename:
             self.__load__(filename, **kwargs)
         elif dic:
