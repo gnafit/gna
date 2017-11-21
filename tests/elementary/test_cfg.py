@@ -30,3 +30,6 @@ cfg.b = { 1:2, 3:4 }
 cfg('c.d.e').a= { 5:6 }
 print( cfg )
 print()
+
+# cfg.set = 2
+# cfg('set')
