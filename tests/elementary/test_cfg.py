@@ -54,9 +54,9 @@ print( cfg )
 print()
 
 cfg = configurator()
+cfg('c.d.e').a= { 5:6 }
 cfg.a = dict(test=1, b=2)
 cfg.b = { 1:2, 3:4 }
-cfg('c.d.e').a= { 5:6 }
 print( cfg )
 print()
 

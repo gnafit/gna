@@ -22,7 +22,7 @@ class NestedDict(object):
             self.__import__(OrderedDict(iterable))
 
     def __repr__(self):
-        return 'configurator'+self.__dict__.__repr__()[11:]
+        return 'NestedDict'+self.__dict__.__repr__()[11:]
 
     def get(self, key, default=None):
         if isinstance( key, (list, tuple) ):
