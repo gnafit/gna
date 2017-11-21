@@ -12,13 +12,15 @@ from gna.env import env, namespace
 
 def detector_nl( graphs, edges, *args, **kwargs  ):
     """Assembles a chain for IAV detector effect using input matrix"""
+    cfg = kwargs.pop( 'cfg', kwargs )
+    names = cfg['names']
+
     gstorage = kwargs.pop( 'storage', None )
     if gstorage:
         storage = gstorage( 'nonlinearity' )
     else:
         storage = namespace( None, 'nonlinearity' )
 
-    names = kwargs.pop( 'names' )
     debug = kwargs.pop( 'debug', False )
     namespaces = kwargs.pop( 'namespaces', [env.globalns] )
 

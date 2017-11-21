@@ -13,13 +13,16 @@ init_globals = dict( percent=0.01 )
 forbidden_keys = []
 
 class NestedDict(object):
-    def __init__(self, iterable=None):
+    def __init__(self, iterable=None, **kwargs):
         super(NestedDict, self).__setattr__('__dict__', OrderedDict())
 
         meta[self] = dict()
 
         if iterable:
             self.__import__(OrderedDict(iterable))
+
+        if kwargs:
+            self.__import__(kwargs)
 
     def __repr__(self):
         return 'NestedDict'+self.__dict__.__repr__()[11:]
@@ -33,7 +36,7 @@ class NestedDict(object):
                     raise KeyError( "No nested key '%s'"%key )
                 return sub.get( rest, default )
 
-        if isinstance( key, str ) and '.' in key:
+        if isinstance( key, basestring ) and '.' in key:
             return self.get(key.split('.'))
 
         return self.__dict__.get(key, default)
@@ -44,7 +47,7 @@ class NestedDict(object):
             if rest:
                 return self.__dict__.__getitem__(key).__getitem__( rest )
 
-        if isinstance( key, str ) and '.' in key:
+        if isinstance( key, basestring ) and '.' in key:
             return self.__getitem__(key.split('.'))
 
         return self.__dict__.__getitem__(key)
@@ -52,7 +55,7 @@ class NestedDict(object):
     __getattr__ = __getitem__
 
     def set(self, key, value):
-        if isinstance(value, str):
+        if isinstance(value, basestring):
             if value.startswith('load:'):
                 value = configurator(filename = value.replace('load:', ''))
         elif isinstance(value, dict):
@@ -66,7 +69,7 @@ class NestedDict(object):
                     return cfg.set( rest, value )
                 return self.__dict__.get(key).set( rest, value )
 
-        if isinstance( key, str ) and '.' in key:
+        if isinstance( key, basestring ) and '.' in key:
             return self.set( key.split('.'), value )
 
         if key in forbidden_keys:
@@ -78,7 +81,7 @@ class NestedDict(object):
     __setitem__= set
 
     def setdefault(self, key, value):
-        if isinstance(value, str):
+        if isinstance(value, basestring):
             if value.startswith('load:'):
                 value = configurator(filename = value.replace('load:', ''))
         elif isinstance(value, dict):
@@ -92,7 +95,7 @@ class NestedDict(object):
                     return cfg.setdefault( rest, value )
                 return self.__dict__.get(key).setdefault( rest, value )
 
-        if isinstance( key, str ):
+        if isinstance( key, basestring ):
             if '.' in key:
                 return self.setdefault(key.split('.'), value)
 
@@ -110,7 +113,7 @@ class NestedDict(object):
             if rest:
                 return self.__dict__.get(key).__contains__(rest)
 
-        if isinstance( key, str ):
+        if isinstance( key, basestring ):
             if '.' in key:
                 return self.__contains__(key.split('.'))
 
@@ -125,20 +128,18 @@ class NestedDict(object):
                     return cfg.__call__( rest )
                 return self.__dict__.get(key).__call__(rest)
 
-        if isinstance( key, str ):
+        if isinstance( key, basestring ):
             if '.' in key:
                 return self.__call__(key.split('.'))
-            else:
-                if self.__dict__.__contains__( key ):
-                    raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
 
-                if key in forbidden_keys:
-                    raise KeyError( "Can not use key '%s' due to technical limitations"%key )
+        if key in forbidden_keys:
+            raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
-                value = self.__dict__[key] = NestedDict()
-                return value
+        if self.__dict__.__contains__( key ):
+            raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
 
-        raise KeyError( 'Unsupported key type', type(key) )
+        value = self.__dict__[key] = NestedDict()
+        return value
 
     def __load__(self, filename, subst=[]):
         if subst:
@@ -191,7 +192,7 @@ class NestedDict(object):
         forbidden_items = [ s for s in dic.keys() if s in forbidden_keys or s in init_globals ]
         if forbidden_items:
             raise KeyError("Configuration file '%s' contains following reserved identifiers: %s"%(
-                self.__dict__.get('@loaded_from', ''), str(forbidden_items)))
+                self.__dict__.get('@loaded_from', ''), basestring(forbidden_items)))
 
 forbidden_keys = [ s for s in NestedDict.__dict__.keys() if not s.startswith('__') ]
 

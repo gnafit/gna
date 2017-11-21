@@ -259,7 +259,7 @@ class nsview(object):
                 print ''
             else:
                 'none'
-        raise KeyError(name)
+        raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
 
 class parametersview(object):
     def __getitem__(self, name):

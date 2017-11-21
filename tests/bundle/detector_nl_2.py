@@ -14,6 +14,7 @@ from gna.env import env
 import constructors as C
 from converters import convert
 import numpy as N
+from gna.configurator import NestedDict
 
 # from argparse import ArgumentParser
 # parser = ArgumentParser()
@@ -23,9 +24,11 @@ import numpy as N
 #
 # Initialize bundle
 #
-names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ]
-pars = [ env.defparameter( 'weight_'+names[0], central=1.0, sigma=0.0, fixed=True ) ]
-for name in names[1:]:
+cfg = NestedDict(
+    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ],
+        )
+pars = [ env.defparameter( 'weight_'+cfg.names[0], central=1.0, sigma=0.0, fixed=True ) ]
+for name in cfg.names[1:]:
     par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
     pars.append( par )
 
@@ -48,7 +51,7 @@ phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
 
 filename = 'output/detector_nl_consModel_450itr.root'
-(nonlin1, nonlin2), storage = detector_nl_from_file( filename, names, edges=edges_p.points,
+(nonlin1, nonlin2), storage = detector_nl_from_file( filename, cfg.names, edges=edges_p.points,
                                          namespaces=[ env.ns(ns) for ns in ('ad1', 'ad2') ],
                                          debug=True )
 factor1 = storage('escale_ad1')['factor']

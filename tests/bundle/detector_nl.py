@@ -12,6 +12,7 @@ from gna.env import env
 import constructors as C
 from converters import convert
 import numpy as N
+from gna.configurator import NestedDict
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -21,9 +22,11 @@ opts=parser.parse_args()
 #
 # Initialize bundle
 #
-names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ]
-pars = [ env.defparameter( 'weight_'+names[0], central=1.0, sigma=0.0, fixed=True ) ]
-for name in names[1:]:
+cfg = NestedDict(
+    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ],
+        )
+pars = [ env.defparameter( 'weight_'+cfg.names[0], central=1.0, sigma=0.0, fixed=True ) ]
+for name in cfg.names[1:]:
     par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
     pars.append( par )
 
@@ -42,7 +45,7 @@ phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
 
 filename = 'output/detector_nl_consModel_450itr.root'
-(nonlin,), storage = detector_nl_from_file( filename, names, edges=points.points, debug=True)
+(nonlin,), storage = detector_nl_from_file( filename, cfg.names, edges=points.points, debug=True)
 corr_lsnl = storage['lsnl_factor']
 corr = storage('escale')['factor']
 
@@ -59,9 +62,9 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( '' )
 
-for par, name in zip(pars, names):
+for par, name in zip(pars, cfg.names):
     if name!='nominal':
-        for par1, name1 in zip(pars[1:], names[1:]):
+        for par1, name1 in zip(pars[1:], cfg.names[1:]):
             par1.set( name==name1 and 1.0 or 0.0 )
 
     lines = ax.plot( edges, corr_lsnl.sum.sum.data(), '-', label=name )

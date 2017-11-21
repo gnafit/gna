@@ -11,16 +11,18 @@ from mpl_tools.helpers import add_colorbar, plot_hist
 from gna.env import env
 import constructors as C
 import numpy as N
+from gna.configurator import NestedDict
 
 #
 # Initialize bundle
 #
-parname = 'DiagScale'
-par1 = env.defparameter( 'ad1.'+parname,  central=1.5, relsigma=0.1 )
-par2 = env.defparameter( 'ad2.'+parname,  central=0.5, relsigma=0.1 )
-(esmear1,esmear2), _ = detector_iav_from_file( 'output/detector_iavMatrix_P14A_LS.root', 'iav_matrix', ndiag=1,
-                                               parname=parname,
-                                               namespaces=[env.globalns(s) for s in ['ad1', 'ad2']] )
+cfg = NestedDict( ndiag = 1)
+par1 = env.defparameter( 'ad1.OffdiagScale',  central=1.5, relsigma=0.1 )
+par2 = env.defparameter( 'ad2.OffdiagScale',  central=0.5, relsigma=0.1 )
+(esmear1,esmear2), _ = detector_iav_from_file( 'output/detector_iavMatrix_P14A_LS.root', 'iav_matrix',
+                                               namespaces=[env.globalns(s) for s in ['ad1', 'ad2']],
+                                               cfg=cfg
+                                               )
 
 #
 # Test bundle
