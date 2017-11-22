@@ -8,8 +8,10 @@ from gna.env import env, namespace
 from gna.bundle.detector_iav import detector_iav_from_file
 from gna.bundle.detector_nl import detector_nl_from_file
 
-def transformations_map( sources, targets ):
-    pass
+def transformations_map( sources, sourcename, targets, targetname ):
+    for source, target in zip( sources, targets ):
+        import IPython
+        IPython.embed()
 
 def detector_dbchain( edges, cfg, **kwargs ):
     gstorage = kwargs.pop( 'storage', None )
@@ -22,10 +24,8 @@ def detector_dbchain( edges, cfg, **kwargs ):
 
     iavlist, _ = detector_iav_from_file( namespaces=namespaces, storage=storage, **cfg.detector.iav )
     nllist, _  = detector_nl_from_file( edges=edges, namespaces=namespaces, storage=storage, **cfg.detector.nonlinearity )
-    import IPython
-    IPython.embed()
 
-    # reslist = transformations_map( iavlist, nllist )
+    reslist = transformations_map( iavlist, 'aaa', nllist, 'aaa' )
 
     # return reslist, storage
 

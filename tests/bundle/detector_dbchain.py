@@ -67,4 +67,4 @@ points = C.Points(edges)
 #
 # Create the chain
 #
-transformations, storage = detector_dbchain( edges=points.single(), cfg=cfg, namespaces=namespaces, storage=storage )
+transformations, storage = detector_dbchain( edges=R.OutputDescriptor(points.single()), cfg=cfg, namespaces=namespaces, storage=storage )

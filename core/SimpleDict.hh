@@ -36,7 +36,7 @@ public:
     if (it == m_container->end()) {
       return T::invalid(name);
     }
-    return T(*it);
+    return *it;
   }
 private:
   Container *m_container;
