@@ -72,6 +72,14 @@ void InputDescriptor::connect(const OutputDescriptor &out) const {
   return BaseClass::connect(out);
 }
 
+TransformationDescriptor TransformationDescriptor::invalid(int index) {
+  throw IndexError(index, "input");
+}
+
+TransformationDescriptor TransformationDescriptor::invalid(const std::string name) {
+  throw KeyError(name, "input");
+}
+
 Input InputDescriptor::invalid(int index) {
   throw IndexError(index, "input");
 }

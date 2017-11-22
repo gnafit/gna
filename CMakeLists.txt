@@ -51,6 +51,7 @@ set (HEADERS
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  TransformationBase.hh
   Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
