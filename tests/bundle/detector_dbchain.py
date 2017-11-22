@@ -4,7 +4,8 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle.detector_dbchain import detector_dbchain
+from gna.bundle import execute_bundle
+from gna.bundle import all
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
@@ -22,14 +23,14 @@ from physlib import percent
 cfg = NestedDict()
 cfg['detector.detectors'] = [ 'AD11', 'AD21', 'AD31' ]
 cfg.detector.chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ]
-cfg.detector.escale = dict(
+cfg.detector.nonlinearity = dict(
+        bundle = 'nonlinearity_db_root_v01',
+        names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+        filename = 'output/detector_nl_consModel_450itr.root',
         relative_uncertainty = 0.2*percent
         )
-cfg.detector.nonlinearity = dict(
-        names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-        filename = 'output/detector_nl_consModel_450itr.root'
-        )
 cfg.detector.iav = dict(
+        bundle = 'iav_db_root_v01',
         parname = 'OffdiagScale',
         offdiag_scale_uncertainty = 4*percent,
         ndiag = 1,
@@ -54,7 +55,7 @@ for detector in cfg.detector.detectors:
     env.defparameter( '{detector}.OffdiagScale'.format(detector=detector, parname=cfg.detector.iav.parname),
                       central=1.0, relsigma=cfg.detector.iav.offdiag_scale_uncertainty )
     env.defparameter( '{detector}.escale'.format(detector=detector),
-                      central=1.0, relsigma=cfg.detector.escale.relative_uncertainty )
+                      central=1.0, relsigma=cfg.detector.nonlinearity.relative_uncertainty )
 
 
 #
@@ -67,4 +68,4 @@ points = C.Points(edges)
 #
 # Create the chain
 #
-transformations, storage = detector_dbchain( edges=R.OutputDescriptor(points.single()), cfg=cfg, namespaces=namespaces, storage=storage )
+execute_bundle( 'dbchain_v01', edges=R.OutputDescriptor(points.single()), cfg=cfg, namespaces=namespaces, storage=storage  )
