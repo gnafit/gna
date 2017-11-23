@@ -18,12 +18,15 @@ class detector_dbchain(TransformationBundle):
 
     def build(self):
         args = dict( namespaces=self.namespaces, storage=self.storage )
+
         iavlist, self.iav = execute_bundle( cfg=self.cfg.iav, **args )
         nllist, self.nl   = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
 
-        connections = [ (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )) ]
-        reslist = transformations_map( (iavlist, nllist), connections )
+        self.inputs, self.outputs = iavlist, nllist
 
-        return reslist
+        connections = [ (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )) ]
+        transformations_map( (iavlist, nllist), connections )
+
+        return nllist
 
 

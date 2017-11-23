@@ -18,6 +18,14 @@ import itertools as I
 from physlib import percent
 
 #
+# Parse arguments
+#
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '--dot', help='write graphviz output' )
+args = parser.parse_args()
+
+#
 # Create the configuration
 #
 cfg = NestedDict()
@@ -72,3 +80,21 @@ points = C.Points(edges)
 # Create the chain
 #
 t, b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
+
+#
+# Make common fake input
+#
+from constructors import Points
+data = Points( N.ones( (240) ) )
+for inp in b.inputs:
+    inp.smear.Ntrue( data.points )
+
+#
+# Dump graph
+#
+if args.dot:
+    from gna.graphviz import GNADot
+
+    graph = GNADot( t[0]['smear'] )
+    graph.write(args.dot)
+
