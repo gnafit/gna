@@ -3,7 +3,13 @@ import numpy as np
 import ROOT
 
 # Protect the following classes/namespaces from being wrapped
-ignored_classes = [ 'Eigen', 'EigenHelpers', 'GNA' ]
+ignored_classes = [
+        'Eigen',
+        'EigenHelpers',
+        'GNA',
+        'TransformationTypes',
+        'ParametrizedTypes',
+        ]
 
 def hygienic(decorator):
     def new_decorator(original):
@@ -219,7 +225,7 @@ def setup(ROOT):
     def patchcls(cls):
         if not isinstance(cls, ROOT.PyRootType):
             return cls
-        if cls.__name__.endswith('_meta'):
+        if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
         if issubclass(cls, GNAObject):
             wrapped = wrapGNAclass(cls)
@@ -227,7 +233,7 @@ def setup(ROOT):
                 wrapped = wrapPoints(wrapped)
                 patchSingle( wrapped )
             return wrapped
-        if 'Class' not in cls.__dict__ and cls.__name__ not in ignored_classes:
+        if 'Class' not in cls.__dict__:
             t = cls.__class__
             origgetattr = cls.__getattribute__
             t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))
