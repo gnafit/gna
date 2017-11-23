@@ -62,8 +62,6 @@ public:
   const Outputs outputs;
 
   TransformationTypes::OutputHandle single() override;
-
-  TransformationTypes::Entry* entry() const { return m_entry; }
 };
 
 class InputDescriptor: public TransformationTypes::InputHandle {

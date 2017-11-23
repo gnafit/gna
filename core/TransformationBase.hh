@@ -226,6 +226,12 @@ namespace TransformationTypes {
     Entry *m_entry;
   };
 
+  class OpenHandle : public Handle {
+  public:
+      OpenHandle(const Handle& other) : Handle(other){};
+      Entry* getEntry() { return m_entry; }
+  };
+
   struct Args {
     Args(const Entry *e): m_entry(e) { }
     const Data<double> &operator[](int i) const;

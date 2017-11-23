@@ -95,3 +95,4 @@ Output OutputDescriptor::invalid(int index) {
 Output OutputDescriptor::invalid(const std::string name) {
   throw KeyError(name, "output");
 }
+
