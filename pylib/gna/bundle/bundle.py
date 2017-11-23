@@ -9,7 +9,8 @@ def declare_bundle(name):
         return cls
     return register_class
 
-def execute_bundle(name=None, **kwargs):
+def init_bundle(**kwargs):
+    name = kwargs.pop('name', None)
     if not name:
         cfg = kwargs['cfg']
         name = cfg.bundle
@@ -21,6 +22,10 @@ def execute_bundle(name=None, **kwargs):
 
     return bundle(**kwargs)
 
+def execute_bundle(**kwargs):
+    bundle = init_bundle(**kwargs )
+    return bundle.build(), bundle
+
 class TransformationBundle(object):
     def __init__(self, cfg, namespaces=[env.globalns], storage=None, **kwargs):
         self.cfg = cfg
@@ -31,3 +36,6 @@ class TransformationBundle(object):
             self.storage = storage( self.storage_name )
         else:
             self.storage = namespace( None, storage_name )
+
+    def build(self):
+        return None

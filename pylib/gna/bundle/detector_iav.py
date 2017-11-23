@@ -4,46 +4,44 @@ from __future__ import print_function
 import numpy as N
 from load import ROOT as R
 import constructors as C
-from gna.env import namespace, env
+from gna.bundle import *
 
-def detector_iav( mat, *args, **kwargs  ):
-    """Assembles a chain for IAV detector effect using input matrix"""
-    cfg = kwargs.pop( 'cfg', kwargs )
-    ndiag   = cfg.get( 'ndiag', 1 )
+@declare_bundle('iav_db_root_v01')
+class detector_iav(TransformationBundle):
+    def __init__(self, edges, **kwargs):
+        kwargs.setdefault( 'storage_name', 'iav')
+        super(detector_dbchain, self).__init__( **kwargs )
 
-    parname = kwargs.pop( 'parname', 'OffdiagScale' )
-    gstorage = kwargs.pop( 'storage', None )
-    if gstorage:
-        storage = gstorage( 'iav' )
-    else:
-        storage = namespace( None, 'iav' )
+        self.parname = kwargs.pop( 'parname', 'OffdiagScale' )
 
-    namespaces=kwargs.pop( 'namespaces', [env.globalns] )
+    def build_mat(self):
+        """Assembles a chain for IAV detector effect using input matrix"""
+        ndiag = self.cfg.get( 'ndiag', 1 )
 
-    norm = mat.sum( axis=0 )
-    norm[norm==0.0]=1.0
-    mat/=norm
+        norm = mat.sum( axis=0 )
+        norm[norm==0.0]=1.0
+        mat/=norm
 
-    points = storage['matrix'] = C.Points( mat )
+        points = self.storage['matrix'] = C.Points( self.iavmatrix )
 
-    output = []
-    for ns in namespaces:
-        with ns:
-            lstorage = storage( 'iav_%s'%ns.name )
-            renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname )
-            lstorage['renormdiag'] = renormdiag
-            renormdiag.renorm.inmat( points.points )
+        output = ()
+        for ns in self.namespaces:
+            with ns:
+                lstorage = self.storage( 'iav_%s'%ns.name )
+                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname )
+                lstorage['renormdiag'] = renormdiag
+                renormdiag.renorm.inmat( points.points )
 
-            esmear = lstorage['esmear'] = R.HistSmear( True )
-            esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-            output.append( esmear )
+                esmear = lstorage['esmear'] = R.HistSmear(True)
+                esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
+                output+=(esmear,)
 
-    return tuple(output), storage
+        return output
 
-def detector_iav_from_file( filename, matrixname, *args, **kwargs ):
-    """Assembles a chain for IAV detector effect using input matrix from a file
-    see detector_iav() for options"""
-    from file_reader import read_object_auto
-    mat = read_object_auto( filename, matrixname, convertto='array' )
+    def build(self):
+        """Assembles a chain for IAV detector effect using input matrix from a file
+        see detector_iav() for options"""
+        from file_reader import read_object_auto
+        self.iavmatrix = read_object_auto( filename, matrixname, convertto='array' )
 
-    return detector_iav( mat, *args, **kwargs )
+        return self.build_mat()

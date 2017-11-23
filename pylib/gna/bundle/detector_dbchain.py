@@ -7,7 +7,6 @@ from gna.env import env, namespace
 
 from gna.bundle import *
 from gna.bundle import declare_all
-from gna.bundle.detector_iav import detector_iav_from_file
 from gna.bundle.detector_nl import detector_nl_from_file
 
 @declare_bundle('dbchain_v01')
@@ -16,11 +15,14 @@ class detector_dbchain(TransformationBundle):
         kwargs.setdefault( 'storage_name', 'detector')
         super(detector_dbchain, self).__init__( **kwargs )
 
-        iavlist, _ = detector_iav_from_file( namespaces=self.namespaces, storage=self.storage, **self.cfg.detector.iav )
-        nllist, _  = detector_nl_from_file( edges=edges, namespaces=self.namespaces, storage=self.storage, **self.cfg.detector.nonlinearity )
+        self.edges=edges
 
-        reslist = transformations_map( iavlist, 'aaa', nllist, 'aaa' )
+    def build(self):
+        iavlist = execute_bundle( cfg=self.cfg.iav )
+        # nllist, _  = detector_nl_from_file( edges=self.edges, namespaces=self.namespaces, storage=self.storage, **self.cfg.detector.nonlinearity )
 
-        # return reslist, storage
+        # reslist = transformations_map( iavlist, 'aaa', nllist, 'aaa' )
+
+        return reslist
 
 

@@ -13,8 +13,9 @@ init_globals = dict( percent=0.01 )
 forbidden_keys = []
 
 class NestedDict(object):
+    __parent__ = None
     def __init__(self, iterable=None, **kwargs):
-        super(NestedDict, self).__setattr__('__dict__', OrderedDict())
+        super(NestedDict, self).__setattr__('__storage__', OrderedDict())
 
         meta[self] = dict()
 
@@ -25,13 +26,19 @@ class NestedDict(object):
             self.__import__(kwargs)
 
     def __repr__(self):
-        return 'NestedDict'+self.__dict__.__repr__()[11:]
+        return 'NestedDict'+self.__storage__.__repr__()[11:]
+
+    def set_parent(self, parent):
+        super(NestedDict, self).__setattr__('__parent__', parent)
+
+    def parent(self):
+        return self.__parent__
 
     def get(self, key, default=None):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                sub = self.__dict__.get(key)
+                sub = self.__storage__.get(key)
                 if sub is None:
                     raise KeyError( "No nested key '%s'"%key )
                 return sub.get( rest, default )
@@ -39,18 +46,18 @@ class NestedDict(object):
         if isinstance( key, basestring ) and '.' in key:
             return self.get(key.split('.'))
 
-        return self.__dict__.get(key, default)
+        return self.__storage__.get(key, default)
 
     def __getitem__(self, key):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                return self.__dict__.__getitem__(key).__getitem__( rest )
+                return self.__storage__.__getitem__(key).__getitem__( rest )
 
         if isinstance( key, basestring ) and '.' in key:
             return self.__getitem__(key.split('.'))
 
-        return self.__dict__.__getitem__(key)
+        return self.__storage__.__getitem__(key)
 
     __getattr__ = __getitem__
 
@@ -60,14 +67,16 @@ class NestedDict(object):
                 value = configurator(filename = value.replace('load:', ''))
         elif isinstance(value, dict):
             value = NestedDict(value)
+        if isinstance(value, NestedDict):
+            value.set_parent( self )
 
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                if not key in self.__dict__:
-                    cfg = self.__dict__[key]=NestedDict()
+                if not key in self.__storage__:
+                    cfg = self.__storage__[key]=NestedDict()
                     return cfg.set( rest, value )
-                return self.__dict__.get(key).set( rest, value )
+                return self.__storage__.get(key).set( rest, value )
 
         if isinstance( key, basestring ) and '.' in key:
             return self.set( key.split('.'), value )
@@ -75,7 +84,7 @@ class NestedDict(object):
         if key in forbidden_keys:
             raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
-        self.__dict__[key] = value
+        self.__storage__[key] = value
 
     __setattr__ = set
     __setitem__= set
@@ -90,10 +99,10 @@ class NestedDict(object):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                if not key in self.__dict__:
-                    cfg = self.__dict__[key]=NestedDict()
+                if not key in self.__storage__:
+                    cfg = self.__storage__[key]=NestedDict()
                     return cfg.setdefault( rest, value )
-                return self.__dict__.get(key).setdefault( rest, value )
+                return self.__storage__.get(key).setdefault( rest, value )
 
         if isinstance( key, basestring ):
             if '.' in key:
@@ -102,31 +111,31 @@ class NestedDict(object):
         if key in forbidden_keys:
             raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
-        return self.__dict__.setdefault(key, value)
+        return self.__storage__.setdefault(key, value)
 
     def keys(self):
-        return self.__dict__.keys()
+        return self.__storage__.keys()
 
     def __contains__(self, key):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                return self.__dict__.get(key).__contains__(rest)
+                return self.__storage__.get(key).__contains__(rest)
 
         if isinstance( key, basestring ):
             if '.' in key:
                 return self.__contains__(key.split('.'))
 
-        return self.__dict__.__contains__(key)
+        return self.__storage__.__contains__(key)
 
     def __call__(self, key):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
-                if not key in self.__dict__:
-                    cfg = self.__dict__[key]=NestedDict()
+                if not key in self.__storage__:
+                    cfg = self.__storage__[key]=NestedDict()
                     return cfg.__call__( rest )
-                return self.__dict__.get(key).__call__(rest)
+                return self.__storage__.get(key).__call__(rest)
 
         if isinstance( key, basestring ):
             if '.' in key:
@@ -135,10 +144,10 @@ class NestedDict(object):
         if key in forbidden_keys:
             raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
-        if self.__dict__.__contains__( key ):
+        if self.__storage__.__contains__( key ):
             raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
 
-        value = self.__dict__[key] = NestedDict()
+        value = self.__storage__[key] = NestedDict()
         return value
 
     def __load__(self, filename, subst=[]):
@@ -192,7 +201,7 @@ class NestedDict(object):
         forbidden_items = [ s for s in dic.keys() if s in forbidden_keys or s in init_globals ]
         if forbidden_items:
             raise KeyError("Configuration file '%s' contains following reserved identifiers: %s"%(
-                self.__dict__.get('@loaded_from', ''), basestring(forbidden_items)))
+                self.__storage__.get('@loaded_from', ''), basestring(forbidden_items)))
 
 forbidden_keys = [ s for s in NestedDict.__dict__.keys() if not s.startswith('__') ]
 

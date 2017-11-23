@@ -21,8 +21,11 @@ from physlib import percent
 # Create the configuration
 #
 cfg = NestedDict()
-cfg['detector.detectors'] = [ 'AD11', 'AD21', 'AD31' ]
-cfg.detector.chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ]
+cfg.detector = dict(
+        bundle = 'dbchain_v01',
+        detectors = [ 'AD11', 'AD21', 'AD31' ],
+        chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ]
+        )
 cfg.detector.nonlinearity = dict(
         bundle = 'nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
@@ -37,6 +40,8 @@ cfg.detector.iav = dict(
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
+import IPython
+IPython.embed()
 
 #
 # Create namespaces
@@ -68,4 +73,4 @@ points = C.Points(edges)
 #
 # Create the chain
 #
-execute_bundle( 'dbchain_v01', edges=R.OutputDescriptor(points.single()), cfg=cfg, namespaces=namespaces, storage=storage  )
+t, b = execute_bundle( edges=R.OutputDescriptor(points.single()), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
