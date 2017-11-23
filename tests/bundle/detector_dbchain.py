@@ -40,8 +40,6 @@ cfg.detector.iav = dict(
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
-import IPython
-IPython.embed()
 
 #
 # Create namespaces

@@ -10,7 +10,6 @@ from weakref import WeakKeyDictionary
 
 meta = WeakKeyDictionary()
 init_globals = dict( percent=0.01 )
-forbidden_keys = []
 
 class NestedDict(object):
     __parent__ = None
@@ -81,9 +80,6 @@ class NestedDict(object):
         if isinstance( key, basestring ) and '.' in key:
             return self.set( key.split('.'), value )
 
-        if key in forbidden_keys:
-            raise KeyError( "Can not use key '%s' due to technical limitations"%key )
-
         self.__storage__[key] = value
 
     __setattr__ = set
@@ -107,9 +103,6 @@ class NestedDict(object):
         if isinstance( key, basestring ):
             if '.' in key:
                 return self.setdefault(key.split('.'), value)
-
-        if key in forbidden_keys:
-            raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
         return self.__storage__.setdefault(key, value)
 
@@ -140,9 +133,6 @@ class NestedDict(object):
         if isinstance( key, basestring ):
             if '.' in key:
                 return self.__call__(key.split('.'))
-
-        if key in forbidden_keys:
-            raise KeyError( "Can not use key '%s' due to technical limitations"%key )
 
         if self.__storage__.__contains__( key ):
             raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
@@ -185,7 +175,6 @@ class NestedDict(object):
         return NestedDict(dic)
 
     def __import__(self, dic):
-        self.__check_for_conflicts__(dic)
         for k, v in sorted(dic.items()):
             if isinstance(k, str) and k.startswith('__'):
                 continue
@@ -195,15 +184,6 @@ class NestedDict(object):
                 else:
                     print( 'Set', k, 'to', v.__repr__() )
             self.__setattr__(k, v)
-
-    def __check_for_conflicts__(self, dic):
-        """checks whether the dicitonary uses any of forbidden identifiers"""
-        forbidden_items = [ s for s in dic.keys() if s in forbidden_keys or s in init_globals ]
-        if forbidden_items:
-            raise KeyError("Configuration file '%s' contains following reserved identifiers: %s"%(
-                self.__storage__.get('@loaded_from', ''), basestring(forbidden_items)))
-
-forbidden_keys = [ s for s in NestedDict.__dict__.keys() if not s.startswith('__') ]
 
 def configurator(filename=None, dic={}, **kwargs):
     self = NestedDict()
