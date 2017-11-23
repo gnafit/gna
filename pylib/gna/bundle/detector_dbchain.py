@@ -7,21 +7,22 @@ from gna.env import env, namespace
 
 from gna.bundle import *
 from gna.bundle import declare_all
-from gna.bundle.detector_nl import detector_nl_from_file
 
 @declare_bundle('dbchain_v01')
 class detector_dbchain(TransformationBundle):
+    name = 'detector'
     def __init__(self, edges, **kwargs):
-        kwargs.setdefault( 'storage_name', 'detector')
         super(detector_dbchain, self).__init__( **kwargs )
 
         self.edges=edges
 
     def build(self):
-        iavlist = execute_bundle( cfg=self.cfg.iav )
-        # nllist, _  = detector_nl_from_file( edges=self.edges, namespaces=self.namespaces, storage=self.storage, **self.cfg.detector.nonlinearity )
+        args = dict( namespaces=self.namespaces, storage=self.storage )
+        iavlist, self.iav = execute_bundle( cfg=self.cfg.iav, **args )
+        nllist, self.nl   = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
 
-        # reslist = transformations_map( iavlist, 'aaa', nllist, 'aaa' )
+        connections = [ (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )) ]
+        reslist = transformations_map( (iavlist, nllist), connections )
 
         return reslist
 

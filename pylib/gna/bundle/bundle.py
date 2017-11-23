@@ -27,15 +27,15 @@ def execute_bundle(**kwargs):
     return bundle.build(), bundle
 
 class TransformationBundle(object):
+    name = '<undefined>'
     def __init__(self, cfg, namespaces=[env.globalns], storage=None, **kwargs):
         self.cfg = cfg
-        self.namespaces = namespaces
-        self.storage_name = kwargs.pop( 'storage_name', '' )
+        self.namespaces = [ env.globalns(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
         if storage:
-            self.storage = storage( self.storage_name )
+            self.storage = storage( self.name )
         else:
-            self.storage = namespace( None, storage_name )
+            self.storage = namespace( None, self.name )
 
     def build(self):
         return None

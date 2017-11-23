@@ -44,7 +44,7 @@ cfg.detector.iav = dict(
 #
 # Create namespaces
 #
-namespaces = [env.globalns(name) for name in cfg.detector.detectors]
+namespaces = cfg.detector.detectors
 storage = env.globalns('storage')
 
 #
@@ -71,4 +71,4 @@ points = C.Points(edges)
 #
 # Create the chain
 #
-t, b = execute_bundle( edges=R.OutputDescriptor(points.single()), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
+t, b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
