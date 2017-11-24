@@ -13,10 +13,10 @@
 
 HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
   transformation_(this, "smear")
-      .input("FakeMatrix")
       .input("Ntrue")
+      .input("FakeMatrix")
       .output("Nvis")
-      .types(Atypes::pass<1,0>)
+      .types(Atypes::pass<0,0>)
       .func(&HistNonlinearity::calcSmear);
 
   transformation_(this, "matrix")
@@ -44,24 +44,24 @@ void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_mod
 
     t_["matrix"].inputs()[0].connect( bin_edges.single() );
     t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
-    t_["smear"].inputs()[0].connect( t_["matrix"].outputs()[0] );
+    t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
     set( bin_edges, bin_edges_modified );
-    t_["smear"].inputs()[1].connect( ntrue.single() );
+    t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
 void HistNonlinearity::set( SingleOutput& ntrue ){
     if( !m_initialized )
         throw std::runtime_error("HistNonlinearity is not initialized");
 
-    t_["smear"].inputs()[1].connect( ntrue.single() );
+    t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
 void HistNonlinearity::calcSmear(Args args, Rets rets) {
-  args[0]; // Needed to trigger updating
-  rets[0].x = m_sparse_cache * args[1].vec;
+  args[1]; // Needed to trigger updating
+  rets[0].x = m_sparse_cache * args[0].vec;
 }
 
 void HistNonlinearity::calcMatrix(Args args, Rets rets) {

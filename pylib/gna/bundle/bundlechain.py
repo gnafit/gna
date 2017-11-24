@@ -8,11 +8,11 @@ from gna.env import env, namespace
 from gna.bundle import *
 from gna.bundle import declare_all
 
-@declare_bundle('dbchain_v01')
-class detector_dbchain(TransformationBundle):
+@declare_bundle('bundlechain_v01')
+class bundlechain(TransformationBundle):
     name = 'detector'
     def __init__(self, edges, **kwargs):
-        super(detector_dbchain, self).__init__( **kwargs )
+        super(bundlechain, self).__init__( **kwargs )
 
         self.edges=edges
 

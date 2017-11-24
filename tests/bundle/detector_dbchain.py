@@ -31,7 +31,7 @@ args = parser.parse_args()
 #
 cfg = NestedDict()
 cfg.detector = dict(
-        bundle = 'dbchain_v01',
+        bundle = 'bundlechain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
         chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ]
         )

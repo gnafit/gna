@@ -12,8 +12,8 @@ as the input to HistSmear_.
 Inputs
 ^^^^^^
 
-1. ``'smear.SmearMatrix'`` —­square smearing matrix of number of events :math:`C`.
-2. ``'smear.Ntrue'`` — one-dimensional histogram of number of events :math:`N_{\text{true}}`.
+1. ``'smear.Ntrue'`` — one-dimensional histogram of number of events :math:`N_{\text{true}}`.
+2. ``'smear.SmearMatrix'`` —­square smearing matrix of number of events :math:`C`.
 
 Outputs
 ^^^^^^^
