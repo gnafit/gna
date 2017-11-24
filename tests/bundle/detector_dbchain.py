@@ -46,6 +46,7 @@ cfg.detector.iav = dict(
         bundle = 'iav_db_root_v01',
         parname = 'OffdiagScale',
         uncertainty = 4*percent,
+        uncertainty_type = 'relative',
         ndiag = 1,
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'

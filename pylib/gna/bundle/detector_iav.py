@@ -46,5 +46,7 @@ class detector_iav_db_root_v01(TransformationBundle):
         return self.build_mat()
 
     def define_variables(self):
+        if self.cfg.uncertainty_type!='relative':
+            raise Exception( 'IAV uncertainty should be relative by definition' )
         for ns in self.namespaces:
             ns.reqparameter( self.parname, central=1.0, relsigma=self.cfg.uncertainty )
