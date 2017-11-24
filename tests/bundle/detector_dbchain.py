@@ -33,7 +33,7 @@ cfg = NestedDict()
 cfg.detector = dict(
         bundle = 'dbchain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ] #FIXME: use this option
+        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ] #FIXME: use this option
         )
 cfg.detector.nonlinearity = dict(
         bundle = 'nonlinearity_db_root_v01',
@@ -66,10 +66,13 @@ storage = env.globalns('storage')
 
 #
 # Bin edges, required by energy nonlinearity
+# Data input
 #
 nbins = 240
 edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
+heights = N.ones( (nbins) )
 points = C.Points(edges)
+data = C.Histogram( edges, heights )
 
 #
 # Define the chain
@@ -82,10 +85,8 @@ print_parameters( env.globalns )
 #
 # Make common fake input
 #
-from constructors import Points
-data = Points( N.ones( (240) ) )
 for inp in b.inputs:
-    inp.smear.Ntrue( data.points )
+    inp.smear.Ntrue( data.hist )
 
 #
 # Dump graph

@@ -25,10 +25,13 @@ class detector_dbchain(TransformationBundle):
         nllist, self.nl     = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
         ereslist, self.eres = execute_bundle( cfg=self.cfg.eres, **args )
 
-        self.inputs, self.outputs = iavlist, nllist
+        self.inputs, self.outputs = iavlist, ereslist
 
-        connections = [ (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )) ]
-        transformations_map( (iavlist, nllist), connections )
+        connections = [
+                (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )),
+                (( 'smear', 'Nvis' ), ( 'smear', 'Nvis' ))
+                ]
+        transformations_map( (iavlist, nllist, ereslist), connections )
 
         return nllist
 

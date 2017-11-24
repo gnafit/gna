@@ -51,7 +51,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
             self.storage('curves')[name] = pts
             corr_lsnl.sum[name]( pts )
 
-        output = ()
+        self.output = ()
         labels = convert([self.parname], 'stdvector')
         for i, ns in enumerate(self.namespaces):
             with ns:
@@ -75,9 +75,9 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                 #
                 nonlin = lstorage['nonlinearity'] = R.HistNonlinearity( self.debug )
                 nonlin.set( self.edges, newe.product )
-                output+=nonlin,
+                self.output+=nonlin,
 
-        return output
+        return self.output
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

@@ -14,6 +14,9 @@ EnergyResolution::EnergyResolution() {
       .output("Nrec")
       .types(Atypes::pass<0>,
          [](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
+           if( args[0].kind!=DataKind::Hist ){
+             throw std::runtime_error("EnergyResolution input should be a histogram");
+           }
            obj->m_datatype = args[0];
            obj->fillCache();
          })

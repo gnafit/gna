@@ -25,7 +25,7 @@ class detector_iav_db_root_v01(TransformationBundle):
 
         points = self.storage['matrix'] = C.Points( self.iavmatrix )
 
-        output = ()
+        self.output = ()
         for ns in self.namespaces:
             with ns:
                 lstorage = self.storage( 'iav_%s'%ns.name )
@@ -35,9 +35,9 @@ class detector_iav_db_root_v01(TransformationBundle):
 
                 esmear = lstorage['esmear'] = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                output+=esmear,
+                self.output+=esmear,
 
-        return output
+        return self.output
 
     def build(self):
         from file_reader import read_object_auto
