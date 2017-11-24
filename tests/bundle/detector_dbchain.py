@@ -26,19 +26,20 @@ parser.add_argument( '--dot', help='write graphviz output' )
 args = parser.parse_args()
 
 #
-# Create the configuration
+# Define the configuration
 #
 cfg = NestedDict()
 cfg.detector = dict(
         bundle = 'dbchain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ]
+        chain = [ 'iav', 'nonlinearity', 'resolution', 'rebin' ] #FIXME: use this option
         )
 cfg.detector.nonlinearity = dict(
         bundle = 'nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'output/detector_nl_consModel_450itr.root',
-        relative_uncertainty = 0.2*percent
+        uncertainty = 0.2*percent,
+        uncertainty_type = 'relsigma' #FIXME: use this option
         )
 cfg.detector.iav = dict(
         bundle = 'iav_db_root_v01',
@@ -48,15 +49,23 @@ cfg.detector.iav = dict(
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
+cfg.detector.resolution = dict(
+        bundle = 'eres_common3',
+        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+        values  = [ 0.014764, 0.0869, 0.0271 ],
+        uncertainties = [30.0*percent]*3,
+        uncertainty_type = 'relsigma' #FIXME: use this option
+        )
 
 #
-# Create namespaces
+# Define namespaces
 #
 namespaces = cfg.detector.detectors
 storage = env.globalns('storage')
 
 #
-# Create variables
+# Define variables
+# FIXME: move variables definition to the bundles
 #
 env.defparameter( 'weight_'+cfg.detector.nonlinearity.names[0], central=1.0, sigma=0.0, fixed=True )
 for name in cfg.detector.nonlinearity.names[1:]:
@@ -77,7 +86,7 @@ edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
 points = C.Points(edges)
 
 #
-# Create the chain
+# Define the chain
 #
 t, b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
 

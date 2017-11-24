@@ -24,6 +24,7 @@ def init_bundle(**kwargs):
 
 def execute_bundle(**kwargs):
     bundle = init_bundle(**kwargs )
+    bundle.define_variables()
     return bundle.build(), bundle
 
 class TransformationBundle(object):
@@ -38,4 +39,7 @@ class TransformationBundle(object):
             self.storage = namespace( None, self.name )
 
     def build(self):
-        return None
+        pass
+
+    def define_variables(self):
+        pass
