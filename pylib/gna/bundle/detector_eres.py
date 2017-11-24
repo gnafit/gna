@@ -14,8 +14,6 @@ class detector_eres_common3(TransformationBundle):
         super(detector_eres_common3, self).__init__( **kwargs )
 
     def build(self):
-        from file_reader import read_object_auto
-
         self.output=()
         for ns in self.namespaces:
             with ns:

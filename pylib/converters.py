@@ -257,12 +257,12 @@ def tmatrix_to_array( m ):
 @save_converter( N.ndarray, R.TMatrixF )
 def array_to_tmatrixd( arr, **kwargs ):
     """Converto numpy array to TMatrixF"""
-    return R.TMatrixF( arr.shape[0], arr.shape[1], N.asanyarray(arr, dtype='f').ravel() )
+    return R.TMatrixF( arr.shape[0], arr.shape[1], N.ascontiguousarray(arr, dtype='f').ravel() )
 
 @save_converter( N.ndarray, R.TMatrixD )
 def array_to_tmatrixd( arr, **kwargs ):
     """Converto numpy array to TMatrixD"""
-    return R.TMatrixD( arr.shape[0], arr.shape[1], N.asanyarray(arr, dtype='d').ravel() )
+    return R.TMatrixD( arr.shape[0], arr.shape[1], N.ascontiguousarray(arr, dtype='d').ravel() )
 
 @save_converter( N.ndarray, 'tmatrix' )
 def array_to_tmatrixd( arr, **kwargs ):

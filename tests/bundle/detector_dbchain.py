@@ -33,7 +33,7 @@ cfg = NestedDict()
 cfg.detector = dict(
         bundle = 'dbchain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ] #FIXME: use this option
+        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ]
         )
 cfg.detector.nonlinearity = dict(
         bundle = 'nonlinearity_db_root_v01',
@@ -56,6 +56,11 @@ cfg.detector.eres = dict(
         values  = [ 0.014764, 0.0869, 0.0271 ],
         uncertainties = [30.0*percent]*3,
         uncertainty_type = 'relative'
+        )
+cfg.detector.rebin = dict(
+        bundle = 'rebin',
+        rounding = 3,
+        edges = [ 1.0, 5.0, 8.0 ]
         )
 
 #
@@ -94,6 +99,6 @@ for inp in b.inputs:
 if args.dot:
     from gna.graphviz import GNADot
 
-    graph = GNADot( t[0]['smear'] )
+    graph = GNADot( t[0][0] )
     graph.write(args.dot)
 

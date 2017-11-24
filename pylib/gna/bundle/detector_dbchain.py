@@ -16,23 +16,48 @@ class detector_dbchain(TransformationBundle):
 
         self.edges=edges
 
+        self.bundles = dict()
+        self.connections = dict(
+                iav = dict(
+                    input=( 'smear', 'Ntrue' ),
+                    output=('smear', 'Nvis')
+                    ),
+                nonlinearity = dict(
+                    input=( 'smear', 'Ntrue' ),
+                    output=('smear', 'Nvis')
+                ),
+                eres = dict(
+                    input=( 'smear', 'Nvis' ),
+                    output=('smear', 'Nrec')
+                ),
+                rebin = dict(
+                    input=( 'rebin', 'histin' ),
+                    output=('rebin', 'histout')
+                )
+            )
+
     def build(self):
         args = dict( namespaces=self.namespaces,
                      common_namespace=self.common_namespace,
-                     storage=self.storage )
+                     storage=self.storage,
+                     edges=self.edges )
 
-        iavlist, self.iav   = execute_bundle( cfg=self.cfg.iav, **args )
-        nllist, self.nl     = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
-        ereslist, self.eres = execute_bundle( cfg=self.cfg.eres, **args )
+        self.lists = ()
+        connections = []
+        bundlename_p = None
+        for bundlename in self.cfg.chain:
+            _, bundle = execute_bundle( cfg=self.cfg[bundlename], **args )
+            self.bundles[bundlename] = bundle
+            self.lists+=bundle.output,
 
-        self.inputs, self.outputs = iavlist, ereslist
+            if bundlename_p:
+                connections.append( (self.connections[bundlename_p]['output'], self.connections[bundlename]['input']) )
+            bundlename_p = bundlename
 
-        connections = [
-                (( 'smear', 'Nvis' ), ( 'smear', 'Ntrue' )),
-                (( 'smear', 'Nvis' ), ( 'smear', 'Nvis' ))
-                ]
-        transformations_map( (iavlist, nllist, ereslist), connections )
+        self.inputs, self.output = self.lists[0], self.lists[-1]
 
-        return nllist
+        transformations_map( self.lists, connections )
+
+        return self.output
 
 
