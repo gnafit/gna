@@ -17,10 +17,13 @@ class detector_dbchain(TransformationBundle):
         self.edges=edges
 
     def build(self):
-        args = dict( namespaces=self.namespaces, storage=self.storage )
+        args = dict( namespaces=self.namespaces,
+                     common_namespace=self.common_namespace,
+                     storage=self.storage )
 
-        iavlist, self.iav = execute_bundle( cfg=self.cfg.iav, **args )
-        nllist, self.nl   = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
+        iavlist, self.iav   = execute_bundle( cfg=self.cfg.iav, **args )
+        nllist, self.nl     = execute_bundle( edges=self.edges, cfg=self.cfg.nonlinearity, **args )
+        ereslist, self.eres = execute_bundle( cfg=self.cfg.eres, **args )
 
         self.inputs, self.outputs = iavlist, nllist
 

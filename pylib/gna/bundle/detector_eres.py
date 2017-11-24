@@ -11,7 +11,7 @@ class detector_eres_common3(TransformationBundle):
     name = 'eres'
     parameters = [ 'Eres_a', 'Eres_b', 'Eres_c' ]
     def __init__(self, **kwargs):
-        super(detector_eres_common3).__init__( **kwargs )
+        super(detector_eres_common3, self).__init__( **kwargs )
 
     def build(self):
         from file_reader import read_object_auto
@@ -25,6 +25,9 @@ class detector_eres_common3(TransformationBundle):
         return self.output
 
     def define_variables(self):
-        for name, val, unc in zip( self.parameters, cfg.values, cfg.uncertainties ):
-            env.defparameter( name, central=value, uncertainty=unc, uncertainty_type=cfg.uncertainty_type )
+        for name, val, unc in zip( self.parameters, self.cfg.values, self.cfg.uncertainties ):
+            self.common_namespace.defparameter( name, central=val, uncertainty=unc, uncertainty_type=self.cfg.uncertainty_type )
+
+        from gna.parameters.printer import print_parameters
+        print_parameters( self.common_namespace )
 

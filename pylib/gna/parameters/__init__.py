@@ -112,7 +112,8 @@ def makeparameter(ns, name, **kwargs):
 
     if 'fixed' in kwargs:
         param.setFixed()
-        print( 'fixed!', end='' )
+        if debug:
+            print( 'fixed!', end='' )
     param.reset()
     param.ns = ns
 

@@ -16,6 +16,7 @@ import numpy as N
 from gna.configurator import NestedDict
 import itertools as I
 from physlib import percent
+from gna import parameters
 
 #
 # Parse arguments
@@ -49,12 +50,12 @@ cfg.detector.iav = dict(
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
-cfg.detector.resolution = dict(
+cfg.detector.eres = dict(
         bundle = 'eres_common3',
         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
         values  = [ 0.014764, 0.0869, 0.0271 ],
         uncertainties = [30.0*percent]*3,
-        uncertainty_type = 'relative' #FIXME: use this option
+        uncertainty_type = 'relative'
         )
 
 #
@@ -75,7 +76,7 @@ for detector in cfg.detector.detectors:
     env.defparameter( '{detector}.OffdiagScale'.format(detector=detector, parname=cfg.detector.iav.parname),
                       central=1.0, relsigma=cfg.detector.iav.offdiag_scale_uncertainty )
     env.defparameter( '{detector}.escale'.format(detector=detector),
-                      central=1.0, relsigma=cfg.detector.nonlinearity.relative_uncertainty )
+                      central=1.0, relsigma=cfg.detector.nonlinearity.uncertainty )
 
 
 #
