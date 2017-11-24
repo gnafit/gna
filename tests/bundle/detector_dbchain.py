@@ -40,12 +40,12 @@ cfg.detector.nonlinearity = dict(
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'output/detector_nl_consModel_450itr.root',
         uncertainty = 0.2*percent,
-        uncertainty_type = 'relative' #FIXME: use this option
+        uncertainty_type = 'relative'
         )
 cfg.detector.iav = dict(
         bundle = 'iav_db_root_v01',
         parname = 'OffdiagScale',
-        offdiag_scale_uncertainty = 4*percent,
+        uncertainty = 4*percent,
         ndiag = 1,
         filename = 'output/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
@@ -63,21 +63,6 @@ cfg.detector.eres = dict(
 #
 namespaces = cfg.detector.detectors
 storage = env.globalns('storage')
-
-#
-# Define variables
-# FIXME: move variables definition to the bundles
-#
-env.defparameter( 'weight_'+cfg.detector.nonlinearity.names[0], central=1.0, sigma=0.0, fixed=True )
-for name in cfg.detector.nonlinearity.names[1:]:
-    env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
-
-for detector in cfg.detector.detectors:
-    env.defparameter( '{detector}.OffdiagScale'.format(detector=detector, parname=cfg.detector.iav.parname),
-                      central=1.0, relsigma=cfg.detector.iav.offdiag_scale_uncertainty )
-    env.defparameter( '{detector}.escale'.format(detector=detector),
-                      central=1.0, relsigma=cfg.detector.nonlinearity.uncertainty )
-
 
 #
 # Bin edges, required by energy nonlinearity

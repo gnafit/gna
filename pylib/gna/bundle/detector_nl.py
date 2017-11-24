@@ -14,6 +14,7 @@ from gna.bundle import *
 @declare_bundle('nonlinearity_db_root_v01')
 class detector_nonlinearity_db_root_v01(TransformationBundle):
     debug = False
+    parname = 'escale'
     def __init__(self, edges, **kwargs):
         kwargs.setdefault( 'storage_name', 'nonlinearity')
         super(detector_nonlinearity_db_root_v01, self).__init__( **kwargs )
@@ -51,7 +52,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
             corr_lsnl.sum[name]( pts )
 
         output = ()
-        labels = convert(['escale'], 'stdvector')
+        labels = convert([self.parname], 'stdvector')
         for i, ns in enumerate(self.namespaces):
             with ns:
                 #
@@ -90,6 +91,14 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         graphs = [ get_buffers_graph(g) for g in graphs ]
 
         return self.build_graphs( graphs )
+
+    def define_variables(self):
+        self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
+        for name in self.cfg.names[1:]:
+            self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
+
+        for ns in self.namespaces:
+            ns.reqparameter( self.parname, central=1.0, uncertainty=self.cfg.uncertainty, uncertainty_type=self.cfg.uncertainty_type )
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )

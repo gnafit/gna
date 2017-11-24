@@ -44,3 +44,7 @@ class detector_iav_db_root_v01(TransformationBundle):
         self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
 
         return self.build_mat()
+
+    def define_variables(self):
+        for ns in self.namespaces:
+            ns.reqparameter( self.parname, central=1.0, relsigma=self.cfg.uncertainty )
