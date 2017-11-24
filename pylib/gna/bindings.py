@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+
 from gna.env import env
 import numpy as np
 import ROOT
@@ -247,3 +250,83 @@ def setup(ROOT):
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass
+
+def patchROOTClass( object=None, method=None ):
+    """Decorator to override ROOT class methods. Usage
+    @patchclass
+    def CLASSNAME__METHODNAME(self,...)
+
+    @patchclass( CLASSNAME, METHODNAME )
+    def function(self,...)
+
+    @patchclass( ROOT.CLASS, METHODNAME )
+    def function(self,...)
+
+    @patchclass( [ROOT.CLASS1, ROOT.CLASS2,...], METHODNAME )
+    def function(self,...)
+    """
+    cfcn = None
+    if not method:
+        cfcn = object
+        object, method= cfcn.__name__.split( '__' )
+
+    if not type( object ) is list:
+        object = [ object ]
+
+    def converter( fcn ):
+        for o in object:
+            if type(o)==str:
+                o = getattr( ROOT, o )
+            setattr( o, method, fcn )
+        return fcn
+
+    if cfcn:
+        return converter( cfcn )
+
+    return converter
+
+@patchROOTClass( ROOT.Uncertain('double'), 'print' )
+def Uncertain__print( self ):
+    fmt = dict(
+            name    = self.name(),
+            val     = self.value(),
+            central = self.central(),
+            sigma   = self.sigma(),
+            )
+
+    print( '{name:30}'.format(**fmt), end='' )
+    print( '={val:10.6g}'.format(**fmt), end='' )
+
+    print( ' | {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    if fmt['central']:
+        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']), end='' )
+
+    print()
+
+@patchROOTClass( ROOT.Parameter('double'), 'print' )
+def Parameter__print( self ):
+    fmt = dict(
+            name    = self.name(),
+            val     = self.value(),
+            central = self.central(),
+            sigma   = self.sigma(),
+            )
+    limits  = self.limits()
+
+    print( '{name:30}'.format(**fmt), end='' )
+    print( '={val:10.6g}'.format(**fmt), end='' )
+
+    if self.isFixed():
+        print( ' [fixed]' )
+        return
+
+    print( ' | {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    if fmt['central']:
+        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']), end='' )
+
+    if limits.size():
+        print( ' |', end='' )
+        for (a,b) in limits:
+            print( ' (%g, %g)'%(a,b), end='' )
+
+    print()

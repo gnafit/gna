@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import ROOT
+# from gna.bindings import patchROOTClass
 
 debug=False
 
@@ -63,9 +64,11 @@ def makeparameter(ns, name, **kwargs):
         if 'uncertainty' in kwargs and 'uncertainty_type' in kwargs:
             uncertainty, uncertainty_type = kwargs['uncertainty'], kwargs['uncertainty_type']
 
-            if not uncertainty_type in [ 'sigma', 'relsigma' ]:
+            unctypes = dict( relative='relsigma', absolute='sigma' )
+            unckey = unctypes.get( uncertainty_type )
+            if not unckey:
                 raise Exception( "Unknown uncertainty type '%s'"%uncertainty_type )
-            kwargs[uncertainty_type] = uncertainty
+            kwargs[unckey] = uncertainty
 
         if 'relsigma' in kwargs:
             rs = float(kwargs['relsigma'])
@@ -116,3 +119,4 @@ def makeparameter(ns, name, **kwargs):
     if debug:
         print()
     return param
+

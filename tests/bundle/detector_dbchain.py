@@ -39,7 +39,7 @@ cfg.detector.nonlinearity = dict(
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'output/detector_nl_consModel_450itr.root',
         uncertainty = 0.2*percent,
-        uncertainty_type = 'relsigma' #FIXME: use this option
+        uncertainty_type = 'relative' #FIXME: use this option
         )
 cfg.detector.iav = dict(
         bundle = 'iav_db_root_v01',
@@ -54,7 +54,7 @@ cfg.detector.resolution = dict(
         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
         values  = [ 0.014764, 0.0869, 0.0271 ],
         uncertainties = [30.0*percent]*3,
-        uncertainty_type = 'relsigma' #FIXME: use this option
+        uncertainty_type = 'relative' #FIXME: use this option
         )
 
 #
