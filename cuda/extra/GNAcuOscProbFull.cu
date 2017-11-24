@@ -29,14 +29,15 @@ __host__ __device__ __forceinline__ double km2MeV(double km) {
 }
 
 
-//TODO: avoid too mane args
-__global__ void fullProb (double DMSq12, double DMSq13, double DMSq23,
+//TODO: avoid too many args
+__global__ void fullProb (int  start_id, 
+			    double DMSq12, double DMSq13, double DMSq23,
 			    double weight12, double weight13, double weight23, double weightCP,
 				double km2, int EnuSize, double* devEnu, 
 				double* devTmp, double* devComp0, double* devCompCP, 
 				double* devComp12, double* devComp13, double* devComp23,
 				double* ret, bool sameAB) {
-  int x = blockDim.x*blockIdx.x + threadIdx.x;
+  int x = (blockDim.x*blockIdx.x + threadIdx.x) ; // / streamcount + stream_id;
   if (x < 0 || x >= EnuSize) return;
   devTmp[x] = km2 / 2.0 * (1.0 / devEnu[x]);
   devComp0[x] = 1.0;
@@ -91,7 +92,7 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
 
   cudaMalloc((void**)&devEnu, alloc_size);
 
-  err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
+//  err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
 //  err = cudaMemcpy(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice);
   cudaMalloc((void**)&devTmp, alloc_size);
   cudaMalloc((void**)&devComp0, alloc_size);
@@ -101,23 +102,61 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
   cudaMalloc((void**)&devCompCP, alloc_size);
   cudaMalloc((void**)&devRet, alloc_size);
 
-  if(err!=cudaSuccess) {
+/*  if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from host to device! \n");
     std::cout << "err is " << cudaGetErrorString(err) << std::endl;
     exit(EXIT_FAILURE);
   }
+*/
   double km2 = km2MeV(L);
 
   std::cout << "km2 = " << km2 << std::endl;
+
+  int streamcount = 8;
+  cudaStream_t workerstreams[streamcount];
+  //cudaStreamCreate (;
+  EnuSize /= streamcount;
+
   cudaDeviceSynchronize();
 
-  fullProb<<<EnuSize/blockSize + 1, blockSize>>>(DMSq12, DMSq13, DMSq23,
-                   weight12, weight13, weight23, weightCP,
-                   km2, EnuSize, devEnu,
-                   devTmp, devComp0, devCompCP,
-                   devComp12,  devComp13, devComp23,
-                   devRet, sameAB);
+for (int i = 0; i < streamcount; i++) {
+  int k = i*EnuSize;
+  cudaStreamCreate ( &workerstreams[i]);
+// TODO: if not devided by streamcount 
+//  std::cout << "Enusize = " << EnuSize << std::endl;
+  err = cudaMemcpyAsync((void**)&devEnu[k], (void**)&Enu[k], EnuSize*sizeof(double), cudaMemcpyHostToDevice, workerstreams[i]);
+  if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from host to device in for! \n");
+    std::cout << "err is " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
+
+
+}
+
+for (int i = 0; i < streamcount; i++) {
+//  std::cout << "i = " << i << std::endl;
+  int k = i*EnuSize;
+//  cudaStreamCreate ( &workerstreams[i]);
+// TODO: if not devided by streamcount 
+//  std::cout << "Enusize = " << EnuSize << std::endl;
+/*  err = cudaMemcpyAsync((void**)&devEnu[k], (void**)&Enu[k], EnuSize*sizeof(double), cudaMemcpyHostToDevice, workerstreams[i]);
+  if(err!=cudaSuccess) {
+    printf("ERROR: unable to copy memory from host to device in for! \n");
+    std::cout << "err is " << cudaGetErrorString(err) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+*/
+// TODO Change pointers
+  
+  fullProb<<<EnuSize/blockSize + 1, blockSize, 0, workerstreams[i]>>>( i, DMSq12, DMSq13, DMSq23,
+                   weight12, weight13, weight23, weightCP,
+                   km2, EnuSize, &devEnu[k],
+                   &devTmp[k], &devComp0[k], &devCompCP[k],
+                   &devComp12[k], &devComp13[k], &devComp23[k],
+                   &devRet[k], sameAB);
+}
   cudaDeviceSynchronize(); 
 //  TODO: Where do we need to do sync?
   err = cudaMemcpyAsync(ret, devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
@@ -127,12 +166,15 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
     exit(EXIT_FAILURE);
   }
 
-  for (int i = 0; i < EnuSize; i++) {
+/*  for (int i = 0; i < EnuSize; i++) {
     std::cout << ret[i] << " ";
-  }
+  }*/
   cudaFree(devComp0);   cudaFree(devCompCP);
   cudaFree(devComp12);  cudaFree(devComp13);  cudaFree(devComp23);
   cudaFree(devRet);     cudaFree(devTmp);     cudaFree(devEnu);
   cudaStreamDestroy(stream1);
+  for (int i = 0 ; i < streamcount; i++) {
+    cudaStreamDestroy(workerstreams[i]);
+  }
 }
 
