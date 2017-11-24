@@ -28,6 +28,3 @@ class detector_eres_common3(TransformationBundle):
         for name, val, unc in zip( self.parameters, self.cfg.values, self.cfg.uncertainties ):
             self.common_namespace.defparameter( name, central=val, uncertainty=unc, uncertainty_type=self.cfg.uncertainty_type )
 
-        from gna.parameters.printer import print_parameters
-        print_parameters( self.common_namespace )
-

@@ -32,9 +32,9 @@ def Uncertain__print( self ):
     print( '{name:30}'.format(**fmt), end='' )
     print( '={val:10.6g}'.format(**fmt), end='' )
 
-    print( ' | {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    print( ' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
     if fmt['central']:
-        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']), end='' )
+        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0), end='' )
 
     print()
 
@@ -52,15 +52,17 @@ def Parameter__print( self ):
     print( '={val:10.6g}'.format(**fmt), end='' )
 
     if self.isFixed():
-        print( ' [fixed]' )
+        print( ' │ [fixed]' )
         return
 
-    print( ' | {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    print( ' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
     if fmt['central']:
-        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']), end='' )
+        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0), end='' )
+    else:
+        print( ' '*14, end='' )
 
     if limits.size():
-        print( ' |', end='' )
+        print( ' │', end='' )
         for (a,b) in limits:
             print( ' (%g, %g)'%(a,b), end='' )
 

@@ -91,6 +91,9 @@ points = C.Points(edges)
 #
 t, b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
 
+from gna.parameters.printer import print_parameters
+print_parameters( env.globalns )
+
 #
 # Make common fake input
 #
