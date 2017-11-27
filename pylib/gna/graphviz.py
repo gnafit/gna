@@ -5,9 +5,10 @@ import ROOT as R
 
 def uid( obj1, obj2=None ):
     if obj2:
-        return '%s -> %s'%( uid( obj1), uid( obj2 ) )
-
-    return obj1.__repr__().replace('*', '')
+        res = '%s -> %s'%( uid( obj1), uid( obj2 ) )
+    else:
+        res = obj1.__repr__().replace('*', '')
+    return res
 
 class GNADot(object):
     def __init__(self, transformation):
@@ -50,6 +51,7 @@ class GNADot(object):
                 continue
 
             for source in sink.sources:
+                # print( entry.name, '->', source.name )
                 assert source.materialized()
 
                 if self.registered( sink.entry, source.entry ):
