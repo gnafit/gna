@@ -2,8 +2,8 @@
 # Make sure python libs are loaded before ROOT
 #
 import numpy
-import scipy
 import matplotlib
+import scipy.stats
 
 import ROOT
 
