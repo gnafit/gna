@@ -114,7 +114,7 @@ if args.dot:
         graph = GNADot( b.output_transformations[0][0] )
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
-    except:
+    except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
 
 #

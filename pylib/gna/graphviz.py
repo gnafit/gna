@@ -17,12 +17,13 @@ class GNADot(object):
         self.walk_back( R.TransformationTypes.OpenHandle(transformation).getEntry() )
         self.write = self.graph.write
 
-    def registered( self, *args ):
+    def registered( self, *args, **kwargs ):
         id = uid( *args )
         if id in self.register:
             return True
 
-        self.register.add( id )
+        if kwargs.pop('register', True):
+            self.register.add( id )
         return False
 
     def walk_back( self, entry ):
@@ -50,15 +51,12 @@ class GNADot(object):
                 self.graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', taillabel='%i: %s'%(i, sink.name), arrowhead='empty' )
                 continue
 
-            for source in sink.sources:
-                # print( entry.name, '->', source.name )
+            for j, source in enumerate(sink.sources):
                 assert source.materialized()
 
                 if self.registered( sink.entry, source.entry ):
                     continue
                 self.graph.add_edge( uid(sink.entry), uid(source.entry), headlabel='%s'%(source.name), taillabel='%i: %s'%(i, sink.name) )
 
-                if not self.registered( source.entry ):
-                    node = self.graph.add_node( uid(source.entry), label=source.entry.name )
-                    self.walk_forward( source.entry )
+                self.walk_back( source.entry )
 
