@@ -4,9 +4,11 @@ from __future__ import print_function
 import numpy as N
 from load import ROOT as R
 from gna.env import env, namespace
+from collections import OrderedDict
 
 from gna.bundle import *
-from gna.bundle import declare_all
+# from gna.bundle import declare_all
+from gna.bundle.connections import each_pair
 
 @declare_bundle('bundlechain_v01')
 class bundlechain(TransformationBundle):
@@ -16,25 +18,7 @@ class bundlechain(TransformationBundle):
 
         self.edges=edges
 
-        self.bundles = dict()
-        self.connections = dict(
-                iav = dict(
-                    input=( 'smear', 'Ntrue' ),
-                    output=('smear', 'Nvis')
-                    ),
-                nonlinearity = dict(
-                    input=( 'smear', 'Ntrue' ),
-                    output=('smear', 'Nvis')
-                ),
-                eres = dict(
-                    input=( 'smear', 'Nvis' ),
-                    output=('smear', 'Nrec')
-                ),
-                rebin = dict(
-                    input=( 'rebin', 'histin' ),
-                    output=('rebin', 'histout')
-                )
-            )
+        self.bundles = OrderedDict()
 
     def build(self):
         args = dict( namespaces=self.namespaces,
@@ -42,22 +26,16 @@ class bundlechain(TransformationBundle):
                      storage=self.storage,
                      edges=self.edges )
 
-        self.lists = ()
-        connections = []
-        bundlename_p = None
         for bundlename in self.cfg.chain:
-            _, bundle = execute_bundle( cfg=self.cfg[bundlename], **args )
-            self.bundles[bundlename] = bundle
-            self.lists+=bundle.output,
+            self.bundles[bundlename] = execute_bundle( cfg=self.cfg[bundlename], **args )
 
-            if bundlename_p:
-                connections.append( (self.connections[bundlename_p]['output'], self.connections[bundlename]['input']) )
-            bundlename_p = bundlename
+        for b1, b2 in each_pair( self.bundles.values() ):
+            print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=b1.name, output=b1.outputs[0].name(),
+                                                                           b2=b2.name, input=b2.inputs[0].name(),
+                                                                           count=len(b1.inputs) ) )
+            for output, input in zip( b1.outputs, b2.inputs ):
+                input( output )
 
-        self.inputs, self.output = self.lists[0], self.lists[-1]
-
-        transformations_map( self.lists, connections )
-
-        return self.output
-
+        self.output_transformations = self.bundles.values()[-1].output_transformations
+        self.inputs, self.output = self.bundles.values()[0].inputs, self.bundles.values()[-1].outputs
 

@@ -13,6 +13,7 @@ from gna.bundle import *
 
 @declare_bundle('nonlinearity_db_root_v01')
 class detector_nonlinearity_db_root_v01(TransformationBundle):
+    name='nonlinearity'
     debug = False
     parname = 'escale'
     def __init__(self, edges, **kwargs):
@@ -51,7 +52,6 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
             self.storage('curves')[name] = pts
             corr_lsnl.sum[name]( pts )
 
-        self.output = ()
         labels = convert([self.parname], 'stdvector')
         for i, ns in enumerate(self.namespaces):
             with ns:
@@ -75,9 +75,10 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                 #
                 nonlin = lstorage['nonlinearity'] = R.HistNonlinearity( self.debug )
                 nonlin.set( self.edges, newe.product )
-                self.output+=nonlin,
+                self.output_transformations+=nonlin,
 
-        return self.output
+                self.inputs  += nonlin.smear.Ntrue,
+                self.outputs += nonlin.smear.Nvis,
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

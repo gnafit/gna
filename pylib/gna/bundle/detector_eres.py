@@ -14,13 +14,13 @@ class detector_eres_common3(TransformationBundle):
         super(detector_eres_common3, self).__init__( **kwargs )
 
     def build(self):
-        self.output=()
         for ns in self.namespaces:
             with ns:
                 eres = R.EnergyResolution()
-                self.output+=eres,
+                self.output_transformations+=eres,
 
-        return self.output
+                self.inputs  += eres.smear.Nvis,
+                self.outputs += eres.smear.Nrec,
 
     def define_variables(self):
         for name, val, unc in zip( self.parameters, self.cfg.values, self.cfg.uncertainties ):

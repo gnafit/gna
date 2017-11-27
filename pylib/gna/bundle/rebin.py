@@ -13,12 +13,13 @@ class bundle_rebin(TransformationBundle):
         super(bundle_rebin, self).__init__( **kwargs )
 
     def build(self):
-        self.output=()
         edges = N.ascontiguousarray(self.cfg.edges, dtype='d')
         for ns in self.namespaces:
             with ns:
-                eres = R.Rebin( edges.size, edges, int( self.cfg.rounding ) )
-                self.output+=eres,
+                rebin = R.Rebin( edges.size, edges, int( self.cfg.rounding ) )
+                self.output_transformations+=rebin,
 
-        return self.output
+                self.inputs  += rebin.rebin.histin,
+                self.outputs += rebin.rebin.histout,
+
 
