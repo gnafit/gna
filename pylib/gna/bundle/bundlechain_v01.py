@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import numpy as N
 from load import ROOT as R
+import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 
 from gna.bundle import *
-# from gna.bundle import declare_all
 from gna.bundle.connections import each_pair
 
-@declare_bundle('bundlechain_v01')
-class bundlechain(TransformationBundle):
+class bundlechain_v01(TransformationBundle):
     name = 'detector'
     def __init__(self, edges, **kwargs):
-        super(bundlechain, self).__init__( **kwargs )
+        super(bundlechain_v01, self).__init__( **kwargs )
 
         self.edges=edges
 

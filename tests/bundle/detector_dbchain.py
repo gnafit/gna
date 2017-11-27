@@ -4,14 +4,14 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle, declare_all
+from gna.bundle import execute_bundle
+import numpy as N
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
 import constructors as C
 from converters import convert
-import numpy as N
 from gna.configurator import NestedDict
 import itertools as I
 from physlib import percent
@@ -42,14 +42,14 @@ cfg.detector = NestedDict(
         chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ]
         )
 cfg.detector.nonlinearity = NestedDict(
-        bundle = 'nonlinearity_db_root_v01',
+        bundle = 'detector_nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'output/detector_nl_consModel_450itr.root',
         uncertainty = 0.2*percent,
         uncertainty_type = 'relative'
         )
 cfg.detector.iav = NestedDict(
-        bundle = 'iav_db_root_v01',
+        bundle = 'detector_iav_db_root_v01',
         parname = 'OffdiagScale',
         uncertainty = 4*percent,
         uncertainty_type = 'relative',
@@ -58,7 +58,7 @@ cfg.detector.iav = NestedDict(
         matrixname = 'iav_matrix'
         )
 cfg.detector.eres = NestedDict(
-        bundle = 'eres_common3',
+        bundle = 'detector_eres_common3',
         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
         values  = [ 0.014764, 0.0869, 0.0271 ],
         uncertainties = [30.0*percent]*3,

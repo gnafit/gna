@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import numpy as N
 from load import ROOT as R
+from scipy.interpolate import interp1d
+import numpy as N
 import constructors as C
 from converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
-from scipy.interpolate import interp1d
-from matplotlib import pyplot as P
 from gna.env import env, namespace
 from gna.bundle import *
 
-@declare_bundle('nonlinearity_db_root_v01')
 class detector_nonlinearity_db_root_v01(TransformationBundle):
     name='nonlinearity'
     debug = False

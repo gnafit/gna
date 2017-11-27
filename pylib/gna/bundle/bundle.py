@@ -1,13 +1,33 @@
 from __future__ import print_function
 from gna.env import namespace, env
+from gna.config import cfg
+from pkgutil import iter_modules
 
-bundles_list = dict()
+bundle_modules = {}
+bundles = {}
 
-def declare_bundle(name):
-    def register_class(cls):
-        bundles_list[name] = cls
-        return cls
-    return register_class
+def get_bundle(name):
+    if name in bundles:
+        return bundles[name]
+
+    if not bundle_modules:
+        for bundlepath in cfg.bundlepaths:
+            for loader, lname, _ in iter_modules([bundlepath]):
+                # print( 'init', lname, loader )
+                bundle_modules.update({lname: loader})
+
+    loader = bundle_modules.get( name )
+    if not loader:
+        raise Exception( 'There is no bundle module for %s in %s'%(name, str(cfg.bundlepaths)) )
+
+    print('load', name)
+    module = loader.find_module(name).load_module(name)
+    bundle = getattr( module, name, None )
+    if not bundle:
+        raise Exception( 'There is no bundle %s in it\'s module'%(name) )
+    bundles[name] = bundle
+
+    return bundle
 
 def init_bundle(**kwargs):
     name = kwargs.pop('name', None)
@@ -15,9 +35,8 @@ def init_bundle(**kwargs):
         cfg = kwargs['cfg']
         name = cfg.bundle
 
-    bundle = bundles_list.get(name, None)
+    bundle = get_bundle(name)
     if not bundle:
-        print('Available bundles:', sorted(bundles_list.keys()))
         raise Exception( "Bundle '%s' is not defined"%name )
 
     return bundle(**kwargs)

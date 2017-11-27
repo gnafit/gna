@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import numpy as N
 from load import ROOT as R
+import numpy as N
 import constructors as C
 from gna.bundle import *
 
-@declare_bundle('iav_db_root_v01')
 class detector_iav_db_root_v01(TransformationBundle):
     iavmatrix=None
     name = 'iav'

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import numpy as N
 from load import ROOT as R
+import numpy as N
 import constructors as C
 from gna.bundle import *
 
-@declare_bundle('eres_common3')
 class detector_eres_common3(TransformationBundle):
     name = 'eres'
     parameters = [ 'Eres_a', 'Eres_b', 'Eres_c' ]
