@@ -20,7 +20,6 @@ def get_bundle(name):
     if not loader:
         raise Exception( 'There is no bundle module for %s in %s'%(name, str(cfg.bundlepaths)) )
 
-    print('load', name)
     module = loader.find_module(name).load_module(name)
     bundle = getattr( module, name, None )
     if not bundle:

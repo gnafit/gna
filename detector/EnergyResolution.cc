@@ -6,7 +6,7 @@ using boost::format;
 
 constexpr double pi = boost::math::constants::pi<double>();
 
-EnergyResolution::EnergyResolution( bool single ) {
+EnergyResolution::EnergyResolution( bool single ) : m_single(single) {
   variable_(&m_a, "Eres_a");
   variable_(&m_b, "Eres_b");
   variable_(&m_c, "Eres_c");

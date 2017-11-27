@@ -17,9 +17,9 @@ public:
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }
 
+  void add();
   void add(SingleOutput& hist);
 private:
-  void add();
   void fillCache();
   void calcSmear(Args args, Rets rets);
 

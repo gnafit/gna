@@ -9,17 +9,30 @@ from gna.bundle import *
 class detector_eres_common3(TransformationBundle):
     name = 'eres'
     parameters = [ 'Eres_a', 'Eres_b', 'Eres_c' ]
+    mode = 'correlated' # 'uncorrelated'
     def __init__(self, **kwargs):
         super(detector_eres_common3, self).__init__( **kwargs )
 
     def build(self):
-        for ns in self.namespaces:
-            with ns:
-                eres = R.EnergyResolution()
-                self.output_transformations+=eres,
+        if self.mode=='correlated':
+            eres = R.EnergyResolution( False )
+            self.output_transformations+=eres,
+            for i, ns in enumerate(self.namespaces):
+                print(i)
+                eres.add()
 
-                self.inputs  += eres.smear.Nvis,
-                self.outputs += eres.smear.Nrec,
+                self.inputs  += eres.transformations[i].Nvis,
+                self.outputs += eres.transformations[i].Nrec,
+        elif self.mode=='uncorrelated':
+            for ns in self.namespaces:
+                with ns:
+                    eres = R.EnergyResolution()
+                    self.output_transformations+=eres,
+
+                    self.inputs  += eres.smear.Nvis,
+                    self.outputs += eres.smear.Nrec,
+        else:
+            raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
         for name, val, unc in zip( self.parameters, self.cfg.values, self.cfg.uncertainties ):
