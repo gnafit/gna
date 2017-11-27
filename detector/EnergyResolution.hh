@@ -9,7 +9,7 @@
 class EnergyResolution: public GNASingleObject,
                         public Transformation<EnergyResolution> {
 public:
-  EnergyResolution();
+  EnergyResolution( bool single=true );
 
   double relativeSigma(double Etrue) const noexcept;
   double resolution(double Etrue, double Erec) const noexcept;
@@ -17,7 +17,9 @@ public:
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }
 
+  void add(SingleOutput& hist);
 private:
+  void add();
   void fillCache();
   void calcSmear(Args args, Rets rets);
 
@@ -27,6 +29,8 @@ private:
 
   size_t m_size;
   Eigen::SparseMatrix<double> m_sparse_cache;
+
+  bool m_single; /// restricts EnergyResolution to contain only one transformation
 };
 
 #endif // ENERGYRESOLUTION_H

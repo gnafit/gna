@@ -1,26 +1,55 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergyResolution.hh"
+#include <boost/format.hpp>
+#include <string.h>
+using boost::format;
 
 constexpr double pi = boost::math::constants::pi<double>();
 
-EnergyResolution::EnergyResolution() {
+EnergyResolution::EnergyResolution( bool single ) {
   variable_(&m_a, "Eres_a");
   variable_(&m_b, "Eres_b");
   variable_(&m_c, "Eres_c");
   callback_([this] { fillCache(); });
 
-  transformation_(this, "smear")
-      .input("Nvis")
-      .output("Nrec")
-      .types(Atypes::pass<0>,
-         [](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
-           if( args[0].kind!=DataKind::Hist ){
-             throw std::runtime_error("EnergyResolution input should be a histogram");
-           }
-           obj->m_datatype = args[0];
-           obj->fillCache();
-         })
-       .func(&EnergyResolution::calcSmear);
+  if (single) {
+    add();
+  }
+}
+
+void EnergyResolution::add(){
+  int index=(int)transformations.size();
+  std::string label="smear";
+  if(!m_single){
+    label=(format("smear_%1%")%index).str();
+  }
+  transformation_(this, label)
+    .input("Nvis")
+    .output("Nrec")
+    .types(Atypes::pass<0>,
+           [index](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
+             if( args[0].kind!=DataKind::Hist ){
+               throw std::runtime_error("EnergyResolution input should be a histogram");
+             }
+             if(index==0){
+               obj->m_datatype = args[0];
+               obj->fillCache();
+             }
+             else{
+               if( args[0]!=obj->m_datatype ) {
+                 throw std::runtime_error("Inconsistent histogram in EnergyResolution");
+               }
+             }
+           })
+  .func(&EnergyResolution::calcSmear);
+}
+
+void EnergyResolution::add(SingleOutput& hist){
+  if( m_single ){
+    throw std::runtime_error("May have only single energy resolution transformation in this class instance");
+  }
+  add();
+  transformations.back().inputs[0]( hist.single() );
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{
