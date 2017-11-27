@@ -357,7 +357,6 @@ namespace TransformationTypes {
   protected:
     Base(): t_(*this) { }
     Base(size_t maxentries): Base() {
-        printf("here %i\n", (int)maxentries);
       m_maxEntries = maxentries;
     }
     void connect(Source &source, Base *sinkobj, Sink &sink);

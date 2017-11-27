@@ -6,7 +6,7 @@
 #include "GNAObject.hh"
 #include "Eigen/Sparse"
 
-class EnergyResolution: public GNASingleObject,
+class EnergyResolution: public GNAObject,
                         public Transformation<EnergyResolution> {
 public:
   EnergyResolution( bool single=true );

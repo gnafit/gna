@@ -18,7 +18,6 @@ class detector_eres_common3(TransformationBundle):
             eres = R.EnergyResolution( False )
             self.output_transformations+=eres,
             for i, ns in enumerate(self.namespaces):
-                print(i)
                 eres.add()
 
                 self.inputs  += eres.transformations[i].Nvis,
