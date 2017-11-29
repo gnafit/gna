@@ -38,7 +38,6 @@ class detector_iav_db_root_v01(TransformationBundle):
                 self.inputs  += esmear.smear.Ntrue,
                 self.outputs += esmear.smear.Nvis,
 
-
     def build(self):
         from file_reader import read_object_auto
         self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )

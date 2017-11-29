@@ -28,9 +28,9 @@ class bundlechain_v01(TransformationBundle):
             self.bundles[bundlename] = execute_bundle( cfg=self.cfg[bundlename], **args )
 
         for b1, b2 in each_pair( self.bundles.values() ):
-            print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=b1.name, output=b1.outputs[0].name(),
-                                                                           b2=b2.name, input=b2.inputs[0].name(),
-                                                                           count=len(b1.inputs) ) )
+            # print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=b1.name, output=b1.outputs[0].name(),
+                                                                           # b2=b2.name, input=b2.inputs[0].name(),
+                                                                           # count=len(b1.inputs) ) )
             for output, input in zip( b1.outputs, b2.inputs ):
                 input( output )
 

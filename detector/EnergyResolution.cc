@@ -18,7 +18,7 @@ EnergyResolution::EnergyResolution( bool single ) : m_single(single) {
 }
 
 void EnergyResolution::add(){
-  int index=(int)transformations.size();
+  int index=static_cast<int>(transformations.size());
   std::string label="smear";
   if(!m_single){
     label=(format("smear_%1%")%index).str();

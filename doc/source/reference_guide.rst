@@ -1,6 +1,16 @@
 Reference guide
 ===============
 
+Overview
+--------
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   main_objects
+   making_sense
+
 Cheat sheet
 -----------
 
@@ -28,6 +38,15 @@ Helper classes
    :glob:
 
    helperclasses/*
+
+Transformation bundles
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   bundles/*
 
 Transformations
 ---------------
