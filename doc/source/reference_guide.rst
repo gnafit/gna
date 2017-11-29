@@ -8,7 +8,6 @@ Overview
    :glob:
    :maxdepth: 1
 
-   main_objects
    making_sense
 
 Cheat sheet
