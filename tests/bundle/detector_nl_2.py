@@ -6,7 +6,6 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle.detector_nl import detector_nl_from_file
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
@@ -15,6 +14,8 @@ import constructors as C
 from converters import convert
 import numpy as N
 from gna.configurator import NestedDict
+from gna.bundle import execute_bundle
+from physlib import percent
 
 # from argparse import ArgumentParser
 # parser = ArgumentParser()
@@ -22,22 +23,19 @@ from gna.configurator import NestedDict
 # opts=parser.parse_args()
 
 #
-# Initialize bundle
+# Configurate
 #
 cfg = NestedDict(
-    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ],
+        bundle = 'detector_nonlinearity_db_root_v01',
+        names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+        filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
+        uncertainty = 0.2*percent,
+        uncertainty_type = 'relative'
         )
-pars = [ env.defparameter( 'weight_'+cfg.names[0], central=1.0, sigma=0.0, fixed=True ) ]
-for name in cfg.names[1:]:
-    par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
-    pars.append( par )
 
-escale1 = env.defparameter( 'ad1.escale', central=1.0, sigma=0.02*0.01 )
-escale2 = env.defparameter( 'ad2.escale', central=1.0, sigma=0.02*0.01 )
-
-escale1.set(0.98)
-escale2.set(1.02)
-
+#
+# Make input histogram
+#
 def singularities( values, edges ):
     indices = N.digitize( values, edges )-1
     phist = N.zeros( edges.size-1 )
@@ -46,16 +44,22 @@ def singularities( values, edges ):
 
 nbins = 240
 edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
-edges_p = C.Points(edges)
+points = C.Points(edges)
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
 
-filename = 'output/detector_nl_consModel_450itr.root'
-(nonlin1, nonlin2), storage = detector_nl_from_file( filename, cfg.names, edges=edges_p.points,
-                                         namespaces=[ env.ns(ns) for ns in ('ad1', 'ad2') ],
-                                         debug=True )
-factor1 = storage('escale_ad1')['factor']
-factor2 = storage('escale_ad2')['factor']
+#
+# Initialize bundle
+#
+b = execute_bundle( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ] )
+pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
+escale1, escale2 = (b.common_namespace(ns)['escale'] for ns in [ 'ad1', 'ad2' ])
+escale1.set(0.98)
+escale2.set(1.02)
+
+(nonlin1, nonlin2) = b.output_transformations
+factor1 = b.storage('escale_ad1')['factor']
+factor2 = b.storage('escale_ad2')['factor']
 
 #
 # Plot curves:

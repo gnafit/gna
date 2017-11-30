@@ -54,7 +54,7 @@ cfg.detector.iav = NestedDict(
         uncertainty = 4*percent,
         uncertainty_type = 'relative',
         ndiag = 1,
-        filename = 'output/detector_iavMatrix_P14A_LS.root',
+        filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
 cfg.detector.eres = NestedDict(

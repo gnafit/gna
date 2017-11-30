@@ -4,7 +4,8 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle.detector_iav import detector_iav_from_file
+from gna.bundle import execute_bundle
+from gna.bundle import execute_bundle
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist
@@ -12,17 +13,23 @@ from gna.env import env
 import constructors as C
 import numpy as N
 from gna.configurator import NestedDict
+from physlib import percent
 
 #
 # Initialize bundle
 #
 cfg = NestedDict(
+        bundle = 'detector_iav_db_root_v01',
+        parname = 'OffdiagScale',
+        uncertainty = 4*percent,
+        uncertainty_type = 'relative',
         ndiag = 1,
-        filename = 'output/detector_iavMatrix_P14A_LS.root',
+        filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
-par = env.defparameter( 'OffdiagScale',  central=1.0, relsigma=0.1 )
-(esmear,), _ = detector_iav_from_file(**cfg )
+b = execute_bundle( cfg=cfg )
+(esmear,) = b.output_transformations
+par = b.common_namespace['OffdiagScale']
 
 #
 # Test bundle

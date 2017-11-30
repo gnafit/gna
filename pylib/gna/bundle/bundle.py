@@ -52,9 +52,9 @@ class TransformationBundle(object):
         self.cfg = cfg
 
         namespaces=kwargs.pop( 'namespaces', [env.globalns] )
-        self.namespaces = [ env.globalns(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
         self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
+        self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
         storage=kwargs.pop( 'storage', None )
         if storage:

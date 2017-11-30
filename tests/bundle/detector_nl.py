@@ -4,7 +4,6 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle.detector_nl import detector_nl_from_file
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
@@ -13,6 +12,8 @@ import constructors as C
 from converters import convert
 import numpy as N
 from gna.configurator import NestedDict
+from gna.bundle import execute_bundle
+from physlib import percent
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -20,18 +21,19 @@ parser.add_argument( '-o', '--output' )
 opts=parser.parse_args()
 
 #
-# Initialize bundle
+# Configurate
 #
 cfg = NestedDict(
-    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3'  ],
+        bundle = 'detector_nonlinearity_db_root_v01',
+        names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+        filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
+        uncertainty = 0.2*percent,
+        uncertainty_type = 'relative'
         )
-pars = [ env.defparameter( 'weight_'+cfg.names[0], central=1.0, sigma=0.0, fixed=True ) ]
-for name in cfg.names[1:]:
-    par = env.defparameter( 'weight_'+name, central=0.0, sigma=1.0 )
-    pars.append( par )
 
-escale = env.defparameter( 'escale', central=1.0, sigma=0.02*0.01 )
-
+#
+# Make input histogram
+#
 def singularities( values, edges ):
     indices = N.digitize( values, edges )-1
     phist = N.zeros( edges.size-1 )
@@ -44,10 +46,16 @@ points = C.Points(edges)
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram( edges, phist )
 
-filename = 'output/detector_nl_consModel_450itr.root'
-(nonlin,), storage = detector_nl_from_file( filename, cfg.names, edges=points.points, debug=True)
-corr_lsnl = storage['lsnl_factor']
-corr = storage('escale')['factor']
+#
+# Initialize bundle
+#
+b = execute_bundle( edges=points.single(), cfg=cfg )
+pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
+escale = b.common_namespace['escale']
+
+(nonlin,) = b.output_transformations
+corr_lsnl = b.storage['lsnl_factor']
+corr = b.storage('escale')['factor']
 
 #
 # Plot curves:
@@ -69,7 +77,7 @@ for par, name in zip(pars, cfg.names):
 
     lines = ax.plot( edges, corr_lsnl.sum.sum.data(), '-', label=name )
     stride = 5
-    ax.plot( storage('inputs')['edges'][::stride], storage('inputs')[name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
+    ax.plot( b.storage('inputs')['edges'][::stride], b.storage('inputs')[name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
 
 for par in pars[1:]:
     par.set(0.0)
@@ -121,7 +129,7 @@ mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
-newe = storage('escale')['edges_mod'].product.data()
+newe = b.storage('escale')['edges_mod'].product.data()
 ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
 
 savefig( opts.output, suffix='_matrix', dpi=300 )

@@ -1,5 +1,7 @@
 #
 # Make sure python libs are loaded before ROOT
+# it seems that recent ROOT versions do have precompiled scipy
+# which may be in conflict with system scipy version (something with QHUL library)
 #
 import numpy
 import matplotlib
