@@ -176,12 +176,12 @@ handled by the ``nsview`` object inside
 Bundles and configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Bundles are implemented by deriving from the base class ``TransformationBundle`` implement the following functionality:
+Bundles are implemented by deriving from the base class :ref:`TransformationBundle` implement the following functionality:
 
 + Construct and configure a single transformation
-+ Construct, configure and connect several transformations, implementing transformation of higher level
++ Construct, configure and connect several transformations. In this sense :ref:`Bundle <TransformationBundle>` is a
+  transformation of a higher level.
 + Based on the given configuration initialize necessary environments and variables, set uncertainties, etc.
 
-
-
-
+The class :ref:`NestedDict` is used to implement the configuration. :ref:`NestedDict` configuration can be saved to or loaded
+from a file, created within python as regular dictionary. It supports nesting, and attribute access syntax.
