@@ -27,7 +27,7 @@ class NestedDict(object):
     def __repr__(self):
         return 'NestedDict'+self.__storage__.__repr__()[11:]
 
-    def set_parent(self, parent):
+    def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
 
     def parent(self):
@@ -67,13 +67,14 @@ class NestedDict(object):
         elif isinstance(value, dict):
             value = NestedDict(value)
         if isinstance(value, NestedDict):
-            value.set_parent( self )
+            value._set_parent( self )
 
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
                 if not key in self.__storage__:
                     cfg = self.__storage__[key]=NestedDict()
+                    cfg._set_parent( self )
                     return cfg.set( rest, value )
                 return self.__storage__.get(key).set( rest, value )
 
@@ -91,12 +92,15 @@ class NestedDict(object):
                 value = configurator(filename = value.replace('load:', ''))
         elif isinstance(value, dict):
             value = NestedDict(value)
+        if isinstance(value, NestedDict):
+            value._set_parent( self )
 
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
                 if not key in self.__storage__:
                     cfg = self.__storage__[key]=NestedDict()
+                    cfg._set_parent( self )
                     return cfg.setdefault( rest, value )
                 return self.__storage__.get(key).setdefault( rest, value )
 
@@ -127,6 +131,7 @@ class NestedDict(object):
             if rest:
                 if not key in self.__storage__:
                     cfg = self.__storage__[key]=NestedDict()
+                    cfg._set_parent( self )
                     return cfg.__call__( rest )
                 return self.__storage__.get(key).__call__(rest)
 
@@ -138,6 +143,7 @@ class NestedDict(object):
             raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
 
         value = self.__storage__[key] = NestedDict()
+        value._set_parent( self )
         return value
 
     def __load__(self, filename, subst=[]):

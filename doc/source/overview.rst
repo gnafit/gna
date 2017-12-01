@@ -134,6 +134,8 @@ exactly after the latter, so there is no real difference between
 them. Commands are executed strictly sequentially in the order
 specified in the command line.
 
+.. _environment_ns:
+
 Environment and namespaces
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

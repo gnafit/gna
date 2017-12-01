@@ -93,7 +93,7 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 # Define the chain
 #
-b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage  )
+b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage )
 
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )

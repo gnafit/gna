@@ -45,6 +45,8 @@ Transformation bundles
    :maxdepth: 1
    :glob:
 
+   python_modules/TransformationBundle.rst
+   python_modules/NestedDict.rst
    bundles/*
 
 Transformations
