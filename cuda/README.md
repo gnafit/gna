@@ -11,3 +11,25 @@
 # Uses cuda-based libs:
 
 - cuBLAS
+
+
+# Comparative table (Osc Prob Full, vec size: 10 000 000)
+
+| Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
+|--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
+| CPU (Intel Core i7) sequential |      1349514.7         |                                  |       ---       |                  |                      |
+| GPU (NVIDIA GeForce GTX 970M)  |       220687.4         |                                  |      490959     |        6.12      |                      |
+| CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
+
+
+# Comparative table (Osc Prob Full, vec size: 1 000 000)
+
+| Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
+|--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
+| CPU (Intel Core i7) sequential |       136908.3         |                                  |       ---       |                  |                      |
+| GPU (NVIDIA GeForce GTX 970M)  |        98733.1         |                                  |       ???       |        1.39      |                      |
+| CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
+
+
+
+*Speed up columns are for an accelerating in comparison with sequential CPU version*
