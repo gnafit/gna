@@ -26,6 +26,8 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 
 # Comparative table (Osc Prob Full, vec size: 1 000 000)
 
+https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
+
 
 | Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
 |--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
