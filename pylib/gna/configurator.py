@@ -7,9 +7,10 @@ import runpy
 from os import path
 from collections import OrderedDict
 from weakref import WeakKeyDictionary
+import numpy
 
 meta = WeakKeyDictionary()
-init_globals = dict( percent=0.01 )
+init_globals = dict( percent=0.01, numpy=numpy )
 
 class NestedDict(object):
     __parent__ = None
@@ -60,11 +61,8 @@ class NestedDict(object):
 
     __getattr__ = __getitem__
 
-    def set(self, key, value):
-        if isinstance(value, basestring):
-            if value.startswith('load:'):
-                value = configurator(filename = value.replace('load:', ''))
-        elif isinstance(value, dict):
+    def set(self, key, value, loading_from_file=False ):
+        if isinstance(value, dict):
             value = NestedDict(value)
         if isinstance(value, NestedDict):
             value._set_parent( self )
@@ -87,10 +85,7 @@ class NestedDict(object):
     __setitem__= set
 
     def setdefault(self, key, value):
-        if isinstance(value, basestring):
-            if value.startswith('load:'):
-                value = configurator(filename = value.replace('load:', ''))
-        elif isinstance(value, dict):
+        if isinstance(value, dict):
             value = NestedDict(value)
         if isinstance(value, NestedDict):
             value._set_parent( self )
@@ -112,6 +107,12 @@ class NestedDict(object):
 
     def keys(self):
         return self.__storage__.keys()
+
+    def values(self):
+        return self.__storage__.values()
+
+    def items(self):
+        return self.__storage__.items()
 
     def __contains__(self, key):
         if isinstance( key, (list, tuple) ):
@@ -174,7 +175,8 @@ class NestedDict(object):
         print('Loading config file:', filename)
         dic =  runpy.run_path(filename, init_globals )
         for k in init_globals:
-            del dic[k]
+            if dic[k]==init_globals[k]:
+                del dic[k]
 
         if dictonly:
             return dic
@@ -205,4 +207,5 @@ def configurator(filename=None, dic={}, **kwargs):
 
     return self
 
+init_globals['load'] = configurator
 
