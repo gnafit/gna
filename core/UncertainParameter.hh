@@ -155,7 +155,7 @@ public:
       }
   }
 
-  virtual const parameter<T> &getParameter() { return m_par; }
+  virtual const parameter<T>& getParameter() { return m_par; }
 
 protected:
   std::vector<std::pair<T, T>> m_limits;

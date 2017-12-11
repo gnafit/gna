@@ -61,13 +61,22 @@ class configurator_base(object):
                 if self.__verbose__:
                     print( 'Skipping nonexistent file', filename )
                 continue
-            dic = self.__load_dic__(filename, dictonly=True)
+            print(subst)
+
+            for variant in subst['values']:
+                if variant in filename.split('/'):
+                    folder = variant
+                    break
+            else:
+                folder = None
+
+            dic = self.__load_dic__(filename, dirname=folder, dictonly=True)
             self.__import__(dic)
             unimportant = True
 
-    def __load_dic__(self, filename, dictonly=False):
+    def __load_dic__(self, filename, dirname = None, dictonly=False):
         print('Loading config file:', filename)
-        dic =  runpy.run_path(filename, init_globals={}) # TODO: add predefined globals
+        dic =  runpy.run_path(filename, init_globals={'location': dirname, 'percent': 0.01}) # TODO: add predefined globals
 
         if dictonly:
             return dic
@@ -86,7 +95,7 @@ class configurator_base(object):
             self.__setattr__(k, v)
 
     def __check_for_conflicts__(self, dic):
-        """checks whether the dicitonary uses any of forbidden identifiers"""
+        """checks whether the dictitonary uses any of forbidden identifiers"""
         forbidden_list  = [ s for s in type(self).__dict__.keys() if not s.startswith('__') ]
         forbidden_items = [ s for s in dic.keys() if s in forbidden_list ]
         if forbidden_items:
