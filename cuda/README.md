@@ -37,4 +37,13 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 
 
 
+# Comparative table (Osc Prob Full, vec size: 10 000)
+
+
+| Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
+|--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
+| CPU (Intel Core i7) sequential |        1669.4          |                                  |       ---       |                  |                      |
+| GPU (NVIDIA GeForce GTX 970M)  |       98895.3          |                 123.8            |       ???       |      0.0169      |       13.48          |
+| CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
+
 *Speed up columns are for an accelerating in comparison with sequential CPU version*
