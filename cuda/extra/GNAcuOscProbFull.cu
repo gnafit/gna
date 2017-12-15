@@ -44,7 +44,6 @@ __global__ void fullProb (int  start_id,
 // TODO: add sharing
   double halfSin12, halfSin13, halfSin23,
          halfCos12, halfCos13, halfCos23;
-// TODO: add streams
   sincos(DMSq12 * devTmp[x] / 2.0, &halfSin12, &halfCos12);
   sincos(DMSq13 * devTmp[x] / 2.0, &halfSin13, &halfCos13);
   sincos(DMSq23 * devTmp[x] / 2.0, &halfSin23, &halfCos23);
@@ -65,50 +64,23 @@ __global__ void fullProb (int  start_id,
   ret[x] += ((double)!sameAB) * 8.0 * weightCP * devCompCP[x];
 }
 
-void calcCuFullProb(double DMSq12, double DMSq13, double DMSq23,
+void calcCuFullProb(GNAcuOscProbMem<double> &mem,
+                        double DMSq12, double DMSq13, double DMSq23,
 			double weight12, double weight13, double weight23, double weightCP, 
 			double* ret, double L, double* Enu, int EnuSize, bool sameAB) {
   const int blockSize = 16;
   int alloc_size = EnuSize * sizeof(double);
   cudaSetDevice(0);
-  GNAcuOscProbMem<double> mem(EnuSize);
+ // GNAcuOscProbMem<double> mem(EnuSize);
 
   cudaError_t err;
 std::cout << "EnuSize is " << EnuSize << std::endl;
   cudaStream_t stream1;
   cudaStreamCreate ( &stream1);
-//  cudaStreamCreate ( &stream2);
-  
 
   bool tmp = false;
   double ttt = 5.5;
   std::cout << "test = " << ttt + tmp << " " << ttt*tmp <<  std::endl;
-
-  /* Allocating device memory */
-/*  double* devEnu; double* devTmp; double* devComp0;
-  double* devComp12; double* devComp13; double* devComp23;
-  double* devCompCP; double* devRet;
-*/
-//  cudaMalloc((void**)&devEnu, alloc_size);
-
-//  err = cudaMemcpyAsync(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice, stream1);
-//  err = cudaMemcpy(devEnu, Enu, alloc_size, cudaMemcpyHostToDevice);
-/*  cudaMalloc((void**)&devTmp, alloc_size);
-  cudaMalloc((void**)&devComp0, alloc_size);
-  cudaMalloc((void**)&devComp12, alloc_size);
-  cudaMalloc((void**)&devComp13, alloc_size);
-  cudaMalloc((void**)&devComp23, alloc_size);
-  cudaMalloc((void**)&devCompCP, alloc_size);
-  cudaMalloc((void**)&devRet, alloc_size);
-*/
-/*  if(err!=cudaSuccess) {
-    printf("ERROR: unable to copy memory from host to device! \n");
-    std::cout << "err is " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
-*/
-
-  
 
   double km2 = km2MeV(L);
 
@@ -149,17 +121,9 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
     exit(EXIT_FAILURE);
   }
 
-/*  for (int i = 0; i < EnuSize; i++) {
-    std::cout << ret[i] << " ";
-  }*/
-/*  cudaFree(devComp0);   cudaFree(devCompCP);
-  cudaFree(devComp12);  cudaFree(devComp13);  cudaFree(devComp23);
-  cudaFree(devRet);     cudaFree(devTmp);     cudaFree(devEnu);
-*/
   cudaStreamDestroy(stream1);
   for (int i = 0 ; i < streamcount; i++) {
     cudaStreamDestroy(workerstreams[i]);
   }
-//  delete &mem;
 }
 

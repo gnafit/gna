@@ -10,10 +10,15 @@
 
 #ifdef GNA_CUDA_SUPPORT 
 #include "extra/GNAcuOscProbFull.h"
+#include "extra/GNAcuOscProbMem.hh"
 #endif
 
+#include <chrono>
+#include <ctime>
 
 using namespace Eigen;
+
+//extern template class GNAcuOscProbMem<double>();
 
 static double km2MeV(double km) {
   return km*1E-3*TMath::Qe()/(TMath::Hbar()*TMath::C());
@@ -142,16 +147,34 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
 #ifdef GNA_CUDA_SUPPORT
 
 void OscProbPMNS::calcFullProbGpu(Args args, Rets rets) {
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now();
+
   bool isABsame = (m_alpha == m_beta);
-  calcCuFullProb(DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
+  int EnuSize =  args[0].x.rows();
+  GNAcuOscProbMem<double> mem(EnuSize);
+  calcCuFullProb(std::ref(mem),
+		   DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
                    weight<1,2>(), weight<1,3>(), weight<2,3>(), weightCP(),
-                   rets[0].x.data(), m_L, args[0].x.data(), args[0].x.rows(), isABsame);
+                   rets[0].x.data(), m_L, args[0].x.data(), EnuSize, isABsame);
+  end = std::chrono::system_clock::now();
+
+  int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
+                           (end-start).count();
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+  std::cout << "End " << std::ctime(&end_time)
+              << " duration " << elapsed_seconds << "s\n";
+
 }
 
 #endif
 
 
 void OscProbPMNS::calcFullProb(Args args, Rets rets) {
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now();
+
     auto& Enu = args[0].x;
     ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
     ArrayXd comp0(Enu);
@@ -177,6 +200,14 @@ void OscProbPMNS::calcFullProb(Args args, Rets rets) {
     if (m_alpha != m_beta) {
       rets[0].x += 8.0*weightCP()*compCP;
     }
+  end = std::chrono::system_clock::now();
+
+  int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
+                           (end-start).count();
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+  std::cout << "End " << std::ctime(&end_time)
+              << " duration " << elapsed_seconds << "s\n";
 
 }
 

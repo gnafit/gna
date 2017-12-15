@@ -68,6 +68,7 @@ if(CUDA_SUPPORT)
     set (CUHEADERS
          CuChi2.hh
          GNAcuOscProbFull.h
+         GNAcuOscProbMem.hh 
         )
 else()
     set(CUSOURCES "")

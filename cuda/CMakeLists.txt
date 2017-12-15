@@ -18,11 +18,13 @@ include_directories(extra/ core/)
 set(CUSOURCES
   extra/GNAcuMath.cu
   extra/GNAcuOscProbFull.cu
+  extra/GNAcuOscProbMem.cu
   )
 
 set(CUHEADERS 
   extra/GNAcuMath.h
   extra/GNAcuOscProbFull.h
+  extra/GNAcuOscProbMem.hh
   )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})
