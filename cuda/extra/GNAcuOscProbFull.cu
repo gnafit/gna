@@ -86,8 +86,9 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
 
   std::cout << "km2 = " << km2 << std::endl;
 
-  int streamcount = 16;
+  int streamcount = 8;
   cudaStream_t workerstreams[streamcount];
+  int fullEnuSize = EnuSize;
   EnuSize /= streamcount;
 
   cudaDeviceSynchronize();
@@ -95,7 +96,12 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
   for (int i = 0; i < streamcount; i++) {
     int k = i*EnuSize;
     cudaStreamCreate ( &workerstreams[i]);
-    err = cudaMemcpyAsync((void**)&mem.devEnu[k], (void**)&Enu[k], EnuSize*sizeof(double), cudaMemcpyHostToDevice, workerstreams[i]);
+    int cpySize;
+    if(i != streamcount - 1) cpySize = EnuSize*sizeof(double);
+    else {
+	cpySize = (fullEnuSize - i*EnuSize)*sizeof(double);
+    }
+    err = cudaMemcpyAsync((void**)&mem.devEnu[k], (void**)&Enu[k], cpySize, cudaMemcpyHostToDevice, workerstreams[i]);
     if(err!=cudaSuccess) {
       printf("ERROR: unable to copy memory from host to device in for! \n");
       std::cout << "err is " << cudaGetErrorString(err) << std::endl;
@@ -105,9 +111,14 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
 
   for (int i = 0; i < streamcount; i++) {
     int k = i*EnuSize;
-    fullProb<<<EnuSize/blockSize + 1, blockSize, 0, workerstreams[i]>>>( i, DMSq12, DMSq13, DMSq23,
+    int dataSize;
+    if(i != streamcount - 1) dataSize = EnuSize;
+    else {
+        dataSize = fullEnuSize - (i-1)*EnuSize;
+    }
+    fullProb<<<dataSize/blockSize + 1, blockSize, 0, workerstreams[i]>>>( i, DMSq12, DMSq13, DMSq23,
                    weight12, weight13, weight23, weightCP,
-                   km2, EnuSize, &mem.devEnu[k],
+                   km2, dataSize, &mem.devEnu[k],
                    &mem.devTmp[k], &mem.devComp0[k], &mem.devCompCP[k],
                    &mem.devComp12[k], &mem.devComp13[k], &mem.devComp23[k],
                    &mem.devRet[k], sameAB);
