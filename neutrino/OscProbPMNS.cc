@@ -153,7 +153,7 @@ void OscProbPMNS::calcFullProbGpu(Args args, Rets rets) {
   bool isABsame = (m_alpha == m_beta);
   int EnuSize =  args[0].x.rows();
   GNAcuOscProbMem<double> mem(EnuSize);
-  calcCuFullProb(std::ref(mem),
+  calcCuFullProb_double(std::ref(mem),
 		   DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
                    weight<1,2>(), weight<1,3>(), weight<2,3>(), weightCP(),
                    rets[0].x.data(), m_L, args[0].x.data(), EnuSize, isABsame);

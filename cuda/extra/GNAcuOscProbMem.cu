@@ -57,3 +57,5 @@ GNAcuOscProbMem<T>::~GNAcuOscProbMem() {
 }
 
 template class GNAcuOscProbMem<double>;
+template class GNAcuOscProbMem<float>;
+
