@@ -42,7 +42,7 @@ __global__ void fullProb (int  start_id,
 				T* devTmp, T* devComp0, T* devCompCP, 
 				T* devComp12, T* devComp13, T* devComp23,
 				T* ret, bool sameAB) {
-  int x = (blockDim.x*blockIdx.x + threadIdx.x) ; // / streamcount + stream_id;
+  int x = (blockDim.x*blockIdx.x + threadIdx.x); 
   if (x < 0 || x >= EnuSize) return;
   devTmp[x] = km2 / 2.0 * (1.0 / devEnu[x]);
   devComp0[x] = 1.0;
@@ -79,14 +79,11 @@ void calcCuFullProb(GNAcuOscProbMem<T> &mem,
   const int blockSize = 16;
   int alloc_size = EnuSize * sizeof(T);
   cudaSetDevice(0);
- // GNAcuOscProbMem<double> mem(EnuSize);
 
   cudaError_t err;
 std::cout << "EnuSize is " << EnuSize << std::endl;
   cudaStream_t stream1;
   cudaStreamCreate ( &stream1);
-
-  bool tmp = false;
 
   T km2 = km2MeV<T>(L);
 
@@ -96,8 +93,6 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
   cudaStream_t workerstreams[streamcount];
   int fullEnuSize = EnuSize;
   EnuSize /= streamcount;
-
-  cudaDeviceSynchronize();
 
   for (int i = 0; i < streamcount; i++) {
     int k = i*EnuSize;
@@ -112,7 +107,6 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
       printf("ERROR: unable to copy memory from host to device in for! \n");
       std::cout << "err is " << cudaGetErrorString(err) << std::endl;
       mem.currentGpuMemState = Crashed;
-     // exit(EXIT_FAILURE);
     } else mem.currentGpuMemState = OnDevice;
   }
 
@@ -131,14 +125,11 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
                    &mem.devRet[k], sameAB);
   }
   cudaDeviceSynchronize(); 
-//  TODO: Where do we need to do sync?
   err = cudaMemcpyAsync(ret, mem.devRet, alloc_size, cudaMemcpyDeviceToHost, stream1);
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from device to host! \n");
     std::cout << "err is " << cudaGetErrorString(err) << std::endl;
     mem.currentGpuMemState = Crashed;
-
-//    exit(EXIT_FAILURE);
   } else  mem.currentGpuMemState = OnHost;
   cudaStreamDestroy(stream1);
   for (int i = 0 ; i < streamcount; i++) {
