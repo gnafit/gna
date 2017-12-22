@@ -111,8 +111,9 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
     if(err!=cudaSuccess) {
       printf("ERROR: unable to copy memory from host to device in for! \n");
       std::cout << "err is " << cudaGetErrorString(err) << std::endl;
-      exit(EXIT_FAILURE);
-    }
+      mem.currentGpuMemState = Crashed;
+     // exit(EXIT_FAILURE);
+    } else mem.currentGpuMemState = OnDevice;
   }
 
   for (int i = 0; i < streamcount; i++) {
@@ -135,9 +136,10 @@ std::cout << "EnuSize is " << EnuSize << std::endl;
   if(err!=cudaSuccess) {
     printf("ERROR: unable to copy memory from device to host! \n");
     std::cout << "err is " << cudaGetErrorString(err) << std::endl;
-    exit(EXIT_FAILURE);
-  }
+    mem.currentGpuMemState = Crashed;
 
+//    exit(EXIT_FAILURE);
+  } else  mem.currentGpuMemState = OnHost;
   cudaStreamDestroy(stream1);
   for (int i = 0 ; i < streamcount; i++) {
     cudaStreamDestroy(workerstreams[i]);
