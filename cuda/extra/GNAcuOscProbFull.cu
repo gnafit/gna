@@ -12,16 +12,10 @@
 #include "math_functions.h"
 #include "GNAcuRootMath.h"
 
-/*#define GnaCuQe 1.602176462e-1
-#define GnaCuC  2.99792458e8
-#define GnaCuHbar 1.054571596e-34
-#define GnaCuKm2MeV(km) (km * 1E-3 * GnaCuQe / (GnaCuHbar * GnaCuC))
-*/
-
 
 // TODO: avoid too many args
 template <typename T>
-__global__ void fullProb(int start_id, T DMSq12, T DMSq13, T DMSq23, T weight12,
+__global__ void fullProb(T DMSq12, T DMSq13, T DMSq23, T weight12,
 			 T weight13, T weight23, T weightCP, T km2, int EnuSize,
 			 T* devEnu, T* devTmp, T* devComp0, T* devCompCP,
 			 T* devComp12, T* devComp13, T* devComp23, T* ret,
@@ -107,7 +101,7 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 		}
 		fullProb<T><<<dataSize / blockSize + 1, blockSize, 0,
 			      workerstreams[i]>>>(
-		    i, DMSq12, DMSq13, DMSq23, weight12, weight13, weight23,
+		    DMSq12, DMSq13, DMSq23, weight12, weight13, weight23,
 		    weightCP, km2, dataSize, &mem.devEnu[k], &mem.devTmp[k],
 		    &mem.devComp0[k], &mem.devCompCP[k], &mem.devComp12[k],
 		    &mem.devComp13[k], &mem.devComp23[k], &mem.devRet[k],
