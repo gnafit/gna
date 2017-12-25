@@ -1,5 +1,3 @@
-#define CUDA_API_PER_THREAD_DEFAULT_STREAM
-#include <cuda.h>
 #include <cuda_runtime.h>
 #include <math.h>
 #include <stdio.h>
@@ -10,7 +8,7 @@
 #include "GNAcuOscProbMem.hh"
 #include "cublas_v2.h"
 #include "math_functions.h"
-#include "GNAcuRootMath.h"
+#include "GNAcuRootMath.cuh"
 
 
 // TODO: avoid too many args
@@ -59,7 +57,7 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 	cudaStream_t stream1;
 	cudaStreamCreate(&stream1);
 
-	T km2 = GnaCuKm2MeV(L);
+	T km2 = km2MeV<T>(L);
 	
 	std::cout << "km2 = " << km2 << std::endl;
 
