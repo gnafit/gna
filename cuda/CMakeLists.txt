@@ -25,6 +25,7 @@ set(CUHEADERS
   extra/GNAcuMath.h
   extra/GNAcuOscProbFull.h
   extra/GNAcuOscProbMem.hh
+  extra/GNAcuRootMath.h
   )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})

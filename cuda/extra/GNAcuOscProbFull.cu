@@ -4,40 +4,20 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <thrust/device_vector.h>
-#include <thrust/host_vector.h>
-#include <iostream>
 #include <iostream>
 #include <typeinfo>
 #include "GNAcuOscProbFull.h"
 #include "GNAcuOscProbMem.hh"
 #include "cublas_v2.h"
 #include "math_functions.h"
+#include "GNAcuRootMath.h"
 
-template <typename T>
-__host__ __device__ __inline__ T Qe() {
-	return 1.602176462e-19;
-}
-// velocity of light
-template <typename T>
-__host__ __device__ __inline__ T C() {
-	return 2.99792458e8;
-}  // m s^-1
-// Planck's constant
-template <typename T>
-__host__ __device__ __inline__ T H() {
-	return 6.62606876e-34;
-}  // J s
-// h-bar (h over 2 pi)
-template <typename T>
-__host__ __device__ __inline__ T Hbar() {
-	return 1.054571596e-34;
-}  // J s
+/*#define GnaCuQe 1.602176462e-1
+#define GnaCuC  2.99792458e8
+#define GnaCuHbar 1.054571596e-34
+#define GnaCuKm2MeV(km) (km * 1E-3 * GnaCuQe / (GnaCuHbar * GnaCuC))
+*/
 
-template <typename T>
-__host__ __device__ __inline__ T km2MeV(T km) {
-	return km * 1E-3 * Qe<T>() / (Hbar<T>() * C<T>());
-}
 
 // TODO: avoid too many args
 template <typename T>
@@ -85,8 +65,8 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 	cudaStream_t stream1;
 	cudaStreamCreate(&stream1);
 
-	T km2 = km2MeV<T>(L);
-
+	T km2 = GnaCuKm2MeV(L);
+	
 	std::cout << "km2 = " << km2 << std::endl;
 
 	int streamcount = 8;

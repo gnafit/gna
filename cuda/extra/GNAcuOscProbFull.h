@@ -1,6 +1,8 @@
 #ifndef GNACUOSCPROBFULL_H
 #define GNACUOSCPROBFULL_H
 #include "GNAcuOscProbMem.hh"
+#include "GNAcuRootMath.h"
+
 
 extern "C" void calcCuFullProb_double(GNAcuOscProbMem<double>& mem,
 				      double DMSq12, double DMSq13,

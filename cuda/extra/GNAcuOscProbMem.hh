@@ -2,7 +2,7 @@
 #define GNACUOSCPROBMEM_H
 
 #include <iostream>
-
+#include "GNAcuRootMath.h"
 enum GpuMemoryState {
 	NotInitialized,
 	InitializedOnly,
