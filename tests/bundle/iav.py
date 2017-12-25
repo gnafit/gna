@@ -5,7 +5,6 @@ from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
 from gna.bundle import execute_bundle
-from gna.bundle import execute_bundle
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist

@@ -34,6 +34,6 @@ class detector_eres_common3(TransformationBundle):
             raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
-        for name, val, unc in zip( self.parameters, self.cfg.values, self.cfg.uncertainties ):
+        for name, val, unc in zip( self.parameters, self.cfg['values'], self.cfg.uncertainties ):
             self.common_namespace.reqparameter( name, central=val, uncertainty=unc, uncertainty_type=self.cfg.uncertainty_type )
 

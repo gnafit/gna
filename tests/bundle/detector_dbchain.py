@@ -44,7 +44,7 @@ cfg.detector = NestedDict(
 cfg.detector.nonlinearity = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-        filename = 'output/detector_nl_consModel_450itr.root',
+        filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
         uncertainty = 0.2*percent,
         uncertainty_type = 'relative'
         )
