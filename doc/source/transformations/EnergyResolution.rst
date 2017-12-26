@@ -1,9 +1,13 @@
+.. _EnergyResolution:
+
 EnergyResolution
 ~~~~~~~~~~~~~~~~
 
 Description
 ^^^^^^^^^^^
 Applies energy resolution to the histogram of events binned in :math:`E_{\text{vis}}`.
+
+The transformation may be configured within :ref:`detector_eres_common3` bundle.
 
 Inputs
 ^^^^^^
@@ -57,3 +61,12 @@ where :math:`\sigma(E_j)` is:
     \sigma(E_j) = E_j \sqrt{ a^2 + \frac{b^2}{E_j}  + \left( \frac{c}{E_j}\right)^2}
 
 where :math:`a`, :math:`b`, :math:`c` are resolution parameters.
+
+.. figure:: ../../img/eres_scheme.png
+   :scale: 25 %
+   :align: center
+
+   Energy resolution bundle scheme.
+
+
+

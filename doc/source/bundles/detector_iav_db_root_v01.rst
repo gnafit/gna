@@ -21,7 +21,7 @@ Scheme
 1. Read the matrix from a ROOT file and store as  :ref:`Points <Points>`.
 2. The output of :ref:`Points <Points>` is passed to the :ref:`RenormalizeDiag` instance. Since the uncertainty is
    uncorrelated between detectors an individual instance of :ref:`Points <Points>` is created for each input namespace.
-   Variable ``n`` is created in each namespace to represent off-diagonal scale (default ``n=1``).
+   Variable :math:`n` is created in each namespace to represent off-diagonal scale (default :math:`n=1`).
 3. The output with renormalized off-diagonal part is passed as smearing matrix to the  :ref:`HistSmear`.
 
 All the transformations are configured to tread IAV matrix as upper triangular.
@@ -35,7 +35,7 @@ All the transformations are configured to tread IAV matrix as upper triangular.
 Parameters
 """"""""""
 
-1. Off-diagonal scale ``n`` is created for each input namespace.
+1. Off-diagonal scale :math:`n` is created for each input namespace.
 
 Configuration
 """""""""""""
