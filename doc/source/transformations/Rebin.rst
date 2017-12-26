@@ -1,3 +1,5 @@
+.. _Rebin:
+
 Rebin transformation
 ~~~~~~~~~~~~~~~~~~~~
 
