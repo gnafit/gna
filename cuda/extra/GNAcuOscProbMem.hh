@@ -2,8 +2,9 @@
 #define GNACUOSCPROBMEM_H
 
 #include <iostream>
-#include "GNAcuRootMath.cuh"
-enum GpuMemoryState {
+#include "GNAcuGpuMemStates.hh"
+
+/*enum GpuMemoryState {
 	NotInitialized,
 	InitializedOnly,
 	OnHost,
@@ -33,7 +34,7 @@ inline std::ostream& operator<<(std::ostream& so, GpuMemoryState gState) {
 	}
 	return so;
 }
-
+*/
 template <typename T>
 class GNAcuOscProbMem {
        public:

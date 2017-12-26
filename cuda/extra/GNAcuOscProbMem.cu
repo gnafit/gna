@@ -64,6 +64,7 @@ GNAcuOscProbMem<T>::~GNAcuOscProbMem() {
 	cudaFree(devRet);
 	cudaFree(devTmp);
 	cudaFree(devEnu);
+	cudaDeviceReset();
 }
 
 template class GNAcuOscProbMem<double>;
