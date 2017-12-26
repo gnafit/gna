@@ -39,7 +39,7 @@ Scheme
 2. For each supplied namespace:
 
     a) Another :ref:`WeightedSum` instance is created with only parameter representing the correction :math:`1+\delta_d`.
-    b) A Product instance is created to transform relative energy correction :math:`E'/E` to :math:`E'`.
+    b) A :ref:`Product` instance is created to transform relative energy correction :math:`E'/E` to :math:`E'`.
     c) An instance of :ref:`HistNonlinearity` is created with :math:`E` and :math:`E'` as inputs.
 
 .. figure:: ../../img/lsnl_scheme.png

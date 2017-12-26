@@ -5,7 +5,7 @@ WeightedSum
 
 Description
 ^^^^^^^^^^^
-Calcualate weighted sum of arrays.
+Calculate weighted sum of arrays.
 
 Arguments
 ^^^^^^^^^
@@ -33,7 +33,7 @@ Variable names are read from ``weight_labels`` if it is not empty. Otherwise wei
 Outputs
 ^^^^^^^
 
-1) ``'sum'`` — weighted sum :math:`S`.
+1) ``'sum.sum'`` — weighted sum :math:`S`.
 
 Implementation
 ^^^^^^^^^^^^^^
