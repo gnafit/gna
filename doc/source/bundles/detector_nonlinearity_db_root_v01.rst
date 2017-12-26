@@ -79,8 +79,8 @@ Testing scripts
 .. code-block:: sh
 
     # For single detector case
-    ../tests/bundle/detector_nl.py
+    tests/bundle/detector_nl.py -s
     # For two detectors case
-    ../tests/bundle/detector_nl_2.py
+    tests/bundle/detector_nl_2.py -s
 
 

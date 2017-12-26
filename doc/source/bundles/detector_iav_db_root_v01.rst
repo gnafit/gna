@@ -64,8 +64,8 @@ Testing scripts
 .. code-block:: sh
 
     # For single detector case
-    tests/bundle/iav.py
+    tests/bundle/iav.py -s
     # For two detectors case
-    tests/bundle/iav2.py
+    tests/bundle/iav2.py -s
 
 

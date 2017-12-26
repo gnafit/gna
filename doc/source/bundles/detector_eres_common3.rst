@@ -52,6 +52,6 @@ There is now individual testing script for  :ref:`detector_eres_common3`. Nevert
 
 .. code-block:: sh
 
-    tests/bundle/detector_dbchain.py
+    tests/bundle/detector_dbchain.py -s
 
 
