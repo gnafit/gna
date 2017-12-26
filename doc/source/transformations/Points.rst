@@ -1,3 +1,5 @@
+.. _Points:
+
 Points transformation
 ~~~~~~~~~~~~~~~~~~~~~
 

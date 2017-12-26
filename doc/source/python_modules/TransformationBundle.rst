@@ -9,21 +9,29 @@ Overview
 ``TransformationBundle`` is a base class to implement a concept of bundles. Bundle is needed to simplify the following
 tasks:
 
-+ Construction and configuration a single transformation
++ Construction and configuration a single transformation.
 + Construction, configuration and connection of several transformations. In this sense Bundle is a transformation of a
   higher level.
 + Based on the given configuration initialize necessary environments and variables, set uncertainties, etc.
 
+Design principle
+""""""""""""""""
+
 Bundles define the way configuration files are processed and variables are created, therefore bundles are meant to be
-persistent during GNA development cycle. Bundle name contains version mark and if modification is required another
-bundle is created with different version. By this we ensure the backward compatibility.
+persistent during GNA development cycle.
+
+Bundle name usually contains a version mark. It is guaranteed that the bundle with given name and version will not be
+modified in a way that breaks the backwards compatibility.
+
+If significant modification is required another bundle is created with different version.
 
 Initialization
 """"""""""""""
 
 There are two ways to initialize a bundle:
 
-1. By using method ``execute_bundle`` (preferred).
+1. By using method ``execute_bundle`` (preferred). One can find example of creating bundle instance of
+   :ref:`detector_iav_db_root_v01`:
 
    .. code-block:: python
 

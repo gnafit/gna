@@ -6,9 +6,9 @@ NestedDict
 Overview
 """"""""
 
-``NestedDict`` is a helper class very similar to the python ``dict`` or ``OrderedDict`` with the following extra features:
+:ref:`NestedDict` is a helper class very similar to the python ``dict`` or ``OrderedDict`` with the following extra features:
 
-1. ``NestedDict`` enables attribute access as well as key access to the stored items:
+1. :ref:`NestedDict` enables attribute access as well as key access to the stored items:
 
    .. code-block:: python
 
@@ -18,12 +18,12 @@ Overview
        nd.a
        # 1
 
-2. ``NestedDict`` enables nesting (unlimited):
+2. :ref:`NestedDict` enables nesting (unlimited):
 
-   * Each stored dictionary will be converted to the ``NestedDict`` instance.
-   * Assigning to ``nd['a.b']`` will create ``NestedDict`` ``nd['a']`` and assign ``nd['a']['b']``.
+   * Each stored dictionary will be converted to the :ref:`NestedDict` instance.
+   * Assigning to ``nd['a.b']`` will create :ref:`NestedDict` ``nd['a']`` and assign ``nd['a']['b']``.
    * Assigning to ``nd.a.b`` also works, but only for existing ``nd.a``.
-   * Nested ``NestedDict`` may be also  created by calling ``nd('a')`` or ``nd('a.b')`` or, etc.
+   * Nested :ref:`NestedDict` may be also  created by calling ``nd('a')`` or ``nd('a.b')`` or, etc.
    * Parent dictionary may be accessed by calling ``nd.parent()`` method.
 
 3. Usual ``dict`` methods like ``set``, ``setdefault``, ``get``, ``keys``, ``values`` and ``items`` are also supported.
@@ -34,7 +34,7 @@ only via ``[]`` operator or the methods themselves, but not via attribute access
 Example
 """""""
 
-An example of the configuration via ``NestedDict`` may be found below:
+An example of the configuration of the  :ref:`bundlechain_v01` via :ref:`NestedDict` may be found below:
 
 .. code-block:: python
 
@@ -77,13 +77,13 @@ Loading configuration from file
 """""""""""""""""""""""""""""""
 
 The ``configurator`` module contains the ``configurator`` function that can read any python file and return it as
-``NestedDict``. The following variables may be used within the ``NestedDict`` file:
+:ref:`NestedDict`. The following variables may be used within the :ref:`NestedDict` file:
 
   + ``percent`` equals to ``0.01``.
   + ``numpy`` to access numpy functions.
   + ``load`` to load nested configuration files. ``load`` is a shortcut for ``configurator``.
 
-The file may be located anywhere. Also, all the created ``dict`` instances will be converted to ``NestedDict``.
+The file may be located anywhere. Also, all the created ``dict`` instances will be converted to :ref:`NestedDict`.
 
 Example code is below:
 
