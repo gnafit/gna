@@ -30,7 +30,7 @@ eperfission = {
 geo_flux_files = {
     'U238': 'AntineutrinoSpectrum_238U.knt',
     'Th232': 'AntineutrinoSpectrum_232Th.knt',
-}        
+}
 
 geo_flux_normalizations = {
     'U238' : (2.7e3/5, 0.3),
@@ -388,7 +388,7 @@ class ReactorExperimentModel(baseexp):
                 ibd = ROOT.IbdZeroOrder()
             integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             histcls = ROOT.GaussLegendreHist
-            econv.Ee.Evis(integrator.points)
+            econv.Ee.Evis(integrator.points.x)
             ibd.xsec.Ee(econv.Ee.Ee)
             ibd.Enu.Ee(econv.Ee.Ee)
             eventsparts = [ibd.xsec]
@@ -463,7 +463,7 @@ class ReactorExperimentModel(baseexp):
             for part in eventsparts:
                 res.multiply(part)
             detector.unoscillated_hist.hist.inputs(res)
-            
+
             if self.opts.backgrounds:
                 detector.unoscillated_with_bkg = ROOT.Sum()
                 detector.unoscillated_with_bkg.add(bkg_summary)
@@ -511,7 +511,7 @@ class ReactorExperimentModel(baseexp):
             inter_sum.add(sum_without_bkg)
             if self.opts.backgrounds:
                 inter_sum.add(detector.back_hists['sum_bkg'])
-            
+
             self.ns.addobservable("{0}_noeffects".format(detector.name), inter_sum, export=False)
 
             if self.opts.with_C14:

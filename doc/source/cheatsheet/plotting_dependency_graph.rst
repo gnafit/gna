@@ -31,7 +31,7 @@ The ``graphviz`` module may be used to plot the graph for existing observable as
 
     ./gna \
         -- juno --name juno_nh \
-        -- graphviz juno_nh/spectrum -o output/juno.dot -O
+        -- graphviz juno_nh/AD1 -o output/juno.dot
 
 Plotting the .dot file
 """"""""""""""""""""""
