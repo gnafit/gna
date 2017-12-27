@@ -7,9 +7,6 @@ from gna.parameter_loader import get_parameters
 from gna import parameters
 parameters.debug=True
 
-import IPython
-IPython.embed()
-
 # Necessary evil, it triggers import of all other symbols from shared library
 ROOT.GNAObject
 Param_Double = ROOT.GaussianParameter('double')
