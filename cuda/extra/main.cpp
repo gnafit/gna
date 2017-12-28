@@ -24,11 +24,11 @@ int main () {
   arr1.setByValue(1.0);
   arr2.setByValue(2.0);
   double* answ;// = (double*)malloc(EnuSize*sizeof(double));
-  GNAcuGpuArray<double> arrAnsw(answ, EnuSize);
-  arrAnsw = arr1 + arr2;
+  GNAcuGpuArray<double> arrAnsw (answ, EnuSize);
+//  arrAnsw = arr1 + arr2;
 
   double* res = new double[EnuSize]; 
-  (&arrAnsw)->getContentToCPU(res);
+  (arr1 + arr2).getContentToCPU(res);
 
   for (int i = 0; i < EnuSize; i++) {
 	std::cout << res[i] << " ";
