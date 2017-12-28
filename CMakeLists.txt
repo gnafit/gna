@@ -68,6 +68,8 @@ if(CUDA_SUPPORT)
     set (CUHEADERS
          CuChi2.hh
          GNAcuOscProbFull.h
+#	 GNAcuRootMath.h
+         GNAcuGpuArray.hh
          GNAcuOscProbMem.hh
         )
 else()

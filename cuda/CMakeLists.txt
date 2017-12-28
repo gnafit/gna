@@ -16,12 +16,14 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_50,code=sm_50 -std=
 include_directories(extra/ core/)
 
 set(CUSOURCES
+  extra/GNAcuGpuArray.cu
   extra/GNAcuMath.cu
   extra/GNAcuOscProbFull.cu
   extra/GNAcuOscProbMem.cu
   )
 
 set(CUHEADERS 
+  extra/GNAcuGpuArray.hh
   extra/GNAcuMath.h
   extra/GNAcuOscProbFull.h
   extra/GNAcuOscProbMem.hh
