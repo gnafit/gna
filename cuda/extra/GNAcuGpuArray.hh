@@ -20,6 +20,8 @@ public:
 	T* getArrayPtr() { return arrayPtr; }
 	size_t getArraySize() { return arrSize; }
 	GNAcuGpuArray<T> operator+(GNAcuGpuArray<T> rhs);
+        GNAcuGpuArray<T> operator-(GNAcuGpuArray<T> rhs);
+        GNAcuGpuArray<T> operator-();
         GNAcuGpuArray<T> operator*(GNAcuGpuArray<T> rhs);
         GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
 protected:
