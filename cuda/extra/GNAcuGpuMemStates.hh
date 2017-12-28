@@ -34,4 +34,24 @@ inline std::ostream& operator<<(std::ostream& so, GpuMemoryState gState) {
         return so;
 }
 
+enum PointerLocation {
+        Host,
+        Device
+};
+
+inline std::ostream& operator<<(std::ostream& so, PointerLocation gState) {
+        switch (gState) {
+                case Host:
+                        so << "Host";
+                        break;
+                case Device:
+                        so << "Device";
+                        break;
+                default:
+                        so.setstate(std::ios_base::failbit);
+        }
+        return so;
+}
+
+
 #endif /* GNACUGPUMEMSTATES_H */
