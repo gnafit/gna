@@ -35,14 +35,13 @@ GNAcuGpuArray<T>::GNAcuGpuArray() {
 template <typename T>
 GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 	std::cout << "I am created by ptr " << std::endl;
-//	cudaSetDevice(0);
 	cudaError_t err;
 	arrSize = inSize;
 	size_t alloc_size = sizeof(T) * inSize;
 	err = cudaMalloc((void**)&arrayPtr, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		std::cout << "err is " << cudaGetErrorString(err) << std::endl;
+		std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
 		arrState = InitializedOnly;
@@ -52,7 +51,6 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 template <typename T>
 GNAcuGpuArray<T>::~GNAcuGpuArray() {
 	cudaFree(arrayPtr);
-//	cudaDeviceReset();
 }
 
 template <typename T>
@@ -87,7 +85,7 @@ void GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 			 cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to set memory H2D!\n");
-		std::cout << "Err is: " << cudaGetErrorString(err) << std::endl;
+		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
 		arrState = OnDevice;
@@ -101,7 +99,7 @@ void GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 			 cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to set memory D2D!\n");
-		std::cout << "Err is: " << cudaGetErrorString(err) << std::endl;
+		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
 		arrState = OnDevice;
@@ -121,7 +119,7 @@ void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 			 cudaMemcpyDeviceToHost);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to get array values to host!\n");
-		std::cout << "Err is: " << cudaGetErrorString(err) << std::endl;
+		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
 		arrState = OnHost;
@@ -131,12 +129,11 @@ void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 template <typename T>
 void GNAcuGpuArray<T>::getContent(T* dst) {
 	cudaError_t err;
-	std::cout << "In getContent: arrSize = " << arrSize << std::endl;
 	err = cudaMemcpy(dst, arrayPtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to get array values!\n");
-		std::cout << "Err is: " << cudaGetErrorString(err) << std::endl;
+		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
 		arrState = OnDevice;
@@ -147,7 +144,6 @@ template <typename F>
 GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
 	F* resPtr;
 	size_t res_size = arrSize;
-        //GNAcuGpuArray<F> res(resPtr, res_size);
 	if (arrSize != rhs.getArraySize()) {
 		std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
 			     "smallest will be used!"
@@ -197,7 +193,9 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> rhs) {
 template <typename T>
 GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 	resize(rhs.getArraySize());
+	(*this).arrState = OnDevice;
 	(*this).setByDeviceArray(rhs.getArrayPtr());
+	//(*this).arrState = OnDevice;
 	return *this;
 }
 
