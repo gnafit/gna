@@ -35,10 +35,10 @@ __global__ void setByValueGPU(T* res, T val, size_t n) {
 }
 
 template <typename T>
-__global__ void vecMinusUnar(T* resPtr, T* arrayPtr, size_t arrSize) {
+__global__ void vecMinusUnar(T* resPtr, T* arrPtr, size_t arrSize) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
         if (x >= arrSize) return;
-        resPtr[x] = -arrayPtr[x];
+        resPtr[x] = -arrPtr[x];
 }
 
 template <typename T>
@@ -53,7 +53,7 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 	cudaError_t err;
 	arrSize = inSize;
 	size_t alloc_size = sizeof(T) * inSize;
-	err = cudaMalloc((void**)&arrayPtr, alloc_size);
+	err = cudaMalloc((void**)&devicePtr, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
 		std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
@@ -65,7 +65,7 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 
 template <typename T>
 GNAcuGpuArray<T>::~GNAcuGpuArray() {
-	cudaFree(arrayPtr);
+	cudaFree(devicePtr);
 }
 
 template <typename T>
@@ -80,10 +80,10 @@ void GNAcuGpuArray<T>::resize(size_t newSize) {
 			  << std::endl;
 	} else if (arrSize < newSize) {
 		// TODO: resizing without realloc
-		cudaFree(arrayPtr);
+		cudaFree(devicePtr);
 		size_t alloc_size = sizeof(T) * newSize;
 		arrSize = newSize;
-		err = cudaMalloc((void**)&arrayPtr, alloc_size);
+		err = cudaMalloc((void**)&devicePtr, alloc_size);
 		if (err != cudaSuccess) {
 			printf("ERROR: unable to  allocate!\n");
 			std::cerr << "err is " << cudaGetErrorString(err)
@@ -96,7 +96,7 @@ void GNAcuGpuArray<T>::resize(size_t newSize) {
 template <typename T>
 void GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 	cudaError_t err;
-	err = cudaMemcpy((void**)&arrayPtr, inHostArr, sizeof(T) * arrSize,
+	err = cudaMemcpy((void**)&devicePtr, inHostArr, sizeof(T) * arrSize,
 			 cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to set memory H2D!\n");
@@ -110,7 +110,7 @@ void GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 template <typename T>
 void GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 	cudaError_t err;
-	err = cudaMemcpy(arrayPtr, inDeviceArr, sizeof(T) * arrSize,
+	err = cudaMemcpy(devicePtr, inDeviceArr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to set memory D2D!\n");
@@ -123,14 +123,14 @@ void GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 
 template <typename T>
 void GNAcuGpuArray<T>::setByValue(T value) {
-	setByValueGPU<T><<<arrSize, 1>>>(arrayPtr, value, arrSize);
+	setByValueGPU<T><<<arrSize, 1>>>(devicePtr, value, arrSize);
 	arrState = OnDevice;
 }
 
 template <typename T>
 void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 	cudaError_t err;
-	err = cudaMemcpy(dst, arrayPtr, sizeof(T) * arrSize,
+	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToHost);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to get array values to host!\n");
@@ -144,7 +144,7 @@ void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 template <typename T>
 void GNAcuGpuArray<T>::getContent(T* dst) {
 	cudaError_t err;
-	err = cudaMemcpy(dst, arrayPtr, sizeof(T) * arrSize,
+	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to get array values!\n");
@@ -154,6 +154,46 @@ void GNAcuGpuArray<T>::getContent(T* dst) {
 		arrState = OnDevice;
 	}
 }
+
+template <typename T> 
+void GNAcuGpuArray<T>::transferH2D() {
+	cudaError_t err;
+	if (arrState == NotInitialized) {
+		err = cudaMalloc((void**)&devicePtr, arrSize * sizeof(T));
+        	if (err != cudaSuccess) {
+                	printf("ERROR: unable to  allocate!\n");
+                	std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
+                	arrState = Crashed;
+        	}
+	}
+	err = cudaMemcpy(devicePtr, hostPtr, sizeof(T) * arrSize,
+                         cudaMemcpyHostToDevice);
+        if (err != cudaSuccess) {
+                printf("ERROR: unable to transfer data H2D!\n");
+                std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
+                arrState = Crashed;
+        } else {
+                arrState = OnDevice;
+        }
+}
+
+template <typename T>
+void GNAcuGpuArray<T>::transferD2H() {
+        cudaError_t err;
+        if (arrState == NotInitialized) {
+                hostPtr = new T[arrSize];
+        }
+        err = cudaMemcpy(hostPtr, devicePtr, sizeof(T) * arrSize,
+                         cudaMemcpyDeviceToHost);
+        if (err != cudaSuccess) {
+                printf("ERROR: unable to transfer data D2H!\n");
+                std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
+                arrState = Crashed;
+        } else {
+                arrState = OnHost;
+        }
+}
+
 
 template <typename F>
 GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
@@ -171,9 +211,9 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
 		printf("ERROR: unable to  allocate memory for add result!\n");
 		std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
 	}
-	vecAdd<F><<<res_size, 1>>>(resPtr, arrayPtr, rhs.getArrayPtr(),
+	vecAdd<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
 				   res_size);
-	F* ttt;
+	F* ttt = nullptr;
 	GNAcuGpuArray<F> res(ttt, res_size);
 	res.setByDeviceArray(resPtr);
 	res.arrState = OnDevice;
@@ -182,7 +222,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
 
 template <typename F>
 GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> rhs) {
-        F* resPtr;
+        F* resPtr = nullptr;
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
                 std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
@@ -196,9 +236,9 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> rhs) {
                 printf("ERROR: unable to  allocate memory for subtraction result!\n");
                 std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
         }
-        vecMinus<F><<<res_size, 1>>>(resPtr, arrayPtr, rhs.getArrayPtr(),
+        vecMinus<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
                                    res_size);
-        F* ttt;
+        F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, res_size);
         res.setByDeviceArray(resPtr);
         res.arrState = OnDevice;
@@ -209,7 +249,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> rhs) {
 
 template <typename F>
 GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
-        F* resPtr;
+        F* resPtr = nullptr;
         cudaError_t err;
         err = cudaMalloc((void**)&resPtr, sizeof(F) * arrSize);
 	if (err != cudaSuccess) {
@@ -217,8 +257,8 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
                 std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
         }
 
-	vecMinusUnar<F><<<arrSize, 1>>>(resPtr, arrayPtr, arrSize);
-	F* ttt;
+	vecMinusUnar<F><<<arrSize, 1>>>(resPtr, devicePtr, arrSize);
+	F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, arrSize);
         res.setByDeviceArray(resPtr);
         res.arrState = OnDevice;
@@ -228,7 +268,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
 
 template <typename F>
 GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> rhs) {
-        F* resPtr;
+        F* resPtr = nullptr;
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
                 std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
@@ -242,9 +282,9 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> rhs) {
                 printf("ERROR: unable to  allocate memory for add result!\n");
                 std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
         }
-        vecMult<F><<<res_size, 1>>>(resPtr, arrayPtr, rhs.getArrayPtr(),
+        vecMult<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
                                    res_size);
-        F* ttt;
+        F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, res_size);
         res.setByDeviceArray(resPtr);
         res.arrState = OnDevice;

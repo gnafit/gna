@@ -3,11 +3,11 @@
 
 #include "GNAcuGpuMemStates.hh"
 #include <iostream>
+//#include "../../core/Data.hh"
 
 template <typename T>
 class GNAcuGpuArray {
 public: 
-	GpuMemoryState arrState;
 	GNAcuGpuArray();
         GNAcuGpuArray(T* inArrayPtr, size_t inSize);
 	~GNAcuGpuArray();
@@ -17,25 +17,22 @@ public:
 	void setByValue(T value);
 	void getContentToCPU(T* dst);
 	void getContent(T* dst);
-	T* getArrayPtr() { return arrayPtr; }
+	void transferH2D(); // TODO
+	void transferD2H(); // TODO
+	T* getArrayPtr() { return devicePtr; }
 	size_t getArraySize() { return arrSize; }
 	GNAcuGpuArray<T> operator+(GNAcuGpuArray<T> rhs);
         GNAcuGpuArray<T> operator-(GNAcuGpuArray<T> rhs);
         GNAcuGpuArray<T> operator-();
         GNAcuGpuArray<T> operator*(GNAcuGpuArray<T> rhs);
         GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
+
+        GpuMemoryState arrState;
+//	DataType type;
 protected:
-	T* arrayPtr;
+	T* devicePtr;
+	T* hostPtr;
         size_t arrSize;
 };
-
-//template <typename T>
-//GNAcuGpuArray<T> operator+(GNAcuGpuArray<T> &lhs, GNAcuGpuArray<T> &rhs) ;
-//extern "C" GNAcuGpuArray<double> operator+(GNAcuGpuArray<double> &lhs, GNAcuGpuArray<double> &rhs);
-
-
-//template <typename T>
-//void operator=(GNAcuGpuArray<T>& lhs, const GNAcuGpuArray<T>& rhs);
-
 
 #endif /* GNACUGPUARRAY_H */
