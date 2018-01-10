@@ -1,5 +1,3 @@
-#include <stdexcept>
-
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -92,7 +90,7 @@ void CovariatedPrediction::covariate(SingleOutput &cov,
     }
     if (act.b->i + act.b->n > act.a->i) {
       throw std::runtime_error("overlapping covariance");
-    } 
+    }
     t_["covbase"].input(cov);
     m_covactions.push_back(act);
   }

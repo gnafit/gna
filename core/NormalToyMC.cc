@@ -8,7 +8,7 @@ NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
     .func(&NormalToyMC::calcToyMC)
   ;
 
-  GNA::Random::register_callback( [=]{ this->m_distr.reset(); } );
+  GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
 }
 
 void NormalToyMC::add(SingleOutput &theory, SingleOutput &sigma) {

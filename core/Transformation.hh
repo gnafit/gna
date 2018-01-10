@@ -55,6 +55,8 @@ public:
   TransformationDescriptor(TransformationTypes::Entry &entry)
     : TransformationDescriptor(BaseClass(entry))
     { }
+  static TransformationDescriptor invalid(int index);
+  static TransformationDescriptor invalid(const std::string name);
 
   const Inputs inputs;
   const Outputs outputs;

@@ -101,10 +101,14 @@ public:
     return out.single().depends(this->getVariable());
   }
 
+  virtual bool isFixed() { return this->m_fixed; }
+  virtual void setFixed() { this->m_fixed = true; }
+
   virtual const parameter<T> &getParameter() { return m_par; }
 protected:
   std::vector<std::pair<T, T>> m_limits;
   parameter<T> m_par;
+  bool m_fixed = false;
 };
 
 template <typename T>

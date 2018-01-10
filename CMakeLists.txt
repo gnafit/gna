@@ -39,6 +39,9 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
+  detector/HistNonlinearity.cc
+  detector/HistSmear.cc
+  detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
   extra/GridFilter.cc
   )
@@ -47,6 +50,7 @@ set (HEADERS
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  TransformationBase.hh
   Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
@@ -85,6 +89,9 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  HistNonlinearity.hh
+  HistSmear.hh
+  RenormalizeDiag.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
@@ -100,7 +107,7 @@ endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")

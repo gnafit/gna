@@ -7,10 +7,11 @@ from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from converters import convert
+import constructors as C
 
 mu      = N.array( [ 100.0 ] )
-mu_p    = convert(mu, 'points')
-sigma_p = convert(mu**0.5, 'points')
+mu_p    = C.Points(mu)
+sigma_p = C.Points(mu**0.5)
 
 toymc = R.NormalToyMC( False )
 toymc.add( mu_p, sigma_p )
