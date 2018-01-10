@@ -1,3 +1,5 @@
+.. _HistNonlinearity:
+
 HistNonlinearity
 ~~~~~~~~~~~~~~~~
 
@@ -57,7 +59,7 @@ diagonal elements and thus is stored as a sparse matrix.
 Inputs
 """"""
 
-1. ``'matrix.Edges'`` —­the original bin edges. These edges will be also used to project the result to.
+1. ``'matrix.Edges'`` — ­the original bin edges. These edges will be also used to project the result to.
 2. ``'matrix.EdgesModified'`` — the modified bin edges of the same size as ``'matrix.Edges'``.
 
 Outputs
@@ -133,8 +135,8 @@ Applies sparse 'smearing' matrix to the histogram of events binned in :math:`E_{
 Inputs
 """"""
 
-1. ``'smear.FakeMatrix'`` — 'smearing' matrix. Not read, but used only for the taint-flag propagation.
-2. ``'smear.Ntrue'`` — one-dimensional histogram of number of events :math:`N_{\text{true}}`.
+1. ``'smear.Ntrue'`` — one-dimensional histogram of number of events :math:`N_{\text{true}}`.
+2. ``'smear.FakeMatrix'`` — 'smearing' matrix. Not read, but used only for the taint-flag propagation.
 
 Outputs
 """""""
