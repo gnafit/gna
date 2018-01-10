@@ -111,7 +111,7 @@ Returns the value of deviation.
 
 ``ComputeAbsGradMatrix()`` computes matrix contains gradient vector length at every point.
 
-``makeCorridor(int curr_x, int curr_y, int deviation)`` is auxiliary function for ``addPoints(int deviation)``. It fills the nearest points to the current points in extended cross-section matrix. As inputs there are coordinates of current point: :math:`curr\_x` and :math:`curr\_y` and deviation value that means that the square with side :math:`2 deviation + 1` will be considered. 
+``makeCorridor(int curr_x, int curr_y, int deviation)`` is auxiliary function for ``addPoints(int deviation)``. It fills the nearest points to the current points in extended cross-section matrix. As inputs there are coordinates of current point: :math:`curr\_x` and :math:`curr\_y` and deviation value that means that the square with side :math:`2 \times\text{deviation} + 1` will be considered. 
 
 .. uml::
 
