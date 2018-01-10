@@ -1,5 +1,5 @@
-Making sense
-------------
+Making sense of C++ core code
+-----------------------------
 
 Let's try log the classes and their meaning and usage.
 The documents and relations may then be converted to doxygen.
