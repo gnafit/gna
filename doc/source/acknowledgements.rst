@@ -1,29 +1,30 @@
 Acknowledgements
 ----------------
 
-.. image:: ../img/logo/jinr_logo.png
-   :width: 150 px
-   :align: left
+.. |jinr| image:: ../img/logo/jinr_logo.png
    :alt: Joint Institute for Nuclear Research
    :target: http://www.jinr.ru/main-en/
 
-.. image:: ../img/logo/DLNP_1_tr.png
-   :width: 110 px
-   :align: left
+.. |dlnp| image:: ../img/logo/DLNP_1_tr.png
    :alt: Dzhelepov Laboratory of Nuclear Problems
    :target: http://dlnp.jinr.ru/en
 
-.. image:: ../img/logo/lit.png
-   :width: 150 px
-   :align: left
+.. |lit| image:: ../img/logo/lit.png
    :alt: Laboratory of Information Technologies
    :target: http://lit.jinr.ru/view.php?var1=about&lang=lat&file=about_about
 
-.. image:: ../img/logo/rfbr_eng_25.png
-   :width: 150 px
-   :align: left
+.. |rfbr| image:: ../img/logo/rfbr_eng_25.png
    :alt: Russian Foundation for Basic Research
    :target: http://www.rfbr.ru/rffi/eng
+
+.. list-table::
+   :widths: 26 22 26 26
+   :align: center
+
+   * - |jinr|
+     - |dlnp|
+     - |lit|
+     - |rfbr|
 
 JINR
 ^^^^
