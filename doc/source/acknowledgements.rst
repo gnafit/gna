@@ -17,14 +17,17 @@ Acknowledgements
    :alt: Russian Foundation for Basic Research
    :target: http://www.rfbr.ru/rffi/eng
 
+.. |ayss| image:: ../img/logo/AYSS-logo.jpg
+   :alt: Assosiation of Young Scientists and Specialists
+   :target: http://www.omus.jinr.ru
+
 .. list-table::
-   :widths: 26 22 26 26
+   :widths: 26 22 26
    :align: center
 
    * - |jinr|
      - |dlnp|
      - |lit|
-     - |rfbr|
 
 JINR
 ^^^^
@@ -35,10 +38,21 @@ Problems. We are also grateful to the Laboratory of Information Technologies for
 Funding agencies
 ^^^^^^^^^^^^^^^^
 
+.. list-table::
+    :widths: 13 13
+    :align: center
+
+    * - |rfbr|
+      - |ayss|
+
 The GNA development is partially supported by the Russian Foundation for Basic Research (`RFBR <http://www.rfbr.ru/rffi/eng>`_):
     - 14-02-91166 a
     - 16-02-01026 a
     - 16-32-00801 mol_a
+
+and by Assosiation of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+    - 17-202-09
+    - 18-202-08
 
 
 
