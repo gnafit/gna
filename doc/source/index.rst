@@ -17,4 +17,4 @@ Contents:
    fc
    reference_guide
    authors
-
+   acknowledgements
