@@ -29,7 +29,7 @@ public:
   }
 
   T back() const {
-    return m_container->back();
+    return T(m_container->back());
   }
 
   T operator[](const std::string &name) const {

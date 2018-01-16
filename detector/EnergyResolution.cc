@@ -26,11 +26,8 @@ void EnergyResolution::add(){
   transformation_(this, label)
     .input("Nvis")
     .output("Nrec")
-    .types(Atypes::pass<0>,
+    .types(Atypes::pass<0>,Atypes::ifHist<0>,
            [index](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
-             if( args[0].kind!=DataKind::Hist ){
-               throw std::runtime_error("EnergyResolution input should be a histogram");
-             }
              if(index==0){
                obj->m_datatype = args[0];
                obj->fillCache();

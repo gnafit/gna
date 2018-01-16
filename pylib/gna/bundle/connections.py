@@ -1,20 +1,12 @@
 from __future__ import print_function
+from itertools import tee, izip
 debug_connections=True
 
-def each_pair( sequence ):
-    """Take each pair from a sequence (overlapping):
-        each_pair( [1,2,3, 4] ) will yield (1,2), (2,3) and (3,4)"""
-    if len(sequence)<2:
-        raise Exception( 'Should define at least two elements for iteration' )
-    it = iter( sequence )
-    prev = it.next()
-    try:
-        while True:
-            current = it.next()
-            yield prev, current
-            prev = current
-    except StopIteration:
-        pass
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)
 
 def transformations_map( chains, connections ):
     """ Connects sequences of transformations input-to-output
