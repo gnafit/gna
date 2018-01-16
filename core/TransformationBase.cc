@@ -99,6 +99,7 @@ bool Entry::check() const {
 
 void Entry::evaluate() {
   return fun(Args(this), Rets(this));
+  /// GPU: sync Rets
 }
 
 void Entry::update() {
@@ -218,9 +219,9 @@ void Source::connect(Sink *newsink) {
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
   sink->entry->tainted.subscribe(entry->tainted);
-  newsink->sources.push_back(this);
+  sink->sources.push_back(this);
   try {
-    newsink->entry->evaluateTypes();
+    sink->entry->evaluateTypes();
     entry->evaluateTypes();
   } catch (const std::exception &exc) {
     std::cerr << "exception in types calculation (bazzeg ROOT): ";
@@ -281,6 +282,11 @@ void Entry::evaluateTypes() {
         deps.insert(depsrc->entry);
       }
     }
+    // GPU: require GPU memory for previous transformation's sink
+    // if gpu
+    //for(auto& source : sources){
+        //source->sink->data->require_gpu();
+    //}
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
