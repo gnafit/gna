@@ -17,9 +17,28 @@ Acknowledgements
    :alt: Russian Foundation for Basic Research
    :target: http://www.rfbr.ru/rffi/eng
 
-.. |ayss| image:: ../img/logo/AYSS-logo.jpg
+.. |ayss| image:: ../img/logo/AYSS-logo_tr.png
    :alt: Assosiation of Young Scientists and Specialists
    :target: http://www.omus.jinr.ru
+
+.. |msu| image:: ../img/logo/msu-logo.png
+   :alt: Moscow State University
+   :target: https://www.msu.ru/en
+
+.. |msu-phys| image:: ../img/logo/sign-physfak-msu.png
+   :alt: Faculty of Physics of Moscow State University
+   :target: http://www.phys.msu.ru/eng/
+
+.. |spbu| image:: ../img/logo/spbu-logo.png
+   :alt: Saint Petersburg University
+   :target: http://english.spbu.ru
+
+.. |spbu-apmath| image:: ../img/logo/apmath-logo-en.png
+   :alt: Faculty of Applied Mathematics and Control Processes
+   :target: http://www.apmath.spbu.ru/en/
+
+JINR
+^^^^
 
 .. list-table::
    :widths: 26 22 26
@@ -29,17 +48,29 @@ Acknowledgements
      - |dlnp|
      - |lit|
 
-JINR
-^^^^
-
 The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Research of Joint Institute for Nuclear
 Problems. We are also grateful to the Laboratory of Information Technologies for their support.
 
-Funding agencies
-^^^^^^^^^^^^^^^^
+Universities
+^^^^^^^^^^^^
 
 .. list-table::
-    :widths: 13 13
+   :widths: 23 23
+   :align: center
+
+   * - |msu|
+     - |spbu|
+   * - |msu-phys|
+     - |spbu-apmath|
+
+
+Students from MSU and SPBU have contributed to the development of GNA.
+       
+Funding
+^^^^^^^
+
+.. list-table::
+    :widths: 14 10
     :align: center
 
     * - |rfbr|
@@ -50,7 +81,9 @@ The GNA development is partially supported by the Russian Foundation for Basic R
     - 16-02-01026 a
     - 16-32-00801 mol_a
 
-and by Assosiation of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+    - 14-202-02
+    - 15-202-04
     - 17-202-09
     - 18-202-08
 
