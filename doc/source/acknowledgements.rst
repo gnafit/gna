@@ -25,7 +25,7 @@ Acknowledgements
    :alt: Moscow State University
    :target: https://www.msu.ru/en
 
-.. |msu-phys| image:: ../img/logo/sign-physfak-msu.png
+.. |msu-phys| image:: ../img/logo/sign-physfak-msu-tr.png
    :alt: Faculty of Physics of Moscow State University
    :target: http://www.phys.msu.ru/eng/
 
@@ -33,7 +33,7 @@ Acknowledgements
    :alt: Saint Petersburg University
    :target: http://english.spbu.ru
 
-.. |spbu-apmath| image:: ../img/logo/apmath-logo-en.png
+.. |spbu-apmath| image:: ../img/logo/apmath-logo-en-tr.png
    :alt: Faculty of Applied Mathematics and Control Processes
    :target: http://www.apmath.spbu.ru/en/
 
