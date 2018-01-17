@@ -57,7 +57,7 @@ JINR
      - |dlnp|
      - |lit|
 
-The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Research of Joint Institute for Nuclear
+The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Problems of Joint Institute for Nuclear
 Problems. We are also grateful to the Laboratory of Information Technologies for their support.
 
 Funding
