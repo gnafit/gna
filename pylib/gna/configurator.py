@@ -20,13 +20,19 @@ class NestedDict(object):
         meta[self] = dict()
 
         if iterable:
+            if type(iterable) is dict:
+                iterable = sorted(iterable.items())
             self.__import__(OrderedDict(iterable))
 
         if kwargs:
-            self.__import__(kwargs)
+            self.__import__(OrderedDict(**kwargs))
 
     def __repr__(self):
         return 'NestedDict'+self.__storage__.__repr__()[11:]
+
+    def __str__(self):
+        pprint(self)
+        return '' #TODO
 
     def __bool__(self):
         return bool(self.keys())
@@ -189,7 +195,7 @@ class NestedDict(object):
         return NestedDict(dic)
 
     def __import__(self, dic):
-        for k, v in sorted(dic.items()):
+        for k, v in dic.items():
             if isinstance(k, str) and k.startswith('__'):
                 continue
             if meta[self].get('verbose', False):
@@ -222,7 +228,7 @@ def pprint( nd, margin='', nested=False ):
             if isinstance( v, NestedDict ):
                 pprint( v, margin, nested=True )
             else:
-                print( v, sep='', end='' )
+                print( str(v), sep='', end='' )
             print(',')
         margin=margin[:-2]
         print(margin, '}', sep='', end='')
