@@ -41,6 +41,11 @@ Acknowledgements
    :alt: Irkutsk State University
    :target: https://isu.ru/en/index.html
 
+.. |isu-physdep| image:: ../img/logo/isu-physdep-logo.png
+   :alt: Physical Department of Irkutsk State University
+   :target: https://physdep.isu.ru
+
+
 JINR
 ^^^^
 
@@ -76,8 +81,6 @@ and by Association of Young Scientists and Specialists of JINR (`AYSS <http://om
     - 17-202-09
     - 18-202-08
 
-
-
 Universities
 ^^^^^^^^^^^^
 
@@ -90,6 +93,6 @@ Universities
      - |isu|
    * - |msu-phys|
      - |spbu-apmath|
-     -
+     - |isu-physdep|
 
-Students from MSU, SPBU and ISU have contributed to the development of GNA.
+Students and alumni of MSU, SPBU and ISU have contributed to the development of GNA.
