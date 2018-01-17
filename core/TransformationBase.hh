@@ -14,6 +14,12 @@
 #include "Parameters.hh"
 #include "Data.hh"
 
+
+#ifdef GNA_CUDA_SUPPORT
+//#include "GNAcuGpuArray.hh"
+#include "GNAcuDataLocation.hh"
+#endif
+
 // #define TRANSFORMATION_DEBUG
 
 #ifdef TRANSFORMATION_DEBUG
@@ -166,6 +172,11 @@ namespace TransformationTypes {
     bool check() const;
     void dump(size_t level = 0) const;
 
+#ifdef GNA_CUDA_SUPPORT
+    void makeDevice() { entryLoc = Device; }
+    void makeHost() {entrtLoc = Host; }
+#endif
+
     std::string name;
     SourcesContainer sources;
     SinksContainer sinks;
@@ -174,6 +185,9 @@ namespace TransformationTypes {
     taintflag tainted;
     const Base *parent;
     int initializing;
+#ifdef GNA_CUDA_SUPPORT
+    DataLocation entryLoc;
+#endif
     bool frozen;
     bool usable;
   private:
@@ -486,6 +500,18 @@ namespace TransformationTypes {
       m_nosubscribe = true;
       return *this;
     }
+
+#ifdef GNA_CUDA_SUPPORT
+    Initializer<T> makeDevice() {
+      m_entry->makeDevice();
+      return *this;
+    }
+
+    Initializer<T> makeHost() {
+      m_entry->makeHost();
+      return *this;
+    }
+#endif
 
   protected:
     Entry *m_entry;
