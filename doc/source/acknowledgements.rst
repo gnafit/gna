@@ -37,6 +37,10 @@ Acknowledgements
    :alt: Faculty of Applied Mathematics and Control Processes
    :target: http://www.apmath.spbu.ru/en/
 
+.. |isu| image:: ../img/logo/isu-logo.png
+   :alt: Irkutsk State University
+   :target: https://isu.ru/en/index.html
+
 JINR
 ^^^^
 
@@ -51,21 +55,6 @@ JINR
 The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Research of Joint Institute for Nuclear
 Problems. We are also grateful to the Laboratory of Information Technologies for their support.
 
-Universities
-^^^^^^^^^^^^
-
-.. list-table::
-   :widths: 23 23
-   :align: center
-
-   * - |msu|
-     - |spbu|
-   * - |msu-phys|
-     - |spbu-apmath|
-
-
-Students from MSU and SPBU have contributed to the development of GNA.
-       
 Funding
 ^^^^^^^
 
@@ -89,3 +78,18 @@ and by Association of Young Scientists and Specialists of JINR (`AYSS <http://om
 
 
 
+Universities
+^^^^^^^^^^^^
+
+.. list-table::
+   :widths: 23 23 23
+   :align: center
+
+   * - |msu|
+     - |spbu|
+     - |isu|
+   * - |msu-phys|
+     - |spbu-apmath|
+     -
+
+Students from MSU, SPBU and ISU have contributed to the development of GNA.
