@@ -21,6 +21,9 @@ Acknowledgements
    :alt: Assosiation of Young Scientists and Specialists
    :target: http://www.omus.jinr.ru
 
+JINR
+^^^^
+
 .. list-table::
    :widths: 26 22 26
    :align: center
@@ -28,9 +31,6 @@ Acknowledgements
    * - |jinr|
      - |dlnp|
      - |lit|
-
-JINR
-^^^^
 
 The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Research of Joint Institute for Nuclear
 Problems. We are also grateful to the Laboratory of Information Technologies for their support.
