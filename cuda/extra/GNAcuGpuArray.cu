@@ -26,6 +26,14 @@ __global__ void vecMult(T* res, T* inA, T* inB, size_t n) {
         res[x] = inA[x] * inB[x];
 }
 
+template <typename T>
+__global__ void vecMultToNum(T* res, T* inA, T inB, size_t n) {
+        int x = blockDim.x * blockIdx.x + threadIdx.x;
+        if (x >= n) return;
+        res[x] = inA[x] * inB;
+}
+
+
 
 template <typename T>
 __global__ void setByValueGPU(T* res, T val, size_t n) {
@@ -203,103 +211,68 @@ DataLocation GNAcuGpuArray<T>::transferD2H() {
 
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> &rhs) {
-	F* resPtr;
-	size_t res_size = arrSize;
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> &rhs) {
 	if (arrSize != rhs.getArraySize()) {
 		std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
 			     "smallest will be used!"
 			  << std::endl;
-		if (arrSize > rhs.getArraySize()) res_size = rhs.getArraySize();
 	}
-	cudaError_t err;
-	err = cudaMalloc((void**)&resPtr, sizeof(F) * res_size);
-	if (err != cudaSuccess) {
-		printf("ERROR: unable to  allocate memory for add result!\n");
-		std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
-	}
-	vecAdd<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
-				   res_size);
-	F* ttt = nullptr;
-	GNAcuGpuArray<F> res(ttt, res_size);
-	res.setByDeviceArray(resPtr);
-	res.arrState = Device;
-	return res;
+	vecAdd<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
+				   arrSize);
+	arrState = Device;
+	return *this;
 }
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> &rhs) {
-        F* resPtr = nullptr;
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> &rhs) {
+        if (arrSize != rhs.getArraySize()) {
+                std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
+                             "smallest will be used!"
+                          << std::endl;
+        }
+        vecMinus<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
+                                   arrSize);
+        arrState = Device;
+        return *this;
+}
+
+
+
+template <typename F>
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-() {
+	vecMinusUnar<F><<<arrSize, 1>>>(devicePtr, devicePtr, arrSize);
+        arrState = Device;
+        return *this;
+}
+
+
+template <typename F>
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> &rhs) {
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
                 std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
                              "smallest will be used!"
                           << std::endl;
-                if (arrSize > rhs.getArraySize()) res_size = rhs.getArraySize();
         }
-        cudaError_t err;
-        err = cudaMalloc((void**)&resPtr, sizeof(F) * res_size);
-        if (err != cudaSuccess) {
-                printf("ERROR: unable to  allocate memory for subtraction result!\n");
-                std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
-        }
-        vecMinus<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
+        vecMult<F><<<res_size, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
                                    res_size);
-        F* ttt = nullptr;
-        GNAcuGpuArray<F> res(ttt, res_size);
-        res.setByDeviceArray(resPtr);
-        res.arrState = Device;
-        return res;
-}
-
-
-
-template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
-        F* resPtr = nullptr;
-        cudaError_t err;
-        err = cudaMalloc((void**)&resPtr, sizeof(F) * arrSize);
-	if (err != cudaSuccess) {
-                printf("ERROR: unable to  allocate memory for subtraction result!\n");
-                std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
-        }
-
-	vecMinusUnar<F><<<arrSize, 1>>>(resPtr, devicePtr, arrSize);
-	F* ttt = nullptr;
-        GNAcuGpuArray<F> res(ttt, arrSize);
-        res.setByDeviceArray(resPtr);
-        res.arrState = Device;
-        return res;
+       arrState = Device;
+       return *this; 
 }
 
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> &rhs) {
-        F* resPtr = nullptr;
-        size_t res_size = arrSize;
-        if (arrSize != rhs.getArraySize()) {
-                std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
-                             "smallest will be used!"
-                          << std::endl;
-                if (arrSize > rhs.getArraySize()) res_size = rhs.getArraySize();
-        }
-        cudaError_t err;
-        err = cudaMalloc((void**)&resPtr, sizeof(F) * res_size);
-        if (err != cudaSuccess) {
-                printf("ERROR: unable to  allocate memory for add result!\n");
-                std::cerr << "err is " << cudaGetErrorString(err) << std::endl;
-        }
-        vecMult<F><<<res_size, 1>>>(resPtr, devicePtr, rhs.getArrayPtr(),
-                                   res_size);
-        F* ttt = nullptr;
-        GNAcuGpuArray<F> res(ttt, res_size);
-        res.setByDeviceArray(resPtr);
-        res.arrState = Device;
-        return res;
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
+        vecMultToNum<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs,
+                                   arrSize);
+        arrState = Device;
+        return *this;
 }
+
+
 
 template <typename T>
-GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
+GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> &rhs) {
 	resize(rhs.getArraySize());
 	(*this).arrState = Device;
 	(*this).setByDeviceArray(rhs.getArrayPtr());

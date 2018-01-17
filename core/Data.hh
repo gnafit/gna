@@ -312,6 +312,7 @@ public:
   }
 
   void require_gpu();
+  void require_sync_H2D();
   void require_sync_D2H();
 
   const DataType type;
@@ -335,6 +336,9 @@ public:
 
 };
 
+#ifdef GNA_CUDA_SUPPORT
+
+// TODO create separate cpp file 
 void Data<T>::require_gpu() {
   if (type.shape.size() == 1) {
     setSize(type.shape[0]);
@@ -343,8 +347,23 @@ void Data<T>::require_gpu() {
     setSize(type.shape[0]*type.shape[1]);
   }
   m_dataLoc = setByHostArray(buffer);
-  
 }
+
+void Data<T>::require_sync_H2D() {
+  m_dataLoc = transferH2D();
+  buffer = m_gpuArr.getArrayPtr();
+  if (type.shape.size() == 1) {
+    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0]);
+    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0]);
+  }
+  else if (type.shape.size() == 2) {
+    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0] * type.shape[1]);
+    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0] * type.shape[1]);
+    new (&arr2d) Eigen::Map<ArrayXXT>(buffer, type.shape[0], type.shape[1]);
+    new (&mat) Eigen::Map<MatrixXT>(buffer, type.shape[0], type.shape[1]);
+  }
+}
+
 
 void Data<T>::require_sync_D2H() {
   m_dataLoc = getContentToCPU(buffer);
@@ -359,4 +378,7 @@ void Data<T>::require_sync_D2H() {
     new (&mat) Eigen::Map<MatrixXT>(buffer, type.shape[0], type.shape[1]);
   }
 }
+
+#endif
+
 #endif // DATA_H
