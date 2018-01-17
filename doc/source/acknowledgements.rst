@@ -39,7 +39,7 @@ Funding
 ^^^^^^^
 
 .. list-table::
-    :widths: 10 10
+    :widths: 14 10
     :align: center
 
     * - |rfbr|
@@ -50,7 +50,7 @@ The GNA development is partially supported by the Russian Foundation for Basic R
     - 16-02-01026 a
     - 16-32-00801 mol_a
 
-and by Assosiation of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
     - 14-202-02
     - 15-202-04
     - 17-202-09
