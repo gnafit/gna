@@ -28,6 +28,12 @@ class NestedDict(object):
     def __repr__(self):
         return 'NestedDict'+self.__storage__.__repr__()[11:]
 
+    def __bool__(self):
+        return bool(self.keys())
+
+    def __len__(self):
+        return len(self.keys())
+
     def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
 
@@ -206,6 +212,25 @@ def configurator(filename=None, dic={}, **kwargs):
         self.__import__(dic)
 
     return self
+
+def pprint( nd, margin='', nested=False ):
+    if nd:
+        print('${')
+        margin+='  '
+        for k, v in nd.items():
+            print( margin, k, ' : ', end='', sep='' )
+            if isinstance( v, NestedDict ):
+                pprint( v, margin, nested=True )
+            else:
+                print( v, sep='', end='' )
+            print(',')
+        margin=margin[:-2]
+        print(margin, '}', sep='', end='')
+    else:
+        print('${}', end='')
+
+    if not nested:
+        print()
 
 init_globals['load'] = configurator
 
