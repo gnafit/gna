@@ -2,7 +2,7 @@
 #include <cuda_runtime.h>
 #include <iostream>
 #include "GNAcuGpuArray.hh"
-#include "GNAcuGpuMemStates.hh"
+#include "GNAcuDataLocation.hh"
 
 template <typename T>
 __global__ void vecAdd(T* res, T* inA, T* inB, size_t n) {
@@ -94,7 +94,7 @@ void GNAcuGpuArray<T>::resize(size_t newSize) {
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
+DataLocation GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 	cudaError_t err;
 	err = cudaMemcpy((void**)&devicePtr, inHostArr, sizeof(T) * arrSize,
 			 cudaMemcpyHostToDevice);
@@ -103,12 +103,13 @@ void GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
-		arrState = OnDevice;
+		arrState = Device;
 	}
+	return arrState;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
+DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 	cudaError_t err;
 	err = cudaMemcpy(devicePtr, inDeviceArr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
@@ -117,18 +118,20 @@ void GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
-		arrState = OnDevice;
+		arrState = Device;
 	}
+        return arrState;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::setByValue(T value) {
+DataLocation GNAcuGpuArray<T>::setByValue(T value) {
 	setByValueGPU<T><<<arrSize, 1>>>(devicePtr, value, arrSize);
-	arrState = OnDevice;
+	arrState = Device;
+        return arrState;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
+DataLocation GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 	cudaError_t err;
 	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToHost);
@@ -137,12 +140,13 @@ void GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
-		arrState = OnHost;
+		arrState = Host;
 	}
+	return arrState;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::getContent(T* dst) {
+DataLocation GNAcuGpuArray<T>::getContent(T* dst) {
 	cudaError_t err;
 	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
@@ -151,12 +155,13 @@ void GNAcuGpuArray<T>::getContent(T* dst) {
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
-		arrState = OnDevice;
+		arrState = Device;
 	}
+	return arrState;
 }
 
 template <typename T> 
-void GNAcuGpuArray<T>::transferH2D() {
+DataLocation GNAcuGpuArray<T>::transferH2D() {
 	cudaError_t err;
 	if (arrState == NotInitialized) {
 		err = cudaMalloc((void**)&devicePtr, arrSize * sizeof(T));
@@ -173,12 +178,13 @@ void GNAcuGpuArray<T>::transferH2D() {
                 std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
                 arrState = Crashed;
         } else {
-                arrState = OnDevice;
+                arrState = Device;
         }
+	return arrState;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::transferD2H() {
+DataLocation GNAcuGpuArray<T>::transferD2H() {
         cudaError_t err;
         if (arrState == NotInitialized) {
                 hostPtr = new T[arrSize];
@@ -190,8 +196,9 @@ void GNAcuGpuArray<T>::transferD2H() {
                 std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
                 arrState = Crashed;
         } else {
-                arrState = OnHost;
+                arrState = Host;
         }
+	return arrState;
 }
 
 
@@ -216,7 +223,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
 	F* ttt = nullptr;
 	GNAcuGpuArray<F> res(ttt, res_size);
 	res.setByDeviceArray(resPtr);
-	res.arrState = OnDevice;
+	res.arrState = Device;
 	return res;
 }
 
@@ -241,7 +248,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> rhs) {
         F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, res_size);
         res.setByDeviceArray(resPtr);
-        res.arrState = OnDevice;
+        res.arrState = Device;
         return res;
 }
 
@@ -261,7 +268,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
 	F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, arrSize);
         res.setByDeviceArray(resPtr);
-        res.arrState = OnDevice;
+        res.arrState = Device;
         return res;
 }
 
@@ -287,16 +294,16 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> rhs) {
         F* ttt = nullptr;
         GNAcuGpuArray<F> res(ttt, res_size);
         res.setByDeviceArray(resPtr);
-        res.arrState = OnDevice;
+        res.arrState = Device;
         return res;
 }
 
 template <typename T>
 GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 	resize(rhs.getArraySize());
-	(*this).arrState = OnDevice;
+	(*this).arrState = Device;
 	(*this).setByDeviceArray(rhs.getArrayPtr());
-	//(*this).arrState = OnDevice;
+	//(*this).arrState = Device;
 	return *this;
 }
 

@@ -2,7 +2,7 @@
 #define GNACUOSCPROBMEM_H
 
 #include <iostream>
-#include "GNAcuGpuMemStates.hh"
+#include "GNAcuDataLocation.hh"
 
 /*enum GpuMemoryState {
 	NotInitialized,
@@ -46,7 +46,7 @@ class GNAcuOscProbMem {
 	T* devComp23;
 	T* devCompCP;
 	T* devRet;
-	GpuMemoryState currentGpuMemState;
+	GpuDataLocation currentGpuMemState;
 
 	GNAcuOscProbMem(int numOfElem);
 	~GNAcuOscProbMem();
