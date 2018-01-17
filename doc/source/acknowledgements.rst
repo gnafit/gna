@@ -17,7 +17,7 @@ Acknowledgements
    :alt: Russian Foundation for Basic Research
    :target: http://www.rfbr.ru/rffi/eng
 
-.. |ayss| image:: ../img/logo/AYSS-logo.jpg
+.. |ayss| image:: ../img/logo/AYSS-logo_tr.png
    :alt: Assosiation of Young Scientists and Specialists
    :target: http://www.omus.jinr.ru
 
@@ -35,11 +35,11 @@ JINR
 The work on GNA is carried out by a group from Dzhelepov Laboratory of Nuclear Research of Joint Institute for Nuclear
 Problems. We are also grateful to the Laboratory of Information Technologies for their support.
 
-Funding agencies
-^^^^^^^^^^^^^^^^
+Funding
+^^^^^^^
 
 .. list-table::
-    :widths: 13 13
+    :widths: 10 10
     :align: center
 
     * - |rfbr|
@@ -51,6 +51,8 @@ The GNA development is partially supported by the Russian Foundation for Basic R
     - 16-32-00801 mol_a
 
 and by Assosiation of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+    - 14-202-02
+    - 15-202-04
     - 17-202-09
     - 18-202-08
 
