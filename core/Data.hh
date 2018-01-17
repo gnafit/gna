@@ -13,6 +13,11 @@
 
 #include <Eigen/Dense>
 
+#ifdef GNA_CUDA_SUPPORT
+#include "GNAcuGpuArray.hh"
+#include "GNAcuDataLocation.hh"
+#endif
+
 enum class Status {
   Undefined = 0, Success, Failed,
 };
@@ -300,8 +305,14 @@ public:
 
       new (&arr2d) Eigen::Map<ArrayXXT>(buf, dt.shape[0], dt.shape[1]);
       new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
-    }
+    } 
+#ifdef GNA_CUDA_SUPPORT
+    m_dataLoc = Host;
+#endif
   }
+
+  void require_gpu();
+  void require_sync_D2H();
 
   const DataType type;
   Status state{Status::Undefined};
@@ -316,6 +327,36 @@ public:
   Eigen::Map<MatrixXT> mat{nullptr, 0, 0};
 
   Eigen::Map<ArrayXT> &x = arr;
+#ifdef GNA_CUDA_SUPPORT
+  GNAcuGpuArray<double> m_gpuArr; 
+  DataLocation m_dataLoc;
+#endif
+
+
 };
 
+void Data<T>::require_gpu() {
+  if (type.shape.size() == 1) {
+    setSize(type.shape[0]);
+  }
+  else if (type.shape.size() == 2) {
+    setSize(type.shape[0]*type.shape[1]);
+  }
+  m_dataLoc = setByHostArray(buffer);
+  
+}
+
+void Data<T>::require_sync_D2H() {
+  m_dataLoc = getContentToCPU(buffer);
+  if (type.shape.size() == 1) {
+    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0]);
+    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0]);
+  }
+  else if (type.shape.size() == 2) {
+    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0] * type.shape[1]);
+    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0] * type.shape[1]);
+    new (&arr2d) Eigen::Map<ArrayXXT>(buffer, type.shape[0], type.shape[1]);
+    new (&mat) Eigen::Map<MatrixXT>(buffer, type.shape[0], type.shape[1]);
+  }
+}
 #endif // DATA_H
