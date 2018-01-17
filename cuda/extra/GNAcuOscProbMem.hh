@@ -46,7 +46,7 @@ class GNAcuOscProbMem {
 	T* devComp23;
 	T* devCompCP;
 	T* devRet;
-	GpuDataLocation currentGpuMemState;
+	DataLocation currentGpuMemState;
 
 	GNAcuOscProbMem(int numOfElem);
 	~GNAcuOscProbMem();

@@ -9,7 +9,7 @@ enum DataLocation {
         Host,
         Device,
 	NoData, 
-	Creshed
+	Crashed
 };
 
 inline std::ostream& operator<<(std::ostream& so, DataLocation gState) {
