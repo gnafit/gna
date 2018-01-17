@@ -60,3 +60,11 @@ print( 'Sub values' )
 print( list(gd.subvalues()) )
 print()
 
+print( 'Retrieve missing key (KeyError): ', end='')
+try:
+    gd['missing']
+except KeyError:
+    print( '\033[32mOK!\033[0m' )
+except:
+    print( '\033[32mFail!\033[0m' )
+

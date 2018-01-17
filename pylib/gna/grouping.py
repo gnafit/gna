@@ -61,7 +61,10 @@ class GroupedDict(OrderedDict):
 
     def __missing__(self, key):
         """Return value by group name instead of a key name"""
-        return self[self.groups[key]]
+        if key in self.groups:
+            return self[self.groups[key]]
+
+        raise KeyError(key)
 
     def subkeys(self, group=None):
         """The same as key but replace each group by its elements"""
