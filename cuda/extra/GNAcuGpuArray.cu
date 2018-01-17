@@ -203,7 +203,7 @@ DataLocation GNAcuGpuArray<T>::transferD2H() {
 
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
+GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> &rhs) {
 	F* resPtr;
 	size_t res_size = arrSize;
 	if (arrSize != rhs.getArraySize()) {
@@ -228,7 +228,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> rhs) {
 }
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> rhs) {
+GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> &rhs) {
         F* resPtr = nullptr;
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
@@ -274,7 +274,7 @@ GNAcuGpuArray<F> GNAcuGpuArray<F>::operator-() {
 
 
 template <typename F>
-GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> rhs) {
+GNAcuGpuArray<F> GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> &rhs) {
         F* resPtr = nullptr;
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {

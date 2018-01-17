@@ -22,10 +22,10 @@ public:
 	DataLocation transferD2H(); 
 	T* getArrayPtr() { return devicePtr; }
 	size_t getArraySize() { return arrSize; }
-	GNAcuGpuArray<T> operator+(GNAcuGpuArray<T> rhs);
-        GNAcuGpuArray<T> operator-(GNAcuGpuArray<T> rhs);
+	GNAcuGpuArray<T> operator+(GNAcuGpuArray<T> &rhs);
+        GNAcuGpuArray<T> operator-(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T> operator-();
-        GNAcuGpuArray<T> operator*(GNAcuGpuArray<T> rhs);
+        GNAcuGpuArray<T> operator*(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
 
         DataLocation arrState;
