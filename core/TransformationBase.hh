@@ -226,6 +226,12 @@ namespace TransformationTypes {
     Entry *m_entry;
   };
 
+  class OpenHandle : public Handle {
+  public:
+      OpenHandle(const Handle& other) : Handle(other){};
+      Entry* getEntry() { return m_entry; }
+  };
+
   struct Args {
     Args(const Entry *e): m_entry(e) { }
     const Data<double> &operator[](int i) const;
@@ -269,6 +275,10 @@ namespace TransformationTypes {
     static void pass(Atypes args, Rtypes rets);
     static void ifSame(Atypes args, Rtypes rets);
     static void ifSameShape(Atypes args, Rtypes rets);
+    template <size_t Arg>
+    static void ifHist(Atypes args, Rtypes rets);
+    template <size_t Arg>
+    static void ifPoints(Atypes args, Rtypes rets);
 
     SourceTypeError error(const DataType &dt, const std::string &message = "");
 
@@ -304,6 +314,20 @@ namespace TransformationTypes {
       throw std::runtime_error("Transformation: invalid Ret index");
     }
     rets[Ret] = args[Arg];
+  }
+
+  template <size_t Arg>
+  inline void Atypes::ifHist(Atypes args, Rtypes rets) {
+    if (args[Arg].kind!=DataKind::Hist) {
+      throw std::runtime_error("Transformation: Arg should be a histogram");
+    }
+  }
+
+  template <size_t Arg>
+  inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
+    if (args[Arg].kind!=DataKind::Points) {
+      throw std::runtime_error("Transformation: Arg should be an array");
+    }
   }
 
   class Accessor {
@@ -451,6 +475,11 @@ namespace TransformationTypes {
       using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
       m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1, _2));
+      return *this;
+    }
+
+    Initializer<T> finalize() {
+      m_entry->evaluateTypes();
       return *this;
     }
 

@@ -24,7 +24,8 @@ protected:
       .func([](Histogram *obj, Args /*args*/, Rets rets) {
           auto &pts = obj->data();
           rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&pts[0], pts.size());
-        });
+        })
+      .finalize();
   }
   std::vector<double> m_edges;
   std::vector<double> m_data;

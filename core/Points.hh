@@ -47,7 +47,8 @@ protected:
       .func([](Points *obj, Args /*args*/, Rets rets) {
           auto &pts = obj->m_points;
           rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&pts[0], pts.size());
-        });
+        })
+      .finalize();
   }
   std::vector<double> m_points;
   std::vector<size_t> m_shape;

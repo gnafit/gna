@@ -24,7 +24,6 @@ def arggroups(argv):
         yield argv[start:end]
 
 def getmodules():
-    # pkgpath = os.path.dirname(gna.ui.__file__)
     modules = {}
     for pkgpath in cfg.pkgpaths:
         modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})

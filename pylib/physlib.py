@@ -71,11 +71,11 @@ pdg[2016]  = dict( pdg[2013]
     , dmSq21 = 7.53e-5 #pdglive, 2013, Gando (KamLAND + solar + SBL + accelerator)
     , dmSq21_e = 0.18e-5
     , sinSqtheta12 = 0.304
-    , sinSqtheta12_e = 0.014 # the error in pdg is asymmetric, took the upper bound 
+    , sinSqtheta12_e = 0.014 # the error in pdg is asymmetric, took the upper bound
     , sinSqtheta13 = 2.19e-2
     , sinSqtheta13_e = 0.12e-2
     , dmSq32_normal = 2.44e-3 # pdglive, 2016, their own fit
-    , dmSq32_normal_e = 0.06e-3 
+    , dmSq32_normal_e = 0.06e-3
     , dmSq32_inverted = 2.51e-3
     , dmSq32_inverted_e = 0.06e-3
     , sinSqtheta23_normal = 0.50 # pdglive, 2016, their own fit
@@ -100,6 +100,7 @@ class PhysicsConstants:
 ##end class PhysicsConstants
 
 pc = PhysicsConstants()
+percent = 0.01
 
 
 
