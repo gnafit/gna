@@ -40,6 +40,8 @@ class NestedDict(object):
             res+='{margin}{key} : '.format( margin=margin, key=k )
             if isinstance( v, NestedDict ):
                 res+=v.__str__(margin)
+            elif isinstance( v, str ):
+                res+=repr(v)
             else:
                 res+=str(v)
             res+=',\n'
