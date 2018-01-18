@@ -99,7 +99,9 @@ class ExpressionsEntry(object):
         return minpaths+[minexpr]
 
 class namespace(Mapping):
+    groups = None
     def __init__(self, parent, name):
+        self.groups=[]
         self.name = name
         if parent is not None and parent.path:
             self.path = '.'.join([parent.path, name])
