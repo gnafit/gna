@@ -1,6 +1,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
+#include <functional>
 #include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
 
@@ -62,6 +63,7 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 	arrSize = inSize;
 	size_t alloc_size = sizeof(T) * inSize;
 	err = cudaMalloc((void**)&devicePtr, alloc_size);
+        std::cout << "Constructor: arrSize is " << arrSize << std::endl;
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
 		std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
@@ -92,6 +94,8 @@ void GNAcuGpuArray<T>::resize(size_t newSize) {
 		size_t alloc_size = sizeof(T) * newSize;
 		arrSize = newSize;
 		err = cudaMalloc((void**)&devicePtr, alloc_size);
+                std::cout << "Resize: arrSize is " << arrSize << std::endl;
+
 		if (err != cudaSuccess) {
 			printf("ERROR: unable to  allocate!\n");
 			std::cerr << "err is " << cudaGetErrorString(err)
@@ -173,6 +177,8 @@ DataLocation GNAcuGpuArray<T>::transferH2D() {
 	cudaError_t err;
 	if (arrState == NotInitialized) {
 		err = cudaMalloc((void**)&devicePtr, arrSize * sizeof(T));
+        std::cout << "transfer H2D: arrSize is " << arrSize << std::endl;
+
         	if (err != cudaSuccess) {
                 	printf("ERROR: unable to  allocate!\n");
                 	std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
@@ -270,15 +276,12 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
 }
 
 
-
 template <typename T>
-GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> &rhs) {
-	resize(rhs.getArraySize());
-	(*this).arrState = Device;
-	(*this).setByDeviceArray(rhs.getArrayPtr());
-	//(*this).arrState = Device;
-	return *this;
+GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
+        return std::ref(rhs);
 }
+
+
 
 template class GNAcuGpuArray<double>;
 template class GNAcuGpuArray<float>;

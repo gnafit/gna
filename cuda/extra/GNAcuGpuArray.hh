@@ -27,8 +27,7 @@ public:
         GNAcuGpuArray<T>& operator-();
         GNAcuGpuArray<T>& operator*(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator*(T rhs);
-        GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> &rhs);
-
+        GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
         DataLocation arrState;
 //	DataType type;
 protected:
