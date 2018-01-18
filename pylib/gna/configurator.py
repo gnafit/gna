@@ -25,14 +25,27 @@ class NestedDict(object):
             self.__import__(OrderedDict(iterable))
 
         if kwargs:
-            self.__import__(OrderedDict(**kwargs))
+            self.__import__(OrderedDict(sorted(kwargs.items())))
 
     def __repr__(self):
-        return 'NestedDict'+self.__storage__.__repr__()[11:]
+        return self.__storage__.__repr__().replace('Ordered', 'Nested', 1)
 
-    def __str__(self):
-        pprint(self)
-        return '' #TODO
+    def __str__(self, margin=''):
+        if not self.__bool__():
+            return '${}'
+
+        res='${\n'
+        margin+='  '
+        for k, v in self.items():
+            res+='{margin}{key} : '.format( margin=margin, key=k )
+            if isinstance( v, NestedDict ):
+                res+=v.__str__(margin)
+            else:
+                res+=str(v)
+            res+=',\n'
+        margin=margin[:-2]
+
+        return res+margin+'}'
 
     def __bool__(self):
         return bool(self.keys())
@@ -218,25 +231,6 @@ def configurator(filename=None, dic={}, **kwargs):
         self.__import__(dic)
 
     return self
-
-def pprint( nd, margin='', nested=False ):
-    if nd:
-        print('${')
-        margin+='  '
-        for k, v in nd.items():
-            print( margin, k, ' : ', end='', sep='' )
-            if isinstance( v, NestedDict ):
-                pprint( v, margin, nested=True )
-            else:
-                print( str(v), sep='', end='' )
-            print(',')
-        margin=margin[:-2]
-        print(margin, '}', sep='', end='')
-    else:
-        print('${}', end='')
-
-    if not nested:
-        print()
 
 init_globals['load'] = configurator
 

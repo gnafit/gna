@@ -38,6 +38,9 @@ class uncertain(object):
 
         return res
 
+    def __repr__(self):
+        return 'uncertain({central!r}, {error!r}, {mode!r})'.format( **self.__dict__ )
+
 def uncertaindict(*args, **kwargs):
     mode = kwargs.pop( 'mode' )
     res  = OrderedDict( *args, **kwargs )
@@ -79,7 +82,7 @@ cfg.lihe = NestedDict(
                 )
             ),
         spectra = NestedDict(
-            docdb = [8772,8860],
+            docdb = [8772, 8860],
             list = [ 'li_spectrum', 'he_spectrum' ],
             li_spectrum = NestedDict(
                 file   = 'data/background/lihe/13.09/toyli9spec_BCWmodel_v1.root',
@@ -147,5 +150,7 @@ cfg.fastn = NestedDict(
                        # ),
 
 print(str(cfg))
-# import IPython
-# IPython.embed()
+
+exec 'cfg_clone='+repr(cfg)
+check = str(cfg)==str(cfg_clone)
+print( '\033[32mNestedDict is clonable!' if else '\033[31mNestedDict clone FAIL!', '\033[0m' )
