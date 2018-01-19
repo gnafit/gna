@@ -317,6 +317,7 @@ std::cout << "DATA constructor" << std::endl;
   void require_gpu();
   void sync_H2D();
   void sync_D2H();
+  void sync(DataLocation loc);
 #endif
 
   const DataType type;
@@ -359,6 +360,19 @@ template <typename T>
 void Data<T>::sync_D2H() {
   dataLoc = gpuArr.getContentToCPU(buffer);
   std::cout << "in D2H size = " << gpuArr.getArraySize() <<std::endl;
+}
+
+template <typename T>
+void Data<T>::sync(DataLocation loc) {
+  if (dataLoc == loc) {
+    std::cerr << "Relevant data on CPU -- no synchronization needed" << std::endl; 
+  } else if(dataLoc == Device && loc == Host) {
+    sync_D2H();
+  } else if(dataLoc == Host && loc == Device) {
+    sync_H2D();
+  } else {
+    std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
+  }
 }
 
 #endif
