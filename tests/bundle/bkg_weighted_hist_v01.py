@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 from __future__ import print_function
 from load import ROOT as R
 from gna.configurator import NestedDict
@@ -72,27 +69,3 @@ def make_sample_file( filename ):
     file.Close()
 
 make_sample_file( cfg.filename )
-
-fig = P.figure()
-ax = P.subplot( 111 )
-ax.minorticks_on()
-ax.grid()
-ax.set_xlabel( 'bin' )
-ax.set_ylabel( 'height' )
-ax.set_title( 'Histogram' )
-for spname in cfg.spectra:
-    scfg = cfg[spname]
-    b = execute_bundle( cfg=scfg, namespaces=list(scfg.get('variants', [''])), storage=storage )
-
-    for output, ns in zip(b.outputs, b.namespaces):
-        data = output.data()
-        ax.bar(range(len(data)), data, label=ns.name)
-
-ax.legend()
-
-print( 'Walk namespaces:' )
-for ns in env.globalns.walknstree():
-    print( '   ', ns )
-
-P.show()
-

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain, uncertaindict
 from collections import OrderedDict
 from physlib import percent
 
@@ -14,10 +14,13 @@ cfg.groups    = OrderedDict( [
                 ( 'EH3', ('AD31', 'AD32', 'AD33', 'AD34') ),
                 ] )
 
-bkg = cfg('bkg')
-bkg.list = [ 'acc', 'lihe', 'fastn', 'amc', 'alphan' ]
+bkg = cfg.bkg = NestedDict([
+    ('list', [ 'acc', 'lihe', 'fastn', 'amc', 'alphan' ]),
+    # ('bundle', 'bundle_sum_v01')
+    ])
 
 bkg.acc = NestedDict(
+        bundle = 'bkg_weighted_hist_v01'
         norm = uncertain( 1.0, 1.0, 'percent' ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
