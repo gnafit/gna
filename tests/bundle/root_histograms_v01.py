@@ -7,6 +7,7 @@ from gna.configurator import NestedDict
 from gna.bundle import execute_bundle
 from gna.env import env
 from matplotlib import pyplot as P
+from collections import OrderedDict
 
 storage = env.globalns('storage')
 
@@ -24,7 +25,6 @@ cfg.spectra1 = NestedDict(
         bundle = 'root_histograms_v01',
         filename = cfg.filename,
         format = 'hist',
-        variants = ['bkg_spectra']
         )
 cfg.spectra2 = NestedDict(
         bundle = 'root_histograms_v01',
@@ -35,9 +35,13 @@ cfg.spectra2 = NestedDict(
 cfg.spectra3 = NestedDict(
         bundle = 'root_histograms_v01',
         filename = cfg.filename,
-        # format = 'hist_{group}_{det}',
         format = 'hist_{}',
-        variants = cfg.detectors
+        variants = OrderedDict([
+            ( 'D1', 'G1_D1' ),
+            ( 'D2', 'G1_D2' ),
+            ( 'D3', 'G2_D3' ),
+            ( 'D4', 'G3_D4' ),
+            ])
         )
 
 def make_sample_file( filename ):
@@ -58,7 +62,7 @@ def make_sample_file( filename ):
         file.WriteTObject( h )
 
         for det in dets:
-            name = 'hist_{det}'.format( group=gr, det=det )
+            name = 'hist_{group}_{det}'.format( group=gr, det=det )
             h = R.TH1D(name, name, 10, 0, 10 )
             h.SetBinContent( it, 1 ); it+=1
             file.WriteTObject( h )
@@ -78,7 +82,7 @@ ax.set_ylabel( 'height' )
 ax.set_title( 'Histogram' )
 for spname in cfg.spectra:
     scfg = cfg[spname]
-    b = execute_bundle( cfg=scfg, namespaces=scfg.variants, storage=storage )
+    b = execute_bundle( cfg=scfg, namespaces=list(scfg.get('variants', [''])), storage=storage )
 
     for output, ns in zip(b.outputs, b.namespaces):
         data = output.data()

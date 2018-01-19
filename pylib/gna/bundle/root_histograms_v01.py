@@ -7,6 +7,7 @@ from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
+from gna.configurator import NestedDict
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise
@@ -24,13 +25,18 @@ class root_histograms_v01(TransformationBundle):
         print( 'Read input file {}:'.format(file.GetName()) )
 
         self.transformations=OrderedDict()
-        for var in self.cfg.variants:
-            hname = self.cfg.format.format(var)
+        variants = self.cfg.get('variants', [''])
+        for var in variants:
+            fmt = var
+            if isinstance(variants, (dict, NestedDict)):
+                fmt = variants[var]
+
+            hname = self.cfg.format.format(fmt)
             h = file.Get( hname )
             if not h:
                 raise Exception('Can not read {hist} from {file}'.format( hist=hname, file=file.GetName() ))
 
-            print( '  read', var, ':', hname )
+            print( '  read{}: {}'.format(var and ' '+var or '', hname) )
             edges = get_bin_edges_axis( h.GetXaxis() )
             data  = get_buffer_hist1( h )
             hist = Histogram( edges, data )

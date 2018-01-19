@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """configurator class allows to load any python file by its filename
 and store the contents in a namespace
 namespace elements are accessible throught both key access or member acess"""
@@ -40,7 +42,7 @@ class NestedDict(object):
             res+='{margin}{key} : '.format( margin=margin, key=k )
             if isinstance( v, NestedDict ):
                 res+=v.__str__(margin)
-            elif isinstance( v, str ):
+            elif isinstance( v, basestring ):
                 res+=repr(v)
             else:
                 res+=str(v)
@@ -71,7 +73,7 @@ class NestedDict(object):
                 return sub.get( rest, default )
 
         if isinstance( key, basestring ) and '.' in key:
-            return self.get(key.split('.'))
+            return self.getitem(key.split('.'), default)
 
         return self.__storage__.get(key, default)
 
@@ -134,6 +136,9 @@ class NestedDict(object):
 
     def keys(self):
         return self.__storage__.keys()
+
+    def __iter__(self):
+        return iter(self.__storage__)
 
     def values(self):
         return self.__storage__.values()
@@ -211,7 +216,7 @@ class NestedDict(object):
 
     def __import__(self, dic):
         for k, v in dic.items():
-            if isinstance(k, str) and k.startswith('__'):
+            if isinstance(k, basestring) and k.startswith('__'):
                 continue
             if meta[self].get('verbose', False):
                 if k in self:

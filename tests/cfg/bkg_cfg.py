@@ -21,9 +21,13 @@ bkg.acc = NestedDict(
         norm = uncertain( 1.0, 1.0, 'percent' ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
-            file   = 'FIXME: data/light_events/dubna/accspec_scaled_all.root',
-            format = '{group}_{det}_singleTrigEnergy',
-            grouping = 'individual',
+            file   = 'data/dayabay/data_spectra/P15A_IHEP_data/data_IHEP_P15A_All.root',
+            format = 'accidental_pred_{}',
+            variants = OrderedDict([
+                ( 'AD11', 'EH1_AD1' ), ( 'AD12', 'EH1_AD2' ),
+                ( 'AD21', 'EH2_AD3' ), ( 'AD22', 'EH2_AD8' ),
+                ( 'AD31', 'EH3_AD4' ), ( 'AD32', 'EH3_AD5' ), ( 'AD33', 'EH3_AD6' ), ( 'AD34', 'EH3_AD7' ),
+                ])
             )
         )
 
@@ -46,13 +50,11 @@ cfg.lihe = NestedDict(
                 bundle = 'root_histograms_v01',
                 file   = 'data/background/lihe/13.09/toyli9spec_BCWmodel_v1.root',
                 format = 'h_eVisAllSmeared',
-                grouping = 'all',
                 ),
             he_spectrum = NestedDict(
                 bundle = 'root_histograms_v01',
                 file   = 'data/background/lihe/13.09/toyhe8spec_BCWmodel_v1.root',
                 format = 'h_eVisAllSmeared',
-                grouping = 'all',
                 )
             )
         )
@@ -97,7 +99,6 @@ cfg.amc = NestedDict(
             bundle = 'root_histograms_v01',
             file = 'data/background/amc/13.09/p12b_amc_fit.root',
             format = 'hCorrAmCPromptSpec',
-            grouping = 'all',
             )
         )
 
@@ -119,7 +120,6 @@ cfg.alphan = NestedDict(
             bundle = 'root_histograms_v01',
             file = 'data/background/alpha_n/13.09/p12b_alpha_n.root',
             format = '{detshort}',
-            grouping = 'individual',
             )
         )
 
