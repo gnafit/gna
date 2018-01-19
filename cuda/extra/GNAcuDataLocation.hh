@@ -3,6 +3,32 @@
 
 #include <iostream>
 
+
+enum SyncFlag {
+	Synchronized,
+	Unsinchronized,
+	SyncFailed
+}
+
+inline std::ostream& operator<<(std::ostream& so, SyncFlag sFlag) {
+        switch (sFlag) {
+                case Synchronized:
+                        so << "Synchronized";
+                        break;
+                case Unsinchronized:
+                        so << "Unsinchronized";
+                        break;
+                case SyncFailed:
+                        so << "SyncFailed";
+                        break;
+                default:
+                        so.setstate(std::ios_base::failbit);
+        }
+        return so;
+}
+
+
+
 enum DataLocation {
 	NotInitialized,
         InitializedOnly,
