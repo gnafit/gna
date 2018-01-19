@@ -38,7 +38,7 @@ class root_histograms_v01(TransformationBundle):
             self.transformations[var] = hist
             self.output_transformations+=hist,
 
-        for i, ns in enumerate(self.iterate_namespaces()):
+        for ns in self.iterate_namespaces():
             self.inputs += None,
             self.outputs += self.transformations[ns.name].hist,
 

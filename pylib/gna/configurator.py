@@ -234,5 +234,64 @@ def configurator(filename=None, dic={}, **kwargs):
 
     return self
 
+class uncertain(object):
+    def __init__(self, central, uncertainty, mode):
+        assert mode in ['absolute', 'relative', 'percent'], 'Unsupported uncertainty mode '+mode
+
+        if mode=='percent':
+            mode='relative'
+            uncertainty*=0.01
+
+        if mode=='relative':
+            assert central!=0, 'Central value should differ from 0 for relative uncertainty'
+
+        self.central = central
+        self.uncertainty   = uncertainty
+        self.mode    = mode
+
+    def __str__(self):
+        res = '{central:.6g}'.format(central=self.central)
+
+        if self.mode=='relative':
+            sigma    = self.central*self.uncertainty
+            relsigma = self.uncertainty
+        else:
+            sigma    = self.uncertainty
+            relsigma = sigma/self.central
+
+        res +=( '±{sigma:.6g}'.format(sigma=sigma) )
+
+        if self.central:
+            res+=( ' [{relsigma:.6g}%]'.format(relsigma=relsigma*100.0) )
+
+        return res
+
+    def __repr__(self):
+        return 'uncertain({central!r}, {uncertainty!r}, {mode!r})'.format( **self.__dict__ )
+
+def uncertaindict(*args, **kwargs):
+    common = dict(
+        central = kwargs.pop( 'central', None ),
+        uncertainty   = kwargs.pop( 'uncertainty',   None ),
+        mode    = kwargs.pop( 'mode',    None ),
+    )
+    missing = [ s for s in ['central', 'uncertainty', 'mode'] if not common[s] ]
+    res  = OrderedDict( *args, **kwargs )
+
+    for k, v in res.items():
+        kcommon = common.copy()
+        if isinstance(v, dict):
+            kcommon.update( v )
+        else:
+            if isinstance( v, (int, float) ):
+                v = (v, )
+            kcommon.update( zip( missing, v ) )
+
+        res[k] = uncertain( **kcommon )
+
+    return res
+
 init_globals['load'] = configurator
+init_globals['uncertain'] = uncertain
+init_globals['uncertaindict'] = uncertaindict
 
