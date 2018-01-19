@@ -173,8 +173,7 @@ namespace TransformationTypes {
     void dump(size_t level = 0) const;
 
 #ifdef GNA_CUDA_SUPPORT
-    void makeDevice() { entryLoc = Device; }
-    void makeHost() {entrtLoc = Host; }
+    void setEntryLocation(DataLocation loc) { entryLoc = loc; }
 #endif
 
     std::string name;
@@ -502,13 +501,8 @@ namespace TransformationTypes {
     }
 
 #ifdef GNA_CUDA_SUPPORT
-    Initializer<T> makeDevice() {
-      m_entry->makeDevice();
-      return *this;
-    }
-
-    Initializer<T> makeHost() {
-      m_entry->makeHost();
+    Initializer<T> setEntryLocation(DataLocation loc) {
+      m_entry->setEntryLocation(DataLocation loc);
       return *this;
     }
 #endif
