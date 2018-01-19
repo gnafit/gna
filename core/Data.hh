@@ -10,7 +10,7 @@
 #include <limits>
 #include <stdexcept>
 #include <numeric>
-
+#include <iostream>
 #include <Eigen/Dense>
 
 #ifdef GNA_CUDA_SUPPORT
@@ -291,6 +291,7 @@ public:
   Data(const DataType &dt, T *buf)
     : type(dt)
   {
+std::cout << "DATA constructor" << std::endl;
     if (!buf) {
       allocated.reset(new T[dt.size()]);
       buf = allocated.get();
@@ -299,21 +300,24 @@ public:
     if (dt.shape.size() == 1) {
       new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]);
       new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]);
+      std::cout << "shape 1 = " <<  dt.shape[0] << std::endl;      
     } else if (dt.shape.size() == 2) {
       new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]*dt.shape[1]);
       new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]*dt.shape[1]);
 
       new (&arr2d) Eigen::Map<ArrayXXT>(buf, dt.shape[0], dt.shape[1]);
       new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
+      std::cout << "shape 2 = " <<  dt.shape[0] << " " <<  dt.shape[1] << std::endl;
     } 
 #ifdef GNA_CUDA_SUPPORT
-    m_dataLoc = Host;
+    dataLoc = Host;
 #endif
   }
-
+#ifdef GNA_CUDA_SUPPORT
   void require_gpu();
-  void require_sync_H2D();
-  void require_sync_D2H();
+  void sync_H2D();
+  void sync_D2H();
+#endif
 
   const DataType type;
   Status state{Status::Undefined};
@@ -329,54 +333,32 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;
 #ifdef GNA_CUDA_SUPPORT
-  GNAcuGpuArray<double> m_gpuArr; 
-  DataLocation m_dataLoc;
+  GNAcuGpuArray<T> gpuArr;
+  DataLocation dataLoc;
 #endif
-
-
 };
 
 #ifdef GNA_CUDA_SUPPORT
 
-// TODO create separate cpp file 
+template <typename T>
 void Data<T>::require_gpu() {
   if (type.shape.size() == 1) {
-    setSize(type.shape[0]);
-  }
-  else if (type.shape.size() == 2) {
-    setSize(type.shape[0]*type.shape[1]);
-  }
-  m_dataLoc = setByHostArray(buffer);
-}
-
-void Data<T>::require_sync_H2D() {
-  m_dataLoc = transferH2D();
-  buffer = m_gpuArr.getArrayPtr();
-  if (type.shape.size() == 1) {
-    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0]);
-    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0]);
-  }
-  else if (type.shape.size() == 2) {
-    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0] * type.shape[1]);
-    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0] * type.shape[1]);
-    new (&arr2d) Eigen::Map<ArrayXXT>(buffer, type.shape[0], type.shape[1]);
-    new (&mat) Eigen::Map<MatrixXT>(buffer, type.shape[0], type.shape[1]);
+    dataLoc = gpuArr.Init(type.shape[0]);
+  } else if (type.shape.size() == 2) {
+    dataLoc = gpuArr.Init(type.shape[0]*type.shape[1]);
   }
 }
 
+template <typename T>
+void Data<T>::sync_H2D() {
+  dataLoc = gpuArr.setByHostArray(buffer);
+  std::cout << "in h2D size = " << gpuArr.getArraySize() <<std::endl;
+}
 
-void Data<T>::require_sync_D2H() {
-  m_dataLoc = getContentToCPU(buffer);
-  if (type.shape.size() == 1) {
-    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0]);
-    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0]);
-  }
-  else if (type.shape.size() == 2) {
-    new (&arr) Eigen::Map<ArrayXT>(buffer, type.shape[0] * type.shape[1]);
-    new (&vec) Eigen::Map<VectorXT>(buffer, type.shape[0] * type.shape[1]);
-    new (&arr2d) Eigen::Map<ArrayXXT>(buffer, type.shape[0], type.shape[1]);
-    new (&mat) Eigen::Map<MatrixXT>(buffer, type.shape[0], type.shape[1]);
-  }
+template <typename T>
+void Data<T>::sync_D2H() {
+  dataLoc = gpuArr.getContentToCPU(buffer);
+  std::cout << "in D2H size = " << gpuArr.getArraySize() <<std::endl;
 }
 
 #endif
