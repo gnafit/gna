@@ -161,7 +161,7 @@ class namespace(Mapping):
     def __len__(self):
         return len(self.storage)
 
-    def defparameter(self, name, **kwargs):
+    def defparameter(self, name, *args, **kwargs):
         if name in self.storage:
             raise Exception("{} is already defined".format(name))
         target = self.matchrule(name)
@@ -170,11 +170,11 @@ class namespace(Mapping):
         if target:
             p = target
         else:
-            p = parameters.makeparameter(self, name, **kwargs)
+            p = parameters.makeparameter(self, name, *args, **kwargs)
         self[name] = p
         return p
 
-    def reqparameter(self, name, **kwargs):
+    def reqparameter(self, name, *args, **kwargs):
         try:
             return self[name]
         except KeyError:
@@ -183,7 +183,7 @@ class namespace(Mapping):
             return env.nsview[name]
         except KeyError:
             pass
-        return self.defparameter(name, **kwargs)
+        return self.defparameter(name, *args, **kwargs)
 
     def addobservable(self, name, output, export=True):
         if output.check():

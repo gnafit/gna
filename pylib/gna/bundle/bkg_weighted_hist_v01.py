@@ -19,7 +19,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
         self.namespaces = self.spectra.namespaces
 
-        self.cfg.name.setdefault( self.cfg.parent_key() )
+        self.cfg.setdefault( 'name', self.cfg.parent_key() )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
@@ -27,5 +27,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def define_variables(self):
         for ns in self.namespaces:
-            import IPython
-            IPython.embed()
+            if 'norm' in self.cfg:
+                ns.reqparameter( '{}_norm'.format(self.cfg.name), self.cfg.norm )
+            ns.reqparameter( '{}_rate'.format(self.cfg.name), central=0.0, sigma=0.0 )

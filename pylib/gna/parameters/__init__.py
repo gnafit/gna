@@ -2,6 +2,7 @@
 from __future__ import print_function
 import ROOT
 # from gna.bindings import patchROOTClass
+from gna.configurator import uncertain
 
 debug=False
 
@@ -37,10 +38,16 @@ class DiscreteParameter(object):
     def getVariable(self):
         return self._variable.getVariable()
 
-def makeparameter(ns, name, **kwargs):
+def makeparameter(ns, name, cfg=None, **kwargs):
     if 'target' in kwargs:
         return kwargs['target']
-    ptype = kwargs.get('type', 'gaussian')
+    if cfg:
+        ptype = kwargs['ptype'] = 'gaussian'
+        kwargs['central']     = cfg.central
+        kwargs['uncertainty'] = cfg.uncertainty
+        kwargs['uncertainty_type'] = cfg.mode
+    else:
+        ptype = kwargs.get('type', 'gaussian')
 
     if debug:
         print( 'Defpar {ns}.{name} ({type}):'.format(
