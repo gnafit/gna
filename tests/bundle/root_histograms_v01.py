@@ -82,7 +82,7 @@ ax.set_ylabel( 'height' )
 ax.set_title( 'Histogram' )
 for spname in cfg.spectra:
     scfg = cfg[spname]
-    b = execute_bundle( cfg=scfg, namespaces=list(scfg.get('variants', [''])), storage=storage )
+    b = execute_bundle( cfg=scfg, storage=storage )
 
     for output, ns in zip(b.outputs, b.namespaces):
         data = output.data()
@@ -95,4 +95,3 @@ for ns in env.globalns.walknstree():
     print( '   ', ns )
 
 P.show()
-

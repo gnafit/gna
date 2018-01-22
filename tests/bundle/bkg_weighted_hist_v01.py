@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from load import ROOT as R
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain, uncertaindict
 from gna.bundle import execute_bundle
 from gna.env import env
 from matplotlib import pyplot as P
@@ -17,28 +20,36 @@ cfg.groups=NestedDict([
         ('G3', ['D4'])
         ])
 
-cfg.spectra = [ 'spectra1', 'spectra2', 'spectra3' ]
-cfg.spectra1 = NestedDict(
-        bundle = 'root_histograms_v01',
-        filename = cfg.filename,
-        format = 'hist',
+bkg = cfg('bkg')
+bkg.list = [ 'bkg_norm', 'bkg_rate' ]
+
+bkg.bkg_norm = NestedDict(
+        bundle = 'bkg_weighted_hist_v01',
+        norm = uncertain( 1.0, 1.0, 'percent' ),
+        spectra = NestedDict(
+            bundle = 'root_histograms_v01',
+            file   = cfg.filename,
+            format = 'hist_{}',
+            variants = cfg.detectors
+            )
         )
-cfg.spectra2 = NestedDict(
-        bundle = 'root_histograms_v01',
-        filename = cfg.filename,
-        format = 'hist_{}',
-        variants = cfg.groups.keys()
-        )
-cfg.spectra3 = NestedDict(
-        bundle = 'root_histograms_v01',
-        filename = cfg.filename,
-        format = 'hist_{}',
-        variants = OrderedDict([
-            ( 'D1', 'G1_D1' ),
-            ( 'D2', 'G1_D2' ),
-            ( 'D3', 'G2_D3' ),
-            ( 'D4', 'G3_D4' ),
-            ])
+
+bkg.bkg_rate = NestedDict(
+        bundle = 'bkg_weighted_hist_v01',
+        rates = NestedDict(
+            rates = uncertaindict(
+                mode = 'absolute',
+                G1 = (2.71, 0.90),
+                G2 = (1.91, 0.73),
+                G3 = (0.22, 0.07),
+                )
+            ),
+        spectra = NestedDict(
+            bundle = 'root_histograms_v01',
+            file   = cfg.filename,
+            format = 'hist_{}',
+            variants = cfg.groups.keys()
+            )
         )
 
 def make_sample_file( filename ):
@@ -69,3 +80,8 @@ def make_sample_file( filename ):
     file.Close()
 
 make_sample_file( cfg.filename )
+
+for bkg in cfg.bkg.list:
+    scfg = cfg.bkg[bkg]
+    b = execute_bundle( cfg=scfg, namespaces=scfg.spectra.variants, storage=storage )
+

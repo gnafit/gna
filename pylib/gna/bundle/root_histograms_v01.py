@@ -15,6 +15,9 @@ from gna.bundle.connections import pairwise
 class root_histograms_v01(TransformationBundle):
     name = 'root_histograms'
     def __init__(self, **kwargs):
+        variants = kwargs['cfg'].get('variants', None)
+        if variants:
+            kwargs.setdefault( 'namespaces', variants )
         super(root_histograms_v01, self).__init__( **kwargs )
 
     def build(self):

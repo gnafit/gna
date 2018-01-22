@@ -10,7 +10,6 @@ from constructors import Histogram
 from gna.configurator import NestedDict
 
 from gna.bundle import *
-from gna.bundle.connections import pairwise
 
 class bkg_weighted_hist_v01(TransformationBundle):
     name = 'bkg_weighted_hist'
@@ -18,6 +17,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
     def build(self):
+        print( 'Executing:\n', str(self.cfg), sep='' )
+
+        self.spectra = execute_bundle( cfg=self.cfg.spectra )
         pass
 
     def define_variables(self):
