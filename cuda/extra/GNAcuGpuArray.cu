@@ -74,6 +74,24 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
 }
 
 template <typename T>
+DataLocation GNAcuGpuArray<T>::Init(size_t inSize) {
+        std::cout << "I am inited by size " << std::endl;
+        cudaError_t err;
+        arrSize = inSize;
+        size_t alloc_size = sizeof(T) * inSize;
+        err = cudaMalloc((void**)&devicePtr, alloc_size);
+        std::cout << "Constructor: arrSize is " << arrSize << std::endl;
+        if (err != cudaSuccess) {
+                printf("ERROR: unable to  allocate!\n");
+                std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
+                arrState = Crashed;
+        } else {
+                arrState = InitializedOnly;
+        }
+	return arrState;
+}
+
+template <typename T>
 GNAcuGpuArray<T>::~GNAcuGpuArray() {
 	cudaFree(devicePtr);
 }
@@ -108,7 +126,8 @@ void GNAcuGpuArray<T>::resize(size_t newSize) {
 template <typename T>
 DataLocation GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 	cudaError_t err;
-	err = cudaMemcpy((void**)&devicePtr, inHostArr, sizeof(T) * arrSize,
+std::cout << "In setByHostArray size = " << arrSize << " inHostArr[0] = " << inHostArr[0] <<std::endl;
+	err = cudaMemcpy(devicePtr, inHostArr, sizeof(T) * arrSize,
 			 cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to set memory H2D!\n");
@@ -277,8 +296,11 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
 
 
 template <typename T>
-GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
-        return std::ref(rhs);
+GNAcuGpuArray<T> GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
+	GNAcuGpuArray<T> ret(rhs.devicePtr, rhs.arrSize);
+//	ret.devicePtr = rhs.devicePtr;
+//	ret.arrSize = rhs.arrSize;
+        return ret;
 }
 
 

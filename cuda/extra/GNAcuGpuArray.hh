@@ -11,6 +11,7 @@ public:
 	GNAcuGpuArray();
         GNAcuGpuArray(T* inArrayPtr, size_t inSize);
 	~GNAcuGpuArray();
+        DataLocation Init(size_t inSize);
 	void resize(size_t newSize);
         inline void setSize(size_t inSize) { arrSize = inSize; }
 	DataLocation setByHostArray(T* inHostArr);
@@ -21,16 +22,17 @@ public:
 	DataLocation transferH2D(); 
 	DataLocation transferD2H(); 
 	T* getArrayPtr() { return devicePtr; }
-	size_t getArraySize() { return arrSize; }
+        void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
+	size_t getArraySize() { std::cout << "in size getter " << arrSize << std::endl; return arrSize; }
 	GNAcuGpuArray<T>& operator+(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator-(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator-();
         GNAcuGpuArray<T>& operator*(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator*(T rhs);
-        GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
+        GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
         DataLocation arrState;
 //	DataType type;
-protected:
+
 	T* devicePtr;
 	T* hostPtr;
         size_t arrSize;
