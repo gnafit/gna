@@ -99,10 +99,10 @@ bool Entry::check() const {
 
 void Entry::evaluate() {
   fun(Args(this), Rets(this));
-// if gpu -> cpu
-  for (auto &sink: sinks) {	//-> after fun
-    sink.data->gpuArr = sources[0].sink->data->gpuArr;
-    sink.data->sync_H2D();
+  if (entryLoc == Device) {
+    for (size_t i = 0; i < sinks.size(); i++) {	
+      DataLocation tmploc = sinks[i].data->sync_D2H();
+    }
   }
 }
 
@@ -289,19 +289,17 @@ void Entry::evaluateTypes() {
 
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT 
-    if (entryLoc == Device) { // && sink->entry->entryLoc == Host) {  
-      std::cout << "Device case" << std::endl;
-      for (auto& source : sources) {
-	//if ( source.sink->entry->entryLoc == Host) {
-std::cout << "Before required gpu "; 
-          source.sink->data->require_gpu();
-          //source.sink->data->m_gpuArr = source->m_gpuArr;
-        //}
-std::cout << " After req gpu" << std::endl;
+    if (entryLoc == Device) {  
+      for (size_t i = 0; i < sources.size(); i++) {
+	if ( sources[i].sink->entry->entryLoc == Host ) {
+          sources[i].sink->data->require_gpu();
+        }
+      }
+      for (auto &sink : sinks) {
+        sink.data->require_gpu();
       }
     }
-    if (entryLoc == Host) { // && sink->entry->entryLoc == Device)
-      std::cout << "Host case" << std::endl;
+    if (entryLoc == Host)
       for (auto& source : sources) {
         if ( source.sink->entry->entryLoc == Device) {
           source.sink->data->sync_D2H();
