@@ -5,7 +5,7 @@
 
 # Dependencies:
 
-- gcc 5.x
+- gcc 5.x or 6.x (cuda 9.0+)
 - cuda toolkit 7.5+
 
 # Uses cuda-based libs:
