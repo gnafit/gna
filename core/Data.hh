@@ -343,6 +343,10 @@ std::cout << "DATA constructor" << std::endl;
 
 template <typename T>
 void Data<T>::require_gpu() {
+  if (gpuArr.arrState != NotInitialized) {
+std::cout << "INITED! Reqire_gpu exit!" << std::endl;
+    return;
+  }
   if (type.shape.size() == 1) {
     dataLoc = gpuArr.Init(type.shape[0]);
   } else if (type.shape.size() == 2) {

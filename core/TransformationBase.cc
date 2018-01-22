@@ -98,8 +98,12 @@ bool Entry::check() const {
 }
 
 void Entry::evaluate() {
-  return fun(Args(this), Rets(this));
-  /// GPU: sync Rets
+  fun(Args(this), Rets(this));
+// if gpu -> cpu
+  for (auto &sink: sinks) {	//-> after fun
+    sink.data->gpuArr = sources[0].sink->data->gpuArr;
+    sink.data->sync_H2D();
+  }
 }
 
 void Entry::update() {
@@ -219,7 +223,7 @@ void Source::connect(Sink *newsink) {
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
   sink->entry->tainted.subscribe(entry->tainted);
-  sink->sources.push_back(this);
+  newsink->sources.push_back(this);
   try {
     sink->entry->evaluateTypes();
     entry->evaluateTypes();
@@ -282,11 +286,29 @@ void Entry::evaluateTypes() {
         deps.insert(depsrc->entry);
       }
     }
+
     // GPU: require GPU memory for previous transformation's sink
-    // if gpu
-    //for(auto& source : sources){
-        //source->sink->data->require_gpu();
-    //}
+#ifdef GNA_CUDA_SUPPORT 
+    if (entryLoc == Device) { // && sink->entry->entryLoc == Host) {  
+      std::cout << "Device case" << std::endl;
+      for (auto& source : sources) {
+	//if ( source.sink->entry->entryLoc == Host) {
+std::cout << "Before required gpu "; 
+          source.sink->data->require_gpu();
+          //source.sink->data->m_gpuArr = source->m_gpuArr;
+        //}
+std::cout << " After req gpu" << std::endl;
+      }
+    }
+    if (entryLoc == Host) { // && sink->entry->entryLoc == Device)
+      std::cout << "Host case" << std::endl;
+      for (auto& source : sources) {
+        if ( source.sink->entry->entryLoc == Device) {
+          source.sink->data->sync_D2H();
+        }
+      }
+    }
+#endif
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
@@ -314,6 +336,7 @@ const Data<double> &Entry::data(int i) {
     throw CalculationError(this, (fmt % i % sink.name).str());
   }
   touch();
+// 
   return *sink.data;
 }
 

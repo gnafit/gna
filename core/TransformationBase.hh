@@ -502,7 +502,7 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     Initializer<T> setEntryLocation(DataLocation loc) {
-      m_entry->setEntryLocation(DataLocation loc);
+      m_entry->setEntryLocation(loc);
       return *this;
     }
 #endif
