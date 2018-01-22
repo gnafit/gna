@@ -314,10 +314,10 @@ std::cout << "DATA constructor" << std::endl;
 #endif
   }
 #ifdef GNA_CUDA_SUPPORT
-  void require_gpu();
-  void sync_H2D();
-  void sync_D2H();
-  void sync(DataLocation loc);
+  DataLocation require_gpu();
+  DataLocation sync_H2D();
+  DataLocation sync_D2H();
+  DataLocation sync(DataLocation loc);
 #endif
 
   const DataType type;
@@ -342,32 +342,37 @@ std::cout << "DATA constructor" << std::endl;
 #ifdef GNA_CUDA_SUPPORT
 
 template <typename T>
-void Data<T>::require_gpu() {
-  if (gpuArr.arrState != NotInitialized) {
-std::cout << "INITED! Reqire_gpu exit!" << std::endl;
-    return;
-  }
+DataLocation Data<T>::require_gpu() {
+ // if (gpuArr.arrState != NotInitialized) {
+//std::cout << "INITED! Reqire_gpu exit!" << std::endl;
+//    return;
+//  }
+std::cout << "IN REQ GPU" << std::endl;
   if (type.shape.size() == 1) {
     dataLoc = gpuArr.Init(type.shape[0]);
   } else if (type.shape.size() == 2) {
     dataLoc = gpuArr.Init(type.shape[0]*type.shape[1]);
   }
+  return dataLoc;
 }
 
 template <typename T>
-void Data<T>::sync_H2D() {
+DataLocation Data<T>::sync_H2D() {
   dataLoc = gpuArr.setByHostArray(buffer);
   std::cout << "in h2D size = " << gpuArr.getArraySize() <<std::endl;
+  return dataLoc;
+
 }
 
 template <typename T>
-void Data<T>::sync_D2H() {
+DataLocation Data<T>::sync_D2H() {
   dataLoc = gpuArr.getContentToCPU(buffer);
   std::cout << "in D2H size = " << gpuArr.getArraySize() <<std::endl;
+  return dataLoc;
 }
 
 template <typename T>
-void Data<T>::sync(DataLocation loc) {
+DataLocation Data<T>::sync(DataLocation loc) {
   if (dataLoc == loc) {
     std::cerr << "Relevant data on CPU -- no synchronization needed" << std::endl; 
   } else if(dataLoc == Device && loc == Host) {
@@ -377,6 +382,7 @@ void Data<T>::sync(DataLocation loc) {
   } else {
     std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
   }
+  return dataLoc;
 }
 
 #endif
