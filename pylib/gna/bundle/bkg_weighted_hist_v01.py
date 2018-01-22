@@ -29,4 +29,5 @@ class bkg_weighted_hist_v01(TransformationBundle):
         for ns in self.namespaces:
             if 'norm' in self.cfg:
                 ns.reqparameter( '{}_norm'.format(self.cfg.name), self.cfg.norm )
-            ns.reqparameter( '{}_rate'.format(self.cfg.name), central=0.0, sigma=0.0 )
+            if 'rates' in self.cfg:
+                ns.reqparameter( '{}_rate'.format(self.cfg.name), self.cfg.rates[ns.name] )

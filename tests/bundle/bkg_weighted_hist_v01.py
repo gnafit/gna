@@ -21,9 +21,9 @@ cfg.groups=NestedDict([
         ])
 
 bkg = cfg('bkg')
-bkg.list = [ 'bkg_norm', 'bkg_rate' ]
+bkg.list = [ 'bkg1', 'bkg2' ]
 
-bkg.bkg_norm = NestedDict(
+bkg.bkg1 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
         norm = uncertain( 1.0, 1.0, 'percent' ),
         spectra = NestedDict(
@@ -39,15 +39,13 @@ bkg.bkg_norm = NestedDict(
             )
         )
 
-bkg.bkg_rate = NestedDict(
+bkg.bkg2 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        rates = NestedDict(
-            rates = uncertaindict(
-                mode = 'absolute',
-                G1 = (2.71, 0.90),
-                G2 = (1.91, 0.73),
-                G3 = (0.22, 0.07),
-                )
+        rates = uncertaindict(
+            mode = 'absolute',
+            G1 = (2.71, 0.90),
+            G2 = (1.91, 0.73),
+            G3 = (0.22, 0.07),
             ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
