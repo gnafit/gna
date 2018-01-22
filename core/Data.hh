@@ -311,6 +311,7 @@ std::cout << "DATA constructor" << std::endl;
     } 
 #ifdef GNA_CUDA_SUPPORT
     dataLoc = Host;
+    syncFlag = Unsinchronized;
 #endif
   }
 #ifdef GNA_CUDA_SUPPORT
@@ -318,6 +319,7 @@ std::cout << "DATA constructor" << std::endl;
   DataLocation sync_H2D();
   DataLocation sync_D2H();
   DataLocation sync(DataLocation loc);
+  DataLocation synchronize();
 #endif
 
   const DataType type;
@@ -336,6 +338,7 @@ std::cout << "DATA constructor" << std::endl;
 #ifdef GNA_CUDA_SUPPORT
   GNAcuGpuArray<T> gpuArr;
   DataLocation dataLoc;
+  SyncFlag syncFlag;
 #endif
 };
 
@@ -343,16 +346,17 @@ std::cout << "DATA constructor" << std::endl;
 
 template <typename T>
 DataLocation Data<T>::require_gpu() {
- // if (gpuArr.arrState != NotInitialized) {
-//std::cout << "INITED! Reqire_gpu exit!" << std::endl;
-//    return;
-//  }
-std::cout << "IN REQ GPU" << std::endl;
+  if (gpuArr.arrState != NotInitialized) {
+std::cout << "INITED! Reqire_gpu exit!" << std::endl;
+    return NotInitialized;
+  }
+std::cout << "IN REQ GPU";
   if (type.shape.size() == 1) {
     dataLoc = gpuArr.Init(type.shape[0]);
   } else if (type.shape.size() == 2) {
     dataLoc = gpuArr.Init(type.shape[0]*type.shape[1]);
-  }
+  } 
+std::cout << " gpusize = " << gpuArr.arrSize <<std::endl;
   return dataLoc;
 }
 
@@ -383,6 +387,23 @@ DataLocation Data<T>::sync(DataLocation loc) {
     std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
   }
   return dataLoc;
+}
+
+template <typename T>
+DataLocation Data<T>::syncronize() {
+  DataLocation tmp;
+  if (dataLoc == Host) {
+    tmp = sync(Device);
+    syncFlag = Synchronized;
+  } else if(dataLoc == Device) {
+    tmp = sync(Host);
+    syncFlag = Synchronized;
+  } else {
+    std::cerr << "Unable to sync as current GPU memory state is " <<  dataLoc << std::endl;
+    tmp = Crashed;
+    syncFlag = SyncFailed;
+  }
+  return tmp;
 }
 
 #endif

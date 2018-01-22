@@ -8,7 +8,7 @@ enum SyncFlag {
 	Synchronized,
 	Unsinchronized,
 	SyncFailed
-}
+};
 
 inline std::ostream& operator<<(std::ostream& so, SyncFlag sFlag) {
         switch (sFlag) {
