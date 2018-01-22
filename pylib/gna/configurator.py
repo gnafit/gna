@@ -63,6 +63,16 @@ class NestedDict(object):
     def parent(self):
         return self.__parent__
 
+    def parent_key(self):
+        if self.__parent__ is None:
+            return None
+
+        for k, v in self.__parent__.items():
+            if v is self:
+                return k
+
+        raise KeyError( "Failed to determine own key in the parent dictionary" )
+
     def get(self, key, default=None):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]

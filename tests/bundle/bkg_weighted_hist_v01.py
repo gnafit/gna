@@ -28,9 +28,14 @@ bkg.bkg_norm = NestedDict(
         norm = uncertain( 1.0, 1.0, 'percent' ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
-            file   = cfg.filename,
+            filename   = cfg.filename,
             format = 'hist_{}',
-            variants = cfg.detectors
+            variants = OrderedDict([
+                ( 'D1', 'G1_D1' ),
+                ( 'D2', 'G1_D2' ),
+                ( 'D3', 'G2_D3' ),
+                ( 'D4', 'G3_D4' ),
+                ])
             )
         )
 
@@ -46,7 +51,7 @@ bkg.bkg_rate = NestedDict(
             ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
-            file   = cfg.filename,
+            filename   = cfg.filename,
             format = 'hist_{}',
             variants = cfg.groups.keys()
             )

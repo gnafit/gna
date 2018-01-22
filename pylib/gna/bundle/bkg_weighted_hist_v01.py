@@ -16,11 +16,16 @@ class bkg_weighted_hist_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-    def build(self):
+        self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
+        self.namespaces = self.spectra.namespaces
+
+        self.cfg.name.setdefault( self.cfg.parent_key() )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
-        self.spectra = execute_bundle( cfg=self.cfg.spectra )
+    def build(self):
         pass
 
     def define_variables(self):
-        pass
+        for ns in self.namespaces:
+            import IPython
+            IPython.embed()
