@@ -8,6 +8,7 @@ from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
 from gna.configurator import NestedDict
+from converters import convert
 
 from gna.bundle import *
 
@@ -26,8 +27,27 @@ class bkg_weighted_hist_v01(TransformationBundle):
         pass
 
     def define_variables(self):
+        ratename = '{}_rate'.format(self.cfg.name)
+        normname = '{}_norm'.format(self.cfg.name)
+
+        mult = False
+        if 'norm' in self.cfg:
+            ratename = '{}_rate_def'.format(self.cfg.name)
+            mult = True
+            order = convert([normname, ratename], 'stdvector')
+            self.products = []
+
         for ns in self.namespaces:
             if 'norm' in self.cfg:
-                ns.reqparameter( '{}_norm'.format(self.cfg.name), self.cfg.norm )
+                ns.reqparameter( normname, self.cfg.norm )
+
             if 'rates' in self.cfg:
-                ns.reqparameter( '{}_rate'.format(self.cfg.name), self.cfg.rates[ns.name] )
+                ns.reqparameter( ratename, self.cfg.rates[ns.name] )
+            else:
+                ns.reqparameter( ratename )
+
+            if mult:
+                vp = R.VarProduct( vnames, 'product', ns=ns )
+                self.products.append( vp )
+
+

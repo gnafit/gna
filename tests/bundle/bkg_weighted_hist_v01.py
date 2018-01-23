@@ -88,7 +88,6 @@ for bkg in cfg.bkg.list:
     scfg = cfg.bkg[bkg]
     b = execute_bundle( cfg=scfg, namespaces=scfg.spectra.variants, storage=storage )
 
-
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
 
