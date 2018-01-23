@@ -268,7 +268,9 @@ def patchROOTClass( object=None, method=None ):
     cfcn = None
     if not method:
         cfcn = object
-        object, method= cfcn.__name__.split( '__' )
+        spl = cfcn.__name__.split( '__' )
+        object=spl[0]
+        method = '__'.join( spl[1:] )
 
     if not type( object ) is list:
         object = [ object ]

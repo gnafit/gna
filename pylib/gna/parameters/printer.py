@@ -15,25 +15,25 @@ def print_parameters( ns, recursive=True ):
             print("Variables in namespace '%s'"%ns.path)
             header=True
         print(end='  ')
-        var.print()
+        print(var)
     if recursive:
         for sns in ns.namespaces.itervalues():
             print_parameters( sns )
 
-@patchROOTClass( ROOT.Variable('double'), 'print' )
-def Variable__print( self ):
+@patchROOTClass( ROOT.Variable('double'), '__str__' )
+def Variable__str( self ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
             )
 
-    print( '{name:30}'.format(**fmt), end='' )
-    print( '={val:10.6g}'.format(**fmt), end='' )
+    s= '{name:30}'.format(**fmt)
+    s+='={val:10.6g}'.format(**fmt)
 
-    print()
+    return s
 
-@patchROOTClass( ROOT.Parameter('double'), 'print' )
-def Parameter__print( self ):
+@patchROOTClass( ROOT.Parameter('double'), '__str__' )
+def Parameter__str( self ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
@@ -41,24 +41,24 @@ def Parameter__print( self ):
             )
     limits  = self.limits()
 
-    print( '{name:30}'.format(**fmt), end='' )
-    print( '={val:10.6g}'.format(**fmt), end='' )
+    s= '{name:30}'.format(**fmt)
+    s+='={val:10.6g}'.format(**fmt)
 
     if self.isFixed():
-        print( ' │ [fixed]' )
-        return
+        s+=' │ [fixed]'
+        return s
 
-    print( ' │ {central:10.6g}'.format(**fmt), end='' )
+    s+= ' │ {central:10.6g}'.format(**fmt)
 
     if limits.size():
-        print( ' │', end='' )
+        s+=' │'
         for (a,b) in limits:
-            print( ' (%g, %g)'%(a,b), end='' )
+            s+=' (%g, %g)'%(a,b)
 
-    print()
+    return s
 
-@patchROOTClass( ROOT.GaussianParameter('double'), 'print' )
-def Parameter__print( self ):
+@patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
+def Parameter__str( self ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
@@ -67,22 +67,22 @@ def Parameter__print( self ):
             )
     limits  = self.limits()
 
-    print( '{name:30}'.format(**fmt), end='' )
-    print( '={val:10.6g}'.format(**fmt), end='' )
+    s= '{name:30}'.format(**fmt)
+    s+='={val:10.6g}'.format(**fmt)
 
     if self.isFixed():
-        print( ' │ [fixed]' )
-        return
+        s+=' │ [fixed]'
+        return s
 
-    print( ' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    s+=' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt)
     if fmt['central']:
-        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0), end='' )
+        s+=' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0)
     else:
-        print( ' '*14, end='' )
+        s+=' '*14
 
     if limits.size():
-        print( ' │', end='' )
+        s+=' │'
         for (a,b) in limits:
-            print( ' (%g, %g)'%(a,b), end='' )
+            s+=' (%g, %g)'%(a,b)
 
-    print()
+    return s
