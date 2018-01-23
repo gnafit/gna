@@ -29,18 +29,18 @@ protected:
 };
 
 template <typename T>
-class Uncertain: public GNASingleObject,
-                 public Transformation<Uncertain<T>>
+class Variable: public GNASingleObject,
+                public Transformation<Variable<T>>
 {
 public:
-  Uncertain(const std::string &name)
+  Variable(const std::string &name)
     : m_varhandle(variable_(&m_var, name)), m_name(name)
   { }
-  Uncertain(const std::string &name, variable<void> var)
-    : Uncertain(name)
+  Variable(const std::string &name, variable<void> var)
+    : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
 
-  virtual ~Uncertain() { }
+  virtual ~Variable() { }
 
   const std::string &name() const { return m_name; }
   virtual T value() { return m_var.value(); }
@@ -58,7 +58,7 @@ protected:
 };
 
 template <>
-inline Uncertain<double>::Uncertain(const std::string &name)
+inline Variable<double>::Variable(const std::string &name)
   : m_varhandle(variable_(&m_var, name)), m_name(name)
 {
   transformation_(this, "value")
@@ -66,17 +66,17 @@ inline Uncertain<double>::Uncertain(const std::string &name)
     .types([](Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(1);
       })
-    .func([](Uncertain<double> *obj, Args, Rets rets) {
+    .func([](Variable<double> *obj, Args, Rets rets) {
         rets[0].arr(0) = obj->m_var.value();
       })
     .finalize();
 }
 
 template <typename T>
-class Parameter: public Uncertain<T> {
+class Parameter: public Variable<T> {
 public:
   Parameter(const std::string &name)
-    : Uncertain<T>(name)
+    : Variable<T>(name)
     { m_par = this->m_varhandle.claim(); }
 
   virtual void set(T value)
