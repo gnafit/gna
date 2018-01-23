@@ -51,21 +51,20 @@ Member functions
 
 ``size_t getArraySize()`` returns array size.
 
+``void negate()`` changes array values to inverse values. 
+
 ``void dump()`` prints array values.
+
 
 Operators
 ---------
 
-*WARNING! Operators (except =) uses references, not copies, it changes input array!*
+``GNAcuGpuArray<T>& operator+=(GNAcuGpuArray<T> &rhs)``
 
-``GNAcuGpuArray<T>& operator+(GNAcuGpuArray<T> &rhs)``
+``GNAcuGpuArray<T>& operator-=(GNAcuGpuArray<T> &rhs)``
 
-``GNAcuGpuArray<T>& operator-(GNAcuGpuArray<T> &rhs)``
+``GNAcuGpuArray<T>& operator*=(GNAcuGpuArray<T> &rhs)``
 
-``GNAcuGpuArray<T>& operator-()``
-
-``GNAcuGpuArray<T>& operator*(GNAcuGpuArray<T> &rhs)``
-
-``GNAcuGpuArray<T>& operator*(T rhs)``
+``GNAcuGpuArray<T>& operator*=(T rhs)``
 
 ``GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs)``
