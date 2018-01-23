@@ -4,7 +4,7 @@ from __future__ import print_function
 from load import ROOT
 from gna.bindings import patchROOTClass
 
-unctypes = (ROOT.Uncertain('double'))
+unctypes = ( ROOT.Uncertain('double'),  )
 
 def print_parameters( ns, recursive=True ):
     header = False
@@ -32,9 +32,10 @@ def Uncertain__print( self ):
     print( '{name:30}'.format(**fmt), end='' )
     print( '={val:10.6g}'.format(**fmt), end='' )
 
-    print( ' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
-    if fmt['central']:
-        print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0), end='' )
+    # Uncertain should not know about sigma and possibly central
+    # print( ' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt), end='' )
+    # if fmt['central']:
+        # print( ' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0), end='' )
 
     print()
 

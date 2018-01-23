@@ -13,7 +13,17 @@ for i, name in enumerate( names, 1 ):
     ns.defparameter( name, central=i, relsigma=0.1 )
 
 vnames = convert( names, 'stdvector' )
-vp = R.VarProduct( vnames, 'product' )
+vp = R.VarProduct( vnames, 'product', ns=ns )
+ns['product'].get()
+
+product = ns['product']
 
 print_parameters(ns)
+
+print('Change one input at a time:')
+for i, name in enumerate( names, 2 ):
+    ns[name].set(i)
+    print_parameters(ns)
+    print()
+
 
