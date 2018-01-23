@@ -44,17 +44,11 @@ public:
 
   const std::string &name() const { return m_name; }
   virtual T value() { return m_var.value(); }
-  virtual T central() { return m_central; }
-  virtual void setCentral(T value) { m_central = value; }
-  virtual T sigma() { return m_sigma; }
-  virtual void setSigma(T sigma) { m_sigma = sigma; }
   virtual const variable<T> &getVariable() { return m_var; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
-  T m_central;
-  T m_sigma;
 };
 
 template <>
@@ -81,22 +75,29 @@ public:
 
   virtual void set(T value)
     { m_par = value; }
-  virtual T relativeValue(T diff)
-    { return this->value() + diff*this->m_sigma; }
-  virtual void relativeShift(T diff)
-    { set(relativeValue(diff)); }
 
   virtual T cast(const std::string &v) const
     { return boost::lexical_cast<T>(v); }
   virtual T cast(const T &v) const
     { return v; }
 
+  virtual T central() { return m_central; }
+  virtual void setCentral(T value) { m_central = value; }
+  virtual void reset() { set(this->central()); }
+
+  virtual T step() { return m_step; }
+  virtual void setStep(T step) { m_step = step; }
+
+  virtual T relativeValue(T diff)
+    { return this->value() + diff*this->m_step; }
+  virtual void setRelativeValue(T diff)
+    { set(relativeValue(diff)); }
+
   virtual void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
   virtual const std::vector<std::pair<T, T>> &limits() const
     { return m_limits; }
 
-  virtual void reset() { set(this->central()); }
   bool influences(SingleOutput &out) {
     return out.single().depends(this->getVariable());
   }
@@ -105,7 +106,10 @@ public:
   virtual void setFixed() { this->m_fixed = true; }
 
   virtual const parameter<T> &getParameter() { return m_par; }
+
 protected:
+  T m_central;
+  T m_step;
   std::vector<std::pair<T, T>> m_limits;
   parameter<T> m_par;
   bool m_fixed = false;
@@ -116,6 +120,12 @@ class GaussianParameter: public Parameter<T> {
 public:
   GaussianParameter(const std::string &name)
     : Parameter<T>(name) { }
+
+  virtual T sigma() { return m_sigma; }
+  virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+
+protected:
+  T m_sigma;
 };
 
 template <typename T>
@@ -123,8 +133,10 @@ class UniformAngleParameter: public Parameter<T> {
 public:
   UniformAngleParameter(const std::string &name)
     : Parameter<T>(name)
-    { this->m_sigma = std::numeric_limits<T>::infinity(); }
+    { this->setStep(0.017453292519943295); /*1 degree*/ }
+
   void set(T value) override;
+
   T cast(const std::string &v) const override;
   T cast(const T &v) const override { return Parameter<T>::cast(v); }
 };

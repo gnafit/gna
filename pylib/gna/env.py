@@ -206,7 +206,7 @@ class namespace(Mapping):
                 self.storage[name].add(obj, expr, bindings)
 
     def addevaluable(self, name, var):
-        evaluable = ROOT.Uncertain(var.typeName())(name, var)
+        evaluable = ROOT.Variable(var.typeName())(name, var)
         evaluable.ns = self
         self[name] = evaluable
         return evaluable

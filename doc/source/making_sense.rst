@@ -458,6 +458,7 @@ and used on python side.
 GaussianParameter : class template
     * a nickname for `Parameter (Variable)`_
     * represents normally distributed variable with central value and sigma
+    * carries also information about variable_'s uncertainty
 
 .. _`Parameter (Variable)`:
 
@@ -479,13 +480,13 @@ Parameter : class template
 ParameterWrapper : class template
     * a simple wrapper for the parameter_ class meant to use on python side
     * has set and get methods
+    * carries also information about variable_'s central value
 
 .. _`Variable (Variable)`:
 
 Variable : class template
     * GNAObject_ represending a transformation with no inputs and one output
     * output is connected with variable_ instance (connection is name based)
-    * carries also information about variable_'s central value and uncertainty (sigma)
 
 .. _UniformAngleParameter:
 
