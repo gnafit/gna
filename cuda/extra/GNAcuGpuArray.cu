@@ -57,8 +57,8 @@ GNAcuGpuArray<T>::GNAcuGpuArray() {
 }
 
 template <typename T>
-GNAcuGpuArray<T>::GNAcuGpuArray(T* inArrayPtr, size_t inSize) {
-	std::cout << "I am created by ptr " << std::endl;
+GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize) {
+	std::cout << "I am created by size constructor" << std::endl;
 	cudaError_t err;
 	arrSize = inSize;
 	size_t alloc_size = sizeof(T) * inSize;
@@ -217,11 +217,11 @@ DataLocation GNAcuGpuArray<T>::transferH2D() {
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::transferD2H() {
+void GNAcuGpuArray<T>::transferD2H() {
         cudaError_t err;
-        if (arrState == NotInitialized) {
+        //if (arrState == NotInitialized) {
                 hostPtr = new T[arrSize];
-        }
+        //}
         err = cudaMemcpy(hostPtr, devicePtr, sizeof(T) * arrSize,
                          cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
@@ -231,7 +231,6 @@ DataLocation GNAcuGpuArray<T>::transferD2H() {
         } else {
                 arrState = Host;
         }
-	return arrState;
 }
 
 
@@ -298,14 +297,19 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
 template <typename T>
 GNAcuGpuArray<T> GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 	GNAcuGpuArray<T> ret(rhs.devicePtr, rhs.arrSize);
-//	ret.devicePtr = rhs.devicePtr;
-//	ret.arrSize = rhs.arrSize;
         return ret;
 }
 
-
+template <typename T>
+void dump() {
+	if (arrState != Host) transferD2H();
+	for (int i = 0; i < arrSize; i++) {
+		std::cout << hostPtr[i] << " ";
+        }
+	std::cout << std::endl;
+}
 
 template class GNAcuGpuArray<double>;
 template class GNAcuGpuArray<float>;
 template class GNAcuGpuArray<int>;
-template class GNAcuGpuArray<bool>;
+//template class GNAcuGpuArray<bool>;
