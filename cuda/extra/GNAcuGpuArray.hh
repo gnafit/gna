@@ -24,12 +24,13 @@ public:
 	T* getArrayPtr() { return devicePtr; }
         void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
 	size_t getArraySize() { std::cout << "in size getter " << arrSize << std::endl; return arrSize; }
-	GNAcuGpuArray<T>& operator+(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator-(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator-();
-        GNAcuGpuArray<T>& operator*(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator*(T rhs);
-        GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
+
+        void negate();
+	GNAcuGpuArray<T>& operator+=(GNAcuGpuArray<T> &rhs);
+        GNAcuGpuArray<T>& operator-=(GNAcuGpuArray<T> &rhs);
+        GNAcuGpuArray<T>& operator*=(GNAcuGpuArray<T> &rhs);
+        GNAcuGpuArray<T>& operator*=(T rhs);
+        GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
 	void dump();
         DataLocation arrState;
 //	DataType type;

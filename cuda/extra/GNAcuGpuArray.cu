@@ -44,10 +44,10 @@ __global__ void setByValueGPU(T* res, T val, size_t n) {
 }
 
 template <typename T>
-__global__ void vecMinusUnar(T* resPtr, T* arrPtr, size_t arrSize) {
+__global__ void vecMinusUnar(T* arrPtr, size_t arrSize) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
         if (x >= arrSize) return;
-        resPtr[x] = -arrPtr[x];
+        arrPtr[x] = -arrPtr[x];
 }
 
 template <typename T>
@@ -235,7 +235,7 @@ void GNAcuGpuArray<T>::transferD2H() {
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> &rhs) {
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+=(GNAcuGpuArray<F> &rhs) {
 	if (arrSize != rhs.getArraySize()) {
 		std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
 			     "smallest will be used!"
@@ -248,7 +248,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+(GNAcuGpuArray<F> &rhs) {
 }
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> &rhs) {
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
         if (arrSize != rhs.getArraySize()) {
                 std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
                              "smallest will be used!"
@@ -263,15 +263,14 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-(GNAcuGpuArray<F> &rhs) {
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-() {
-	vecMinusUnar<F><<<arrSize, 1>>>(devicePtr, devicePtr, arrSize);
+void GNAcuGpuArray<F>::negate() {
+	vecMinusUnar<F><<<arrSize, 1>>>(devicePtr, arrSize);
         arrState = Device;
-        return *this;
 }
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> &rhs) {
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
                 std::cerr << "ERROR: Sizes of lhs and rhs are different! The "
@@ -286,7 +285,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(GNAcuGpuArray<F> &rhs) {
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
+GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
         vecMultToNum<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs,
                                    arrSize);
         arrState = Device;
@@ -295,13 +294,15 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*(F rhs) {
 
 
 template <typename T>
-GNAcuGpuArray<T> GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
-	GNAcuGpuArray<T> ret(rhs.devicePtr, rhs.arrSize);
-        return ret;
+GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
+	GNAcuGpuArray<T> ret(rhs.arrSize);
+	DataLocation tm = ret.setByDeviceArray(rhs.getArrayPtr());
+std::cout << tm << std::endl;
+        return std::ref(ret);
 }
 
 template <typename T>
-void dump() {
+void GNAcuGpuArray<T>::dump() {
 	if (arrState != Host) transferD2H();
 	for (int i = 0; i < arrSize; i++) {
 		std::cout << hostPtr[i] << " ";
