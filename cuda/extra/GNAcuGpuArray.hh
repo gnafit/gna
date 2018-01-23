@@ -30,7 +30,7 @@ public:
         GNAcuGpuArray<T>& operator-=(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator*=(GNAcuGpuArray<T> &rhs);
         GNAcuGpuArray<T>& operator*=(T rhs);
-        GNAcuGpuArray<T>& operator=(GNAcuGpuArray<T> rhs);
+        GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
 	void dump();
         DataLocation arrState;
 //	DataType type;

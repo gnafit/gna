@@ -296,9 +296,8 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
 template <typename T>
 GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 	GNAcuGpuArray<T> ret(rhs.arrSize);
-	DataLocation tm = ret.setByDeviceArray(rhs.getArrayPtr());
-std::cout << tm << std::endl;
-        return std::ref(ret);
+	ret.setByDeviceArray(rhs.getArrayPtr());
+        return ret;
 }
 
 template <typename T>
