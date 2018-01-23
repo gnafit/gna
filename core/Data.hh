@@ -390,7 +390,7 @@ DataLocation Data<T>::sync(DataLocation loc) {
 }
 
 template <typename T>
-DataLocation Data<T>::syncronize() {
+DataLocation Data<T>::synchronize() {
   DataLocation tmp;
   if (dataLoc == Host) {
     tmp = sync(Device);

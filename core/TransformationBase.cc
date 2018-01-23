@@ -102,6 +102,7 @@ void Entry::evaluate() {
   if (entryLoc == Device) {
     for (size_t i = 0; i < sinks.size(); i++) {	
       DataLocation tmploc = sinks[i].data->sync_D2H();
+      if (tmploc == Crashed) std::cerr << "Evaluate GPU arrays impossible!" << std::endl;
     }
   }
 }
@@ -299,7 +300,7 @@ void Entry::evaluateTypes() {
         sink.data->require_gpu();
       }
     }
-    if (entryLoc == Host)
+    if (entryLoc == Host) {
       for (auto& source : sources) {
         if ( source.sink->entry->entryLoc == Device) {
           source.sink->data->sync_D2H();
