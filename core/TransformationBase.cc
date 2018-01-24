@@ -401,6 +401,10 @@ SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
   return SinkTypeError(sink, message);
 }
 
+CalculationError Rets::error(const std::string &message) {
+  return CalculationError(this->m_entry, message);
+}
+
 bool OutputHandle::check() const {
   return m_sink->entry->check();
 }
