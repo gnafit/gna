@@ -3,7 +3,7 @@
 from __future__ import print_function
 from load import ROOT
 from gna.env import env
-from gna.parameter_loader import get_parameters
+from gna.parameters.parameter_loader import get_parameters
 from gna import parameters
 parameters.debug=True
 
