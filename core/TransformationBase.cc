@@ -97,10 +97,12 @@ bool Entry::check() const {
   return true;
 }
 
+/** Does not update the taintflag */
 void Entry::evaluate() {
   return fun(Args(this), Rets(this));
 }
 
+/** Handles exception and resets the taintflag */
 void Entry::update() {
   Status status = Status::Success;
   try {
@@ -306,6 +308,11 @@ void Entry::touch() {
   }
 }
 
+/**
+ * Returns i-th data. Does the calculation if needed.
+ * @param i -- index of a Sink to read the data.
+ * @return i-th Sink's Data.
+ */
 const Data<double> &Entry::data(int i) {
   if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
     auto fmt = format("invalid sink idx %1%, have %2% sinks");

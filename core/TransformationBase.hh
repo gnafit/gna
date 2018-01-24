@@ -152,30 +152,30 @@ namespace TransformationTypes {
     InputHandle addSource(const std::string &name);
     OutputHandle addSink(const std::string &name);
 
-    void evaluate();
-    void update();
-    void evaluateTypes(); ///< Evaluate output types based on input types via typefuns call, allocate memory.
+    void evaluate();      ///< Do actual calculation by calling Entry::fun.
+    void update();        ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
+    void evaluateTypes(); ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void updateTypes();
 
-    void touch();
-    const Data<double> &data(int i);
+    void touch();         ///< Update the transformation if it is not frozen and tainted.
+    const Data<double> &data(int i); ///< Evaluates the function if needed and returns i-th data.
 
-    void freeze() { frozen = true; }
-    void unfreeze() { frozen = false; }
+    void freeze() { frozen = true; }     ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
+    void unfreeze() { frozen = false; }  ///< Unfreeze the Entry. Enables the taintflag propagation.
 
     bool check() const;
     void dump(size_t level = 0) const;
 
-    std::string name;
-    SourcesContainer sources;
-    SinksContainer sinks;
-    Function fun;
-    std::vector<TypesFunction> typefuns;
-    taintflag tainted;
+    std::string name;                    ///< Transformation name
+    SourcesContainer sources;            ///< Transformation inputs (sources)
+    SinksContainer sinks;                ///< Transformation outputs (sinks)
+    Function fun;                        ///< The function that does actual calculation
+    std::vector<TypesFunction> typefuns; ///< Vector of TypeFunction instances
+    taintflag tainted;                   ///< taintflag shows whether the result is up to date
     const Base *parent;
     int initializing;
-    bool frozen;
-    bool usable;
+    bool frozen;                         ///< If Entry is frozen, it is not updated even if tainted.
+    bool usable;                         ///< Unused.
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
