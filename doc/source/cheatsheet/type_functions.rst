@@ -16,3 +16,5 @@ outputs based on inputs sizes, see `core/TransformationBase.hh`:
 3. ``Atypes::ifSame`` - checks that all inputs are of the same type (shape and
    content description).
 4. ``Atypes::ifSameShape`` - checks that all inputs have the same shape.
+5. ``Atypes::ifHist<I>`` - checks that input `I` is a histogram (has kind Hist).
+6. ``Atypes::ifPoints<I>`` - checks that input `I` is of kind Points.

@@ -1,5 +1,5 @@
 Overview
-=====================
+========
 
 The codebase consists of two parts. The code where computations are
 implemented is written in C++11 and is scattered in different
@@ -24,13 +24,15 @@ dropping it in favor of something more cleaner (maybe `pybind11
 <https://github.com/wjakob/pybind11/>`_) in the future.
 
 C++ side
-************************
+--------
 All the objects, which are going to be used in the computations are
 derived from the ``GNAObject`` class. This object provides the
 following basic features.
 
+.. _variables:
+
 Variables, parameters, evaluables and taintflags
-###################################################
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 A *variable* represents a named value, which is going to be changed
 during fit procedure; it's generally a parameter on which the
 theoretical prediction of experemental observations depends. Variables
@@ -75,7 +77,7 @@ the ``Parametrized`` base class, which is implemented in
 ``core/Parametrized.hh``.
 
 Transformations
-#################
+^^^^^^^^^^^^^^^
 A *transformation* represents the
 actual computation procedure -- it's basically a function taking any
 number of inputs (or sometimes internally called *sources*) and
@@ -118,7 +120,11 @@ PyROOT. This was done with ROOT5 in mind, since ROOT6 is very good at
 C++11 bindings, the distinction is not as important anymore.
 
 Python side
-****************
+-----------
+
+Running
+^^^^^^^
+
 The entry point of python code is ``run()`` function from ``gna.dispatch``. It
 handles command line arguments  parsing and runs specified commands
 from ``gna.ui``. Each command corresponds to one module in ``gna.ui``,
@@ -127,6 +133,11 @@ it should contain ``cmd`` class which should be derived at least from
 exactly after the latter, so there is no real difference between
 them. Commands are executed strictly sequentially in the order
 specified in the command line.
+
+.. _environment_ns:
+
+Environment and namespaces
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Commands do everything -- define experiments, data, do fits, plotting,
 etc. They share common state with ``env`` object. This
@@ -163,3 +174,16 @@ handled by the ``nsview`` object inside
 ``env``. Activation/deactivation is done with the context syntax
 (``with ns: ...``) or with explicit
 ``ns.add([...])`` / ``ns.remove([...])``.
+
+Bundles and configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Bundles are implemented by deriving from the base class :ref:`TransformationBundle` implement the following functionality:
+
++ Construct and configure a single transformation
++ Construct, configure and connect several transformations. In this sense :ref:`Bundle <TransformationBundle>` is a
+  transformation of a higher level.
++ Based on the given configuration initialize necessary environments and variables, set uncertainties, etc.
+
+The class :ref:`NestedDict` is used to implement the configuration. :ref:`NestedDict` configuration can be saved to or loaded
+from a file, created within python as regular dictionary. It supports nesting, and attribute access syntax.

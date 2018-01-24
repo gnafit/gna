@@ -8,10 +8,10 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from converters import convert
+from constructors import Points
 
 #
-# Create the matrix
+# Create the matrix in numpy
 #
 size = 4
 v = N.matrix(N.arange(size, dtype='d'))
@@ -29,14 +29,23 @@ print( 'L (numpy)' )
 print( chol )
 print()
 
-points = convert( mat, R.Points )
+#
+# Create the transformations
+#
+points = Points( mat )
 cholesky = R.Cholesky()
 
 cholesky.cholesky.mat( points.points.points )
 
+#
+# Retrieve data
+#
 res = cholesky.cholesky.L.data()
 res = N.matrix(N.tril( res ))
 
+#
+# Print data
+#
 print( 'L' )
 print( res )
 

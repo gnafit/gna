@@ -69,7 +69,7 @@ class cmd(basecmd):
         prediction = ROOT.Prediction()
         integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         ibd = ROOT.IbdFirstOrder()
-        ibd.Enu.inputs(integrator.points)
+        ibd.Enu.inputs(integrator.points.x)
         ibd.xsec.Enu(ibd.Enu)
         ibd.xsec.ctheta(integrator.points.y)
         ibd.jacobian.Enu(ibd.Enu)

@@ -1,4 +1,4 @@
-from collections import defaultdict, deque, Mapping
+from collections import defaultdict, deque, Mapping, OrderedDict
 import parameters
 from contextlib import contextmanager
 import ROOT
@@ -6,7 +6,7 @@ from gna.config import cfg
 
 env = None
 
-class namespacedict(defaultdict):
+class namespacedict(OrderedDict):
     def __init__(self, ns):
         super(namespacedict, self).__init__()
         self.ns = ns
@@ -74,7 +74,7 @@ class ExpressionsEntry(object):
         self.exprs.append(ExpressionWithBindings(self.ns, obj, expr, bindings))
 
     def get(self):
-        path = self.resolvepath({self}, {})
+        path = self.resolvepath({self}, OrderedDict())
         if not path:
             raise KeyError()
         for expr in path:
@@ -106,8 +106,8 @@ class namespace(Mapping):
         else:
             self.path = name
 
-        self.storage = {}
-        self.observables = {}
+        self.storage = OrderedDict()
+        self.observables = OrderedDict()
         self.observables_tags = defaultdict(set)
 
         self.rules = []
@@ -186,6 +186,7 @@ class namespace(Mapping):
     def addobservable(self, name, output, export=True):
         if output.check():
             self.observables[name] = output
+            print 'Add observable:', '%s/%s'%(self.path, name)
         else:
             print "observation", name, "is invalid"
             output.dump()
@@ -217,7 +218,7 @@ class namespace(Mapping):
     def walkobservables(self, internal=False):
         for ns in self.walknstree():
             for name, val in ns.observables.iteritems():
-                if not internal and 'internal' in ns.observables_tags.get(name, {}):
+                if not internal and 'internal' in ns.observables_tags.get(name, OrderedDict()):
                     continue
                 yield '{}/{}'.format(ns.path, name), val
 
@@ -259,7 +260,7 @@ class nsview(object):
                 print ''
             else:
                 'none'
-        raise KeyError(name)
+        raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
 
 class parametersview(object):
     def __getitem__(self, name):
@@ -268,7 +269,7 @@ class parametersview(object):
 
     @contextmanager
     def update(self, newvalues):
-        oldvalues = {}
+        oldvalues = OrderedDict()
         for p, v in newvalues.iteritems():
             if isinstance(p, str):
                 p = self[p]
@@ -280,7 +281,7 @@ class parametersview(object):
 
     @contextmanager
     def save(self, params):
-        oldvalues = {}
+        oldvalues = OrderedDict()
         for p in params:
             if isinstance(p, str):
                 p = self[p]
@@ -310,7 +311,7 @@ class envpart(dict):
 
 class envparts(object):
     def __init__(self):
-        self.storage = {}
+        self.storage = OrderedDict()
 
     def __getattr__(self, parttype):
         if not parttype in self.storage:
@@ -341,7 +342,7 @@ class _environment(object):
             self.globalns.objs.append(obj)
         else:
             ns.objs.append(obj)
-        bindings = self._bindings+[kwargs.pop("bindings", {})]
+        bindings = self._bindings+[kwargs.pop("bindings", OrderedDict())]
         if ns:
             ns.addexpressions(obj, bindings=bindings)
         if not kwargs.pop('bind', True):

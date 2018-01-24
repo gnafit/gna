@@ -2,13 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from load import ROOT as R
 from matplotlib import pyplot as P
 import numpy as N
-from load import ROOT as R
 from gna.env import env
 from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
+from matplotlib import pyplot as P
 from converters import convert
 from argparse import ArgumentParser
 import constructors as C
@@ -41,16 +42,17 @@ edges   = N.array( [   -1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
 edges_m = N.array( [ -2e100, -0.9, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
 matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 
-pedges, pedges_m = C.Points( edges ), C.Points( edges_m )
+pedges_m = C.Points( edges_m )
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 
+histedges = R.HistEdges()
+histedges.histedges.hist( ntrue.hist )
+
 nl = R.HistNonlinearity(True)
-nl.set( pedges, pedges_m, ntrue )
+nl.set( histedges.histedges, pedges_m, ntrue )
 
-idy = R.Identity()
-idy.identity.source(nl.matrix.FakeMatrix)
 
-mat = idy.identity.target.data()
+mat = nl.matrix.FakeMatrix.data()
 print( 'C++' )
 print( mat )
 print( mat.sum( axis=0 ) )

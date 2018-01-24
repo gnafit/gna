@@ -10,7 +10,7 @@ from gna.parameters.parameter_loader import get_parameters
 ROOT.GNAObject
 Param_Double = ROOT.GaussianParameter('double')
 
-print() 
+print()
 
 env.defparameter('probe1', central=0., sigma=1.)
 env.defparameter('probe2', central=0., sigma=1.)

@@ -73,7 +73,7 @@ inline Uncertain<double>::Uncertain(const std::string &name)
     .func([](Uncertain<double> *obj, Args, Rets rets) {
         rets[0].arr(0) = obj->m_var.value();
       })
-    ;
+    .finalize();
 }
 
 

@@ -16,4 +16,5 @@ Contents:
    inputs
    fc
    reference_guide
-
+   authors
+   acknowledgements
