@@ -154,7 +154,7 @@ namespace TransformationTypes {
 
     void evaluate();
     void update();
-    void evaluateTypes();
+    void evaluateTypes(); ///< Evaluate output types based on input types via typefuns call, allocate memory.
     void updateTypes();
 
     void touch();

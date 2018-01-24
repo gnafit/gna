@@ -244,6 +244,15 @@ Entry &Base::getEntry(const std::string &name) {
   throw KeyError(name, "transformation");
 }
 
+/**
+ * evaluateTypes() calls each of the TypeFunction functions which determine
+ * the consistency of the inputs and derive the types (DataType) of the outputs.
+ *
+ * In case any output DataType has been changed or created:
+ *   - the corresponding Data instance is created. Memory allocation happens here.
+ *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
+ *   also executed.
+ */
 void Entry::evaluateTypes() {
   Atypes args(this);
   Rtypes rets(this);
