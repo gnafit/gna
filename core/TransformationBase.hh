@@ -232,77 +232,300 @@ namespace TransformationTypes {
       Entry* getEntry() { return m_entry; }
   };
 
+
+  /**
+   * @brief Access the transformation inputs.
+   *
+   * Args instance is passed to the Entry::fun function and is used to retrieve input data for the transformation.
+   *
+   * Args gives read-only access to the Source instances through Entry instance.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Args {
+  public:
+    /**
+     * @brief Args constructor.
+     * @param e -- Entry instance. Args will get access to Entry's sources.
+     */
     Args(const Entry *e): m_entry(e) { }
+
+    /**
+     * @brief Get i-th Source Data.
+     * @param i -- index of a Source.
+     * @return i-th Sources's Data as input (const).
+     */
     const Data<double> &operator[](int i) const;
+
+    /**
+     * @brief Get number of transformation sources.
+     * @return Number of transformation Source instances.
+     */
     size_t size() const { return m_entry->sources.size(); }
   private:
-    const Entry *m_entry;
+    const Entry *m_entry; ///< Entry instance to access Sources.
   };
 
+  /**
+   * @brief Access the transformation outputs.
+   *
+   * Rets instance is passed to the Entry::fun function and is used to write output data of the transformation.
+   *
+   * Rets gives write access to the Sink instances through Entry instance.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Rets {
   public:
+    /**
+     * @brief Rets constructor.
+     * @param e -- Entry instance. Rets will get access to Entry's sinks.
+     */
     Rets(Entry *e): m_entry(e) { }
+
+    /**
+     * @brief Get i-th Sink Data.
+     * @param i -- index of a Sink.
+     * @return i-th Sink's Data as output.
+     */
     Data<double> &operator[](int i) const;
+
+    /**
+     * @brief Get number of transformation sinks.
+     * @return Number of transformation Sink instances.
+     */
     size_t size() const { return m_entry->sinks.size(); }
+
+    /**
+     * @brief Calculation error exception.
+     * @param message -- exception message.
+     * @todo Define the method.
+     * @return exception.
+     */
     CalculationError error(const std::string &message = "");
+
+    /**
+     * @brief Freeze the Entry.
+     *
+     * While entry is frozen the taintflag is not propagated. Entry is always up to date.
+     */
     void freeze()  { m_entry->freeze(); }
+
+    /**
+     * @brief Unfreeze the Entry.
+     *
+     * Enables the taintflag propagation.
+     */
     void unfreeze()  { m_entry->unfreeze(); }
+
   private:
-    Entry *m_entry;
+    Entry *m_entry; ///< Entry instance to access Sinks.
   };
 
+  /**
+   * @brief Access the transformation inputs' DataType (read only).
+   *
+   * It's needed to:
+   *   - check the consistency of the inputs in the run time.
+   *   - derive the output DataTypes.
+   *
+   * Atypes instance is passed to each of the Entry's TypeFunction instances.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Atypes {
+    /**
+     * @brief An exception for uninitialized Source instance
+     */
     class Undefined {
     public:
       Undefined(const Source *s = nullptr) : source(s) { }
       const Source *source;
     };
+    /**
+     * @brief Atypes constructor.
+     * @param e -- Entry instance. Atypes will get access to Entry's source types.
+     */
     Atypes(const Entry *e): m_entry(e) { }
+
+    /**
+     * @brief Direct access to Sink instance, which is used as Source for the transformation.
+     * @param i -- Source number to return its Sink.
+     * @return i-th Source's Sink instance.
+     */
     const Sink *sink(int i) const {
       if (!m_entry->sources[i].materialized()) {
         throw Undefined(&m_entry->sources[i]);
       }
       return m_entry->sources[i].sink;
     }
+
+    /**
+     * @brief Get i-th Source DataType (const).
+     * @param i -- Source index.
+     * @return i-th Source DataType.
+     */
     const DataType &operator[](int i) const {
       return sink(i)->data->type;
     }
+
+    /**
+     * @brief Get number of Source instances.
+     * @return number of sources.
+     */
     size_t size() const { return m_entry->sources.size(); }
 
+    /**
+     * @brief Assigns shape of each input to corresponding output.
+     *
+     * If the number of inputs and outputs is not the same, exception will be
+     * thrown. In case of single input and multiple outputs assign its size to
+     * each output.
+     *
+     * @param args -- source types.
+     * @param rets -- output types.
+     */
     static void passAll(Atypes args, Rtypes rets);
+
+    /**
+     * @brief assigns shape of Arg-th input to Ret-th output
+     *
+     * @tparam Arg -- index of Arg to read the type.
+     * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
+     *
+     * @param args -- source types.
+     * @param rets -- output types.
+     */
     template <size_t Arg, size_t Ret = Arg>
     static void pass(Atypes args, Rtypes rets);
+
+    /**
+     * @brief Checks that all inputs are of the same type (shape and content description).
+     *
+     * Raises an exception otherwise.
+     *
+     * @param args -- source types.
+     * @param rets -- output types.
+     */
     static void ifSame(Atypes args, Rtypes rets);
+
+    /**
+     * @brief Checks that all inputs are of the same shape.
+     *
+     * Raises an exception otherwise.
+     *
+     * @param args -- source types.
+     * @param rets -- output types.
+     */
     static void ifSameShape(Atypes args, Rtypes rets);
+
+    /**
+     * @brief checks if Arg-th input is a histogram (DataKind=Histogram).
+     *
+     * Raises an exception otherwise.
+     *
+     *  @tparam Arg -- index of Arg to check.
+     *
+     *  @param args -- source types.
+     *  @param rets -- output types.
+     */
     template <size_t Arg>
     static void ifHist(Atypes args, Rtypes rets);
+
+    /**
+     * @brief checks if Arg-th input is an array (DataKind=Points).
+     *
+     * Raises an exception otherwise.
+     *
+     * @tparam Arg -- index of Arg to check.
+     *
+     * @param args -- source types.
+     * @param rets -- output types.
+     */
     template <size_t Arg>
     static void ifPoints(Atypes args, Rtypes rets);
 
+    /**
+     * @brief Source type exception.
+     * @param dt -- incorrect DataType.
+     * @param message -- exception message.
+     * @return exception.
+     */
     SourceTypeError error(const DataType &dt, const std::string &message = "");
 
+    /**
+     * @brief Get Entry's name
+     * @return Entry's name
+     */
     const std::string &name() const { return m_entry->name; }
 
+    /**
+     * @brief Empty Undefined exception.
+     * @return Empty Undefined exception.
+     */
     Undefined undefined() { return Undefined(); }
   private:
-    const Entry *m_entry;
+    const Entry *m_entry; ///< Entry instance to access Source DataType.
   };
 
+  /**
+   * @brief Storage for the new transformation's outputs' DataType types.
+   *
+   * It's needed to store the derived outputs' DataType types.
+   *
+   * Rtypes instance is passed to each of the Entry's TypeFunction functions.
+   *
+   * @note Rtypes will NOT write to Entry's output DataType types by itself. The actual assignment happens in the Entry::evaluateTypes() method.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Rtypes {
   public:
+    /**
+     * @brief Rtypes constructor.
+     *
+     * Rtypes will NOT write to Entry's output DataType types by itself.
+     *
+     * @param e -- Entry instance.
+     */
     Rtypes(const Entry *e)
       : m_entry(e), m_types(new std::vector<DataType>(e->sinks.size()))
       { }
+
+    /**
+     * @brief Get i-th Sink DataType.
+     * @param i -- Sink index.
+     * @return i-th Sink DataType.
+     */
     DataType &operator[](int i);
+
+    /**
+     * @brief Get number of Sink instances.
+     * @return number of sinks.
+     */
     size_t size() const { return m_types->size(); }
 
+    /**
+     * @brief Sink type exception.
+     * @param dt -- incorrect DataType.
+     * @param message -- exception message.
+     * @return exception.
+     */
     SinkTypeError error(const DataType &dt, const std::string &message = "");
 
+    /**
+     * @brief Get Entry's name
+     * @return Entry's name
+     */
     const std::string &name() const { return m_entry->name; }
+
   protected:
-    const Entry *m_entry;
-    std::shared_ptr<std::vector<DataType> > m_types;
+    const Entry *m_entry; ///< Entry instance.
+    std::shared_ptr<std::vector<DataType> > m_types; ///< Storage for the output DataType types.
   };
 
   template <size_t Arg, size_t Ret>
