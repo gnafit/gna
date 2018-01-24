@@ -44,10 +44,13 @@ class bkg_weighted_hist_v01(TransformationBundle):
             if 'rates' in self.cfg:
                 ns.reqparameter( ratename, self.cfg.rates[ns.name] )
             else:
-                ns.reqparameter( ratename )
+                ns.reqparameter( ratename, central=0.0, sigma=0.1 )
 
             if mult:
-                vp = R.VarProduct( vnames, 'product', ns=ns )
+                print( order[0], order[1] )
+                with ns:
+                    vp = R.VarProduct( order, 'product', ns=ns )
+                    ns['product'].get()
                 self.products.append( vp )
 
 
