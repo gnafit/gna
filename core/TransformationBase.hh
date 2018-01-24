@@ -301,7 +301,6 @@ namespace TransformationTypes {
     /**
      * @brief Calculation error exception.
      * @param message -- exception message.
-     * @todo Define the method.
      * @return exception.
      */
     CalculationError error(const std::string &message = "");
