@@ -44,8 +44,13 @@ def makeparameter(ns, name, cfg=None, **kwargs):
     if cfg:
         ptype = kwargs['ptype'] = 'gaussian'
         kwargs['central']     = cfg.central
-        kwargs['uncertainty'] = cfg.uncertainty
-        kwargs['uncertainty_type'] = cfg.mode
+        if cfg.mode=='fixed':
+            kwargs['uncertainty'] = 0.1
+            kwargs['uncertainty_type'] = 'absolute'
+            kwargs['fixed'] = True
+        else:
+            kwargs['uncertainty'] = cfg.uncertainty
+            kwargs['uncertainty_type'] = cfg.mode
     else:
         ptype = kwargs.get('type', 'gaussian')
 

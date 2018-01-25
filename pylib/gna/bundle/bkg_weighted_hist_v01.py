@@ -7,7 +7,7 @@ from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain
 from converters import convert
 
 from gna.bundle import *
@@ -36,28 +36,29 @@ class bkg_weighted_hist_v01(TransformationBundle):
             print(ns.name)
 
     def define_variables(self):
-        ratename = self.ratename
+        pitems = None
+        formula = [ self.formats[item].format( self.cfg.name ) for item in self.cfg.formula ]
+        if len(formula)>1:
+            pitems = convert( formula, 'stdvector' )
 
-        mult = False
-        if 'norm' in self.cfg:
-            ratename = '{}_rate_def'.format(self.cfg.name)
-            mult = True
-            order = convert([self.normname, ratename], 'stdvector')
-            self.products = []
-
+        self.products=[]
+        numname = self.formats['num'].format( self.cfg.name )
         for ns in self.namespaces:
-            if 'norm' in self.cfg:
-                ns.reqparameter( self.normname, self.cfg.norm )
+            for item in self.cfg.formula:
+                num = self.cfg[item]
 
-            if 'rates' in self.cfg:
-                ns.reqparameter( ratename, self.cfg.rates[ns.name] )
-            else:
-                ns.reqparameter( ratename, central=1.0, sigma=0.1 )
+                if isinstance( num, uncertain ):
+                    cnum = num
+                else:
+                    cnum = num[ns.name]
+                ns.reqparameter( self.formats[item].format( self.cfg.name ), cnum )
 
-            if mult:
+            if pitems:
                 with ns:
-                    vp = R.VarProduct( order, self.ratename, ns=ns )
-                    ns[self.ratename].get()
-                self.products.append( vp )
+                    vp = R.VarProduct( pitems, numname, ns=ns )
+                    ns[numname].get()
+                    self.products.append( vp )
+            else:
+                ns.defparameter( numname, target=formula[0] )
 
 

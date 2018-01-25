@@ -250,8 +250,10 @@ def configurator(filename=None, dic={}, **kwargs):
     return self
 
 class uncertain(object):
-    def __init__(self, central, uncertainty, mode):
-        assert mode in ['absolute', 'relative', 'percent'], 'Unsupported uncertainty mode '+mode
+    def __init__(self, central, uncertainty=None, mode='fixed'):
+        assert mode in ['absolute', 'relative', 'percent', 'fixed'], 'Unsupported uncertainty mode '+mode
+
+        assert (mode=='fixed')==(uncertainty is None), 'Inconsistent mode and uncertainty'
 
         if mode=='percent':
             mode='relative'
@@ -266,6 +268,9 @@ class uncertain(object):
 
     def __str__(self):
         res = '{central:.6g}'.format(central=self.central)
+
+        if self.mode=='fixed':
+            return res
 
         if self.mode=='relative':
             sigma    = self.central*self.uncertainty

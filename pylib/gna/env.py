@@ -254,6 +254,7 @@ class nsview(object):
                 return ns[name]
             except KeyError:
                 pass
+
         if cfg.debug_bindings:
             print "can't find name {}. Names in view: ".format(name),
             if self.nses:
