@@ -52,10 +52,23 @@ CalculationError::CalculationError(const Entry *e, const std::string &message)
     entry(e)
 { }
 
+/**
+ * @brief Constructor.
+ *
+ * @param name -- Entry's name.
+ * @param parent -- Base class instance to hold the Entry.
+ */
 Entry::Entry(const std::string &name, const Base *parent)
   : name(name), parent(parent), initializing(0), frozen(false)
 { }
 
+/**
+ * @brief Copy constructor.
+ * @todo Cross check the description.
+ *
+ * @param other -- Entry to copy name, inputs and outputs from.
+ * @param parent -- Base class instance to hold the Entry.
+ */
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), sources(other.sources.size()), sinks(other.sinks.size()),
     fun(), typefuns(), parent(parent), initializing(0), frozen(false)
@@ -63,6 +76,16 @@ Entry::Entry(const Entry &other, const Base *parent)
   initSourcesSinks(other.sources, other.sinks);
 }
 
+/**
+ * @brief Initialize the clones for inputs and outputs.
+ *
+ * To be used in a copy constructor Entry::Entry().
+ *
+ * @tparam InsT -- container type for Source instances.
+ * @tparam OutsT -- container type for Sink instances.
+ * @param inputs -- container for Source instances.
+ * @param outputs -- container for Sink instances.
+ */
 template <typename InsT, typename OutsT>
 void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
   std::transform(inputs.begin(), inputs.end(), std::back_inserter(sources),
@@ -71,18 +94,38 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
                  [this](const Sink &s) { return new Sink{s, this}; });
 }
 
+/**
+ * @brief Initialize and return new input Source.
+ *
+ * @param name -- new Source's name.
+ * @return InputHandle for the new Source.
+ */
 InputHandle Entry::addSource(const std::string &name) {
   Source *s = new Source(name, this);
   sources.push_back(s);
   return InputHandle(*s);
 }
 
+/**
+ * @brief Initialize and return new input Sink.
+ *
+ * @param name -- new Sink's name.
+ * @return OutputHandle for the new Sink.
+ */
 OutputHandle Entry::addSink(const std::string &name) {
   Sink *s = new Sink(name, this);
   sinks.push_back(s);
   return OutputHandle(*s);
 }
 
+/**
+ * @brief Checks that Data are initialized.
+ *
+ * Checks that all the Source instances are materialized (Data are allocated).
+ * The procedure triggers Entry::check() for all the preceding Entry instances.
+ *
+ * @return true if everything is OK.
+ */
 bool Entry::check() const {
   for (const Source &s: sources) {
     if (!s.materialized()) {
@@ -97,12 +140,20 @@ bool Entry::check() const {
   return true;
 }
 
-/** Does not update the taintflag */
+/**
+ * @brief Do actual calculation by calling Entry::fun.
+ *
+ * Does not reset the taintflag.
+ */
 void Entry::evaluate() {
   return fun(Args(this), Rets(this));
 }
 
-/** Handles exception and resets the taintflag */
+/**
+ * @brief Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
+ *
+ * Handles exception and resets the taintflag.
+ */
 void Entry::update() {
   Status status = Status::Success;
   try {
@@ -116,6 +167,12 @@ void Entry::update() {
   }
 }
 
+/** @brief Recursively print Source names and their connection status.
+ *
+ * For each Source's Entry Entry::dump() method is called with hither indentation level.
+ *
+ * @param level -- indentation level.
+ */
 void Entry::dump(size_t level) const {
   std::string spacing = std::string(level*2, ' ');
   std::cerr << spacing << "Transformation " << name << std::endl;
@@ -205,6 +262,18 @@ void Base::copyEntries(const Base &other) {
                  [this](const Entry &e) { return new Entry{e, this}; });
 }
 
+/**
+ * @brief Connect the Source to the Sink.
+ *
+ * After the connection:
+ *   - the current Entry is subscribed to the Sink's taintflag to track dependencies.
+ *   - Execute Sink::evaluateTypes() is called to define the input data types if not already defined.
+ *   - Execute Entry::evaluateTypes() to check input data types and derive output data types if needed.
+ *
+ * @param newsink -- sink to connect to.
+ *
+ * @exception std::runtime_error if there already exists a connected Sink.
+ */
 void Source::connect(Sink *newsink) {
   if (sink) {
     std::cerr << this << " " << name << " " << sink->entry->name << "\n";
@@ -214,9 +283,9 @@ void Source::connect(Sink *newsink) {
        .str()
       );
   }
-  if (false) {
-    throw std::runtime_error("Transformation: connecting incompatible types");
-  }
+  //if (false) {
+    //throw std::runtime_error("Transformation: connecting incompatible types");
+  //}
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
   sink->entry->tainted.subscribe(entry->tainted);
@@ -247,6 +316,8 @@ Entry &Base::getEntry(const std::string &name) {
 }
 
 /**
+ * @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+ *
  * evaluateTypes() calls each of the TypeFunction functions which determine
  * the consistency of the inputs and derive the types (DataType) of the outputs.
  *
@@ -254,6 +325,8 @@ Entry &Base::getEntry(const std::string &name) {
  *   - the corresponding Data instance is created. Memory allocation happens here.
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
+ *
+ * @exception std::runtime_error in case any of type functions fails.
  */
 void Entry::evaluateTypes() {
   Atypes args(this);
@@ -298,10 +371,12 @@ void Entry::evaluateTypes() {
   }
 }
 
+/** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */
 void Entry::updateTypes() {
   evaluateTypes();
 }
 
+/** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
   if (tainted && !frozen) {
     update();
@@ -312,6 +387,9 @@ void Entry::touch() {
  * Returns i-th data. Does the calculation if needed.
  * @param i -- index of a Sink to read the data.
  * @return i-th Sink's Data.
+ *
+ * @exception CalculationError in case invalid index is queried.
+ * @exception CalculationError in case input data is undefined.
  */
 const Data<double> &Entry::data(int i) {
   if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
@@ -327,6 +405,16 @@ const Data<double> &Entry::data(int i) {
   return *sink.data;
 }
 
+/**
+ * @brief Assigns shape of each input to corresponding output.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case the number of inputs and outputs is >1 and not the same.
+ */
 void Atypes::passAll(Atypes args, Rtypes rets) {
   if (args.size() == 1) {
     for (size_t i = 0; i < rets.size(); ++i) {
@@ -342,6 +430,16 @@ void Atypes::passAll(Atypes args, Rtypes rets) {
   }
 }
 
+/**
+ * @brief Checks that all inputs are of the same type (shape and content description).
+ *
+ * Raises an exception otherwise.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input types are not the same.
+ */
 void Atypes::ifSame(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
@@ -350,6 +448,16 @@ void Atypes::ifSame(Atypes args, Rtypes rets) {
   }
 }
 
+/**
+ * @brief Checks that all inputs are of the same shape.
+ *
+ * Raises an exception otherwise.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input shapes are not the same.
+ */
 void Atypes::ifSameShape(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {
@@ -358,6 +466,14 @@ void Atypes::ifSameShape(Atypes args, Rtypes rets) {
   }
 }
 
+/**
+ * @brief Get i-th Sink DataType.
+ *
+ * @param i -- Sink index.
+ * @return i-th Sink DataType.
+ *
+ * @exception std::runtime_error in case invalid index is queried.
+ */
 DataType &Rtypes::operator[](int i) {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
@@ -367,6 +483,14 @@ DataType &Rtypes::operator[](int i) {
   return (*m_types)[i];
 }
 
+/**
+ * @brief Get i-th Source Data.
+ * @param i -- index of a Source.
+ * @return i-th Sources's Data as input (const).
+ *
+ * @exception CalculationError in case invalid index is queried.
+ * @exception CalculationError in case input data is not initialized.
+ */
 const Data<double> &Args::operator[](int i) const {
   if (i < 0 or static_cast<size_t>(i) > m_entry->sources.size()) {
     auto fmt = format("invalid arg idx %1%, have %2% args");
@@ -381,6 +505,14 @@ const Data<double> &Args::operator[](int i) const {
   return *src.sink->data;
 }
 
+/**
+ * @brief Get i-th Sink Data.
+ * @param i -- index of a Sink.
+ * @return i-th Sink's Data as output.
+ *
+ * @exception CalculationError in case invalid index is queried.
+ * @exception CalculationError in case output data is not initialized.
+ */
 Data<double> &Rets::operator[](int i) const {
   if (i < 0 or static_cast<size_t>(i) > m_entry->sinks.size()) {
     auto fmt = format("invalid ret idx %1%, have %2% rets");
@@ -395,6 +527,12 @@ Data<double> &Rets::operator[](int i) const {
   return *m_entry->sinks[i].data;
 }
 
+/**
+ * @brief Source type exception.
+ * @param dt -- incorrect DataType.
+ * @param message -- exception message.
+ * @return exception.
+ */
 SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
   const Source *source = nullptr;
   for (size_t i = 0; i < m_entry->sources.size(); ++i) {
@@ -406,6 +544,12 @@ SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
   return SourceTypeError(source, message);
 }
 
+/**
+ * @brief Sink type exception.
+ * @param dt -- incorrect DataType.
+ * @param message -- exception message.
+ * @return exception.
+ */
 SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
   const Sink *sink = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
@@ -417,6 +561,11 @@ SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
   return SinkTypeError(sink, message);
 }
 
+/**
+ * @brief Calculation error exception.
+ * @param message -- exception message.
+ * @return exception.
+ */
 CalculationError Rets::error(const std::string &message) {
   return CalculationError(this->m_entry, message);
 }

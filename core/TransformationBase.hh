@@ -34,32 +34,57 @@ namespace TransformationTypes {
   struct Entry;
   struct Source;
 
+  /**
+   * @brief Definition of a single transformation output (Sink).
+   *
+   * Sink instance carries the actual Data.
+   *
+   * It also knows where this data is connected to (Sink::sources).
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Sink: public boost::noncopyable {
     Sink(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+      : name(name), entry(entry) { }            ///< Constructor.
     Sink(const Sink &other, Entry *entry)
-      : name(other.name), entry(entry) { }
+      : name(other.name), entry(entry) { }      ///< Copy constructor.
 
-    std::string name;
-    std::unique_ptr<Data<double>> data;
-    std::vector<Source*> sources;
-    Entry *entry;
+    std::string name;                           ///< Sink's name.
+    std::unique_ptr<Data<double>> data;         ///< Sink's Data.
+    std::vector<Source*> sources;               ///< Container with Source pointers which use this Sink as their input.
+    Entry *entry;                               ///< Pointer to the transformation Entry this Sink belongs to.
   };
 
   class OutputHandle;
+
+  /**
+   * @brief Definition of a single transformation input (Source).
+   *
+   * Source instance is a link to the other transformation Entry's Sink,
+   * that carries the transformation output.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Source: public boost::noncopyable {
     Source(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+      : name(name), entry(entry) { }               ///< Constructor.
     Source(const Source &other, Entry *entry)
-      : name(other.name), entry(entry) { }
+      : name(other.name), entry(entry) { }         ///< Copy constructor.
 
-    void connect(Sink *newsink);
+    void connect(Sink *newsink);                   ///< Connect the Source to the Sink.
+
+    /**
+     * @brief Check if the input data is allocated.
+     * @return true if input data is allocated.
+     */
     bool materialized() const {
       return sink && sink->data;
     }
-    std::string name;
-    const Sink *sink = nullptr;
-    Entry *entry;
+    std::string name;                             ///< Source's name.
+    const Sink *sink = nullptr;                   ///< Pointer to the Sink the Source is connected to.
+    Entry *entry;                                 ///< Entry pointer the Source belongs to.
   };
 
   class TypeError: public std::runtime_error {
@@ -138,49 +163,84 @@ namespace TransformationTypes {
   struct Rets;
   struct Atypes;
   struct Rtypes;
+  /**
+   * @brief Function, that does the actual calculation.
+   *
+   * This function is used to define the transformation via Entry::fun
+   * and is executed via Entry::update() or Entry::touch().
+   *
+   * @param args -- container with transformation inputs (Args).
+   * @param rets -- container with transformation outputs (Args).
+   */
   typedef std::function<void(Args, Rets)> Function;
+
+  /**
+   * @brief Function, that does the input types checking and output types derivation.
+   *
+   * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
+   *
+   * @param atypes -- container with transformation inputs' types (Atypes).
+   * @param rtypes -- container with transformation outputs' types (Rtypes).
+   */
   typedef std::function<void(Atypes, Rtypes)> TypesFunction;
 
   class Base;
 
-  typedef boost::ptr_vector<Source> SourcesContainer;
-  typedef boost::ptr_vector<Sink> SinksContainer;
+  typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source instances.
+  typedef boost::ptr_vector<Sink> SinksContainer;       ///< Container for Sink instances.
+  /**
+   * @brief Definition of a single transformation.
+   *
+   * Entry defines a transformation that:
+   *   - has zero or more inputs: Source instances.
+   *   - has one or more outputs: Sink instances.
+   *   - has a function Entry::fun that defines the transformation.
+   *   - may have several type functions (Entry::typefuns), that check the input types
+   *     and derive the output types.
+   *
+   * Entry has a taintflag (Entry::taintflag), then defines whether the Entry's Sink instances
+   * contain up to date output data.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   struct Entry: public boost::noncopyable {
-    Entry(const std::string &name, const Base *parent);
-    Entry(const Entry &other, const Base *parent);
+    Entry(const std::string &name, const Base *parent); ///< Constructor.
+    Entry(const Entry &other, const Base *parent);      ///< Copy constructor.
 
-    InputHandle addSource(const std::string &name);
-    OutputHandle addSink(const std::string &name);
+    InputHandle addSource(const std::string &name);     ///< Initialize and return new Source.
+    OutputHandle addSink(const std::string &name);      ///< Initialize and return new Sink.
 
-    void evaluate();      ///< Do actual calculation by calling Entry::fun.
-    void update();        ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
-    void evaluateTypes(); ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
-    void updateTypes();
+    void evaluate();                                    ///< Do actual calculation by calling Entry::fun.
+    void update();                                      ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
+    void evaluateTypes();                               ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+    void updateTypes();                                 ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
-    void touch();         ///< Update the transformation if it is not frozen and tainted.
-    const Data<double> &data(int i); ///< Evaluates the function if needed and returns i-th data.
+    void touch();                                       ///< Update the transformation if it is not frozen and tainted.
+    const Data<double> &data(int i);                    ///< Evaluates the function if needed and returns i-th data.
 
-    void freeze() { frozen = true; }     ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
-    void unfreeze() { frozen = false; }  ///< Unfreeze the Entry. Enables the taintflag propagation.
+    void freeze() { frozen = true; }                    ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
+    void unfreeze() { frozen = false; }                 ///< Unfreeze the Entry. Enables the taintflag propagation.
 
-    bool check() const;
-    void dump(size_t level = 0) const;
+    bool check() const;                                 ///< Checks that Data are initialized.
+    void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
 
-    std::string name;                    ///< Transformation name
-    SourcesContainer sources;            ///< Transformation inputs (sources)
-    SinksContainer sinks;                ///< Transformation outputs (sinks)
-    Function fun;                        ///< The function that does actual calculation
-    std::vector<TypesFunction> typefuns; ///< Vector of TypeFunction instances
-    taintflag tainted;                   ///< taintflag shows whether the result is up to date
-    const Base *parent;
-    int initializing;
-    bool frozen;                         ///< If Entry is frozen, it is not updated even if tainted.
-    bool usable;                         ///< Unused.
+    std::string name;                                   ///< Transformation name
+    SourcesContainer sources;                           ///< Transformation inputs (sources)
+    SinksContainer sinks;                               ///< Transformation outputs (sinks)
+    Function fun;                                       ///< The function that does actual calculation
+    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction instances
+    taintflag tainted;                                  ///< taintflag shows whether the result is up to date
+    const Base *parent;                                 ///< Base class, containing the transformation Entry.
+    int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
+    bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
+    bool usable;                                        ///< Unused.
+
   private:
     template <typename InsT, typename OutsT>
-    void initSourcesSinks(const InsT &inputs, const OutsT &outputs);
+    void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
   };
-  typedef boost::ptr_vector<Entry> Container;
+  typedef boost::ptr_vector<Entry> Container; ///< Container for Entry pointers.
 
   inline const double *OutputHandle::data() const {
     m_sink->entry->touch();
@@ -328,7 +388,7 @@ namespace TransformationTypes {
    *
    * It's needed to:
    *   - check the consistency of the inputs in the run time.
-   *   - derive the output DataTypes.
+   *   - derive the output DataType instances.
    *
    * Atypes instance is passed to each of the Entry's TypeFunction instances.
    *
@@ -352,8 +412,11 @@ namespace TransformationTypes {
 
     /**
      * @brief Direct access to Sink instance, which is used as Source for the transformation.
+     *
      * @param i -- Source number to return its Sink.
      * @return i-th Source's Sink instance.
+     *
+     * @exception Undefined in case input data is not initialized.
      */
     const Sink *sink(int i) const {
       if (!m_entry->sources[i].materialized()) {
@@ -377,75 +440,19 @@ namespace TransformationTypes {
      */
     size_t size() const { return m_entry->sources.size(); }
 
-    /**
-     * @brief Assigns shape of each input to corresponding output.
-     *
-     * If the number of inputs and outputs is not the same, exception will be
-     * thrown. In case of single input and multiple outputs assign its size to
-     * each output.
-     *
-     * @param args -- source types.
-     * @param rets -- output types.
-     */
-    static void passAll(Atypes args, Rtypes rets);
+    static void passAll(Atypes args, Rtypes rets); ///< Assigns shape of each input to corresponding output.
 
-    /**
-     * @brief assigns shape of Arg-th input to Ret-th output
-     *
-     * @tparam Arg -- index of Arg to read the type.
-     * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
-     *
-     * @param args -- source types.
-     * @param rets -- output types.
-     */
     template <size_t Arg, size_t Ret = Arg>
-    static void pass(Atypes args, Rtypes rets);
+    static void pass(Atypes args, Rtypes rets);    ///< Assigns shape of Arg-th input to Ret-th output.
 
-    /**
-     * @brief Checks that all inputs are of the same type (shape and content description).
-     *
-     * Raises an exception otherwise.
-     *
-     * @param args -- source types.
-     * @param rets -- output types.
-     */
-    static void ifSame(Atypes args, Rtypes rets);
+    static void ifSame(Atypes args, Rtypes rets);  ///< Checks that all inputs are of the same type (shape and content description).
+    static void ifSameShape(Atypes args, Rtypes rets); ///< Checks that all inputs are of the same shape.
 
-    /**
-     * @brief Checks that all inputs are of the same shape.
-     *
-     * Raises an exception otherwise.
-     *
-     * @param args -- source types.
-     * @param rets -- output types.
-     */
-    static void ifSameShape(Atypes args, Rtypes rets);
-
-    /**
-     * @brief checks if Arg-th input is a histogram (DataKind=Histogram).
-     *
-     * Raises an exception otherwise.
-     *
-     *  @tparam Arg -- index of Arg to check.
-     *
-     *  @param args -- source types.
-     *  @param rets -- output types.
-     */
     template <size_t Arg>
-    static void ifHist(Atypes args, Rtypes rets);
+    static void ifHist(Atypes args, Rtypes rets);  ///< Checks if Arg-th input is a histogram (DataKind=Histogram).
 
-    /**
-     * @brief checks if Arg-th input is an array (DataKind=Points).
-     *
-     * Raises an exception otherwise.
-     *
-     * @tparam Arg -- index of Arg to check.
-     *
-     * @param args -- source types.
-     * @param rets -- output types.
-     */
     template <size_t Arg>
-    static void ifPoints(Atypes args, Rtypes rets);
+    static void ifPoints(Atypes args, Rtypes rets); ///< Checks if Arg-th input is an array (DataKind=Points).
 
     /**
      * @brief Source type exception.
@@ -527,6 +534,17 @@ namespace TransformationTypes {
     std::shared_ptr<std::vector<DataType> > m_types; ///< Storage for the output DataType types.
   };
 
+  /**
+   * @brief Assigns shape of Arg-th input to Ret-th output
+   *
+   * @tparam Arg -- index of Arg to read the type.
+   * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
+   *
+   * @param args -- source types.
+   * @param rets -- output types.
+   *
+   * @exception std::runtime_error in case of invalid index is passed.
+   */
   template <size_t Arg, size_t Ret>
   inline void Atypes::pass(Atypes args, Rtypes rets) {
     if (Arg >= args.size()) {
@@ -538,6 +556,18 @@ namespace TransformationTypes {
     rets[Ret] = args[Arg];
   }
 
+  /**
+   * @brief Checks if Arg-th input is a histogram (DataKind=Histogram).
+   *
+   * Raises an exception otherwise.
+   *
+   *  @tparam Arg -- index of Arg to check.
+   *
+   *  @param args -- source types.
+   *  @param rets -- output types.
+   *
+   *  @exception std::runtime_error in case input data is not a histogram.
+   */
   template <size_t Arg>
   inline void Atypes::ifHist(Atypes args, Rtypes rets) {
     if (args[Arg].kind!=DataKind::Hist) {
@@ -545,6 +575,18 @@ namespace TransformationTypes {
     }
   }
 
+  /**
+   * @brief Checks if Arg-th input is an array (DataKind=Points).
+   *
+   * Raises an exception otherwise.
+   *
+   * @tparam Arg -- index of Arg to check.
+   *
+   * @param args -- source types.
+   * @param rets -- output types.
+   *
+   *  @exception std::runtime_error in case input data is not an array.
+   */
   template <size_t Arg>
   inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
     if (args[Arg].kind!=DataKind::Points) {
