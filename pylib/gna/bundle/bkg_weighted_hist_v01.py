@@ -14,6 +14,13 @@ from gna.bundle import *
 
 class bkg_weighted_hist_v01(TransformationBundle):
     name = 'bkg_weighted_hist'
+
+    formats = dict(
+            rate = '{}_rate',
+            norm = '{}_norm',
+            num  = '{}_num',
+            livetime = 'livetime'
+            )
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
@@ -23,12 +30,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
-        self.ratename = '{}_rate'.format(self.cfg.name)
-        self.normname = '{}_norm'.format(self.cfg.name)
-
     def build(self):
         for ns in self.iterate_namespaces():
-            ws = R.WeightedSum()
+            # ws = R.WeightedSum()
             print(ns.name)
 
     def define_variables(self):
@@ -38,7 +42,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         if 'norm' in self.cfg:
             ratename = '{}_rate_def'.format(self.cfg.name)
             mult = True
-            order = convert([self.norname, ratename], 'stdvector')
+            order = convert([self.normname, ratename], 'stdvector')
             self.products = []
 
         for ns in self.namespaces:
@@ -51,10 +55,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
                 ns.reqparameter( ratename, central=1.0, sigma=0.1 )
 
             if mult:
-                print( order[0], order[1] )
                 with ns:
                     vp = R.VarProduct( order, self.ratename, ns=ns )
-                    ns['product'].get()
+                    ns[self.ratename].get()
                 self.products.append( vp )
 
 

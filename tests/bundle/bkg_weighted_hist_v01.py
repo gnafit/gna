@@ -25,6 +25,7 @@ bkg.list = [ 'bkg1', 'bkg2' ]
 
 bkg.bkg1 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
+        formula = ['livetime', 'norm', 'rate'],
         norm = uncertain( 1.0, 1.0, 'percent' ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
@@ -41,7 +42,8 @@ bkg.bkg1 = NestedDict(
 
 bkg.bkg2 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        rates = uncertaindict(
+        formula = ['livetime', 'rate'],
+        rate = uncertaindict(
             mode = 'absolute',
             G1 = (2.71, 0.90),
             G2 = (1.91, 0.73),
@@ -90,4 +92,7 @@ for bkg in cfg.bkg.list:
 
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
+
+import IPython
+IPython.embed()
 
