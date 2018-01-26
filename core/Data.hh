@@ -1,6 +1,6 @@
 #ifndef DATA_H
 #define DATA_H
-
+#include "config_vars.h"
 #include <stddef.h>
 
 #include <vector>
@@ -13,10 +13,10 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT 
 #include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
-//#endif
+#endif
 
 enum class Status {
   Undefined = 0, Success, Failed,
@@ -309,18 +309,18 @@ std::cout << "DATA constructor" << std::endl;
       new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
       std::cout << "shape 2 = " <<  dt.shape[0] << " " <<  dt.shape[1] << std::endl;
     } 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
     dataLoc = NoData;
     syncFlag = Unsynchronized;
-//#endif
+#endif
   }
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
   DataLocation require_gpu();
   DataLocation sync_H2D();
   DataLocation sync_D2H();
   DataLocation sync(DataLocation loc);
   DataLocation synchronize();
-//#endif
+#endif
 
   const DataType type;
   Status state{Status::Undefined};
@@ -335,14 +335,16 @@ std::cout << "DATA constructor" << std::endl;
   Eigen::Map<MatrixXT> mat{nullptr, 0, 0};
 
   Eigen::Map<ArrayXT> &x = arr;
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
   GNAcuGpuArray<T> gpuArr;
   DataLocation dataLoc;		// Shows where actual data is placed or whether it inited or crashed.
   SyncFlag syncFlag;		// May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
-//#endif
+
+  void setLocation( DataLocation loc ) { dataLoc=loc; syncFlag=Unsynchronized; }
+#endif
 };
 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
 
 template <typename T>
 DataLocation Data<T>::require_gpu() {
@@ -350,10 +352,10 @@ DataLocation Data<T>::require_gpu() {
 Allocate GPU memory in case of GPU array is not inited yet
 */
   syncFlag = Unsynchronized;
-//  if (gpuArr.arrState != NotInitialized) {
-//    std::cerr << "INITED! Reqire_gpu exit!" << std::endl;
-//    return dataLoc;
-//  }
+  if (gpuArr.arrState != NotInitialized) {
+    std::cerr << "INITED! Reqire_gpu exit!" << std::endl;
+    return dataLoc;
+  }
   DataLocation tmp = NoData;
   if (type.shape.size() == 1) {
     tmp = gpuArr.Init(type.shape[0]);
@@ -426,6 +428,6 @@ Makes data the same on GPU and CPU
   return tmp;
 }
 
-//#endif
+#endif
 
 #endif // DATA_H

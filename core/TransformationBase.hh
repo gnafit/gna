@@ -1,6 +1,6 @@
 #ifndef TRANSFORMATIONBASE_H
 #define TRANSFORMATIONBASE_H
-
+#include "config_vars.h"
 #include <string>
 #include <vector>
 #include <list>
@@ -15,10 +15,10 @@
 #include "Data.hh"
 
 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
 //#include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
-//#endif
+#endif
 
 // #define TRANSFORMATION_DEBUG
 
@@ -172,9 +172,9 @@ namespace TransformationTypes {
     bool check() const;
     void dump(size_t level = 0) const;
 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { entryLoc = loc; }
-//#endif
+#endif
 
     std::string name;
     SourcesContainer sources;
@@ -184,9 +184,9 @@ namespace TransformationTypes {
     taintflag tainted;
     const Base *parent;
     int initializing;
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
     DataLocation entryLoc = Host;
-//#endif
+#endif
     bool frozen;
     bool usable;
   private:
@@ -196,7 +196,10 @@ namespace TransformationTypes {
   typedef boost::ptr_vector<Entry> Container;
 
   inline const double *OutputHandle::data() const {
+#ifdef GNA_CUDA_SUPPORT
     m_sink->entry->touch();
+    m_sink->data->sync( Host );
+#endif
     return view();
   }
 
@@ -241,7 +244,6 @@ namespace TransformationTypes {
 
   struct Args {
     Args(const Entry *e): m_entry(e) { }
-    Args(const Entry *e, DataLocation loc): m_entry(e) { }
     const Data<double> &operator[](int i) const;
     size_t size() const { return m_entry->sources.size(); }
   private:
@@ -501,16 +503,12 @@ namespace TransformationTypes {
       return *this;
     }
 
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
     Initializer<T> setEntryLocation(DataLocation loc) {
       m_entry->setEntryLocation(loc);
       return *this;
     }
-    Initializer<T> needH2Dsync() {
-      // TODO 
-      return *this;
-    }
-//#endif
+#endif
 
   protected:
     Entry *m_entry;
