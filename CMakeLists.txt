@@ -71,6 +71,7 @@ if(CUDA_SUPPORT)
          GNAcuOscProbMem.hh
         )
 else()
+   set(CUDA_SUPPORT 0)
     set(CUSOURCES "")
     set(CUHEADERS "")
 endif()
