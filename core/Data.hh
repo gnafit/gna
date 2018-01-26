@@ -387,12 +387,15 @@ template <typename T>
 DataLocation Data<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
+Move branch NoData to else clause
 */
-  if (dataLoc == loc) {
+    if (dataLoc == NoData) {
+        throw std::runtime_error("Data is no initialized");
+    } else if (dataLoc == loc) {
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl; 
-  } else if((dataLoc == Device && loc == Host)){
+  } else if((dataLoc == Device && loc == Host)) {
     sync_D2H();
-  } else if((dataLoc == Host && loc == Device) || (dataLoc == NoData && loc == Device)) {
+  } else if((dataLoc == Host && loc == Device)) {
     sync_H2D();
   } else {
     syncFlag = SyncFailed;

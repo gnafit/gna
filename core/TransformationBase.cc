@@ -105,6 +105,7 @@ void Entry::evaluate() {
     source.sink->data->sync_H2D();
   }*/
   fun(Args(this), Rets(this));
+  auto 
 //#ifdef GNA_CUDA_SUPPORT
 // TODO: find sync condition
 /*  if (entryLoc == Device) {

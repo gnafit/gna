@@ -185,7 +185,7 @@ namespace TransformationTypes {
     const Base *parent;
     int initializing;
 //#ifdef GNA_CUDA_SUPPORT
-    DataLocation entryLoc;
+    DataLocation entryLoc = Host;
 //#endif
     bool frozen;
     bool usable;
