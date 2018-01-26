@@ -27,6 +27,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
         self.namespaces = self.spectra.namespaces
 
+        import IPython
+        IPython.embed()
+
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
