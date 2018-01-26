@@ -59,6 +59,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
                     ns[numname].get()
                     self.products.append( vp )
             else:
-                ns.defparameter( numname, target=formula[0] )
-
+                ns[numname] = R.Variable('double')( numname, ns[formula[0]].getVariable() )
+                # ns.defparameter( numname, target=formula[0] )
 

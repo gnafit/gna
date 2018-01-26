@@ -101,3 +101,8 @@ for bkg in cfg.bkg.list:
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
 
+import IPython
+IPython.embed()
+
+print_parameters( env.globalns )
+
