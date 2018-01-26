@@ -25,10 +25,10 @@ bkg.list = [ 'bkg1', 'bkg2' ]
 
 bkg.bkg1 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ 'norm', 'rate' ],
-        norm = uncertain( 1.0, 1.0, 'percent' ),
+        formula = [ 'bkg1_norm', 'bkg1_rate', 'livetime' ],
+        bkg1_norm = uncertain( 1.0, 1.0, 'percent' ),
 
-        rate = uncertaindict(
+        bkg1_rate = uncertaindict(
             mode = 'fixed',
             D1 = 8,
             D2 = 7,
@@ -50,8 +50,8 @@ bkg.bkg1 = NestedDict(
 
 bkg.bkg2 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ 'rate' ],
-        rate = uncertaindict(
+        formula = [ 'site.bkg2_rate', 'livetime' ],
+        bkg2_rate = uncertaindict(
             mode = 'absolute',
             G1 = (2.71, 0.90),
             G2 = (1.91, 0.73),

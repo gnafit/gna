@@ -16,10 +16,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
     name = 'bkg_weighted_hist'
 
     formats = dict(
-            rate = '{}_rate',
-            norm = '{}_norm',
             num  = '{}_num',
-            livetime = 'livetime'
             )
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
@@ -27,8 +24,17 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
         self.namespaces = self.spectra.namespaces
 
-        import IPython
-        IPython.embed()
+        for site, detectors in self.cfg.parent().parent()['groups'].items():
+            sitens = self.common_namespace(site)
+            sitens['detectors'] = {}
+            for det in detectors:
+                detns = self.common_namespace(det)
+                detns['site'] = self.common_namespace(site)
+                detns['exp'] = self.common_namespace
+                detns.reqparameter('livetime', central=10, sigma=0.1, fixed=True)
+                detns['detectors'] = { det: detns }
+
+                sitens['detectors'][det]=detns
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         print( 'Executing:\n', str(self.cfg), sep='' )
@@ -40,28 +46,35 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def define_variables(self):
         pitems = None
-        formula = [ self.formats[item].format( self.cfg.name ) for item in self.cfg.formula ]
-        if len(formula)>1:
-            pitems = convert( formula, 'stdvector' )
+        if len(self.cfg.formula)>1:
+            pitems = convert( self.cfg.formula, 'stdvector' )
 
         self.products=[]
         numname = self.formats['num'].format( self.cfg.name )
         for ns in self.namespaces:
-            for item in self.cfg.formula:
+            bindings = {}
+            for fullitem in self.cfg.formula:
+                if '.' in fullitem:
+                    item = fullitem.split('.')[-1]
+                else:
+                    if not fullitem in self.cfg:
+                        continue
+                    item = fullitem
                 num = self.cfg[item]
 
                 if isinstance( num, uncertain ):
                     cnum = num
                 else:
                     cnum = num[ns.name]
-                ns.reqparameter( self.formats[item].format( self.cfg.name ), cnum )
+                bindings[fullitem] = ns.reqparameter( item.format( self.cfg.name ), cnum )
 
-            if pitems:
-                with ns:
-                    vp = R.VarProduct( pitems, numname, ns=ns )
-                    ns[numname].get()
-                    self.products.append( vp )
-            else:
-                ns[numname] = R.Variable('double')( numname, ns[formula[0]].getVariable() )
-                # ns.defparameter( numname, target=formula[0] )
+            for detns in ns['detectors'].values():
+                if pitems:
+                    with detns:
+                        vp = R.VarProduct( pitems, numname, ns=detns, bindings=bindings )
+                        detns[numname].get()
+                        self.products.append( vp )
+                # else:
+                    # ns[numname] = R.Variable('double')( numname, ns[formula[0]].getVariable() )
+                    # # ns.defparameter( numname, target=formula[0] )
 
