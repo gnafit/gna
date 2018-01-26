@@ -6,7 +6,7 @@
 
 enum SyncFlag {
 	Synchronized,
-	Unsinchronized,
+	Unsynchronized,
 	SyncFailed
 };
 
@@ -15,8 +15,8 @@ inline std::ostream& operator<<(std::ostream& so, SyncFlag sFlag) {
                 case Synchronized:
                         so << "Synchronized";
                         break;
-                case Unsinchronized:
-                        so << "Unsinchronized";
+                case Unsynchronized:
+                        so << "Unsynchronized";
                         break;
                 case SyncFailed:
                         so << "SyncFailed";

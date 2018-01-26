@@ -15,10 +15,10 @@
 #include "Data.hh"
 
 
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
 //#include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
-#endif
+//#endif
 
 // #define TRANSFORMATION_DEBUG
 
@@ -172,9 +172,9 @@ namespace TransformationTypes {
     bool check() const;
     void dump(size_t level = 0) const;
 
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { entryLoc = loc; }
-#endif
+//#endif
 
     std::string name;
     SourcesContainer sources;
@@ -184,9 +184,9 @@ namespace TransformationTypes {
     taintflag tainted;
     const Base *parent;
     int initializing;
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
     DataLocation entryLoc;
-#endif
+//#endif
     bool frozen;
     bool usable;
   private:
@@ -241,6 +241,7 @@ namespace TransformationTypes {
 
   struct Args {
     Args(const Entry *e): m_entry(e) { }
+    Args(const Entry *e, DataLocation loc): m_entry(e) { }
     const Data<double> &operator[](int i) const;
     size_t size() const { return m_entry->sources.size(); }
   private:
@@ -500,12 +501,16 @@ namespace TransformationTypes {
       return *this;
     }
 
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
     Initializer<T> setEntryLocation(DataLocation loc) {
       m_entry->setEntryLocation(loc);
       return *this;
     }
-#endif
+    Initializer<T> needH2Dsync() {
+      // TODO 
+      return *this;
+    }
+//#endif
 
   protected:
     Entry *m_entry;

@@ -28,7 +28,7 @@ __global__ void vecMult(T* res, T* inA, T* inB, size_t n) {
 }
 
 template <typename T>
-__global__ void vecMultToNum(T* res, T* inA, T inB, size_t n) {
+__global__ void vecMult(T* res, T* inA, T inB, size_t n) {
         int x = blockDim.x * blockIdx.x + threadIdx.x;
         if (x >= n) return;
         res[x] = inA[x] * inB;
@@ -63,6 +63,12 @@ GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize) {
 	arrSize = inSize;
 	size_t alloc_size = sizeof(T) * inSize;
 	err = cudaMalloc((void**)&devicePtr, alloc_size);
+/*
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  end = std::chrono::system_clock::now();
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+std::cout << "After Malloc Constructor: " << std::ctime(&end_time) << std::endl;
+*/
         std::cout << "Constructor: arrSize is " << arrSize << std::endl;
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
@@ -80,6 +86,13 @@ DataLocation GNAcuGpuArray<T>::Init(size_t inSize) {
         arrSize = inSize;
         size_t alloc_size = sizeof(T) * inSize;
         err = cudaMalloc((void**)&devicePtr, alloc_size);
+/*
+std::chrono::time_point<std::chrono::system_clock> start, end;
+  end = std::chrono::system_clock::now();
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+std::cout << "After Malloc Init: " << std::ctime(&end_time) << std::endl;
+*/
+
         std::cout << "Constructor: arrSize is " << arrSize << std::endl;
         if (err != cudaSuccess) {
                 printf("ERROR: unable to  allocate!\n");
@@ -130,7 +143,7 @@ std::cout << "In setByHostArray size = " << arrSize << " inHostArr[0] = " << inH
 	err = cudaMemcpy(devicePtr, inHostArr, sizeof(T) * arrSize,
 			 cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
-		printf("ERROR: unable to set memory H2D!\n");
+		printf("ERROR: unable to copy memory H2D!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
@@ -145,7 +158,7 @@ DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 	err = cudaMemcpy(devicePtr, inDeviceArr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
-		printf("ERROR: unable to set memory D2D!\n");
+		printf("ERROR: unable to copy memory D2D!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 		arrState = Crashed;
 	} else {
@@ -286,7 +299,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
 
 template <typename F>
 GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
-        vecMultToNum<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs,
+        vecMult<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs,
                                    arrSize);
         arrState = Device;
         return *this;
@@ -294,7 +307,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
 
 
 template <typename T>
-GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
+GNAcuGpuArray<T> GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 	GNAcuGpuArray<T> ret(rhs.arrSize);
 	ret.setByDeviceArray(rhs.getArrayPtr());
         return ret;
@@ -302,14 +315,16 @@ GNAcuGpuArray<T>& GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
 
 template <typename T>
 void GNAcuGpuArray<T>::dump() {
-	if (arrState != Host) transferD2H();
+	//if (arrState != Host) transferD2H();
+	T* tmp = new T[arrSize];
+	getContentToCPU(tmp);
 	for (int i = 0; i < arrSize; i++) {
-		std::cout << hostPtr[i] << " ";
+		std::cout << tmp[i] << " ";
         }
 	std::cout << std::endl;
 }
 
 template class GNAcuGpuArray<double>;
-template class GNAcuGpuArray<float>;
-template class GNAcuGpuArray<int>;
+//template class GNAcuGpuArray<float>;
+//template class GNAcuGpuArray<int>;
 //template class GNAcuGpuArray<bool>;

@@ -13,10 +13,10 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
 #include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
-#endif
+//#endif
 
 enum class Status {
   Undefined = 0, Success, Failed,
@@ -309,18 +309,18 @@ std::cout << "DATA constructor" << std::endl;
       new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
       std::cout << "shape 2 = " <<  dt.shape[0] << " " <<  dt.shape[1] << std::endl;
     } 
-#ifdef GNA_CUDA_SUPPORT
-    dataLoc = Host;
-    syncFlag = Unsinchronized;
-#endif
+//#ifdef GNA_CUDA_SUPPORT
+    dataLoc = NoData;
+    syncFlag = Unsynchronized;
+//#endif
   }
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
   DataLocation require_gpu();
   DataLocation sync_H2D();
   DataLocation sync_D2H();
   DataLocation sync(DataLocation loc);
   DataLocation synchronize();
-#endif
+//#endif
 
   const DataType type;
   Status state{Status::Undefined};
@@ -335,27 +335,32 @@ std::cout << "DATA constructor" << std::endl;
   Eigen::Map<MatrixXT> mat{nullptr, 0, 0};
 
   Eigen::Map<ArrayXT> &x = arr;
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
   GNAcuGpuArray<T> gpuArr;
-  DataLocation dataLoc;
-  SyncFlag syncFlag;
-#endif
+  DataLocation dataLoc;		// Shows where actual data is placed or whether it inited or crashed.
+  SyncFlag syncFlag;		// May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
+//#endif
 };
 
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
 
 template <typename T>
 DataLocation Data<T>::require_gpu() {
-  if (gpuArr.arrState != NotInitialized) {
-std::cout << "INITED! Reqire_gpu exit!" << std::endl;
-    return NotInitialized;
-  }
-std::cout << "IN REQ GPU";
+/**
+Allocate GPU memory in case of GPU array is not inited yet
+*/
+  syncFlag = Unsynchronized;
+//  if (gpuArr.arrState != NotInitialized) {
+//    std::cerr << "INITED! Reqire_gpu exit!" << std::endl;
+//    return dataLoc;
+//  }
+  DataLocation tmp = NoData;
   if (type.shape.size() == 1) {
-    dataLoc = gpuArr.Init(type.shape[0]);
+    tmp = gpuArr.Init(type.shape[0]);
   } else if (type.shape.size() == 2) {
-    dataLoc = gpuArr.Init(type.shape[0]*type.shape[1]);
+    tmp = gpuArr.Init(type.shape[0]*type.shape[1]);
   } 
+  if(tmp == Crashed) { dataLoc = tmp;}
 std::cout << " gpusize = " << gpuArr.arrSize <<std::endl;
   return dataLoc;
 }
@@ -363,27 +368,34 @@ std::cout << " gpusize = " << gpuArr.arrSize <<std::endl;
 template <typename T>
 DataLocation Data<T>::sync_H2D() {
   dataLoc = gpuArr.setByHostArray(buffer);
+  syncFlag = Synchronized;
   std::cout << "in h2D size = " << gpuArr.getArraySize() <<std::endl;
+  if (dataLoc == Crashed) syncFlag = SyncFailed;
   return dataLoc;
-
 }
 
 template <typename T>
 DataLocation Data<T>::sync_D2H() {
   dataLoc = gpuArr.getContentToCPU(buffer);
+  syncFlag = Synchronized;
   std::cout << "in D2H size = " << gpuArr.getArraySize() <<std::endl;
+  if (dataLoc == Crashed) syncFlag = SyncFailed;
   return dataLoc;
 }
 
 template <typename T>
 DataLocation Data<T>::sync(DataLocation loc) {
+/**
+Copies the actual data to the loc location
+*/
   if (dataLoc == loc) {
-    std::cerr << "Relevant data on CPU -- no synchronization needed" << std::endl; 
-  } else if(dataLoc == Device && loc == Host) {
+    std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl; 
+  } else if((dataLoc == Device && loc == Host)){
     sync_D2H();
-  } else if(dataLoc == Host && loc == Device) {
+  } else if((dataLoc == Host && loc == Device) || (dataLoc == NoData && loc == Device)) {
     sync_H2D();
   } else {
+    syncFlag = SyncFailed;
     std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
   }
   return dataLoc;
@@ -391,13 +403,18 @@ DataLocation Data<T>::sync(DataLocation loc) {
 
 template <typename T>
 DataLocation Data<T>::synchronize() {
+/**
+Makes data the same on GPU and CPU
+*/
   DataLocation tmp;
-  if (dataLoc == Host) {
-    tmp = sync(Device);
-    syncFlag = Synchronized;
-  } else if(dataLoc == Device) {
+  if (dataLoc == Device) {
     tmp = sync(Host);
     syncFlag = Synchronized;
+    printf("sync to GPU\n");
+  } else if(dataLoc == Host) {
+    tmp = sync(Device);
+    syncFlag = Synchronized;
+    printf("sync to CPU\n");
   } else {
     std::cerr << "Unable to sync as current GPU memory state is " <<  dataLoc << std::endl;
     tmp = Crashed;
@@ -406,6 +423,6 @@ DataLocation Data<T>::synchronize() {
   return tmp;
 }
 
-#endif
+//#endif
 
 #endif // DATA_H

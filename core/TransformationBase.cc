@@ -98,13 +98,27 @@ bool Entry::check() const {
 }
 
 void Entry::evaluate() {
+/*  for (auto &source : sources) {
+  std::cout << "Evaluate data ";
+    for(int i = 0; i < 10; i++){
+    std::cout << source.sink->data->arr[i] << " ";}
+    source.sink->data->sync_H2D();
+  }*/
   fun(Args(this), Rets(this));
-  if (entryLoc == Device) {
+//#ifdef GNA_CUDA_SUPPORT
+// TODO: find sync condition
+/*  if (entryLoc == Device) {
     for (size_t i = 0; i < sinks.size(); i++) {	
       DataLocation tmploc = sinks[i].data->sync_D2H();
       if (tmploc == Crashed) std::cerr << "Evaluate GPU arrays impossible!" << std::endl;
     }
+    for (size_t k= 0; k < sinks[0].data->gpuArr.arrSize; k++) {
+      std::cout << sinks[0].data->x[k] << " ";
+    }
+    std::cout << std::endl;
   }
+*/
+//#endif
 }
 
 void Entry::update() {
@@ -157,6 +171,7 @@ InputHandle Handle::input(SingleOutput &output) {
   OutputHandle outhandle = output.single();
   InputHandle inp = m_entry->addSource(outhandle.name());
   inp.connect(outhandle);
+  
   return inp;
 }
 
@@ -289,10 +304,10 @@ void Entry::evaluateTypes() {
     }
 
     // GPU: require GPU memory for previous transformation's sink
-#ifdef GNA_CUDA_SUPPORT 
+//#ifdef GNA_CUDA_SUPPORT 
     if (entryLoc == Device) {  
       for (size_t i = 0; i < sources.size(); i++) {
-	if ( sources[i].sink->entry->entryLoc == Host ) {
+	if ( sources[i].sink->entry->entryLoc != Device ) {
           sources[i].sink->data->require_gpu();
         }
       }
@@ -300,14 +315,15 @@ void Entry::evaluateTypes() {
         sink.data->require_gpu();
       }
     }
-    if (entryLoc == Host) {
+/*    if (entryLoc == Host) {
       for (auto& source : sources) {
         if ( source.sink->entry->entryLoc == Device) {
           source.sink->data->sync_D2H();
         }
       }
     }
-#endif
+*/
+//#endif
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
@@ -360,8 +376,7 @@ void Atypes::ifSame(Atypes args, Rtypes rets) {
       throw args.error(args[i], "inputs should have same type");
     }
   }
-}
-
+} 
 void Atypes::ifSameShape(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {
@@ -390,6 +405,12 @@ const Data<double> &Args::operator[](int i) const {
     throw CalculationError(m_entry, (fmt % i % src.name).str());
   }
   src.sink->entry->touch();
+//#ifdef GNA_CUDA_SUPPORT
+  std::cout << "Sink loc = " << src.sink->data->dataLoc << std::endl;
+  src.sink->data->sync(this->m_entry->entryLoc);
+//  src.sink->data->syncFlag = Synchronized;
+  //src.sink->data->sync( Device );
+//#endif
   return *src.sink->data;
 }
 
@@ -410,9 +431,7 @@ Data<double> &Rets::operator[](int i) const {
 SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
   const Source *source = nullptr;
   for (size_t i = 0; i < m_entry->sources.size(); ++i) {
-    if (&m_entry->sources[i].sink->data->type == &dt) {
-      source = &m_entry->sources[i];
-      break;
+    if (&m_entry->sources[i].sink->data->type == &dt) { source = &m_entry->sources[i]; break;
     }
   }
   return SourceTypeError(source, message);
