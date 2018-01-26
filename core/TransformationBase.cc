@@ -3,7 +3,6 @@
 
 #include <boost/format.hpp>
 using boost::format;
-
 #include "Transformation.hh"
 #include "Exceptions.hh"
 
@@ -336,8 +335,9 @@ const Data<double> &Entry::data(int i) {
     throw CalculationError(this, (fmt % i % sink.name).str());
   }
   touch();
+#ifdef GNA_CUDA_SUPPORT
   sink.data->sync( Host );
-// 
+#endif
   return *sink.data;
 }
 

@@ -27,7 +27,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wa
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 include(dev-tools)
 
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
@@ -49,7 +48,6 @@ include_directories(SYSTEM ${GSL_INCLUDE_DIR})
 cmake_policy(SET CMP0015 NEW)
 
 if(CUDA_SUPPORT)
-    add_definitions( -DGNA_CUDA_SUPPORT )
     find_package( CUDA REQUIRED)
     include_directories(cuda/extra/ cuda/core/)
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
@@ -99,6 +97,8 @@ set (HEADERS
   Points.hh
   Histogram.hh
   Identity.hh
+  IdentityX2.hh
+  IdentityGPU.hh
   LinearInterpolator.hh
   FillLike.hh
   Derivative.hh
@@ -128,7 +128,8 @@ set (HEADERS
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
-  EigenHelpers.hh
+  EigenHelpers.hh 
+  #IdentityGPU.hh
   ${CUHEADERS}
   )
 
