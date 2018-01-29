@@ -10,6 +10,13 @@ Uses ``boost::mt19937`` random generator.
 The sample becomes frozen upon generation. One has to manually taint the transformation
 for the next sample by calling ``nextSample`` method.
 
+Limitations
+^^^^^^^^^^^
+
+*Be careful with generatining random numbers with high level of correlation.
+Presence of correlation coefficients of order of 0.9 will most likely cause the
+distribution width to be invalid. So test the generator prior the actual usage.*
+
 Inputs
 ^^^^^^
 
@@ -26,6 +33,15 @@ Outputs
 ^^^^^^^
 
 1. ``'toymc'`` — output vector :math:`x` of size of concatination of :math:`\mu_i`.
+
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/test_random_transformations.py -n 100000 -o output/random.pdf
 
 Implementation
 ^^^^^^^^^^^^^^
@@ -50,7 +66,7 @@ One can define the variable :math:`z`:
    &x = Lz + \mu.
 
 Since the transition Jacobian :math:`|dx/dz|=|L|=\sqrt{|V|}` each :math:`z_i` is distributed
-normally with :math:`\sigma=1` and central value of :math:`0`.
+normally with :math:`\sigma=1` with central value of :math:`0`.
 
 The algorithm generates normal vector :math:`z` and transforms it to :math:`x=Lz + \mu`.
 

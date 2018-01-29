@@ -13,6 +13,19 @@
 - cuBLAS
 
 
+# Build options
+
+To make CUDA availible you should
+- have CUDA capable GPU in your target machine, 
+- have CUDA Toolkit installed,
+- build GNA with option `-DCUDA_SUPPORT=1`
+
+To print debug info you should use `-DCUDA_DEBUG_INFO=<value>` cmake option, where *value* may be the following:
+- 1 means that only cuda warnings and errors will be printed,
+- 2 means that data management warnings are also printed,
+- 3 means that data tranfer messagies are printed.
+
+
 # Comparative table (Osc Prob Full, vec size: 10 000 000) 
 
 https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
