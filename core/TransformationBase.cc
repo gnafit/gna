@@ -328,7 +328,7 @@ const Data<double> &Entry::data(int i) {
   }
   touch();
 #ifdef GNA_CUDA_SUPPORT
-  sink.data->gpuArr->sync( Host );
+  if (sink.data->gpuArr->dataLoc != Host && sink.data->gpuArr->syncFlag != Synchronized) sink.data->gpuArr->sync( Host );
 #endif
   return *sink.data;
 }
