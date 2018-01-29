@@ -45,10 +45,20 @@ namespace TransformationTypes {
    * @date 2015
    */
   struct Sink: public boost::noncopyable {
+    /**
+     * @brief Constructor.
+     * @param name -- Sink name.
+     * @param entry -- Entry pointer Sink belongs to.
+     */
     Sink(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }            ///< Constructor.
+      : name(name), entry(entry) { }
+    /**
+     * @brief Copy constructor.
+     * @param name -- other Sink to get the name from.
+     * @param entry -- Entry pointer Sink belongs to.
+     */
     Sink(const Sink &other, Entry *entry)
-      : name(other.name), entry(entry) { }      ///< Copy constructor.
+      : name(other.name), entry(entry) { }
 
     std::string name;                           ///< Sink's name.
     std::unique_ptr<Data<double>> data;         ///< Sink's Data.
@@ -68,8 +78,18 @@ namespace TransformationTypes {
    * @date 2015
    */
   struct Source: public boost::noncopyable {
+    /**
+     * @brief Constructor.
+     * @param name -- Source name.
+     * @param entry -- Entry pointer Source belongs to.
+     */
     Source(const std::string &name, Entry *entry)
       : name(name), entry(entry) { }               ///< Constructor.
+    /**
+     * @brief Copy constructor.
+     * @param name -- other Source to get the name from.
+     * @param entry -- Entry pointer Source belongs to.
+     */
     Source(const Source &other, Entry *entry)
       : name(other.name), entry(entry) { }         ///< Copy constructor.
 
@@ -87,74 +107,144 @@ namespace TransformationTypes {
     Entry *entry;                                 ///< Entry pointer the Source belongs to.
   };
 
+  /**
+   * @brief Base exception definition for Atypes and Rtypes classes.
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class TypeError: public std::runtime_error {
   public:
+    /** @brief Constructor.
+     *  @param message -- error message.
+     */
     TypeError(const std::string &message)
       : std::runtime_error(message) { }
   };
 
+  /**
+   * @brief Exception to be returned from Rtypes in case of output type error.
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class SinkTypeError: public TypeError {
   public:
-    SinkTypeError(const Sink *s, const std::string &message);
+    SinkTypeError(const Sink *s, const std::string &message); ///< Constructor.
 
-    const Sink *sink;
+    const Sink *sink; ///< Sink pointer.
   };
 
+  /**
+   * @brief Exception to be returned from Atypes in case of input type error.
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class SourceTypeError: public TypeError {
   public:
-    SourceTypeError(const Source *s, const std::string &message);
+    SourceTypeError(const Source *s, const std::string &message); ///< Constructor.
 
-    const Source *source;
+    const Source *source; ///< Source pointer.
   };
 
+  /**
+   * @brief Exception to be returned from Rets in case of calculation error.
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class CalculationError: public std::runtime_error {
   public:
-    CalculationError(const Entry *e, const std::string &message);
+    CalculationError(const Entry *e, const std::string &message); ///< Constructor.
 
-    const Entry *entry;
+    const Entry *entry; ///< Entry pointer.
   };
 
   class OutputHandle;
+  /**
+   * @brief Source wrapper to make it user accessible from the Python.
+   * @copydetails OutputHandle
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class InputHandle {
     friend class OutputHandle;
   public:
+    /**
+     * @brief Constructor.
+     * @param s -- Source to access.
+     */
     InputHandle(Source &source): m_source(&source) { }
+    /**
+     * @brief Copy constructor.
+     * @param other -- other InputHandle instance to access its Source.
+     */
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
-    static InputHandle invalid(const std::string name);
 
-    void connect(const OutputHandle &out) const;
+    // /**
+    // * @brief
+    // * @param name
+    // * @todo method is undefined.
+    // */
+    // static InputHandle invalid(const std::string name);
 
-    const std::string &name() const { return m_source->name; }
+    void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
 
-    const void *rawptr() const { return static_cast<const void*>(m_source); }
-    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }
+    const std::string &name() const { return m_source->name; } ///< Get Source's name.
+
+    const void *rawptr() const { return static_cast<const void*>(m_source); } ///< Return Source's pointer as void pointer.
+    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.
   protected:
-    TransformationTypes::Source *m_source;
+    TransformationTypes::Source *m_source; ///< Pointer to the Source.
   };
 
+  /**
+   * @brief Sink wrapper to make it user accessible from the Python.
+   *
+   * InputHandle and OutputHandle classes give indirect access to Source and Sink instances
+   * and enable users to connect them in a calculation chain.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class OutputHandle {
     friend class InputHandle;
   public:
+    /**
+     * @brief Constructor.
+     * @param s -- Sink to access.
+     */
     OutputHandle(Sink &sink): m_sink(&sink) { }
+    /**
+     * @brief Copy constructor.
+     * @param other -- other OutputHandle instance to access its Sink.
+     */
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
-    static OutputHandle invalid(const std::string name);
+    // /**
+    // * @brief
+    // * @param name
+    // * @todo method is undefined.
+    // */
+    //static OutputHandle invalid(const std::string name);
 
-    const std::string &name() const { return m_sink->name; }
+    const std::string &name() const { return m_sink->name; } ///< Get Source's name.
 
-    bool check() const;
-    void dump() const;
+    bool check() const; ///< Check the Entry.
+    void dump() const;  ///< Dump the Entry.
 
-    const double *data() const;
-    const double *view() const { return m_sink->data->x.data(); }
-    const DataType &datatype() const { return m_sink->data->type; }
+    const double *data() const;                                     ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
+    const double *view() const { return m_sink->data->x.data(); }   ///< Return pointer to the Sink's data buffer without evaluation.
+    const DataType &datatype() const { return m_sink->data->type; } ///< Return Sink's DataType.
 
-    const void *rawptr() const { return static_cast<const void*>(m_sink); }
-    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }
-    bool depends(changeable x) const;
+    const void *rawptr() const { return static_cast<const void*>(m_sink); }  ///< Return Source's pointer as void pointer.
+    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); } ///< Return a Source's hash value based on it's pointer address.
+
+    bool depends(changeable x) const;  ///< Check that Sink depends on a changeable.
   private:
-    TransformationTypes::Sink *m_sink;
+    TransformationTypes::Sink *m_sink; ///< Pointer to the Sink.
   };
 
+  /**
+   * @brief Connect the Source to the other transformation's Sink via its OutputHandle
+   * @param out -- OutputHandle view to the Sink to connect to.
+   */
   inline void InputHandle::connect(const OutputHandle &out) const {
     return m_source->connect(out.m_sink);
   }
@@ -186,8 +276,8 @@ namespace TransformationTypes {
 
   class Base;
 
-  typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source instances.
-  typedef boost::ptr_vector<Sink> SinksContainer;       ///< Container for Sink instances.
+  typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source pointers.
+  typedef boost::ptr_vector<Sink> SinksContainer;       ///< Container for Sink pointers.
   /**
    * @brief Definition of a single transformation.
    *
@@ -225,12 +315,12 @@ namespace TransformationTypes {
     bool check() const;                                 ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
 
-    std::string name;                                   ///< Transformation name
-    SourcesContainer sources;                           ///< Transformation inputs (sources)
-    SinksContainer sinks;                               ///< Transformation outputs (sinks)
-    Function fun;                                       ///< The function that does actual calculation
-    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction instances
-    taintflag tainted;                                  ///< taintflag shows whether the result is up to date
+    std::string name;                                   ///< Transformation name.
+    SourcesContainer sources;                           ///< Transformation inputs (sources).
+    SinksContainer sinks;                               ///< Transformation outputs (sinks).
+    Function fun;                                       ///< The function that does actual calculation.
+    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction instances.
+    taintflag tainted;                                  ///< taintflag shows whether the result is up to date.
     const Base *parent;                                 ///< Base class, containing the transformation Entry.
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
@@ -242,11 +332,21 @@ namespace TransformationTypes {
   };
   typedef boost::ptr_vector<Entry> Container; ///< Container for Entry pointers.
 
+  /**
+   * @brief Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
+   * @return pointer to the Sink's data buffer.
+   */
   inline const double *OutputHandle::data() const {
     m_sink->entry->touch();
     return view();
   }
 
+  /**
+   * @brief Check that Sink depends on a changeable.
+   * Simply checks that Entry depends on a changeable.
+   * @param x -- changeable to test.
+   * @return true if depends.
+   */
   inline bool OutputHandle::depends(changeable x) const {
     return m_sink->entry->tainted.depends(x);
   }
