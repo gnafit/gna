@@ -100,7 +100,7 @@ void Entry::evaluate() {
   fun(Args(this), Rets(this));
 #ifdef GNA_CUDA_SUPPORT
   for(auto& sink : this->sinks){
-    sink.data->setLocation( this->entryLoc );
+    sink.data->gpuArr->setLocation( this->entryLoc );
   }
 #endif
 }
@@ -328,7 +328,7 @@ const Data<double> &Entry::data(int i) {
   }
   touch();
 #ifdef GNA_CUDA_SUPPORT
-  sink.data->sync( Host );
+  sink.data->gpuArr->sync( Host );
 #endif
   return *sink.data;
 }
@@ -384,7 +384,7 @@ const Data<double> &Args::operator[](int i) const {
   }
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
-  src.sink->data->sync(this->m_entry->entryLoc);
+  src.sink->data->gpuArr->sync(this->m_entry->entryLoc);
 #endif
   return *src.sink->data;
 }

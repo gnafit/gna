@@ -19,10 +19,10 @@ public:
       .output("target")
       .types(Atypes::pass<0>)
       .func([](Args args, Rets rets){ 
-		rets[0].gpuArr.setByDeviceArray(args[0].gpuArr.devicePtr); 
-		rets[0].gpuArr *=15;
+		rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr); 
+		*(rets[0].gpuArr) *=15;
 		std::cout << "Dump: ";
-		rets[0].gpuArr.dump();
+		rets[0].gpuArr->dump();
 		})
       ;
   };

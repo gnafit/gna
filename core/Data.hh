@@ -307,17 +307,9 @@ public:
       new (&arr2d) Eigen::Map<ArrayXXT>(buf, dt.shape[0], dt.shape[1]);
       new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
     } 
-#ifdef GNA_CUDA_SUPPORT
-    dataLoc = NoData;
-    syncFlag = Unsynchronized;
-#endif
   }
 #ifdef GNA_CUDA_SUPPORT
   DataLocation require_gpu();
-  DataLocation sync_H2D();
-  DataLocation sync_D2H();
-  DataLocation sync(DataLocation loc);
-  DataLocation synchronize();
 #endif
 
   const DataType type;
@@ -334,11 +326,7 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;
 #ifdef GNA_CUDA_SUPPORT
-  GNAcuGpuArray<T> gpuArr;
-  DataLocation dataLoc;		// Shows where actual data is placed or whether it inited or crashed.
-  SyncFlag syncFlag;		// May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
-
-  void setLocation( DataLocation loc ) { dataLoc=loc; syncFlag=Unsynchronized; }
+  GNAcuGpuArray<T>* gpuArr{nullptr};
 #endif
 };
 
@@ -349,91 +337,22 @@ DataLocation Data<T>::require_gpu() {
 /**
 Allocate GPU memory in case of GPU array is not inited yet
 */
-  syncFlag = Unsynchronized;
-  if (gpuArr.arrState != NotInitialized) {
+  if (gpuArr == nullptr) {
+    gpuArr = new GNAcuGpuArray<T>();
+  }
+  if (gpuArr->deviceMemAllocated) {
 #ifdef CU_DEBUG_2
     std::cerr << "INITED! Nothing to do! Reqire_gpu exit!" << std::endl;
 #endif
-    return dataLoc;
+    return gpuArr->dataLoc;
   }
   DataLocation tmp = NoData;
   if (type.shape.size() == 1) {
-    tmp = gpuArr.Init(type.shape[0]);
+    tmp = gpuArr->Init(type.shape[0], buffer);
   } else if (type.shape.size() == 2) {
-    tmp = gpuArr.Init(type.shape[0]*type.shape[1]);
+    tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
   } 
-  if(tmp == Crashed) { dataLoc = tmp;}
-  return dataLoc;
-}
-
-template <typename T>
-DataLocation Data<T>::sync_H2D() {
-  dataLoc = gpuArr.setByHostArray(buffer);
-  syncFlag = Synchronized;
-  if (dataLoc == Crashed) syncFlag = SyncFailed;
-  return dataLoc;
-}
-
-template <typename T>
-DataLocation Data<T>::sync_D2H() {
-  dataLoc = gpuArr.getContentToCPU(buffer);
-  syncFlag = Synchronized;
-  if (dataLoc == Crashed) syncFlag = SyncFailed;
-  return dataLoc;
-}
-
-template <typename T>
-DataLocation Data<T>::sync(DataLocation loc) {
-/**
-Copies the actual data to the loc location
-*/
-  if (dataLoc == loc) {
-#ifdef CU_DEBUG_2
-    std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl; 
-#endif
-  } else if((dataLoc == Device && loc == Host)) {
-    sync_D2H();
-  } else if((dataLoc == Host && loc == Device)) {
-    sync_H2D();
-  } else if (dataLoc == NoData) {
-    throw std::runtime_error("Data is not initialized");
-  } else {
-    syncFlag = SyncFailed;
-#ifdef CU_DEBUG_2
-    std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
-#endif
-  }
-  return dataLoc;
-}
-
-template <typename T>
-DataLocation Data<T>::synchronize() {
-/**
-Makes data the same on GPU and CPU
-*/
-  DataLocation tmp;
-  if (dataLoc == Device) {
-    tmp = sync(Host);
-    syncFlag = Synchronized;
-#ifdef CU_DEBUG_3
-    printf("Sync to GPU\n");
-#endif
-  } else if(dataLoc == Host) {
-    tmp = sync(Device);
-    syncFlag = Synchronized;
-#ifdef CU_DEBUG_3
-    printf("Sync to CPU\n");
-#endif
-  } else {
-#ifdef CU_DEBUG_2
-    std::cerr << "Unable to sync data as current GPU memory state is " <<  dataLoc << std::endl;
-#endif
-    tmp = Crashed;
-    syncFlag = SyncFailed;
-  }
   return tmp;
 }
-
 #endif
-
 #endif // DATA_H
