@@ -42,6 +42,9 @@ class root_histograms_v01(TransformationBundle):
             print( '  read{}: {}'.format(var and ' '+var or '', hname) )
             edges = get_bin_edges_axis( h.GetXaxis() )
             data  = get_buffer_hist1( h )
+            if self.cfg.get( 'normalize', False ):
+                data=data/data.sum()
+
             hist = Histogram( edges, data )
 
             self.transformations[var] = hist

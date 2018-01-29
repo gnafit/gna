@@ -152,21 +152,6 @@ class namespace(Mapping):
             return findname(v, env.nsview)
         return v
 
-    def getrec(self, name, lookkeys=False):
-        ns = self
-
-        if '.' in name:
-            nsname, name = name.rsplit('.', 1)
-            namespaces = nsname.split('.')
-
-            for nsname in namespaces:
-                if lookkeys:
-                    ns = ns.__getitem__(nsname)
-                else:
-                    ns = ns(nsname)
-
-        return ns.__getitem__( name )
-
     def __setitem__(self, name, value):
         self.storage[name] = value
 

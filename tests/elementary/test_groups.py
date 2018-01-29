@@ -6,10 +6,10 @@ from gna.grouping import *
 from collections import OrderedDict
 
 dets = OrderedDict( [
-    ('11', 1), ('12', 2),
-    ('21', 3), ('22', 8),
-    ('31', 4), ('32', 5),
-    ('33', 6), ('33', 7)
+    ('AD11', 1), ('AD12', 2),
+    ('AD21', 3), ('AD22', 8),
+    ('AD31', 4), ('AD32', 5),
+    ('AD33', 6), ('AD33', 7)
     ] )
 
 sites = OrderedDict( [
@@ -19,10 +19,16 @@ sites = OrderedDict( [
     ] )
 
 groups = OrderedDict( [
-    ( 'EH1', ('11', '12') ),
-    ( 'EH2', ('21', '22') ),
-    ( 'EH3', ('31', '32', '33', '34') ),
+    ( 'EH1', ('AD11', 'AD12') ),
+    ( 'EH2', ('AD21', 'AD22') ),
+    ( 'EH3', ('AD31', 'AD32', 'AD33', 'AD34') ),
     ] )
+
+groupings = GroupsSet(OrderedDict(
+        site=groups,
+        exp ={ '': dets.keys() },
+        det ={ d: (d,) for d in dets.keys() }
+        ))
 
 gd = GroupedDict( sites, groups=groups )
 
@@ -68,3 +74,14 @@ except KeyError:
 except:
     print( '\033[32mFail!\033[0m' )
 
+print()
+
+print( 'Test sets' )
+print( '11 in sets:', 'AD11' in groupings )
+print( '11 group:', groupings.group('AD11') )
+print( '11 group ("site"):', groupings.group('AD11', 'site') )
+print( '11 group ("exp"):', groupings.group('AD11', 'exp') )
+print( '11 groups:', groupings.groups('AD11') )
+print( '11 items:', groupings.items('AD11') )
+print( 'Format {exp}.{site}.{det}:', groupings.format( 'AD11', '{exp}.{site}.{det}' ) )
+print( 'Format {exp}.{site}.{det} (clean):', groupings.format_splitjoin( 'AD11', '{exp}.{site}.{det}' ) )

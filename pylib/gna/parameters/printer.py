@@ -9,6 +9,9 @@ unctypes = ( ROOT.Variable('double'),  )
 def print_parameters( ns, recursive=True ):
     header = False
     for name, var in ns.iteritems():
+        if isinstance( ns.storage[name], basestring ):
+            print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
+            continue
         if not isinstance( var, unctypes ):
             continue
         if not header:

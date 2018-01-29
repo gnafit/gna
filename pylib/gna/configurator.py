@@ -60,8 +60,21 @@ class NestedDict(object):
     def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
 
-    def parent(self):
-        return self.__parent__
+    def parent(self, n=1):
+        if n==1:
+            return self.__parent__
+
+        if n==0:
+            return self
+
+        if n<0:
+            raise Exception('Invalid parent depth')
+
+        if self.__parent__ is None:
+            raise Exception('No parent')
+
+        return self.__parent__.parent( n-1 )
+
 
     def parent_key(self):
         if self.__parent__ is None:

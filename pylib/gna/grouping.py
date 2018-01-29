@@ -41,6 +41,41 @@ class Groups(object):
         """Returns a group of an item"""
         return self.match[item]
 
+class GroupsSet(object):
+    """A set of Groups instances"""
+    def __init__(self, groups):
+        self.__groups__ = OrderedDict([ (k, Groups(g)) for k, g in groups.items() ])
+
+    def __contains__(self, item):
+        """Checks if the item belongs at least to the one of groupings"""
+        for group in self.__groups__.values():
+            if item in group:
+                return True
+        return False
+
+    def group(self, item, set=None):
+        if set:
+            return self.__groups__[set][item]
+
+        for group, items in self.__groups__.items():
+            if item in items:
+                return items[item]
+        return None
+
+    def groups(self, item):
+        return [ name for name, group in self.__groups__.items() if item in group ]
+
+    def items(self, item):
+        return OrderedDict([ (name, group[item]) for name, group in self.__groups__.items() if item in group ])
+
+    def format(self, item, fmt):
+        if isinstance(fmt, basestring):
+            return fmt.format(**self.items( item ) )
+
+        return type(fmt)(self.format(item, s) for s in fmt)
+
+    def format_splitjoin(self, item, fmt, sep='.', filter=('')):
+        return sep.join(s for s in self.format(item, fmt.split(sep)) if not s in filter)
 
 class GroupedDict(OrderedDict):
     """OrderedDict implementation with:
