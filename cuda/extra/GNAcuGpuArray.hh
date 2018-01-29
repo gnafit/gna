@@ -2,6 +2,7 @@
 #define GNACUGPUARRAY_H
 
 #include "GNAcuDataLocation.hh"
+#include "cuda_config_vars.h"
 #include <iostream>
 //#include "../../core/Data.hh"
 
@@ -11,6 +12,7 @@ public:
 	GNAcuGpuArray();
         GNAcuGpuArray(size_t inSize);
 	~GNAcuGpuArray();
+
         DataLocation Init(size_t inSize);
 	void resize(size_t newSize);
         inline void setSize(size_t inSize) { arrSize = inSize; }
@@ -23,7 +25,7 @@ public:
 	void transferD2H(); 
 	T* getArrayPtr() { return devicePtr; }
         void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
-	size_t getArraySize() { std::cout << "in size getter " << arrSize << std::endl; return arrSize; }
+	size_t getArraySize() { return arrSize; }
 
         void negate();
 	GNAcuGpuArray<T>& operator+=(GNAcuGpuArray<T> &rhs);
@@ -32,9 +34,9 @@ public:
         GNAcuGpuArray<T>& operator*=(T rhs);
         GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
 	void dump() ;
+
         DataLocation arrState;
 //	DataType type;
-
 	T* devicePtr;
 	T* hostPtr;
         size_t arrSize;

@@ -1,6 +1,7 @@
 #ifndef TRANSFORMATIONBASE_H
 #define TRANSFORMATIONBASE_H
 #include "config_vars.h"
+#include "cuda_config_vars.h"
 #include <string>
 #include <vector>
 #include <list>

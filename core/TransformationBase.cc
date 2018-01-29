@@ -299,14 +299,6 @@ void Entry::evaluateTypes() {
         sink.data->require_gpu();
       }
     }
-/*    if (entryLoc == Host) {
-      for (auto& source : sources) {
-        if ( source.sink->entry->entryLoc == Device) {
-          source.sink->data->sync_D2H();
-        }
-      }
-    }
-*/
 #endif
     for (Entry *dep: deps) {
       dep->evaluateTypes();
@@ -392,7 +384,6 @@ const Data<double> &Args::operator[](int i) const {
   }
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
-  std::cout << "Sink loc = " << src.sink->data->dataLoc << std::endl;
   src.sink->data->sync(this->m_entry->entryLoc);
 #endif
   return *src.sink->data;

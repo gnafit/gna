@@ -71,9 +71,13 @@ if(CUDA_SUPPORT)
          GNAcuOscProbMem.hh
         )
 else()
-   set(CUDA_SUPPORT 0)
+    set(CUDA_SUPPORT 0)
     set(CUSOURCES "")
     set(CUHEADERS "")
+endif()
+
+if (NOT CUDA_DEBUG_INFO )
+    set(CUDA_DEBUG_INFO 0)
 endif()
 
 configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
@@ -130,7 +134,6 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh 
-  #IdentityGPU.hh
   ${CUHEADERS}
   )
 
