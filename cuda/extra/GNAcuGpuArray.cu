@@ -5,6 +5,8 @@
 #include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
 
+#define GridSize(size) (size/CU_BLOCK_SIZE + 1)
+
 template <typename T>
 __global__ void vecAdd(T* res, T* inA, T* inB, size_t n) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
@@ -149,7 +151,7 @@ DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 
 template <typename T>
 DataLocation GNAcuGpuArray<T>::setByValue(T value) {
-	setByValueGPU<T><<<arrSize, 1>>>(devicePtr, value, arrSize);
+	setByValueGPU<T><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, value, arrSize);
 	dataLoc = Device;
         return dataLoc;
 }
@@ -303,7 +305,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+=(GNAcuGpuArray<F> &rhs) {
 			  << std::endl;
 #endif
 	}
-	vecAdd<F><<<smallest_size, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
+	vecAdd<F><<<GridSize(smallest_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
 				   smallest_size);
 	dataLoc = Device;
 	return *this;
@@ -320,7 +322,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
                           << std::endl;
 #endif
         }
-        vecMinus<F><<<smallest_size, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
+        vecMinus<F><<<GridSize(smallest_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
                                     smallest_size);
         dataLoc = Device;
         return *this;
@@ -330,7 +332,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
 
 template <typename F>
 void GNAcuGpuArray<F>::negate() {
-	vecMinusUnar<F><<<arrSize, 1>>>(devicePtr, arrSize);
+	vecMinusUnar<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, arrSize);
         dataLoc = Device;
 }
 
@@ -346,7 +348,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
                           << std::endl;
 #endif
         }
-        vecMult<F><<<res_size, 1>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
+        vecMult<F><<<GridSize(res_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
                                    res_size);
        dataLoc = Device;
        return *this; 
@@ -355,7 +357,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
 
 template <typename F>
 GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
-        vecMult<F><<<arrSize, 1>>>(devicePtr, devicePtr, rhs,
+        vecMult<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs,
                                    arrSize);
         dataLoc = Device;
         return *this;
