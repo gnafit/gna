@@ -199,7 +199,9 @@ namespace TransformationTypes {
   inline const double *OutputHandle::data() const {
 #ifdef GNA_CUDA_SUPPORT
     m_sink->entry->touch();
-    if (m_sink->data->gpuArr->dataLoc != Host && m_sink->data->gpuArr->syncFlag != Synchronized) m_sink->data->gpuArr->sync( Host );
+    if (m_sink->data->gpuArr != nullptr) {
+      if (m_sink->data->gpuArr->dataLoc != Host && m_sink->data->gpuArr->syncFlag != Synchronized) m_sink->data->gpuArr->sync( Host );
+    }
 #endif
     return view();
   }
