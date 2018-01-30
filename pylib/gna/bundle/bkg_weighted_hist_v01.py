@@ -35,14 +35,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
             print(ns.name)
 
     def define_variables(self):
-        pitems = None
-        if len(self.cfg.formula)>1:
-            pitems = convert( self.cfg.formula, 'stdvector' )
-
         self.products=[]
         numname = '{}_num'.format( self.cfg.name )
 
-        print( self.cfg.name )
         groups = GroupsSet( self.cfg.get('groups', {}) )
 
         #
@@ -59,42 +54,21 @@ class bkg_weighted_hist_v01(TransformationBundle):
         #
         for det in self.cfg.groups['det']:
             ns = self.common_namespace(det)
+            formula = []
             for fullitem in self.cfg.formula:
                 path, head = fullitem.rsplit('.', 1)
 
-                item = groups.format( det, fullitem )
+                import IPython
+                IPython.embed()
+                item = groups.format_splitjoin( det, fullitem )
+                formula.append(item)
 
-                if head in ns:
-                    continue
-                self.common_namespace(det)[head] = item
+                if not head in ns:
+                    self.common_namespace(det)[head] = item
 
-            # item = groups.format( ritem )
-            # print('   ', item)
-
-        # for ns in self.namespaces:
-            # bindings = {}
-            # for fullitem in self.cfg.formula:
-                # if '.' in fullitem:
-                    # item = fullitem.split('.')[-1]
-                # else:
-                    # if not fullitem in self.cfg:
-                        # continue
-                    # item = fullitem
-                # num = self.cfg[item]
-
-                # if isinstance( num, uncertain ):
-                    # cnum = num
-                # else:
-                    # cnum = num[ns.name]
-                # bindings[fullitem] = ns.reqparameter( item.format( self.cfg.name ), cnum )
-
-            # for detns in ns['detectors'].values():
-                # if pitems:
-                    # with detns:
-                        # vp = R.VarProduct( pitems, numname, ns=detns, bindings=bindings )
-                        # detns[numname].get()
-                        # self.products.append( vp )
-                # # else:
-                    # # ns[numname] = R.Variable('double')( numname, ns[formula[0]].getVariable() )
-                    # # # ns.defparameter( numname, target=formula[0] )
-
+            if len(formula)>1:
+                vp = R.VarProduct(convert(formula, 'stdvector'), numname, ns=ns)
+                ns[numname].get()
+                self.products.append( vp )
+            else:
+                ns.defparameter( numname, target=formula[0] )

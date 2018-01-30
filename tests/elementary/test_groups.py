@@ -85,3 +85,4 @@ print( '11 groups:', groupings.groups('AD11') )
 print( '11 items:', groupings.items('AD11') )
 print( 'Format {exp}.{site}.{det}:', groupings.format( 'AD11', '{exp}.{site}.{det}' ) )
 print( 'Format {exp}.{site}.{det} (clean):', groupings.format_splitjoin( 'AD11', '{exp}.{site}.{det}' ) )
+
