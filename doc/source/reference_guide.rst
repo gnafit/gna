@@ -36,7 +36,7 @@ Helper classes
    :maxdepth: 1
    :glob:
 
-   helperclasses/*
+   cppclasses/*
 
 Transformation bundles
 ----------------------
