@@ -74,8 +74,8 @@ class GroupsSet(object):
 
         return type(fmt)(self.format(item, s) for s in fmt)
 
-    def format_splitjoin(self, item, fmt, sep='.', filter=('')):
-        return sep.join(s for s in self.format(item, fmt.split(sep)) if not s in filter)
+    def format_splitjoin(self, item, fmt, sep='.', filter=(''), prepend=''):
+        return sep.join(s for s in self.format(item, prepend.split(sep)+fmt.split(sep)) if not s in filter)
 
 class GroupedDict(OrderedDict):
     """OrderedDict implementation with:

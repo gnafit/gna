@@ -58,9 +58,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             for fullitem in self.cfg.formula:
                 path, head = fullitem.rsplit('.', 1)
 
-                import IPython
-                IPython.embed()
-                item = groups.format_splitjoin( det, fullitem )
+                item = groups.format_splitjoin( det, fullitem, prepend=self.common_namespace.path )
                 formula.append(item)
 
                 if not head in ns:
