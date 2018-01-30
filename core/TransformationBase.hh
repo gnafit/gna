@@ -291,6 +291,9 @@ namespace TransformationTypes {
    * Entry has a taintflag (Entry::taintflag), then defines whether the Entry's Sink instances
    * contain up to date output data.
    *
+   * Entry will call the transformation function Entry::fun before returning
+   * Data in case Entry is tainted or any of the Inputs is tainted.
+   *
    * @author Dmitry Taychenachev
    * @date 2015
    */
@@ -738,19 +741,41 @@ namespace TransformationTypes {
     }
   }
 
+  /**
+   * @brief Accessor gives an access to the Base's Entry instances by wrapping them into Handle.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class Accessor {
   public:
-    Accessor() { }
-    Accessor(Base &parent): m_parent(&parent) { }
-    Handle operator[](int idx) const;
-    Handle operator[](const std::string &name) const;
-    size_t size() const;
+    Accessor() { };                                       ///< Default constructor.
+    Accessor(Base &parent): m_parent(&parent) { }         ///< Constructor. @param parent -- Base instance to access its Entry instances.
+    Handle operator[](int idx) const;                     ///< Get a Handle for the i-th Entry.
+    Handle operator[](const std::string &name) const;     ///< Get a Handle for the Entry by name.
+    size_t size() const;                                  ///< Get number of Entry instances.
   private:
-    Base *m_parent;
+    Base *m_parent;                                       ///< Pointer to the Base that keeps Entry instances.
   };
 
   template <typename T>
-  class Initializer;
+    class Initializer;
+
+  /**
+   * @brief Base transformation class handling.
+   *
+   * Base class does the bookkeeping for the transformations and defines the GNAObject transformation handling.
+   *
+   * Base class defines an object containing several transformation Entry instances.
+   *
+   * Each Entry defines an elementary transformation that will be updated in case any of Entry's inputs is updated.
+   * Base enables the user to organize a more complex transformation each part of which depends on its own inputs
+   * and thus may be updated independently. Entry instances within Base class may share internal data directly
+   * (not via Sink-Source connections).
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class Base: public boost::noncopyable {
     template <typename T>
     friend class ::Transformation;
@@ -760,36 +785,58 @@ namespace TransformationTypes {
     friend class Accessor;
     friend class ::GNAObject;
   public:
-    Base(const Base &other);
-    Base &operator=(const Base &other);
+    Base(const Base &other);                                             ///< Clone constructor.
+    Base &operator=(const Base &other);                                  ///< Clone assignment.
   protected:
-    Base(): t_(*this) { }
+    Base(): t_(*this) { }                                                ///< Default constructor.
+    /**
+     * @brief Constructor that limits the maximal number of allowed Entry instances.
+     * @param maxentries -- maximal number of Entry instances the Base may keep.
+     */
     Base(size_t maxentries): Base() {
       m_maxEntries = maxentries;
     }
-    void connect(Source &source, Base *sinkobj, Sink &sink);
+
+    // Not implemented!
+    // void connect(Source &source, Base *sinkobj, Sink &sink);
+
+    /**
+     * @brief Get Entry by index.
+     * @param idx -- index of an Entry to return.
+     * @return Entry.
+     */
     Entry &getEntry(size_t idx) {
       return m_entries[idx];
     }
-    Entry &getEntry(const std::string &name);
+    Entry &getEntry(const std::string &name);                            ///< Get an Entry by name.
 
     template <typename T>
     Initializer<T> transformation_(T *obj, const std::string &name) {
       return Initializer<T>(obj, name);
     }
 
-    Accessor t_;
+    Accessor t_;                                                         ///< An Accessor to Base's Entry instances via Handle.
   private:
-    size_t addEntry(Entry *e);
-    boost::ptr_vector<Entry> m_entries;
-    boost::optional<size_t> m_maxEntries;
-    void copyEntries(const Base &other);
+    size_t addEntry(Entry *e);                                           ///< Add new Entry.
+    boost::ptr_vector<Entry> m_entries;                                  ///< Vector of Entry pointers. Calls destructors when deleted.
+    boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.
+    void copyEntries(const Base &other);                                 ///< Clone entries from the other Base.
   };
 
+  /**
+   * @brief Get a Handle for the i-th Entry.
+   * @param idx -- index of the Entry.
+   * @return Handle for the Entry.
+   */
   inline Handle Accessor::operator[](int idx) const {
     return Handle(m_parent->getEntry(idx));
   }
 
+  /**
+   * @brief Get a Handle for the Entry by name.
+   * @param name -- Entry's name.
+   * @return Handle for the Entry.
+   */
   inline Handle Accessor::operator[](const std::string &name) const {
     TR_DPRINTF("accessing %s on %p\n", name.c_str(), (void*)m_parent);
     return Handle(m_parent->getEntry(name));
@@ -799,6 +846,16 @@ namespace TransformationTypes {
     return m_parent->m_entries.size();
   }
 
+  /**
+   * @brief Transformation initializer (CRTP).
+   *
+   * See
+   * https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
+   * for the CRTP description.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   template <typename T>
   class Initializer {
   public:

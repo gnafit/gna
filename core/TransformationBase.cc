@@ -26,6 +26,13 @@ using TransformationTypes::Rtypes;
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
 
+/**
+ * @brief Formatted exception message.
+ * @tparam T -- type of the class to get the ->name from.
+ * @param type -- exception's source.
+ * @param s -- the ->name of this class will be shown in a message.
+ * @param msg -- the actual message.
+ */
 template <typename T>
 std::string errorMessage(const std::string &type, const T *s,
                          const std::string &msg) {
@@ -290,12 +297,22 @@ void Handle::dumpObj() const {
   }
 }
 
+/**
+ * @brief Clone constructor.
+ * @copydetails Base::copyEntries
+ * @param other -- the other Base.
+ */
 Base::Base(const Base &other)
   : t_(*this), m_entries(other.m_entries.size())
 {
   copyEntries(other);
 }
 
+/**
+ * @brief Clone assignment.
+ * @copydetails Base::copyEntries
+ * @param other -- the other Base.
+ */
 Base &Base::operator=(const Base &other) {
   t_ = Accessor(*this);
   m_entries.reserve(other.m_entries.size());
@@ -303,6 +320,13 @@ Base &Base::operator=(const Base &other) {
   return *this;
 }
 
+/**
+ * @brief Clone entries from the other Base.
+ *
+ * Fills Base::m_entries with clones of Entry instances from the other Base.
+ *
+ * @param other -- the other Base to copy Entry instances from.
+ */
 void Base::copyEntries(const Base &other) {
   std::transform(other.m_entries.begin(), other.m_entries.end(),
                  std::back_inserter(m_entries),
@@ -347,12 +371,23 @@ void Source::connect(Sink *newsink) {
   }
 }
 
+/**
+ * @brief Add new Entry.
+ * @param e -- new Entry.
+ * @return the current number of Entry instances in the Base.
+ */
 size_t Base::addEntry(Entry *e) {
   size_t idx = m_entries.size();
   m_entries.push_back(e);
   return idx;
 }
 
+/**
+ * @brief Get an Entry by name.
+ * @param name -- Entry name to return.
+ * @return Entry.
+ * @exception KeyError in case there is no Entry with such a name.
+ */
 Entry &Base::getEntry(const std::string &name) {
   for (Entry &e: m_entries) {
     if (e.name == name) {
