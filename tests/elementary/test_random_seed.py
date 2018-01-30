@@ -15,14 +15,12 @@ sigma_p = C.Points(mu**0.5)
 
 toymc = R.NormalToyMC( False )
 toymc.add( mu_p, sigma_p )
-out = R.Identity()
-out.identity.source( toymc.toymc )
 
 def test( n=11 ):
     res = N.zeros( shape=n, dtype='d' )
     for i in xrange( n ):
         toymc.nextSample()
-        res[i] = out.identity.target.data()
+        res[i] = toymc.toymc.data()
     return res
 
 R.GNA.Random.seed( 1 )

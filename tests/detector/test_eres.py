@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from load import ROOT as R
 from matplotlib import pyplot as P
 import numpy as N
-from load import ROOT as R
 from gna.env import env
 from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
@@ -12,6 +12,7 @@ from scipy.stats import norm
 from converters import convert
 from argparse import ArgumentParser
 import constructors as C
+from gna.parameters.printer import print_parameters
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -34,11 +35,18 @@ def singularities( values, edges ):
     phist[indices] = 1.0
     return phist
 
+#
+# Define the parameters in the current namespace
+#
 percent = 0.01
 env.defparameter( 'Eres_a',  central=0.016, relsigma=30*percent )
 env.defparameter( 'Eres_b',  central=0.081, relsigma=30*percent )
 env.defparameter( 'Eres_c',  central=0.026, relsigma=30*percent )
+print_parameters( env.globalns )
 
+#
+# Define bin edges
+#
 binwidth=0.05
 edges = N.arange( 0.0, 12.0001, binwidth )
 efine = N.arange( edges[0], edges[-1]+1.e-5, 0.005 )

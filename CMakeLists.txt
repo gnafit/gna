@@ -97,6 +97,7 @@ set (HEADERS
   WeightedSum.hh
   Points.hh
   Histogram.hh
+  HistEdges.hh
   Identity.hh
   IdentityX2.hh
   IdentityGPU.hh
@@ -110,6 +111,7 @@ set (HEADERS
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
+  Rebin.hh
   Minimizable.hh
   Neutrino.hh
   OscillationVariables.hh
@@ -157,6 +159,7 @@ set (SOURCES
   core/CovarianceToyMC.cc
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
+  core/Rebin.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc

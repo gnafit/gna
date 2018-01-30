@@ -63,7 +63,7 @@ struct DataType {
   std::vector<double> edges = {};
   std::pair<double, double> bounds = {
     -std::numeric_limits<double>::infinity(),
-    std::numeric_limits<double>::infinity()
+     std::numeric_limits<double>::infinity()
   };
 
   double *buffer = nullptr;
@@ -217,6 +217,10 @@ public:
   DataType::Hist<T> &edges(const std::vector<double> &edges) {
     m_type.edges = edges;
     return bins(edges.size()-1);
+  }
+  DataType::Hist<T> &edges(size_t n, double* edges) {
+    m_type.edges.assign(edges, edges+n);
+    return bins(n-1);
   }
   std::vector<double> &edges() {
     return m_type.edges;

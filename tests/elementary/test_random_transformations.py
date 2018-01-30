@@ -49,11 +49,8 @@ def run(opts):
     for label, distr in zip( labels, distrs ):
         data = N.zeros( shape=opts.n, dtype=[ ('x', 'd'), ('y', 'd'), ('z', 'd') ] )
 
-        out = R.Identity()
-        out.identity.source( distr.toymc )
-
         for i in xrange( opts.n ):
-            data[i] = out.identity.target.data()
+            data[i] = distr.toymc.data()
             distr.nextSample()
 
         plot( label, data, opts )
