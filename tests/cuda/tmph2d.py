@@ -17,7 +17,7 @@ def array_to_stdvector( array, dtype ):
     return ret
 
 
-mat = N.ones(100000, dtype='d')
+mat = N.ones(100, dtype='d')
 
 print( 'Input matrix (numpy)' )
 print( mat )
