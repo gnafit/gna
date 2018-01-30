@@ -113,7 +113,7 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 				  << std::endl;
 			mem.currentGpuMemState = Crashed;
 		} else
-			mem.currentGpuMemState = OnDevice;
+			mem.currentGpuMemState = Device;
 	}
 
 	for (int i = 0; i < streamcount; i++) {
@@ -140,7 +140,7 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 		std::cout << "err is " << cudaGetErrorString(err) << std::endl;
 		mem.currentGpuMemState = Crashed;
 	} else
-		mem.currentGpuMemState = OnHost;
+		mem.currentGpuMemState = Host;
 	cudaStreamDestroy(stream1);
 	for (int i = 0; i < streamcount; i++) {
 		cudaStreamDestroy(workerstreams[i]);

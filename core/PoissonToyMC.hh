@@ -1,28 +1,26 @@
 #ifndef POISSONTOYMC_H
 #define POISSONTOYMC_H
 
-#include <boost/random.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/poisson_distribution.hpp>
-
+#include "Random.hh"
 #include "GNAObject.hh"
 
 class PoissonToyMC: public GNASingleObject,
                     public Transformation<PoissonToyMC> {
 public:
-  PoissonToyMC();
+  PoissonToyMC( bool autofreeze=true );
 
-  void add(SingleOutput &theory, SingleOutput &cov);
+  void add(SingleOutput &theory, SingleOutput &cov) { add( theory ); }
+  void add(SingleOutput &theory);
   void nextSample();
-  void seed(unsigned int s);
+
+  void reset() { m_distr.reset(); }
 protected:
   void calcTypes(Atypes args, Rtypes rets);
   void calcToyMC(Args args, Rets rets);
 
-  boost::mt19937 m_rand;
-  boost::variate_generator<
-    boost::mt19937&, boost::poisson_distribution<int>
-  > m_gen{m_rand, boost::poisson_distribution<int>()};
+  std::poisson_distribution<> m_distr;
+
+  bool m_autofreeze;
 };
 
 #endif // POISSONTOYMC_H

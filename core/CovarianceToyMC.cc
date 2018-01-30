@@ -1,26 +1,25 @@
 #include "CovarianceToyMC.hh"
+#include <boost/format.hpp>
 
-CovarianceToyMC::CovarianceToyMC() {
+CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_(this, "toymc")
     .output("toymc")
     .types(&CovarianceToyMC::calcTypes)
     .func(&CovarianceToyMC::calcToyMC)
   ;
+
+  GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
 }
 
 void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
-  t_["toymc"].input(theory);
-  t_["toymc"].input(cov);
+  auto n = t_["toymc"].inputs().size()/2 + 1;
+  t_["toymc"].input((boost::format("theory_%1%")%n).str()).connect(theory.single());
+  t_["toymc"].input((boost::format("cov_%1%")%n).str()).connect(cov.single());
 }
 
 void CovarianceToyMC::nextSample() {
   t_["toymc"].unfreeze();
   t_["toymc"].taint();
-}
-
-void CovarianceToyMC::seed(unsigned int s) {
-  m_rand.seed(s);
-  m_gen.distribution().reset();
 }
 
 void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
@@ -47,9 +46,10 @@ void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].vec;
     for (int j = 0; j < out.size(); ++j) {
-      out(j) = m_gen();
+      out(j) = m_distr( GNA::Random::gen() );
     }
     out = args[i+0].vec + args[i+1].mat.triangularView<Eigen::Lower>()*out;
   }
-  rets.freeze();
+  if(m_autofreeze)
+    rets.freeze();
 }

@@ -17,16 +17,20 @@ int main () {
   int EnuSize = 100;
   bool sameAB = false;
 
-  double* ret1;// = (double*)malloc(EnuSize*sizeof(double));
+  double* ret1 = new double[EnuSize];// = (double*)malloc(EnuSize*sizeof(double));
+  for(int i = 0; i < EnuSize; i++) {
+    ret1[i] = i;
+  }
   double* ret2;// = (double*)malloc(EnuSize*sizeof(double));
-  GNAcuGpuArray<double> arr1(ret1, EnuSize);
-  GNAcuGpuArray<double> arr2(ret2, EnuSize);
+  GNAcuGpuArray<double> arr1( EnuSize);
+  GNAcuGpuArray<double> arr2( EnuSize);
   arr1.setByValue(5.0);
-  arr2.setByValue(5.0);
+  arr2.setByValue(3.0);
   double* answ;// = (double*)malloc(EnuSize*sizeof(double));
-  GNAcuGpuArray<double> arrAnsw (answ, EnuSize);
-  arrAnsw = arr1 + arr2;
-
+  GNAcuGpuArray<double> arrAnsw (EnuSize);
+  //arrAnsw = -arr2+arr1*10.0;
+  arrAnsw.setByHostArray(ret1);
+  std::cout << "size = " << arrAnsw.getArraySize();
   double* res = new double[EnuSize]; 
 //  (arr1 + arr2).getContentToCPU(res);
   arrAnsw.getContentToCPU(res);

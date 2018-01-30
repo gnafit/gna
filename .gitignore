@@ -1,4 +1,5 @@
 build/
+output/
 *~
 \#*
 *.pyc
@@ -18,6 +19,7 @@ compile_commands.json
 .ycm_extra_conf.py
 doc/doxygen
 .vimrc
+.nvimrc
 config_local
 .gitignore
 .viminfo

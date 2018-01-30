@@ -9,6 +9,7 @@ The conversion is done by means of ``converters`` module:
 
 Function ``convert(object, target_type)`` converts an object (usually an array) to the ``target_type``.
 The following types are recognized:
+
     + ``ROOT.vector`` or ``'stdvector'``
     + ``ROOT.Points`` or ``'points'``
     + ``ROOT.Eigen.MatrixXd`` or ``'eigenmatrix'``
@@ -17,6 +18,8 @@ The following types are recognized:
     + ``ROOT.Eigen.ArrayXXd`` or ``'eigenarray2d'``
     + ``numpy.ndarray`` or ``'array'``
     + ``numpy.matrixlib.defmatrix.matrix`` or ``'matrix'``
+
+For more complex conversions see also ``constructors`` module.
 
 STD vector
 """"""""""
@@ -88,3 +91,14 @@ GNA types
    +---------------------------------+-----------------------------+
    | ``convert(array, 'points')``    | same as above               |
    +---------------------------------+-----------------------------+
+
+
+Tests
+"""""
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/test_converters.py
+

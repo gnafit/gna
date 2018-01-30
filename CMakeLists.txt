@@ -7,12 +7,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
-set(SOURCES_STANDALONE standalone/LittleTest.cc)
-set(NAME_STANDALONE standalone_test)
-set(HEADERS_STANDALONE LittleTest.hh)
-include_directories(standalone)
-
-include_directories( core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ cuda/)
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -21,7 +16,7 @@ endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
@@ -84,13 +79,14 @@ configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config
 include_directories( SYSTEM ${CMAKE_BINARY_DIR}/generated/ )
 
 find_package(ROOT)
-include_directories(SYSTEM ${ROOT_INCLUDE_DIR} )
+include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
-
 set (HEADERS
+  Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  TransformationBase.hh
   Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
@@ -112,6 +108,7 @@ set (HEADERS
   Chi2.hh
   Poisson.hh
   CovarianceToyMC.hh
+  NormalToyMC.hh
   PoissonToyMC.hh
   Minimizable.hh
   Neutrino.hh
@@ -130,10 +127,13 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  HistNonlinearity.hh
+  HistSmear.hh
+  RenormalizeDiag.hh
   C14Spectrum.hh
   GaussianPeakWithBackground.hh
   GridFilter.hh
-  EigenHelpers.hh 
+  EigenHelpers.hh
   ${CUHEADERS}
   )
 
@@ -155,6 +155,7 @@ set (SOURCES
   core/Chi2.cc
   core/Poisson.cc
   core/CovarianceToyMC.cc
+  core/NormalToyMC.cc
   core/PoissonToyMC.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
@@ -168,18 +169,15 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
+  detector/HistNonlinearity.cc
+  detector/HistSmear.cc
+  detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
   extra/GridFilter.cc
   ${CUSOURCES}
   )
 
-
-
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl  -lgslcblas -lm )
-
-#add_executable(${NAME_STANDALONE} ${SOURCES_STANDALONE})
-#target_link_libraries(${NAME_STANDALONE} ${LIBNAME})
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl -lgslcblas -lm)

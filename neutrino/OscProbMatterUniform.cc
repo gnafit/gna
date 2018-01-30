@@ -57,7 +57,7 @@ void OscProbMatter::calcOscProb(Args args, Rets rets) {
 	};
 	double L = km2MeV(m_L.value());
 	auto& Enu = args[0].arr;
-
+        std::cout << "IN OSCPROB: Enu size = " << Enu.size() << std::endl;
 	Eigen::ArrayXd E = Enu;
 
 	double m_qe = -2.0 / 3.0 * 7.63E-8 * 0.5 * m_rho.value();
