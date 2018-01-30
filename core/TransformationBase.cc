@@ -75,7 +75,7 @@ Entry::Entry(const std::string &name, const Base *parent)
 { }
 
 /**
- * @brief Copy constructor.
+ * @brief Clone constructor.
  * @todo Cross check the description.
  *
  * @param other -- Entry to copy name, inputs and outputs from.
@@ -202,6 +202,14 @@ void Entry::dump(size_t level) const {
   }
 }
 
+/**
+ * @brief Get vector of inputs.
+ *
+ * The method creates a new vector and fills it with InputHandle instances
+ * for each Entry's Source.
+ *
+ * @return new vector of inputs.
+ */
 std::vector<InputHandle> Handle::inputs() const {
   std::vector<InputHandle> ret;
   auto &sources = m_entry->sources;
@@ -210,6 +218,14 @@ std::vector<InputHandle> Handle::inputs() const {
   return ret;
 }
 
+/**
+ * @brief Get vector of outputs.
+ *
+ * The method creates a new vector and fills it with OutputHandle instances
+ * for each Entry's Sink.
+ *
+ * @return new vector of outputs.
+ */
 std::vector<OutputHandle> Handle::outputs() const {
   std::vector<OutputHandle> ret;
   auto &sinks = m_entry->sinks;
@@ -218,6 +234,14 @@ std::vector<OutputHandle> Handle::outputs() const {
   return ret;
 }
 
+/**
+ * @brief Create a new input and connect to the SingleOutput transformation.
+ *
+ * New input name is copied from the output name.
+ *
+ * @param output -- SingleOutput transformation.
+ * @return InputHandle for the new input.
+ */
 InputHandle Handle::input(SingleOutput &output) {
   OutputHandle outhandle = output.single();
   InputHandle inp = m_entry->addSource(outhandle.name());
@@ -225,10 +249,21 @@ InputHandle Handle::input(SingleOutput &output) {
   return inp;
 }
 
+/**
+ * @brief Create a new output with a same name as SingleOutput's output.
+ *
+ * @param out -- SingleOutput transformation.
+ * @return OutputHandle for the new output.
+ */
 OutputHandle Handle::output(SingleOutput &out) {
   return output(out.single().name());
 }
 
+/**
+ * @brief Print Entry's Sink and Source instances and their connection status.
+ *
+ * The data is printed to the stderr.
+ */
 void Handle::dumpObj() const {
   std::cerr << m_entry->name;
   std::cerr << std::endl;

@@ -53,7 +53,7 @@ namespace TransformationTypes {
     Sink(const std::string &name, Entry *entry)
       : name(name), entry(entry) { }
     /**
-     * @brief Copy constructor.
+     * @brief Clone constructor.
      * @param name -- other Sink to get the name from.
      * @param entry -- Entry pointer Sink belongs to.
      */
@@ -86,12 +86,12 @@ namespace TransformationTypes {
     Source(const std::string &name, Entry *entry)
       : name(name), entry(entry) { }               ///< Constructor.
     /**
-     * @brief Copy constructor.
+     * @brief Clone constructor.
      * @param name -- other Source to get the name from.
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const Source &other, Entry *entry)
-      : name(other.name), entry(entry) { }         ///< Copy constructor.
+      : name(other.name), entry(entry) { }         ///< Clone constructor.
 
     void connect(Sink *newsink);                   ///< Connect the Source to the Sink.
 
@@ -173,7 +173,7 @@ namespace TransformationTypes {
      */
     InputHandle(Source &source): m_source(&source) { }
     /**
-     * @brief Copy constructor.
+     * @brief Clone constructor.
      * @param other -- other InputHandle instance to access its Source.
      */
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
@@ -213,7 +213,7 @@ namespace TransformationTypes {
      */
     OutputHandle(Sink &sink): m_sink(&sink) { }
     /**
-     * @brief Copy constructor.
+     * @brief Clone constructor.
      * @param other -- other OutputHandle instance to access its Sink.
      */
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
@@ -296,7 +296,7 @@ namespace TransformationTypes {
    */
   struct Entry: public boost::noncopyable {
     Entry(const std::string &name, const Base *parent); ///< Constructor.
-    Entry(const Entry &other, const Base *parent);      ///< Copy constructor.
+    Entry(const Entry &other, const Base *parent);      ///< Clone constructor.
 
     InputHandle addSource(const std::string &name);     ///< Initialize and return new Source.
     OutputHandle addSink(const std::string &name);      ///< Initialize and return new Sink.
@@ -351,45 +351,89 @@ namespace TransformationTypes {
     return m_sink->entry->tainted.depends(x);
   }
 
+  /**
+   * @brief User-end Entry wrapper.
+   *
+   * This class gives an access to the transformation Entry.
+   * It is inherited by TransformationDescriptor.
+   *
+   * @author Dmitry Taychenachev
+   * @date 2015
+   */
   class Handle {
   public:
-    Handle(): m_entry(nullptr) { }
-    Handle(Entry &entry) : m_entry(&entry) { }
-    Handle(const Handle &other): Handle(*other.m_entry) { }
+    Handle(): m_entry(nullptr) { }                            ///< Default constructor.
+    Handle(Entry &entry) : m_entry(&entry) { }                ///< Constructor. @param entry -- an Entry instance to wrap.
+    Handle(const Handle &other): Handle(*other.m_entry) { }   ///< Constructor. @param other -- Handle instance to get Entry to wrap.
 
-    const std::string &name() const { return m_entry->name; }
-    std::vector<InputHandle> inputs() const;
-    std::vector<OutputHandle> outputs() const;
+    const std::string &name() const { return m_entry->name; } ///< Get entry name.
+    std::vector<InputHandle> inputs() const;                  ///< Get vector of inputs.
+    std::vector<OutputHandle> outputs() const;                ///< Get vector of outputs.
+
+    /**
+     * @brief Add named input.
+     * @param name -- Source name.
+     * @return InputHandle for the newly created Source.
+     */
     InputHandle input(const std::string &name) {
       return m_entry->addSource(name);
     }
-    InputHandle input(SingleOutput &output);
+
+    InputHandle input(SingleOutput &output);                 ///< Create a new input and connect to the SingleOutput transformation.
+
+    /**
+     * @brief Add new named output.
+     *
+     * @param name -- new Sink's name.
+     * @return OutputHandle for the new Sink.
+     */
     OutputHandle output(const std::string &name) {
       return m_entry->addSink(name);
     }
-    OutputHandle output(SingleOutput &output);
+    OutputHandle output(SingleOutput &output);               ///< Create a new output with a same name as SingleOutput's output.
 
+    /**
+     * @brief Return i-th Entry's Sink's data.
+     *
+     * The transformation function is evaluated if needed.
+     *
+     * @param i -- index of an output.
+     * @return Data instance.
+     */
     const Data<double> &operator[](int i) const { return m_entry->data(i); }
 
+    /**
+     * @brief Trigger an update of an Entry by simulating access to the i-th data.
+     *
+     * @param i -- Entry's Sink's index.
+     */
     void update(int i) const { (void)m_entry->data(i); }
-    void updateTypes() { m_entry->updateTypes(); }
+    void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
-    void unfreeze() { m_entry->frozen = false; }
+    void unfreeze() { m_entry->frozen = false; }            ///< @copybrief Entry::unfreeze().
 
-    void taint() { m_entry->tainted.taint(); }
-    taintflag tainted() { return m_entry->tainted; }
+    void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
+    taintflag tainted() { return m_entry->tainted; }        ///< Return the Entry's taintflag status.
 
-    bool check() const { return m_entry->check(); }
-    void dump() const { m_entry->dump(0); }
-    void dumpObj() const;
+    bool check() const { return m_entry->check(); }         ///< Call Entry::check(). @copydoc Entry::check()
+    void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
+    void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
-    Entry *m_entry;
+    Entry *m_entry;                                         ///< Wrapped Entry pointer.
   };
 
+  /**
+   * @brief User-end wrapper for the Entry class that gives user an access to the actual Entry.
+   *
+   * The class is used for the dependency tree plotting via graphviz module.
+   *
+   * @author Maxim Gonchar
+   * @date 12.2017
+   */
   class OpenHandle : public Handle {
   public:
-      OpenHandle(const Handle& other) : Handle(other){};
-      Entry* getEntry() { return m_entry; }
+      OpenHandle(const Handle& other) : Handle(other){}; ///< Constructor. @param other -- Handle instance.
+      Entry* getEntry() { return m_entry; }              ///< Get the Entry pointer.
   };
 
 
