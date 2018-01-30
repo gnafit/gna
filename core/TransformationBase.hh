@@ -338,11 +338,12 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { entryLoc = loc; }
+    DataLocation getEntryLocation() { return entryLoc; }
 #endif
+  private:
 #ifdef GNA_CUDA_SUPPORT
     DataLocation entryLoc = Host;
 #endif
-  private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
   };
@@ -350,6 +351,7 @@ namespace TransformationTypes {
 
   /**
    * @brief Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
+   * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
    * @return pointer to the Sink's data buffer.
    */
   inline const double *OutputHandle::data() const {

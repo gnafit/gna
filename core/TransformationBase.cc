@@ -163,12 +163,14 @@ bool Entry::check() const {
  * @brief Do actual calculation by calling Entry::fun.
  *
  * Does not reset the taintflag.
+ *
+ * If CUDA enabled, sets the location of relevant data (Host oe Device)
  */
 void Entry::evaluate() {
   fun(Args(this), Rets(this));
 #ifdef GNA_CUDA_SUPPORT
   for(auto& sink : this->sinks){
-    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->entryLoc );
+    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
   }
 #endif
 }
@@ -411,6 +413,8 @@ Entry &Base::getEntry(const std::string &name) {
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
  *
+ * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
+ *
  * @exception std::runtime_error in case any of type functions fails.
  */
 void Entry::evaluateTypes() {
@@ -453,9 +457,9 @@ void Entry::evaluateTypes() {
 
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT 
-    if (entryLoc == Device) {  
+    if (this->getEntryLocation() == Device) {  
       for (size_t i = 0; i < sources.size(); i++) {
-	if ( sources[i].sink->entry->entryLoc != Device ) {
+	if ( sources[i].sink->entry->getEntryLocation() != Device ) {
           sources[i].sink->data->require_gpu();
         }
       }
@@ -484,6 +488,7 @@ void Entry::touch() {
 
 /**
  * Returns i-th data. Does the calculation if needed.
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
  * @param i -- index of a Sink to read the data.
  * @return i-th Sink's Data.
  *
@@ -589,6 +594,7 @@ DataType &Rtypes::operator[](int i) {
 
 /**
  * @brief Get i-th Source Data.
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
  * @param i -- index of a Source.
  * @return i-th Sources's Data as input (const).
  *
@@ -608,7 +614,7 @@ const Data<double> &Args::operator[](int i) const {
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
   if (src.sink->data->gpuArr) {
-    src.sink->data->gpuArr->sync(this->m_entry->entryLoc);
+    src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
   }
 #endif
   return *src.sink->data;
