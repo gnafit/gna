@@ -17,12 +17,7 @@ def array_to_stdvector( array, dtype ):
     return ret
 
 
-#
-# Create the matrix
-#
-mat = N.arange(12, dtype='d')
-
-# emat = R.Eigen.MatrixXd()
+mat = N.ones(100000, dtype='d')
 
 print( 'Input matrix (numpy)' )
 print( mat )
@@ -32,30 +27,13 @@ lmat = mat.ravel( order='F' )
 shape = array_to_stdvector(mat.shape, 'size_t')
 
 points = R.Points( lmat, shape )
-print( 'Input 0' )
-test = N.frombuffer( points.data(), count=mat.size )
-print( test )
 
 identity = R.IdentityX2()
 id2 = R.IdentityGPU()
-#idGPU = R.IdentityGPU()
 identity.identityx2.source( points.points.points )
 id2.identitygpu.source(identity.identityx2.target)
-#print( 'Eigen dump (C++)' )
-#identity.dump()
-#print()
-
 res = id2.identitygpu.target.data()
 
-print( 'Input 1' )
-test = N.frombuffer( points.data(), count=mat.size )
-print( test )
-
-print( 'Input 2' )
-print(points.points.points.data())
-
-print( 'Eigen dump (C++)' )
-id2.dump()
 print( 'Result (C++ Data to numpy)' )
 print( res )
 print()
