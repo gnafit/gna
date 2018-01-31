@@ -181,4 +181,4 @@ set (SOURCES
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lgsl -lgslcblas -lm)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT -lm)

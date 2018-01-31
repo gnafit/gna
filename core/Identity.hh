@@ -6,29 +6,25 @@
 
 //
 // Identity transformation
-//
+//i
 class Identity: public GNASingleObject,
                 public Transformation<Identity> {
 public:
-  Identity(){
+  Identity(bool is_gpu = false) : isgpu(is_gpu) {
     transformation_(this, "identity")
+      .setEntryLocation(is_gpu ? Device : Host)
       .input("source")
       .output("target")
-      .types(Atypes::pass<0>)
+      .types(Atypes::pass<0,0>)
       .func(&Identity::identity)
       ;
-    auto gpu_test = transformation_(this, "gpu_test")
-      .setEntryLocation(Device)
-      .input("source")
-      .output("target")
-      .types(Atypes::pass<0>)
-      .func(&Identity::gpu_test)
-      ;
+  };
 
-  }
+  bool isgpu = false;
 
   void identity (Args args, Rets rets) {
-    rets[0].x = args[0].x;
+    if (isgpu) { gpu_test(args, rets); }
+    else rets[0].x = args[0].x;
   }
 
   void gpu_test (Args args, Rets rets) {

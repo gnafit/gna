@@ -28,11 +28,11 @@ shape = array_to_stdvector(mat.shape, 'size_t')
 
 points = R.Points( lmat, shape )
 
-identitygpu = R.IdentityGPU()
-id2 = R.IdentityX2()
-identitygpu.identitygpu.source( points.points.points )
-id2.identityx2.source(identitygpu.identitygpu.target)
-res = id2.identityx2.target.data()
+identitygpu = R.Identity()
+id2 = R.Identity()
+identitygpu.identity.source( points.points.points )
+id2.identity.source(identitygpu.identity.target)
+res = id2.identity.target.data()
 
 print( 'Result (C++ Data to numpy)' )
 print( res )
