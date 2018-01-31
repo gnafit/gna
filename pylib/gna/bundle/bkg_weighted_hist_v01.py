@@ -9,7 +9,7 @@ from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
 from gna.configurator import NestedDict, uncertain
 from converters import convert
-from gna.grouping import GroupsSet
+from gna.grouping import GroupsSet, CatDict
 
 from gna.bundle import *
 
@@ -29,21 +29,30 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         self.numname = '{}_num'.format( self.cfg.name )
+
+        self.groups = GroupsSet( self.cfg.get('groups', {}) )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
+        spectra = CatDict( self.spectra.transformations, categories=self.groups )
         for ns in self.namespaces:
-            labels  = convert((ns.pathto(self.cfg.name)), 'stdvector')
-            weights = convert((ns.pathto(self.cfg.num_name)), 'stdvector')
+            labels  = convert([self.cfg.name], 'stdvector')
+            weights = convert([ns.pathto(self.numname)], 'stdvector')
+            ws = R.WeightedSum(labels, weights)
+
+            print(ns.name)
+            print(list(ws.sum.inputs))
+            print(list(ws.sum.outputs))
+
+            inp = spectra[ns.name]
+            print(list(inp.hist.inputs))
+            print(list(inp.hist.outputs))
+
             import IPython
             IPython.embed()
-            # ws = R.WeightedSum()
-            print(ns.name)
 
     def define_variables(self):
         self.products=[]
-
-        groups = GroupsSet( self.cfg.get('groups', {}) )
 
         #
         # Define variables, which inputs are defined within the current config
@@ -63,7 +72,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             for fullitem in self.cfg.formula:
                 path, head = fullitem.rsplit('.', 1)
 
-                item = groups.format_splitjoin( det, fullitem, prepend=self.common_namespace.path )
+                item = self.groups.format_splitjoin( det, fullitem, prepend=self.common_namespace.path )
                 formula.append(item)
 
                 if self.create_variable_links and not head in ns:

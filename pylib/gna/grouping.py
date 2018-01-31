@@ -63,10 +63,13 @@ class GroupsSet(object):
         return None
 
     def groups(self, item):
-        return [ name for name, group in self.__groups__.items() if item in group ]
+        return [ group[item] for cat, group in self.__groups__.items() if item in group ]
+
+    def categories(self, item):
+        return [ cat for cat, group in self.__groups__.items() if item in group ]
 
     def items(self, item):
-        return OrderedDict([ (name, group[item]) for name, group in self.__groups__.items() if item in group ])
+        return OrderedDict([ (cat, group[item]) for cat, group in self.__groups__.items() if item in group ])
 
     def format(self, item, fmt):
         if isinstance(fmt, basestring):
@@ -115,9 +118,35 @@ class GroupedDict(OrderedDict):
         for group, key in self.groups.items():
             yield self[group]
 
+class CatDict(OrderedDict):
+    """OrderedDict implementation with:
+        - if key is present the behaviour is regular
+        - if key is missing, checks if key belongs to a group and uses group name instead of key"""
+    def __init__(self, *args, **kwargs):
+        """Obligatory argument: groups - Groups object or dict like object with key : [item1, item2, ...] pairs"""
+        self.categories = kwargs.pop( 'categories' )
+        if not isinstance(self.categories, GroupsSet):
+            self.categories = GroupsSet(self.groups)
 
+        super(CatDict, self).__init__(*args, **kwargs)
 
+    def __contains__(self, key):
+        """Checks if key or its group present in dictionary"""
+        contains = super(CatDict, self).__contains__
+        if contains(key):
+            return True
 
+        for group in self.categories.groups(key):
+            if contains(group):
+                return True
 
+        return False
 
+    def __missing__(self, key):
+        """Return value by group name instead of a key name"""
+        for group in self.categories.groups(key):
+            if super(CatDict, self).__contains__(group):
+                return self[group]
+
+        raise KeyError(key)
 
