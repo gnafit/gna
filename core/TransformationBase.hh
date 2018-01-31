@@ -1,7 +1,5 @@
 #ifndef TRANSFORMATIONBASE_H
 #define TRANSFORMATIONBASE_H
-#include "config_vars.h"
-#include "cuda_config_vars.h"
 
 #include <string>
 #include <vector>
@@ -18,6 +16,7 @@
 
 #ifdef GNA_CUDA_SUPPORT
 #include "GNAcuDataLocation.hh"
+#include "cuda_config_vars.h"
 #endif
 
 // #define TRANSFORMATION_DEBUG
@@ -335,6 +334,7 @@ namespace TransformationTypes {
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
     bool usable;                                        ///< Unused.
 
+    void setEntryLocation() {/* Empty func*/};
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { m_entryLoc = loc; }
     DataLocation getEntryLocation() const { return m_entryLoc; }
@@ -997,6 +997,12 @@ namespace TransformationTypes {
 
     Initializer<T> dont_subscribe() {
       m_nosubscribe = true;
+      return *this;
+    }
+
+    Initializer<T> setEntryLocation() {
+      // Yes, it should be empty
+      m_entry->setEntryLocation();
       return *this;
     }
 

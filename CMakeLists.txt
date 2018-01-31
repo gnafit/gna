@@ -75,8 +75,9 @@ if (NOT CUDA_DEBUG_INFO )
     set(CUDA_DEBUG_INFO 0)
 endif()
 
-configure_file( config/gna/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+
 
 find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR})

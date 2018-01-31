@@ -2,8 +2,9 @@
 #define IDENTITY_H 1
 
 #include <stdio.h>
+#ifdef GNA_CUDA_SUPPORT
 #include "extra/GNAcuGpuArray.hh"
-
+#endif
 //
 // Identity transformation
 //i
@@ -12,7 +13,11 @@ class Identity: public GNASingleObject,
 public:
   Identity(bool is_gpu = false) : isgpu(is_gpu) {
     transformation_(this, "identity")
-      .setEntryLocation(is_gpu ? Device : Host)
+      .setEntryLocation(
+#ifdef GNA_CUDA_SUPPORT
+              is_gpu ? Device : Host
+#endif
+              )
       .input("source")
       .output("target")
       .types(Atypes::pass<0,0>)
@@ -23,17 +28,19 @@ public:
   bool isgpu = false;
 
   void identity (Args args, Rets rets) {
-    if (isgpu) { gpu_test(args, rets); }
-    else rets[0].x = args[0].x;
+    if (!isgpu) rets[0].x = args[0].x;
+#ifdef GNA_CUDA_SUPPORT
+    else { gpu_test(args, rets); }
+#endif
   }
-
+#ifdef GNA_CUDA_SUPPORT
   void gpu_test (Args args, Rets rets) {
     rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
     *(rets[0].gpuArr) *=15;
     std::cout << "Dump: ";
     rets[0].gpuArr->dump();
   }
-
+#endif
   void dump(){
       auto& data = t_["identity"][0];
 

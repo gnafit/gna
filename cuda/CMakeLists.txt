@@ -30,8 +30,8 @@ set(CUHEADERS
 #  extra/GNAcuRootMath.h
   )
 
-configure_file( ${CMAKE_BINARY_DIR}/../config/gna/cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
-include_directories( SYSTEM ${CMAKE_BINARY_DIR}/generated/ )
+configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})
 cuda_add_cublas_to_target(cuGNA)

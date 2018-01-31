@@ -3,7 +3,7 @@
 #include "CuChi2.hh"
 #include "GNAcuMath.h"
 #include <chrono>
-#include "config_vars.h"
+#include "cuda_config_vars.h"
 
 using namespace Eigen;
 

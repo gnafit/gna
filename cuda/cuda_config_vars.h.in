@@ -13,3 +13,4 @@
 
 #define CU_BLOCK_SIZE 1024
 #define CU_GRID_SIZE 32
+

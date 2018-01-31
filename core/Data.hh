@@ -1,7 +1,5 @@
 #ifndef DATA_H
 #define DATA_H
-#include "config_vars.h"
-#include "cuda_config_vars.h"
 #include <stddef.h>
 
 #include <vector>
@@ -17,6 +15,7 @@
 #ifdef GNA_CUDA_SUPPORT 
 #include "GNAcuGpuArray.hh"
 #include "GNAcuDataLocation.hh"
+#include "cuda_config_vars.h"
 #endif
 
 enum class Status {
