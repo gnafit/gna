@@ -50,7 +50,7 @@ class root_histograms_v01(TransformationBundle):
             self.transformations[var] = hist
             self.output_transformations+=hist,
 
-        for ns in self.iterate_namespaces():
+        for ns in self.namespaces:
             self.inputs += None,
             self.outputs += self.transformations[ns.name].hist,
 

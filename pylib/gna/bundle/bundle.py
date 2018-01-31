@@ -75,13 +75,3 @@ class TransformationBundle(object):
     def define_variables(self):
         pass
 
-    def iterate_namespaces(self, groups=False):
-        for ns in self.namespaces:
-            with ns:
-                if groups:
-                    for sns in ns.get('groups', ()):
-                        sns.__enter__()
-                yield ns
-                if groups:
-                    for sns in ns.get('groups', ()):
-                        sns.__leave__()

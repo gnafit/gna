@@ -21,23 +21,27 @@ class bkg_weighted_hist_v01(TransformationBundle):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
         self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
-        self.namespaces = self.spectra.namespaces
+        self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
         for det in self.cfg.parent(2).detectors:
             detns = self.common_namespace(det)
             detns.reqparameter('livetime', central=10, sigma=0.1, fixed=True)
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
+        self.numname = '{}_num'.format( self.cfg.name )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
-        for ns in self.iterate_namespaces():
+        for ns in self.namespaces:
+            import IPython
+            IPython.embed()
+            labels  = convert([ self.cfg.name ], 'stdvector')
+            weights = convert([ self.cfg.num_name ], 'stdvector')
             # ws = R.WeightedSum()
             print(ns.name)
 
     def define_variables(self):
         self.products=[]
-        numname = '{}_num'.format( self.cfg.name )
 
         groups = GroupsSet( self.cfg.get('groups', {}) )
 
@@ -53,7 +57,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         #
         # Link the other variables
         #
-        for det in self.cfg.groups['det']:
+        for det in self.cfg.variants:
             ns = self.common_namespace(det)
             formula = []
             for fullitem in self.cfg.formula:
@@ -66,8 +70,8 @@ class bkg_weighted_hist_v01(TransformationBundle):
                     self.common_namespace(det)[head] = item
 
             if len(formula)>1:
-                vp = R.VarProduct(convert(formula, 'stdvector'), numname, ns=ns)
-                ns[numname].get()
+                vp = R.VarProduct(convert(formula, 'stdvector'), self.numname, ns=ns)
+                ns[self.numname].get()
                 self.products.append( vp )
             else:
-                ns.defparameter( numname, target=formula[0] )
+                ns.defparameter( self.numname, target=formula[0] )

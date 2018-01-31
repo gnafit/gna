@@ -103,8 +103,10 @@ class namespace(Mapping):
     def __init__(self, parent, name):
         self.groups=[]
         self.name = name
-        if parent is not None and parent.path:
-            self.path = '.'.join([parent.path, name])
+        if parent and name=='':
+            raise Exception( 'Only root namespace may have no name' )
+        if parent:
+            self.path = parent.pathto(name)
         else:
             self.path = name
 
@@ -116,6 +118,9 @@ class namespace(Mapping):
         self.namespaces = namespacedict(self)
 
         self.objs = []
+
+    def pathto(self, name):
+        return '.'.join((self.path, name)) if self.path else name
 
     def __nonzero__(self):
         return True

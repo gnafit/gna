@@ -28,9 +28,10 @@ bkg = cfg('bkg')
 bkg.list = [ 'bkg1', 'bkg2' ]
 
 bkg.bkg1 = NestedDict(
-        bundle  = 'bkg_weighted_hist_v01',
-        formula = [ '{det}.bkg1_norm', '{det}.bkg1_rate', '{det}.livetime' ],
-        groups  = cfg.groups,
+        bundle   = 'bkg_weighted_hist_v01',
+        formula  = [ '{det}.bkg1_norm', '{det}.bkg1_rate', '{det}.livetime' ],
+        groups   = cfg.groups,
+        variants = cfg.detectors,
 
         bkg1_norm = uncertaindict([ (det, (1.0, 1.0, 'percent')) for det in cfg.detectors ]),
 
@@ -41,6 +42,7 @@ bkg.bkg1 = NestedDict(
             D3 = 4,
             D4 = 3,
             ),
+
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
             filename   = cfg.filename,
@@ -50,7 +52,8 @@ bkg.bkg1 = NestedDict(
                 ( 'D2', 'G1_D2' ),
                 ( 'D3', 'G2_D3' ),
                 ( 'D4', 'G3_D4' ),
-                ])
+                ]),
+            normalize = True,
             )
         )
 
@@ -58,6 +61,7 @@ bkg.bkg2 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
         formula = [ '{site}.bkg2_rate', '{det}.livetime' ],
         groups = cfg.groups,
+        variants = cfg.detectors,
 
         bkg2_rate = uncertaindict(
             mode = 'absolute',
@@ -69,7 +73,8 @@ bkg.bkg2 = NestedDict(
             bundle = 'root_histograms_v01',
             filename   = cfg.filename,
             format = 'hist_{}',
-            variants = cfg.groups['site'].keys()
+            variants = cfg.groups['site'].keys(),
+            normalize = True,
             )
         )
 
