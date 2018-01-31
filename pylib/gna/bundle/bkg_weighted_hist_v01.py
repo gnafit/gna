@@ -33,10 +33,10 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def build(self):
         for ns in self.namespaces:
+            labels  = convert((ns.pathto(self.cfg.name)), 'stdvector')
+            weights = convert((ns.pathto(self.cfg.num_name)), 'stdvector')
             import IPython
             IPython.embed()
-            labels  = convert([ self.cfg.name ], 'stdvector')
-            weights = convert([ self.cfg.num_name ], 'stdvector')
             # ws = R.WeightedSum()
             print(ns.name)
 
