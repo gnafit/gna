@@ -458,10 +458,8 @@ void Entry::evaluateTypes() {
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT 
     if (this->getEntryLocation() == Device) {  
-      for (size_t i = 0; i < sources.size(); i++) {
-	if ( sources[i].sink->entry->getEntryLocation() != Device ) {
-          sources[i].sink->data->require_gpu();
-        }
+      for (auto &source : sources) {
+          source.sink->data->require_gpu();
       }
       for (auto &sink : sinks) {
         sink.data->require_gpu();
@@ -508,7 +506,7 @@ const Data<double> &Entry::data(int i) {
   touch();
 #ifdef GNA_CUDA_SUPPORT
   if (sink.data->gpuArr != nullptr) {
-    if (sink.data->gpuArr->dataLoc != Host && sink.data->gpuArr->syncFlag != Synchronized) sink.data->gpuArr->sync( Host );
+    sink.data->gpuArr->sync( Host );
   }
 #endif
   return *sink.data;
