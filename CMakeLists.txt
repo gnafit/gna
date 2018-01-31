@@ -99,8 +99,6 @@ set (HEADERS
   Histogram.hh
   HistEdges.hh
   Identity.hh
-  IdentityX2.hh
-  IdentityGPU.hh
   LinearInterpolator.hh
   FillLike.hh
   Derivative.hh

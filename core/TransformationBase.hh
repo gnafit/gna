@@ -183,7 +183,6 @@ namespace TransformationTypes {
      * @param other -- other InputHandle instance to access its Source.
      */
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
-    static InputHandle invalid(const std::string name);
 
     // /**
     // * @brief
@@ -337,12 +336,12 @@ namespace TransformationTypes {
     bool usable;                                        ///< Unused.
 
 #ifdef GNA_CUDA_SUPPORT
-    void setEntryLocation(DataLocation loc) { entryLoc = loc; }
-    DataLocation getEntryLocation() { return entryLoc; }
+    void setEntryLocation(DataLocation loc) { m_entryLoc = loc; }
+    DataLocation getEntryLocation() const { return m_entryLoc; }
 #endif
   private:
 #ifdef GNA_CUDA_SUPPORT
-    DataLocation entryLoc = Host;
+    DataLocation m_entryLoc = Host;
 #endif
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
@@ -358,7 +357,7 @@ namespace TransformationTypes {
 #ifdef GNA_CUDA_SUPPORT
     m_sink->entry->touch();
     if (m_sink->data->gpuArr != nullptr) {
-      if (m_sink->data->gpuArr->dataLoc != Host && m_sink->data->gpuArr->syncFlag != Synchronized) m_sink->data->gpuArr->sync( Host );
+       m_sink->data->gpuArr->sync( Host );
     }
 #endif
     return view();

@@ -249,7 +249,7 @@ void GNAcuGpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
-  if (dataLoc == loc !! syncFlag == Synchronized) {
+  if (dataLoc == loc || syncFlag == Synchronized) {
 #ifdef CU_DEBUG_2
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl;
 #endif

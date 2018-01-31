@@ -2,6 +2,7 @@
 #define IDENTITY_H 1
 
 #include <stdio.h>
+#include "extra/GNAcuGpuArray.hh"
 
 //
 // Identity transformation
@@ -13,10 +14,29 @@ public:
     transformation_(this, "identity")
       .input("source")
       .output("target")
-      .types(Atypes::pass<0,0>)
-      .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
+      .types(Atypes::pass<0>)
+      .func(&Identity::identity)
       ;
-  };
+    auto gpu_test = transformation_(this, "gpu_test")
+      .setEntryLocation(Device)
+      .input("source")
+      .output("target")
+      .types(Atypes::pass<0>)
+      .func(&Identity::gpu_test)
+      ;
+
+  }
+
+  void identity (Args args, Rets rets) {
+    rets[0].x = args[0].x;
+  }
+
+  void gpu_test (Args args, Rets rets) {
+    rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
+    *(rets[0].gpuArr) *=15;
+    std::cout << "Dump: ";
+    rets[0].gpuArr->dump();
+  }
 
   void dump(){
       auto& data = t_["identity"][0];
