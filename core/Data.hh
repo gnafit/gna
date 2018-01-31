@@ -330,7 +330,7 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;
 #ifdef GNA_CUDA_SUPPORT
-  GNAcuGpuArray<T>* gpuArr{nullptr};
+  std::unique_ptr<GNAcuGpuArray<T>> gpuArr{nullptr};
 #endif
 };
 
@@ -342,7 +342,7 @@ DataLocation Data<T>::require_gpu() {
 Allocate GPU memory in case of GPU array is not inited yet
 */
   if (gpuArr == nullptr) {
-    gpuArr = new GNAcuGpuArray<T>();
+    gpuArr.reset(new GNAcuGpuArray<T>());
   }
   if (gpuArr->deviceMemAllocated) {
 #ifdef CU_DEBUG_2
