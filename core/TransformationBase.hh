@@ -888,24 +888,20 @@ namespace TransformationTypes {
   public:
     /**
      * @brief Function, that does the actual calculation (reference to a member function).
-     * @copydoc Function
      *
      * First argument is the actual transformation classe's `this` allowing to use member functions.
      *
-     * @param args -- container with transformation inputs (Args).
-     * @param rets -- container with transformation outputs (Args).
+     * @copydoc Function
      */
     typedef std::function<void(T*,
                                TransformationTypes::Args,
                                TransformationTypes::Rets)> MemFunction;
     /**
      * @brief Function, that does the input types checking and output types derivation (reference to a member function).
-     * @copydoc TypesFunction
      *
      * First argument is the actual transformation classe's `this` allowing to use member functions.
      *
-     * @param atypes -- container with transformation inputs' types (Atypes).
-     * @param rtypes -- container with transformation outputs' types (Rtypes).
+     * @copydoc TypesFunction
      */
     typedef std::function<void(T*,
                                TransformationTypes::Atypes,
