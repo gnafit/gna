@@ -29,21 +29,25 @@ def get_bundle(name):
     return bundle
 
 def init_bundle(**kwargs):
-    name = kwargs.pop('name', None)
-    if not name:
+    names = kwargs.pop('name', None)
+    if not names:
         cfg = kwargs['cfg']
-        name = cfg.bundle
+        names = cfg.bundle
 
-    bundle = get_bundle(name)
-    if not bundle:
-        raise Exception( "Bundle '%s' is not defined"%name )
+    if not isinstance( names, (list, tuple) ):
+        names = names,
 
-    return bundle(**kwargs)
+    bundles = tuple(get_bundle(name) for name in names)
+    if not bundles:
+        raise Exception( "Bundle '%s' is not defined"%str(name) )
+
+    return tuple(bundle(**kwargs) for bundle in bundles)
 
 def execute_bundle(**kwargs):
-    bundle = init_bundle(**kwargs )
-    bundle.define_variables()
-    bundle.build()
+    bundles = init_bundle(**kwargs )
+    for bundle in bundles:
+        bundle.define_variables()
+        bundle.build()
     return bundle
 
 class TransformationBundle(object):

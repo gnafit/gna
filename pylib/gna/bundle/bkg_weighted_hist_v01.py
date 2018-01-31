@@ -15,6 +15,7 @@ from gna.bundle import *
 
 class bkg_weighted_hist_v01(TransformationBundle):
     name = 'bkg_weighted_hist'
+    create_variable_links = True
 
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
@@ -61,7 +62,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
                 item = groups.format_splitjoin( det, fullitem, prepend=self.common_namespace.path )
                 formula.append(item)
 
-                if not head in ns:
+                if self.create_variable_links and not head in ns:
                     self.common_namespace(det)[head] = item
 
             if len(formula)>1:
