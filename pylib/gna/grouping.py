@@ -53,6 +53,9 @@ class Groups(object):
     def samegroup(self, items):
         return len({self.match[item] for item in items})==1
 
+    def group(self, item):
+        return self.groups[self[item]]
+
 class Categories(object):
     """A set of Groups instances"""
     def __init__(self, groups, recursive=False):
@@ -69,6 +72,9 @@ class Categories(object):
                 return True
 
         return False
+
+    def get_group(self, item, cat):
+        return self.__categories__[cat].group(item)
 
     def group(self, item, cat=None):
         if cat:

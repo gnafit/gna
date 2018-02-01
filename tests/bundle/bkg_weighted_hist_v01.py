@@ -5,9 +5,15 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.configurator import NestedDict, uncertain, uncertaindict
 from gna.bundle import execute_bundle
-from gna.env import env
+from gna.env import env, findname
 from matplotlib import pyplot as P
+from mpl_tools.helpers import plot_hist, plot_bar
 from collections import OrderedDict
+
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-s', '--set', nargs=2, action='append', help='set parameter' )
+opts = parser.parse_args()
 
 storage = env.globalns('storage')
 
@@ -82,23 +88,22 @@ def make_sample_file( filename ):
     file = R.TFile( filename, 'recreate' )
     assert not file.IsZombie()
 
-    it = 1
-
     name='hist'
     h = R.TH1D(name, name, 10, 0, 10 )
-    h.SetBinContent( it, 1 ); it+=1
+    h.SetBinContent( 1, 1 )
     file.WriteTObject( h )
 
+    it_site, it_det = 1, 1
     for gr, dets in cfg.groups['site'].items():
         name = 'hist_{group}'.format( group=gr )
         h = R.TH1D(name, name, 10, 0, 10 )
-        h.SetBinContent( it, 1 ); it+=1
+        h.SetBinContent( it_site, 1 ); it_site+=1
         file.WriteTObject( h )
 
         for det in dets:
             name = 'hist_{group}_{det}'.format( group=gr, det=det )
             h = R.TH1D(name, name, 10, 0, 10 )
-            h.SetBinContent( it, 1 ); it+=1
+            h.SetBinContent( it_det, 1 ); it_det+=1
             file.WriteTObject( h )
 
     print('Generated file contents')
@@ -108,13 +113,48 @@ def make_sample_file( filename ):
 make_sample_file( cfg.filename )
 
 ns = env.globalns('testexp')
+for det in cfg.detectors:
+    detns = ns(det).reqparameter('livetime', central=10, sigma=0.1, fixed=True)
+
+bundles=()
 for bkg in cfg.bkg.list:
     scfg = cfg.bkg[bkg]
     b = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.variants, storage=storage )
-
-    import IPython
-    IPython.embed()
+    bundles+=b,
 
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
+
+if opts.set:
+    for name, value in opts.set:
+        value = float(value)
+        print( 'Set', name, value )
+        var = findname( ns.pathto(name), ns )
+        var.set( value )
+
+    from gna.parameters.printer import print_parameters
+    print_parameters( env.globalns )
+
+for bundle in bundles:
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'x axis' )
+    ax.set_ylabel( 'entries' )
+    ax.set_title( bundle.cfg.name )
+
+    for name, ts in bundle.transformations.items():
+        output = ts.sum.single()
+        if bundle.cfg.name=='bkg2':
+            group = bundle.groups.get_group(name, 'site')
+            pack = (group.index(name), len(group))
+        else:
+            pack = None
+        plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )
+
+    ax.legend( loc='upper right' )
+
+P.show()
+
 

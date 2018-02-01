@@ -20,6 +20,22 @@ def plot_hist( lims, height, *args, **kwargs ):
 
     return P.plot( x, y, *args, **kwargs )
 
+def plot_bar( lims, height, *args, **kwargs ):
+    """Plot bars with edges specified"""
+    kwargs.setdefault( 'align', 'edge' )
+    pack = kwargs.pop( 'pack', None )
+
+    lims = N.asanyarray( lims )
+    left = lims[:-1]
+    widths  = lims[1:] - left
+
+    if pack:
+        i, n = pack
+        widths/=n
+        left+=i*widths
+
+    return P.bar( left, height, widths, *args, **kwargs )
+
 def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""
     rasterized = kwargs.pop( 'rasterized', True )

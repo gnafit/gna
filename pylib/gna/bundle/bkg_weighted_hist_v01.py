@@ -23,10 +23,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
-        for det in self.cfg.parent(2).detectors:
-            detns = self.common_namespace(det)
-            detns.reqparameter('livetime', central=10, sigma=0.1, fixed=True)
-
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         self.numname = '{}_num'.format( self.cfg.name )
 
@@ -35,6 +31,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def build(self):
         spectra = CatDict(self.groups, self.spectra.transformations)
+        self.transformations=NestedDict()
         for ns in self.namespaces:
             labels  = convert([self.cfg.name], 'stdvector')
             weights = convert([ns.pathto(self.numname)], 'stdvector')
@@ -42,6 +39,9 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp.hist.hist)
+
+            self.transformations(ns.name).hist = inp
+            self.transformations[ns.name].sum = ws
 
             self.outputs += ws.sum.sum,
             self.output_transformations+=ws,
