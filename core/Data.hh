@@ -11,6 +11,7 @@
 #include <numeric>
 #include <iostream>
 #include <Eigen/Dense>
+#include "config_vars.h"
 
 #ifdef GNA_CUDA_SUPPORT 
 #include "GNAcuGpuArray.hh"

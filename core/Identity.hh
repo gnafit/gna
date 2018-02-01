@@ -9,15 +9,35 @@
 class Identity: public GNASingleObject,
                 public Transformation<Identity> {
 public:
-  Identity(){
+  bool isgpu = false;
+  Identity(bool gpu = false) : isgpu(gpu) {
     transformation_(this, "identity")
       .input("source")
       .output("target")
       .types(Atypes::pass<0,0>)
-      .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
+      .func(&Identity::ident)
+#ifdef GNA_CUDA_SUPPORT
+      .setEntryLocation(gpu? Device : Host)
+#endif
       ;
   };
 
+  void ident(Args args, Rets rets) {
+#ifdef GNA_CUDA_SUPPORT
+    if (isgpu) gpu_test(args, rets);
+    else 
+#endif
+      rets[0].x = args[0].x;
+  }
+
+#ifdef GNA_CUDA_SUPPORT
+  void gpu_test (Args args, Rets rets) {
+    rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
+    *(rets[0].gpuArr) *=15;
+    std::cout << "Dump: ";
+    rets[0].gpuArr->dump();
+  }
+#endif
   void dump(){
       auto& data = t_["identity"][0];
 

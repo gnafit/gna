@@ -14,6 +14,8 @@
 #include "Parameters.hh"
 #include "Data.hh"
 
+#include "config_vars.h"
+
 #ifdef GNA_CUDA_SUPPORT
 #include "GNAcuDataLocation.hh"
 #include "cuda_config_vars.h"
@@ -334,7 +336,7 @@ namespace TransformationTypes {
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
     bool usable;                                        ///< Unused.
 
-    void setEntryLocation() {/* Empty func*/};
+   // void setEntryLocation() {/* Empty func*/};
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { m_entryLoc = loc; }
     DataLocation getEntryLocation() const { return m_entryLoc; }
@@ -354,8 +356,8 @@ namespace TransformationTypes {
    * @return pointer to the Sink's data buffer.
    */
   inline const double *OutputHandle::data() const {
-#ifdef GNA_CUDA_SUPPORT
     m_sink->entry->touch();
+#ifdef GNA_CUDA_SUPPORT
     if (m_sink->data->gpuArr != nullptr) {
        m_sink->data->gpuArr->sync( Host );
     }
@@ -1000,12 +1002,12 @@ namespace TransformationTypes {
       return *this;
     }
 
-    Initializer<T> setEntryLocation() {
+ /*   Initializer<T> setEntryLocation() {
       // Yes, it should be empty
       m_entry->setEntryLocation();
       return *this;
     }
-
+*/
 #ifdef GNA_CUDA_SUPPORT
     Initializer<T> setEntryLocation(DataLocation loc) {
       m_entry->setEntryLocation(loc);
