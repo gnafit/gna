@@ -112,6 +112,9 @@ for bkg in cfg.bkg.list:
     scfg = cfg.bkg[bkg]
     b = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.variants, storage=storage )
 
+    import IPython
+    IPython.embed()
+
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
 

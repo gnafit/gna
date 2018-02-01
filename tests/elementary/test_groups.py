@@ -24,13 +24,13 @@ groups = OrderedDict( [
     ( 'EH3', ('AD31', 'AD32', 'AD33', 'AD34') ),
     ] )
 
-groupings = GroupsSet(OrderedDict(
+cat = Categories(OrderedDict(
         site=groups,
         exp ={ '': dets.keys() },
         det ={ d: (d,) for d in dets.keys() }
         ))
 
-gd = GroupedDict( sites, groups=groups )
+gd = GroupedDict( groups, sites )
 
 print( 'Retrieve data by actual keys (sites):' )
 for k, v in gd.items():
@@ -44,6 +44,14 @@ print()
 
 print( 'Keys' )
 print( list(gd.keys()) )
+print()
+
+print( 'Group keys' )
+print( list(gd.groups.keys()) )
+print()
+
+print( 'Group keys (EH1)' )
+print( list(gd.groups.keys('EH1')) )
 print()
 
 print( 'Sub keys' )
@@ -76,13 +84,27 @@ except:
 
 print()
 
-print( 'Test sets' )
-print( '11 in sets:', 'AD11' in groupings )
-print( '11 group:', groupings.group('AD11') )
-print( '11 group ("site"):', groupings.group('AD11', 'site') )
-print( '11 group ("exp"):', groupings.group('AD11', 'exp') )
-print( '11 groups:', groupings.groups('AD11') )
-print( '11 items:', groupings.items('AD11') )
-print( 'Format {exp}.{site}.{det}:', groupings.format( 'AD11', '{exp}.{site}.{det}' ) )
-print( 'Format {exp}.{site}.{det} (clean):', groupings.format_splitjoin( 'AD11', '{exp}.{site}.{det}' ) )
+print( 'Test categories:' )
+print( 'AD11 in cat:', 'AD11' in cat )
+print( 'EH11 in cat:', 'EH1' in cat )
+print( 'AD11 group:', cat.group('AD11') )
+print( 'AD11 group ("site"):', cat.group('AD11', 'site') )
+print( 'AD11 group ("exp"):', cat.group('AD11', 'exp') or '""' )
+print( 'AD11 groups:', cat.groups('AD11') )
+print( 'AD11 categories:', cat.categories('AD11') )
+print( 'AD11 items:', cat.itemdict('AD11') )
+print( 'Format {exp}.{site}.{det}:', cat.format( 'AD11', '{exp}.{site}.{det}' ) )
+print( 'Format {exp}.{site}.{det} (clean):', cat.format_splitjoin( 'AD11', '{exp}.{site}.{det}' ) )
 
+cat.recursive=True
+print( 'Test recursive categories:' )
+print( 'AD11 in cat:', 'AD11' in cat )
+print( 'AD11 group:', cat.group('AD11') )
+print( 'AD11 groups:', cat.groups('AD11') )
+print( 'AD11 cat:', cat.categories('AD11') )
+print( 'AD11 items:', cat.itemdict('AD11') )
+print( 'EH1 in cat:', 'EH1' in cat )
+print( 'EH1 group:', cat.group('EH1') )
+print( 'EH1 groups:', cat.groups('EH1') )
+print( 'EH1 cat:', cat.categories('EH1') )
+print( 'EH1 items:', cat.itemdict('EH1') )

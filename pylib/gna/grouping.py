@@ -41,39 +41,91 @@ class Groups(object):
         """Returns a group of an item"""
         return self.match[item]
 
-class GroupsSet(object):
-    """A set of Groups instances"""
-    def __init__(self, groups):
-        self.__groups__ = OrderedDict([ (k, Groups(g)) for k, g in groups.items() ])
+    def hasgroup(self, group):
+        return group in self.groups
 
-    def __contains__(self, item):
+    def containsall(self, items):
+        for item in items:
+            if not item in self:
+                return False
+        return True
+
+    def samegroup(self, items):
+        return len({self.match[item] for item in items})==1
+
+class Categories(object):
+    """A set of Groups instances"""
+    def __init__(self, groups, recursive=False):
+        self.recursive = recursive
+        self.__categories__ = OrderedDict([ (k, Groups(g)) for k, g in groups.items() ])
+
+    def __contains__(self, item, recursive=None):
         """Checks if the item belongs at least to the one of groupings"""
-        for group in self.__groups__.values():
+        for group in self.__categories__.values():
             if item in group:
                 return True
+
+            if self.recursive and item in group.groups:
+                return True
+
         return False
 
-    def group(self, item, set=None):
-        if set:
-            return self.__groups__[set][item]
+    def group(self, item, cat=None):
+        if cat:
+            return self.__categories__[cat][item]
 
-        for group, items in self.__groups__.items():
+        for group, items in self.__categories__.items():
             if item in items:
                 return items[item]
         return None
 
     def groups(self, item):
-        return [ group[item] for cat, group in self.__groups__.items() if item in group ]
+        res = [ group[item] for cat, group in self.__categories__.items() if item in group ]
+        if self.recursive:
+            for cat, group in self.__categories__.items():
+                if not group.hasgroup(item):
+                    continue
+                groupitems = group.keys(item)
+                for newcat, newgroup in self.__categories__.items():
+                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                        continue
+                    res.append( newgroup[groupitems[0]] )
+            return list(OrderedDict.fromkeys(res))
+        return res
 
     def categories(self, item):
-        return [ cat for cat, group in self.__groups__.items() if item in group ]
+        res = [ cat for cat, group in self.__categories__.items() if item in group ]
+        if self.recursive:
+            for cat, group in self.__categories__.items():
+                if not group.hasgroup(item):
+                    continue
+                groupitems = group.keys(item)
+                for newcat, newgroup in self.__categories__.items():
+                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                        continue
+                    res.append( newcat )
+            return list(OrderedDict.fromkeys(res))
+        return res
 
     def items(self, item):
-        return OrderedDict([ (cat, group[item]) for cat, group in self.__groups__.items() if item in group ])
+        return self.itemdict(item).items()
+
+    def itemdict(self, item):
+        res = OrderedDict([ (cat, group[item]) for cat, group in self.__categories__.items() if item in group ])
+        if self.recursive:
+            for cat, group in self.__categories__.items():
+                if not group.hasgroup(item):
+                    continue
+                groupitems = group.keys(item)
+                for newcat, newgroup in self.__categories__.items():
+                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                        continue
+                    res[newcat]=newgroup[groupitems[0]]
+        return res
 
     def format(self, item, fmt):
         if isinstance(fmt, basestring):
-            return fmt.format(**self.items( item ) )
+            return fmt.format(**self.itemdict( item ))
 
         return type(fmt)(self.format(item, s) for s in fmt)
 
@@ -84,9 +136,9 @@ class GroupedDict(OrderedDict):
     """OrderedDict implementation with:
         - if key is present the behaviour is regular
         - if key is missing, checks if key belongs to a group and uses group name instead of key"""
-    def __init__(self, *args, **kwargs):
+    def __init__(self, groups, *args, **kwargs):
         """Obligatory argument: groups - Groups object or dict like object with key : [item1, item2, ...] pairs"""
-        self.groups = kwargs.pop( 'groups' )
+        self.groups = groups
         if not isinstance(self.groups, Groups):
             self.groups = Groups(self.groups)
 
@@ -122,11 +174,11 @@ class CatDict(OrderedDict):
     """OrderedDict implementation with:
         - if key is present the behaviour is regular
         - if key is missing, checks if key belongs to a group and uses group name instead of key"""
-    def __init__(self, *args, **kwargs):
+    def __init__(self, categories, *args, **kwargs):
         """Obligatory argument: groups - Groups object or dict like object with key : [item1, item2, ...] pairs"""
-        self.categories = kwargs.pop( 'categories' )
-        if not isinstance(self.categories, GroupsSet):
-            self.categories = GroupsSet(self.groups)
+        self.categories = categories
+        if not isinstance(self.categories, Categories):
+            self.categories = Categories(self.groups)
 
         super(CatDict, self).__init__(*args, **kwargs)
 

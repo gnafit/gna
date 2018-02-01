@@ -9,7 +9,7 @@ from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
 from gna.configurator import NestedDict, uncertain
 from converters import convert
-from gna.grouping import GroupsSet, CatDict
+from gna.grouping import Categories, CatDict
 
 from gna.bundle import *
 
@@ -30,26 +30,21 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
         self.numname = '{}_num'.format( self.cfg.name )
 
-        self.groups = GroupsSet( self.cfg.get('groups', {}) )
+        self.groups = Categories( self.cfg.get('groups', {}) )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
-        spectra = CatDict( self.spectra.transformations, categories=self.groups )
+        spectra = CatDict(self.groups, self.spectra.transformations)
         for ns in self.namespaces:
             labels  = convert([self.cfg.name], 'stdvector')
             weights = convert([ns.pathto(self.numname)], 'stdvector')
             ws = R.WeightedSum(labels, weights)
 
-            print(ns.name)
-            print(list(ws.sum.inputs))
-            print(list(ws.sum.outputs))
-
             inp = spectra[ns.name]
-            print(list(inp.hist.inputs))
-            print(list(inp.hist.outputs))
+            ws.sum.inputs[self.cfg.name](inp.hist.hist)
 
-            import IPython
-            IPython.embed()
+            self.outputs += ws.sum.sum,
+            self.output_transformations+=ws,
 
     def define_variables(self):
         self.products=[]
