@@ -28,11 +28,11 @@ shape = array_to_stdvector(mat.shape, 'size_t')
 
 points = R.Points( lmat, shape )
 
-identity = R.IdentityX2()
-id2 = R.IdentityX2()
-identity.identityx2.source( points.points.points )
-id2.identityx2.source(identity.identityx2.target)
-res = id2.identityx2.target.data()
+identity = R.Identity()
+id2 = R.Identity()
+identity.identity.inputs.source( points.points.points )
+id2.identity.inputs.source(identity.identity.target)
+res = id2.identity.target.data()
 
 print( 'Result (C++ Data to numpy)' )
 print( res )

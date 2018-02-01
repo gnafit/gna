@@ -4,6 +4,8 @@
 #include "GNAcuMath.h"
 #include <chrono>
 #include "cuda_config_vars.h"
+#include "config_vars.h"
+
 
 using namespace Eigen;
 
