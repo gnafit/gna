@@ -245,6 +245,8 @@ Transformation : class template
 TransformationTypes namespace (TransformationBase)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The header is now fully documented via Doxygen.
+
 Functions
 """""""""
 
