@@ -5,7 +5,7 @@
 
 class VarProduct: public GNAObject {
 public:
-  VarProduct(const std::vector<std::string>& varnamess, const std::string& productname);
+  VarProduct(const std::vector<std::string>& varnames, const std::string& productname);
 
 protected:
   std::vector<variable<double>> m_vars;
