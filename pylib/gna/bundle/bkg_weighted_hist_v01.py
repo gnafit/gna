@@ -20,7 +20,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.spectra = execute_bundle( cfg=self.cfg.spectra, storage=self.storage )
+        self.spectra = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace, storage=self.storage )
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )

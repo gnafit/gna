@@ -31,7 +31,7 @@ cfg.groups=NestedDict(
         )
 
 bkg = cfg('bkg')
-bkg.list = [ 'bkg1', 'bkg2' ]
+bkg.list = [ 'bkg1', 'bkg2', 'bkg3' ]
 
 bkg.bkg1 = NestedDict(
         bundle   = 'bkg_weighted_hist_v01',
@@ -84,6 +84,35 @@ bkg.bkg2 = NestedDict(
             )
         )
 
+bkg.bkg3 = NestedDict(
+        bundle = 'bkg_weighted_hist_v01',
+        formula = [ '{site}.bkg3_rate', '{det}.livetime' ],
+        groups = cfg.groups,
+        variants = cfg.detectors,
+
+        bkg3_rate = uncertaindict(
+            mode = 'absolute',
+            G1 = (2.0, 0.3),
+            G2 = (1.0, 0.2),
+            G3 = (0.1, 0.1),
+            ),
+        spectra = NestedDict(
+            bundle = 'hist_mixture_v01',
+
+            fractions = uncertaindict(
+                li = ( 0.95, 0.05, 'relative' )
+                ),
+            spectra = NestedDict([
+                ('li', NestedDict(
+
+                    )),
+                ('he', NestedDict(
+
+                    )),
+                ])
+            )
+        )
+
 def make_sample_file( filename ):
     file = R.TFile( filename, 'recreate' )
     assert not file.IsZombie()
@@ -119,7 +148,7 @@ for det in cfg.detectors:
 bundles=()
 for bkg in cfg.bkg.list:
     scfg = cfg.bkg[bkg]
-    b = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.variants, storage=storage )
+    b = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.get('variants', None), storage=storage )
     bundles+=b,
 
 from gna.parameters.printer import print_parameters
