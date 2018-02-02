@@ -10,6 +10,7 @@
 #include <limits>
 #include <stdexcept>
 #include <numeric>
+#include <type_traits>
 
 #include <Eigen/Dense>
 
@@ -83,7 +84,7 @@ struct DataType {
                            std::multiplies<size_t>());
   }
 
-  bool preallocated() { return buffer != nullptr; }             ///< Check if data buffer is preallocated and not managed by Data.
+  bool preallocated() const { return buffer != nullptr; }       ///< Check if data buffer is preallocated and not managed by Data.
 
   /**
    * @brief Set the preallocated (double) buffer pointer.
@@ -516,39 +517,48 @@ class Data {
 public:
   /**
    * @brief Constructor.
+   * @param dt -- DataType specification.
    *
    * Constructor does:
-   *   - if `buf==nullptr` allocates the buffer, enough to hold data, specified for the DataType.
-   *   - or uses a buffer `buf` directly. The user must ensure that the buffer size is consistent with DataType requirements.
-   *   - Initializez array, vector and matrix views on the buffer.
+   *   - if dt has preallocated buffer uses it is to store the data. The user must ensure that the buffer size is consistent with DataType requirements.
+   *   - allocates the buffer, enough to hold data, specified for the DataType.
+   *   - Initializes array, vector and matrix views on the buffer.
    *
-   * @param dt -- DataType specification.
-   * @param buf -- the buffer to view.
+   * @exception std::runtime_error in case DataType is not defined.
+   * @exception std::bad_typeid in case preallocated buffer type is not the same as Data<T> type.
    */
-  Data(const DataType &dt, T *buf)
+  Data(const DataType &dt)
     : type(dt)
   {
-    if (!buf) {
-      allocated.reset(new T[dt.size()]);
-      buf = allocated.get();
+    if(!dt.defined()){
+      throw std::runtime_error("Using undefined DataType to initialize data");
     }
-    buffer = buf;
+    if (dt.preallocated()) {
+      if(!std::is_same<T*, decltype(dt.buffer)>::value) {
+        throw std::bad_typeid();
+      }
+      this->buffer = dt.buffer;
+    }
+    else {
+      allocated.reset(new T[dt.size()]);
+      this->buffer = allocated.get();
+    }
     if (dt.shape.size() == 1) {
-      new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]);
-      new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]);
+      new (&this->arr)   Eigen::Map<ArrayXT>(  this->buffer, dt.shape[0] );
+      new (&this->vec)   Eigen::Map<VectorXT>( this->buffer, dt.shape[0] );
     } else if (dt.shape.size() == 2) {
-      new (&arr) Eigen::Map<ArrayXT>(buf, dt.shape[0]*dt.shape[1]);
-      new (&vec) Eigen::Map<VectorXT>(buf, dt.shape[0]*dt.shape[1]);
+      new (&this->arr)   Eigen::Map<ArrayXT>(  this->buffer, dt.shape[0]*dt.shape[1] );
+      new (&this->vec)   Eigen::Map<VectorXT>( this->buffer, dt.shape[0]*dt.shape[1] );
 
-      new (&arr2d) Eigen::Map<ArrayXXT>(buf, dt.shape[0], dt.shape[1]);
-      new (&mat) Eigen::Map<MatrixXT>(buf, dt.shape[0], dt.shape[1]);
+      new (&this->arr2d) Eigen::Map<ArrayXXT>( this->buffer, dt.shape[0], dt.shape[1] );
+      new (&this->mat)   Eigen::Map<MatrixXT>( this->buffer, dt.shape[0], dt.shape[1] );
     }
   }
 
   const DataType type;                             ///< data type.
   Status state{Status::Undefined};                 ///< data status.
 
-  T *buffer{nullptr};                              ///< the buffer.
+  T *buffer{nullptr};                              ///< the buffer. Data ownership is undefined.
   std::unique_ptr<T> allocated{nullptr};           ///< the buffer initialized within Data. Deallocates the data when destructed.
 
   Eigen::Map<ArrayXT> arr{nullptr, 0};             ///< 1D array view.
