@@ -29,16 +29,16 @@ shape = array_to_stdvector(mat.shape, 'size_t')
 
 points = R.Points( lmat, shape )
 
-identitygpu = R.Identity()
-id2 = R.Identity()
-IPython.embed()
+identitygpu = R.Identity(True)
+id2 = R.Identity(True)
+#IPython.embed()
 identitygpu.identity.source( points.points.points )
 id2.identity.source(identitygpu.identity.target)
-res = identitygpu.identity.target.data()
+res = id2.identity.target.data()
 
 print( 'Result (C++ Data to numpy)' )
-print( points.points.points.data() )
+#print( points.points.points.data() )
 print( res )
-print( id2.identity.target.data() )
+#print( id2.identity.target.data() )
 print()
 

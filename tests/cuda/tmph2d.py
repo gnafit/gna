@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
+import IPython
 
 def array_to_stdvector( array, dtype ):
     """Convert an array to the std::vector<dtype>"""
@@ -28,13 +29,16 @@ shape = array_to_stdvector(mat.shape, 'size_t')
 
 points = R.Points( lmat, shape )
 
-identity = R.IdentityX2()
-id2 = R.IdentityGPU()
-identity.identityx2.source( points.points.points )
-id2.identitygpu.source(identity.identityx2.target)
-res = id2.identitygpu.target.data()
+identity = R.Identity()
+id2 = R.Identity(True)
+#IPython.embed()
+identity.identity.source( points.points.points )
+id2.identity.source(identity.identity.target)
+res = id2.identity.target.data()
 
 print( 'Result (C++ Data to numpy)' )
+#print( points.points.points.data() )
 print( res )
+#print( id2.identity.target.data() )
 print()
 
