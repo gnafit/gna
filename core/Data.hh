@@ -279,6 +279,20 @@ inline void DataType::dump() const {
   }
 }
 
+/**
+ * @brief Generic data class.
+ *
+ * The class holds the following informations:
+ *   - The buffer of date of type T (usually double).
+ *   - DatType specification, i.e. buffer size, dimensions, bin edges.
+ *   - Several views on the buffer via Eigen classes:
+ *     * 1- and 2- dimensinal arrays.
+ *     * Vector and Matrix.
+ *
+ * @tparam T -- datatype to hold buffer for.
+ * @author Dmitry Taychenachev
+ * @date 2015
+ */
 template <typename T>
 class Data {
   typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
@@ -287,6 +301,17 @@ class Data {
   typedef Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> ArrayXXT;
   typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> MatrixXT;
 public:
+  /**
+   * @brief Constructor.
+   *
+   * Constructor does:
+   *   - if `buf==nullptr` allocates the buffer, enough to hold data, specified for the DataType.
+   *   - or uses a buffer `buf` directly. The user must ensure that the buffer size is consistent with DataType requirements.
+   *   - Initializez array, vector and matrix views on the buffer.
+   *
+   * @param dt -- DataType specification.
+   * @param buf -- the buffer to view.
+   */
   Data(const DataType &dt, T *buf)
     : type(dt)
   {
@@ -307,19 +332,19 @@ public:
     }
   }
 
-  const DataType type;
-  Status state{Status::Undefined};
+  const DataType type;                             ///< data type.
+  Status state{Status::Undefined};                 ///< data status.
 
-  T *buffer{nullptr};
-  std::unique_ptr<T> allocated{nullptr};
+  T *buffer{nullptr};                              ///< the buffer.
+  std::unique_ptr<T> allocated{nullptr};           ///< the buffer initialized within Data. Deallocates the data when destructed.
 
-  Eigen::Map<ArrayXT> arr{nullptr, 0};
-  Eigen::Map<VectorXT> vec{nullptr, 0};
+  Eigen::Map<ArrayXT> arr{nullptr, 0};             ///< 1D array view.
+  Eigen::Map<VectorXT> vec{nullptr, 0};            ///< 1D vector view.
 
-  Eigen::Map<ArrayXXT> arr2d{nullptr, 0, 0};
-  Eigen::Map<MatrixXT> mat{nullptr, 0, 0};
+  Eigen::Map<ArrayXXT> arr2d{nullptr, 0, 0};       ///< 2D array view.
+  Eigen::Map<MatrixXT> mat{nullptr, 0, 0};         ///< 2D matrix view.
 
-  Eigen::Map<ArrayXT> &x = arr;
+  Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
 };
 
 #endif // DATA_H
