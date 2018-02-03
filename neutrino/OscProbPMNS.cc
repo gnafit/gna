@@ -8,15 +8,6 @@
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
 
-#ifdef GNA_CUDA_SUPPORT 
-#include "extra/GNAcuOscProbFull.h"
-#include "extra/GNAcuOscProbMem.hh"
-#include "extra/GNAcuGpuArray.hh"
-#endif
-
-#include <chrono>
-#include <ctime>
-
 using namespace Eigen;
 
 static double km2MeV(double km) {
@@ -131,103 +122,9 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(Atypes::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
-
-#ifdef GNA_CUDA_SUPPORT
-  auto full_formula_gpu = transformation_(this, "full_osc_prob_gpu")
-      .input("Enu")
-      .output("oscprob")
-      .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .types(Atypes::pass<0>)
-      .func(&OscProbPMNS::calcFullProbGpu)
-      .setEntryLocation(DataLocation::Device);
-#endif
-
 }
-
-#ifdef GNA_CUDA_SUPPORT
-
-void OscProbPMNS::calcFullProbGpu(Args args, Rets rets) {
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now();
-//int n = 10;
-//double *a1ptr = nullptr; //new double[n];
-//double *a2ptr = nullptr; //new double[n];
-//double *resptr = nullptr; //new double[n];
-GNAcuGpuArray<double> a1(args[0].x.rows());
-//GNAcuGpuArray<double> a2(a2ptr, n);
-
-auto tmmm = a1.setByValue(3);
-a1 *= 2;
-std::cout << "State is " << tmmm << " " ; 
-/*a2.setByValue(5);
-
-GNAcuGpuArray<double> res(resptr, n);
-
-res = a1 + a2;
-
-double *rescpu = new double[n];
-
-res.getContentToCPU(rescpu);
-  for (int i = 0; i < n; i++) {
-        std::cout << rescpu[i] << " ";
-  }
-std::cout << std::endl << "arr state is " << res.arrState << std::endl;
-*/
-
-  //bool isABsame = (m_alpha == m_beta);
-  //int EnuSize =  args[0].x.rows();
-  //GNAcuGpuArray<double> tmp(args[0].gpuArr.devicePtr, args[0].gpuArr.arrSize);
-  //int sss1 = args[0].gpuArr.arrSize;
-  //std::cout << "sss1 = " << sss1 <<std::endl;
-//  int sss = tmp.getArraySize();
-  std::cout << " I AM IN FUNC! " << std::endl;
-  
-//  rets[0].gpuArr.setByDeviceArray(a1.devicePtr);
-//rets[0].gpuArr = a1;
-//double *rescpu = new double[110];
-
-//a1.getContentToCPU(rescpu);
-//a1.transferD2H();
-std::cout << "in OscPMNS ";
-for (int i = 0; i < 110; i++) {
-  std::cout << a1.hostPtr[i] << " ";
-}
-std::cout << std::endl;
-
-//  for(size_t i = 0; i < 110; i++) {
-//    std::cout << args[0].arr[i] << " " ; 
-//  }
-  //  rets[0].sync_D2H();
-//  for(size_t i = 0; i < 110; i++) {
-//    std::cout << rets[0].arr[i] << " " ;
-// }  
-
-
-
-//  GNAcuOscProbMem<double> mem(EnuSize);
-/*  calcCuFullProb_double(std::ref(mem),
-		   DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
-                   weight<1,2>(), weight<1,3>(), weight<2,3>(), weightCP(),
-                   rets[0].x.data(), m_L, args[0].x.data(), EnuSize, isABsame);
-*/
-  end = std::chrono::system_clock::now();
-
-  int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
-                           (end-start).count();
-  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-  std::cout << "End " << std::ctime(&end_time)
-              << " duration " << elapsed_seconds << "s\n";
-
-}
-
-#endif
-
 
 void OscProbPMNS::calcFullProb(Args args, Rets rets) {
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now();
-
     auto& Enu = args[0].x;
     ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
     ArrayXd comp0(Enu);
@@ -253,14 +150,6 @@ void OscProbPMNS::calcFullProb(Args args, Rets rets) {
     if (m_alpha != m_beta) {
       rets[0].x += 8.0*weightCP()*compCP;
     }
-  end = std::chrono::system_clock::now();
-
-  int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
-                           (end-start).count();
-  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-  std::cout << "End " << std::ctime(&end_time)
-              << " duration " << elapsed_seconds << "s\n";
 
 }
 
