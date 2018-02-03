@@ -13,44 +13,44 @@ GNAcuOscProbMem<T>::GNAcuOscProbMem(int numOfElem) {
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
 		std::cout << "err is " << cudaGetErrorString(err) << std::endl;
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devTmp, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devComp0, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devComp12, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devComp13, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devComp23, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devCompCP, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
 	err = cudaMalloc((void**)&devRet, alloc_size);
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to  allocate!\n");
-		currentGpuMemState = Crashed;
+		currentGpuMemState = DataLocation::Crashed;
 	}
-	currentGpuMemState = InitializedOnly;
+	currentGpuMemState = DataLocation::InitializedOnly;
 	std::cout << "State is " << currentGpuMemState << std::endl;
 }
 

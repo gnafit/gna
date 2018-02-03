@@ -139,7 +139,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(Atypes::pass<0>)
       .func(&OscProbPMNS::calcFullProbGpu)
-      .setEntryLocation(Device);
+      .setEntryLocation(DataLocation::Device);
 #endif
 
 }

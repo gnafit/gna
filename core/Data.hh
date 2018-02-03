@@ -350,7 +350,7 @@ Allocate GPU memory in case of GPU array is not inited yet
 #endif
     return gpuArr->dataLoc;
   }
-  DataLocation tmp = NoData;
+  DataLocation tmp = DataLocation::NoData;
   if (type.shape.size() == 1) {
     tmp = gpuArr->Init(type.shape[0], buffer);
   } else if (type.shape.size() == 2) {

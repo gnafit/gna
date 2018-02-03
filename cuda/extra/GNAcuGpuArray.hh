@@ -37,7 +37,7 @@ public:
         GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
 	void dump() ;
 
-	inline void setLocation( DataLocation loc ) { dataLoc = loc; syncFlag =  Unsynchronized; }
+	inline void setLocation( DataLocation loc ) { dataLoc = loc; syncFlag =  SyncFlag::Unsynchronized; }
 
 //        DataLocation arrState;
 //	DataType type;

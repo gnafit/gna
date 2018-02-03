@@ -343,7 +343,7 @@ namespace TransformationTypes {
 #endif
   private:
 #ifdef GNA_CUDA_SUPPORT
-    DataLocation m_entryLoc = Host;
+    DataLocation m_entryLoc = DataLocation::Host;
 #endif
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
@@ -359,7 +359,7 @@ namespace TransformationTypes {
     m_sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
     if (m_sink->data->gpuArr != nullptr) {
-       m_sink->data->gpuArr->sync( Host );
+       m_sink->data->gpuArr->sync( DataLocation::Host );
     }
 #endif
     return view();

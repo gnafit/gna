@@ -111,9 +111,9 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 			    "in for! \n");
 			std::cout << "err is " << cudaGetErrorString(err)
 				  << std::endl;
-			mem.currentGpuMemState = Crashed;
+			mem.currentGpuMemState = DataLocation::Crashed;
 		} else
-			mem.currentGpuMemState = Device;
+			mem.currentGpuMemState =DataLocation::Device;
 	}
 
 	for (int i = 0; i < streamcount; i++) {
@@ -138,9 +138,9 @@ void calcCuFullProb(GNAcuOscProbMem<T>& mem, T DMSq12, T DMSq13, T DMSq23,
 	if (err != cudaSuccess) {
 		printf("ERROR: unable to copy memory from device to host! \n");
 		std::cout << "err is " << cudaGetErrorString(err) << std::endl;
-		mem.currentGpuMemState = Crashed;
+		mem.currentGpuMemState = DataLocation::Crashed;
 	} else
-		mem.currentGpuMemState = Host;
+		mem.currentGpuMemState = DataLocation::Host;
 	cudaStreamDestroy(stream1);
 	for (int i = 0; i < streamcount; i++) {
 		cudaStreamDestroy(workerstreams[i]);

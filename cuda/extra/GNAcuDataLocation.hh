@@ -4,21 +4,21 @@
 #include <iostream>
 
 
-enum SyncFlag {
+enum class SyncFlag {
+	Unsynchronized = 0,
 	Synchronized,
-	Unsynchronized,
 	SyncFailed
 };
 
 inline std::ostream& operator<<(std::ostream& so, SyncFlag sFlag) {
         switch (sFlag) {
-                case Synchronized:
+                case SyncFlag::Synchronized:
                         so << "Synchronized";
                         break;
-                case Unsynchronized:
+                case SyncFlag::Unsynchronized:
                         so << "Unsynchronized";
                         break;
-                case SyncFailed:
+                case SyncFlag::SyncFailed:
                         so << "SyncFailed";
                         break;
                 default:
@@ -29,8 +29,8 @@ inline std::ostream& operator<<(std::ostream& so, SyncFlag sFlag) {
 
 
 
-enum DataLocation {
-	NotInitialized,
+enum class DataLocation {
+	NotInitialized = 0,
         InitializedOnly,
         Host,
         Device,
@@ -40,22 +40,22 @@ enum DataLocation {
 
 inline std::ostream& operator<<(std::ostream& so, DataLocation gState) {
         switch (gState) {
-                case NotInitialized:
+                case DataLocation::NotInitialized:
                         so << "NotInitialized";
                         break;
-                case InitializedOnly:
+                case DataLocation::InitializedOnly:
                         so << "InitializedOnly";
                         break;
-                case Host:
+                case DataLocation::Host:
                         so << "Host";
                         break;
-                case Device:
+                case DataLocation::Device:
                         so << "Device";
                         break;
-                case NoData:
+                case DataLocation::NoData:
                         so << "NoData";
                         break;
-                case Crashed:
+                case DataLocation::Crashed:
                         so << "Crashed";
                         break;
                 default:

@@ -58,16 +58,16 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inHostPtr) {
 	std::cout << "GPUArray is created but not inited " << std::endl;
 #endif
 	hostPtr = inHostPtr;
-	if(inHostPtr == nullptr)    dataLoc = NoData;
-	else 			    dataLoc = Host;
-	syncFlag = Unsynchronized;
+	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
+	else 			    dataLoc = DataLocation::Host;
+	syncFlag = SyncFlag::Unsynchronized;
 }
 
 template <typename T>
 GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
-	if(inHostPtr == nullptr)    dataLoc = NoData;
-	syncFlag = Unsynchronized;
+	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
+	syncFlag = SyncFlag::Unsynchronized;
 #ifdef CU_DEBUG
 	std::cout << "GPU Array is created by size (constructor)" << std::endl;
 #endif
@@ -80,18 +80,18 @@ GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize, T* inHostPtr) {
 		printf("ERROR: unable to  allocate!\n");
 		std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
 #endif
-		dataLoc = Crashed;
+		dataLoc = DataLocation::Crashed;
 	} else {
 		deviceMemAllocated = true;
-		dataLoc = InitializedOnly;
+		dataLoc = DataLocation::InitializedOnly;
 	}
 }
 
 template <typename T>
 DataLocation GNAcuGpuArray<T>::Init(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
-	if(inHostPtr == nullptr)    dataLoc = NoData;
-	syncFlag = Unsynchronized;
+	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
+	syncFlag = SyncFlag::Unsynchronized;
 #ifdef CU_DEBUG
         std::cout << "GPU Array is inited by size (Init)" << std::endl;
 #endif
@@ -104,10 +104,10 @@ DataLocation GNAcuGpuArray<T>::Init(size_t inSize, T* inHostPtr) {
                 printf("ERROR: unable to  allocate!\n");
                 std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
 #endif
-                dataLoc = Crashed;
+                dataLoc = DataLocation::Crashed;
         } else {
 		deviceMemAllocated = true; 
-                dataLoc = InitializedOnly;
+                dataLoc = DataLocation::InitializedOnly;
         }
 	return dataLoc;
 }
@@ -126,9 +126,9 @@ DataLocation GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 		printf("ERROR: unable to copy memory H2D!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-		dataLoc = Crashed;
+		dataLoc = DataLocation::Crashed;
 	} else {
-		dataLoc = Device;
+		dataLoc = DataLocation::Device;
 	}
 	return dataLoc;
 }
@@ -142,9 +142,9 @@ DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 		printf("ERROR: unable to copy memory D2D!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-		dataLoc = Crashed;
+		dataLoc = DataLocation::Crashed;
 	} else {
-		dataLoc = Device;
+		dataLoc = DataLocation::Device;
 	}
         return dataLoc;
 }
@@ -152,7 +152,7 @@ DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 template <typename T>
 DataLocation GNAcuGpuArray<T>::setByValue(T value) {
 	setByValueGPU<T><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, value, arrSize);
-	dataLoc = Device;
+	dataLoc = DataLocation::Device;
         return dataLoc;
 }
 
@@ -165,9 +165,9 @@ DataLocation GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 		printf("ERROR: unable to get array values to host!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-		dataLoc = Crashed;
+		dataLoc = DataLocation::Crashed;
 	} else {
-		dataLoc = Host;
+		dataLoc = DataLocation::Host;
 	}
 	return dataLoc;
 }
@@ -182,9 +182,9 @@ DataLocation GNAcuGpuArray<T>::getContent(T* dst) {
 		printf("ERROR: unable to get array values!\n");
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-		dataLoc = Crashed;
+		dataLoc = DataLocation::Crashed;
 	} else {
-		dataLoc = Device;
+		dataLoc = DataLocation::Device;
 	}
 	return dataLoc;
 }
@@ -195,14 +195,14 @@ void GNAcuGpuArray<T>::sync_H2D() {
     	printf("Sync to H2D\n");
 #endif
 	cudaError_t err;
-	if (dataLoc == NotInitialized) {
+	if (dataLoc == DataLocation::NotInitialized) {
 		err = cudaMalloc((void**)&devicePtr, arrSize * sizeof(T));
         	if (err != cudaSuccess) {
 #ifdef CU_DEBUG
                 	printf("ERROR: unable to  allocate!\n");
                 	std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
 #endif
-                	dataLoc = Crashed;
+                	dataLoc = DataLocation::Crashed;
 			return;
         	}
 		deviceMemAllocated = true;
@@ -214,11 +214,11 @@ void GNAcuGpuArray<T>::sync_H2D() {
                 printf("ERROR: unable to transfer data H2D!\n");
                 std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-                dataLoc = Crashed;
-		syncFlag = SyncFailed;
+                dataLoc = DataLocation::Crashed;
+		syncFlag = SyncFlag::SyncFailed;
         } else {
-                dataLoc = Device;
-                syncFlag = Synchronized;
+                dataLoc = DataLocation::Device;
+                syncFlag = SyncFlag::Synchronized;
         }
 }
 
@@ -235,11 +235,11 @@ void GNAcuGpuArray<T>::sync_D2H() {
                 printf("ERROR: unable to transfer data D2H!\n");
                 std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
-                dataLoc = Crashed;
-		syncFlag = SyncFailed;
+                dataLoc = DataLocation::Crashed;
+		syncFlag = SyncFlag::SyncFailed;
         } else {
-                dataLoc = Host;
-		syncFlag = Synchronized;
+                dataLoc = DataLocation::Host;
+		syncFlag = SyncFlag::Synchronized;
         }
 }
 
@@ -249,18 +249,18 @@ void GNAcuGpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
-  if (dataLoc == loc || syncFlag == Synchronized) {
+  if (dataLoc == loc || syncFlag == SyncFlag::Synchronized) {
 #ifdef CU_DEBUG_2
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl;
 #endif
-  } else if((dataLoc == Device && loc == Host)) {
+  } else if((dataLoc == DataLocation::Device && loc == DataLocation::Host)) {
     sync_D2H();
-  } else if((dataLoc == Host && loc == Device)) {
+  } else if((dataLoc == DataLocation::Host && loc == DataLocation::Device)) {
     sync_H2D();
-  } else if (dataLoc == NoData) {
+  } else if (dataLoc == DataLocation::NoData) {
     throw std::runtime_error("Data is not initialized");
   } else {
-    syncFlag = SyncFailed;
+    syncFlag = SyncFlag::SyncFailed;
 #ifdef CU_DEBUG_2
     std::cerr << "Cannot be synchronized! Smth wrong: current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
 #endif
@@ -273,15 +273,15 @@ void GNAcuGpuArray<T>::synchronize() {
 /**
 Makes data the same on GPU and CPU
 */
-  if (dataLoc == Device) {
-    sync(Host);
-    syncFlag = Synchronized;
+  if (dataLoc == DataLocation::Device) {
+    sync(DataLocation::Host);
+    syncFlag = SyncFlag::Synchronized;
 #ifdef CU_DEBUG_3
     printf("Sync to GPU\n");
 #endif
-  } else if(dataLoc == Host) {
-    sync(Device);
-    syncFlag = Synchronized;
+  } else if(dataLoc == DataLocation::Host) {
+    sync(DataLocation::Device);
+    syncFlag = SyncFlag::Synchronized;
 #ifdef CU_DEBUG_3
     printf("Sync to CPU\n");
 #endif
@@ -289,7 +289,7 @@ Makes data the same on GPU and CPU
 #ifdef CU_DEBUG_2
     std::cerr << "Unable to sync data as current GPU memory state is " <<  dataLoc << std::endl;
 #endif
-    syncFlag = SyncFailed;
+    syncFlag = SyncFlag::SyncFailed;
   }
 }
 
@@ -307,7 +307,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+=(GNAcuGpuArray<F> &rhs) {
 	}
 	vecAdd<F><<<GridSize(smallest_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
 				   smallest_size);
-	dataLoc = Device;
+	dataLoc = DataLocation::Device;
 	return *this;
 }
 
@@ -324,7 +324,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
         }
         vecMinus<F><<<GridSize(smallest_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
                                     smallest_size);
-        dataLoc = Device;
+        dataLoc = DataLocation::Device;
         return *this;
 }
 
@@ -333,7 +333,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
 template <typename F>
 void GNAcuGpuArray<F>::negate() {
 	vecMinusUnar<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, arrSize);
-        dataLoc = Device;
+        dataLoc = DataLocation::Device;
 }
 
 
@@ -350,7 +350,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
         }
         vecMult<F><<<GridSize(res_size), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs.getArrayPtr(),
                                    res_size);
-       dataLoc = Device;
+       dataLoc = DataLocation::Device;
        return *this; 
 }
 
@@ -359,7 +359,7 @@ template <typename F>
 GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
         vecMult<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs,
                                    arrSize);
-        dataLoc = Device;
+        dataLoc = DataLocation::Device;
         return *this;
 }
 

@@ -457,7 +457,7 @@ void Entry::evaluateTypes() {
 
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT 
-    if (this->getEntryLocation() == Device) {  
+    if (this->getEntryLocation() == DataLocation::Device) {  
       for (auto &source : sources) {
           source.sink->data->require_gpu();
       }
@@ -506,7 +506,7 @@ const Data<double> &Entry::data(int i) {
   touch();
 #ifdef GNA_CUDA_SUPPORT
   if (sink.data->gpuArr != nullptr) {
-    sink.data->gpuArr->sync( Host );
+    sink.data->gpuArr->sync( DataLocation::Host );
   }
 #endif
   return *sink.data;

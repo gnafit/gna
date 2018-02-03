@@ -17,7 +17,7 @@ public:
       .types(Atypes::pass<0,0>)
       .func(&Identity::ident)
 #ifdef GNA_CUDA_SUPPORT
-      .setEntryLocation(gpu? Device : Host)
+      .setEntryLocation(gpu? DataLocation::Device : DataLocation::Host)
 #endif
       ;
   };
