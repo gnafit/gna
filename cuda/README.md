@@ -44,8 +44,8 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 
 | Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
 |--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
-| CPU (Intel Core i7) sequential |       136908.3         |                                  |       ---       |                  |                      |
-| GPU (NVIDIA GeForce GTX 970M)  |        98733.1         |                                  |       ???       |        1.39      |                      |
+| CPU (Intel Core i7) sequential |       136908.3         |             ----                 |       ---       |                  |                      |
+| GPU (NVIDIA GeForce GTX 970M)  |        98733.1         |             5175                 |       ???       |        1.39      |          26.46       |
 | CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
 
 
@@ -55,8 +55,8 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 
 | Processor                      | Average Time Full (us) | Average Time Computing Only (us) | First Call (us) |  Speed Up (full) | Speed Up (Computing) |
 |--------------------------------|------------------------|----------------------------------|-----------------|------------------|----------------------|
-| CPU (Intel Core i7) sequential |        1669.4          |                                  |       ---       |                  |                      |
-| GPU (NVIDIA GeForce GTX 970M)  |       98895.3          |                 123.8            |       ???       |      0.0169      |       13.48          |
+| CPU (Intel Core i7) sequential |        1669.4          |             ----                 |       ---       |                  |                      |
+| GPU (NVIDIA GeForce GTX 970M)  |       98895.3          |                 80               |       ???       |       0.017      |         20.9         |
 | CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
 
 *Speed up columns are for an accelerating in comparison with sequential CPU version*
