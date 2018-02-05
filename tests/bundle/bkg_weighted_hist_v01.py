@@ -31,7 +31,7 @@ cfg.groups=NestedDict(
         )
 
 bkg = cfg('bkg')
-bkg.list = [ 'bkg1', 'bkg2', 'bkg3' ]
+bkg.list = [ 'bkg1', 'bkg2', 'bkgsum', 'bkg_fn' ]
 
 bkg.bkg1 = NestedDict(
         bundle   = 'bkg_weighted_hist_v01',
@@ -39,15 +39,17 @@ bkg.bkg1 = NestedDict(
         groups   = cfg.groups,
         variants = cfg.detectors,
 
-        bkg1_norm = uncertaindict([ (det, (1.0, 1.0, 'percent')) for det in cfg.detectors ]),
+        bkg1_norm = uncertaindict([
+            (det, (1.0, 1.0, 'percent')) \
+              for det in cfg.detectors
+            ]),
 
-        bkg1_rate = uncertaindict( [
-                ('D1', 8),
+        bkg1_rate = uncertaindict(
+              [ ('D1', 8),
                 ('D2', 7),
                 ('D3', 4),
-                ('D4', 3)
-                ],
-            mode = 'fixed',
+                ('D4', 3) ],
+                mode = 'fixed',
             ),
 
         spectra = NestedDict(
@@ -85,13 +87,13 @@ bkg.bkg2 = NestedDict(
             )
         )
 
-bkg.bkg3 = NestedDict(
+bkg.bkgsum = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{det}.bkg3_num', ('bkg3_rate.{site}', '{det}.livetime') ],
+        formula = [ '{det}.bkgsum_num', ('bkgsum_rate.{site}', '{det}.livetime') ],
         groups = cfg.groups,
         variants = cfg.detectors,
 
-        bkg3_rate = uncertaindict(
+        bkgsum_rate = uncertaindict(
            [('G1', (1.0, 0.3)),
             ('G2', (3.0, 0.2)),
             ('G3', (2.0, 0.1))],
@@ -117,6 +119,30 @@ bkg.bkg3 = NestedDict(
                     normalize = True,
                     )),
                 ])
+            )
+        )
+
+bkg.bkg_fn = NestedDict(
+        bundle = 'bkg_weighted_hist_v01',
+        formula = [ '{det}.bkgsum_num', ('bkgsum_rate.{site}', '{det}.livetime') ],
+        groups = cfg.groups,
+        variants = cfg.detectors,
+
+        bkgsum_rate = uncertaindict(
+           [('G1', (1.0, 0.3)),
+            ('G2', (3.0, 0.2)),
+            ('G3', (2.0, 0.1))],
+            mode = 'absolute',
+            ),
+        spectra = NestedDict(
+            bundle='dayabay_fastn_v01',
+            range=(0.7, 12.0),
+            pars=uncertaindict(
+               [ ('G1', (67.79, 0.1132)),
+                 ('G2', (58.30, 0.0817)),
+                 ('G3', (68.02, 0.0997)) ],
+                mode='relative',
+                ),
             )
         )
 
@@ -185,7 +211,7 @@ for bundle in bundles:
         if bundle.cfg.name=='bkg2':
             group = bundle.groups.get_group(name, 'site')
             pack = (group.index(name), len(group))
-        if bundle.cfg.name=='bkg3':
+        if bundle.cfg.name=='bkgsum':
             pack = (i, len(bundle.transformations))
         else:
             pack = None
