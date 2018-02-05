@@ -3,6 +3,10 @@
 VarProduct::VarProduct(const std::vector<std::string>& varnames, const std::string& productname)
   : m_vars(varnames.size())
 {
+  if (m_vars.size()<2u) {
+    throw std::runtime_error("You must specify at least two variables for VarProduct");
+  }
+
   std::vector<changeable> deps;
   deps.reserve(varnames.size());
   for (size_t i = 0; i < varnames.size(); ++i) {
@@ -10,9 +14,9 @@ VarProduct::VarProduct(const std::vector<std::string>& varnames, const std::stri
     deps.push_back(m_vars[i]);
   }
   m_product = evaluable_<double>(productname, [this]() {
-      double res = 1.0;
-      for (auto& var : m_vars) {
-          res*=var;
+      double res = m_vars[0];
+      for (size_t i = 1; i < m_vars.size(); ++i) {
+          res*=m_vars[i];
       }
       return res;
     }, deps);

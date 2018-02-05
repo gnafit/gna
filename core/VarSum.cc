@@ -3,6 +3,10 @@
 VarSum::VarSum(const std::vector<std::string>& varnames, const std::string& sumname)
   : m_vars(varnames.size())
 {
+  if (m_vars.size()<2u) {
+    throw std::runtime_error("You must specify at least two variables for VarSum");
+  }
+
   std::vector<changeable> deps;
   deps.reserve(varnames.size());
   for (size_t i = 0; i < varnames.size(); ++i) {
@@ -10,9 +14,9 @@ VarSum::VarSum(const std::vector<std::string>& varnames, const std::string& sumn
     deps.push_back(m_vars[i]);
   }
   m_sum = evaluable_<double>(sumname, [this]() {
-      double res = 0.0;
-      for (auto& var : m_vars) {
-          res+=var;
+      double res = m_vars[0];
+      for (size_t i = 1; i < m_vars.size(); ++i) {
+          res+=m_vars[i];
       }
       return res;
     }, deps);

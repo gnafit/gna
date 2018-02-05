@@ -30,6 +30,7 @@ set (SOURCES
   core/Rebin.cc
   core/VarProduct.cc
   core/VarSum.cc
+  core/VarDiff.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -79,6 +80,7 @@ set (HEADERS
   Rebin.hh
   VarProduct.hh
   VarSum.hh
+  VarDiff.hh
   Minimizable.hh
   Neutrino.hh
   OscillationVariables.hh
