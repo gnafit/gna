@@ -27,7 +27,7 @@ class hist_mixture_v01(TransformationBundle):
             print( 'here', ns.path, ns.name )
 
             for name, val in self.cfg.fractions.items():
-                ns.defparameter( ns.pathto(name+'_frac'), cfg=val )
+                ns.defparameter( name+'_frac', cfg=val )
 
             from gna.parameters.printer import print_parameters
             print_parameters( ns )

@@ -93,7 +93,7 @@ class Categories(object):
                     continue
                 groupitems = group.keys(item)
                 for newcat, newgroup in self.__categories__.items():
-                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                    if not newgroup.samegroup( groupitems ):
                         continue
                     res.append( newgroup[groupitems[0]] )
             return list(OrderedDict.fromkeys(res))
@@ -107,7 +107,7 @@ class Categories(object):
                     continue
                 groupitems = group.keys(item)
                 for newcat, newgroup in self.__categories__.items():
-                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                    if not newgroup.samegroup( groupitems ):
                         continue
                     res.append( newcat )
             return list(OrderedDict.fromkeys(res))
@@ -124,7 +124,7 @@ class Categories(object):
                     continue
                 groupitems = group.keys(item)
                 for newcat, newgroup in self.__categories__.items():
-                    if cat==newcat or not newgroup.samegroup( groupitems ):
+                    if not newgroup.samegroup( groupitems ):
                         continue
                     res[newcat]=newgroup[groupitems[0]]
         return res

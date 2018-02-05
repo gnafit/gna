@@ -35,7 +35,7 @@ bkg.list = [ 'bkg1', 'bkg2', 'bkg3' ]
 
 bkg.bkg1 = NestedDict(
         bundle   = 'bkg_weighted_hist_v01',
-        formula  = [ '{det}.bkg1_norm', '{det}.bkg1_rate', '{det}.livetime' ],
+        formula  = [ '{det}.bkg1_num', ('bkg1_norm.{det}', '{det}.bkg1_rate', '{det}.livetime') ],
         groups   = cfg.groups,
         variants = cfg.detectors,
 
@@ -65,7 +65,7 @@ bkg.bkg1 = NestedDict(
 
 bkg.bkg2 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{site}.bkg2_rate', '{det}.livetime' ],
+        formula = '{det}.bkg2_num=bkg2_rate.{site}*{det}.livetime' ,
         groups = cfg.groups,
         variants = cfg.detectors,
 
@@ -86,7 +86,7 @@ bkg.bkg2 = NestedDict(
 
 bkg.bkg3 = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{site}.bkg3_rate', '{det}.livetime' ],
+        formula = [ '{det}.bkg3_num', ('bkg3_rate.{site}', '{det}.livetime') ],
         groups = cfg.groups,
         variants = cfg.detectors,
 

@@ -24,17 +24,21 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
-        self.numname = '{}_num'.format( self.cfg.name )
 
-        self.groups = Categories( self.cfg.get('groups', {}) )
+        self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
         print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
         spectra = CatDict(self.groups, self.spectra.transformations)
         self.transformations=NestedDict()
+
+        targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
+            target = self.groups.format_splitjoin(ns.name, targetfmt, prepend=self.common_namespace.path)
+
             labels  = convert([self.cfg.name], 'stdvector')
-            weights = convert([ns.pathto(self.numname)], 'stdvector')
+            weights = convert([target], 'stdvector')
+            print( list(labels), list(weights) )
             ws = R.WeightedSum(labels, weights)
 
             inp = spectra[ns.name]
@@ -52,30 +56,54 @@ class bkg_weighted_hist_v01(TransformationBundle):
         #
         # Define variables, which inputs are defined within the current config
         #
-        for fullitem in self.cfg.formula:
-            path, head = fullitem.rsplit('.', 1)
-            numbers = self.cfg.get( head, {} )
+        for fullitem in self.iterate_formula():
+            static = self.determine_variable( fullitem )
+            numbers = self.cfg.get( static, {} )
+
             for loc, unc in numbers.items():
-                self.common_namespace(loc).defparameter(head, cfg=unc)
+                path, head = self.groups.format_splitjoin( loc, fullitem ).rsplit( '.', 1 )
+                self.common_namespace(path).defparameter(head, cfg=unc)
 
         #
         # Link the other variables
         #
+        targetfmt, formulafmt = self.get_target_formula()
         for det in self.cfg.variants:
             ns = self.common_namespace(det)
             formula = []
-            for fullitem in self.cfg.formula:
-                path, head = fullitem.rsplit('.', 1)
-
-                item = self.groups.format_splitjoin( det, fullitem, prepend=self.common_namespace.path )
+            for fullitem in formulafmt:
+                item = self.groups.format_splitjoin(det, fullitem, prepend=self.common_namespace.path)
                 formula.append(item)
 
-                if self.create_variable_links and not head in ns:
-                    self.common_namespace(det)[head] = item
+                # if self.create_variable_links and not head in ns:
+                    # self.common_namespace(det)[head] = item
 
+            target = self.groups.format_splitjoin(det, targetfmt)
+            tpath, thead = target.rsplit('.', 1)
+            tns = self.common_namespace(tpath)
             if len(formula)>1:
-                vp = R.VarProduct(convert(formula, 'stdvector'), self.numname, ns=ns)
-                ns[self.numname].get()
+                vp = R.VarProduct(convert(formula, 'stdvector'), thead, ns=tns)
+
+                tns[thead].get()
                 self.products.append( vp )
             else:
-                ns.defparameter( self.numname, target=formula[0] )
+                tns.defparameter( thead, target=formula[0] )
+
+    def get_target_formula(self):
+        formula = self.cfg.formula
+        if isinstance(formula, basestring):
+            target, formula = formula.split('=')
+        else:
+            target, formula = formula
+
+        if isinstance(formula, basestring):
+            formula = formula.split('*')
+
+        return target, formula
+
+    def iterate_formula(self):
+        for item in self.get_target_formula()[1]:
+            yield item
+
+    def determine_variable(self, item):
+        return '.'.join(i for i in item.split('.') if not ('{' in i or '}' in i))
