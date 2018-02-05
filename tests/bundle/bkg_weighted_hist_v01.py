@@ -21,7 +21,7 @@ cfg = NestedDict()
 cfg.filename = 'output/sample_hists.root'
 cfg.detectors = [ 'D1', 'D2', 'D3', 'D4' ]
 cfg.groups=NestedDict(
-        exp  = { '': cfg.detectors },
+        exp  = { 'testexp': cfg.detectors },
         det  = { d: (d,) for d in cfg.detectors },
         site = NestedDict([
             ('G1', ['D1', 'D2']),
@@ -92,23 +92,29 @@ bkg.bkg3 = NestedDict(
         variants = cfg.detectors,
 
         bkg3_rate = uncertaindict(
-           [('G1', (2.0, 0.3)),
-            ('G2', (1.0, 0.2)),
-            ('G3', (0.1, 0.1))],
+           [('G1', (1.0, 0.3)),
+            ('G2', (3.0, 0.2)),
+            ('G3', (2.0, 0.1))],
             mode = 'absolute',
             ),
         spectra = NestedDict(
             bundle = 'hist_mixture_v01',
 
             fractions = uncertaindict(
-                li = ( 0.95, 0.05, 'relative' )
+                li = ( 0.90, 0.05, 'relative' )
                 ),
             spectra = NestedDict([
                 ('li', NestedDict(
-
+                    bundle = 'root_histograms_v01',
+                    filename   = cfg.filename,
+                    format = 'hist_G1_D1',
+                    normalize = True,
                     )),
                 ('he', NestedDict(
-
+                    bundle = 'root_histograms_v01',
+                    filename   = cfg.filename,
+                    format = 'hist_G2_D3',
+                    normalize = True,
                     )),
                 ])
             )
@@ -174,11 +180,13 @@ for bundle in bundles:
     ax.set_ylabel( 'entries' )
     ax.set_title( bundle.cfg.name )
 
-    for name, ts in bundle.transformations.items():
+    for i, (name, ts) in enumerate(bundle.transformations.items()):
         output = ts.sum.single()
         if bundle.cfg.name=='bkg2':
             group = bundle.groups.get_group(name, 'site')
             pack = (group.index(name), len(group))
+        if bundle.cfg.name=='bkg3':
+            pack = (i, len(bundle.transformations))
         else:
             pack = None
         plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )

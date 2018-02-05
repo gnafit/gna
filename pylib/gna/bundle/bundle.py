@@ -2,6 +2,7 @@ from __future__ import print_function
 from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules
+from collections import OrderedDict
 
 bundle_modules = {}
 bundles = {}
@@ -65,6 +66,7 @@ class TransformationBundle(object):
         else:
             self.storage = namespace( None, self.name )
 
+        self.transformations=OrderedDict()
         self.output_transformations = ()
         self.outputs = ()
         self.inputs = ()

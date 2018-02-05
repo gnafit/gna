@@ -17,10 +17,30 @@ class hist_mixture_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(hist_mixture_v01, self).__init__( **kwargs )
 
+        if len(self.cfg.spectra)<2:
+            raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )
+
+        self.spectra = OrderedDict([
+                (name, execute_bundle(cfg=cfg, common_namespace=self.common_namespace, storage=self.storage))
+                for name, cfg in self.cfg.spectra.items()
+            ])
+
+        for name, spectrum in self.spectra.items():
+            if len(spectrum.outputs)!=1:
+                raise Exception('hist_mixture_v01: expect only single output for each spectrum (exception for %s)'%name)
+
     def build(self):
-        # file = R.TFile( self.cfg.filename, 'READ' )
-        self.transformations={}
-        pass
+        names = self.spectra.keys()
+        for ns in self.namespaces:
+            weights = [ ns.pathto('frac_'+name) for name in names ]
+
+            ws = self.transformations[ns.name] = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector') )
+
+            for name, spectrum in self.spectra.items():
+                ws.sum.inputs[name]( spectrum.outputs[0] )
+
+                self.outputs += ws.sum.sum,
+                self.output_transformations+= ws,
 
     def define_variables(self):
         comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))

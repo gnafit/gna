@@ -28,8 +28,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def build(self):
         self.transformations=NestedDict()
-        if not self.spectra.transformations:
-            return #FIXME
         spectra = CatDict(self.groups, self.spectra.transformations)
 
         targetfmt, formulafmt = self.get_target_formula()
@@ -41,7 +39,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             ws = R.WeightedSum(labels, weights)
 
             inp = spectra[ns.name]
-            ws.sum.inputs[self.cfg.name](inp.hist.hist)
+            ws.sum.inputs[self.cfg.name](inp.single())
 
             self.transformations(ns.name).hist = inp
             self.transformations[ns.name].sum = ws

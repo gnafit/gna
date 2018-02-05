@@ -28,7 +28,7 @@ class root_histograms_v01(TransformationBundle):
         print( 'Read input file {}:'.format(file.GetName()) )
 
         self.transformations=OrderedDict()
-        variants = self.cfg.get('variants', [''])
+        variants = self.cfg.get('variants', [self.common_namespace.name])
         for var in variants:
             fmt = var
             if isinstance(variants, (dict, NestedDict)):
