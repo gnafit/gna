@@ -216,8 +216,8 @@ def __prefetch_covariances(dic, cov_pathes=[]):
             try:
                 dic['covariances'][loaded['name']] = (loaded['params'], loaded['cov_mat'])
             except KeyError:
-                print('Failed to extract covariance from {}. Check the naming
-                        conventions'.format(path))
+                print('Failed to extract covariance from {}.'
+                ' Check the naming conventions'.format(path))
 
 
 
