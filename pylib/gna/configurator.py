@@ -202,8 +202,29 @@ class NestedDict(object):
                     print( 'Set', k, 'to', v.__repr__() )
             self.__setattr__(k, v)
 
+
+def __prefetch_covariances(dic, cov_pathes=[]):
+    import os
+    from collections import namedtuple
+    for cov_path in cov_pathes:
+        for cov_file in os.listdir( cov_path ):
+            print("Importing covariance from {} ".format(cov_file) )
+            path = os.path.join(cov_path, cov_file)
+            loaded = runpy.run_path( path )
+            if not dic.get('covariances', None):
+                dic['covariances'] = NestedDict()
+            try:
+                dic['covariances'][loaded['name']] = (loaded['params'], loaded['cov_mat'])
+            except KeyError:
+                print('Failed to extract covariance from {}. Check the naming
+                        conventions'.format(path))
+
+
+
 def configurator(filename=None, dic={}, **kwargs):
     self = NestedDict()
+
+    prefetch = kwargs.pop('prefetch', True)
 
     if filename:
         self['@loaded_from']=filename
@@ -213,6 +234,9 @@ def configurator(filename=None, dic={}, **kwargs):
         self.__load__(filename, **kwargs)
     elif dic:
         self.__import__(dic)
+
+    if prefetch:
+        __prefetch_covariances(dic=self, cov_pathes=self.get('covariance_path', []))
 
     return self
 

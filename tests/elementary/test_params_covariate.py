@@ -6,8 +6,15 @@ import ROOT
 import numpy as np
 from gna.env import env
 from gna.parameters.parameter_loader import get_parameters
+from gna.config import cfg
 import gna.parameters.covariance_helpers as ch 
 import itertools
+
+def make_fake_covmat(dimension):
+    eigen_decomp = np.eye(dimension)*0.5
+    triued_mat = np.triu(np.ones(dimension))
+    transform_mat = np.matrix(triued_mat/np.sum(triued_mat, axis=0))
+    return np.matmul(transform_mat.T, np.matmul(eigen_decomp, transform_mat))
 
 # Necessary evil, it triggers import of all other symbols from shared library
 ROOT.GNAObject
@@ -45,7 +52,7 @@ print("Success\n")
 
 test_pars = get_parameters(['test_ns.test0', 'test_ns.test1', 'test_ns.test2', 'test_ns.test3'])
 print("Test pars sequence is {}".format([_.name() for _ in test_pars]))
-cov_matrix1 = np.arange(4)*np.arange(4)[:, np.newaxis]*0.1
+cov_matrix1 = make_fake_covmat(4)
 print("Test covariance matrix is \n", cov_matrix1)
 
 ch.covariate_pars(pars=test_pars, cov_matrix=cov_matrix1)
@@ -53,10 +60,12 @@ for first, second in itertools.combinations_with_replacement(range(len(test_pars
     assert test_pars[first].getCovariance(test_pars[second]) == cov_matrix1[first, second]
 
 extra_pars = [extra1, extra2, extra3]
-cov_mat_extra = np.arange(3)*np.arange(3)[:, np.newaxis]*0.15 
+cov_mat_extra = make_fake_covmat(3)
 cov_storage = ch.CovarianceStorage("extra_store", extra_pars, cov_mat_extra)
 ch.covariate_ns('extra_test_ns', cov_storage)
 for first, second in itertools.combinations_with_replacement(range(len(extra_pars)), 2):
     assert extra_pars[first].getCovariance(extra_pars[second]) == cov_mat_extra[first, second]
 
-
+print(cfg)
+import IPython
+IPython.embed()
