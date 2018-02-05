@@ -41,12 +41,13 @@ bkg.bkg1 = NestedDict(
 
         bkg1_norm = uncertaindict([ (det, (1.0, 1.0, 'percent')) for det in cfg.detectors ]),
 
-        bkg1_rate = uncertaindict(
+        bkg1_rate = uncertaindict( [
+                ('D1', 8),
+                ('D2', 7),
+                ('D3', 4),
+                ('D4', 3)
+                ],
             mode = 'fixed',
-            D1 = 8,
-            D2 = 7,
-            D3 = 4,
-            D4 = 3,
             ),
 
         spectra = NestedDict(
@@ -70,10 +71,10 @@ bkg.bkg2 = NestedDict(
         variants = cfg.detectors,
 
         bkg2_rate = uncertaindict(
+           [('G1',  (2.71, 0.90)),
+            ('G2',  (1.91, 0.73)),
+            ('G3',  (0.22, 0.07))],
             mode = 'absolute',
-            G1 = (2.71, 0.90),
-            G2 = (1.91, 0.73),
-            G3 = (0.22, 0.07),
             ),
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
@@ -91,10 +92,10 @@ bkg.bkg3 = NestedDict(
         variants = cfg.detectors,
 
         bkg3_rate = uncertaindict(
+           [('G1', (2.0, 0.3)),
+            ('G2', (1.0, 0.2)),
+            ('G3', (0.1, 0.1))],
             mode = 'absolute',
-            G1 = (2.0, 0.3),
-            G2 = (1.0, 0.2),
-            G3 = (0.1, 0.1),
             ),
         spectra = NestedDict(
             bundle = 'hist_mixture_v01',

@@ -6,7 +6,7 @@ import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
-from constructors import Histogram
+from converters import convert
 from gna.configurator import NestedDict
 
 from gna.bundle import *
@@ -18,22 +18,29 @@ class hist_mixture_v01(TransformationBundle):
         super(hist_mixture_v01, self).__init__( **kwargs )
 
     def build(self):
-        file = R.TFile( self.cfg.filename, 'READ' )
+        # file = R.TFile( self.cfg.filename, 'READ' )
+        self.transformations={}
         pass
 
     def define_variables(self):
-        print( 'Hist mixture' )
+        comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))
+
+        self.vardiffs = OrderedDict()
         for ns in self.namespaces:
-            print( 'here', ns.path, ns.name )
+            ns.defparameter( name=comb, central=1, sigma=0.1, fixed=True )
 
+            missing = self.cfg.spectra.keys()
+            subst = [ns.pathto(comb)]
             for name, val in self.cfg.fractions.items():
-                ns.defparameter( name+'_frac', cfg=val )
+                cname = 'frac_'+name
+                ns.defparameter( cname, cfg=val )
+                missing.pop(missing.index(name))
+                subst.append(ns.pathto(cname))
 
-            from gna.parameters.printer import print_parameters
-            print_parameters( ns )
+            if len(missing)!=1:
+                raise Exception('One weight of the hist_mixture should be autmatic')
 
-            # import IPython
-            # IPython.embed()
-
-        from sys import exit
-        exit(1)
+            missing = 'frac_'+missing[0]
+            vd = R.VarDiff( convert(subst, 'stdvector'), missing, ns=ns)
+            ns[missing].get()
+            self.vardiffs[ns.name] = vd

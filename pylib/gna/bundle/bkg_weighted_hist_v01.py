@@ -15,7 +15,6 @@ from gna.bundle import *
 
 class bkg_weighted_hist_v01(TransformationBundle):
     name = 'bkg_weighted_hist'
-    create_variable_links = True
 
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
@@ -26,11 +25,12 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
 
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
-        print( 'Executing:\n', str(self.cfg), sep='' )
 
     def build(self):
-        spectra = CatDict(self.groups, self.spectra.transformations)
         self.transformations=NestedDict()
+        if not self.spectra.transformations:
+            return #FIXME
+        spectra = CatDict(self.groups, self.spectra.transformations)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
@@ -38,7 +38,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             labels  = convert([self.cfg.name], 'stdvector')
             weights = convert([target], 'stdvector')
-            print( list(labels), list(weights) )
             ws = R.WeightedSum(labels, weights)
 
             inp = spectra[ns.name]
@@ -74,9 +73,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
             for fullitem in formulafmt:
                 item = self.groups.format_splitjoin(det, fullitem, prepend=self.common_namespace.path)
                 formula.append(item)
-
-                # if self.create_variable_links and not head in ns:
-                    # self.common_namespace(det)[head] = item
 
             target = self.groups.format_splitjoin(det, targetfmt)
             tpath, thead = target.rsplit('.', 1)
