@@ -25,6 +25,7 @@ set (SOURCES
   core/Chi2.cc
   core/Poisson.cc
   core/SelfPower.cc
+  core/Normalize.cc
   core/CovarianceToyMC.cc
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
@@ -76,6 +77,7 @@ set (HEADERS
   Chi2.hh
   Poisson.hh
   SelfPower.hh
+  Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
