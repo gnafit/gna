@@ -136,11 +136,13 @@ bkg.bkg_fn = NestedDict(
             ),
         spectra = NestedDict(
             bundle='dayabay_fastn_v01',
+            formula='fastn_shape.{site}',
+            groups=cfg.groups,
             range=(0.7, 12.0),
             pars=uncertaindict(
-               [ ('G1', (67.79, 0.1132)),
-                 ('G2', (58.30, 0.0817)),
-                 ('G3', (68.02, 0.0997)) ],
+               [ ('G1', (70.00, 0.1)),
+                 ('G2', (60.00, 0.05)),
+                 ('G3', (50.00, 0.2)) ],
                 mode='relative',
                 ),
             )

@@ -167,6 +167,9 @@ class namespace(Mapping):
         return len(self.storage)
 
     def defparameter(self, name, *args, **kwargs):
+        if '.' in name:
+            path, name = name.rsplit('.', 1)
+            return self(path).defparameter(name, *args, **kwargs)
         if name in self.storage:
             raise Exception("{} is already defined".format(name))
         target = self.matchrule(name)
@@ -180,6 +183,9 @@ class namespace(Mapping):
         return p
 
     def reqparameter(self, name, *args, **kwargs):
+        if '.' in name:
+            path, name = name.rsplit('.', 1)
+            return self(path).reqparameter(name, *args, **kwargs)
         try:
             return self[name]
         except KeyError:
