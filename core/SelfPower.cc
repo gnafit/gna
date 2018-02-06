@@ -23,10 +23,10 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
 
 void SelfPower::calculate(Args args, Rets rets){
     auto& res = rets[0].x = args[0].x/m_scale.value();
-    res.pow(res);
+    res=res.pow(res);
 }
 
 void SelfPower::calculate_inv(Args args, Rets rets){
     auto& res = rets[0].x = args[0].x/m_scale.value();
-    res.pow(-res);
+    res=res.pow(-res);
 }

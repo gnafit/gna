@@ -4,8 +4,8 @@
 #include "GNAObject.hh"
 #include "Statistic.hh"
 
-class SelfPower: public GNASingleObject,
-          public Transformation<SelfPower> {
+class SelfPower: public GNAObject,
+                 public Transformation<SelfPower> {
 public:
     SelfPower(const char* scalename="sp_scale");
 
