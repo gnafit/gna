@@ -17,7 +17,7 @@ public:
     variable_(&m_w, "Width");
     using namespace ParametricLazyOps;
 
-    m_w_scaled = mkdep(m_w*std::sqrt( n )); 
+    m_w_scaled = mkdep(m_w*std::sqrt( n ));
     m_E0_scaled = mkdep(m_E0*n);
 
     transformation_(this, "rate")
