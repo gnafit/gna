@@ -20,9 +20,6 @@ class dayabay_fastn_v01(TransformationBundle):
         self.bindings=OrderedDict()
 
     def build(self):
-        from gna.parameters.printer import print_parameters
-        print_parameters( self.common_namespace )
-
         bins = N.ascontiguousarray(self.cfg.bins, dtype='d')
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
         for ns in self.namespaces:
@@ -34,6 +31,8 @@ class dayabay_fastn_v01(TransformationBundle):
 
             self.output_transformations+=hist,
             self.outputs+=hist.hist.data,
+
+            self.transformations[ns.name]=hist
 
     def define_variables(self):
         for loc, unc in self.cfg.pars.items():

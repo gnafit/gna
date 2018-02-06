@@ -220,7 +220,11 @@ for bundle in bundles:
             pack = (i, len(bundle.transformations))
         else:
             pack = None
-        plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )
+
+        if bundle.cfg.name=='bkg_fn':
+            plot_hist( output.datatype().edges, output.data(), label=name )
+        else:
+            plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )
 
     ax.legend( loc='upper right' )
 
