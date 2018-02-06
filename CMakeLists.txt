@@ -24,6 +24,7 @@ set (SOURCES
   core/Covmat.cc
   core/Chi2.cc
   core/Poisson.cc
+  core/SelfPower.cc
   core/CovarianceToyMC.cc
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
@@ -74,6 +75,7 @@ set (HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
+  SelfPower.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh

@@ -18,8 +18,8 @@ public:
       ;
     m_transform = t_["poisson"];
   }
-  
-  
+
+
 
   void add(SingleOutput &theory, SingleOutput &data);
 
