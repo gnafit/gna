@@ -33,6 +33,7 @@ ns.defparameter( 'Width',          central=sigma, sigma=0.1 )
 print_parameters( ns )
 
 fcn = R.GaussianPeakWithBackground()
+output=fcn.rate.rate
 
 """Initialize the integrator"""
 edges = N.arange(*opts.bins, dtype='d')
@@ -46,11 +47,11 @@ gl_hist = R.GaussLegendreHist( gl_int )
 # knots = gl_int.points.x.data()
 # y = N.exp(-(knots-mean)**2/2.0/sigma**2)/N.sqrt(2.0*N.pi)/sigma
 # points = Points( y )
+# output = points.points.points
 
 """Make fake gaussian data"""
 fcn.rate.E(gl_int.points.x)
-gl_hist.hist.f( fcn.rate.rate )
-# gl_hist.hist.f( points.points.points )
+gl_hist.hist.f( output )
 hist = gl_hist.hist.hist.data()
 
 """Plot data"""
