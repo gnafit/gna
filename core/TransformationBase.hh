@@ -185,13 +185,6 @@ namespace TransformationTypes {
      */
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
 
-    // /**
-    // * @brief
-    // * @param name
-    // * @todo method is undefined.
-    // */
-    // static InputHandle invalid(const std::string name);
-
     void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
 
     const std::string &name() const { return m_source->name; } ///< Get Source's name.
@@ -224,12 +217,6 @@ namespace TransformationTypes {
      * @param other -- other OutputHandle instance to access its Sink.
      */
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
-    // /**
-    // * @brief
-    // * @param name
-    // * @todo method is undefined.
-    // */
-    //static OutputHandle invalid(const std::string name);
 
     const std::string &name() const { return m_sink->name; }                 ///< Get Source's name.
 
