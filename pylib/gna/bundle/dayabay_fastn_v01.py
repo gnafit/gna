@@ -16,19 +16,27 @@ class dayabay_fastn_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(dayabay_fastn_v01, self).__init__( **kwargs )
         self.namespaces = [self.common_namespace(var) for var in self.cfg.pars.keys()]
-        self.groups = self.cfg.get('groups', {})
-        self.groups = Categories(self.groups, recursive=True)
+        self.groups = Categories(self.cfg.get('groups', {}), recursive=True)
+        self.bindings=OrderedDict()
 
     def build(self):
-        pass
-
-    def define_variables(self):
-        for loc, unc in self.cfg.pars.items():
-            name = self.groups.format_splitjoin( loc, self.cfg.formula)
-            self.common_namespace.defparameter(name, cfg=unc)
-
         from gna.parameters.printer import print_parameters
         print_parameters( self.common_namespace )
 
-        import sys
-        sys.exit(1)
+        bins = N.ascontiguousarray(self.cfg.bins, dtype='d')
+        self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
+        for ns in self.namespaces:
+            fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
+            fcn.selfpower_inv.points( self.integrator_gl.points.x )
+
+            hist = R.GaussLegendreHist(self.integrator_gl, ns=ns)
+            hist.hist.f(fcn.selfpower_inv.result)
+
+            self.output_transformations+=hist,
+            self.outputs+=hist.hist.data,
+
+    def define_variables(self):
+        for loc, unc in self.cfg.pars.items():
+            name = self.groups.format_splitjoin(loc, self.cfg.formula)
+            par = self.common_namespace.defparameter(name, cfg=unc)
+            self.bindings[loc]=par

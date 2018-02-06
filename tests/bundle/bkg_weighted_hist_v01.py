@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
+import numpy as N
 from gna.configurator import NestedDict, uncertain, uncertaindict
 from gna.bundle import execute_bundle
 from gna.env import env, findname
@@ -124,11 +125,11 @@ bkg.bkgsum = NestedDict(
 
 bkg.bkg_fn = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{det}.bkgsum_num', ('bkgsum_rate.{site}', '{det}.livetime') ],
+        formula = [ '{det}.bkg_fn_num', ('bkg_fn_rate.{site}', '{det}.livetime') ],
         groups = cfg.groups,
         variants = cfg.detectors,
 
-        bkgsum_rate = uncertaindict(
+        bkg_fn_rate = uncertaindict(
            [('G1', (1.0, 0.3)),
             ('G2', (3.0, 0.2)),
             ('G3', (2.0, 0.1))],
@@ -139,6 +140,8 @@ bkg.bkg_fn = NestedDict(
             formula='fastn_shape.{site}',
             groups=cfg.groups,
             range=(0.7, 12.0),
+            bins =N.linspace(0.0, 12.0, 241),
+            order=2,
             pars=uncertaindict(
                [ ('G1', (70.00, 0.1)),
                  ('G2', (60.00, 0.05)),

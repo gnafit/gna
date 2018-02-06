@@ -171,7 +171,7 @@ class namespace(Mapping):
             path, name = name.rsplit('.', 1)
             return self(path).defparameter(name, *args, **kwargs)
         if name in self.storage:
-            raise Exception("{} is already defined".format(name))
+            raise Exception("{} is already defined in {}".format(name, self.path))
         target = self.matchrule(name)
         if not target:
             target = kwargs.pop('target', None)
@@ -404,8 +404,8 @@ class _environment(object):
         else:
             return self.globalns.defparameter(name, **kwargs)
 
-    def iternstree(self):
-        return self.globalns.iternstree()
+    # def iternstree(self):
+        # return self.globalns.iternstree()
 
     def bind(self, **bindings):
         self._bindings.append(bindings)
