@@ -8,14 +8,16 @@ class Normalize: public GNAObject,
                  public Transformation<Normalize> {
 public:
     Normalize();
-    Normalize(int start, int length);
+    Normalize(size_t start, size_t length);
 
-    void normalize(Args args, Rets rets);
-    void normalize_segment(Args args, Rets rets);
+    void doNormalize(Args args, Rets rets);
+    void doNormalize_segment(Args args, Rets rets);
 
-private:
-    int m_start;
-    int m_length;
+protected:
+    void checkLimits(Atypes args, Rtypes rets);
+
+    size_t m_start;
+    size_t m_length;
 };
 
 #endif
