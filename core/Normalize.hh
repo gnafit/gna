@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 #include "Statistic.hh"
 
-class Normalize: public GNAObject,
+class Normalize: public GNASingleObject,
                  public Transformation<Normalize> {
 public:
     Normalize();

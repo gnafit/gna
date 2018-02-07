@@ -21,6 +21,12 @@ class dayabay_fastn_v01(TransformationBundle):
 
     def build(self):
         bins = N.ascontiguousarray(self.cfg.bins, dtype='d')
+        emin, emax=self.cfg.normalize
+        try:
+            (imin, imax), = N.where( ((bins-emin)*(bins-emax)).round(6)==0.0 )
+        except:
+            raise Exception('Was unable to determine normalization region for Fast Neutrons (%f, %f)'%(emin, emax))
+
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
         for ns in self.namespaces:
             fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
@@ -29,10 +35,13 @@ class dayabay_fastn_v01(TransformationBundle):
             hist = R.GaussLegendreHist(self.integrator_gl, ns=ns)
             hist.hist.f(fcn.selfpower_inv.result)
 
-            self.output_transformations+=hist,
-            self.outputs+=hist.hist.data,
+            normalize = R.Normalize(imin, imax-imin, ns=ns)
+            normalize.normalize.inp( hist.hist.hist )
 
-            self.transformations[ns.name]=hist
+            self.output_transformations+=normalize,
+            self.outputs+=normalize.normalize.out,
+
+            self.transformations[ns.name]=normalize
 
     def define_variables(self):
         for loc, unc in self.cfg.pars.items():
