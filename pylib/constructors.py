@@ -8,6 +8,9 @@ from load import ROOT as R
 import numpy as N
 from converters import array_to_stdvector_size_t
 
+"""Construct std::vector object from an array"""
+from converters import list_to_stdvector as stdvector
+
 """Construct Points object from numpy array"""
 def Points( array, *args, **kwargs ):
     """Convert array to Points"""

@@ -11,6 +11,7 @@ class detector_iav_db_root_v01(TransformationBundle):
     def __init__(self, **kwargs):
         self.parname = kwargs.pop( 'parname', 'OffdiagScale' )
         super(detector_iav_db_root_v01, self).__init__( **kwargs )
+        self.transformations_in = self.transformations_out
 
 
     def build_mat(self):
@@ -31,7 +32,6 @@ class detector_iav_db_root_v01(TransformationBundle):
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
 
-                self.transformations_in[ns.name]  = esmear
                 self.transformations_out[ns.name] = esmear
 
                 self.inputs[ns.name]  = esmear.smear.Ntrue

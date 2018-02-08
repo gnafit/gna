@@ -9,12 +9,12 @@ from gna.bundle import *
 class rebin(TransformationBundle):
     def __init__(self, **kwargs):
         super(rebin, self).__init__( **kwargs )
+        self.transformations_in = self.transformations_out
 
     def build(self):
         for ns in self.namespaces:
             rebin = C.Rebin( self.cfg.edges, self.cfg.rounding, ns=ns )
 
-            self.transformations_in[ns.name]  = rebin
             self.transformations_out[ns.name] = rebin
 
             self.inputs[ns.name]  = rebin.rebin.histin

@@ -12,7 +12,7 @@ from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
 import constructors as C
 from converters import convert
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertaindict, uncertain
 import itertools as I
 from physlib import percent
 from gna import parameters
@@ -59,9 +59,13 @@ cfg.detector.iav = NestedDict(
 cfg.detector.eres = NestedDict(
         bundle = 'detector_eres_common3',
         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
-        values  = [ 0.014764, 0.0869, 0.0271 ],
-        uncertainties = [30.0*percent]*3,
-        uncertainty_type = 'relative'
+        pars = uncertaindict(
+            [('Eres_a', 0.014764) ,
+             ('Eres_b', 0.0869) ,
+             ('Eres_c', 0.0271)],
+            mode='percent',
+            uncertainty=30
+            )
         )
 cfg.detector.rebin = NestedDict(
         bundle = 'rebin',

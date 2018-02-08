@@ -12,28 +12,31 @@ class detector_eres_common3(TransformationBundle):
     mode = 'correlated' # 'uncorrelated'
     def __init__(self, **kwargs):
         super(detector_eres_common3, self).__init__( **kwargs )
+        self.transformations_in = self.transformations_out
 
     def build(self):
-        if self.mode=='correlated':
-            eres = R.EnergyResolution( False )
-            self.output_transformations+=eres,
-            for i, ns in enumerate(self.namespaces):
-                eres.add()
+        with self.common_namespace:
+            if self.mode=='correlated':
+                eres = R.EnergyResolution(False, ns=self.common_namespace)
+                for i, ns in enumerate(self.namespaces):
+                    eres.add()
 
-                self.inputs  += eres.transformations[i].Nvis,
-                self.outputs += eres.transformations[i].Nrec,
-        elif self.mode=='uncorrelated':
-            for ns in self.namespaces:
-                with ns:
-                    eres = R.EnergyResolution()
-                    self.output_transformations+=eres,
+                    self.inputs[ns.name]  = eres.transformations[i].Nvis
+                    self.outputs[ns.name] = eres.transformations[i].Nrec
 
-                    self.inputs  += eres.smear.Nvis,
-                    self.outputs += eres.smear.Nrec,
-        else:
-            raise Exception( 'Invalid mode '+self.mode )
+                self.transformations_out[ns.name] = eres
+            elif self.mode=='uncorrelated':
+                for ns in self.namespaces:
+                    eres = R.EnergyResolution(ns=ns)
+
+                    self.transformations_out[ns.name] = eres
+
+                    self.inputs[ns.name]  = eres.smear.Nvis
+                    self.outputs[ns.name] = eres.smear.Nrec
+            else:
+                raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
-        for name, val, unc in zip( self.parameters, self.cfg['values'], self.cfg.uncertainties ):
-            self.common_namespace.reqparameter( name, central=val, uncertainty=unc, uncertainty_type=self.cfg.uncertainty_type )
+        for name, unc in zip(self.cfg.pars):
+            self.common_namespace.reqparameter(name, cfg=unc)
 
