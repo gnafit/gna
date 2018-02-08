@@ -2,7 +2,7 @@ from __future__ import print_function
 from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules
-from collections import OrderedDict
+from gna.configurator import NestedDict
 
 bundle_modules = {}
 bundles = {}
@@ -47,9 +47,8 @@ def init_bundle(**kwargs):
 def execute_bundle(**kwargs):
     bundles = init_bundle(**kwargs )
     for bundle in bundles:
-        bundle.define_variables()
-        bundle.build()
-    return bundle
+        bundle.execute()
+    return bundles
 
 class TransformationBundle(object):
     name = '<undefined>'
@@ -57,19 +56,18 @@ class TransformationBundle(object):
         self.cfg = cfg
 
         self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
-        namespaces=kwargs.pop( 'namespaces', None ) or [self.common_namespace]
+        namespaces=kwargs.pop( 'namespaces', (self.common_namespace))
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
-        storage=kwargs.pop( 'storage', None )
-        if storage:
-            self.storage = storage( self.name )
-        else:
-            self.storage = namespace( None, self.name )
+        self.transformations     = NestedDict()
+        self.transformations_in  = NestedDict()
+        self.transformations_out = NestedDict()
+        self.outputs             = NestedDict()
+        self.inputs              = NestedDict()
 
-        self.transformations=OrderedDict()
-        self.output_transformations = ()
-        self.outputs = ()
-        self.inputs = ()
+    def execute(self):
+        self.define_variables()
+        self.build()
 
     def build(self):
         pass

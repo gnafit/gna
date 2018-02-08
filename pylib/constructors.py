@@ -9,18 +9,20 @@ import numpy as N
 from converters import array_to_stdvector_size_t
 
 """Construct Points object from numpy array"""
-def Points( array ):
-    """Convert numpy array to Points"""
+def Points( array, *args, **kwargs ):
+    """Convert array to Points"""
     if len(array.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
-    a = N.asarray(array).ravel( order='F' )
+    a = N.ascontiguousarray(array, dtype='d').ravel( order='F' )
     s = array_to_stdvector_size_t( array.shape )
-    return R.Points( a, s )
+    return R.Points( a, s, *args, **kwargs )
 
-def Histogram( edges, data ):
-    """Construct Histogram object from numpy arrays: edges and data"""
-    if edges.size-1!=data.size:
+def Histogram( edges, data, *args, **kwargs ):
+    """Construct Histogram object from two arrays: edges and data"""
+    edges = N.ascontiguousarray(edges, dtype='d')
+    data  = N.ascontiguousarray(data,  dtype='d')
+    if (edges.size-1)!=data.size:
         raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
 
-    return R.Histogram( data.size, edges, data )
+    return R.Histogram( data.size, edges, data, *args, **kwargs )
 

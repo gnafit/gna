@@ -9,8 +9,6 @@ from gna.env import env
 from matplotlib import pyplot as P
 from collections import OrderedDict
 
-storage = env.globalns('storage')
-
 cfg = NestedDict()
 cfg.filename = 'output/sample_hists.root'
 cfg.detectors = [ 'D1', 'D2', 'D3', 'D4' ]
@@ -82,9 +80,9 @@ ax.set_ylabel( 'height' )
 ax.set_title( 'Histogram' )
 for spname in cfg.spectra:
     scfg = cfg[spname]
-    b = execute_bundle( cfg=scfg, storage=storage )
+    b, = execute_bundle(cfg=scfg)
 
-    for output, ns in zip(b.outputs, b.namespaces):
+    for output, ns in zip(b.outputs.values(), b.namespaces):
         data = output.data()
         ax.bar(range(len(data)), data, label=ns.name)
 

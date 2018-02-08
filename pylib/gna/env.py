@@ -136,6 +136,8 @@ class namespace(Mapping):
 
     def __call__(self, nsname):
         if isinstance(nsname, basestring):
+            if nsname=='':
+                return self
             parts = nsname.split('.')
         else:
             parts = nsname
