@@ -29,7 +29,6 @@ class root_histograms_v01(TransformationBundle):
 
         print( 'Read input file {}:'.format(file.GetName()) )
 
-        self.transformations=OrderedDict()
         variants = self.cfg.get('variants', [self.common_namespace.name])
         for var in variants:
             fmt = var
@@ -47,11 +46,10 @@ class root_histograms_v01(TransformationBundle):
             if self.cfg.get( 'normalize', False ):
                 data=data/data.sum()
 
-            ns=self.common_namespace(var)
-            hist=Histogram(edges, data, ns=ns)
+            hist=Histogram(edges, data, ns=self.common_namespace(var))
 
-            self.transformations_out[var]     = hist
-            self.transformations['hist.'+var] = hist
-            self.outputs[var]                 = hist.hist.hist
+            self.transformations_out[var]      = hist
+            self.transformations[('hist',var)] = hist
+            self.outputs[var]                  = hist.hist.hist
 
         file.Close()

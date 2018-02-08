@@ -17,8 +17,8 @@ def Points( array, *args, **kwargs ):
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s, *args, **kwargs )
 
+"""Construct Histogram object from two arrays: edges and data"""
 def Histogram( edges, data, *args, **kwargs ):
-    """Construct Histogram object from two arrays: edges and data"""
     edges = N.ascontiguousarray(edges, dtype='d')
     data  = N.ascontiguousarray(data,  dtype='d')
     if (edges.size-1)!=data.size:
@@ -26,3 +26,9 @@ def Histogram( edges, data, *args, **kwargs ):
 
     return R.Histogram( data.size, edges, data, *args, **kwargs )
 
+"""Construct the GaussLegendre transformation based on bin edges and order(s)"""
+def GaussLegendre(edges, orders, *args, **kwargs):
+    edges = N.ascontiguousarray(edges, dtype='d')
+    if not isinstance(orders, int):
+        orders = N.ascontiguousarray(orders, dtype='i')
+    return R.GaussLegendre(edges, orders, edges.size-1, *args, **kwargs)

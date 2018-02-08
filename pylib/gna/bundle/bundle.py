@@ -51,19 +51,18 @@ def execute_bundle(**kwargs):
     return bundles
 
 class TransformationBundle(object):
-    name = '<undefined>'
     def __init__(self, cfg, **kwargs):
         self.cfg = cfg
 
         self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
-        namespaces=kwargs.pop( 'namespaces', (self.common_namespace))
+        namespaces=kwargs.pop('namespaces', None) or [self.common_namespace]
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
-        self.transformations     = NestedDict()
-        self.transformations_in  = NestedDict()
-        self.transformations_out = NestedDict()
-        self.outputs             = NestedDict()
-        self.inputs              = NestedDict()
+        self.transformations     = NestedDict() # {'group': {key: transformation}} - transformations, not listed in transformation_in and transformations_out
+        self.transformations_in  = NestedDict() # {key: transformation}            - transfromations, that require inputs to be connected
+        self.transformations_out = NestedDict() # {key: transformation}            - transformations, with oupen outputs
+        self.outputs             = NestedDict() # {key: output}                    - inputs to be connected (should be consistent with transformations_out)
+        self.inputs              = NestedDict() # {key: input}                     - open outputs (should be consistent with transformations_in)
 
     def execute(self):
         self.define_variables()

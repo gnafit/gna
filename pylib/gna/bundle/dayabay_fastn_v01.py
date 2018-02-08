@@ -12,7 +12,6 @@ from gna.grouping import CatDict, Categories
 from gna.bundle import *
 
 class dayabay_fastn_v01(TransformationBundle):
-    name = 'dayabay_fastn'
     def __init__(self, **kwargs):
         super(dayabay_fastn_v01, self).__init__( **kwargs )
         self.namespaces = [self.common_namespace(var) for var in self.cfg.pars.keys()]
@@ -25,9 +24,10 @@ class dayabay_fastn_v01(TransformationBundle):
         try:
             (imin, imax), = N.where( ((bins-emin)*(bins-emax)).round(6)==0.0 )
         except:
-            raise Exception('Was unable to determine normalization region for Fast Neutrons (%f, %f)'%(emin, emax))
+            raise Exception('Was able to determine normalization region for Fast Neutrons (%f, %f)'%(emin, emax))
 
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
+        self.transformations[('integrator', '')] = self.integrator_gl
         for ns in self.namespaces:
             fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
             fcn.selfpower_inv.points( self.integrator_gl.points.x )
@@ -38,10 +38,10 @@ class dayabay_fastn_v01(TransformationBundle):
             normalize = R.Normalize(imin, imax-imin, ns=ns)
             normalize.normalize.inp( hist.hist.hist )
 
-            self.output_transformations+=normalize,
-            self.outputs+=normalize.normalize.out,
-
-            self.transformations[ns.name]=normalize
+            self.transformations[('fcn', ns.name)]  = fcn
+            self.transformations[('hist', ns.name)] = hist
+            self.transformations_out[ns.name]       = normalize
+            self.outputs[ns.name]                   = normalize.normalize.out
 
     def define_variables(self):
         for loc, unc in self.cfg.pars.items():

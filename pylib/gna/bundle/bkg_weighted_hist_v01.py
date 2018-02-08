@@ -19,7 +19,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.spectra = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace, storage=self.storage )
+        self.spectra, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
         self.cfg.setdefault( 'name', self.cfg.parent_key() )
@@ -27,8 +27,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
     def build(self):
-        self.transformations=NestedDict()
-        spectra = CatDict(self.groups, self.spectra.transformations)
+        spectra = CatDict(self.groups, self.spectra.transformations_out)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
@@ -36,20 +35,17 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             labels  = convert([self.cfg.name], 'stdvector')
             weights = convert([target], 'stdvector')
-            ws = R.WeightedSum(labels, weights)
+            ws = R.WeightedSum(labels, weights, ns=ns)
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp.single())
+            self.transformations[('spec',ns.name)] = inp
 
-            self.transformations(ns.name).hist = inp
-            self.transformations[ns.name].sum = ws
 
-            self.outputs += ws.sum.sum,
-            self.output_transformations+=ws,
+            self.transformations_out[ns.name] = ws
+            self.outputs[ns.name]             = ws.sum.sum
 
     def define_variables(self):
-        self.products=[]
-
         #
         # Define variables, which inputs are defined within the current config
         #
@@ -65,21 +61,21 @@ class bkg_weighted_hist_v01(TransformationBundle):
         # Link the other variables
         #
         targetfmt, formulafmt = self.get_target_formula()
-        for det in self.cfg.variants:
-            ns = self.common_namespace(det)
+        for variant in self.cfg.variants:
+            ns = self.common_namespace(variant)
             formula = []
             for fullitem in formulafmt:
-                item = self.groups.format_splitjoin(det, fullitem, prepend=self.common_namespace.path)
+                item = self.groups.format_splitjoin(variant, fullitem, prepend=self.common_namespace.path)
                 formula.append(item)
 
-            target = self.groups.format_splitjoin(det, targetfmt)
+            target = self.groups.format_splitjoin(variant, targetfmt)
             tpath, thead = target.rsplit('.', 1)
             tns = self.common_namespace(tpath)
             if len(formula)>1:
                 vp = R.VarProduct(convert(formula, 'stdvector'), thead, ns=tns)
 
                 tns[thead].get()
-                self.products.append( vp )
+                self.transformations[('prod', variant)]=vp
             else:
                 tns.defparameter( thead, target=formula[0] )
 

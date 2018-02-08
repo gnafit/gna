@@ -13,7 +13,6 @@ from gna.bundle import *
 from gna.bundle.connections import pairwise
 
 class hist_mixture_v01(TransformationBundle):
-    name = 'hist_mixture'
     def __init__(self, **kwargs):
         super(hist_mixture_v01, self).__init__( **kwargs )
 
@@ -21,7 +20,7 @@ class hist_mixture_v01(TransformationBundle):
             raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )
 
         self.spectra = OrderedDict([
-                (name, execute_bundle(cfg=cfg, common_namespace=self.common_namespace, storage=self.storage))
+                (name, execute_bundle(cfg=cfg, common_namespace=self.common_namespace)[0])
                 for name, cfg in self.cfg.spectra.items()
             ])
 
@@ -34,18 +33,16 @@ class hist_mixture_v01(TransformationBundle):
         for ns in self.namespaces:
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
-            ws = self.transformations[ns.name] = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector') )
+            ws = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector'), ns=ns )
+            self.transformations_out[ns.name]=ws
+            self.outputs[ns.name]=ws.sum.sum
 
             for name, spectrum in self.spectra.items():
-                ws.sum.inputs[name]( spectrum.outputs[0] )
-
-                self.outputs += ws.sum.sum,
-                self.output_transformations+= ws,
+                ws.sum.inputs[name]( spectrum.outputs.values()[0] )
 
     def define_variables(self):
         comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))
 
-        self.vardiffs = OrderedDict()
         for ns in self.namespaces:
             ns.defparameter( name=comb, central=1, sigma=0.1, fixed=True )
 
@@ -63,4 +60,4 @@ class hist_mixture_v01(TransformationBundle):
             missing = 'frac_'+missing[0]
             vd = R.VarDiff( convert(subst, 'stdvector'), missing, ns=ns)
             ns[missing].get()
-            self.vardiffs[ns.name] = vd
+            self.transformations[('vardiff', ns.name)] = vd

@@ -186,7 +186,7 @@ for det in cfg.detectors:
 bundles=()
 for bkg in cfg.bkg.list:
     scfg = cfg.bkg[bkg]
-    b = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.get('variants', None), storage=storage )
+    b, = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.get('variants', None), storage=storage )
     bundles+=b,
 
 from gna.parameters.printer import print_parameters
@@ -211,8 +211,7 @@ for bundle in bundles:
     ax.set_ylabel( 'entries' )
     ax.set_title( bundle.cfg.name )
 
-    for i, (name, ts) in enumerate(bundle.transformations.items()):
-        output = ts.sum.single()
+    for i, (name, output) in enumerate(bundle.outputs.items()):
         if bundle.cfg.name=='bkg2':
             group = bundle.groups.get_group(name, 'site')
             pack = (group.index(name), len(group))
