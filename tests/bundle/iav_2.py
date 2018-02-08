@@ -11,7 +11,7 @@ from mpl_tools.helpers import add_colorbar, plot_hist
 from gna.env import env
 import constructors as C
 import numpy as N
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain
 from physlib import percent
 
 #
@@ -20,14 +20,13 @@ from physlib import percent
 cfg = NestedDict(
         bundle = 'detector_iav_db_root_v01',
         parname = 'OffdiagScale',
-        uncertainty = 10*percent,
-        uncertainty_type = 'relative',
+        scale   = uncertain(1.0, 4, 'percent'),
         ndiag = 1,
         filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
-b = execute_bundle( cfg=cfg, namespaces=['ad1', 'ad2', 'ad3'] )
-(esmear1, esmear2, esmear3) = b.output_transformations
+b, = execute_bundle( cfg=cfg, namespaces=['ad1', 'ad2', 'ad3'] )
+(esmear1, esmear2, esmear3) = b.transformations_out.values()
 
 par1, par2, par3 = (b.common_namespace(s)['OffdiagScale'] for s in ('ad1', 'ad2', 'ad3'))
 par1.set( 1.5 )

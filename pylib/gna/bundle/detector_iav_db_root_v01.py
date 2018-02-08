@@ -22,21 +22,26 @@ class detector_iav_db_root_v01(TransformationBundle):
         norm[norm==0.0]=1.0
         self.iavmatrix/=norm
 
-        points = self.storage['matrix'] = C.Points( self.iavmatrix )
+        points = C.Points( self.iavmatrix, ns=self.common_namespace )
 
         for ns in self.namespaces:
             with ns:
-                lstorage = self.storage( 'iav_%s'%ns.name )
-                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.parname )
-                lstorage['renormdiag'] = renormdiag
+                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.parname, ns=ns )
                 renormdiag.renorm.inmat( points.points )
 
-                esmear = lstorage['esmear'] = R.HistSmear(True)
+                esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                self.output_transformations+=esmear,
 
-                self.inputs  += esmear.smear.Ntrue,
-                self.outputs += esmear.smear.Nvis,
+                self.transformations_in[ns.name]  = esmear
+                self.transformations_out[ns.name] = esmear
+
+                self.inputs[ns.name]  = esmear.smear.Ntrue
+                self.outputs[ns.name] = esmear.smear.Nvis
+
+                self.transformations[('renormdiag',ns.name)] = renormdiag
+                self.transformations[('esmear',ns.name)]     = esmear
+
+        self.transformations['matrix'] = points
 
     def build(self):
         from file_reader import read_object_auto
@@ -45,7 +50,9 @@ class detector_iav_db_root_v01(TransformationBundle):
         return self.build_mat()
 
     def define_variables(self):
-        if self.cfg.uncertainty_type!='relative':
-            raise Exception( 'IAV uncertainty should be relative by definition' )
+        if self.cfg.scale.mode!='relative':
+            raise Exception('IAV uncertainty should be relative by definition')
+        if self.cfg.scale.central!=1.0:
+            raise exception('IAV scale should be 1 by definition')
         for ns in self.namespaces:
-            ns.reqparameter( self.parname, central=1.0, relsigma=self.cfg.uncertainty )
+            ns.reqparameter( self.parname, cfg=self.cfg.scale )

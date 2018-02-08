@@ -27,7 +27,7 @@ class dayabay_fastn_v01(TransformationBundle):
             raise Exception('Was able to determine normalization region for Fast Neutrons (%f, %f)'%(emin, emax))
 
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
-        self.transformations[('integrator', '')] = self.integrator_gl
+        self.transformations['integrator'] = self.integrator_gl
         for ns in self.namespaces:
             fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
             fcn.selfpower_inv.points( self.integrator_gl.points.x )
