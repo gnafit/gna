@@ -8,7 +8,6 @@ from gna.bundle import *
 
 class detector_iav_db_root_v01(TransformationBundle):
     iavmatrix=None
-    name = 'iav'
     def __init__(self, **kwargs):
         self.parname = kwargs.pop( 'parname', 'OffdiagScale' )
         super(detector_iav_db_root_v01, self).__init__( **kwargs )

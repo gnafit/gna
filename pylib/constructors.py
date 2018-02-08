@@ -32,3 +32,10 @@ def GaussLegendre(edges, orders, *args, **kwargs):
     if not isinstance(orders, int):
         orders = N.ascontiguousarray(orders, dtype='i')
     return R.GaussLegendre(edges, orders, edges.size-1, *args, **kwargs)
+
+"""Construct Rebin object from array with edges"""
+def Rebin( edges, rounding, *args, **kwargs ):
+    if not isinstance( rounding, int ):
+        raise Exception('Rebin rounding should be an integer')
+    edges = N.ascontiguousarray(self.cfg.edges, dtype='d')
+    return C.Rebin( edges.size, edges, int( self.cfg.rounding ), *args, **kwargs )
