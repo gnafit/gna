@@ -50,7 +50,7 @@ cfg.detector.nonlinearity = NestedDict(
         )
 cfg.detector.iav = NestedDict(
         bundle = 'detector_iav_db_root_v01',
-        parname = 'OffdiagScale',
+        parname = 'OffdiagScale.{}',
         scale   = uncertain(1.0, 4, 'percent'),
         ndiag = 1,
         filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',

@@ -19,7 +19,7 @@ from physlib import percent
 #
 cfg = NestedDict(
         bundle = 'detector_iav_db_root_v01',
-        parname = 'OffdiagScale',
+        parname = 'OffdiagScale.{}',
         scale   = uncertain(1.0, 4, 'percent'),
         ndiag = 1,
         filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
@@ -28,7 +28,7 @@ cfg = NestedDict(
 b, = execute_bundle( cfg=cfg, namespaces=['ad1', 'ad2', 'ad3'] )
 (esmear1, esmear2, esmear3) = b.transformations_out.values()
 
-par1, par2, par3 = (b.common_namespace(s)['OffdiagScale'] for s in ('ad1', 'ad2', 'ad3'))
+par1, par2, par3 = (b.common_namespace('OffdiagScale')[s] for s in ('ad1', 'ad2', 'ad3'))
 par1.set( 1.5 )
 par2.set( 1.0 )
 par3.set( 0.5 )
