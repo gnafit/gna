@@ -7,8 +7,6 @@ import constructors as C
 from gna.bundle import *
 
 class detector_eres_common3(TransformationBundle):
-    name = 'eres'
-    parameters = [ 'Eres_a', 'Eres_b', 'Eres_c' ]
     mode = 'correlated' # 'uncorrelated'
     def __init__(self, **kwargs):
         super(detector_eres_common3, self).__init__( **kwargs )
@@ -37,6 +35,6 @@ class detector_eres_common3(TransformationBundle):
                 raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
-        for name, unc in zip(self.cfg.pars):
+        for name, unc in self.cfg.pars.items():
             self.common_namespace.reqparameter(name, cfg=unc)
 

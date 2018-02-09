@@ -65,8 +65,19 @@ class TransformationBundle(object):
         self.inputs              = NestedDict() # {key: input}                     - open outputs (should be consistent with transformations_in)
 
     def execute(self):
-        self.define_variables()
-        self.build()
+        try:
+            self.define_variables()
+        except Exception as e:
+            print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
+            import sys
+            raise e, None, sys.exc_info()[2]
+
+        try:
+            self.build()
+        except Exception as e:
+            print( 'Failed to build the bundle %s'%(type(self).__name__) )
+            import sys
+            raise e, None, sys.exc_info()[2]
 
     def build(self):
         pass

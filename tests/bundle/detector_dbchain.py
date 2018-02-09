@@ -39,7 +39,7 @@ cfg = NestedDict()
 cfg.detector = NestedDict(
         bundle = 'bundlechain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ]
+        chain = [ 'iav', 'eres', 'rebin' ], #, 'nonlinearity', ]
         )
 cfg.detector.nonlinearity = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
@@ -77,7 +77,6 @@ cfg.detector.rebin = NestedDict(
 # Define namespaces
 #
 namespaces = cfg.detector.detectors
-storage = env.globalns('storage')
 
 #
 # Bin edges, required by energy nonlinearity
@@ -96,7 +95,7 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 # Define the chain
 #
-b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage )
+b, = execute_bundle(edges=points.single(), cfg=cfg.detector, namespaces=namespaces)
 
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
@@ -104,7 +103,7 @@ print_parameters( env.globalns )
 #
 # Connect inputs
 #
-for inp, hist in zip(b.inputs, hists_list):
+for inp, hist in zip(b.inputs.values(), hists_list):
     inp( hist.hist )
 
 #
@@ -114,7 +113,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot( b.output_transformations[0][0] )
+        graph = GNADot( b.transformations_out[0][0] )
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
     except Exception as e:
@@ -141,13 +140,13 @@ for i, hist in enumerate(hists_list):
     plot_hist(edges, data, label='original')
 
 for bundle in b.bundles.values():
-    for i, out in enumerate( bundle.outputs ):
+    for i, (oname, out) in enumerate( bundle.outputs.items() ):
         P.sca(axes[i])
 
         data = out.data()
-        print( 'Sum data %s %i=%f'%( bundle.name, i, data.sum() ) )
+        print( 'Sum data %s (%s) %i=%f'%( type(bundle).__name__, oname, i, data.sum() ) )
 
-        plot_hist(out.datatype().edges, data, label=bundle.name)
+        plot_hist(out.datatype().edges, data, label=type(bundle).__name__)
 
 for i, hist in enumerate(hists_list):
     ax=axes[i]

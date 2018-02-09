@@ -5,6 +5,7 @@ from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
+from gna.configurator import NestedDict
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise
@@ -15,25 +16,27 @@ class bundlechain_v01(TransformationBundle):
         super(bundlechain_v01, self).__init__( **kwargs )
 
         self.edges=edges
-
-        self.bundles = OrderedDict()
+        self.bundles = NestedDict()
 
     def build(self):
         args = dict( namespaces=self.namespaces,
                      common_namespace=self.common_namespace,
-                     storage=self.storage,
                      edges=self.edges )
 
         for bundlename in self.cfg.chain:
-            self.bundles[bundlename] = execute_bundle( cfg=self.cfg[bundlename], **args )
+            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
 
         for b1, b2 in pairwise( self.bundles.values() ):
             # print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=b1.name, output=b1.outputs[0].name(),
                                                                            # b2=b2.name, input=b2.inputs[0].name(),
                                                                            # count=len(b1.inputs) ) )
-            for output, input in zip( b1.outputs, b2.inputs ):
+            for (oname, output), (iname, input) in zip( b1.outputs.items(), b2.inputs.items() ):
+                if oname!=iname:
+                    raise Exception('Trying to connect inconsistent ouput-input pair')
                 input( output )
 
-        self.output_transformations = self.bundles.values()[-1].output_transformations
-        self.inputs, self.output = self.bundles.values()[0].inputs, self.bundles.values()[-1].outputs
+        self.transformations_in  = self.bundles.values()[ 0].transformations_in
+        self.transformations_out = self.bundles.values()[-1].transformations_out
+        self.inputs              = self.bundles.values()[ 0].inputs
+        self.outputs             = self.bundles.values()[-1].outputs
 
