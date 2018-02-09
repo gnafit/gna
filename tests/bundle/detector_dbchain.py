@@ -39,14 +39,14 @@ cfg = NestedDict()
 cfg.detector = NestedDict(
         bundle = 'bundlechain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'eres', 'rebin' ], #, 'nonlinearity', ]
+        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
         )
 cfg.detector.nonlinearity = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-        uncertainty = 0.2*percent,
-        uncertainty_type = 'relative'
+        parname = 'escale.{}',
+        par = uncertain(1.0, 0.2, 'percent'),
         )
 cfg.detector.iav = NestedDict(
         bundle = 'detector_iav_db_root_v01',
