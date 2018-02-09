@@ -34,8 +34,9 @@ class hist_mixture_v01(TransformationBundle):
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
             ws = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector'), ns=ns )
-            self.transformations_out[ns.name]=ws
-            self.outputs[ns.name]=ws.sum.sum
+            self.transformations[('sum', ns.name)] = ws
+            self.transformations_out[ns.name]      = ws.sum
+            self.outputs[ns.name]                  = ws.sum.sum
 
             for name, spectrum in self.spectra.items():
                 ws.sum.inputs[name]( spectrum.outputs.values()[0] )
@@ -44,13 +45,13 @@ class hist_mixture_v01(TransformationBundle):
         comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))
 
         for ns in self.namespaces:
-            ns.defparameter( name=comb, central=1, sigma=0.1, fixed=True )
+            ns.reqparameter( name=comb, central=1, sigma=0.1, fixed=True )
 
             missing = self.cfg.spectra.keys()
             subst = [ns.pathto(comb)]
             for name, val in self.cfg.fractions.items():
                 cname = 'frac_'+name
-                ns.defparameter( cname, cfg=val )
+                ns.reqparameter( cname, cfg=val )
                 missing.pop(missing.index(name))
                 subst.append(ns.pathto(cname))
 

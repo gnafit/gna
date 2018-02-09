@@ -53,7 +53,8 @@ b, = execute_bundle( edges=points.single(), cfg=cfg )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 
-(nonlin,) = b.transformations_out.values()
+(smear,) = b.transformations_out.values()
+nonlin   = b.transformations['nonlinearity'].values()[0]
 corr_lsnl = b.transformations['lsnl_factor']
 corr,     = b.transformations['factor'].values()
 
@@ -91,7 +92,7 @@ ax.legend( loc='lower right' )
 #
 # Test bundle
 #
-nonlin.smear.Ntrue( hist.hist )
+smear.Ntrue( hist.hist )
 
 #
 # Plot hists
@@ -104,7 +105,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared = nonlin.smear.Nvis.data().copy()
+smeared = smear.Nvis.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 
 plot_hist( edges, phist, label='original' )

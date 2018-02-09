@@ -38,12 +38,12 @@ class bkg_weighted_hist_v01(TransformationBundle):
             ws = R.WeightedSum(labels, weights, ns=ns)
 
             inp = spectra[ns.name]
-            ws.sum.inputs[self.cfg.name](inp.single())
+            ws.sum.inputs[self.cfg.name](inp)
+
             self.transformations[('spec',ns.name)] = inp
-
-
-            self.transformations_out[ns.name] = ws
-            self.outputs[ns.name]             = ws.sum.sum
+            self.transformations[('sum', ns.name)] = ws
+            self.transformations_out[ns.name]      = ws.sum
+            self.outputs[ns.name]                  = ws.sum.sum
 
     def define_variables(self):
         #
@@ -55,7 +55,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             for loc, unc in numbers.items():
                 path, head = self.groups.format_splitjoin( loc, fullitem ).rsplit( '.', 1 )
-                self.common_namespace(path).defparameter(head, cfg=unc)
+                self.common_namespace(path).reqparameter(head, cfg=unc)
 
         #
         # Link the other variables

@@ -48,8 +48,8 @@ class root_histograms_v01(TransformationBundle):
 
             hist=Histogram(edges, data, ns=self.common_namespace(var))
 
-            self.transformations_out[var]      = hist
             self.transformations[('hist',var)] = hist
+            self.transformations_out[var]      = hist.hist
             self.outputs[var]                  = hist.hist.hist
 
         file.Close()

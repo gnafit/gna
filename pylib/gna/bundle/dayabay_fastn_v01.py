@@ -28,23 +28,25 @@ class dayabay_fastn_v01(TransformationBundle):
 
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.common_namespace)
         self.transformations['integrator'] = self.integrator_gl
-        for ns in self.namespaces:
-            fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
-            fcn.selfpower_inv.points( self.integrator_gl.points.x )
+        with self.common_namespace:
+            for ns in self.namespaces:
+                fcn  = R.SelfPower(ns.name, ns=ns, bindings=self.bindings)
+                fcn.selfpower_inv.points( self.integrator_gl.points.x )
 
-            hist = R.GaussLegendreHist(self.integrator_gl, ns=ns)
-            hist.hist.f(fcn.selfpower_inv.result)
+                hist = R.GaussLegendreHist(self.integrator_gl, ns=ns)
+                hist.hist.f(fcn.selfpower_inv.result)
 
-            normalize = R.Normalize(imin, imax-imin, ns=ns)
-            normalize.normalize.inp( hist.hist.hist )
+                normalize = R.Normalize(imin, imax-imin, ns=ns)
+                normalize.normalize.inp( hist.hist.hist )
 
-            self.transformations[('fcn', ns.name)]  = fcn
-            self.transformations[('hist', ns.name)] = hist
-            self.transformations_out[ns.name]       = normalize
-            self.outputs[ns.name]                   = normalize.normalize.out
+                self.transformations[('fcn', ns.name)]       = fcn
+                self.transformations[('hist', ns.name)]      = hist
+                self.transformations[('normalize', ns.name)] = normalize
+                self.transformations_out[ns.name]            = normalize.normalize
+                self.outputs[ns.name]                        = normalize.normalize.out
 
     def define_variables(self):
         for loc, unc in self.cfg.pars.items():
             name = self.groups.format_splitjoin(loc, self.cfg.formula)
-            par = self.common_namespace.defparameter(name, cfg=unc)
+            par = self.common_namespace.reqparameter(name, cfg=unc)
             self.bindings[loc]=par

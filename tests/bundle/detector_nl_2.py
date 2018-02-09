@@ -55,7 +55,7 @@ b, = execute_bundle( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ]
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale1, escale2 = (b.common_namespace('escale')[ns] for ns in [ 'ad1', 'ad2' ])
 
-(nonlin1, nonlin2) = b.transformations_out.values()
+(nonlin1, nonlin2) = b.transformations['nonlinearity'].values()
 factor1, factor2 = b.transformations['factor'].values()
 
 factor_nominal = factor1.data().copy()

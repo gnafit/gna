@@ -80,7 +80,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     #
                     # Provide output transformations
                     #
-                    self.transformations_out[ns.name] = nonlin
+                    self.transformations_out[ns.name] = nonlin.smear
                     self.inputs[ns.name]              = nonlin.smear.Ntrue
                     self.outputs[ns.name]             = nonlin.smear.Nvis
 

@@ -26,7 +26,7 @@ cfg = NestedDict(
         matrixname = 'iav_matrix'
         )
 b, = execute_bundle( cfg=cfg, namespaces=['ad1', 'ad2', 'ad3'] )
-(esmear1, esmear2, esmear3) = b.transformations_out.values()
+(smear1, smear2, smear3) = b.transformations_out.values()
 
 par1, par2, par3 = (b.common_namespace('OffdiagScale')[s] for s in ('ad1', 'ad2', 'ad3'))
 par1.set( 1.5 )
@@ -47,9 +47,9 @@ edges = N.arange( 0.0, 12.0001, binwidth )
 
 phist = singularities( [ 1.225, 4.025, 7.025 ], edges )
 hist = C.Histogram( edges, phist )
-esmear1.smear.inputs.Ntrue( hist.hist )
-esmear2.smear.inputs.Ntrue( hist.hist )
-esmear3.smear.inputs.Ntrue( hist.hist )
+smear1.inputs.Ntrue( hist.hist )
+smear2.inputs.Ntrue( hist.hist )
+smear3.inputs.Ntrue( hist.hist )
 
 #
 # Plot
@@ -62,9 +62,9 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'IAV effect' )
 
-smeared1 = esmear1.smear.Nvis.data()
-smeared2 = esmear2.smear.Nvis.data()
-smeared3 = esmear3.smear.Nvis.data()
+smeared1 = smear1.Nvis.data()
+smeared2 = smear2.Nvis.data()
+smeared3 = smear3.Nvis.data()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared1.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared3.sum() ) )

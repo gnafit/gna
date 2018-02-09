@@ -26,7 +26,7 @@ cfg = NestedDict(
         matrixname = 'iav_matrix'
         )
 b, = execute_bundle( cfg=cfg )
-esmear, = b.transformations_out.values()
+smear, = b.transformations_out.values()
 par = b.common_namespace['OffdiagScale']
 
 #
@@ -43,7 +43,7 @@ edges = N.arange( 0.0, 12.0001, binwidth )
 
 phist = singularities( [ 1.225, 4.025, 7.025 ], edges )
 hist = C.Histogram( edges, phist )
-esmear.smear.inputs.Ntrue( hist.hist )
+smear.inputs.Ntrue( hist.hist )
 
 #
 # Plot
@@ -56,9 +56,9 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'IAV effect' )
 
-smeared = esmear.smear.Nvis.data().copy()
+smeared = smear.Nvis.data().copy()
 par.set( 2.0 )
-smeared2 = esmear.smear.Nvis.data().copy()
+smeared2 = smear.Nvis.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 
