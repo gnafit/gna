@@ -6,6 +6,7 @@ using boost::format;
 
 #include "Transformation.hh"
 #include "Exceptions.hh"
+#include "ThreadPool.hh"
 
 using TransformationTypes::Source;
 using TransformationTypes::Sink;
@@ -25,6 +26,11 @@ using TransformationTypes::Rtypes;
 
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
+
+class ThreadPool;
+class Task;
+ThreadPool tpool(4);
+
 
 /**
  * @brief Formatted exception message.
@@ -168,6 +174,13 @@ void Entry::evaluate() {
   return fun(Args(this), Rets(this));
 }
 
+
+/*void Entry::evaluate_parallel() {
+  fun(Args(this), Rets(this));
+  
+}*/
+
+
 /**
  * @brief Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
  *
@@ -176,7 +189,11 @@ void Entry::evaluate() {
 void Entry::update() {
   Status status = Status::Success;
   try {
-    evaluate();
+  //  ThreadPool pool(4);
+    tpool.add_task(this);
+    //MultiThreading::Task task(this);
+    //task.run_task();
+
     tainted = false;
   } catch (const SinkTypeError&) {
     status = Status::Failed;
@@ -462,7 +479,7 @@ void Entry::updateTypes() {
 void Entry::touch() {
   if (tainted && !frozen) {
     update();
-  }
+  } 
 }
 
 /**

@@ -28,6 +28,7 @@ set (SOURCES
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
   core/Rebin.cc
+  core/ThreadPool.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -99,6 +100,7 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh
+  ThreadPool.hh
   )
 
 include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
@@ -143,4 +145,4 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)
+target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -pthread -lPyROOT -lgsl -lgslcblas -lm)

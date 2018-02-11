@@ -51,6 +51,8 @@
 #pragma link C++ class FillLike-;
 #pragma link C++ class Identity-;
 
+#pragma link C++ class Task+;
+
 #pragma link C++ class CovarianceToyMC-;
 #pragma link C++ class PoissonToyMC-;
 

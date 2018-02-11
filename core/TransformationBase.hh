@@ -13,6 +13,8 @@
 
 #include "Parameters.hh"
 #include "Data.hh"
+//#include "ThreadPool.hh"
+
 
 // #define TRANSFORMATION_DEBUG
 
@@ -328,6 +330,8 @@ namespace TransformationTypes {
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
     bool usable;                                        ///< Unused.
+
+    //ThreadPool &tpool;
 
   private:
     template <typename InsT, typename OutsT>
