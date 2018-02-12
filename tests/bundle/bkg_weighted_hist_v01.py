@@ -216,7 +216,7 @@ for bundle in bundles:
             group = bundle.groups.get_group(name, 'site')
             pack = (group.index(name), len(group))
         if bundle.cfg.name=='bkgsum':
-            pack = (i, len(bundle.transformations))
+            pack = (i, len(bundle.objects))
         else:
             pack = None
 

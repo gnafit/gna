@@ -54,9 +54,9 @@ pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 
 (smear,) = b.transformations_out.values()
-nonlin   = b.transformations['nonlinearity'].values()[0]
-corr_lsnl = b.transformations['lsnl_factor']
-corr,     = b.transformations['factor'].values()
+nonlin   = b.objects['nonlinearity'].values()[0]
+corr_lsnl = b.objects['lsnl_factor']
+corr,     = b.objects['factor'].values()
 
 #
 # Plot curves:
@@ -130,7 +130,7 @@ mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
-newe = b.transformations.edges_mod.values()[0].product.data()
+newe = b.objects.edges_mod.values()[0].product.data()
 ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
 
 savefig( opts.output, suffix='_matrix', dpi=300 )

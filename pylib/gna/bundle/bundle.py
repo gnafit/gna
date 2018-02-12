@@ -58,11 +58,11 @@ class TransformationBundle(object):
         namespaces=kwargs.pop('namespaces', None) or [self.common_namespace]
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
-        self.transformations     = NestedDict() # {'group': {key: transformation}} - transformations, not listed in transformation_in and transformations_out
-        self.transformations_in  = NestedDict() # {key: transformation}            - transfromations, that require inputs to be connected
-        self.transformations_out = NestedDict() # {key: transformation}            - transformations, with oupen outputs
-        self.outputs             = NestedDict() # {key: output}                    - inputs to be connected (should be consistent with transformations_out)
-        self.inputs              = NestedDict() # {key: input}                     - open outputs (should be consistent with transformations_in)
+        self.objects             = NestedDict() # {'group': {key: object}} - objects with transformations
+        self.transformations_in  = NestedDict() # {key: transformation}    - transfromations, that require inputs to be connected
+        self.transformations_out = NestedDict() # {key: transformation}    - transformations, with oupen outputs
+        self.outputs             = NestedDict() # {key: output}            - inputs to be connected (should be consistent with transformations_out)
+        self.inputs              = NestedDict() # {key: input}             - open outputs (should be consistent with transformations_in)
 
     def execute(self):
         try:

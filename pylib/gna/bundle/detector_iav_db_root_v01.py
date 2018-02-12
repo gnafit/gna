@@ -31,14 +31,15 @@ class detector_iav_db_root_v01(TransformationBundle):
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
 
+                """Save transformations"""
                 self.transformations_out[ns.name] = esmear.smear
                 self.inputs[ns.name]              = esmear.smear.Ntrue
                 self.outputs[ns.name]             = esmear.smear.Nvis
 
-                self.transformations[('renormdiag',ns.name)] = renormdiag
-                self.transformations[('esmear',ns.name)]     = esmear
+                self.objects[('renormdiag',ns.name)] = renormdiag
+                self.objects[('esmear',ns.name)]     = esmear
 
-        self.transformations['matrix'] = points
+        self.objects['matrix'] = points
 
     def build(self):
         from file_reader import read_object_auto

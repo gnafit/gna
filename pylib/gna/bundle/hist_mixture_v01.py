@@ -34,9 +34,9 @@ class hist_mixture_v01(TransformationBundle):
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
             ws = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector'), ns=ns )
-            self.transformations[('sum', ns.name)] = ws
-            self.transformations_out[ns.name]      = ws.sum
-            self.outputs[ns.name]                  = ws.sum.sum
+            self.objects[('sum', ns.name)]    = ws
+            self.transformations_out[ns.name] = ws.sum
+            self.outputs[ns.name]             = ws.sum.sum
 
             for name, spectrum in self.spectra.items():
                 ws.sum.inputs[name]( spectrum.outputs.values()[0] )
@@ -61,4 +61,4 @@ class hist_mixture_v01(TransformationBundle):
             missing = 'frac_'+missing[0]
             vd = R.VarDiff( convert(subst, 'stdvector'), missing, ns=ns)
             ns[missing].get()
-            self.transformations[('vardiff', ns.name)] = vd
+            self.objects[('vardiff', ns.name)] = vd

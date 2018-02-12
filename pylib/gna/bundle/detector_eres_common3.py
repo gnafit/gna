@@ -23,15 +23,15 @@ class detector_eres_common3(TransformationBundle):
                     self.inputs[ns.name]              = eres.transformations[i].Nvis
                     self.outputs[ns.name]             = eres.transformations[i].Nrec
 
-                self.transformations['eres'] = eres
+                self.objects['eres'] = eres
             elif self.mode=='uncorrelated':
                 for ns in self.namespaces:
                     eres = R.EnergyResolution(ns=ns)
 
-                    self.transformations[('eres', ns.name)] = eres
-                    self.transformations_out[ns.name]       = eres.smear
-                    self.inputs[ns.name]                    = eres.smear.Nvis
-                    self.outputs[ns.name]                   = eres.smear.Nrec
+                    self.objects[('eres', ns.name)]   = eres
+                    self.transformations_out[ns.name] = eres.smear
+                    self.inputs[ns.name]              = eres.smear.Nvis
+                    self.outputs[ns.name]             = eres.smear.Nrec
             else:
                 raise Exception( 'Invalid mode '+self.mode )
 

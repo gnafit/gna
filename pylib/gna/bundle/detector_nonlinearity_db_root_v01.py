@@ -46,12 +46,12 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # a weighted sum of input curves
         #
         corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
-        self.transformations['lsnl_factor']=corr_lsnl
+        self.objects['lsnl_factor']=corr_lsnl
         for y, name in zip( newy, self.cfg.names ):
             pts = C.Points( y, ns=self.common_namespace )
             corr_lsnl.sum[name]( pts )
 
-            self.transformations[('curves', name)] = pts
+            self.objects[('curves', name)] = pts
 
         with self.common_namespace:
             for i, ns in enumerate(self.namespaces):
@@ -87,9 +87,9 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     #
                     # Save intermediate transformations
                     #
-                    self.transformations[('factor', ns.name)]       = corr
-                    self.transformations[('edges_mod', ns.name)]    = newe
-                    self.transformations[('nonlinearity', ns.name)] = nonlin
+                    self.objects[('factor', ns.name)]       = corr
+                    self.objects[('edges_mod', ns.name)]    = newe
+                    self.objects[('nonlinearity', ns.name)] = nonlin
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

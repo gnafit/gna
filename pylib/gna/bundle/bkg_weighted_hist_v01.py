@@ -40,10 +40,13 @@ class bkg_weighted_hist_v01(TransformationBundle):
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp)
 
-            self.transformations[('spec',ns.name)] = inp
-            self.transformations[('sum', ns.name)] = ws
-            self.transformations_out[ns.name]      = ws.sum
-            self.outputs[ns.name]                  = ws.sum.sum
+            """Save transformations"""
+            self.objects[('spec',ns.name)]    = inp
+            self.objects[('sum', ns.name)]    = ws
+            self.transformations_out[ns.name] = ws.sum
+            self.outputs[ns.name]             = ws.sum.sum
+
+            """Add observables"""
 
     def define_variables(self):
         #
@@ -75,7 +78,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
                 vp = R.VarProduct(convert(formula, 'stdvector'), thead, ns=tns)
 
                 tns[thead].get()
-                self.transformations[('prod', variant)]=vp
+                self.objects[('prod', variant)]=vp
             else:
                 tns.defparameter( thead, target=formula[0] )
 
