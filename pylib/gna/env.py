@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import defaultdict, deque, Mapping, OrderedDict
 import parameters
 from contextlib import contextmanager
@@ -85,7 +86,7 @@ class ExpressionsEntry(object):
         minexpr, minpaths = None, None
         for expr in self.exprs:
             if cfg.debug_bindings:
-                print expr.expr.name(), seen
+                print(expr.expr.name(), seen)
             paths = expr.resolvepath(seen, set(known))
             if paths is None:
                 continue
@@ -201,9 +202,9 @@ class namespace(Mapping):
     def addobservable(self, name, output, export=True):
         if output.check():
             self.observables[name] = output
-            print 'Add observable:', '%s/%s'%(self.path, name)
+            print('Add observable:', '%s/%s'%(self.path, name))
         else:
-            print "observation", name, "is invalid"
+            print("observation", name, "is invalid")
             output.dump()
         if not export:
             self.observables_tags[name].add('internal')
@@ -211,7 +212,7 @@ class namespace(Mapping):
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
             if cfg.debug_bindings:
-                print self.path, obj, expr.name()
+                print(self.path, obj, expr.name())
             name = expr.name()
             if name not in self.storage:
                 self.storage[name] = ExpressionsEntry(self)
@@ -250,6 +251,17 @@ class namespace(Mapping):
             if not pattern or pattern(name):
                 return target
 
+    def printobservables(self, internal=False):
+        from sys import stderr
+        for path, out in self.walkobservables(internal):
+            stderr.write('%-30s'%(path+':'))
+            out.datatype().dump()
+
+    def printparameters(self):
+        from gna.parameters.printer import print_parameters
+        print_parameters(self)
+
+
 class nsview(object):
     def __init__(self):
         self.nses = deque()
@@ -269,13 +281,13 @@ class nsview(object):
                 pass
 
         if cfg.debug_bindings:
-            print "can't find name {}. Names in view: ".format(name),
+            print("can't find name {}. Names in view: ".format(name), end='')
             if self.nses:
                 for ns in self.nses:
-                    print '"{}": "{}"'.format(ns.path, ', '.join(ns.storage)), ' ',
-                print ''
+                    print('"{}": "{}"'.format(ns.path, ', '.join(ns.storage)), ' ', end='')
+                print('')
             else:
-                'none'
+                print('none')
         raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
 
 class parametersview(object):
@@ -380,13 +392,13 @@ class _environment(object):
                 param = param.get()
             if param is not None:
                 if cfg.debug_bindings:
-                    print "binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
+                    print("binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()]))
                 v.bind(param.getVariable())
             else:
                 msg = "unable to bind variable %s of %r" % (v.name(), obj)
                 if not v.required():
                     msg += ", optional"
-                    print msg
+                    print(msg)
                 else:
                     raise Exception(msg)
         return obj

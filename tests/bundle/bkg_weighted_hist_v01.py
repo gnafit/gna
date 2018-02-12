@@ -189,11 +189,11 @@ for bkg in cfg.bkg.list:
     b, = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.get('variants', None), storage=storage )
     bundles+=b,
 
-from gna.parameters.printer import print_parameters
-print_parameters( env.globalns )
+print( 'Parameters:' )
+env.globalns.printparameters()
 
-import IPython
-IPython.embed()
+print( 'Observables:' )
+env.globalns.printobservables()
 
 if opts.set:
     for name, value in opts.set:
