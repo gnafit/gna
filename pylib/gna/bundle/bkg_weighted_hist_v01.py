@@ -47,6 +47,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             self.outputs[ns.name]             = ws.sum.sum
 
             """Add observables"""
+            ns.addobservable(self.cfg.name, ws.sum.sum)
 
     def define_variables(self):
         #

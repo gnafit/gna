@@ -192,6 +192,9 @@ for bkg in cfg.bkg.list:
 from gna.parameters.printer import print_parameters
 print_parameters( env.globalns )
 
+import IPython
+IPython.embed()
+
 if opts.set:
     for name, value in opts.set:
         value = float(value)
