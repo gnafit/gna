@@ -199,8 +199,8 @@ class namespace(Mapping):
             pass
         return self.defparameter(name, *args, **kwargs)
 
-    def addobservable(self, name, output, export=True):
-        if output.check():
+    def addobservable(self, name, output, export=True, ignorecheck=False):
+        if ignorecheck or output.check():
             self.observables[name] = output
             print('Add observable:', '%s/%s'%(self.path, name))
         else:

@@ -97,14 +97,17 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 b, = execute_bundle(edges=points.single(), cfg=cfg.detector, namespaces=namespaces)
 
-from gna.parameters.printer import print_parameters
-print_parameters( env.globalns )
+print('Parameters:')
+env.globalns.printparameters()
 
 #
 # Connect inputs
 #
 for inp, hist in zip(b.inputs.values(), hists_list):
     inp( hist.hist )
+
+print('\nObservables:')
+env.globalns.printobservables()
 
 #
 # Dump graph

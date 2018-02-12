@@ -35,8 +35,8 @@ class bundlechain_v01(TransformationBundle):
                     raise Exception('Trying to connect inconsistent ouput-input pair')
                 input( output )
 
+        """Save transformations"""
         self.transformations_in  = self.bundles.values()[ 0].transformations_in
         self.transformations_out = self.bundles.values()[-1].transformations_out
         self.inputs              = self.bundles.values()[ 0].inputs
         self.outputs             = self.bundles.values()[-1].outputs
-

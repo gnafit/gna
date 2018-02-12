@@ -15,9 +15,13 @@ class rebin(TransformationBundle):
         for ns in self.namespaces:
             rebin = C.Rebin( self.cfg.edges, self.cfg.rounding, ns=ns )
 
+            """Save the transformations"""
             self.objects[('rebin', ns.name)]  = rebin
             self.transformations_out[ns.name] = rebin.rebin
             self.inputs[ns.name]              = rebin.rebin.histin
             self.outputs[ns.name]             = rebin.rebin.histout
+
+            """Define observables"""
+            ns.addobservable('rebin', rebin.rebin.histout, ignorecheck=True)
 
 

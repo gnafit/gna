@@ -19,19 +19,27 @@ class detector_eres_common3(TransformationBundle):
                 for i, ns in enumerate(self.namespaces):
                     eres.add()
 
+                    """Save transformations"""
                     self.transformations_out[ns.name] = eres.transformations[i]
                     self.inputs[ns.name]              = eres.transformations[i].Nvis
                     self.outputs[ns.name]             = eres.transformations[i].Nrec
+
+                    """Define observables"""
+                    ns.addobservable('eres', eres.transformations[i].Nrec, ignorecheck=True)
 
                 self.objects['eres'] = eres
             elif self.mode=='uncorrelated':
                 for ns in self.namespaces:
                     eres = R.EnergyResolution(ns=ns)
 
+                    """Save transformations"""
                     self.objects[('eres', ns.name)]   = eres
                     self.transformations_out[ns.name] = eres.smear
                     self.inputs[ns.name]              = eres.smear.Nvis
                     self.outputs[ns.name]             = eres.smear.Nrec
+
+                    """Define observables"""
+                    ns.addobservable('eres', eres.smear.Nrec, ignorecheck=True)
             else:
                 raise Exception( 'Invalid mode '+self.mode )
 

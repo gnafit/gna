@@ -22,6 +22,7 @@ class detector_iav_db_root_v01(TransformationBundle):
         self.iavmatrix/=norm
 
         points = C.Points( self.iavmatrix, ns=self.common_namespace )
+        self.objects['matrix'] = points
 
         with self.common_namespace:
             for ns in self.namespaces:
@@ -39,7 +40,8 @@ class detector_iav_db_root_v01(TransformationBundle):
                 self.objects[('renormdiag',ns.name)] = renormdiag
                 self.objects[('esmear',ns.name)]     = esmear
 
-        self.objects['matrix'] = points
+                """Define observables"""
+                ns.addobservable('iav', esmear.smear.Nvis, ignorecheck=True)
 
     def build(self):
         from file_reader import read_object_auto

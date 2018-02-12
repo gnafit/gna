@@ -56,40 +56,33 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         with self.common_namespace:
             for i, ns in enumerate(self.namespaces):
                 with ns:
-                    #
-                    # Uncorrelated between detectors part of the energy nonlinearity factor
-                    # correlated part multiplicated by the scale factor
-                    #
+                    """Uncorrelated between detectors part of the energy nonlinearity factor
+                    correlated part multiplicated by the scale factor"""
                     labels = C.stdvector([self.pars[ns.name]])
                     corr = R.WeightedSum(labels, labels, ns=ns)
                     corr.sum.inputs[0]( corr_lsnl.sum )
 
-                    #
-                    # Finally, original bin edges multiplied by the correction factor
-                    #
+                    """Finally, original bin edges multiplied by the correction factor"""
                     newe = R.Product(ns=ns)
                     newe.multiply( self.edges )
                     newe.multiply( corr.sum )
 
-                    #
-                    # Construct the nonlinearity calss
-                    #
+                    """Construct the nonlinearity calss"""
                     nonlin = R.HistNonlinearity(self.debug, ns=ns)
                     nonlin.set(self.edges, newe.product)
 
-                    #
-                    # Provide output transformations
-                    #
+                    """Provide output transformations"""
                     self.transformations_out[ns.name] = nonlin.smear
                     self.inputs[ns.name]              = nonlin.smear.Ntrue
                     self.outputs[ns.name]             = nonlin.smear.Nvis
 
-                    #
-                    # Save intermediate transformations
-                    #
+                    """Save intermediate transformations"""
                     self.objects[('factor', ns.name)]       = corr
                     self.objects[('edges_mod', ns.name)]    = newe
                     self.objects[('nonlinearity', ns.name)] = nonlin
+
+                    """Define observables"""
+                    ns.addobservable('nonlinearity', nonlin.smear.Nvis, ignorecheck=True)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )
