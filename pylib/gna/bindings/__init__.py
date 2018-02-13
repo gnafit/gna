@@ -9,6 +9,7 @@ import ROOT
 ignored_classes = [
         'Eigen',
         'EigenHelpers',
+        'DataType',
         'GNA',
         'TransformationTypes',
         'ParametrizedTypes',

@@ -252,10 +252,9 @@ class namespace(Mapping):
                 return target
 
     def printobservables(self, internal=False):
-        from sys import stderr
+        import gna.bindings.DataType
         for path, out in self.walkobservables(internal):
-            stderr.write('%-30s'%(path+':'))
-            out.datatype().dump()
+            print('%-30s'%(path+':'), str(out.datatype()))
 
     def printparameters(self):
         from gna.parameters.printer import print_parameters

@@ -53,6 +53,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
