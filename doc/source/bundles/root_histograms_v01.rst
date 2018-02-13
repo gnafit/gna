@@ -16,7 +16,8 @@ The bundle ignores provided namespaces. It operates its own list of namespaces b
 
 1. Read a set of histograms from a ROOT file.
 2. For each histogram are dedicated namespace is created in the ``common_namespace``.
-3. Each histogram is converted to a ``Histogram`` object with open output.
+3. Each histogram is converted to a ``Histogram`` object with open output. The corresponding transformation and output
+   are stored by the same name as the namespace.
 
 Configuration
 """""""""""""
@@ -39,6 +40,12 @@ The names are resolved by the following scheme:
       namespace names and dictionary values are used to substitute ``{}`` in the format string.
 
     See https://pyformat.info for more information on formatting.
+
+The following keys are recognized:
+  - filename -- the filename to read.
+  - format -- the histogram name format.
+  - variants (optional) -- list of values or dictionary wit key-value pairs. Each value is applied to the format field.
+  - normalize (optional) -- if True the histogram will be normalized so the integral=1.
 
 .. code-block:: python
 

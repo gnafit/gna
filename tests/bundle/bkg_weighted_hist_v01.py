@@ -187,6 +187,7 @@ for det in cfg.detectors:
     detns = ns(det).reqparameter('livetime', central=10, sigma=0.1, fixed=True)
 
 b, = execute_bundle( cfg=bkg, common_namespace=ns )
+bfn, = execute_bundle( cfg=bkg.bkg_fn, common_namespace=ns )
 
 print( 'Parameters:' )
 env.globalns.printparameters()
@@ -204,7 +205,7 @@ if opts.set:
     from gna.parameters.printer import print_parameters
     print_parameters( env.globalns )
 
-for bundle in b.bundles.values()+[b]:
+for bundle in b.bundles.values()+[b, bfn]:
     bkgname=bundle.cfg.get('name', 'total')
 
     fig = P.figure()
@@ -227,7 +228,7 @@ for bundle in b.bundles.values()+[b]:
         if bkgname=='bkg_fn':
             plot_hist( output.datatype().edges, output.data(), label=name )
         else:
-            plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )
+            plot_bar( output.datatype().edges, output.data(), label=name, pack=pack, alpha=0.8 )
 
     ax.legend( loc='upper right' )
 
