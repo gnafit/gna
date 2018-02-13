@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 
 /**
- * @brief Transformation implementing the evaluable for variable difference 'a+b+c+...'.
+ * @brief Transformation implementing the evaluable for variable sum 'a+b+c+...'.
  *
  * For at least two input variables computes the sum 'a+b+c+...'.
  *

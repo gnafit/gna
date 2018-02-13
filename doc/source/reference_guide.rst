@@ -52,6 +52,20 @@ Transformation bundles
 Transformations
 ---------------
 
+Evaluables
+^^^^^^^^^^
+
+The following transformations do not provide the inputs and outputs. They rather define the new parameters via evaluable
+mechanism.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/VarDiff.rst
+   transformations/VarProduct.rst
+   transformations/VarSum.rst
+
 Basic types and actions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
