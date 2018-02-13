@@ -109,6 +109,15 @@ Stats and calculus
    transformations/NormalToyMC.rst
    transformations/Poisson.rst
 
+Math functions
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/SelfPower.rst
+
 Neutrino oscillations
 ^^^^^^^^^^^^^^^^^^^^^
 
