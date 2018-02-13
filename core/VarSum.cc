@@ -1,5 +1,11 @@
 #include "VarSum.hh"
 
+/**
+ * @brief Constructor.
+ * @param varnames -- list of variable names.
+ * @param sumname -- variable name to store the result to.
+ * @exception std::runtime_error in case less than 2 variables are passed.
+ */
 VarSum::VarSum(const std::vector<std::string>& varnames, const std::string& sumname)
   : m_vars(varnames.size())
 {

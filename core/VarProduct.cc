@@ -1,5 +1,11 @@
 #include "VarProduct.hh"
 
+/**
+ * @brief Constructor.
+ * @param varnames -- list of variable names.
+ * @param productname -- variable name to store the result to.
+ * @exception std::runtime_error in case less than 2 variables are passed.
+ */
 VarProduct::VarProduct(const std::vector<std::string>& varnames, const std::string& productname)
   : m_vars(varnames.size())
 {

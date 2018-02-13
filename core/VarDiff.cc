@@ -1,5 +1,11 @@
 #include "VarDiff.hh"
 
+/**
+ * @brief Constructor.
+ * @param varnames -- list of variable names.
+ * @param diffname -- variable name to store the result to.
+ * @exception std::runtime_error in case less than 2 variables are passed.
+ */
 VarDiff::VarDiff(const std::vector<std::string>& varnames, const std::string& diffname)
   : m_vars(varnames.size())
 {

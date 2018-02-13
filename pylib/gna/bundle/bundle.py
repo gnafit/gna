@@ -51,7 +51,37 @@ def execute_bundle(**kwargs):
     return bundles
 
 class TransformationBundle(object):
+    """TransformationBundle is a base class for implementing a Bundle.
+
+    Bundle is an object that is able to configure and construct a part of a computational chain.
+    Bundles should be designed to be backwards compatible. Once bundle is added to the master, its
+    code should not be modified and new bundles should be created to introduce additional functionality.
+
+    Bundles are meant to operate on a list of namespaces creating (partial) replicas of transformation chains.
+    Distinct namespace may represent one of the similar designed detectors for example.
+
+    The bundle is defined by implementation of two methods:
+      - define_variables() — for initializing relevant parameters and variables.
+      - build() — for building an actual chain.
+
+    The bundle provides the following data:
+        self.objects             - {'group': {key: object}} - objects with transformations
+        self.transformations_in  - {key: transformation}    - transformations, that require inputs to be connected
+        self.transformations_out - {key: transformation}    - transformations, with open outputs
+        self.outputs             - {key: output}            - inputs to be connected (should be consistent with transformations_out)
+        self.inputs              - {key: input}             - open outputs (should be consistent with transformations_in)
+    """
     def __init__(self, cfg, **kwargs):
+        """Constructor.
+
+        Arguments:
+            - cfg — bundle configuration (NesteDict).
+
+        Keyword arguments:
+            - common_namespace — namespace, common for all transformations.
+            - namespaces — list of namespaces to create replica of a chain. If a list of strings is passed
+              it is replaces by a list of namespaces with corresponding names with parent=common_namespace.
+        """
         self.cfg = cfg
 
         self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
@@ -59,12 +89,13 @@ class TransformationBundle(object):
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
         self.objects             = NestedDict() # {'group': {key: object}} - objects with transformations
-        self.transformations_in  = NestedDict() # {key: transformation}    - transfromations, that require inputs to be connected
-        self.transformations_out = NestedDict() # {key: transformation}    - transformations, with oupen outputs
+        self.transformations_in  = NestedDict() # {key: transformation}    - transformations, that require inputs to be connected
+        self.transformations_out = NestedDict() # {key: transformation}    - transformations, with open outputs
         self.outputs             = NestedDict() # {key: output}            - inputs to be connected (should be consistent with transformations_out)
         self.inputs              = NestedDict() # {key: input}             - open outputs (should be consistent with transformations_in)
 
     def execute(self):
+        """Calls sequentially the methods to define variables and build the computational chain."""
         try:
             self.define_variables()
         except Exception as e:
@@ -80,8 +111,10 @@ class TransformationBundle(object):
             raise e, None, sys.exc_info()[2]
 
     def build(self):
+        """Builds the computational chain. Should handle each namespace in namespaces."""
         pass
 
     def define_variables(self):
+        """Defines the variables necessary for the computational chain. Should handle each namespace."""
         pass
 
