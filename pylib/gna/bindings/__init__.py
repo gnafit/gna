@@ -286,3 +286,4 @@ def patchROOTClass( object=None, method=None ):
         return converter( cfcn )
 
     return converter
+
