@@ -18,13 +18,19 @@ from physlib import percent
 # Initialize bundle
 #
 cfg = NestedDict(
-        bundle = 'detector_iav_db_root_v01',
-        parname = 'OffdiagScale',
-        scale   = uncertain(1.0, 4, 'percent'),
-        ndiag = 1,
-        filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-        matrixname = 'iav_matrix'
-        )
+    # Bundle name
+    bundle = 'detector_iav_db_root_v01',
+    # Parameter name
+    parname = 'OffdiagScale',
+    # Parameter uncertainty and its type (absolute or relative)
+    scale   = uncertain(1.0, 4, 'percent'),
+    # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
+    ndiag = 1,
+    # File name to read
+    filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+    # Matrix name
+    matrixname = 'iav_matrix'
+    )
 b, = execute_bundle( cfg=cfg )
 smear, = b.transformations_out.values()
 par = b.common_namespace['OffdiagScale']

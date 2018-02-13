@@ -37,11 +37,16 @@ Configuration
             # bundle name
             bundle = 'detector_eres_common3',
             # parameters a, b and c respectively for sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 )
-            values  = [ 0.014764, 0.0869, 0.0271 ],
-            # uncertainty on each parameter
-            uncertainties = [30.0*percent]*3,
-            # uncertainty type (absolute/relative)
-            uncertainty_type = 'relative'
+            pars = uncertaindict(
+                # parameter values
+                [('Eres_a', 0.014764) ,
+                 ('Eres_b', 0.0869) ,
+                 ('Eres_c', 0.0271)],
+                # parameters uncertainty mode (absolute, relative or percent)
+                mode='percent',
+                # parameters uncertainty
+                uncertainty=30
+                )
             )
 
 Testing scripts

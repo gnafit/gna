@@ -67,11 +67,15 @@ Configuration
             filename = 'output/detector_nl_consModel_450itr.root',
             # TGraph names. First curve will be used as nominal
             names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-            # The uncorrelated energy scale uncertainty
-            uncertainty = 0.2*percent,
-            # The uncorrelated energy scale uncertainty type (absolute/relative)
-            uncertainty_type = 'relative'
+            # The uncorrelated energy scale uncertainty type (absolute/relative/percent)
+            par = uncertain(1.0, 0.2, 'percent'),
+            # The parameter name to use for storage
+            parname = 'escale',
             )
+
+``parname`` may optionally contain a formatting directive ('escale.{}'). '{}' will be replaced with namespace
+(detector) name. Period '.' is interpreted as nesting, i.e. bundle will created new namespace ``'escale'`` and
+collect all the parameters within.
 
 Testing scripts
 """""""""""""""

@@ -43,20 +43,23 @@ Configuration
 .. code-block:: python
 
     cfg = NestedDict(
-             # Bundle name
-             bundle = 'detector_iav_db_root_v01',
-             # Parameter name
-             parname = 'OffdiagScale',
-             # Parameter uncertainty and its type (absolute or relative)
-             uncertainty = 4*percent,
-             uncertainty_type = 'relative',
-             # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
-             ndiag = 1,
-             # File name to read
-             filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-             # Matrix name
-             matrixname = 'iav_matrix'
+            # Bundle name
+            bundle = 'detector_iav_db_root_v01',
+            # Parameter name to use for storage
+            parname = 'OffdiagScale',
+            # Parameter uncertainty and its type (absolute or relative)
+            scale   = uncertain(1.0, 4, 'percent'),
+            # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
+            ndiag = 1,
+            # File name to read
+            filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+            # Matrix name
+            matrixname = 'iav_matrix'
          )
+
+``parname`` may optionally contain a formatting directive ('OffdiagScale.{}'). '{}' will be replaced with namespace
+(detector) name. Period '.' is interpreted as nesting, i.e. bundle will created new namespace ``'OffdiagScale'`` and
+collect all the parameters within.
 
 Testing scripts
 """""""""""""""
