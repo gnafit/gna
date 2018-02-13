@@ -88,6 +88,7 @@ Linear algebra
    transformations/Cholesky.rst
    transformations/FillLike.rst
    transformations/Identity.rst
+   transformations/Normalize.rst
    transformations/Product.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst

@@ -19,7 +19,7 @@ Implementation
 The transformation reads each variable by name from ``varnames`` and computes the product:
 
 .. math::
-   \text{diffname} = \text{varname}_0 + \text{varname}_1 - \text{varname}_1 - \dots.
+   \text{diffname} = \text{varname}_0 - \text{varname}_1 - \text{varname}_1 - \dots.
 
 Tests
 ^^^^^
