@@ -17,26 +17,31 @@ class bundlesum_v01(TransformationBundle):
         self.bundles = NestedDict()
 
     def build(self):
-        args = dict( namespaces=self.namespaces,
-                     common_namespace=self.common_namespace,
-                     edges=self.edges )
+        args = dict(namespaces=self.namespaces, common_namespace=self.common_namespace)
 
-        for bundlename in self.cfg.chain:
+        for bundlename in self.cfg.list:
             self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
 
+        names=self.bundles.values()[0].outputs.keys()
+        for name in names:
+            ns = self.common_namespace(name)
+            osum = R.Sum(ns=ns)
 
-        import IPython
-        IPython.embed()
-        osum = R.Sum()
-        self.objects['sum'] = osum
-        for name, bundle in self.bundles.items() :
-            # print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=type(b1).__name__, output=b1.outputs[0].name(),
-                                                                           # b2=type(b2).__name__, input=b2.inputs[0].name(),
-                                                                           # count=len(b1.inputs) ) )
-            if len( bundle.outputs )!=1:
-                raise Exception('bundlesum_v01 can sum only bundles with single output. Exception on '+name)
-            osum.add(bundle.outputs[0])
+            print('Sum bundles for', name)
+            for bundlename, bundle in self.bundles.items():
+                if not name in bundle.outputs:
+                    raise Exception( 'Failed to find output for {} in {} {}'.format( name, type(bundle).__name__, bundlename ) )
 
-        """Save transformations"""
-        self.transformations_out['sum'] = osum
-        self.outputs                   = self.bundles.values()[-1].outputs
+                print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
+                osum.add(bundle.outputs[name])
+
+            """Save transformations"""
+            self.objects[('sum', name)]    = osum
+            self.transformations_out[name] = osum.sum
+            self.outputs[name]             = osum.sum.outputs['sum']
+
+            """Define observable"""
+            obsname = self.cfg.get('observable', '')
+            if obsname:
+                ns.addobservable( obsname, osum.sum.outputs['sum'] )
+

@@ -14,6 +14,7 @@ from collections import OrderedDict
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-s', '--set', nargs=2, action='append', help='set parameter' )
+parser.add_argument( '-p', '--pack', action='store_true', help='pack same site histograms' )
 opts = parser.parse_args()
 
 storage = env.globalns('storage')
@@ -32,7 +33,9 @@ cfg.groups=NestedDict(
         )
 
 bkg = cfg('bkg')
-bkg.list = [ 'bkg1', 'bkg2', 'bkgsum', 'bkg_fn' ]
+bkg.bundle = 'bundlesum_v01'
+bkg.list = [ 'bkg1', 'bkg2', 'bkgw' ] #, 'bkg_fn'
+bkg.observable = 'bkg_total'
 
 bkg.bkg1 = NestedDict(
         bundle   = 'bkg_weighted_hist_v01',
@@ -88,13 +91,13 @@ bkg.bkg2 = NestedDict(
             )
         )
 
-bkg.bkgsum = NestedDict(
+bkg.bkgw = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{det}.bkgsum_num', ('bkgsum_rate.{site}', '{det}.livetime') ],
+        formula = [ '{det}.bkgw', ('bkgw.{site}', '{det}.livetime') ],
         groups = cfg.groups,
         variants = cfg.detectors,
 
-        bkgsum_rate = uncertaindict(
+        bkgw = uncertaindict(
            [('G1', (1.0, 0.3)),
             ('G2', (3.0, 0.2)),
             ('G3', (2.0, 0.1))],
@@ -183,11 +186,7 @@ ns = env.globalns('testexp')
 for det in cfg.detectors:
     detns = ns(det).reqparameter('livetime', central=10, sigma=0.1, fixed=True)
 
-bundles=()
-for bkg in cfg.bkg.list:
-    scfg = cfg.bkg[bkg]
-    b, = execute_bundle( cfg=scfg, common_namespace=ns, namespaces=scfg.spectra.get('variants', None), storage=storage )
-    bundles+=b,
+b, = execute_bundle( cfg=bkg, common_namespace=ns )
 
 print( 'Parameters:' )
 env.globalns.printparameters()
@@ -205,25 +204,27 @@ if opts.set:
     from gna.parameters.printer import print_parameters
     print_parameters( env.globalns )
 
-for bundle in bundles:
+for bundle in b.bundles.values()+[b]:
+    bkgname=bundle.cfg.get('name', 'total')
+
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'x axis' )
     ax.set_ylabel( 'entries' )
-    ax.set_title( bundle.cfg.name )
+    ax.set_title(bkgname)
 
     for i, (name, output) in enumerate(bundle.outputs.items()):
-        if bundle.cfg.name=='bkg2':
-            group = bundle.groups.get_group(name, 'site')
-            pack = (group.index(name), len(group))
-        if bundle.cfg.name=='bkgsum':
-            pack = (i, len(bundle.objects))
-        else:
-            pack = None
+        pack=None
+        if opts.pack:
+            if bkgname=='bkg2':
+                group = bundle.groups.get_group(name, 'site')
+                pack = (group.index(name), len(group))
+            elif bkgname=='bkgw':
+                pack = (i, len(bundle.outputs))
 
-        if bundle.cfg.name=='bkg_fn':
+        if bkgname=='bkg_fn':
             plot_hist( output.datatype().edges, output.data(), label=name )
         else:
             plot_bar( output.datatype().edges, output.data(), label=name, pack=pack )

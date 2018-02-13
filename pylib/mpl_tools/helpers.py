@@ -29,9 +29,9 @@ def plot_bar( lims, height, *args, **kwargs ):
     left = lims[:-1]
     widths  = lims[1:] - left
 
-    if pack:
+    if pack is not None:
         i, n = pack
-        widths/=n
+        widths/=float(n)
         left+=i*widths
 
     return P.bar( left, height, widths, *args, **kwargs )

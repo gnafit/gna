@@ -16,8 +16,8 @@ def DataType__Points____str__(self):
     dt=self.cast()
     if len(dt.shape):
         return 'array {}d, {}={:3d}'.format(len(dt.shape), 'x'.join(dt.shape), dt.size())
-    else:
-        return 'array, undefined'
+
+    return 'array, undefined'
 
 @patchROOTClass
 def DataType____str__(self):
@@ -26,7 +26,7 @@ def DataType____str__(self):
             return str(self.points())
         elif self.kind==2:
             return str(self.hist())
-        else:
-            return 'datatype, unsupported'
+
+        return 'datatype, unsupported'
 
     return 'datatype, undefined'
