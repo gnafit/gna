@@ -14,7 +14,6 @@
 #include "Parameters.hh"
 #include "GNAObject.hh"
 
-#define COVARIANCE_DEBUG
 
 template <typename T>
 class ParameterWrapper {
@@ -122,8 +121,8 @@ public:
   virtual void setFixed() { this->m_fixed = true; }
 
   virtual bool isCovariated(const Parameter<T>& other) const {
-      auto it = m_covariances.find(other);
-      if (it == m_covariances.end()) { 
+      auto it = this->m_covariances.find(other);
+      if (it == this->m_covariances.end()) { 
           return false;
       } else {
           return true;
@@ -131,15 +130,16 @@ public:
   }
 
   virtual void setCovariance(Parameter<T>& other, T cov) {
-    if ( &other == this) {
+    if (&other != this) {
+        this->m_covariances[other] = cov;
+        other.updateCovariance(*this, cov);
+    } else {
         this->setSigma(std::sqrt(cov));
     }
-    m_covariances[other] = cov;
-    other.updateCovariance(*this, cov);
   }
 
   virtual void updateCovariance(const Parameter<T>& other, T cov) {
-    m_covariances[other] = cov;
+    this->m_covariances[other] = cov;
   }
 
   virtual T getCovariance(const Parameter<T>& other) {
@@ -159,7 +159,7 @@ public:
 
 protected:
   std::vector<std::pair<T, T>> m_limits;
-  using CovStorage = std::map<Parameter<T>, T>;
+  using CovStorage = std::map<const Parameter<T>, T>;
   CovStorage m_covariances;
   parameter<T> m_par;
   bool m_fixed = false;
