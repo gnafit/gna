@@ -1,7 +1,7 @@
 .. _bundlesum_v01:
 
-bundlesum -- sum bundles outputs (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bundlesum_v01 -- sum bundles outputs (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

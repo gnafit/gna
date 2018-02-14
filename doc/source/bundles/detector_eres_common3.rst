@@ -68,7 +68,7 @@ Configuration
 Testing scripts
 """""""""""""""
 
-There is now individual testing script for  :ref:`detector_eres_common3`. Nevertheless it is included in the
+There is no individual testing script for  :ref:`detector_eres_common3`. Nevertheless it is included in the
 :ref:`bundlechain_v01` testing script:
 
 .. code-block:: sh

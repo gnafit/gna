@@ -14,10 +14,12 @@ Scheme
 
 For each variant:
   - Parse the formula:
+
     + initialize the variables if the values and uncertainties are provided within current configuration.
     + require the other variables.
     + create the target variable and define it as a product of input variables.
   - Build the chain:
+
     + For each variant create a :ref:`WeightedSum` instance that weights the input histogram with calculated weight.
 
 Parameters
