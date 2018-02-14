@@ -17,6 +17,23 @@ Scheme
 
 1. For each of the provided namespaces create :ref:`rebin_bundle` instance according to the configuration.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`Rebin` by namespace name. The observable ``'rebin'`` is also
+defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]              = rebin.rebin.histin
+    self.outputs[ns.name]             = rebin.rebin.histout
+    ns.addobservable('rebin', rebin.rebin.histout, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
+
 Configuration
 """""""""""""
 

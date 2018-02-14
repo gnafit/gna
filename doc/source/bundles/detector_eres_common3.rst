@@ -27,6 +27,22 @@ Parameters
 
 :ref:`EnergyResolution` parameters :math:`a`, :math:`b` and :math:`c`.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`EnergyResolution` by namespace name. The observable ``'eres'`` is
+also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]              = eres.smear.Nvis
+    self.outputs[ns.name]             = eres.smear.Nrec
+    ns.addobservable('eres', eres.smear.Nrec, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
 
 Configuration
 """""""""""""

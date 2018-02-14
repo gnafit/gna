@@ -20,6 +20,11 @@ For each variant:
   - Build the chain:
     + For each variant create a :ref:`WeightedSum` instance that weights the input histogram with calculated weight.
 
+Parameters
+""""""""""
+
+1. Parameters are defined according to the ``formula`` specification. See `Weight formula`_.
+
 Outputs and observables
 """""""""""""""""""""""
 

@@ -18,6 +18,26 @@ Scheme
      configuration file. The last weight is defined as :math:`1-w_1-\dots-w_{N-1}`.
    - Create a weighted sum of :math:`N` histograms with corresponding weights.
 
+The :ref:`WeightedSum` transformation is used for implementation.
+
+Parameters
+""""""""""
+
+1. :math:`N-1` parameters are created in each namespaces with names ``'frac_<name1>'``, ``'frac_<name2>'``, etc. Where
+   ``nameI`` are taken from the ``fractions`` configuration.
+2. A parameter named ``'frac_<name1>_<name2>_..._comb'`` is created. The value is 1. It is used to define the
+   subtraction.
+
+Outputs
+"""""""
+
+The output of the :ref:`WeightedSum` is provided.
+
+.. code-block:: python
+
+    self.transformations_out[ns.name] = ws.sum
+    self.outputs[ns.name]             = ws.sum.sum
+
 Configuration
 """""""""""""
 

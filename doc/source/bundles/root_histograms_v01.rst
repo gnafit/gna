@@ -19,6 +19,16 @@ The bundle ignores provided namespaces. It operates its own list of namespaces b
 3. Each histogram is converted to a ``Histogram`` object with open output. The corresponding transformation and output
    are stored by the same name as the namespace.
 
+Outputs
+"""""""
+
+The output of the :ref:`Histogram` is provided for each variant.
+
+.. code-block:: python
+
+    self.transformations_out[var] = hist.hist
+    self.outputs[var]             = hist.hist.hist
+
 Configuration
 """""""""""""
 

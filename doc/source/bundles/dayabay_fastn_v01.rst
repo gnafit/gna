@@ -30,6 +30,11 @@ For each parameter in ``pars``:
 The bundle uses :ref:`SelfPower` transformation for the function, GaussLegendre integrator for the integration and
 :ref:`Normalize` transformation for the normalization over the range.
 
+Parameters
+""""""""""
+
+1. A shape parameter is defined according to ``formula`` for each field of the ``pars``. See Configuration_.
+
 Outputs
 """""""
 

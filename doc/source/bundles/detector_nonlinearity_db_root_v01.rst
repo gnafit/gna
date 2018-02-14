@@ -34,7 +34,9 @@ Scheme
    histogram bin edges :math:`E` and summed together within  :ref:`WeightedSum` transformation. The :ref:`WeightedSums
    <WeightedSum>` weights representing parameters :math:`a_i` are created in a common namespace.
 
-   NOTE: the values of :math:`f_0(E)` and :math:`f_i(E)` are extrapolated for the whole range of :math:`E` if needed.
+.. attention::
+
+   The values of :math:`f_0(E)` and :math:`f_i(E)` are extrapolated for the whole range of :math:`E` if needed.
 
 2. For each supplied namespace:
 
@@ -54,6 +56,23 @@ Parameters
 1. LSNL parameters :math:`a_i` in a common namespace by a number of correction LSNL curves.
 
 2. Uncorrelated energy scale parameters :math:`\delta_d` for each supplied namespace.
+
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`HistNonlinearity` by namespace name. The observable
+``'nonlinearity'`` is also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]  = nonlin.smear.Ntrue
+    self.outputs[ns.name] = nonlin.smear.Nvis
+    ns.addobservable('nonlinearity', nonlin.smear.Nvis, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
 
 Configuration
 """""""""""""

@@ -32,6 +32,23 @@ All the transformations are configured to tread IAV matrix as upper triangular.
 
    IAV bundle scheme.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`HistSmear` by namespace name. The observable ``'iav'`` is
+also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]  = esmear.smear.Ntrue
+    self.outputs[ns.name] = esmear.smear.Nvis
+    ns.addobservable('iav', esmear.smear.Nvis, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
+
 Parameters
 """"""""""
 
