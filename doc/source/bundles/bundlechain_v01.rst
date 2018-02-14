@@ -26,6 +26,13 @@ from Configuration_ section is shown below (excluding rebinner).
 
    The chain of the IAV, LSNL and energy resolution effects.
 
+Inputs and outputs
+""""""""""""""""""
+
+The inputs and ``transformations_in`` of the first bundle in the chain are provided.
+
+The outputs and ``transformations_out`` of the last bundle in the chain are provided.
+
 Configuration
 """""""""""""
 
@@ -89,7 +96,7 @@ Testing scripts
 
 .. code-block:: sh
 
-    ../tests/bundle/detector_dbchain.py -s
+    ./tests/bundle/detector_dbchain.py -s
 
 
 
