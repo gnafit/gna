@@ -13,14 +13,16 @@ Scheme
 
 1. Read a set of input spectra. The spectra have names.
 2. In each namespace:
+
    - For each of :math:`N-1` spectra create a variable ``frac_<name>`` and initialize it with value and uncertainty from
-    configuration file. The last weight is defined as :math:`1-w_1-\dots-w_{N-1}`.
+     configuration file. The last weight is defined as :math:`1-w_1-\dots-w_{N-1}`.
    - Create a weighted sum of :math:`N` histograms with corresponding weights.
 
 Configuration
 """""""""""""
 
 The configuration contains two main items:
+
 1. ``fractions`` -- dictionary with key-value pairs, where values are :math:`N-1` default weight values and their
    uncertainties.
 2. ``spectra`` -- dictionary with :math:`N` key-value pairs, where value is a bundle with output histogram. In the

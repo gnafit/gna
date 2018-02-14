@@ -39,6 +39,7 @@ class dayabay_fastn_v01(TransformationBundle):
                 normalize = R.Normalize(imin, imax-imin, ns=ns)
                 normalize.normalize.inp( hist.hist.hist )
 
+                """Provide the outputs and objects"""
                 self.objects[('fcn', ns.name)]       = fcn
                 self.objects[('hist', ns.name)]      = hist
                 self.objects[('normalize', ns.name)] = normalize
