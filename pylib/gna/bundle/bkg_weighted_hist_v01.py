@@ -22,7 +22,11 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.spectra, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
-        self.cfg.setdefault( 'name', self.cfg.parent_key() )
+        try:
+            self.cfg.setdefault( 'name', self.cfg.parent_key() )
+        except KeyError:
+            if not 'name' in self.cfg:
+                raise Exception( 'Background name is not specified' )
 
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
