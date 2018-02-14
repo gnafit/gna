@@ -38,6 +38,7 @@ cov1 = 0.1
 print("Setting covariance of probe_1 with probe_2 to {0}".format(cov1))
 probe_1.setCovariance(probe_2, cov1)
 print("Check that they are mutually covariated now.")
+
 assert probe_1.isCovariated(probe_2) and probe_2.isCovariated(probe_1)
 print("Success")
 print("Get covariance from both -- {0} and {1}\n".format(probe_1.getCovariance(probe_2), probe_2.getCovariance(probe_1)))
@@ -45,8 +46,7 @@ print("Get covariance from both -- {0} and {1}\n".format(probe_1.getCovariance(p
 print("Checks that change of one propagates to another")
 cov2 = 0.2
 probe_1.setCovariance(probe_2, cov2)
-assert (probe_1.getCovariance(probe_2) == cov2 
-        and probe_2.getCovariance(probe_1) == cov2)
+assert (probe_1.getCovariance(probe_2) == cov2 and probe_2.getCovariance(probe_1) == cov2)
 print("Success\n")
 
 
@@ -55,17 +55,34 @@ print("Test pars sequence is {}".format([_.name() for _ in test_pars]))
 cov_matrix1 = make_fake_covmat(4)
 print("Test covariance matrix is \n", cov_matrix1)
 
-ch.covariate_pars(pars=test_pars, cov_matrix=cov_matrix1)
+ch.covariate_pars(test_pars, cov_matrix1)
 for first, second in itertools.combinations_with_replacement(range(len(test_pars)), 2):
-    assert test_pars[first].getCovariance(test_pars[second]) == cov_matrix1[first, second]
+    try:
+        if first != second:
+            assert test_pars[first].getCovariance(test_pars[second]) == cov_matrix1[first, second]
+        else:
+            assert test_pars[first].sigma() == np.sqrt(cov_matrix1[first, second])
+    except AssertionError:
+        print((first, second),
+                test_pars[first].getCovariance(test_pars[second])**2,
+                cov_matrix1[first, second])
+        raise
 
 extra_pars = [extra1, extra2, extra3]
 cov_mat_extra = make_fake_covmat(3)
 cov_storage = ch.CovarianceStorage("extra_store", extra_pars, cov_mat_extra)
 ch.covariate_ns('extra_test_ns', cov_storage)
 for first, second in itertools.combinations_with_replacement(range(len(extra_pars)), 2):
-    assert extra_pars[first].getCovariance(extra_pars[second]) == cov_mat_extra[first, second]
+    try:
+        if first != second:
+            assert test_pars[first].getCovariance(test_pars[second]) == cov_matrix1[first, second]
+        else:
+            assert test_pars[first].sigma() == np.sqrt(cov_matrix1[first, second])
+    except AssertionError:
+        print((first, second),
+                test_pars[first].getCovariance(test_pars[second])**2,
+                cov_matrix1[first, second])
+        raise
 
-print(cfg)
 import IPython
 IPython.embed()

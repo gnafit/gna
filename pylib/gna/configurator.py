@@ -205,7 +205,6 @@ class NestedDict(object):
 
 def __prefetch_covariances(dic, cov_pathes=[]):
     import os
-    from collections import namedtuple
     for cov_path in cov_pathes:
         for cov_file in os.listdir( cov_path ):
             print("Importing covariance from {} ".format(cov_file) )
@@ -214,7 +213,8 @@ def __prefetch_covariances(dic, cov_pathes=[]):
             if not dic.get('covariances', None):
                 dic['covariances'] = NestedDict()
             try:
-                dic['covariances'][loaded['name']] = (loaded['params'], loaded['cov_mat'])
+                dic['covariances'][loaded['name']] = {'params': loaded['params'],
+                                                      'cov_mat': loaded['cov_mat'],}
             except KeyError:
                 print('Failed to extract covariance from {}.'
                 ' Check the naming conventions'.format(path))
