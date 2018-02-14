@@ -1,7 +1,7 @@
 .. _detector_nonlinearity_db_root_v01:
 
-EnergyNonlinearity effect parametrization (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_nonlinearity_db_root_v01 -- energyNonlinearity effect parametrization (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

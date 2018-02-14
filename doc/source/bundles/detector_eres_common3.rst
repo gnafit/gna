@@ -1,7 +1,7 @@
 .. _detector_eres_common3:
 
-Energy resolution (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_eres_common3 -- common energy resolution with 3 parameters (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

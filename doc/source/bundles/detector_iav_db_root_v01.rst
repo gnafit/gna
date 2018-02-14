@@ -1,7 +1,7 @@
 .. _detector_iav_db_root_v01:
 
-Daya Bay IAV effect (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_iav_db_root_v01 -- Daya Bay IAV effect (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

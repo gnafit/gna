@@ -1,7 +1,7 @@
-.. _root_histograms_v01_bundle:
+.. _root_histograms_v01:
 
-Read ROOT histograms (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+root_histograms_v01 -- read histograms from a ROOT file (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

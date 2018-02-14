@@ -1,7 +1,7 @@
 .. _rebin_bundle:
 
-Rebin
-^^^^^
+rebin -- rebin histograms
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

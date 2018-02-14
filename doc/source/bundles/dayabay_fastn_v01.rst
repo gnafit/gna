@@ -1,7 +1,7 @@
-.. _dayabay_fastn_v01_bundle:
+.. _dayabay_fastn_v01:
 
-Fast neutron background for Daya Bay  (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+dayabay_fastn_v01 -- fast neutron background for Daya Bay (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

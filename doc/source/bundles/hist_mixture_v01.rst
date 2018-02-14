@@ -1,12 +1,13 @@
 .. _hist_mixture_v01_bundle:
 
-Weighted histogram mixture (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+hist_mixture_v01 -- weighted histogram mixture (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""
 
-The bundle ``hist_mixture_v01`` enables user to mix :math:`N` histograms with :math:`N-1` weights.
+The bundle ``hist_mixture_v01`` enables user to mix :math:`N` histograms with :math:`N-1` independent weights. The sum
+of weights is supposed to be 1.
 
 Scheme
 """"""
@@ -48,7 +49,7 @@ The configuration contains two main items:
 2. ``spectra`` -- dictionary with :math:`N` key-value pairs, where value is a bundle with output histogram. In the
    example below ``root_histograms_v01`` is used. Keys in spectra should correspond to keys in fractions.
 
-See ref  :ref:`root_histograms_v01_bundle` for the explanation of the relevant bundle configuration.
+See ref  :ref:`root_histograms_v01` for the explanation of the relevant bundle configuration.
 
 .. code-block:: python
 

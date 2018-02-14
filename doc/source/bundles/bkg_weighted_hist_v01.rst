@@ -1,7 +1,7 @@
 .. _bkg_weighted_hist_v01:
 
-Weighted background (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+bkg_weighted_hist_v01 -- weighted background (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""

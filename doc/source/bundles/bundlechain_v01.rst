@@ -1,7 +1,7 @@
 .. _bundlechain_v01:
 
-Bundle chain (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^
+bundlechain_v01 -- chain bundle outputs-inputs (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""
