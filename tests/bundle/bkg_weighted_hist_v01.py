@@ -59,7 +59,7 @@ bkg.bkg1 = NestedDict(
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
             filename   = cfg.filename,
-            format = 'hist_{}',
+            format = 'hist_{self}',
             variants = OrderedDict([
                 ( 'D1', 'G1_D1' ),
                 ( 'D2', 'G1_D2' ),
@@ -85,7 +85,7 @@ bkg.bkg2 = NestedDict(
         spectra = NestedDict(
             bundle = 'root_histograms_v01',
             filename   = cfg.filename,
-            format = 'hist_{}',
+            format = 'hist_{self}',
             variants = cfg.groups['site'].keys(),
             normalize = True,
             )
@@ -93,11 +93,11 @@ bkg.bkg2 = NestedDict(
 
 bkg.bkgw = NestedDict(
         bundle = 'bkg_weighted_hist_v01',
-        formula = [ '{det}.bkgw', ('bkgw.{site}', '{det}.livetime') ],
+        formula = [ '{det}.bkgw_num', ('bkgw_rate.{site}', '{det}.livetime') ],
         groups = cfg.groups,
         variants = cfg.detectors,
 
-        bkgw = uncertaindict(
+        bkgw_rate = uncertaindict(
            [('G1', (1.0, 0.3)),
             ('G2', (3.0, 0.2)),
             ('G3', (2.0, 0.1))],

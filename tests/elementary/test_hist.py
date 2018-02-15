@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Check Points class
-
-and test the matrix memory ordering"""
+"""Check Histogram class"""
 
 from __future__ import print_function
 from matplotlib import pyplot as plt

@@ -27,13 +27,13 @@ cfg.spectra1 = NestedDict(
 cfg.spectra2 = NestedDict(
         bundle = 'root_histograms_v01',
         filename = cfg.filename,
-        format = 'hist_{}',
+        format = 'hist_{self}',
         variants = cfg.groups.keys()
         )
 cfg.spectra3 = NestedDict(
         bundle = 'root_histograms_v01',
         filename = cfg.filename,
-        format = 'hist_{}',
+        format = 'hist_{self}',
         variants = OrderedDict([
             ( 'D1', 'G1_D1' ),
             ( 'D2', 'G1_D2' ),

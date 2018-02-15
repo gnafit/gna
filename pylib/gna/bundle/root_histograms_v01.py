@@ -8,6 +8,7 @@ from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from constructors import Histogram
 from gna.configurator import NestedDict
+from gna.grouping import Categories
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise
@@ -22,6 +23,8 @@ class root_histograms_v01(TransformationBundle):
             kwargs['namespaces']=variants
         super(root_histograms_v01, self).__init__( **kwargs )
 
+        self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
+
     def build(self):
         file = R.TFile( self.cfg.filename, 'READ' )
         if file.IsZombie():
@@ -35,7 +38,8 @@ class root_histograms_v01(TransformationBundle):
             if isinstance(variants, (dict, NestedDict)):
                 fmt = variants[var]
 
-            hname = self.cfg.format.format(fmt)
+            hname = self.groups.format(fmt, self.cfg.format)
+            # print( self.cfg.format, fmt, hname )
             h = file.Get( hname )
             if not h:
                 raise Exception('Can not read {hist} from {file}'.format( hist=hname, file=file.GetName() ))
