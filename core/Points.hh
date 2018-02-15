@@ -23,11 +23,7 @@ public:
    *
    * @param points - vector of doubles.
    */
-  Points(const std::vector<double> &points)
-    : m_points(Eigen::Map<const Eigen::ArrayXd>(&points[0], points.size())), m_shape{points.size()}
-  {
-    init();
-  }
+  Points(const std::vector<double> &points) : Points(&points[0], points.size()) {  }
 
   /**
    * @brief Construct 1d array from C++ array of doubles.
@@ -59,7 +55,7 @@ public:
 
   /**
    * @brief Return the size of an array.
-   * @return number of lements in an array.
+   * @return number of bins in the histogram.
    */
   size_t size() const {
     return m_points.size();

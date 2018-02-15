@@ -7,7 +7,7 @@ from gna.bindings import patchROOTClass
 def DataType__Hist____str__(self):
     dt=self.cast()
     if len(dt.shape):
-        return 'hist, {:3d} bins, {}->{}'.format(dt.shape[0], dt.edges[0], dt.edges[-1])
+        return 'hist, {:3d} bins, edges {}->{}'.format(dt.shape[0], dt.edges[0], dt.edges[-1])
 
     return 'histogram, undefined'
 
@@ -15,7 +15,7 @@ def DataType__Hist____str__(self):
 def DataType__Points____str__(self):
     dt=self.cast()
     if len(dt.shape):
-        return 'array {}d, {}={:3d}'.format(len(dt.shape), 'x'.join(dt.shape), dt.size())
+        return 'array {}d, shape {}, size {:3d}'.format(len(dt.shape), 'x'.join((str(i) for i in dt.shape)), dt.size())
 
     return 'array, undefined'
 
