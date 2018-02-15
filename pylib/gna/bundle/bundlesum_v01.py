@@ -32,7 +32,8 @@ class bundlesum_v01(TransformationBundle):
                 if not name in bundle.outputs:
                     raise Exception( 'Failed to find output for {} in {} {}'.format( name, type(bundle).__name__, bundlename ) )
 
-                print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
+                # print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
+                data = bundle.outputs[name].data().sum()
                 osum.add(bundle.outputs[name])
 
             """Save transformations"""

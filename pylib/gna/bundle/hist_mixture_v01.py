@@ -6,8 +6,8 @@ import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
-from converters import convert
 from gna.configurator import NestedDict
+from constructors import stdvector
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise
@@ -33,13 +33,14 @@ class hist_mixture_v01(TransformationBundle):
         for ns in self.namespaces:
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
-            ws = R.WeightedSum( convert(names, 'stdvector'), convert(weights, 'stdvector'), ns=ns )
-            self.objects[('sum', ns.name)]    = ws
-            self.transformations_out[ns.name] = ws.sum
-            self.outputs[ns.name]             = ws.sum.sum
+            ws = R.WeightedSum( stdvector(names), stdvector(weights), ns=ns )
 
             for name, spectrum in self.spectra.items():
                 ws.sum.inputs[name]( spectrum.outputs.values()[0] )
+
+            self.objects[('sum', ns.name)]    = ws
+            self.transformations_out[ns.name] = ws.sum
+            self.outputs[ns.name]             = ws.sum.sum
 
     def define_variables(self):
         comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))
@@ -59,6 +60,6 @@ class hist_mixture_v01(TransformationBundle):
                 raise Exception('One weight of the hist_mixture should be autmatic')
 
             missing = 'frac_'+missing[0]
-            vd = R.VarDiff( convert(subst, 'stdvector'), missing, ns=ns)
+            vd = R.VarDiff( stdvector(subst), missing, ns=ns)
             ns[missing].get()
             self.objects[('vardiff', ns.name)] = vd

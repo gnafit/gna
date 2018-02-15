@@ -59,6 +59,19 @@ struct DataType {
   Hist<DataType> hist();                                        ///< Hist DataType initialization and configuration.
   Hist<const DataType> hist() const;                            ///< Hist DataType initialization and configuration.
 
+  DataType() = default;                                         ///< Constructor.
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Copy constructor copies all members except preallocated buffer.
+   *
+   * @param other instance of DataType.
+   */
+  DataType(const DataType& other) :
+  kind{other.kind}, shape(other.shape), edges(other.edges)
+  { }
+
   bool operator==(const DataType &other) const;                 ///< Check if data types are identical.
   bool operator!=(const DataType &other) const;                 ///< Check if data types are not identical.
 
