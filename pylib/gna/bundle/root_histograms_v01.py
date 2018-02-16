@@ -39,6 +39,7 @@ class root_histograms_v01(TransformationBundle):
         print( 'Read input file {}:'.format(file.GetName()) )
 
         variants = self.cfg.get('variants', self.namespaces)
+        obsname = self.cfg.get('observable', '')
         for var in variants:
             if isinstance(var, basestring):
                 ns = self.common_namespace(var)
@@ -73,5 +74,9 @@ class root_histograms_v01(TransformationBundle):
             self.objects[('hist',var)]    = hist
             self.transformations_out[var] = hist.hist
             self.outputs[var]             = hist.hist.hist
+
+            """Define observable"""
+            if obsname:
+                ns.addobservable( obsname, hist.hist.hist )
 
         file.Close()

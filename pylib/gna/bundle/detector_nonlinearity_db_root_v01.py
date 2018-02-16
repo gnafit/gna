@@ -45,8 +45,10 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # Correlated part of the energy nonlinearity factor
         # a weighted sum of input curves
         #
-        corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
+        with self.common_namespace:
+            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
         self.objects['lsnl_factor']=corr_lsnl
+
         for y, name in zip( newy, self.cfg.names ):
             pts = C.Points( y, ns=self.common_namespace )
             corr_lsnl.sum[name]( pts )

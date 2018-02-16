@@ -26,7 +26,11 @@ class detector_iav_db_root_v01(TransformationBundle):
 
         with self.common_namespace:
             for ns in self.namespaces:
-                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
+                try:
+                    renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
+                except:
+                    import IPython
+                    IPython.embed()
                 renormdiag.renorm.inmat( points.points )
 
                 esmear = R.HistSmear(True)

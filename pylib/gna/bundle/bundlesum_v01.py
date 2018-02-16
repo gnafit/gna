@@ -28,9 +28,20 @@ class bundlesum_v01(TransformationBundle):
 
         debug = self.cfg.get('debug', False)
         names=self.bundles.values()[0].outputs.keys()
+
+        obsname = self.cfg.get('observable', '')
+        chaininput = self.cfg.get('chaininput', None)
+        if chaininput and not isinstance(chaininput, str):
+            raise Exception( 'chaininput should be a string' )
         for name in names:
             ns = self.common_namespace(name)
             osum = R.Sum(ns=ns)
+
+            if chaininput:
+                inp = osum.add(chaininput)
+                """Save unconnected input"""
+                self.inputs[name]             = inp
+                self.transformations_in[name] = osum
 
             for bundlename, bundle in self.bundles.items():
                 if not name in bundle.outputs:
@@ -47,7 +58,6 @@ class bundlesum_v01(TransformationBundle):
             self.outputs[name]             = osum.sum.outputs['sum']
 
             """Define observable"""
-            obsname = self.cfg.get('observable', '')
             if obsname:
-                ns.addobservable( obsname, osum.sum.outputs['sum'] )
+                ns.addobservable( obsname, osum.sum.outputs['sum'], ignorecheck=bool(chaininput) )
 
