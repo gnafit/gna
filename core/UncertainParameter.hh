@@ -14,7 +14,7 @@
 #include "Parameters.hh"
 #include "GNAObject.hh"
 
-#define COVARIANCE_DEBUG
+/* #define COVARIANCE_DEBUG */
 
 
 template <typename T>
