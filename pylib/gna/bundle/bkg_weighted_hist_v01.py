@@ -18,7 +18,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
     def __init__(self, **kwargs):
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.spectra, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
+        self.bundles, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
         self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
 
         try:
@@ -30,7 +30,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
     def build(self):
-        spectra = CatDict(self.groups, self.spectra.outputs)
+        spectra = CatDict(self.groups, self.bundles.outputs)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:

@@ -19,23 +19,23 @@ class hist_mixture_v01(TransformationBundle):
         if len(self.cfg.spectra)<2:
             raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )
 
-        self.spectra = OrderedDict([
+        self.bundles = OrderedDict([
                 (name, execute_bundle(cfg=cfg, common_namespace=self.common_namespace)[0])
                 for name, cfg in self.cfg.spectra.items()
             ])
 
-        for name, spectrum in self.spectra.items():
+        for name, spectrum in self.bundles.items():
             if len(spectrum.outputs)!=1:
                 raise Exception('hist_mixture_v01: expect only single output for each spectrum (exception for %s)'%name)
 
     def build(self):
-        names = self.spectra.keys()
+        names = self.bundles.keys()
         for ns in self.namespaces:
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
             ws = R.WeightedSum( stdvector(names), stdvector(weights), ns=ns )
 
-            for name, spectrum in self.spectra.items():
+            for name, spectrum in self.bundles.items():
                 ws.sum.inputs[name]( spectrum.outputs.values()[0] )
 
             self.objects[('sum', ns.name)]    = ws

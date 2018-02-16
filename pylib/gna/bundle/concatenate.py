@@ -11,18 +11,18 @@ class concatenate(TransformationBundle):
         self.transformations_in = self.transformations_out
 
     def build(self):
-        self.concat = R.Prediction(ns=self.common_namespace)
+        concat = R.Prediction(ns=self.common_namespace)
         for ns in self.namespaces:
-            self.concat.append()
-            concatenate = C.Rebin( self.cfg.edges, self.cfg.rounding, ns=ns )
+            """Create and store the input"""
+            self.inputs[ns.name] = concat.append(ns.name)
 
-        """Save the transformations"""
-        self.objects[('rebin', ns.name)]  = rebin
-        self.transformations_out[ns.name] = rebin.rebin
-        self.inputs[ns.name]              = rebin.rebin.histin
-        self.outputs[ns.name]             = rebin.rebin.histout
+        self.objects['concat']                               = concat
+        self.transformations_out[self.common_namespace.name] = concat.prediction
+        self.outputs[self.common_namespace.name]             = concat.prediction.prediction
 
         """Define observables"""
-        ns.addobservable('rebin', rebin.rebin.histout, ignorecheck=True)
+        obsname = self.cfg.get( 'observable', None )
+        if obsname:
+            self.common_namespace.addobservable(obsname, concat.prediction.prediction, ignorecheck=True)
 
 

@@ -26,6 +26,7 @@ class bundlesum_v01(TransformationBundle):
         for bundlename in bundlelist:
             self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
 
+        debug = self.cfg.get('debug', False)
         names=self.bundles.values()[0].outputs.keys()
         for name in names:
             ns = self.common_namespace(name)
@@ -35,7 +36,8 @@ class bundlesum_v01(TransformationBundle):
                 if not name in bundle.outputs:
                     raise Exception( 'Failed to find output for {} in {} {}'.format( name, type(bundle).__name__, bundlename ) )
 
-                # print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
+                if debug:
+                    print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
                 data = bundle.outputs[name].data().sum()
                 osum.add(bundle.outputs[name])
 
