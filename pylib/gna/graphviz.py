@@ -12,6 +12,9 @@ def uid( obj1, obj2=None ):
 
 class GNADot(object):
     def __init__(self, transformation):
+        if not isinstance(transformation, R.TransformationTypes.Handle):
+            raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle')
+
         self.graph=G.AGraph( directed=True, label=transformation.name() )
         self.register = set()
         self.walk_back( R.TransformationTypes.OpenHandle(transformation).getEntry() )
