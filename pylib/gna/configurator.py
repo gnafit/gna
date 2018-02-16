@@ -208,35 +208,35 @@ def __prefetch_covariances(dic, cov_pathes=[]):
     for cov_path in cov_pathes:
         for cov_file in os.listdir( cov_path ):
             print("Importing covariance from {} ".format(cov_file) )
-            path = os.path.join(cov_path, cov_file)
-            loaded = runpy.run_path( path )
-            if not dic.get('covariances', None):
+            module_path = path.join( cov_path, cov_file )
+            loaded = runpy.run_path( module_path )
+            if not dic.get( 'covariances', None ):
                 dic['covariances'] = NestedDict()
             try:
-                dic['covariances'][loaded['name']] = {'params': loaded['params'],
-                                                      'cov_mat': loaded['cov_mat'],}
+                name = loaded.pop( 'name' )
+                dic['covariances'][name] = dict( loaded )
             except KeyError:
-                print('Failed to extract covariance from {}.'
-                ' Check the naming conventions'.format(path))
+                print( 'Failed to extract covariance from {}.'
+                ' Check the naming conventions'.format(path) )
 
 
 
 def configurator(filename=None, dic={}, **kwargs):
     self = NestedDict()
 
-    prefetch = kwargs.pop('prefetch', True)
+    prefetch = kwargs.pop( 'prefetch', True )
 
     if filename:
         self['@loaded_from']=filename
 
     meta[self]['verbose']=kwargs.pop( 'debug', False )
     if filename:
-        self.__load__(filename, **kwargs)
+        self.__load__( filename, **kwargs )
     elif dic:
-        self.__import__(dic)
+        self.__import__( dic )
 
     if prefetch:
-        __prefetch_covariances(dic=self, cov_pathes=self.get('covariance_path', []))
+        __prefetch_covariances( dic=self, cov_pathes=self.get('covariance_path', []) )
 
     return self
 

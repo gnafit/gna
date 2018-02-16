@@ -11,21 +11,26 @@ class CovarianceHandler(object):
         try:
             self.covariance_obj = cfg['covariances'][covariance_name]
         except KeyError as e:
-            e.message = e.message + 'Covariance {0} is absent in '
-            'configuration. Check the contents of {1} to see whether it is '
-            'present'.format(covariance_name, cfg['covariance_path'])
-            raise
+            info = 'Covariance {0} is absent in configuration. ' + 'Check the contents of {1} to see whether it is present'
+            raise KeyError, info.format(covariance_name, str(cfg['covariance_path']))
 
         self.cov_store = cfg['covariances'][covariance_name]
         self.passed_pars = [pars]
 
     def covariate_pars(self):
+        policy = self.cov_store['policy']
+        mode = self.cov_store['mode']
+        uncorr_uncs = self.cov_store['uncorr_uncs']
         pars_to_covariate = [par for par in get_parameters(self.passed_pars) 
                              if par.name() in self.cov_store['params']]
         if all(_.name() in self.cov_store['params'] for _ in pars_to_covariate):
             # put params in order to match order in covariance matrix
             pars_to_covariate.sort(key=lambda x: self.cov_store['params'].index(x.name()))
-            covariate_pars(pars_to_covariate, self.cov_store['cov_mat'])
+            covariate_pars(pars=pars_to_covariate,
+                           cov_mat = self.cov_store['cov_mat'],
+                           mode=mode,
+                           policy=policy,
+                           uncorr_uncs=uncorr_uncs)
  
 
 
@@ -59,16 +64,38 @@ def covariate_ns(ns, cov_storage):
     for par1, par2 in itertools.combinations_with_replacement(mutual_pars, 2):
         par1.setCovariance(par2, cov_storage.get_cov(par1, par2))
     
-def covariate_pars(pars, in_cov_matrix):
-    if isinstance(in_cov_matrix, np.ndarray):
-        cov_matrix = in_cov_matrix
+def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=None):
+    if isinstance(cov_mat, np.ndarray):
+        cov_matrix = cov_mat
     else:
-        cov_matrix = np.array(in_cov_matrix)
+        cov_matrix = np.array(cov_mat)
+    
 
     is_covmat(pars, cov_matrix)
 
-    for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-        pars[first].setCovariance(pars[second], cov_matrix[first, second])
+    if (mode == 'relative') and (policy == 'keep'):
+        for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+            sigma_1, sigma_2 = pars[first].sigma(), pars[second].sigma()
+            covariance = sigma_1 * sigma_2 * cov_matrix[first, second]
+            pars[first].setCovariance(pars[second], covariance)
+        return
+
+    if (mode == 'relative') and (policy == 'override'):
+        if len(uncorr_uncs) == len(pars):
+            for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+                sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
+                covariance = sigma_1 * sigma_2 * cov_matrix[first, second]
+                print ('In mode = {mode} and with policy = {policy}\n'
+                      'sigma_1 = {0}, sigma_2 = {1}, '
+                      'covariance = {0} * {1} * {2} = {3}'
+                      .format(sigma_1, sigma_2, cov_matrix[first, second],
+                          covariance, mode=mode, policy=policy))
+                pars[first].setCovariance(pars[second], covariance)
+            return
+        else:
+            raise Exception("You want to override uncorrelated errors of "
+                    "parameters but don't provide enough within covariance set")
+
 
 def is_covmat(pars, cov_matrix):
     def is_positive_semidefinite(cov_matrix):
