@@ -15,12 +15,18 @@ from gna.bundle.connections import pairwise
 
 class root_histograms_v01(TransformationBundle):
     def __init__(self, **kwargs):
-        variants = kwargs['cfg'].get('variants', None)
+        variants   = kwargs['cfg'].get('variants', None)
+        namespaces = kwargs.get('namespaces', None)
+
+        if variants and namespaces:
+            print( 'root_histograms_v01 got namespaces and variants in the same time:' )
+            print( '    variants:', variants )
+            print( '    namespaces:', namespaces )
+            raise Exception('root_histograms_v01 confusing initialization')
+
         if variants:
-            namespaces = kwargs.pop( 'namespaces', None )
-            if namespaces:
-                raise Exception('root_histograms_v01 initializes namespaces on its own')
             kwargs['namespaces']=variants
+
         super(root_histograms_v01, self).__init__( **kwargs )
 
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
@@ -32,14 +38,22 @@ class root_histograms_v01(TransformationBundle):
 
         print( 'Read input file {}:'.format(file.GetName()) )
 
-        variants = self.cfg.get('variants', [self.common_namespace.name])
+        variants = self.cfg.get('variants', self.namespaces)
         for var in variants:
-            fmt = var
-            if isinstance(variants, (dict, NestedDict)):
-                fmt = variants[var]
+            if isinstance(var, basestring):
+                ns = self.common_namespace(var)
 
-            hname = self.groups.format(fmt, self.cfg.format)
-            # print( self.cfg.format, fmt, hname )
+                if isinstance(variants, (dict, NestedDict)):
+                    subst = variants[var]
+                else:
+                    subst = var
+            else:
+                ns    = var
+                var   = ns.name
+                subst = var
+
+            hname = self.groups.format(subst, self.cfg.format)
+            # print( self.cfg.format, subst, hname )
             h = file.Get( hname )
             if not h:
                 raise Exception('Can not read {hist} from {file}'.format( hist=hname, file=file.GetName() ))
@@ -54,7 +68,7 @@ class root_histograms_v01(TransformationBundle):
             else:
                 print()
 
-            hist=Histogram(edges, data, ns=self.common_namespace(var))
+            hist=Histogram(edges, data, ns=ns)
 
             self.objects[('hist',var)]    = hist
             self.transformations_out[var] = hist.hist
