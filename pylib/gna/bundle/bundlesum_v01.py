@@ -11,7 +11,8 @@ from gna.bundle import *
 from gna.bundle.connections import pairwise
 
 class bundlesum_v01(TransformationBundle):
-    def __init__(self, **kwargs):
+    def __init__(self, listkey='bundlesum_list', **kwargs):
+        self.listkey=listkey
         super(bundlesum_v01, self).__init__( **kwargs )
 
         self.bundles = NestedDict()
@@ -19,7 +20,10 @@ class bundlesum_v01(TransformationBundle):
     def build(self):
         args = dict(namespaces=self.namespaces, common_namespace=self.common_namespace)
 
-        for bundlename in self.cfg.list:
+        bundlelist = self.cfg.get(self.listkey, None)
+        if not bundlelist:
+            raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
+        for bundlename in bundlelist:
             self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
 
         names=self.bundles.values()[0].outputs.keys()
@@ -27,7 +31,6 @@ class bundlesum_v01(TransformationBundle):
             ns = self.common_namespace(name)
             osum = R.Sum(ns=ns)
 
-            print('Sum bundles for', name)
             for bundlename, bundle in self.bundles.items():
                 if not name in bundle.outputs:
                     raise Exception( 'Failed to find output for {} in {} {}'.format( name, type(bundle).__name__, bundlename ) )

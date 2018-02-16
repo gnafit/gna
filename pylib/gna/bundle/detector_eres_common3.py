@@ -1,4 +1,4 @@
-j -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R

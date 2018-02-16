@@ -34,7 +34,7 @@ cfg.groups=NestedDict(
 
 bkg = cfg('bkg')
 bkg.bundle = 'bundlesum_v01'
-bkg.list = [ 'bkg1', 'bkg2', 'bkgw' ] #, 'bkg_fn'
+bkg.bundlesum_list = [ 'bkg1', 'bkg2', 'bkgw' ] #, 'bkg_fn'
 bkg.observable = 'bkg_total'
 
 bkg.bkg1 = NestedDict(

@@ -40,11 +40,21 @@ def init_bundle(**kwargs):
     if not isinstance( names, (list, tuple) ):
         names = names,
 
-    bundles = tuple(get_bundle(name) for name in names)
+    bundles = ()
+    for name in names:
+        if ':' in name:
+            name, args = name.split(':', 1)
+            args = args.split(':')
+        else:
+            args=[]
+        bundleclass = get_bundle(name)
+        bundle = bundleclass(*args, **kwargs)
+        bundles+=bundle,
+
     if not bundles:
         raise Exception( "Bundle '%s' is not defined"%str(name) )
 
-    return tuple(bundle(**kwargs) for bundle in bundles)
+    return bundles
 
 def execute_bundle(**kwargs):
     bundles = init_bundle(**kwargs )

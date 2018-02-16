@@ -11,7 +11,8 @@ from gna.bundle import *
 from gna.bundle.connections import pairwise
 
 class bundlechain_v01(TransformationBundle):
-    def __init__(self, edges, **kwargs):
+    def __init__(self, listkey='bundlechain_list', edges=None, **kwargs):
+        self.listkey = listkey
         super(bundlechain_v01, self).__init__( **kwargs )
 
         self.edges=edges
@@ -22,7 +23,10 @@ class bundlechain_v01(TransformationBundle):
                      common_namespace=self.common_namespace,
                      edges=self.edges )
 
-        for bundlename in self.cfg.chain:
+        bundlelist = self.cfg.get(self.listkey)
+        if not bundlelist:
+            raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
+        for bundlename in bundlelist:
             self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
 
         for b1, b2 in pairwise( self.bundles.values() ):
