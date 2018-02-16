@@ -2,6 +2,32 @@ import ROOT
 from gna.env import env
 import numpy as np
 import itertools
+from gna.config import cfg
+from parameter_loader import get_parameters
+
+
+class CovarianceHandler(object):
+    def __init__(self, covariance_name, pars):
+        try:
+            self.covariance_obj = cfg['covariances'][covariance_name]
+        except KeyError as e:
+            e.message = e.message + 'Covariance {0} is absent in '
+            'configuration. Check the contents of {1} to see whether it is '
+            'present'.format(covariance_name, cfg['covariance_path'])
+            raise
+
+        self.cov_store = cfg['covariances'][covariance_name]
+        self.passed_pars = [pars]
+
+    def covariate_pars(self):
+        pars_to_covariate = [par for par in get_parameters(self.passed_pars) 
+                             if par.name() in self.cov_store['params']]
+        if all(_.name() in self.cov_store['params'] for _ in pars_to_covariate):
+            # put params in order to match order in covariance matrix
+            pars_to_covariate.sort(key=lambda x: self.cov_store['params'].index(x.name()))
+            covariate_pars(pars_to_covariate, self.cov_store['cov_mat'])
+ 
+
 
 class CovarianceStorage(object):
     """Simple class to store the order of parameters and corresponding
