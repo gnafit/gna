@@ -6,11 +6,11 @@
 #include <string>
 
 #include "GNAObject.hh"
-#include <Eigen/Dense> 
+#include <Eigen/Dense>
 
 
 class GeoNeutrinoFluxNormed: public GNASingleObject,
-                public Transformation<GeoNeutrinoFluxNormed> {
+                public TransformationBlock<GeoNeutrinoFluxNormed> {
 public:
   GeoNeutrinoFluxNormed(double livetime_years): m_livetime_years(livetime_years) {
     variable_(&m_fluxnorm, "FluxNorm");
@@ -27,7 +27,7 @@ protected:
       size_t first_non_nan_idx{0};
       // find first not nan assuming all other values are not NaN!
       for (; first_non_nan_idx < insize; ++first_non_nan_idx) {
-        if (std::isnan(events[first_non_nan_idx])) { 
+        if (std::isnan(events[first_non_nan_idx])) {
             ++first_non_nan_idx;
         }
         else {
@@ -35,13 +35,13 @@ protected:
         }
       }
       const double total_events = std::accumulate(events + first_non_nan_idx, events + insize, 0.);
-      
+
       rets[0].x = (m_fluxnorm/total_events) * m_livetime_years * args[0].x;
 
   }
 
   variable<double> m_fluxnorm;
-  
+
   double m_livetime_years;
 };
 

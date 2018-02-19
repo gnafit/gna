@@ -8,7 +8,7 @@
 #include "ParametricLazy.hpp"
 
 class GaussianPeakWithBackground: public GNAObject,
-                                  public Transformation<GaussianPeakWithBackground> {
+                                  public TransformationBlock<GaussianPeakWithBackground> {
 public:
   GaussianPeakWithBackground(double n=1) {
     variable_(&m_b, "BackgroundRate");

@@ -5,7 +5,7 @@
 #include "Statistic.hh"
 
 class Chi2: public GNASingleObject,
-            public Transformation<Chi2>,
+            public TransformationBlock<Chi2>,
             public Statistic {
 public:
   Chi2() {

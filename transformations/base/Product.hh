@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 
 class Product: public GNASingleObject,
-               public Transformation<Product> {
+               public TransformationBlock<Product> {
 public:
   Product();
 

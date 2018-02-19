@@ -7,7 +7,7 @@
 #include "OscillationVariables.hh"
 
 class OscProb2nu: public GNAObject,
-                  public Transformation<OscProb2nu> {
+                  public TransformationBlock<OscProb2nu> {
 public:
   OscProb2nu();
 

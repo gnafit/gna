@@ -26,7 +26,7 @@
 #endif
 
 template <typename T>
-class Transformation;
+class TransformationBlock;
 
 class GNAObject;
 class SingleOutput;
@@ -773,7 +773,7 @@ namespace TransformationTypes {
    */
   class Base: public boost::noncopyable {
     template <typename T>
-    friend class ::Transformation;
+    friend class ::TransformationBlock;
     template <typename T>
     friend class Initializer;
     friend class TransformationDescriptor;
@@ -842,7 +842,7 @@ namespace TransformationTypes {
   }
 
   /**
-   * @brief Transformation Entry initializer (CRTP).
+   * @brief TransformationBlock Entry initializer (CRTP).
    *
    * See
    * https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
@@ -901,10 +901,10 @@ namespace TransformationTypes {
      * Constructor increments Entry::initializing flag value thus indicating that Entry
      * is currently being configured via Initializer.
      *
-     * @param obj -- Transformation pointer to manage. Used to get Base pointer for Entry.
+     * @param obj -- TransformationBlock pointer to manage. Used to get Base pointer for Entry.
      * @param name -- new Entry name.
      */
-    Initializer(Transformation<T> *obj, const std::string &name)
+    Initializer(TransformationBlock<T> *obj, const std::string &name)
       : m_entry(new Entry(name, obj->baseobj())), m_obj(obj),
         m_nosubscribe(false)
     {
@@ -939,11 +939,11 @@ namespace TransformationTypes {
      *   - passes Atypes::passAll() as TypeFunction if no TypeFunction objects are provided.
      *   - subscribes the Entry to the Base's taint flag unless Initializer::m_nosubscribe is set.
      *   - adds the Entry to the Base.
-     *   - adds MemFunction and MemTypesFunction objects to the Transformation Initializer::m_obj.
+     *   - adds MemFunction and MemTypesFunction objects to the TransformationBlock Initializer::m_obj.
      *
      * @note while Function and TypeFunction objects are kept within Entry
      * instance, MemFunction and MemTypesFunction instances are managed via
-     * Transformation instance (Initializer::m_obj).
+     * TransformationBlock instance (Initializer::m_obj).
      */
     void add() {
       auto *baseobj = m_obj->baseobj();
@@ -1143,7 +1143,7 @@ namespace TransformationTypes {
 
   protected:
     Entry *m_entry;             ///< New Entry pointer.
-    Transformation<T> *m_obj;   ///< The Transformation object managing MemFunction and MemTypesFunction objects. Has a reference to the Base.
+    TransformationBlock<T> *m_obj;   ///< The TransformationBlock object managing MemFunction and MemTypesFunction objects. Has a reference to the Base.
 
     MemFunction m_mfunc;        ///< MemFunction object.
     std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs; ///< MemTypesFunction objects.
@@ -1162,10 +1162,10 @@ namespace TransformationTypes {
  *
  * Each GNA transformation class is defined by deriving to base classes:
  *   - GNAObject or GNASingleObject (deriving from TransformationTypes::Base and ParametrizedTypes::Base).
- *   - Transformation<class>.
+ *   - TransformationBlock<class>.
  *
- * Transformation class does the bookkeeping for MemFunction and MemTypesFunction. By defining CRTP
- * Transformation::obj() method it facilitates the binding of the first
+ * TransformationBlock class does the bookkeeping for MemFunction and MemTypesFunction. By defining CRTP
+ * TransformationBlock::obj() method it facilitates the binding of the first
  * argument of MemFunction and MemTypesFunction objects to `this` of the transformation.
  *
  * @tparam Derived -- derived class type. See CRTP concept.
@@ -1174,17 +1174,17 @@ namespace TransformationTypes {
  * @date 2015
  */
 template <typename Derived>
-class Transformation {
+class TransformationBlock {
 public:
-  Transformation() { }                                                                ///< Default constructor.
+  TransformationBlock() { }                                                                ///< Default constructor.
   /**
    * @brief Clone constructor.
    *
    * The constructor copies the list of MemFunction objects and rebinds them to `this`.
    *
-   * @param other -- Transformation to copy MemFunction and MemTypesFunction objects from.
+   * @param other -- TransformationBlock to copy MemFunction and MemTypesFunction objects from.
    */
-  Transformation(const Transformation<Derived> &other)
+  TransformationBlock(const TransformationBlock<Derived> &other)
     : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
   {
     rebindMemFunctions();
@@ -1192,9 +1192,9 @@ public:
 
   /**
    * @brief Clone assignment. Works the same was as clone constructor.
-   * @copydoc Transformation::Transformation(const Transformation<Derived>&)
+   * @copydoc TransformationBlock::TransformationBlock(const TransformationBlock<Derived>&)
    */
-  Transformation<Derived> &operator=(const Transformation<Derived> &other) {
+  TransformationBlock<Derived> &operator=(const TransformationBlock<Derived> &other) {
     m_memFuncs = other.m_memFuncs;
     m_memTypesFuncs = other.m_memTypeFuncs;
     rebindMemFunctions();
@@ -1214,7 +1214,7 @@ private:
   Derived *obj() { return static_cast<Derived*>(this); }
 
   /**
-   * @copydoc Transformation::obj()
+   * @copydoc TransformationBlock::obj()
    */
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 
@@ -1227,7 +1227,7 @@ private:
   }
 
   /**
-   * @copydoc Transformation::baseobj()
+   * @copydoc TransformationBlock::baseobj()
    */
   const TransformationTypes::Base *baseobj() const {
     return static_cast<const TransformationTypes::Base*>(obj());

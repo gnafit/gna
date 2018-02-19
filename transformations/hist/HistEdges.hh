@@ -6,7 +6,7 @@
 #include "GNAObject.hh"
 
 class HistEdges: public GNASingleObject,
-                 public Transformation<HistEdges> {
+                 public TransformationBlock<HistEdges> {
 public:
   HistEdges() {
     transformation_(this, "histedges")

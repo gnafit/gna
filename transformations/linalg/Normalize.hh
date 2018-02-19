@@ -15,7 +15,7 @@
  * @date 02.2018
  */
 class Normalize: public GNASingleObject,
-                 public Transformation<Normalize> {
+                 public TransformationBlock<Normalize> {
 public:
     Normalize();                                    ///< Default constructor.
     Normalize(size_t start, size_t length);         ///< Subhistogram normalization constructor.

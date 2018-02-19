@@ -7,7 +7,7 @@
 #include "GNAObject.hh"
 
 class ReactorNormAbsolute: public GNAObject,
-                           public Transformation<ReactorNormAbsolute> {
+                           public TransformationBlock<ReactorNormAbsolute> {
 public:
   ReactorNormAbsolute(const std::vector<std::string> &isonames);
 protected:
@@ -15,7 +15,7 @@ protected:
 };
 
 class ReactorNorm: public GNAObject,
-                   public Transformation<ReactorNorm> {
+                   public TransformationBlock<ReactorNorm> {
 public:
   ReactorNorm(const std::vector<std::string> &isonames);
 protected:

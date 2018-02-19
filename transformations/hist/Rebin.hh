@@ -7,7 +7,7 @@
 #include "Eigen/Sparse"
 
 class Rebin: public GNAObject,
-             public Transformation<Rebin> {
+             public TransformationBlock<Rebin> {
 public:
   Rebin(size_t n, double* edges, int rounding);
 

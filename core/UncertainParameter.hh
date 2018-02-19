@@ -30,7 +30,7 @@ protected:
 
 template <typename T>
 class Variable: public GNASingleObject,
-                public Transformation<Variable<T>>
+                public TransformationBlock<Variable<T>>
 {
 public:
   Variable(const std::string &name)

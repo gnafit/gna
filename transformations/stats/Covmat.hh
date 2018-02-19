@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 
 class Covmat: public GNAObject,
-              public Transformation<Covmat> {
+              public TransformationBlock<Covmat> {
 public:
   Covmat()
     : m_fixed(false)

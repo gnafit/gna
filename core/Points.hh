@@ -14,7 +14,7 @@
  * @date 2015
  */
 class Points: public GNASingleObject,
-              public Transformation<Points> {
+              public TransformationBlock<Points> {
 public:
   /**
    * @brief Construct 1d array from a vector of doubles.

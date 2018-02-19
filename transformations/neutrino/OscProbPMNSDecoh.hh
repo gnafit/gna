@@ -9,8 +9,8 @@
 class OscillationVariables;
 class PMNSVariables;
 class OscProbPMNSDecoh: public OscProbPMNSBase,
-                        public Transformation<OscProbPMNSDecoh> {
-public:	
+                        public TransformationBlock<OscProbPMNSDecoh> {
+public:
   OscProbPMNSDecoh(Neutrino from, Neutrino to);
   void calcSum(Args args, Rets rets);
   template <int I, int J>
@@ -19,7 +19,7 @@ public:
   void calcComponentCP(Args args, Rets rets);
 protected:
   variable<double> m_L;
-  variable<double> m_sigma; 		
+  variable<double> m_sigma;
 };
 
 #endif // OSCPROBPMNSDECOH_H

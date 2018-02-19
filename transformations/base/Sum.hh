@@ -13,7 +13,7 @@
  * @date 2015
  */
 class Sum: public GNASingleObject,
-           public Transformation<Sum> {
+           public TransformationBlock<Sum> {
 public:
   Sum();                                     ///< Constructor.
   InputDescriptor add(SingleOutput &data);   ///< Add an input and connect it to the output.

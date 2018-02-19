@@ -14,7 +14,7 @@
  * @date 2015
  */
 class Histogram: public GNASingleObject,
-                 public Transformation<Histogram> {
+                 public TransformationBlock<Histogram> {
 public:
   /**
    * @brief Construct 1d histogram from two arrays: edges and data

@@ -7,7 +7,7 @@
 #include "GNAObject.hh"
 
 class GaussianPeakWithBackground: public GNAObject,
-                                  public Transformation<GaussianPeakWithBackground> {
+                                  public TransformationBlock<GaussianPeakWithBackground> {
 public:
   GaussianPeakWithBackground() {
     variable_(&m_b, "BackgroundRate");

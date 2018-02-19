@@ -9,7 +9,7 @@
  * @date 2015
  */
 class Prediction: public GNASingleObject,
-                  public Transformation<Prediction> {
+                  public TransformationBlock<Prediction> {
 public:
   Prediction();                                     ///< Default constructor.
   Prediction(const Prediction &other);              ///< Copy constructor.

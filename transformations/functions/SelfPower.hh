@@ -19,7 +19,7 @@
  * @date
  */
 class SelfPower: public GNAObject,
-                 public Transformation<SelfPower> {
+                 public TransformationBlock<SelfPower> {
 public:
     SelfPower(const char* scalename="sp_scale"); ///< Constructor.
 

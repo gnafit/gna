@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 
 class HistSmear: public GNASingleObject,
-                 public Transformation<HistSmear> {
+                 public TransformationBlock<HistSmear> {
 public:
   HistSmear( bool upper=false );
 

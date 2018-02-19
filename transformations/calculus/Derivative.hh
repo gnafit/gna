@@ -5,7 +5,7 @@
 #include "UncertainParameter.hh"
 
 class Derivative: public GNASingleObject,
-                  public Transformation<Derivative> {
+                  public TransformationBlock<Derivative> {
 public:
   Derivative(Parameter<double> *x, double reldelta=1.0)
     : m_x(x), m_reldelta(reldelta)

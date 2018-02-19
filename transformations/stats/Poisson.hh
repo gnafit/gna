@@ -6,7 +6,7 @@
 
 
 class Poisson: public GNASingleObject,
-	       public Transformation<Poisson>,
+	       public TransformationBlock<Poisson>,
 	       public Statistic	 {
 public:
 

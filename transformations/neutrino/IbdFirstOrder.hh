@@ -4,7 +4,7 @@
 #include "IbdInteraction.hh"
 
 class IbdFirstOrder: public IbdInteraction,
-                     public Transformation<IbdFirstOrder> {
+                     public TransformationBlock<IbdFirstOrder> {
 public:
   IbdFirstOrder();
 protected:

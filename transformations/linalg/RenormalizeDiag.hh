@@ -4,7 +4,7 @@
 #include "GNAObject.hh"
 
 class RenormalizeDiag: public GNASingleObject,
-                       public Transformation<RenormalizeDiag> {
+                       public TransformationBlock<RenormalizeDiag> {
 public:
   enum Target {
     Diagonal = 0,

@@ -5,7 +5,7 @@
 #include "GNAObject.hh"
 
 class NormalToyMC: public GNASingleObject,
-                   public Transformation<NormalToyMC> {
+                   public TransformationBlock<NormalToyMC> {
 public:
   NormalToyMC( bool autofreeze=true );
 

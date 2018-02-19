@@ -7,7 +7,7 @@
 #include "GNAObject.hh"
 
 class ReactorCore: public GNAObject,
-                   public Transformation<ReactorCore> {
+                   public TransformationBlock<ReactorCore> {
 public:
   ReactorCore(const std::vector<std::string> &isonames);
 protected:

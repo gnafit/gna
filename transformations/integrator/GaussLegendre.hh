@@ -8,7 +8,7 @@
 #include "GNAObject.hh"
 
 class GaussLegendre: public GNAObject,
-                     public Transformation<GaussLegendre> {
+                     public TransformationBlock<GaussLegendre> {
   friend class GaussLegendreHist;
 public:
   GaussLegendre(const std::vector<double> &edges,
@@ -49,7 +49,7 @@ protected:
 };
 
 class GaussLegendreHist: public GNASingleObject,
-                         public Transformation<GaussLegendreHist> {
+                         public TransformationBlock<GaussLegendreHist> {
 public:
   GaussLegendreHist(const GaussLegendre *base);
 protected:

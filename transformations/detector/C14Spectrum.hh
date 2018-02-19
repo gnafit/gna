@@ -10,7 +10,7 @@
 using GLTable = gsl_integration_glfixed_table;
 
 class C14Spectrum: public GNAObject,
-                    public Transformation<C14Spectrum>
+                    public TransformationBlock<C14Spectrum>
 {
     public:
         C14Spectrum(int order, int n_pivots);
@@ -21,7 +21,7 @@ class C14Spectrum: public GNAObject,
         void   fillCache();
         double IntegrateSpectrum(double from, double to);
 
-        void   calcSmear(Args args, Rets rets); 
+        void   calcSmear(Args args, Rets rets);
 
 
         variable<double> m_rho, m_protons, m_e;
@@ -40,7 +40,7 @@ class C14Spectrum: public GNAObject,
         std::vector<double> m_rescache;
         std::vector<int>    m_cacheidx;
         std::vector<int>    m_startidx;
-        
+
 
 };
 
