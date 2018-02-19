@@ -42,8 +42,8 @@ set (SOURCES
   neutrino/ReactorNorm.cc
   neutrino/ReactorGroup.cc
   neutrino/OscProbMatterUniform.cc
-  integrator/GaussLegendre.cc
-  integrator/GaussLegendre2d.cc
+  transformations/integrator/GaussLegendre.cc
+  transformations/integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
   detector/HistNonlinearity.cc
   detector/HistSmear.cc
@@ -112,7 +112,7 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/ transformations/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+include_directories(core/ transformations/ extra/ neutrino/ transformations/integrator/ detector/ examples/ backgrounds/)
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
