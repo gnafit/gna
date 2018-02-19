@@ -94,11 +94,15 @@ class TransformationBundle(object):
             - namespaces — list of namespaces to create replica of a chain. If a list of strings is passed
               it is replaces by a list of namespaces with corresponding names with parent=common_namespace.
         """
+        self.shared=kwargs.pop('shared', NestedDict())
         self.cfg = cfg
 
-        self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
-        namespaces=kwargs.pop('namespaces', None) or [self.common_namespace]
+        self.common_namespace = kwargs.pop( 'common_namespace', self.shared.get('common_namespace', env.globalns) )
+        namespaces=kwargs.pop('namespaces', self.shared.get('namespaces', None)) or [self.common_namespace]
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
+
+        self.shared.setdefault('namespaces', self.namespaces)
+        self.shared.setdefault('common_namespace', self.common_namespace)
 
         self.objects             = NestedDict() # {'group': {key: object}} - objects with transformations
         self.transformations_in  = NestedDict() # {key: transformation}    - transformations, that require inputs to be connected

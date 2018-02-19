@@ -13,10 +13,12 @@ from gna.bundle import *
 
 class detector_nonlinearity_db_root_v01(TransformationBundle):
     debug = False
-    def __init__(self, edges, **kwargs):
+    def __init__(self, **kwargs):
         super(detector_nonlinearity_db_root_v01, self).__init__( **kwargs )
 
-        self.edges = edges
+        self.edges = kwargs.pop('edges', self.shared.get('edges', None))
+        if not self.edges:
+            raise Exception('detector_nonlinearity_db_root_v01 expects bin edges to be passed as argument or shared')
         self.storage=NestedDict()
         self.pars=NestedDict()
 

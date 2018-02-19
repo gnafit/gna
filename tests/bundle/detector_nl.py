@@ -27,7 +27,7 @@ cfg = NestedDict(
     # bundle name
     bundle = 'detector_nonlinearity_db_root_v01',
     # file to read
-    filename = 'output/detector_nl_consModel_450itr.root',
+    filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
     # TGraph names. First curve will be used as nominal
     names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         # The uncorrelated energy scale uncertainty type (absolute/relative)

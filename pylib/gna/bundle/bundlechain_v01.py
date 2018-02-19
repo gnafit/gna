@@ -11,23 +11,18 @@ from gna.bundle import *
 from gna.bundle.connections import pairwise
 
 class bundlechain_v01(TransformationBundle):
-    def __init__(self, listkey='bundlechain_list', edges=None, **kwargs):
+    def __init__(self, listkey='bundlechain_list', **kwargs):
         self.listkey = listkey
         super(bundlechain_v01, self).__init__( **kwargs )
 
-        self.edges=edges
         self.bundles = NestedDict()
 
     def build(self):
-        args = dict( namespaces=self.namespaces,
-                     common_namespace=self.common_namespace,
-                     edges=self.edges )
-
         bundlelist = self.cfg.get(self.listkey)
         if not bundlelist:
             raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
         for bundlename in bundlelist:
-            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
+            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], shared=self.shared)
 
         debug = self.cfg.get('debug', False)
         for b1, b2 in pairwise( self.bundles.values() ):

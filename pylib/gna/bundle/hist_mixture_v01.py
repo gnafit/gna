@@ -20,7 +20,7 @@ class hist_mixture_v01(TransformationBundle):
             raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )
 
         self.bundles = OrderedDict([
-                (name, execute_bundle(cfg=cfg, common_namespace=self.common_namespace)[0])
+                (name, execute_bundle(cfg=cfg, namespaces=None, shared=self.shared)[0])
                 for name, cfg in self.cfg.spectra.items()
             ])
 

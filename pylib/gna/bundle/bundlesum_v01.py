@@ -18,13 +18,11 @@ class bundlesum_v01(TransformationBundle):
         self.bundles = NestedDict()
 
     def build(self):
-        args = dict(namespaces=self.namespaces, common_namespace=self.common_namespace)
-
         bundlelist = self.cfg.get(self.listkey, None)
         if not bundlelist:
             raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
         for bundlename in bundlelist:
-            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
+            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], shared=self.shared )
 
         debug = self.cfg.get('debug', False)
         names=self.bundles.values()[0].outputs.keys()

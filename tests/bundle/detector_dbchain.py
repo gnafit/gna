@@ -96,7 +96,8 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 # Define the chain
 #
-b, = execute_bundle(edges=points.single(), cfg=cfg.detector, namespaces=namespaces)
+shared = NestedDict( edges=points.single() )
+b, = execute_bundle(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
 print('Parameters:')
 env.globalns.printparameters()
