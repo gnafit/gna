@@ -596,6 +596,18 @@ namespace TransformationTypes {
     template <size_t Arg>
     static void ifPoints(Atypes args, Rtypes rets);    ///< Checks if Arg-th input is an array (DataKind=Points).
 
+    //template <size_t Arg>
+    //static void if1d(Atypes args, Rtypes rets);        ///<
+
+    //template <size_t Arg>
+    //static void if2d(Atypes args, Rtypes rets);        ///<
+
+    //template <size_t Arg>
+    //static void ifSquare(Atypes args, Rtypes rets);    ///<
+
+    //template <size_t Arg>
+    //static void ifSparse(Atypes args, Rtypes rets);    ///<
+
     /**
      * @brief Source type exception.
      * @param dt -- incorrect DataType.
@@ -675,66 +687,6 @@ namespace TransformationTypes {
     const Entry *m_entry; ///< Entry instance.
     std::shared_ptr<std::vector<DataType> > m_types; ///< Storage for the output DataType types.
   };
-
-  /**
-   * @brief Assigns shape of Arg-th input to Ret-th output
-   *
-   * @tparam Arg -- index of Arg to read the type.
-   * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
-   *
-   * @param args -- source types.
-   * @param rets -- output types.
-   *
-   * @exception std::runtime_error in case of invalid index is passed.
-   */
-  template <size_t Arg, size_t Ret>
-  inline void Atypes::pass(Atypes args, Rtypes rets) {
-    if (Arg >= args.size()) {
-      throw std::runtime_error("Transformation: invalid Arg index");
-    }
-    if (Ret >= rets.size()) {
-      throw std::runtime_error("Transformation: invalid Ret index");
-    }
-    rets[Ret] = args[Arg];
-  }
-
-  /**
-   * @brief Checks if Arg-th input is a histogram (DataKind=Histogram).
-   *
-   * Raises an exception otherwise.
-   *
-   *  @tparam Arg -- index of Arg to check.
-   *
-   *  @param args -- source types.
-   *  @param rets -- output types.
-   *
-   *  @exception std::runtime_error in case input data is not a histogram.
-   */
-  template <size_t Arg>
-  inline void Atypes::ifHist(Atypes args, Rtypes rets) {
-    if (args[Arg].kind!=DataKind::Hist) {
-      throw std::runtime_error("Transformation: Arg should be a histogram");
-    }
-  }
-
-  /**
-   * @brief Checks if Arg-th input is an array (DataKind=Points).
-   *
-   * Raises an exception otherwise.
-   *
-   * @tparam Arg -- index of Arg to check.
-   *
-   * @param args -- source types.
-   * @param rets -- output types.
-   *
-   *  @exception std::runtime_error in case input data is not an array.
-   */
-  template <size_t Arg>
-  inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
-    if (args[Arg].kind!=DataKind::Points) {
-      throw std::runtime_error("Transformation: Arg should be an array");
-    }
-  }
 
   /**
    * @brief Accessor gives an access to the Base's Entry instances by wrapping them into Handle.

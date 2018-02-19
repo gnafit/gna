@@ -12,6 +12,7 @@ set (SOURCES
   core/ParametersGroup.cc
   core/Parametrized.cc
   core/Transformation.cc
+  core/TypesFunctions.cc
   core/TransformationBase.cc
   core/UncertainParameter.cc
   transformations/base/Prediction.cc
