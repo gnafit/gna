@@ -45,7 +45,7 @@ class detector_iav_db_root_v01(TransformationBundle):
                 self.objects[('esmear',ns.name)]     = esmear
 
                 """Define observables"""
-                ns.addobservable('iav', esmear.smear.Nvis, ignorecheck=True)
+                self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
 
     def build(self):
         from file_reader import read_object_auto

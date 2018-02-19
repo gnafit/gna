@@ -21,8 +21,6 @@ class concatenate(TransformationBundle):
         self.outputs[self.common_namespace.name]             = concat.prediction.prediction
 
         """Define observables"""
-        obsname = self.cfg.get( 'observable', None )
-        if obsname:
-            self.common_namespace.addobservable(obsname, concat.prediction.prediction, ignorecheck=True)
+        self.addcfgobservable(self.common_namespace, concat.prediction.prediction, ignorecheck=True)
 
 

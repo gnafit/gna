@@ -130,3 +130,21 @@ class TransformationBundle(object):
         """Defines the variables necessary for the computational chain. Should handle each namespace."""
         pass
 
+    def addcfgobservable(self, ns, obj, defname=None, key='observable', fmtdict={}, **kwargs):
+        obsname = None
+
+        if key:
+            obsname = self.cfg.get(key, None)
+
+        if obsname and isinstance(obsname, bool):
+            obsname=defname
+
+        if not obsname:
+            return
+
+        if fmtdict:
+            obsname=obsname.format(**fmtdict)
+
+        ns.addobservable(obsname, obj, **kwargs)
+
+

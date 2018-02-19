@@ -29,7 +29,6 @@ class bundlesum_v01(TransformationBundle):
         debug = self.cfg.get('debug', False)
         names=self.bundles.values()[0].outputs.keys()
 
-        obsname = self.cfg.get('observable', '')
         chaininput = self.cfg.get('chaininput', None)
         if chaininput and not isinstance(chaininput, str):
             raise Exception( 'chaininput should be a string' )
@@ -58,6 +57,5 @@ class bundlesum_v01(TransformationBundle):
             self.outputs[name]             = osum.sum.outputs['sum']
 
             """Define observable"""
-            if obsname:
-                ns.addobservable( obsname, osum.sum.outputs['sum'], ignorecheck=bool(chaininput) )
+            self.addcfgobservable(ns, osum.sum.outputs['sum'], ignorecheck=bool(chaininput))
 

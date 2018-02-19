@@ -13,13 +13,13 @@ from gna.grouping import Categories, CatDict
 from gna.bundle import *
 
 class bkg_weighted_hist_v01(TransformationBundle):
-    name = 'bkg_weighted_hist'
-
     def __init__(self, **kwargs):
+        variants  = kwargs['cfg'].get('variants', None)
+        if variants is not None:
+            kwargs['namespaces'] = list(variants)
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.bundles, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
-        self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
+        self.bundles, = execute_bundle(cfg=self.cfg.spectra, common_namespace=self.common_namespace, namespaces=self.namespaces)
 
         try:
             self.cfg.setdefault( 'name', self.cfg.parent_key() )
@@ -50,7 +50,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             self.outputs[ns.name]             = ws.sum.sum
 
             """Add observables"""
-            ns.addobservable(self.cfg.name, ws.sum.sum)
+            self.addcfgobservable(ns, ws.sum.sum, 'bkg/{name}', fmtdict=dict(name=self.cfg.name))
 
     def define_variables(self):
         #
@@ -68,8 +68,8 @@ class bkg_weighted_hist_v01(TransformationBundle):
         # Link the other variables
         #
         targetfmt, formulafmt = self.get_target_formula()
-        for variant in self.cfg.variants:
-            ns = self.common_namespace(variant)
+        for ns in self.namespaces:
+            variant = ns.name
             formula = []
             for fullitem in formulafmt:
                 item = self.groups.format_splitjoin(variant, fullitem, prepend=self.common_namespace.path)

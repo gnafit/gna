@@ -84,7 +84,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     self.objects[('nonlinearity', ns.name)] = nonlin
 
                     """Define observables"""
-                    ns.addobservable('nonlinearity', nonlin.smear.Nvis, ignorecheck=True)
+                    self.addcfgobservable(ns, nonlin.smear.Nvis, 'nonlinearity', ignorecheck=True)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

@@ -15,17 +15,9 @@ from gna.bundle.connections import pairwise
 
 class root_histograms_v01(TransformationBundle):
     def __init__(self, **kwargs):
-        variants   = kwargs['cfg'].get('variants', None)
-        namespaces = kwargs.get('namespaces', None)
-
-        if variants and namespaces:
-            print( 'root_histograms_v01 got namespaces and variants in the same time:' )
-            print( '    variants:', variants )
-            print( '    namespaces:', namespaces )
-            raise Exception('root_histograms_v01 confusing initialization')
-
+        variants   = kwargs['cfg'].get('variants', (), types=(list,tuple,dict,NestedDict))
         if variants:
-            kwargs['namespaces']=variants
+            kwargs['namespaces'] = list(variants)
 
         super(root_histograms_v01, self).__init__( **kwargs )
 
@@ -38,19 +30,12 @@ class root_histograms_v01(TransformationBundle):
 
         print( 'Read input file {}:'.format(file.GetName()) )
 
-        variants = self.cfg.get('variants', self.namespaces)
-        obsname = self.cfg.get('observable', '')
-        for var in variants:
-            if isinstance(var, basestring):
-                ns = self.common_namespace(var)
-
-                if isinstance(variants, (dict, NestedDict)):
-                    subst = variants[var]
-                else:
-                    subst = var
+        variants = self.cfg.get('variants', ())
+        for ns in self.namespaces:
+            var=ns.name
+            if variants and isinstance(variants, (dict, NestedDict)):
+                subst = variants[var]
             else:
-                ns    = var
-                var   = ns.name
                 subst = var
 
             hname = self.groups.format(subst, self.cfg.format)
@@ -76,7 +61,6 @@ class root_histograms_v01(TransformationBundle):
             self.outputs[var]             = hist.hist.hist
 
             """Define observable"""
-            if obsname:
-                ns.addobservable( obsname, hist.hist.hist )
+            self.addcfgobservable(ns, hist.hist.hist)
 
         file.Close()

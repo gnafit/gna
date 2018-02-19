@@ -22,6 +22,6 @@ class rebin(TransformationBundle):
             self.outputs[ns.name]             = rebin.rebin.histout
 
             """Define observables"""
-            ns.addobservable('rebin', rebin.rebin.histout, ignorecheck=True)
+            self.addcfgobservable(ns, rebin.rebin.histout, 'rebin', ignorecheck=True)
 
 
