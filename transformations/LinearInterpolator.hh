@@ -13,9 +13,9 @@ class LinearInterpolator: public GNASingleObject,
                           public Transformation<LinearInterpolator> {
 public:
   LinearInterpolator(int size, const double *xs, const double *ys, std::string return_on_fail = "")
-    : m_xs(xs, xs+size), m_ys(ys, ys+size) 
+    : m_xs(xs, xs+size), m_ys(ys, ys+size)
   {
-    
+
     indexBins();
     transformation_(this, "f")
       .input("x")

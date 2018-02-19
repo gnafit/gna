@@ -14,25 +14,25 @@ set (SOURCES
   core/GNAObject.cc
   core/UncertainParameter.cc
   core/ParametersGroup.cc
-  core/Prediction.cc
-  core/CovariatedPrediction.cc
-  core/Product.cc
-  core/Sum.cc
-  core/WeightedSum.cc
-  core/LinearInterpolator.cc
-  core/Derivative.cc
-  core/Covmat.cc
-  core/Chi2.cc
-  core/Poisson.cc
-  core/SelfPower.cc
-  core/Normalize.cc
-  core/CovarianceToyMC.cc
-  core/NormalToyMC.cc
-  core/PoissonToyMC.cc
-  core/Rebin.cc
-  core/VarProduct.cc
-  core/VarSum.cc
-  core/VarDiff.cc
+  transformations/Prediction.cc
+  transformations/CovariatedPrediction.cc
+  transformations/Product.cc
+  transformations/Sum.cc
+  transformations/WeightedSum.cc
+  transformations/LinearInterpolator.cc
+  transformations/Derivative.cc
+  transformations/Covmat.cc
+  transformations/Chi2.cc
+  transformations/Poisson.cc
+  transformations/SelfPower.cc
+  transformations/Normalize.cc
+  transformations/CovarianceToyMC.cc
+  transformations/NormalToyMC.cc
+  transformations/PoissonToyMC.cc
+  transformations/Rebin.cc
+  transformations/VarProduct.cc
+  transformations/VarSum.cc
+  transformations/VarDiff.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -112,7 +112,7 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+include_directories(core/ transformations/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -151,7 +151,7 @@ find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)
