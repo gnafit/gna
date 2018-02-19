@@ -8,47 +8,47 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 enable_language(Fortran)
 
 set (SOURCES
-  core/TransformationBase.cc
-  core/Transformation.cc
-  core/Parametrized.cc
   core/GNAObject.cc
-  core/UncertainParameter.cc
   core/ParametersGroup.cc
-  transformations/Prediction.cc
-  transformations/CovariatedPrediction.cc
-  transformations/Product.cc
-  transformations/Sum.cc
-  transformations/WeightedSum.cc
-  transformations/LinearInterpolator.cc
-  transformations/Derivative.cc
-  transformations/Covmat.cc
-  transformations/Chi2.cc
-  transformations/Poisson.cc
-  transformations/SelfPower.cc
-  transformations/Normalize.cc
-  transformations/CovarianceToyMC.cc
-  transformations/NormalToyMC.cc
-  transformations/PoissonToyMC.cc
-  transformations/Rebin.cc
-  transformations/VarProduct.cc
-  transformations/VarSum.cc
-  transformations/VarDiff.cc
-  neutrino/OscProb2nu.cc
-  neutrino/OscProbPMNS.cc
-  neutrino/OscProbPMNSDecoh.cc
-  neutrino/IbdInteraction.cc
-  neutrino/IbdZeroOrder.cc
-  neutrino/IbdFirstOrder.cc
-  neutrino/ReactorNorm.cc
-  neutrino/ReactorGroup.cc
-  neutrino/OscProbMatterUniform.cc
+  core/Parametrized.cc
+  core/Transformation.cc
+  core/TransformationBase.cc
+  core/UncertainParameter.cc
+  transformations/base/Prediction.cc
+  transformations/base/Product.cc
+  transformations/base/Sum.cc
+  transformations/base/WeightedSum.cc
+  transformations/calculus/Derivative.cc
+  transformations/detector/C14Spectrum.cc
+  transformations/detector/EnergyResolution.cc
+  transformations/detector/HistNonlinearity.cc
+  transformations/detector/HistSmear.cc
+  transformations/functions/SelfPower.cc
+  transformations/hist/Rebin.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
-  detector/EnergyResolution.cc
-  detector/HistNonlinearity.cc
-  detector/HistSmear.cc
-  detector/RenormalizeDiag.cc
-  detector/C14Spectrum.cc
+  transformations/interpolation/LinearInterpolator.cc
+  transformations/linalg/Normalize.cc
+  transformations/linalg/RenormalizeDiag.cc
+  transformations/neutrino/IbdFirstOrder.cc
+  transformations/neutrino/IbdInteraction.cc
+  transformations/neutrino/IbdZeroOrder.cc
+  transformations/neutrino/OscProb2nu.cc
+  transformations/neutrino/OscProbMatterUniform.cc
+  transformations/neutrino/OscProbPMNS.cc
+  transformations/neutrino/OscProbPMNSDecoh.cc
+  transformations/neutrino/ReactorGroup.cc
+  transformations/neutrino/ReactorNorm.cc
+  transformations/stats/Chi2.cc
+  transformations/stats/CovarianceToyMC.cc
+  transformations/stats/CovariatedPrediction.cc
+  transformations/stats/Covmat.cc
+  transformations/stats/NormalToyMC.cc
+  transformations/stats/Poisson.cc
+  transformations/stats/PoissonToyMC.cc
+  transformations/var/VarDiff.cc
+  transformations/var/VarProduct.cc
+  transformations/var/VarSum.cc
   extra/GridFilter.cc
   )
 
@@ -112,7 +112,23 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/ transformations/ extra/ neutrino/ transformations/integrator/ detector/ examples/ backgrounds/)
+include_directories(core/
+                    transformations/base
+                    transformations/calculus
+                    transformations/detector
+                    transformations/functions
+                    transformations/hist
+                    transformations/integrator
+                    transformations/interpolation
+                    transformations/linalg
+                    transformations/neutrino
+                    transformations/stats
+                    transformations/var
+                    extra/
+                    examples/
+                    backgrounds/
+                   )
+
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
