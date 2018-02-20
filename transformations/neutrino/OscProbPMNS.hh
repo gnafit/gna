@@ -9,7 +9,7 @@
 class OscillationVariables;
 class PMNSVariables;
 class OscProbPMNSBase: public GNAObject,
-                       public TransformationBlock<OscProbPMNSBase> {
+                       public TransformationBind<OscProbPMNSBase> {
 protected:
   OscProbPMNSBase(Neutrino from, Neutrino to);
 
@@ -29,7 +29,7 @@ protected:
 };
 
 class OscProbPMNS: public OscProbPMNSBase,
-                   public TransformationBlock<OscProbPMNS> {
+                   public TransformationBind<OscProbPMNS> {
 public:
   OscProbPMNS(Neutrino from, Neutrino to);
 
@@ -43,7 +43,7 @@ protected:
 };
 
 class OscProbAveraged: public OscProbPMNSBase,
-                           public TransformationBlock<OscProbAveraged> {
+                           public TransformationBind<OscProbAveraged> {
 
 public:
     OscProbAveraged(Neutrino from, Neutrino to);
@@ -52,7 +52,7 @@ private:
 };
 
 class OscProbPMNSMult: public OscProbPMNSBase,
-                       public TransformationBlock<OscProbPMNSMult> {
+                       public TransformationBind<OscProbPMNSMult> {
 public:
   OscProbPMNSMult(Neutrino from, Neutrino to);
 

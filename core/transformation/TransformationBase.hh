@@ -6,12 +6,11 @@
 
 #include "Accessor.hh"
 #include "TransformationEntry.hh"
-#include "TransformationBlock.hh"
 #include "Exceptions.hh"
 
 class GNAObject;
 template <typename Derived>
-class TransformationBlock;
+class TransformationBind;
 
 /**
  * @brief A namespace for transformations.
@@ -43,7 +42,7 @@ namespace TransformationTypes {
    */
   class Base: public boost::noncopyable {
     template <typename T>
-    friend class ::TransformationBlock;
+    friend class ::TransformationBind;
     template <typename T>
     friend class Initializer;
     friend class TransformationDescriptor;
@@ -74,9 +73,6 @@ namespace TransformationTypes {
       return m_entries[idx];
     }
     Entry &getEntry(const std::string &name);                            ///< Get an Entry by name.
-
-    template <typename T>
-    Initializer<T> transformation_(T *obj, const std::string &name);     ///< Initialize the new transformation Entry
 
     Accessor t_;                                                         ///< An Accessor to Base's Entry instances via Handle.
   private:

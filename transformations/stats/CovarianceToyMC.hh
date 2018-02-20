@@ -5,7 +5,7 @@
 #include "GNAObject.hh"
 
 class CovarianceToyMC: public GNASingleObject,
-                       public TransformationBlock<CovarianceToyMC> {
+                       public TransformationBind<CovarianceToyMC> {
 public:
   CovarianceToyMC( bool autofreeze=true );
 

@@ -69,13 +69,3 @@ Entry &Base::getEntry(const std::string &name) {
   throw KeyError(name, "transformation");
 }
 
-/**
- * @brief Initialize the new transformation Entry.
- * @param obj -- the pointer to the TransformationBlock.
- * @param name -- the transformation name.
- * @return transformation Initializer.
- */
-template <typename T>
-Initializer<T> transformation_(T *obj, const std::string &name) {
-  return Initializer<T>(obj, name);
-}

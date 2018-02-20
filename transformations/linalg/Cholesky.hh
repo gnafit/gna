@@ -11,7 +11,7 @@
  * where L is the lower triangular matrix.
  */
 class Cholesky: public GNASingleObject,
-                public TransformationBlock<Cholesky> {
+                public TransformationBind<Cholesky> {
 public:
   Cholesky()
   {

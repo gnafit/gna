@@ -6,7 +6,7 @@
 #include "GNAObject.hh"
 
 class EvisToEe: public GNASingleObject,
-                public TransformationBlock<EvisToEe> {
+                public TransformationBind<EvisToEe> {
 public:
   EvisToEe() {
     variable_(&m_me, "ElectronMass");

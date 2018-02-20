@@ -19,6 +19,7 @@ set (SOURCES
   core/transformation/EntryHandle.cc
   core/transformation/OutputHandle.cc
   core/transformation/InputHandle.cc
+  core/transformation/Initializer.hh
   core/transformation/Rets.cc
   core/transformation/Rtypes.cc
   core/transformation/Source.cc
@@ -82,7 +83,7 @@ set (HEADERS
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationDescriptor.hh
-  TransformationBlock.hh
+  TransformationBind.hh
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
@@ -139,8 +140,9 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/transformation
+include_directories(core/transformation/
                     core/
+                    transformations/backgrounds/
                     transformations/base/
                     transformations/calculus/
                     transformations/detector/
@@ -154,7 +156,6 @@ include_directories(core/transformation
                     transformations/var/
                     extra/
                     examples/
-                    backgrounds/
                    )
 
 set(DICT    Dict.cc)

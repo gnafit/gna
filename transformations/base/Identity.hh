@@ -7,7 +7,7 @@
 // Identity transformation
 //
 class Identity: public GNASingleObject,
-                public TransformationBlock<Identity> {
+                public TransformationBind<Identity> {
 public:
   Identity(){
     transformation_(this, "identity")

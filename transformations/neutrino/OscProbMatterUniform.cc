@@ -14,7 +14,7 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
 
     variable_(&m_L, "L");
     variable_(&m_rho, "rho"); // g/cm3
-    transformation_(this, "oscprob")
+    TransformationBind<OscProbMatter>::transformation_(this, "oscprob")
         .input("Enu") //MeV
         .output("oscprob")
         .depends(m_L)

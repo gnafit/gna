@@ -10,7 +10,7 @@
 enum class ReturnOnFail: int {UseNaN, UseZero};
 
 class LinearInterpolator: public GNASingleObject,
-                          public TransformationBlock<LinearInterpolator> {
+                          public TransformationBind<LinearInterpolator> {
 public:
   LinearInterpolator(int size, const double *xs, const double *ys, std::string return_on_fail = "")
     : m_xs(xs, xs+size), m_ys(ys, ys+size)

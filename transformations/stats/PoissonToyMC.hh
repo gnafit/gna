@@ -5,7 +5,7 @@
 #include "GNAObject.hh"
 
 class PoissonToyMC: public GNASingleObject,
-                    public TransformationBlock<PoissonToyMC> {
+                    public TransformationBind<PoissonToyMC> {
 public:
   PoissonToyMC( bool autofreeze=true );
 

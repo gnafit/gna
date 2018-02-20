@@ -7,7 +7,7 @@
 #include "UncertainParameter.hh"
 
 class CovariatedPrediction: public GNAObject,
-                            public TransformationBlock<CovariatedPrediction> {
+                            public TransformationBind<CovariatedPrediction> {
 public:
   struct Segment {
     size_t i, n;

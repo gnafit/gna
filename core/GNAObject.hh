@@ -4,6 +4,7 @@
 #include "Parametrized.hh"
 #include "TransformationDescriptor.hh"
 #include "TransformationBase.hh"
+#include "TransformationBind.hh"
 
 class GNAObject: public ParametrizedTypes::Base,
                  public TransformationTypes::Base {

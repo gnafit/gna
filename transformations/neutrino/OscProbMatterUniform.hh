@@ -8,7 +8,7 @@
 #include "OscProbPMNS.hh"
 
 class  OscProbMatter: public OscProbPMNSBase,
-                      public TransformationBlock<OscProbMatter> {
+                      public TransformationBind<OscProbMatter> {
 public:
     OscProbMatter(Neutrino from, Neutrino to);
 

@@ -10,7 +10,7 @@
 using GLTable = gsl_integration_glfixed_table;
 
 class C14Spectrum: public GNAObject,
-                    public TransformationBlock<C14Spectrum>
+                    public TransformationBind<C14Spectrum>
 {
     public:
         C14Spectrum(int order, int n_pivots);

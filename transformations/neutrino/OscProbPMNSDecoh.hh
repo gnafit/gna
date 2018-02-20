@@ -9,7 +9,7 @@
 class OscillationVariables;
 class PMNSVariables;
 class OscProbPMNSDecoh: public OscProbPMNSBase,
-                        public TransformationBlock<OscProbPMNSDecoh> {
+                        public TransformationBind<OscProbPMNSDecoh> {
 public:
   OscProbPMNSDecoh(Neutrino from, Neutrino to);
   void calcSum(Args args, Rets rets);

@@ -109,12 +109,12 @@ contexts making code shorter.
 The transformations machinery is implemented by inheriting from two
 classes: ``TransformationTypes::TransformationBase``, which is
 generally inherited only through ``GNAObject`` and should not be used
-directly, and ``Transformation<T>`` template class which should be
+directly, and ``TransformationBind<T>`` template class which should be
 inherited by each user of transformations with the class itself as
 ``T`` (CRTP is employed).
 
-The code can be found in ``core/TransformationBase.hh`` and
-``core/Transformation.hh``. The former is (at least was) intended to be
+The code can be found in ``core/transformation/`` and
+``core/TransformationDescriptor.hh``. The former is (at least was) intended to be
 used only by C++, while the latter to be exported to Python side with
 PyROOT. This was done with ROOT5 in mind, since ROOT6 is very good at
 C++11 bindings, the distinction is not as important anymore.

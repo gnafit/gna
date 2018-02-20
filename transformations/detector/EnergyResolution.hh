@@ -7,7 +7,7 @@
 #include "Eigen/Sparse"
 
 class EnergyResolution: public GNAObject,
-                        public TransformationBlock<EnergyResolution> {
+                        public TransformationBind<EnergyResolution> {
 public:
   EnergyResolution( bool single=true );
 

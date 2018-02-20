@@ -7,7 +7,7 @@
 #include "Eigen/Sparse"
 
 class HistNonlinearity: public GNAObject,
-                        public TransformationBlock<HistNonlinearity> {
+                        public TransformationBind<HistNonlinearity> {
 public:
   HistNonlinearity( bool propagate_matrix=false );
 

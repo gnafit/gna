@@ -6,7 +6,7 @@
 #include "GNAObject.hh"
 
 class FillLike: public GNASingleObject,
-                public TransformationBlock<FillLike> {
+                public TransformationBind<FillLike> {
 public:
   FillLike(double value)
     : m_value(value)

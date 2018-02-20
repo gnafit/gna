@@ -10,7 +10,7 @@
 
 
 class GeoNeutrinoFluxNormed: public GNASingleObject,
-                public TransformationBlock<GeoNeutrinoFluxNormed> {
+                public TransformationBind<GeoNeutrinoFluxNormed> {
 public:
   GeoNeutrinoFluxNormed(double livetime_years): m_livetime_years(livetime_years) {
     variable_(&m_fluxnorm, "FluxNorm");
