@@ -1,5 +1,4 @@
-#ifndef PMNSVARIABLES_H
-#define PMNSVARIABLES_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -96,5 +95,3 @@ public:
     : ExpressionsProvider(new PMNSVariables(this))
     { }
 };
-
-#endif // PMNSVARIABLES_H

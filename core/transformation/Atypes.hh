@@ -1,5 +1,4 @@
-#ifndef TYPESFUNCTIONS_H
-#define TYPESFUNCTIONS_H 1
+#pragma once
 
 #include <string>
 
@@ -164,5 +163,3 @@ namespace TransformationTypes
   }
 
 } /* TransformationBase */
-
-#endif

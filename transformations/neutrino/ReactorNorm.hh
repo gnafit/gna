@@ -1,5 +1,4 @@
-#ifndef REACTORNORM_H
-#define REACTORNORM_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -26,5 +25,3 @@ protected:
   variable<double> m_targetProtons;
   variable<double> m_L;
 };
-
-#endif // REACTORNORM_H

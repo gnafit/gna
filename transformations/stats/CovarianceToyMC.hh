@@ -1,5 +1,4 @@
-#ifndef COVARIANCETOYMC_H
-#define COVARIANCETOYMC_H
+#pragma once
 
 #include "Random.hh"
 #include "GNAObject.hh"
@@ -21,5 +20,3 @@ protected:
 
   bool m_autofreeze;
 };
-
-#endif // COVARIANCETOYMC_H

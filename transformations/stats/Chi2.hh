@@ -1,5 +1,4 @@
-#ifndef CHI2_H
-#define CHI2_H
+#pragma once
 
 #include "GNAObject.hh"
 #include "Statistic.hh"
@@ -28,5 +27,3 @@ public:
 protected:
   Handle m_transform;
 };
-
-#endif // CHI2_H

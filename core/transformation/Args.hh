@@ -1,5 +1,4 @@
-#ifndef ARGS_H
-#define ARGS_H 1
+#pragma once
 
 #include "Data.hh"
 #include "TransformationEntry.hh"
@@ -40,5 +39,3 @@ namespace TransformationTypes
     const Entry *m_entry; ///< Entry instance to access Sources.
   }; /* struct Args */
 } /* TransformationTypes */
-
-#endif /* ARGS_H */

@@ -1,5 +1,4 @@
-#ifndef WEIGHTEDSUM_H
-#define WEIGHTEDSUM_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -13,5 +12,3 @@ public:
 protected:
   std::vector<variable<double>> m_vars;
 };
-
-#endif // WEIGHTEDSUM_H

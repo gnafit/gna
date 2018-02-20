@@ -1,5 +1,4 @@
-#ifndef NORMALIZE_H
-#define NORMALIZE_H
+#pragma once
 
 #include "GNAObject.hh"
 #include "Statistic.hh"
@@ -29,5 +28,3 @@ protected:
     size_t m_start;                                 ///< Sub-histogram first bin.
     size_t m_length;                                ///< Sub-histogram length.
 };
-
-#endif

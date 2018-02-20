@@ -1,5 +1,4 @@
-#ifndef HISTOGRAM_H
-#define HISTOGRAM_H
+#pragma once
 
 #include <vector>
 #include "GNAObject.hh"
@@ -73,5 +72,3 @@ protected:
   std::vector<double> m_edges;                                  ///< Vector with bin edges.
   Eigen::ArrayXd m_data;                                        ///< The array holding the raw 1d data buffer.
 };
-
-#endif // HISTOGRAM_H

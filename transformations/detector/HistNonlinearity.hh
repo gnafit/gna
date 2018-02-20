@@ -1,5 +1,4 @@
-#ifndef HISTNONLINEARITY_H
-#define HISTNONLINEARITY_H
+#pragma once
 
 #include <vector>
 
@@ -36,5 +35,3 @@ private:
   double m_range_min{-1.e+100};
   double m_range_max{+1.e+100};
 };
-
-#endif // HISTNONLINEARITY_H

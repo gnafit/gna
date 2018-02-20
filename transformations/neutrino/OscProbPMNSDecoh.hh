@@ -1,5 +1,4 @@
-#ifndef OSCPROBPMNSDECOH_H
-#define OSCPROBPMNSDECOH_H
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -22,6 +21,4 @@ protected:
   variable<double> m_L;
   variable<double> m_sigma;
 };
-
-#endif // OSCPROBPMNSDECOH_H
 

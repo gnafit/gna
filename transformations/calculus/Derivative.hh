@@ -1,5 +1,4 @@
-#ifndef DERIVATIVE_H
-#define DERIVATIVE_H
+#pragma once
 
 #include "GNAObject.hh"
 #include "UncertainParameter.hh"
@@ -23,5 +22,3 @@ protected:
   Parameter<double> *m_x;
   double m_reldelta;
 };
-
-#endif // DERIVATIVE_H

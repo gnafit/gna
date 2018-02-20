@@ -1,5 +1,4 @@
-#ifndef ENERGYRESOLUTION_H
-#define ENERGYRESOLUTION_H
+#pragma once
 
 #include <vector>
 
@@ -32,5 +31,3 @@ private:
 
   bool m_single; /// restricts EnergyResolution to contain only one transformation
 };
-
-#endif // ENERGYRESOLUTION_H

@@ -1,5 +1,4 @@
-#ifndef VARDIFF_H
-#define VARDIFF_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -19,5 +18,3 @@ protected:
   std::vector<variable<double>> m_vars; ///< List of variables.
   dependant<double> m_diff;             ///< The subtraction result.
 };
-
-#endif // VARDIFF_H

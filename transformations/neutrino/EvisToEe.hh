@@ -1,5 +1,4 @@
-#ifndef EVISTOEE_H
-#define EVISTOEE_H
+#pragma once
 
 #include <string>
 
@@ -21,5 +20,3 @@ public:
 protected:
   variable<double> m_me;
 };
-
-#endif // EVISTOEE_H

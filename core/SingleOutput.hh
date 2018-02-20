@@ -1,5 +1,4 @@
-#ifndef SINGLEOUTPUT_H
-#define SINGLEOUTPUT_H 1
+#pragma once
 
 #include "Data.hh"
 #include "OutputHandle.hh"
@@ -20,6 +19,4 @@ public:
   //const double *view() { return single().view(); }           ///< Return the view on a single output's Data.
   const DataType &datatype() { return single().datatype(); }   ///< Return the single output's DataType.
 };
-
-#endif /* SINGLEOUTPUT_H */
 

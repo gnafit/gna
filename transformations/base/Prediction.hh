@@ -1,5 +1,4 @@
-#ifndef PREDICTION_H
-#define PREDICTION_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -27,5 +26,3 @@ public:
 protected:
   Handle m_transform;                               ///< The transformation instance.
 };
-
-#endif // PREDICTION_H

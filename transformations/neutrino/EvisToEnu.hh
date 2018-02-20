@@ -1,6 +1,3 @@
-#ifndef EVISTOENU_H
-#define EVISTOENU_H
-
 #include <vector>
 #include <string>
 

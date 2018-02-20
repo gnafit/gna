@@ -1,5 +1,4 @@
-#ifndef SELFPOWER_H
-#define SELFPOWER_H
+#pragma once
 
 #include "GNAObject.hh"
 #include "Statistic.hh"
@@ -28,5 +27,3 @@ public:
 protected:
     variable<double> m_scale;                    ///< The scale (a) variable.
 };
-
-#endif

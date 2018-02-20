@@ -1,5 +1,4 @@
-#ifndef IBDINTERACTION_H
-#define IBDINTERACTION_H
+#pragma once
 
 #include <stdexcept>
 #include <utility>
@@ -28,5 +27,3 @@ protected:
   const double fsq = f*f;
   const double f2sq = f2*f2;
 };
-
-#endif // IBDINTERACTION_H

@@ -1,5 +1,4 @@
-#ifndef VARPRODUCT_H
-#define VARPRODUCT_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -19,5 +18,3 @@ protected:
   std::vector<variable<double>> m_vars; ///< List of variables.
   dependant<double> m_product;          ///< The product result.
 };
-
-#endif // VARPRODUCT_H

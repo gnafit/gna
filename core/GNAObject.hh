@@ -1,5 +1,4 @@
-#ifndef GNAOBJECT_H
-#define GNAOBJECT_H
+#pragma once
 
 #include "Parametrized.hh"
 #include "TransformationDescriptor.hh"
@@ -87,5 +86,3 @@ public:
     (*this)[0].dump();
   }
 };
-
-#endif // GNAOBJECT_H

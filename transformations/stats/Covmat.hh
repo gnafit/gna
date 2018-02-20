@@ -1,5 +1,4 @@
-#ifndef COVMAT_H
-#define COVMAT_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -56,5 +55,3 @@ protected:
   bool m_fixed;
   LLT m_llt;
 };
-
-#endif // COVMAT_H

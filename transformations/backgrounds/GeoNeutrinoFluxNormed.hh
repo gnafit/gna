@@ -1,5 +1,4 @@
-#ifndef GEONEUTRINOFLUXNORMED_H
-#define GEONEUTRINOFLUXNORMED_H
+#pragma once
 
 #include <iostream>
 #include <cmath>
@@ -44,5 +43,3 @@ protected:
 
   double m_livetime_years;
 };
-
-#endif // GEONEUTRINOFLUXNORMED_H

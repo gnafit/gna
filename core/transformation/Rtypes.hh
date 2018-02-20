@@ -1,5 +1,4 @@
-#ifndef RTYPES_H
-#define RTYPES_H 1
+#pragma once
 
 #include <string>
 #include <memory>
@@ -68,4 +67,3 @@ namespace TransformationTypes
     std::shared_ptr<std::vector<DataType> > m_types; ///< Storage for the output DataType types.
   }; /* struct Rtypes */
 } /* TransformationTypes */
-#endif /* RTYPES_H */

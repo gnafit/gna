@@ -1,5 +1,4 @@
-#ifndef CHOLESKY_H
-#define CHOLESKY_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -56,5 +55,3 @@ void Cholesky::prepareCholesky(Atypes args, Rtypes rets) {
 void Cholesky::calculateCholesky(Args args, Rets rets) {
   m_llt.compute(args[0].mat);
 }
-
-#endif // CHOLESKY_H

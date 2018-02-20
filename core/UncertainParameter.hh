@@ -1,5 +1,4 @@
-#ifndef UNCERTAINPARAMETER_H
-#define UNCERTAINPARAMETER_H
+#pragma once
 
 #include <string>
 #include <limits>
@@ -170,5 +169,3 @@ inline T UniformAngleParameter<T>::cast(const std::string &v) const {
   T b = boost::lexical_cast<T>(v.substr(pipos+2));
   return a*pi/b;
 }
-
-#endif // UNCERTAINPARAMETER_H

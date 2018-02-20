@@ -1,5 +1,4 @@
-#ifndef OSCPROB2NU_H
-#define OSCPROB2NU_H
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -18,5 +17,3 @@ protected:
   variable<double> m_L;
   std::unique_ptr<OscillationVariables> m_param;
 };
-
-#endif // OSCPROB2NU_H

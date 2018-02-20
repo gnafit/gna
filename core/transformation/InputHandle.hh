@@ -1,5 +1,4 @@
-#ifndef INPUTHANDLE_H
-#define INPUTHANDLE_H 1
+#pragma once
 
 #include <string>
 
@@ -40,6 +39,4 @@ namespace TransformationTypes
   }; /* class InputHandle */
 
 } /* TransformationTypes */
-
-#endif /* INPUTHANDLE_H */
 

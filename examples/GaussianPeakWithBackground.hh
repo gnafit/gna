@@ -1,5 +1,4 @@
-#ifndef GAUSSIANPEAKWITHBACKGROUND_H
-#define GAUSSIANPEAKWITHBACKGROUND_H
+#pragma once
 
 #include <boost/math/constants/constants.hpp>
 #include <cmath>
@@ -37,5 +36,3 @@ protected:
   variable<double> m_b, m_mu, m_E0, m_w;
   dependant<double> m_w_scaled, m_E0_scaled;
 };
-
-#endif // GAUSSIANPEAKWITHBACKGROUND_H

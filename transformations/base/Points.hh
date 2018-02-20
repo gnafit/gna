@@ -1,5 +1,4 @@
-#ifndef POINTS_H
-#define POINTS_H
+#pragma once
 
 #include <vector>
 #include "GNAObject.hh"
@@ -92,5 +91,3 @@ protected:
   Eigen::ArrayXd m_points;                                    ///< The array holding the raw 1d data buffer.
   std::vector<size_t> m_shape;                                ///< Vector with data dimensions.
 };
-
-#endif // POINTS_H

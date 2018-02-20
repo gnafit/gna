@@ -1,5 +1,4 @@
-#ifndef NORMALTOYMC_H
-#define NORMALTOYMC_H
+#pragma once
 
 #include "Random.hh"
 #include "GNAObject.hh"
@@ -22,5 +21,3 @@ protected:
 
   bool m_autofreeze;
 };
-
-#endif // NORMALTOYMC_H

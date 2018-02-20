@@ -1,9 +1,8 @@
-#ifndef FakeGSLFunction_H
-#define FakeGSLFunction_H
+#pragma once
 
 #include <gsl/gsl_integration.h>
 // TODO: once C++17 is shipped with the compilers study the ability to use
-// std::invoke() for that problem. 
+// std::invoke() for that problem.
 
 /* The original problem was how to pass a class member function to GSL
  * integration routine, hopefully this will work.
@@ -28,9 +27,6 @@ template< typename F >
  *  Class* ptr2 = this;
 <<<<<<< HEAD
  *  auto ptr = [=](double x)->double{return ptr2->foo(x);};
- *  gsl_function_pp<decltype(ptr)> Fp(ptr);     
+ *  gsl_function_pp<decltype(ptr)> Fp(ptr);
  *  gsl_function *F = static_cast<gsl_function*>(&Fp);   */
 /* Note that declaring every member function as static should also work as well, since static function location in memory is known even before instantiation of object of class */
-
-
-#endif

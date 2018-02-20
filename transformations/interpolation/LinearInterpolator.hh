@@ -1,5 +1,4 @@
-#ifndef LINEARINTERPOLATOR_H
-#define LINEARINTERPOLATOR_H
+#pragma once
 
 #include <vector>
 #include <limits>
@@ -41,5 +40,3 @@ protected:
   std::vector<size_t> m_index;
   double m_minbinsize;
 };
-
-#endif // LINEARINTERPOLATOR_H

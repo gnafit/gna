@@ -1,5 +1,4 @@
-#ifndef PDGVARIABLES_H
-#define PDGVARIABLES_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,5 +27,3 @@ protected:
     ;
   }
 };
-
-#endif // PDGVARIABLES_H

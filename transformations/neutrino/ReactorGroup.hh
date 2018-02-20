@@ -1,5 +1,4 @@
-#ifndef REACTORGROUP_H
-#define REACTORGROUP_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -14,5 +13,3 @@ protected:
   dependant<double> m_Pavg;
   dependant<std::array<double, 3>> m_weights;
 };
-
-#endif // REACTORGROUP_H

@@ -1,5 +1,4 @@
-#ifndef IBDZEROORDER_H
-#define IBDZEROORDER_H
+#pragma once
 
 #include "IbdInteraction.hh"
 
@@ -11,5 +10,3 @@ protected:
   void calcEnu(Args args, Rets rets);
   void calcXsec(Args args, Rets rets);
 };
-
-#endif // IBDZEROORDER_H

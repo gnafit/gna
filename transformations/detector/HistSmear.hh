@@ -1,5 +1,4 @@
-#ifndef ENERGYSMEAR_H
-#define ENERGYSMEAR_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -12,5 +11,3 @@ private:
   void calcSmear(Args args, Rets rets);
   void calcSmearUpper(Args args, Rets rets);
 };
-
-#endif // ENERGYSMEAR_H

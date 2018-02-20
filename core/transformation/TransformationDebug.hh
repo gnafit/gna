@@ -1,5 +1,4 @@
-#ifndef TRANSFORMATIONDEBUG_H
-#define TRANSFORMATIONDEBUG_H 1
+#pragma once
 
 #ifdef TRANSFORMATION_DEBUG
 #define TR_DPRINTF(...) do {                    \
@@ -8,5 +7,3 @@
 #else
 #define TR_DPRINTF(...)
 #endif
-
-#endif /* TRANSFORMATIONDEBUG_H */

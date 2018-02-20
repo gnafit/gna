@@ -1,5 +1,4 @@
-#ifndef POISSONTOYMC_H
-#define POISSONTOYMC_H
+#pragma once
 
 #include "Random.hh"
 #include "GNAObject.hh"
@@ -22,5 +21,3 @@ protected:
 
   bool m_autofreeze;
 };
-
-#endif // POISSONTOYMC_H

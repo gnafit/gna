@@ -1,5 +1,4 @@
-#ifndef GAUSSLEGENDRE2D_H
-#define GAUSSLEGENDRE2D_H
+#pragma once
 
 #include <vector>
 
@@ -56,6 +55,4 @@ public:
 protected:
   const GaussLegendre2d *m_base;
 };
-
-#endif // GAUSSLEGENDRE2D_H
 

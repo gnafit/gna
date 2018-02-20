@@ -1,5 +1,4 @@
-#ifndef IBDFIRSTORDER_H
-#define IBDFIRSTORDER_H
+#pragma once
 
 #include "IbdInteraction.hh"
 
@@ -17,5 +16,3 @@ protected:
   dependant<double> DeltaNPE_tilded;
   dependant<double> y2;
 };
-
-#endif // IBDFIRSTORDER_H

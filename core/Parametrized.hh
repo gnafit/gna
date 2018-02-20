@@ -1,5 +1,4 @@
-#ifndef PARAMETRIZED_H
-#define PARAMETRIZED_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -295,5 +294,3 @@ public:
 
   const Sources sources;
 };
-
-#endif // PARAMETRIZED_H

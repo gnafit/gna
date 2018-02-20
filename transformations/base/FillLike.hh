@@ -1,5 +1,4 @@
-#ifndef FILLLIKE_H
-#define FILLLIKE_H
+#pragma once
 
 #include <string>
 
@@ -22,5 +21,3 @@ public:
 protected:
   double m_value;
 };
-
-#endif // FILLLIKE_H

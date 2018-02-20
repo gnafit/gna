@@ -1,5 +1,4 @@
-#ifndef PRODUCT_H
-#define PRODUCT_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -11,5 +10,3 @@ public:
   void multiply(SingleOutput &data);
   size_t size() const;
 };
-
-#endif // PRODUCT_H

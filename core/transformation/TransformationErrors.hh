@@ -1,5 +1,4 @@
-#ifndef TRANSFORMATIONERRORS_H
-#define TRANSFORMATIONERRORS_H 1
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -59,4 +58,3 @@ namespace TransformationTypes
     const Entry *entry; ///< Entry pointer.
   };
 } /* TransformationTypes */
-#endif /* TRANSFORMATIONERRORS_H */

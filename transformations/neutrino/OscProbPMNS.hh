@@ -1,5 +1,4 @@
-#ifndef OSCPROBPMNS_H
-#define OSCPROBPMNS_H
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -68,5 +67,3 @@ protected:
 
   variable<std::array<double, 3>> m_weights;
 };
-
-#endif // OSCPROBPMNS_H

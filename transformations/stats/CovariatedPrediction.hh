@@ -1,5 +1,4 @@
-#ifndef COVARIATEDPREDICTION_H
-#define COVARIATEDPREDICTION_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -73,5 +72,3 @@ protected:
   LLT m_lltbase, m_llt;
   Eigen::ArrayXXd m_covbase;
 };
-
-#endif // COVARIATEDPREDICTION_H

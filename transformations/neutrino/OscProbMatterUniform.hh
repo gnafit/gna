@@ -1,5 +1,4 @@
-#ifndef OSCPROBUNIFORMMATTER_H
-#define OSCPROBUNIFORMMATTER_H
+#pragma once
 
 #include <Eigen/Dense>
 
@@ -21,5 +20,3 @@ protected:
     Neutrino m_from;
     Neutrino m_to;
 };
-
-#endif //OSCPROBUNIFORMMATTER_H

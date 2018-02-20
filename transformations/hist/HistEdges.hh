@@ -1,5 +1,4 @@
-#ifndef HISTEDGES_H
-#define HISTEDGES_H
+#pragma once
 
 #include <vector>
 
@@ -23,5 +22,3 @@ public:
             });
   };
 };
-
-#endif // HISTEDGES_H

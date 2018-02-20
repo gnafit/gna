@@ -1,5 +1,4 @@
-#ifndef RENORMALIZEDIAG_H
-#define RENORMALIZEDIAG_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -31,5 +30,3 @@ private:
 
   bool m_lower_uninitialized{true};
 };
-
-#endif // RENORMALIZEDIAG_H

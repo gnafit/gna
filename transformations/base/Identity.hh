@@ -1,5 +1,4 @@
-#ifndef IDENTITY_H
-#define IDENTITY_H 1
+#pragma once
 
 #include <stdio.h>
 
@@ -29,5 +28,3 @@ public:
       }
   }
 };
-
-#endif

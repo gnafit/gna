@@ -1,5 +1,4 @@
-#ifndef VARSUM_H
-#define VARSUM_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -19,5 +18,3 @@ protected:
   std::vector<variable<double>> m_vars; ///< List of variables to sum.
   dependant<double> m_sum;              ///< The sum result.
 };
-
-#endif // VARSUM_H

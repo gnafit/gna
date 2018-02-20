@@ -1,5 +1,4 @@
-#ifndef NEUTRINO_H
-#define NEUTRINO_H
+#pragma once
 
 class Neutrino {
 public:
@@ -47,5 +46,3 @@ public:
   static Neutrino tau() { return Neutrino{Particle, Tau}; }
   static Neutrino atau() { return Neutrino{Antiparticle, Tau}; }
 };
-
-#endif // NEUTRINO_H

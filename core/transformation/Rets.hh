@@ -1,5 +1,4 @@
-#ifndef RETS_H
-#define RETS_H 1
+#pragma once
 
 #include "Data.hh"
 #include "TransformationEntry.hh"
@@ -63,4 +62,3 @@ namespace TransformationTypes
     Entry *m_entry; ///< Entry instance to access Sinks.
   };
 } /* TransformationTypes */
-#endif /* RETS_H */

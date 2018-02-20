@@ -1,5 +1,4 @@
-#ifndef EIGENHELPERS_H
-#define EIGENHELPERS_H 1
+#pragma once
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -13,5 +12,3 @@ namespace EigenHelpers{
     void dump(const Eigen::ArrayXd& mat)  { std::cout<<mat<<std::endl; }
     void dump(const Eigen::ArrayXXd& mat) { std::cout<<mat<<std::endl; }
 }
-
-#endif

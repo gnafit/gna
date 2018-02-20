@@ -1,5 +1,4 @@
-#ifndef POISSON_H
-#define POISSON_H
+#pragma once
 
 #include "GNAObject.hh"
 #include "Statistic.hh"
@@ -36,5 +35,3 @@ public:
 protected:
   Handle m_transform;
 };
-
-#endif

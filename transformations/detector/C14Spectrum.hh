@@ -1,5 +1,4 @@
-#ifndef C14_spectrum_H
-#define C14_spectrum_H
+#pragma once
 
 #include <vector>
 #include <gsl/gsl_integration.h>
@@ -43,5 +42,3 @@ class C14Spectrum: public GNAObject,
 
 
 };
-
-#endif

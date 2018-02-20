@@ -1,5 +1,4 @@
-#ifndef REBIN_H
-#define REBIN_H
+#pragma once
 
 #include <vector>
 
@@ -25,5 +24,3 @@ private:
   bool m_initialized{false};
   Eigen::SparseMatrix<double> m_sparse_cache;
 };
-
-#endif // REBIN_H

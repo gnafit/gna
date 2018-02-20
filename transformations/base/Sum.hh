@@ -1,5 +1,4 @@
-#ifndef SUM_H
-#define SUM_H
+#pragma once
 
 #include "GNAObject.hh"
 
@@ -19,5 +18,3 @@ public:
   InputDescriptor add(SingleOutput &data);   ///< Add an input and connect it to the output.
   InputDescriptor add(const char* name);     ///< Add an input by name and leave unconnected.
 };
-
-#endif // SUM_H
