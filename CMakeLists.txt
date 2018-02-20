@@ -7,6 +7,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
+file (GLOB_RECURSE SOURCES SOURCES1 core/*.cc)
 set (SOURCES
   core/GNAObject.cc
   core/ParametersGroup.cc
@@ -17,6 +18,7 @@ set (SOURCES
   core/transformation/Args.cc
   core/transformation/Atypes.cc
   core/transformation/EntryHandle.cc
+  core/transformation/OpenHandle.cc
   core/transformation/OutputHandle.cc
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh

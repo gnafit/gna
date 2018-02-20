@@ -15,8 +15,8 @@ namespace TransformationTypes
    */
   class OpenHandle : public Handle {
   public:
-      OpenHandle(const Handle& other) : Handle(other){}; ///< Constructor. @param other -- Handle instance.
-      Entry* getEntry() { return m_entry; }              ///< Get the Entry pointer.
+      OpenHandle(const Handle& other);        ///< Constructor. @param other -- Handle instance.
+      Entry* getEntry() { return m_entry; }   ///< Get the Entry pointer.
   };
 } /* TransformationTypes */
 
