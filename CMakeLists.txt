@@ -7,7 +7,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
-file (GLOB_RECURSE SOURCES SOURCES1 core/*.cc)
 set (SOURCES
   core/GNAObject.cc
   core/ParametersGroup.cc
@@ -174,8 +173,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wa
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 include(dev-tools)
 
-
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
@@ -198,7 +195,7 @@ find_package(ROOT)
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF)
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}")
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)

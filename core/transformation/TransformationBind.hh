@@ -55,8 +55,8 @@ public:
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
-  TransformationTypes::Initializer<Derived> transformation_(Derived *obj, const std::string &name) {
-    return TransformationTypes::Initializer<Derived>(obj, name);
+  TransformationTypes::Initializer<Derived> transformation_(TransformationTypes::Base *base, const std::string &name) {
+    return TransformationTypes::Initializer<Derived>(base, this, name);
   }
 
 private:

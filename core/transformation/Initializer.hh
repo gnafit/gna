@@ -69,8 +69,8 @@ namespace TransformationTypes {
      * @param obj -- TransformationBind pointer to manage. Used to get Base pointer for Entry.
      * @param name -- new Entry name.
      */
-    Initializer(TransformationBind<T> *obj, const std::string &name)
-      : m_entry(new Entry(name, obj->baseobj())), m_obj(obj),
+    Initializer(Base* base, TransformationBind<T> *obj, const std::string &name)
+      : m_entry(new Entry(name, base)), m_base(base), m_obj(obj),
         m_nosubscribe(false)
     {
       m_entry->initializing++;
@@ -111,9 +111,8 @@ namespace TransformationTypes {
      * TransformationBind instance (Initializer::m_obj).
      */
     void add() {
-      auto *baseobj = m_obj->baseobj();
-      if (baseobj->m_maxEntries &&
-          baseobj->m_entries.size()+1 > baseobj->m_maxEntries) {
+      if (m_base->m_maxEntries &&
+          m_base->m_entries.size()+1 > m_base->m_maxEntries) {
         throw std::runtime_error("too much transformations");
       }
       if (m_entry->typefuns.empty()) {
@@ -123,7 +122,7 @@ namespace TransformationTypes {
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
-      size_t idx = baseobj->addEntry(m_entry);
+      size_t idx = m_base->addEntry(m_entry);
       m_entry = nullptr;
       if (m_mfunc) {
         m_obj->addMemFunction(idx, m_mfunc);
@@ -308,7 +307,8 @@ namespace TransformationTypes {
 
   protected:
     Entry *m_entry;                  ///< New Entry pointer.
-    TransformationBind<T> *m_obj;   ///< The TransformationBind object managing MemFunction and MemTypesFunction objects. Has a reference to the Base.
+    Base  *m_base;                   ///< Base object pointer.
+    TransformationBind<T> *m_obj;    ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
 
     MemFunction m_mfunc;             ///< MemFunction object.
     std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs; ///< MemTypesFunction objects.
