@@ -11,10 +11,20 @@ set (SOURCES
   core/GNAObject.cc
   core/ParametersGroup.cc
   core/Parametrized.cc
-  core/Transformation.cc
-  core/TypesFunctions.cc
-  core/TransformationBase.cc
+  core/TransformationDescriptor.cc
   core/UncertainParameter.cc
+  core/transformation/Accessor.cc
+  core/transformation/Args.cc
+  core/transformation/Atypes.cc
+  core/transformation/EntryHandle.cc
+  core/transformation/OutputHandle.cc
+  core/transformation/InputHandle.cc
+  core/transformation/Rets.cc
+  core/transformation/Rtypes.cc
+  core/transformation/Source.cc
+  core/transformation/TransformationBase.cc
+  core/transformation/TransformationEntry.cc
+  core/transformation/TransformationErrors.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -58,8 +68,24 @@ set (HEADERS
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  Sink.hh
+  Source.hh
+  Args.hh
+  Rets.hh
+  Rtypes.hh
+  Atypes.hh
+  EntryHandle.hh
+  OutputHandle.hh
+  InputHandle.hh
+  TransformationDebug.hh
   TransformationBase.hh
-  Transformation.hh
+  TransformationEntry.hh
+  TransformationErrors.hh
+  TransformationDescriptor.hh
+  TransformationBlock.hh
+  SingleOutput.hh
+  Initializer.hh
+  Accessor.hh
   GNAObject.hh
   UncertainParameter.hh
   Prediction.hh
@@ -113,18 +139,19 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/
-                    transformations/base
-                    transformations/calculus
-                    transformations/detector
-                    transformations/functions
-                    transformations/hist
-                    transformations/integrator
-                    transformations/interpolation
-                    transformations/linalg
-                    transformations/neutrino
-                    transformations/stats
-                    transformations/var
+include_directories(core/transformation
+                    core/
+                    transformations/base/
+                    transformations/calculus/
+                    transformations/detector/
+                    transformations/functions/
+                    transformations/hist/
+                    transformations/integrator/
+                    transformations/interpolation/
+                    transformations/linalg/
+                    transformations/neutrino/
+                    transformations/stats/
+                    transformations/var/
                     extra/
                     examples/
                     backgrounds/

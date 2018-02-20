@@ -1,10 +1,10 @@
-#ifndef TRANSFORMATION_H
-#define TRANSFORMATION_H
+#pragma once
 
 #include <string>
 #include <iostream>
 
-#include "TransformationBase.hh"
+#include "EntryHandle.hh"
+#include "SingleOutput.hh"
 #include "SimpleDict.hh"
 
 class GNASingleObject;
@@ -119,4 +119,3 @@ public:
   TransformationTypes::OutputHandle single() override { return *this; }
 };
 
-#endif // TRANSFORMATION_H

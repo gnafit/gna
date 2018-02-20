@@ -2,14 +2,15 @@
 #define GNAOBJECT_H
 
 #include "Parametrized.hh"
-#include "Transformation.hh"
+#include "TransformationDescriptor.hh"
+#include "TransformationBase.hh"
 
 class GNAObject: public ParametrizedTypes::Base,
                  public TransformationTypes::Base {
 public:
   typedef ParametrizedTypes::VariablesContainer VariablesContainer;
   typedef ParametrizedTypes::EvaluablesContainer EvaluablesContainer;
-  typedef TransformationTypes::Container TransformationsContainer;
+  typedef TransformationTypes::EntryContainer TransformationsContainer;
   typedef SimpleDict<VariableDescriptor, VariablesContainer> Variables;
   typedef SimpleDict<EvaluableDescriptor, EvaluablesContainer> Evaluables;
   typedef SimpleDict<TransformationDescriptor,

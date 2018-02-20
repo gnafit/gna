@@ -1,9 +1,28 @@
-#include "TransformationBase.hh"
+#include "Atypes.hh"
 
 #include <boost/format.hpp>
 using boost::format;
 
 using TransformationTypes::Atypes;
+using TransformationTypes::Rtypes;
+using TransformationTypes::SourceTypeError;
+
+/**
+ * @brief Source type exception.
+ * @param dt -- incorrect DataType.
+ * @param message -- exception message.
+ * @return exception.
+ */
+SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
+  const Source *source = nullptr;
+  for (size_t i = 0; i < m_entry->sources.size(); ++i) {
+    if (&m_entry->sources[i].sink->data->type == &dt) {
+      source = &m_entry->sources[i];
+      break;
+    }
+  }
+  return SourceTypeError(source, message);
+}
 
 /**
  * @brief Assigns shape of each input to corresponding output.
@@ -66,62 +85,3 @@ void Atypes::ifSameShape(Atypes args, Rtypes rets) {
   }
 }
 
-/**
- * @brief Assigns shape of Arg-th input to Ret-th output
- *
- * @tparam Arg -- index of Arg to read the type.
- * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
- *
- * @param args -- source types.
- * @param rets -- output types.
- *
- * @exception std::runtime_error in case of invalid index is passed.
- */
-template <size_t Arg, size_t Ret>
-inline void Atypes::pass(Atypes args, Rtypes rets) {
-  if (Arg >= args.size()) {
-	throw std::runtime_error("Transformation: invalid Arg index");
-  }
-  if (Ret >= rets.size()) {
-	throw std::runtime_error("Transformation: invalid Ret index");
-  }
-  rets[Ret] = args[Arg];
-}
-
-/**
- * @brief Checks if Arg-th input is a histogram (DataKind=Histogram).
- *
- * Raises an exception otherwise.
- *
- *  @tparam Arg -- index of Arg to check.
- *
- *  @param args -- source types.
- *  @param rets -- output types.
- *
- *  @exception std::runtime_error in case input data is not a histogram.
- */
-template <size_t Arg>
-inline void Atypes::ifHist(Atypes args, Rtypes rets) {
-  if (args[Arg].kind!=DataKind::Hist) {
-	throw std::runtime_error("Transformation: Arg should be a histogram");
-  }
-}
-
-/**
- * @brief Checks if Arg-th input is an array (DataKind=Points).
- *
- * Raises an exception otherwise.
- *
- * @tparam Arg -- index of Arg to check.
- *
- * @param args -- source types.
- * @param rets -- output types.
- *
- *  @exception std::runtime_error in case input data is not an array.
- */
-template <size_t Arg>
-inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
-  if (args[Arg].kind!=DataKind::Points) {
-	throw std::runtime_error("Transformation: Arg should be an array");
-  }
-}
