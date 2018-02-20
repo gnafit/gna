@@ -25,10 +25,10 @@ public:
   ParameterWrapper(parameter<void> &pvar)
     : m_var(pvar) { }
 
-  T value() const { return m_var; }
+  T value() const noexcept { return m_var; }
   void set(T value) { m_var = value; }
 
-  const variable<T> &getVariable() const { return m_var; }
+  const variable<T> &getVariable() const noexcept { return m_var; }
 protected:
   parameter<T> m_var;
 };
@@ -48,12 +48,12 @@ public:
   virtual ~Uncertain() { }
 
   const std::string &name() const { return m_name; }
-  virtual T value() const { return m_var.value(); }
-  virtual T central() const { return m_central; }
-  virtual void setCentral(T value) { m_central = value; }
-  virtual T sigma() const { return m_sigma; }
-  virtual void setSigma(T sigma) { m_sigma = sigma; }
-  virtual const variable<T>& getVariable() const { return m_var; }
+  virtual T value() const noexcept { return m_var.value(); }
+  virtual T central() const noexcept { return m_central; }
+  virtual void setCentral(T value) noexcept { m_central = value; }
+  virtual T sigma() const noexcept { return m_sigma; }
+  virtual void setSigma(T sigma) noexcept { m_sigma = sigma; }
+  virtual const variable<T>& getVariable() const noexcept { return m_var; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
@@ -80,7 +80,7 @@ inline Uncertain<double>::Uncertain(const std::string &name)
 
 template <typename T>
 struct ParameterComparator {
-    bool operator()(const T& lhs, const T& rhs) const {
+    bool operator()(const T& lhs, const T& rhs) const noexcept {
         return lhs.value() < rhs.value();
     };
 };
@@ -94,7 +94,7 @@ public:
 
   static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values in Parameter template");
 
-  friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs)
+  friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs) noexcept
   { return (lhs.value() < rhs.value()) || (lhs.name() < rhs.name());};
 
   virtual void set(T value)
@@ -115,14 +115,14 @@ public:
     { return m_limits; }
 
   virtual void reset() { set(this->central()); }
-  bool influences(SingleOutput &out) const {
+  bool influences(SingleOutput &out) const noexcept {
     return out.single().depends(this->getVariable());
   }
 
-  virtual bool isFixed() const { return this->m_fixed; }
-  virtual void setFixed() { this->m_fixed = true; }
+  virtual bool isFixed() const noexcept { return this->m_fixed; }
+  virtual void setFixed() noexcept { this->m_fixed = true; }
 
-  virtual bool isCovariated(const Parameter<T>& other) const {
+  virtual bool isCovariated(const Parameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(other);
       if (it == this->m_covariances.end() and (&other != this)) { 
           return false;
@@ -153,7 +153,7 @@ public:
     this->m_covariances[other] = cov;
   }
 
-  virtual T getCovariance(const Parameter<T>& other) {
+  virtual T getCovariance(const Parameter<T>& other) const noexcept {
       if (this == &other) {return this->sigma();}
       auto search = m_covariances.find(other);
       if (search != m_covariances.end()) {
@@ -167,7 +167,7 @@ public:
       }
   }
 
-  virtual const parameter<T>& getParameter() { return m_par; }
+  virtual const parameter<T>& getParameter() const noexcept { return m_par; }
 
 protected:
   std::vector<std::pair<T, T>> m_limits;

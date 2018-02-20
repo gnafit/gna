@@ -5,6 +5,31 @@ import itertools
 from gna.config import cfg
 from parameter_loader import get_parameters
 
+def __keep_relative(**kwargs):
+    cov_mat = kwargs.pop('cov_mat')
+    pars = kwargs.pop('pars')
+    _uncorr_uncs = np.array([par.sigma() for par in pars])
+    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    return cov_matrix * tmp
+
+def __keep_absolute(**kwargs):
+    pass
+
+def __override_absolute(**kwargs):
+    pass
+
+def __override_relative(**kwargs):
+    cov_mat = kwargs.pop('cov_mat')
+    pars = kwargs.pop('pars')
+    _uncorr_uncs = kwargs.pop('uncorr_from_file')
+    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    return cov_matrix * tmp
+
+dispatch_modes = {('keep', 'relative'): __keep_relative, 
+                  ('keep', 'absolute'): __keep_absolute, 
+                  ('override', 'relative'): __override_relative,
+                  ('override', 'absolute'): __override_absolute,}
+
 
 class CovarianceHandler(object):
     def __init__(self, covariance_name, pars):
@@ -70,31 +95,42 @@ def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=No
     else:
         cov_matrix = np.array(cov_mat)
     
+    keyword_args = {'cov_mat': cov_matrix,
+                    'uncorr_from_file': uncorr_uncs,
+                    'pars': pars,}
+
+                    
+
+    if (mode == 'relative') and (policy == 'keep'):
+        _uncorr_uncs = np.array([par.sigma() for par in pars])
+    elif (policy == 'override':
+        _uncorr_uncs = np.array(uncorr_uncs)
+
+    print(cov_matrix)
+    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    print(tmp)
+    _cov_mat = cov_matrix
+    cov_matrix = cov_matrix * tmp
+    print(cov_matrix)
 
     is_covmat(pars, cov_matrix)
 
-    if (mode == 'relative') and (policy == 'keep'):
-        for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-            sigma_1, sigma_2 = pars[first].sigma(), pars[second].sigma()
-            covariance = sigma_1 * sigma_2 * cov_matrix[first, second]
-            pars[first].setCovariance(pars[second], covariance)
-        return
-
-    if (mode == 'relative') and (policy == 'override'):
-        if len(uncorr_uncs) == len(pars):
-            for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-                sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
-                covariance = sigma_1 * sigma_2 * cov_matrix[first, second]
-                print ('In mode = {mode} and with policy = {policy}\n'
-                      'sigma_1 = {0}, sigma_2 = {1}, '
-                      'covariance = {0} * {1} * {2} = {3}'
-                      .format(sigma_1, sigma_2, cov_matrix[first, second],
-                          covariance, mode=mode, policy=policy))
-                pars[first].setCovariance(pars[second], covariance)
-            return
+    for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+        sigma_1, sigma_2 = _uncorr_uncs[first], _uncorr_uncs[second]
+        covariance = cov_matrix[first, second]
+        if first == second:
+            print('In mode = {mode} and with policy = {policy}\n'
+                  'sigma_1 = sigma_2 = {0}, '
+                  'uncorrelated unc = {0} = {1} '
+                  .format(sigma_1, np.sqrt(covariance),
+                          mode=mode, policy=policy))
         else:
-            raise Exception("You want to override uncorrelated errors of "
-                    "parameters but don't provide enough within covariance set")
+            print('In mode = {mode} and with policy = {policy}\n'
+                  'sigma_1 = {0}, sigma_2 = {1}, '
+                  'covariance = {0} * {1} * {2} = {3}'
+                  .format(sigma_1, sigma_2, _cov_mat[first, second],
+                          covariance, mode=mode, policy=policy))
+        pars[first].setCovariance(pars[second], covariance)
 
 
 def is_covmat(pars, cov_matrix):
