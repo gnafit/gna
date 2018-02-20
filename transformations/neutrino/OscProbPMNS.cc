@@ -63,7 +63,7 @@ double OscProbPMNSBase::weightCP() const {
 OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
     OscProbPMNSBase(from, to)
 {
-  TransformationBind<OscProbAveraged>::transformation_(this, "average_oscillations")
+  transformation_(this, "average_oscillations")
         .input("flux")
         .output("flux_averaged_osc")
         .types(Atypes::pass<0>)
@@ -81,30 +81,30 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   : OscProbPMNSBase(from, to)
 {
   variable_(&m_L, "L");
-  TransformationBind<OscProbPMNS>::transformation_(this, "comp12")
+  transformation_(this, "comp12")
     .input("Enu")
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>);
-  TransformationBind<OscProbPMNS>::transformation_(this, "comp13")
+  transformation_(this, "comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>);
-  TransformationBind<OscProbPMNS>::transformation_(this, "comp23")
+  transformation_(this, "comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>);
   if (m_alpha != m_beta) {
-    TransformationBind<OscProbPMNS>::transformation_(this, "compCP")
+    transformation_(this, "compCP")
       .input("Enu")
       .output("compCP")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
   }
-  auto probsum = TransformationBind<OscProbPMNS>::transformation_(this, "probsum")
+  auto probsum = transformation_(this, "probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
@@ -116,7 +116,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
     probsum.input("compCP");
   }
 
-  auto full_formula = TransformationBind<OscProbPMNS>::transformation_(this, "full_osc_prob")
+  auto full_formula = transformation_(this, "full_osc_prob")
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
@@ -191,22 +191,22 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
   variable_(&m_Lavg, "Lavg");
   variable_(&m_weights, "weights");
 
-  TransformationBind<OscProbPMNSMult>::transformation_(this, "comp12")
+  transformation_(this, "comp12")
     .input("Enu")
     .output("comp12")
     .depends(m_Lavg, m_param->DeltaMSq12)
     .func(&OscProbPMNSMult::calcComponent<1,2>);
-  TransformationBind<OscProbPMNSMult>::transformation_(this, "comp13")
+  transformation_(this, "comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_Lavg, m_param->DeltaMSq13)
     .func(&OscProbPMNSMult::calcComponent<1,3>);
-  TransformationBind<OscProbPMNSMult>::transformation_(this, "comp23")
+  transformation_(this, "comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_Lavg, m_param->DeltaMSq23)
     .func(&OscProbPMNSMult::calcComponent<2,3>);
-  TransformationBind<OscProbPMNSMult>::transformation_(this, "probsum")
+  transformation_(this, "probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")

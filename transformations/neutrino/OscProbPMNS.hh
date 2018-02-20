@@ -21,7 +21,6 @@ protected:
 
   double weightCP() const;
 
-
   std::unique_ptr<OscillationVariables> m_param;
   std::unique_ptr<PMNSVariables> m_pmns;
 
@@ -31,6 +30,8 @@ protected:
 class OscProbPMNS: public OscProbPMNSBase,
                    public TransformationBind<OscProbPMNS> {
 public:
+  using TransformationBind<OscProbPMNS>::transformation_;
+
   OscProbPMNS(Neutrino from, Neutrino to);
 
   template <int I, int J>
@@ -43,17 +44,20 @@ protected:
 };
 
 class OscProbAveraged: public OscProbPMNSBase,
-                           public TransformationBind<OscProbAveraged> {
-
+                       public TransformationBind<OscProbAveraged> {
 public:
-    OscProbAveraged(Neutrino from, Neutrino to);
+  using TransformationBind<OscProbAveraged>::transformation_;
+
+  OscProbAveraged(Neutrino from, Neutrino to);
 private:
-    void CalcAverage(Args args, Rets rets);
+  void CalcAverage(Args args, Rets rets);
 };
 
 class OscProbPMNSMult: public OscProbPMNSBase,
                        public TransformationBind<OscProbPMNSMult> {
 public:
+  using TransformationBind<OscProbPMNSMult>::transformation_;
+
   OscProbPMNSMult(Neutrino from, Neutrino to);
 
   template <int I, int J>

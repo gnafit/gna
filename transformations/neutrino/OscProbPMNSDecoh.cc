@@ -13,25 +13,25 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
   variable_(&m_L, "L");
   variable_(&m_sigma, "SigmaDecohRel");
 
-  TransformationBind<OscProbPMNSDecoh>::transformation_(this, "comp12")
+  transformation_(this, "comp12")
     .input("Enu")
     .output("comp12")
     .output("compCP12")
     .depends(m_L, m_sigma, m_param->DeltaMSq12)
     .func(&OscProbPMNSDecoh::calcComponent<1,2>);
-  TransformationBind<OscProbPMNSDecoh>::transformation_(this, "comp13")
+  transformation_(this, "comp13")
     .input("Enu")
     .output("comp13")
     .output("compCP13")
     .depends(m_L, m_sigma,m_param->DeltaMSq13)
     .func(&OscProbPMNSDecoh::calcComponent<1,3>);
-  TransformationBind<OscProbPMNSDecoh>::transformation_(this, "comp23")
+  transformation_(this, "comp23")
     .input("Enu")
     .output("comp23")
     .output("compCP23")
     .depends(m_L, m_sigma,m_param->DeltaMSq23)
     .func(&OscProbPMNSDecoh::calcComponent<2,3>);
-   auto probsum = TransformationBind<OscProbPMNSDecoh>::transformation_(this, "probsum")
+   auto probsum = transformation_(this, "probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")

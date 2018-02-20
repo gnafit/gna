@@ -10,6 +10,7 @@
 class  OscProbMatter: public OscProbPMNSBase,
                       public TransformationBind<OscProbMatter> {
 public:
+    using TransformationBind<OscProbMatter>::transformation_;
     OscProbMatter(Neutrino from, Neutrino to);
 
     void calcOscProb(Args args, Rets rets);

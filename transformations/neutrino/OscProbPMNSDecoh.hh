@@ -11,6 +11,7 @@ class PMNSVariables;
 class OscProbPMNSDecoh: public OscProbPMNSBase,
                         public TransformationBind<OscProbPMNSDecoh> {
 public:
+  using TransformationBind<OscProbPMNSDecoh>::transformation_;
   OscProbPMNSDecoh(Neutrino from, Neutrino to);
   void calcSum(Args args, Rets rets);
   template <int I, int J>
