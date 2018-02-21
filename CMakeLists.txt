@@ -17,7 +17,6 @@ set (SOURCES
   core/transformation/Args.cc
   core/transformation/Atypes.cc
   core/transformation/EntryHandle.cc
-  core/transformation/OpenHandle.cc
   core/transformation/OutputHandle.cc
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh
@@ -78,6 +77,7 @@ set (HEADERS
   Atypes.hh
   EntryHandle.hh
   OutputHandle.hh
+  OpenHandle.hh
   InputHandle.hh
   TransformationDebug.hh
   TransformationBase.hh
@@ -158,8 +158,6 @@ include_directories(core/transformation/
                     extra/
                     examples/
                    )
-
-set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
