@@ -11,5 +11,7 @@ Commits to the `master` branch are commonly prohibited. Please, contribute your 
 # Code style
 
 * Two space indentation, no tabs.
-* Class members shold start with 'm_'.
+* Class members should start with 'm_'.
+* Class methods are called with explicit `this->method()` to distinguish them from static functions.
+* Composite names follow camelCaseAgreement.
 * TBD :)
