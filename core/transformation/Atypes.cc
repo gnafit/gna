@@ -1,6 +1,5 @@
 #include "Atypes.hh"
 
-#include <boost/format.hpp>
 using boost::format;
 
 using TransformationTypes::Atypes;

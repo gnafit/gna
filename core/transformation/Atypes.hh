@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <boost/format.hpp>
 
 #include "TransformationEntry.hh"
 #include "TransformationErrors.hh"
@@ -79,6 +80,12 @@ namespace TransformationTypes
     template <size_t Arg>
     static void ifPoints(Atypes args, Rtypes rets);    ///< Checks if Arg-th input is an array (DataKind=Points).
 
+    template <size_t Arg, size_t Ndim=1>
+    static void ifNd(Atypes args, Rtypes rets);        ///< Checks if Arg-th input is N-dimensional (1 by default).
+
+    template <size_t Arg>
+    static void ifSquare(Atypes args, Rtypes rets);    ///< Checks if Arg-th input is of square shape.
+
     /**
      * @brief Source type exception.
      * @param dt -- incorrect DataType.
@@ -116,10 +123,12 @@ namespace TransformationTypes
   template <size_t Arg, size_t Ret>
   inline void Atypes::pass(Atypes args, Rtypes rets) {
     if (Arg >= args.size()) {
-      throw std::runtime_error("Transformation: invalid Arg index");
+      auto fmt = boost::format("Transformation: invalid Arg index (%1% out of %2%)");
+      throw std::runtime_error( (fmt%Arg%args.size()).str() );
     }
     if (Ret >= rets.size()) {
-      throw std::runtime_error("Transformation: invalid Ret index");
+      auto fmt = boost::format("Transformation: invalid Ret index (%1% out of %2%)");
+      throw std::runtime_error( (fmt%Ret%rets.size()).str() );
     }
     rets[Ret] = args[Arg];
   }
@@ -129,17 +138,18 @@ namespace TransformationTypes
    *
    * Raises an exception otherwise.
    *
-   *  @tparam Arg -- index of Arg to check.
+   * @tparam Arg -- index of Arg to check.
    *
-   *  @param args -- source types.
-   *  @param rets -- output types.
+   * @param args -- source types.
+   * @param rets -- output types.
    *
-   *  @exception std::runtime_error in case input data is not a histogram.
+   * @exception std::runtime_error in case input data is not a histogram.
    */
   template <size_t Arg>
   inline void Atypes::ifHist(Atypes args, Rtypes rets) {
     if (args[Arg].kind!=DataKind::Hist) {
-      throw std::runtime_error("Transformation: Arg should be a histogram");
+      auto fmt = boost::format("Transformation: Arg %1% should be a histogram");
+      throw std::runtime_error((fmt%Arg).str());
     }
   }
 
@@ -153,13 +163,55 @@ namespace TransformationTypes
    * @param args -- source types.
    * @param rets -- output types.
    *
-   *  @exception std::runtime_error in case input data is not an array.
+   * @exception std::runtime_error in case input data is not an array.
    */
   template <size_t Arg>
   inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
     if (args[Arg].kind!=DataKind::Points) {
-      throw std::runtime_error("Transformation: Arg should be an array");
+      auto fmt = boost::format("Transformation: Arg %1% should be an array");
+      throw std::runtime_error((fmt%Arg).str());
     }
   }
 
+  /**
+   * @brief Checks if Arg-th input is 1d.
+   *
+   * Raises an exception otherwise.
+   *
+   * @tparam Arg -- index of Arg to check.
+   *
+   * @param args -- source types.
+   * @param rets -- output types.
+   *
+   * @exception std::runtime_error in case input data is not 1 dimensional.
+   */
+  template <size_t Arg, size_t Ndim>
+  inline void Atypes::ifNd(Atypes args, Rtypes rets) {
+    auto ndim=args[Arg].shape.size();
+    if (ndim!=Ndim) {
+      auto fmt = boost::format("Transformation: Arg %1% should be %2%-dimensional, not %3%-dimensional");
+      throw std::runtime_error((fmt%Arg%Ndim%ndim).str());
+    }
+  }
+
+  /**
+   * @brief Checks if Arg-th input is of square shape
+   *
+   * Raises an exception otherwise.
+   *
+   * @tparam Arg -- index of Arg to check.
+   *
+   * @param args -- source types.
+   * @param rets -- output types.
+   *
+   * @exception std::runtime_error in case input data is not square (NxN).
+   */
+  template <size_t Arg>
+  inline void Atypes::ifSquare(Atypes args, Rtypes rets) {
+    auto shape = args[Arg].shape;
+    if (shape.size()!=2 || shape[0]!=shape[1] ) {
+      auto fmt = boost::format("Transformation: Arg %1% should be NxN, got %2%x%3%");
+      throw std::runtime_error((fmt%Arg%shape[0]%shape[1]).str());
+    }
+  }
 } /* TransformationBase */

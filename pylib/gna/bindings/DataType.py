@@ -9,6 +9,9 @@ def DataType__Hist____str__(self):
     dt=self.cast()
     if len(dt.shape):
         edges = N.asanyarray(dt.edges)
+        if edges.size<2:
+            return 'hist, {:3d} bins, edges undefined'.format(dt.shape[0])
+
         width = edges[1:]-edges[:-1]
         if (N.fabs(width-width[0])/width<1.e-9).all():
             suffix='width {}'.format(width[0])

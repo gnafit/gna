@@ -176,16 +176,16 @@ public:
   void dump() const {
     switch (shape().size()) {
     case 0:
-      fprintf(stderr, "shape == empty\n");
+      fprintf(stderr, ", shape == empty\n");
       break;
     case 1:
-      fprintf(stderr, "shape == (%lu)\n", shape()[0]);
+      fprintf(stderr, ", shape == (%lu)\n", shape()[0]);
       break;
     case 2:
-      fprintf(stderr, "shape == (%lu, %lu)\n", shape()[0], shape()[1]);
+      fprintf(stderr, ", shape == (%lu, %lu)\n", shape()[0], shape()[1]);
       break;
     default:
-      fprintf(stderr, "shape == WTF(%lu)?\n", shape().size());
+      fprintf(stderr, ", shape == WTF(%lu)?\n", shape().size());
       assert(shape().size() < 3);
       break;
     }
