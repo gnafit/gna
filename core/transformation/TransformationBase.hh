@@ -8,10 +8,6 @@
 #include "TransformationEntry.hh"
 #include "Exceptions.hh"
 
-class GNAObject;
-template <typename Derived>
-class TransformationBind;
-
 /**
  * @brief A namespace for transformations.
  * The namespace defines Entry, Sink, Source and Base classes, necessary to deal
@@ -42,15 +38,13 @@ namespace TransformationTypes {
    */
   class Base: public boost::noncopyable {
     template <typename T>
-    friend class ::TransformationBind;
-    template <typename T>
     friend class Initializer;
     friend class TransformationDescriptor;
     friend class Accessor;
-    friend class ::GNAObject;
   public:
     Base(const Base &other);                                             ///< Clone constructor.
     Base &operator=(const Base &other);                                  ///< Clone assignment.
+
   protected:
     Base(): t_(*this) { }                                                ///< Default constructor.
     /**
@@ -60,9 +54,6 @@ namespace TransformationTypes {
     Base(size_t maxentries): Base() {
       m_maxEntries = maxentries;
     }
-
-    // Not implemented!
-    // void connect(Source &source, Base *sinkobj, Sink &sink);
 
     /**
      * @brief Get Entry by index.
@@ -75,7 +66,7 @@ namespace TransformationTypes {
     Entry &getEntry(const std::string &name);                            ///< Get an Entry by name.
 
     Accessor t_;                                                         ///< An Accessor to Base's Entry instances via Handle.
-  private:
+
     size_t addEntry(Entry *e);                                           ///< Add new Entry.
     boost::ptr_vector<Entry> m_entries;                                  ///< Vector of Entry pointers. Calls destructors when deleted.
     boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.

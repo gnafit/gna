@@ -3,6 +3,7 @@
 #include <list>
 #include <tuple>
 
+#include "TransformationBase.hh"
 #include "Initializer.hh"
 
 /**
@@ -22,7 +23,7 @@
  * @date 2015
  */
 template <typename Derived>
-class TransformationBind {
+class TransformationBind: public virtual TransformationTypes::Base {
 public:
   TransformationBind() { }                                                   ///< Default constructor.
   /**
@@ -51,12 +52,24 @@ public:
 
   /**
    * @brief Initialize the new transformation Entry.
+   * @note The method is left for backward compatibility.
+   * @todo eliminate transformation_(this, ...)
    * @param obj -- the pointer to the TransformationBind.
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
-  TransformationTypes::Initializer<Derived> transformation_(TransformationTypes::Base *base, const std::string &name) {
-    return TransformationTypes::Initializer<Derived>(base, this, name);
+  [[deprecated]]
+  TransformationTypes::Initializer<Derived> transformation_(TransformationBind<Derived> *obj, const std::string &name) {
+    return TransformationTypes::Initializer<Derived>(obj, name);
+  }
+
+  /**
+   * @brief Initialize the new transformation Entry.
+   * @param name -- the transformation name.
+   * @return transformation Initializer.
+   */
+  TransformationTypes::Initializer<Derived> transformation_(const std::string &name) {
+    return TransformationTypes::Initializer<Derived>(this, name);
   }
 
 private:
@@ -75,21 +88,6 @@ private:
    * @copydoc TransformationBind::obj()
    */
   const Derived *obj() const { return static_cast<const Derived*>(this); }
-
-  /**
-   * @brief Return `this` cast to the TransformationTypes::Base.
-   * @return `this`.
-   */
-  TransformationTypes::Base *baseobj() {
-    return static_cast<TransformationTypes::Base*>(obj());
-  }
-
-  /**
-   * @copydoc TransformationBind::baseobj()
-   */
-  const TransformationTypes::Base *baseobj() const {
-    return static_cast<const TransformationTypes::Base*>(obj());
-  }
 
   std::list<std::tuple<size_t, MemFunction>> m_memFuncs;                      ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
   std::list<std::tuple<size_t, size_t, MemTypesFunction>> m_memTypesFuncs;    ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
@@ -119,15 +117,14 @@ private:
    */
   void rebindMemFunctions() {
     using namespace std::placeholders;
-    auto &entries = baseobj()->m_entries;
     for (const auto &f: m_memFuncs) {
       auto idx = std::get<0>(f);
-      entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+      m_entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
     }
     for (const auto &f: m_memTypesFuncs) {
       auto idx = std::get<0>(f);
       auto fidx = std::get<1>(f);
-      entries[idx].typefuns[fidx] = std::bind(std::get<2>(f), obj(), _1, _2);
+      m_entries[idx].typefuns[fidx] = std::bind(std::get<2>(f), obj(), _1, _2);
     }
   }
 }; /* class TransformationBind */
