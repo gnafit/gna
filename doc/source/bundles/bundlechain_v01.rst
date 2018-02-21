@@ -26,6 +26,22 @@ from Configuration_ section is shown below (excluding rebinner).
 
    The chain of the IAV, LSNL and energy resolution effects.
 
+Arguments
+"""""""""
+
+The bundle supports an argument ``listkey`` which by default is ``bundlechain_list``. It is an address to retrieve the
+list of bundles to load and chain. Therefore the bundle may be initialized with extended name:
+
+.. code-block:: python
+
+    cfg = NestedDict(
+       bundle = 'bundlechain_v01:mylistname',
+       mylistname = [ 'bundle1', 'bundle2' ],
+       # other options
+    )
+
+In this key the bundle will use ``mylistname`` as the bundle list to read.
+
 Inputs and outputs
 """"""""""""""""""
 
@@ -43,6 +59,9 @@ The example configuration for three detectors and a chain of transformations tha
 * :ref:`detector_eres_common3` and
 * :ref:`rebin`.
 
+Optional configuration fields:
+  - ``debug`` (bool). If true the chain will print the debug output: what is connected.
+
 For the description of the nested configuration, please refer to the relevant bundles.
 
 .. code-block:: python
@@ -54,7 +73,7 @@ For the description of the nested configuration, please refer to the relevant bu
             # a list of detector names
             detectors = [ 'AD11', 'AD21', 'AD31' ],
         # a list of bundles to process
-            chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
+            bundlechain_list = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
             )
     #
     # The following configuration is explained in the documentation for the relevant bundles.

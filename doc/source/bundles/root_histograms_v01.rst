@@ -52,10 +52,13 @@ The names are resolved by the following scheme:
     See https://pyformat.info for more information on formatting.
 
 The following keys are recognized:
-  - filename -- the filename to read.
-  - format -- the histogram name format.
-  - variants (optional) -- list of values or dictionary wit key-value pairs. Each value is applied to the format field.
-  - normalize (optional) -- if True the histogram will be normalized so the integral=1.
+  - ``filename`` -- the filename to read.
+  - ``format`` -- the histogram name format.
+
+Optional options:
+  - ``variants`` (list or dict) -- list of values or dictionary wit key-value pairs. Each value is applied to the format field.
+  - ``normalize`` (bool) -- if True the histogram will be normalized so the integral=1.
+  - ``observable`` (string). If provided, the observable is added for each output to th relevant namespace.
 
 .. code-block:: python
 

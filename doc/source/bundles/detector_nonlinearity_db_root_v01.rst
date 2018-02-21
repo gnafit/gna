@@ -27,6 +27,11 @@ Function :math:`f_0(E)` is the nominal LSNL. The functions :math:`f_i(E)` repres
 in order to parametrize LSNL uncertainty with parameters :math:`a_i=0\pm1`. Parameters' :math:`a_i` uncertainties are
 uncorrelated between parameters and fully correlated between detectors.
 
+.. note::
+
+    The current implementation of the bundle requireds input edges ``shared.edges`` to be provided within ``shared``
+    constructor argument.
+
 Scheme
 """"""
 
@@ -76,6 +81,10 @@ The bundle provides the input and output of the :ref:`HistNonlinearity` by names
 
 Configuration
 """""""""""""
+
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'nonlinearity' will be used.
 
 .. code-block:: python
 
