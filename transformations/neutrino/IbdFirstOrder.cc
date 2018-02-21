@@ -15,7 +15,7 @@ using namespace Eigen;
 
 IbdFirstOrder::IbdFirstOrder()
 {
-  transformation_(this, "Enu")
+  transformation_("Enu")
     .input("Ee")
     .input("ctheta")
     .types([](Atypes args, Rtypes rets) {
@@ -23,13 +23,13 @@ IbdFirstOrder::IbdFirstOrder()
       })
     .output("Enu")
     .func(&IbdFirstOrder::calc_Enu);
-  transformation_(this, "xsec")
+  transformation_("xsec")
     .input("Enu")
     .input("ctheta")
     .types(Atypes::pass<0>)
     .output("xsec")
     .func(&IbdFirstOrder::calc_Xsec);
-  transformation_(this, "jacobian")
+  transformation_("jacobian")
     .input("Enu")
     .input("Ee")
     .input("ctheta")

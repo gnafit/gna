@@ -12,14 +12,14 @@
 #endif
 
 HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
-  transformation_(this, "smear")
+  transformation_("smear")
       .input("Ntrue")
       .input("FakeMatrix")
       .output("Nvis")
       .types(Atypes::pass<0,0>)
       .func(&HistNonlinearity::calcSmear);
 
-  transformation_(this, "matrix")
+  transformation_("matrix")
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")

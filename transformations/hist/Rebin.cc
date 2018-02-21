@@ -9,7 +9,7 @@ using std::placeholders::_1;
 Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_scale{pow(10, rounding)} {
   std::transform( edges, edges+n, m_new_edges.begin(), std::bind(&Rebin::round, this, _1) );
 
-  transformation_(this, "rebin")
+  transformation_("rebin")
     .input("histin")
     .output("histout")
     .types([](Rebin *obj, Atypes args, Rtypes rets){

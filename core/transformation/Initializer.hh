@@ -25,7 +25,7 @@ namespace TransformationTypes {
    *
    * The typical usage is the following (from Identity transformation):
    * ```cpp
-   * transformation_(this, "identity")
+   * transformation_("identity")
    *   .input("source")
    *   .output("target")
    *   .types(Atypes::pass<0,0>)

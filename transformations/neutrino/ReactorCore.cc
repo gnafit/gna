@@ -7,7 +7,7 @@ ReactorCore::ReactorCore(const std::vector<std::string> &isonames)
   for (size_t i = 0; i < isonames.size(); ++i) {
     variable_(&m_ePerFission[i], "EnergyPerFission_"+isonames[i]);
   }
-  auto reactor = transformation_(this, "reactor")
+  auto reactor = transformation_("reactor")
     .input("efficiency")
     .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
         for (size_t i = 0; i < rets.size(); ++i) {

@@ -13,14 +13,14 @@
 SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
     variable_(&m_scale, scalename);
 
-    transformation_(this, "selfpower")
+    transformation_("selfpower")
         .input("points")
 	.output("result")
 	.types(Atypes::ifPoints<0>, Atypes::pass<0>)
 	.func(&SelfPower::calculate)
       ;
 
-    transformation_(this, "selfpower_inv")
+    transformation_("selfpower_inv")
         .input("points")
 	.output("result")
 	.types(Atypes::ifPoints<0>, Atypes::pass<0>)

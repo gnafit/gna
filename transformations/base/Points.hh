@@ -79,7 +79,7 @@ protected:
    * The transformation function is empty.
    */
   void init() {
-    transformation_(this, "points")                           /// Initialize the transformation points.
+    transformation_("points")                           /// Initialize the transformation points.
       .output("points")                                       /// Add an output points.
       .types([](Points *obj, Atypes /*args*/, Rtypes rets) {  /// Define the TypesFunction:
           rets[0] = DataType().points().shape(obj->m_shape);  ///   - assign the data shape for the first output (points).

@@ -12,7 +12,7 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
       throw std::runtime_error((format("Can't dispatch the function in RenormalizeDiag! Passed target %1 and mode %2") % target % mode).str());
   }
 
-  transformation_(this, "renorm")
+  transformation_("renorm")
       .input("inmat")
       .output("outmat")
       .types(Atypes::pass<0>,

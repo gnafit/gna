@@ -8,7 +8,7 @@ class HistEdges: public GNASingleObject,
                  public TransformationBind<HistEdges> {
 public:
   HistEdges() {
-    transformation_(this, "histedges")
+    transformation_("histedges")
       .input("hist")
       .output("edges")
       .types(Atypes::ifHist<0>,

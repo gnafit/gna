@@ -9,7 +9,7 @@ class EvisToEe: public GNASingleObject,
 public:
   EvisToEe() {
     variable_(&m_me, "ElectronMass");
-    transformation_(this, "Ee")
+    transformation_("Ee")
       .input("Evis")
       .output("Ee")
       .types(Atypes::passAll)

@@ -227,6 +227,7 @@ public:
     m_type.shape = std::vector<size_t>{shape0, shape1};
     return setKind();
   }
+
   /**
    * @brief Set the data size and dimensions for multidimensional data.
    * @param shape -- vector with dimensions.
@@ -236,6 +237,37 @@ public:
     m_type.shape = shapes;
     return setKind();
   }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Points<T> &preallocated(double* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated 1d Array
+   * @param array - 1d Eigen array.
+   * @return `*this`.
+   */
+  DataType::Points<T> &view(Eigen::ArrayXd& array) {
+    shape(array.size());
+    return preallocated(array.data());
+  }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated 2d Array
+   * @param array - 2d Eigen array.
+   * @return `*this`.
+   */
+  DataType::Points<T> &view(Eigen::ArrayXXd& array) {
+    shape(array.rows(), array.cols());
+    return preallocated(array.data());
+  }
+
   /**
    * @brief Return the dimensions.
    * @return vector with dimensions.

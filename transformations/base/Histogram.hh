@@ -60,7 +60,7 @@ public:
 
 protected:
   void init() {
-    transformation_(this, "hist")                               /// Initialize the transformation hist.
+    transformation_("hist")                               /// Initialize the transformation hist.
       .output("hist")                                           /// Add an output hist.
       .types([](Histogram *obj, Atypes /*args*/, Rtypes rets) { /// Define the TypesFunction:
           rets[0] = DataType().hist().edges(obj->edges());      ///   - assign the data shape and bin edges for the first output (hist).

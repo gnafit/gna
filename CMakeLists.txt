@@ -40,6 +40,7 @@ set (SOURCES
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
+  transformations/interpolation/SegmentWise.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/neutrino/IbdFirstOrder.cc
@@ -100,6 +101,7 @@ set (HEADERS
   HistEdges.hh
   Identity.hh
   LinearInterpolator.hh
+  SegmentWise.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh

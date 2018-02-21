@@ -16,7 +16,7 @@ public:
   {
 
     indexBins();
-    transformation_(this, "f")
+    transformation_("f")
       .input("x")
       .output("y")
       .types(Atypes::pass<0>)

@@ -23,7 +23,7 @@ void EnergyResolution::add(){
   if(!m_single){
     label=(format("smear_%1%")%index).str();
   }
-  transformation_(this, label)
+  transformation_(label)
     .input("Nvis")
     .output("Nrec")
     .types(Atypes::pass<0>,Atypes::ifHist<0>,

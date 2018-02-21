@@ -2,7 +2,7 @@
 #include <boost/format.hpp>
 
 NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
-  transformation_(this, "toymc")
+  transformation_("toymc")
     .output("toymc")
     .types(&NormalToyMC::calcTypes)
     .func(&NormalToyMC::calcToyMC)

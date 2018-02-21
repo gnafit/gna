@@ -8,7 +8,7 @@ class Chi2: public GNASingleObject,
             public Statistic {
 public:
   Chi2() {
-    transformation_(this, "chi2")
+    transformation_("chi2")
       .output("chi2")
       .types(&Chi2::checkTypes)
       .func(&Chi2::calculateChi2)

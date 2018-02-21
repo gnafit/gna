@@ -39,7 +39,7 @@ void GaussLegendre2d::init() {
   }
   gsl_integration_glfixed_table_free(t);
 
-  transformation_(this, "points")
+  transformation_("points")
     .output("x")
     .output("y")
     .output("xedges")
@@ -61,7 +61,7 @@ void GaussLegendre2d::init() {
 GaussLegendre2dHist::GaussLegendre2dHist(const GaussLegendre2d *base)
   : m_base(base)
 {
-  transformation_(this, "hist")
+  transformation_("hist")
     .input("f")
     .output("hist")
     .types(Atypes::ifSame, [](GaussLegendre2dHist *obj, Atypes, Rtypes rets) {

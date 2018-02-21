@@ -9,7 +9,7 @@
  * Initializes the transformation for the whole histogram normalization.
  */
 Normalize::Normalize() {
-    transformation_(this, "normalize")
+    transformation_("normalize")
         .input("inp")
         .output("out")
         .types(Atypes::pass<0>)
@@ -26,7 +26,7 @@ Normalize::Normalize() {
  * @param length -- number of bins to normalize to.
  */
 Normalize::Normalize(size_t start, size_t length) : m_start{start}, m_length{length} {
-    transformation_(this, "normalize")
+    transformation_("normalize")
         .input("inp")
         .output("out")
         .types(Atypes::pass<0>, &Normalize::checkLimits)

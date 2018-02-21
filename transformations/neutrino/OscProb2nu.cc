@@ -14,7 +14,7 @@ OscProb2nu::OscProb2nu()
   variable_(&m_L, "L");
   m_param->variable_("DeltaMSq12");
   m_param->variable_("SinSq12");
-  transformation_(this, "prob")
+  transformation_("prob")
     .input("Enu")
     .output("prob")
     .func([](OscProb2nu *obj, Args args, Rets rets) {

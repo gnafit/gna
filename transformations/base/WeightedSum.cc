@@ -9,7 +9,7 @@ WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vect
   if( !weight_labels.empty() && labels.size()!=weight_labels.size() ){
       throw std::runtime_error( "Incompartible labels weight_labels lists" );
   }
-  auto sum = transformation_(this, "sum")
+  auto sum = transformation_("sum")
     .output("sum")
     .types(Atypes::ifSame, Atypes::pass<0>)
     .func([] (WeightedSum *obj, Args args, Rets rets) {

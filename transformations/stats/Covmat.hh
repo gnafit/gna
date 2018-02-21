@@ -8,7 +8,7 @@ public:
   Covmat()
     : m_fixed(false)
   {
-    transformation_(this, "cov")
+    transformation_("cov")
       .types(Atypes::ifSameShape, [](Atypes args, Rtypes rets) {
           rets[0] = DataType().points().shape(args[0].size(), args[0].size());
         })
@@ -16,13 +16,13 @@ public:
       .input("stat")
       .output("cov")
     ;
-    transformation_(this, "inv")
+    transformation_("inv")
       .types(Atypes::pass<0>)
       .func(&Covmat::calculateInv)
       .input("cov")
       .output("inv")
       ;
-    transformation_(this, "cholesky")
+    transformation_("cholesky")
       .types(Atypes::pass<0>, &Covmat::prepareCholesky)
       .func(&Covmat::calculateCholesky)
       .input("cov")

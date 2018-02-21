@@ -10,7 +10,7 @@ public:
   FillLike(double value)
     : m_value(value)
   {
-    transformation_(this, "fill")
+    transformation_("fill")
       .input("a")
       .output("a")
       .types(Atypes::passAll)

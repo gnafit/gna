@@ -11,14 +11,14 @@
 constexpr auto pi = boost::math::constants::pi<double>();
 constexpr auto alpha = 1./137.035989;
 /* constexpr auto fm_to_keV = 1 / (197.326 * 1e3);   */
-constexpr auto fm_to_MeV = 1 / (197.326);  
+constexpr auto fm_to_MeV = 1 / (197.326);
 constexpr auto Z_nitrogen = 7;
 constexpr auto A_nitrogen = 14;
 constexpr auto spectrum_end_point = 156.27 * 1e-3; /* MeV */
 constexpr auto spectrum_start_point = 0.; /* MeV */
 /* constexpr auto shape_factor = 1.24 ;   [> MeV^{-1} <]
  * constexpr auto integration_order = 6;
- * constexpr auto MeV_to_keV = 1e3; 
+ * constexpr auto MeV_to_keV = 1e3;
  * constexpr auto keV_to_MeV = 1e-3;  */
 constexpr auto coincidence_window = 300*ns;
 constexpr auto C14_half_life = 5730*year;
@@ -38,7 +38,7 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
 
 
    using namespace std::placeholders;
-   transformation_(this, "smear")
+   transformation_("smear")
                   .input("Nvis")
                   .output("NvisC")
                   .types(Atypes::pass<0>,
@@ -47,29 +47,29 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
                            obj->fillCache();
                          })
                   .func(&C14Spectrum::calcSmear);
-   
+
 }
 
 /* Here we precalculate the matrix shifting the energy spectrum of IBD events, we take into account the coincidence of C14 events and IBD events in such a way */
 void C14Spectrum::fillCache()
 {
     m_size = m_datatype.hist().bins();
-    
+
     if (m_size == 0) return;
-    
+
     m_rescache.resize(m_size*m_size);
     m_cacheidx.resize(m_size + 1);
     m_startidx.resize(m_size);
     std::vector<double> buf(m_size);
 
-    static const auto norm = 1./IntegrateSpectrum(spectrum_start_point, spectrum_end_point);   
+    static const auto norm = 1./IntegrateSpectrum(spectrum_start_point, spectrum_end_point);
 
 /* Linear alkybenzene's chemical formula is C_6 H_5 C_n H_{2n+1}
  * where n is integer between 10 and 13 (see JUNO Conceptual Design Report), so convesrion between number of
  * protons (only hydrogen) to number of C12s is a bit unclear.
  * Here for no particular reasons we use the median n = 11*/
 
-    auto convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); }; 
+    auto convers_H_to_C12 = [this](const double n){ return ((n+6)/(2*n+6) * this->m_protons); };
     double C14_nuclei_number = m_rho * convers_H_to_C12(11);
     coincidence_prob = (coincidence_window / C14_half_life) * C14_nuclei_number;
 
@@ -77,16 +77,16 @@ void C14Spectrum::fillCache()
 
     auto bin_width = m_datatype.edges[1] - m_datatype.edges[0];
     auto pivot_width = bin_width/n_pivots;
-    
+
     if (this->stayed_in_bin == 0.)
     for (int pivot = 1; pivot <= n_pivots; ++pivot) {
         auto Etrue_piv = m_datatype.edges[0] + (2*pivot-1)*pivot_width/2;
-        assert(Etrue_piv <= m_datatype.edges[1]); 
+        assert(Etrue_piv <= m_datatype.edges[1]);
         /* std::cout << "Bin width " << m_datatype.edges[1] - m_datatype.edges[0] << std::endl;
          * std::cout << "Center of subbin " << (Etrue_piv - m_datatype.edges[0])*MeV_to_keV <<std::endl;
          * std::cout << "Integrating from 0 to "<< (m_datatype.edges[1] - Etrue_piv)*MeV_to_keV << std::endl;  */
-        this->stayed_in_bin += norm  / n_pivots * IntegrateSpectrum(0, m_datatype.edges[1] - Etrue_piv); 
-    } 
+        this->stayed_in_bin += norm  / n_pivots * IntegrateSpectrum(0, m_datatype.edges[1] - Etrue_piv);
+    }
 
     for (size_t etrue = 0; etrue < m_size; ++etrue) {
         int startidx{-1};
@@ -128,16 +128,16 @@ void C14Spectrum::fillCache()
             overall +=  rel_prob_sum * coincidence_prob * norm/(pivot_to_bin);
             prob_acc += norm/(pivot_to_bin)*rel_prob_sum;
             ++bin_count;
-  
-        } 
+
+        }
         buf[etrue] = 1 - overall;
 
         if (endidx < 0) endidx = m_size;
 
         if (startidx >= 0) {
             std::copy(std::make_move_iterator(&buf[startidx]),
-                      std::make_move_iterator(&buf[endidx]), 
-                      &m_rescache[cachekey]); 
+                      std::make_move_iterator(&buf[endidx]),
+                      &m_rescache[cachekey]);
             m_cacheidx[etrue] = cachekey;
             cachekey += endidx - startidx;
         }
@@ -145,7 +145,7 @@ void C14Spectrum::fillCache()
             m_cacheidx[etrue] = cachekey;
         }
         m_startidx[etrue] = startidx;
-    }     
+    }
     m_cacheidx[m_size] = cachekey;
 }
 
@@ -189,8 +189,8 @@ void C14Spectrum::calcSmear(Args args, Rets rets)
             }
         events_rec[etrue] -= delta;
         }
-        
-    } 
+
+    }
 
 }
 
@@ -201,8 +201,8 @@ inline double C14Spectrum::Spectra(double Ekin) const  noexcept
 
     auto p =  std::sqrt(Ekin*Ekin + 2*Ekin*m_e);
     return Fermi_function(Ekin, p, Z_nitrogen, A_nitrogen) *
-           std::pow((spectrum_end_point - Ekin), 2) * p * (Ekin + m_e); 
-} 
+           std::pow((spectrum_end_point - Ekin), 2) * p * (Ekin + m_e);
+}
 
 
 double C14Spectrum::Fermi_function(double Ekin, double momentum, int Z, int A) const noexcept
@@ -230,7 +230,7 @@ double C14Spectrum::IntegrateSpectrum(double from, double  to)
     gsl_function_pp<decltype(ptr)> Fp(ptr);
     auto F = static_cast<gsl_function>(Fp);
     return gsl_integration_glfixed(&F, from, to, integr_table);
-    
+
 }
 
 

@@ -54,7 +54,7 @@ template <>
 inline Variable<double>::Variable(const std::string &name)
   : m_varhandle(variable_(&m_var, name)), m_name(name)
 {
-  transformation_(this, "value")
+  transformation_("value")
     .output(name)
     .types([](Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(1);

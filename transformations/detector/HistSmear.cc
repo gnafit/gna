@@ -2,7 +2,7 @@
 #include "HistSmear.hh"
 
 HistSmear::HistSmear(bool upper) {
-  transformation_(this, "smear")
+  transformation_("smear")
       .input("Ntrue")
       .input("SmearMatrix")
       .output("Nvis")

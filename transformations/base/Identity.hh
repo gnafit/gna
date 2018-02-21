@@ -9,7 +9,7 @@ class Identity: public GNASingleObject,
                 public TransformationBind<Identity> {
 public:
   Identity(){
-    transformation_(this, "identity")
+    transformation_("identity")
       .input("source")
       .output("target")
       .types(Atypes::pass<0,0>)

@@ -1,7 +1,7 @@
 #include "PoissonToyMC.hh"
 
 PoissonToyMC::PoissonToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
-  transformation_(this, "toymc")
+  transformation_("toymc")
     .output("toymc")
     .types(&PoissonToyMC::calcTypes)
     .func(&PoissonToyMC::calcToyMC)

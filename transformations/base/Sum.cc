@@ -4,7 +4,7 @@
  * @brief Constructor.
  */
 Sum::Sum() {
-  transformation_(this, "sum")                         ///< Define the transformation `sum`:
+  transformation_("sum")                         ///< Define the transformation `sum`:
     .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
     .types(                                            ///<   - provide type checking functions:
            Atypes::ifSame,                             ///<     * check that inputs have the same type and size

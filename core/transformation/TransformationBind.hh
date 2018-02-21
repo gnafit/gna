@@ -52,19 +52,6 @@ public:
 
   /**
    * @brief Initialize the new transformation Entry.
-   * @note The method is left for backward compatibility.
-   * @todo eliminate transformation_(this, ...)
-   * @param obj -- the pointer to the TransformationBind.
-   * @param name -- the transformation name.
-   * @return transformation Initializer.
-   */
-  [[deprecated]]
-  TransformationTypes::Initializer<Derived> transformation_(TransformationBind<Derived> *obj, const std::string &name) {
-    return TransformationTypes::Initializer<Derived>(obj, name);
-  }
-
-  /**
-   * @brief Initialize the new transformation Entry.
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
