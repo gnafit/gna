@@ -76,6 +76,7 @@ Basic types and actions
    transformations/HistEdges.rst
    transformations/Histogram.rst
    transformations/Points.rst
+   transformations/Prediction.rst
    transformations/Rebin.rst
 
 Linear algebra

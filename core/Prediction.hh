@@ -5,6 +5,10 @@
 
 /**
  * @brief Concatenation transformations. Concatenates several predictions in a single array.
+ *
+ * Outputs:
+ *   `prediction.prediction` -- the concatenated arrays.
+ *
  * @author Dmitry Taychenachev
  * @date 2015
  */
