@@ -18,6 +18,7 @@ class namespacedict(OrderedDict):
         return value
 
 def findname(name, curns):
+    """@todo remove findname usage"""
     # if '.' in name:
         # nsname, name = name.rsplit('.', 1)
         # ns = env.globalns(nsname)

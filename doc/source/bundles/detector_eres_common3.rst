@@ -47,6 +47,10 @@ also defined for the corresponding namespace:
 Configuration
 """""""""""""
 
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'eres' will be used.
+
 .. code-block:: python
 
     cfg = NestedDict(

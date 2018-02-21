@@ -49,6 +49,10 @@ There are two ways to initialize a bundle:
        from gna.bundles.detector_iav_db_root_v01 import detector_iav_db_root_v01
        bundle = detector_iav_db_root_v01( cfg=cfg, namespaces=namespaces, common_namespace=common_namespace )
 
+If a bundle name contains ':' like ``'bundlename:arg1'`` or ``'bundlename:arg1:arg2'`` all the strings split by ':' will
+be treated as string arguments and passed to the bundle constructor. See  :ref:`bundlesum_v01` or :ref:`bundlechain_v01`
+bundles for the example.
+
 Arguments
 """""""""
 

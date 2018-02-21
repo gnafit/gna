@@ -37,6 +37,10 @@ defined for the corresponding namespace:
 Configuration
 """""""""""""
 
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'rebin' is used.
+
 .. code-block:: python
 
    cfg = NestedDict(
