@@ -21,7 +21,6 @@ void MultiThreading::Task::run_task() {
 
 
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
-
     task_stack = new std::stack<Task>();
 }
 
@@ -29,8 +28,10 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 void MultiThreading::Worker::work(){ // runs task stack
     std::cerr << "Work" << std::endl;
     while (!task_stack->empty()) {
+
+    std::cout << "Work task size  = " << task_stack->size() << std::endl;
 // TODO: add lock task stack
-      Task current_task = task_stack->top();
+      Task& current_task = task_stack->top();
 //      if (!current_task.ready()) { /* make waiting for finish children */ }
       task_stack->pop(); 
 //TODO: add unlock task stack

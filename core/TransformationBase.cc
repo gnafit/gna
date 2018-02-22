@@ -479,7 +479,7 @@ void Entry::touch() {
 //  if (tainted && !frozen) {
 
   std::cout << "tainted = " <<  tainted  << " frozen = " << frozen << std::endl;
-  if (!frozen) {
+  if (tainted && !frozen) {
     update();
   } 
 }
