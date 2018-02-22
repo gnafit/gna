@@ -29,7 +29,7 @@ using TransformationTypes::Base;
 
 //class ThreadPool;
 class Task;
-MultiThreading::ThreadPool tpool(4);
+MultiThreading::ThreadPool tpool(1);
 
 
 /**
@@ -478,6 +478,7 @@ void Entry::updateTypes() {
 void Entry::touch() {
 //  if (tainted && !frozen) {
 
+  std::cout << "tainted = " <<  tainted  << " frozen = " << frozen << std::endl;
   if (!frozen) {
     update();
   } 

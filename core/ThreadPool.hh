@@ -28,7 +28,7 @@ namespace MultiThreading {
   public:
     Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) { } 
     void run_task();
-    inline bool done() { return !(m_entry->tainted); }
+    inline bool done() { std::cout << "src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
   private:
     TransformationTypes::Entry *m_entry;
   };

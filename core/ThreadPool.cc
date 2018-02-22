@@ -49,14 +49,16 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
 
     std::thread::id curr_id = std::this_thread::get_id();
     bool worker_found = false;
+    std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
     for (auto worker : m_workers) {
       if(worker.is_free()) { 
         std::cerr << "Free worker found!" << std::endl;
         worker.add_to_task_stack(in_task);
         worker.thr_head = curr_id;
         worker_found = true;
-        //if (in_task.done()) 
-        worker.work();
+//        in_task.run_task();
+        if (in_task.done()) { std::cout << "done -- now work "; worker.work(); }
+        else { std::cout << "eval only "; in_task.run_task(); }
         break;
       }
     }
