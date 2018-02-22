@@ -18,6 +18,7 @@ for case in [
         (-1.5, 6.6, 0.4),
         (0.0, 5.1),
         (-1.e-17, 5.1),
+        (-0.5, 6.5, 2.)
         ]:
     points   = N.arange(*case, dtype='d')
     print( '  points', points )
