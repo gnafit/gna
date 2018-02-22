@@ -122,10 +122,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 
-find_package( Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
-find_package( Boost 1.40.0 REQUIRED)
+find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
     message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
     include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
