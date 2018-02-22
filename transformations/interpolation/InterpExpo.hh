@@ -15,7 +15,7 @@ public:
   InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");
 
   void do_interpolate(Args, Rets);
-  void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);
+  void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx)a;
 
   void setUnderflow(double value) { m_underflow = value; }
   void setOverflow(double value) { m_overflow = value; }
