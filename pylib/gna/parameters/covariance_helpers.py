@@ -10,20 +10,24 @@ def __keep_relative(**kwargs):
     pars = kwargs.pop('pars')
     _uncorr_uncs = np.array([par.sigma() for par in pars])
     tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
-    return cov_matrix * tmp
+    return cov_mat * tmp
 
 def __keep_absolute(**kwargs):
-    pass
+    raise Exception('Perhaps one shouldn\'t override uncorrelated '
+                    'unceratinties in absolute mode from configuration file')
+    raise
+
 
 def __override_absolute(**kwargs):
-    pass
+    return kwargs.pop('cov_mat')
 
 def __override_relative(**kwargs):
     cov_mat = kwargs.pop('cov_mat')
     pars = kwargs.pop('pars')
     _uncorr_uncs = kwargs.pop('uncorr_from_file')
+    print(_uncorr_uncs)
     tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
-    return cov_matrix * tmp
+    return cov_mat * tmp
 
 dispatch_modes = {('keep', 'relative'): __keep_relative, 
                   ('keep', 'absolute'): __keep_absolute, 
@@ -45,7 +49,7 @@ class CovarianceHandler(object):
     def covariate_pars(self):
         policy = self.cov_store['policy']
         mode = self.cov_store['mode']
-        uncorr_uncs = self.cov_store['uncorr_uncs']
+        uncorr_uncs = np.array(self.cov_store['uncorr_uncs'])
         pars_to_covariate = [par for par in get_parameters(self.passed_pars) 
                              if par.name() in self.cov_store['params']]
         if all(_.name() in self.cov_store['params'] for _ in pars_to_covariate):
@@ -91,45 +95,45 @@ def covariate_ns(ns, cov_storage):
     
 def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=None):
     if isinstance(cov_mat, np.ndarray):
-        cov_matrix = cov_mat
+        _cov_initial = cov_mat
     else:
-        cov_matrix = np.array(cov_mat)
+        _cov_initial = np.array(cov_mat)
     
-    keyword_args = {'cov_mat': cov_matrix,
+    keyword_args = {'cov_mat': _cov_initial,
                     'uncorr_from_file': uncorr_uncs,
                     'pars': pars,}
 
+    cov_matrix = dispatch_modes[(policy, mode)](**keyword_args)
                     
 
-    if (mode == 'relative') and (policy == 'keep'):
-        _uncorr_uncs = np.array([par.sigma() for par in pars])
-    elif (policy == 'override':
-        _uncorr_uncs = np.array(uncorr_uncs)
+    #  if (mode == 'relative') and (policy == 'keep'):
+        #  _uncorr_uncs = np.array([par.sigma() for par in pars])
+    #  elif (policy == 'override':
+        #  _uncorr_uncs = np.array(uncorr_uncs)
 
-    print(cov_matrix)
-    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
-    print(tmp)
-    _cov_mat = cov_matrix
-    cov_matrix = cov_matrix * tmp
+    #  print(cov_matrix)
+    #  tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    #  print(tmp)
+    #  _cov_mat = cov_matrix
+    #  cov_matrix = cov_matrix * tmp
     print(cov_matrix)
 
     is_covmat(pars, cov_matrix)
 
     for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-        sigma_1, sigma_2 = _uncorr_uncs[first], _uncorr_uncs[second]
+        sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
         covariance = cov_matrix[first, second]
         if first == second:
             print('In mode = {mode} and with policy = {policy}\n'
                   'sigma_1 = sigma_2 = {0}, '
-                  'uncorrelated unc = {0} = {1} '
+                  'uncorrelated unc = sigma  = {1} '
                   .format(sigma_1, np.sqrt(covariance),
                           mode=mode, policy=policy))
         else:
             print('In mode = {mode} and with policy = {policy}\n'
                   'sigma_1 = {0}, sigma_2 = {1}, '
                   'covariance = {0} * {1} * {2} = {3}'
-                  .format(sigma_1, sigma_2, _cov_mat[first, second],
-                          covariance, mode=mode, policy=policy))
+                  .format(sigma_1, sigma_2, _cov_initial[first, second], covariance, mode=mode, policy=policy))
         pars[first].setCovariance(pars[second], covariance)
 
 
