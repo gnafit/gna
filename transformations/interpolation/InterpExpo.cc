@@ -21,7 +21,7 @@ InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string&
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::if1d<2>)
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)
-    .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifSame2<1,3>)
+    .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifSame2<1,3>, TypesFunctions::ifBinsEdges<4,3>)
     .types(TypesFunctions::pass<0,0>)
     .func(&InterpExpo::do_interpolate)
     ;

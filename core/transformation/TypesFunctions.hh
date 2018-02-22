@@ -25,6 +25,8 @@ struct TypesFunctions
   static void ifSame2(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);      ///< Checks that inputs Arg1 and Arg2 are of the same type (shape and content description).
   template <size_t Arg1, size_t Arg2>
   static void ifSameShape2(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets); ///< Checks that inputs Arg1 and Arg2 inputs are of the same shape.
+  template <size_t Arg1, size_t Arg2>
+  static void ifBinsEdges(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);  ///< Checks that inputs Arg1 and Arg2 inputs has shape as bins and edges (N, N+1).
 
   template <size_t Arg>
   static void ifHist(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);      ///< Checks if Arg-th input is a histogram (DataKind=Histogram).
@@ -107,6 +109,27 @@ void TypesFunctions::ifSameShape2(TransformationTypes::Atypes args, Transformati
   }
 }
 
+/**
+ * @brief Checks that inputs Arg1 and Arg2 are bins and edges with N and N+1 elements.
+ *
+ * Raises an exception otherwise.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input shapes are not the same.
+ */
+template <size_t Arg1, size_t Arg2>
+void TypesFunctions::ifBinsEdges(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets) {
+  TypesFunctions::ifPoints<Arg1>(args, rets);
+  TypesFunctions::ifPoints<Arg2>(args, rets);
+  TypesFunctions::if1d<Arg1>(args, rets);
+  TypesFunctions::if1d<Arg2>(args, rets);
+  if (args[Arg1].shape[0] != (args[Arg2].shape[0]-1u)) {
+    auto fmt = format("Transformation %1%: inputs %2% and %3% should sizes N and N+1, got %4% and %5%");
+    throw args.error(args[Arg2], (fmt%args.name()%Arg1%Arg2%args[Arg1].shape[0]%(args[Arg2].shape[0])).str());
+  }
+}
 
 /**
  * @brief Assigns shape of Arg-th input to Ret-th output. The ret-s size is N+1.
