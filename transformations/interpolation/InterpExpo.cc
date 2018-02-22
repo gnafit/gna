@@ -1,6 +1,8 @@
 #include "InterpExpo.hh"
 #include "TypesFunctions.hh"
 
+//#define DEBUG_INTERPEXPO
+
 #include <stdexcept>
 
 using std::next;
@@ -31,14 +33,17 @@ InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string&
 
 void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   auto segments = this->t_["segments"];
-  segments.inputs["x"](x)
-  segments.inputs["points"](newx)
+  auto sinputs  = segments.inputs();
+  auto soutputs = segments.outputs();
+  sinputs[0].connect(newx.single());
+  sinputs[1].connect(x.single());
 
   auto interp = this->t_["interp"];
-  interp.inputs["points"](newx)
-  interp.inputs["x"](x)
-  interp.inputs["y"](y)
-  interp.inputs["segments"](segments.outputs["segments"])
+  auto iinputs = interp.inputs();
+  iinputs[0].connect(newx.single());
+  iinputs[1].connect(x.single());
+  iinputs[2].connect(y.single());
+  iinputs[3].connect(soutputs[0]);
 }
 
 void InterpExpo::do_interpolate(Args args, Rets rets){
@@ -47,9 +52,7 @@ void InterpExpo::do_interpolate(Args args, Rets rets){
   auto& y_a=args[2].x;
 
   auto nseg=x_a.size()-1;
-  auto& ratio_a=y_a.head(nseg)/y_a.tail(nseg);
-  auto& width_a=x_a.tail(nseg)-x_a.head(nseg);
-  auto& b_a=(ratio_a.log()/width_a).eval();
+  auto& b_a=((y_a.head(nseg)/y_a.tail(nseg)).log()/(x_a.tail(nseg)-x_a.head(nseg))).eval();
 
   auto k_current=y_a.data();
   auto b_current=b_a.data();
@@ -64,8 +67,20 @@ void InterpExpo::do_interpolate(Args args, Rets rets){
 
   auto idx_current=static_cast<size_t>(*ddx_current);
   if(idx_current>0u){
-    interp_a.head(idx_current) = m_underflow;
-    //printf("Fill %i->%i (%i): %g (head)\n", (int)0, (int)idx_current, (int)idx_current, m_underflow);
+    switch (m_underflow_strategy) {
+      case Constant:
+        interp_a.head(idx_current) = m_underflow;
+        #ifdef DEBUG_INTERPEXPO
+        printf("Fill %i->%i (%i): %g (head)\n", (int)0, (int)idx_current, (int)idx_current, m_underflow);
+        #endif
+        break;
+      case Extrapolate:
+        interp_a.head(idx_current) = *k_current * ((*e0_current - newx_a.head(idx_current))*(*b_current)).exp();
+        #ifdef DEBUG_INTERPEXPO
+        printf("Fill %i->%i (%i): fcn (head)\n", (int)0, (int)idx_current, (int)idx_current);
+        #endif
+        break;
+    }
   }
 
   auto next_iter = [&](){
@@ -73,30 +88,50 @@ void InterpExpo::do_interpolate(Args args, Rets rets){
     ddx_next=next(ddx_next);
     idx_current=static_cast<size_t>(*ddx_current);
 
+    if(ddx_current>=ddx_last){
+      return false;
+    }
+
     k_current=next(k_current);
     b_current=next(b_current);
     e0_current=next(e0_current);
-  };
-  while(ddx_current<ddx_last){
-    auto idx_next=static_cast<size_t>(*ddx_next);
 
-    if(idx_current==idx_next){
-      next_iter();
+    return true;
+  };
+  bool iterate=true;
+  while(iterate){
+    auto idx_next=static_cast<size_t>(*ddx_next);
+    auto length=idx_next-idx_current;
+
+    if(length==0u){
+      iterate=next_iter();
       continue;
     }
 
-    auto length=idx_next-idx_current;
-
-    //printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
+    #ifdef DEBUG_INTERPEXPO
+    printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
+    #endif
     interp_a.segment(idx_current, length) = *k_current * ((*e0_current - newx_a.segment(idx_current, length))*(*b_current)).exp();
 
-    next_iter();
+    iterate=next_iter();
   }
 
-  auto n=static_cast<size_t>(interp_a.size());
-  if(idx_current<n){
-    interp_a.tail(n-idx_current)=m_overflow;
-    //printf("Fill %i->%i (%i): %g (tail)\n", (int)idx_current, (int)n, (int)(n-idx_current), m_overflow);
+  auto nleft=interp_a.size()-static_cast<long int>(idx_current);
+  if(nleft){
+    switch (m_underflow_strategy) {
+      case Constant:
+        interp_a.tail(nleft)=m_overflow;
+        #ifdef DEBUG_INTERPEXPO
+        printf("Fill %i->%i (%i): %g (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft, m_overflow);
+        #endif
+        break;
+      case Extrapolate:
+        interp_a.tail(nleft) = *k_current * ((*e0_current - newx_a.tail(nleft))*(*b_current)).exp();
+        #ifdef DEBUG_INTERPEXPO
+        printf("Fill %i->%i (%i): fcn (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft);
+        #endif
+        break;
+    }
   }
 }
 
