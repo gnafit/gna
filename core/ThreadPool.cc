@@ -50,20 +50,22 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     std::thread::id curr_id = std::this_thread::get_id();
     bool worker_found = false;
     std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
-    for (auto worker : m_workers) {
-      if(worker.is_free()) { 
+    size_t w_size = m_workers.size();
+
+    for (size_t i = 0; i < w_size; i++)  {
+      if((m_workers[i].is_free()) || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
         std::cerr << "Free worker found!" << std::endl;
-        worker.add_to_task_stack(in_task);
-        worker.thr_head = curr_id;
+        m_workers[i].add_to_task_stack(in_task);
+        m_workers[i].thr_head = curr_id;
         worker_found = true;
 //        in_task.run_task();
-        if (in_task.done()) { std::cout << "done -- now work "; worker.work(); }
+        if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
         else { std::cout << "eval only "; in_task.run_task(); }
         break;
       }
     }
     if (!worker_found) {
-      size_t w_size = m_workers.size();
+      //w_size = m_workers.size();
       if (w_size < m_max_thread_number) {
         m_workers.push_back(Worker(*this));
         std::cerr << "New worker added!" << std::endl;
