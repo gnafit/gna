@@ -53,14 +53,14 @@ namespace MultiThreading {
   public:
     Worker(ThreadPool &in_pool);
     void work();
-    inline bool is_free () { return task_stack.size() == 0; }
-    inline void add_to_task_stack(Task task) { task_stack.push(task); std::cerr << "Size of stack now is " << task_stack.size() << std::endl;}
+    inline bool is_free () { return task_stack->size() == 0; }
+    inline void add_to_task_stack(Task task) { task_stack->push(task); std::cerr << "Size of stack now is " << task_stack->size() << std::endl;}
 
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
 //  std::vector<std::thread::id> mother_thread_ids;
-    std::stack<Task> task_stack;
+    std::stack<Task> *task_stack;
   };
 }
 #endif /* GNATHREADPOOL_H */

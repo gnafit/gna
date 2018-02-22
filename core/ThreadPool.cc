@@ -15,21 +15,24 @@
 
 void MultiThreading::Task::run_task() {
     printf("runtask\n");
-    m_entry->evaluate();
+    if (m_entry->tainted) m_entry->evaluate();
     m_entry->tainted = false;
 }
 
 
-MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) { }
+MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
+
+    task_stack = new std::stack<Task>();
+}
 
 
 void MultiThreading::Worker::work(){ // runs task stack
     std::cerr << "Work" << std::endl;
-    while (!task_stack.empty()) {
+    while (!task_stack->empty()) {
 // TODO: add lock task stack
-      Task current_task = task_stack.top();
+      Task current_task = task_stack->top();
 //      if (!current_task.ready()) { /* make waiting for finish children */ }
-      task_stack.pop(); 
+      task_stack->pop(); 
 //TODO: add unlock task stack
       current_task.run_task(); // TODO: make it in separate thread
     }
@@ -58,7 +61,6 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
         m_workers[i].add_to_task_stack(in_task);
         m_workers[i].thr_head = curr_id;
         worker_found = true;
-//        in_task.run_task();
         if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
         else { std::cout << "eval only "; in_task.run_task(); }
         break;
