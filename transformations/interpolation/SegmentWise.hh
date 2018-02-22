@@ -34,11 +34,12 @@
  * for example InterpExpo.
  *
  * Inputs:
- *   - segments.points
- *   - segments.edges
+ *   - segments.points - array (to interpolate on).
+ *   - segments.edges - edges.
  *
  * Outputs:
- *   - segments.segments
+ *   - segments.segment - segment indices.
+ *   - segments.widths - segment widths.
  *
  * @note If `edge-point<m_tolerance` is equivalent to `point==edge`.
  *

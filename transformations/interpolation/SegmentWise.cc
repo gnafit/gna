@@ -19,11 +19,14 @@ SegmentWise::SegmentWise() {
                                                                   ///   - with two inputs:
     .input("points")                                              ///     + `points` - fine x.
     .input("edges")                                               ///     + `edges` - coarse x bins.
-    .output("segments")                                           ///   - output `segments` with segment indices.
+                                                                  ///   - two outputs:
+    .output("segments")                                           ///     + output `segments` with segment indices.
+    .output("widths")                                             ///     + output `width` with segment widths.
     .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>)  ///   - `points` is 1-dimensional array.
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)  ///   - `edges` is 1-dimensional array.
     .types(TypesFunctions::pass<1,0>)                             ///   - the dimension of the first output the same
                                                                   ///     as dimension of the second input (one index per edge).
+    .types(TypesFunctions::edgesToBins<1,1>)                      ///   - the `widths` output has N-1 elements.
     .func(&SegmentWise::determineSegments)                        ///   - provide the function.
     ;
 }
@@ -36,9 +39,12 @@ SegmentWise::SegmentWise() {
 void SegmentWise::determineSegments(Args args, Rets rets){
   double* segment = rets[0].buffer;                      /// The output array pointer.
 
-  auto& edges_d = args[1];                               /// The edges data,
-  auto  edge = args[1].buffer;                           /// edges array pointer,
-  auto  edge_end = next(edge, edges_d.x.size());         /// the end of the edges array.
+  auto& edges_a = args[1].x;                             /// The edges data,
+  auto  edge = edges_a.data();                           /// edges array pointer,
+  auto  nedges=edges_a.size();
+  auto  edge_end = next(edge, nedges);                   /// the end of the edges array.
+
+  rets[1].x=edges_a.tail(nedges-1) - edges_a.head(nedges-1); /// Determine bin widths.
 
   auto& points_d=args[0];                                /// The points data,
   auto  point_first=points_d.buffer;                     /// points array pointer,

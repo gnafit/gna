@@ -10,15 +10,18 @@ using std::prev;
 
 InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : SegmentWise() {
   transformation_("interp")
-    .input("newx")
-    .input("x")
-    .input("y")
-    .input("segments")
-    .output("interp")
+    .input("newx")             /// 0
+    .input("x")                /// 1
+    .input("y")                /// 2
+    .input("segments")         /// 3
+    .input("widths")           /// 4
+    .output("interp")          ///
     .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>)
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::if1d<2>)
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)
+    .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)
+    .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifSame2<1,3>)
     .types(TypesFunctions::pass<0,0>)
     .func(&InterpExpo::do_interpolate)
     ;
@@ -44,15 +47,17 @@ void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& new
   iinputs[1].connect(x.single());
   iinputs[2].connect(y.single());
   iinputs[3].connect(soutputs[0]);
+  iinputs[4].connect(soutputs[1]);
 }
 
 void InterpExpo::do_interpolate(Args args, Rets rets){
   auto& newx_a=args[0].x;
   auto& x_a=args[1].x;
   auto& y_a=args[2].x;
+  auto& widths_a=args[4].x;
 
   auto nseg=x_a.size()-1;
-  auto& b_a=((y_a.head(nseg)/y_a.tail(nseg)).log()/(x_a.tail(nseg)-x_a.head(nseg))).eval();
+  auto& b_a=((y_a.head(nseg)/y_a.tail(nseg)).log()/widths_a).eval();
 
   auto k_current=y_a.data();
   auto b_current=b_a.data();

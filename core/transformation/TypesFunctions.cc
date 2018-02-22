@@ -41,7 +41,8 @@ void TypesFunctions::passAll(Atypes args, Rtypes rets) {
 void TypesFunctions::ifSame(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
-      throw args.error(args[i], "inputs should have same type");
+      auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
+      throw args.error(args[i], (fmt%args.name()%0%i).str());
     }
   }
 }
@@ -59,7 +60,8 @@ void TypesFunctions::ifSame(Atypes args, Rtypes rets) {
 void TypesFunctions::ifSameShape(Atypes args, Rtypes rets) {
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {
-      throw args.error(args[i], "inputs should have same shape");
+      auto fmt = format("Transformation %1%: all inputs should have same shape, %2% and %3% differ");
+      throw args.error(args[i], (fmt%args.name()%0%i).str());
     }
   }
 }
