@@ -13,81 +13,54 @@
 #include <stack>
 
 #include "TransformationBase.hh"
-//#include "Transformation.hh"
 #include "GNAObject.hh"
-
-//#include "Parameters.hh"
-//#include "Data.hh"
-
-//#include "Transformation.hh"
-//#include "Exceptions.hh"
 
 //using namespace TransformationTypes;
 
 
 namespace MultiThreading {
-class Worker;
+  class Worker;
 
-class Task {
-public:
-    Task(TransformationTypes::Entry *in_entry) { entry = in_entry; }
+  /**
+  * Separate task. Contains pointer to transformation that runs on demand. 
+  */
+  class Task {
+  public:
+    Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) { } 
     void run_task();
-    TransformationTypes::Entry *entry;
-    /*  TransformationTypes::Args args;
-      TransformationTypes::Rets rets;
-      TransformationTypes::Function func;
-    */
-};
+    inline bool done() { return !(m_entry->tainted); }
+  private:
+    TransformationTypes::Entry *m_entry;
+  };
 
 
-class ThreadPool {
-public:
-  ThreadPool (int maxthr = 0);
-  void add_task(Task task);
-  int is_free_worker_exists();
-  bool is_pool_full();
-  void set_max_thread_num(int k);
+  class ThreadPool {
+  public:
+    ThreadPool (int maxthr = 0);
+    void add_task(Task task);
+    int is_free_worker_exists();
+    bool is_pool_full();
+//    void set_max_thread_num(int k);
 
-//private:
-  std::vector< Worker > workers = {};
-  std::vector< std::thread > pool = {};
-  std::vector<int> pool_task_counters ={};
-  size_t max_thread_number = 0;
-};
+  private:
+    std::vector< Worker > m_workers = {};  // every worker has it's own task stack
+    std::vector< std::vector<Task> > m_global_wait_list;
+    size_t m_max_thread_number;
+  };
 
 
-class Worker {
-public:
-  Worker(ThreadPool &in_pool);
-  void work();
-  void wait_for_free_thread();
-  bool is_any_fakes_in_pool();
-  bool is_free ();
-  bool is_fake();
+  class Worker {
+  public:
+    Worker(ThreadPool &in_pool);
+    void work();
+    inline bool is_free () { return task_stack.size() == 0; }
+    inline void add_to_task_stack(Task task) { task_stack.push(task); std::cerr << "Size of stack now is " << task_stack.size() << std::endl;}
 
 //private:
-  ThreadPool &pool;
- // std::thread thread;
+    ThreadPool &pool;
+    std::thread::id thr_head;
 //  std::vector<std::thread::id> mother_thread_ids;
-  std::stack<Task> task_stack;
-  bool freedom = true;
-  bool isfake = false;
-};
-
-/*class ThreadPool {
-public:
-  ThreadPool (int maxthr = 0);
-  void add_task(Function in_func);
-  int is_free_worker_exists();
-  bool is_pool_full();
-  void set_max_thread_num(int k);
-
-private:
-  std::vector< Worker* > workers = {};
-  std::vector< std::thread > pool = {};
-  std::vector<int> pool_task_counters ={};
-  int max_thread_number;
-};
-*/
+    std::stack<Task> task_stack;
+  };
 }
 #endif /* GNATHREADPOOL_H */

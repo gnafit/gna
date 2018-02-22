@@ -27,9 +27,9 @@ using TransformationTypes::Rtypes;
 using TransformationTypes::Entry;
 using TransformationTypes::Base;
 
-class ThreadPool;
+//class ThreadPool;
 class Task;
-ThreadPool tpool(4);
+MultiThreading::ThreadPool tpool(4);
 
 
 /**
@@ -171,6 +171,7 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
+  printf( "evaluation \n");
   return fun(Args(this), Rets(this));
 }
 
@@ -189,12 +190,10 @@ void Entry::evaluate() {
 void Entry::update() {
   Status status = Status::Success;
   try {
-  //  ThreadPool pool(4);
     tpool.add_task(this);
     //MultiThreading::Task task(this);
-    //task.run_task();
 
-    tainted = false;
+    //tainted = false;
   } catch (const SinkTypeError&) {
     status = Status::Failed;
   }
@@ -477,7 +476,9 @@ void Entry::updateTypes() {
 
 /** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
-  if (tainted && !frozen) {
+//  if (tainted && !frozen) {
+
+  if (!frozen) {
     update();
   } 
 }

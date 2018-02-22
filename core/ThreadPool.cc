@@ -14,60 +14,70 @@
 //using namespace TransformationTypes;
 
 void MultiThreading::Task::run_task() {
-    this->entry->evaluate();
+    printf("runtask\n");
+    m_entry->evaluate();
+    m_entry->tainted = false;
 }
 
 
-MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool){
-//    if (pool.pool.size() < pool.workers.size()) isfake = true;    
-/*    if (!isfake) {
-      mother_thread_ids.push_back(std::this_thread::get_id());
-    }*/
-}
+MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) { }
+
 
 void MultiThreading::Worker::work(){ // runs task stack
-    while (pool.size() > 0) {
+    std::cerr << "Work" << std::endl;
+    while (!task_stack.empty()) {
 // TODO: add lock task stack
       Task current_task = task_stack.top();
+//      if (!current_task.ready()) { /* make waiting for finish children */ }
       task_stack.pop(); 
 //TODO: add unlock task stack
       current_task.run_task(); // TODO: make it in separate thread
     }
 }
 
-void MultiThreading::Worker::wait_for_free_thread() {
-}
 
-bool MultiThreading::Worker::is_any_fakes_in_pool() {
-    return (pool.pool.size() < pool.workers.size());
-}
-
-bool MultiThreading::Worker::is_free () {
-    return freedom;
-}
-
-bool MultiThreading::Worker::is_fake() {
-    return isfake;
-}
-
-MultiThreading::ThreadPool::ThreadPool (int maxthr) : max_thread_number(maxthr) {
+MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr) {
     // Mother thread creation
-    // setting max thread number
-    std::cout << "Mother thread created" << std::endl;
-    if (max_thread_number <= 0) max_thread_number = std::thread::hardware_concurrency();
-    workers.push_back(Worker(*this));
-    //pool.push_back(std::thread(workers[0]));
-   // pool_task_counters.push_back(0);
+    std::cout << "Thread pool created" << std::endl;
+    if (m_max_thread_number <= 0) m_max_thread_number = std::thread::hardware_concurrency();
+    m_workers.push_back(Worker(*this));
+    m_workers[0].thr_head = std::this_thread::get_id();
 }
 
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
-    // mother thread  creates new one
-    if (!is_pool_full()) {
-      if (! is_free_worker_exists() ) {
-        workers.push_back(Worker(*this));
-        //pool_task_counters.push_back(0);
+    // mother thread  creates new one if it is possible
+
+    std::thread::id curr_id = std::this_thread::get_id();
+    bool worker_found = false;
+    for (auto worker : m_workers) {
+      if(worker.is_free()) { 
+        std::cerr << "Free worker found!" << std::endl;
+        worker.add_to_task_stack(in_task);
+        worker.thr_head = curr_id;
+        worker_found = true;
+        //if (in_task.done()) 
+        worker.work();
+        break;
       }
     }
+    if (!worker_found) {
+      size_t w_size = m_workers.size();
+      if (w_size < m_max_thread_number) {
+        m_workers.push_back(Worker(*this));
+        std::cerr << "New worker added!" << std::endl;
+        m_workers[w_size - 1].thr_head = curr_id;
+        if (in_task.done()) m_workers[w_size - 1].work();
+      } else {
+        std::cerr << "Try to add task to wait list" << std::endl;
+        for (size_t i = 0; i < w_size; i++) {
+          if (m_workers[i].thr_head == curr_id && !in_task.done()) {
+            std::cerr << "Task added to wait list" << std::endl;
+            m_global_wait_list[i].push_back(in_task);
+          }
+        }
+      } 
+    }
+    
 }
 
 int MultiThreading::ThreadPool::is_free_worker_exists() {
@@ -77,10 +87,7 @@ int MultiThreading::ThreadPool::is_free_worker_exists() {
 } 
 
 bool MultiThreading::ThreadPool::is_pool_full () {
-    // returns true if size of pool >= max pool size (usually settet externally)
-    return (pool.size() < max_thread_number);
+    // returns true if size of pool >= max pool size (usually setted externally)
+    return (m_workers.size() >= m_max_thread_number);
 }
 
-void MultiThreading::ThreadPool::set_max_thread_num(int k) {
-    max_thread_number = k;
-}
