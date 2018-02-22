@@ -1,4 +1,5 @@
 #include <boost/math/constants/constants.hpp>
+#include "TypesFunctions.hh"
 
 #include <TMath.h>
 
@@ -10,7 +11,7 @@ ReactorNormAbsolute::ReactorNormAbsolute(const std::vector<std::string> &isoname
 {
   variable_(&m_norm, "Norm");
   auto norm = transformation_("isotopes")
-    .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
         for (size_t i = 0; i < rets.size(); ++i) {
           rets[i] = DataType().points().shape(1);
         }
@@ -37,7 +38,7 @@ ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
   variable_(&m_targetProtons, "TargetProtons");
   variable_(&m_L, "L");
   auto norm = transformation_("isotopes")
-    .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
         for (size_t i = 0; i < rets.size(); ++i) {
           rets[i] = DataType().points().shape(1);
         }

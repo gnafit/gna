@@ -6,6 +6,7 @@
 #include "IbdInteraction.hh"
 #include "IbdFirstOrder.hh"
 #include "PDGVariables.hh"
+#include "TypesFunctions.hh"
 
 #include "ParametricLazy.hpp"
 
@@ -26,14 +27,14 @@ IbdFirstOrder::IbdFirstOrder()
   transformation_("xsec")
     .input("Enu")
     .input("ctheta")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .output("xsec")
     .func(&IbdFirstOrder::calc_Xsec);
   transformation_("jacobian")
     .input("Enu")
     .input("Ee")
     .input("ctheta")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .output("jacobian")
     .func(&IbdFirstOrder::calc_dEnu_wrt_Ee);
   PDGVariables *p = m_pdg;

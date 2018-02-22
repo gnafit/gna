@@ -26,6 +26,7 @@ set (SOURCES
   core/transformation/TransformationBase.cc
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
+  core/transformation/TypesFunctions.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -76,6 +77,7 @@ set (HEADERS
   Rets.hh
   Rtypes.hh
   Atypes.hh
+  TypesFunctions.hh
   EntryHandle.hh
   OutputHandle.hh
   OpenHandle.hh

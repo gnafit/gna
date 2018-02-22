@@ -1,12 +1,13 @@
 #include <boost/math/constants/constants.hpp>
 #include "HistSmear.hh"
+#include "TypesFunctions.hh"
 
 HistSmear::HistSmear(bool upper) {
   transformation_("smear")
       .input("Ntrue")
       .input("SmearMatrix")
       .output("Nvis")
-      .types(Atypes::pass<0,0>,
+      .types(TypesFunctions::pass<0,0>,
          [](Atypes args, Rtypes /*rets*/) {
            if (args[1].shape.size() != 2) {
                throw args.error(args[0], "SmearMatrix is not matrix");

@@ -49,6 +49,3 @@ def Rebin( edges, rounding, *args, **kwargs ):
         raise Exception('Rebin rounding should be an integer')
     edges = N.ascontiguousarray(edges, dtype='d')
     return R.Rebin(edges.size, edges, int( rounding), *args, **kwargs )
-
-"""Construct SegmentWise object from array with edges"""
-SegmentWise = wrap_constructor1( R.SegmentWise )

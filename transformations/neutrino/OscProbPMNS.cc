@@ -7,6 +7,7 @@
 
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
+#include "TypesFunctions.hh"
 
 using namespace Eigen;
 
@@ -66,7 +67,7 @@ OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
   transformation_("average_oscillations")
         .input("flux")
         .output("flux_averaged_osc")
-        .types(Atypes::pass<0>)
+        .types(TypesFunctions::pass<0>)
         .func(&OscProbAveraged::CalcAverage);
 }
 
@@ -110,7 +111,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
     .input("comp23")
     .input("comp0")
     .output("probsum")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNS::calcSum);
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
@@ -120,7 +121,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .types(Atypes::pass<0>)
+      .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
 }
 
@@ -212,7 +213,7 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
     .input("comp23")
     .input("comp0")
     .output("probsum")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNSMult::calcSum);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 class Covmat: public GNAObject,
               public TransformationBind<Covmat> {
@@ -9,7 +10,7 @@ public:
     : m_fixed(false)
   {
     transformation_("cov")
-      .types(Atypes::ifSameShape, [](Atypes args, Rtypes rets) {
+      .types(TypesFunctions::ifSameShape, [](Atypes args, Rtypes rets) {
           rets[0] = DataType().points().shape(args[0].size(), args[0].size());
         })
       .func(&Covmat::calculateCov)
@@ -17,13 +18,13 @@ public:
       .output("cov")
     ;
     transformation_("inv")
-      .types(Atypes::pass<0>)
+      .types(TypesFunctions::pass<0>)
       .func(&Covmat::calculateInv)
       .input("cov")
       .output("inv")
       ;
     transformation_("cholesky")
-      .types(Atypes::pass<0>, &Covmat::prepareCholesky)
+      .types(TypesFunctions::pass<0>, &Covmat::prepareCholesky)
       .func(&Covmat::calculateCholesky)
       .input("cov")
       .output("L")

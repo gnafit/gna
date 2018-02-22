@@ -4,6 +4,7 @@
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
 #include "Units.hh"
+#include "TypesFunctions.hh"
 
 using namespace Eigen;
 
@@ -36,7 +37,7 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
     .input("comp13")
     .input("comp23")
     .output("probsum")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNSDecoh::calcSum);
   if (from.flavor != to.flavor) {
     probsum.input("compCP12");

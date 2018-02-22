@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include "TypesFunctions.hh"
 
 //
 // Identity transformation
@@ -12,7 +13,7 @@ public:
     transformation_("identity")
       .input("source")
       .output("target")
-      .types(Atypes::pass<0,0>)
+      .types(TypesFunctions::pass<0,0>)
       .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
       ;
   };

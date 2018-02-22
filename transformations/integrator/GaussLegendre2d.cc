@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "GaussLegendre2d.hh"
+#include "TypesFunctions.hh"
 
 using namespace Eigen;
 
@@ -64,7 +65,7 @@ GaussLegendre2dHist::GaussLegendre2dHist(const GaussLegendre2d *base)
   transformation_("hist")
     .input("f")
     .output("hist")
-    .types(Atypes::ifSame, [](GaussLegendre2dHist *obj, Atypes, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](GaussLegendre2dHist *obj, Atypes, Rtypes rets) {
         rets[0] = DataType().hist().bins(obj->m_base->m_xorders.size()).edges(obj->m_base->m_xedges);
       })
     .func([](GaussLegendre2dHist *obj, Args args, Rets rets) {

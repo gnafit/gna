@@ -1,5 +1,5 @@
 #include "Normalize.hh"
-#include "TMath.h"
+#include "TypesFunctions.hh"
 #include <Eigen/Core>
 #include <cmath>
 
@@ -12,7 +12,7 @@ Normalize::Normalize() {
     transformation_("normalize")
         .input("inp")
         .output("out")
-        .types(Atypes::pass<0>)
+        .types(TypesFunctions::pass<0>)
         .func(&Normalize::doNormalize)
         ;
 }
@@ -29,7 +29,7 @@ Normalize::Normalize(size_t start, size_t length) : m_start{start}, m_length{len
     transformation_("normalize")
         .input("inp")
         .output("out")
-        .types(Atypes::pass<0>, &Normalize::checkLimits)
+        .types(TypesFunctions::pass<0>, &Normalize::checkLimits)
         .func(&Normalize::doNormalize_segment)
         ;
 }

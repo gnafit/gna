@@ -5,8 +5,8 @@
 #include <string>
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 #include <Eigen/Dense>
-
 
 class GeoNeutrinoFluxNormed: public GNASingleObject,
                 public TransformationBind<GeoNeutrinoFluxNormed> {
@@ -16,7 +16,7 @@ public:
     transformation_("flux_norm")
       .input("flux")
       .output("normed_flux")
-      .types(Atypes::ifSame, Atypes::pass<0>)
+      .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
       .func(&GeoNeutrinoFluxNormed::CalcNorm);
   }
 protected:

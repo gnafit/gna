@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 enum class ReturnOnFail: int {UseNaN, UseZero};
 
@@ -19,7 +20,7 @@ public:
     transformation_("f")
       .input("x")
       .output("y")
-      .types(Atypes::pass<0>)
+      .types(TypesFunctions::pass<0>)
       .func(&LinearInterpolator::interpolate) ;
 
    if (return_on_fail == "use_zero") {

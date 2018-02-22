@@ -1,5 +1,5 @@
 #include "SelfPower.hh"
-#include "TMath.h"
+#include "TypesFunctions.hh"
 #include <Eigen/Core>
 #include <cmath>
 
@@ -16,14 +16,14 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
     transformation_("selfpower")
         .input("points")
 	.output("result")
-	.types(Atypes::ifPoints<0>, Atypes::pass<0>)
+	.types(TypesFunctions::ifPoints<0>, TypesFunctions::pass<0>)
 	.func(&SelfPower::calculate)
       ;
 
     transformation_("selfpower_inv")
         .input("points")
 	.output("result")
-	.types(Atypes::ifPoints<0>, Atypes::pass<0>)
+	.types(TypesFunctions::ifPoints<0>, TypesFunctions::pass<0>)
 	.func(&SelfPower::calculate_inv)
       ;
 }

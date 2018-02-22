@@ -1,4 +1,5 @@
 #include "HistNonlinearity.hh"
+#include "TypesFunctions.hh"
 #include <algorithm>
 
 //#define DEBUG_ENL
@@ -16,14 +17,14 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("Ntrue")
       .input("FakeMatrix")
       .output("Nvis")
-      .types(Atypes::pass<0,0>)
+      .types(TypesFunctions::pass<0,0>)
       .func(&HistNonlinearity::calcSmear);
 
   transformation_("matrix")
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")
-      .types(Atypes::ifSame,
+      .types(TypesFunctions::ifSame,
          [](HistNonlinearity *obj, Atypes args, Rtypes rets) {
          obj->m_size = args[0].shape[0]-1;
          obj->m_sparse_cache.resize(obj->m_size, obj->m_size);

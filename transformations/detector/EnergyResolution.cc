@@ -1,5 +1,6 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergyResolution.hh"
+#include "TypesFunctions.hh"
 #include <boost/format.hpp>
 #include <string.h>
 using boost::format;
@@ -26,7 +27,7 @@ void EnergyResolution::add(){
   transformation_(label)
     .input("Nvis")
     .output("Nrec")
-    .types(Atypes::pass<0>,Atypes::ifHist<0>,
+    .types(TypesFunctions::pass<0>,TypesFunctions::ifHist<0>,
            [index](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
              if(index==0){
                obj->m_datatype = args[0];

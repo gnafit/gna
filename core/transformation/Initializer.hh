@@ -5,6 +5,7 @@
 #include "Rtypes.hh"
 #include "Args.hh"
 #include "Rets.hh"
+#include "TypesFunctions.hh"
 
 template <typename Derived>
 class TransformationBind;
@@ -28,7 +29,7 @@ namespace TransformationTypes {
    * transformation_("identity")
    *   .input("source")
    *   .output("target")
-   *   .types(Atypes::pass<0,0>)
+   *   .types(TypesFunctions::pass<0,0>)
    *   .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
    *   ;
    * ```
@@ -101,7 +102,7 @@ namespace TransformationTypes {
      * The method:
      *   - checks that the number of Entry instances in the Base does not
      *     exceed the maximal number of allowed entries.
-     *   - passes Atypes::passAll() as TypeFunction if no TypeFunction objects are provided.
+     *   - passes TypesFunctions::passAll() as TypeFunction if no TypeFunction objects are provided.
      *   - subscribes the Entry to the Base's taint flag unless Initializer::m_nosubscribe is set.
      *   - adds the Entry to the Base.
      *   - adds MemFunction and MemTypesFunction objects to the TransformationBind Initializer::m_obj.
@@ -116,7 +117,7 @@ namespace TransformationTypes {
         throw std::runtime_error("too much transformations");
       }
       if (m_entry->typefuns.empty()) {
-        m_entry->typefuns.push_back(Atypes::passAll);
+        m_entry->typefuns.push_back(TypesFunctions::passAll);
       }
       m_entry->initializing = 0;
       if (!m_nosubscribe) {

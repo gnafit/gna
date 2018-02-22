@@ -1,4 +1,5 @@
 #include "RenormalizeDiag.hh"
+#include "TypesFunctions.hh"
 #include <iostream>
 #include <boost/format.hpp>
 using namespace std;
@@ -15,7 +16,7 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
   transformation_("renorm")
       .input("inmat")
       .output("outmat")
-      .types(Atypes::pass<0>,
+      .types(TypesFunctions::pass<0>,
          [](Atypes args, Rtypes /*rets*/) {
            if (args[0].shape.size() != 2) {
                throw args.error(args[0], "SmearMatrix is not matrix");

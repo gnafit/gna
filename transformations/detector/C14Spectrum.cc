@@ -1,4 +1,5 @@
 #include "C14Spectrum.hh"
+#include "TypesFunctions.hh"
 
 #include "FakeGSLFunction.hh"
 #include "Units.hh"
@@ -41,7 +42,7 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
    transformation_("smear")
                   .input("Nvis")
                   .output("NvisC")
-                  .types(Atypes::pass<0>,
+                  .types(TypesFunctions::pass<0>,
                          [](C14Spectrum *obj, Atypes args, Rtypes /*rets*/) {
                            obj->m_datatype = args[0];
                            obj->fillCache();

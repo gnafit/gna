@@ -1,6 +1,7 @@
 #include <boost/format.hpp>
 
 #include "WeightedSum.hh"
+#include "TypesFunctions.hh"
 
 WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vector<std::string> &weight_labels) {
   if (labels.empty()) {
@@ -11,7 +12,7 @@ WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vect
   }
   auto sum = transformation_("sum")
     .output("sum")
-    .types(Atypes::ifSame, Atypes::pass<0>)
+    .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
     .func([] (WeightedSum *obj, Args args, Rets rets) {
         rets[0].x = obj->m_vars[0]*args[0].x;
         for (size_t i = 1; i < args.size(); ++i) {

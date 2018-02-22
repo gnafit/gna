@@ -2,6 +2,7 @@
 
 #include "GNAObject.hh"
 #include "UncertainParameter.hh"
+#include "TypesFunctions.hh"
 
 class Derivative: public GNASingleObject,
                   public TransformationBind<Derivative> {
@@ -12,7 +13,7 @@ public:
     transformation_("derivative")
       .input("y")
       .output("dy")
-      .types(Atypes::pass<0>)
+      .types(TypesFunctions::pass<0>)
       .func(&Derivative::calcDerivative)
     ;
   }

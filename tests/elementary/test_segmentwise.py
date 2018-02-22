@@ -7,12 +7,15 @@ import numpy as N
 from constructors import SegmentWise, Points
 from gna.bindings import DataType
 
-segments = N.arange(0.0, 10.0, dtype='d')
+segments   = N.arange(0.0, 10.0, dtype='d')
+segments_t = Points(segments)
+
 points   = N.arange(-0.5, 11.0, dtype='d')
 points_t = Points( points )
 
-sw = SegmentWise(segments)
-sw.segments.points( points_t.points.points )
+sw = SegmentWise()
+sw.segments.edges(segments_t.points.points)
+sw.segments.points(points_t.points.points)
 
 diff = segments - sw.segments.edges.data()
 if not (N.fabs(diff)<1.e-16).all():
