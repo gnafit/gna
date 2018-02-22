@@ -21,8 +21,14 @@ struct TypesFunctions
   template <size_t Arg>
   static void ifPoints(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);    ///< Checks if Arg-th input is an array (DataKind=Points).
 
-  template <size_t Arg, size_t Ndim=1>
-  static void ifNd(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);        ///< Checks if Arg-th input is N-dimensional (1 by default).
+  template <size_t Arg, size_t Ndim>
+  static void ifNd(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);        ///< Checks if Arg-th input is N-dimensional.
+
+  template <size_t Arg>
+  static void if1d(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);        ///< Checks if Arg-th input is 1-dimensional.
+
+  template <size_t Arg>
+  static void if2d(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);        ///< Checks if Arg-th input is 2-dimensional.
 
   template <size_t Arg>
   static void ifSquare(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets);    ///< Checks if Arg-th input is of square shape.
@@ -103,7 +109,7 @@ inline void TypesFunctions::ifPoints(TransformationTypes::Atypes args, Transform
  * @param args -- source types.
  * @param rets -- output types.
  *
- * @exception std::runtime_error in case input data is not 1 dimensional.
+ * @exception std::runtime_error in case input data is not N-dimensional.
  */
 template <size_t Arg, size_t Ndim>
 inline void TypesFunctions::ifNd(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets) {
@@ -114,6 +120,40 @@ inline void TypesFunctions::ifNd(TransformationTypes::Atypes args, Transformatio
   }
 }
 
+/**
+ * @brief Checks if Arg-th input is 1d.
+ *
+ * Raises an exception otherwise.
+ *
+ * @tparam Arg -- index of Arg to check.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case input data is not 1-dimensional.
+ */
+template <size_t Arg>
+inline void TypesFunctions::if1d(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets) {
+  TypesFunctions::ifNd<Arg,1>(args, rets);
+}
+
+
+/**
+ * @brief Checks if Arg-th input is 2d.
+ *
+ * Raises an exception otherwise.
+ *
+ * @tparam Arg -- index of Arg to check.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case input data is not 2-dimensional.
+ */
+template <size_t Arg>
+inline void TypesFunctions::if2d(TransformationTypes::Atypes args, TransformationTypes::Rtypes rets) {
+  TypesFunctions::ifNd<Arg,2>(args, rets);
+}
 /**
  * @brief Checks if Arg-th input is of square shape
  *

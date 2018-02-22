@@ -7,7 +7,9 @@ class SegmentWise: public GNASingleObject,
 public:
   SegmentWise();
 
+  void setTolerance(double value) { m_tolerance = value; }
 protected:
-  void defineTypes(Atypes, Rtypes);
   void determineSegments(Args, Rets);
+
+  double m_tolerance{1.e-16};
 };
