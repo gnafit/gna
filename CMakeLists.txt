@@ -37,6 +37,7 @@ set (SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
+  transformations/functions/Exp.cc
   transformations/hist/Rebin.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
@@ -113,6 +114,7 @@ set (HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
+  Exp.hh
   SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh

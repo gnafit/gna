@@ -1,0 +1,23 @@
+#pragma once
+
+#include "GNAObject.hh"
+#include "Statistic.hh"
+
+/**
+ * @brief Transformation to calculate the value of Exp(x)
+ *
+ * Inputs:
+ *   - exp.points
+ *   - exp.result
+ *
+ * @author Maxim Gonchar
+ * @date 27.02.2018
+ */
+class Exp: public GNAObject,
+           public TransformationBind<Exp> {
+public:
+    Exp(); ///< Constructor.
+
+    void calculate(Args args, Rets rets);        ///< Calculate the value of function.
+protected:
+};
