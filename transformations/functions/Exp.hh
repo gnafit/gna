@@ -13,7 +13,7 @@
  * @author Maxim Gonchar
  * @date 27.02.2018
  */
-class Exp: public GNAObject,
+class Exp: public GNASingleObject,
            public TransformationBind<Exp> {
 public:
     Exp(); ///< Constructor.
