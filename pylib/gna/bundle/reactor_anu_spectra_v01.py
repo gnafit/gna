@@ -32,16 +32,22 @@ class reactor_anu_spectra_v01(TransformationBundle):
         self.objects['corrections'] = corrections_t
 
         newx = self.shared.points
-        segments=None
+        segments_t=None
         for ns in self.namespaces:
             spectrum_raw_t = C.Points( self.spectra[ns.name], ns=self.common_namespace )
 
+            # import IPython
+            # IPython.embed()
             spectrum_t = R.Product(ns=self.common_namespace)
             spectrum_t.multiply( spectrum_raw_t )
             spectrum_t.multiply( corrections_t )
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
-            interp_expo_t.interpolate(model_edges_t, spectrum_t, newx)
+            if segments_t:
+                interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx)
+            else:
+                interp_expo_t.interpolate(model_edges_t, spectrum_t, newx)
+                segments_t = interp_expo_t.segments
 
             """Store data"""
             self.objects[('spectrum_raw', ns.name)] = spectrum_raw_t

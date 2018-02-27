@@ -86,6 +86,7 @@ namespace TransformationTypes
     void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
 
     std::string name;                                   ///< Transformation name.
+    std::string label;                                  ///< Transformation label.
     SourcesContainer sources;                           ///< Transformation inputs (sources).
     SinksContainer sinks;                               ///< Transformation outputs (sinks).
     Function fun=nullptr;                               ///< The function that does actual calculation.

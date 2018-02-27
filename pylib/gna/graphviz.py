@@ -18,6 +18,7 @@ class GNADot(object):
     # tailfmt = '{index:d}: {name}'
     tailfmt = '{name}'
     tailfmt_noi = '{name}'
+    entryfmt = '{label}'
     def __init__(self, transformation):
         if not isinstance(transformation, R.TransformationTypes.Handle):
             raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle')
@@ -43,9 +44,9 @@ class GNADot(object):
             return obj
 
         if i is None:
-            return self.headfmt_noi.format(name=obj.name)
+            return self.headfmt_noi.format(name=obj.name, label=obj.label)
 
-        return self.headfmt.format(index=i, name=obj.name)
+        return self.headfmt.format(index=i, name=obj.name, label=obj.label)
 
     def get_tail_label(self, i, obj):
         if not self.marktail:
@@ -54,9 +55,9 @@ class GNADot(object):
             return obj
 
         if i is None:
-            return self.tailfmt_noi.format(name=obj.name)
+            return self.tailfmt_noi.format(name=obj.name, label=obj.label)
 
-        return self.tailfmt.format(index=i, name=obj.name)
+        return self.tailfmt.format(index=i, name=obj.name, label=obj.label)
 
     def get_labels(self, isink, sink, isource=None, source=None):
         labels = {}
@@ -72,7 +73,8 @@ class GNADot(object):
         if self.registered( entry ):
             return
 
-        node = self.graph.add_node( uid(entry), label=entry.name )
+        name = self.entryfmt.format(name=entry.name, label=entry.label)
+        node = self.graph.add_node( uid(entry), label=name )
         self.walk_forward( entry )
 
         for i, source in enumerate(entry.sources):

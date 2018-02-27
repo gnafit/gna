@@ -27,14 +27,14 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+      : name(name), label(name), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const Source &other, Entry *entry)
-      : name(other.name), entry(entry) { }
+      : name(other.name), label(other.label), entry(entry) { }
 
     void connect(Sink *newsink);                   ///< Connect the Source to the Sink.
 
@@ -46,6 +46,7 @@ namespace TransformationTypes
       return sink && sink->data;
     }
     std::string name;                             ///< Source's name.
+    std::string label;                            ///< Source's label.
     const Sink *sink = nullptr;                   ///< Pointer to the Sink the Source is connected to.
     Entry *entry;                                 ///< Entry pointer the Source belongs to.
   };
