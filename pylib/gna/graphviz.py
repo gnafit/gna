@@ -11,19 +11,21 @@ def uid( obj1, obj2=None ):
     return res
 
 class GNADot(object):
-    markhead, marktail = True, False
-    # headfmt = '{index:d}: {name}'
-    headfmt = '{name}'
-    headfmt_noi = '{name}'
-    # tailfmt = '{index:d}: {name}'
-    tailfmt = '{name}'
-    tailfmt_noi = '{name}'
+    markhead, marktail = True, True
+    # headfmt = '{index:d}: {label}'
+    headfmt = '{label}'
+    headfmt_noi = '{label}'
+    # tailfmt = '{index:d}: {label}'
+    tailfmt = '{label}'
+    tailfmt_noi = '{label}'
     entryfmt = '{label}'
-    def __init__(self, transformation):
+    def __init__(self, transformation, **kwargs):
+        kwargs.setdefault('fontsize', 10)
+        kwargs.setdefault('labelfontsize', 10)
         if not isinstance(transformation, R.TransformationTypes.Handle):
             raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle')
 
-        self.graph=G.AGraph( directed=True, label=transformation.name() )
+        self.graph=G.AGraph( directed=True, label=transformation.name(), **kwargs )
         self.register = set()
         self.walk_back( R.OpenHandle(transformation).getEntry() )
         self.write = self.graph.write

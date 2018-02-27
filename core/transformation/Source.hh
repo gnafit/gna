@@ -27,7 +27,7 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const std::string &name, Entry *entry)
-      : name(name), label(name), entry(entry) { }
+      : name(name), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.

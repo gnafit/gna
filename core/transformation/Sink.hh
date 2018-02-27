@@ -28,7 +28,7 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Sink belongs to.
      */
     Sink(const std::string &name, Entry *entry)
-      : name(name), label(name), entry(entry) { }
+      : name(name), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Sink to get the name from.

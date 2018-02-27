@@ -16,6 +16,7 @@ from gna.labelfmt import formatter as L
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-l', '--log', action='store_true', help='logarithmic scale' )
+parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '--set', nargs=2, action='append', default=[], help='set parameter I to value V', metavar=('I', 'V') )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts=parser.parse_args()
@@ -34,6 +35,7 @@ cfg.varmode = 'log'
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )
 points_t = C.Points(points)
+points_t.points.setLabel('E (integr)')
 shared=NestedDict( points=points_t.single() )
 
 ns = env.globalns('testexp')
@@ -82,4 +84,5 @@ if opts.dot:
     except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
 
-P.show()
+if opts.show:
+    P.show()

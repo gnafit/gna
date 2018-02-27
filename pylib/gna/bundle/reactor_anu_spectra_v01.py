@@ -19,15 +19,19 @@ class reactor_anu_spectra_v01(TransformationBundle):
         self.load_data()
 
         model_edges_t = C.Points( self.model_edges, ns=self.common_namespace )
+        model_edges_t.points.setLabel('E0 (model)')
         self.objects['edges'] = model_edges_t
 
         with self.common_namespace:
             corrections_raw_t = R.VarArray(C.stdvector(self.variables), ns=self.common_namespace)
         if self.cfg.varmode=='log':
+            corrections_raw_t.vararray.setLabel('Spec pars:\nlog(n_i)')
             corrections_t = R.Exp(ns=self.common_namespace)
             corrections_t.exp.points( corrections_raw_t )
+            corrections_t.exp.setLabel('n_i')
             self.objects['corrections_log'] = corrections_raw_t
         else:
+            corrections_raw_t.vararray.setLabel('n_i')
             corrections_t = corrections_raw_t
         self.objects['corrections'] = corrections_t
 
@@ -35,14 +39,15 @@ class reactor_anu_spectra_v01(TransformationBundle):
         segments_t=None
         for ns in self.namespaces:
             spectrum_raw_t = C.Points( self.spectra[ns.name], ns=self.common_namespace )
+            spectrum_raw_t.points.setLabel('S0(E0):\n'+ns.name)
 
-            # import IPython
-            # IPython.embed()
             spectrum_t = R.Product(ns=self.common_namespace)
             spectrum_t.multiply( spectrum_raw_t )
             spectrum_t.multiply( corrections_t )
+            spectrum_t.product.setLabel('S(E0):\n'+ns.name)
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
+            interp_expo_t.interp.setLabel('S(E):\n'+ns.name)
             if segments_t:
                 interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx)
             else:
