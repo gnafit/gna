@@ -170,7 +170,7 @@ void CovariatedPrediction::calculateTypes(Atypes args, Rtypes rets) {
 */ 
  
 void CovariatedPrediction::calculatePrediction(Args args, Rets rets) {
-  auto* buf = rets[0].x.data();
+  auto* buf  = rets[0].x.data();
   for (size_t i = 0; i < args.size(); ++i) {
     const auto &arg = args[i];
     buf = std::copy(arg.x.data(), arg.x.data()+arg.type.size(), buf);

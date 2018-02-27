@@ -78,12 +78,12 @@ inline Uncertain<double>::Uncertain(const std::string &name)
 }
 
 
-template <typename T>
-struct ParameterComparator {
-    bool operator()(const T& lhs, const T& rhs) const noexcept {
-        return lhs.value() < rhs.value();
-    };
-};
+/* template <typename T>
+ * struct ParameterComparator {
+ *     bool operator()(const T& lhs, const T& rhs) const noexcept {
+ *         return lhs.value() < rhs.value();
+ *     };
+ * }; */
 
 template <typename T>
 class Parameter: public Uncertain<T> {
@@ -99,22 +99,27 @@ public:
 
   virtual void set(T value)
     { m_par = value; }
+
   virtual T relativeValue(T diff)
     { return this->value() + diff*this->m_sigma; }
+
   virtual void relativeShift(T diff)
     { set(relativeValue(diff)); }
 
-  virtual T cast(const std::string &v) const
+  virtual T cast(const std::string& v) const
     { return boost::lexical_cast<T>(v); }
-  virtual T cast(const T &v) const
+
+  virtual T cast(const T& v) const
     { return v; }
 
   virtual void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
-  virtual const std::vector<std::pair<T, T>> &limits() const
+
+  virtual const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
   virtual void reset() { set(this->central()); }
+
   bool influences(SingleOutput &out) const noexcept {
     return out.single().depends(this->getVariable());
   }
@@ -130,6 +135,14 @@ public:
           return true;
       }
   }
+
+  virtual std::vector<std::reference_wrapper<Parameter<T>>> getCovariatedParams() {
+      std::vector<std::reference_wrapper<Parameter<T>>> pars_covarited_with;
+      for (const auto& cov_elements: m_covariances) {
+          pars_covarited_with.push_back(const_cast<Parameter<T>&>(cov_elements.first));
+      }
+      return pars_covarited_with;
+  };
 
   virtual void setCovariance(Parameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
@@ -175,6 +188,7 @@ protected:
   CovStorage m_covariances;
   parameter<T> m_par;
   bool m_fixed = false;
+
 };
 
 
