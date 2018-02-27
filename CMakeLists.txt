@@ -64,6 +64,7 @@ set (SOURCES
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
+  transformations/var/VarArray.cc
   extra/GridFilter.cc
   )
 
@@ -118,6 +119,7 @@ set (HEADERS
   NormalToyMC.hh
   PoissonToyMC.hh
   Rebin.hh
+  VarArray.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
