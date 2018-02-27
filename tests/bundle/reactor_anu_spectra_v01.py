@@ -17,6 +17,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-l', '--log', action='store_true', help='logarithmic scale' )
 parser.add_argument( '--set', nargs=2, action='append', default=[], help='set parameter I to value V', metavar=('I', 'V') )
+parser.add_argument( '--dot', help='write graphviz output' )
 opts=parser.parse_args()
 
 """Init configuration"""
@@ -70,5 +71,15 @@ if opts.log:
     ax.set_yscale('log')
 
 ax.legend( loc='upper right' )
+
+if opts.dot:
+    try:
+        from gna.graphviz import GNADot
+
+        graph = GNADot( b.transformations_out.values()[0] )
+        graph.write(opts.dot)
+        print( 'Write output to:', opts.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )
 
 P.show()

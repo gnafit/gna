@@ -32,6 +32,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
         self.objects['corrections'] = corrections_t
 
         newx = self.shared.points
+        segments=None
         for ns in self.namespaces:
             spectrum_raw_t = C.Points( self.spectra[ns.name], ns=self.common_namespace )
 

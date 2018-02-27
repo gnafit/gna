@@ -50,6 +50,18 @@ void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& new
   iinputs[4].connect(soutputs[1]);
 }
 
+void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+  auto soutputs = segments.outputs();
+
+  auto interp = this->t_["interp"];
+  auto iinputs = interp.inputs();
+  iinputs[0].connect(newx.single());
+  iinputs[1].connect(x.single());
+  iinputs[2].connect(y.single());
+  iinputs[3].connect(soutputs[0]);
+  iinputs[4].connect(soutputs[1]);
+}
+
 void InterpExpo::do_interpolate(Args args, Rets rets){
   auto& newx_a=args[0].x;
   auto& x_a=args[1].x;
