@@ -170,6 +170,17 @@ namespace TransformationTypes {
       return *this;
     }
 
+
+    /**
+     * @brief Set Entry label.
+     * @param label -- Entry label.
+     * @return `*this`.
+     */
+    Initializer<T> label(const std::string &label) {
+      m_entry->label=label;
+      return *this;
+    }
+
     /**
      * @brief Set the Entry::fun from a MemFunction.
      *

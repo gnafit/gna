@@ -3,26 +3,38 @@
 #include "WeightedSum.hh"
 #include "TypesFunctions.hh"
 
-WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vector<std::string> &weight_labels) {
+WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vector<std::string> &weight_labels)
+  : WeightedSum(false, labels, weight_labels){ }
+
+WeightedSum::WeightedSum(double fillvalue, const std::vector<std::string> &labels, const std::vector<std::string> &weight_labels)
+  : WeightedSum(true, labels, weight_labels) { m_fillvalue=fillvalue; }
+
+WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &labels, const std::vector<std::string> &weight_labels) {
   if (labels.empty()) {
     return;
   }
+
+  if( weight_labels.size()>0u ){
+    m_common = std::min(labels.size(), weight_labels.size());
+  }
+  else{
+    m_common = labels.size();
+  }
+
   auto sum = transformation_("sum")
     .output("sum")
+    .label("wsum")
     .types(TypesFunctions::ifSame, TypesFunctions::pass<0>);
 
-  if( labels.size()==weight_labels.size() ){
-    sum.func(&WeightedSum::sumEq);
+  if( use_fillvalue ){
+    sum.func(&WeightedSum::sumFill);
   }
-  else if( labels.size()>weight_labels.size() ) {
-    sum.func(&WeightedSum::sumArr);
-  }
-  else {
-    sum.func(&WeightedSum::sumVal);
+  else{
+    sum.func(&WeightedSum::sum);
   }
 
   m_vars.resize(labels.size());
-  for (size_t i = 0; i < labels.size(); ++i) {
+  for (size_t i = 0; i < m_common; ++i) {
     std::string wlabel;
     if ( weight_labels.empty() ) {
       wlabel = str(boost::format("weight_%1%")%labels[i]);
@@ -35,32 +47,30 @@ WeightedSum::WeightedSum(const std::vector<std::string> &labels, const std::vect
   }
 }
 
-void WeightedSum::sumEq(Args args, Rets rets){
-    rets[0].x = m_vars[0]*args[0].x;
-    for (size_t i = 1; i < args.size(); ++i) {
-      rets[0].x += m_vars[i]*args[i].x;
-    }
-}
-
-void WeightedSum::sumArr(Args args, Rets rets){
+void WeightedSum::sum(Args args, Rets rets){
     rets[0].x = m_vars[0]*args[0].x;
     size_t i = 1;
-    for (; i < m_vars.size(); ++i) {
+    for (; i < m_common; ++i) {
       rets[0].x += m_vars[i]*args[i].x;
     }
     for (; i < args.size(); ++i) {
       rets[0].x += args[i].x;
-    }
-}
-
-void WeightedSum::sumVal(Args args, Rets rets){
-    rets[0].x = m_vars[0]*args[0].x;
-    size_t i = 1;
-    for (; i < args.size(); ++i) {
-      rets[0].x += m_vars[i]*args[i].x;
     }
     for (; i < m_vars.size(); ++i) {
       rets[0].x += m_vars[i].value();
     }
 }
 
+void WeightedSum::sumFill(Args args, Rets rets){
+    rets[0].x = m_fillvalue;
+    size_t i = 0;
+    for (; i < m_common; ++i) {
+      rets[0].x += m_vars[i]*args[i].x;
+    }
+    for (; i < args.size(); ++i) {
+      rets[0].x += args[i].x;
+    }
+    for (; i < m_vars.size(); ++i) {
+      rets[0].x += m_vars[i].value();
+    }
+}

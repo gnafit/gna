@@ -84,7 +84,10 @@ if opts.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot( b.transformations_out.values()[0], splines='ortho' )
+        kwargs=dict(
+                # splines='ortho'
+                )
+        graph = GNADot( b.transformations_out.values()[0], **kwargs )
         graph.write(opts.dot)
         print( 'Write output to:', opts.dot )
     except Exception as e:

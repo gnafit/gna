@@ -46,8 +46,8 @@ class reactor_anu_spectra_v01(TransformationBundle):
         for name, vars in self.corr_vars.items():
             with self.common_namespace:
                 corr_sigma_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
-                corrpar_t = R.WeightedSum(C.stdvector(['offset']), C.stdvector(self.corr_names))
-                corrpar_i = corrpar_t.sum.inputs()
+                corrpar_t = R.WeightedSum(1.0, C.stdvector(['offset']), C.stdvector([self.cfg.corrname]))
+                corrpar_i = corrpar_t.sum.inputs
                 corrpar_i['offset']( corr_sigma_t )
 
             corr_sigma_t.vararray.setLabel('Corr unc:\n'+name)
@@ -144,10 +144,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 var=self.common_namespace.reqparameter( name, central=1.0, sigma=N.inf )
                 var.setLabel('Average reactor spectrum correction for {} MeV'.format(self.model_edges[i]))
 
-        name = self.cfg.corrname
-        self.common_namespace.reqparameter( name+'_central', central=1.0, sigma=0.1, fixed=True, label='Correlated reactor anu spectrum correction (central)' )
-        self.common_namespace.reqparameter( name, central=0.0, sigma=0.1, label='Correlated reactor anu spectrum correction (offset)'  )
-        self.corr_names=[ name, name+'_central' ]
+        self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=0.1, label='Correlated reactor anu spectrum correction (offset)'  )
 
         self.uncorr_vars=OrderedDict()
         for isotope in self.isotopes:
