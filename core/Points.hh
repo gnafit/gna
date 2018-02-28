@@ -13,12 +13,14 @@ public:
   {
     init();
   }
+
   Points(const double *points, size_t cnt)
     : m_points(cnt), m_shape{cnt}
   {
     std::copy(points, points+cnt, m_points.begin());
     init();
   }
+  
   Points(const double *points, std::vector<size_t> shape)
     : m_shape(shape)
   {
@@ -31,12 +33,18 @@ public:
     init();
   }
 
+  Points(const double single_point)
+    : Points(&single_point, 1)
+  {}    
+
   size_t size() const {
     return m_points.size();
   }
-  const double *data() const {
+
+  const double* data() const {
     return &m_points[0];
   }
+
 protected:
   void init() {
     transformation_(this, "points")
@@ -44,7 +52,7 @@ protected:
       .types([](Points *obj, Atypes /*args*/, Rtypes rets) {
           rets[0] = DataType().points().shape(obj->m_shape);
         })
-      .func([](Points *obj, Args /*args*/, Rets rets) {
+      .func([](Points *obj, Args /*args*/, Rets rets) noexcept {
           auto &pts = obj->m_points;
           rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&pts[0], pts.size());
         })
