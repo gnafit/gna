@@ -136,13 +136,6 @@ public:
       }
   }
 
-  virtual std::vector<std::reference_wrapper<Parameter<T>>> getCovariatedParams() {
-      std::vector<std::reference_wrapper<Parameter<T>>> pars_covarited_with;
-      for (const auto& cov_elements: m_covariances) {
-          pars_covarited_with.push_back(const_cast<Parameter<T>&>(cov_elements.first));
-      }
-      return pars_covarited_with;
-  };
 
   virtual void setCovariance(Parameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
