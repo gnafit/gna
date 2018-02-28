@@ -26,11 +26,17 @@ cfg = NestedDict()
 cfg.bundle = 'reactor_anu_spectra_v01'
 cfg.isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ]
 cfg.filename = ['data/Huber_smooth_extrap_{iso}_13MeV0.01MeVbin.dat', 'data/Mueller_smooth_extrap_{iso}_13MeV0.01MeVbin.dat']
+
 cfg.strategy = dict( underflow='constant', overflow='extrapolate' )
 cfg.edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) )
 cfg.varname = 'avganushape.n{index:02d}'
 # cfg.varmode = 'plain'
 cfg.varmode = 'log'
+
+cfg.uncedges  = 'same'
+cfg.uncnames  = '{isotope}_uncorr.uncn{index:02d}'
+cfg.corrnames = '{isotope}_corr.uncn{index:02d}'
+cfg.corrname  = 'isotopes_corr'
 
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )
@@ -43,7 +49,7 @@ ns = env.globalns('testexp')
 """Execute bundle"""
 b, = execute_bundle( cfg=cfg, common_namespace=ns, shared=shared )
 
-env.globalns.printparameters()
+env.globalns.printparameters( labels=True )
 
 """Plot result"""
 fig = P.figure()
@@ -61,7 +67,7 @@ for name, output in b.outputs.items():
 
 if opts.set:
     for var, value in opts.set:
-        par=ns('avganushape')[var]
+        par=ns[var]
         par.set(float(value))
 
     env.globalns.printparameters()
@@ -78,7 +84,7 @@ if opts.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot( b.transformations_out.values()[0] )
+        graph = GNADot( b.transformations_out.values()[0], splines='ortho' )
         graph.write(opts.dot)
         print( 'Write output to:', opts.dot )
     except Exception as e:

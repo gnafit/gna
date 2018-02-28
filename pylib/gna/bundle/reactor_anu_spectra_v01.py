@@ -12,42 +12,64 @@ class reactor_anu_spectra_v01(TransformationBundle):
     short_names = dict( U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241' )
     debug = False
     def __init__(self, **kwargs):
-        kwargs['namespaces'] = [self.short_names.get(s,s) for s in kwargs['cfg'].isotopes]
+        self.isotopes = kwargs['namespaces'] = [self.short_names.get(s,s) for s in kwargs['cfg'].isotopes]
         super(reactor_anu_spectra_v01, self).__init__( **kwargs )
 
-    def build(self):
         self.load_data()
 
+    def build(self):
         model_edges_t = C.Points( self.model_edges, ns=self.common_namespace )
         model_edges_t.points.setLabel('E0 (model)')
         self.objects['edges'] = model_edges_t
 
         with self.common_namespace:
-            corrections_raw_t = R.VarArray(C.stdvector(self.variables), ns=self.common_namespace)
+            npar_raw_t = R.VarArray(C.stdvector(self.variables), ns=self.common_namespace)
         if self.cfg.varmode=='log':
-            corrections_raw_t.vararray.setLabel('Spec pars:\nlog(n_i)')
-            corrections_t = R.Exp(ns=self.common_namespace)
-            corrections_t.exp.points( corrections_raw_t )
-            corrections_t.exp.setLabel('n_i')
-            self.objects['corrections_log'] = corrections_raw_t
+            npar_raw_t.vararray.setLabel('Spec pars:\nlog(n_i)')
+            npar_t = R.Exp(ns=self.common_namespace)
+            npar_t.exp.points( npar_raw_t )
+            npar_t.exp.setLabel('n_i')
+            self.objects['npar_log'] = npar_raw_t
         else:
-            corrections_raw_t.vararray.setLabel('n_i')
-            corrections_t = corrections_raw_t
-        self.objects['corrections'] = corrections_t
+            npar_raw_t.vararray.setLabel('n_i')
+            npar_t = npar_raw_t
+        self.objects['corrections'] = npar_t
+
+        uncpars = OrderedDict()
+        for name, vars in self.uncorr_vars.items():
+            with self.common_namespace:
+                uncpar_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
+            uncpar_t.vararray.setLabel('Uncorr correction:\n'+name)
+            uncpars[name]=uncpar_t
+
+        corrpars = OrderedDict()
+        for name, vars in self.corr_vars.items():
+            with self.common_namespace:
+                corr_sigma_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
+                corrpar_t = R.WeightedSum(C.stdvector(['offset']), C.stdvector(self.corr_names))
+                corrpar_i = corrpar_t.sum.inputs()
+                corrpar_i['offset']( corr_sigma_t )
+
+            corr_sigma_t.vararray.setLabel('Corr unc:\n'+name)
+            corrpar_t.sum.setLabel('Corr correction:\n'+name)
+            corrpars[name]=corrpar_t
 
         newx = self.shared.points
         segments_t=None
         for ns in self.namespaces:
-            spectrum_raw_t = C.Points( self.spectra[ns.name], ns=self.common_namespace )
-            spectrum_raw_t.points.setLabel('S0(E0):\n'+ns.name)
+            isotope=ns.name
+            spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.common_namespace )
+            spectrum_raw_t.points.setLabel('S0(E0):\n'+isotope)
 
             spectrum_t = R.Product(ns=self.common_namespace)
             spectrum_t.multiply( spectrum_raw_t )
-            spectrum_t.multiply( corrections_t )
-            spectrum_t.product.setLabel('S(E0):\n'+ns.name)
+            spectrum_t.multiply( npar_t )
+            spectrum_t.multiply( uncpars[isotope] )
+            spectrum_t.multiply( corrpars[isotope] )
+            spectrum_t.product.setLabel('S(E0):\n'+isotope)
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
-            interp_expo_t.interp.setLabel('S(E):\n'+ns.name)
+            interp_expo_t.interp.setLabel('S(E):\n'+isotope)
             if segments_t:
                 interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx)
             else:
@@ -55,11 +77,11 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 segments_t = interp_expo_t.segments
 
             """Store data"""
-            self.objects[('spectrum_raw', ns.name)] = spectrum_raw_t
-            self.objects[('spectrum', ns.name)]     = spectrum_t
-            self.objects[('interp', ns.name)]       = interp_expo_t
-            self.transformations_out[ns.name]       = interp_expo_t.interp
-            self.outputs[ns.name]                   = interp_expo_t.interp.interp
+            self.objects[('spectrum_raw', isotope)] = spectrum_raw_t
+            self.objects[('spectrum', isotope)]     = spectrum_t
+            self.objects[('interp', isotope)]       = interp_expo_t
+            self.transformations_out[isotope]       = interp_expo_t.interp
+            self.outputs[isotope]                   = interp_expo_t.interp.interp
 
     def load_data(self):
         """Read raw input spectra"""
@@ -95,17 +117,53 @@ class reactor_anu_spectra_v01(TransformationBundle):
             model = N.exp(f(self.model_edges))
             self.spectra[name] = model
 
+        """Read the uncertainties edges"""
+        self.unc_edges=self.cfg.uncedges
+        if self.unc_edges=='same':
+            self.unc_edges = self.model_edges
+        else:
+            """If the differ from the model edges, check that they contain all the model edges"""
+            self.unc_edges=N.ascontiguousarray(self.unc_edges, dtype='d')
+
+            raise Exception('not implemented')
+
     def define_variables(self):
         varmode = self.cfg.varmode
         if not varmode in ['log', 'plain']:
             raise Exception('Unknown varmode (should be log or plain): '+str(varmode))
 
         self.variables=[]
-        for i in range(self.cfg.edges.size):
+        for i in range(self.model_edges.size):
             name = self.cfg.varname.format( index=i )
             self.variables.append(name)
 
             if varmode=='log':
-                self.common_namespace.reqparameter( name, central=0.0, sigma=0.1 )
+                var=self.common_namespace.reqparameter( name, central=0.0, sigma=N.inf )
+                var.setLabel('Average reactor spectrum correction for {} MeV [log]'.format(self.model_edges[i]))
             else:
-                self.common_namespace.reqparameter( name, central=1.0, sigma=0.1 )
+                var=self.common_namespace.reqparameter( name, central=1.0, sigma=N.inf )
+                var.setLabel('Average reactor spectrum correction for {} MeV'.format(self.model_edges[i]))
+
+        name = self.cfg.corrname
+        self.common_namespace.reqparameter( name+'_central', central=1.0, sigma=0.1, fixed=True, label='Correlated reactor anu spectrum correction (central)' )
+        self.common_namespace.reqparameter( name, central=0.0, sigma=0.1, label='Correlated reactor anu spectrum correction (offset)'  )
+        self.corr_names=[ name, name+'_central' ]
+
+        self.uncorr_vars=OrderedDict()
+        for isotope in self.isotopes:
+            for i in range(self.unc_edges.size):
+                name = self.cfg.uncnames.format( isotope=isotope, index=i )
+                self.uncorr_vars.setdefault(isotope, []).append(name)
+
+                var = self.common_namespace.reqparameter( name, central=1.0, sigma=0.1 )
+                var.setLabel('Uncorrelated {} anu spectrum correction for {} MeV'.format(isotope, self.model_edges[i]))
+
+        self.corr_vars=OrderedDict()
+        for isotope in self.isotopes:
+            for i in range(self.unc_edges.size):
+                name = self.cfg.corrnames.format( isotope=isotope, index=i )
+                self.corr_vars.setdefault(isotope, []).append(name)
+
+                var = self.common_namespace.reqparameter( name, central=0.1, sigma=0.1, fixed=True )
+                var.setLabel('Correlated {} anu spectrum correction sigma for {} MeV'.format(isotope, self.model_edges[i]))
+
