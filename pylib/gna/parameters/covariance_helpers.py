@@ -44,7 +44,7 @@ class CovarianceHandler(object):
             raise KeyError, info.format(covariance_name, str(cfg['covariance_path']))
 
         self.cov_store = cfg['covariances'][covariance_name]
-        self.passed_pars = [pars]
+        self.passed_pars = pars
 
     def covariate_pars(self):
         policy = self.cov_store['policy']

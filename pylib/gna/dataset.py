@@ -12,7 +12,25 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
+            #  self.covariance.update(base.covariance)
+        self._update_covariances(bases) 
+
+    def _update_covariances(self, bases):
+        from itertools import combinations
+        #Update individual covariances, i.e. unocorrelated errors
+        for base in reversed(bases):
             self.covariance.update(base.covariance)
+
+        # Check for covariations between different dataset, i.e. for presense
+        #  for covariated pull terms
+        underlaying_params = [key for base in bases for key in base.data.keys()
+                              if isinstance(key, ROOT.Parameter('double'))
+                                 and not key.isFixed()]
+        print("Underlying params -- {}".format(underlaying_params))
+        for first, second in combinations(underlaying_params, 2):
+            mutual_cov =  first.getCovariance(second)
+            self.covariance[frozenset([first, second])] = self._pointize(mutual_cov)
+        print(self.covariance)
 
     def assign(self, obs, value, error):
         """Given observable assign value that is going to serve as data and uncertainty to it.

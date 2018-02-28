@@ -34,6 +34,7 @@ class cmd(basecmd):
                             metavar=('PAR'), default=[])
 
         parser.add_argument('--covariance', action='append', nargs='*',
+                default=[],
                             metavar=('COVARIANCE_SET', 'PARS'), help='First '
                             'argument: name of covariance matrix, rest: names '
                             'of parameters to covariate')
@@ -75,7 +76,8 @@ class cmd(basecmd):
         #  for name1, name2, corr in self.opts.correlation:
             #  self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
 
-        for cov, pars in self.opts.covariance:
+        for entry in self.opts.covariance:
+            cov, pars = entry[0], entry[1:]
             CovarianceHandler(cov, pars).covariate_pars()
             
             
