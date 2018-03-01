@@ -15,7 +15,15 @@
 
 void MultiThreading::Task::run_task() {
     printf("runtask\n");
-    if (m_entry->tainted) m_entry->evaluate();
+    if (m_entry->tainted) {
+//m_entry->evaluate();
+	size_t src_size = m_entry->sources.size();
+        for (size_t i = 0; i < src_size; i++) {
+	    if ( m_entry->sources[i].sink->entry->tainted)  m_entry->sources[i].sink->entry->evaluate();
+	}
+
+    }
+
     m_entry->tainted = false;
 }
 

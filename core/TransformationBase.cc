@@ -29,7 +29,7 @@ using TransformationTypes::Base;
 
 //class ThreadPool;
 class Task;
-MultiThreading::ThreadPool tpool(1);
+MultiThreading::ThreadPool tpool(2);
 
 
 /**
