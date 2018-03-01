@@ -1,5 +1,3 @@
-#include <boost/format.hpp>
-
 #include "WeightedSum.hh"
 #include "TypesFunctions.hh"
 
@@ -33,17 +31,12 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &lab
     sum.func(&WeightedSum::sum);
   }
 
-  m_vars.resize(labels.size());
-  for (size_t i = 0; i < m_common; ++i) {
-    std::string wlabel;
-    if ( weight_labels.empty() ) {
-      wlabel = str(boost::format("weight_%1%")%labels[i]);
-    }
-    else{
-      wlabel = weight_labels[i];
-    }
-    variable_(&m_vars[i], wlabel.data());
-    sum.input(labels[i]);
+  m_vars.resize(weight_labels.size());
+  for (size_t i = 0; i < m_vars.size(); ++i) {
+    variable_(&m_vars[i], weight_labels[i].data());
+  }
+  for (auto& label : labels) {
+    sum.input(label);
   }
 }
 
