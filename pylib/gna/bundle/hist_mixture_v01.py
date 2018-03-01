@@ -43,13 +43,9 @@ class hist_mixture_v01(TransformationBundle):
             self.outputs[ns.name]             = ws.sum.sum
 
     def define_variables(self):
-        comb = '_'.join(('frac',)+tuple(sorted(self.cfg.spectra.keys()))+('comb',))
-
         for ns in self.namespaces:
-            ns.reqparameter( name=comb, central=1, sigma=0.1, fixed=True )
-
             missing = self.cfg.spectra.keys()
-            subst = [ns.pathto(comb)]
+            subst = []
             for name, val in self.cfg.fractions.items():
                 cname = 'frac_'+name
                 ns.reqparameter( cname, cfg=val )
@@ -60,6 +56,6 @@ class hist_mixture_v01(TransformationBundle):
                 raise Exception('One weight of the hist_mixture should be autmatic')
 
             missing = 'frac_'+missing[0]
-            vd = R.VarDiff( stdvector(subst), missing, ns=ns)
+            vd = R.VarDiff( stdvector(subst), missing, 1.0, ns=ns)
             ns[missing].get()
             self.objects[('vardiff', ns.name)] = vd

@@ -26,4 +26,7 @@ for i, name in enumerate( names, 2 ):
     print_parameters(ns)
     print()
 
-
+print( 'Subtracto from 100' )
+vp = R.VarDiff( vnames, 'diff100', 100., ns=ns )
+ns['diff100'].get()
+print_parameters(ns)
