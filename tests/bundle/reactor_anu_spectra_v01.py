@@ -26,7 +26,10 @@ opts=parser.parse_args()
 cfg = NestedDict()
 cfg.bundle = 'reactor_anu_spectra_v01'
 cfg.isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ]
-cfg.filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{iso}_13MeV0.01MeVbin.dat', 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{iso}_13MeV0.01MeVbin.dat']
+cfg.filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
+                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat']
+cfg.uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
+                     'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
 
 cfg.strategy = dict( underflow='constant', overflow='extrapolate' )
 cfg.edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) )

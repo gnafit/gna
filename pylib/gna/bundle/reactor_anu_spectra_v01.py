@@ -86,24 +86,20 @@ class reactor_anu_spectra_v01(TransformationBundle):
     def load_data(self):
         """Read raw input spectra"""
         self.spectra_raw = OrderedDict()
+        self.uncertainties_corr = OrderedDict()
+        self.uncertainties_uncorr = OrderedDict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')
         for ns in self.namespaces:
-            for format in self.cfg.filename:
-                fname = format.format(iso=ns.name)
-                try:
-                    data = N.loadtxt(fname, dtype, unpack=True)
-                except:
-                    pass
-                else:
-                    if self.debug:
-                        print( ns.name, fname )
-                        print( data )
-                    self.spectra_raw[ns.name] = data
-                    break
-            else:
-                raise Exception('Failed to load the spectrum for %s'%ns.name)
+            data = self.load_file(self.cfg.filename, dtype, isotope=ns.name)
+            self.spectra_raw[ns.name] = data
+
+            unc_corr = self.load_file(self.cfg.uncertainties, dtype, isotope=ns.name, mode='corr')
+            self.uncertainties_corr[ns.name] = unc_corr
+
+            unc_uncorr = self.load_file(self.cfg.uncertainties, dtype, isotope=ns.name, mode='uncorr')
+            self.uncertainties_uncorr[ns.name] = unc_uncorr
 
         """Read parametrization edges"""
         self.model_edges = N.ascontiguousarray( self.cfg.edges, dtype='d' )
@@ -144,23 +140,41 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 var=self.common_namespace.reqparameter( name, central=1.0, sigma=N.inf )
                 var.setLabel('Average reactor spectrum correction for {} MeV'.format(self.model_edges[i]))
 
-        self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=0.1, label='Correlated reactor anu spectrum correction (offset)'  )
+        self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=1.0, label='Correlated reactor anu spectrum correction (offset)'  )
 
         self.uncorr_vars=OrderedDict()
         for isotope in self.isotopes:
+            uncfcn = interp1d( *self.uncertainties_uncorr[isotope] )
             for i in range(self.unc_edges.size):
                 name = self.cfg.uncnames.format( isotope=isotope, index=i )
                 self.uncorr_vars.setdefault(isotope, []).append(name)
 
-                var = self.common_namespace.reqparameter( name, central=1.0, sigma=0.1 )
-                var.setLabel('Uncorrelated {} anu spectrum correction for {} MeV'.format(isotope, self.model_edges[i]))
+                en=self.model_edges[i]
+                var = self.common_namespace.reqparameter( name, central=1.0, sigma=uncfcn(en) )
+                var.setLabel('Uncorrelated {} anu spectrum correction for {} MeV'.format(isotope, en))
 
         self.corr_vars=OrderedDict()
         for isotope in self.isotopes:
+            corrfcn = interp1d( *self.uncertainties_corr[isotope] )
             for i in range(self.unc_edges.size):
                 name = self.cfg.corrnames.format( isotope=isotope, index=i )
                 self.corr_vars.setdefault(isotope, []).append(name)
 
-                var = self.common_namespace.reqparameter( name, central=0.1, sigma=0.1, fixed=True )
-                var.setLabel('Correlated {} anu spectrum correction sigma for {} MeV'.format(isotope, self.model_edges[i]))
+                en = self.model_edges[i]
+                var = self.common_namespace.reqparameter( name, central=corrfcn(en), sigma=0.1, fixed=True )
+                var.setLabel('Correlated {} anu spectrum correction sigma for {} MeV'.format(isotope, en))
 
+    def load_file(self, filenames, dtype, **kwargs):
+        for format in filenames:
+            fname = format.format(**kwargs)
+            try:
+                data = N.loadtxt(fname, dtype, unpack=True)
+            except:
+                pass
+            else:
+                if self.debug:
+                    print( kwargs, fname )
+                    print( data )
+                return data
+
+        raise Exception('Failed to load file for '+str(kwargs))

@@ -7,6 +7,19 @@ from gna.bindings import patchROOTClass
 
 unctypes = ( ROOT.Variable('double'),  )
 
+namefmt='{name:30}'
+valfmt='={val:11.6g}'
+centralfmt=' │ {central:11.6g}'
+limitsfmt=' ({:g}, {:g})'
+centralsigmafmt=' │ {central:11.6g}±{sigma:11.6g}'
+relsigmafmt=' [{relsigma:11.6g}%]'
+relsigma_len=len(relsigmafmt.format(relsigma=0))
+
+sepstr=' │ '
+fixedstr=sepstr+'[fixed]'
+freestr=' [free]'
+freestr+=' '*(relsigma_len-len(freestr))
+
 def print_parameters( ns, recursive=True, labels=False ):
     header = False
     for name, var in ns.iteritems():
@@ -31,8 +44,8 @@ def Variable__str( self, labels=False ):
             val     = self.value(),
             )
 
-    s= '{name:30}'.format(**fmt)
-    s+='={val:10.6g}'.format(**fmt)
+    s= namefmt.format(**fmt)
+    s+=valfmt.format(**fmt)
 
     return s
 
@@ -45,19 +58,19 @@ def Parameter__str( self, labels=False  ):
             )
     limits  = self.limits()
 
-    s= '{name:30}'.format(**fmt)
-    s+='={val:10.6g}'.format(**fmt)
+    s= namefmt.format(**fmt)
+    s+=valfmt.format(**fmt)
 
     if self.isFixed():
-        s+=' │ [fixed]'
+        s+=fixedstr
         return s
 
-    s+= ' │ {central:10.6g}'.format(**fmt)
+    s+= centralfmt.format(**fmt)
 
     if limits.size():
-        s+=' │'
+        s+=sepstr
         for (a,b) in limits:
-            s+=' (%g, %g)'%(a,b)
+            s+=limitsfmt.format(a,b)
 
     return s
 
@@ -74,27 +87,27 @@ def Parameter__str( self, labels=False  ):
     if not labels or label=='value':
         label=''
 
-    s= '{name:30}'.format(**fmt)
-    s+='={val:10.6g}'.format(**fmt)
+    s= namefmt.format(**fmt)
+    s+=valfmt.format(**fmt)
 
     if self.isFixed():
-        s+=' │ [fixed]'
+        s+=fixedstr
     else:
-        s+=' │ {central:10.6g}±{sigma:10.6g}'.format(**fmt)
+        s+=centralsigmafmt.format(**fmt)
         if N.isinf(fmt['sigma']):
-            s+=' [free]'+' '*7
+            s+=freestr
         else:
             if fmt['central']:
-                s+=' [{relsigma:10.6g}%]'.format(relsigma=fmt['sigma']/fmt['central']*100.0)
+                s+=relsigmafmt.format(relsigma=fmt['sigma']/fmt['central']*100.0)
             else:
-                s+=' '*14
+                s+=' '*relsigma_len
 
         if limits.size():
-            s+=' │'
+            s+=sepstr
             for (a,b) in limits:
-                s+=' (%g, %g)'%(a,b)
+                s+=limitsfmt.format(a,b)
 
     if label:
-        s+=' │ '+label
+        s+=sepstr+label
 
     return s
