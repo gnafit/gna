@@ -34,8 +34,11 @@ public:
   }
 
   Points(const double single_point)
-    : Points(&single_point, 1)
-  {}    
+    : m_shape{1}
+  {
+    m_points.push_back(single_point);
+    init();
+  }    
 
   size_t size() const {
     return m_points.size();

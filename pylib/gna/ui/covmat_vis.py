@@ -1,3 +1,4 @@
+from __future__ import print_function
 from gna.env import env
 from gna.ui import basecmd
 import ROOT
@@ -22,6 +23,8 @@ class cmd(basecmd):
         chol_blocks = (np.tril(block.cov.data()) for block in self.opts.analysis)
         matrix_stack = [np.matmul(chol, chol.T) for chol in chol_blocks]
         covmat = self.make_blocked_matrix(matrix_stack)
+
+
 
         if self.opts.mask:
             covmat = np.ma.array(covmat, mask=(covmat == 0.)) 

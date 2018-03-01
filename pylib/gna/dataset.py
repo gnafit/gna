@@ -23,13 +23,15 @@ class Dataset(object):
 
         # Check for covariations between different dataset, i.e. for presense
         #  for covariated pull terms
-        underlaying_params = [key for base in bases for key in base.data.keys()
+        underlaying_params = [(key, base.data.values()[0]) for base in bases for key in base.data.keys()
                               if isinstance(key, ROOT.Parameter('double'))
                                  and not key.isFixed()]
         print("Underlying params -- {}".format(underlaying_params))
-        for first, second in combinations(underlaying_params, 2):
-            mutual_cov =  first.getCovariance(second)
-            self.covariance[frozenset([first, second])] = self._pointize(mutual_cov)
+        for (par_1, base_1), (par_2, base_2) in combinations(underlaying_params, 2):
+            mutual_cov =  par_1.getCovariance(par_2)
+            if par_1 != par_2:
+                print(mutual_cov, "mutual cov")
+            self.covariance[frozenset([par_1, par_2])] = [self._pointize(mutual_cov)]
         print(self.covariance)
 
     def assign(self, obs, value, error):
@@ -56,7 +58,9 @@ class Dataset(object):
     def iscovariated(self, obs1, obs2, covparameters):
         """Checks whether two observables are covariated or affected by covparameters
         """
+        print(frozenset([obs1, obs2]), obs1, obs2)
         if self.covariance.get(frozenset([obs1, obs2])):
+            print("Yes, I'm already in the covlist!!!!!!!")
             return True
         for par in covparameters:
             if par.influences(obs1) and par.influences(obs2):
@@ -65,7 +69,7 @@ class Dataset(object):
 
     def sortobservables(self, observables, covparameters):
         """Splits observables into such a groups that observables that are
-        all covariated with respect to a covparameters 
+        all covariated with respect to a covparameters or pull terms 
         """
         to_process = list(observables)
         groups = [[]]
@@ -94,7 +98,9 @@ class Dataset(object):
                 obs1 = obs2 = list(covkey)[0]
             else:
                 obs1, obs2 = list(covkey)
+            print('obs1 -- {0}, obs2 -- {1}'.format(obs1, obs2))
             for cov in covs:
+                print('cov', cov)
                 prediction.covariate(cov, obs1, 1, obs2, 1)
         for par in covparameters:
             der = ROOT.Derivative(par)

@@ -79,5 +79,3 @@ class cmd(basecmd):
         for entry in self.opts.covariance:
             cov, pars = entry[0], entry[1:]
             CovarianceHandler(cov, pars).covariate_pars()
-            
-            
