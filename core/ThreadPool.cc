@@ -16,16 +16,8 @@
 void MultiThreading::Task::run_task() {
     printf("runtask\n");
     if (m_entry->tainted) {
-//m_entry->evaluate();
-	size_t src_size = m_entry->sources.size();
-	m_entry->sources[0].sink->entry->update();	// first one always runs in the same thread (current main thread for exact entry)
-        for (size_t i = 1; i < src_size; i++) {			// Try to make new thread
-	    if ( m_entry->sources[i].sink->entry->tainted) {
-		m_entry->sources[i].sink->entry->update();
-	    }
-	}
+	m_entry->evaluate();
     }
-
     m_entry->tainted = false;
 }
 
@@ -65,18 +57,31 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool tou
     bool worker_found = false;
     std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
     size_t w_size = m_workers.size();
-    if (touching) {
-        for (size_t i = 0; i < w_size; i++)  {
-          if((m_workers[i].is_free()) || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
-            std::cerr << "Free worker found!" << std::endl;
-            m_workers[i].add_to_task_stack(in_task);
-            m_workers[i].thr_head = curr_id;
-            worker_found = true;
-            if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
-            else { std::cout << "eval only "; in_task.run_task(); }
-            break;
-          }
-        } 
+    size_t worker_index = 0;
+    for (size_t i = 0; i < w_size; i++)  {
+      if((m_workers[i].is_free())) { // || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
+        std::cerr << "Free worker found!" << std::endl;
+        m_workers[i].add_to_task_stack(in_task);
+        m_workers[i].thr_head = curr_id;
+        worker_found = true;
+	worker_index = i;
+/*	size_t src_size = in_task.m_entry->sources.size();
+// TODO move to top -- always to current
+	Task motherthread_task(in_task.m_entry->sources[0].sink->entry);	
+	add_task(motherthread_task, true);
+        //in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
+        for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread
+            std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;  
+            if ( in_task.m_entry->sources[i].sink->entry->tainted) {
+                in_task.m_entry->sources[i].sink->entry->update();
+            }
+        }
+*/
+
+ //       if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
+ //       else { std::cout << "eval only "; in_task.run_task(); }
+        break;
+      }
     }
     if (!worker_found) {
       if (w_size < m_max_thread_number) {
@@ -94,7 +99,21 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool tou
         }
       } 
     }
-    
+   
+
+    size_t src_size = in_task.m_entry->sources.size();                                               
+// TODO move to top -- always to current
+    Task motherthread_task(in_task.m_entry->sources[0].sink->entry);                                 
+    add_task(motherthread_task, true);                                                               
+    //in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
+        for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
+            std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;                    
+            if ( in_task.m_entry->sources[i].sink->entry->tainted) {
+                add_task(Task(in_task.m_entry->sources[i].sink->entry));                                       
+            }
+        }
+   if (in_task.done()) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
+   else { std::cout << "eval only "; in_task.run_task(); } 
 }
 
 int MultiThreading::ThreadPool::is_free_worker_exists() {
