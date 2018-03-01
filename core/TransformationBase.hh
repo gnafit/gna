@@ -307,7 +307,7 @@ namespace TransformationTypes {
     OutputHandle addSink(const std::string &name);      ///< Initialize and return new Sink.
 
     void evaluate();                                    ///< Do actual calculation by calling Entry::fun.
-    void update(bool touching = false);                                      ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
+    void update();                                      ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
     void evaluateTypes();                               ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void updateTypes();                                 ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 

@@ -187,11 +187,10 @@ void Entry::evaluate() {
  *
  * Handles exception and resets the taintflag.
  */
-void Entry::update(bool touching) {
-  std::cout << "update touchib = " << touching << std::endl;
+void Entry::update() {
   Status status = Status::Success;
   try {
-    tpool.add_task(this, touching);
+    tpool.add_task(this);
     //MultiThreading::Task task(this);
 
     //tainted = false;
@@ -477,11 +476,8 @@ void Entry::updateTypes() {
 
 /** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
-//  if (tainted && !frozen) {
-
-  std::cout << "tainted = " <<  tainted  << " frozen = " << frozen << std::endl;
   if (tainted && !frozen) {
-    update(true);
+    update();
   } 
 }
 

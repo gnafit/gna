@@ -37,7 +37,7 @@ namespace MultiThreading {
   class ThreadPool {
   public:
     ThreadPool (int maxthr = 0);
-    void add_task(Task task, bool touching = false);
+    void add_task(Task task);
     int is_free_worker_exists();
     bool is_pool_full();
 //    void set_max_thread_num(int k);
