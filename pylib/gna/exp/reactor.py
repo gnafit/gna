@@ -14,10 +14,10 @@ from gna.env import env
 year=365*24*60*60.0
 
 spectrumfiles = {
-    'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
-    'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
-    'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
-    'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
+    'Pu239': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
+    'Pu241': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
+    'U235': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
+    'U238': 'reactor_anu_spectra/Mueller/Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
 }
 
 eperfission = {
