@@ -128,7 +128,7 @@ public:
   virtual void setFixed() noexcept { this->m_fixed = true; }
 
   virtual bool isCovariated(const Parameter<T>& other) const noexcept {
-      auto it = this->m_covariances.find(other);
+      auto it = this->m_covariances.find(&other);
       if (it == this->m_covariances.end() and (&other != this)) { 
           return false;
       } else {
@@ -143,7 +143,7 @@ public:
         std::cout << msg % this->name() % other.name() % cov << std::endl;
 #endif
     if (&other != this) {
-        this->m_covariances[other] = cov;
+        this->m_covariances[&other] = cov;
         other.updateCovariance(*this, cov);
     } else {
         this->setSigma(std::sqrt(cov));
@@ -156,12 +156,12 @@ public:
                              "to %3% after setting in %1%");
     std::cout << msg % this->name() % other.name() % cov << std::endl;
 #endif
-    this->m_covariances[other] = cov;
+    this->m_covariances[&other] = cov;
   }
 
   virtual T getCovariance(const Parameter<T>& other) const noexcept {
       if (this == &other) {return this->sigma();}
-      auto search = m_covariances.find(other);
+      auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
           return search->second;
       } else  {
@@ -177,7 +177,7 @@ public:
 
 protected:
   std::vector<std::pair<T, T>> m_limits;
-  using CovStorage = std::map<Parameter<T>, T>;
+  using CovStorage = std::map<const Parameter<T>*, T>;
   CovStorage m_covariances;
   parameter<T> m_par;
   bool m_fixed = false;
