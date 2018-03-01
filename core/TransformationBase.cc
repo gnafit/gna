@@ -187,10 +187,11 @@ void Entry::evaluate() {
  *
  * Handles exception and resets the taintflag.
  */
-void Entry::update() {
+void Entry::update(bool touching) {
+  std::cout << "update touchib = " << touching << std::endl;
   Status status = Status::Success;
   try {
-    tpool.add_task(this);
+    tpool.add_task(this, touching);
     //MultiThreading::Task task(this);
 
     //tainted = false;
@@ -480,7 +481,7 @@ void Entry::touch() {
 
   std::cout << "tainted = " <<  tainted  << " frozen = " << frozen << std::endl;
   if (tainted && !frozen) {
-    update();
+    update(true);
   } 
 }
 

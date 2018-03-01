@@ -18,10 +18,12 @@ void MultiThreading::Task::run_task() {
     if (m_entry->tainted) {
 //m_entry->evaluate();
 	size_t src_size = m_entry->sources.size();
-        for (size_t i = 0; i < src_size; i++) {
-	    if ( m_entry->sources[i].sink->entry->tainted)  m_entry->sources[i].sink->entry->evaluate();
+	m_entry->sources[0].sink->entry->update();	// first one always runs in the same thread (current main thread for exact entry)
+        for (size_t i = 1; i < src_size; i++) {			// Try to make new thread
+	    if ( m_entry->sources[i].sink->entry->tainted) {
+		m_entry->sources[i].sink->entry->update();
+	    }
 	}
-
     }
 
     m_entry->tainted = false;
@@ -56,27 +58,27 @@ MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr
     m_workers[0].thr_head = std::this_thread::get_id();
 }
 
-void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
+void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool touching) {
     // mother thread  creates new one if it is possible
-
+    std::cout << "Ad task touching = " << touching << std::endl;
     std::thread::id curr_id = std::this_thread::get_id();
     bool worker_found = false;
     std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
     size_t w_size = m_workers.size();
-
-    for (size_t i = 0; i < w_size; i++)  {
-      if((m_workers[i].is_free()) || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
-        std::cerr << "Free worker found!" << std::endl;
-        m_workers[i].add_to_task_stack(in_task);
-        m_workers[i].thr_head = curr_id;
-        worker_found = true;
-        if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
-        else { std::cout << "eval only "; in_task.run_task(); }
-        break;
-      }
+    if (touching) {
+        for (size_t i = 0; i < w_size; i++)  {
+          if((m_workers[i].is_free()) || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
+            std::cerr << "Free worker found!" << std::endl;
+            m_workers[i].add_to_task_stack(in_task);
+            m_workers[i].thr_head = curr_id;
+            worker_found = true;
+            if (in_task.done()) { std::cout << "done -- now work "; m_workers[i].work(); }
+            else { std::cout << "eval only "; in_task.run_task(); }
+            break;
+          }
+        } 
     }
     if (!worker_found) {
-      //w_size = m_workers.size();
       if (w_size < m_max_thread_number) {
         m_workers.push_back(Worker(*this));
         std::cerr << "New worker added!" << std::endl;
