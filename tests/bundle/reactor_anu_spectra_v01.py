@@ -18,6 +18,7 @@ parser = ArgumentParser()
 parser.add_argument( '-l', '--log', action='store_true', help='logarithmic scale' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '--set', nargs=2, action='append', default=[], help='set parameter I to value V', metavar=('I', 'V') )
+parser.add_argument( '--rset', nargs=2, action='append', default=[], help='set parameter I to value central+sigma*V', metavar=('I', 'V') )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts=parser.parse_args()
 
@@ -65,11 +66,16 @@ ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
 for name, output in b.outputs.items():
     ax.plot( points, output.data().copy(), label=L.s(name) )
 
-if opts.set:
+if opts.set or opts.rset:
     for var, value in opts.set:
         par=ns[var]
         par.set(float(value))
+    for var, value in opts.rset:
+        par=ns[var]
+        par.setNormalValue(float(value))
 
+    print()
+    print('Parameters after modification')
     env.globalns.printparameters()
 
     for name, output in b.outputs.items():

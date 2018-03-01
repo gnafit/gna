@@ -126,6 +126,11 @@ public:
   virtual T sigma() { return m_sigma; }
   virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
 
+  virtual T normalValue(T reldiff)
+    { return this->central() + reldiff*this->m_sigma; }
+
+  virtual void setNormalValue(T reldiff)
+    { this->set(this->normalValue(reldiff)); }
 protected:
   T m_sigma;
 };
