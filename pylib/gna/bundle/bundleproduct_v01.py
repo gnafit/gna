@@ -10,10 +10,10 @@ from gna.configurator import NestedDict
 from gna.bundle import *
 from gna.bundle.connections import pairwise
 
-class bundlesum_v01(TransformationBundle):
-    def __init__(self, listkey='bundlesum_list', **kwargs):
+class bundleproduct_v01(TransformationBundle):
+    def __init__(self, listkey='bundleproduct_list', **kwargs):
         self.listkey=listkey
-        super(bundlesum_v01, self).__init__( **kwargs )
+        super(bundleproduct_v01, self).__init__( **kwargs )
 
         self.bundles = NestedDict()
 
@@ -32,13 +32,13 @@ class bundlesum_v01(TransformationBundle):
             raise Exception( 'chaininput should be a string' )
         for name in names:
             ns = self.common_namespace(name)
-            osum = R.Sum(ns=ns)
+            prod = R.Product(ns=ns)
 
             if chaininput:
-                inp = osum.add(chaininput)
+                inp = prod.multiply(chaininput)
                 """Save unconnected input"""
                 self.inputs[name]             = inp
-                self.transformations_in[name] = osum
+                self.transformations_in[name] = prod
 
             for bundlename, bundle in self.bundles.items():
                 if not name in bundle.outputs:
@@ -46,13 +46,13 @@ class bundlesum_v01(TransformationBundle):
 
                 if debug:
                     print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
-                osum.add(bundle.outputs[name])
+                prod.add(bundle.outputs[name])
 
             """Save transformations"""
-            self.objects[('sum', name)]    = osum
-            self.transformations_out[name] = osum.sum
-            self.outputs[name]             = osum.sum.outputs['sum']
+            self.objects[('product', name)]= prod
+            self.transformations_out[name] = prod.product
+            self.outputs[name]             = prod.product.product
 
             """Define observable"""
-            self.addcfgobservable(ns, osum.sum.outputs['sum'], ignorecheck=bool(chaininput))
+            self.addcfgobservable(ns, prod.product.product, ignorecheck=bool(chaininput))
 
