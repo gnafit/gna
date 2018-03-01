@@ -43,9 +43,15 @@ def Variable__str( self, labels=False ):
             name    = self.name(),
             val     = self.value(),
             )
+    label = self.label()
+    if not labels or label=='value':
+        label=''
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
+
+    if label:
+        s+=sepstr+label
 
     return s
 
@@ -57,20 +63,24 @@ def Parameter__str( self, labels=False  ):
             central = self.central(),
             )
     limits  = self.limits()
+    if label:
+        s+=sepstr+label
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
 
     if self.isFixed():
         s+=fixedstr
-        return s
+    else:
+        s+= centralfmt.format(**fmt)
 
-    s+= centralfmt.format(**fmt)
+        if limits.size():
+            s+=sepstr
+            for (a,b) in limits:
+                s+=limitsfmt.format(a,b)
 
-    if limits.size():
-        s+=sepstr
-        for (a,b) in limits:
-            s+=limitsfmt.format(a,b)
+    if label:
+        s+=sepstr+label
 
     return s
 
