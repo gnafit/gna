@@ -33,9 +33,16 @@ cfg.uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_hube
 
 cfg.strategy = dict( underflow='constant', overflow='extrapolate' )
 cfg.edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) )
-cfg.varname = 'avganushape.n{index:02d}'
-# cfg.varmode = 'plain'
-cfg.varmode = 'log'
+
+cfg.corrections=NestedDict(
+        bundle       = 'bundlelist_v01',
+        bundles_list = [ 'free' ],
+        free = NestedDict(
+            bundle='reactor_anu_freemodel_v01',
+            varname = 'avganushape.n{index:02d}',
+            varmode = 'log', # 'plain'
+            )
+    )
 
 cfg.uncedges  = 'same'
 cfg.uncnames  = '{isotope}_uncorr.uncn{index:02d}'

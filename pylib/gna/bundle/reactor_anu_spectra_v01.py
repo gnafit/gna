@@ -21,19 +21,11 @@ class reactor_anu_spectra_v01(TransformationBundle):
         model_edges_t = C.Points( self.model_edges, ns=self.common_namespace )
         model_edges_t.points.setLabel('E0 (model)')
         self.objects['edges'] = model_edges_t
+        self.shared.reactor_anu_edges = model_edges_t.single()
 
-        with self.common_namespace:
-            npar_raw_t = R.VarArray(C.stdvector(self.variables), ns=self.common_namespace)
-        if self.cfg.varmode=='log':
-            npar_raw_t.vararray.setLabel('Spec pars:\nlog(n_i)')
-            npar_t = R.Exp(ns=self.common_namespace)
-            npar_t.exp.points( npar_raw_t )
-            npar_t.exp.setLabel('n_i')
-            self.objects['npar_log'] = npar_raw_t
-        else:
-            npar_raw_t.vararray.setLabel('n_i')
-            npar_t = npar_raw_t
-        self.objects['corrections'] = npar_t
+        self.corrections=None
+        if 'corrections' in self.cfg:
+            self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
         uncpars = OrderedDict()
         for name, vars in self.uncorr_vars.items():
@@ -41,7 +33,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 uncpar_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
             uncpar_t.vararray.setLabel('Uncorr correction:\n'+name)
             uncpars[name]=uncpar_t
-            self.objects[('uncorrelated_correction', isotope)] = uncpar_t
+            self.objects[('uncorrelated_correction', name)] = uncpar_t
 
         corrpars = OrderedDict()
         for name, vars in self.corr_vars.items():
@@ -55,8 +47,8 @@ class reactor_anu_spectra_v01(TransformationBundle):
             corrpar_t.sum.setLabel('Corr correction:\n'+name)
             corrpars[name]=corrpar_t
 
-            self.objects[('correlated_sigma', isotope)] = corr_sigma_t
-            self.objects[('correlated_correction', isotope)] = corrpar_t
+            self.objects[('correlated_sigma', name)] = corr_sigma_t
+            self.objects[('correlated_correction', name)] = corrpar_t
 
         newx = self.shared.points
         segments_t=None
@@ -67,7 +59,9 @@ class reactor_anu_spectra_v01(TransformationBundle):
 
             spectrum_t = R.Product(ns=self.common_namespace)
             spectrum_t.multiply( spectrum_raw_t )
-            spectrum_t.multiply( npar_t )
+            for corr in self.corrections.bundles.values():
+                spectrum_t.multiply( corr.outputs[isotope] )
+
             spectrum_t.multiply( uncpars[isotope] )
             spectrum_t.multiply( corrpars[isotope] )
             spectrum_t.product.setLabel('S(E0):\n'+isotope)
@@ -128,22 +122,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
             raise Exception('not implemented')
 
     def define_variables(self):
-        varmode = self.cfg.varmode
-        if not varmode in ['log', 'plain']:
-            raise Exception('Unknown varmode (should be log or plain): '+str(varmode))
-
-        self.variables=[]
-        for i in range(self.model_edges.size):
-            name = self.cfg.varname.format( index=i )
-            self.variables.append(name)
-
-            if varmode=='log':
-                var=self.common_namespace.reqparameter( name, central=0.0, sigma=N.inf )
-                var.setLabel('Average reactor spectrum correction for {} MeV [log]'.format(self.model_edges[i]))
-            else:
-                var=self.common_namespace.reqparameter( name, central=1.0, sigma=N.inf )
-                var.setLabel('Average reactor spectrum correction for {} MeV'.format(self.model_edges[i]))
-
         self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=1.0, label='Correlated reactor anu spectrum correction (offset)'  )
 
         self.uncorr_vars=OrderedDict()

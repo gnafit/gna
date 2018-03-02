@@ -46,7 +46,7 @@ class bundleproduct_v01(TransformationBundle):
 
                 if debug:
                     print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
-                prod.add(bundle.outputs[name])
+                prod.multiply(bundle.outputs[name])
 
             """Save transformations"""
             self.objects[('product', name)]= prod
