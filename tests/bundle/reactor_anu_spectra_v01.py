@@ -36,16 +36,21 @@ cfg.edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) )
 
 cfg.corrections=NestedDict(
         bundle       = 'bundlelist_v01',
-        bundles_list = [ 'free' ],
+        bundles_list = [ 'free', 'uncorrelated' ],
         free = NestedDict(
             bundle='reactor_anu_freemodel_v01',
             varname = 'avganushape.n{index:02d}',
             varmode = 'log', # 'plain'
+            ),
+        uncorrelated = NestedDict(
+            bundle = 'reactor_anu_uncorr_v01',
+            uncnames  = '{isotope}_uncorr.uncn{index:02d}',
+            uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
+                             'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
             )
     )
 
 cfg.uncedges  = 'same'
-cfg.uncnames  = '{isotope}_uncorr.uncn{index:02d}'
 cfg.corrnames = '{isotope}_corr.uncn{index:02d}'
 cfg.corrname  = 'isotopes_corr'
 

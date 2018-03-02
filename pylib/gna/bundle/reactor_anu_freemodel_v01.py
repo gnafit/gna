@@ -15,7 +15,7 @@ class reactor_anu_freemodel_v01(TransformationBundle):
 
         self.edges = self.shared.reactor_anu_edges.data()
 
-        self.bundles=NestedDict( self=self )
+        self.bundles=OrderedDict( self=self )
 
     def build(self):
         with self.common_namespace:

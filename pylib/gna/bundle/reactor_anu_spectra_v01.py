@@ -27,14 +27,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
         if 'corrections' in self.cfg:
             self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
-        uncpars = OrderedDict()
-        for name, vars in self.uncorr_vars.items():
-            with self.common_namespace:
-                uncpar_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
-            uncpar_t.vararray.setLabel('Uncorr correction:\n'+name)
-            uncpars[name]=uncpar_t
-            self.objects[('uncorrelated_correction', name)] = uncpar_t
-
         corrpars = OrderedDict()
         for name, vars in self.corr_vars.items():
             with self.common_namespace:
@@ -62,7 +54,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
             for corr in self.corrections.bundles.values():
                 spectrum_t.multiply( corr.outputs[isotope] )
 
-            spectrum_t.multiply( uncpars[isotope] )
             spectrum_t.multiply( corrpars[isotope] )
             spectrum_t.product.setLabel('S(E0):\n'+isotope)
 
@@ -85,7 +76,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
         """Read raw input spectra"""
         self.spectra_raw = OrderedDict()
         self.uncertainties_corr = OrderedDict()
-        self.uncertainties_uncorr = OrderedDict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')
@@ -95,9 +85,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
 
             unc_corr = self.load_file(self.cfg.uncertainties, dtype, isotope=ns.name, mode='corr')
             self.uncertainties_corr[ns.name] = unc_corr
-
-            unc_uncorr = self.load_file(self.cfg.uncertainties, dtype, isotope=ns.name, mode='uncorr')
-            self.uncertainties_uncorr[ns.name] = unc_uncorr
 
         """Read parametrization edges"""
         self.model_edges = N.ascontiguousarray( self.cfg.edges, dtype='d' )
@@ -123,17 +110,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
 
     def define_variables(self):
         self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=1.0, label='Correlated reactor anu spectrum correction (offset)'  )
-
-        self.uncorr_vars=OrderedDict()
-        for isotope in self.isotopes:
-            uncfcn = interp1d( *self.uncertainties_uncorr[isotope] )
-            for i in range(self.unc_edges.size):
-                name = self.cfg.uncnames.format( isotope=isotope, index=i )
-                self.uncorr_vars.setdefault(isotope, []).append(name)
-
-                en=self.model_edges[i]
-                var = self.common_namespace.reqparameter( name, central=1.0, sigma=uncfcn(en) )
-                var.setLabel('Uncorrelated {} anu spectrum correction for {} MeV'.format(isotope, en))
 
         self.corr_vars=OrderedDict()
         for isotope in self.isotopes:
