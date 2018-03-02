@@ -41,6 +41,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 uncpar_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
             uncpar_t.vararray.setLabel('Uncorr correction:\n'+name)
             uncpars[name]=uncpar_t
+            self.objects[('uncorrelated_correction', isotope)] = uncpar_t
 
         corrpars = OrderedDict()
         for name, vars in self.corr_vars.items():
@@ -53,6 +54,9 @@ class reactor_anu_spectra_v01(TransformationBundle):
             corr_sigma_t.vararray.setLabel('Corr unc:\n'+name)
             corrpar_t.sum.setLabel('Corr correction:\n'+name)
             corrpars[name]=corrpar_t
+
+            self.objects[('correlated_sigma', isotope)] = corr_sigma_t
+            self.objects[('correlated_correction', isotope)] = corrpar_t
 
         newx = self.shared.points
         segments_t=None

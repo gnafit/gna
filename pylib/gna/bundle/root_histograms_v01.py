@@ -55,6 +55,7 @@ class root_histograms_v01(TransformationBundle):
                 print()
 
             hist=Histogram(edges, data, ns=ns)
+            hist.hist.setLabel('hist\n{}'.format(ns.name))
 
             self.objects[('hist',var)]    = hist
             self.transformations_out[var] = hist.hist

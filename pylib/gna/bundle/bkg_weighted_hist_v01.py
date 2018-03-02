@@ -40,6 +40,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             weights = stdvector([target])
             with self.common_namespace:
                 ws = R.WeightedSum(labels, weights, ns=ns)
+            ws.sum.setLabel('Weighted {}:\n{}'.format(self.cfg.name, ns.name))
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp)
