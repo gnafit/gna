@@ -71,13 +71,50 @@ class GNADot(object):
             labels['arrowhead']='empty'
         return {k:v for k, v in labels.items() if v}
 
+    def get_subgraph(self, subname, label, graph=None):
+        graph = graph or self.graph
+        if not subname:
+            return graph
+
+        subname = 'cluster_'+subname
+        graph = graph.get_subgraph(subname) or graph.add_subgraph(name=subname, label=label)
+
+        return graph
+
+    def get_graph(self, name):
+        subname = None
+        label = None
+        graph = self.graph
+
+        if 'AD' in name:
+            idx = name.find('AD')
+            ad = name[idx:idx+4]
+            subname=ad
+            label=ad
+
+            eh = 'EH'+ad[2]
+            print( ad, eh )
+            graph = self.get_subgraph(eh, eh, graph)
+        elif 'EH' in name:
+            idx = name.find('EH')
+            eh = name[idx:idx+3]
+            subname = eh
+            label=eh
+            print(eh )
+        elif 'NL' in name:
+            subname = 'NL'
+            label='NL'
+
+        return self.get_subgraph(subname, label, graph)
+
     def walk_back( self, entry ):
         if self.registered( entry ):
             return
 
         name = self.entryfmt.format(name=entry.name, label=entry.label)
-        node = self.graph.add_node( uid(entry), label=name )
-        self.walk_forward( entry )
+        graph = self.get_graph(name)
+        node = graph.add_node( uid(entry), label=name )
+        self.walk_forward( entry, graph )
 
         for i, source in enumerate(entry.sources):
             assert source.materialized()
@@ -86,15 +123,16 @@ class GNADot(object):
             if self.registered( sink.entry, entry ):
                 continue
 
-            self.graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
+            graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
 
             self.walk_back( sink.entry )
 
-    def walk_forward( self, entry ):
+    def walk_forward( self, entry, graph=None ):
+        graph = graph or self.graph
         for i, sink in enumerate( entry.sinks ):
             if sink.sources.size()==0:
-                self.graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
-                self.graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
+                graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
+                graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
                 continue
 
             for j, source in enumerate(sink.sources):
@@ -102,7 +140,7 @@ class GNADot(object):
 
                 if self.registered( sink.entry, source.entry ):
                     continue
-                self.graph.add_edge( uid(sink.entry), uid(source.entry), **self.get_labels(i, sink, None, source))
+                graph.add_edge( uid(sink.entry), uid(source.entry), **self.get_labels(i, sink, None, source))
 
                 self.walk_back( source.entry )
 
