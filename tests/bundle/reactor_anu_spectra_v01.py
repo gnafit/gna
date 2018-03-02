@@ -28,31 +28,32 @@ cfg.bundle = 'reactor_anu_spectra_v01'
 cfg.isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ]
 cfg.filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat']
-cfg.uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
-                     'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
 
 cfg.strategy = dict( underflow='constant', overflow='extrapolate' )
 cfg.edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) )
 
 cfg.corrections=NestedDict(
         bundle       = 'bundlelist_v01',
-        bundles_list = [ 'free', 'uncorrelated' ],
+        bundles_list = [ 'free', 'uncorrelated', 'correlated' ],
         free = NestedDict(
-            bundle='reactor_anu_freemodel_v01',
+            bundle  ='reactor_anu_freemodel_v01',
             varname = 'avganushape.n{index:02d}',
             varmode = 'log', # 'plain'
             ),
         uncorrelated = NestedDict(
-            bundle = 'reactor_anu_uncorr_v01',
-            uncnames  = '{isotope}_uncorr.uncn{index:02d}',
+            bundle        = 'reactor_anu_uncorr_v01',
+            uncnames      = '{isotope}_uncorr.uncn{index:02d}',
+            uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
+                'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
+            ),
+        correlated = NestedDict(
+            bundle   = 'reactor_anu_corr_v01',
+            uncname  = 'isotopes_corr',
+            parnames = '{isotope}_corr.uncn{index:02d}',
             uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
                              'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
             )
-    )
-
-cfg.uncedges  = 'same'
-cfg.corrnames = '{isotope}_corr.uncn{index:02d}'
-cfg.corrname  = 'isotopes_corr'
+        )
 
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )

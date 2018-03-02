@@ -27,21 +27,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
         if 'corrections' in self.cfg:
             self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
-        corrpars = OrderedDict()
-        for name, vars in self.corr_vars.items():
-            with self.common_namespace:
-                corr_sigma_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
-                corrpar_t = R.WeightedSum(1.0, C.stdvector(['offset']), C.stdvector([self.cfg.corrname]))
-                corrpar_i = corrpar_t.sum.inputs
-                corrpar_i['offset']( corr_sigma_t )
-
-            corr_sigma_t.vararray.setLabel('Corr unc:\n'+name)
-            corrpar_t.sum.setLabel('Corr correction:\n'+name)
-            corrpars[name]=corrpar_t
-
-            self.objects[('correlated_sigma', name)] = corr_sigma_t
-            self.objects[('correlated_correction', name)] = corrpar_t
-
         newx = self.shared.points
         segments_t=None
         for ns in self.namespaces:
@@ -53,8 +38,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
             spectrum_t.multiply( spectrum_raw_t )
             for corr in self.corrections.bundles.values():
                 spectrum_t.multiply( corr.outputs[isotope] )
-
-            spectrum_t.multiply( corrpars[isotope] )
             spectrum_t.product.setLabel('S(E0):\n'+isotope)
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
@@ -75,16 +58,12 @@ class reactor_anu_spectra_v01(TransformationBundle):
     def load_data(self):
         """Read raw input spectra"""
         self.spectra_raw = OrderedDict()
-        self.uncertainties_corr = OrderedDict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')
         for ns in self.namespaces:
             data = self.load_file(self.cfg.filename, dtype, isotope=ns.name)
             self.spectra_raw[ns.name] = data
-
-            unc_corr = self.load_file(self.cfg.uncertainties, dtype, isotope=ns.name, mode='corr')
-            self.uncertainties_corr[ns.name] = unc_corr
 
         """Read parametrization edges"""
         self.model_edges = N.ascontiguousarray( self.cfg.edges, dtype='d' )
@@ -98,29 +77,8 @@ class reactor_anu_spectra_v01(TransformationBundle):
             model = N.exp(f(self.model_edges))
             self.spectra[name] = model
 
-        """Read the uncertainties edges"""
-        self.unc_edges=self.cfg.uncedges
-        if self.unc_edges=='same':
-            self.unc_edges = self.model_edges
-        else:
-            """If the differ from the model edges, check that they contain all the model edges"""
-            self.unc_edges=N.ascontiguousarray(self.unc_edges, dtype='d')
-
-            raise Exception('not implemented')
-
     def define_variables(self):
-        self.common_namespace.reqparameter( self.cfg.corrname, central=0.0, sigma=1.0, label='Correlated reactor anu spectrum correction (offset)'  )
-
-        self.corr_vars=OrderedDict()
-        for isotope in self.isotopes:
-            corrfcn = interp1d( *self.uncertainties_corr[isotope] )
-            for i in range(self.unc_edges.size):
-                name = self.cfg.corrnames.format( isotope=isotope, index=i )
-                self.corr_vars.setdefault(isotope, []).append(name)
-
-                en = self.model_edges[i]
-                var = self.common_namespace.reqparameter( name, central=corrfcn(en), sigma=0.1, fixed=True )
-                var.setLabel('Correlated {} anu spectrum correction sigma for {} MeV'.format(isotope, en))
+        pass
 
     def load_file(self, filenames, dtype, **kwargs):
         for format in filenames:
