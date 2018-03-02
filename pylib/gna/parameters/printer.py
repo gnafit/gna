@@ -9,12 +9,15 @@ unctypes = ( ROOT.Variable('double'),  )
 
 namefmt='{name:30}'
 valfmt='={val:11.6g}'
-centralfmt=' │ {central:11.6g}'
+centralfmt='{central:11.6g}'
 limitsfmt=' ({:g}, {:g})'
-centralsigmafmt=' │ {central:11.6g}±{sigma:11.6g}'
+centralsigmafmt='{central:11.6g}±{sigma:11.6g}'
 relsigmafmt=' [{relsigma:11.6g}%]'
+
+centralsigma_len=len(centralsigmafmt.format(central=0, sigma=0))
 relsigma_len=len(relsigmafmt.format(relsigma=0))
 
+centralrel_empty =(centralsigma_len+relsigma_len-1)*' '
 sepstr=' │ '
 fixedstr=sepstr+'[fixed]'
 freestr=' [free]'
@@ -51,6 +54,7 @@ def Variable__str( self, labels=False ):
     s+=valfmt.format(**fmt)
 
     if label:
+        s+=sepstr+centralrel_empty
         s+=sepstr+label
 
     return s
@@ -72,7 +76,7 @@ def Parameter__str( self, labels=False  ):
     if self.isFixed():
         s+=fixedstr
     else:
-        s+= centralfmt.format(**fmt)
+        s+= sepstr+centralfmt.format(**fmt)
 
         if limits.size():
             s+=sepstr
@@ -103,7 +107,7 @@ def Parameter__str( self, labels=False  ):
     if self.isFixed():
         s+=fixedstr
     else:
-        s+=centralsigmafmt.format(**fmt)
+        s+=sepstr + centralsigmafmt.format(**fmt)
         if N.isinf(fmt['sigma']):
             s+=freestr
         else:

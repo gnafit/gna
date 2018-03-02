@@ -48,7 +48,8 @@ class hist_mixture_v01(TransformationBundle):
             subst = []
             for name, val in self.cfg.fractions.items():
                 cname = 'frac_'+name
-                ns.reqparameter( cname, cfg=val )
+                par = ns.reqparameter( cname, cfg=val )
+                par.setLabel( '{} fraction'.format(name) )
                 missing.pop(missing.index(name))
                 subst.append(ns.pathto(cname))
 
@@ -57,5 +58,6 @@ class hist_mixture_v01(TransformationBundle):
 
             missing = 'frac_'+missing[0]
             vd = R.VarDiff( stdvector(subst), missing, 1.0, ns=ns)
-            ns[missing].get()
+            par=ns[missing].get()
             self.objects[('vardiff', ns.name)] = vd
+            par.setLabel('-'.join(['1']+['frac_'+n for n in self.cfg.fractions.keys()]))

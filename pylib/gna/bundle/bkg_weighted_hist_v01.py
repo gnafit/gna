@@ -34,11 +34,12 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
-            target = self.groups.format_splitjoin(ns.name, targetfmt, prepend=self.common_namespace.path)
+            target = self.groups.format_splitjoin(ns.name, targetfmt)
 
             labels  = stdvector([self.cfg.name])
             weights = stdvector([target])
-            ws = R.WeightedSum(labels, weights, ns=ns)
+            with self.common_namespace:
+                ws = R.WeightedSum(labels, weights, ns=ns)
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp)
@@ -72,17 +73,19 @@ class bkg_weighted_hist_v01(TransformationBundle):
             variant = ns.name
             formula = []
             for fullitem in formulafmt:
-                item = self.groups.format_splitjoin(variant, fullitem, prepend=self.common_namespace.path)
+                item = self.groups.format_splitjoin(variant, fullitem)
                 formula.append(item)
 
             target = self.groups.format_splitjoin(variant, targetfmt)
             tpath, thead = target.rsplit('.', 1)
             tns = self.common_namespace(tpath)
             if len(formula)>1:
-                vp = R.VarProduct(stdvector(formula), thead, ns=tns)
+                with self.common_namespace:
+                    vp = R.VarProduct(stdvector(formula), thead, ns=tns)
+                    par = tns[thead].get()
 
-                tns[thead].get()
                 self.objects[('prod', variant)]=vp
+                par.setLabel('*'.join(formula))
             else:
                 tns.defparameter( thead, target=formula[0] )
 
