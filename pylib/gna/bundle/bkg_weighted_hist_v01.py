@@ -31,6 +31,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
     def build(self):
         spectra = CatDict(self.groups, self.bundles.outputs)
+        transs = CatDict(self.groups, self.bundles.transformations_out)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
@@ -44,6 +45,10 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp)
+
+            inp_t=transs[ns.name]
+            if inp_t.label().startswith('hist'):
+                inp_t.setLabel('{} hist:\n{}'.format(self.cfg.name, ns.name))
 
             """Save transformations"""
             self.objects[('spec',ns.name)]    = inp

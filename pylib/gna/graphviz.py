@@ -72,17 +72,21 @@ class GNADot(object):
         return {k:v for k, v in labels.items() if v}
 
     def get_subgraph(self, subname, label, graph=None):
-        graph = graph or self.graph
+        if graph is None:
+            graph = self.graph
+
         if not subname:
             return graph
 
         subname = 'cluster_'+subname
-        graph = graph.get_subgraph(subname) or graph.add_subgraph(name=subname, label=label)
+        subgraph = graph.get_subgraph(subname)
+        if subgraph is None:
+            subgraph=graph.add_subgraph(name=subname, label=label)
 
-        return graph
+        return subgraph
 
     def get_graph(self, name):
-        return self.graph
+        # return self.graph
         subname = None
         label = None
         graph = self.graph
@@ -94,7 +98,6 @@ class GNADot(object):
             label=ad
 
             eh = 'EH'+ad[2]
-            print( ad, eh )
             graph = self.get_subgraph(eh, eh, graph)
         elif 'EH' in name:
             idx = name.find('EH')
@@ -115,7 +118,7 @@ class GNADot(object):
         name = self.entryfmt.format(name=entry.name, label=entry.label)
         graph = self.get_graph(name)
         node = graph.add_node( uid(entry), label=name )
-        self.walk_forward( entry, graph )
+        self.walk_forward( entry )
 
         for i, source in enumerate(entry.sources):
             assert source.materialized()
@@ -124,12 +127,13 @@ class GNADot(object):
             if self.registered( sink.entry, entry ):
                 continue
 
-            graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
+            self.graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
 
             self.walk_back( sink.entry )
 
     def walk_forward( self, entry, graph=None ):
-        graph = graph or self.graph
+        if graph is None:
+            graph = self.graph
         for i, sink in enumerate( entry.sinks ):
             if sink.sources.size()==0:
                 graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
