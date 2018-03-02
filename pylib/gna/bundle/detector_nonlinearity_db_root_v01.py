@@ -48,7 +48,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # a weighted sum of input curves
         #
         with self.common_namespace:
-            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
+            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), C.stdvector(['weight_'+n for n in self.cfg.names]), ns=self.common_namespace )
         self.objects['lsnl_factor']=corr_lsnl
 
         for y, name in zip( newy, self.cfg.names ):
@@ -102,15 +102,18 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         return self.build_graphs( graphs )
 
     def define_variables(self):
-        self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
+        par = self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
+        par.setLabel( 'Nominal nonlinearity curve weight' )
         for name in self.cfg.names[1:]:
-            self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
+            par = self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
+            par.setLabel( 'Correction nonlinearity weight for '+name )
 
         if self.cfg.par.central!=1:
             raise Exception('Relative energy scale parameter should have central value of 1 by definition')
         for ns in self.namespaces:
             parname = self.cfg.parname.format(ns.name)
             par = self.common_namespace.reqparameter( parname, cfg=self.cfg.par )
+            par.setLabel( 'Uncorrelated energy scale for '+ns.name )
             self.pars[ns.name]=parname
 
 def interpolate( (x, y), edges):

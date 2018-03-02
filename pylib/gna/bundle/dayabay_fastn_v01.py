@@ -51,3 +51,4 @@ class dayabay_fastn_v01(TransformationBundle):
             name = self.groups.format_splitjoin(loc, self.cfg.formula)
             par = self.common_namespace.reqparameter(name, cfg=unc)
             self.bindings[loc]=par
+            par.setLabel('Fast neutron shape parameter for '+loc)

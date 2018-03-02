@@ -44,6 +44,12 @@ class detector_eres_common3(TransformationBundle):
                 raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
-        for name, unc in self.cfg.pars.items():
-            self.common_namespace.reqparameter(name, cfg=unc)
+        descriptions=[
+                'spatial/temporal resolution',
+                'photon statistics',
+                'dark noise'
+                ]
+        for i, (name, unc) in enumerate(self.cfg.pars.items()):
+            par = self.common_namespace.reqparameter(name, cfg=unc)
+            par.setLabel( 'Energy resolution ({})'.format(descriptions[i]) )
 

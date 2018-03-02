@@ -19,7 +19,8 @@ relsigma_len=len(relsigmafmt.format(relsigma=0))
 
 centralrel_empty =(centralsigma_len+relsigma_len-1)*' '
 sepstr=' │ '
-fixedstr=sepstr+'[fixed]'
+fixedstr='[fixed]'
+fixedstr+=' '*(centralsigma_len+relsigma_len-1-len(fixedstr))
 freestr=' [free]'
 freestr+=' '*(relsigma_len-len(freestr))
 
@@ -53,9 +54,10 @@ def Variable__str( self, labels=False ):
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
 
+    if labels:
+        s+=sepstr+centralrel_empty+sepstr
     if label:
-        s+=sepstr+centralrel_empty
-        s+=sepstr+label
+        s+=label
 
     return s
 
@@ -74,7 +76,7 @@ def Parameter__str( self, labels=False  ):
     s+=valfmt.format(**fmt)
 
     if self.isFixed():
-        s+=fixedstr
+        s+=sepstr+fixedstr
     else:
         s+= sepstr+centralfmt.format(**fmt)
 
@@ -83,8 +85,10 @@ def Parameter__str( self, labels=False  ):
             for (a,b) in limits:
                 s+=limitsfmt.format(a,b)
 
+    if labels:
+        s+=sepstr
     if label:
-        s+=sepstr+label
+        s+=label
 
     return s
 
@@ -105,7 +109,7 @@ def Parameter__str( self, labels=False  ):
     s+=valfmt.format(**fmt)
 
     if self.isFixed():
-        s+=fixedstr
+        s+=sepstr+fixedstr
     else:
         s+=sepstr + centralsigmafmt.format(**fmt)
         if N.isinf(fmt['sigma']):
@@ -121,7 +125,9 @@ def Parameter__str( self, labels=False  ):
             for (a,b) in limits:
                 s+=limitsfmt.format(a,b)
 
+    if labels:
+        s+=sepstr
     if label:
-        s+=sepstr+label
+        s+=label
 
     return s

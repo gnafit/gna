@@ -63,5 +63,6 @@ class detector_iav_db_root_v01(TransformationBundle):
         for ns in self.namespaces:
             parname = self.cfg.parname.format(ns.name)
             par = self.common_namespace.reqparameter( parname, cfg=self.cfg.scale )
+            par.setLabel('IAV offdiagonal contribution scale for '+ns.name)
             self.pars[ns.name]=parname
 

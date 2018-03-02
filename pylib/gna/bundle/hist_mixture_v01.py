@@ -14,6 +14,9 @@ from gna.bundle.connections import pairwise
 
 class hist_mixture_v01(TransformationBundle):
     def __init__(self, **kwargs):
+        variants  = kwargs['cfg'].get('variants', None)
+        if variants is not None:
+            kwargs['namespaces'] = list(variants)
         super(hist_mixture_v01, self).__init__( **kwargs )
 
         if len(self.cfg.spectra)<2:
@@ -49,15 +52,18 @@ class hist_mixture_v01(TransformationBundle):
             for name, val in self.cfg.fractions.items():
                 cname = 'frac_'+name
                 par = ns.reqparameter( cname, cfg=val )
-                par.setLabel( '{} fraction'.format(name) )
+                par.setLabel('{} fraction'.format(name))
                 missing.pop(missing.index(name))
                 subst.append(ns.pathto(cname))
 
             if len(missing)!=1:
                 raise Exception('One weight of the hist_mixture should be autmatic')
 
+            label='{} fraction: '.format(missing[0])
+            label+='-'.join(['1']+['frac_'+n for n in self.cfg.fractions.keys()])
+
             missing = 'frac_'+missing[0]
             vd = R.VarDiff( stdvector(subst), missing, 1.0, ns=ns)
             par=ns[missing].get()
             self.objects[('vardiff', ns.name)] = vd
-            par.setLabel('-'.join(['1']+['frac_'+n for n in self.cfg.fractions.keys()]))
+            par.setLabel(label)

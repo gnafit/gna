@@ -63,7 +63,8 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             for loc, unc in numbers.items():
                 path, head = self.groups.format_splitjoin( loc, fullitem ).rsplit( '.', 1 )
-                self.common_namespace(path).reqparameter(head, cfg=unc)
+                par = self.common_namespace(path).reqparameter(head, cfg=unc)
+                par.setLabel('{} for {}'.format('.'.join([path, head]), loc))
 
         #
         # Link the other variables
@@ -85,7 +86,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
                     par = tns[thead].get()
 
                 self.objects[('prod', variant)]=vp
-                par.setLabel('*'.join(formula))
+                par.setLabel('Norm of {} for {}: '.format(self.cfg.name, ns.name)+'*'.join(formula))
             else:
                 tns.defparameter( thead, target=formula[0] )
 
