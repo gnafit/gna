@@ -86,7 +86,7 @@ class GNADot(object):
         return subgraph
 
     def get_graph(self, name):
-        # return self.graph
+        return self.graph
         subname = None
         label = None
         graph = self.graph
