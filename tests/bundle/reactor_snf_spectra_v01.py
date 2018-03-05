@@ -35,7 +35,6 @@ cfg.fission_fractions = NestedDict( # Nucl.Instrum.Meth.A569:837-844,2006
             ('Pu241': 0.057)
         ] )
 
-
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )
 points_t = C.Points(points)
