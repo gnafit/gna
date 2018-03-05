@@ -41,6 +41,18 @@ class reactor_snf_spectra_v01(TransformationBundle):
             # f = interp1d( x, N.log(y), bounds_error=True )
             # model = N.exp(f(self.model_edges))
             # self.spectra[name] = model
+        pass
 
     def define_variables(self):
-        pass
+        for reactor in self.cfg.reactors:
+            ns = self.common_namespace(reactor)
+            for isotope in self.isotopes:
+                pname = 'ffrac_{}'.format(isotope)
+                par = ns.reqparameter( pname, central=self.cfg.fission_fractions[isotope], relsigma=0.1 )
+                par.setLabel( '{isotope} fission fraction at {reactor}'.format(isotope=isotope, reactor=reactor) )
+
+            for isotope in self.isotopes:
+                pname = 'ffrac_{}'.format(isotope)
+                par = ns.reqparameter( pname+'_fixed', central=self.cfg.fission_fractions[isotope], relsigma=0.1, fixed=True )
+                par.setLabel( '{isotope} fission fraction at {reactor} (const)'.format(isotope=isotope, reactor=reactor) )
+

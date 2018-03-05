@@ -29,11 +29,12 @@ cfg.isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ]
 cfg.reactors = [ 'DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4' ]
 cfg.fission_fractions = NestedDict( # Nucl.Instrum.Meth.A569:837-844,2006
         [
-            ('U235' : 0.563),
-            ('U238' : 0.079),
-            ('Pu239': 0.301),
-            ('Pu241': 0.057)
+            ('U235' , 0.563),
+            ('U238' , 0.079),
+            ('Pu239', 0.301),
+            ('Pu241', 0.057)
         ] )
+cfg.spectrum = 'data/reactor_anu_spectra/SNF/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat'
 
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )
