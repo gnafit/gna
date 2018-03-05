@@ -34,13 +34,13 @@ cfg.fission_fractions = NestedDict( # Nucl.Instrum.Meth.A569:837-844,2006
             ('Pu239', 0.301),
             ('Pu241', 0.057)
         ] )
-cfg.spectrum = 'data/reactor_anu_spectra/SNF/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat'
+cfg.filename = 'data/reactor_anu_spectra/SNF/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat'
 
 """Init inputs"""
 points = N.linspace( 0.0, 12.0, 241 )
 points_t = C.Points(points)
 points_t.points.setLabel('E (integr)')
-shared=NestedDict( points=points_t.single() )
+shared=NestedDict( edges=points_t.single() )
 
 ns = env.globalns('testexp')
 

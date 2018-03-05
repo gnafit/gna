@@ -124,10 +124,10 @@ class GNADot(object):
             assert source.materialized()
             sink = source.sink
 
-            if self.registered( sink.entry, entry ):
+            if self.registered( sink, register=False ):
                 continue
 
-            self.graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
+            # self.graph.add_edge( uid(sink.entry), uid(entry), **self.get_labels(None, sink, i, source))
 
             self.walk_back( sink.entry )
 
@@ -139,13 +139,26 @@ class GNADot(object):
                 graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
                 graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
                 continue
-
-            for j, source in enumerate(sink.sources):
+            elif sink.sources.size()==1:
+                source=sink.sources[0]
                 assert source.materialized()
 
-                if self.registered( sink.entry, source.entry ):
+                if self.registered( sink ):
                     continue
                 graph.add_edge( uid(sink.entry), uid(source.entry), **self.get_labels(i, sink, None, source))
 
                 self.walk_back( source.entry )
+            else:
+                if self.registered(sink):
+                    continue
+                joint = graph.add_node( uid(sink), label='', shape='none', width=0, height=0 )
+                graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none' )
+                for j, source in enumerate(sink.sources):
+                    assert source.materialized()
+
+                    # if self.registered( sink.entry, source.entry ):
+                        # continue
+                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
+
+                    self.walk_back( source.entry )
 
