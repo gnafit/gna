@@ -28,6 +28,7 @@ set (SOURCES
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
   core/Rebin.cc
+  core/Jacobian.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -76,6 +77,7 @@ set (HEADERS
   PoissonToyMC.hh
   Rebin.hh
   Minimizable.hh
+  Jacobian.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
