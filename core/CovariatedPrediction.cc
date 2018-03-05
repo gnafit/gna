@@ -29,7 +29,7 @@ CovariatedPrediction::CovariatedPrediction()
 
 CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other)
   : m_transform(t_["prediction"]),
-    m_inputs(other.m_inputs), m_finalized(other.m_finalized)
+    m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
 {
 }
 
@@ -37,6 +37,7 @@ CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction
   m_transform = t_["prediction"];
   m_inputs = other.m_inputs;
   m_finalized = other.m_finalized;
+  m_prediction_ready = other.m_prediction_ready;
   return *this;
 }
 
@@ -56,11 +57,17 @@ void CovariatedPrediction::append(SingleOutput& obs) {
    * @brief Finalize the creation of covariances and prediction. Revaulates
    * types and forbids adding new inputs to prediction and covariations.
 */ 
+
+void CovariatedPrediction::prediction_ready() {
+  m_prediction_ready = true;
+  t_["prediction"].updateTypes();
+}
+
 void CovariatedPrediction::finalize() {
   m_finalized = true;
   t_["prediction"].updateTypes();
   t_["covbase"].updateTypes();
-  t_["cov"].updateTypes();
+  t_["cov"].updateTypes(); 
 }
 
 /**
@@ -114,6 +121,7 @@ void CovariatedPrediction::covariate(SingleOutput &cov,
 }
 
 
+
    
 /**
    * @brief Add input vector to be used for rank-1 update of covariance matrix
@@ -147,7 +155,7 @@ void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
 }
 
 void CovariatedPrediction::calculateTypes(Atypes args, Rtypes rets) {
-  if (!m_finalized) {
+  if (!m_finalized and !m_prediction_ready) {
     throw args.undefined();
   }
   if (args.size() == 0) {
@@ -223,6 +231,7 @@ void CovariatedPrediction::calculateCovbase(Args args, Rets rets) {
       m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = args[i].arr;
       break;
     case CovarianceAction::Block:
+      std::cout << args[i].arr;
       m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = args[i].arr;
       break;
     }

@@ -24,6 +24,7 @@ public:
 
   void append(SingleOutput &obs);
   void finalize();
+  void prediction_ready();
 
   size_t blockOffset(OutputDescriptor inp);
   size_t blocksCount() const noexcept;
@@ -84,6 +85,7 @@ protected:
   std::vector<CovarianceAction> m_covactions;
 
   bool m_finalized;
+  bool m_prediction_ready;
   LLT m_lltbase, m_llt;
   Eigen::ArrayXXd m_covbase;
 };
