@@ -24,7 +24,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
         self.shared.reactor_anu_edges = model_edges_t.single()
 
         self.corrections=None
-        if 'corrections' in self.cfg:
+        if self.cfg.get('corrections', None):
             self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
         newx = self.shared.points
@@ -33,12 +33,16 @@ class reactor_anu_spectra_v01(TransformationBundle):
             isotope=ns.name
             spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.common_namespace )
             spectrum_raw_t.points.setLabel('S0(E0):\n'+isotope)
+            self.objects[('spectrum_raw', isotope)] = spectrum_raw_t
 
-            spectrum_t = R.Product(ns=self.common_namespace)
-            spectrum_t.multiply( spectrum_raw_t )
-            for corr in self.corrections.bundles.values():
-                spectrum_t.multiply( corr.outputs[isotope] )
-            spectrum_t.product.setLabel('S(E0):\n'+isotope)
+            if self.corrections:
+                spectrum_t = R.Product(ns=self.common_namespace)
+                spectrum_t.multiply( spectrum_raw_t )
+                for corr in self.corrections.bundles.values():
+                    spectrum_t.multiply( corr.outputs[isotope] )
+                spectrum_t.product.setLabel('S(E0):\n'+isotope)
+            else:
+                spectrum_t = spectrum_raw_t
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
             interp_expo_t.interp.setLabel('S(E):\n'+isotope)
@@ -49,7 +53,6 @@ class reactor_anu_spectra_v01(TransformationBundle):
                 segments_t = interp_expo_t.segments
 
             """Store data"""
-            self.objects[('spectrum_raw', isotope)] = spectrum_raw_t
             self.objects[('spectrum', isotope)]     = spectrum_t
             self.objects[('interp', isotope)]       = interp_expo_t
             self.transformations_out[isotope]       = interp_expo_t.interp
@@ -72,8 +75,11 @@ class reactor_anu_spectra_v01(TransformationBundle):
 
         """Compute the values of spectra on the parametrization"""
         self.spectra=OrderedDict()
+        self.shared.reactor_anu_fcn=OrderedDict()
+        fcns = self.shared.reactor_anu_fcn
         for name, (x, y) in self.spectra_raw.items():
             f = interp1d( x, N.log(y), bounds_error=True )
+            fcns[name] = lambda e: N.exp(f(e))
             model = N.exp(f(self.model_edges))
             self.spectra[name] = model
 

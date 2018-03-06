@@ -10,25 +10,26 @@ from gna.configurator import NestedDict
 from gna.bundle import *
 from gna.bundle.connections import pairwise
 
-class bundlelist_v01(TransformationBundle):
-    def __init__(self, listkey='bundles_list', **kwargs):
-        self.listkey=listkey
-        super(bundlelist_v01, self).__init__( **kwargs )
-
-        self.bundles = NestedDict()
+class subbundle(TransformationBundle):
+    bundle = None
+    def __init__(self, cfgkey, **kwargs):
+        self.cfgkey=cfgkey
+        kwargs['cfg'] = kwargs['cfg'][cfgkey]
+        super(subbundle, self).__init__( **kwargs )
 
     def build(self):
-
-        bundlelist = self.cfg.get(self.listkey, None)
-        if not bundlelist:
-            raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
-        for bundlename in bundlelist:
-            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], shared=self.shared )
+        self.bundles = execute_bundle(cfg=self.cfg, shared=self.shared)
 
         if len(self.bundles)==1:
-            bundle = self.bundles.values()[0]
+            self.bundle = bundle = self.bundles[0]
             self.objects             = bundle.objects
             self.transformations_in  = bundle.transformations_in
             self.transformations_out = bundle.transformations_out
             self.outputs             = bundle.outputs
             self.inputs              = bundle.inputs
+
+    def __getattr__(self, attr):
+        if self.bundle is None:
+            raise Exception('Can not forward attributes to multiple bundles')
+
+        return getattr(self.bundle, attr)

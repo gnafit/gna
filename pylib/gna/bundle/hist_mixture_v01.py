@@ -22,6 +22,7 @@ class hist_mixture_v01(TransformationBundle):
         if len(self.cfg.spectra)<2:
             raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )
 
+    def build(self):
         self.bundles = OrderedDict([
                 (name, execute_bundle(cfg=cfg, namespaces=None, shared=self.shared)[0])
                 for name, cfg in self.cfg.spectra.items()
@@ -31,7 +32,6 @@ class hist_mixture_v01(TransformationBundle):
             if len(spectrum.outputs)!=1:
                 raise Exception('hist_mixture_v01: expect only single output for each spectrum (exception for %s)'%name)
 
-    def build(self):
         names = self.bundles.keys()
         for ns in self.namespaces:
             weights = [ ns.pathto('frac_'+name) for name in names ]

@@ -27,7 +27,7 @@ class GNADot(object):
         if not isinstance(transformation, R.TransformationTypes.Handle):
             raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle')
 
-        self.graph=G.AGraph( directed=True, label=transformation.name(), **kwargs )
+        self.graph=G.AGraph( directed=True, **kwargs )
         self.register = set()
         self.walk_back( R.OpenHandle(transformation).getEntry() )
         self.write = self.graph.write

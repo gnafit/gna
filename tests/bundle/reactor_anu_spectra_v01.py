@@ -44,7 +44,7 @@ cfg.corrections=NestedDict(
             bundle        = 'reactor_anu_uncorr_v01',
             uncnames      = '{isotope}_uncorr.uncn{index:02d}',
             uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
-                'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
+                             'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
             ),
         correlated = NestedDict(
             bundle   = 'reactor_anu_corr_v01',
