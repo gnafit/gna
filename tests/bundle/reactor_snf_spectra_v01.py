@@ -23,7 +23,7 @@ opts=parser.parse_args()
 
 """Init configuration"""
 cfg = NestedDict()
-cfg.bundle = ['reactor_fission_fractions_const_v01', 'subbundle:anu', 'subbundle:snf']
+cfg.bundle = ['reactor_fission_fractions_const_v01', 'subbundle:anu', 'subbundle:offeq', 'subbundle:snf']
 cfg.isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ]
 cfg.reactors = [ 'DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4' ]
 cfg.fission_fractions = NestedDict( # Nucl.Instrum.Meth.A569:837-844,2006
@@ -46,7 +46,15 @@ cfg.anu = NestedDict(
 cfg.snf = NestedDict(
         bundle='reactor_snf_spectra_v01',
         filename = 'data/reactor_anu_spectra/SNF/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
-        norm=uncertain( 1.0, 50, mode='percent' ),
+        norm=uncertain( 1.0, 100, mode='percent' ),
+        edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) )
+        )
+
+cfg.offeq = NestedDict(
+        bundle='reactor_offeq_spectra_v01',
+        skip=['U238'],
+        filename = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
+        norm=uncertain( 1.0, 30, mode='percent' ),
         edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) )
         )
 
@@ -61,6 +69,7 @@ ns = env.globalns('testexp')
 """Execute bundle"""
 bundles = execute_bundle( cfg=cfg, common_namespace=ns, shared=shared )
 snf = bundles[-1]
+offeq = bundles[-2]
 
 env.globalns.printparameters( labels=True )
 
@@ -101,17 +110,18 @@ ax.plot( snf.edges, snf.ratio )
 # ax.legend( loc='upper right' )
 
 if opts.dot:
-    try:
+    if True:
         from gna.graphviz import GNADot
 
         kwargs=dict(
                 # splines='ortho'
                 )
-        graph = GNADot( snf.transformations_out.values()[0], **kwargs )
+        ts = [ snf.transformations_out.values()[0] ]+list(offeq.transformations_out.values()[0].values())
+        graph = GNADot( ts, **kwargs )
         graph.write(opts.dot)
         print( 'Write output to:', opts.dot )
-    except Exception as e:
-        print( '\033[31mFailed to plot dot\033[0m' )
+    # except Exception as e:
+        # print( '\033[31mFailed to plot dot\033[0m' )
 
 if opts.show:
     P.show()

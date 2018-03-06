@@ -46,7 +46,7 @@ class reactor_snf_spectra_v01(TransformationBundle):
 
         snf_spec_o = R.Product()
         snf_spec_o.multiply(spec_o)
-        snf_spec_o.multiplyaratio_o)
+        snf_spec_o.multiply(ratio_o)
         snf_spec_o.product.setLabel('SNF spectrum')
         self.objects['snf_spec_raw']=snf_spec_o
 
