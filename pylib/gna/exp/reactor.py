@@ -329,12 +329,15 @@ class ReactorExperimentModel(baseexp):
                         oscprob = oscprobcls(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
 
                 normedflux = ROOT.Sum()
+                normedflux.sum.setLabel('normed flux:\n{}'.format(rgroup.name))
 
                 for isoname in rgroup.fission_fractions.keys():
                     isotope = Isotope(self.ns, isoname)
+                    isotope.spectrum.f.setLabel('spectrum:\n{} at {}'.format(isoname, rgroup.name))
                     self._isotopes[(detector, rgroup)].append(isotope)
                     self._Enu_inputs[detector].add(isotope.spectrum.f.inputs.x)
                     subflux = ROOT.Product()
+                    subflux.product.setLabel('flux\n{}'.format(isoname))
                     subflux.multiply(isotope.spectrum)
                     subflux.multiply(norm.isotopes['norm_{0}'.format(isoname)])
                     detector.intermediates['flux_{}'.format(isoname)] = subflux
@@ -348,6 +351,7 @@ class ReactorExperimentModel(baseexp):
                 if 'comp0' in compnames:
                     detector.components['rate'][(weightscls, 'comp0')].add(normedflux)
                     ones = ROOT.FillLike(1.0)
+                    ones.fill.setLabel('1')
                     ones.fill.inputs(normedflux)
                     detector.components['oscprob'][(weightscls, 'comp0')].add(ones)
                     self.oscprobs_comps[(detector, rgroup)][(weightscls, 'comp0')] = ones
@@ -357,6 +361,7 @@ class ReactorExperimentModel(baseexp):
                         if compname not in compnames:
                             continue
                         product = ROOT.Product()
+                        product.product.setLabel('osc flux:\n{}'.format(compname))
                         product.multiply(normedflux)
                         product.multiply(osccomp)
                         detector.components['rate'][(weightscls, compname)].add(product)
@@ -409,12 +414,12 @@ class ReactorExperimentModel(baseexp):
             eventsparts = [ibd.xsec, ibd.jacobian]
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
+        ibd.xsec.setLabel('IBD xsec')
 
         detector.intermediates['Enu'] = ibd.Enu
         detector.intermediates['xsec'] = ibd.xsec
         for inp in self._Enu_inputs.get(detector, []):
             inp.connect(ibd.Enu.Enu)
-
 
         for detector in self.detectors:
             for resname, comps in detector.components.iteritems():
@@ -422,6 +427,7 @@ class ReactorExperimentModel(baseexp):
                     res = None
                     if resname == 'rate':
                         res = ROOT.Product()
+                        res.product.setLabel('count rate:\n{} at {}'.format(compid[1], detector.name))
                         res.multiply(comp)
                         for part in eventsparts:
                             res.multiply(part)
