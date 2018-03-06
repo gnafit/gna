@@ -108,6 +108,7 @@ if opts.dot:
 
         kwargs=dict(
                 # splines='ortho'
+                joints=False,
                 )
         graph = GNADot( b.transformations_out.values()[0], **kwargs )
         graph.write(opts.dot)
