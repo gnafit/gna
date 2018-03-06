@@ -10,6 +10,7 @@ from scipy.interpolate import interp1d
 
 class reactor_offeq_spectra_v01(TransformationBundle):
     parname = 'offeq_scale'
+    debug = False
     def __init__(self, **kwargs):
         super(reactor_offeq_spectra_v01, self).__init__( **kwargs )
 
@@ -63,7 +64,10 @@ class reactor_offeq_spectra_v01(TransformationBundle):
         for name, specfcn in self.shared.reactor_anu_fcn.items():
             if name in skip:
                 continue
-            x, y = N.loadtxt(self.cfg.filename.format(isotope=name), dtype, unpack=True)
+            fname = self.cfg.filename.format(isotope=name)
+            if self.debug:
+                print('Load:', fname)
+            x, y = N.loadtxt(fname, dtype, unpack=True)
 
             f = interp1d( x, y, bounds_error=False, fill_value=0.0 )
 
