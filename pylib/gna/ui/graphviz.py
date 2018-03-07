@@ -19,6 +19,8 @@ class cmd(basecmd):
         parser.add_argument('plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
+        parser.add_argument('-J', '--no-joints', action='store_false', dest='joints', help='disable joints')
+        parser.add_argument('-s', '--splines', help='splines option [dot]')
         parser.add_argument('-o', '--output', help='output .dot file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
         parser.add_argument('-E', '--stderr', action='store_true', help='output to stderr')
@@ -26,7 +28,10 @@ class cmd(basecmd):
     def init(self):
         head = self.opts.plot[0]
 
-        graph = GNADot( head )
+        kwargs = dict(joints=self.opts.joints)
+        if self.opts.splines:
+            kwargs['splines']=self.opts.splines
+        graph = GNADot( head, **kwargs )
 
         if self.opts.output:
             print( 'Write graph to:', self.opts.output )
