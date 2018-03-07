@@ -123,6 +123,10 @@ print(prod+prod)
 print(prod*prod)
 print(s+s)
 print(s*s)
+print(jac+prod)
+print(prod*jac)
+print(s+jac)
+print(jac*s)
 
 
 # class Sum(Indexed):
