@@ -9,6 +9,7 @@ Overview
    :maxdepth: 1
 
    making_sense
+   equation_concept
 
 Cheat sheet
 -----------

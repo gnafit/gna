@@ -125,7 +125,7 @@ print(s+s)
 print(s*s)
 print(jac+prod)
 print(prod*jac)
-print(s+jac)
+print(jac+s)
 print(jac*s)
 
 
