@@ -76,8 +76,9 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
         m_workers[w_size - 1].thr_head = curr_id;
         if (in_task.done()) m_workers[w_size - 1].work();
       } else {
-        std::cerr << "Try to add task to wait list" << std::endl;
+        std::cerr << "Try to add task to wait list, w_size =  " << w_size << " m_workers = " << m_workers.size()  << std::endl;
         for (size_t i = 0; i < w_size; i++) {
+	 std::cout << i << " " << m_workers[i].thr_head << " ";
           if (m_workers[i].thr_head == curr_id && !in_task.done()) {
             std::cerr << "Task added to wait list" << std::endl;
             m_global_wait_list[i].push_back(in_task);
@@ -86,20 +87,26 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
       } 
     }
    
-
+    std::cout << "w ind = " << worker_index << std::endl;
     size_t src_size = in_task.m_entry->sources.size();                                               
 // TODO move to top -- always to current
-    Task motherthread_task(in_task.m_entry->sources[0].sink->entry);                                 
-    add_task(motherthread_task);                                                               
-    //in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
-        for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
+    std::cout << "src_size = " << src_size << std::endl;
+    if (in_task.m_entry->sources.size() > 0) {
+      Task motherthread_task(in_task.m_entry->sources[0].sink->entry);                                 
+    
+      add_task(motherthread_task);                                                               
+      in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
+
+      for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
             std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;                    
             if ( in_task.m_entry->sources[i].sink->entry->tainted) {
                 add_task(Task(in_task.m_entry->sources[i].sink->entry));                                       
             }
-        }
+      }
+   }
    if (in_task.done()) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
    else { std::cout << "eval only "; in_task.run_task(); } 
+
 }
 
 int MultiThreading::ThreadPool::is_free_worker_exists() {
