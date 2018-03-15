@@ -72,15 +72,18 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     if (!worker_found) {
       if (w_size < m_max_thread_number) {
         m_workers.push_back(Worker(*this));
+	m_global_wait_list.push_back({});
         std::cerr << "New worker added!" << std::endl;
         m_workers[w_size - 1].thr_head = curr_id;
         if (in_task.done()) m_workers[w_size - 1].work();
       } else {
-        std::cerr << "Try to add task to wait list, w_size =  " << w_size << " m_workers = " << m_workers.size()  << std::endl;
+        std::cerr << "Try to add task to wait list, w_size =  " << w_size 
+			<< " m_workers = " << m_workers.size()  << std::endl;
         for (size_t i = 0; i < w_size; i++) {
 	 std::cout << i << " " << m_workers[i].thr_head << " ";
           if (m_workers[i].thr_head == curr_id && !in_task.done()) {
-            std::cerr << "Task added to wait list" << std::endl;
+            std::cerr << "Task added to wait list, m_global_wait_list size = " 
+			<< m_global_wait_list.size() << " i = " << i  << std::endl;
             m_global_wait_list[i].push_back(in_task);
           }
         }
@@ -92,11 +95,12 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
 // TODO move to top -- always to current
     std::cout << "src_size = " << src_size << std::endl;
     if (in_task.m_entry->sources.size() > 0) {
-      Task motherthread_task(in_task.m_entry->sources[0].sink->entry);                                 
+      if ( in_task.m_entry->sources[0].sink->entry->tainted) {
+        Task motherthread_task(in_task.m_entry->sources[0].sink->entry);                                 
     
-      add_task(motherthread_task);                                                               
-      in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
-
+        add_task(motherthread_task);                                                               
+        in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
+      }
       for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
             std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;                    
             if ( in_task.m_entry->sources[i].sink->entry->tainted) {
