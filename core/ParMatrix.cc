@@ -12,6 +12,7 @@ void ParMatrix::FillMatrix(Args args, Rets rets) {
             std::cout << format("row %1%, col %2%") % row % col << std::endl;
 
             pars_covmat(row, col) = pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
+            pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
         }
     }
         rets[0].mat = pars_covmat;

@@ -29,6 +29,7 @@ set (SOURCES
   core/PoissonToyMC.cc
   core/Rebin.cc
   core/Jacobian.cc
+  core/ParMatrix.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -101,6 +102,7 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh
+  ParMatrix.hh
   )
 
 include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
