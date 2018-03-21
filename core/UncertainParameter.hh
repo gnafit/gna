@@ -160,7 +160,7 @@ public:
   }
 
   virtual T getCovariance(const Parameter<T>& other) const noexcept {
-      if (this == &other) {return this->sigma();}
+      if (this == &other) {return this->sigma()*this->sigma();}
       auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
           return search->second;
