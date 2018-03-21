@@ -11,14 +11,9 @@ void ParMatrix::FillMatrix(Args args, Rets rets) {
             auto*  secondary_par __attribute__((unused)) = m_pars.at(col);
             std::cout << format("row %1%, col %2%") % row % col << std::endl;
 
-            pars_covmat(row, col) = primary_par->getCovariance(*secondary_par);
+            pars_covmat(row, col) = pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
         }
     }
-        std::cout << "Before symmetrizing: " << std::endl;
-        std::cout << pars_covmat << std::endl;
-        pars_covmat.matrix().triangularView<Eigen::StrictlyLower>() = pars_covmat.matrix().triangularView<Eigen::StrictlyUpper>();
-        std::cout << "After symmetrizing: " << std::endl;
-        /* std::cout << pars_covmat << std::endl; */
         rets[0].mat = pars_covmat;
         std::cout << rets[0].mat << std::endl;
 
