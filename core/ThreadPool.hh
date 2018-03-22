@@ -38,14 +38,17 @@ namespace MultiThreading {
   public:
     ThreadPool (int maxthr = 0);
     void add_task(Task task);
+    void new_worker(Task &task, size_t index);
     int is_free_worker_exists();
     bool is_pool_full();
 //    void set_max_thread_num(int k);
 
   private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
+    std::vector< std::thread > threads;
     std::vector< std::vector<Task> > m_global_wait_list;
     size_t m_max_thread_number;
+    std::mutex tp_mutex;
   };
 
 
@@ -61,6 +64,7 @@ namespace MultiThreading {
     std::thread::id thr_head;
 //  std::vector<std::thread::id> mother_thread_ids;
     std::stack<Task> *task_stack;
+    
   };
 }
 #endif /* GNATHREADPOOL_H */

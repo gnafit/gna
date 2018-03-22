@@ -1,5 +1,5 @@
 #include <chrono>
-//#include <mutex>
+#include <mutex>
 #include <thread>
 #include <iostream>
 #include <vector>
@@ -23,6 +23,7 @@ void MultiThreading::Task::run_task() {
 
 
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
+   // thr_head = std::this_thread::get_id();
     task_stack = new std::stack<Task>();
 }
 
@@ -50,6 +51,19 @@ MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr
     m_workers[0].thr_head = std::this_thread::get_id();
 }
 
+
+void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_t index) {
+	 m_workers.push_back(Worker(*this));
+//	size_t index = 0;
+//      threads.push_back(std::thread(std::ref(*m_workers[m_workers.size() - 1])));
+//        threads.push_back(std::thread(Worker::Worker, std::ref(*this)));
+        m_global_wait_list.push_back({});
+        std::cerr << "New worker added!" << std::endl;
+        m_workers[index].thr_head =  std::this_thread::get_id();
+	std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
+        if (in_task.done()) m_workers[index].work();
+}
+
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     // mother thread  creates new one if it is possible
     std::thread::id curr_id = std::this_thread::get_id();
@@ -61,21 +75,30 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     for (size_t i = 0; i < w_size; i++)  {
       if((m_workers[i].is_free())) { // || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
         std::cerr << "Free worker found!" << std::endl;
-        m_workers[i].add_to_task_stack(in_task);
-        m_workers[i].thr_head = curr_id;
-        worker_found = true;
-	worker_index = i;
+	{
+	//	std::unique_lock<std::mutex> 
+        //        	lock(tp_mutex);
+        	m_workers[i].add_to_task_stack(in_task);
+	
+        	m_workers[i].thr_head = curr_id;
+        	worker_found = true;
+		worker_index = i;
+	}
         break;
       }
     }
 
     if (!worker_found) {
       if (w_size < m_max_thread_number) {
-        m_workers.push_back(Worker(*this));
+/*        m_workers.push_back(Worker(*this));
+	threads.push_back(std::thread(std::ref(*m_workers[m_workers.size() - 1])));
+	threads.push_back(std::thread(Worker::Worker, std::ref(*this)));
 	m_global_wait_list.push_back({});
         std::cerr << "New worker added!" << std::endl;
         m_workers[w_size - 1].thr_head = curr_id;
         if (in_task.done()) m_workers[w_size - 1].work();
+*/
+	threads.push_back(std::thread([&in_task, w_size, this]() {MultiThreading::ThreadPool::new_worker (std::ref(in_task), w_size - 1); }) );
       } else {
         std::cerr << "Try to add task to wait list, w_size =  " << w_size 
 			<< " m_workers = " << m_workers.size()  << std::endl;
