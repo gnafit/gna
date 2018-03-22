@@ -73,7 +73,7 @@ class Sum(Indexed):
 
     def __radd__(self, other):
         if isinstance(other, Sum):
-            return Sum(*(other.objects+elf.objects))
+            return Sum(*(other.objects+self.objects))
 
         return Sum(other, *self.objects)
 
@@ -128,6 +128,7 @@ print(prod*jac)
 print(jac+s)
 print(jac*s)
 
+print( ( prod+prod )*s )
 
 # class Sum(Indexed):
     # def __init__(self, name, *objects):

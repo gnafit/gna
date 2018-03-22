@@ -8,13 +8,14 @@ from gna.configurator import NestedDict, uncertain, uncertaindict
 from gna.bundle import execute_bundle
 from gna.env import env
 from matplotlib import pyplot as P
-from mpl_tools.helpers import plot_hist, plot_bar
+from mpl_tools.helpers import plot_hist, plot_bar, savefig
 import constructors as C
 from gna.labelfmt import formatter as L
 
 """Parse arguments"""
 from argparse import ArgumentParser
 parser = ArgumentParser()
+parser.add_argument( '-o', '--output', help='output figure' )
 parser.add_argument( '-l', '--log', action='store_true', help='logarithmic scale' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '--set', nargs=2, action='append', default=[], help='set parameter I to value V', metavar=('I', 'V') )
@@ -77,10 +78,11 @@ ax.set_xlabel( L.u('enu') )
 ax.set_ylabel( L.u('anu_yield') )
 ax.set_title( '' )
 
-ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
+# ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
 
 for name, output in b.outputs.items():
-    ax.plot( points, output.data().copy(), label=L.s(name) )
+    data=output.data().copy()
+    ax.plot( points, N.ma.array(data, mask=data==0.0), label=L.s(name) )
 
 if opts.set or opts.rset:
     for var, value in opts.set:
@@ -95,7 +97,8 @@ if opts.set or opts.rset:
     env.globalns.printparameters()
 
     for name, output in b.outputs.items():
-        ax.plot( points, output.data().copy(), '--', label=L.s(name) )
+        data=output.data().copy()
+        ax.plot( points, N.ma.array(data, mask=data==0.0), '--', label=L.s(name) )
 
 if opts.log:
     ax.set_yscale('log')
@@ -115,6 +118,8 @@ if opts.dot:
         print( 'Write output to:', opts.dot )
     except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
+
+savefig(opts.output)
 
 if opts.show:
     P.show()
