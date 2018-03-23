@@ -17,6 +17,9 @@ class Indices(object):
 
         self.indices=list(sorted(self.indices))
 
+        if kwargs:
+            raise Exception('Unparsed kwargs')
+
     def __str__(self):
         return ', '.join( self.indices )
 
@@ -30,6 +33,13 @@ class Indices(object):
 
     def __eq__(self, other):
         return self.indices==other.indices
+
+    def reduce(self, *indices):
+        if not set(indices).issubset(self.indices):
+            raise Exception( "Indices.reduce should be called on a subset of indices" )
+
+        return Indices(*(set(self.indices)-set(indices)))
+
 
 class Indexed(Indices):
     def __init__(self, name, *indices, **kwargs):
@@ -47,6 +57,8 @@ class Indexed(Indices):
             return False
         return self.indices==other.indices
 
+    def reduce(self, newname, *indices):
+        return Indexed( newname, Indices.reduce(self, *indices) )
 
 class Variable(Indexed):
     def __init__(self, name, *indices, **kwargs):
@@ -58,6 +70,30 @@ class Variable(Indexed):
     def __call__(self):
         return Transformation(self.name)
 
+class VProduct(Variable):
+    def __init__(self, *objects, **kwargs):
+        name = kwargs.pop('name', '')
+        for o in objects:
+            if not isinstance(o, Variable):
+                raise Exception('Expect Variable instance')
+
+        self.objects=list(objects)
+        super(VProduct, self).__init__(name, *objects)
+
+    def estr(self):
+        return '{}'.format( ' * '.join(str(o) for o in self.objects) )
+
+    def __mul__(self, other):
+        if isinstance(other, VProduct):
+            return VProduct(*(self.objects+other.objects))
+        return VProduct(*(self.objects+[other]))
+
+    def __rmul__(self, other):
+        if isinstance(other, VProduct):
+            return VProduct(*(other.objects+self.objects))
+
+        return VProduct(other, *self.objects)
+
 class Transformation(Indexed):
     def __init__(self, name, *indices, **kwargs):
         super(Variable, self).__init__(name, *indices, **kwargs)
@@ -65,26 +101,9 @@ class Transformation(Indexed):
     def __mul__(self, other):
         return VProduct(self, other)
 
-class VProduct(Indexed):
-    def __init__(self, *objects, **kwargs):
-        name = kwargs.pop('name', '')
-        self.objects=list(objects)
-        super(VProduct, self).__init__(name, collect=[o.indices for o in self.objects])
+        # if isinstance(other, VSum):
+            # return VProduct(*(self.objects+other.objects))
 
-    def __str__(self):
-        return '{}'.format( ' * '.join(str(o) for o in self.objects) )
-
-    def __mul__(self, other):
-        if isinstance(other, VSum):
-            return VProduct(*(self.objects+other.objects))
-
-        return VProduct(*(self.objects+[other]))
-
-    def __rmul__(self, other):
-        if isinstance(other, VProduct):
-            return VProduct(*(other.objects+elf.objects))
-
-        return VProduct(other, *self.objects)
 
 # class VSum(Indexed):
     # def __init__(self, *objects, **kwargs):

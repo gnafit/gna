@@ -16,7 +16,10 @@ print(i2)
 j2 = Indexed('j2', 'j', 'k')
 print(j2)
 
-print( Indexed('operation_i1_i2_j2', i1, i2, j2) )
+op = Indexed('operation_i1_i2_j2', i1, i2, j2)
+print( op )
 
 print( 'i1==i2', i1==i2 )
 print( 'i1==i1', i1==i1 )
+
+print('reduce', op, 'by k', op.reduce('op_reduced', 'k'))
