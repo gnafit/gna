@@ -61,22 +61,23 @@ class Indexed(Indices):
         return self.indices==other.indices
 
     def reduce(self, newname, *indices):
-        return Indexed( newname, Indices.reduce(self, *indices) )
+        return Indexed(newname, Indices.reduce(self, *indices))
 
 class Variable(Indexed):
-    def __init__(self, *args, **kwargs):
-        super(Variable, self).__init__(*args, **kwargs)
+    def __init__(self, name, *args, **kwargs):
+        super(Variable, self).__init__(name, *args, **kwargs)
 
     def __mul__(self, other):
-        return VProduct(self, other)
+        if isinstance(other, Transformation):
+            return WeightedTransformation('?', other, self)
+
+        return VProduct('?', self, other)
 
     def __call__(self, *targs):
         return Transformation(self.name, self, targs=targs)
 
 class VProduct(Variable):
-    def __init__(self, *objects, **kwargs):
-        if objects and isinstance(objects[0]):
-            self.name, objects = objects[0], objects[1:]
+    def __init__(self, name, *objects, **kwargs):
         if not objects:
             raise Exception('Expect at least one variable for VarProduct')
 
@@ -92,17 +93,17 @@ class VProduct(Variable):
 
     def __mul__(self, other):
         if isinstance(other, VProduct):
-            return VProduct(*(self.objects+other.objects))
-        return VProduct(*(self.objects+[other]))
+            return VProduct('?', *(self.objects+other.objects))
+        return VProduct('?', *(self.objects+[other]))
 
     def __rmul__(self, other):
         if isinstance(other, VProduct):
-            return VProduct(*(other.objects+self.objects))
+            return VProduct('?', *(other.objects+self.objects))
 
-        return VProduct(other, *self.objects)
+        return VProduct('?', other, *self.objects)
 
 class Transformation(Indexed):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         targs = ()
         if '|' in args:
             idx = args.index('|')
@@ -117,17 +118,27 @@ class Transformation(Indexed):
                 raise Exception('Transformation argument should be another Transformation')
             self.arguments.append(arg)
 
-        super(Transformation, self).__init__(*(list(args)+self.arguments), **kwargs)
+        super(Transformation, self).__init__(name, *(list(args)+self.arguments), **kwargs)
 
     def __str__(self):
         return '{}({})'.format(Indexed.__str__(self), ', '.join(str(a) for a in self.arguments))
-    #
-    # def __mul__(self, other):
+
+    def __mul__(self, other):
+        if isinstance(other, Variable):
+            return WeightedTransformation('?', self, other)
+
         # return VProduct(self, other)
+        raise Exception('')
 
-        # if isinstance(other, VSum):
-            # return VProduct(*(self.objects+other.objects))
+class WeightedTransformation(Transformation):
+    def __init__(self, name, trans, var, **kwargs):
+        self.object = trans
+        self.weight = var
 
+        super(WeightedTransformation, self).__init__(name, self.object, self.weight, targs='', **kwargs)
+
+    def estr(self):
+        return '{:s} * {:s}'.format( self.weight, self.object )
 
 # class VSum(Indexed):
     # def __init__(self, *objects, **kwargs):
