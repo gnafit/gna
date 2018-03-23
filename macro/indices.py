@@ -110,11 +110,11 @@ class Product(Indexed):
                 # del self.weights[i]
                 # break
 
-jac    = Indexed( 'Jac' )
-dnorm  = Indexed( 'detnorm', 'd' )
-prod=jac*dnorm
-s=jac+dnorm
-print(jac, dnorm)
+a    = Indexed( 'A' )
+b  = Indexed( 'B', 'd' )
+prod=a*b
+s=a+b
+print(a, b)
 print(prod)
 print(s)
 print(s+prod)
@@ -123,10 +123,10 @@ print(prod+prod)
 print(prod*prod)
 print(s+s)
 print(s*s)
-print(jac+prod)
-print(prod*jac)
-print(jac+s)
-print(jac*s)
+print(a+prod)
+print(prod*a)
+print(a+s)
+print(a*s)
 
 print( ( prod+prod )*s )
 
