@@ -32,6 +32,8 @@ class Indices(object):
     __nonzero__=__bool__
 
     def __eq__(self, other):
+        if not isinstance(other, Indices):
+            return False
         return self.indices==other.indices
 
     def reduce(self, *indices):
@@ -39,7 +41,6 @@ class Indices(object):
             raise Exception( "Indices.reduce should be called on a subset of indices" )
 
         return Indices(*(set(self.indices)-set(indices)))
-
 
 class Indexed(Indices):
     def __init__(self, name, *indices, **kwargs):
@@ -53,6 +54,8 @@ class Indexed(Indices):
             return self.name
 
     def __eq__(self, other):
+        if not isinstance(other, Indexed):
+            return False
         if self.name!=other.name:
             return False
         return self.indices==other.indices
@@ -61,24 +64,28 @@ class Indexed(Indices):
         return Indexed( newname, Indices.reduce(self, *indices) )
 
 class Variable(Indexed):
-    def __init__(self, name, *indices, **kwargs):
-        super(Variable, self).__init__(name, *indices, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(Variable, self).__init__(*args, **kwargs)
 
     def __mul__(self, other):
         return VProduct(self, other)
 
-    def __call__(self):
-        return Transformation(self.name)
+    def __call__(self, *targs):
+        return Transformation(self.name, self, targs=targs)
 
 class VProduct(Variable):
     def __init__(self, *objects, **kwargs):
-        name = kwargs.pop('name', '')
+        if objects and isinstance(objects[0]):
+            self.name, objects = objects[0], objects[1:]
+        if not objects:
+            raise Exception('Expect at least one variable for VarProduct')
+
         for o in objects:
             if not isinstance(o, Variable):
                 raise Exception('Expect Variable instance')
 
         self.objects=list(objects)
-        super(VProduct, self).__init__(name, *objects)
+        super(VProduct, self).__init__(name, *objects, **kwargs)
 
     def estr(self):
         return '{}'.format( ' * '.join(str(o) for o in self.objects) )
@@ -95,11 +102,28 @@ class VProduct(Variable):
         return VProduct(other, *self.objects)
 
 class Transformation(Indexed):
-    def __init__(self, name, *indices, **kwargs):
-        super(Variable, self).__init__(name, *indices, **kwargs)
+    def __init__(self, *args, **kwargs):
+        targs = ()
+        if '|' in args:
+            idx = args.index('|')
+            args, targs = args[:idx], args[idx+1:]
 
-    def __mul__(self, other):
-        return VProduct(self, other)
+        arguments = list(targs) + list(kwargs.pop('targs', ()))
+        self.arguments=[]
+        for arg in arguments:
+            if isinstance(arg, str):
+                arg = Transformation(arg)
+            elif not isinstance(arg, Transformation):
+                raise Exception('Transformation argument should be another Transformation')
+            self.arguments.append(arg)
+
+        super(Transformation, self).__init__(*(list(args)+self.arguments), **kwargs)
+
+    def __str__(self):
+        return '{}({})'.format(Indexed.__str__(self), ', '.join(str(a) for a in self.arguments))
+    #
+    # def __mul__(self, other):
+        # return VProduct(self, other)
 
         # if isinstance(other, VSum):
             # return VProduct(*(self.objects+other.objects))
