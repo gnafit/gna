@@ -43,6 +43,9 @@ class Indices(object):
 
         return Indices(*(set(self.indices)-set(indices)))
 
+    def ident(self):
+        return '_'.join(self.indices)
+
 class Indexed(Indices):
     def __init__(self, name, *indices, **kwargs):
         self.name=name
