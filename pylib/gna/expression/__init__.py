@@ -26,10 +26,11 @@ class Indices(object):
     def __add__(self, other):
         return Indices(self, other)
 
-    def __bool__(self):
-        return bool(self.indices)
+    def singular(self):
+        return not bool(self.indices)
 
-    __nonzero__=__bool__
+    def plural(self):
+        return bool(self.indices)
 
     def __eq__(self, other):
         if not isinstance(other, Indices):
@@ -53,6 +54,9 @@ class Indexed(Indices):
         else:
             return self.name
 
+    def estr(self, expand=100):
+        return self.__str__()
+
     def __eq__(self, other):
         if not isinstance(other, Indexed):
             return False
@@ -69,7 +73,7 @@ class Variable(Indexed):
 
     def __mul__(self, other):
         if isinstance(other, Transformation):
-            return WeightedTransformation('?', other, self)
+            return WeightedTransformation('?', self, other)
 
         return VProduct('?', self, other)
 
@@ -81,26 +85,24 @@ class VProduct(Variable):
         if not objects:
             raise Exception('Expect at least one variable for VarProduct')
 
+        self.objects = []
         for o in objects:
             if not isinstance(o, Variable):
                 raise Exception('Expect Variable instance')
 
-        self.objects=list(objects)
+            if isinstance(o, VProduct):
+                self.objects+=o.objects
+            else:
+                self.objects.append(o)
+
         super(VProduct, self).__init__(name, *objects, **kwargs)
 
-    def estr(self):
-        return '{}'.format( ' * '.join(str(o) for o in self.objects) )
-
-    def __mul__(self, other):
-        if isinstance(other, VProduct):
-            return VProduct('?', *(self.objects+other.objects))
-        return VProduct('?', *(self.objects+[other]))
-
-    def __rmul__(self, other):
-        if isinstance(other, VProduct):
-            return VProduct('?', *(other.objects+self.objects))
-
-        return VProduct('?', other, *self.objects)
+    def estr(self, expand=100):
+        if expand:
+            expand = expand-1
+            return '{}'.format( ' * '.join(o.estr(expand) for o in self.objects) )
+        else:
+            return self.__str__()
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -124,21 +126,84 @@ class Transformation(Indexed):
         return '{}({})'.format(Indexed.__str__(self), ', '.join(str(a) for a in self.arguments))
 
     def __mul__(self, other):
-        if isinstance(other, Variable):
+        if isinstance(other, (Variable, WeightedTransformation)):
             return WeightedTransformation('?', self, other)
 
-        # return VProduct(self, other)
-        raise Exception('')
+        return TProduct('?', self, other)
+
+class TProduct(Variable):
+    def __init__(self, name, *objects, **kwargs):
+        if not objects:
+            raise Exception('Expect at least one variable for TProduct')
+
+        self.objects = []
+        for o in objects:
+            if not isinstance(o, Transformation):
+                raise Exception('Expect Transformation instance')
+
+            if isinstance(o, TProduct):
+                self.objects+=o.objects
+            else:
+                self.objects.append(o)
+
+        super(TProduct, self).__init__(name, *objects, **kwargs)
+
+    def estr(self, expand=100):
+        if expand:
+            expand = expand-1
+            return ' * '.join(o.estr(expand) for o in self.objects)
+        else:
+            return self.__str__()
+
+class TSum(Variable):
+    def __init__(self, name, *objects, **kwargs):
+        if not objects:
+            raise Exception('Expect at least one variable for TSum')
+
+        self.objects = []
+        for o in objects:
+            if not isinstance(o, Transformation):
+                raise Exception('Expect Transformation instance')
+
+            if isinstance(o, TSum):
+                self.objects+=o.objects
+            else:
+                self.objects.append(o)
+
+        super(TSum, self).__init__(name, *objects, **kwargs)
+
+    def estr(self, expand=100):
+        if expand:
+            expand = expand-1
+            return '({})'.format(' + '.join(o.estr(expand) for o in self.objects))
+        else:
+            return self.__str__()
 
 class WeightedTransformation(Transformation):
-    def __init__(self, name, trans, var, **kwargs):
-        self.object = trans
-        self.weight = var
+    object, weight = None, None
+    def __init__(self, name, *objects, **kwargs):
+        for other in objects:
+            if isinstance(other, WeightedTransformation):
+                self.object = self.object*other.object if self.object is not None else other.object
+                self.weight = self.weight*other.weight if self.weight is not None else other.weight
+            elif isinstance(other, Variable):
+                self.weight = self.weight*other if self.weight is not None else other
+            elif isinstance(other, Transformation):
+                self.object = self.object*other if self.object is not None else other
+            else:
+                raise Exception( 'Unsupported type' )
 
-        super(WeightedTransformation, self).__init__(name, self.object, self.weight, targs='', **kwargs)
+        super(WeightedTransformation, self).__init__(name, self.object, self.weight, targs=(), **kwargs)
 
-    def estr(self):
-        return '{:s} * {:s}'.format( self.weight, self.object )
+    def estr(self, expand=100):
+        if expand:
+            expand = expand-1
+            return '{:s} * {:s}'.format( self.weight.estr(expand), self.object.estr(expand) )
+        else:
+            return self.__str__()
+
+    def __mul__(self, other):
+        return WeightedTransformation('?', self, other)
 
 # class VSum(Indexed):
     # def __init__(self, *objects, **kwargs):
