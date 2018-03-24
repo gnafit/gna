@@ -48,6 +48,9 @@ class Indexed(Indices):
         self.name=name
         super(Indexed,self).__init__(*indices, **kwargs)
 
+    def __add__(self, other):
+        raise Exception('not implemented')
+
     def __str__(self):
         if self.indices:
             return '{}[{}]'.format(self.name, Indices.__str__(self))
@@ -131,7 +134,10 @@ class Transformation(Indexed):
 
         return TProduct('?', self, other)
 
-class TProduct(Variable):
+    def __add__(self, other):
+        return TSum('?', self, other)
+
+class TProduct(Transformation):
     def __init__(self, name, *objects, **kwargs):
         if not objects:
             raise Exception('Expect at least one variable for TProduct')
@@ -155,7 +161,7 @@ class TProduct(Variable):
         else:
             return self.__str__()
 
-class TSum(Variable):
+class TSum(Transformation):
     def __init__(self, name, *objects, **kwargs):
         if not objects:
             raise Exception('Expect at least one variable for TSum')
