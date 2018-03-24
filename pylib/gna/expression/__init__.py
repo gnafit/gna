@@ -70,6 +70,9 @@ class Indexed(Indices):
     def reduce(self, newname, *indices):
         return Indexed(newname, Indices.reduce(self, *indices))
 
+    def walk(self, yieldself=False, level=0):
+        yield level, self
+
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
         super(Variable, self).__init__(name, *args, **kwargs)
@@ -106,6 +109,14 @@ class VProduct(Variable):
             return '{}'.format( ' * '.join(o.estr(expand) for o in self.objects) )
         else:
             return self.__str__()
+
+    def walk(self, yieldself=False, level=0):
+        if yieldself:
+            yield level, self
+        level+=1
+        for o in self.objects:
+            for sub in  o.walk(yieldself, level):
+                yield sub
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -161,6 +172,14 @@ class TProduct(Transformation):
         else:
             return self.__str__()
 
+    def walk(self, yieldself=False, level=0):
+        if yieldself:
+            yield level, self
+        level+=1
+        for o in self.objects:
+            for sub in o.walk(yieldself, level):
+                yield sub
+
 class TSum(Transformation):
     def __init__(self, name, *objects, **kwargs):
         if not objects:
@@ -184,6 +203,14 @@ class TSum(Transformation):
             return '({})'.format(' + '.join(o.estr(expand) for o in self.objects))
         else:
             return self.__str__()
+
+    def walk(self, yieldself=False, level=0):
+        if yieldself:
+            yield level, self
+        level+=1
+        for o in self.objects:
+            for sub in o.walk(yieldself, level):
+                yield sub
 
 class WeightedTransformation(Transformation):
     object, weight = None, None
@@ -210,6 +237,15 @@ class WeightedTransformation(Transformation):
 
     def __mul__(self, other):
         return WeightedTransformation('?', self, other)
+
+    def walk(self, yieldself=False, level=0):
+        if yieldself:
+            yield level, self
+        level+=1
+        for sub in self.weight.walk(yieldself, level):
+            yield sub
+        for sub in self.object.walk(yieldself, level):
+            yield sub
 
 # class VSum(Indexed):
     # def __init__(self, *objects, **kwargs):

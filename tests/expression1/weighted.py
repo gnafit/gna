@@ -33,3 +33,13 @@ wt1.object.name='o1'
 print(wt1, '=', wt1.estr(1))
 print(wt1, '=', wt1.estr(2))
 print(wt1, '=', wt1.estr())
+
+print()
+print('Walk+self')
+for i, (l, o) in enumerate(wt1.walk(True)):
+    print( i, l, '  '*l, o )
+
+print()
+print('Walk')
+for i, (l, o) in enumerate(wt1.walk()):
+    print( i, l, '  '*l, o )
