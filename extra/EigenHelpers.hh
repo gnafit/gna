@@ -1,6 +1,4 @@
-#ifndef EIGENHELPERS_H
-#define EIGENHELPERS_H 1
-
+#pragma once
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/Core>
@@ -22,4 +20,3 @@ namespace EigenHelpers{
     }
 }
 
-#endif
