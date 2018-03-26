@@ -54,3 +54,7 @@ print()
 print('Walk')
 for i, (l, o, op) in enumerate(wt1.walk()):
     print( i, l, '  '*l, o, op )
+
+print()
+print('ident', 'wt1', wt1.ident())
+print('ident full', 'wt1', wt1.ident_full())
