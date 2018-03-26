@@ -76,8 +76,8 @@ class Indexed(object):
     def reduce(self, newname, *indices):
         return Indexed(newname, self.indices.reduce(*indices))
 
-    def walk(self, yieldself=False, level=0):
-        yield level, self
+    def walk(self, yieldself=False, level=0, operation=''):
+        yield level, self, operation
 
     def ident(self):
         if self.name=='?':
@@ -97,12 +97,12 @@ class IndexedContainer(object):
     def __init__(self, *objects):
         self.objects = list(objects)
 
-    def walk(self, yieldself=False, level=0):
+    def walk(self, yieldself=False, level=0, operation=''):
         if yieldself:
-            yield level, self
+            yield level, self, operation+':'
         level+=1
         for o in self.objects:
-            for sub in  o.walk(yieldself, level):
+            for sub in  o.walk(yieldself, level, self.operator.strip()):
                 yield sub
 
     def set_operator(self, operator, left=None, right=None):
@@ -249,6 +249,8 @@ class WeightedTransformation(IndexedContainer, Transformation):
 
         IndexedContainer.__init__(self, self.weight, self.object)
         Transformation.__init__(self, name, self.weight, self.object, targs=(), **kwargs)
+
+        self.set_operator( ' * ' )
 
     def estr(self, expand=100):
         if expand:
