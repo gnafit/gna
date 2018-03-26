@@ -3,7 +3,6 @@
 #include "GNAObject.hh"
 #include "UncertainParameter.hh"
 #include <vector>
-#include "Eigen/Dense"
 
 class Jacobian: public GNAObject,
                 public Transformation<Jacobian> {
@@ -27,8 +26,6 @@ public:
         m_pars.push_back(par);
     };
 protected:
-    template <typename T>
-    inline Eigen::ArrayXd computeDerivative(const T& input, Parameter<double>* x);
     std::vector<Parameter<double>*> m_pars;
     double m_reldelta;
 };
