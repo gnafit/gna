@@ -27,3 +27,5 @@ print('i2==i2:', i2==i2)
 print('i1+i2==i2:', i1+i2==i2)
 
 print('reduce i2+j2 by k:', (i2+j2).reduce('k'))
+
+print('ident', 'j2', j2.ident())

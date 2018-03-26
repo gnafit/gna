@@ -50,3 +50,8 @@ print( 'pr5=pr3*pr4:', pr5, '=', pr5.estr() )
 pr6 = pr4*pr3
 pr6.name = 'pr6'
 print( 'pr6=pr4*pr3:', pr6, '=', pr6.estr() )
+
+print()
+pr6.name='?'
+print('ident', 'pr6', pr6.ident())
+print('ident full', 'pr6', pr6.ident_full())

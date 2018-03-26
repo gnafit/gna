@@ -23,3 +23,6 @@ print( 'i1==i2', i1==i2 )
 print( 'i1==i1', i1==i1 )
 
 print('reduce', op, 'by k', op.reduce('op_reduced', 'k'))
+
+print('ident', 'j2', j2.ident())
+print('ident full', 'j2', j2.ident_full())

@@ -57,3 +57,7 @@ print( tp2, '=', tp2.estr() )
 tp2 = ts*ts
 tp2.name = 'prodsum'
 print( tp2, '=', tp2.estr() )
+
+print()
+print('ident', 'tp2', tp2.ident())
+print('ident full', 'tp2', tp2.ident_full())
