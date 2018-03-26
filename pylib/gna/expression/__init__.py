@@ -87,7 +87,7 @@ class Indexed(object):
     def ident_full(self, trunc=True):
         return '{}:{}'.format(self.ident(), self.indices.ident())
 
-    def guessname(self):
+    def guessname(self, save=False):
         return '?'
 
 class IndexedContainer(object):
@@ -112,12 +112,17 @@ class IndexedContainer(object):
         if right is not None:
             self.right = right
 
-    def guessname(self):
-        return '{left}{expr}{right}'.format(
-                left = self.left.strip(),
-                expr = self.operator.strip().join(sorted(o.ident() for o in self.objects)),
-                right= self.right.strip()
-                )
+    def guessname(self, save=True):
+        newname = '{left}{expr}{right}'.format(
+                    left = self.left.strip(),
+                    expr = self.operator.strip().join(sorted(o.ident() for o in self.objects)),
+                    right= self.right.strip()
+                    )
+
+        if save:
+            self.name = newname
+
+        return newname
 
     def estr(self, expand=100):
         if expand:
