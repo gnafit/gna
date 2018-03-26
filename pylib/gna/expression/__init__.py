@@ -92,6 +92,8 @@ class Indexed(object):
 
 class IndexedContainer(object):
     objects = None
+    operator='.'
+    left, right = '', ''
     def __init__(self, *objects):
         self.objects = list(objects)
 
@@ -102,6 +104,31 @@ class IndexedContainer(object):
         for o in self.objects:
             for sub in  o.walk(yieldself, level):
                 yield sub
+
+    def set_operator(self, operator, left=None, right=None):
+        self.operator=operator
+        if left is not None:
+            self.left = left
+        if right is not None:
+            self.right = right
+
+    def guessname(self):
+        return '{left}{expr}{right}'.format(
+                left = self.left.strip(),
+                expr = self.operator.strip().join(sorted(o.ident() for o in self.objects)),
+                right= self.right.strip()
+                )
+
+    def estr(self, expand=100):
+        if expand:
+            expand = expand-1
+            return '{left}{expr}{right}'.format(
+                    left = self.left,
+                    expr = self.operator.join(o.estr(expand) for o in self.objects),
+                    right= self.right
+                    )
+        else:
+            return self.__str__()
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -134,15 +161,7 @@ class VProduct(IndexedContainer, Variable):
         IndexedContainer.__init__(self, *newobjects)
         Variable.__init__(self, name, *newobjects, **kwargs)
 
-    def guessname(self):
-        return '*'.join(sorted(o.ident() for o in self.objects))
-
-    def estr(self, expand=100):
-        if expand:
-            expand = expand-1
-            return '{}'.format( ' * '.join(o.estr(expand) for o in self.objects) )
-        else:
-            return self.__str__()
+        self.set_operator( '*' )
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -192,15 +211,7 @@ class TProduct(IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-    def estr(self, expand=100):
-        if expand:
-            expand = expand-1
-            return ' * '.join(o.estr(expand) for o in self.objects)
-        else:
-            return self.__str__()
-
-    def guessname(self):
-        return '*'.join(sorted(o.ident() for o in self.objects))
+        self.set_operator( ' * ' )
 
 class TSum(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -220,15 +231,7 @@ class TSum(IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-    def estr(self, expand=100):
-        if expand:
-            expand = expand-1
-            return '({})'.format(' + '.join(o.estr(expand) for o in self.objects))
-        else:
-            return self.__str__()
-
-    def guessname(self):
-        return '({})'.format('+'.join(sorted(o.ident() for o in self.objects)))
+        self.set_operator( ' + ', '(', ')' )
 
 class WeightedTransformation(IndexedContainer, Transformation):
     object, weight = None, None
