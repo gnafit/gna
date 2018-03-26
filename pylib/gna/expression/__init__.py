@@ -45,7 +45,7 @@ class Indices(object):
 
         return Indices(*(set(self.indices)-set(indices)))
 
-    def ident(self):
+    def ident(self, **kwargs):
         return '_'.join(self.indices)
 
 class Indexed(object):
@@ -79,15 +79,15 @@ class Indexed(object):
     def walk(self, yieldself=False, level=0, operation=''):
         yield level, self, operation
 
-    def ident(self):
+    def ident(self, **kwargs):
         if self.name=='?':
-            return self.guessname()
+            return self.guessname(**kwargs)
         return self.name
 
-    def ident_full(self, trunc=True):
-        return '{}:{}'.format(self.ident(), self.indices.ident())
+    def ident_full(self, **kwargs):
+        return '{}:{}'.format(self.ident(**kwargs), self.indices.ident(**kwargs))
 
-    def guessname(self, save=False):
+    def guessname(self, **kwargs):
         return '?'
 
 class IndexedContainer(object):
@@ -112,15 +112,23 @@ class IndexedContainer(object):
         if right is not None:
             self.right = right
 
-    def guessname(self, save=True):
-        newname = '{left}{expr}{right}'.format(
-                    left = self.left.strip(),
-                    expr = self.operator.strip().join(sorted(o.ident() for o in self.objects)),
-                    right= self.right.strip()
+    def guessname(self, lib={}, save=False):
+        newname = '{expr}'.format(
+                    expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
                     )
 
-        if save:
-            self.name = newname
+        newnamei = newname+':'+self.indices.ident()
+
+        guessed = False
+        if newname in lib:
+            guessed = lib[newname]
+        elif newnamei in lib:
+            guessed = lib[newnamei]
+
+        if guessed:
+            newname = guessed
+            if save:
+                self.name = newname
 
         return newname
 
@@ -257,16 +265,6 @@ class WeightedTransformation(IndexedContainer, Transformation):
 
         self.set_operator( ' * ' )
 
-    def estr(self, expand=100):
-        if expand:
-            expand = expand-1
-            return '{:s} * {:s}'.format( self.weight.estr(expand), self.object.estr(expand) )
-        else:
-            return self.__str__()
-
     def __mul__(self, other):
         return WeightedTransformation('?', self, other)
-
-    def guessname(self):
-        return '*'.join(sorted(o.ident() for o in (self.weight, self.object)))
 
