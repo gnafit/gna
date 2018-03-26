@@ -6,8 +6,6 @@ void Jacobian::calcJacobian(Args args, Rets rets) {
     std::cout << "Initial jac " << rets[0].mat << std::endl;
     Eigen::MatrixXd storage(args[0].x.size(), m_pars.size());
     storage.setZero();
-    const auto& input = args[0].x;
-    auto size = input.size();
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
       auto x0 = x->value();
@@ -41,6 +39,5 @@ void Jacobian::calcJacobian(Args args, Rets rets) {
 }
 
 void Jacobian::calcTypes(Atypes args, Rtypes rets){
-    std::cout << "m_pars.size() * args[0].size() = " << m_pars.size() << " * " << args[0].size() << std::endl;
     rets[0] = DataType().points().shape(args[0].size(), m_pars.size());
 }
