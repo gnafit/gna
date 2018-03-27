@@ -31,10 +31,10 @@ print('ident', 'wt1', wt1.ident())
 print('ident full', 'wt1', wt1.ident_full())
 
 lib = dict([
-    ('var1*var2:j_k_m', 'prod12'),
-    ('obj2+obj3', 'sum23'),
-    ('obj1*sum23', 'os123'),
-    ('os123*prod12', 'final' ),
+    ('var1*var2:j_k_m', dict(name='prod12')),
+    ('obj2+obj3',       dict(name='sum23') ),
+    ('obj1*sum23',      dict(name='os123') ),
+    ('os123*prod12',    dict(name='final') ),
     ])
 print()
 print('Guess names from:')

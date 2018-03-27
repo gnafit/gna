@@ -117,13 +117,18 @@ class IndexedContainer(object):
                     expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
                     )
 
-        newnamei = newname+':'+self.indices.ident()
+        newnameu = '{expr}'.format(
+                    expr = self.operator.strip().join(o.ident(lib=lib, save=save) for o in self.objects),
+                     )
+
+        variants=[newnameu, newname]
+        for nn in tuple(variants):
+            variants.append(nn+':'+self.indices.ident())
 
         guessed = False
-        if newname in lib:
-            guessed = lib[newname]
-        elif newnamei in lib:
-            guessed = lib[newnamei]
+        for var in variants:
+            if var in lib:
+                guessed = lib[var]['name']
 
         if guessed:
             newname = guessed
