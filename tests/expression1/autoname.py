@@ -18,13 +18,11 @@ print(wt1, '=', wt1.estr())
 print()
 print('Raw calculation tree state')
 print('Walk+self')
-for i, (l, o, op) in enumerate(wt1.walk(True)):
-    print( i, l, '  '*l, o, op )
+wt1.dump(True)
 
 print()
 print('Walk')
-for i, (l, o, op) in enumerate(wt1.walk()):
-    print( i, l, '  '*l, o, op )
+wt1.dump()
 
 print()
 print('ident', 'wt1', wt1.ident())
@@ -47,13 +45,11 @@ print(wt1, '=', wt1.estr())
 
 print()
 print('Walk+self')
-for i, (l, o, op) in enumerate(wt1.walk(True)):
-    print( i, l, '  '*l, o, op )
+wt1.dump(True)
 
 print()
 print('Walk')
-for i, (l, o, op) in enumerate(wt1.walk()):
-    print( i, l, '  '*l, o, op )
+wt1.dump()
 
 print()
 print('ident', 'wt1', wt1.ident())

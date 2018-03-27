@@ -19,6 +19,5 @@ lib = dict([
 
 eperfission_avg.guessname(lib=lib, save=True)
 print(eperfission_avg, '=', eperfission_avg.estr())
-for i, (l, o, op) in enumerate(eperfission_avg.walk(True)):
-    print( i, l, '  '*l, o, op )
+eperfission_avg.dump(True)
 
