@@ -3,6 +3,12 @@
 from __future__ import print_function
 from collections import OrderedDict
 
+class Index(object):
+    def __init__(self, short, name, variants):
+        self.short = short
+        self.name  = name
+        self.variants = variants
+
 class Indices(object):
     def __init__(self, *indices, **kwargs):
         self.indices = set()
@@ -14,13 +20,15 @@ class Indices(object):
                 self.indices |= set(idx.indices)
             elif isinstance(idx, str):
                 self.indices.add(idx)
+            elif isinstance(idx, Index):
+                self.indices.add(idx.short)
             else:
                 raise Exception( 'Unsupported index type '+type(idx).__name__ )
 
         self.indices=list(sorted(self.indices))
 
         if kwargs:
-            raise Exception('Unparsed kwargs')
+            raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
     def __str__(self):
         return ', '.join( self.indices )
@@ -28,11 +36,10 @@ class Indices(object):
     def __add__(self, other):
         return Indices(self, other)
 
-    def singular(self):
-        return not bool(self.indices)
-
-    def plural(self):
+    def __bool__(self):
         return bool(self.indices)
+
+    __nonzero__ = __bool__
 
     def __eq__(self, other):
         if not isinstance(other, Indices):
@@ -53,6 +60,15 @@ class Indexed(object):
     def __init__(self, name, *indices, **kwargs):
         self.name=name
         self.indices=Indices(*indices, **kwargs)
+
+    def __getitem__(self, args):
+        if self.indices:
+            raise Exception('May not modify already declared indices')
+        if isinstance(args, tuple):
+            self.indices=Indices(*args)
+        else:
+            self.indices=Indices(args)
+        return self
 
     def __add__(self, other):
         raise Exception('not implemented')
@@ -77,9 +93,11 @@ class Indexed(object):
         return Indexed(newname, self.indices.reduce(*indices))
 
     def walk(self, yieldself=False, level=0, operation=''):
-        yield level, self, operation
+        yield self, level, operation
 
     def ident(self, **kwargs):
+        if hasattr(self, 'arguments'):
+            self.arguments.guessname(**kwargs)
         if self.name=='?':
             return self.guessname(**kwargs)
         return self.name
@@ -88,7 +106,13 @@ class Indexed(object):
         return '{}:{}'.format(self.ident(**kwargs), self.indices.ident(**kwargs))
 
     def guessname(self, **kwargs):
+        if hasattr(self, 'arguments'):
+            self.arguments.guessname(**kwargs)
         return '?'
+
+    def dump(self, yieldself=False):
+        for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
+            print( i, level, '    '*level, operator, obj )
 
 class IndexedContainer(object):
     objects = None
@@ -99,7 +123,7 @@ class IndexedContainer(object):
 
     def walk(self, yieldself=False, level=0, operation=''):
         if yieldself:
-            yield level, self, operation+':'
+            yield self, level, operation
         level+=1
         for o in self.objects:
             for sub in  o.walk(yieldself, level, self.operator.strip()):
@@ -113,6 +137,9 @@ class IndexedContainer(object):
             self.right = right
 
     def guessname(self, lib={}, save=False):
+        if hasattr(self, 'arguments'):
+            self.arguments.guessname(lib, save)
+
         newname = '{expr}'.format(
                     expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
                     )
@@ -129,6 +156,7 @@ class IndexedContainer(object):
         for var in variants:
             if var in lib:
                 guessed = lib[var]['name']
+                break
 
         if guessed:
             newname = guessed
@@ -147,6 +175,9 @@ class IndexedContainer(object):
                     )
         else:
             return self.__str__()
+
+    def nonempty(self):
+        return bool(self.objects)
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -181,6 +212,23 @@ class VProduct(IndexedContainer, Variable):
 
         self.set_operator( '*' )
 
+class Arguments(IndexedContainer, Indexed):
+    def __init__(self, *args, **kwargs):
+        objects = []
+        for arg in args:
+            if isinstance(arg, str):
+                arg = Transformation(arg)
+            elif not isinstance(arg, Transformation):
+                raise Exception('Arguments argument should be another Transformation')
+            objects.append(arg)
+
+        IndexedContainer.__init__(self, *objects)
+        Indexed.__init__(self, 'args', *objects, **kwargs)
+        self.set_operator( ', ', '(', ')' )
+
+    # def __str__(self):
+        # return self.operator.join(str(a) for a in self.objects)
+
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
         targs = ()
@@ -188,19 +236,12 @@ class Transformation(Indexed):
             idx = args.index('|')
             args, targs = args[:idx], args[idx+1:]
 
-        arguments = list(targs) + list(kwargs.pop('targs', ()))
-        self.arguments=[]
-        for arg in arguments:
-            if isinstance(arg, str):
-                arg = Transformation(arg)
-            elif not isinstance(arg, Transformation):
-                raise Exception('Transformation argument should be another Transformation')
-            self.arguments.append(arg)
-
-        super(Transformation, self).__init__(name, *(list(args)+self.arguments), **kwargs)
+        targs = list(targs) + list(kwargs.pop('targs', ()))
+        self.arguments = Arguments(*targs, **kwargs)
+        super(Transformation, self).__init__(name, self.arguments, *args, **kwargs)
 
     def __str__(self):
-        return '{}({})'.format(Indexed.__str__(self), ', '.join(str(a) for a in self.arguments))
+        return '{}({:s})'.format(Indexed.__str__(self), '...' if self.arguments.nonempty() else '' )
 
     def __mul__(self, other):
         if isinstance(other, (Variable, WeightedTransformation)):
@@ -210,6 +251,19 @@ class Transformation(Indexed):
 
     def __add__(self, other):
         return TSum('?', self, other)
+
+    def walk(self, yieldself=False, level=0, operation=''):
+        if isinstance(self, IndexedContainer):
+            gen = IndexedContainer.walk(self, yieldself, level, operation)
+        else:
+            gen = Indexed.walk(self, yieldself, level, operation)
+        for s in gen:
+            yield s
+
+        if self.arguments.nonempty():
+            level+=1
+            for sub in self.arguments.walk(yieldself, level, '|'):
+                yield sub
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -272,4 +326,47 @@ class WeightedTransformation(IndexedContainer, Transformation):
 
     def __mul__(self, other):
         return WeightedTransformation('?', self, other)
+
+class VTContainer(OrderedDict):
+    def __init__(self, *args, **kwargs):
+        super(VTContainer, self).__init__(*args, **kwargs)
+
+    def __missing__(self, key):
+        newvar = Variable(key)
+        self[key] = newvar
+        return newvar
+
+class Expression(object):
+    def __init__(self, expression, indices):
+        self.expression_raw = expression
+        self.expression = self.preprocess( self.expression_raw )
+
+        self.globals=VTContainer()
+        self.indices=OrderedDict()
+        self.defindices(indices)
+
+
+    def preprocess(self, expression):
+        n = expression.count('|')
+        if n:
+            expression = expression.replace('|', '(')
+            expression+=')'*n
+        return expression
+
+    def parse(self):
+        self.tree=eval(self.expression, self.globals)
+
+    def __str__(self):
+        return self.expression_raw
+
+    def __repr__(self):
+        return 'Expression("{}")'.format(self.expression_raw)
+
+    def newindex(self, short, name, *variants):
+        idx = self.indices[short] = Index(short, name, variants)
+        self.globals[short] = idx
+
+    def defindices(self, defs):
+        for d in defs:
+            self.newindex(*d)
 

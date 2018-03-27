@@ -26,3 +26,15 @@ print('reduce', op, 'by k', op.reduce('op_reduced', 'k'))
 
 print('ident', 'j2', j2.ident())
 print('ident full', 'j2', j2.ident_full())
+
+print()
+print('Testing __getitem__ syntax')
+b = Index('b', 'longindex', ['b1', 'b1'])
+v = Indexed('v')
+print( v )
+print( v['a', b] )
+print( v )
+try:
+    v['a', b]
+except:
+    print( 'OK' )
