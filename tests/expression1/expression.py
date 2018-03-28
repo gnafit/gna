@@ -22,6 +22,6 @@ print(a.expression_raw)
 print(a.expression)
 
 a.parse()
-a.tree.guessname( lib=lib, save=True )
+a.tree.guessname(lib=lib, save=True)
 a.tree.dump(True)
 
