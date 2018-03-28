@@ -29,7 +29,7 @@ set (SOURCES
   core/PoissonToyMC.cc
   core/Rebin.cc
   core/Jacobian.cc
-  core/ParMatrix.cc
+  core/ParCovMatrix.cc
   core/MatrixProduct.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
@@ -103,7 +103,7 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh
-  ParMatrix.hh
+  ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
   )

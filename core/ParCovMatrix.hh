@@ -4,17 +4,19 @@
 #include "UncertainParameter.hh"
 
 
-class ParMatrix: public GNAObject,
-                 public Transformation<ParMatrix> {
+class ParCovMatrix: public GNAObject,
+                 public Transformation<ParCovMatrix> {
     public:
-        ParMatrix() {
+        ParCovMatrix() {
             transformation_(this, "unc_matrix")
                 .output("unc_matrix")
-                .types([](ParMatrix* obj, Atypes /*args*/, Rtypes rets){
+                .types([](ParCovMatrix* obj, Atypes /*args*/, Rtypes rets){
     rets[0] = DataType().points().shape(obj->m_pars.size(), obj->m_pars.size());})
-                .func(&ParMatrix::FillMatrix);
+                .func(&ParCovMatrix::FillMatrix);
         };
-        ParMatrix(std::vector<Parameter<double>*> pars): ParMatrix() {m_pars = pars;};
+
+        ParCovMatrix(std::vector<Parameter<double>*> pars): ParCovMatrix() {m_pars = pars;};
+
         void append(Parameter<double>* par) {m_pars.push_back(par);};
         void materialize();
 

@@ -1,5 +1,4 @@
 #include "MatrixProduct.hh"
-#include "boost/format.hpp"
 #include "fmt/format.h"
 
 
@@ -15,13 +14,12 @@ void MatrixProduct::checkTypes(Atypes args, Rtypes rets) {
         auto& prev = args[i-1]; 
         auto& cur = args[i];
         if ((prev.shape.size()!=2) ||(cur.shape.size()!=2)) {
-            throw std::runtime_error("Trying to use not matrices in a product");
+            throw std::runtime_error("Trying to use something different from matrices in a matrix product");
         }
         if (prev.shape.back() != cur.shape.front()) {
-                auto fmted = boost::format("Shapes of matrices doesn't match: (%1%,%2) x (%3%, %4%)");
-                auto msg = fmted % prev.shape[0] % prev.shape[1] % cur.shape[0] % cur.shape[1];
-                throw std::runtime_error(msg.str());
-                throw std::runtime_error(fmt::format("Shapes of matrices doesn't match: ({0},{1}) x ({2}, {3})", prev.shape[0], prev.shape[1], cur.shape[0], cur.shape[1]));
+                auto msg = fmt::format("Shapes of matrices doesn't match: ({0},{1})x({2},{3})",
+                                        prev.shape[0] % prev.shape[1] % cur.shape[0] % cur.shape[1]);
+                throw std::runtime_error(msg);
         }
     }
     rets[0] = DataType().points().shape(args[0].shape[0], args[args.size()-1].shape[1]);
