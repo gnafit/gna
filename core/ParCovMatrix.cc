@@ -1,11 +1,9 @@
 #include "ParCovMatrix.hh"
-/* #include "fmt/format.h" */
 #include "fmt/ostream.h"
 
 void ParCovMatrix::FillMatrix(Args args, Rets rets) {
     Eigen::MatrixXd pars_covmat{m_pars.size(), m_pars.size()};
     pars_covmat.setZero();
-    fmt::print("pars_covmat.size() = {}\n", pars_covmat.size());
     for (size_t row{0}; row < m_pars.size(); ++row) {
         for (size_t col{row}; col < m_pars.size(); ++col) {
             auto*  primary_par = m_pars.at(row);
@@ -16,8 +14,6 @@ void ParCovMatrix::FillMatrix(Args args, Rets rets) {
         }
     }
         rets[0].mat = pars_covmat;
-        std::cout << rets[0].mat << std::endl;
-
 }
 
 void ParCovMatrix::materialize() {
