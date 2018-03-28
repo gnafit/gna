@@ -25,6 +25,10 @@ class Indices(object):
             else:
                 raise Exception( 'Unsupported index type '+type(idx).__name__ )
 
+        ignore = kwargs.pop('ignore', None)
+        if ignore:
+            self.indices.discard(*ignore.indices)
+
         self.indices=list(sorted(self.indices))
 
         if kwargs:
@@ -60,16 +64,19 @@ class Indexed(object):
     indices_locked=False
     def __init__(self, name, *indices, **kwargs):
         self.name=name
+        self.set_indices(*indices, **kwargs)
+
+    def set_indices(self, *indices, **kwargs):
         self.indices=Indices(*indices, **kwargs)
+        if indices:
+            self.indices_locked=True
 
     def __getitem__(self, args):
-        if self.indices or self.indices_locked:
+        if self.indices_locked:
             raise Exception('May not modify already declared indices')
-        self.indices_locked=True
-        if isinstance(args, tuple):
-            self.indices=Indices(*args)
-        else:
-            self.indices=Indices(args)
+        if not isinstance(args, tuple):
+            args = args,
+        self.set_indices(*args)
         return self
 
     def __add__(self, other):
@@ -117,6 +124,9 @@ class IndexedContainer(object):
     operator='.'
     left, right = '', ''
     def __init__(self, *objects):
+        self.set_objects(*objects)
+
+    def set_objects(self, *objects):
         self.objects = list(objects)
 
     def walk(self, yieldself=False, level=0, operation=''):
@@ -312,6 +322,39 @@ class WeightedTransformation(IndexedContainer, Transformation):
     def __mul__(self, other):
         return WeightedTransformation('?', self, other)
 
+class OperationMeta(type):
+    def __getitem__(cls, args):
+        if not isinstance(args, tuple):
+            args = args,
+        return cls(*args)
+
+class Operation(TCall):
+    __metaclass__ = OperationMeta
+    call_lock=False
+    def __init__(self, name, *indices, **kwargs):
+        self.reduced_indices = Indices(*indices)
+        TCall.__init__(self, name)
+
+    def __str__(self):
+        return '{}{{{:s}}}({:s})'.format(Indexed.__str__(self), self.reduced_indices, '...' if self.objects else '' )
+
+    def __call__(self, *args):
+        if self.call_lock:
+            raise Exception('May call Operation only once')
+        self.call_lock=True
+
+        self.set_objects(*args)
+        self.set_indices(*args, ignore=self.reduced_indices)
+        return self
+
+class OSum(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'sum', *indices, **kwargs)
+
+class OProd(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'prod', *indices, **kwargs)
+
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
         super(VTContainer, self).__init__(*args, **kwargs)
@@ -322,11 +365,12 @@ class VTContainer(OrderedDict):
         return newvar
 
 class Expression(object):
+    operations = dict(sum=OSum, prod=OProd)
     def __init__(self, expression, indices):
         self.expression_raw = expression
         self.expression = self.preprocess( self.expression_raw )
 
-        self.globals=VTContainer()
+        self.globals=VTContainer(self.operations)
         self.indices=OrderedDict()
         self.defindices(indices)
 

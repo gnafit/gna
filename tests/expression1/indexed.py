@@ -34,7 +34,7 @@ v = Indexed('v')
 print( v )
 print( v['a', b] )
 print( v )
-try:
-    v['a', b]
-except:
-    print( 'OK' )
+# try:
+v['a', b]
+# except:
+    # print( 'OK' )

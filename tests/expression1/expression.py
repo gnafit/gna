@@ -15,7 +15,7 @@ lib = dict(
             ('weighted+bkg', dict(name='signal'))
             ]
         )
-expr = 'mat[b]|fun|var[j]*obj[i]()+bkg()'
+expr = 'prod[i]| sum[b]| mat[b]| fun| var[j]*obj[i]() + bkg()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -24,4 +24,3 @@ print(a.expression)
 a.parse()
 a.tree.guessname(lib=lib, save=True)
 a.tree.dump(True)
-
