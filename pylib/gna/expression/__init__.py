@@ -130,7 +130,7 @@ class IndexedContainer(object):
         self.objects = list(objects)
 
     def walk(self, yieldself=False, level=0, operation=''):
-        if yieldself:
+        if yieldself or not self.objects:
             yield self, level, operation
         level+=1
         for o in self.objects:
@@ -259,6 +259,13 @@ class TCall(IndexedContainer, Transformation):
 
     def __str__(self):
         return '{}({:s})'.format(Indexed.__str__(self), '...' if self.objects else '' )
+
+    def estr(self, expand=100):
+        if expand:
+            expand-=1
+            return '{fcn}{args}'.format(fcn=Indexed.__str__(self), args=IndexedContainer.estr(self, expand))
+        else:
+            return self.__str__()
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
