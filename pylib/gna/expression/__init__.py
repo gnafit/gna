@@ -343,7 +343,7 @@ class Operation(TCall):
         TCall.__init__(self, name)
 
     def __str__(self):
-        return '{}{{{:s}}}({:s})'.format(Indexed.__str__(self), self.reduced_indices, '...' if self.objects else '' )
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.reduced_indices)
 
     def __call__(self, *args):
         if self.call_lock:
@@ -354,13 +354,27 @@ class Operation(TCall):
         self.set_indices(*args, ignore=self.reduced_indices)
         return self
 
+    def guessname(self, lib={}, save=False):
+        for o in self.objects:
+            o.guessname(lib, save)
+
+        newname=self.name+':'+self.reduced_indices.ident()
+        if newname in lib:
+            newname = lib[newname]['name']
+
+            if save:
+                self.name = newname
+        return newname
+
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'sum', *indices, **kwargs)
+        self.set_operator( ' ++ ' )
 
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
+        self.set_operator( ' ** ' )
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):

@@ -12,7 +12,9 @@ indices = [
 lib = dict(
         [
             ('var*obj', dict(name='weighted')),
-            ('weighted+bkg', dict(name='signal'))
+            ('weighted+bkg', dict(name='signal')),
+            ('sum:b', dict(name='totalsum')),
+            ('prod:i', dict(name='ToTaLProd')),
             ]
         )
 expr = 'prod[i]| sum[b]| mat[b]| fun| var[j]*obj[i]() + bkg()'
