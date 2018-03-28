@@ -1,5 +1,7 @@
-#include "MatrixMult.hh"
+#include "MatrixProduct.hh"
 #include "boost/format.hpp"
+#include "fmt/format.h"
+
 
 
 void MatrixProduct::multiply(SingleOutput& out) {
@@ -19,6 +21,7 @@ void MatrixProduct::checkTypes(Atypes args, Rtypes rets) {
                 auto fmted = boost::format("Shapes of matrices doesn't match: (%1%,%2) x (%3%, %4%)");
                 auto msg = fmted % prev.shape[0] % prev.shape[1] % cur.shape[0] % cur.shape[1];
                 throw std::runtime_error(msg.str());
+                throw std::runtime_error(fmt::format("Shapes of matrices doesn't match: ({0},{1}) x ({2}, {3})", prev.shape[0], prev.shape[1], cur.shape[0], cur.shape[1]));
         }
     }
     rets[0] = DataType().points().shape(args[0].shape[0], args[args.size()-1].shape[1]);
@@ -31,7 +34,7 @@ void MatrixProduct::product(Args args, Rets rets) {
         prod *= args[i].mat;
     }
 
-    assert(rets[0].mat.cols() == prod.cols() && rets[0].mat.rows() == prod.cols());
+    assert(rets[0].mat.cols() == prod.cols() && rets[0].mat.rows() == prod.rows());
 
     rets[0].mat = prod;
 }

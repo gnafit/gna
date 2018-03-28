@@ -30,6 +30,7 @@ set (SOURCES
   core/Rebin.cc
   core/Jacobian.cc
   core/ParMatrix.cc
+  core/MatrixProduct.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -103,6 +104,8 @@ set (HEADERS
   GridFilter.hh
   EigenHelpers.hh
   ParMatrix.hh
+  MatrixProduct.hh
+  Transpose.hh
   )
 
 
