@@ -1,5 +1,6 @@
 #include "GNAObject.hh"
 #include <algorithm>
+#include <iterator>
 
 class Transpose: public GNAObject,
                  public Transformation<Transpose> {
@@ -9,9 +10,8 @@ class Transpose: public GNAObject,
                 .input("mat")
                 .output("T")
                 .types([](Transpose* obj, Atypes args, Rtypes rets){
-                        auto reversed_shape = args[0].shape;
-                        std::reverse(std::begin(reversed_shape), std::end(reversed_shape));
-                        rets[0] = DataType().points().shape(reversed_shape);
+                        auto shape = args[0].shape;
+                        rets[0] = DataType().points().shape({shape.rbegin(), shape.rend()});
                         })
                 .func([](Transpose* obj, Args args, Rets rets){
                         rets[0].mat = args[0].mat.transpose();
