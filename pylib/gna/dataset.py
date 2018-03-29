@@ -17,6 +17,7 @@ class Dataset(object):
 
     def _update_covariances(self, bases):
         from itertools import combinations
+
         #Update individual covariances, i.e. unocorrelated errors
         for base in reversed(bases):
             self.covariance.update(base.covariance)
@@ -26,13 +27,13 @@ class Dataset(object):
         underlaying_params = [(key, base.data.values()[0]) for base in bases for key in base.data.keys()
                               if isinstance(key, ROOT.Parameter('double'))
                                  and not key.isFixed()]
-        print("Underlying params -- {}".format(underlaying_params))
+        #  print("Underlying params -- {}".format(underlaying_params))
         for (par_1, base_1), (par_2, base_2) in combinations(underlaying_params, 2):
             mutual_cov =  par_1.getCovariance(par_2)
-            if par_1 != par_2:
-                print(mutual_cov, "mutual cov")
+            #  if par_1 != par_2:
+                #  print(mutual_cov, "mutual cov")
             self.covariance[frozenset([par_1, par_2])] = [self._pointize(mutual_cov)]
-        print(self.covariance)
+        #  pprint.pprint(self.covariance)
 
     def assign(self, obs, value, error):
         """Given observable assign value that is going to serve as data and uncertainty to it.
@@ -58,9 +59,7 @@ class Dataset(object):
     def iscovariated(self, obs1, obs2, covparameters):
         """Checks whether two observables are covariated or affected by covparameters
         """
-        print(frozenset([obs1, obs2]), obs1, obs2)
         if self.covariance.get(frozenset([obs1, obs2])):
-            print("Yes, I'm already in the covlist!!!!!!!")
             return True
         for par in covparameters:
             if par.influences(obs1) and par.influences(obs2):
@@ -85,6 +84,21 @@ class Dataset(object):
         groups = [sorted(group, key=lambda t: observables.index(t)) for group in groups]
         return sorted(groups, key=lambda t: observables.index(t[0]))
 
+    def _group_covpars(self, covparameters):
+        to_process = list(covparameters)
+        groups = [[]]
+        while to_process:
+            for par in to_process:
+                if not groups[-1] or any(par.isCovariated(x) for x in groups[-1]):
+                    groups[-1].append(par)
+                    break
+            else:
+                groups.append([])
+                continue
+            to_process.remove(obs)
+        groups = [sorted(group, key=lambda t: covparameters.index(t)) for group in groups]
+        return sorted(groups, key=lambda t: covparameters.index(t[0]))
+
     def assigncovariances(self, observables, prediction, covparameters):
         """Assign covariance for a given observable and add it to a
         prediction. Checks for covariance that is already in the
@@ -98,15 +112,39 @@ class Dataset(object):
                 obs1 = obs2 = list(covkey)[0]
             else:
                 obs1, obs2 = list(covkey)
-            print('obs1 -- {0}, obs2 -- {1}'.format(obs1, obs2))
+            #  print('obs1 -- {0}, obs2 -- {1}'.format(obs1, obs2))
             for cov in covs:
-                print('cov', cov)
+                #  print('cov', cov)
                 prediction.covariate(cov, obs1, 1, obs2, 1)
-        for par in covparameters:
-            der = ROOT.Derivative(par)
-            der.derivative.inputs(prediction.prediction)
-            prediction.rank1(der)
+        if covparameters:
+            jac = ROOT.Jacobian()
+            par_covs = ROOT.ParCovMatrix()
+            for par in covparameters:
+                der = ROOT.Derivative(par)
+                jac.append(par)
+                der.derivative.inputs(prediction.prediction)
+                prediction.rank1(der)
+                par_covs.append(par)
+            par_covs.materialize()
+            #  I = ROOT.Identity()
+            #  I.identity.source(par_covs.unc_matrix)
+            #  print(I.identity.target.data())
+            prediction.prediction_ready()
+            jac.jacobian.func(prediction.prediction)
+            #  print(jac.jacobian.jacobian.data())
+            jac_T = ROOT.Transpose()
+            jac_T.transpose.mat(jac.jacobian)
+            product = ROOT.MatrixProduct()
+            product.multiply(jac.jacobian)
+            product.multiply(par_covs.unc_matrix)
+            product.multiply(jac_T.transpose.T)
+            #  import matplotlib.pyplot as plt
+            #  plt.imshow(product.product.data())
+            #  plt.show()
         prediction.finalize()
+
+    
+
 
     def makedata(self, obsblock):
         """ Returns either observable itself or a concantenation of
@@ -126,7 +164,8 @@ class Dataset(object):
         """ Returns a list of blocks with theoretical prediction, data and
         covariance matrix.
 
-        Accepts list of observables that would be used as theory and parameters for
+        Accepts list of observables that would be used as theoretical
+        prediction and parameters for
         what covariance matrix is going to be calculated.
         """
         blocks = []

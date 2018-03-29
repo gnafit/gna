@@ -2,14 +2,14 @@
 #include "EigenHelpers.hh"
 
 void Jacobian::calcJacobian(Args args, Rets rets) {
-    std::cout << "Dimensions of jac -- " << rets[0].mat.rows() << " x " << rets[0].mat.cols() << std::endl;
-    std::cout << "Initial jac " << rets[0].mat << std::endl;
+    /* std::cout << "Dimensions of jac -- " << rets[0].mat.rows() << " x " << rets[0].mat.cols() << std::endl; */
+    /* std::cout << "Initial jac " << rets[0].mat << std::endl; */
     Eigen::MatrixXd storage(args[0].x.size(), m_pars.size());
     storage.setZero();
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
       auto x0 = x->value();
-      std::cout << "x0 = " << x0 << std::endl;
+      /* std::cout << "x0 = " << x0 << std::endl; */
 
       double f1 = 4.0/(3.0*m_reldelta);
       double f2 = 1.0/(6.0*m_reldelta);

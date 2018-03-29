@@ -1,6 +1,7 @@
 #include "GNAObject.hh"
 #include <algorithm>
 #include <vector>
+#include <iterator>
 
 class Transpose: public GNAObject,
                  public Transformation<Transpose> {
