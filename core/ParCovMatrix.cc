@@ -8,7 +8,6 @@ void ParCovMatrix::FillMatrix(Args args, Rets rets) {
         for (size_t col{row}; col < m_pars.size(); ++col) {
             auto*  primary_par = m_pars.at(row);
             auto*  secondary_par = m_pars.at(col);
-            fmt::print("row {0}, col {1}\n", row, col);
             pars_covmat(row, col) = pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
             pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
         }
