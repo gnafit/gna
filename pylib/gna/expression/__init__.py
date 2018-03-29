@@ -2,6 +2,12 @@
 
 from __future__ import print_function
 from collections import OrderedDict
+from gna.configurator import NestedDict
+import itertools as I
+
+def printl(level, *args, **kwargs):
+    print('    '*level, sep='', end='')
+    print(*args, **kwargs)
 
 class Index(object):
     def __init__(self, short, name, variants):
@@ -117,7 +123,7 @@ class Indexed(object):
 
     def dump(self, yieldself=False):
         for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
-            print( i, level, '    '*level, operator, obj )
+            printl( level, i, level, operator, obj )
 
 class IndexedContainer(object):
     objects = None
@@ -366,15 +372,34 @@ class Operation(TCall):
                 self.name = newname
         return newname
 
+    def build(self, *args, **kwargs):
+        raise Exception('Unimplemented method called')
+
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'sum', *indices, **kwargs)
         self.set_operator( ' ++ ' )
 
+placeholder=['placeholder']
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
         self.set_operator( ' ** ' )
+
+    def build(self, context, level=0):
+        printl(level, 'build product:', str(self) )
+
+        level+=1
+        for obj in self.objects:
+            context.check_outputs(obj, level=level)
+
+        for (oidx, dct) in context.index_combinations(self.reduced_indices, name=self.name):
+            for (nidx, dct) in context.index_combinations(self.indices, name=self.name):
+                # for obj in self.objects:
+                    # context.get_output(obj.name, nidx, level=level)
+                pass
+
+            context.set_output(placeholder, self.name, oidx, level=level)
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -387,6 +412,7 @@ class VTContainer(OrderedDict):
 
 class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
+    tree = None
     def __init__(self, expression, indices):
         self.expression_raw = expression
         self.expression = self.preprocess( self.expression_raw )
@@ -394,7 +420,6 @@ class Expression(object):
         self.globals=VTContainer(self.operations)
         self.indices=OrderedDict()
         self.defindices(indices)
-
 
     def preprocess(self, expression):
         n = expression.count('|')
@@ -404,7 +429,10 @@ class Expression(object):
         return expression
 
     def parse(self):
+        if self.tree:
+            raise Exception('Expression is already parsed')
         self.tree=eval(self.expression, self.globals)
+        self.guessname=self.tree.guessname
 
     def __str__(self):
         return self.expression_raw
@@ -420,3 +448,77 @@ class Expression(object):
         for d in defs:
             self.newindex(*d)
 
+    def build(self, context):
+        if not self.tree:
+            raise Exception('Expression is not initialized, call parse() method first')
+
+        context.set_indices(self.indices)
+        self.tree.build( context )
+
+class ExpressionContext(object):
+    indices = None
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.outputs = NestedDict()
+
+        self.providers = dict()
+        for keys, value in cfg.items():
+            if isinstance(value, NestedDict) and 'provides' in value:
+                keys=value.provides
+
+            if not isinstance(keys, (list, tuple)):
+                keys=keys,
+
+            for key in keys:
+                self.providers[key]=value
+
+    def set_indices(self, indices):
+        self.indices = indices
+
+    def index_combinations(self, indices, **kwargs):
+        subset = OrderedDict([(k,v) for k, v in self.indices.items() if k in indices.indices])
+        snames, names, variants = [], [], []
+        for k, ss in subset.items():
+            snames.append(k)
+            names.append(ss.name)
+            variants.append(ss.variants)
+        for nidx in I.product(*variants):
+            dct = OrderedDict(list(zip(snames,nidx))+list(zip(names,nidx)), **kwargs)
+            yield nidx, dct
+
+    def build(self, name, indices, level=0):
+        cfg = self.providers.get(name, None)
+        if cfg is None:
+            raise Exception('Do not know how to build '+name)
+
+        printl( level, 'build', name )
+        level+=1
+        for nidx, _ in self.index_combinations(indices):
+            self.set_output(placeholder, name, nidx, level=level)
+
+    def get_variable(self, name, *idx):
+        pass
+
+    def check_outputs(self, obj, level=0):
+        if obj.name in self.outputs:
+            return
+
+        self.build(obj.name, obj.indices, level)
+
+    def get_output(self, name, nidx, **kwargs):
+        level=kwargs.pop('level', 0)
+        output = self.outputs.get((name, nidx), None)
+        if not output:
+            raise Exception('Failed to get output {}[{}]'.format(name, nidx))
+
+        printl( level, 'get', name, nidx )
+        return output
+
+
+    def set_output(self, output, name, nidx, **kwargs):
+        level = kwargs.pop('level', 0)
+        printl( level, 'set output', name, nidx )
+        self.outputs[(name, nidx)]=output
+
+    def connect(self, source, sink, *idx):
+        pass

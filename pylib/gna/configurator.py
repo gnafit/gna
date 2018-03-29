@@ -14,6 +14,24 @@ import numpy
 meta = WeakKeyDictionary()
 init_globals = dict( percent=0.01, numpy=numpy )
 
+def process_key(key):
+    listkey = None
+    if isinstance( key, basestring ):
+        if '.' in key:
+            listkey = list(key.split('.'))
+    elif isinstance( key, (list, tuple) ):
+        listkey = []
+        for sk in key:
+            if isinstance(sk, (list, tuple)):
+                listkey+=list(sk)
+            else:
+                listkey.append(sk)
+
+    if listkey:
+        return listkey[0], listkey[1:]
+
+    return key, None
+
 class NestedDict(object):
     __parent__ = None
     def __init__(self, iterable=None, **kwargs):
@@ -87,16 +105,14 @@ class NestedDict(object):
         raise KeyError( "Failed to determine own key in the parent dictionary" )
 
     def get(self, key, *args, **kwargs):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                sub = self.__storage__.get(key)
-                if sub is None:
-                    raise KeyError( "No nested key '%s'"%key )
-                return sub.get( rest, *args, **kwargs )
-
-        if isinstance( key, basestring ) and '.' in key:
-            return self.get(key.split('.'), *args, **kwargs)
+        key, rest=process_key(key)
+        if rest:
+            sub = self.__storage__.get(key)
+            if sub is None:
+                if args:
+                    return args[0]
+                raise KeyError( "No nested key '%s'"%key )
+            return sub.get( rest, *args, **kwargs )
 
         types=kwargs.pop('types', None)
         obj=self.__storage__.get(key, *args, **kwargs)
@@ -109,13 +125,9 @@ class NestedDict(object):
         return obj
 
     def __getitem__(self, key):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                return self.__storage__.__getitem__(key).__getitem__( rest )
-
-        if isinstance( key, basestring ) and '.' in key:
-            return self.__getitem__(key.split('.'))
+        key, rest=process_key(key)
+        if rest:
+            return self.__storage__.__getitem__(key).__getitem__( rest )
 
         return self.__storage__.__getitem__(key)
 
@@ -127,17 +139,13 @@ class NestedDict(object):
         if isinstance(value, NestedDict):
             value._set_parent( self )
 
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                if not key in self.__storage__:
-                    cfg = self.__storage__[key]=NestedDict()
-                    cfg._set_parent( self )
-                    return cfg.set( rest, value )
-                return self.__storage__.get(key).set( rest, value )
-
-        if isinstance( key, basestring ) and '.' in key:
-            return self.set( key.split('.'), value )
+        key, rest=process_key(key)
+        if rest:
+            if not key in self.__storage__:
+                cfg = self.__storage__[key]=NestedDict()
+                cfg._set_parent( self )
+                return cfg.set( rest, value )
+            return self.__storage__.get(key).set( rest, value )
 
         self.__storage__[key] = value
 
@@ -150,18 +158,13 @@ class NestedDict(object):
         if isinstance(value, NestedDict):
             value._set_parent( self )
 
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                if not key in self.__storage__:
-                    cfg = self.__storage__[key]=NestedDict()
-                    cfg._set_parent( self )
-                    return cfg.setdefault( rest, value )
-                return self.__storage__.get(key).setdefault( rest, value )
-
-        if isinstance( key, basestring ):
-            if '.' in key:
-                return self.setdefault(key.split('.'), value)
+        key, rest=process_key(key)
+        if rest:
+            if not key in self.__storage__:
+                cfg = self.__storage__[key]=NestedDict()
+                cfg._set_parent( self )
+                return cfg.setdefault( rest, value )
+            return self.__storage__.get(key).setdefault( rest, value )
 
         return self.__storage__.setdefault(key, value)
 
@@ -178,14 +181,11 @@ class NestedDict(object):
         return self.__storage__.items()
 
     def __contains__(self, key):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                return self.__storage__.get(key).__contains__(rest)
+        key, listkey=process_key(key)
 
-        if isinstance( key, basestring ):
-            if '.' in key:
-                return self.__contains__(key.split('.'))
+        key, rest=process_key(key)
+        if rest:
+            return self.__storage__.get(key).__contains__(rest)
 
         return self.__storage__.__contains__(key)
 
