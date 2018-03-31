@@ -31,8 +31,8 @@ class cmd(basecmd):
         integrator = ROOT.GaussLegendre(edges, orders, len(orders))
         for name in names:
             locns = env.ns(name)
-            locns.reqparameter('BackgroundRate', central=100, relsigma=0.1)
-            locns.reqparameter('Mu', central=200, relsigma=0.1)
+            locns.reqparameter('BackgroundRate', central=50, relsigma=0.1)
+            locns.reqparameter('Mu', central=100, relsigma=0.1)
             locns.reqparameter('E0', central=2, sigma=0.05)
             locns.reqparameter('Width', central=0.2, sigma=0.005)
             with locns:

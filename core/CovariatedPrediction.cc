@@ -92,6 +92,7 @@ size_t CovariatedPrediction::blocksCount() const noexcept {
   return m_inputs.size();
 }
 
+
 void CovariatedPrediction::covariate(SingleOutput &cov,
                                      SingleOutput &obs1, size_t n1,
                                      SingleOutput &obs2, size_t n2) {
@@ -129,6 +130,10 @@ void CovariatedPrediction::covariate(SingleOutput &cov,
 */ 
 void CovariatedPrediction::rank1(SingleOutput& vec) {
   t_["cov"].input(vec);
+}
+
+void CovariatedPrediction::addSystematicCovMatrix(SingleOutput& sys_covmat) {
+  t_["cov"].input(sys_covmat);
 }
 
 Segment CovariatedPrediction::resolveSegment(Atypes args,
@@ -217,9 +222,10 @@ void CovariatedPrediction::calculateCovbaseTypes(Atypes args, Rtypes rets) {
     }
   }
   rets[0] = DataType().points().shape(size(), size());
-  m_lltbase = LLT(size());
-  rets[0].preallocated(m_lltbase.matrixRef().data());
+  /* m_lltbase = LLT(size()); */
+  /* rets[0].preallocated(m_lltbase.matrixRef().data()); */
   m_covbase.resize(size(), size());
+  rets[0].preallocated(m_covbase.matrix().data());
 }
 
 void CovariatedPrediction::calculateCovbase(Args args, Rets rets) {
@@ -239,7 +245,7 @@ void CovariatedPrediction::calculateCovbase(Args args, Rets rets) {
 
   /* Force materialization of matrix */
   (void)rets[0].mat;
-  m_lltbase.compute(m_covbase);
+  /* m_lltbase.compute(m_covbase); */
 }
 
 /**
@@ -247,15 +253,15 @@ void CovariatedPrediction::calculateCovbase(Args args, Rets rets) {
    * matrix match and preallocate covmatrix storage.
 */ 
 void CovariatedPrediction::calculateCovTypes(Atypes args, Rtypes rets) {
-  for (size_t i = 1; i < args.size(); ++i) {
-    if (args[i].size() != size()) {
-      throw args.error(args[i], "rank1 vec size does not match prediction size");
-    }
-  }
+  /* for (size_t i = 1; i < args.size(); ++i) {
+   *   if (args[i].size() != size()) {
+   *     throw args.error(args[i], "rank1 vec size does not match prediction size");
+   *   }
+   * } */
   rets[0] = args[0];
   m_llt = LLT(size());
   using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
-  rets[0].preallocated(const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()));
+  rets[0].preallocated( const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()) );
 }
 
 /**
@@ -264,10 +270,15 @@ void CovariatedPrediction::calculateCovTypes(Atypes args, Rtypes rets) {
 */ 
 void CovariatedPrediction::calculateCov(Args args, Rets rets) {
   (void)args[0].mat;
-  m_llt = m_lltbase;
-  for (size_t i = 1; i < args.size(); ++i) {
-    m_llt.rankUpdate(args[i].vec);
+  auto full_covmat = m_covbase;
+  if (args.size() > 1) {
+      auto& sys_covmat = args[1].arr2d;
+      full_covmat += sys_covmat;
   }
+  m_llt.compute(full_covmat);
+  /* for (size_t i = 1; i < args.size(); ++i) {
+   *   m_llt.rankUpdate(args[i].vec);
+   * } */
   (void)rets[0].mat;
 }
 

@@ -41,6 +41,7 @@ public:
   void calculateCovbase(Args args, Rets rets);
   void calculateCovTypes(Atypes args, Rtypes rets);
   void calculateCov(Args args, Rets rets);
+  void addSystematicCovMatrix(SingleOutput& sys_covmat);
 
   size_t size() const;
 

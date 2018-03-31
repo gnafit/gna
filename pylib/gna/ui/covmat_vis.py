@@ -30,7 +30,7 @@ class cmd(basecmd):
             covmat = np.ma.array(covmat, mask=(covmat == 0.)) 
 
         fig, ax = plt.subplots()
-        im = ax.imshow(covmat)
+        im = ax.matshow(covmat)
         ax.minorticks_on()
         cbar = fig.colorbar(im)
         plt.title("Covariance matrix")

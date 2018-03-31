@@ -120,16 +120,16 @@ class Dataset(object):
             jac = ROOT.Jacobian()
             par_covs = ROOT.ParCovMatrix()
             for par in covparameters:
-                der = ROOT.Derivative(par)
+                #  der = ROOT.Derivative(par)
+                #  der.derivative.inputs(prediction.prediction)
+                #  prediction.rank1(der)
                 jac.append(par)
-                der.derivative.inputs(prediction.prediction)
-                prediction.rank1(der)
                 par_covs.append(par)
+            prediction.prediction_ready()
             par_covs.materialize()
             #  I = ROOT.Identity()
             #  I.identity.source(par_covs.unc_matrix)
             #  print(I.identity.target.data())
-            prediction.prediction_ready()
             jac.jacobian.func(prediction.prediction)
             #  print(jac.jacobian.jacobian.data())
             jac_T = ROOT.Transpose()
@@ -141,6 +141,7 @@ class Dataset(object):
             #  import matplotlib.pyplot as plt
             #  plt.imshow(product.product.data())
             #  plt.show()
+            prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 
     
