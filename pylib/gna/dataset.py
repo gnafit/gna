@@ -12,7 +12,6 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
-            #  self.covariance.update(base.covariance)
         self._update_covariances(bases) 
 
     def _update_covariances(self, bases):
@@ -27,13 +26,9 @@ class Dataset(object):
         underlaying_params = [(key, base.data.values()[0]) for base in bases for key in base.data.keys()
                               if isinstance(key, ROOT.Parameter('double'))
                                  and not key.isFixed()]
-        #  print("Underlying params -- {}".format(underlaying_params))
         for (par_1, base_1), (par_2, base_2) in combinations(underlaying_params, 2):
             mutual_cov =  par_1.getCovariance(par_2)
-            #  if par_1 != par_2:
-                #  print(mutual_cov, "mutual cov")
             self.covariance[frozenset([par_1, par_2])] = [self._pointize(mutual_cov)]
-        #  pprint.pprint(self.covariance)
 
     def assign(self, obs, value, error):
         """Given observable assign value that is going to serve as data and uncertainty to it.
@@ -112,35 +107,23 @@ class Dataset(object):
                 obs1 = obs2 = list(covkey)[0]
             else:
                 obs1, obs2 = list(covkey)
-            #  print('obs1 -- {0}, obs2 -- {1}'.format(obs1, obs2))
             for cov in covs:
-                #  print('cov', cov)
                 prediction.covariate(cov, obs1, 1, obs2, 1)
         if covparameters:
             jac = ROOT.Jacobian()
             par_covs = ROOT.ParCovMatrix()
             for par in covparameters:
-                #  der = ROOT.Derivative(par)
-                #  der.derivative.inputs(prediction.prediction)
-                #  prediction.rank1(der)
                 jac.append(par)
                 par_covs.append(par)
             prediction.prediction_ready()
             par_covs.materialize()
-            #  I = ROOT.Identity()
-            #  I.identity.source(par_covs.unc_matrix)
-            #  print(I.identity.target.data())
             jac.jacobian.func(prediction.prediction)
-            #  print(jac.jacobian.jacobian.data())
             jac_T = ROOT.Transpose()
             jac_T.transpose.mat(jac.jacobian)
             product = ROOT.MatrixProduct()
             product.multiply(jac.jacobian)
             product.multiply(par_covs.unc_matrix)
             product.multiply(jac_T.transpose.T)
-            #  import matplotlib.pyplot as plt
-            #  plt.imshow(product.product.data())
-            #  plt.show()
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 
