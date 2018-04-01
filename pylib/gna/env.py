@@ -159,6 +159,16 @@ class namespace(Mapping):
     def __len__(self):
         return len(self.storage)
 
+    def defparameter_group(self, *args, **kwargs):
+        from gna.parameters.covariance_helpers import covariate_pars
+        pars = [self.defparameter(name, **ctor_args) for name, ctor_args in args]
+        covmat_passed =  kwargs.get('covmat')
+        if covmat_passed is not None:
+            covariate_pars(pars, covmat_passed)
+
+        return pars
+        
+        
     def defparameter(self, name, **kwargs):
         if name in self.storage:
             raise Exception("{} is already defined".format(name))

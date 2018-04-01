@@ -63,25 +63,6 @@ class CovarianceHandler(object):
  
 
 
-class CovarianceStorage(object):
-    """Simple class to store the order of parameters and corresponding
-    covariance matrix. Meant to be used with covariate_ns() function."""
-    def __init__(self, name, pars, cov_matrix):
-        self.pars = pars
-        self.cov_matrix = cov_matrix
-        is_covmat(self.pars, self.cov_matrix)
-        self.name = name
-
-    def get_pars(self):
-        return self.pars
-
-    def get_cov(self, par1, par2):
-        try:
-            idx1, idx2 = self.pars.index(par1), self.pars.index(par2)
-        except ValueError:
-            raise ValueError("Some of pars {0} and {1} is not in covariance "
-                             "storage".format(par1, par2))
-        return self.cov_matrix[idx1, idx2]
         
 def covariate_ns(ns, cov_storage):
     cov_ns = env.ns(ns)
@@ -104,43 +85,29 @@ def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=No
                     'pars': pars,}
 
     cov_matrix = dispatch_modes[(policy, mode)](**keyword_args)
-                    
-
-    #  if (mode == 'relative') and (policy == 'keep'):
-        #  _uncorr_uncs = np.array([par.sigma() for par in pars])
-    #  elif (policy == 'override':
-        #  _uncorr_uncs = np.array(uncorr_uncs)
-
-    #  print(cov_matrix)
-    #  tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
-    #  print(tmp)
-    #  _cov_mat = cov_matrix
-    #  cov_matrix = cov_matrix * tmp
-    print(cov_matrix)
 
     is_covmat(pars, cov_matrix)
 
     for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-        sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
+        #  sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
         covariance = cov_matrix[first, second]
-        if first == second:
-            print('In mode = {mode} and with policy = {policy}\n'
-                  'sigma_1 = sigma_2 = {0}, '
-                  'uncorrelated unc = sigma  = {1} '
-                  .format(sigma_1, np.sqrt(covariance),
-                          mode=mode, policy=policy))
-        else:
-            print('In mode = {mode} and with policy = {policy}\n'
-                  'sigma_1 = {0}, sigma_2 = {1}, '
-                  'covariance = {0} * {1} * {2} = {3}'
-                  .format(sigma_1, sigma_2, _cov_initial[first, second], covariance, mode=mode, policy=policy))
+        #  if first == second:
+            #  print('In mode = {mode} and with policy = {policy}\n'
+                  #  'sigma_1 = sigma_2 = {0}, '
+                  #  'uncorrelated unc = sigma  = {1} '
+                  #  .format(sigma_1, np.sqrt(covariance),
+                          #  mode=mode, policy=policy))
+        #  else:
+            #  print('In mode = {mode} and with policy = {policy}\n'
+                  #  'sigma_1 = {0}, sigma_2 = {1}, '
+                  #  'covariance = {0} * {1} * {2} = {3}'
+                  #  .format(sigma_1, sigma_2, _cov_initial[first, second], covariance, mode=mode, policy=policy))
         pars[first].setCovariance(pars[second], covariance)
 
 
 def is_covmat(pars, cov_matrix):
     def is_positive_semidefinite(cov_matrix):
         return np.all(np.linalg.eigvals(cov_matrix) > 0.)
-
 
     assert cov_matrix.shape[0] == cov_matrix.shape[1], (
             "Covariance matrix for parameters {} is not square".format([_.name() for _ in pars]))
@@ -152,3 +119,22 @@ def is_covmat(pars, cov_matrix):
     "The matrix is not positive-semidefinite")
     return
 
+class CovarianceStorage(object):
+    """Simple class to store the order of parameters and corresponding
+    covariance matrix. Meant to be used with covariate_ns() function."""
+    def __init__(self, name, pars, cov_matrix):
+        self.pars = pars
+        self.cov_matrix = cov_matrix
+        is_covmat(self.pars, self.cov_matrix)
+        self.name = name
+
+    def get_pars(self):
+        return self.pars
+
+    def get_cov(self, par1, par2):
+        try:
+            idx1, idx2 = self.pars.index(par1), self.pars.index(par2)
+        except ValueError:
+            raise ValueError("Some of pars {0} and {1} is not in covariance "
+                             "storage".format(par1, par2))
+        return self.cov_matrix[idx1, idx2]
