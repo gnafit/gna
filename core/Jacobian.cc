@@ -33,8 +33,6 @@ void Jacobian::calcJacobian(Args args, Rets rets) {
       storage.col(i) = ret.matrix();
     }
 
-    //Sanitize for NaN
-    std::transform(storage.data(), storage.data() + storage.size(), storage.data(), [](auto& x){ return std::isnan(x) ? 0 : x;});
     rets[0].mat = storage;
 }
 
