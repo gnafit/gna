@@ -173,7 +173,6 @@ class namespace(Mapping):
 
         return pars
         
-        
     def defparameter(self, name, **kwargs):
         if name in self.storage:
             raise Exception("{} is already defined".format(name))
@@ -188,20 +187,56 @@ class namespace(Mapping):
         return p
 
     def reqparameter(self, name, **kwargs):
-        found = False
-        try:
-            par = self[name]
-            found = True
-            return par, found
-        except KeyError:
-            pass
-        try:
-            par = env.nsview[name]
-            found = True
-            return par, found
-        except KeyError:
-            pass
-        return self.defparameter(name, **kwargs), found
+        def without_status(name, **kwargs):
+            try:
+                par = self[name]
+                return par
+            except KeyError:
+                pass
+            try:
+                par = env.nsview[name]
+                return par
+            except KeyError:
+                pass
+            return self.defparameter(name, **kwargs)
+
+        def with_status(name, **kwargs):
+            found = False
+            try:
+                par = self[name]
+                found = True
+                return par, found
+            except KeyError:
+                pass
+            try:
+                par = env.nsview[name]
+                found = True
+                return par, found 
+            except KeyError:
+                pass
+            return self.defparameter(name, **kwargs), found
+
+        if kwargs.get('with_status'):
+            return with_status(name, **kwargs)
+        else:
+            return without_status(name, **kwargs)
+
+    def reqparameter_group(self, *args, **kwargs):
+        import gna.parameters.covariance_helpers as ch
+        args_patched = [(name, dict(ctor_args, with_status=True))
+                        for name, ctor_args in args]
+        pars_with_status = [self.reqparameter(name, **ctor_args)
+                            for name, ctor_args in args_patched]
+        statuses = [status for _, status in pars_with_status]
+        pars = [par for par, _ in pars_with_status]
+        if not any(statuses):
+            covmat_passed =  kwargs.get('covmat')
+            if covmat_passed is not None:
+                ch.covariate_pars(pars, covmat_passed)
+            cov_from_cfg = kwargs.get('covmat_cfg')
+            if cov_from_cfg is not None:
+                ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
+        return pars
 
     def addobservable(self, name, output, export=True):
         if output.check():
