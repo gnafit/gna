@@ -160,11 +160,16 @@ class namespace(Mapping):
         return len(self.storage)
 
     def defparameter_group(self, *args, **kwargs):
-        from gna.parameters.covariance_helpers import covariate_pars
+        import gna.parameters.covariance_helpers as ch
         pars = [self.defparameter(name, **ctor_args) for name, ctor_args in args]
+
         covmat_passed =  kwargs.get('covmat')
         if covmat_passed is not None:
-            covariate_pars(pars, covmat_passed)
+            ch.covariate_pars(pars, covmat_passed)
+
+        cov_from_cfg = kwargs.get('covmat_cfg')
+        if cov_from_cfg is not None:
+            ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
 
         return pars
         
@@ -183,15 +188,20 @@ class namespace(Mapping):
         return p
 
     def reqparameter(self, name, **kwargs):
+        found = False
         try:
-            return self[name]
+            par = self[name]
+            found = True
+            return par, found
         except KeyError:
             pass
         try:
-            return env.nsview[name]
+            par = env.nsview[name]
+            found = True
+            return par, found
         except KeyError:
             pass
-        return self.defparameter(name, **kwargs)
+        return self.defparameter(name, **kwargs), found
 
     def addobservable(self, name, output, export=True):
         if output.check():

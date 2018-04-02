@@ -6,5 +6,5 @@ uncorr_uncs = [0.5, 0.1]
 # 'keep' stands for keeping uncorrelated uncertainties of parameters and 'override' stands
 # for substituting them values from uncorr_uncs
 policy = 'keep' 
-params = ['Width', 'E0']
-cov_mat = [[1, 0.1], [0.1, 1]]
+params = ['extra1', 'extra2', 'extra3']
+cov_mat = [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]]
