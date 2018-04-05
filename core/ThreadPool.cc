@@ -17,6 +17,7 @@ void MultiThreading::Task::run_task() {
     printf("runtask\n");
     if (m_entry->tainted) {
 	m_entry->evaluate();
+    	printf("EVA\n");
     }
     m_entry->tainted = false;
 }
@@ -89,13 +90,18 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     }
 
     if (!worker_found) {
-      std::lock_guard<std::mutex> lock(tp_add_mutex);
+      //std::lock_guard<std::mutex> lock(tp_add_mutex);
       if (w_size < m_max_thread_number) {
-	threads.push_back(std::thread([&in_task, w_size, this]() {MultiThreading::ThreadPool::new_worker (std::ref(in_task), w_size - 1); }) );
+        std::lock_guard<std::mutex> lock(tp_thr_add_mutex);
+	threads.push_back(std::thread(
+		[&in_task, w_size, this]() 
+		{MultiThreading::ThreadPool::new_worker (std::ref(in_task), w_size - 1); 
+		}) );
       } else {
         std::cerr << "Try to add task to wait list, w_size =  " << w_size 
 			<< " m_workers = " << m_workers.size()  << std::endl;
         for (size_t i = 0; i < w_size; i++) {
+	  std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
 	  std::cout << i << " " << m_workers[i].thr_head << " ";
           if (m_workers[i].thr_head == curr_id && !in_task.done()) {
             std::cerr << "Task added to wait list, m_global_wait_list size = " 
