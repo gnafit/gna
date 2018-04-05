@@ -41,6 +41,7 @@ namespace MultiThreading {
     void new_worker(Task &task, size_t index);
     int is_free_worker_exists();
     bool is_pool_full();
+    size_t worker_count;
 //    void set_max_thread_num(int k);
 
   private:
@@ -48,7 +49,9 @@ namespace MultiThreading {
     std::vector< std::thread > threads;
     std::vector< std::vector<Task> > m_global_wait_list;
     size_t m_max_thread_number;
-    std::mutex tp_mutex;
+    std::mutex tp_add_mutex;
+    std::mutex tp_waitlist_mutex;
+
   };
 
 

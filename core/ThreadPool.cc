@@ -57,30 +57,43 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_
 //	size_t index = 0;
 //      threads.push_back(std::thread(std::ref(*m_workers[m_workers.size() - 1])));
 //        threads.push_back(std::thread(Worker::Worker, std::ref(*this)));
+
+//        std::lock(tp_waitlist_mutex);
+//        std::lock_guard<std::mutex> lock(tp_waitlist_mutex, std::adopt_lock);
+//	std::lock(lock);
         m_global_wait_list.push_back({});
         std::cerr << "New worker added!" << std::endl;
         m_workers[index].thr_head =  std::this_thread::get_id();
 	std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
         if (in_task.done()) m_workers[index].work();
+//	lock.unlock();
 }
 
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     // mother thread  creates new one if it is possible
     std::thread::id curr_id = std::this_thread::get_id();
     bool worker_found = false;
-    std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
-    size_t w_size = m_workers.size();
+    //std::cout << "workers size = " << m_workers.size() << " curr id  = " << curr_id << std::endl;
+    size_t w_size; 
+    {
+        std::lock_guard<std::mutex> lock(tp_waitlist_mutex, std::adopt_lock);
+        worker_count = m_workers.size();
+        w_size = worker_count;
+    }
     size_t worker_index = 0;
 
     for (size_t i = 0; i < w_size; i++)  {
+      std::lock_guard<std::mutex> lock(tp_add_mutex, std::adopt_lock);
       if((m_workers[i].is_free())) { // || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
         std::cerr << "Free worker found!" << std::endl;
 	{
-	//	std::unique_lock<std::mutex> 
-        //        	lock(tp_mutex);
+		//std::unique_lock<std::mutex> 
+               // 	lock(tp_add_mutex);
+	//	std::lock(lock);
+		//std::lock_guard<std::mutex> lock(tp_add_mutex, std::adopt_lock);
         	m_workers[i].add_to_task_stack(in_task);
-	
         	m_workers[i].thr_head = curr_id;
+		//lock.unlock();
         	worker_found = true;
 		worker_index = i;
 	}
@@ -89,6 +102,7 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     }
 
     if (!worker_found) {
+    std::lock_guard<std::mutex> lock(tp_add_mutex, std::adopt_lock);
       if (w_size < m_max_thread_number) {
 /*        m_workers.push_back(Worker(*this));
 	threads.push_back(std::thread(std::ref(*m_workers[m_workers.size() - 1])));
@@ -125,7 +139,8 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
         in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
       }
       for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
-            std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;                    
+            std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;
+	    std::lock_guard<std::mutex> lock(tp_add_mutex, std::adopt_lock);                    
             if ( in_task.m_entry->sources[i].sink->entry->tainted) {
                 add_task(Task(in_task.m_entry->sources[i].sink->entry));                                       
             }
