@@ -22,7 +22,7 @@ print( op )
 print( 'i1==i2', i1==i2 )
 print( 'i1==i1', i1==i1 )
 
-print('reduce', op, 'by k', op.reduce('op_reduced', 'k'))
+# print('reduce', op, 'by k', op.reduce('op_reduced', 'k'))
 
 print('ident', 'j2', j2.ident())
 print('ident full', 'j2', j2.ident_full())
@@ -34,7 +34,7 @@ v = Indexed('v')
 print( v )
 print( v['a', b] )
 print( v )
-# try:
-v['a', b]
-# except:
-    # print( 'OK' )
+try:
+    v['a', b]
+except:
+    print( 'OK' )

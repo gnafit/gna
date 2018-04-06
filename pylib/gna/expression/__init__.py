@@ -15,7 +15,7 @@ class Index(object):
         self.name  = name
         self.variants = variants
 
-    def iterate(self, fix={}):
+    def iterate(self, **fix):
         if self.variants is None:
             raise Exception( 'Variants are not initialized for {name}'.format(**self.__dict__) )
 
@@ -35,34 +35,45 @@ class Index(object):
 
 class NIndex(object):
     def __init__(self, *indices, **kwargs):
-        self.indices = set()
+        self.indices = OrderedDict()
 
         for idx in indices:
-            if isinstance(idx, Indexed):
-                self.indices |= set(idx.indices.indices)
-            elif isinstance(idx, NIndex):
-                self.indices |= set(idx.indices)
-            elif isinstance(idx, str):
-                self.indices.add(idx)
-            elif isinstance(idx, Index):
-                self.indices.add(idx.short)
-            else:
-                raise Exception( 'Unsupported index type '+type(idx).__name__ )
+            self |= idx
 
         ignore = kwargs.pop('ignore', None)
         if ignore:
-            self.indices.discard(*ignore.indices)
+            for other in ignore:
+                if other in self.indices:
+                    del self.indices[other]
 
-        self.indices=list(sorted(self.indices))
+        self.arrange()
 
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
     def __ior__(self, other):
-        pass
+        if isinstance(other, Index):
+            self.indices[other.short]=other
+        elif isinstance(other, str):
+            self.indices[other]=Index(other, other, variants=None)
+        else:
+            if isinstance(other, NIndex):
+                others = other.indices.values()
+            elif isinstance(other, Indexed):
+                others = other.indices.indices.values()
+            else:
+                raise Exception( 'Unsupported index type '+type(other).__name__ )
+
+            for other in others:
+                self.indices[other.short]=other
+
+        return self
+
+    def arrange(self):
+        self.indices = OrderedDict( [(k, self.indices[k]) for k in sorted(self.indices.keys())] )
 
     def __str__(self):
-        return ', '.join( self.indices )
+        return ', '.join( self.indices.keys() )
 
     def __add__(self, other):
         return NIndex(self, other)
@@ -77,17 +88,17 @@ class NIndex(object):
             return False
         return self.indices==other.indices
 
-    def reduce(self, *indices):
-        if not set(indices).issubset(self.indices):
-            raise Exception( "NIndex.reduce should be called on a subset of indices, got {:s} in {:s}".format(indices, self.indices) )
+    # def reduce(self, *indices):
+        # if not set(indices.keys()).issubset(self.indices.keys()):
+            # raise Exception( "NIndex.reduce should be called on a subset of indices, got {:s} in {:s}".format(indices.keys(), self.indices.keys()) )
 
-        return NIndex(*(set(self.indices)-set(indices)))
+        # return NIndex(*(set(self.indices)-set(indices))) #legacy
 
     def ident(self, **kwargs):
-        return '_'.join(self.indices)
+        return '_'.join(self.indices.keys())
 
-    def iterate(self, fix={}):
-        for it in I.product(*self.indices):
+    def iterate(self, **fix):
+        for it in I.product(*(idx.iterate(**fix) for idx in self.indices.values())):
             yield it
 
     __iter__ = iterate
@@ -131,8 +142,8 @@ class Indexed(object):
             return False
         return self.indices==other.indices
 
-    def reduce(self, newname, *indices):
-        return Indexed(newname, self.indices.reduce(*indices))
+    # def reduce(self, newname, *indices):
+        # return Indexed(newname, self.indices.reduce(*indices))
 
     def walk(self, yieldself=False, level=0, operation=''):
         yield self, level, operation

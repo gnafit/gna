@@ -29,5 +29,17 @@ for i in ndx:
     print( i )
 print()
 
+print( 'Iterate nidx: fix i' )
+for i in ndx.iterate(i='b'):
+    print( i )
+print()
 
+print( 'Iterate nidx: fix j' )
+for i in ndx.iterate(j='2'):
+    print( i )
+print()
 
+print( 'Iterate nidx: fix k, j' )
+for i in ndx.iterate(k='y', j='2'):
+    print( i )
+print()
