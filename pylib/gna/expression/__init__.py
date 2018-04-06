@@ -273,7 +273,23 @@ class IndexedContainer(object):
         return bool(self.objects)
 
     def build(self, context, level=0):
-        return False
+        printl(level, 'build {}:'.format(type(self).__name__), str(self) )
+
+        level+=1
+        for obj in self.objects:
+            context.check_outputs(obj, level=level)
+
+        printl(level, 'connect', str(self))
+        level+=1
+        for idx in self.indices.iterate(mode='items'):
+            level+=1
+            for obj in self.objects:
+                obj.get_output(idx, context, level=level)
+            level-=1
+
+            context.set_output(placeholder, self.name, idx, level=level)
+
+        return True
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -287,6 +303,12 @@ class Variable(Indexed):
 
     def __call__(self, *targs):
         return TCall(self.name, self, targs=targs)
+
+    def build(self, context, level=0):
+        return True
+
+    def get_output(self, nidx, context, level=0):
+        pass
 
 class VProduct(IndexedContainer, Variable):
     def __init__(self, name, *objects, **kwargs):
@@ -324,6 +346,9 @@ class Transformation(Indexed):
     def __add__(self, other):
         return TSum('?', self, other)
 
+    def build(self, context, level=0):
+        return False
+
 class TCall(IndexedContainer, Transformation):
     def __init__(self, name, *args, **kwargs):
         targs = ()
@@ -354,25 +379,6 @@ class TCall(IndexedContainer, Transformation):
             return '{fcn}{args}'.format(fcn=Indexed.__str__(self), args=IndexedContainer.estr(self, expand))
         else:
             return self.__str__()
-
-    def build(self, context, level=0):
-        printl(level, 'build {}:'.format(type(self.__name__)), str(self) )
-
-        level+=1
-        for obj in self.objects:
-            context.check_outputs(obj, level=level)
-
-        printl(level, 'connect', str(self))
-        level+=1
-        for idx in self.indices.iterate(mode='items'):
-            level+=1
-            for obj in self.objects:
-                obj.get_output(idx, context, level=level)
-            level-=1
-
-            context.set_output(placeholder, self.name, idx, level=level)
-
-        return True
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
