@@ -6,6 +6,10 @@ from gna.configurator import NestedDict
 import itertools as I
 
 def printl(level, *args, **kwargs):
+    prefix = kwargs.pop('prefix', ())
+
+    if prefix:
+        print( *prefix, end='' )
     print('    '*level, sep='', end='')
     print(*args, **kwargs)
 
@@ -15,7 +19,7 @@ class Index(object):
         self.name  = name
         self.variants = variants
 
-    def iterate(self, **fix):
+    def iterate(self, mode='values', fix={}):
         if self.variants is None:
             raise Exception( 'Variants are not initialized for {name}'.format(**self.__dict__) )
 
@@ -23,10 +27,21 @@ class Index(object):
         if val is not None:
             if not val in self.variants:
                 raise Exception( 'Can not fix index {name} in value {value}. Variants are: {variants:s}'.format( **self.__dict__ ) )
-            yield val
+            variants = val,
         else:
-            for var in self.variants:
+            variants = self.variants
+
+        if mode=='values':
+            for var in variants:
                 yield var
+        elif mode=='items':
+            for var in variants:
+                yield self.short, var
+        elif mode=='longitems':
+            for var in variants:
+                yield self.name, var
+        else:
+            raise Exception('Unsupported iteration mode: {}'.format(mode))
 
     __iter__ = iterate
 
@@ -69,6 +84,9 @@ class NIndex(object):
 
         return self
 
+    def __sub__(self, other):
+        return NIndex(self, ignore=other.indices.keys())
+
     def arrange(self):
         self.indices = OrderedDict( [(k, self.indices[k]) for k in sorted(self.indices.keys())] )
 
@@ -97,9 +115,23 @@ class NIndex(object):
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
 
-    def iterate(self, **fix):
-        for it in I.product(*(idx.iterate(**fix) for idx in self.indices.values())):
-            yield it
+    def names(short=False):
+        if short:
+            return [idx.short for idx in self.indices]
+        else:
+            return [idx.name for idx in self.indices]
+
+    def iterate(self, mode='values', fix={}):
+        if mode in ['values', 'items', 'longitems']:
+            for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
+                yield it
+        else:
+            if not isinstance(mode, str):
+                raise Exception('Mode should be a string, got {}'.format(type(str).__name__))
+
+            for it in self.iterate(mode='items', fix=fix):
+                dct = OrderedDict(it)
+                yield mode.format(**dct)
 
     __iter__ = iterate
 
@@ -161,7 +193,7 @@ class Indexed(object):
 
     def dump(self, yieldself=False):
         for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
-            print( i, level, '  '*level, operator, obj )
+            printl( level, operator, obj, prefix=(i, level) )
 
 class IndexedContainer(object):
     objects = None
@@ -383,11 +415,11 @@ class Operation(TCall):
     __metaclass__ = OperationMeta
     call_lock=False
     def __init__(self, name, *indices, **kwargs):
-        self.reduced_indices = NIndex(*indices)
+        self.indices_to_reduce = NIndex(*indices)
         TCall.__init__(self, name)
 
     def __str__(self):
-        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.reduced_indices)
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.indices_to_reduce)
 
     def __call__(self, *args):
         if self.call_lock:
@@ -395,14 +427,14 @@ class Operation(TCall):
         self.call_lock=True
 
         self.set_objects(*args)
-        self.set_indices(*args, ignore=self.reduced_indices)
+        self.set_indices(*args, ignore=self.indices_to_reduce.indices.keys())
         return self
 
     def guessname(self, lib={}, save=False):
         for o in self.objects:
             o.guessname(lib, save)
 
-        newname=self.name+':'+self.reduced_indices.ident()
+        newname=self.name+':'+self.indices_to_reduce.ident()
         if newname in lib:
             newname = lib[newname]['name']
 
@@ -431,13 +463,17 @@ class OProd(Operation):
         for obj in self.objects:
             context.check_outputs(obj, level=level)
 
-        for (oidx, dct) in context.index_combinations(self.reduced_indices, name=self.name):
-            for (nidx, dct) in context.index_combinations(self.indices, name=self.name):
-                # for obj in self.objects:
-                    # context.get_output(obj.name, nidx, level=level)
-                pass
+        printl(level, 'connect', self.name)
+        level+=1
+        for freeidx in self.indices.iterate(mode='items'):
+            level+=1
+            for opidx in self.indices_to_reduce.iterate(mode='items'):
+                fullidx = list(freeidx)+list(opidx)
+                for obj in self.objects:
+                    context.get_output(obj.name, fullidx, level=level)
+            level-=1
 
-            context.set_output(placeholder, self.name, oidx, level=level)
+            context.set_output(placeholder, self.name, freeidx, level=level)
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -513,17 +549,6 @@ class ExpressionContext(object):
     def set_indices(self, indices):
         self.indices = indices
 
-    def index_combinations(self, indices, **kwargs):
-        subset = OrderedDict([(k,v) for k, v in self.indices.items() if k in indices.indices])
-        snames, names, variants = [], [], []
-        for k, ss in subset.items():
-            snames.append(k)
-            names.append(ss.name)
-            variants.append(ss.variants)
-        for nidx in I.product(*variants):
-            dct = OrderedDict(list(zip(snames,nidx))+list(zip(names,nidx)), **kwargs)
-            yield nidx, dct
-
     def build(self, name, indices, level=0):
         cfg = self.providers.get(name, None)
         if cfg is None:
@@ -531,7 +556,7 @@ class ExpressionContext(object):
 
         printl( level, 'build', name )
         level+=1
-        for nidx, _ in self.index_combinations(indices):
+        for nidx in indices.iterate(mode='items'):
             self.set_output(placeholder, name, nidx, level=level)
 
     def get_variable(self, name, *idx):
@@ -545,17 +570,25 @@ class ExpressionContext(object):
 
     def get_output(self, name, nidx, **kwargs):
         level=kwargs.pop('level', 0)
+
+        printl( level, 'get', name, nidx )
+        nidx = OrderedDict(nidx)
+        nidx = [nidx[k] for k in sorted(nidx.keys())]
+
         output = self.outputs.get((name, nidx), None)
         if not output:
             raise Exception('Failed to get output {}[{}]'.format(name, nidx))
 
-        printl( level, 'get', name, nidx )
         return output
 
 
     def set_output(self, output, name, nidx, **kwargs):
         level = kwargs.pop('level', 0)
+
         printl( level, 'set output', name, nidx )
+        nidx = OrderedDict(nidx)
+        nidx = [nidx[k] for k in sorted(nidx.keys())]
+
         self.outputs[(name, nidx)]=output
 
     def connect(self, source, sink, *idx):

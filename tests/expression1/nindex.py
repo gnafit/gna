@@ -16,7 +16,7 @@ print( ndx )
 
 print( 'Iterate i' )
 for i in idx1:
-    print( i )
+    print( *i )
 print()
 
 print( 'Iterate i (fixed)' )
@@ -26,20 +26,40 @@ print()
 
 print( 'Iterate nidx' )
 for i in ndx:
-    print( i )
+    print( *i )
 print()
 
 print( 'Iterate nidx: fix i' )
-for i in ndx.iterate(i='b'):
-    print( i )
+for i in ndx.iterate(fix=dict(i='b')):
+    print( *i )
 print()
 
 print( 'Iterate nidx: fix j' )
-for i in ndx.iterate(j='2'):
-    print( i )
+for i in ndx.iterate(fix=dict(j='2')):
+    print( *i )
 print()
 
 print( 'Iterate nidx: fix k, j' )
-for i in ndx.iterate(k='y', j='2'):
+for i in ndx.iterate(fix=dict(k='y', j='2')):
+    print( *i )
+print()
+
+print( 'Iterate nidx: fix k, j, i' )
+for i in ndx.iterate(fix=dict(k='y', j='2', i='a')):
+    print( *i )
+print()
+
+print( 'Iterate nidx (items): fix k, j' )
+for i in ndx.iterate(mode='items', fix=dict(k='y', j='2')):
+    print( *i )
+print()
+
+print( 'Iterate nidx (format): fix k, j' )
+for i in ndx.iterate(mode='i={i}, j={j}, k={k}', fix=dict(k='y', j='2')):
+    print( i )
+print()
+
+print( 'Iterate nidx (format): fix k, j' )
+for i in ndx.iterate(mode='j={j}, k={k}, i={i}', fix=dict(k='y', j='2')):
     print( i )
 print()
