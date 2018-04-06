@@ -20,8 +20,12 @@ class cmd(basecmd):
                             default=[])
         parser.add_argument('--error-type', choices=['pearson', 'neyman'],
                 default='pearson', help='The type of statistical errors to be used')
+        parser.add_argument('--random-seed', type=int, help='Set random seed of numpy random generator to given value')
 
     def run(self):
+        if self.opts.random_seed:
+            np.random.seed(self.opts.random_seed)
+
         dataset = Dataset(desc=None)
         if self.opts.pull:
             pull_pars = get_parameters(self.opts.pull)
