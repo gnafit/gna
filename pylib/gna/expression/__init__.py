@@ -135,6 +135,9 @@ class NIndex(object):
 
     __iter__ = iterate
 
+    def get_relevant(self, nidx):
+        return type(nidx)((k,v) for (k,v) in nidx if k in self.indices)
+
 class Indexed(object):
     name=''
     indices_locked=False
@@ -194,6 +197,12 @@ class Indexed(object):
     def dump(self, yieldself=False):
         for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
             printl( level, operator, obj, prefix=(i, level) )
+
+    def get_output(self, nidx, context, level=0):
+        return context.get_output(self.name, self.get_relevant( nidx ), level)
+
+    def get_relevant(self, nidx):
+        return self.indices.get_relevant(nidx)
 
 class IndexedContainer(object):
     objects = None
@@ -262,6 +271,9 @@ class IndexedContainer(object):
 
     def nonempty(self):
         return bool(self.objects)
+
+    def build(self, context, level=0):
+        return False
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -342,6 +354,25 @@ class TCall(IndexedContainer, Transformation):
             return '{fcn}{args}'.format(fcn=Indexed.__str__(self), args=IndexedContainer.estr(self, expand))
         else:
             return self.__str__()
+
+    def build(self, context, level=0):
+        printl(level, 'build call:', str(self) )
+
+        level+=1
+        for obj in self.objects:
+            context.check_outputs(obj, level=level)
+
+        printl(level, 'connect', str(self))
+        level+=1
+        for idx in self.indices.iterate(mode='items'):
+            level+=1
+            for obj in self.objects:
+                obj.get_output(idx, context, level=level)
+            level-=1
+
+            context.set_output(placeholder, self.name, idx, level=level)
+
+        return True
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -442,8 +473,29 @@ class Operation(TCall):
                 self.name = newname
         return newname
 
-    def build(self, *args, **kwargs):
+    def make_object(self, *args, **kwargs):
         raise Exception('Unimplemented method called')
+
+    def build(self, context, level=0):
+        printl(level, 'build product:', str(self) )
+
+        level+=1
+        for obj in self.objects:
+            context.check_outputs(obj, level=level)
+
+        printl(level, 'connect', str(self))
+        level+=1
+        for freeidx in self.indices.iterate(mode='items'):
+            level+=1
+            for opidx in self.indices_to_reduce.iterate(mode='items'):
+                fullidx = list(freeidx)+list(opidx)
+                for obj in self.objects:
+                    obj.get_output(fullidx, context, level=level)
+            level-=1
+
+            context.set_output(placeholder, self.name, freeidx, level=level)
+
+        return True
 
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
@@ -455,25 +507,6 @@ class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
         self.set_operator( ' ** ' )
-
-    def build(self, context, level=0):
-        printl(level, 'build product:', str(self) )
-
-        level+=1
-        for obj in self.objects:
-            context.check_outputs(obj, level=level)
-
-        printl(level, 'connect', self.name)
-        level+=1
-        for freeidx in self.indices.iterate(mode='items'):
-            level+=1
-            for opidx in self.indices_to_reduce.iterate(mode='items'):
-                fullidx = list(freeidx)+list(opidx)
-                for obj in self.objects:
-                    context.get_output(obj.name, fullidx, level=level)
-            level-=1
-
-            context.set_output(placeholder, self.name, freeidx, level=level)
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -554,10 +587,9 @@ class ExpressionContext(object):
         if cfg is None:
             raise Exception('Do not know how to build '+name)
 
-        printl( level, 'build', name )
-        level+=1
+        printl( level, 'build', name, 'via bundle' )
         for nidx in indices.iterate(mode='items'):
-            self.set_output(placeholder, name, nidx, level=level)
+            self.set_output(placeholder, name, nidx, level=level+1)
 
     def get_variable(self, name, *idx):
         pass
@@ -566,11 +598,11 @@ class ExpressionContext(object):
         if obj.name in self.outputs:
             return
 
-        self.build(obj.name, obj.indices, level)
+        level+=1
+        if not obj.build(self, level=level):
+            self.build(obj.name, obj.indices, level)
 
-    def get_output(self, name, nidx, **kwargs):
-        level=kwargs.pop('level', 0)
-
+    def get_output(self, name, nidx, level=0):
         printl( level, 'get', name, nidx )
         nidx = OrderedDict(nidx)
         nidx = [nidx[k] for k in sorted(nidx.keys())]
@@ -580,7 +612,6 @@ class ExpressionContext(object):
             raise Exception('Failed to get output {}[{}]'.format(name, nidx))
 
         return output
-
 
     def set_output(self, output, name, nidx, **kwargs):
         level = kwargs.pop('level', 0)

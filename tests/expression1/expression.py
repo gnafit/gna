@@ -18,7 +18,7 @@ lib = dict(
             ('prod:i', dict(name='ToTaLProd')),
             ]
         )
-expr = 'prod[i]| sum[b]| mat[b]| fun| var[j]*obj[i]() + bkg[k]()'
+expr = 'prod[i]| sum[b]| mat[b]| fun| var[j]*obj[i]() + bkg[k](), norm()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -30,7 +30,9 @@ a.tree.dump(True)
 
 print()
 cfg = NestedDict(
-        totalsum = NestedDict()
+        mat = NestedDict(),
+        signal = NestedDict(),
+        norm = NestedDict()
         )
 context = ExpressionContext( cfg )
 a.build(context)
