@@ -58,6 +58,9 @@ class NIndex(object):
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
+    def __ior__(self, other):
+        pass
+
     def __str__(self):
         return ', '.join( self.indices )
 
