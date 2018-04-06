@@ -356,7 +356,7 @@ class TCall(IndexedContainer, Transformation):
             return self.__str__()
 
     def build(self, context, level=0):
-        printl(level, 'build call:', str(self) )
+        printl(level, 'build {}:'.format(type(self.__name__)), str(self) )
 
         level+=1
         for obj in self.objects:
