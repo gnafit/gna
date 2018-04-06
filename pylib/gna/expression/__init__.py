@@ -15,14 +15,32 @@ class Index(object):
         self.name  = name
         self.variants = variants
 
-class Indices(object):
+    def iterate(self, fix={}):
+        if self.variants is None:
+            raise Exception( 'Variants are not initialized for {name}'.format(**self.__dict__) )
+
+        val = fix.get(self.name, fix.get(self.short, None))
+        if val is not None:
+            if not val in self.variants:
+                raise Exception( 'Can not fix index {name} in value {value}. Variants are: {variants:s}'.format( **self.__dict__ ) )
+            yield val
+        else:
+            for var in self.variants:
+                yield var
+
+    __iter__ = iterate
+
+    def __str__(self):
+        return '{name} ({short}): {variants:s}'.format( **self.__dict__ )
+
+class NIndex(object):
     def __init__(self, *indices, **kwargs):
         self.indices = set()
 
         for idx in indices:
             if isinstance(idx, Indexed):
                 self.indices |= set(idx.indices.indices)
-            elif isinstance(idx, Indices):
+            elif isinstance(idx, NIndex):
                 self.indices |= set(idx.indices)
             elif isinstance(idx, str):
                 self.indices.add(idx)
@@ -44,7 +62,7 @@ class Indices(object):
         return ', '.join( self.indices )
 
     def __add__(self, other):
-        return Indices(self, other)
+        return NIndex(self, other)
 
     def __bool__(self):
         return bool(self.indices)
@@ -52,18 +70,24 @@ class Indices(object):
     __nonzero__ = __bool__
 
     def __eq__(self, other):
-        if not isinstance(other, Indices):
+        if not isinstance(other, NIndex):
             return False
         return self.indices==other.indices
 
     def reduce(self, *indices):
         if not set(indices).issubset(self.indices):
-            raise Exception( "Indices.reduce should be called on a subset of indices, got {:s} in {:s}".format(indices, self.indices) )
+            raise Exception( "NIndex.reduce should be called on a subset of indices, got {:s} in {:s}".format(indices, self.indices) )
 
-        return Indices(*(set(self.indices)-set(indices)))
+        return NIndex(*(set(self.indices)-set(indices)))
 
     def ident(self, **kwargs):
         return '_'.join(self.indices)
+
+    def iterate(self, fix={}):
+        for it in I.product(*self.indices):
+            yield it
+
+    __iter__ = iterate
 
 class Indexed(object):
     name=''
@@ -73,7 +97,7 @@ class Indexed(object):
         self.set_indices(*indices, **kwargs)
 
     def set_indices(self, *indices, **kwargs):
-        self.indices=Indices(*indices, **kwargs)
+        self.indices=NIndex(*indices, **kwargs)
         if indices:
             self.indices_locked=True
 
@@ -123,7 +147,7 @@ class Indexed(object):
 
     def dump(self, yieldself=False):
         for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
-            printl( level, i, level, operator, obj )
+            print( i, level, '  '*level, operator, obj )
 
 class IndexedContainer(object):
     objects = None
@@ -345,7 +369,7 @@ class Operation(TCall):
     __metaclass__ = OperationMeta
     call_lock=False
     def __init__(self, name, *indices, **kwargs):
-        self.reduced_indices = Indices(*indices)
+        self.reduced_indices = NIndex(*indices)
         TCall.__init__(self, name)
 
     def __str__(self):
