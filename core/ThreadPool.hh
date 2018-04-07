@@ -38,11 +38,12 @@ namespace MultiThreading {
   public:
     ThreadPool (int maxthr = 0);
     ~ThreadPool () {
+	std::cout << "thr num = " << threads.size() <<std::endl;
 	for (auto &thr : threads) {
 	    thr.join();
 	}
     }
-    void add_task(Task task);
+    void add_task(Task task, bool isfirst = true);
     void new_worker(Task &task, size_t index);
     int is_free_worker_exists();
     bool is_pool_full();

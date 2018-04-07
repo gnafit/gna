@@ -171,8 +171,11 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
+  freeze();
   printf( "evaluation \n");
-  return fun(Args(this), Rets(this));
+  fun(Args(this), Rets(this));
+  unfreeze();
+  return;
 }
 
 

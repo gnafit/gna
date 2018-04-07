@@ -330,7 +330,6 @@ namespace TransformationTypes {
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
     bool usable;                                        ///< Unused.
-
     //ThreadPool &tpool;
 
   private:
