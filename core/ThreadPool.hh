@@ -50,7 +50,7 @@ namespace MultiThreading {
     size_t worker_count;
 //    void set_max_thread_num(int k);
 
-  private:
+//  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;
     std::vector< std::vector<Task> > m_global_wait_list;
@@ -58,6 +58,7 @@ namespace MultiThreading {
     std::mutex tp_add_mutex;
     std::mutex tp_thr_add_mutex;
     std::mutex tp_waitlist_mutex;
+    std::mutex tp_pop_mutex;
 
   };
 

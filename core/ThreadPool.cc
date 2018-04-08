@@ -36,9 +36,12 @@ void MultiThreading::Worker::work(){ // runs task stack
 
     std::cout << "Work task size  = " << task_stack->size() << std::endl;
 // TODO: add lock task stack
+      std::unique_lock<std::mutex> lock(pool.tp_pop_mutex);
+//      lock.lock();
       Task& current_task = task_stack->top();
-//      if (!current_task.ready()) { /* make waiting for finish children */ }
+//        if (!current_task.ready()) { /* make waiting for finish children */ }
       task_stack->pop(); 
+      lock.unlock();
 //TODO: add unlock task stack
       current_task.run_task(); // TODO: make it in separate thread
     }
@@ -71,9 +74,9 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool isf
 /*      if ( in_task.m_entry->sources[0].sink->entry->tainted) {
         Task motherthread_task(in_task.m_entry->sources[0].sink->entry);
         add_task(motherthread_task, true);
-  */    //  in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
- //     }
-      for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
+      //  in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
+      }
+ */     for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
             std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;
             if ( in_task.m_entry->sources[i].sink->entry->tainted) {
                 add_task(Task(in_task.m_entry->sources[i].sink->entry), false);
@@ -94,7 +97,7 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool isf
 
     for (size_t i = 0; i < w_size; i++)  {
       std::lock_guard<std::mutex> lock(tp_add_mutex);
-      if((m_workers[i].is_free() || isfirst) && !worker_found) { 
+      if((m_workers[i].is_free()) && !worker_found) { 
 	// || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
         std::cerr << "Free worker found!" << std::endl;
 	{
@@ -141,6 +144,7 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, bool isf
   //      in_task.m_entry->sources[0].sink->entry->touch();       // first one always runs in the same thread (current main thread for exact entry)
       }
     }
+
 /*      for (size_t i = 1; i < src_size; i++) {                 // Try to make new thread                
             std::cout << "SECOND SOURCE! " << i << " size " << src_size << std::endl;
             if ( in_task.m_entry->sources[i].sink->entry->tainted) {
