@@ -14,13 +14,12 @@
 //using namespace TransformationTypes;
 
 void MultiThreading::Task::run_task() {
-    printf("runtask\n");
-    if (m_entry->tainted && !m_entry->frozen) {
+    if (m_entry->tainted){// && !m_entry->frozen) {
 	m_entry->evaluate();
-    	printf("EVA ");
-	std::cout << "evi id = " << std::this_thread::get_id() << std::endl;
+	std::cout << "EVA-id = " << std::this_thread::get_id() << std::endl;
+        m_entry->tainted = false;
     }
-    m_entry->tainted = false;
+//    m_entry->tainted = false;
 }
 
 
@@ -61,12 +60,17 @@ MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr
 
 
 void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_t index) {
-//        std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
-	m_workers.push_back(Worker(*this));
-	m_global_wait_list.push_back({});
-        std::cerr << "New worker added!" << std::endl;
-        m_workers[index].thr_head =  std::this_thread::get_id();
-	std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
+        {	
+		std::lock_guard<std::mutex> lock(tp_add_mutex);
+		m_workers.push_back(Worker(*this));
+		{
+			std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
+			m_global_wait_list.push_back({});
+		}
+        	std::cerr << "New worker added!" << std::endl;
+        	m_workers[index].thr_head =  std::this_thread::get_id();
+		std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
+	}
         if (in_task.done()) m_workers[index].work();
 }
 

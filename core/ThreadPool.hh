@@ -56,9 +56,13 @@ namespace MultiThreading {
     std::vector< std::vector<Task> > m_global_wait_list;
     size_t m_max_thread_number;
     std::mutex tp_add_mutex;
+//    std::condition_variable cv_add;
     std::mutex tp_thr_add_mutex;
+//    std::condition_variable cv_thr_add;
     std::mutex tp_waitlist_mutex;
+//    std::condition_variable cv_waitlist;
     std::mutex tp_pop_mutex;
+//    std::condition_variable cv_pop;
 
   };
 

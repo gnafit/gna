@@ -15,7 +15,8 @@
 #include "Data.hh"
 //#include "ThreadPool.hh"
 
-
+#include <condition_variable>
+#include <thread>
 // #define TRANSFORMATION_DEBUG
 
 #ifdef TRANSFORMATION_DEBUG
@@ -333,6 +334,8 @@ namespace TransformationTypes {
     //ThreadPool &tpool;
 
   private:
+    std::condition_variable cv_mut;
+    std::mutex mut;
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
   };

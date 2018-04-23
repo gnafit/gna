@@ -171,10 +171,17 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
+  std::unique_lock<std::mutex> lk(mut);
+  if (frozen) cv_mut.wait(lk);
+  if (!tainted) {
+    cv_mut.notify_all();
+    return;
+  }
   freeze();
   printf( "evaluation \n");
   fun(Args(this), Rets(this));
   unfreeze();
+  cv_mut.notify_all();
   return;
 }
 
@@ -191,6 +198,7 @@ void Entry::evaluate() {
  * Handles exception and resets the taintflag.
  */
 void Entry::update() {
+  //if (frozen) return;
   Status status = Status::Success;
   try {
     tpool.add_task(this);
@@ -479,9 +487,12 @@ void Entry::updateTypes() {
 
 /** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
-  if (tainted && !frozen) {
+  //std::unique_lock<std::mutex> lk(mut);
+  //if (frozen) cv_mut.wait(lk);
+  if (tainted) { // && !frozen) {
     update();
   } 
+//  cv_mut.notify_all();
 }
 
 /**
