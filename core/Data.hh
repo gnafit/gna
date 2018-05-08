@@ -144,6 +144,7 @@ public:
   Points(T &type): m_type(type) { }
 
   operator T() const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
+  T cast()     const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
 
   /**
    * @brief Compare the dimensions with the dimensions of another instance of DataType::Points.
@@ -319,6 +320,7 @@ public:
   Hist(T &type): m_type(type) { }
 
   operator T() const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
+  T cast()     const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
 
   /**
    * @brief Compare the dimensions and bin edges with data of another instance of DataType::Hist.

@@ -25,7 +25,6 @@ def __override_relative(**kwargs):
     cov_mat = kwargs.pop('cov_mat')
     pars = kwargs.pop('pars')
     _uncorr_uncs = kwargs.pop('uncorr_from_file')
-    print(_uncorr_uncs)
     tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
     return cov_mat * tmp
 
@@ -89,19 +88,7 @@ def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=No
     is_covmat(pars, cov_matrix)
 
     for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-        #  sigma_1, sigma_2 = uncorr_uncs[first], uncorr_uncs[second]
         covariance = cov_matrix[first, second]
-        #  if first == second:
-            #  print('In mode = {mode} and with policy = {policy}\n'
-                  #  'sigma_1 = sigma_2 = {0}, '
-                  #  'uncorrelated unc = sigma  = {1} '
-                  #  .format(sigma_1, np.sqrt(covariance),
-                          #  mode=mode, policy=policy))
-        #  else:
-            #  print('In mode = {mode} and with policy = {policy}\n'
-                  #  'sigma_1 = {0}, sigma_2 = {1}, '
-                  #  'covariance = {0} * {1} * {2} = {3}'
-                  #  .format(sigma_1, sigma_2, _cov_initial[first, second], covariance, mode=mode, policy=policy))
         pars[first].setCovariance(pars[second], covariance)
 
 
@@ -118,23 +105,3 @@ def is_covmat(pars, cov_matrix):
     assert is_positive_semidefinite(cov_matrix), (
     "The matrix is not positive-semidefinite")
     return
-
-class CovarianceStorage(object):
-    """Simple class to store the order of parameters and corresponding
-    covariance matrix. Meant to be used with covariate_ns() function."""
-    def __init__(self, name, pars, cov_matrix):
-        self.pars = pars
-        self.cov_matrix = cov_matrix
-        is_covmat(self.pars, self.cov_matrix)
-        self.name = name
-
-    def get_pars(self):
-        return self.pars
-
-    def get_cov(self, par1, par2):
-        try:
-            idx1, idx2 = self.pars.index(par1), self.pars.index(par2)
-        except ValueError:
-            raise ValueError("Some of pars {0} and {1} is not in covariance "
-                             "storage".format(par1, par2))
-        return self.cov_matrix[idx1, idx2]

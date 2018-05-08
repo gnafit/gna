@@ -32,9 +32,9 @@
 #pragma link C++ class ExpressionsProvider-;
 
 #pragma link C++ class ParameterWrapper<double>-;
-#pragma link C++ class Uncertain<double>-;
-#pragma link C++ class Uncertain<std::complex<double>>-;
-#pragma link C++ class Uncertain<std::array<double,3>>-;
+#pragma link C++ class Variable<double>-;
+#pragma link C++ class Variable<std::complex<double>>-;
+#pragma link C++ class Variable<std::array<double,3>>-;
 #pragma link C++ class Parameter<double>-;
 #pragma link C++ class GaussianParameter<double>-;
 #pragma link C++ class UniformAngleParameter<double>-;

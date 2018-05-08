@@ -24,6 +24,8 @@ set (SOURCES
   core/Covmat.cc
   core/Chi2.cc
   core/Poisson.cc
+  core/SelfPower.cc
+  core/Normalize.cc
   core/CovarianceToyMC.cc
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
@@ -31,6 +33,9 @@ set (SOURCES
   core/Jacobian.cc
   core/ParCovMatrix.cc
   core/MatrixProduct.cc
+  core/VarProduct.cc
+  core/VarSum.cc
+  core/VarDiff.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -51,6 +56,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
@@ -74,10 +80,15 @@ set (HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
+  SelfPower.hh
+  Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
   Rebin.hh
+  VarProduct.hh
+  VarSum.hh
+  VarDiff.hh
   Minimizable.hh
   Jacobian.hh
   Neutrino.hh

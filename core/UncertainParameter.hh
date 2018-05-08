@@ -34,36 +34,30 @@ protected:
 };
 
 template <typename T>
-class Uncertain: public GNASingleObject,
-                 public Transformation<Uncertain<T>>
+class Variable: public GNASingleObject,
+                public Transformation<Variable<T>>
 {
 public:
-  Uncertain(const std::string &name)
+  Variable(const std::string &name)
     : m_varhandle(variable_(&m_var, name)), m_name(name)
   { }
-  Uncertain(const std::string &name, variable<void> var)
-    : Uncertain(name)
+  Variable(const std::string &name, variable<void> var)
+    : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
 
-  virtual ~Uncertain() { }
+  virtual ~Variable() { }
 
   const std::string &name() const { return m_name; }
-  virtual T value() const noexcept { return m_var.value(); }
-  virtual T central() const noexcept { return m_central; }
-  virtual void setCentral(T value) noexcept { m_central = value; }
-  virtual T sigma() const noexcept { return m_sigma; }
-  virtual void setSigma(T sigma) noexcept { m_sigma = sigma; }
-  virtual const variable<T>& getVariable() const noexcept { return m_var; }
+  virtual T value() { return m_var.value(); }
+  virtual const variable<T> &getVariable() const noexcept { return m_var; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
-  T m_central;
-  T m_sigma;
 };
 
 template <>
-inline Uncertain<double>::Uncertain(const std::string &name)
+inline Variable<double>::Variable(const std::string &name)
   : m_varhandle(variable_(&m_var, name)), m_name(name)
 {
   transformation_(this, "value")
@@ -71,7 +65,7 @@ inline Uncertain<double>::Uncertain(const std::string &name)
     .types([](Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(1);
       })
-    .func([](Uncertain<double> *obj, Args, Rets rets) {
+    .func([](Variable<double> *obj, Args, Rets rets) {
         rets[0].arr(0) = obj->m_var.value();
       })
     .finalize();
@@ -86,10 +80,10 @@ inline Uncertain<double>::Uncertain(const std::string &name)
  * }; */
 
 template <typename T>
-class Parameter: public Uncertain<T> {
+class Parameter: public Variable<T> {
 public:
   Parameter(const std::string &name)
-    : Uncertain<T>(name)
+    : Variable<T>(name)
     { m_par = this->m_varhandle.claim(); }
 
   static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values in Parameter template");
@@ -100,17 +94,23 @@ public:
   virtual void set(T value)
     { m_par = value; }
 
-  virtual T relativeValue(T diff)
-    { return this->value() + diff*this->m_sigma; }
-
-  virtual void relativeShift(T diff)
-    { set(relativeValue(diff)); }
-
   virtual T cast(const std::string& v) const
     { return boost::lexical_cast<T>(v); }
 
   virtual T cast(const T& v) const
     { return v; }
+
+  virtual T central() { return m_central; }
+  virtual void setCentral(T value) { m_central = value; }
+  virtual void reset() { set(this->central()); }
+
+  virtual T step() { return m_step; }
+  virtual void setStep(T step) { m_step = step; }
+
+  virtual T relativeValue(T diff)
+    { return this->value() + diff*this->m_step; }
+  virtual void setRelativeValue(T diff)
+    { set(relativeValue(diff)); }
 
   virtual void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
@@ -118,16 +118,39 @@ public:
   virtual const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
-  virtual void reset() { set(this->central()); }
 
-  bool influences(SingleOutput &out) const noexcept {
+  virtual bool influences(SingleOutput &out) const noexcept {
     return out.single().depends(this->getVariable());
   }
 
   virtual bool isFixed() const noexcept { return this->m_fixed; }
   virtual void setFixed() noexcept { this->m_fixed = true; }
 
-  virtual bool isCovariated(const Parameter<T>& other) const noexcept {
+
+  virtual const parameter<T>& getParameter() const noexcept { return m_par; }
+
+protected:
+  T m_central;
+  T m_step;
+  std::vector<std::pair<T, T>> m_limits;
+  /* using CovStorage = std::map<const Parameter<T>*, T>;
+   * CovStorage m_covariances; */
+  parameter<T> m_par;
+  bool m_fixed = false;
+
+};
+
+
+template <typename T>
+class GaussianParameter: public Parameter<T> {
+public:
+  GaussianParameter(const std::string &name)
+    : Parameter<T>(name) { }
+
+  virtual T sigma() const noexcept { return m_sigma; }
+  virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+
+  virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
       if (it == this->m_covariances.end() and (&other != this)) { 
           return false;
@@ -137,7 +160,7 @@ public:
   }
 
 
-  virtual void setCovariance(Parameter<T>& other, T cov) {
+  virtual void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
         auto msg = boost::format("Covariance of parameters %1% and %2% is set to %3%");
         std::cout << msg % this->name() % other.name() % cov << std::endl;
@@ -150,7 +173,7 @@ public:
     }
   }
 
-  virtual void updateCovariance(Parameter<T>& other, T cov) {
+  virtual void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
     auto msg = boost::format("Covariance of parameters %1% and %2% is updated "
                              "to %3% after setting in %1%");
@@ -159,7 +182,7 @@ public:
     this->m_covariances[&other] = cov;
   }
 
-  virtual T getCovariance(const Parameter<T>& other) const noexcept {
+  virtual T getCovariance(const GaussianParameter<T>& other) const noexcept {
       if (this == &other) {return this->sigma()*this->sigma();}
       auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
@@ -173,23 +196,10 @@ public:
       }
   }
 
-  virtual const parameter<T>& getParameter() const noexcept { return m_par; }
-
 protected:
-  std::vector<std::pair<T, T>> m_limits;
-  using CovStorage = std::map<const Parameter<T>*, T>;
+  T m_sigma;
+  using CovStorage = std::map<const GaussianParameter<T>*, T>;
   CovStorage m_covariances;
-  parameter<T> m_par;
-  bool m_fixed = false;
-
-};
-
-
-template <typename T>
-class GaussianParameter: public Parameter<T> {
-public:
-  GaussianParameter(const std::string &name)
-    : Parameter<T>(name) { }
 };
 
 template <typename T>
@@ -197,8 +207,10 @@ class UniformAngleParameter: public Parameter<T> {
 public:
   UniformAngleParameter(const std::string &name)
     : Parameter<T>(name)
-    { this->m_sigma = std::numeric_limits<T>::infinity(); }
+    { this->setStep(0.017453292519943295); /*1 degree*/ }
+
   void set(T value) override;
+
   T cast(const std::string &v) const override;
   T cast(const T &v) const override { return Parameter<T>::cast(v); }
 };

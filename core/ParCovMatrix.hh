@@ -15,13 +15,13 @@ class ParCovMatrix: public GNAObject,
                 .func(&ParCovMatrix::FillMatrix);
         };
 
-        ParCovMatrix(std::vector<Parameter<double>*> pars): ParCovMatrix() {m_pars = pars;};
+        ParCovMatrix(std::vector<GaussianParameter<double>*> pars): ParCovMatrix() {m_pars = pars;};
 
-        void append(Parameter<double>* par) {m_pars.push_back(par);};
+        void append(GaussianParameter<double>* par) {m_pars.push_back(par);};
         void materialize();
 
     private:
-        std::vector<Parameter<double>*> m_pars;
+        std::vector<GaussianParameter<double>*> m_pars;
         void FillMatrix(Args args, Rets rets);
 
 };

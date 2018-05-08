@@ -36,8 +36,8 @@ There are two ways to initialize a bundle:
    .. code-block:: python
 
        from gna.bundle import execute_bundle
-       bundle = execute_bundle( name='detector_iav_db_root_v01', cfg=cfg, namespaces=namespaces, common_namespace=common_namespace, storage=storage )
-       bundle = execute_bundle( cfg=cfg, namespaces=namespaces, common_namespace=common_namespace, storage=storage )
+       bundle = execute_bundle( name='detector_iav_db_root_v01', cfg=cfg, namespaces=namespaces, common_namespace=common_namespace )
+       bundle = execute_bundle( cfg=cfg, namespaces=namespaces, common_namespace=common_namespace )
 
    if name is not passed, it's read from ``cfg.bundle``. The specified class ``<name>`` is searched in the module
    ``gna.bundles.<name>``.
@@ -47,7 +47,7 @@ There are two ways to initialize a bundle:
    .. code-block:: python
 
        from gna.bundles.detector_iav_db_root_v01 import detector_iav_db_root_v01
-       bundle = detector_iav_db_root_v01( cfg=cfg, namespaces=namespaces, common_namespace=common_namespace, storage=storage )
+       bundle = detector_iav_db_root_v01( cfg=cfg, namespaces=namespaces, common_namespace=common_namespace )
 
 Arguments
 """""""""
@@ -62,10 +62,7 @@ The arguments to the bundle initialization are the following:
 
 3. ``namespaces`` — a list of namespaces or namespace names (from ``common_namespace``), where uncorrelated variables
    will be stored. The bundle is expected to create an output transformation for each namespace. By default set to
-   ``[common_namespace]``.
-
-4. ``storage`` — namespace :ref:`namespace <environment_ns>`, where bundle will store created transformations and stuff.
-   The bundle will create ``storage[self.name]`` sub namespace to keep its stuff.
+   ``[common_namespace]``. In principle, the bundle may decide to create namespaces on it's own.
 
 Execution and output
 """"""""""""""""""""
@@ -75,7 +72,10 @@ method reads the configuration and uncertain parameters within ``common_namespac
 creates a single transformation or a graph of the transformations. The graph has an output transformation for each
 namespace in ``namespaces``. After the execution the following tuples are populated:
 
-1. ``self.output_transformations`` — computation graph output transformations (for each ``namespace``).
-2. ``self.outputs`` — transformations outputs (for each ``namespace``).
-3. ``self.inputs`` — inputs, that should be connected in order graph was completely initialized.
+
+1. ``self.objects``             - NestedDict with all the GNAObjects created within bundle.
+2. ``self.transformations_in``  - NestedDict with individual transformations, that require inputs to be connected.
+3. ``self.transformations_out`` - NestedDict with individual transformations, with open outputs to passed further.
+4. ``self.outputs``             - NestedDict with inputs to be connected (should be consistent with transformations_out).
+5. ``self.inputs``              - NestedDict with open outputs (should be consistent with transformations_in).
 

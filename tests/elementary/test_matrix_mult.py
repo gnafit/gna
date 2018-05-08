@@ -34,5 +34,5 @@ prod2.multiply(points3)
 prod_of_three = np.dot(prod_of_two, mat3)
 print("Third matrix\n", points3.points.data())
 print("Product of three from python\n", prod_of_three)
-print("Product of three from C++\n", prod.product.data())
+print("Product of three from C++\n", prod2.product.data())
 assert np.allclose(prod_of_three, prod2.product.data()), "The products of three matrices don't coincide"

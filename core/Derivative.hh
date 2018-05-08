@@ -7,7 +7,7 @@
 class Derivative: public GNASingleObject,
                   public Transformation<Derivative> {
 public:
-  Derivative(Parameter<double> *x, double reldelta = 1e-1)// 1.0/(65536*16))
+  Derivative(Parameter<double> *x, double reldelta=1.0)
     : m_x(x), m_reldelta(reldelta)
   {
     transformation_(this, "derivative")

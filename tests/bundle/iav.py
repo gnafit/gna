@@ -11,23 +11,28 @@ from mpl_tools.helpers import add_colorbar, plot_hist
 from gna.env import env
 import constructors as C
 import numpy as N
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain
 from physlib import percent
 
 #
 # Initialize bundle
 #
 cfg = NestedDict(
-        bundle = 'detector_iav_db_root_v01',
-        parname = 'OffdiagScale',
-        uncertainty = 4*percent,
-        uncertainty_type = 'relative',
-        ndiag = 1,
-        filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-        matrixname = 'iav_matrix'
-        )
-b = execute_bundle( cfg=cfg )
-(esmear,) = b.output_transformations
+    # Bundle name
+    bundle = 'detector_iav_db_root_v01',
+    # Parameter name
+    parname = 'OffdiagScale',
+    # Parameter uncertainty and its type (absolute or relative)
+    scale   = uncertain(1.0, 4, 'percent'),
+    # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
+    ndiag = 1,
+    # File name to read
+    filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+    # Matrix name
+    matrixname = 'iav_matrix'
+    )
+b, = execute_bundle( cfg=cfg )
+smear, = b.transformations_out.values()
 par = b.common_namespace['OffdiagScale']
 
 #
@@ -44,7 +49,7 @@ edges = N.arange( 0.0, 12.0001, binwidth )
 
 phist = singularities( [ 1.225, 4.025, 7.025 ], edges )
 hist = C.Histogram( edges, phist )
-esmear.smear.inputs.Ntrue( hist.hist )
+smear.inputs.Ntrue( hist.hist )
 
 #
 # Plot
@@ -57,9 +62,9 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'IAV effect' )
 
-smeared = esmear.smear.Nvis.data().copy()
+smeared = smear.Nvis.data().copy()
 par.set( 2.0 )
-smeared2 = esmear.smear.Nvis.data().copy()
+smeared2 = smear.Nvis.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 
