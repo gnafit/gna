@@ -7,12 +7,20 @@ R.GNAObject
 from gna.bundle import execute_bundle
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
-from mpl_tools.helpers import add_colorbar, plot_hist
+from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
 import constructors as C
 import numpy as N
 from gna.configurator import NestedDict, uncertain
 from physlib import percent
+
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '--dot', help='write graphviz output' )
+parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument( '-o', '--output', help='output file' )
+parser.add_argument( '-x', '--xlim', nargs=2, type=float, help='xlim' )
+args = parser.parse_args()
 
 #
 # Initialize bundle
@@ -58,8 +66,8 @@ fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
-ax.set_xlabel( '' )
-ax.set_ylabel( '' )
+ax.set_xlabel( r'$E_\nu$, MeV' )
+ax.set_ylabel( 'entries' )
 ax.set_title( 'IAV effect' )
 
 smeared = smear.Nvis.data().copy()
@@ -73,4 +81,23 @@ lines = plot_hist( edges, smeared2, linewidth=1.0, label='diag scale $s=2$' )
 
 ax.legend( loc='upper right' )
 
-P.show()
+if args.xlim:
+    ax.set_xlim( *args.xlim )
+
+savefig( args.output )
+
+#
+# Dump graph
+#
+if args.dot:
+    try:
+        from gna.graphviz import GNADot
+
+        graph = GNADot( b.transformations_out.values()[0] )
+        graph.write(args.dot)
+        print( 'Write output to:', args.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )
+
+if args.show:
+    P.show()
