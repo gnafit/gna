@@ -1150,6 +1150,11 @@ namespace TransformationTypes {
 
     bool m_nosubscribe;         ///< Flag forbidding automatic subscription to Base taintflag emissions.
   };
+
+  /*
+   * @brief Empty Function instance.
+   */
+  //void FunctionDummy(Args, Rets){}
 }
 
 /**

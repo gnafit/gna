@@ -40,7 +40,7 @@ cfg.detector = NestedDict(
         # the bundle name
         bundle = 'bundlechain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
+        bundlechain_list = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
         )
 cfg.detector.nonlinearity = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
@@ -96,7 +96,8 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 # Define the chain
 #
-b, = execute_bundle(edges=points.single(), cfg=cfg.detector, namespaces=namespaces)
+shared = NestedDict( edges=points.single() )
+b, = execute_bundle(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
 print('Parameters:')
 env.globalns.printparameters()

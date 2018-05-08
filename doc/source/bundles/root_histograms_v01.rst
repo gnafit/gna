@@ -45,17 +45,20 @@ The names are resolved by the following scheme:
 
     * if ``variants`` is a list of strings for each variant from ``variants`` a namespace is created with
       ``name=variant``, a histogram is read from a file with name formatted from ``format`` in which first occurrence of
-      ``{}`` is replaced by variant.
+      ``{self}`` is replaced by variant.
     * if ``variants`` is a dictionary the procedure is the same with the only difference: dictionary key is used as
-      namespace names and dictionary values are used to substitute ``{}`` in the format string.
+      namespace names and dictionary values are used to substitute ``{self}`` in the format string.
 
     See https://pyformat.info for more information on formatting.
 
 The following keys are recognized:
-  - filename -- the filename to read.
-  - format -- the histogram name format.
-  - variants (optional) -- list of values or dictionary wit key-value pairs. Each value is applied to the format field.
-  - normalize (optional) -- if True the histogram will be normalized so the integral=1.
+  - ``filename`` -- the filename to read.
+  - ``format`` -- the histogram name format.
+
+Optional options:
+  - ``variants`` (list or dict) -- list of values or dictionary wit key-value pairs. Each value is applied to the format field.
+  - ``normalize`` (bool) -- if True the histogram will be normalized so the integral=1.
+  - ``observable`` (string). If provided, the observable is added for each output to th relevant namespace.
 
 .. code-block:: python
 
@@ -80,7 +83,7 @@ The following keys are recognized:
             # filename to read
             filename =  'output/sample_hists.root',
             # formattable histogram name to read
-            format = 'hist_{}',
+            format = 'hist_{self}',
             # variants to pass to the format
             variants = groups.keys()
             )
@@ -90,7 +93,7 @@ The following keys are recognized:
             # filename to read
             filename =  'output/sample_hists.root',
             # formattable histogram name to read
-            format = 'hist_{}',
+            format = 'hist_{self}',
             # variants to pass to the format (dictionary)
             variants = OrderedDict([
                 ( 'D1', 'G1_D1' ),

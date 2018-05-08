@@ -6,21 +6,20 @@ import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
-from constructors import Histogram
+from constructors import Histogram, stdvector
 from gna.configurator import NestedDict, uncertain
-from converters import convert
 from gna.grouping import Categories, CatDict
 
 from gna.bundle import *
 
 class bkg_weighted_hist_v01(TransformationBundle):
-    name = 'bkg_weighted_hist'
-
     def __init__(self, **kwargs):
+        variants  = kwargs['cfg'].get('variants', None)
+        if variants is not None:
+            kwargs['namespaces'] = list(variants)
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.spectra, = execute_bundle( cfg=self.cfg.spectra, common_namespace=self.common_namespace)
-        self.namespaces = [self.common_namespace(var) for var in self.cfg.variants]
+        self.bundles, = execute_bundle(cfg=self.cfg.spectra, shared=self.shared)
 
         try:
             self.cfg.setdefault( 'name', self.cfg.parent_key() )
@@ -31,14 +30,14 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
     def build(self):
-        spectra = CatDict(self.groups, self.spectra.transformations_out)
+        spectra = CatDict(self.groups, self.bundles.outputs)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
             target = self.groups.format_splitjoin(ns.name, targetfmt, prepend=self.common_namespace.path)
 
-            labels  = convert([self.cfg.name], 'stdvector')
-            weights = convert([target], 'stdvector')
+            labels  = stdvector([self.cfg.name])
+            weights = stdvector([target])
             ws = R.WeightedSum(labels, weights, ns=ns)
 
             inp = spectra[ns.name]
@@ -51,7 +50,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             self.outputs[ns.name]             = ws.sum.sum
 
             """Add observables"""
-            ns.addobservable(self.cfg.name, ws.sum.sum)
+            self.addcfgobservable(ns, ws.sum.sum, 'bkg/{name}', fmtdict=dict(name=self.cfg.name))
 
     def define_variables(self):
         #
@@ -69,8 +68,8 @@ class bkg_weighted_hist_v01(TransformationBundle):
         # Link the other variables
         #
         targetfmt, formulafmt = self.get_target_formula()
-        for variant in self.cfg.variants:
-            ns = self.common_namespace(variant)
+        for ns in self.namespaces:
+            variant = ns.name
             formula = []
             for fullitem in formulafmt:
                 item = self.groups.format_splitjoin(variant, fullitem, prepend=self.common_namespace.path)
@@ -80,7 +79,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
             tpath, thead = target.rsplit('.', 1)
             tns = self.common_namespace(tpath)
             if len(formula)>1:
-                vp = R.VarProduct(convert(formula, 'stdvector'), thead, ns=tns)
+                vp = R.VarProduct(stdvector(formula), thead, ns=tns)
 
                 tns[thead].get()
                 self.objects[('prod', variant)]=vp

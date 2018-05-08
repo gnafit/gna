@@ -26,7 +26,11 @@ class detector_iav_db_root_v01(TransformationBundle):
 
         with self.common_namespace:
             for ns in self.namespaces:
-                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
+                try:
+                    renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
+                except:
+                    import IPython
+                    IPython.embed()
                 renormdiag.renorm.inmat( points.points )
 
                 esmear = R.HistSmear(True)
@@ -41,7 +45,7 @@ class detector_iav_db_root_v01(TransformationBundle):
                 self.objects[('esmear',ns.name)]     = esmear
 
                 """Define observables"""
-                ns.addobservable('iav', esmear.smear.Nvis, ignorecheck=True)
+                self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
 
     def build(self):
         from file_reader import read_object_auto

@@ -11,24 +11,26 @@ from gna.bundle import *
 from gna.bundle.connections import pairwise
 
 class bundlechain_v01(TransformationBundle):
-    def __init__(self, edges, **kwargs):
+    def __init__(self, listkey='bundlechain_list', **kwargs):
+        self.listkey = listkey
         super(bundlechain_v01, self).__init__( **kwargs )
 
-        self.edges=edges
         self.bundles = NestedDict()
 
     def build(self):
-        args = dict( namespaces=self.namespaces,
-                     common_namespace=self.common_namespace,
-                     edges=self.edges )
+        bundlelist = self.cfg.get(self.listkey)
+        if not bundlelist:
+            raise Exception('Bundle list is not provided (key: {})'.format(self.listkey))
+        for bundlename in bundlelist:
+            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], shared=self.shared)
 
-        for bundlename in self.cfg.chain:
-            self.bundles[bundlename], = execute_bundle( cfg=self.cfg[bundlename], **args )
-
+        debug = self.cfg.get('debug', False)
         for b1, b2 in pairwise( self.bundles.values() ):
-            # print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format( b1=type(b1).__name__, output=b1.outputs[0].name(),
-                                                                           # b2=type(b2).__name__, input=b2.inputs[0].name(),
-                                                                           # count=len(b1.inputs) ) )
+            if debug:
+                print( 'Connect {b1}.{output}->{b2}.{input} ({count})'.format(
+                    b1=type(b1).__name__, output=b1.outputs.values()[0].name(),
+                    b2=type(b2).__name__, input=b2.inputs.values()[0].name(),
+                    count=len(b1.inputs) ) )
             for (oname, output), (iname, input) in zip( b1.outputs.items(), b2.inputs.items() ):
                 if oname!=iname:
                     raise Exception('Trying to connect inconsistent ouput-input pair')

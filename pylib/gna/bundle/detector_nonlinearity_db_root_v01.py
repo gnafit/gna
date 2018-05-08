@@ -13,10 +13,12 @@ from gna.bundle import *
 
 class detector_nonlinearity_db_root_v01(TransformationBundle):
     debug = False
-    def __init__(self, edges, **kwargs):
+    def __init__(self, **kwargs):
         super(detector_nonlinearity_db_root_v01, self).__init__( **kwargs )
 
-        self.edges = edges
+        self.edges = kwargs.pop('edges', self.shared.get('edges', None))
+        if not self.edges:
+            raise Exception('detector_nonlinearity_db_root_v01 expects bin edges to be passed as argument or shared')
         self.storage=NestedDict()
         self.pars=NestedDict()
 
@@ -45,8 +47,10 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # Correlated part of the energy nonlinearity factor
         # a weighted sum of input curves
         #
-        corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
+        with self.common_namespace:
+            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
         self.objects['lsnl_factor']=corr_lsnl
+
         for y, name in zip( newy, self.cfg.names ):
             pts = C.Points( y, ns=self.common_namespace )
             corr_lsnl.sum[name]( pts )
@@ -82,7 +86,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     self.objects[('nonlinearity', ns.name)] = nonlin
 
                     """Define observables"""
-                    ns.addobservable('nonlinearity', nonlin.smear.Nvis, ignorecheck=True)
+                    self.addcfgobservable(ns, nonlin.smear.Nvis, 'nonlinearity', ignorecheck=True)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

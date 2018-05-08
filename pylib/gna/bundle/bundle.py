@@ -40,11 +40,21 @@ def init_bundle(**kwargs):
     if not isinstance( names, (list, tuple) ):
         names = names,
 
-    bundles = tuple(get_bundle(name) for name in names)
+    bundles = ()
+    for name in names:
+        if ':' in name:
+            name, args = name.split(':', 1)
+            args = args.split(':')
+        else:
+            args=[]
+        bundleclass = get_bundle(name)
+        bundle = bundleclass(*args, **kwargs)
+        bundles+=bundle,
+
     if not bundles:
         raise Exception( "Bundle '%s' is not defined"%str(name) )
 
-    return tuple(bundle(**kwargs) for bundle in bundles)
+    return bundles
 
 def execute_bundle(**kwargs):
     bundles = init_bundle(**kwargs )
@@ -84,11 +94,15 @@ class TransformationBundle(object):
             - namespaces — list of namespaces to create replica of a chain. If a list of strings is passed
               it is replaces by a list of namespaces with corresponding names with parent=common_namespace.
         """
+        self.shared=kwargs.pop('shared', NestedDict())
         self.cfg = cfg
 
-        self.common_namespace = kwargs.pop( 'common_namespace', env.globalns )
-        namespaces=kwargs.pop('namespaces', None) or [self.common_namespace]
+        self.common_namespace = kwargs.pop( 'common_namespace', self.shared.get('common_namespace', env.globalns) )
+        namespaces=kwargs.pop('namespaces', self.shared.get('namespaces', None)) or [self.common_namespace]
         self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
+
+        self.shared.setdefault('namespaces', self.namespaces)
+        self.shared.setdefault('common_namespace', self.common_namespace)
 
         self.objects             = NestedDict() # {'group': {key: object}} - objects with transformations
         self.transformations_in  = NestedDict() # {key: transformation}    - transformations, that require inputs to be connected
@@ -119,4 +133,22 @@ class TransformationBundle(object):
     def define_variables(self):
         """Defines the variables necessary for the computational chain. Should handle each namespace."""
         pass
+
+    def addcfgobservable(self, ns, obj, defname=None, key='observable', fmtdict={}, **kwargs):
+        obsname = None
+
+        if key:
+            obsname = self.cfg.get(key, None)
+
+        if obsname and isinstance(obsname, bool):
+            obsname=defname
+
+        if not obsname:
+            return
+
+        if fmtdict:
+            obsname=obsname.format(**fmtdict)
+
+        ns.addobservable(obsname, obj, **kwargs)
+
 

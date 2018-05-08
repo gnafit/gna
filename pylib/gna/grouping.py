@@ -129,14 +129,15 @@ class Categories(object):
                     res[newcat]=newgroup[groupitems[0]]
         return res
 
-    def format(self, item, fmt):
+    def format(self, item, fmt, **kwargs):
         if isinstance(fmt, basestring):
-            return fmt.format(**self.itemdict( item ))
+            kwargs = OrderedDict([('self', item)]+list(self.itemdict(item).items())+list(kwargs.items()))
+            return fmt.format(**kwargs)
 
-        return type(fmt)(self.format(item, s) for s in fmt)
+        return type(fmt)(self.format(item, s, **kwargs) for s in fmt)
 
-    def format_splitjoin(self, item, fmt, sep='.', filter=(''), prepend=''):
-        return sep.join(s for s in self.format(item, prepend.split(sep)+fmt.split(sep)) if not s in filter)
+    def format_splitjoin(self, item, fmt, sep='.', filter=(''), prepend='', **kwargs):
+        return sep.join(s for s in self.format(item, prepend.split(sep)+fmt.split(sep), **kwargs) if not s in filter)
 
 class GroupedDict(OrderedDict):
     """OrderedDict implementation with:

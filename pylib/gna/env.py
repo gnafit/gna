@@ -18,12 +18,13 @@ class namespacedict(OrderedDict):
         return value
 
 def findname(name, curns):
-    if '.' in name:
-        nsname, name = name.rsplit('.', 1)
-        ns = env.ns(nsname)
-    else:
-        ns = curns
-    return ns[name]
+    """@todo remove findname usage"""
+    # if '.' in name:
+        # nsname, name = name.rsplit('.', 1)
+        # ns = env.globalns(nsname)
+    # else:
+        # ns = curns
+    return curns[name]
 
 class ExpressionWithBindings(object):
     def __init__(self, ns, obj, expr, bindings):
@@ -155,12 +156,20 @@ class namespace(Mapping):
                 self.namespaces[nsname] = otherns.namespaces[nsname]
 
     def __getitem__(self, name):
+        if '.' in name:
+            path, head = name.rsplit('.', 1)
+            return self(path)[head]
+
         v = self.storage[name]
         if isinstance(v, basestring):
             return findname(v, env.nsview)
         return v
 
     def __setitem__(self, name, value):
+        if '.' in name:
+            path, head = name.rsplit('.', 1)
+            return self(path).__setitem__(head, value)
+
         self.storage[name] = value
 
     def __iter__(self):

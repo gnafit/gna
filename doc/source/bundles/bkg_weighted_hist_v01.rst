@@ -57,6 +57,9 @@ Optional parameters:
   - ``name`` -- the background name. If omitted the background name is determined as a key from the parent dictionary.
     The name is required in case there is no parent.
   - Predefined input parameters, see explanation for the ``formula``.
+  - ``observable`` (string or bool). If provided, the observable is added for each output to th relevant namespace. The
+    string may contain ``{name}`` which will be substituted by the background name. If True, the string ``bkg/{name}``
+    will be used.
 
 Weight formula
 """"""""""""""

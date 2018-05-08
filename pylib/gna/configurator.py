@@ -86,19 +86,27 @@ class NestedDict(object):
 
         raise KeyError( "Failed to determine own key in the parent dictionary" )
 
-    def get(self, key, default=None):
+    def get(self, key, *args, **kwargs):
         if isinstance( key, (list, tuple) ):
             key, rest = key[0], key[1:]
             if rest:
                 sub = self.__storage__.get(key)
                 if sub is None:
                     raise KeyError( "No nested key '%s'"%key )
-                return sub.get( rest, default )
+                return sub.get( rest, *args, **kwargs )
 
         if isinstance( key, basestring ) and '.' in key:
-            return self.getitem(key.split('.'), default)
+            return self.get(key.split('.'), *args, **kwargs)
 
-        return self.__storage__.get(key, default)
+        types=kwargs.pop('types', None)
+        obj=self.__storage__.get(key, *args, **kwargs)
+        if types:
+            if not isinstance(obj, types):
+                if isinstance(types, tuple):
+                    raise Exception('The field "{}" is expected to be of one of types {}, not {}'.format(key, str([t.__name__ for t in types]), type(obj).__name__))
+                else:
+                    raise Exception('The field "{}" is expected to be of type {}, not {}'.format(key, types.__name__, type(obj).__name__))
+        return obj
 
     def __getitem__(self, key):
         if isinstance( key, (list, tuple) ):

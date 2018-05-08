@@ -1,4 +1,4 @@
-j -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
@@ -25,7 +25,7 @@ class detector_eres_common3(TransformationBundle):
                     self.outputs[ns.name]             = eres.transformations[i].Nrec
 
                     """Define observables"""
-                    ns.addobservable('eres', eres.transformations[i].Nrec, ignorecheck=True)
+                    self.addcfgobservable(ns, eres.transformations[i].Nrec, 'eres', ignorecheck=True)
 
                 self.objects['eres'] = eres
             elif self.mode=='uncorrelated':
@@ -39,7 +39,7 @@ class detector_eres_common3(TransformationBundle):
                     self.outputs[ns.name]             = eres.smear.Nrec
 
                     """Define observables"""
-                    ns.addobservable('eres', eres.smear.Nrec, ignorecheck=True)
+                    self.addcfgobservable(ns, eres.smear.Nrec, 'eres', ignorecheck=True)
             else:
                 raise Exception( 'Invalid mode '+self.mode )
 
