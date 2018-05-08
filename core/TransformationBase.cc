@@ -174,14 +174,16 @@ void Entry::evaluate() {
   std::unique_lock<std::mutex> lk(mut);
   if (frozen) cv_mut.wait(lk);
   if (!tainted) {
-    cv_mut.notify_all();
+    lk.unlock();
+    cv_mut.notify_one();
     return;
   }
   freeze();
   printf( "evaluation \n");
   fun(Args(this), Rets(this));
   unfreeze();
-  cv_mut.notify_all();
+  lk.unlock();
+  cv_mut.notify_one();
   return;
 }
 
@@ -290,6 +292,7 @@ InputHandle Handle::input(SingleOutput &output) {
  * @return OutputHandle for the new output.
  */
 OutputHandle Handle::output(SingleOutput &out) {
+  //std::lock_guard<std::mutex> lock(handle_mutex);
   return output(out.single().name());
 }
 
@@ -341,6 +344,7 @@ Base::Base(const Base &other)
  * @param other -- the other Base.
  */
 Base &Base::operator=(const Base &other) {
+  std::lock_guard<std::mutex> lck(base_mutex);
   t_ = Accessor(*this);
   m_entries.reserve(other.m_entries.size());
   copyEntries(other);
@@ -514,6 +518,7 @@ const Data<double> &Entry::data(int i) {
     throw CalculationError(this, (fmt % i % sink.name).str());
   }
   touch();
+  std::lock_guard<std::mutex> lock(read_mutex);
   return *sink.data;
 }
 

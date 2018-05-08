@@ -17,6 +17,7 @@
 
 #include <condition_variable>
 #include <thread>
+#include <mutex>
 // #define TRANSFORMATION_DEBUG
 
 #ifdef TRANSFORMATION_DEBUG
@@ -242,6 +243,7 @@ namespace TransformationTypes {
     bool depends(changeable x) const;  ///< Check that Sink depends on a changeable.
   private:
     TransformationTypes::Sink *m_sink; ///< Pointer to the Sink.
+  //  mutable std::mutex read_mutex_OH;
   };
 
   /**
@@ -336,6 +338,7 @@ namespace TransformationTypes {
   private:
     std::condition_variable cv_mut;
     std::mutex mut;
+    std::mutex read_mutex;
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
   };
@@ -347,6 +350,7 @@ namespace TransformationTypes {
    */
   inline const double *OutputHandle::data() const {
     m_sink->entry->touch();
+  //  std::lock_guard<std::mutex> lock(read_mutex_OH);
     return view();
   }
 
@@ -428,6 +432,7 @@ namespace TransformationTypes {
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
+    //mutable std::mutex handle_mutex;
     Entry *m_entry;                                         ///< Wrapped Entry pointer.
   };
 
@@ -800,6 +805,7 @@ namespace TransformationTypes {
      * @param maxentries -- maximal number of Entry instances the Base may keep.
      */
     Base(size_t maxentries): Base() {
+      std::lock_guard<std::mutex> lck(base_mutex);
       m_maxEntries = maxentries;
     }
 
@@ -827,6 +833,7 @@ namespace TransformationTypes {
     boost::ptr_vector<Entry> m_entries;                                  ///< Vector of Entry pointers. Calls destructors when deleted.
     boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.
     void copyEntries(const Base &other);                                 ///< Clone entries from the other Base.
+    mutable std::mutex base_mutex;
   };
 
   /**
@@ -1019,6 +1026,7 @@ private:
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
   typedef typename Initializer::MemFunction MemFunction;
   typedef typename Initializer::MemTypesFunction MemTypesFunction;
+  mutable std::mutex trans_mutex;
   Derived *obj() { return static_cast<Derived*>(this); }
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 
