@@ -28,6 +28,9 @@ set (SOURCES
   core/NormalToyMC.cc
   core/PoissonToyMC.cc
   core/Rebin.cc
+  core/Jacobian.cc
+  core/ParCovMatrix.cc
+  core/MatrixProduct.cc
   neutrino/OscProb2nu.cc
   neutrino/OscProbPMNS.cc
   neutrino/OscProbPMNSDecoh.cc
@@ -76,6 +79,7 @@ set (HEADERS
   PoissonToyMC.hh
   Rebin.hh
   Minimizable.hh
+  Jacobian.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
@@ -99,10 +103,14 @@ set (HEADERS
   GaussianPeakWithBackground.hh
   GridFilter.hh
   EigenHelpers.hh
+  ParCovMatrix.hh
+  MatrixProduct.hh
+  Transpose.hh
   )
 
+
 include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
-set(DICT    Dict.cc)
+# set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -116,31 +124,33 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wa
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
 include(dev-tools)
 
-
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 
-find_package( Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
-find_package( Boost 1.40.0 REQUIRED)
+find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
     message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
-    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+    # include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
 
-find_Package(GSL REQUIRED)
-include_directories(SYSTEM ${GSL_INCLUDE_DIR})
-
-find_package(ROOT)
-include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
+find_package(GSL REQUIRED)
+find_package(ROOT REQUIRED)
+# include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
-target_link_libraries(${LIBNAME} ${ROOT_LIBRARIES} -lPyROOT -lgsl -lgslcblas -lm)
+target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
+target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
+target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)

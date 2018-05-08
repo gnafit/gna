@@ -1,5 +1,8 @@
 from gna.ui import basecmd
 from importlib import import_module
+from gna.config import cfg
+from gna.parameters.covariance_helpers import CovarianceHandler
+
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
@@ -30,9 +33,13 @@ class cmd(basecmd):
         parser.add_argument('--fix', action='append', nargs=1,
                             metavar=('PAR'), default=[])
 
-        parser.add_argument('--correlation', action='append', nargs=3,
-                            metavar=('PAR1', 'PAR2', 'CORR'),
-                            default=[])
+        parser.add_argument('--covariance', action='append', nargs='*',
+                default=[],
+                            metavar=('COVARIANCE_SET', 'PARS'), help='First '
+                            'argument: name of covariance matrix, rest: names '
+                            'of parameters to covariate')
+        #  parser.add_argument('--correlation', action='append', nargs='*',
+                            #  metavar=('CORRELATION_SET', 'PARS'))
 
     def init(self):
         self.env.nsview.add([self.env.ns(x) for x in self.opts.push])
@@ -66,5 +73,9 @@ class cmd(basecmd):
             p = self.env.parameters[name[0]]
             p.setFixed()
 
-        for name1, name2, corr in self.opts.correlation:
-            self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
+        #  for name1, name2, corr in self.opts.correlation:
+            #  self.env.parameters[name1].setCorrelation(self.env.parameters[name2], float(corr))
+
+        for entry in self.opts.covariance:
+            cov, pars = entry[0], entry[1:]
+            CovarianceHandler(cov, pars).covariate_pars()

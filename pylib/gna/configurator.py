@@ -167,11 +167,20 @@ class NestedDict(object):
                 if meta[self].get('verbose', False):
                     print( 'Skipping nonexistent file', filename )
                 continue
-            dic = self.__load_dic__(filename, dictonly=True)
+            print(subst)
+
+            for variant in subst['values']:
+                if variant in filename.split('/'):
+                    folder = variant
+                    break
+            else:
+                folder = None
+
+            dic = self.__load_dic__(filename, dirname=folder, dictonly=True)
             self.__import__(dic)
             unimportant = True
 
-    def __load_dic__(self, filename, dictonly=False):
+    def __load_dic__(self, filename, dirname = None, dictonly=False):
         print('Loading config file:', filename)
         dic =  runpy.run_path(filename, init_globals )
         for k in init_globals:
@@ -193,17 +202,41 @@ class NestedDict(object):
                     print( 'Set', k, 'to', v.__repr__() )
             self.__setattr__(k, v)
 
+
+def __prefetch_covariances(dic, cov_pathes=[]):
+    import os
+    for cov_path in cov_pathes:
+        for cov_file in os.listdir( cov_path ):
+            print("Importing covariance from {} ".format(cov_file) )
+            module_path = path.join( cov_path, cov_file )
+            loaded = runpy.run_path( module_path )
+            if not dic.get( 'covariances', None ):
+                dic['covariances'] = NestedDict()
+            try:
+                name = loaded.pop( 'name' )
+                dic['covariances'][name] = dict( loaded )
+            except KeyError:
+                print( 'Failed to extract covariance from {}.'
+                ' Check the naming conventions'.format(path) )
+
+
+
 def configurator(filename=None, dic={}, **kwargs):
     self = NestedDict()
+
+    prefetch = kwargs.pop( 'prefetch', True )
 
     if filename:
         self['@loaded_from']=filename
 
     meta[self]['verbose']=kwargs.pop( 'debug', False )
     if filename:
-        self.__load__(filename, **kwargs)
+        self.__load__( filename, **kwargs )
     elif dic:
-        self.__import__(dic)
+        self.__import__( dic )
+
+    if prefetch:
+        __prefetch_covariances( dic=self, cov_pathes=self.get('covariance_path', []) )
 
     return self
 
