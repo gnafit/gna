@@ -8,18 +8,21 @@ import constructors as C
 from converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
+from gna.configurator import NestedDict
 from gna.bundle import *
 
 class detector_nonlinearity_db_root_v01(TransformationBundle):
-    name='nonlinearity'
     debug = False
-    parname = 'escale'
-    def __init__(self, edges, **kwargs):
-        kwargs.setdefault( 'storage_name', 'nonlinearity')
+    def __init__(self, **kwargs):
         super(detector_nonlinearity_db_root_v01, self).__init__( **kwargs )
 
-        self.edges = edges
-        self.storage['edges'] = edges
+        self.edges = kwargs.pop('edges', self.shared.get('edges', None))
+        if not self.edges:
+            raise Exception('detector_nonlinearity_db_root_v01 expects bin edges to be passed as argument or shared')
+        self.storage=NestedDict()
+        self.pars=NestedDict()
+
+        self.transformations_in = self.transformations_out
 
     def build_graphs( self, graphs ):
         #
@@ -27,12 +30,12 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # (extrapolate as well)
         #
         newx = self.edges.data()
-        self.storage('inputs')['edges'] = newx
+        self.storage['edges'] = newx
         newy = []
         for xy, name in zip(graphs, self.cfg.names):
             f = interpolate( xy, newx )
             newy.append(f)
-            self.storage('inputs')[name] = f.copy()
+            self.storage[name] = f.copy()
 
         #
         # All curves but first are the corrections to the nominal
@@ -44,39 +47,46 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # Correlated part of the energy nonlinearity factor
         # a weighted sum of input curves
         #
-        corr_lsnl = self.storage['lsnl_factor'] = R.WeightedSum( convert(self.cfg.names, 'stdvector') )
+        with self.common_namespace:
+            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
+        self.objects['lsnl_factor']=corr_lsnl
+
         for y, name in zip( newy, self.cfg.names ):
-            pts = C.Points( y )
-            self.storage('curves')[name] = pts
+            pts = C.Points( y, ns=self.common_namespace )
             corr_lsnl.sum[name]( pts )
 
-        labels = convert([self.parname], 'stdvector')
-        for i, ns in enumerate(self.namespaces):
-            with ns:
-                #
-                # Uncorrelated between detectors part of the energy nonlinearity factor
-                # correlated part multiplicated by the scale factor
-                #
-                lstorage = self.storage('escale_%s'%ns.name if ns.name else 'escale')
-                corr = lstorage['factor'] = R.WeightedSum( labels, labels )
-                corr.sum['escale']( corr_lsnl.sum )
+            self.objects[('curves', name)] = pts
 
-                #
-                # Finally, original bin edges multiplied by the correction factor
-                #
-                newe = lstorage['edges_mod'] = R.Product()
-                newe.multiply( self.edges )
-                newe.multiply( corr.sum )
+        with self.common_namespace:
+            for i, ns in enumerate(self.namespaces):
+                with ns:
+                    """Uncorrelated between detectors part of the energy nonlinearity factor
+                    correlated part multiplicated by the scale factor"""
+                    labels = C.stdvector([self.pars[ns.name]])
+                    corr = R.WeightedSum(labels, labels, ns=ns)
+                    corr.sum.inputs[0]( corr_lsnl.sum )
 
-                #
-                # Construct the nonlinearity calss
-                #
-                nonlin = lstorage['nonlinearity'] = R.HistNonlinearity( self.debug )
-                nonlin.set( self.edges, newe.product )
-                self.output_transformations+=nonlin,
+                    """Finally, original bin edges multiplied by the correction factor"""
+                    newe = R.Product(ns=ns)
+                    newe.multiply( self.edges )
+                    newe.multiply( corr.sum )
 
-                self.inputs  += nonlin.smear.Ntrue,
-                self.outputs += nonlin.smear.Nvis,
+                    """Construct the nonlinearity calss"""
+                    nonlin = R.HistNonlinearity(self.debug, ns=ns)
+                    nonlin.set(self.edges, newe.product)
+
+                    """Provide output transformations"""
+                    self.transformations_out[ns.name] = nonlin.smear
+                    self.inputs[ns.name]              = nonlin.smear.Ntrue
+                    self.outputs[ns.name]             = nonlin.smear.Nvis
+
+                    """Save intermediate transformations"""
+                    self.objects[('factor', ns.name)]       = corr
+                    self.objects[('edges_mod', ns.name)]    = newe
+                    self.objects[('nonlinearity', ns.name)] = nonlin
+
+                    """Define observables"""
+                    self.addcfgobservable(ns, nonlin.smear.Nvis, 'nonlinearity', ignorecheck=True)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )
@@ -96,8 +106,12 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         for name in self.cfg.names[1:]:
             self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
 
+        if self.cfg.par.central!=1:
+            raise Exception('Relative energy scale parameter should have central value of 1 by definition')
         for ns in self.namespaces:
-            ns.reqparameter( self.parname, central=1.0, uncertainty=self.cfg.uncertainty, uncertainty_type=self.cfg.uncertainty_type )
+            parname = self.cfg.parname.format(ns.name)
+            par = self.common_namespace.reqparameter( parname, cfg=self.cfg.par )
+            self.pars[ns.name]=parname
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )

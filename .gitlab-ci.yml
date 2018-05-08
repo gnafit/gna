@@ -9,14 +9,17 @@ pages:
   - pip install sphinxcontrib-plantuml
   - pip install ipython
   - apk update && apk add ca-certificates wget && update-ca-certificates
-  - apk --no-cache add openssl
-  - wget https://sourceforge.net/projects/plantuml/files/latest/download -O /plantuml.jar
+  - apk --no-cache add openssl doxygen
+  - wget https://downloads.sourceforge.net/project/plantuml/plantuml.jar -O /plantuml.jar
   - java -jar /plantuml.jar -testdot 
   - cd doc
   - make html
+  - make doxygen
   - cd ..
   - mkdir public/
+  - mkdir -p public/doxygen
   - cp -r doc/build/html/* public/
+  - cp -r doc/doxygen/html/* public/doxygen/
   artifacts:
     paths:
     - public

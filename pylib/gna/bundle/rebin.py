@@ -7,18 +7,21 @@ import constructors as C
 from gna.bundle import *
 
 class rebin(TransformationBundle):
-    name = 'rebin'
     def __init__(self, **kwargs):
         super(rebin, self).__init__( **kwargs )
+        self.transformations_in = self.transformations_out
 
     def build(self):
-        edges = N.ascontiguousarray(self.cfg.edges, dtype='d')
         for ns in self.namespaces:
-            with ns:
-                rebin = R.Rebin( edges.size, edges, int( self.cfg.rounding ) )
-                self.output_transformations+=rebin,
+            rebin = C.Rebin( self.cfg.edges, self.cfg.rounding, ns=ns )
 
-                self.inputs  += rebin.rebin.histin,
-                self.outputs += rebin.rebin.histout,
+            """Save the transformations"""
+            self.objects[('rebin', ns.name)]  = rebin
+            self.transformations_out[ns.name] = rebin.rebin
+            self.inputs[ns.name]              = rebin.rebin.histin
+            self.outputs[ns.name]             = rebin.rebin.histout
+
+            """Define observables"""
+            self.addcfgobservable(ns, rebin.rebin.histout, 'rebin', ignorecheck=True)
 
 

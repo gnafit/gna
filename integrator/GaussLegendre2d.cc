@@ -52,6 +52,7 @@ void GaussLegendre2d::init() {
         rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_xpoints[0], obj->m_xpoints.size());
         rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_ypoints[0], obj->m_ypoints.size());
         rets[2].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_xedges[0], obj->m_xedges.size());
+        rets.freeze();
       })
     .finalize()
     ;

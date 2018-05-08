@@ -5,7 +5,7 @@ RenormalizeDiag
 
 Description
 ^^^^^^^^^^^
-For a given squre matrix this transformation either:
+For a given square matrix this transformation either:
 
 1. Scales :math:`n` diagonals by a given number.
 2. Scales all the elements except :math:`n` diagonals by a given number.

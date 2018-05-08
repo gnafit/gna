@@ -466,9 +466,11 @@ void Entry::evaluateTypes() {
       if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
-      sinks[i].data.reset();
       if (rets[i].defined()) {
-        sinks[i].data.reset(new Data<double>(rets[i], rets[i].buffer));
+        sinks[i].data.reset(new Data<double>(rets[i]));
+      }
+      else{
+        sinks[i].data.reset();
       }
       TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
 #ifdef TRANSFORMATION_DEBUG

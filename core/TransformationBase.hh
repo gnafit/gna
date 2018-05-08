@@ -13,7 +13,6 @@
 
 #include "Parameters.hh"
 #include "Data.hh"
-//#include "ThreadPool.hh"
 
 #include <condition_variable>
 #include <thread>
@@ -34,6 +33,13 @@ class Transformation;
 
 class GNAObject;
 class SingleOutput;
+/**
+ * @brief A namespace for transformations.
+ * The namespace defines Entry, Sink, Source and Base classes, necessary to deal
+ * with transformations. Helper classes are also provided here.
+ * @author Dmitry Taychenachev
+ * @date 2015
+ */
 namespace TransformationTypes {
   struct Entry;
   struct Source;
@@ -88,14 +94,14 @@ namespace TransformationTypes {
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }               ///< Constructor.
+      : name(name), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.
      * @param entry -- Entry pointer Source belongs to.
      */
     Source(const Source &other, Entry *entry)
-      : name(other.name), entry(entry) { }         ///< Clone constructor.
+      : name(other.name), entry(entry) { }
 
     void connect(Sink *newsink);                   ///< Connect the Source to the Sink.
 
@@ -182,13 +188,6 @@ namespace TransformationTypes {
      */
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
 
-    // /**
-    // * @brief
-    // * @param name
-    // * @todo method is undefined.
-    // */
-    // static InputHandle invalid(const std::string name);
-
     void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
 
     const std::string &name() const { return m_source->name; } ///< Get Source's name.
@@ -221,29 +220,23 @@ namespace TransformationTypes {
      * @param other -- other OutputHandle instance to access its Sink.
      */
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
-    // /**
-    // * @brief
-    // * @param name
-    // * @todo method is undefined.
-    // */
-    //static OutputHandle invalid(const std::string name);
 
-    const std::string &name() const { return m_sink->name; } ///< Get Source's name.
+    const std::string &name() const { return m_sink->name; }                 ///< Get Source's name.
 
     bool check() const; ///< Check the Entry.
     void dump() const;  ///< Dump the Entry.
 
-    const double *data() const;                                     ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
-    const double *view() const { return m_sink->data->x.data(); }   ///< Return pointer to the Sink's data buffer without evaluation.
-    const DataType &datatype() const { return m_sink->data->type; } ///< Return Sink's DataType.
+    const double *data() const;                                              ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
+    const DataType &datatype() const { return m_sink->data->type; }          ///< Return Sink's DataType.
 
     const void *rawptr() const { return static_cast<const void*>(m_sink); }  ///< Return Source's pointer as void pointer.
     const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); } ///< Return a Source's hash value based on it's pointer address.
 
-    bool depends(changeable x) const;  ///< Check that Sink depends on a changeable.
+    bool depends(changeable x) const;                                        ///< Check that Sink depends on a changeable.
+
   private:
-    TransformationTypes::Sink *m_sink; ///< Pointer to the Sink.
-  //  mutable std::mutex read_mutex_OH;
+    const double *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
+    TransformationTypes::Sink *m_sink;                                       ///< Pointer to the Sink.
   };
 
   /**
@@ -327,13 +320,12 @@ namespace TransformationTypes {
     SourcesContainer sources;                           ///< Transformation inputs (sources).
     SinksContainer sinks;                               ///< Transformation outputs (sinks).
     Function fun;                                       ///< The function that does actual calculation.
-    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction instances.
+    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction objects.
     taintflag tainted;                                  ///< taintflag shows whether the result is up to date.
     const Base *parent;                                 ///< Base class, containing the transformation Entry.
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
     bool usable;                                        ///< Unused.
-    //ThreadPool &tpool;
 
   private:
     std::condition_variable cv_mut;
@@ -350,7 +342,6 @@ namespace TransformationTypes {
    */
   inline const double *OutputHandle::data() const {
     m_sink->entry->touch();
-  //  std::lock_guard<std::mutex> lock(read_mutex_OH);
     return view();
   }
 
@@ -432,7 +423,6 @@ namespace TransformationTypes {
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
-    //mutable std::mutex handle_mutex;
     Entry *m_entry;                                         ///< Wrapped Entry pointer.
   };
 
@@ -548,7 +538,7 @@ namespace TransformationTypes {
    *   - check the consistency of the inputs in the run time.
    *   - derive the output DataType instances.
    *
-   * Atypes instance is passed to each of the Entry's TypeFunction instances.
+   * Atypes instance is passed to each of the Entry's TypeFunction objects.
    *
    * @author Dmitry Taychenachev
    * @date 2015
@@ -598,19 +588,19 @@ namespace TransformationTypes {
      */
     size_t size() const { return m_entry->sources.size(); }
 
-    static void passAll(Atypes args, Rtypes rets); ///< Assigns shape of each input to corresponding output.
+    static void passAll(Atypes args, Rtypes rets);     ///< Assigns shape of each input to corresponding output.
 
     template <size_t Arg, size_t Ret = Arg>
-    static void pass(Atypes args, Rtypes rets);    ///< Assigns shape of Arg-th input to Ret-th output.
+    static void pass(Atypes args, Rtypes rets);        ///< Assigns shape of Arg-th input to Ret-th output.
 
-    static void ifSame(Atypes args, Rtypes rets);  ///< Checks that all inputs are of the same type (shape and content description).
+    static void ifSame(Atypes args, Rtypes rets);      ///< Checks that all inputs are of the same type (shape and content description).
     static void ifSameShape(Atypes args, Rtypes rets); ///< Checks that all inputs are of the same shape.
 
     template <size_t Arg>
-    static void ifHist(Atypes args, Rtypes rets);  ///< Checks if Arg-th input is a histogram (DataKind=Histogram).
+    static void ifHist(Atypes args, Rtypes rets);      ///< Checks if Arg-th input is a histogram (DataKind=Histogram).
 
     template <size_t Arg>
-    static void ifPoints(Atypes args, Rtypes rets); ///< Checks if Arg-th input is an array (DataKind=Points).
+    static void ifPoints(Atypes args, Rtypes rets);    ///< Checks if Arg-th input is an array (DataKind=Points).
 
     /**
      * @brief Source type exception.
@@ -640,7 +630,7 @@ namespace TransformationTypes {
    *
    * It's needed to store the derived outputs' DataType types.
    *
-   * Rtypes instance is passed to each of the Entry's TypeFunction functions.
+   * Rtypes instance is passed to each of the Entry's TypeFunction objects.
    *
    * @note Rtypes will NOT write to Entry's output DataType types by itself. The actual assignment happens in the Entry::evaluateTypes() method.
    *
@@ -775,7 +765,7 @@ namespace TransformationTypes {
   /**
    * @brief Base transformation class handling.
    *
-   * Base class does the bookkeeping for the transformations and defines the GNAObject transformation handling.
+   * Base class is derived by GNAObject does the bookkeeping for the transformations and defines the GNAObject transformation handling.
    *
    * Base class defines an object containing several transformation Entry instances.
    *
@@ -833,7 +823,6 @@ namespace TransformationTypes {
     boost::ptr_vector<Entry> m_entries;                                  ///< Vector of Entry pointers. Calls destructors when deleted.
     boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.
     void copyEntries(const Base &other);                                 ///< Clone entries from the other Base.
-    mutable std::mutex base_mutex;
   };
 
   /**
@@ -860,11 +849,31 @@ namespace TransformationTypes {
   }
 
   /**
-   * @brief Transformation initializer (CRTP).
+   * @brief Transformation Entry initializer (CRTP).
    *
    * See
    * https://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
    * for the CRTP description.
+   *
+   * Initializer is used in the transformation Base class via Base::transformation_() method
+   * to add and configure new Entry instance. Each method of the Initializer returns this
+   * thus allowing chain method call.
+   *
+   * Initializer enables user to add inputs, outputs, type functions and the trasnformation function.
+   *
+   * The typical usage is the following (from Identity transformation):
+   * ```cpp
+   * transformation_(this, "identity")
+   *   .input("source")
+   *   .output("target")
+   *   .types(Atypes::pass<0,0>)
+   *   .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
+   *   ;
+   * ```
+   * Initializer is usually used in the transformation's constructor and the scope is limited with
+   * this constructor.
+   *
+   * @tparam T -- the actual transformation class being initialized.
    *
    * @author Dmitry Taychenachev
    * @date 2015
@@ -872,19 +881,49 @@ namespace TransformationTypes {
   template <typename T>
   class Initializer {
   public:
+    /**
+     * @brief Function, that does the actual calculation (reference to a member function).
+     *
+     * First argument is the actual transformation classe's `this` allowing to use member functions.
+     *
+     * @copydoc Function
+     */
     typedef std::function<void(T*,
                                TransformationTypes::Args,
                                TransformationTypes::Rets)> MemFunction;
+    /**
+     * @brief Function, that does the input types checking and output types derivation (reference to a member function).
+     *
+     * First argument is the actual transformation classe's `this` allowing to use member functions.
+     *
+     * @copydoc TypesFunction
+     */
     typedef std::function<void(T*,
                                TransformationTypes::Atypes,
                                TransformationTypes::Rtypes)> MemTypesFunction;
 
+    /**
+     * @brief Constructor.
+     *
+     * Constructor increments Entry::initializing flag value thus indicating that Entry
+     * is currently being configured via Initializer.
+     *
+     * @param obj -- Transformation pointer to manage. Used to get Base pointer for Entry.
+     * @param name -- new Entry name.
+     */
     Initializer(Transformation<T> *obj, const std::string &name)
       : m_entry(new Entry(name, obj->baseobj())), m_obj(obj),
         m_nosubscribe(false)
     {
       m_entry->initializing++;
     }
+    /**
+     * @brief Destructor.
+     *
+     * Destructor decrements the Entry::initializing flag value.
+     * If Entry::initializing==0 then Initializer::add() method is called
+     * which adds Entry instance to the Base.
+     */
     ~Initializer() {
       if (!m_entry) {
         return;
@@ -898,6 +937,21 @@ namespace TransformationTypes {
         add();
       }
     }
+    /**
+     * @brief Add the Entry to the Base.
+     *
+     * The method:
+     *   - checks that the number of Entry instances in the Base does not
+     *     exceed the maximal number of allowed entries.
+     *   - passes Atypes::passAll() as TypeFunction if no TypeFunction objects are provided.
+     *   - subscribes the Entry to the Base's taint flag unless Initializer::m_nosubscribe is set.
+     *   - adds the Entry to the Base.
+     *   - adds MemFunction and MemTypesFunction objects to the Transformation Initializer::m_obj.
+     *
+     * @note while Function and TypeFunction objects are kept within Entry
+     * instance, MemFunction and MemTypesFunction instances are managed via
+     * Transformation instance (Initializer::m_obj).
+     */
     void add() {
       auto *baseobj = m_obj->baseobj();
       if (baseobj->m_maxEntries &&
@@ -921,22 +975,51 @@ namespace TransformationTypes {
       }
     }
 
+    /**
+     * @brief Add a named input.
+     *
+     * Adds a new Source to the Entry.
+     *
+     * @param name -- input name.
+     * @return `*this`.
+     */
     Initializer<T> input(const std::string &name) {
       m_entry->addSource(name);
       return *this;
     }
 
+    /**
+     * @brief Add a named output.
+     *
+     * Adds a new Sink to the Entry.
+     *
+     * @param name -- output name.
+     * @return `*this`.
+     */
     Initializer<T> output(const std::string &name) {
       m_entry->addSink(name);
       return *this;
     }
 
+    /**
+     * @brief Set the Entry::fun Function.
+     * @param fun -- the Function that defines the transformation.
+     * @return `*this`.
+     */
     Initializer<T> func(Function func) {
       m_mfunc = nullptr;
       m_entry->fun = func;
       return *this;
     }
 
+    /**
+     * @brief Set the Entry::fun from a MemFunction.
+     *
+     * The method sets Entry::fun to the fun with first argument binded to `this` of the transformation.
+     *
+     * @param fun -- the MemFunction that defines the transformation.
+     * @return `*this`.
+     */
     Initializer<T> func(MemFunction func) {
       using namespace std::placeholders;
       m_mfunc = func;
@@ -944,11 +1027,25 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Add new TypesFunction to the Entry.
+     * @param func -- the TypesFunction to be added.
+     * @return `*this`.
+     */
     Initializer<T> types(TypesFunction func) {
       m_entry->typefuns.push_back(func);
       return *this;
     }
 
+    /**
+     * @brief Add new TypesFunction to the Entry based on the MemTypesFunction.
+     *
+     * The method makes new TypesFunction by binding the MemTypesFunction first argument `this`
+     * of the transformation.
+     *
+     * @param func -- the MemTypesFunction to be added.
+     * @return `*this`.
+     */
     Initializer<T> types(MemTypesFunction func) {
       using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
@@ -956,11 +1053,26 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Force Entry::evaluateTypes() call.
+     *
+     * Entry::evaluateTypes() is usually called when outputs are connected to the inputs of other
+     * transformations. This function should be used in case when it's known
+     * that transformation has no inputs and its DataType may be derived immediately.
+     */
     Initializer<T> finalize() {
       m_entry->evaluateTypes();
       return *this;
     }
 
+    /**
+     * @brief Add two TypeFunction objects at once.
+     * @tparam FuncA -- first function type (TypeFunction or MemTypesFunction).
+     * @tparam FuncB -- second function type (TypeFunction or MemTypesFunction).
+     * @note template parameters are usually determined automatically based on passed function types.
+     * @param func1 -- first function to add.
+     * @param func2 -- second function to add.
+     */
     template <typename FuncA, typename FuncB>
     Initializer<T> types(FuncA func1, FuncB func2) {
       types(func1);
@@ -968,6 +1080,16 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Add three TypeFunction objects at once.
+     * @tparam FuncA -- first function type (TypeFunction or MemTypesFunction).
+     * @tparam FuncB -- second function type (TypeFunction or MemTypesFunction).
+     * @tparam FuncB -- third function type (TypeFunction or MemTypesFunction).
+     * @note template parameters are usually determined automatically based on passed function types.
+     * @param func1 -- first function to add.
+     * @param func2 -- second function to add.
+     * @param func3 -- third function to add.
+     */
     template <typename FuncA, typename FuncB, typename FuncC>
     Initializer<T> types(FuncA func1, FuncB func2, FuncC func3) {
       types(func1);
@@ -976,6 +1098,19 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Subscribe the Entry to track changeable's taintflag.
+     *
+     * Calling this method implies that Entry should not be subscribed automatically
+     * to any taintflag. The user has to call Initializer::depends() explicitly for each
+     * taintflag emitter.
+     *
+     * I.e. the Initializer::m_nosubscribe flag is set.
+     *
+     * @tparam Changeable -- the changeable type.
+     * @param v -- changeable with ::subscribe() method.
+     * @return `*this`
+     */
     template <typename Changeable>
     Initializer<T> depends(Changeable v) {
       v.subscribe(m_entry->tainted);
@@ -983,40 +1118,92 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Subscribe the Entry to 1 or more changeable's taintflags.
+     *
+     * The function recursively calls itself to process all the arguments.
+     *
+     * @tparam Changeable -- the changeable type.
+     * @tparam ... -- parameter pack.
+     * @param v -- changeable with ::subscribe() method.
+     * @param ... -- all other changeable instances.
+     * @return `*this`
+     */
     template <typename Changeable, typename... Rest>
     Initializer<T> depends(Changeable v, Rest... rest) {
       depends(v);
       return depends(rest...);
     }
 
+    /**
+     * @brief Disable automatic Entry subscription to the taintflag emissions.
+     *
+     * Sets the Initializer::m_nosubscribe flag and disables subscription to
+     * the Base taintflag emission.
+     *
+     * @return `*this`
+     */
     Initializer<T> dont_subscribe() {
       m_nosubscribe = true;
       return *this;
     }
 
   protected:
-    Entry *m_entry;
-    Transformation<T> *m_obj;
+    Entry *m_entry;             ///< New Entry pointer.
+    Transformation<T> *m_obj;   ///< The Transformation object managing MemFunction and MemTypesFunction objects. Has a reference to the Base.
 
-    MemFunction m_mfunc;
-    std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs;
+    MemFunction m_mfunc;        ///< MemFunction object.
+    std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs; ///< MemTypesFunction objects.
 
-    bool m_nosubscribe;
+    bool m_nosubscribe;         ///< Flag forbidding automatic subscription to Base taintflag emissions.
   };
+
+  /*
+   * @brief Empty Function instance.
+   */
+  //void FunctionDummy(Args, Rets){}
 }
 
+/**
+ * @brief Base class for the transformation definition.
+ *
+ * Each GNA transformation class is defined by deriving to base classes:
+ *   - GNAObject or GNASingleObject (deriving from TransformationTypes::Base and ParametrizedTypes::Base).
+ *   - Transformation<class>.
+ *
+ * Transformation class does the bookkeeping for MemFunction and MemTypesFunction. By defining CRTP
+ * Transformation::obj() method it facilitates the binding of the first
+ * argument of MemFunction and MemTypesFunction objects to `this` of the transformation.
+ *
+ * @tparam Derived -- derived class type. See CRTP concept.
+ *
+ * @author Dmitry Taychenachev
+ * @date 2015
+ */
 template <typename Derived>
 class Transformation {
 public:
-  Transformation() { }
+  Transformation() { }                                                                ///< Default constructor.
+  /**
+   * @brief Clone constructor.
+   *
+   * The constructor copies the list of MemFunction objects and rebinds them to `this`.
+   *
+   * @param other -- Transformation to copy MemFunction and MemTypesFunction objects from.
+   */
   Transformation(const Transformation<Derived> &other)
-    : m_memFuncs(other.m_memFuncs)
+    : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
   {
     rebindMemFunctions();
   }
 
+  /**
+   * @brief Clone assignment. Works the same was as clone constructor.
+   * @copydoc Transformation::Transformation(const Transformation<Derived>&)
+   */
   Transformation<Derived> &operator=(const Transformation<Derived> &other) {
     m_memFuncs = other.m_memFuncs;
+    m_memTypesFuncs = other.m_memTypeFuncs;
     rebindMemFunctions();
     return *this;
   }
@@ -1026,29 +1213,59 @@ private:
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
   typedef typename Initializer::MemFunction MemFunction;
   typedef typename Initializer::MemTypesFunction MemTypesFunction;
-  mutable std::mutex trans_mutex;
+
+  /**
+   * @brief Return `this` casted to the Derived type (CRTP).
+   * @return `this`.
+   */
   Derived *obj() { return static_cast<Derived*>(this); }
+
+  /**
+   * @copydoc Transformation::obj()
+   */
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 
+  /**
+   * @brief Return `this` cast to the TransformationTypes::Base.
+   * @return `this`.
+   */
   TransformationTypes::Base *baseobj() {
     return static_cast<TransformationTypes::Base*>(obj());
   }
 
+  /**
+   * @copydoc Transformation::baseobj()
+   */
   const TransformationTypes::Base *baseobj() const {
     return static_cast<const TransformationTypes::Base*>(obj());
   }
 
-  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;
-  std::list<std::tuple<size_t, size_t, MemTypesFunction>> m_memTypesFuncs;
+  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;                      ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
+  std::list<std::tuple<size_t, size_t, MemTypesFunction>> m_memTypesFuncs;    ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
 
+  /**
+   * @brief Add new MemFunction.
+   * @param idx -- Entry index.
+   * @param func -- the function.
+   */
   void addMemFunction(size_t idx, MemFunction func) {
     m_memFuncs.emplace_back(idx, func);
   }
 
+  /**
+   * @brief Add new MemTypesFunction.
+   * @param idx -- Entry index.
+   * @param fidx -- function index (Each Entry may have several TypeFunction objects).
+   * @param func -- the function.
+   */
   void addMemTypesFunction(size_t idx, size_t fidx, MemTypesFunction func) {
     m_memTypesFuncs.emplace_back(idx, fidx, func);
   }
 
+  /**
+   * @brief Bind each of the MemFunction and MemTypesFunction objects to `this` of the transformation.
+   * The method replaces the relevant Function and TypesFunction of the Entry by the binded MemFunction and MemTypesFunction.
+   */
   void rebindMemFunctions() {
     using namespace std::placeholders;
     auto &entries = baseobj()->m_entries;
@@ -1064,13 +1281,21 @@ private:
   }
 };
 
+/**
+ * @brief The object with single output.
+ *
+ * Base class declares the SingleOutput::single() function to be used for object with single output.
+ *
+ * @author Dmitry Taychenachev
+ * @date 2015
+ */
 class SingleOutput {
 public:
-  virtual ~SingleOutput() { }
-  virtual TransformationTypes::OutputHandle single() = 0;
-  const double *data() { return single().data(); }
-  const double *view() { return single().view(); }
-  const DataType &datatype() { return single().datatype(); }
+  virtual ~SingleOutput() { }                                  ///< Destructor.
+  virtual TransformationTypes::OutputHandle single() = 0;      ///< Return the single output.
+  const double *data() { return single().data(); }             ///< Return the single output's Data. The relevant Entry is updated if needed.
+  //const double *view() { return single().view(); }           ///< Return the view on a single output's Data.
+  const DataType &datatype() { return single().datatype(); }   ///< Return the single output's DataType.
 };
 
 #endif // TRANSFORMATIONBASE_H

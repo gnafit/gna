@@ -11,7 +11,7 @@ from gna.env import env
 import constructors as C
 from converters import convert
 import numpy as N
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain
 from gna.bundle import execute_bundle
 from physlib import percent
 
@@ -24,12 +24,16 @@ opts=parser.parse_args()
 # Configurate
 #
 cfg = NestedDict(
-        bundle = 'detector_nonlinearity_db_root_v01',
-        names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-        filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-        uncertainty = 0.2*percent,
-        uncertainty_type = 'relative'
-        )
+    # bundle name
+    bundle = 'detector_nonlinearity_db_root_v01',
+    # file to read
+    filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
+    # TGraph names. First curve will be used as nominal
+    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+        # The uncorrelated energy scale uncertainty type (absolute/relative)
+    par = uncertain(1.0, 0.2, 'percent'),
+    parname = 'escale',
+    )
 
 #
 # Make input histogram
@@ -49,13 +53,14 @@ hist = C.Histogram( edges, phist )
 #
 # Initialize bundle
 #
-b = execute_bundle( edges=points.single(), cfg=cfg )
+b, = execute_bundle( edges=points.single(), cfg=cfg )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 
-(nonlin,) = b.output_transformations
-corr_lsnl = b.storage['lsnl_factor']
-corr = b.storage('escale')['factor']
+(smear,) = b.transformations_out.values()
+nonlin   = b.objects['nonlinearity'].values()[0]
+corr_lsnl = b.objects['lsnl_factor']
+corr,     = b.objects['factor'].values()
 
 #
 # Plot curves:
@@ -77,7 +82,7 @@ for par, name in zip(pars, cfg.names):
 
     lines = ax.plot( edges, corr_lsnl.sum.sum.data(), '-', label=name )
     stride = 5
-    ax.plot( b.storage('inputs')['edges'][::stride], b.storage('inputs')[name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
+    ax.plot( b.storage.edges[::stride], b.storage[name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
 
 for par in pars[1:]:
     par.set(0.0)
@@ -91,7 +96,7 @@ ax.legend( loc='lower right' )
 #
 # Test bundle
 #
-nonlin.smear.Ntrue( hist.hist )
+smear.Ntrue( hist.hist )
 
 #
 # Plot hists
@@ -104,7 +109,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared = nonlin.smear.Nvis.data().copy()
+smeared = smear.Nvis.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 
 plot_hist( edges, phist, label='original' )
@@ -129,7 +134,7 @@ mat = N.ma.array( mat, mask= mat==0.0 )
 c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
 add_colorbar( c )
 
-newe = b.storage('escale')['edges_mod'].product.data()
+newe = b.objects.edges_mod.values()[0].product.data()
 ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
 
 savefig( opts.output, suffix='_matrix', dpi=300 )

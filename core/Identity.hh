@@ -1,7 +1,8 @@
 #ifndef IDENTITY_H
 #define IDENTITY_H 1
 
-#include <stdio.h>
+#include <iostream>
+#include "GNAObject.hh"
 
 //
 // Identity transformation

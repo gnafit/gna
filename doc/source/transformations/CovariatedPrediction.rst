@@ -52,8 +52,9 @@ Description
 """""""""""
 
 Calculate compound covariance matrix based on statistical uncertainties (diagonal)
-and optional covariation matrices for each predction :math:`m_i`
-and between predictions :math:`m_i` and :math:`m_j`.
+, optional covariation matrices for each prediction :math:`m_i`
+and between predictions :math:`m_i` and :math:`m_j`. The pull terms are
+included here. 
 
 This is the constant predefined covariance matrix part: the base.
 
@@ -69,11 +70,7 @@ Inputs are assigned via ``covariate(cov, obs1, n1, obs2, n2)`` method.
 Outputs
 """""""
 
-1) ``'L'`` — covariance matrix Cholesky decomposition :math:`L_\text{base}`: :math:`V_\text{base}=L_\text{base}L_\text{base}^T`.
-
-**IMPORTANT**: Be sure to use :math:`L_\text{base}` as lower triangular matrix
-(use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part
-may contain unmaintained non-zero elements.
+1) ``'V'`` — basic covariance matrix with optional pull-terms.
 
 Implementation
 """"""""""""""
@@ -88,7 +85,8 @@ Calculates :math:`V_\text{base}` as a block matrix:
    \dots    & \dots  & \dots
    \end{pmatrix}.
 
-Returns the Cholesky decomposition :math:`L_\text{base}`.
+   Returns constructed covariance matrix.
+.. Returns the Cholesky decomposition :math:`L_\text{base}`.
 
 Cov transformation
 ^^^^^^^^^^^^^^^^^^
@@ -98,7 +96,7 @@ Description
 
 Calculate the final covariance matrix based on:
     * predefined covariance base.
-    * extra systematical part based on the variation of the
+    * extra (optional) systematical part based on the variation of the
       prediction :math:`\mu` due to variation of the systematical
       parameters :math:`\eta`.
 
@@ -106,13 +104,10 @@ Inputs
 """"""
 
 1) Base covariance matrix :math:`V_\text{base}`.
-2) Derivative (Jacobian) :math:`D_1` of the :math:`\mu` over uncertain parameter :math:`\eta_1`.
-3) Derivative (Jacobian) :math:`D_i` of the :math:`\mu` over uncertain parameter :math:`\eta_i`.
-4) etc.
+2) Optional systematical covariance matrix due to propagation of uncertain parameters.
 
-See ``Derivative`` transformation. Parameters :math:`\eta_i` are meant to be uncorrelated. (To be updated)
+See ``Jacobian``, ``ParMatrix`` and ``MatrixProduct`` transformations. Parameters :math:`\eta_i` are meant to be uncorrelated.
 
-Inputs are processed via ``rank1(vec)`` method.
 
 Outputs
 """""""
@@ -129,27 +124,20 @@ Implementation
 Calculates covariance matrix :math:`V` in the linear approximation:
 
 .. math::
-   V = V_\text{base} + D D^T,
+   V = V_\text{base} + J V_{sys} J^T,
 
-where :math:`D` is the complete Jacobian:
+where :math:`J` is the complete Jacobian:
 
 .. math::
-   D = \{ D_1, D_2, \dots \}.
+   J = \{ J_1, J_2, \dots \}.
 
 Considering prediction column of size :math:`[N \times 1]` and uncertainties vector of size :math:`M`
-the Jacobian :math:`D` dimension is :math:`[N \times M]` and covariance matrix :math:`V` dimension
+the Jacobian :math:`J` dimension is :math:`[N \times M]` and covariance matrix :math:`V` dimension
 is :math:`[N \times N]`.
 
-The calculation of :math:`V` is implemented iteratively in terms of rank 1 update:
+Then the Cholesky decomposition is applied to the full covaraince matrix :math:`V`:
 
 .. math::
-   L_i = \operatorname{rank1}( L_{i-1}, D_i ), \quad i=1,2,\dots,
-
-where :math:`L_0=L_\text{base}`. The function :math:`\operatorname{rank1}` is defined so that for
-:math:`V_0 = L_0 L_0^T` the following equation holds:
-
-.. math::
-   &V_1 = V_0 + D_1 D_1^T = L_1 L_1^T, \\
-   &L_1 = \operatorname{rank1}( L_0, D_1 ).
+    V = LL^T
 
 Returns the Cholesky decomposition :math:`L` of :math:`V`.

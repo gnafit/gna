@@ -104,7 +104,7 @@ Variables represent simple data types (double) with taintflag_ propagation featu
 Variables within same namespace (python side) are distinguished by their name.
 Creating several variable_ or parameter_ instances with the same name will manage the same data.
 
-Variables are mostly used on C++ side. On python side the Parameter, Uncertain, etc are used as accessors.
+Variables are mostly used on C++ side. On python side the Parameter, Variable, etc are used as accessors.
 
 .. _callback:
 
@@ -245,6 +245,8 @@ Transformation : class template
 TransformationTypes namespace (TransformationBase)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The header is now fully documented via Doxygen.
+
 Functions
 """""""""
 
@@ -332,14 +334,14 @@ Accessor : class
 .. _Args:
 
 Args : struct
-    * limited indirect access to `TransformationBase::Entry`_ instance
+    * limited indirect access to `Source`_ instances through `TransformationBase::Entry`_ instance
     * transformation input implementation
     * access to `TransformationBase::Entry`_'s data
 
 .. _Atypes:
 
 Atypes : struct
-    * limited indirect access to `TransformationBase::Entry`_ instance
+    * limited indirect access to `Source`_ types through `TransformationBase::Entry`_ instance
     * used for inputs' type checking
     * access to `TransformationBase::Entry`_'s ``DataType``
 
@@ -358,7 +360,7 @@ InputHandle : class
 .. _Rets:
 
 Rets : struct
-    * limited indirect access to `TransformationBase::Entry`_ instance
+    * limited indirect access to `Sink`_ instances through `TransformationBase::Entry`_ instance
     * transformation output implementation
     * access to `TransformationBase::Entry`_'s data
     * may be (un)frozen
@@ -366,7 +368,7 @@ Rets : struct
 .. _Rtypes:
 
 Rtypes : struct
-    * limited indirect access to `TransformationBase::Entry`_ instance
+    * limited indirect access to `Sink`_ types through `TransformationBase::Entry`_ instance
     * used for outputs' type checking
     * access to `TransformationBase::Entry`_'s ``DataType``
 
@@ -454,13 +456,14 @@ and used on python side.
 .. _GaussianParameter:
 
 GaussianParameter : class template
-    * a nickname for `Parameter (Uncertain)`_
+    * a nickname for `Parameter (Variable)`_
     * represents normally distributed variable with central value and sigma
+    * carries also information about variable_'s uncertainty
 
-.. _`Parameter (Uncertain)`:
+.. _`Parameter (Variable)`:
 
 Parameter : class template
-    * derives _Uncertain
+    * derives _Variable
     * carries parameter_ instance for the variable_, i.e. may set it's value
     * may:
 
@@ -477,13 +480,13 @@ Parameter : class template
 ParameterWrapper : class template
     * a simple wrapper for the parameter_ class meant to use on python side
     * has set and get methods
+    * carries also information about variable_'s central value
 
-.. _Uncertain:
+.. _`Variable (Variable)`:
 
-Uncertain : class template
+Variable : class template
     * GNAObject_ represending a transformation with no inputs and one output
     * output is connected with variable_ instance (connection is name based)
-    * carries also information about variable_'s central value and uncertainty (sigma)
 
 .. _UniformAngleParameter:
 

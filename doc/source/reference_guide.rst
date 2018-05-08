@@ -52,6 +52,20 @@ Transformation bundles
 Transformations
 ---------------
 
+Evaluables
+^^^^^^^^^^
+
+The following transformations do not provide the inputs and outputs. They rather define the new parameters via evaluable
+mechanism.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/VarDiff.rst
+   transformations/VarProduct.rst
+   transformations/VarSum.rst
+
 Basic types and actions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -62,6 +76,7 @@ Basic types and actions
    transformations/HistEdges.rst
    transformations/Histogram.rst
    transformations/Points.rst
+   transformations/Prediction.rst
    transformations/Rebin.rst
 
 Linear algebra
@@ -74,6 +89,7 @@ Linear algebra
    transformations/Cholesky.rst
    transformations/FillLike.rst
    transformations/Identity.rst
+   transformations/Normalize.rst
    transformations/Product.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst
@@ -93,6 +109,15 @@ Stats and calculus
    transformations/Derivative.rst
    transformations/NormalToyMC.rst
    transformations/Poisson.rst
+
+Math functions
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/SelfPower.rst
 
 Neutrino oscillations
 ^^^^^^^^^^^^^^^^^^^^^
