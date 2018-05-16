@@ -46,7 +46,7 @@ class cmd(basecmd):
 
         detector = Detector(
             name='AD1',
-            edges=np.linspace(1., 10., 200+1),
+            edges=np.linspace(1., 10., 300+1),
             location=0,
             protons=0.8*1.42e33, #TODO: is this detection efficiency of 80% ?
             livetime=[6*365*24*60*60.0],

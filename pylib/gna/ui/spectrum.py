@@ -1,5 +1,8 @@
 from gna.ui import basecmd, append_typed, qualified
 from matplotlib import pyplot as plt
+params = {'legend.fontsize': 18,
+          'legend.handlelength': 2}
+plt.rcParams.update(params)
 from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml

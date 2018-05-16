@@ -93,6 +93,8 @@ set (HEADERS
   GaussLegendre2d.hh
   EnergyResolution.hh
   HistNonlinearity.hh
+  Quadratic.hh
+  Worst.hh
   HistSmear.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
