@@ -386,10 +386,13 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
-class PartNotFoundError(BaseException):
+class PartNotFoundError(Exception):
     def __init__(self, parttype, partname):
         self.parttype = parttype
         self.partname = partname
+        msg = "Failed to find {} in the env".format(self.partname)
+        super(PartNotFoundError, self).__init__(msg)
+
 
 class envpart(dict):
     def __init__(self, parttype):
