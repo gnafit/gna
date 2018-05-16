@@ -40,6 +40,9 @@ class Index(object):
         elif mode=='longitems':
             for var in variants:
                 yield self.name, var
+        elif mode=='bothitems':
+            for var in variants:
+                yield self.short, self.name, var
         else:
             raise Exception('Unsupported iteration mode: {}'.format(mode))
 
@@ -60,6 +63,11 @@ class NIndex(object):
             for other in ignore:
                 if other in self.indices:
                     del self.indices[other]
+
+        fromlist = kwargs.pop('fromlist', [])
+        for args in fromlist:
+            idx = Index(*args)
+            self |= idx
 
         self.arrange()
 
@@ -115,22 +123,22 @@ class NIndex(object):
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
 
-    def names(short=False):
+    def names(self, short=False):
         if short:
-            return [idx.short for idx in self.indices]
+            return [idx.short for idx in self.indices.values()]
         else:
-            return [idx.name for idx in self.indices]
+            return [idx.name for idx in self.indices.values()]
 
     def iterate(self, mode='values', fix={}):
-        if mode in ['values', 'items', 'longitems']:
+        if mode in ['values', 'items', 'longitems', 'bothitems']:
             for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
                 yield it
         else:
             if not isinstance(mode, str):
                 raise Exception('Mode should be a string, got {}'.format(type(str).__name__))
 
-            for it in self.iterate(mode='items', fix=fix):
-                dct = OrderedDict(it)
+            for it in self.iterate(mode='bothitems', fix=fix):
+                dct = OrderedDict([ (a,c) for a,b,c in it]+[ (b,c) for a,b,c in it])
                 yield mode.format(**dct)
 
     __iter__ = iterate

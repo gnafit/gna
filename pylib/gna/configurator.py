@@ -93,7 +93,6 @@ class NestedDict(object):
 
         return self.__parent__.parent( n-1 )
 
-
     def parent_key(self):
         if self.__parent__ is None:
             return None
