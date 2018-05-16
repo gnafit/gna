@@ -137,9 +137,17 @@ class NIndex(object):
             if not isinstance(mode, str):
                 raise Exception('Mode should be a string, got {}'.format(type(str).__name__))
 
+            autoindex = '{'+'}.{'.join(self.names())+'}'
             for it in self.iterate(mode='bothitems', fix=fix):
-                dct = OrderedDict([ (a,c) for a,b,c in it]+[ (b,c) for a,b,c in it])
-                yield mode.format(**dct)
+                if it:
+                    dct = OrderedDict([ (a,c) for a,b,c in it]+[ (b,c) for a,b,c in it])
+                    dct['autoindex'] = autoindex.format( '', **dct )
+                    yield mode.format(**dct)
+                else:
+                    if '{autoindex}' in mode:
+                        mode = mode.replace( '.{autoindex}', '' )
+                        mode = mode.replace( '{autoindex}.', '' )
+                    yield mode
 
     __iter__ = iterate
 
@@ -285,6 +293,7 @@ class IndexedContainer(object):
 
         level+=1
         for obj in self.objects:
+            print( 'check', obj )
             context.check_outputs(obj, level=level)
 
         printl(level, 'connect', str(self))
@@ -297,7 +306,7 @@ class IndexedContainer(object):
 
             context.set_output(placeholder, self.name, idx, level=level)
 
-        return True
+        return False
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -355,7 +364,7 @@ class Transformation(Indexed):
         return TSum('?', self, other)
 
     def build(self, context, level=0):
-        return False
+        context.build( self.name, self.indices, level )
 
 class TCall(IndexedContainer, Transformation):
     def __init__(self, name, *args, **kwargs):
@@ -387,6 +396,10 @@ class TCall(IndexedContainer, Transformation):
             return '{fcn}{args}'.format(fcn=Indexed.__str__(self), args=IndexedContainer.estr(self, expand))
         else:
             return self.__str__()
+
+    def build(self, context, level=0):
+        IndexedContainer.build(self, context, level)
+        Transformation.build(self, context, level+1)
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -561,7 +574,7 @@ class Expression(object):
     def __repr__(self):
         return 'Expression("{}")'.format(self.expression_raw)
 
-    def newindex(self, short, name, *variants):
+    def newindex(self, short, name, variants):
         idx = self.indices[short] = Index(short, name, variants)
         self.globals[short] = idx
 
@@ -602,8 +615,10 @@ class ExpressionContext(object):
             raise Exception('Do not know how to build '+name)
 
         printl( level, 'build', name, 'via bundle' )
-        for nidx in indices.iterate(mode='items'):
-            self.set_output(placeholder, name, nidx, level=level+1)
+
+        cfg.indices=indices
+        from gna.bundle import execute_bundle
+        b=execute_bundle( cfg=cfg, shared=self.outputs )
 
     def get_variable(self, name, *idx):
         pass

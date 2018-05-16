@@ -18,7 +18,8 @@ cfg = NestedDict(
         ],
     format = 'var.{num}.{alph}.{zyx}',
     input = True,
-    size = 10
+    size = 10,
+    debug = True
     )
 
 ns = env.globalns

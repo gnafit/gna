@@ -5,10 +5,10 @@ from __future__ import print_function
 from gna.expression import *
 
 indices = [
-        ('i', 'index_i', '1', '2', '3'),
-        ('j', 'index_j', '4', '5', '6'),
-        ('k', 'index_k', '7', '8', '9'),
-        ('b', 'index_b', 'a', 'b', 'c')
+        ('i', 'index_i', ['1', '2', '3']),
+        ('j', 'index_j', ['4', '5', '6']),
+        ('k', 'index_k', ['7', '8', '9']),
+        ('b', 'index_b', ['a', 'b', 'c'])
         ]
 lib = dict(
         [

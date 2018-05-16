@@ -12,28 +12,29 @@ class dummy(TransformationBundle):
 
     def build(self):
         from gna.expression import NIndex
-        idx = NIndex(fromlist=self.cfg.indices)
+        idx = self.cfg.indices
+        if not isinstance(idx, NIndex):
+            idx = NIndex(fromlist=self.cfg.indices)
 
+        for i, key in enumerate(idx.iterate( mode=self.cfg.format )):
+            self.make_trans( i, key )
+
+    def make_trans(self, i, key):
         if self.cfg.input:
-            for i, key in enumerate(idx.iterate( mode=self.cfg.format )):
-                trans = R.Identity()
-                trans.identity.setLabel( key )
+            obj = R.Identity()
+            trans = obj.identity
 
-                self.objects[key] = trans
-                self.transformations_out[key] = trans.identity
-                self.shared[key] = self.outputs[key] = trans.identity.target
-
-                self.transformations_in[key] = trans.identity
-                self.inputs[key] = trans.identity.source
+            self.transformations_in[key] = trans
+            self.inputs[key] = trans.source
         else:
-            for i, key in enumerate(idx.iterate( mode=self.cfg.format )):
-                trans = C.Points( N.zeros(shape=self.cfg.size, dtype='d') )
-                trans.points.setLabel( key )
+            obj = C.Points( N.zeros(shape=self.cfg.size, dtype='d') )
+            trans = obj.points
 
-                self.objects[key] = trans
-                self.transformations_out[key] = trans.points
-                self.shared[key] = self.outputs[key] = trans.points.points
+        if self.cfg.debug:
+            print( 'Create {var} [{inp}out]'.format(var=key, inp=self.cfg.input and 'in, ' or '') )
 
-
-
+        self.objects[key] = obj
+        self.transformations_out[key] = trans
+        self.shared[key] = self.outputs[key] = trans.single()
+        trans.setLabel( key )
 
