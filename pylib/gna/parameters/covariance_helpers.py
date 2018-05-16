@@ -15,7 +15,6 @@ def __keep_relative(**kwargs):
 def __keep_absolute(**kwargs):
     raise Exception('Perhaps one shouldn\'t override uncorrelated '
                     'unceratinties in absolute mode from configuration file')
-    raise
 
 
 def __override_absolute(**kwargs):
