@@ -4,6 +4,7 @@ from __future__ import print_function
 from collections import OrderedDict
 from gna.configurator import NestedDict
 import itertools as I
+from gna.expression.preparse import open_fcn
 
 printlevel = 0
 class nextlevel():
@@ -624,18 +625,11 @@ class Expression(object):
     tree = None
     def __init__(self, expression, indices):
         self.expression_raw = expression
-        self.expression = self.preprocess( self.expression_raw )
+        self.expression = open_fcn( self.expression_raw )
 
         self.globals=VTContainer(self.operations)
         self.indices=OrderedDict()
         self.defindices(indices)
-
-    def preprocess(self, expression):
-        n = expression.count('|')
-        if n:
-            expression = expression.replace('|', '(')
-            expression+=')'*n
-        return expression
 
     def parse(self):
         if self.tree:
