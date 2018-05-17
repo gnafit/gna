@@ -13,21 +13,21 @@ parser.add_argument( '--dot', help='write graphviz output' )
 args = parser.parse_args()
 
 indices = [
-    ('n', 'num',   ['1', '2', '3']),
-    ('a', 'alph',  ['a', 'b', 'c']),
-    ('z', 'zyx',   ['X', 'Y', 'Z']),
-    ('b', 'bkg',   ['b1', 'b2', 'b3'])
+    ('n', 'num',   ['1', '2']),
+    ('a', 'alph',  ['a', 'b']),
+    ('z', 'zyx',   ['X', 'Y']),
+    ('b', 'bkg',   ['b1', 'b2'])
     ]
 
 lib = dict(
         [
             ('norm*spec', dict(name='obs_spec')),
             ('obs_spec+bkg', dict(name='obs_tot')),
-            ('sum', dict(name='totalsum'))
+            ('sum:z', dict(name='totalsum'))
             ]
         )
 
-expr = 'prod[n] | sum[a,b] | norm()*spec[n](enu[a]()) + bkg[b]()'
+expr = 'sum[z] | prod[n] | sum[a,b] | norm()*spec[n](enu[a,z]()) + bkg[b]()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -59,7 +59,7 @@ cfg = NestedDict(
             bundle = 'dummy',
             name = 'norm',
             format = '{name}{autoindex}',
-            input = True,
+            input = False,
             size = 10,
             debug = False
             ),
@@ -109,7 +109,7 @@ if args.dot:
     # try:
     from gna.graphviz import GNADot
 
-    graph = GNADot( context.outputs.prod )
+    graph = GNADot( context.outputs.totalsum )
     graph.write(args.dot)
     print( 'Write output to:', args.dot )
     # except Exception as e:
