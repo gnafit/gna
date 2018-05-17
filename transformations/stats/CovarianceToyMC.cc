@@ -1,5 +1,5 @@
 #include "CovarianceToyMC.hh"
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_("toymc")
@@ -13,8 +13,8 @@ CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze )
 
 void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
   auto n = t_["toymc"].inputs().size()/2 + 1;
-  t_["toymc"].input((boost::format("theory_%1%")%n).str()).connect(theory.single());
-  t_["toymc"].input((boost::format("cov_%1%")%n).str()).connect(cov.single());
+  t_["toymc"].input(fmt::format("theory_{0}", n)).connect(theory.single());
+  t_["toymc"].input(fmt::format("cov_{0}", n)).connect(cov.single());
 }
 
 void CovarianceToyMC::nextSample() {

@@ -4,8 +4,7 @@
 #include "Source.hh"
 #include "TransformationEntry.hh"
 
-#include <boost/format.hpp>
-using boost::format;
+#include <fmt/format.h>
 
 using TransformationTypes::SinkTypeError;
 using TransformationTypes::SourceTypeError;
@@ -26,7 +25,7 @@ std::string errorMessage(const std::string &type, const T *s,
     name = std::string(" ")+s->name;
   }
   std::string message = msg.empty() ? "unspecified error" : msg;
-  return (boost::format("%2%%1%: %3%") % name % type % message).str();
+  return fmt::format("{1}{0}: {2}", name, type, message);
 }
 
 /** @brief Constructor.

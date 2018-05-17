@@ -1,6 +1,6 @@
 #include <array>
 
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 #include "ReactorGroup.hh"
 
@@ -10,9 +10,9 @@ ReactorGroup::ReactorGroup(size_t count)
   std::vector<changeable> deps;
   deps.reserve(2*count);
   for (size_t i = 0; i < count; ++i) {
-    variable_(&m_Ps[i], (boost::format("P_%1%")%i).str());
+    variable_(&m_Ps[i], fmt::format("P_{0}", i));
     deps.push_back(m_Ps[i]);
-    variable_(&m_Ls[i], (boost::format("L_%1%")%i).str());
+    variable_(&m_Ls[i], fmt::format("L_{0}", i));
     deps.push_back(m_Ls[i]);
   }
   m_Lavg = evaluable_<double>("Lavg", [this]() {

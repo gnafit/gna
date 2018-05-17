@@ -1,5 +1,5 @@
 #include "NormalToyMC.hh"
-#include <boost/format.hpp>
+#include <fmt/format.h>
 
 NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
   transformation_("toymc")
@@ -13,8 +13,8 @@ NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
 
 void NormalToyMC::add(SingleOutput &theory, SingleOutput &sigma) {
   auto n = t_["toymc"].inputs().size()/2 + 1;
-  t_["toymc"].input( (boost::format("theory_%1%")%n).str() ).connect(theory.single());
-  t_["toymc"].input( (boost::format("sigma_%1%")%n).str() ).connect(sigma.single());
+  t_["toymc"].input(fmt::format("theory_{0}", n)).connect(theory.single());
+  t_["toymc"].input(fmt::format("sigma_{0}", n)).connect(sigma.single());
 }
 
 void NormalToyMC::nextSample() {
