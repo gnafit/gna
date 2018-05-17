@@ -30,7 +30,9 @@ namespace TransformationTypes
 
     void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
 
-    const std::string &name() const { return m_source->name; } ///< Get Source's name.
+    const std::string &name() const { return m_source->name; }                 ///< Get Source's name.
+    const std::string &label() const { return m_source->label; }               ///< Get Source's label.
+    void  setLabel(const std::string& label) const { m_source->label=label; }  ///< Set Source's label.
 
     const void *rawptr() const { return static_cast<const void*>(m_source); } ///< Return Source's pointer as void pointer.
     const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.

@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 
 #include "GaussLegendre.hh"
+#include "TypesFunctions.hh"
 
 using namespace Eigen;
 
@@ -37,7 +38,7 @@ void GaussLegendre::init() {
     gsl_integration_glfixed_table_free(t);
   }
   //return only points, WTF?
-  transformation_(this, "points")
+  transformation_("points")
     .output("x")
     .output("xedges")
     .types([](GaussLegendre *obj, Atypes, Rtypes rets) {
@@ -55,10 +56,10 @@ void GaussLegendre::init() {
 GaussLegendreHist::GaussLegendreHist(const GaussLegendre *base)
   : m_base(base)
 {
-  transformation_(this, "hist")
+  transformation_("hist")
     .input("f")
     .output("hist")
-    .types(Atypes::ifSame, [](GaussLegendreHist *obj, Atypes, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](GaussLegendreHist *obj, Atypes, Rtypes rets) {
         rets[0] = DataType().hist().bins(obj->m_base->m_orders.size()).edges(obj->m_base->m_edges);
       })
     .func([](GaussLegendreHist *obj, Args args, Rets rets) {

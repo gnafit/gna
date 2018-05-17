@@ -35,9 +35,10 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Sink belongs to.
      */
     Sink(const Sink &other, Entry *entry)
-      : name(other.name), entry(entry) { }
+      : name(other.name), label(other.label), entry(entry) { }
 
     std::string name;                           ///< Sink's name.
+    std::string label;                          ///< Sink's label.
     std::unique_ptr<Data<double>> data;         ///< Sink's Data.
     std::vector<Source*> sources;               ///< Container with Source pointers which use this Sink as their input.
     Entry *entry;                               ///< Pointer to the transformation Entry this Sink belongs to.

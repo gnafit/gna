@@ -5,18 +5,18 @@
 #include <string>
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 #include <Eigen/Dense>
-
 
 class GeoNeutrinoFluxNormed: public GNASingleObject,
                 public TransformationBind<GeoNeutrinoFluxNormed> {
 public:
   GeoNeutrinoFluxNormed(double livetime_years): m_livetime_years(livetime_years) {
     variable_(&m_fluxnorm, "FluxNorm");
-    transformation_(this, "flux_norm")
+    transformation_("flux_norm")
       .input("flux")
       .output("normed_flux")
-      .types(Atypes::ifSame, Atypes::pass<0>)
+      .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
       .func(&GeoNeutrinoFluxNormed::CalcNorm);
   }
 protected:

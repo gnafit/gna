@@ -10,7 +10,7 @@ class Poisson: public GNASingleObject,
 public:
 
  Poisson(bool ln_approx = false) {
-    transformation_(this, "poisson")
+    transformation_("poisson")
         .output("poisson")
         .types(&Poisson::checkTypes)
         .func(ln_approx ? &Poisson::calcPoissonApprox : &Poisson::calcPoisson)

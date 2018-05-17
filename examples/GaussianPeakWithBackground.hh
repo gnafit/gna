@@ -5,6 +5,7 @@
 
 #include "GNAObject.hh"
 #include "ParametricLazy.hpp"
+#include "TypesFunctions.hh"
 
 class GaussianPeakWithBackground: public GNAObject,
                                   public TransformationBind<GaussianPeakWithBackground> {
@@ -19,10 +20,10 @@ public:
     m_w_scaled = mkdep(m_w*std::sqrt( n ));
     m_E0_scaled = mkdep(m_E0*n);
 
-    transformation_(this, "rate")
+    transformation_("rate")
       .input("E")
       .output("rate")
-      .types(Atypes::pass<0,0>)
+      .types(TypesFunctions::pass<0,0>)
       .func(&GaussianPeakWithBackground::calcRate)
       ;
   }

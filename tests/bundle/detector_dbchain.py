@@ -100,7 +100,7 @@ shared = NestedDict( edges=points.single() )
 b, = execute_bundle(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
 print('Parameters:')
-env.globalns.printparameters()
+env.globalns.printparameters(labels=True)
 
 #
 # Connect inputs

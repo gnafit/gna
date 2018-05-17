@@ -129,6 +129,8 @@ def makeparameter(ns, name, cfg=None, **kwargs):
     param.reset()
     param.ns = ns
 
+    if 'label' in kwargs:
+        param.setLabel(kwargs['label'])
     if debug:
         print()
     return param

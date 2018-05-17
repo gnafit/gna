@@ -29,7 +29,9 @@ namespace TransformationTypes
      */
     OutputHandle(const OutputHandle &other): OutputHandle(*other.m_sink) { }
 
-    const std::string &name() const { return m_sink->name; }                 ///< Get Source's name.
+    const std::string &name() const { return m_sink->name; }                   ///< Get Source's name.
+    const std::string &label() const { return m_sink->label; }                 ///< Get Sink's label.
+    void  setLabel(const std::string& label) const { m_sink->label=label; }    ///< Set Sink's label.
 
     bool check() const; ///< Check the Entry.
     void dump() const;  ///< Dump the Entry.

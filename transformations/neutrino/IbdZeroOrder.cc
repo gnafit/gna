@@ -12,11 +12,11 @@ constexpr double pi = boost::math::constants::pi<double>();
 
 IbdZeroOrder::IbdZeroOrder()
 {
-  transformation_(this, "Enu")
+  transformation_("Enu")
     .input("Ee")
     .output("Enu")
     .func(&IbdZeroOrder::calcEnu);
-  transformation_(this, "xsec")
+  transformation_("xsec")
     .input("Ee")
     .output("xsec")
     .func(&IbdZeroOrder::calcXsec);

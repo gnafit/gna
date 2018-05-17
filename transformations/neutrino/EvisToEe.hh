@@ -3,16 +3,17 @@
 #include <string>
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 class EvisToEe: public GNASingleObject,
                 public TransformationBind<EvisToEe> {
 public:
   EvisToEe() {
     variable_(&m_me, "ElectronMass");
-    transformation_(this, "Ee")
+    transformation_("Ee")
       .input("Evis")
       .output("Ee")
-      .types(Atypes::passAll)
+      .types(TypesFunctions::passAll)
       .func([](EvisToEe *obj, Args args, Rets rets) {
           rets[0].x = args[0].x - obj->m_me;
         });

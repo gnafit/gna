@@ -4,6 +4,7 @@
 #include "PMNSVariables.hh"
 #include "ParametricLazy.hpp"
 #include "TMath.h"
+#include "TypesFunctions.hh"
 
 OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
     : OscProbPMNSBase(from, to), m_from(from), m_to(to)
@@ -14,12 +15,12 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
 
     variable_(&m_L, "L");
     variable_(&m_rho, "rho"); // g/cm3
-    transformation_(this, "oscprob")
+    transformation_("oscprob")
         .input("Enu") //MeV
         .output("oscprob")
         .depends(m_L)
         .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-        .types(Atypes::pass<0>)
+        .types(TypesFunctions::pass<0>)
         .func(&OscProbMatter::calcOscProb);
 
     m_param->variable_("DeltaMSq12");

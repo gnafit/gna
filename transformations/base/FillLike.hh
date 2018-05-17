@@ -3,6 +3,7 @@
 #include <string>
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 class FillLike: public GNASingleObject,
                 public TransformationBind<FillLike> {
@@ -10,10 +11,10 @@ public:
   FillLike(double value)
     : m_value(value)
   {
-    transformation_(this, "fill")
+    transformation_("fill")
       .input("a")
       .output("a")
-      .types(Atypes::passAll)
+      .types(TypesFunctions::passAll)
       .func([](FillLike *obj, Args /*args*/, Rets rets) {
           rets[0].x.setConstant(obj->m_value);
         });

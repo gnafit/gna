@@ -14,7 +14,7 @@ public:
     variable_(&m_E0, "E0");
     variable_(&m_w, "Width");
 
-    transformation_(this, "rate")
+    transformation_("rate")
       .input("E")
       .output("rate")
       .types(Atypes::pass<0,0>)

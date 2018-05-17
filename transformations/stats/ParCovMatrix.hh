@@ -8,7 +8,7 @@ class ParCovMatrix: public GNAObject,
                  public TransformationBind<ParCovMatrix> {
     public:
         ParCovMatrix() {
-            transformation_(this, "unc_matrix")
+            transformation_("unc_matrix")
                 .output("unc_matrix")
                 .types([](ParCovMatrix* obj, Atypes /*args*/, Rtypes rets){
     rets[0] = DataType().points().shape(obj->m_pars.size(), obj->m_pars.size());})

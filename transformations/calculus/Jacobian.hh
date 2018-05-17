@@ -10,7 +10,7 @@ public:
     Jacobian(double reldelta = 1e-1)
         : m_reldelta{reldelta}
     {
-        transformation_(this, "jacobian")
+        transformation_("jacobian")
             .input("func")
             .output("jacobian")
             .types(&Jacobian::calcTypes)

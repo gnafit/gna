@@ -86,15 +86,15 @@ namespace TransformationTypes
     void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
 
     std::string name;                                   ///< Transformation name.
+    std::string label;                                  ///< Transformation label.
     SourcesContainer sources;                           ///< Transformation inputs (sources).
     SinksContainer sinks;                               ///< Transformation outputs (sinks).
-    Function fun;                                       ///< The function that does actual calculation.
+    Function fun=nullptr;                               ///< The function that does actual calculation.
     std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction objects.
     taintflag tainted;                                  ///< taintflag shows whether the result is up to date.
     const Base *parent;                                 ///< Base class, containing the transformation Entry.
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
-    bool usable;                                        ///< Unused.
 
   private:
     template <typename InsT, typename OutsT>

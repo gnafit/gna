@@ -65,20 +65,6 @@ namespace TransformationTypes
      */
     size_t size() const { return m_entry->sources.size(); }
 
-    static void passAll(Atypes args, Rtypes rets);     ///< Assigns shape of each input to corresponding output.
-
-    template <size_t Arg, size_t Ret = Arg>
-    static void pass(Atypes args, Rtypes rets);        ///< Assigns shape of Arg-th input to Ret-th output.
-
-    static void ifSame(Atypes args, Rtypes rets);      ///< Checks that all inputs are of the same type (shape and content description).
-    static void ifSameShape(Atypes args, Rtypes rets); ///< Checks that all inputs are of the same shape.
-
-    template <size_t Arg>
-    static void ifHist(Atypes args, Rtypes rets);      ///< Checks if Arg-th input is a histogram (DataKind=Histogram).
-
-    template <size_t Arg>
-    static void ifPoints(Atypes args, Rtypes rets);    ///< Checks if Arg-th input is an array (DataKind=Points).
-
     /**
      * @brief Source type exception.
      * @param dt -- incorrect DataType.
@@ -101,65 +87,4 @@ namespace TransformationTypes
   private:
     const Entry *m_entry; ///< Entry instance to access Source DataType.
   };
-
-  /**
-   * @brief Assigns shape of Arg-th input to Ret-th output
-   *
-   * @tparam Arg -- index of Arg to read the type.
-   * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
-   *
-   * @param args -- source types.
-   * @param rets -- output types.
-   *
-   * @exception std::runtime_error in case of invalid index is passed.
-   */
-  template <size_t Arg, size_t Ret>
-  inline void Atypes::pass(Atypes args, Rtypes rets) {
-    if (Arg >= args.size()) {
-      throw std::runtime_error("Transformation: invalid Arg index");
-    }
-    if (Ret >= rets.size()) {
-      throw std::runtime_error("Transformation: invalid Ret index");
-    }
-    rets[Ret] = args[Arg];
-  }
-
-  /**
-   * @brief Checks if Arg-th input is a histogram (DataKind=Histogram).
-   *
-   * Raises an exception otherwise.
-   *
-   *  @tparam Arg -- index of Arg to check.
-   *
-   *  @param args -- source types.
-   *  @param rets -- output types.
-   *
-   *  @exception std::runtime_error in case input data is not a histogram.
-   */
-  template <size_t Arg>
-  inline void Atypes::ifHist(Atypes args, Rtypes rets) {
-    if (args[Arg].kind!=DataKind::Hist) {
-      throw std::runtime_error("Transformation: Arg should be a histogram");
-    }
-  }
-
-  /**
-   * @brief Checks if Arg-th input is an array (DataKind=Points).
-   *
-   * Raises an exception otherwise.
-   *
-   * @tparam Arg -- index of Arg to check.
-   *
-   * @param args -- source types.
-   * @param rets -- output types.
-   *
-   *  @exception std::runtime_error in case input data is not an array.
-   */
-  template <size_t Arg>
-  inline void Atypes::ifPoints(Atypes args, Rtypes rets) {
-    if (args[Arg].kind!=DataKind::Points) {
-      throw std::runtime_error("Transformation: Arg should be an array");
-    }
-  }
-
 } /* TransformationBase */

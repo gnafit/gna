@@ -19,8 +19,6 @@ class bkg_weighted_hist_v01(TransformationBundle):
             kwargs['namespaces'] = list(variants)
         super(bkg_weighted_hist_v01, self).__init__( **kwargs )
 
-        self.bundles, = execute_bundle(cfg=self.cfg.spectra, shared=self.shared)
-
         try:
             self.cfg.setdefault( 'name', self.cfg.parent_key() )
         except KeyError:
@@ -30,18 +28,27 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
     def build(self):
+        self.bundles, = execute_bundle(cfg=self.cfg.spectra, shared=self.shared)
+
         spectra = CatDict(self.groups, self.bundles.outputs)
+        transs = CatDict(self.groups, self.bundles.transformations_out)
 
         targetfmt, formulafmt = self.get_target_formula()
         for ns in self.namespaces:
-            target = self.groups.format_splitjoin(ns.name, targetfmt, prepend=self.common_namespace.path)
+            target = self.groups.format_splitjoin(ns.name, targetfmt)
 
             labels  = stdvector([self.cfg.name])
             weights = stdvector([target])
-            ws = R.WeightedSum(labels, weights, ns=ns)
+            with self.common_namespace:
+                ws = R.WeightedSum(labels, weights, ns=ns)
+            ws.sum.setLabel('Weighted {}:\n{}'.format(self.cfg.name, ns.name))
 
             inp = spectra[ns.name]
             ws.sum.inputs[self.cfg.name](inp)
+
+            inp_t=transs[ns.name]
+            if inp_t.label().startswith('hist'):
+                inp_t.setLabel('{} hist:\n{}'.format(self.cfg.name, ns.name))
 
             """Save transformations"""
             self.objects[('spec',ns.name)]    = inp
@@ -62,7 +69,8 @@ class bkg_weighted_hist_v01(TransformationBundle):
 
             for loc, unc in numbers.items():
                 path, head = self.groups.format_splitjoin( loc, fullitem ).rsplit( '.', 1 )
-                self.common_namespace(path).reqparameter(head, cfg=unc)
+                par = self.common_namespace(path).reqparameter(head, cfg=unc)
+                par.setLabel('{} for {}'.format('.'.join([path, head]), loc))
 
         #
         # Link the other variables
@@ -72,17 +80,19 @@ class bkg_weighted_hist_v01(TransformationBundle):
             variant = ns.name
             formula = []
             for fullitem in formulafmt:
-                item = self.groups.format_splitjoin(variant, fullitem, prepend=self.common_namespace.path)
+                item = self.groups.format_splitjoin(variant, fullitem)
                 formula.append(item)
 
             target = self.groups.format_splitjoin(variant, targetfmt)
             tpath, thead = target.rsplit('.', 1)
             tns = self.common_namespace(tpath)
             if len(formula)>1:
-                vp = R.VarProduct(stdvector(formula), thead, ns=tns)
+                with self.common_namespace:
+                    vp = R.VarProduct(stdvector(formula), thead, ns=tns)
+                    par = tns[thead].get()
 
-                tns[thead].get()
                 self.objects[('prod', variant)]=vp
+                par.setLabel('Norm of {} for {}: '.format(self.cfg.name, ns.name)+'*'.join(formula))
             else:
                 tns.defparameter( thead, target=formula[0] )
 

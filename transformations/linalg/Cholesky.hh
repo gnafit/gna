@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 /**
  * Cholesky tranformation
@@ -14,10 +15,10 @@ class Cholesky: public GNASingleObject,
 public:
   Cholesky()
   {
-    transformation_(this, "cholesky")
+    transformation_("cholesky")
       .input("mat")
       .output("L")
-      .types(Atypes::pass<0>, &Cholesky::prepareCholesky)
+      .types(TypesFunctions::pass<0>, &Cholesky::prepareCholesky)
       .func(&Cholesky::calculateCholesky)
     ;
   }

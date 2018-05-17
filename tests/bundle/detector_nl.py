@@ -57,6 +57,8 @@ b, = execute_bundle( edges=points.single(), cfg=cfg )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 
+env.globalns.printparameters(labels=True)
+
 (smear,) = b.transformations_out.values()
 nonlin   = b.objects['nonlinearity'].values()[0]
 corr_lsnl = b.objects['lsnl_factor']

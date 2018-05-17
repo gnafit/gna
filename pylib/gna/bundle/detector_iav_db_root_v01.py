@@ -22,19 +22,18 @@ class detector_iav_db_root_v01(TransformationBundle):
         self.iavmatrix/=norm
 
         points = C.Points( self.iavmatrix, ns=self.common_namespace )
+        points.points.setLabel('IAV matrix\nraw')
         self.objects['matrix'] = points
 
         with self.common_namespace:
             for ns in self.namespaces:
-                try:
-                    renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
-                except:
-                    import IPython
-                    IPython.embed()
+                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
                 renormdiag.renorm.inmat( points.points )
+                renormdiag.renorm.setLabel('IAV matrix:\n'+ns.name)
 
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
+                esmear.smear.setLabel('IAV effect:\n'+ns.name)
 
                 """Save transformations"""
                 self.transformations_out[ns.name] = esmear.smear
@@ -63,5 +62,6 @@ class detector_iav_db_root_v01(TransformationBundle):
         for ns in self.namespaces:
             parname = self.cfg.parname.format(ns.name)
             par = self.common_namespace.reqparameter( parname, cfg=self.cfg.scale )
+            par.setLabel('IAV offdiagonal contribution scale for '+ns.name)
             self.pars[ns.name]=parname
 

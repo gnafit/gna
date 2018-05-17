@@ -5,7 +5,7 @@
 class MatrixProduct: public GNAObject, public TransformationBind<MatrixProduct> {
     public:
         MatrixProduct() {
-            transformation_(this, "product")
+            transformation_("product")
                 .output("product")
                 .types(&MatrixProduct::checkTypes)
                 .func(&MatrixProduct::product);

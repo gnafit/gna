@@ -1,14 +1,15 @@
 #include "Sum.hh"
+#include "TypesFunctions.hh"
 
 /**
  * @brief Constructor.
  */
 Sum::Sum() {
-  transformation_(this, "sum")                         ///< Define the transformation `sum`:
+  transformation_("sum")                               ///< Define the transformation `sum`:
     .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
     .types(                                            ///<   - provide type checking functions:
-           Atypes::ifSame,                             ///<     * check that inputs have the same type and size
-           Atypes::pass<0>                             ///<     * the output type is derived from the first input type
+           TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
+           TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
            )                                           ///<
     .func([](Args args, Rets rets) {                   ///<   - provide the calculation function:
         rets[0].x = args[0].x;                         ///<     * assign (copy) the first input to output

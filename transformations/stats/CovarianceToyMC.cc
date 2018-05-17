@@ -2,7 +2,7 @@
 #include <boost/format.hpp>
 
 CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
-  transformation_(this, "toymc")
+  transformation_("toymc")
     .output("toymc")
     .types(&CovarianceToyMC::calcTypes)
     .func(&CovarianceToyMC::calcToyMC)

@@ -7,6 +7,7 @@
 
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
+#include "TypesFunctions.hh"
 
 using namespace Eigen;
 
@@ -63,10 +64,10 @@ double OscProbPMNSBase::weightCP() const {
 OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
     OscProbPMNSBase(from, to)
 {
-  transformation_(this, "average_oscillations")
+  transformation_("average_oscillations")
         .input("flux")
         .output("flux_averaged_osc")
-        .types(Atypes::pass<0>)
+        .types(TypesFunctions::pass<0>)
         .func(&OscProbAveraged::CalcAverage);
 }
 
@@ -81,46 +82,46 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
   : OscProbPMNSBase(from, to)
 {
   variable_(&m_L, "L");
-  transformation_(this, "comp12")
+  transformation_("comp12")
     .input("Enu")
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>);
-  transformation_(this, "comp13")
+  transformation_("comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>);
-  transformation_(this, "comp23")
+  transformation_("comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>);
   if (m_alpha != m_beta) {
-    transformation_(this, "compCP")
+    transformation_("compCP")
       .input("Enu")
       .output("compCP")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
   }
-  auto probsum = transformation_(this, "probsum")
+  auto probsum = transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
     .input("comp0")
     .output("probsum")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNS::calcSum);
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
   }
 
-  auto full_formula = transformation_(this, "full_osc_prob")
+  auto full_formula = transformation_("full_osc_prob")
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .types(Atypes::pass<0>)
+      .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
 }
 
@@ -191,28 +192,28 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
   variable_(&m_Lavg, "Lavg");
   variable_(&m_weights, "weights");
 
-  transformation_(this, "comp12")
+  transformation_("comp12")
     .input("Enu")
     .output("comp12")
     .depends(m_Lavg, m_param->DeltaMSq12)
     .func(&OscProbPMNSMult::calcComponent<1,2>);
-  transformation_(this, "comp13")
+  transformation_("comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_Lavg, m_param->DeltaMSq13)
     .func(&OscProbPMNSMult::calcComponent<1,3>);
-  transformation_(this, "comp23")
+  transformation_("comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_Lavg, m_param->DeltaMSq23)
     .func(&OscProbPMNSMult::calcComponent<2,3>);
-  transformation_(this, "probsum")
+  transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
     .input("comp0")
     .output("probsum")
-    .types(Atypes::pass<0>)
+    .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNSMult::calcSum);
 }
 

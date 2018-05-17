@@ -25,9 +25,11 @@ namespace TransformationTypes
     Handle(Entry &entry) : m_entry(&entry) { }                ///< Constructor. @param entry -- an Entry instance to wrap.
     Handle(const Handle &other): Handle(*other.m_entry) { }   ///< Constructor. @param other -- Handle instance to get Entry to wrap.
 
-    const std::string &name() const { return m_entry->name; } ///< Get entry name.
-    std::vector<InputHandle> inputs() const;                  ///< Get vector of inputs.
-    std::vector<OutputHandle> outputs() const;                ///< Get vector of outputs.
+    const std::string &name() const { return m_entry->name; }                 ///< Get entry name.
+    const std::string &label() const { return m_entry->label; }               ///< Get entry label.
+    void  setLabel(const std::string& label) const { m_entry->label=label; }  ///< Set entry label.
+    std::vector<InputHandle> inputs() const;                                  ///< Get vector of inputs.
+    std::vector<OutputHandle> outputs() const;                                ///< Get vector of outputs.
 
     /**
      * @brief Add named input.

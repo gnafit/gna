@@ -1,4 +1,5 @@
 #include "ReactorCore.hh"
+#include "TypesFunctions.hh"
 
 ReactorCore::ReactorCore(const std::vector<std::string> &isonames)
   : m_ePerFission(isonames.size())
@@ -7,9 +8,9 @@ ReactorCore::ReactorCore(const std::vector<std::string> &isonames)
   for (size_t i = 0; i < isonames.size(); ++i) {
     variable_(&m_ePerFission[i], "EnergyPerFission_"+isonames[i]);
   }
-  auto reactor = transformation_(this, "reactor")
+  auto reactor = transformation_("reactor")
     .input("efficiency")
-    .types(Atypes::ifSame, [](Atypes args, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
         for (size_t i = 0; i < rets.size(); ++i) {
           rets[i] = args[0];
         }

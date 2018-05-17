@@ -1,7 +1,7 @@
 #include "Product.hh"
 
 Product::Product() {
-  transformation_(this, "product")
+  transformation_("product")
     .output("product")
     .types([](Atypes args, Rtypes rets) {
         DataType dtsingle = DataType().points().shape(1);

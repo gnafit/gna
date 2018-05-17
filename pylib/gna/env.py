@@ -325,9 +325,9 @@ class namespace(Mapping):
         for path, out in self.walkobservables(internal):
             print('%-30s'%(path+':'), str(out.datatype()))
 
-    def printparameters(self):
+    def printparameters(self, **kwargs):
         from gna.parameters.printer import print_parameters
-        print_parameters(self)
+        print_parameters(self, **kwargs)
 
 
 class nsview(object):

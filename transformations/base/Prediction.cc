@@ -7,7 +7,7 @@
  *   `prediction.prediction` -- the concatenated arrays.
  */
 Prediction::Prediction() {
-  transformation_(this, "prediction")
+  transformation_("prediction")
     .output("prediction")
     .types(&Prediction::calculateTypes)
     .func(&Prediction::calculatePrediction)

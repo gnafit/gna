@@ -15,7 +15,7 @@
  *     * [out] selfpower_inv.result
  *
  * @author Maxim Gonchar
- * @date
+ * @date 13.02.2018
  */
 class SelfPower: public GNAObject,
                  public TransformationBind<SelfPower> {

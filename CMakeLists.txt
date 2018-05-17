@@ -24,6 +24,7 @@ set (SOURCES
   core/transformation/TransformationBase.cc
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
+  core/transformation/TypesFunctions.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -35,10 +36,13 @@ set (SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
+  transformations/functions/Exp.cc
   transformations/hist/Rebin.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
+  transformations/interpolation/SegmentWise.cc
+  transformations/interpolation/InterpExpo.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
@@ -62,6 +66,7 @@ set (SOURCES
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
+  transformations/var/VarArray.cc
   extra/GridFilter.cc
   )
 
@@ -76,6 +81,7 @@ set (HEADERS
   Rets.hh
   Rtypes.hh
   Atypes.hh
+  TypesFunctions.hh
   EntryHandle.hh
   OutputHandle.hh
   OpenHandle.hh
@@ -101,18 +107,22 @@ set (HEADERS
   HistEdges.hh
   Identity.hh
   LinearInterpolator.hh
+  SegmentWise.hh
+  InterpExpo.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh
   Cholesky.hh
   Chi2.hh
   Poisson.hh
+  Exp.hh
   SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
   Rebin.hh
+  VarArray.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh

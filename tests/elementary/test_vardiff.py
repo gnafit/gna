@@ -14,11 +14,12 @@ for i, name in enumerate( names ):
 
 vnames = convert( names, 'stdvector' )
 vp = R.VarDiff( vnames, 'diff', ns=ns )
-ns['diff'].get()
+v=ns['diff'].get()
+v.setLabel('a-b-c-...')
 
 diff = ns['diff']
 
-print_parameters(ns)
+print_parameters(ns, labels=True)
 
 print('Change one input at a time:')
 for i, name in enumerate( names, 2 ):
@@ -26,4 +27,8 @@ for i, name in enumerate( names, 2 ):
     print_parameters(ns)
     print()
 
-
+print( 'Subtracto from 100' )
+vp = R.VarDiff( vnames, 'diff100', 100., ns=ns )
+v=ns['diff100'].get()
+v.setLabel('100-a-b-c-...')
+print_parameters(ns, labels=True)

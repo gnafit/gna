@@ -8,17 +8,17 @@ typedef CovariatedPrediction::Segment Segment;
 CovariatedPrediction::CovariatedPrediction()
   : m_finalized(false)
 {
-  transformation_(this, "prediction")
+  transformation_("prediction")
     .output("prediction")
     .types(&CovariatedPrediction::calculateTypes)
     .func(&CovariatedPrediction::calculatePrediction)
     ;
-  transformation_(this, "covbase")
+  transformation_("covbase")
     .output("L")
     .types(&CovariatedPrediction::calculateCovbaseTypes)
     .func(&CovariatedPrediction::calculateCovbase)
     ;
-  transformation_(this, "cov")
+  transformation_("cov")
     .input("Lbase")
     .output("L")
     .types(&CovariatedPrediction::calculateCovTypes)

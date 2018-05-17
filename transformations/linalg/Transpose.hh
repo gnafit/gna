@@ -4,7 +4,7 @@ class Transpose: public GNAObject,
                  public TransformationBind<Transpose> {
     public:
         Transpose() {
-            transformation_(this, "transpose")
+            transformation_("transpose")
                 .input("mat")
                 .output("T")
                 .types([](Transpose* obj, Atypes args, Rtypes rets){
