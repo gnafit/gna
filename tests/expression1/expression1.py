@@ -19,7 +19,7 @@ lib = dict(
             ]
         )
 
-expr = 'norm()*spec[n]() + bkg[b]()'
+expr = 'norm()*spec[n](enu()) + bkg[b]()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -31,6 +31,14 @@ a.tree.dump(True)
 
 print()
 cfg = NestedDict(
+        enu = NestedDict(
+            bundle = 'dummy',
+            name = 'enu',
+            format = '{name}{autoindex}',
+            input = False,
+            size = 10,
+            debug = False
+            ),
         norm = NestedDict(
             bundle = 'dummy',
             name = 'norm',

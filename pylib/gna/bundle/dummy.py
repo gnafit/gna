@@ -25,21 +25,27 @@ class dummy(TransformationBundle):
         if self.cfg.input:
             obj = R.Identity()
             trans = obj.identity
-
-            self.transformations_in[tkey] = trans
-            self.inputs[tkey] = trans.source
+            input = trans.source
         else:
             obj = C.Points( N.zeros(shape=self.cfg.size, dtype='d') )
             trans = obj.points
+            input = None
+        output = trans.single()
 
         if self.cfg.debug:
             print( 'Create {var} [{inp}out]'.format(var=tkey, inp=self.cfg.input and 'in, ' or '') )
 
         if self.context:
-            self.context.set_output(trans.single(), self.cfg.name, key, self.fmt)
+            self.context.set_output(output, self.cfg.name, key, self.fmt)
+            if input:
+                self.context.set_input(input, self.cfg.name, key, self.fmt)
+
+        if input:
+            self.transformations_in[tkey] = trans
+            self.inputs[tkey] = input
 
         self.objects[tkey] = obj
         self.transformations_out[tkey] = trans
-        self.shared[tkey] = self.outputs[tkey] = trans.single()
+        self.shared[tkey] = self.outputs[tkey] = output
         trans.setLabel( tkey )
 

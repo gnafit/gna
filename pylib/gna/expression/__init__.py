@@ -15,12 +15,12 @@ class nextlevel():
         global printlevel
         printlevel-=1
 
-def printl(level, *args, **kwargs):
+def printl(*args, **kwargs):
     prefix = kwargs.pop('prefix', ())
 
     if prefix:
         print( *prefix, end='' )
-    print('    '*level, sep='', end='')
+    print('    '*printlevel, sep='', end='')
     print(*args, **kwargs)
 
 class Index(object):
@@ -147,10 +147,10 @@ class NIndex(object):
         if mode in ['values']:
             for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
                 yield it
-        if mode in ['items']:
+        elif mode in ['items']:
             for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
                 yield it
-        if mode in ['longitems']:
+        elif mode in ['longitems']:
             for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
                 res = it + tuple(kwargs.items())
                 res = res + (( 'autoindex', autoindex.format('', **dict(res))),)
@@ -159,21 +159,25 @@ class NIndex(object):
             if not isinstance(mode, str):
                 raise Exception('Mode should be a string, got {}'.format(type(str).__name__))
 
-            for it in self.iterate(mode='longitems', fix=fix):
+            for it in self.iterate(mode='longitems', fix=fix, **kwargs):
                 dct = OrderedDict(it)
                 yield mode.format(**dct)
 
     __iter__ = iterate
 
     def get_relevant(self, nidx):
-        return type(nidx)((k,v) for (k,v) in nidx if k in self.indices)
+        return type(nidx)([(k,v) for (k,v) in nidx if k in self.indices])
 
 class Indexed(object):
     name=''
     indices_locked=False
+    fmt=None
     def __init__(self, name, *indices, **kwargs):
         self.name=name
         self.set_indices(*indices, **kwargs)
+
+    def set_format(self, fmt):
+        self.fmt = fmt
 
     def set_indices(self, *indices, **kwargs):
         self.indices=NIndex(*indices, **kwargs)
@@ -210,8 +214,8 @@ class Indexed(object):
     # def reduce(self, newname, *indices):
         # return Indexed(newname, self.indices.reduce(*indices))
 
-    def walk(self, yieldself=False, level=0, operation=''):
-        yield self, level, operation
+    def walk(self, yieldself=False, operation=''):
+        yield self, operation
 
     def ident(self, **kwargs):
         if self.name=='?':
@@ -225,11 +229,11 @@ class Indexed(object):
         return '?'
 
     def dump(self, yieldself=False):
-        for i, (obj, level, operator) in enumerate(self.walk(yieldself)):
-            printl( level, operator, obj, prefix=(i, level) )
+        for i, (obj, operator) in enumerate(self.walk(yieldself)):
+            printl(operator, obj, prefix=(i, printlevel) )
 
-    def get_output(self, nidx, context, level=0):
-        return context.get_output(self.name, self.get_relevant( nidx ), level)
+    def get_output(self, nidx, context):
+        return context.get_output(self.name, self.get_relevant( nidx ))
 
     def get_relevant(self, nidx):
         return self.indices.get_relevant(nidx)
@@ -244,13 +248,13 @@ class IndexedContainer(object):
     def set_objects(self, *objects):
         self.objects = list(objects)
 
-    def walk(self, yieldself=False, level=0, operation=''):
+    def walk(self, yieldself=False, operation=''):
         if yieldself or not self.objects:
-            yield self, level, operation
-        level+=1
-        for o in self.objects:
-            for sub in  o.walk(yieldself, level, self.operator.strip()):
-                yield sub
+            yield self, operation
+        with nextlevel():
+            for o in self.objects:
+                for sub in  o.walk(yieldself, self.operator.strip()):
+                    yield sub
 
     def set_operator(self, operator, left=None, right=None):
         self.operator=operator
@@ -302,23 +306,21 @@ class IndexedContainer(object):
     def nonempty(self):
         return bool(self.objects)
 
-    def build(self, context, level=0):
-        printl(level, 'build {}:'.format(type(self).__name__), str(self) )
+    def build(self, context):
+        printl('build {}:'.format(type(self).__name__), str(self) )
 
-        level+=1
-        for obj in self.objects:
-            print( 'check', obj )
-            context.check_outputs(obj, level=level)
-
-        printl(level, 'connect', str(self))
-        level+=1
-        for idx in self.indices.iterate(mode='items'):
-            level+=1
+        with nextlevel():
             for obj in self.objects:
-                obj.get_output(idx, context, level=level)
-            level-=1
+                context.check_outputs(obj)
 
-            context.set_output(placeholder, self.name, idx, level=level)
+            printl('connect', str(self))
+            with nextlevel():
+                for idx in self.indices.iterate(mode='items'):
+                    with nextlevel():
+                        for obj in self.objects:
+                            obj.get_output(idx, context)
+
+                    context.set_output(placeholder, self.name, idx)
 
         return False
 
@@ -335,10 +337,10 @@ class Variable(Indexed):
     def __call__(self, *targs):
         return TCall(self.name, self, targs=targs)
 
-    def build(self, context, level=0):
+    def build(self, context):
         return True
 
-    def get_output(self, nidx, context, level=0):
+    def get_output(self, nidx, context):
         pass
 
 class VProduct(IndexedContainer, Variable):
@@ -377,8 +379,8 @@ class Transformation(Indexed):
     def __add__(self, other):
         return TSum('?', self, other)
 
-    def build(self, context, level=0):
-        context.build( self.name, self.indices, level )
+    def build(self, context):
+        context.build( self.name, self.indices)
 
 class TCall(IndexedContainer, Transformation):
     def __init__(self, name, *args, **kwargs):
@@ -411,9 +413,10 @@ class TCall(IndexedContainer, Transformation):
         else:
             return self.__str__()
 
-    def build(self, context, level=0):
-        Transformation.build(self, context, level+1)
-        # IndexedContainer.build(self, context, level)
+    def build(self, context):
+        with nextlevel():
+            Transformation.build(self, context)
+        IndexedContainer.build(self, context)
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -517,24 +520,23 @@ class Operation(TCall):
     def make_object(self, *args, **kwargs):
         raise Exception('Unimplemented method called')
 
-    def build(self, context, level=0):
-        printl(level, 'build product:', str(self) )
+    def build(self, context):
+        printl('build product:', str(self) )
 
-        level+=1
-        for obj in self.objects:
-            context.check_outputs(obj, level=level)
+        with nextlevel():
+            for obj in self.objects:
+                context.check_outputs(obj)
 
-        printl(level, 'connect', str(self))
-        level+=1
-        for freeidx in self.indices.iterate(mode='items'):
-            level+=1
-            for opidx in self.indices_to_reduce.iterate(mode='items'):
-                fullidx = list(freeidx)+list(opidx)
-                for obj in self.objects:
-                    obj.get_output(fullidx, context, level=level)
-            level-=1
+            printl('connect', str(self))
+            with nextlevel():
+                for freeidx in self.indices.iterate(mode='items'):
+                    with nextlevel():
+                        for opidx in self.indices_to_reduce.iterate(mode='items'):
+                            fullidx = list(freeidx)+list(opidx)
+                            for obj in self.objects:
+                                obj.get_output(fullidx, context)
 
-            context.set_output(placeholder, self.name, freeidx, level=level)
+                    context.set_output(placeholder, self.name, freeidx)
 
         return True
 
@@ -605,7 +607,6 @@ class Expression(object):
 
 class ExpressionContext(object):
     indices = None
-    tmplevel=None
     def __init__(self, cfg):
         self.cfg = cfg
         self.outputs = NestedDict()
@@ -625,62 +626,72 @@ class ExpressionContext(object):
     def set_indices(self, indices):
         self.indices = indices
 
-    def build(self, name, indices, level=0):
+    def build(self, name, indices):
         cfg = self.providers.get(name, None)
         if cfg is None:
             if indices:
-                fmt='{name}.{autoindex}'
+                fmt='{name}{autoindex}' #FIXME: hardcoded
                 for it in indices.iterate( mode=fmt, name=name ):
-                    self.build(it, None, level)
+                    self.build(it, None)
                 return
 
             raise Exception('Do not know how to build '+name)
 
-        printl( level, 'build', name, 'via bundle' )
+        printl('build', name, 'via bundle' )
 
         if indices is not None:
             cfg.indices=indices
 
         from gna.bundle import execute_bundle
-        self.tmplevel = level
-        b=execute_bundle( cfg=cfg, context=self )
-        self.tmplevel = None
+        with nextlevel():
+            b=execute_bundle( cfg=cfg, context=self )
 
     def get_variable(self, name, *idx):
         pass
 
-    def check_outputs(self, obj, level=0):
-        if obj.name in self.outputs:
-            return
+    def check_outputs(self, obj):
+        printl( 'check', obj )
+        with nextlevel():
+            if obj.name in self.outputs:
+                printl( 'found' )
+                return
 
-        level+=1
-        if not obj.build(self, level=level):
-            self.build(obj.name, obj.indices, level)
+        obj.build(self)
 
     def get_key(self, name, nidx, fmt=None):
         nidx = OrderedDict(nidx)
         if fmt:
             return fmt.format( **nidx )
 
-        nidx = [nidx[k] for k in sorted(nidx.keys())]
-        return name, nidx
+        nidx = tuple([nidx[k] for k in sorted(nidx.keys())])
+        return (name,)+nidx
 
-    def get_output(self, name, nidx, level=0):
-        printl( level, 'get', name, nidx )
-        nidx = OrderedDict(nidx)
-        nidx = [nidx[k] for k in sorted(nidx.keys())]
-
-        output = self.outputs.get((name, nidx), None)
-        if not output:
-            raise Exception('Failed to get output {}[{}]'.format(name, nidx))
-
-        return output
+    def get_output(self, name, nidx):
+        return self.get( self.outputs, name, nidx, 'output' )
 
     def set_output(self, output, name, nidx, fmt=None, **kwargs):
-        level = self.tmplevel if self.tmplevel is not None else kwargs.pop('level', 0)
+        self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )
+
+    def get_input(self, name, nidx):
+        return self.get( self.inputs, name, nidx, 'input' )
+
+    def set_input(self, input, name, nidx, fmt=None, **kwargs):
+        self.set( self.inputs, input, name, nidx, 'input', fmt, **kwargs )
+
+    def get(self, source, name, nidx, type):
+        printl('get {}'.format(type), name, nidx )
+        key = self.get_key(name, nidx)
+
+        ret = source.get(key, None)
+        if not ret:
+            raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx))
+
+        return ret
+
+    def set(self, target, io, name, nidx, type, fmt=None, **kwargs):
         key = self.get_key( name, nidx, fmt )
-        printl( level, 'set output', name, key )
-        self.outputs[key]=output
+        printl('set {}'.format(type), name, key )
+        target[key]=io
 
     def connect(self, source, sink, *idx):
         pass

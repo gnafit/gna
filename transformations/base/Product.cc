@@ -35,6 +35,23 @@ Product::Product() {
       });
 }
 
-void Product::multiply(SingleOutput &out) {
-  t_["product"].input(out);
+/**
+ * @brief Add an input and connect it to the output.
+ *
+ * The input name is derived from the output name.
+ *
+ * @param out -- a SingleOutput instance.
+ * @return InputDescriptor instance for the newly created input.
+ */
+InputDescriptor Product::multiply(SingleOutput &out) {
+  return InputDescriptor(t_[0].input(out));
+}
+
+/**
+ * @brief Add an input by name and leave unconnected.
+ * @param name -- a name for the new input.
+ * @return InputDescriptor instance for the newly created input.
+ */
+InputDescriptor Product::multiply(const char* name) {
+  return InputDescriptor(t_[0].input(name));
 }

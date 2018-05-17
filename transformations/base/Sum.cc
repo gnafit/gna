@@ -28,7 +28,7 @@ Sum::Sum() {
  * @return InputDescriptor instance for the newly created input.
  */
 InputDescriptor Sum::add(SingleOutput &out) {
-  return InputDescriptor(t_["sum"].input(out));
+  return InputDescriptor(t_[0].input(out));
 }
 
 /**
@@ -37,5 +37,5 @@ InputDescriptor Sum::add(SingleOutput &out) {
  * @return InputDescriptor instance for the newly created input.
  */
 InputDescriptor Sum::add(const char* name) {
-  return InputDescriptor(t_["sum"].input(name));
+  return InputDescriptor(t_[0].input(name));
 }
