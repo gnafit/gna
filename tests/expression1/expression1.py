@@ -8,16 +8,18 @@ from gna.bundle import execute_bundle
 indices = [
     ('n', 'num',   ['1', '2', '3']),
     ('a', 'alph',  ['a', 'b', 'c']),
-    ('z', 'zyx',   ['X', 'Y', 'Z'])
+    ('z', 'zyx',   ['X', 'Y', 'Z']),
+    ('b', 'bkg',   ['b1', 'b2', 'b3'])
     ]
 
 lib = dict(
         [
             ('norm*spec', dict(name='obs_spec')),
+            ('obs_spec+bkg', dict(name='obs_tot'))
             ]
         )
 
-expr = 'norm()*spec[n]()'
+expr = 'norm()*spec[n]() + bkg[b]()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -31,18 +33,50 @@ print()
 cfg = NestedDict(
         norm = NestedDict(
             bundle = 'dummy',
-            format = 'norm.{autoindex}',
+            name = 'norm',
+            format = '{name}{autoindex}',
             input = True,
             size = 10,
             debug = False
             ),
         spec = NestedDict(
             bundle = 'dummy',
-            format = 'spec.{autoindex}',
+            name = 'spec',
+            format = '{name}{autoindex}',
             input = True,
             size = 10,
-            debug = True
-            )
+            debug = False
+            ),
+        bkg1 = NestedDict(
+            bundle = 'dummy',
+            name = 'bkg',
+            format = '{name}{autoindex}',
+            indices = [ ('b', 'bkg',   ['b1']) ],
+            input = False,
+            size = 10,
+            debug = False,
+            provides = [ 'bkg.b1' ]
+            ),
+        bkg2 = NestedDict(
+            bundle = 'dummy',
+            name = 'bkg',
+            format = '{name}{autoindex}',
+            indices = [ ('b', 'bkg',   ['b2']) ],
+            input = False,
+            size = 10,
+            debug = False,
+            provides = [ 'bkg.b2' ]
+            ),
+        bkg3 = NestedDict(
+            bundle = 'dummy',
+            name = 'bkg',
+            format = '{name}{autoindex}',
+            indices = [ ('b', 'bkg',   ['b3']) ],
+            input = False,
+            size = 10,
+            debug = False,
+            provides = [ 'bkg.b3' ]
+            ),
         )
 context = ExpressionContext( cfg )
 a.build(context)

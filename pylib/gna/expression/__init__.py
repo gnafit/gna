@@ -5,6 +5,16 @@ from collections import OrderedDict
 from gna.configurator import NestedDict
 import itertools as I
 
+printlevel = 0
+class nextlevel():
+    def __enter__(self):
+        global printlevel
+        printlevel+=1
+
+    def __exit__(self, *args, **kwargs):
+        global printlevel
+        printlevel-=1
+
 def printl(level, *args, **kwargs):
     prefix = kwargs.pop('prefix', ())
 
@@ -40,9 +50,9 @@ class Index(object):
         elif mode=='longitems':
             for var in variants:
                 yield self.name, var
-        elif mode=='bothitems':
-            for var in variants:
-                yield self.short, self.name, var
+        # elif mode=='bothitems':
+            # for var in variants:
+                # yield self.short, self.name, var
         else:
             raise Exception('Unsupported iteration mode: {}'.format(mode))
 
@@ -129,25 +139,29 @@ class NIndex(object):
         else:
             return [idx.name for idx in self.indices.values()]
 
-    def iterate(self, mode='values', fix={}):
-        if mode in ['values', 'items', 'longitems', 'bothitems']:
+    def iterate(self, mode='values', fix={}, **kwargs):
+        autoindex = '{'+'}.{'.join(self.names())+'}'
+        if autoindex!='{}':
+            autoindex = '.'+autoindex
+
+        if mode in ['values']:
             for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
                 yield it
+        if mode in ['items']:
+            for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
+                yield it
+        if mode in ['longitems']:
+            for it in I.product(*(idx.iterate(mode=mode, fix=fix) for idx in self.indices.values())):
+                res = it + tuple(kwargs.items())
+                res = res + (( 'autoindex', autoindex.format('', **dict(res))),)
+                yield res
         else:
             if not isinstance(mode, str):
                 raise Exception('Mode should be a string, got {}'.format(type(str).__name__))
 
-            autoindex = '{'+'}.{'.join(self.names())+'}'
-            for it in self.iterate(mode='bothitems', fix=fix):
-                if it:
-                    dct = OrderedDict([ (a,c) for a,b,c in it]+[ (b,c) for a,b,c in it])
-                    dct['autoindex'] = autoindex.format( '', **dct )
-                    yield mode.format(**dct)
-                else:
-                    if '{autoindex}' in mode:
-                        mode = mode.replace( '.{autoindex}', '' )
-                        mode = mode.replace( '{autoindex}.', '' )
-                    yield mode
+            for it in self.iterate(mode='longitems', fix=fix):
+                dct = OrderedDict(it)
+                yield mode.format(**dct)
 
     __iter__ = iterate
 
@@ -398,8 +412,8 @@ class TCall(IndexedContainer, Transformation):
             return self.__str__()
 
     def build(self, context, level=0):
-        IndexedContainer.build(self, context, level)
         Transformation.build(self, context, level+1)
+        # IndexedContainer.build(self, context, level)
 
 class TProduct(IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -591,9 +605,11 @@ class Expression(object):
 
 class ExpressionContext(object):
     indices = None
+    tmplevel=None
     def __init__(self, cfg):
         self.cfg = cfg
         self.outputs = NestedDict()
+        self.inputs  = NestedDict()
 
         self.providers = dict()
         for keys, value in cfg.items():
@@ -612,13 +628,23 @@ class ExpressionContext(object):
     def build(self, name, indices, level=0):
         cfg = self.providers.get(name, None)
         if cfg is None:
+            if indices:
+                fmt='{name}.{autoindex}'
+                for it in indices.iterate( mode=fmt, name=name ):
+                    self.build(it, None, level)
+                return
+
             raise Exception('Do not know how to build '+name)
 
         printl( level, 'build', name, 'via bundle' )
 
-        cfg.indices=indices
+        if indices is not None:
+            cfg.indices=indices
+
         from gna.bundle import execute_bundle
-        b=execute_bundle( cfg=cfg, shared=self.outputs )
+        self.tmplevel = level
+        b=execute_bundle( cfg=cfg, context=self )
+        self.tmplevel = None
 
     def get_variable(self, name, *idx):
         pass
@@ -631,6 +657,14 @@ class ExpressionContext(object):
         if not obj.build(self, level=level):
             self.build(obj.name, obj.indices, level)
 
+    def get_key(self, name, nidx, fmt=None):
+        nidx = OrderedDict(nidx)
+        if fmt:
+            return fmt.format( **nidx )
+
+        nidx = [nidx[k] for k in sorted(nidx.keys())]
+        return name, nidx
+
     def get_output(self, name, nidx, level=0):
         printl( level, 'get', name, nidx )
         nidx = OrderedDict(nidx)
@@ -642,14 +676,11 @@ class ExpressionContext(object):
 
         return output
 
-    def set_output(self, output, name, nidx, **kwargs):
-        level = kwargs.pop('level', 0)
-
-        printl( level, 'set output', name, nidx )
-        nidx = OrderedDict(nidx)
-        nidx = [nidx[k] for k in sorted(nidx.keys())]
-
-        self.outputs[(name, nidx)]=output
+    def set_output(self, output, name, nidx, fmt=None, **kwargs):
+        level = self.tmplevel if self.tmplevel is not None else kwargs.pop('level', 0)
+        key = self.get_key( name, nidx, fmt )
+        printl( level, 'set output', name, key )
+        self.outputs[key]=output
 
     def connect(self, source, sink, *idx):
         pass
