@@ -10,7 +10,7 @@ class cmd(basecmd):
         parser.add_argument('--npeaks', default=1, type=int)
         parser.add_argument('--Emin', default=0, type=float)
         parser.add_argument('--Emax', default=5, type=float)
-        parser.add_argument('--nbins', default=70, type=int)
+        parser.add_argument('--nbins', default=100, type=int)
         parser.add_argument('--order', default=8)
 
     def init(self):
@@ -31,8 +31,8 @@ class cmd(basecmd):
         integrator = ROOT.GaussLegendre(edges, orders, len(orders))
         for name in names:
             locns = env.ns(name)
-            locns.reqparameter('BackgroundRate', central=1, sigma=0.1)
-            locns.reqparameter('Mu', central=2, sigma=1)
+            locns.reqparameter('BackgroundRate', central=50, relsigma=0.1)
+            locns.reqparameter('Mu', central=100, relsigma=0.1)
             locns.reqparameter('E0', central=2, sigma=0.05)
             locns.reqparameter('Width', central=0.2, sigma=0.005)
             with locns:

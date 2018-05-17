@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stdio.h>
+#include <iostream>
+#include "GNAObject.hh"
 
 //
 // Identity transformation

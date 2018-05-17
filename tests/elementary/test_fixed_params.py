@@ -5,7 +5,7 @@ from __future__ import print_function
 import load
 import ROOT
 from gna.env import env
-from gna.parameter_loader import get_parameters
+from gna.parameters.parameter_loader import get_parameters
 
 # Necessary evil, it triggers import of all other symbols from shared library
 ROOT.GNAObject

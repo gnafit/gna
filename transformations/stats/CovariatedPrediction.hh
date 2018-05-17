@@ -8,6 +8,10 @@
 class CovariatedPrediction: public GNAObject,
                             public TransformationBind<CovariatedPrediction> {
 public:
+
+    /**
+   * @brief Defines a segment in covariance
+   */
   struct Segment {
     size_t i, n;
   };
@@ -19,9 +23,10 @@ public:
 
   void append(SingleOutput &obs);
   void finalize();
+  void prediction_ready();
 
   size_t blockOffset(OutputDescriptor inp);
-  size_t blocksCount() const;
+  size_t blocksCount() const noexcept;
   void covariate(SingleOutput &cov,
                  SingleOutput &obs1, size_t n1,
                  SingleOutput &obs2, size_t n2);
@@ -35,17 +40,23 @@ public:
   void calculateCovbase(Args args, Rets rets);
   void calculateCovTypes(Atypes args, Rtypes rets);
   void calculateCov(Args args, Rets rets);
+  void addSystematicCovMatrix(SingleOutput& sys_covmat);
 
   size_t size() const;
 
   void update() const;
 protected:
+
+    /**
+   * @brief Defines an action to perform on a given segment
+   * @param Action -- Either CovarianceAction::Diagonal or CovarianceAction::Block
+   */
   struct CovarianceAction {
     enum Action {
       Diagonal, Block
     };
 
-    CovarianceAction(Action act) : action(act) { }
+    explicit CovarianceAction(Action act) : action(act) { }
 
     Action action;
 
@@ -55,11 +66,16 @@ protected:
     boost::optional<Segment> x, y;
   };
 
+/**
+   * @brief Stores LLT decomposition matrix and provides access to it
+   * @param size -- size of a matrix to be allocated.
+*/ 
+ /* TODO: Also would need change to play along with floats. */
   class LLT: public Eigen::LLT<Eigen::MatrixXd> {
   public:
-    LLT(): Eigen::LLT<Eigen::MatrixXd>() { }
-    LLT(size_t size): Eigen::LLT<Eigen::MatrixXd>(size) { }
-    Eigen::MatrixXd &matrixRef() { return this->m_matrix; }
+    explicit LLT(): Eigen::LLT<Eigen::MatrixXd>() { }
+    explicit LLT(size_t size): Eigen::LLT<Eigen::MatrixXd>(size) { }
+    Eigen::MatrixXd& matrixRef() { return this->m_matrix; }
   };
 
   Handle m_transform;
@@ -69,6 +85,7 @@ protected:
   std::vector<CovarianceAction> m_covactions;
 
   bool m_finalized;
+  bool m_prediction_ready;
   LLT m_lltbase, m_llt;
   Eigen::ArrayXXd m_covbase;
 };

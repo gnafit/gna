@@ -74,6 +74,7 @@ The GNA development is partially supported by the Russian Foundation for Basic R
     - 14-02-91166 a
     - 16-02-01026 a
     - 16-32-00801 mol_a
+    - 18-32-00935 mol_a
 
 and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
     - 14-202-02
