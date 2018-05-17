@@ -1,5 +1,4 @@
-#ifndef SIMPLEDICT_H
-#define SIMPLEDICT_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -45,5 +44,3 @@ public:
 private:
   Container *m_container;
 };
-
-#endif // SIMPLEDICT_H

@@ -1,5 +1,4 @@
-#ifndef DATA_H
-#define DATA_H
+#pragma once
 
 #include <stddef.h>
 
@@ -584,5 +583,3 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
 };
-
-#endif // DATA_H

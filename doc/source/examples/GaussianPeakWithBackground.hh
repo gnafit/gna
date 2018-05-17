@@ -1,5 +1,4 @@
-#ifndef GAUSSIANPEAKWITHBACKGROUND_H
-#define GAUSSIANPEAKWITHBACKGROUND_H
+#pragma once
 
 #include <boost/math/constants/constants.hpp>
 #include <cmath>
@@ -7,7 +6,7 @@
 #include "GNAObject.hh"
 
 class GaussianPeakWithBackground: public GNAObject,
-                                  public Transformation<GaussianPeakWithBackground> {
+                                  public TransformationBind<GaussianPeakWithBackground> {
 public:
   GaussianPeakWithBackground() {
     variable_(&m_b, "BackgroundRate");
@@ -31,5 +30,3 @@ public:
 protected:
   variable<double> m_b, m_mu, m_E0, m_w;
 };
-
-#endif // GAUSSIANPEAKWITHBACKGROUND_H

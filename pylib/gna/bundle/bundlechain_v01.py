@@ -6,6 +6,7 @@ import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 from gna.configurator import NestedDict
+from gna.grouping import CatDict, Categories
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise
@@ -14,6 +15,8 @@ class bundlechain_v01(TransformationBundle):
     def __init__(self, listkey='bundlechain_list', **kwargs):
         self.listkey = listkey
         super(bundlechain_v01, self).__init__( **kwargs )
+
+        self.shared.groups = Categories(self.cfg.get('groups', {}), recursive=True)
 
         self.bundles = NestedDict()
 

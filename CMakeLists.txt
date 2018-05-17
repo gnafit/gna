@@ -8,50 +8,59 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 enable_language(Fortran)
 
 set (SOURCES
-  core/TransformationBase.cc
-  core/Transformation.cc
-  core/Parametrized.cc
   core/GNAObject.cc
-  core/UncertainParameter.cc
   core/ParametersGroup.cc
-  core/Prediction.cc
-  core/CovariatedPrediction.cc
-  core/Product.cc
-  core/Sum.cc
-  core/WeightedSum.cc
-  core/LinearInterpolator.cc
-  core/Derivative.cc
-  core/Covmat.cc
-  core/Chi2.cc
-  core/Poisson.cc
-  core/SelfPower.cc
-  core/Normalize.cc
-  core/CovarianceToyMC.cc
-  core/NormalToyMC.cc
-  core/PoissonToyMC.cc
-  core/Rebin.cc
-  core/Jacobian.cc
-  core/ParCovMatrix.cc
-  core/MatrixProduct.cc
-  core/VarProduct.cc
-  core/VarSum.cc
-  core/VarDiff.cc
-  neutrino/OscProb2nu.cc
-  neutrino/OscProbPMNS.cc
-  neutrino/OscProbPMNSDecoh.cc
-  neutrino/IbdInteraction.cc
-  neutrino/IbdZeroOrder.cc
-  neutrino/IbdFirstOrder.cc
-  neutrino/ReactorNorm.cc
-  neutrino/ReactorGroup.cc
-  neutrino/OscProbMatterUniform.cc
-  integrator/GaussLegendre.cc
-  integrator/GaussLegendre2d.cc
-  detector/EnergyResolution.cc
-  detector/HistNonlinearity.cc
-  detector/HistSmear.cc
-  detector/RenormalizeDiag.cc
-  detector/C14Spectrum.cc
+  core/Parametrized.cc
+  core/TransformationDescriptor.cc
+  core/UncertainParameter.cc
+  core/transformation/Accessor.cc
+  core/transformation/Args.cc
+  core/transformation/Atypes.cc
+  core/transformation/EntryHandle.cc
+  core/transformation/OutputHandle.cc
+  core/transformation/InputHandle.cc
+  core/transformation/Initializer.hh
+  core/transformation/Rets.cc
+  core/transformation/Rtypes.cc
+  core/transformation/Source.cc
+  core/transformation/TransformationBase.cc
+  core/transformation/TransformationEntry.cc
+  core/transformation/TransformationErrors.cc
+  transformations/base/Prediction.cc
+  transformations/base/Product.cc
+  transformations/base/Sum.cc
+  transformations/base/WeightedSum.cc
+  transformations/calculus/Derivative.cc
+  transformations/detector/C14Spectrum.cc
+  transformations/detector/EnergyResolution.cc
+  transformations/detector/HistNonlinearity.cc
+  transformations/detector/HistSmear.cc
+  transformations/functions/SelfPower.cc
+  transformations/hist/Rebin.cc
+  transformations/integrator/GaussLegendre.cc
+  transformations/integrator/GaussLegendre2d.cc
+  transformations/interpolation/LinearInterpolator.cc
+  transformations/linalg/Normalize.cc
+  transformations/linalg/RenormalizeDiag.cc
+  transformations/neutrino/IbdFirstOrder.cc
+  transformations/neutrino/IbdInteraction.cc
+  transformations/neutrino/IbdZeroOrder.cc
+  transformations/neutrino/OscProb2nu.cc
+  transformations/neutrino/OscProbMatterUniform.cc
+  transformations/neutrino/OscProbPMNS.cc
+  transformations/neutrino/OscProbPMNSDecoh.cc
+  transformations/neutrino/ReactorGroup.cc
+  transformations/neutrino/ReactorNorm.cc
+  transformations/stats/Chi2.cc
+  transformations/stats/CovarianceToyMC.cc
+  transformations/stats/CovariatedPrediction.cc
+  transformations/stats/Covmat.cc
+  transformations/stats/NormalToyMC.cc
+  transformations/stats/Poisson.cc
+  transformations/stats/PoissonToyMC.cc
+  transformations/var/VarDiff.cc
+  transformations/var/VarProduct.cc
+  transformations/var/VarSum.cc
   extra/GridFilter.cc
   )
 
@@ -60,8 +69,25 @@ set (HEADERS
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  Sink.hh
+  Source.hh
+  Args.hh
+  Rets.hh
+  Rtypes.hh
+  Atypes.hh
+  EntryHandle.hh
+  OutputHandle.hh
+  OpenHandle.hh
+  InputHandle.hh
+  TransformationDebug.hh
   TransformationBase.hh
-  Transformation.hh
+  TransformationEntry.hh
+  TransformationErrors.hh
+  TransformationDescriptor.hh
+  TransformationBind.hh
+  SingleOutput.hh
+  Initializer.hh
+  Accessor.hh
   GNAObject.hh
   UncertainParameter.hh
   Prediction.hh
@@ -119,9 +145,23 @@ set (HEADERS
   Transpose.hh
   )
 
-
-include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
-# set(DICT    Dict.cc)
+include_directories(core/transformation/
+                    core/
+                    transformations/backgrounds/
+                    transformations/base/
+                    transformations/calculus/
+                    transformations/detector/
+                    transformations/functions/
+                    transformations/hist/
+                    transformations/integrator/
+                    transformations/interpolation/
+                    transformations/linalg/
+                    transformations/neutrino/
+                    transformations/stats/
+                    transformations/var/
+                    extra/
+                    examples/
+                   )
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -157,7 +197,7 @@ find_package(ROOT REQUIRED)
 # include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}")
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})

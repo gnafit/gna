@@ -1,5 +1,4 @@
-#ifndef UNCERTAINPARAMETER_H
-#define UNCERTAINPARAMETER_H
+#pragma once
 
 #include <string>
 #include <limits>
@@ -35,7 +34,7 @@ protected:
 
 template <typename T>
 class Variable: public GNASingleObject,
-                public Transformation<Variable<T>>
+                public TransformationBind<Variable<T>>
 {
 public:
   Variable(const std::string &name)
@@ -244,5 +243,3 @@ inline T UniformAngleParameter<T>::cast(const std::string &v) const {
   T b = boost::lexical_cast<T>(v.substr(pipos+2));
   return a*pi/b;
 }
-
-#endif // UNCERTAINPARAMETER_H

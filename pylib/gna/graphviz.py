@@ -24,7 +24,7 @@ class GNADot(object):
 
         self.graph=G.AGraph( directed=True, label=transformation.name() )
         self.register = set()
-        self.walk_back( R.TransformationTypes.OpenHandle(transformation).getEntry() )
+        self.walk_back( R.OpenHandle(transformation).getEntry() )
         self.write = self.graph.write
 
     def registered( self, *args, **kwargs ):

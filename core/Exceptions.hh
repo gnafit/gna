@@ -1,5 +1,4 @@
-#ifndef EXCEPTIONS_H
-#define EXCEPTIONS_H
+#pragma once
 
 #include <stdexcept>
 #include <string>
@@ -30,5 +29,3 @@ public:
   std::string indexstr;
   std::string object;
 };
-
-#endif // EXCEPTIONS_H
