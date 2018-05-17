@@ -31,6 +31,7 @@ set (SOURCES
   transformations/base/Sum.cc
   transformations/base/WeightedSum.cc
   transformations/calculus/Derivative.cc
+  transformations/calculus/Jacobian.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
   transformations/detector/HistNonlinearity.cc
@@ -42,6 +43,7 @@ set (SOURCES
   transformations/interpolation/LinearInterpolator.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
+  transformations/linalg/MatrixProduct.cc
   transformations/neutrino/IbdFirstOrder.cc
   transformations/neutrino/IbdInteraction.cc
   transformations/neutrino/IbdZeroOrder.cc
@@ -58,6 +60,7 @@ set (SOURCES
   transformations/stats/NormalToyMC.cc
   transformations/stats/Poisson.cc
   transformations/stats/PoissonToyMC.cc
+  transformations/stats/ParCovMatrix.cc
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
@@ -197,7 +200,7 @@ find_package(ROOT REQUIRED)
 # include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}")
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})

@@ -5,7 +5,7 @@
 
 
 class ParCovMatrix: public GNAObject,
-                 public Transformation<ParCovMatrix> {
+                 public TransformationBind<ParCovMatrix> {
     public:
         ParCovMatrix() {
             transformation_(this, "unc_matrix")

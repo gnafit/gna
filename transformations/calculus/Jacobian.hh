@@ -5,7 +5,7 @@
 #include <vector>
 
 class Jacobian: public GNAObject,
-                public Transformation<Jacobian> {
+                public TransformationBind<Jacobian> {
 public:
     Jacobian(double reldelta = 1e-1)
         : m_reldelta{reldelta}
@@ -22,7 +22,6 @@ public:
     void calcJacobian(Args args, Rets rets);
     void dump();
     void append(Parameter<double>* par) {
-        std::cout << "Append called" << std::endl;
         m_pars.push_back(par);
     };
 protected:

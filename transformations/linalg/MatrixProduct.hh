@@ -1,7 +1,8 @@
 #pragma once
+
 #include "GNAObject.hh"
 
-class MatrixProduct: public GNAObject, public Transformation<MatrixProduct> {
+class MatrixProduct: public GNAObject, public TransformationBind<MatrixProduct> {
     public:
         MatrixProduct() {
             transformation_(this, "product")
