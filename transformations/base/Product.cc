@@ -52,6 +52,6 @@ InputDescriptor Product::multiply(SingleOutput &out) {
  * @param name -- a name for the new input.
  * @return InputDescriptor instance for the newly created input.
  */
-InputDescriptor Product::multiply(const char* name) {
+InputDescriptor Product::add_input(const char* name) {
   return InputDescriptor(t_[0].input(name));
 }

@@ -36,6 +36,6 @@ InputDescriptor Sum::add(SingleOutput &out) {
  * @param name -- a name for the new input.
  * @return InputDescriptor instance for the newly created input.
  */
-InputDescriptor Sum::add(const char* name) {
+InputDescriptor Sum::add_input(const char* name) {
   return InputDescriptor(t_[0].input(name));
 }

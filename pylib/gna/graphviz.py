@@ -30,10 +30,14 @@ class GNADot(object):
         if not isinstance(transformation, (list, tuple)):
             transformation = [transformation]
         for t in transformation:
-            if not isinstance(t, R.TransformationTypes.Handle):
-                raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle, got '+type(t).__name__)
+            if isinstance(t, R.TransformationTypes.OutputHandle):
+                entry = R.OpenOutputHandle(t).getEntry()
+            elif isinstance(t, R.TransformationTypes.Handle):
+                entry = R.OpenHandle(t).getEntry()
+            else:
+                raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
 
-            self.walk_back( R.OpenHandle(t).getEntry() )
+            self.walk_back( entry )
         self.write = self.graph.write
 
     def registered( self, *args, **kwargs ):

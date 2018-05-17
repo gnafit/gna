@@ -72,6 +72,10 @@ void InputDescriptor::connect(const OutputDescriptor &out) const {
   return BaseClass::connect(out);
 }
 
+void InputDescriptor::connect(const TransformationTypes::OutputHandle &out) const {
+  return BaseClass::connect(out);
+}
+
 TransformationDescriptor TransformationDescriptor::invalid(int index) {
   throw IndexError(index, "input");
 }

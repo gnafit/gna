@@ -26,11 +26,12 @@ class dummy(TransformationBundle):
             obj = R.Identity()
             trans = obj.identity
             input = trans.source
+            output = trans.target
         else:
             obj = C.Points( N.zeros(shape=self.cfg.size, dtype='d') )
             trans = obj.points
+            output = trans.points
             input = None
-        output = trans.single()
 
         if self.cfg.debug:
             print( 'Create {var} [{inp}out]'.format(var=tkey, inp=self.cfg.input and 'in, ' or '') )
@@ -38,7 +39,7 @@ class dummy(TransformationBundle):
         if self.context:
             self.context.set_output(output, self.cfg.name, key, self.fmt)
             if input:
-                self.context.set_input(input, self.cfg.name, key, self.fmt)
+                self.context.set_input(input, self.cfg.name, key, self.fmt, clone=0)
 
         if input:
             self.transformations_in[tkey] = trans

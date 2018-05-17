@@ -16,7 +16,12 @@ class Product: public GNASingleObject,
 public:
   Product();                                    ///< Constructor
 
-  InputDescriptor multiply(const char* name);   ///< Add an input by name and leave unconnected.
+  InputDescriptor add_input(const char* name);  ///< Add an input by name and leave unconnected.
+  /** @brief Add an input by name and leave unconnected. */
+  InputDescriptor multiply(const char* name){
+    return add_input(name);
+  }
+
   InputDescriptor multiply(SingleOutput &data); ///< Add an input and connect it to the output.
 
   /**

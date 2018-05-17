@@ -235,6 +235,9 @@ class Indexed(object):
     def get_output(self, nidx, context):
         return context.get_output(self.name, self.get_relevant( nidx ))
 
+    def get_input(self, nidx, context, clone=None):
+        return context.get_input(self.name, self.get_relevant( nidx ), clone=clone)
+
     def get_relevant(self, nidx):
         return self.indices.get_relevant(nidx)
 
@@ -306,23 +309,28 @@ class IndexedContainer(object):
     def nonempty(self):
         return bool(self.objects)
 
-    def build(self, context):
-        printl('build {}:'.format(type(self).__name__), str(self) )
+    def build(self, context, connect=True):
+        if not self.objects:
+            return
+
+        printl('build (container) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
             for obj in self.objects:
                 context.check_outputs(obj)
 
-            printl('connect', str(self))
+            if not connect:
+                return
+
+            printl('connect (container)', str(self))
             with nextlevel():
                 for idx in self.indices.iterate(mode='items'):
+                    printl( 'index', idx )
                     with nextlevel():
-                        for obj in self.objects:
-                            obj.get_output(idx, context)
-
-                    context.set_output(placeholder, self.name, idx)
-
-        return False
+                        for i, obj in enumerate(self.objects):
+                            output = obj.get_output(idx, context)
+                            input  = self.get_input(idx, context, clone=i)
+                            input(output)
 
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -338,7 +346,7 @@ class Variable(Indexed):
         return TCall(self.name, self, targs=targs)
 
     def build(self, context):
-        return True
+        pass
 
     def get_output(self, nidx, context):
         pass
@@ -380,7 +388,39 @@ class Transformation(Indexed):
         return TSum('?', self, other)
 
     def build(self, context):
+        printl('build (trans) {}:'.format(type(self).__name__), str(self) )
         context.build( self.name, self.indices)
+
+class NestedTransformation(object):
+    tinit = None
+
+    def __init__(self):
+        self.tobjects = []
+
+    def set_tinit(self, obj):
+        self.tinit = obj
+
+    def new_tobject(self, label):
+        newobj = self.tinit()
+        newobj.transformations[0].setLabel(label)
+        self.tobjects.append(newobj)
+        import ROOT as R
+        return newobj, R.OutputDescriptor(newobj.single())
+
+    def build(self, context):
+        printl('build (nested) {}:'.format(type(self).__name__), str(self) )
+
+        if self.tinit:
+            with nextlevel():
+                for idx in self.indices.iterate(mode='items'):
+                    tobj, newout = self.new_tobject(str(idx))
+                    context.set_output(newout, self.name, idx)
+                    for i, obj in enumerate(self.objects):
+                        inp = tobj.add_input('%02d'%i)
+                        context.set_input(inp, self.name, idx, clone=i)
+
+        with nextlevel():
+            IndexedContainer.build(self, context)
 
 class TCall(IndexedContainer, Transformation):
     def __init__(self, name, *args, **kwargs):
@@ -414,11 +454,12 @@ class TCall(IndexedContainer, Transformation):
             return self.__str__()
 
     def build(self, context):
+        printl('build (call) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
             Transformation.build(self, context)
-        IndexedContainer.build(self, context)
+            IndexedContainer.build(self, context)
 
-class TProduct(IndexedContainer, Transformation):
+class TProduct(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
         if not objects:
             raise Exception('Expect at least one variable for TProduct')
@@ -433,12 +474,15 @@ class TProduct(IndexedContainer, Transformation):
             else:
                 newobjects.append(o)
 
+        NestedTransformation.__init__(self)
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
         self.set_operator( ' * ' )
+        import ROOT as R
+        self.set_tinit( R.Product )
 
-class TSum(IndexedContainer, Transformation):
+class TSum(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
         if not objects:
             raise Exception('Expect at least one variable for TSum')
@@ -453,12 +497,15 @@ class TSum(IndexedContainer, Transformation):
             else:
                 newobjects.append(o)
 
+        NestedTransformation.__init__(self)
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
         self.set_operator( ' + ', '(', ')' )
+        import ROOT as R
+        self.set_tinit( R.Sum )
 
-class WeightedTransformation(IndexedContainer, Transformation):
+class WeightedTransformation(NestedTransformation, IndexedContainer, Transformation):
     object, weight = None, None
     def __init__(self, name, *objects, **kwargs):
         for other in objects:
@@ -472,6 +519,7 @@ class WeightedTransformation(IndexedContainer, Transformation):
             else:
                 raise Exception( 'Unsupported type' )
 
+        NestedTransformation.__init__(self)
         IndexedContainer.__init__(self, self.weight, self.object)
         Transformation.__init__(self, name, self.weight, self.object, **kwargs)
 
@@ -486,12 +534,13 @@ class OperationMeta(type):
             args = args,
         return cls(*args)
 
-class Operation(TCall):
+class Operation(TCall,NestedTransformation):
     __metaclass__ = OperationMeta
     call_lock=False
     def __init__(self, name, *indices, **kwargs):
         self.indices_to_reduce = NIndex(*indices)
         TCall.__init__(self, name)
+        NestedTransformation.__init__(self)
 
     def __str__(self):
         return '{}{{{:s}}}'.format(Indexed.__str__(self), self.indices_to_reduce)
@@ -521,35 +570,45 @@ class Operation(TCall):
         raise Exception('Unimplemented method called')
 
     def build(self, context):
-        printl('build product:', str(self) )
+        printl('build (operation) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
-            for obj in self.objects:
-                context.check_outputs(obj)
+            IndexedContainer.build(self, context, connect=False)
 
-            printl('connect', str(self))
+        if not self.tinit:
+            return
+
+        with nextlevel():
+            printl('connect (operation)', str(self))
             with nextlevel():
                 for freeidx in self.indices.iterate(mode='items'):
+                    tobj, newout = self.new_tobject(str(freeidx))
+                    context.set_output(newout, self.name, freeidx)
                     with nextlevel():
                         for opidx in self.indices_to_reduce.iterate(mode='items'):
                             fullidx = list(freeidx)+list(opidx)
-                            for obj in self.objects:
-                                obj.get_output(fullidx, context)
-
-                    context.set_output(placeholder, self.name, freeidx)
-
-        return True
+                            for i, obj in enumerate(self.objects):
+                                output = obj.get_output(fullidx, context)
+                                inp  = tobj.add_input('%02d'%i)
+                                context.set_input(inp, self.name, fullidx, clone=i)
+                                inp(output)
 
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'sum', *indices, **kwargs)
         self.set_operator( ' ++ ' )
 
+        import ROOT as R
+        self.set_tinit( R.Sum )
+
 placeholder=['placeholder']
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
         self.set_operator( ' ** ' )
+
+        import ROOT as R
+        self.set_tinit( R.Product )
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -656,14 +715,22 @@ class ExpressionContext(object):
                 printl( 'found' )
                 return
 
-        obj.build(self)
+            obj.build(self)
 
-    def get_key(self, name, nidx, fmt=None):
+    def get_key(self, name, nidx, fmt=None, clone=None):
+        if clone is not None:
+            clone = '%02d'%clone
+
         nidx = OrderedDict(nidx)
         if fmt:
-            return fmt.format( **nidx )
+            ret = fmt.format( **nidx )
+            if clone:
+                ret += '.'+clone
+            return ret
 
         nidx = tuple([nidx[k] for k in sorted(nidx.keys())])
+        if clone:
+            nidx = nidx + (clone,)
         return (name,)+nidx
 
     def get_output(self, name, nidx):
@@ -672,26 +739,31 @@ class ExpressionContext(object):
     def set_output(self, output, name, nidx, fmt=None, **kwargs):
         self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )
 
-    def get_input(self, name, nidx):
-        return self.get( self.inputs, name, nidx, 'input' )
+    def get_input(self, name, nidx, clone=None):
+        return self.get( self.inputs, name, nidx, 'input', clone=clone )
 
-    def set_input(self, input, name, nidx, fmt=None, **kwargs):
-        self.set( self.inputs, input, name, nidx, 'input', fmt, **kwargs )
+    def set_input(self, input, name, nidx, fmt=None, clone=None):
+        self.set( self.inputs, input, name, nidx, 'input', fmt, clone)
 
-    def get(self, source, name, nidx, type):
-        printl('get {}'.format(type), name, nidx )
-        key = self.get_key(name, nidx)
+    def get(self, source, name, nidx, type, clone=None):
+        key = self.get_key(name, nidx, clone=clone)
+        printl('get {}'.format(type), name, key)
 
         ret = source.get(key, None)
         if not ret:
-            raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx))
+            raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 
         return ret
 
-    def set(self, target, io, name, nidx, type, fmt=None, **kwargs):
-        key = self.get_key( name, nidx, fmt )
-        printl('set {}'.format(type), name, key )
+    def set(self, target, io, name, nidx, type, fmt=None, clone=None):
+        key = self.get_key( name, nidx, fmt, clone )
+        printl('set {}'.format(type), name, key)
         target[key]=io
 
-    def connect(self, source, sink, *idx):
-        pass
+    # def connect(self, source, sink, nidx, fmtsource=None, fmtsink=None):
+        # printl( 'connect: {}->{} ({:s})'.format( source, sink, nidx ) )
+        # with nextlevel():
+            # output = self.get_output( source, nidx )
+            # input  = self.get_input( sink, nidx )
+
+        # input( output )

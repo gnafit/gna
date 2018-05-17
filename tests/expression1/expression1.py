@@ -4,6 +4,13 @@
 from __future__ import print_function
 from gna.expression import *
 from gna.bundle import execute_bundle
+from load import ROOT as R
+R.GNAObject
+
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '--dot', help='write graphviz output' )
+args = parser.parse_args()
 
 indices = [
     ('n', 'num',   ['1', '2', '3']),
@@ -15,11 +22,12 @@ indices = [
 lib = dict(
         [
             ('norm*spec', dict(name='obs_spec')),
-            ('obs_spec+bkg', dict(name='obs_tot'))
+            ('obs_spec+bkg', dict(name='obs_tot')),
+            ('sum', dict(name='totalsum'))
             ]
         )
 
-expr = 'norm()*spec[n](enu()) + bkg[b]()'
+expr = 'prod[n] | sum[a,b] | norm()*spec[n](enu[a]()) + bkg[b]()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -34,6 +42,14 @@ cfg = NestedDict(
         enu = NestedDict(
             bundle = 'dummy',
             name = 'enu',
+            format = '{name}{autoindex}',
+            input = False,
+            size = 10,
+            debug = False
+            ),
+        epos = NestedDict(
+            bundle = 'dummy',
+            name = 'epos',
             format = '{name}{autoindex}',
             input = False,
             size = 10,
@@ -88,3 +104,13 @@ cfg = NestedDict(
         )
 context = ExpressionContext( cfg )
 a.build(context)
+
+if args.dot:
+    # try:
+    from gna.graphviz import GNADot
+
+    graph = GNADot( context.outputs.prod )
+    graph.write(args.dot)
+    print( 'Write output to:', args.dot )
+    # except Exception as e:
+        # print( '\033[31mFailed to plot dot\033[0m' )
