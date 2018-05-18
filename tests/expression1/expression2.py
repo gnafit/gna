@@ -62,6 +62,10 @@ print()
 context = ExpressionContext( cfg )
 a.build(context)
 
+from gna.bindings import OutputDescriptor
+print( 'outputs:' )
+print( context.outputs )
+
 if args.dot:
     # try:
     from gna.graphviz import GNADot

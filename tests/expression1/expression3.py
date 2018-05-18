@@ -22,10 +22,11 @@ indices = [
     ]
 
 lib = dict(
-        wspec = dict( expr = 'weight*spec' )
+        wspec    = dict( expr = 'weight*spec' ),
+        totalsum = dict( expr= 'sum:z' )
 )
 
-expr = 'weight[z] * spec| enu()'
+expr = 'sum[z]| weight[z] * spec| enu()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -68,12 +69,12 @@ env.globalns.printparameters()
 print( 'outputs:' )
 print( context.outputs )
 
-# if args.dot:
-    # # try:
-    # from gna.graphviz import GNADot
+if args.dot:
+    # try:
+    from gna.graphviz import GNADot
 
-    # graph = GNADot( context.outputs.totalsum )
-    # graph.write(args.dot)
-    # print( 'Write output to:', args.dot )
-    # # except Exception as e:
-        # # print( '\033[31mFailed to plot dot\033[0m' )
+    graph = GNADot( context.outputs.totalsum )
+    graph.write(args.dot)
+    print( 'Write output to:', args.dot )
+    # except Exception as e:
+        # print( '\033[31mFailed to plot dot\033[0m' )

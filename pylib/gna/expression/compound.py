@@ -92,8 +92,8 @@ class IndexedContainer(object):
                     with nextlevel():
                         nobj = len(self.objects)
                         for i, obj in enumerate(self.objects):
-                            if nobj==1:
-                                i=None
+                            # if nobj==1:
+                                # i=None
                             output = obj.get_output(idx, context)
                             input  = self.get_input(idx, context, clone=i)
                             input(output)
@@ -144,8 +144,8 @@ class NestedTransformation(object):
                     context.set_output(newout, self.name, idx)
                     nobj = len(self.objects)
                     for i, obj in enumerate(self.objects):
-                        if nobj==1:
-                            i=None
+                        # if nobj==1:
+                            # i=None
                         inp = tobj.add_input('%02d'%i)
                         context.set_input(inp, self.name, idx, clone=i)
 
@@ -268,9 +268,14 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
 
             from constructors import stdvector
             labels  = stdvector([self.object.name])
+            printl('connect (weighted)')
             for idx in self.indices.iterate():
                 wname = idx.current_format('{name}{autoindex}', name=self.weight.name)
                 weights = stdvector([wname])
                 tobj, newout = self.new_tobject( idx.current_format('{name}{autoindex}', name=self.name), labels, weights )
+                inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
+                context.set_input(inp, self.name, idx)
+                out = self.object.get_output(idx, context)
+                inp(out)
 
