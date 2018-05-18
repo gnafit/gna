@@ -10,8 +10,10 @@ class Variable(Indexed):
 
     def __mul__(self, other):
         if isinstance(other, Transformation):
+            from gna.expression.compound import WeightedTransformation
             return WeightedTransformation('?', self, other)
 
+        from gna.expression.compound import VProduct
         return VProduct('?', self, other)
 
     def __call__(self, *targs):
@@ -19,7 +21,9 @@ class Variable(Indexed):
         return TCall(self.name, self, targs=targs)
 
     def build(self, context):
-        pass
+        printl('build (var) {}:'.format(type(self).__name__), str(self) )
+        with nextlevel():
+            context.build(self.name, self.indices)
 
     def get_output(self, nidx, context):
         pass
@@ -32,6 +36,7 @@ class Transformation(Indexed):
         return '{}()'.format(Indexed.__str__(self))
 
     def __mul__(self, other):
+        from gna.expression.compound import WeightedTransformation
         if isinstance(other, (Variable, WeightedTransformation)):
             return WeightedTransformation('?', self, other)
 
@@ -42,4 +47,4 @@ class Transformation(Indexed):
 
     def build(self, context):
         printl('build (trans) {}:'.format(type(self).__name__), str(self) )
-        context.build( self.name, self.indices)
+        context.build(self.name, self.indices)

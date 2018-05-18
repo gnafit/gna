@@ -90,7 +90,10 @@ class IndexedContainer(object):
                 for idx in self.indices.iterate():
                     printl( 'index', idx )
                     with nextlevel():
+                        nobj = len(self.objects)
                         for i, obj in enumerate(self.objects):
+                            if nobj==1:
+                                i=None
                             output = obj.get_output(idx, context)
                             input  = self.get_input(idx, context, clone=i)
                             input(output)
@@ -124,8 +127,8 @@ class NestedTransformation(object):
     def set_tinit(self, obj):
         self.tinit = obj
 
-    def new_tobject(self, label):
-        newobj = self.tinit()
+    def new_tobject(self, label, *args):
+        newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
         self.tobjects.append(newobj)
         import ROOT as R
@@ -139,7 +142,10 @@ class NestedTransformation(object):
                 for idx in self.indices.iterate():
                     tobj, newout = self.new_tobject(idx.current_format('{name}{autoindex}', name=self.name))
                     context.set_output(newout, self.name, idx)
+                    nobj = len(self.objects)
                     for i, obj in enumerate(self.objects):
+                        if nobj==1:
+                            i=None
                         inp = tobj.add_input('%02d'%i)
                         context.set_input(inp, self.name, idx, clone=i)
 
@@ -249,5 +255,22 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
 
         self.set_operator( ' * ' )
 
+        import ROOT as R
+        self.set_tinit( R.WeightedSum )
+
     def __mul__(self, other):
         return WeightedTransformation('?', self, other)
+
+    def build(self, context):
+        printl('build (weighted) {}:'.format(type(self).__name__), str(self) )
+        with nextlevel():
+            IndexedContainer.build(self, context, connect=False)
+
+            from constructors import stdvector
+            labels  = stdvector([self.object.name])
+            for idx in self.indices.iterate():
+                wname = idx.current_format('{name}{autoindex}', name=self.weight.name)
+                weights = stdvector([wname])
+                tobj, newout = self.new_tobject( idx.current_format('{name}{autoindex}', name=self.name), labels, weights )
+                context.set_output(newout, self.name, idx)
+

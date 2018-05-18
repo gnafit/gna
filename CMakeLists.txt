@@ -105,6 +105,7 @@ set (HEADERS
   Histogram.hh
   HistEdges.hh
   Identity.hh
+  Dummy.hh
   LinearInterpolator.hh
   SegmentWise.hh
   InterpExpo.hh

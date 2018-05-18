@@ -48,4 +48,3 @@ class dummy(TransformationBundle):
         self.transformations_out[tkey] = trans
         self.shared[tkey] = self.outputs[tkey] = output
         trans.setLabel( tkey )
-

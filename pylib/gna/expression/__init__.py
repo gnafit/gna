@@ -4,6 +4,7 @@ from __future__ import print_function
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
+from gna.env import env
 
 class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
@@ -51,10 +52,11 @@ class Expression(object):
 
 class ExpressionContext(object):
     indices = None
-    def __init__(self, cfg):
+    def __init__(self, cfg, ns=None):
         self.cfg = cfg
         self.outputs = NestedDict()
         self.inputs  = NestedDict()
+        self.ns = ns or env.globalns
 
         self.providers = dict()
         for keys, value in cfg.items():
@@ -144,6 +146,11 @@ class ExpressionContext(object):
         key = self.get_key( name, nidx, fmt, clone )
         printl('set {}'.format(type), name, key)
         target[key]=io
+
+    def set_variable(self, name, nidx, var, **kwargs):
+        key = '.'.join(self.get_key( name, nidx ))
+        printl('set variable', name, key)
+        self.ns.reqparameter(key, cfg=var, **kwargs)
 
     # def connect(self, source, sink, nidx, fmtsource=None, fmtsink=None):
         # printl( 'connect: {}->{} ({:s})'.format( source, sink, nidx ) )
