@@ -118,6 +118,23 @@ class VProduct(IndexedContainer, Variable):
 
         self.set_operator( '*' )
 
+    def build(self, context):
+        printl('build (var) {}:'.format(type(self).__name__), str(self) )
+        with nextlevel():
+            IndexedContainer.build(self, context, connect=False)
+
+            from constructors import stdvector
+            import ROOT as R
+            with context.ns:
+                for idx in self.indices.iterate():
+                    names = [idx.current_format('{name}{autoindex}', name=obj.name) for obj in self.objects]
+                    name = idx.current_format('{name}{autoindex}', name=self.name)
+
+                    path, head = name.rsplit('.', 1)
+                    ns = context.ns(path)
+                    vp = R.VarProduct( stdvector( names ), head, ns=ns )
+                    ns[head].get()
+
 class NestedTransformation(object):
     tinit = None
 
@@ -272,7 +289,9 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             for idx in self.indices.iterate():
                 wname = idx.current_format('{name}{autoindex}', name=self.weight.name)
                 weights = stdvector([wname])
-                tobj, newout = self.new_tobject( idx.current_format('{name}{autoindex}', name=self.name), labels, weights )
+
+                with context.ns:
+                    tobj, newout = self.new_tobject( idx.current_format('{name}{autoindex}', name=self.name), labels, weights )
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)

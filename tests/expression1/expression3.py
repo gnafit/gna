@@ -22,11 +22,12 @@ indices = [
     ]
 
 lib = dict(
-        wspec    = dict( expr = 'weight*spec' ),
-        totalsum = dict( expr= 'sum:z' )
+        wspec    = dict( expr = 'w2*spec' ),
+        w2       = dict( expr='weight*weight' ),
+        totalsum = dict( expr= 'sum:z' ),
 )
 
-expr = 'sum[z]| weight[z] * spec| enu()'
+expr = 'sum[z]| weight[z]*weight * spec| enu()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -41,7 +42,7 @@ cfg = NestedDict(
         weight = NestedDict(
             bundle = 'dummyvar',
             variables = uncertaindict([
-                ('weight', (1, 0.1)),
+                ('weight', (2, 0.1)),
                 ],
                 mode='percent'
                 )

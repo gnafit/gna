@@ -98,7 +98,7 @@ class ExpressionContext(object):
     def check_outputs(self, obj):
         printl( 'check', obj )
         with nextlevel():
-            if obj.name in self.outputs:
+            if obj.name in self.outputs or obj.name in self.ns.storage or obj.name in self.ns.namespaces:
                 printl( 'found' )
                 return
 
