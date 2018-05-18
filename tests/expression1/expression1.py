@@ -20,12 +20,12 @@ indices = [
     ]
 
 lib = dict(
-        [
-            ('norm*spec', dict(name='obs_spec')),
-            ('obs_spec+bkg', dict(name='obs_tot')),
-            ('sum:z', dict(name='totalsum'))
-            ]
-        )
+    obs_spec = dict(expr='norm*spec'),
+    obs_tot  = dict(expr='obs_spec+bkg'),
+    insum    = dict(expr='sum:a_b'),
+    inproduct= dict(expr='prod:n'),
+    totalsum = dict(expr='sum:z')
+)
 
 expr = 'sum[z] | prod[n] | sum[a,b] | norm()*spec[n](enu[a,z]()) + bkg[b]()'
 a = Expression(expr, indices=indices)
@@ -34,7 +34,7 @@ print(a.expression_raw)
 print(a.expression)
 
 a.parse()
-a.guessname(lib=lib, save=True)
+a.guessname(lib, save=True)
 a.tree.dump(True)
 
 print()
@@ -42,7 +42,6 @@ cfg = NestedDict(
         enu = NestedDict(
             bundle = 'dummy',
             name = 'enu',
-            format = '{name}{autoindex}',
             input = False,
             size = 10,
             debug = False
@@ -50,7 +49,6 @@ cfg = NestedDict(
         epos = NestedDict(
             bundle = 'dummy',
             name = 'epos',
-            format = '{name}{autoindex}',
             input = False,
             size = 10,
             debug = False
@@ -58,7 +56,6 @@ cfg = NestedDict(
         norm = NestedDict(
             bundle = 'dummy',
             name = 'norm',
-            format = '{name}{autoindex}',
             input = False,
             size = 10,
             debug = False
@@ -66,7 +63,6 @@ cfg = NestedDict(
         spec = NestedDict(
             bundle = 'dummy',
             name = 'spec',
-            format = '{name}{autoindex}',
             input = True,
             size = 10,
             debug = False
@@ -74,7 +70,6 @@ cfg = NestedDict(
         bkg1 = NestedDict(
             bundle = 'dummy',
             name = 'bkg',
-            format = '{name}{autoindex}',
             indices = [ ('b', 'bkg',   ['b1']) ],
             input = False,
             size = 10,
@@ -84,7 +79,6 @@ cfg = NestedDict(
         bkg2 = NestedDict(
             bundle = 'dummy',
             name = 'bkg',
-            format = '{name}{autoindex}',
             indices = [ ('b', 'bkg',   ['b2']) ],
             input = False,
             size = 10,
@@ -94,7 +88,6 @@ cfg = NestedDict(
         bkg3 = NestedDict(
             bundle = 'dummy',
             name = 'bkg',
-            format = '{name}{autoindex}',
             indices = [ ('b', 'bkg',   ['b3']) ],
             input = False,
             size = 10,

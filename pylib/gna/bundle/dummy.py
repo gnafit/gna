@@ -16,12 +16,11 @@ class dummy(TransformationBundle):
         if not isinstance(idx, NIndex):
             idx = NIndex(fromlist=self.cfg.indices)
 
-        self.fmt = self.cfg.get('format', '{name}{autoindex}')
-        for i, key in enumerate(idx.iterate( mode='longitems', name=self.cfg.name)):
+        for i, key in enumerate(idx.iterate()):
             self.make_trans( i, key )
 
     def make_trans(self, i, key):
-        tkey = self.fmt.format(**dict(key))
+        tkey = key.current_format('{name}{autoindex}', name=self.cfg.name)
         if self.cfg.input:
             obj = R.Identity()
             trans = obj.identity
@@ -37,9 +36,9 @@ class dummy(TransformationBundle):
             print( 'Create {var} [{inp}out]'.format(var=tkey, inp=self.cfg.input and 'in, ' or '') )
 
         if self.context:
-            self.context.set_output(output, self.cfg.name, key, self.fmt)
+            self.context.set_output(output, self.cfg.name, key)
             if input:
-                self.context.set_input(input, self.cfg.name, key, self.fmt, clone=0)
+                self.context.set_input(input, self.cfg.name, key, clone=0)
 
         if input:
             self.transformations_in[tkey] = trans
