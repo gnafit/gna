@@ -58,7 +58,7 @@ class Operation(TCall,NestedTransformation):
             printl('connect (operation)', str(self))
             with nextlevel():
                 for freeidx in self.indices.iterate():
-                    tobj, newout = self.new_tobject(freeidx.current_format('{name}{autoindex}', name=self.name))
+                    tobj, newout = self.new_tobject(self.current_format(freeidx))
                     context.set_output(newout, self.name, freeidx)
                     with nextlevel():
                         for opidx in self.indices_to_reduce.iterate():

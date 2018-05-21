@@ -228,3 +228,9 @@ class Indexed(object):
     def get_relevant(self, nidx):
         return self.indices.get_relevant(nidx)
 
+    def current_format(self, nidx, fmt=None, *args, **kwargs):
+        nidx = self.indices.get_relevant(nidx)
+        if not fmt:
+            fmt = '{name}{autoindex}'
+        return nidx.current_format( fmt, *args, name=self.name, **kwargs )
+

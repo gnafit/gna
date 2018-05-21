@@ -40,9 +40,11 @@ class Transformation(Indexed):
         if isinstance(other, (Variable, WeightedTransformation)):
             return WeightedTransformation('?', self, other)
 
+        from gna.expression.compound import TProduct
         return TProduct('?', self, other)
 
     def __add__(self, other):
+        from gna.expression.compound import TSum
         return TSum('?', self, other)
 
     def build(self, context):

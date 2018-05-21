@@ -23,11 +23,12 @@ indices = [
 
 lib = dict(
         wspec    = dict( expr = 'w2*spec' ),
-        w2       = dict( expr='weight*weight' ),
+        w2       = dict( expr='weight1*weight2' ),
         totalsum = dict( expr= 'sum:z' ),
+        totalprod = dict( expr= 'prod:a' ),
 )
 
-expr = 'sum[z]| weight[z]*weight * spec| enu()'
+expr = 'prod[a]| sum[z]| weight1[z]*weight2[a] * spec| enu()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -39,10 +40,18 @@ a.tree.dump(True)
 
 print()
 cfg = NestedDict(
-        weight = NestedDict(
+        weight1 = NestedDict(
             bundle = 'dummyvar',
             variables = uncertaindict([
-                ('weight', (2, 0.1)),
+                ('weight1', (2, 0.1)),
+                ],
+                mode='percent'
+                )
+            ),
+        weight2 = NestedDict(
+            bundle = 'dummyvar',
+            variables = uncertaindict([
+                ('weight2', (3, 0.1)),
                 ],
                 mode='percent'
                 )
@@ -74,7 +83,7 @@ if args.dot:
     # try:
     from gna.graphviz import GNADot
 
-    graph = GNADot( context.outputs.totalsum )
+    graph = GNADot( context.outputs.totalprod )
     graph.write(args.dot)
     print( 'Write output to:', args.dot )
     # except Exception as e:

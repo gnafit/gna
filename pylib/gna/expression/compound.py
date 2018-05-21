@@ -127,8 +127,8 @@ class VProduct(IndexedContainer, Variable):
             import ROOT as R
             with context.ns:
                 for idx in self.indices.iterate():
-                    names = [idx.current_format('{name}{autoindex}', name=obj.name) for obj in self.objects]
-                    name = idx.current_format('{name}{autoindex}', name=self.name)
+                    names = [obj.current_format(idx) for obj in self.objects]
+                    name = self.current_format(idx)
 
                     path, head = name.rsplit('.', 1)
                     ns = context.ns(path)
@@ -157,7 +157,7 @@ class NestedTransformation(object):
         if self.tinit:
             with nextlevel():
                 for idx in self.indices.iterate():
-                    tobj, newout = self.new_tobject(idx.current_format('{name}{autoindex}', name=self.name))
+                    tobj, newout = self.new_tobject(self.current_format(idx))
                     context.set_output(newout, self.name, idx)
                     nobj = len(self.objects)
                     for i, obj in enumerate(self.objects):
@@ -287,11 +287,11 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             labels  = stdvector([self.object.name])
             printl('connect (weighted)')
             for idx in self.indices.iterate():
-                wname = idx.current_format('{name}{autoindex}', name=self.weight.name)
+                wname = self.weight.current_format(idx)
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject( idx.current_format('{name}{autoindex}', name=self.name), labels, weights )
+                    tobj, newout = self.new_tobject( self.current_format(idx), labels, weights )
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)
