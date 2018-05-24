@@ -120,8 +120,8 @@ class ExpressionContext(object):
             nidx = nidx + (clone,)
         return (name,)+nidx
 
-    def get_output(self, name, nidx):
-        return self.get( self.outputs, name, nidx, 'output' )
+    def get_output(self, name, nidx, clone=None):
+        return self.get( self.outputs, name, nidx, 'output', clone=clone )
 
     def set_output(self, output, name, nidx, fmt=None, **kwargs):
         self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )

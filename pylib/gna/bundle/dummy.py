@@ -21,15 +21,17 @@ class dummy(TransformationBundle):
 
     def make_trans(self, i, key):
         tkey = key.current_format('{name}{autoindex}', name=self.cfg.name)
+
+        obj = R.Dummy(self.cfg.size, tkey)
+        trans = obj.dummy
+        output = obj.add_output('output')
         if self.cfg.input:
-            obj = R.Identity()
-            trans = obj.identity
-            input = trans.source
-            output = trans.target
+            ninputs = int(self.cfg.input)
+            if ninputs>1:
+                input = tuple(obj.add_input('input_%02d'%i) for i in range(self.cfg.input))
+            else:
+                input = obj.add_input('input')
         else:
-            obj = C.Points( N.zeros(shape=self.cfg.size, dtype='d') )
-            trans = obj.points
-            output = trans.points
             input = None
 
         if self.cfg.debug:
@@ -38,13 +40,21 @@ class dummy(TransformationBundle):
         if self.context:
             self.context.set_output(output, self.cfg.name, key)
             if input:
-                self.context.set_input(input, self.cfg.name, key, clone=0)
+                if isinstance(input, tuple):
+                    for i, inp in enumerate(input):
+                        self.context.set_input(inp, self.cfg.name, key, clone=i)
+                else:
+                    self.context.set_input(input, self.cfg.name, key, clone=0)
 
         if input:
             self.transformations_in[tkey] = trans
-            self.inputs[tkey] = input
+
+            if isinstance(input, tuple):
+                for i, inp in enumerate(input):
+                    self.inputs[(tkey, '%02i'%i)] = inp
+            else:
+                self.inputs[tkey] = input
 
         self.objects[tkey] = obj
         self.transformations_out[tkey] = trans
         self.shared[tkey] = self.outputs[tkey] = output
-        trans.setLabel( tkey )

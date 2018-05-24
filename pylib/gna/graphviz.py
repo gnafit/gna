@@ -137,7 +137,9 @@ class GNADot(object):
         """For each source of the Entry walk backward and build the tree"""
         for i, source in enumerate(entry.sources):
             if not source.materialized():
-                raise Exception('Trying to build a graph with not fully initialized tree')
+                graph.add_node( uid(source)+' in', shape='point', label='in' )
+                graph.add_edge( uid(source)+' in', uid(entry), **self.get_labels(i, source) )
+                continue
 
             self.walk_back( source.sink.entry )
 
@@ -151,8 +153,8 @@ class GNADot(object):
 
             if sink.sources.size()==0:
                 """In case sink is not connected, draw empty output"""
-                graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
-                graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
+                graph.add_node( uid(sink)+' out', shape='point', label='out' )
+                graph.add_edge( uid(sink.entry), uid(sink)+' out', **self.get_labels(i, sink) )
                 continue
             elif sink.sources.size()==1 or not self.joints:
                 """In case there is only one connection draw it as is"""
