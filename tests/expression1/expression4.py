@@ -22,9 +22,12 @@ indices = [
     ]
 
 lib = dict(
+        sume = dict( expr = 'sum:a' ),
+        sums = dict( expr = 'sum:n' ),
+        res  = dict( expr = 'sums+prod' )
 )
 
-expr = 'spec| enu(), epos()'
+expr = 'prod[n](spec( enu[n](), sum[a]| epos[a]() )) + sum[n]| spec[n]()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -70,7 +73,7 @@ if args.dot:
     # try:
     from gna.graphviz import GNADot
 
-    graph = GNADot( context.outputs.spec, joints=False )
+    graph = GNADot( context.outputs.spec['1'], joints=False )
     graph.write(args.dot)
     print( 'Write output to:', args.dot )
     # except Exception as e:

@@ -114,7 +114,6 @@ class ExpressionContext(object):
                 ret += '.'+clone
             return ret
 
-
         nidx = nidx.current_values()
         if clone:
             nidx = nidx + (clone,)

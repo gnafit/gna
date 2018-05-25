@@ -26,7 +26,7 @@ class Index(object):
             variants = self.variants
 
         for var in variants:
-            yield Index(self.short, self.name, self.variants, var)
+            yield Index(self.short, self.name, self.variants, current=var)
 
     __iter__ = iterate
 
