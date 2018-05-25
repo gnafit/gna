@@ -25,7 +25,7 @@ class GNADot(object):
         kwargs.setdefault('labelfontsize', 10)
         self.joints = kwargs.pop('joints', True)
 
-        self.graph=G.AGraph( directed=True, **kwargs )
+        self.graph=G.AGraph( directed=True, strict=False, **kwargs )
         self.register = set()
         if not isinstance(transformation, (list, tuple)):
             transformation = [transformation]
@@ -158,11 +158,10 @@ class GNADot(object):
                 continue
             elif sink.sources.size()==1 or not self.joints:
                 """In case there is only one connection draw it as is"""
-                for source in sink.sources:
+                for j, source in enumerate(sink.sources):
                     assert source.materialized()
 
                     graph.add_edge( uid(sink.entry), uid(source.entry), sametail=str(i), **self.get_labels(i, sink, None, source))
-
                     self.walk_back( source.entry )
             else:
                 """In case there is more than one connections, merge them"""
@@ -172,6 +171,5 @@ class GNADot(object):
                     assert source.materialized()
 
                     graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
-
                     self.walk_back( source.entry )
 
