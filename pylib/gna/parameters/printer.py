@@ -69,8 +69,7 @@ def Parameter__str( self, labels=False  ):
             central = self.central(),
             )
     limits  = self.limits()
-    if label:
-        s+=sepstr+label
+    label = self.label()
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)

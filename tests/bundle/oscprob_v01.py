@@ -15,22 +15,15 @@ parser.add_argument( '--dot', help='write graphviz output' )
 args = parser.parse_args()
 
 indices = [
-    ( 'r', 'reactor', ('DB', 'LA1', 'LA2') ),
-    ( 'd', 'detector', ('AD11', 'AD12', 'AD21') ),
-    ( 'c', 'component', ('comp0', 'comp1', 'comp2') )
+    ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
+    ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
+    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
     ]
 
-def rules( nidx ):
-    if nidx.indices['c'].current == 'comp0':
-        nidx.indices['r'].current = 'all'
-        nidx.indices['d'].current = 'all'
-    return nidx
-
 lib = dict(
-    sums = dict( expr = 'sum:n' )
 )
 
-expr = 'enu()'
+expr = 'oscprob[c,d,r]( enu() )'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -40,7 +33,7 @@ a.parse()
 a.guessname(lib, save=True)
 a.tree.dump(True)
 
-# print()
+print()
 cfg = NestedDict(
         enu = NestedDict(
             bundle = 'dummy',
@@ -49,17 +42,10 @@ cfg = NestedDict(
             size = 10,
             debug = False
             ),
-        epos = NestedDict(
-            bundle = 'dummy',
-            name = 'epos',
-            input = False,
-            size = 10,
-            debug = False
-            ),
-        spec = NestedDict(
-            bundle = 'dummy',
-            name = 'spec',
-            input = 1,
+        oscprob = NestedDict(
+            bundle = 'oscprob_v01',
+            name = 'oscprob',
+            input = True,
             size = 10,
             debug = False
             ),
@@ -73,11 +59,11 @@ print( 'outputs:' )
 print( context.outputs )
 
 if args.dot:
-    # try:
-    from gna.graphviz import GNADot
+    try:
+        from gna.graphviz import GNADot
 
-    graph = GNADot( context.outputs.enu, joints=False )
-    graph.write(args.dot)
-    print( 'Write output to:', args.dot )
-    # except Exception as e:
-        # print( '\033[31mFailed to plot dot\033[0m' )
+        graph = GNADot( context.outputs.enu, joints=False )
+        graph.write(args.dot)
+        print( 'Write output to:', args.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )

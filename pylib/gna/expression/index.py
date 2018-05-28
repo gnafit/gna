@@ -47,8 +47,6 @@ class Index(object):
 class NIndex(object):
     def __init__(self, *indices, **kwargs):
         self.indices = OrderedDict()
-        self.rules = set()
-        self.set_rules( kwargs.pop('rules', None) )
 
         for idx in indices:
             self |= idx
@@ -69,20 +67,11 @@ class NIndex(object):
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
-    def set_rules(self, rules):
-        if not rules:
-            return
-
-        if isinstance( rules, (tuple, list, set) ):
-            self.rules.update( set(rules) )
-        else:
-            self.rules.add(rules)
-
     def __add__(self, other):
         if not isinstance(other, NIndex):
             raise Exception('Unsupported add() type')
 
-        return NIndex(self, other, rules=self.rules.intersection(other))
+        return NIndex(self, other)
 
     def __ior__(self, other):
         if isinstance(other, Index):
@@ -92,7 +81,6 @@ class NIndex(object):
         else:
             if isinstance(other, NIndex):
                 others = other.indices.values()
-                self.rules.intersection_update( other.rules )
             elif isinstance(other, Indexed):
                 others = other.indices.indices.values()
             else:
@@ -104,7 +92,7 @@ class NIndex(object):
         return self
 
     def __sub__(self, other):
-        return NIndex(self, ignore=other.indices.keys(), rules=self.rules.intersection(other.rules))
+        return NIndex(self, ignore=other.indices.keys())
 
     def arrange(self):
         self.indices = OrderedDict( [(k, self.indices[k]) for k in sorted(self.indices.keys())] )
@@ -113,7 +101,7 @@ class NIndex(object):
         return ', '.join( self.indices.keys() )
 
     def __add__(self, other):
-        return NIndex(self, other, rules=self.rules.intersection(other.rules))
+        return NIndex(self, other)
 
     def __bool__(self):
         return bool(self.indices)
@@ -142,10 +130,7 @@ class NIndex(object):
 
     def iterate(self, fix={}, **kwargs):
         for it in I.product(*(idx.iterate(fix=fix) for idx in self.indices.values())):
-            ret = NIndex(*(Index(idx) for idx in it), rules=self.rules)
-            for rule in self.rules:
-                ret = rule( ret )
-            yield ret
+            yield NIndex(*(Index(idx) for idx in it))
 
     __iter__ = iterate
 
@@ -179,7 +164,13 @@ class NIndex(object):
         return fmt.format( **dct )
 
     def get_relevant(self, nidx):
-        return NIndex(*[v for k, v in nidx.indices.items() if k in self.indices], rules=self.rules)
+        return NIndex(*[v for k, v in nidx.indices.items() if k in self.indices])
+
+    def get_sub(self, indices):
+        return NIndex(*[v for k, v in self.indices.items() if k in indices])
+
+    def get_current(self, short):
+        return self.indices[short].current
 
 class Indexed(object):
     name=''

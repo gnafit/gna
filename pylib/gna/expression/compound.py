@@ -96,7 +96,8 @@ class IndexedContainer(object):
                                 # i=None
                             output = obj.get_output(idx, context)
                             input  = self.get_input(idx, context, clone=i)
-                            input(output)
+                            if not input.materialized(): #Fixme: should be configurable
+                                input(output)
 
 class VProduct(IndexedContainer, Variable):
     def __init__(self, name, *objects, **kwargs):
