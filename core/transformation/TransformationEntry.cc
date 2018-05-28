@@ -204,6 +204,7 @@ void Entry::evaluateTypes() {
       if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
       }
+      printf("here");
       if (rets[i].defined()) {
         sinks[i].data.reset(new Data<double>(rets[i]));
       }

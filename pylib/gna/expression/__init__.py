@@ -6,16 +6,25 @@ from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
 from gna.env import env
 
+class VTContainer(OrderedDict):
+    def __init__(self, *args, **kwargs):
+        super(VTContainer, self).__init__(*args, **kwargs)
+
+    def __missing__(self, key):
+        newvar = Variable(key)
+        self[key] = newvar
+        return newvar
+
 class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
     tree = None
-    def __init__(self, expression, indices):
+    def __init__(self, expression, indices, **kwargs):
         self.expression_raw = expression
         self.expression = open_fcn( self.expression_raw )
 
         self.globals=VTContainer(self.operations)
         self.indices=OrderedDict()
-        self.defindices(indices)
+        self.defindices(indices, **kwargs)
 
     def parse(self):
         if self.tree:
@@ -35,13 +44,10 @@ class Expression(object):
     def __repr__(self):
         return 'Expression("{}")'.format(self.expression_raw)
 
-    def newindex(self, short, name, variants):
-        idx = self.indices[short] = Index(short, name, variants)
-        self.globals[short] = idx
-
     def defindices(self, defs):
-        for d in defs:
-            self.newindex(*d)
+        self.indices = NIndex(fromlist=defs)
+        for short, idx in self.indices.indices.items():
+            self.globals[short] = idx
 
     def build(self, context):
         if not self.tree:

@@ -45,7 +45,9 @@ public:
 
   /** @brief Add an output by name */
   OutputDescriptor add_output(const char* name){
-    return OutputDescriptor(t_[0].output(name));
+    auto ret = OutputDescriptor(t_[0].output(name));
+    t_[0].updateTypes();
+    return ret;
   }
 
   std::vector<variable<double>> m_vars;

@@ -15,17 +15,22 @@ parser.add_argument( '--dot', help='write graphviz output' )
 args = parser.parse_args()
 
 indices = [
-    ('n', 'num',   ['1', '2']),
-    ('a', 'alph',  ['a', 'b']),
-    ('z', 'zyx',   ['X', 'Y', 'Z']),
-    ('b', 'bkg',   ['b1', 'b2'])
+    ( 'r', 'reactor', ('DB', 'LA1', 'LA2') ),
+    ( 'd', 'detector', ('AD11', 'AD12', 'AD21') ),
+    ( 'c', 'component', ('comp0', 'comp1', 'comp2') )
     ]
 
+def rules( nidx ):
+    if nidx.indices['c'].current == 'comp0':
+        nidx.indices['r'].current = 'all'
+        nidx.indices['d'].current = 'all'
+    return nidx
+
 lib = dict(
-    sum = dict( expr = 'spec+spec' )
+    sums = dict( expr = 'sum:n' )
 )
 
-expr = 'spec() + spec()'
+expr = 'enu()'
 a = Expression(expr, indices=indices)
 
 print(a.expression_raw)
@@ -35,7 +40,7 @@ a.parse()
 a.guessname(lib, save=True)
 a.tree.dump(True)
 
-print()
+# print()
 cfg = NestedDict(
         enu = NestedDict(
             bundle = 'dummy',
@@ -54,7 +59,7 @@ cfg = NestedDict(
         spec = NestedDict(
             bundle = 'dummy',
             name = 'spec',
-            input = 0,
+            input = 1,
             size = 10,
             debug = False
             ),
@@ -71,7 +76,7 @@ if args.dot:
     # try:
     from gna.graphviz import GNADot
 
-    graph = GNADot( context.outputs.spec, joints=False )
+    graph = GNADot( context.outputs.enu, joints=False )
     graph.write(args.dot)
     print( 'Write output to:', args.dot )
     # except Exception as e:

@@ -7,11 +7,21 @@ from collections import OrderedDict
 from gna.expression.printl import *
 
 class Index(object):
-    def __init__(self, short, name, variants, current=None):
-        self.short = short
-        self.name  = name
-        self.variants = variants
-        self.current=current
+    def __init__(self, *args, **kwargs):
+        first, args = args[0], args[1:]
+        if isinstance(first, Index):
+            self.short    = first.short
+            self.name     = first.name
+            self.variants = first.variants
+            self.current  = first.current
+        else:
+            self.short = first
+            self.name, self.variants = args
+            args = []
+            self.current=kwargs.pop( 'current', None )
+
+        if args or kwargs:
+            raise Exception( 'Unparsed paramters: {:s}, {:s}'.format(args, kwargs) )
 
     def iterate(self, fix={}):
         if self.variants is None:
@@ -26,7 +36,8 @@ class Index(object):
             variants = self.variants
 
         for var in variants:
-            yield Index(self.short, self.name, self.variants, current=var)
+            ret = Index(self.short, self.name, self.variants, current=var)
+            yield ret
 
     __iter__ = iterate
 
@@ -36,6 +47,8 @@ class Index(object):
 class NIndex(object):
     def __init__(self, *indices, **kwargs):
         self.indices = OrderedDict()
+        self.rules = set()
+        self.set_rules( kwargs.pop('rules', None) )
 
         for idx in indices:
             self |= idx
@@ -56,11 +69,20 @@ class NIndex(object):
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
+    def set_rules(self, rules):
+        if not rules:
+            return
+
+        if isinstance( rules, (tuple, list, set) ):
+            self.rules.update( set(rules) )
+        else:
+            self.rules.add(rules)
+
     def __add__(self, other):
         if not isinstance(other, NIndex):
             raise Exception('Unsupported add() type')
 
-        return NIndex(self, other)
+        return NIndex(self, other, rules=self.rules.intersection(other))
 
     def __ior__(self, other):
         if isinstance(other, Index):
@@ -70,6 +92,7 @@ class NIndex(object):
         else:
             if isinstance(other, NIndex):
                 others = other.indices.values()
+                self.rules.intersection_update( other.rules )
             elif isinstance(other, Indexed):
                 others = other.indices.indices.values()
             else:
@@ -81,7 +104,7 @@ class NIndex(object):
         return self
 
     def __sub__(self, other):
-        return NIndex(self, ignore=other.indices.keys())
+        return NIndex(self, ignore=other.indices.keys(), rules=self.rules.intersection(other.rules))
 
     def arrange(self):
         self.indices = OrderedDict( [(k, self.indices[k]) for k in sorted(self.indices.keys())] )
@@ -90,7 +113,7 @@ class NIndex(object):
         return ', '.join( self.indices.keys() )
 
     def __add__(self, other):
-        return NIndex(self, other)
+        return NIndex(self, other, rules=self.rules.intersection(other.rules))
 
     def __bool__(self):
         return bool(self.indices)
@@ -119,7 +142,10 @@ class NIndex(object):
 
     def iterate(self, fix={}, **kwargs):
         for it in I.product(*(idx.iterate(fix=fix) for idx in self.indices.values())):
-            yield NIndex(*it)
+            ret = NIndex(*(Index(idx) for idx in it), rules=self.rules)
+            for rule in self.rules:
+                ret = rule( ret )
+            yield ret
 
     __iter__ = iterate
 
@@ -153,7 +179,7 @@ class NIndex(object):
         return fmt.format( **dct )
 
     def get_relevant(self, nidx):
-        return NIndex(*[v for k, v in nidx.indices.items() if k in self.indices])
+        return NIndex(*[v for k, v in nidx.indices.items() if k in self.indices], rules=self.rules)
 
 class Indexed(object):
     name=''

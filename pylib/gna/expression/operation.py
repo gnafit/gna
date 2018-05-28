@@ -85,13 +85,3 @@ class OProd(Operation):
 
         import ROOT as R
         self.set_tinit( R.Product )
-
-class VTContainer(OrderedDict):
-    def __init__(self, *args, **kwargs):
-        super(VTContainer, self).__init__(*args, **kwargs)
-
-    def __missing__(self, key):
-        newvar = Variable(key)
-        self[key] = newvar
-        return newvar
-
