@@ -54,7 +54,7 @@ context = ExpressionContext(cfg, ns=env.globalns)
 a.build(context)
 
 from gna.bindings import OutputDescriptor
-env.globalns.printparameters()
+env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 

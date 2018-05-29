@@ -31,7 +31,7 @@ class OscProbPMNS: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNS>::transformation_;
 
-  OscProbPMNS(Neutrino from, Neutrino to);
+  OscProbPMNS(Neutrino from, Neutrino to, std::string l_name="L");
 
   template <int I, int J>
   void calcComponent(Args args, Rets rets);
@@ -57,7 +57,7 @@ class OscProbPMNSMult: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNSMult>::transformation_;
 
-  OscProbPMNSMult(Neutrino from, Neutrino to);
+  OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name="Lavg");
 
   template <int I, int J>
   void calcComponent(Args args, Rets rets);

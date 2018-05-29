@@ -78,10 +78,10 @@ void OscProbAveraged::CalcAverage(Args args, Rets rets) {
 }
 
 
-OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
+OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)
 {
-  variable_(&m_L, "L");
+  variable_(&m_L, l_name);
   transformation_("comp12")
     .input("Enu")
     .output("comp12")
@@ -183,13 +183,13 @@ void OscProbPMNS::calcSum(Args args, Rets rets) {
   }
 }
 
-OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
+OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)
 {
   if (m_alpha != m_beta) {
     throw std::runtime_error("OscProbPMNSMult is only for survivals");
   }
-  variable_(&m_Lavg, "Lavg");
+  variable_(&m_Lavg, l_name);
   variable_(&m_weights, "weights");
 
   transformation_("comp12")

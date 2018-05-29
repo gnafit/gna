@@ -21,13 +21,13 @@ class oscprob_v01(TransformationBundle):
 
         for i, it in enumerate(self.idx.iterate()):
             dist_it = it.get_sub( ('d', 'r') )
-            distenv = dist_it.current_format('baseline{autoindex}')
+            dist = dist_it.current_format('baseline{autoindex}')
 
             oscprobkey = dist_it.current_format('{autoindex}')[1:]
             oscprob = self.objects.get( oscprobkey, None )
             if not oscprob:
-                with self.common_namespace(distenv):
-                    oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae())
+                # with self.common_namespace(distenv):
+                oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), dist)
 
             component = it.get_current('c')
             if component=='comp0':
@@ -51,7 +51,7 @@ class oscprob_v01(TransformationBundle):
         reqparameters(self.common_namespace)
 
         for it in self.idx.get_sub( ['r', 'd'] ):
-            key = it.current_format('baseline{autoindex}.L')
-            head, key = key.rsplit('.', 1)
-            self.common_namespace(head).reqparameter( key, central=1, sigma=0.1, fixed=True )
+            key = it.current_format('baseline{autoindex}')
+
+            self.common_namespace.reqparameter( key, central=1, sigma=0.1, fixed=True )
 

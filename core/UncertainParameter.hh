@@ -23,6 +23,7 @@ public:
   void set(T value) { m_var = value; }
 
   const variable<T> &getVariable() const { return m_var; }
+
 protected:
   parameter<T> m_var;
 };
