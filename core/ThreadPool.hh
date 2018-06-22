@@ -26,7 +26,13 @@ namespace MultiThreading {
   */
   class Task {
   public:
+    Task() {}
     Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) { } 
+
+    void operator=(const Task& task) {
+	this->m_entry = task.m_entry;
+    }
+
     void run_task();
     inline bool done() { std::cout << "src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
@@ -43,6 +49,8 @@ namespace MultiThreading {
 	    thr.join();
 	}
     }
+
+    int whoami();
     void add_task(Task task);
     void new_worker(Task &task, size_t index);
     int is_free_worker_exists();

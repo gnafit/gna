@@ -31,16 +31,21 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 void MultiThreading::Worker::work(){ // runs task stack
  //   std::cout << "EVA-id-work() = " << std::this_thread::get_id() << std::endl;
   //  std::cerr << "Work" << std::endl;
-    std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
+    Task current_task;
+    //std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
   //  std::cerr << "Work-after-locker" << std::endl;
 
     while (!task_stack->empty()) {
-    std::cout << "Work task size  = " << task_stack->size() << std::endl;
-    Task& current_task = task_stack->top();
+    	{
+	    std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
+    	    std::cout << "Work task size  = " << task_stack->size() << std::endl;
+    	    current_task = task_stack->top();
 //        if (!current_task.ready()) { /* make waiting for finish children */ }
-      task_stack->pop(); 
-      current_task.run_task(); // TODO: make it in separate thread
+      	    task_stack->pop(); 
+	}
+      	current_task.run_task(); // TODO: make it in separate thread
     }
+    // TODO sleep thread
 
 }
 
@@ -52,6 +57,16 @@ MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr
     m_workers.push_back(Worker(*this));
     m_workers[0].thr_head = std::this_thread::get_id();
 }
+
+
+int MultiThreading::ThreadPool::whoami() {
+        size_t thr_size = m_workers.size();
+        for (size_t i =0; i < thr_size; i++) {
+            if (m_workers[i].thr_head == std::this_thread::get_id())
+                return i;
+        }
+        return -1;
+    }
 
 
 void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_t index) {
@@ -67,11 +82,11 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_
         	std::cerr << "New worker added! mw size = " << m_workers.size() << std::endl;
         	m_workers[index].thr_head =  std::this_thread::get_id();
 		std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
-        	if (in_task.done()) std::async(std::launch::async, std::bind(&Worker::work, m_workers[index]));
+        	//if (in_task.done()) std::async(std::launch::async, std::bind(&Worker::work, m_workers[index]));
 	}
 	tp_add_mutex.unlock();
 	cv_tp_add_mutex.notify_one();
-        //if (in_task.done()) m_workers[index].work();
+        if (in_task.done()) m_workers[index].work();
 }
 
 void MultiThreading::ThreadPool::manage_not_motherthread(MultiThreading::Task in_task) {
@@ -88,6 +103,8 @@ void MultiThreading::ThreadPool::manage_not_motherthread(MultiThreading::Task in
 
 size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_task) {
     int worker_index = -1;
+
+    std::cout << "WHOAMI = " << whoami() << std::endl;
     size_t w_size;
     {
         std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
