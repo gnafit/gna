@@ -795,7 +795,7 @@ namespace TransformationTypes {
      * @param maxentries -- maximal number of Entry instances the Base may keep.
      */
     Base(size_t maxentries): Base() {
-      std::lock_guard<std::mutex> lck(base_mutex);
+      //std::lock_guard<std::mutex> lck(base_mutex);
       m_maxEntries = maxentries;
     }
 

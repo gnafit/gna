@@ -11,7 +11,7 @@
 #include <thread>
 #include <vector>
 #include <stack>
-
+#include <condition_variable> 
 #include "TransformationBase.hh"
 #include "GNAObject.hh"
 
@@ -43,10 +43,13 @@ namespace MultiThreading {
 	    thr.join();
 	}
     }
-    void add_task(Task task, bool isfirst = true);
+    void add_task(Task task);
     void new_worker(Task &task, size_t index);
     int is_free_worker_exists();
     bool is_pool_full();
+    void manage_not_motherthread(Task in_task);
+    size_t try_to_find_worker(Task in_task);
+
     size_t worker_count;
 //    void set_max_thread_num(int k);
 
@@ -56,6 +59,7 @@ namespace MultiThreading {
     std::vector< std::vector<Task> > m_global_wait_list;
     size_t m_max_thread_number;
     std::mutex tp_add_mutex;
+    std::condition_variable cv_tp_add_mutex;
 //    std::condition_variable cv_add;
     std::mutex tp_thr_add_mutex;
 //    std::condition_variable cv_thr_add;

@@ -29,7 +29,7 @@ using TransformationTypes::Base;
 
 //class ThreadPool;
 class Task;
-MultiThreading::ThreadPool tpool(2);
+MultiThreading::ThreadPool tpool(4);
 
 
 /**
@@ -344,7 +344,7 @@ Base::Base(const Base &other)
  * @param other -- the other Base.
  */
 Base &Base::operator=(const Base &other) {
-  std::lock_guard<std::mutex> lck(base_mutex);
+  //std::lock_guard<std::mutex> lck(base_mutex);
   t_ = Accessor(*this);
   m_entries.reserve(other.m_entries.size());
   copyEntries(other);

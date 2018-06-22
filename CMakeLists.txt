@@ -10,6 +10,7 @@ enable_language(Fortran)
 set (SOURCES
   core/TransformationBase.cc
   core/Transformation.cc
+  core/ThreadPool.cc
   core/Parametrized.cc
   core/GNAObject.cc
   core/UncertainParameter.cc
@@ -62,6 +63,7 @@ set (HEADERS
   Exceptions.hh
   TransformationBase.hh
   Transformation.hh
+  ThreadPool.hh
   GNAObject.hh
   UncertainParameter.hh
   Prediction.hh
@@ -133,6 +135,7 @@ set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -pipe")
 include(dev-tools)
 
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
@@ -162,6 +165,6 @@ ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" LINKDEF LinkDef.h)
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT) #-lasan)# -fsanitize=address -lasan)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
