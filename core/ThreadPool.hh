@@ -37,6 +37,7 @@ namespace MultiThreading {
     inline bool done() { std::cout << "src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
     TransformationTypes::Entry *m_entry;
+    //Worker &
   };
 
 
@@ -82,16 +83,20 @@ namespace MultiThreading {
   class Worker {
   public:
     Worker(ThreadPool &in_pool);
+    Worker(Worker &&worker) : pool(std::move(worker).pool), thr_head(std::move(worker.thr_head)), task_stack(std::move(worker.task_stack)) {
+    }
     void work();
-    inline bool is_free () { return task_stack->size() == 0; }
-    inline void add_to_task_stack(Task task) { task_stack->push(task); std::cerr << "Size of stack now is " << task_stack->size() << std::endl;}
+    bool is_free ();
+    void add_to_task_stack(Task task);
 
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
 //  std::vector<std::thread::id> mother_thread_ids;
     std::stack<Task> *task_stack;
-    
+
+    mutable std::mutex mtx_worker;
+    std::condition_variable cv_worker;    
   };
 }
 #endif /* GNATHREADPOOL_H */

@@ -15,6 +15,7 @@
 #include <future>
 
 void MultiThreading::Task::run_task() {
+    std::unique_lock<std::mutex> w_lck(mtx_worker);
     if (m_entry->tainted){// && !m_entry->frozen) {
 	m_entry->evaluate();
 	std::cout << "EVA-id = " << std::this_thread::get_id() << std::endl;
@@ -28,25 +29,26 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 }
 
 
-void MultiThreading::Worker::work(){ // runs task stack
+void MultiThreading::Worker::work() { // runs task stack
  //   std::cout << "EVA-id-work() = " << std::this_thread::get_id() << std::endl;
   //  std::cerr << "Work" << std::endl;
     Task current_task;
     //std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
   //  std::cerr << "Work-after-locker" << std::endl;
-
-    while (!task_stack->empty()) {
-    	{
-	    std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
-    	    std::cout << "Work task size  = " << task_stack->size() << std::endl;
-    	    current_task = task_stack->top();
+    std::unique_lock<std::mutex> w_lck(mtx_worker);
+    while (task_stack->empty()) {
+        cv_worker.wait(w_lck);
+        while (!task_stack->empty()) {
+    	    {
+	        std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
+//       	        std::cout << "Work task size  = " << task_stack->size() << std::endl;
+    	        current_task = task_stack->top();
 //        if (!current_task.ready()) { /* make waiting for finish children */ }
-      	    task_stack->pop(); 
-	}
-      	current_task.run_task(); // TODO: make it in separate thread
+      	        task_stack->pop(); 
+ 	    }
+     	 current_task.run_task(); // TODO: make it in separate thread
+         }
     }
-    // TODO sleep thread
-
 }
 
 
@@ -71,7 +73,7 @@ int MultiThreading::ThreadPool::whoami() {
 
 void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_t index) {
         {	
-	std::cout << "new_worker-index = " << index << std::endl;
+//	std::cout << "new_worker-index = " << index << std::endl;
 		//std::lock_guard<std::mutex> lock(tp_add_mutex);
 		m_workers.push_back(Worker(*this));
 /*		{
@@ -79,14 +81,16 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task, size_
 			m_global_wait_list.push_back({});
 		}
 */
-        	std::cerr << "New worker added! mw size = " << m_workers.size() << std::endl;
+  //      	std::cerr << "New worker added! mw size = " << m_workers.size() << std::endl;
         	m_workers[index].thr_head =  std::this_thread::get_id();
 		std::cout << "New worker ID = " << std::this_thread::get_id() << std::endl;
         	//if (in_task.done()) std::async(std::launch::async, std::bind(&Worker::work, m_workers[index]));
 	}
 	tp_add_mutex.unlock();
 	cv_tp_add_mutex.notify_one();
-        if (in_task.done()) m_workers[index].work();
+//	std::cout << "WHOAMI_NEWWORKWE = " << whoami() << std::endl;
+        if (in_task.done()) m_workers[whoami()].work();
+	else in_task.run_task();
 }
 
 void MultiThreading::ThreadPool::manage_not_motherthread(MultiThreading::Task in_task) {
@@ -122,6 +126,7 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_ta
                 m_workers[i].add_to_task_stack(in_task);
                 m_workers[i].thr_head = curr_id;
                 worker_index = i;
+		m_workers[i].cv_worker.notify_one();
                 std::cout << "Fount worker index = " << worker_index << std::endl;
         }
       }
@@ -156,7 +161,6 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_ta
     }
     std::cout << "try-to-find worker_index = " << worker_index << " size =" <<  threads.size() << ";";
     return worker_index;
-
 }
 
 
@@ -174,7 +178,8 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
     }
    size_t worker_index = try_to_find_worker(in_task);
    std::cout << "worker_index = " << worker_index << "m_workers size = " << m_workers.size() << std::endl;
-   if (in_task.done() && worker_index >= 0) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
+   
+   if (in_task.done() && worker_index >= 0)  m_workers[whoami()].work();	// && worker_index >= 0) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
    else { std::cout << "eval only "; in_task.run_task(); } 
 
 }
@@ -189,4 +194,14 @@ bool MultiThreading::ThreadPool::is_pool_full () {
     // returns true if size of pool >= max pool size (usually setted externally)
     return (m_workers.size() >= m_max_thread_number);
 }
+
+bool MultiThreading::Worker::is_free () { 
+	return task_stack->size() == 0; 
+}
+
+void MultiThreading::Worker::add_to_task_stack(Task task) { 
+	task_stack->push(task);
+	std::cerr << "Size of stack now is " << task_stack->size() << std::endl;
+}
+
 
