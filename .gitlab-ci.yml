@@ -10,7 +10,7 @@ pages:
   - pip install ipython
   - apk update && apk add ca-certificates wget && update-ca-certificates
   - apk --no-cache add openssl doxygen
-  - wget https://downloads.sourceforge.net/project/plantuml/plantuml.jar -O /plantuml.jar
+  - wget https://sourceforge.net/projects/plantuml/files/plantuml.jar/download -O /plantuml.jar
   - java -jar /plantuml.jar -testdot 
   - cd doc
   - make html
