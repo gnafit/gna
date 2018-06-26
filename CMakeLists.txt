@@ -201,6 +201,7 @@ if(Boost_FOUND)
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
