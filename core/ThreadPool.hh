@@ -28,6 +28,8 @@ namespace MultiThreading {
   public:
     Task() {}
     Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) { } 
+    Task(Task &&task) : m_entry(std::move(task.m_entry)) {}
+    Task(const Task &task) : m_entry(task.m_entry) {}
 
     void operator=(const Task& task) {
 	this->m_entry = task.m_entry;
@@ -37,7 +39,8 @@ namespace MultiThreading {
     inline bool done() { std::cout << "src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
     TransformationTypes::Entry *m_entry;
-    //Worker &
+    std::mutex task_mtx;
+    std::condition_variable task_cv;
   };
 
 
@@ -54,7 +57,6 @@ namespace MultiThreading {
     int whoami();
     void add_task(Task task);
     void new_worker(Task &task, size_t index);
-    int is_free_worker_exists();
     bool is_pool_full();
     void manage_not_motherthread(Task in_task);
     size_t try_to_find_worker(Task in_task);
@@ -83,8 +85,7 @@ namespace MultiThreading {
   class Worker {
   public:
     Worker(ThreadPool &in_pool);
-    Worker(Worker &&worker) : pool(std::move(worker).pool), thr_head(std::move(worker.thr_head)), task_stack(std::move(worker.task_stack)) {
-    }
+    Worker(Worker &&worker) : pool(std::move(worker).pool), thr_head(std::move(worker.thr_head)), task_stack(std::move(worker.task_stack)) { }
     void work();
     bool is_free ();
     void add_to_task_stack(Task task);
