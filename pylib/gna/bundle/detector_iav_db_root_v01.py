@@ -5,14 +5,13 @@ from load import ROOT as R
 import numpy as N
 import constructors as C
 from gna.bundle import *
+from collections import OrderedDict
 
 class detector_iav_db_root_v01(TransformationBundle):
     iavmatrix=None
-    name = 'iav'
     def __init__(self, **kwargs):
-        self.parname = kwargs.pop( 'parname', 'OffdiagScale' )
         super(detector_iav_db_root_v01, self).__init__( **kwargs )
-
+        self.transformations_in = self.transformations_out
 
     def build_mat(self):
         """Assembles a chain for IAV detector effect using input matrix"""
@@ -22,21 +21,30 @@ class detector_iav_db_root_v01(TransformationBundle):
         norm[norm==0.0]=1.0
         self.iavmatrix/=norm
 
-        points = self.storage['matrix'] = C.Points( self.iavmatrix )
+        points = C.Points( self.iavmatrix, ns=self.common_namespace )
+        points.points.setLabel('IAV matrix\nraw')
+        self.objects['matrix'] = points
 
-        for ns in self.namespaces:
-            with ns:
-                lstorage = self.storage( 'iav_%s'%ns.name )
-                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.parname )
-                lstorage['renormdiag'] = renormdiag
+        with self.common_namespace:
+            for ns in self.namespaces:
+                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
                 renormdiag.renorm.inmat( points.points )
+                renormdiag.renorm.setLabel('IAV matrix:\n'+ns.name)
 
-                esmear = lstorage['esmear'] = R.HistSmear(True)
+                esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                self.output_transformations+=esmear,
+                esmear.smear.setLabel('IAV effect:\n'+ns.name)
 
-                self.inputs  += esmear.smear.Ntrue,
-                self.outputs += esmear.smear.Nvis,
+                """Save transformations"""
+                self.transformations_out[ns.name] = esmear.smear
+                self.inputs[ns.name]              = esmear.smear.Ntrue
+                self.outputs[ns.name]             = esmear.smear.Nvis
+
+                self.objects[('renormdiag',ns.name)] = renormdiag
+                self.objects[('esmear',ns.name)]     = esmear
+
+                """Define observables"""
+                self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
 
     def build(self):
         from file_reader import read_object_auto
@@ -45,7 +53,15 @@ class detector_iav_db_root_v01(TransformationBundle):
         return self.build_mat()
 
     def define_variables(self):
-        if self.cfg.uncertainty_type!='relative':
-            raise Exception( 'IAV uncertainty should be relative by definition' )
+        if self.cfg.scale.mode!='relative':
+            raise Exception('IAV uncertainty should be relative by definition')
+        if self.cfg.scale.central!=1.0:
+            raise exception('IAV scale should be 1 by definition')
+
+        self.pars = OrderedDict()
         for ns in self.namespaces:
-            ns.reqparameter( self.parname, central=1.0, relsigma=self.cfg.uncertainty )
+            parname = self.cfg.parname.format(ns.name)
+            par = self.common_namespace.reqparameter( parname, cfg=self.cfg.scale )
+            par.setLabel('IAV offdiagonal contribution scale for '+ns.name)
+            self.pars[ns.name]=parname
+

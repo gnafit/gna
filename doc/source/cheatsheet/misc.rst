@@ -28,8 +28,10 @@ Note, if you are using ``numpy`` random generator, the seed is changed by:
     import numpy as N
     N.random.seed( seed )
 
-**WARNING!** When using both ``numpy`` and ``GNA`` random generators, make sure
-that they use *different* random seeds. Since they both use Mersenne Twister
-random generator, but different instances, setting similar seed will lead
-random distributions to be based on the same pseudo-random sequence.
+.. caution::
+
+    When using both ``numpy`` and ``GNA`` random generators, make sure
+    that they use *different* random seeds. Since they both use Mersenne Twister
+    random generator, but different instances, setting similar seed will lead
+    random distributions to be based on the same pseudo-random sequence.
 

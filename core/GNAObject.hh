@@ -1,28 +1,30 @@
-#ifndef GNAOBJECT_H
-#define GNAOBJECT_H
+#pragma once
 
 #include "Parametrized.hh"
-#include "Transformation.hh"
+#include "TransformationDescriptor.hh"
+#include "TransformationBase.hh"
+#include "TransformationBind.hh"
 
-class GNAObject: public ParametrizedTypes::Base,
-                 public TransformationTypes::Base {
+class GNAObject: public virtual TransformationTypes::Base,
+                 public ParametrizedTypes::Base {
 public:
   typedef ParametrizedTypes::VariablesContainer VariablesContainer;
   typedef ParametrizedTypes::EvaluablesContainer EvaluablesContainer;
-  typedef TransformationTypes::Container TransformationsContainer;
+  typedef TransformationTypes::EntryContainer TransformationsContainer;
   typedef SimpleDict<VariableDescriptor, VariablesContainer> Variables;
   typedef SimpleDict<EvaluableDescriptor, EvaluablesContainer> Evaluables;
   typedef SimpleDict<TransformationDescriptor,
                      TransformationsContainer> Transformations;
   GNAObject()
-    : ParametrizedTypes::Base(), TransformationTypes::Base(),
+    : TransformationTypes::Base(),
+      ParametrizedTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
       transformations(TransformationTypes::Base::m_entries)
     { }
   GNAObject(const GNAObject &other)
-    : ParametrizedTypes::Base(other),
-      TransformationTypes::Base(other),
+    : TransformationTypes::Base(other),
+      ParametrizedTypes::Base(other),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
       transformations(TransformationTypes::Base::m_entries)
@@ -48,7 +50,8 @@ public:
 protected:
   class SingleTransformation { };
   GNAObject(SingleTransformation)
-    : ParametrizedTypes::Base(), TransformationTypes::Base(1),
+    : TransformationTypes::Base(1),
+      ParametrizedTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
       transformations(TransformationTypes::Base::m_entries)
@@ -85,5 +88,3 @@ public:
     (*this)[0].dump();
   }
 };
-
-#endif // GNAOBJECT_H

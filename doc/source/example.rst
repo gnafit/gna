@@ -26,7 +26,7 @@ itself is hopefully understandable, but anyway, let's go line by line.
 All the computation code goes to one class that should be derived from
 GNAObject. First of all, you'll need to include ``GNAObject.hh`` if
 you want to use it. You also need to derive from
-``Transformation<your-class-name>`` to make things work properly.
+``TransformationBind<your-class-name>`` to make things work properly.
 
 In our class constructor, we define the variables which we are going
 to use in our computations. The syntax is simple:
@@ -51,7 +51,7 @@ args, Rtypes rets)`` or usual ``std::function`` (for example, a
 lambda) with signature ``void func(T obj, Atypes args, Rtypes
 rets)``, where ``T`` is your class name. Here we use the predefined
 ``Atypes::pass<I,J>`` function which just assigns the type of ``I``-th
-input to  ``J``-th output (check that in ``core/TransformationBase.hh``).
+input to  ``J``-th output (check that in ``core/transformation/Atypes.hh``).
 
 Finally, the *function* which does all the calculation is specified
 with ``.func(func)``, there can be only one of them and it should have

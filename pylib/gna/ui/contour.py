@@ -224,6 +224,8 @@ class cmd(basecmd):
         parser.add_argument('--xlim', type=float, nargs=2)
         parser.add_argument('--labels', nargs='+')
         parser.add_argument('--legend', nargs=2)
+        parser.add_argument('--title', default='', required=False, 
+                            help='Set a title to the plot')
         parser.add_argument('--no-bestfit', action='store_false',
         help='Do not show best fit point with contour')
         parser.add_argument('--minimizer', action=set_typed(env.parts.minimizer))
@@ -406,6 +408,8 @@ class cmd(basecmd):
             ax.grid(which = 'major', alpha = 0.7)
         if self.opts.legend:
             plt.legend(loc=' '.join(self.opts.legend))
+        if self.opts.title:
+            plt.title(r'{0}'.format(self.opts.title), fontsize=20)
         if self.opts.show:
             plt.show()
         if self.opts.output:

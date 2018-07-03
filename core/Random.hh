@@ -1,5 +1,4 @@
-#ifndef RANDOM_H
-#define RANDOM_H 1
+#pragma once
 
 #include <functional>
 #include <random>
@@ -47,5 +46,3 @@ namespace GNA
   };
 
 } /* GNA */
-
-#endif

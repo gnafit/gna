@@ -12,7 +12,7 @@ with experimental data, and a number of parameters to be fitted or
 fixed.
 
 At the moment, the only implemented experimental model which have
-physical sense is the reactor experement model. It's quite simple and
+physical sense is the reactor experiment model. It's quite simple and
 straightforward though and does only the primitive event number
 computation.
 
@@ -343,14 +343,14 @@ example, there are two values for larger square mass difference:
   Out[6]: 0.00234
 
   In [7]: self.env.get('juno.oscillation.DeltaMSq23')
-  Out[7]: <ROOT.Uncertain<double> object at 0x55da99544580>
+  Out[7]: <ROOT.Variable<double> object at 0x55da99544580>
 
   In [8]: self.env.get('juno.oscillation.DeltaMSq23').value()
   Out[8]: 0.0022877478
 
 The ``DeltaMSqEE`` is the real independent parameter (hence the type,
 ``GaussianParameter``), while the ``DeltaMSq23`` is just read only
-value (typed as ``Uncertain``). Their origin is also different:
+value (typed as ``Variable``). Their origin is also different:
 independent parameters are defined by the ``ns.reqparameter()`` or
 ``ns.defparameter()`` calls, while the read-only values originate from
 evaluables defined in ``GNAObject``\s. For example, there is class
@@ -364,7 +364,7 @@ which is required by the oscillations probability class
 ``DeltaMSqEE``, ``Alpha``, ``SinSq12`` and ``DeltaMSq12`` was
 automatically used.
 
-You can't change ``Uncertain`` objects directly, there is even no
+You can't change ``Variable`` objects directly, there is even no
 ``set()`` method. But if you change the independent parameters which
 they depend on, the values will be automatically updated:
 

@@ -22,3 +22,8 @@ if(NONLINEARITY_DEBUG)
     message(STATUS "Setting debug mode for EnergyNonlinearity")
     add_definitions(-DDEBUG_ENL)
 endif()
+
+if(COV_DEBUG)
+    message(STATUS "Setting debug mode for parameter covariances")
+    add_definitions(-DCOVARIANCE_DEBUG)
+endif()

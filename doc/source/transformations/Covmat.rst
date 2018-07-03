@@ -1,11 +1,13 @@
 Covmat
 ~~~~~~
 
+.. attention::
+
+    This is the older version of the covariance matrix calculation. If you care about getting the result, but not
+    on the internal details consider using the CovariatedPrediction transformation instead.
+
 Description
 ^^^^^^^^^^^
-Note: this is the older version of the covariance matrix calculation.
-If you care about getting the result, but not on the internal details
-consider using the CovariatedPrediction transformation instead.
 
 Covmat_ class contains three distinct trasformations used to calculate the
 covariance matrix.

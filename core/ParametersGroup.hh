@@ -1,5 +1,4 @@
-#ifndef PARAMETERSGROUP_H
-#define PARAMETERSGROUP_H
+#pragma once
 
 #include <functional>
 #include <vector>
@@ -85,5 +84,3 @@ protected:
 
   ParametersGroup *m_pgroup;
 };
-
-#endif // PARAMETERSGROUP_H

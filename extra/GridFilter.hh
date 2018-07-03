@@ -1,5 +1,4 @@
-#ifndef GRIDFILTER_H
-#define GRIDFILTER_H
+#pragma once
 
 #include <cmath>
 #include <iostream>
@@ -70,5 +69,3 @@ protected:
         m_PMrows;                   //!< The number of rows of ParaboloidMatrix, computed in constructor, can't be changed after
 
 };
-
-#endif /* GRIDFILTER_H */

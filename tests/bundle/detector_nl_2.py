@@ -13,7 +13,7 @@ from gna.env import env
 import constructors as C
 from converters import convert
 import numpy as N
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertain
 from gna.bundle import execute_bundle
 from physlib import percent
 
@@ -29,8 +29,8 @@ cfg = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-        uncertainty = 0.2*percent,
-        uncertainty_type = 'relative'
+        par = uncertain(1.0, 0.2, 'percent'),
+        parname = 'escale.{}',
         )
 
 #
@@ -51,15 +51,16 @@ hist = C.Histogram( edges, phist )
 #
 # Initialize bundle
 #
-b = execute_bundle( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ] )
+b, = execute_bundle( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ] )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
-escale1, escale2 = (b.common_namespace(ns)['escale'] for ns in [ 'ad1', 'ad2' ])
+escale1, escale2 = (b.common_namespace('escale')[ns] for ns in [ 'ad1', 'ad2' ])
+
+(nonlin1, nonlin2) = b.objects['nonlinearity'].values()
+factor1, factor2 = b.objects['factor'].values()
+
+factor_nominal = factor1.data().copy()
 escale1.set(0.98)
 escale2.set(1.02)
-
-(nonlin1, nonlin2) = b.output_transformations
-factor1 = b.storage('escale_ad1')['factor']
-factor2 = b.storage('escale_ad2')['factor']
 
 #
 # Plot curves:
@@ -74,6 +75,7 @@ ax.set_title( '' )
 
 lines = ax.plot( edges, factor1.data(), '-', label='Escale 1' )
 lines = ax.plot( edges, factor2.data(), '-', label='Escale 2' )
+lines = ax.plot( edges, factor_nominal, '--', label='nominal' )
 
 ax.legend( loc='lower right' )
 

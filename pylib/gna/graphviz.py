@@ -11,10 +11,29 @@ def uid( obj1, obj2=None ):
     return res
 
 class GNADot(object):
-    def __init__(self, transformation):
-        self.graph=G.AGraph( directed=True, label=transformation.name() )
+    markhead, marktail = True, True
+    # headfmt = '{index:d}: {label}'
+    headfmt = '{label}'
+    headfmt_noi = '{label}'
+    # tailfmt = '{index:d}: {label}'
+    tailfmt = '{label}'
+    tailfmt_noi = '{label}'
+    entryfmt = '{label}'
+
+    def __init__(self, transformation, **kwargs):
+        kwargs.setdefault('fontsize', 10)
+        kwargs.setdefault('labelfontsize', 10)
+        self.joints = kwargs.pop('joints', True)
+
+        self.graph=G.AGraph( directed=True, **kwargs )
         self.register = set()
-        self.walk_back( R.TransformationTypes.OpenHandle(transformation).getEntry() )
+        if not isinstance(transformation, (list, tuple)):
+            transformation = [transformation]
+        for t in transformation:
+            if not isinstance(t, R.TransformationTypes.Handle):
+                raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle, got '+type(t).__name__)
+
+            self.walk_back( R.OpenHandle(t).getEntry() )
         self.write = self.graph.write
 
     def registered( self, *args, **kwargs ):
@@ -26,37 +45,127 @@ class GNADot(object):
             self.register.add( id )
         return False
 
+    def get_head_label(self, i, obj):
+        if not self.markhead:
+            return None
+        if isinstance(obj, basestring):
+            return obj
+
+        if i is None:
+            return self.headfmt_noi.format(name=obj.name, label=obj.label)
+
+        return self.headfmt.format(index=i, name=obj.name, label=obj.label)
+
+    def get_tail_label(self, i, obj):
+        if not self.marktail:
+            return None
+        if isinstance(obj, basestring):
+            return obj
+
+        if i is None:
+            return self.tailfmt_noi.format(name=obj.name, label=obj.label)
+
+        return self.tailfmt.format(index=i, name=obj.name, label=obj.label)
+
+    def get_labels(self, isink, sink, isource=None, source=None):
+        labels = {}
+        if sink:
+            labels['taillabel']=self.get_tail_label(isink, sink)
+        if source:
+            labels['headlabel']=self.get_head_label(isource, source)
+        else:
+            labels['arrowhead']='empty'
+        return {k:v for k, v in labels.items() if v}
+
+    def get_subgraph(self, subname, label, graph=None):
+        if graph is None:
+            graph = self.graph
+
+        if not subname:
+            return graph
+
+        subname = 'cluster_'+subname
+        subgraph = graph.get_subgraph(subname)
+        if subgraph is None:
+            subgraph=graph.add_subgraph(name=subname, label=label)
+
+        return subgraph
+
+    def get_graph(self, name):
+        return self.graph
+        subname = None
+        label = None
+        graph = self.graph
+
+        if 'AD' in name:
+            idx = name.find('AD')
+            ad = name[idx:idx+4]
+            subname=ad
+            label=ad
+
+            eh = 'EH'+ad[2]
+            graph = self.get_subgraph(eh, eh, graph)
+        elif 'EH' in name:
+            idx = name.find('EH')
+            eh = name[idx:idx+3]
+            subname = eh
+            label=eh
+            print(eh )
+        elif 'NL' in name:
+            subname = 'NL'
+            label='NL'
+
+        return self.get_subgraph(subname, label, graph)
+
     def walk_back( self, entry ):
         if self.registered( entry ):
             return
 
-        node = self.graph.add_node( uid(entry), label=entry.name )
+        name = self.entryfmt.format(name=entry.name, label=entry.label)
+        graph = self.get_graph(name)
+
+        """Add a node for current Entry"""
+        node = graph.add_node( uid(entry), label=name )
+
+        """For each sink of the Entry walk forward and build tree"""
         self.walk_forward( entry )
 
+        """For each source of the Entry walk backward and build the tree"""
         for i, source in enumerate(entry.sources):
-            assert source.materialized()
-            sink = source.sink
+            if not source.materialized():
+                raise Exception('Trying to build a graph with not fully initialized tree')
 
-            if self.registered( sink.entry, entry ):
-                continue
+            self.walk_back( source.sink.entry )
 
-            self.graph.add_edge( uid(sink.entry), uid(entry), headlabel='%i: %s'%(i, source.name), taillabel=sink.name )
+    def walk_forward( self, entry, graph=None ):
+        if graph is None:
+            graph = self.graph
 
-            self.walk_back( sink.entry )
-
-    def walk_forward( self, entry ):
         for i, sink in enumerate( entry.sinks ):
-            if sink.sources.size()==0:
-                self.graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
-                self.graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', taillabel='%i: %s'%(i, sink.name), arrowhead='empty' )
+            if self.registered( sink ):
                 continue
 
-            for j, source in enumerate(sink.sources):
-                assert source.materialized()
+            if sink.sources.size()==0:
+                """In case sink is not connected, draw empty output"""
+                graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
+                graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
+                continue
+            elif sink.sources.size()==1 or not self.joints:
+                """In case there is only one connection draw it as is"""
+                for source in sink.sources:
+                    assert source.materialized()
 
-                if self.registered( sink.entry, source.entry ):
-                    continue
-                self.graph.add_edge( uid(sink.entry), uid(source.entry), headlabel='%s'%(source.name), taillabel='%i: %s'%(i, sink.name) )
+                    graph.add_edge( uid(sink.entry), uid(source.entry), sametail=str(i), **self.get_labels(i, sink, None, source))
 
-                self.walk_back( source.entry )
+                    self.walk_back( source.entry )
+            else:
+                """In case there is more than one connections, merge them"""
+                joint = graph.add_node( uid(sink), label='', shape='none', width=0, height=0, penwidth=0 )
+                graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
+                for j, source in enumerate(sink.sources):
+                    assert source.materialized()
+
+                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
+
+                    self.walk_back( source.entry )
 

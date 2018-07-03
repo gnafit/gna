@@ -1,3 +1,5 @@
+.. _Histogram:
+
 Histogram transformation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 

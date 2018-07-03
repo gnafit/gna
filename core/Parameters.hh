@@ -1,5 +1,4 @@
-#ifndef PARAMETERS_H
-#define PARAMETERS_H
+#pragma once
 
 #include <vector>
 #include <functional>
@@ -455,5 +454,3 @@ public:
     m_data.hdr->changed = f;
   }
 };
-
-#endif // PARAMETERS_H

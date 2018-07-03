@@ -1,8 +1,12 @@
 from gna.ui import basecmd, append_typed, qualified
+import matplotlib
 from matplotlib import pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml
+
+matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.latex.unicode'] = True
 
 
 class cmd(basecmd):
@@ -31,8 +35,11 @@ class cmd(basecmd):
                             help='All additional plotting options go here. They are applied for all plots')
         parser.add_argument('--drawgrid', action='store_true')
         parser.add_argument('--savefig', default='', help='Path to save figure')
+        parser.add_argument('--title', nargs='+', help='Title to the figure')
         parser.add_argument('--new-figure', action='store_true',
                             help='Create new figure')
+        parser.add_argument('--xlabel', nargs='+', required=False)
+        parser.add_argument('--ylabel', nargs='+', required=False)
         parser.add_argument('--nbar', type=int, default=1,
                             help='Divide bar width by', metavar='NBAR')
 
@@ -84,6 +91,16 @@ class cmd(basecmd):
 
         if show_legend:
             ax.legend(loc='best')
+        
+        if self.opts.xlabel:
+            plt.xlabel(r'{}'.format(self.opts.xlabel[0]),
+                    fontsize=self.opts.xlabel[1])
+        if self.opts.ylabel:
+            plt.ylabel(r'{}'.format(self.opts.ylabel[0]),
+                    fontsize=self.opts.xlabel[1])
+        if self.opts.title:
+            plt.title(r'{}'.format(self.opts.title[0]),
+                    fontsize=self.opts.title[1])
 
         if self.opts.savefig:
             plt.savefig(self.opts.savefig)

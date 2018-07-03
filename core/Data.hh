@@ -1,5 +1,4 @@
-#ifndef DATA_H
-#define DATA_H
+#pragma once
 
 #include <stddef.h>
 
@@ -65,6 +64,19 @@ struct DataType {
   class Hist;
   Hist<DataType> hist();                                        ///< Hist DataType initialization and configuration.
   Hist<const DataType> hist() const;                            ///< Hist DataType initialization and configuration.
+
+  DataType() = default;                                         ///< Constructor.
+
+  /**
+   * @brief Copy constructor.
+   *
+   * Copy constructor copies all members except preallocated buffer.
+   *
+   * @param other instance of DataType.
+   */
+  DataType(const DataType& other) :
+  kind{other.kind}, shape(other.shape), edges(other.edges)
+  { }
 
   bool operator==(const DataType &other) const;                 ///< Check if data types are identical.
   bool operator!=(const DataType &other) const;                 ///< Check if data types are not identical.
@@ -151,6 +163,7 @@ public:
   Points(T &type): m_type(type) { }
 
   operator T() const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
+  T cast()     const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
 
   /**
    * @brief Compare the dimensions with the dimensions of another instance of DataType::Points.
@@ -170,16 +183,16 @@ public:
   void dump() const {
     switch (shape().size()) {
     case 0:
-      fprintf(stderr, "shape == empty\n");
+      fprintf(stderr, ", shape == empty\n");
       break;
     case 1:
-      fprintf(stderr, "shape == (%lu)\n", shape()[0]);
+      fprintf(stderr, ", shape == (%lu)\n", shape()[0]);
       break;
     case 2:
-      fprintf(stderr, "shape == (%lu, %lu)\n", shape()[0], shape()[1]);
+      fprintf(stderr, ", shape == (%lu, %lu)\n", shape()[0], shape()[1]);
       break;
     default:
-      fprintf(stderr, "shape == WTF(%lu)?\n", shape().size());
+      fprintf(stderr, ", shape == WTF(%lu)?\n", shape().size());
       assert(shape().size() < 3);
       break;
     }
@@ -221,6 +234,7 @@ public:
     m_type.shape = std::vector<size_t>{shape0, shape1};
     return setKind();
   }
+
   /**
    * @brief Set the data size and dimensions for multidimensional data.
    * @param shape -- vector with dimensions.
@@ -230,6 +244,37 @@ public:
     m_type.shape = shapes;
     return setKind();
   }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Points<T> &preallocated(double* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated 1d Array
+   * @param array - 1d Eigen array.
+   * @return `*this`.
+   */
+  DataType::Points<T> &view(Eigen::ArrayXd& array) {
+    shape(array.size());
+    return preallocated(array.data());
+  }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated 2d Array
+   * @param array - 2d Eigen array.
+   * @return `*this`.
+   */
+  DataType::Points<T> &view(Eigen::ArrayXXd& array) {
+    shape(array.rows(), array.cols());
+    return preallocated(array.data());
+  }
+
   /**
    * @brief Return the dimensions.
    * @return vector with dimensions.
@@ -326,6 +371,7 @@ public:
   Hist(T &type): m_type(type) { }
 
   operator T() const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
+  T cast()     const { return m_type; }                            ///< Cast to (return) the initialized DataType instance.
 
   /**
    * @brief Compare the dimensions and bin edges with data of another instance of DataType::Hist.
@@ -578,34 +624,6 @@ public:
   Eigen::Map<MatrixXT> mat{nullptr, 0, 0};         ///< 2D matrix view.
 
   Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
+};
 
-#ifdef GNA_CUDA_SUPPORT
-  std::unique_ptr<GNAcuGpuArray<T>> gpuArr{nullptr};
-#endif // GNA_CUDA_SUPPORT
-}; 
 
-#ifdef GNA_CUDA_SUPPORT
-template <typename T>
-DataLocation Data<T>::require_gpu() {
-/**
-Allocate GPU memory in case of GPU array is not inited yet
-*/
-  if (gpuArr == nullptr) {
-    gpuArr.reset(new GNAcuGpuArray<T>());
-  }
-  if (gpuArr->deviceMemAllocated) {
-#ifdef CU_DEBUG_2
-    std::cerr << "INITED! Nothing to do! Reqire_gpu exit!" << std::endl;
-#endif
-    return gpuArr->dataLoc;
-  }
-  DataLocation tmp = DataLocation::NoData;
-  if (type.shape.size() == 1) {
-    tmp = gpuArr->Init(type.shape[0], buffer);
-  } else if (type.shape.size() == 2) {
-    tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
-  } 
-  return tmp;
-}
-#endif // GNA_CUDA_SUPPORT
-#endif // DATA_H
