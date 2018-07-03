@@ -7,6 +7,94 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 enable_language(Fortran)
 
+include_directories(core/transformation/
+                    core/
+                    transformations/backgrounds/
+                    transformations/base/
+                    transformations/calculus/
+                    transformations/detector/
+                    transformations/functions/
+                    transformations/hist/
+                    transformations/integrator/
+                    transformations/interpolation/
+                    transformations/linalg/
+                    transformations/neutrino/
+                    transformations/stats/
+                    transformations/var/
+                    extra/
+                    examples/
+		    cuda/
+                   )
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
+
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 14)
+message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+include(dev-tools)
+
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
+
+find_package(Eigen3 REQUIRED NO_MODULE)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
+
+find_package(Boost 1.40.0 REQUIRED)
+if(Boost_FOUND)
+    message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
+else(Boost_FOUND)
+    message(FATAL_ERROR "Boost >= 1.40.0 not found")
+endif(Boost_FOUND)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
+find_package(GSL REQUIRED)
+
+cmake_policy(SET CMP0015 NEW)
+
+if(CUDA_SUPPORT)
+    find_package( CUDA REQUIRED)
+    include_directories(cuda/extra/ cuda/core/)
+    if(NOT CUDA_MAT_SIZE_THRESHOLD)
+        set(CUDA_MAT_SIZE_THRESHOLD 100)
+    endif()
+    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
+    set(CUDA_ADD_LIBS)
+    IF (CUDA_FOUND)
+        add_subdirectory(cuda/)
+        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
+        link_directories(cuda/)
+    ENDIF()
+    set (CUSOURCES
+         cuda/core/CuChi2.cc
+        )
+    set (CUHEADERS
+         CuChi2.hh
+         GNAcuOscProbFull.h
+#	 GNAcuRootMath.h
+         GNAcuGpuArray.hh
+         GNAcuOscProbMem.hh
+        )
+else()
+    set(CUDA_SUPPORT 0)
+    set(CUSOURCES "")
+    set(CUHEADERS "")
+endif()
+
+if (NOT CUDA_DEBUG_INFO )
+    set(CUDA_DEBUG_INFO 0)
+endif()
+
+configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+
 set (SOURCES
   core/GNAObject.cc
   core/ParametersGroup.cc
@@ -159,94 +247,6 @@ set (HEADERS
   Transpose.hh
   ${CUHEADERS}
   )
-
-include_directories(core/transformation/
-                    core/
-                    transformations/backgrounds/
-                    transformations/base/
-                    transformations/calculus/
-                    transformations/detector/
-                    transformations/functions/
-                    transformations/hist/
-                    transformations/integrator/
-                    transformations/interpolation/
-                    transformations/linalg/
-                    transformations/neutrino/
-                    transformations/stats/
-                    transformations/var/
-                    extra/
-                    examples/
-		    cuda/
-                   )
-
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
-
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 14)
-message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
-include(dev-tools)
-
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
-
-find_package(Eigen3 REQUIRED NO_MODULE)
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
-
-find_package(Boost 1.40.0 REQUIRED)
-if(Boost_FOUND)
-    message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
-else(Boost_FOUND)
-    message(FATAL_ERROR "Boost >= 1.40.0 not found")
-endif(Boost_FOUND)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-
-find_package(GSL REQUIRED)
-
-cmake_policy(SET CMP0015 NEW)
-
-if(CUDA_SUPPORT)
-    find_package( CUDA REQUIRED)
-    include_directories(cuda/extra/ cuda/core/)
-    if(NOT CUDA_MAT_SIZE_THRESHOLD)
-        set(CUDA_MAT_SIZE_THRESHOLD 100)
-    endif()
-    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
-    set(CUDA_ADD_LIBS)
-    IF (CUDA_FOUND)
-        add_subdirectory(cuda/)
-        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
-        link_directories(cuda/)
-    ENDIF()
-    set (CUSOURCES
-         cuda/core/CuChi2.cc
-        )
-    set (CUHEADERS
-         CuChi2.hh
-         GNAcuOscProbFull.h
-#	 GNAcuRootMath.h
-         GNAcuGpuArray.hh
-         GNAcuOscProbMem.hh
-        )
-else()
-    set(CUDA_SUPPORT 0)
-    set(CUSOURCES "")
-    set(CUHEADERS "")
-endif()
-
-if (NOT CUDA_DEBUG_INFO )
-    set(CUDA_DEBUG_INFO 0)
-endif()
-
-configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
-include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 
 find_package(ROOT)

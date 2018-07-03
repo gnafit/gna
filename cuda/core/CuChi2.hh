@@ -5,11 +5,11 @@
 #include "Statistic.hh"
 
 class CuChi2: public GNASingleObject,
-            public Transformation<CuChi2>,
+            public TransformationBind<CuChi2>,
             public Statistic {
 public:
   CuChi2() : InvMatCompFlag(false) {
-    transformation_(this, "cuchi2")
+    transformation_("cuchi2")
       .output("cuchi2")
       .types(&CuChi2::checkTypes)
       .func(&CuChi2::calculateChi2)

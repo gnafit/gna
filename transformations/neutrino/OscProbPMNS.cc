@@ -9,6 +9,15 @@
 #include "PMNSVariables.hh"
 #include "TypesFunctions.hh"
 
+#ifdef GNA_CUDA_SUPPORT 
+#include "extra/GNAcuOscProbFull.h"
+#include "extra/GNAcuOscProbMem.hh"
+#endif
+
+#include <chrono>
+#include <ctime>
+
+
 using namespace Eigen;
 
 static double km2MeV(double km) {
@@ -123,7 +132,46 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
+
+#ifdef GNA_CUDA_SUPPORT
+  auto full_formula_gpu = transformation_(this, "full_osc_prob_gpu")
+      .input("Enu")
+      .output("oscprob")
+      .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
+      .types(Atypes::pass<0>)
+      .func(&OscProbPMNS::calcFullProbGpu);
+#endif
+
+
 }
+
+#ifdef GNA_CUDA_SUPPORT
+
+void OscProbPMNS::calcFullProbGpu(Args args, Rets rets) {
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now();
+
+  bool isABsame = (m_alpha == m_beta);
+  int EnuSize =  args[0].x.rows();
+  GNAcuOscProbMem<double> mem(EnuSize);
+  calcCuFullProb_double(std::ref(mem),
+		   DeltaMSq<1,2>(), DeltaMSq<1,3>(),  DeltaMSq<2,3>(),
+                   weight<1,2>(), weight<1,3>(), weight<2,3>(), weightCP(),
+                   rets[0].x.data(), m_L, args[0].x.data(), EnuSize, isABsame);
+  end = std::chrono::system_clock::now();
+
+  int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
+                           (end-start).count();
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+  std::cout << "End " << std::ctime(&end_time)
+              << " duration " << elapsed_seconds << "s\n";
+
+}
+
+#endif
+
+
 
 void OscProbPMNS::calcFullProb(Args args, Rets rets) {
     auto& Enu = args[0].x;
