@@ -70,10 +70,12 @@ set (SOURCES
   )
 
 set (HEADERS
+  # core/
   Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  # core/transformation/
   Sink.hh
   Source.hh
   Args.hh
@@ -94,8 +96,10 @@ set (HEADERS
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
+  # core/
   GNAObject.hh
   UncertainParameter.hh
+  # transformations/
   Prediction.hh
   CovariatedPrediction.hh
   Product.hh
@@ -147,7 +151,9 @@ set (HEADERS
   HistSmear.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
+  # examples/
   GaussianPeakWithBackground.hh
+  # extra/
   GridFilter.hh
   EigenHelpers.hh
   )
