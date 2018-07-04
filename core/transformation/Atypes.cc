@@ -1,7 +1,5 @@
 #include "Atypes.hh"
 
-using boost::format;
-
 using TransformationTypes::Atypes;
 using TransformationTypes::Rtypes;
 using TransformationTypes::SourceTypeError;

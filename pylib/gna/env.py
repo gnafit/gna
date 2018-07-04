@@ -178,6 +178,20 @@ class namespace(Mapping):
     def __len__(self):
         return len(self.storage)
 
+    def defparameter_group(self, *args, **kwargs):
+        import gna.parameters.covariance_helpers as ch
+        pars = [self.defparameter(name, **ctor_args) for name, ctor_args in args]
+
+        covmat_passed =  kwargs.get('covmat')
+        if covmat_passed is not None:
+            ch.covariate_pars(pars, covmat_passed)
+
+        cov_from_cfg = kwargs.get('covmat_cfg')
+        if cov_from_cfg is not None:
+            ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
+
+        return pars
+        
     def defparameter(self, name, *args, **kwargs):
         if '.' in name:
             path, name = name.rsplit('.', 1)
@@ -194,19 +208,65 @@ class namespace(Mapping):
         self[name] = p
         return p
 
-    def reqparameter(self, name, *args, **kwargs):
-        if '.' in name:
-            path, name = name.rsplit('.', 1)
-            return self(path).reqparameter(name, *args, **kwargs)
-        try:
-            return self[name]
-        except KeyError:
-            pass
-        try:
-            return env.nsview[name]
-        except KeyError:
-            pass
-        return self.defparameter(name, *args, **kwargs)
+    def reqparameter(self, name, **kwargs):
+        def without_status(name, **kwargs):
+            if '.' in name:
+                path, name = name.rsplit('.', 1)
+                return self(path).reqparameter(name, *args, **kwargs)
+
+            try:
+                par = self[name]
+                return par
+            except KeyError:
+                pass
+            try:
+                par = env.nsview[name]
+                return par
+            except KeyError:
+                pass
+            return self.defparameter(name, **kwargs)
+
+        def with_status(name, **kwargs):
+            if '.' in name:
+                path, name = name.rsplit('.', 1)
+                return self(path).reqparameter(name, *args, **kwargs)
+
+            found = False
+            try:
+                par = self[name]
+                found = True
+                return par, found
+            except KeyError:
+                pass
+            try:
+                par = env.nsview[name]
+                found = True
+                return par, found 
+            except KeyError:
+                pass
+            return self.defparameter(name, **kwargs), found
+
+        if kwargs.get('with_status'):
+            return with_status(name, **kwargs)
+        else:
+            return without_status(name, **kwargs)
+
+    def reqparameter_group(self, *args, **kwargs):
+        import gna.parameters.covariance_helpers as ch
+        args_patched = [(name, dict(ctor_args, with_status=True))
+                        for name, ctor_args in args]
+        pars_with_status = [self.reqparameter(name, **ctor_args)
+                            for name, ctor_args in args_patched]
+        statuses = [status for _, status in pars_with_status]
+        pars = [par for par, _ in pars_with_status]
+        if not any(statuses):
+            covmat_passed =  kwargs.get('covmat')
+            if covmat_passed is not None:
+                ch.covariate_pars(pars, covmat_passed)
+            cov_from_cfg = kwargs.get('covmat_cfg')
+            if cov_from_cfg is not None:
+                ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
+        return pars
 
     def addobservable(self, name, output, export=True, ignorecheck=False):
         if ignorecheck or output.check():
@@ -326,10 +386,13 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
-class PartNotFoundError(BaseException):
+class PartNotFoundError(Exception):
     def __init__(self, parttype, partname):
         self.parttype = parttype
         self.partname = partname
+        msg = "Failed to find {} in the env".format(self.partname)
+        super(PartNotFoundError, self).__init__(msg)
+
 
 class envpart(dict):
     def __init__(self, parttype):

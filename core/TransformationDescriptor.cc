@@ -1,8 +1,5 @@
 #include <stdexcept>
 
-#include <boost/format.hpp>
-using boost::format;
-
 #include "TransformationDescriptor.hh"
 #include "Exceptions.hh"
 #include "GNAObject.hh"

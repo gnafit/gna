@@ -1,16 +1,15 @@
 #include "RenormalizeDiag.hh"
 #include "TypesFunctions.hh"
 #include <iostream>
-#include <boost/format.hpp>
+#include <fmt/format.h>
 using namespace std;
-using boost::format;
 
 RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const char* parname) : m_ndiagonals(ndiag) {
   variable_(&m_scale, parname);
 
   auto memberFun = dispatchFunction(target, mode);
   if (memberFun == nullptr) {
-      throw std::runtime_error((format("Can't dispatch the function in RenormalizeDiag! Passed target %1 and mode %2") % target % mode).str());
+      throw std::runtime_error((fmt::format("Can't dispatch the function in RenormalizeDiag! Passed target {0} and mode {1}", target, mode)));
   }
 
   transformation_("renorm")

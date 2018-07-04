@@ -23,7 +23,7 @@ class C14Spectrum: public GNAObject,
         void   calcSmear(Args args, Rets rets);
 
 
-        variable<double> m_rho, m_protons, m_e;
+        variable<double> m_rho, m_protons, m_e, m_coinc_window;
         /* dependant<double> m_e; */
 
         DataType m_datatype;

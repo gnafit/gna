@@ -9,6 +9,9 @@ def is_independent(par):
 def get_parameters(params, drop_fixed=True):
     pars = []
     for candidate in params:
+        if isinstance(candidate, ROOT.Parameter('double')):
+            pars.append(candidate)
+            continue
         try:
             par_namespace = env.ns(candidate)
             par_namespace.walknames().next()

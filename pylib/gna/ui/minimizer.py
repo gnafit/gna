@@ -2,7 +2,7 @@ import ROOT
 from gna.ui import basecmd, set_typed
 from gna.minimizers import minimizers
 from gna.minimizers import spec
-from gna.parameter_loader import get_parameters
+from gna.parameters.parameter_loader import get_parameters
 from gna.config import cfg
 import warnings
 

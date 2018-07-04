@@ -21,7 +21,7 @@ constexpr auto spectrum_start_point = 0.; /* MeV */
  * constexpr auto integration_order = 6;
  * constexpr auto MeV_to_keV = 1e3;
  * constexpr auto keV_to_MeV = 1e-3;  */
-constexpr auto coincidence_window = 300*ns;
+/* constexpr auto coincidence_window = 1200*ns; */
 constexpr auto C14_half_life = 5730*year;
 /* constexpr auto H_to_C_ratio = 1.639;    */
 
@@ -31,6 +31,7 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
 {
    variable_(&m_rho, "rho_C14");
    variable_(&m_protons, "TargetProtons");
+   variable_(&m_coinc_window, "CoincidenceWindow");
    variable_(&m_e, "ElectronMass");
    callback_([this]{fillCache();});
 
@@ -57,7 +58,8 @@ void C14Spectrum::fillCache()
     m_size = m_datatype.hist().bins();
 
     if (m_size == 0) return;
-
+    
+    double coincidence_window = m_coinc_window * ns;
     m_rescache.resize(m_size*m_size);
     m_cacheidx.resize(m_size + 1);
     m_startidx.resize(m_size);

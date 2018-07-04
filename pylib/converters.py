@@ -185,6 +185,8 @@ def array_to_Points( array ):
     """Convert numpy array to Points"""
     if len(array.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
+    if array.dtype != 'float64':
+        array = array.astype('float64')
     a = array.ravel( order='F' )
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s )

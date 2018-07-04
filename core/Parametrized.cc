@@ -1,8 +1,7 @@
 #include <stdexcept>
 #include <iostream>
 
-#include <boost/format.hpp>
-using boost::format;
+#include <fmt/format.h>
 
 #include "Parametrized.hh"
 
@@ -27,7 +26,7 @@ Entry::Entry(const Entry &other, const Base *parent)
 void Entry::bind(variable<void> newvar) {
   if (!var.is(par)) {
     throw std::runtime_error(
-      (format("can not rebind parameter `%1%'") % name).str()
+      fmt::format("can not rebind parameter `{0}'", name)
       );
   }
   var.replace(newvar);
@@ -41,7 +40,7 @@ void Entry::bind(variable<void> newvar) {
 parameter<void> Entry::claim(Base *other) {
   if (state != Entry::State::Free) {
     throw std::runtime_error(
-      (format("claiming non-free parameter `%1%'") % name).str()
+      fmt::format("claiming non-free parameter `{0}'", name)
       );
   }
   state = Entry::State::Claimed;
@@ -108,7 +107,7 @@ Entry &Base::getEntry(const std::string &name) {
   int i = findEntry(name);
   if (i < 0) {
     throw std::runtime_error(
-      (format("unknown parameter `%1%'") % name).str()
+      fmt::format("unknown parameter `{0}'", name)
       );
   }
   return m_entries[i];

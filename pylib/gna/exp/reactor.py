@@ -112,12 +112,13 @@ class Detector(object):
         self.ns = ns("detectors")(self.name)
 
         if self.protons is not None:
-            self.ns.defparameter("TargetProtons", central=self.protons, sigma=0)
+            self.ns.defparameter("TargetProtons", central=self.protons, relsigma=0.01)
 
         self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
         self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
-        #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
+        self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-19)
+        self.ns.reqparameter("CoincidenceWindow", central=300, sigma=1)
 
 class GeoNeutrinoIsotope(object):
     def __init__(self, name):

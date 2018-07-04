@@ -1,9 +1,8 @@
 #include <boost/math/constants/constants.hpp>
 #include "EnergyResolution.hh"
 #include "TypesFunctions.hh"
-#include <boost/format.hpp>
+#include <fmt/format.h>
 #include <string.h>
-using boost::format;
 
 constexpr double pi = boost::math::constants::pi<double>();
 
@@ -22,7 +21,7 @@ void EnergyResolution::add(){
   int index=static_cast<int>(transformations.size());
   std::string label="smear";
   if(!m_single){
-    label=(format("smear_%1%")%index).str();
+    label = fmt::format("smear_{0}", index);
   }
   transformation_(label)
     .input("Nvis")

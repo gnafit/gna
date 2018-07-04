@@ -53,9 +53,16 @@ public:
   }
 
   /**
+   * @brief Construct from just a single point.
+   * @param single_point - just one double.
+   */
+  Points(const double single_point) : Points(&single_point, 1) {}
+
+  /**
    * @brief Return the size of an array.
    * @return number of bins in the histogram.
    */
+
   size_t size() const {
     return m_points.size();
   }
