@@ -7,6 +7,8 @@
 
 #define GridSize(size) (size/CU_BLOCK_SIZE + 1)
 
+
+
 template <typename T>
 __global__ void vecAdd(T* res, T* inA, T* inB, size_t n) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
