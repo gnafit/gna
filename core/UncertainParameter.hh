@@ -88,7 +88,7 @@ public:
   virtual T cast(const T& v) const
     { return v; }
 
-  virtual T central() { return m_central; }
+  virtual T central() const noexcept { return m_central; }
   virtual void setCentral(T value) { m_central = value; }
   virtual void reset() { set(this->central()); }
 
@@ -135,7 +135,7 @@ public:
 
   virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
-      if (it == this->m_covariances.end() and (&other != this)) { 
+      if (it == this->m_covariances.end() and (&other != this)) {
           return false;
       } else {
           return true;
@@ -172,7 +172,7 @@ public:
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated"); 
+          auto msg = boost::format("Parameters %1% and %2% are not covariated");
           std::cout << msg % this->name() % other.name() << std::endl;
 #endif
           return static_cast<T>(0.);
