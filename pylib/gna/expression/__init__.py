@@ -18,7 +18,7 @@ class VTContainer(OrderedDict):
 class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
     tree = None
-    def __init__(self, expression, indices, **kwargs):
+    def __init__(self, expression, indices=[], **kwargs):
         self.expression_raw = expression
         self.expression = open_fcn( self.expression_raw )
 
@@ -67,7 +67,7 @@ class ExpressionContext(object):
         self.providers = dict()
         for keys, value in cfg.items():
             if isinstance(value, NestedDict) and 'provides' in value:
-                keys=value.provides
+                keys=value.provides+[keys]
 
             if not isinstance(keys, (list, tuple)):
                 keys=keys,
@@ -111,6 +111,8 @@ class ExpressionContext(object):
             obj.build(self)
 
     def get_key(self, name, nidx, fmt=None, clone=None):
+        if nidx is None:
+            nidx = NIndex()
         if clone is not None:
             clone = '%02d'%clone
 
@@ -128,10 +130,10 @@ class ExpressionContext(object):
     def get_output(self, name, nidx, clone=None):
         return self.get( self.outputs, name, nidx, 'output', clone=clone )
 
-    def set_output(self, output, name, nidx, fmt=None, **kwargs):
+    def set_output(self, output, name, nidx=None, fmt=None, **kwargs):
         self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )
 
-    def get_input(self, name, nidx, clone=None):
+    def get_input(self, name, nidx=None, clone=None):
         return self.get( self.inputs, name, nidx, 'input', clone=clone )
 
     def set_input(self, input, name, nidx, fmt=None, clone=None):

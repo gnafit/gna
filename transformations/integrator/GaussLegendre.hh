@@ -24,18 +24,18 @@ public:
     init();
   }
 
-  GaussLegendre(const double *edges, const size_t *orders, size_t cnt)
-    : m_edges(cnt+1), m_orders(cnt)
+  GaussLegendre(const double *edges, const size_t *orders, size_t bins)
+    : m_edges(bins+1), m_orders(bins)
   {
-    std::copy(edges, edges+cnt+1, m_edges.begin());
-    std::copy(orders, orders+cnt, m_orders.begin());
+    std::copy(edges, edges+bins+1, m_edges.begin());
+    std::copy(orders, orders+bins, m_orders.begin());
     init();
   }
 
-  GaussLegendre(const double *edges, size_t order, size_t cnt)
-    : m_edges(cnt+1), m_orders(cnt, order)
+  GaussLegendre(const double *edges, size_t order, size_t bins)
+    : m_edges(bins+1), m_orders(bins, order)
   {
-    std::copy(edges, edges+cnt+1, m_edges.begin());
+    std::copy(edges, edges+bins+1, m_edges.begin());
     init();
   }
 protected:
