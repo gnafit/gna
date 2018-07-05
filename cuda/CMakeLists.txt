@@ -20,6 +20,7 @@ set(CUSOURCES
   extra/GNAcuMath.cu
   extra/GNAcuOscProbFull.cu
   extra/GNAcuOscProbMem.cu
+ # core/IdentityGPU.cu
   )
 
 set(CUHEADERS 

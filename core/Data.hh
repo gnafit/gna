@@ -624,6 +624,35 @@ public:
   Eigen::Map<MatrixXT> mat{nullptr, 0, 0};         ///< 2D matrix view.
 
   Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
+#ifdef GNA_CUDA_SUPPORT
+  std::unique_ptr<GNAcuGpuArray<T>> gpuArr{nullptr};
+#endif
+
 };
 
+#ifdef GNA_CUDA_SUPPORT
+
+template <typename T>
+DataLocation Data<T>::require_gpu() {
+/**
+Allocate GPU memory in case of GPU array is not inited yet
+*/
+  if (gpuArr == nullptr) {
+    gpuArr.reset(new GNAcuGpuArray<T>());
+  }
+  if (gpuArr->deviceMemAllocated) {
+#ifdef CU_DEBUG_2
+    std::cerr << "INITED! Nothing to do! Reqire_gpu exit!" << std::endl;
+#endif
+    return gpuArr->dataLoc;
+  }
+  DataLocation tmp = DataLocation::NoData;
+  if (type.shape.size() == 1) {
+    tmp = gpuArr->Init(type.shape[0], buffer);
+  } else if (type.shape.size() == 2) {
+    tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
+  } 
+  return tmp;
+}
+#endif
 

@@ -30,7 +30,7 @@ shape = array_to_stdvector(mat.shape, 'size_t')
 points = R.Points( lmat, shape )
 
 identitygpu = R.Identity(True)
-id2 = R.Identity()
+id2 = R.Identity(False)
 #IPython.embed()
 identitygpu.identity.source( points.points.points )
 id2.identity.source(identitygpu.identity.target)

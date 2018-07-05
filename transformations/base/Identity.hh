@@ -25,14 +25,16 @@ public:
 
   void ident(Args args, Rets rets) {
 #ifdef GNA_CUDA_SUPPORT
+    std::cout << "GPUSUPPORT swithced on!" ;
     if (isgpu) gpu_test(args, rets);
     else 
 #endif
-      rets[0].x = args[0].x;
+      rets[0].x = 2*args[0].x;
   }
 
 #ifdef GNA_CUDA_SUPPORT
   void gpu_test (Args args, Rets rets) {
+    std::cout << "IM ON GPU";
     rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
     *(rets[0].gpuArr) *=15;
     std::cout << "Dump: ";

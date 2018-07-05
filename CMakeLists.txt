@@ -162,6 +162,7 @@ set (SOURCES
   )
 
 set (HEADERS
+  config_vars.h
   Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
