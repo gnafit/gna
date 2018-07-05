@@ -22,9 +22,15 @@ indices = [
         ('k', 'kin', ['a', 'b', 'c'])
         ]
 lib = dict(
+        scaled_e = dict(expr='weight*evis'),
 )
 
-expr = 'kinint[k]| evis()'
+pars = tuple()
+pars+=env.globalns.defparameter('weight.a', central=1, sigma=0.1),
+pars+=env.globalns.defparameter('weight.b', central=2, sigma=0.1),
+pars+=env.globalns.defparameter('weight.c', central=3, sigma=0.1),
+
+expr = 'kinint| weight[k] * evis()'
 a = Expression(expr, indices)
 
 print(a.expression_raw)
@@ -60,12 +66,14 @@ ax.set_xlabel( 'E' )
 ax.set_ylabel( 'int f(E)' )
 ax.set_title( 'Linear function f(E)=E integrated' )
 
-context.outputs.kinint.a.plot_hist(label='GL quad')
 edges = cfg.kinint.edges
 centers = (edges[1:]+edges[:-1])*0.5
 widths  = (edges[1:]-edges[:-1])
 ints    = centers*widths
-ax.plot( centers, ints, '--', label='calc' )
+for i, (par, out) in enumerate(zip(pars, context.outputs.kinint.values())):
+    out.plot_hist(label='GL quad '+str(i))
+    ax.plot( centers, ints*par.value(), '--', label='calc '+str(i) )
+
 ax.legend(loc='upper left')
 
 if args.show:
