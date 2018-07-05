@@ -52,10 +52,6 @@ class integral_1d_v01(TransformationBundle):
                 self.context.set_input( hist.hist.f,    self.cfg.name, it, clone=0)
                 self.context.set_output(hist.hist.hist, self.cfg.name, it)
 
-        # econv.Ee.Evis(integrator.points.x)
-        # ibd.xsec.Ee(econv.Ee.Ee)
-        # ibd.Enu.Ee(econv.Ee.Ee)
-
     def define_variables(self):
         pass
 

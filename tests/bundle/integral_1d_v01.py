@@ -46,7 +46,7 @@ cfg = NestedDict(
             bundle   = 'integral_1d_v01',
             variable = 'evis',
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-            orders = 3,
+            orders   = 3,
             provides = [ 'evis' ]
             ),
         )

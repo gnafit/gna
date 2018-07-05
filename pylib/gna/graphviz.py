@@ -136,7 +136,7 @@ class GNADot(object):
 
         """For each source of the Entry walk backward and build the tree"""
         for i, source in enumerate(entry.sources):
-            if not source.materialized():
+            if not source.sink:
                 graph.add_node( uid(source)+' in', shape='point', label='in' )
                 graph.add_edge( uid(source)+' in', uid(entry), **self.get_labels(i, source) )
                 continue
@@ -159,8 +159,6 @@ class GNADot(object):
             elif sink.sources.size()==1 or not self.joints:
                 """In case there is only one connection draw it as is"""
                 for j, source in enumerate(sink.sources):
-                    assert source.materialized()
-
                     graph.add_edge( uid(sink.entry), uid(source.entry), sametail=str(i), **self.get_labels(i, sink, None, source))
                     self.walk_back( source.entry )
             else:
@@ -168,8 +166,6 @@ class GNADot(object):
                 joint = graph.add_node( uid(sink), label='', shape='none', width=0, height=0, penwidth=0 )
                 graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
                 for j, source in enumerate(sink.sources):
-                    assert source.materialized()
-
                     graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
                     self.walk_back( source.entry )
 

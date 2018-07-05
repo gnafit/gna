@@ -19,8 +19,14 @@ class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
-        self.expression_raw = expression
-        self.expression = open_fcn( self.expression_raw )
+        if isinstance(expression, basestring):
+            self.expressions_raw = [expression]
+        elif isinstance(expression, (tuple, list)):
+            self.expressions_raw = list(expression)
+        else:
+            raise Exception('Unsupported expression: {!r}'.format(expression))
+
+        self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
         self.globals=VTContainer(self.operations)
         self.indices=OrderedDict()
@@ -29,7 +35,18 @@ class Expression(object):
     def parse(self):
         if self.tree:
             raise Exception('Expression is already parsed')
-        self.tree=eval(self.expression, self.globals)
+
+        self.trees = []
+        for expr in self.expressions:
+            try:
+                tree = eval(expr, self.globals)
+            except:
+                print('Failed to evaluate expression:')
+                print(expr)
+                raise
+            self.trees.append(tree)
+
+        self.tree=self.trees[-1]
 
     def guessname(self, ilib, *args, **kwargs):
         lib = dict()
@@ -39,10 +56,10 @@ class Expression(object):
         self.tree.guessname(lib, *args, **kwargs)
 
     def __str__(self):
-        return self.expression_raw
+        return self.expressions_raw
 
     def __repr__(self):
-        return 'Expression("{}")'.format(self.expression_raw)
+        return 'Expression("{}")'.format(self.expressions_raw)
 
     def defindices(self, defs):
         self.indices = NIndex(fromlist=defs)
@@ -54,7 +71,8 @@ class Expression(object):
             raise Exception('Expression is not initialized, call parse() method first')
 
         context.set_indices(self.indices)
-        self.tree.build( context )
+        for tree in self.trees:
+            tree.build( context )
 
 class ExpressionContext(object):
     indices = None
@@ -127,7 +145,7 @@ class ExpressionContext(object):
             nidx = nidx + (clone,)
         return (name,)+nidx
 
-    def get_output(self, name, nidx, clone=None):
+    def get_output(self, name, nidx=None, clone=None):
         return self.get( self.outputs, name, nidx, 'output', clone=clone )
 
     def set_output(self, output, name, nidx=None, fmt=None, **kwargs):
@@ -136,7 +154,7 @@ class ExpressionContext(object):
     def get_input(self, name, nidx=None, clone=None):
         return self.get( self.inputs, name, nidx, 'input', clone=clone )
 
-    def set_input(self, input, name, nidx, fmt=None, clone=None):
+    def set_input(self, input, name, nidx=None, fmt=None, clone=None):
         self.set( self.inputs, input, name, nidx, 'input', fmt, clone)
 
     def get(self, source, name, nidx, type, clone=None):

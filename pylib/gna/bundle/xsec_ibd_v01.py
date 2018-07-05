@@ -10,37 +10,44 @@ class xsec_ibd_v01(TransformationBundle):
     def __init__(self, **kwargs):
         TransformationBundle.__init__( self, **kwargs )
 
+        if not self.cfg.order in [0, 1]:
+            raise Exception("Unsupported ibe order {} (should be 0 or 1)".format(self.cfg.order))
+
     def build(self):
-        self.econv = ROOT.EvisToEe()
+        with self.common_namespace("ibd"):
+            self.econv = R.EvisToEe()
 
-        if ibdtype == 'zero':
-            with self.ns("ibd"):
-                ibd = ROOT.IbdZeroOrder()
+        self.set_input( self.econv.Ee.Evis, 'ee', clone=0 )
+        self.set_output( self.econv.Ee.Ee, 'ee' )
 
-            # econv.Ee.Evis(integrator.points.x)
+        if self.cfg.order==0:
+            with self.common_namespace("ibd"):
+                self.ibd = R.IbdZeroOrder()
 
-            # ibd.Enu.Ee(econv.Ee.Ee)
-            # ibd.xsec.Ee(econv.Ee.Ee)
-        elif ibdtype == 'first':
-            with self.ns("ibd"):
-                ibd = ROOT.IbdFirstOrder()
+            self.ibd.Enu.Ee(self.econv.Ee.Ee)
+            self.ibd.xsec.Ee(self.econv.Ee.Ee)
+            self.ibd.xsec.setLabel('IBD xsec (0)')
 
-            # econv.Ee.Evis(integrator.points.x)
-            # ibd.Enu.Ee(econv.Ee.Ee)
-            # ibd.Enu.ctheta(integrator.points.y)
+            self.set_output(self.ibd.Enu.Enu, 'enu')
+            self.set_output(self.ibd.xsec.xsec, 'ibd_xsec')
+        elif self.cfg.order==1:
+            raise Exception('Unimplemented')
+            # with self.ns("ibd"):
+                # ibd = ROOT.IbdFirstOrder()
 
-            ibd.xsec.Enu(ibd.Enu)
-            ibd.xsec.ctheta(integrator.points.y)
+            # # econv.Ee.Evis(integrator.points.x)
+            # # ibd.Enu.Ee(econv.Ee.Ee)
+            # # ibd.Enu.ctheta(integrator.points.y)
 
-            # ibd.jacobian.Enu(ibd.Enu)
-            # ibd.jacobian.Ee(integrator.points.x)
-            # ibd.jacobian.ctheta(integrator.points.y)
-            #
-            ibd.jacobian.setLabel('Jacobian')
-        else:
-            raise Exception("unknown ibd type {0!r}".format(ibdtype))
+            # ibd.xsec.Enu(ibd.Enu)
+            # ibd.xsec.ctheta(integrator.points.y)
 
-        ibd.xsec.setLabel('IBD xsec')
+            # # ibd.jacobian.Enu(ibd.Enu)
+            # # ibd.jacobian.Ee(integrator.points.x)
+            # # ibd.jacobian.ctheta(integrator.points.y)
+            # #
+            # ibd.jacobian.setLabel('Jacobian')
+
         #
         # self.comp0 = R.FillLike(1.0)
         # self.comp0.fill.setLabel('OP comp0')
@@ -73,5 +80,6 @@ class xsec_ibd_v01(TransformationBundle):
                 # self.context.set_input(input, self.cfg.name, it, clone=0)
 
     def define_variables(self):
-        pass
+        from gna.parameters import ibd
+        ibd.reqparameters(self.common_namespace('ibd'))
 
