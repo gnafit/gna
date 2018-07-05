@@ -13,6 +13,7 @@ ignored_classes = [
         'GNA',
         'TransformationTypes',
         'ParametrizedTypes',
+        'TypesFunctions',
         ]
 
 def hygienic(decorator):
