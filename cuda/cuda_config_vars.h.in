@@ -1,16 +1,18 @@
-#if  (@CUDA_DEBUG_INFO@ == 1)  // Only info from CUDA files is presented
-        #define CU_DEBUG
-#endif
-#if  (@CUDA_DEBUG_INFO@ == 2) // Info from CUDA files and data CPU-GPU management errors and warnings are presented
-        #define CU_DEBUG
-        #define CU_DEBUG_2
-#endif
-#if  (@CUDA_DEBUG_INFO@ == 3) // Data transfer messagies are also displays
-        #define CU_DEBUG
-        #define CU_DEBUG_2
-        #define CU_DEBUG_3
-#endif
+#ifdef CUDA_DEBUG_INFO
 
+	#if  (@CUDA_DEBUG_INFO@ == 1)  // Only info from CUDA files is presented
+        	#define CU_DEBUG
+	#endif
+	#if  (@CUDA_DEBUG_INFO@ == 2) // Info from CUDA files and data CPU-GPU management errors and warnings are presented
+        	#define CU_DEBUG
+	        #define CU_DEBUG_2
+	#endif
+	#if  (@CUDA_DEBUG_INFO@ == 3) // Data transfer messagies are also displays
+       		#define CU_DEBUG
+        	#define CU_DEBUG_2
+        	#define CU_DEBUG_3
+	#endif
+#endif
 #define CU_BLOCK_SIZE 1024
 #define CU_GRID_SIZE 32
 
