@@ -18,7 +18,7 @@
 To make CUDA availible you should
 - have CUDA capable GPU in your target machine, 
 - have CUDA Toolkit installed,
-- build GNA with option `-DCUDA_SUPPORT=1`
+- build GNA with option `-DCUDA_SUPPORT=TRUE`
 
 To print debug info you should use `-DCUDA_DEBUG_INFO=<value>` cmake option, where *value* may be the following:
 - 1 means that only cuda warnings and errors will be printed,
@@ -63,7 +63,7 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 
 # HOWTO add CUDA-oriented version of transformation
 
-## On cuGNA side
+### On cuGNA side
 
 - Создать функцию на CUDA, который принимает в себя указатели в качестве аргументов.
 - Добавить к ней заголовочный файл, в котором экспортится функция, вызывающая cuda-код<br/>
@@ -72,7 +72,7 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 - Добавить соответствующие заголовочный и сорс файлы в <br/>
     `cuda/CMakeLists.txt`
 
-## На стороне GNA
+### On GNA side
 - В коде трансформации, для которой создана GPU-версия, заменить в <br/>
     `.func(&cpu_func)` <br/>
   вызов `cpu_func` на вызов функции-переключателя. Пример <br/>
@@ -84,7 +84,7 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
     `.setEntryLocation(gpu? DataLocation::Device : DataLocation::Host).`
 - Добавить реализацию функции, которая вызывает реализованную в cuGNA GPU-функцию. В качестве аргумента передавать ей указатели на соответствующие GPU-указатели в `GpuArray`
 
-## IMPORTANT NOTE:
+### IMPORTANT NOTE:
 Все части кода, связанные с cuGNA, должны быть обернуты в 
 
     #ifdef GNA_CUDA_SUPPORT
