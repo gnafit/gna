@@ -60,3 +60,34 @@ https://git.jinr.ru/gna/gna/commit/8ef13a52f577380d023b3428e6a2751851c61c7c
 | CPU concurrent (coming soon)   |                        |                                  |                 |                  |                      |
 
 *Speed up columns are for an accelerating in comparison with sequential CPU version*
+
+# HOWTO add CUDA-oriented version of transformation
+
+## On cuGNA side
+
+- Создать функцию на CUDA, который принимает в себя указатели в качестве аргументов.
+- Добавить к ней заголовочный файл, в котором экспортится функция, вызывающая cuda-код<br/>
+    `extern "C" void func_name(args);`<br/>
+  это нужно для того, чтобы этот код мог быть вызван из основной части GNA.
+- Добавить соответствующие заголовочный и сорс файлы в <br/>
+    `cuda/CMakeLists.txt`
+
+## На стороне GNA
+- В коде трансформации, для которой создана GPU-версия, заменить в <br/>
+    `.func(&cpu_func)` <br/>
+  вызов `cpu_func` на вызов функции-переключателя. Пример <br/>
+    `gna/transformations/base/Identity.hh`
+- Добавить в трансформацию флаг, по умолчанию равный false <br/>
+    `bool isgpu = false;`
+- Добавить в конструктор трансформации его определение,
+- Добавить в инициализацию трансформации <br/>
+    `.setEntryLocation(gpu? DataLocation::Device : DataLocation::Host).`
+- Добавить реализацию функции, которая вызывает реализованную в cuGNA GPU-функцию. В качестве аргумента передавать ей указатели на соответствующие GPU-указатели в `GpuArray`
+
+## IMPORTANT NOTE:
+Все части кода, связанные с cuGNA, должны быть обернуты в 
+
+    #ifdef GNA_CUDA_SUPPORT
+    #endif
+
+в том числе, определение флага. В противном случае GNA будет невозможно скомпилировать без поддержки GPU.
