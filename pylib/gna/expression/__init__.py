@@ -124,6 +124,8 @@ class ExpressionContext(object):
         with nextlevel():
             if obj.name in self.outputs or obj.name in self.ns.storage or obj.name in self.ns.namespaces:
                 printl( 'found' )
+                if hasattr(obj, 'connect'):
+                    obj.connect(self)
                 return
 
             obj.build(self)

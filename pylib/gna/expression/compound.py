@@ -171,6 +171,7 @@ class NestedTransformation(object):
             IndexedContainer.build(self, context)
 
 class TCall(IndexedContainer, Transformation):
+    inputs_connected = False
     def __init__(self, name, *args, **kwargs):
         targs = ()
         if '|' in args:
@@ -191,6 +192,8 @@ class TCall(IndexedContainer, Transformation):
         Transformation.__init__(self,name, *(list(args)+list(objects)), **kwargs)
         self.set_operator( ', ', '(', ')' )
 
+        self.inputs_connected = not self.nonempty()
+
     def __str__(self):
         return '{}({:s})'.format(Indexed.__str__(self), '...' if self.objects else '' )
 
@@ -206,6 +209,18 @@ class TCall(IndexedContainer, Transformation):
         with nextlevel():
             Transformation.build(self, context)
             IndexedContainer.build(self, context)
+
+        self.inputs_connected = True
+
+    def connect(self, context):
+        if self.inputs_connected:
+            return
+
+        printl('connect (call) {}:'.format(type(self).__name__), str(self) )
+        with nextlevel():
+            IndexedContainer.build(self, context)
+
+        self.inputs_connected = True
 
 class TProduct(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):

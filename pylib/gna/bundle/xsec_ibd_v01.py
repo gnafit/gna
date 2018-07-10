@@ -18,28 +18,26 @@ class xsec_ibd_v01(TransformationBundle):
             self.econv = R.EvisToEe()
 
         self.set_input( self.econv.Ee.Evis, 'ee', clone=0 )
-        self.set_output( self.econv.Ee.Ee, 'ee' )
+        self.set_output( self.econv.Ee.Ee,  'ee' )
 
         if self.cfg.order==0:
             with self.common_namespace("ibd"):
                 self.ibd = R.IbdZeroOrder()
 
-            self.ibd.Enu.Ee(self.econv.Ee.Ee)
-            self.ibd.xsec.Ee(self.econv.Ee.Ee)
+            self.set_input(self.ibd.Enu.Ee,   'enu', clone=0)
+            self.set_output(self.ibd.Enu.Enu, 'enu')
+
+            self.set_input(self.ibd.xsec.Ee,   'ibd_xsec', clone=0)
+            self.set_output(self.ibd.xsec.xsec, 'ibd_xsec')
+
             self.ibd.xsec.setLabel('IBD xsec (0)')
 
-            self.set_output(self.ibd.Enu.Enu, 'enu')
-            self.set_output(self.ibd.xsec.xsec, 'ibd_xsec')
         elif self.cfg.order==1:
-            raise Exception('Unimplemented')
-            # with self.ns("ibd"):
-                # ibd = ROOT.IbdFirstOrder()
+            with self.ns("ibd"):
+                self.ibd = ROOT.IbdFirstOrder()
 
-            # # econv.Ee.Evis(integrator.points.x)
-            # # ibd.Enu.Ee(econv.Ee.Ee)
-            # # ibd.Enu.ctheta(integrator.points.y)
-
-            # ibd.xsec.Enu(ibd.Enu)
+            self.ibd.Enu.Ee(econv.Ee.Ee)
+            self.ibd.xsec.Enu(self.ibd.Enu)
             # ibd.xsec.ctheta(integrator.points.y)
 
             # # ibd.jacobian.Enu(ibd.Enu)

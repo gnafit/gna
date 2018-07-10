@@ -30,8 +30,8 @@ lib = dict(
 expr = 'sum[z] | prod[n] | sum[a,b] | norm()*spec[n](enu[a,z]()) + bkg[b]()'
 a = Expression(expr, indices=indices)
 
-print(a.expression_raw)
-print(a.expression)
+print(a.expressions_raw)
+print(a.expressions)
 
 a.parse()
 a.guessname(lib, save=True)

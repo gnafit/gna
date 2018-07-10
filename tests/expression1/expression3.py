@@ -31,8 +31,8 @@ lib = dict(
 expr = 'prod[a]| sum[z]| weight1[z]*weight2[a] * spec| enu()'
 a = Expression(expr, indices=indices)
 
-print(a.expression_raw)
-print(a.expression)
+print(a.expressions_raw)
+print(a.expressions)
 
 a.parse()
 a.guessname(lib, save=True)

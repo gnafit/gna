@@ -51,8 +51,8 @@ expr = 'sum[n]| '+expr
 
 a = Expression(expr, indices=indices)
 
-print(a.expression_raw)
-print(a.expression)
+print(a.expressions_raw)
+print(a.expressions)
 
 a.parse()
 a.guessname(lib, save=True)
