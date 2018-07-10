@@ -67,11 +67,11 @@ expr =[
         #
         # - ee() is positron energy provided by cross section, which is computed from evis().
         #
-        # in first rexpression we feed 'evis()' to 'ee()'
+        # - enu() is neutrino energy provided by cross section, which is computed from ee().
+        #
+        # in first rexpression we feed 'evis()' to 'ee() and then to enu()'
         'enu| ee| evis()',
-        # the ibd_xsec() is a cross section is provided by the cross section bundle. It depends
-        # on 'ee()', but we do not pass 'ee()' as an argument, since it is already connected.
-        # (this point will be covered by the documentation).
+        # the ibd_xsec() is a cross section is provided by the cross section bundle. It depends on 'ee()'.
         'kinint| ibd_xsec(ee())'
         # 'kinint' is an integration function provided by the integrator. It is needed to convert
         # the cross section, computed in each point to a histogram.

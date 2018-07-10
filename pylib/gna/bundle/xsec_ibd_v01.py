@@ -27,17 +27,31 @@ class xsec_ibd_v01(TransformationBundle):
             self.set_input(self.ibd.Enu.Ee,   'enu', clone=0)
             self.set_output(self.ibd.Enu.Enu, 'enu')
 
-            self.set_input(self.ibd.xsec.Ee,   'ibd_xsec', clone=0)
+            self.set_input(self.ibd.xsec.Ee,    'ibd_xsec', clone=0)
             self.set_output(self.ibd.xsec.xsec, 'ibd_xsec')
 
             self.ibd.xsec.setLabel('IBD xsec (0)')
-
         elif self.cfg.order==1:
-            with self.ns("ibd"):
-                self.ibd = ROOT.IbdFirstOrder()
+            with self.common_namespace("ibd"):
+                self.ibd = R.IbdFirstOrder()
 
-            self.ibd.Enu.Ee(econv.Ee.Ee)
-            self.ibd.xsec.Enu(self.ibd.Enu)
+            self.set_input(self.ibd.Enu.Ee,     'enu', clone=0)
+            self.set_input(self.ibd.Enu.ctheta, 'enu', clone=1)
+            self.set_output(self.ibd.Enu.Enu,   'enu')
+
+            self.set_input(self.ibd.xsec.Enu,    'ibd_xsec', clone=0)
+            self.set_input(self.ibd.xsec.ctheta, 'ibd_xsec', clone=1)
+            self.set_output(self.ibd.xsec.xsec,  'ibd_xsec')
+            self.ibd.xsec.setLabel('IBD xsec (0)')
+
+            self.set_input(self.ibd.jacobian.Enu,       'jacobian', clone=0)
+            self.set_input(self.ibd.jacobian.Ee,        'jacobian', clone=1)
+            self.set_input(self.ibd.jacobian.ctheta,    'jacobian', clone=2)
+            self.set_output(self.ibd.jacobian.jacobian, 'jacobian')
+            self.ibd.jacobian.setLabel('Ee->Enu jacobian')
+
+        self.ibd.Enu.setLabel('Enu')
+
             # ibd.xsec.ctheta(integrator.points.y)
 
             # # ibd.jacobian.Enu(ibd.Enu)
@@ -45,6 +59,17 @@ class xsec_ibd_v01(TransformationBundle):
             # # ibd.jacobian.ctheta(integrator.points.y)
             # #
             # ibd.jacobian.setLabel('Jacobian')
+
+            # histcls = ROOT.GaussLegendre2dHist
+            # econv.Ee.Evis(integrator.points.x)
+            # ibd.Enu.Ee(econv.Ee.Ee)
+            # ibd.Enu.ctheta(integrator.points.y)
+            # detector.intermediates['ctheta'] = integrator.points.y
+            # ibd.xsec.Enu(ibd.Enu)
+            # ibd.xsec.ctheta(integrator.points.y)
+            # ibd.jacobian.Enu(ibd.Enu)
+            # ibd.jacobian.Ee(integrator.points.x)
+            # ibd.jacobian.ctheta(integrator.points.y)
 
         #
         # self.comp0 = R.FillLike(1.0)

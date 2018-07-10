@@ -67,13 +67,14 @@ expr =[
         #
         # - ee() is positron energy provided by cross section, which is computed from evis().
         #
-        # in first rexpression we feed 'evis()' to 'ee()'
-        'ee| evis()',
-        'enu(ee(), ctheta())',
-        # the ibd_xsec() is a cross section is provided by the cross section bundle. It depends
-        # on 'ee()', but we do not pass 'ee()' as an argument, since it is already connected.
-        # (this point will be covered by the documentation).
-        'ibd_xsec()'
+        # - enu() is neutrino energy provided by cross section, which is computed from ee().
+        #
+        # in first rexpression we feed 'evis()' to 'ee() and then to enu()'
+        'enu| ee(evis()), ctheta()',
+        # connect jacobian
+        'jacobian(enu(), ee(), ctheta())',
+        # the ibd_xsec() is a cross section is provided by the cross section bundle. It depends on 'enu()' and 'costheta()'.
+        'kinint2| ibd_xsec(enu(), ctheta()) * jacobian()'
         # 'kinint' is an integration function provided by the integrator. It is needed to convert
         # the cross section, computed in each point to a histogram.
         ]
@@ -104,14 +105,16 @@ cfg = NestedDict(
         kinint2 = NestedDict(
             # that one need to execute the bundle 'integral_1d_v01'
             # that will create and provide the necessary transformations
-            bundle   = 'integral_2d_v01',
+            bundle   = 'integral_2d1d_v01',
             # The following lines are the bundle options:
             # - the integration variable name
-            variable = 'evis',
+            variables = ('evis', 'ctheta'),
             # - the bin edges
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-            # - the integration order for each bin (or fo all of the bins) (Gauss-Legendre)
-            orders   = 3,
+            # - the integration order for each X bin (or fo all of the bins) (Gauss-Legendre)
+            xorders   = 3,
+            # - the integration order for all Y bins (Gauss-Legendre)
+            yorder   = 3,
             # - this line says that the bundle will create 'evis' output in addition to 'kinint'
             provides = [ 'evis', 'ctheta' ]
             ),
@@ -123,7 +126,7 @@ cfg = NestedDict(
             # - the IBD cross section order (0 for zero-th or 1 the first). First is not yet implemented.
             order = 1,
             # this line says that the bundle will provide the 'ee' - positron energy as additional output.
-            provides = [ 'ibd_xsec', 'ee', 'enu' ]
+            provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
             )
         )
 #
