@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+r"""Computes the integral:
+    \int_{-1}^{+1} d\cos\theta \int_{E_i}^{E_j} dE \sigma(E_\nu(E, \cos\theta)) dE_\nu(E, \cos \theta)/dE
+    for each energy bin.
+"""
+
 # Usage:
 #   - Just run and show the figure:
 #      tests/bundle/xsec_ibd_2d_v01.py -s
