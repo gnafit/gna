@@ -67,7 +67,6 @@ def bar_hist1( output, *args, **kwargs ):
 
     height=output.data()
     lims  = N.array(output.datatype().edges)
-    ax=h.GetXaxis()
     left  = lims[:-1]
     width = lims[1:] - left
 

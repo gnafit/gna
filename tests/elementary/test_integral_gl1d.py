@@ -12,6 +12,7 @@ from constructors import Points
 from gna.env import env
 from argparse import ArgumentParser
 from gna.parameters.printer import print_parameters
+from mpl_tools import bindings
 
 """Parse arguments"""
 parser = ArgumentParser()
@@ -32,16 +33,21 @@ ns.defparameter( 'E0',             central=mean,  sigma=0.1 )
 ns.defparameter( 'Width',          central=sigma, sigma=0.1 )
 print_parameters( ns )
 
+# Initialize the function of interest
 fcn = R.GaussianPeakWithBackground()
+# keep its output as variable
 output=fcn.rate.rate
 
 """Initialize the integrator"""
+# create array with bin edges
 edges = N.arange(*opts.bins, dtype='d')
 
+# create 1d integrator (sample points) for given edges and integration order
 gl_int = R.GaussLegendre( edges, opts.order, edges.size-1 )
 edges = gl_int.points.xedges.data()
 widths = edges[1:]-edges[:-1]
 
+# create the 1d integrator (histogram) for given sample points
 gl_hist = R.GaussLegendreHist( gl_int )
 
 # knots = gl_int.points.x.data()
@@ -50,11 +56,16 @@ gl_hist = R.GaussLegendreHist( gl_int )
 # output = points.points.points
 
 """Make fake gaussian data"""
+# pass sample points as input to the function 'energy'
 fcn.rate.E(gl_int.points.x)
+# pass the function output to the histogram builder (integrator)
 gl_hist.hist.f( output )
-hist = gl_hist.hist.hist.data()
+# read the histogram contents
+hist_output = gl_hist.hist.hist
+hist = hist_output.data()
 
 """Plot data"""
+# init figure
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
@@ -63,12 +74,18 @@ ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
 ax.set_title( 'Integrate Gaussian (%g, %g) with order %i'%( mean, sigma, opts.order ) )
 
+# plot function versus sample points
 ax.plot( gl_int.points.x.data(), fcn.rate.rate.data(), label='function' )
-plot_bar( edges, hist, label='histogram (sum=%g)'%hist.sum(), alpha=0.5 )
+# plot histogram using GNA to matplotlib interface
+hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), alpha=0.5 )
+# plot histogram manually
 plot_bar( edges, hist/widths, label='histogram/binwidth', alpha=0.5 )
 
+# add legend
 ax.legend( loc=opts.legend)
 
+# Our function of interest is a guassian and should give 1 when integrated
+# Test it by summing the histogram bins
 diff = hist.sum()-1
 print( 'Integral-1:', diff )
 print( N.fabs(diff)<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
