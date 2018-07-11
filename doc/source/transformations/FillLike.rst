@@ -13,10 +13,10 @@ Arguments
 Inputs
 ^^^^^^
 
-1) ``'a'`` — array.
+1) ``fill.a`` — array.
 
 Outputs
 ^^^^^^^
 
-1) ``'a'`` — array, filled with :math:`v`.
+1) ``fill.a`` — array, filled with :math:`v`.
 
