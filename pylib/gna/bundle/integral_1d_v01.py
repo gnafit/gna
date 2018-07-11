@@ -39,7 +39,10 @@ class integral_1d_v01(TransformationBundle):
             self.integrator = R.GaussLegendre(self.edges, self.orders, self.edges.size-1)
         else:
             self.integrator = R.GaussLegendre(self.edges, int(self.orders[0]), self.edges.size-1)
-        self.integrator.points.setLabel('integrator 1d')
+        self.integrator.points.setLabel('Gauss-Legendre 1d')
+
+        self.integrator.points.x.setLabel(self.cfg.variable)
+        self.integrator.points.xedges.setLabel('%s edges'%self.cfg.variable)
 
         self.set_output(self.integrator.points.x,      self.cfg.variable)
         self.set_output(self.integrator.points.xedges, '%s_edges'%self.cfg.variable)

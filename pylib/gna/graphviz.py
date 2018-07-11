@@ -163,9 +163,9 @@ class GNADot(object):
                     self.walk_back( source.entry )
             else:
                 """In case there is more than one connections, merge them"""
-                joint = graph.add_node( uid(sink), label='', shape='none', width=0, height=0, penwidth=0 )
+                joint = graph.add_node( uid(sink), shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.get_tail_label(None, sink) )
                 graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
                 for j, source in enumerate(sink.sources):
-                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
+                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, None, None, source))
                     self.walk_back( source.entry )
 

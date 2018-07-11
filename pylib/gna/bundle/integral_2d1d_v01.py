@@ -42,7 +42,11 @@ class integral_2d1d_v01(TransformationBundle):
             self.integrator = R.GaussLegendre2d(self.edges, self.xorders, self.edges.size-1, -1.0, 1.0, self.cfg.yorder)
         else:
             self.integrator = R.GaussLegendre2d(self.edges, int(self.xorders[0]), self.edges.size-1, -1.0, 1.0, self.cfg.yorder)
-        self.integrator.points.setLabel('integrator 2d')
+        self.integrator.points.setLabel('Gauss-Legendre 2d')
+
+        self.integrator.points.x.setLabel(self.cfg.variables[0])
+        self.integrator.points.xedges.setLabel('%s edges'%self.cfg.variables[0])
+        self.integrator.points.y.setLabel(self.cfg.variables[1])
 
         self.set_output(self.integrator.points.x,      self.cfg.variables[0])
         self.set_output(self.integrator.points.xedges, '%s_edges'%self.cfg.variables[0])

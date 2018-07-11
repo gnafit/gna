@@ -75,8 +75,8 @@ expr =[
         'jacobian(enu(), ee(), ctheta())',
         # the ibd_xsec() is a cross section is provided by the cross section bundle. It depends on 'enu()' and 'costheta()'.
         'kinint2| ibd_xsec(enu(), ctheta()) * jacobian()'
-        # 'kinint' is an integration function provided by the integrator. It is needed to convert
-        # the cross section, computed in each point to a histogram.
+        # 'kinint2' is 2d integration function provided by the integrator. It is needed to convert
+        # the cross section, computed in each point to a histogram. The integration is done for each evis bin and for ctheta=[-1,1]
         ]
 
 # Initialize the expression and indices
@@ -115,7 +115,7 @@ cfg = NestedDict(
             xorders   = 3,
             # - the integration order for all Y bins (Gauss-Legendre)
             yorder   = 3,
-            # - this line says that the bundle will create 'evis' output in addition to 'kinint'
+            # - this line says that the bundle will create 'evis' and 'ctheta' output in addition to 'kinint2'
             provides = [ 'evis', 'ctheta' ]
             ),
         # This bundle configuration will be triggered in order to build 'ibd_xsec()' output.
@@ -140,30 +140,25 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-# #
-# # Do some plots
-# #
-# # Initialize figure
-# fig = P.figure()
-# ax = P.subplot( 111 )
-# ax.minorticks_on()
-# ax.grid()
-# ax.set_xlabel( 'Visible energy, MeV' )
-# ax.set_ylabel( r'$\sigma$' )
-# ax.set_title( 'IBD cross section' )
+#
+# Do some plots
+#
+# Initialize figure
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( 'Visible energy, MeV' )
+ax.set_ylabel( r'$\sigma$' )
+ax.set_title( 'IBD cross section (1st order)' )
 
-# # Get evis and cross section
-# evis = context.outputs.evis.data()
-# xsec = context.outputs.ibd_xsec.data()
+# Plot
+context.outputs.kinint2.plot_hist( label='Integrated cross section' )
 
-# # Plot
-# ax.plot( evis, xsec, label='Differential IBD cross section' )
-# context.outputs.kinint.plot_hist( label='Integrated cross section' )
+ax.legend(loc='upper left')
 
-# ax.legend(loc='upper left')
-
-# if args.show:
-    # P.show()
+if args.show:
+    P.show()
 
 #
 # Dump the histogram to a dot graph
@@ -172,7 +167,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot(context.outputs.ee, joints=False)
+        graph = GNADot(context.outputs.ee, joints=True)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
     except Exception as e:

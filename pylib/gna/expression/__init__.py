@@ -76,6 +76,7 @@ class Expression(object):
 
 class ExpressionContext(object):
     indices = None
+    executed_bundes = set()
     def __init__(self, cfg, ns=None):
         self.cfg = cfg
         self.outputs = NestedDict()
@@ -85,7 +86,8 @@ class ExpressionContext(object):
         self.providers = dict()
         for keys, value in cfg.items():
             if isinstance(value, NestedDict) and 'provides' in value:
-                keys=value.provides+[keys]
+                value.provides+=[keys]
+                keys=value.provides
 
             if not isinstance(keys, (list, tuple)):
                 keys=keys,
@@ -112,9 +114,16 @@ class ExpressionContext(object):
         if indices is not None:
             cfg.indices=indices
 
+        if name in self.executed_bundes:
+            printl('already provided')
+            return
+
         from gna.bundle import execute_bundle
         with nextlevel():
             b=execute_bundle( cfg=cfg, context=self )
+
+        printl('provides:', cfg.provides)
+        self.executed_bundes = self.executed_bundes.union( cfg.provides )
 
     def get_variable(self, name, *idx):
         pass
