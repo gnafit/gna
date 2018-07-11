@@ -9,18 +9,18 @@ Uses finite differences method of 4-th order.
 Arguments
 ^^^^^^^^^
 
-1) ``'x'`` — parameter instance.
-2) ``'reldelta'`` — finite difference step :math:`h`.
+1) ``x`` — parameter instance.
+2) ``reldelta`` — finite difference step :math:`h`.
 
 Inputs
 ^^^^^^
 
-1) ``'y'`` — array of size :math:`N`.
+1) ``derivative.y`` — array of size :math:`N`.
 
 Outputs
 ^^^^^^^
 
-1) ``'dy'`` — array of size :math:`N`.
+1) ``derivative.dy`` — array of size :math:`N`.
 
 Implementation
 ^^^^^^^^^^^^^^
