@@ -7,7 +7,6 @@ import constructors as C
 from gna.bundle import *
 
 class integral_1d_v01(TransformationBundle):
-    ## class integral_1d_v01
     # @brief 1d integral bundle
     #
     # Integral_1d bundle. Creates necessary transformations to integrate 1d function into 1d histogram
