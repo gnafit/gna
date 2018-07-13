@@ -93,7 +93,7 @@ void RenormalizeDiag::renormalizeOffdiag(FunctionArgs fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;
-    ret.arr = arg.arr*m_scale;
+    ret = arg*m_scale;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
         ret.diagonal(i)=arg.diagonal(i);
         if( i>0 ) {
@@ -107,7 +107,7 @@ void RenormalizeDiag::renormalizeDiag(FunctionArgs fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;
-    ret.arr = arg.arr;
+    ret = arg;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
         ret.diagonal(i)*=m_scale;
         if( i>0 ) {

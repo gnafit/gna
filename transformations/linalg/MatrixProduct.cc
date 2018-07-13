@@ -28,7 +28,7 @@ void MatrixProduct::checkTypes(Atypes args, Rtypes rets) {
 
 void MatrixProduct::product(FunctionArgs fargs) {
     auto& args=fargs.args;
-    auto& ret=fargs.ret[0].mat;
+    auto& ret=fargs.rets[0].mat;
     ret = args[0].mat;
     for (size_t i=1; i < args.size(); ++i) {
         ret *= args[i].mat;
