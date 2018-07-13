@@ -88,6 +88,7 @@ set (HEADERS
   InputHandle.hh
   TransformationDebug.hh
   TransformationBase.hh
+  TransformationTypes.hh
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationDescriptor.hh
