@@ -2,8 +2,11 @@
 #include "EigenHelpers.hh"
 #include <algorithm>
 
-void Jacobian::calcJacobian(Args args, Rets rets) {
-    Eigen::MatrixXd storage(args[0].x.size(), m_pars.size());
+void Jacobian::calcJacobian(FunctionArgs fargs) {
+    auto& arg=fargs.args[0];
+    auto& ret=fargs.rets[0];
+
+    Eigen::MatrixXd storage(arg.x.size(), m_pars.size());
     storage.setZero();
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
@@ -20,20 +23,20 @@ void Jacobian::calcJacobian(Args args, Rets rets) {
 
       x->set(points[0]);
 
-      Eigen::ArrayXd ret = f1*args[0].x;
+      Eigen::ArrayXd ret = f1*arg.x;
 
       x->set(points[1]);
-      ret -= f1*args[0].x;
+      ret -= f1*arg.x;
       x->set(points[2]);
-      ret -= f2*args[0].x;
+      ret -= f2*arg.x;
       x->set(points[3]);
-      ret += f2*args[0].x;
+      ret += f2*arg.x;
       x->set(x0);
 
       storage.col(i) = ret.matrix();
     }
 
-    rets[0].mat = storage;
+    ret.mat = storage;
 }
 
 void Jacobian::calcTypes(Atypes args, Rtypes rets){

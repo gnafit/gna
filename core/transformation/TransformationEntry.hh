@@ -6,7 +6,7 @@
 
 #include "Data.hh"
 #include "Parameters.hh"
-#include "TransformationTypes.hh"
+#include "TransformationFunction.hh"
 
 namespace TransformationTypes
 {

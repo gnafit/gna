@@ -23,7 +23,7 @@ public:
   InputDescriptor append(SingleOutput &out);        ///< Add an input and connect an output to it.
 
   void calculateTypes(Atypes args, Rtypes rets);    ///< MemTypesFunction.
-  void calculatePrediction(Args args, Rets rets);   ///< MemFunction.
+  void calculatePrediction(FunctionArgs fargs);     ///< MemFunction.
 
   size_t size() const;                              ///< The size of the output.
   void update() const;                              ///< Force update of the calculation.

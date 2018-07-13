@@ -11,9 +11,9 @@ class Transpose: public GNAObject,
                         auto input_shape = args[0].shape;
                         rets[0] = DataType().points().shape({input_shape.rbegin(), input_shape.rend()});
                         })
-                .func([](Transpose* obj, Args args, Rets rets){
-                        rets[0].mat = args[0].mat.transpose();
+                .func([](Transpose* obj, FunctionArgs fargs){
+                        fargs.rets[0].mat = fargs.args[0].mat.transpose();
                         });
         }
-                         
+
 };

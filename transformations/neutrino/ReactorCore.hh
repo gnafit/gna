@@ -10,7 +10,7 @@ class ReactorCore: public GNAObject,
 public:
   ReactorCore(const std::vector<std::string> &isonames);
 protected:
-  void calcRates(Args args, Rets rets);
+  void calcRates(FunctionArgs fargs);
 
   variable<double> m_nominalThermalPower;
   std::vector<variable<double>> m_ePerFission;

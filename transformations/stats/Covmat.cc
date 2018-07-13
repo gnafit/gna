@@ -1,6 +1,8 @@
 #include "Covmat.hh"
 
-void Covmat::calculateCov(Args args, Rets rets) {
+void Covmat::calculateCov(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   auto &cov = rets[0].mat;
   cov.setZero();
   cov.diagonal() = args[0].vec;
@@ -13,8 +15,8 @@ void Covmat::calculateCov(Args args, Rets rets) {
   }
 }
 
-void Covmat::calculateInv(Args args, Rets rets) {
-  rets[0].mat = args[0].mat.inverse();
+void Covmat::calculateInv(FunctionArgs fargs) {
+  fargs.rets[0].mat = fargs.args[0].mat.inverse();
 }
 
 void Covmat::prepareCholesky(Atypes args, Rtypes rets) {
@@ -28,8 +30,8 @@ void Covmat::prepareCholesky(Atypes args, Rtypes rets) {
   rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
 }
 
-void Covmat::calculateCholesky(Args args, Rets rets) {
-  m_llt.compute(args[0].mat);
+void Covmat::calculateCholesky(FunctionArgs fargs) {
+  m_llt.compute(fargs.args[0].mat);
 }
 
 void Covmat::rank1(SingleOutput &out) {

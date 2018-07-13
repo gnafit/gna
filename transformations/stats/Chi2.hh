@@ -19,7 +19,7 @@ public:
   void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
 
   void checkTypes(Atypes args, Rtypes rets);
-  void calculateChi2(Args args, Rets rets);
+  void calculateChi2(FunctionArgs fargs);
 
   virtual double value() override {
     return m_transform[0].x[0];

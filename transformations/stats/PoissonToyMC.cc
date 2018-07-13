@@ -28,7 +28,9 @@ void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
   }
 }
 
-void PoissonToyMC::calcToyMC(Args args, Rets rets) {
+void PoissonToyMC::calcToyMC(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < args.size(); i+=1) {
     auto &mean = args[i].vec;
     auto &out = rets[i].vec;

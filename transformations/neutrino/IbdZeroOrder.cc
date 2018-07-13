@@ -22,12 +22,12 @@ IbdZeroOrder::IbdZeroOrder()
     .func(&IbdZeroOrder::calcXsec);
 }
 
-void IbdZeroOrder::calcEnu(Args args, Rets rets) {
-  rets[0].x = args[0].x + m_DeltaNP;
+void IbdZeroOrder::calcEnu(FunctionArgs fargs) {
+  fargs.rets[0].x = fargs.args[0].x + m_DeltaNP;
 }
 
-void IbdZeroOrder::calcXsec(Args args, Rets rets) {
-  const auto &Ee = args[0].x;
+void IbdZeroOrder::calcXsec(FunctionArgs fargs) {
+  const auto &Ee = fargs.args[0].x;
 
   const double MeV2J = 1.E6 * TMath::Qe();
   const double J2MeV = 1./MeV2J;
@@ -40,5 +40,5 @@ void IbdZeroOrder::calcXsec(Args args, Rets rets) {
                 [](double x){return (!std::isnan(x) ? x : 0.);});
   auto coeff = 2.*pi*pi /
     (std::pow(m_pdg->ElectronMass, 5) * PhaseFactor * m_pdg->NeutronLifeTime/(1.E-6*TMath::Hbar()/TMath::Qe()));
-  rets[0].x = MeV2cm * coeff*Ee*pe;
+  fargs.rets[0].x = MeV2cm * coeff*Ee*pe;
 }

@@ -20,8 +20,8 @@ void VarArray::typesFunction(Atypes args, Rtypes rets){
   rets[0] = DataType().points().shape(m_vars.size());
 }
 
-void VarArray::function(Args args, Rets rets){
-  auto* buffer = rets[0].buffer;
+void VarArray::function(FunctionArgs fargs){
+  auto* buffer = fargs.rets[0].buffer;
   for( auto var : m_vars ){
       *buffer = var.value();
       buffer=next(buffer);

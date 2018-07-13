@@ -3,8 +3,7 @@
 #include "TransformationEntry.hh"
 #include "Atypes.hh"
 #include "Rtypes.hh"
-#include "Args.hh"
-#include "Rets.hh"
+#include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
 template <typename Derived>
@@ -30,7 +29,7 @@ namespace TransformationTypes {
    *   .input("source")
    *   .output("target")
    *   .types(TypesFunctions::pass<0,0>)
-   *   .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
+   *   .func([](FunctionArgs fargs){ fargs.rets[0].x = fargs.args[0].x; })
    *   ;
    * ```
    * Initializer is usually used in the transformation's constructor and the scope is limited with
@@ -51,7 +50,7 @@ namespace TransformationTypes {
      *
      * @copydoc Function
      */
-    typedef std::function<void(T*, Args, Rets)> MemFunction;
+    typedef std::function<void(T*, FunctionArgs)> MemFunction;
     /**
      * @brief Function, that does the input types checking and output types derivation (reference to a member function).
      *
@@ -192,7 +191,7 @@ namespace TransformationTypes {
     Initializer<T> func(MemFunction func) {
       using namespace std::placeholders;
       m_mfunc = func;
-      m_entry->fun = std::bind(func, m_obj->obj(), _1, _2);
+      m_entry->fun = std::bind(func, m_obj->obj(), _1);
       return *this;
     }
 

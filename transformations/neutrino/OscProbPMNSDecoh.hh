@@ -12,11 +12,11 @@ class OscProbPMNSDecoh: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNSDecoh>::transformation_;
   OscProbPMNSDecoh(Neutrino from, Neutrino to);
-  void calcSum(Args args, Rets rets);
+  void calcSum(FunctionArgs fargs);
   template <int I, int J>
-  void calcComponent(Args args, Rets rets);
+  void calcComponent(FunctionArgs fargs);
   template <int I, int J>
-  void calcComponentCP(Args args, Rets rets);
+  void calcComponentCP(FunctionArgs fargs);
 protected:
   variable<double> m_L;
   variable<double> m_sigma;

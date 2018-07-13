@@ -21,11 +21,12 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
     .func(&Rebin::calcSmear);
 }
 
-void Rebin::calcSmear(Args args, Rets rets) {
+void Rebin::calcSmear(FunctionArgs fargs) {
+  auto& args=fargs.args;
   if( !m_initialized ){
       calcMatrix( args[0].type );
   }
-  rets[0].x = m_sparse_cache * args[0].vec;
+  fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
 void Rebin::calcMatrix(const DataType& type) {

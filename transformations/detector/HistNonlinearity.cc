@@ -60,14 +60,16 @@ void HistNonlinearity::set( SingleOutput& ntrue ){
     t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
-void HistNonlinearity::calcSmear(Args args, Rets rets) {
+void HistNonlinearity::calcSmear(FunctionArgs fargs) {
+  auto& args=fargs.args;
   args[1]; // Needed to trigger updating
-  rets[0].x = m_sparse_cache * args[0].vec;
+  fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
-void HistNonlinearity::calcMatrix(Args args, Rets rets) {
+void HistNonlinearity::calcMatrix(FunctionArgs fargs) {
   m_sparse_cache.setZero();
 
+  auto& args=fargs.args;
   auto n = args[0].arr.size();
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
@@ -151,6 +153,6 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
   DEBUG("\n");
 
   if ( m_propagate_matrix )
-    rets[0].mat = m_sparse_cache;
+    fargs.rets[0].mat = m_sparse_cache;
 }
 

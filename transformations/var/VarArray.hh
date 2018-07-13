@@ -9,6 +9,6 @@ public:
 
 protected:
   void typesFunction(Atypes args, Rtypes rets);
-  void function(Args args, Rets rets);
+  void function(FunctionArgs fargs);
   std::vector<variable<double>> m_vars;              ///< List of variables.
 };

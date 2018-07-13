@@ -5,8 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "Args.hh"
-#include "Rets.hh"
+#include "TransformationFunctionArgs.hh"
 #include "Source.hh"
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
@@ -122,7 +121,7 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
-  return fun(Args(this), Rets(this));
+  return fun(FunctionArgs(this));
 }
 
 /**

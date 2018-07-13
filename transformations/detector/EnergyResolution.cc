@@ -98,8 +98,8 @@ void EnergyResolution::fillCache() {
 }
 
 /* Apply precalculated cache and actually smear */
-void EnergyResolution::calcSmear(Args args, Rets rets) {
-  rets[0].x = m_sparse_cache * args[0].vec;
+void EnergyResolution::calcSmear(FunctionArgs fargs) {
+  fargs.rets[0].x = m_sparse_cache * fargs.args[0].vec;
 }
 
 

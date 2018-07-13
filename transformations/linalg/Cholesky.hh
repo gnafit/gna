@@ -23,7 +23,7 @@ public:
     ;
   }
   void prepareCholesky(Atypes args, Rtypes rets);
-  void calculateCholesky(Args args, Rets rets);
+  void calculateCholesky(FunctionArgs fargs);
 
 protected:
   class LLT: public Eigen::LLT<Eigen::MatrixXd> {
@@ -53,6 +53,6 @@ void Cholesky::prepareCholesky(Atypes args, Rtypes rets) {
 /**
  * Decompose
  */
-void Cholesky::calculateCholesky(Args args, Rets rets) {
-  m_llt.compute(args[0].mat);
+void Cholesky::calculateCholesky(FunctionArgs fargs) {
+  m_llt.compute(fargs.args[0].mat);
 }

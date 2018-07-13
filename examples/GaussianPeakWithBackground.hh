@@ -28,10 +28,10 @@ public:
       ;
   }
 
-  void calcRate(Args args, Rets rets) {
+  void calcRate(FunctionArgs fargs) {
     const double pi = boost::math::constants::pi<double>();
-    const auto &E = args[0].arr;
-    rets[0].arr = m_b + m_mu*(1./std::sqrt(2*pi)/m_w_scaled)*(-(E-m_E0_scaled).square()/(2*m_w_scaled*m_w_scaled)).exp();
+    const auto &E = fargs.args[0].arr;
+    fargs.rets[0].arr = m_b + m_mu*(1./std::sqrt(2*pi)/m_w_scaled)*(-(E-m_E0_scaled).square()/(2*m_w_scaled*m_w_scaled)).exp();
   }
 protected:
   variable<double> m_b, m_mu, m_E0, m_w;

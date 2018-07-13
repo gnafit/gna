@@ -16,13 +16,13 @@ public:
 
   RenormalizeDiag( size_t ndiag=1, Target target=Target::Diagonal, Mode mode=Mode::Upper, const char* parname="DiagScale" );
 
-  using PointerToMember = void (RenormalizeDiag::*)(TransformationTypes::Args, TransformationTypes::Rets);
+  using PointerToMember = void (RenormalizeDiag::*)(FunctionArgs);
 
 private:
-  void renormalizeDiag(Args args, Rets rets);
-  void renormalizeDiagUpper(Args args, Rets rets);
-  void renormalizeOffdiag(Args args, Rets rets);
-  void renormalizeOffdiagUpper(Args args, Rets rets);
+  void renormalizeDiag(FunctionArgs fargs);
+  void renormalizeDiagUpper(FunctionArgs fargs);
+  void renormalizeOffdiag(FunctionArgs fargs);
+  void renormalizeOffdiagUpper(FunctionArgs fargs);
   PointerToMember dispatchFunction(Target target, Mode mode);
 
   size_t m_ndiagonals;

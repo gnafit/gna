@@ -25,10 +25,12 @@ HistSmear::HistSmear(bool upper) {
        .func( upper ? &HistSmear::calcSmearUpper : &HistSmear::calcSmear );
 }
 
-void HistSmear::calcSmearUpper(Args args, Rets rets) {
-  rets[0].x = args[1].mat.triangularView<Eigen::Upper>() * args[0].vec;
+void HistSmear::calcSmearUpper(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  fargs.rets[0].x = args[1].mat.triangularView<Eigen::Upper>() * args[0].vec;
 }
 
-void HistSmear::calcSmear(Args args, Rets rets) {
-  rets[0].x = args[1].mat * args[0].vec;
+void HistSmear::calcSmear(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  fargs.rets[0].x = args[1].mat * args[0].vec;
 }

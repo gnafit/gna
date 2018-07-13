@@ -42,7 +42,9 @@ void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
   }
 }
 
-void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
+void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].vec;
     for (int j = 0; j < out.size(); ++j) {

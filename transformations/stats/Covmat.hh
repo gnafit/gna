@@ -30,11 +30,11 @@ public:
       .output("L")
     ;
   }
-  void calculateCov(Args args, Rets rets);
-  void calculateInv(Args args, Rets rets);
+  void calculateCov(FunctionArgs fargs);
+  void calculateInv(FunctionArgs fargs);
 
   void prepareCholesky(Atypes args, Rtypes rets);
-  void calculateCholesky(Args args, Rets rets);
+  void calculateCholesky(FunctionArgs fargs);
 
   void rank1(SingleOutput &data);
 

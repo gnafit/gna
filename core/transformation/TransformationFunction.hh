@@ -6,8 +6,8 @@
 
 namespace TransformationTypes
 {
-  struct Args;
-  struct Rets;
+  struct FunctionArgs;
+  struct FunctionArgs;
   struct Atypes;
   struct Rtypes;
 
@@ -20,10 +20,9 @@ namespace TransformationTypes
    * This function is used to define the transformation via Entry::fun
    * and is executed via Entry::update() or Entry::touch().
    *
-   * @param args -- container with transformation inputs (Args).
-   * @param rets -- container with transformation outputs (Args).
+   * @param FunctionArgs -- container with transformation inputs (Args), outputs (Rets) and other data.
    */
-  typedef std::function<void(Args, Rets)> Function;
+  typedef std::function<void(FunctionArgs)> Function;
 
   /**
    * @brief Function, that does the input types checking and output types derivation.

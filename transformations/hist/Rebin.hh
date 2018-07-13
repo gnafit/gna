@@ -15,7 +15,7 @@ public:
 
 private:
   void calcMatrix(const DataType& type);
-  void calcSmear(Args args, Rets rets);
+  void calcSmear(FunctionArgs fargs);
   double round(double num);
 
   std::vector<double> m_new_edges;

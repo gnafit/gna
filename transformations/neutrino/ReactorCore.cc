@@ -23,7 +23,9 @@ ReactorCore::ReactorCore(const std::vector<std::string> &isonames)
   }
 }
 
-void ReactorCore::calcRates(Args args, Rets rets) {
+void ReactorCore::calcRates(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < rets.size(); ++i) {
     rets[i].x = m_nominalThermalPower*args[0].x*args[1+i].x/m_ePerFission[i];
   }

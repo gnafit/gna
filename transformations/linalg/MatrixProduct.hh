@@ -13,6 +13,6 @@ class MatrixProduct: public GNAObject, public TransformationBind<MatrixProduct> 
     void multiply(SingleOutput& single);
     private:
         void checkTypes(Atypes args, Rtypes rets);
-        void product(Args args, Rets rets);
+        void product(FunctionArgs fargs);
 };
 
