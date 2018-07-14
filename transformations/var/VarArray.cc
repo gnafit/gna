@@ -22,7 +22,7 @@ void VarArray::typesFunction(Atypes args, Rtypes rets){
 
 void VarArray::function(FunctionArgs fargs){
   auto* buffer = fargs.rets[0].buffer;
-  for( auto var : m_vars ){
+  for( auto& var : m_vars ){
       *buffer = var.value();
       buffer=next(buffer);
   }

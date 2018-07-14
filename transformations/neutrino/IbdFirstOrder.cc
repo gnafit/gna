@@ -111,7 +111,7 @@ void IbdFirstOrder::calc_dEnu_wrt_Ee(FunctionArgs fargs) {
   const auto &Enu = args[0].arr2d;
   const auto &Ee = args[1].x;
   const auto &ctheta = args[2].x;
-  auto jacobian = fargs.rets[0].arr2d;
+  auto& jacobian = fargs.rets[0].arr2d;
 
   ArrayXd Ve = (1.0 - ElectronMass2 / (Ee*Ee)).sqrt();
   ArrayXXd Vectheta = (Ve.matrix()*ctheta.matrix().transpose()).array();
