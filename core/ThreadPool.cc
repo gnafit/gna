@@ -15,15 +15,20 @@
 #include <future>
 
 void MultiThreading::Task::run_task() {
+	std::cout << "runtask-before-lock-taskmtx ";
     std::unique_lock<std::mutex> t_lck(task_mtx);
+	std::cout << "runtask-after-lock-taskmtx ";
     if (m_entry->tainted){// && !m_entry->frozen) {
+//        t_lck.lock();
         task_cv.wait(t_lck);
+std::cout << "EVA-after-wait" << std::endl;
         if (m_entry->tainted){ 
 	    m_entry->evaluate();
 	    std::cout << "EVA-id = " << std::this_thread::get_id() << std::endl;
             m_entry->tainted = false;
 	}
 	t_lck.unlock();
+std::cout << "EVA-after-unlock" << std::endl;
         task_cv.notify_one();
     }
 }
@@ -36,17 +41,25 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 
 void MultiThreading::Worker::work() { // runs task stack
     Task current_task;
+    std::cout << "inside-work" << std::endl;
+	std::cout << "work-before-lock-worker ";
     std::unique_lock<std::mutex> w_lck(mtx_worker);
+	std::cout << "work-after-lock-worker ";
     while (task_stack->empty()) {
+	std::cout << "while-task-empty";
         cv_worker.wait(w_lck);
         while (!task_stack->empty()) {
     	    {
+	std::cout << "work-before-lock-pop ";
 	        std::lock_guard<std::mutex> lock(pool.tp_pop_mutex);
+	std::cout << "work-after-lock-pop ";
     	        current_task = task_stack->top();
       	        task_stack->pop(); 
  	    }
+         //w_lck.unlock();
      	 current_task.run_task(); // TODO: make it in separate thread
          }
+         w_lck.unlock();
     }
 }
 
@@ -60,7 +73,8 @@ MultiThreading::ThreadPool::ThreadPool (int maxthr) : m_max_thread_number(maxthr
 }
 
 
-int MultiThreading::ThreadPool::whoami() {
+int MultiThreading::ThreadPool::whoami() { 
+	std::cout << "in-whoami";
         size_t thr_size = m_workers.size();
         for (size_t i =0; i < thr_size; i++) {
             if (m_workers[i].thr_head == std::this_thread::get_id())
@@ -105,14 +119,18 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_ta
 
     size_t w_size;
     {
+std::cout << "try-to-lock-before-wait";
         std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
+std::cout << "try-to-lock-afrer-wait";
         w_size = m_workers.size();
     }
 
     auto curr_id = std::this_thread::get_id();
 
     for (size_t i = 0; i < w_size; i++)  {
+	std::cout << "try-to-before-lock-add ";
       std::lock_guard<std::mutex> lock(tp_add_mutex);
+	std::cout << "try-to-after-lock-add ";
       if((m_workers[i].is_free()) && worker_index == -1) {
         // || (!m_workers[i].is_free() && curr_id == m_workers[i].thr_head)) { 
         {
@@ -128,9 +146,13 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_ta
 
     if (worker_index == -1) {
       if (w_size  < m_max_thread_number) {
+	std::cout << "try-to-before-lock-thradd ";
         std::lock_guard<std::mutex> lock(tp_thr_add_mutex);
         //std::lock_guard<std::mutex> lock2(tp_add_mutex);
+	std::cout << "try-to-after-lock-thradd ";
+	std::cout << "try-to-before-lock-add ";
 	std::unique_lock<std::mutex> lck(tp_add_mutex);
+	std::cout << "try-to-after-lock-add ";
         threads.push_back(std::thread(
                 [&in_task, w_size, this]() 
                 {MultiThreading::ThreadPool::new_worker (std::ref(in_task), w_size - 1); 
@@ -140,7 +162,9 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(MultiThreading::Task in_ta
         worker_index = threads.size()-1;
       } else {
         for (size_t i = 0; i < w_size; i++) {
+	std::cout << "try-to-before-lock-wait ";
           std::lock_guard<std::mutex> lock(tp_waitlist_mutex);
+	std::cout << "try-to-after-lock-wait ";
           std::cout << i << " " << m_workers[i].thr_head << " (try to add task to waitlist) ";
           if (m_workers[i].thr_head == curr_id && !in_task.done()) {
             std::cout << "Task added to wait list, m_global_wait_list size = "
@@ -167,10 +191,22 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
       }
     }
    size_t worker_index = try_to_find_worker(in_task);
+   std::cout << "WHOAMIID = " << std::this_thread::get_id();
+
    std::cout << "worker_index = " << worker_index << "m_workers size = " << m_workers.size() << std::endl;
-   
-   if (in_task.done() && worker_index >= 0)  m_workers[whoami()].work();	// && worker_index >= 0) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
-   else { std::cout << "eval only "; in_task.run_task(); } 
+   std::cout << "WHOAMIID = " << std::this_thread::get_id(); 
+   std::cout << "WHOAMI = " << whoami(); 
+
+   if (in_task.done() && worker_index >= 0) { 
+	std::cout << "condition!!"; 
+	m_workers[whoami()].work();
+   }
+   else { 
+	std::cout << "eval only "; 
+	in_task.run_task(); 
+   } 
+
+// && worker_index >= 0) { std::cout << "done -- now work "; m_workers[worker_index].work(); }
 
 }
 

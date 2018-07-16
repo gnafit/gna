@@ -36,7 +36,7 @@ namespace MultiThreading {
     }
 
     void run_task();
-    inline bool done() { std::cout << "src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
+    inline bool done() { std::cout << "DONE FUNC src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
     TransformationTypes::Entry *m_entry;
     std::mutex task_mtx;
