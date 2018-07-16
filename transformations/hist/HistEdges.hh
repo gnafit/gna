@@ -13,13 +13,13 @@ public:
       .input("hist")
       .output("edges")
       .types(TypesFunctions::ifHist<0>,
-             [](Atypes args, Rtypes rets) {
-             rets[0] = DataType().points().shape(args[0].edges.size());
+             [](TypesFunctionArgs fargs) {
+               fargs.rets[0] = DataType().points().shape(fargs.args[0].edges.size());
              })
-      .func([](Args args, Rets rets) {
-            auto& edges = args[0].type.edges;
-            rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
-            rets.freeze();
+      .func([](FunctionArgs fargs) {
+              auto& edges = fargs.args[0].type.edges;
+              fargs.rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
+              fargs.rets.freeze();
             });
   };
 };

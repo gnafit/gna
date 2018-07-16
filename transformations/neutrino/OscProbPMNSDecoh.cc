@@ -49,8 +49,9 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
 }
 
 template <int I, int J>
-void OscProbPMNSDecoh::calcComponent(Args args, Rets rets) {
-  auto &Enu = args[0].x;
+void OscProbPMNSDecoh::calcComponent(FunctionArgs fargs) {
+  auto& rets=fargs.rets;
+  auto &Enu = fargs.args[0].x;
   ArrayXd phi_st = DeltaMSq<I,J>()*eV2*m_L*km/2.0*Enu.inverse()/MeV;
   ArrayXd Lcoh = TMath::Sqrt2()*2*Enu*MeV/DeltaMSq<I,J>()/eV2/m_sigma;
   ArrayXd Ld   = Lcoh/m_sigma/(TMath::Sqrt2()*2);
@@ -67,13 +68,15 @@ void OscProbPMNSDecoh::calcComponent(Args args, Rets rets) {
   }
 }
 
-void OscProbPMNSDecoh::calcSum(Args args, Rets rets) {
-  rets[0].x = -2.0*weight<1,2>()*args[0].x;
-  rets[0].x+= -2.0*weight<1,3>()*args[1].x;
-  rets[0].x+= -2.0*weight<2,3>()*args[2].x;
+void OscProbPMNSDecoh::calcSum(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& ret=fargs.rets[0].x;
+  ret = -3.0*weight<1,2>()*args[0].x;
+  ret+= -2.0*weight<1,3>()*args[1].x;
+  ret+= -2.0*weight<2,3>()*args[2].x;
   if (m_alpha == m_beta) {
-    rets[0].x += args[3].x;
+    ret += args[3].x;
   } else {
-    rets[0].x += 8.0*weightCP()*(args[3].x-args[4].x+args[5].x);
+    ret += 8.0*weightCP()*(args[3].x-args[4].x+args[5].x);
   }
 }

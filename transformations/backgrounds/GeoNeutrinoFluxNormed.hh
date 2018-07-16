@@ -8,6 +8,7 @@
 #include "TypesFunctions.hh"
 #include <Eigen/Dense>
 
+
 class GeoNeutrinoFluxNormed: public GNASingleObject,
                 public TransformationBind<GeoNeutrinoFluxNormed> {
 public:
@@ -20,7 +21,8 @@ public:
       .func(&GeoNeutrinoFluxNormed::CalcNorm);
   }
 protected:
-  void CalcNorm(Args args, Rets rets) {
+  void CalcNorm(FunctionArgs fargs) {
+      auto& args=fargs.args;
       const double* events = args[0].x.data();
       const size_t insize = args[0].type.size();
       size_t first_non_nan_idx{0};
@@ -35,8 +37,7 @@ protected:
       }
       const double total_events = std::accumulate(events + first_non_nan_idx, events + insize, 0.);
 
-      rets[0].x = (m_fluxnorm/total_events) * m_livetime_years * args[0].x;
-
+      fargs.rets[0].x = (m_fluxnorm/total_events) * m_livetime_years * fargs.args[0].x;
   }
 
   variable<double> m_fluxnorm;

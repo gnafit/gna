@@ -60,15 +60,15 @@ public:
 
 protected:
   void init() {
-    transformation_("hist")                               /// Initialize the transformation hist.
-      .output("hist")                                           /// Add an output hist.
-      .types([](Histogram *obj, Atypes /*args*/, Rtypes rets) { /// Define the TypesFunction:
-          rets[0] = DataType().hist().edges(obj->edges());      ///   - assign the data shape and bin edges for the first output (hist).
-          rets[0].preallocated(obj->m_data.data());             ///   - tell the DataType that the buffer is preallocated (m_data).
+    transformation_("hist")                                      /// Initialize the transformation hist.
+      .output("hist")                                            /// Add an output hist.
+      .types([](Histogram *obj, TypesFunctionArgs fargs) {       /// Define the TypesFunction:
+          fargs.rets[0] = DataType().hist().edges(obj->edges()); ///   - assign the data shape and bin edges for the first output (hist).
+          fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
         })
-      .func([](Args,Rets) {})                                   /// Assign empty Function.
-      .finalize();                                              /// Tell the initializer that there are no more configuration and it may initialize the types.
+      .func([](FunctionArgs fargs) {})                           /// Assign empty Function.
+      .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
-  std::vector<double> m_edges;                                  ///< Vector with bin edges.
-  Eigen::ArrayXd m_data;                                        ///< The array holding the raw 1d data buffer.
+  std::vector<double> m_edges;                                   ///< Vector with bin edges.
+  Eigen::ArrayXd m_data;                                         ///< The array holding the raw 1d data buffer.
 };

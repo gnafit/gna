@@ -25,14 +25,14 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(TypesFunctions::ifSame,
-         [](HistNonlinearity *obj, Atypes args, Rtypes rets) {
-         obj->m_size = args[0].shape[0]-1;
+         [](HistNonlinearity *obj, TypesFunctionArgs fargs) {
+         obj->m_size = fargs.args[0].shape[0]-1;
          obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
          if( obj->m_propagate_matrix ){
-           rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
+           fargs.rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
          }
          else{
-           rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
+           fargs.rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
          }
          })
        .func(&HistNonlinearity::calcMatrix);
@@ -60,14 +60,16 @@ void HistNonlinearity::set( SingleOutput& ntrue ){
     t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
-void HistNonlinearity::calcSmear(Args args, Rets rets) {
+void HistNonlinearity::calcSmear(FunctionArgs fargs) {
+  auto& args=fargs.args;
   args[1]; // Needed to trigger updating
-  rets[0].x = m_sparse_cache * args[0].vec;
+  fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
-void HistNonlinearity::calcMatrix(Args args, Rets rets) {
+void HistNonlinearity::calcMatrix(FunctionArgs fargs) {
   m_sparse_cache.setZero();
 
+  auto& args=fargs.args;
   auto n = args[0].arr.size();
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
@@ -151,6 +153,6 @@ void HistNonlinearity::calcMatrix(Args args, Rets rets) {
   DEBUG("\n");
 
   if ( m_propagate_matrix )
-    rets[0].mat = m_sparse_cache;
+    fargs.rets[0].mat = m_sparse_cache;
 }
 

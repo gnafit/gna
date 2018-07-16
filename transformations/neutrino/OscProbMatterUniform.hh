@@ -12,7 +12,7 @@ public:
     using TransformationBind<OscProbMatter>::transformation_;
     OscProbMatter(Neutrino from, Neutrino to);
 
-    void calcOscProb(Args args, Rets rets);
+    void calcOscProb(FunctionArgs fargs);
 
 protected:
     variable<double> m_L;

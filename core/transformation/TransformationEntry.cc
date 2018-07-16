@@ -5,8 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "Args.hh"
-#include "Rets.hh"
+#include "TransformationFunctionArgs.hh"
 #include "Source.hh"
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
@@ -122,7 +121,7 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
-  return fun(Args(this), Rets(this));
+  return fun(FunctionArgs(this));
 }
 
 /**
@@ -180,13 +179,13 @@ void Entry::dump(size_t level) const {
  * @exception std::runtime_error in case any of type functions fails.
  */
 void Entry::evaluateTypes() {
-  Atypes args(this);
-  Rtypes rets(this);
+  TypesFunctionArgs fargs(this);
+  auto& rets=fargs.rets;
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
-      typefun(args, rets);
+      typefun(fargs);
     }
     success = true;
   } catch (const TypeError &exc) {

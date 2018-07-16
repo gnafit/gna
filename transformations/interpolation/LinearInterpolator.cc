@@ -27,9 +27,9 @@ void LinearInterpolator::indexBins() {
   m_minbinsize = minbinsize;
 }
 
-void LinearInterpolator::interpolate(Args args, Rets rets) {
-  const auto &xs = args[0].x;
-  auto &ys = rets[0].x;
+void LinearInterpolator::interpolate(FunctionArgs fargs) {
+  const auto &xs = fargs.args[0].x;
+  auto &ys = fargs.rets[0].x;
   Eigen::ArrayXi idxes = ((xs - m_xs[0]) / m_minbinsize).cast<int>();
   for (int i = 0; i < idxes.size(); ++i) {
     if (idxes(i) < 0 || static_cast<size_t>(idxes(i)) >= m_index.size()) {

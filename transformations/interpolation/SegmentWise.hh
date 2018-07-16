@@ -51,7 +51,7 @@ class SegmentWise: public GNAObject,
 public:
   SegmentWise();                                             ///< Constructor.
   void setTolerance(double value) { m_tolerance = value; }   ///< Set tolerance.
-  void determineSegments(Args, Rets);                        ///< Function that determines segments.
+  void determineSegments(FunctionArgs fargs);                ///< Function that determines segments.
 
 private:
   double m_tolerance{1.e-16};                                ///< Tolerance. If point is below left edge on less than m_tolerance, it is considered to belong to the bin anyway.

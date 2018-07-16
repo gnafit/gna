@@ -17,9 +17,9 @@ public:
             .func(&Jacobian::calcJacobian)
             ;
     }
-    
-    void calcTypes(Atypes args, Rtypes rets);
-    void calcJacobian(Args args, Rets rets);
+
+    void calcTypes(TypesFunctionArgs fargs);
+    void calcJacobian(FunctionArgs fargs);
     void dump();
     void append(Parameter<double>* par) {
         m_pars.push_back(par);

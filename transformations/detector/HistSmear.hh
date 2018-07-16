@@ -8,6 +8,6 @@ public:
   HistSmear( bool upper=false );
 
 private:
-  void calcSmear(Args args, Rets rets);
-  void calcSmearUpper(Args args, Rets rets);
+  void calcSmear(FunctionArgs fargs);
+  void calcSmearUpper(FunctionArgs fargs);
 };

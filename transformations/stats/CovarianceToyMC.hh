@@ -13,8 +13,8 @@ public:
 
   void reset() { m_distr.reset(); }
 protected:
-  void calcTypes(Atypes args, Rtypes rets);
-  void calcToyMC(Args args, Rets rets);
+  void calcTypes(TypesFunctionArgs fargs);
+  void calcToyMC(FunctionArgs fargs);
 
   std::normal_distribution<> m_distr;
 

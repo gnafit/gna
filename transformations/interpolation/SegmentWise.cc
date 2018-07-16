@@ -36,17 +36,17 @@ SegmentWise::SegmentWise() {
  *
  * For each edge from the bin edges it find an index of the point, that is higher or equal to it.
  */
-void SegmentWise::determineSegments(Args args, Rets rets){
-  double* segment = rets[0].buffer;                      /// The output array pointer.
+void SegmentWise::determineSegments(FunctionArgs fargs){
+  double* segment = fargs.rets[0].buffer;                /// The output array pointer.
 
-  auto& edges_a = args[1].x;                             /// The edges data,
+  auto& edges_a = fargs.args[1].x;                       /// The edges data,
   auto  edge = edges_a.data();                           /// edges array pointer,
   auto  nedges=edges_a.size();
   auto  edge_end = next(edge, nedges);                   /// the end of the edges array.
 
-  rets[1].x=edges_a.tail(nedges-1) - edges_a.head(nedges-1); /// Determine bin widths.
+  fargs.rets[1].x=edges_a.tail(nedges-1) - edges_a.head(nedges-1); /// Determine bin widths.
 
-  auto& points_d=args[0];                                /// The points data,
+  auto& points_d=fargs.args[0];                          /// The points data,
   auto  point_first=points_d.buffer;                     /// points array pointer,
   auto  point_end=next(point_first, points_d.x.size());  /// points end pointer,
   auto  point = point_first;                             /// current points pointer (to be iterated over).

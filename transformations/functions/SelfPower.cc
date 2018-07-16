@@ -31,15 +31,15 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
 /**
  * @brief Calculate the value of function with positive power.
  */
-void SelfPower::calculate(Args args, Rets rets){
-    auto& res = rets[0].x = args[0].x/m_scale.value();
+void SelfPower::calculate(FunctionArgs fargs){
+    auto& res = fargs.rets[0].x = fargs.args[0].x/m_scale.value();
     res=res.pow(res);
 }
 
 /**
  * @brief Calculate the value of function with negative power.
  */
-void SelfPower::calculate_inv(Args args, Rets rets){
-    auto& res = rets[0].x = args[0].x/m_scale.value();
+void SelfPower::calculate_inv(FunctionArgs fargs){
+    auto& res = fargs.rets[0].x = fargs.args[0].x/m_scale.value();
     res=res.pow(-res);
 }

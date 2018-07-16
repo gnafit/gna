@@ -86,15 +86,15 @@ protected:
    * The transformation function is empty.
    */
   void init() {
-    transformation_("points")                           /// Initialize the transformation points.
-      .output("points")                                       /// Add an output points.
-      .types([](Points *obj, Atypes /*args*/, Rtypes rets) {  /// Define the TypesFunction:
-          rets[0] = DataType().points().shape(obj->m_shape);  ///   - assign the data shape for the first output (points).
-          rets[0].preallocated(obj->m_points.data());         ///   - tell the DataType that the buffer is preallocated (m_points).
+    transformation_("points")                                      /// Initialize the transformation points.
+      .output("points")                                            /// Add an output points.
+      .types([](Points *obj, TypesFunctionArgs fargs) {            /// Define the TypesFunction:
+          fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
+          fargs.rets[0].preallocated(obj->m_points.data());        ///   - tell the DataType that the buffer is preallocated (m_points).
         })
-      .func([](Args,Rets){})                                  /// Assign empty Function.
-      .finalize();                                            /// Tell the initializer that there are no more configuration and it may initialize the types.
+      .func([](FunctionArgs fargs){})                              /// Assign empty Function.
+      .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
-  Eigen::ArrayXd m_points;                                    ///< The array holding the raw 1d data buffer.
-  std::vector<size_t> m_shape;                                ///< Vector with data dimensions.
+  Eigen::ArrayXd m_points;                                         ///< The array holding the raw 1d data buffer.
+  std::vector<size_t> m_shape;                                     ///< Vector with data dimensions.
 };
