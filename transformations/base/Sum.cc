@@ -1,5 +1,7 @@
 #include "Sum.hh"
 #include "TypesFunctions.hh"
+#include "GNAObject.hh" 
+
 
 /**
  * @brief Constructor.
@@ -35,19 +37,20 @@ void Sum::cpu_sum(Args args, Rets rets) {
 
 #ifdef GNA_CUDA_SUPPORT
   void Sum::gpu_sum(Args args, Rets rets) {
-    rets[0].x = args[0].x;
+    rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
     size_t n = args.size();
 //    for (size_t i = 0; i < rets[0].gpuArr->arrSize; i++) {
 //      printf("%f\n", rets[0].x[i]);
 //    }
 
     for (size_t i = 1; i < n; i++) {
-      rets[0].x += args[i].x;
+      *(rets[0].gpuArr) += *(args[i].gpuArr);
     }
 
-    for (size_t i = 0; i < rets[0].gpuArr->arrSize; i++) {
-      printf("%f\n", rets[0].x[i]);
-    }
+    rets[0].gpuArr->dump();
+    //for (size_t i = 0; i < rets[0].gpuArr->arrSize; i++) {
+      //printf("%f\n", rets[0].x[i]);
+    //}
   }
 #endif
 
