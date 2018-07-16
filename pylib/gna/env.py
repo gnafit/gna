@@ -191,7 +191,7 @@ class namespace(Mapping):
             ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
 
         return pars
-        
+
     def defparameter(self, name, *args, **kwargs):
         if '.' in name:
             path, name = name.rsplit('.', 1)
@@ -208,7 +208,7 @@ class namespace(Mapping):
         self[name] = p
         return p
 
-    def reqparameter(self, name, **kwargs):
+    def reqparameter(self, name, *args, **kwargs):
         def without_status(name, **kwargs):
             if '.' in name:
                 path, name = name.rsplit('.', 1)
@@ -224,7 +224,7 @@ class namespace(Mapping):
                 return par
             except KeyError:
                 pass
-            return self.defparameter(name, **kwargs)
+            return self.defparameter(name, *args, **kwargs)
 
         def with_status(name, **kwargs):
             if '.' in name:
@@ -241,10 +241,10 @@ class namespace(Mapping):
             try:
                 par = env.nsview[name]
                 found = True
-                return par, found 
+                return par, found
             except KeyError:
                 pass
-            return self.defparameter(name, **kwargs), found
+            return self.defparameter(name, *args, **kwargs), found
 
         if kwargs.get('with_status'):
             return with_status(name, **kwargs)

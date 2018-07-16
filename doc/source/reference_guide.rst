@@ -9,7 +9,8 @@ Overview
    :maxdepth: 1
 
    making_sense
-   equation_concept
+
+.. equation_concept
 
 Cheat sheet
 -----------
@@ -96,8 +97,21 @@ Linear algebra
    transformations/Sum.rst
    transformations/WeightedSum.rst
 
-Stats and calculus
-^^^^^^^^^^^^^^^^^^
+Calculus
+^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/Derivative.rst
+   transformations/GaussLegendre.rst
+   transformations/GaussLegendreHist.rst
+   transformations/GaussLegendre2d.rst
+   transformations/GaussLegendre2dHist.rst
+
+Stats
+^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -107,7 +121,6 @@ Stats and calculus
    transformations/CovarianceToyMC.rst
    transformations/CovariatedPrediction.rst
    transformations/Covmat.rst
-   transformations/Derivative.rst
    transformations/NormalToyMC.rst
    transformations/Poisson.rst
 
