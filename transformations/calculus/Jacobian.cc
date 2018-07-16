@@ -39,6 +39,6 @@ void Jacobian::calcJacobian(FunctionArgs fargs) {
     ret.mat = storage;
 }
 
-void Jacobian::calcTypes(Atypes args, Rtypes rets){
-    rets[0] = DataType().points().shape(args[0].size(), m_pars.size());
+void Jacobian::calcTypes(TypesFunctionArgs fargs){
+    fargs.rets[0] = DataType().points().shape(fargs.args[0].size(), m_pars.size());
 }

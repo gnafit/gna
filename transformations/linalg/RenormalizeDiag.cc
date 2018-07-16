@@ -15,15 +15,7 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
   transformation_("renorm")
       .input("inmat")
       .output("outmat")
-      .types(TypesFunctions::pass<0>,
-         [](Atypes args, Rtypes /*rets*/) {
-           if (args[0].shape.size() != 2) {
-               throw args.error(args[0], "SmearMatrix is not matrix");
-           }
-           if (args[0].shape[0] != args[0].shape[1]) {
-               throw args.error(args[0], "SmearMatrix is not square");
-           }
-         })
+      .types(TypesFunctions::ifSquare<0>, TypesFunctions::pass<0>)
       .func(memberFun);
 }
 

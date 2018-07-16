@@ -16,8 +16,8 @@ VarArray::VarArray(const std::vector<std::string>& varnames)
     .finalize();                                            /// Tell the initializer that there are no more configuration and it may initialize the types.
 }
 
-void VarArray::typesFunction(Atypes args, Rtypes rets){
-  rets[0] = DataType().points().shape(m_vars.size());
+void VarArray::typesFunction(TypesFunctionArgs fargs){
+  fargs.rets[0] = DataType().points().shape(m_vars.size());
 }
 
 void VarArray::function(FunctionArgs fargs){

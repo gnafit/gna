@@ -159,7 +159,9 @@ void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
   }
 }
 
-void CovariatedPrediction::calculateTypes(Atypes args, Rtypes rets) {
+void CovariatedPrediction::calculateTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (!m_finalized and !m_prediction_ready) {
     throw args.undefined();
   }
@@ -191,7 +193,9 @@ void CovariatedPrediction::calculatePrediction(FunctionArgs fargs) {
   }
 }
 
-void CovariatedPrediction::calculateCovbaseTypes(Atypes args, Rtypes rets) {
+void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (!m_finalized) {
     throw args.undefined();
   }
@@ -254,7 +258,9 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
    * @brief Checks that dimensions of vectors and dimension of covbase
    * matrix match and preallocate covmatrix storage.
 */
-void CovariatedPrediction::calculateCovTypes(Atypes args, Rtypes rets) {
+void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   /* for (size_t i = 1; i < args.size(); ++i) {
    *   if (args[i].size() != size()) {
    *     throw args.error(args[i], "rank1 vec size does not match prediction size");

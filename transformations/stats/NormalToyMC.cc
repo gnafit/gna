@@ -22,7 +22,9 @@ void NormalToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void NormalToyMC::calcTypes(Atypes args, Rtypes rets) {
+void NormalToyMC::calcTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%2 != 0) {
     throw args.undefined();
   }

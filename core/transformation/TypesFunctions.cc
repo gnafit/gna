@@ -1,5 +1,6 @@
 #include "TypesFunctions.hh"
 
+using TransformationTypes::TypesFunctionArgs;
 using TransformationTypes::Atypes;
 using TransformationTypes::Rtypes;
 
@@ -13,7 +14,9 @@ using TransformationTypes::Rtypes;
  *
  * @exception std::runtime_error in case the number of inputs and outputs is >1 and not the same.
  */
-void TypesFunctions::passAll(Atypes args, Rtypes rets) {
+void TypesFunctions::passAll(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size() == 1) {
     for (size_t i = 0; i < rets.size(); ++i) {
       rets[i] = args[0];
@@ -38,7 +41,8 @@ void TypesFunctions::passAll(Atypes args, Rtypes rets) {
  *
  * @exception SourceTypeError in case input types are not the same.
  */
-void TypesFunctions::ifSame(Atypes args, Rtypes rets) {
+void TypesFunctions::ifSame(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
       auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
@@ -57,7 +61,8 @@ void TypesFunctions::ifSame(Atypes args, Rtypes rets) {
  *
  * @exception SourceTypeError in case input shapes are not the same.
  */
-void TypesFunctions::ifSameShape(Atypes args, Rtypes rets) {
+void TypesFunctions::ifSameShape(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {
       auto fmt = format("Transformation %1%: all inputs should have same shape, %2% and %3% differ");

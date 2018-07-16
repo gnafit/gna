@@ -34,11 +34,11 @@ public:
 
   Segment resolveSegment(Atypes args, const Segment &iseg);
   void resolveCovarianceActions(Atypes args);
-  void calculateTypes(Atypes args, Rtypes rets);
+  void calculateTypes(TypesFunctionArgs fargs);
   void calculatePrediction(FunctionArgs fargs);
-  void calculateCovbaseTypes(Atypes args, Rtypes rets);
+  void calculateCovbaseTypes(TypesFunctionArgs fargs);
   void calculateCovbase(FunctionArgs fargs);
-  void calculateCovTypes(Atypes args, Rtypes rets);
+  void calculateCovTypes(TypesFunctionArgs fargs);
   void calculateCov(FunctionArgs fargs);
   void addSystematicCovMatrix(SingleOutput& sys_covmat);
 

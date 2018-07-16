@@ -22,7 +22,9 @@ void CovarianceToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
+void CovarianceToyMC::calcTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%2 != 0) {
     throw args.undefined();
   }

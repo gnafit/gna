@@ -25,14 +25,14 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(TypesFunctions::ifSame,
-         [](HistNonlinearity *obj, Atypes args, Rtypes rets) {
-         obj->m_size = args[0].shape[0]-1;
+         [](HistNonlinearity *obj, TypesFunctionArgs fargs) {
+         obj->m_size = fargs.args[0].shape[0]-1;
          obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
          if( obj->m_propagate_matrix ){
-           rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
+           fargs.rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
          }
          else{
-           rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
+           fargs.rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
          }
          })
        .func(&HistNonlinearity::calcMatrix);

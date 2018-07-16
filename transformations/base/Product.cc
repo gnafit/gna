@@ -3,7 +3,9 @@
 Product::Product() {
   transformation_("product")
     .output("product")
-    .types([](Atypes args, Rtypes rets) {
+    .types([](TypesFunctionArgs fargs) {
+        auto& args=fargs.args;
+        auto& rets=fargs.rets;
         DataType dtsingle = DataType().points().shape(1);
         DataType dt = dtsingle;
         for (size_t i = 0; i < args.size(); ++i) {

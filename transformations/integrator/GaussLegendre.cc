@@ -41,7 +41,8 @@ void GaussLegendre::init() {
   transformation_("points")
     .output("x")
     .output("xedges")
-    .types([](GaussLegendre *obj, Atypes, Rtypes rets) {
+    .types([](GaussLegendre *obj, TypesFunctionArgs fargs) {
+        auto& rets=fargs.rets;
         rets[0] = DataType().points().shape(obj->m_points.size());
         rets[1] = DataType().points().shape(obj->m_edges.size());
       })
@@ -60,8 +61,8 @@ GaussLegendreHist::GaussLegendreHist(const GaussLegendre *base)
   transformation_("hist")
     .input("f")
     .output("hist")
-    .types(TypesFunctions::ifSame, [](GaussLegendreHist *obj, Atypes, Rtypes rets) {
-        rets[0] = DataType().hist().bins(obj->m_base->m_orders.size()).edges(obj->m_base->m_edges);
+    .types(TypesFunctions::ifSame, [](GaussLegendreHist *obj, TypesFunctionArgs fargs) {
+        fargs.rets[0] = DataType().hist().bins(obj->m_base->m_orders.size()).edges(obj->m_base->m_edges);
       })
     .func([](GaussLegendreHist *obj, FunctionArgs fargs) {
         auto& ret=fargs.rets[0].x;

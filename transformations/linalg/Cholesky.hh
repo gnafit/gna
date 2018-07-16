@@ -18,11 +18,11 @@ public:
     transformation_("cholesky")
       .input("mat")
       .output("L")
-      .types(TypesFunctions::pass<0>, &Cholesky::prepareCholesky)
+      .types(TypesFunctions::ifSquare<0>, TypesFunctions::pass<0>, &Cholesky::prepareCholesky)
       .func(&Cholesky::calculateCholesky)
     ;
   }
-  void prepareCholesky(Atypes args, Rtypes rets);
+  void prepareCholesky(TypesFunctionArgs fargs);
   void calculateCholesky(FunctionArgs fargs);
 
 protected:
@@ -39,15 +39,9 @@ protected:
 /**
  * Check that the input is matrix and the matrix is symmetric
  */
-void Cholesky::prepareCholesky(Atypes args, Rtypes rets) {
-  if (args[0].shape.size() != 2) {
-    throw args.error(args[0], "Cholesky decomposition can't be performed on non-2d data");
-  }
-  if (args[0].shape[0] != args[0].shape[1]) {
-    throw args.error(args[0], "Cholesky decomposition can't be performed with non-square matrix");
-  }
-  m_llt = LLT(args[0].shape[0]);
-  rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
+void Cholesky::prepareCholesky(TypesFunctionArgs fargs) {
+  m_llt = LLT(fargs.args[0].shape[0]);
+  fargs.rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
 }
 
 /**

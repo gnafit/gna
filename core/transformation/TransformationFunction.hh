@@ -6,10 +6,8 @@
 
 namespace TransformationTypes
 {
+  struct TypesFunctionArgs;
   struct FunctionArgs;
-  struct FunctionArgs;
-  struct Atypes;
-  struct Rtypes;
 
   typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source pointers.
   typedef boost::ptr_vector<Sink>   SinksContainer;     ///< Container for Sink pointers.
@@ -29,8 +27,7 @@ namespace TransformationTypes
    *
    * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
    *
-   * @param atypes -- container with transformation inputs' types (Atypes).
-   * @param rtypes -- container with transformation outputs' types (Rtypes).
+   * @param TypesFunctionArgs -- container with transformation types (Atypes, Rtypes).
    */
-  typedef std::function<void(Atypes, Rtypes)> TypesFunction;
+  typedef std::function<void(TypesFunctionArgs)> TypesFunction;
 }

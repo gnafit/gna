@@ -8,7 +8,9 @@ void MatrixProduct::multiply(SingleOutput& out) {
 }
 
  /* Check that matrices have correct shape for computing matrix product.  */
-void MatrixProduct::checkTypes(Atypes args, Rtypes rets) {
+void MatrixProduct::checkTypes(TypesFunctionArgs fargs) {
+    auto& args=fargs.args;
+    auto& rets=fargs.rets;
     if (args.size() == 1) return;
     for (size_t i=1; i<args.size(); ++i) {
         auto& prev = args[i-1];

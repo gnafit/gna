@@ -13,7 +13,9 @@ void Poisson::add(SingleOutput &theory, SingleOutput &data) {
 }
 
 
-void Poisson::checkTypes(Atypes args, Rtypes rets) {
+void Poisson::checkTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%2 != 0) {
     throw args.undefined();
   }

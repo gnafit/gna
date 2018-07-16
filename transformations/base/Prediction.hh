@@ -22,7 +22,7 @@ public:
   InputDescriptor append(const char* name);         ///< Add a named input.
   InputDescriptor append(SingleOutput &out);        ///< Add an input and connect an output to it.
 
-  void calculateTypes(Atypes args, Rtypes rets);    ///< MemTypesFunction.
+  void calculateTypes(TypesFunctionArgs fargs);     ///< MemTypesFunction.
   void calculatePrediction(FunctionArgs fargs);     ///< MemFunction.
 
   size_t size() const;                              ///< The size of the output.

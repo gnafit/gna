@@ -179,13 +179,13 @@ void Entry::dump(size_t level) const {
  * @exception std::runtime_error in case any of type functions fails.
  */
 void Entry::evaluateTypes() {
-  Atypes args(this);
-  Rtypes rets(this);
+  TypesFunctionArgs fargs(this);
+  auto& rets=fargs.rets;
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
-      typefun(args, rets);
+      typefun(fargs);
     }
     success = true;
   } catch (const TypeError &exc) {

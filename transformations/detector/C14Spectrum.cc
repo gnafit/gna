@@ -44,8 +44,8 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
                   .input("Nvis")
                   .output("NvisC")
                   .types(TypesFunctions::pass<0>,
-                         [](C14Spectrum *obj, Atypes args, Rtypes /*rets*/) {
-                           obj->m_datatype = args[0];
+                         [](C14Spectrum *obj, TypesFunctionArgs fargs) {
+                           obj->m_datatype = fargs.args[0];
                            obj->fillCache();
                          })
                   .func(&C14Spectrum::calcSmear);

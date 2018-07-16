@@ -59,7 +59,9 @@ InputDescriptor Prediction::append(SingleOutput &obs) {
  * Sums the sizes of the input arrays/histograms.
  * @exception SinkTypeError in case there are no inputs.
  */
-void Prediction::calculateTypes(Atypes args, Rtypes rets) {
+void Prediction::calculateTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size() == 0) {
     throw rets.error(rets[0]);
   } else if (args.size() == 1) {

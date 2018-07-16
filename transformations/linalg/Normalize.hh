@@ -23,7 +23,7 @@ public:
     void doNormalize_segment(FunctionArgs fargs);   ///< Normalize subhistogram.
 
 protected:
-    void checkLimits(Atypes args, Rtypes rets);     ///< typesFunction to check histogram limits.
+    void checkLimits(TypesFunctionArgs fargs);      ///< typesFunction to check histogram limits.
 
     size_t m_start;                                 ///< Sub-histogram first bin.
     size_t m_length;                                ///< Sub-histogram length.

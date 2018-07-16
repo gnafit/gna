@@ -10,9 +10,9 @@ ReactorCore::ReactorCore(const std::vector<std::string> &isonames)
   }
   auto reactor = transformation_("reactor")
     .input("efficiency")
-    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
+    .types(TypesFunctions::ifSame, [](TypesFunctionArgs fargs) {
         for (size_t i = 0; i < rets.size(); ++i) {
-          rets[i] = args[0];
+          fargs.rets[i] = fargs.args[0];
         }
       })
     .func(&ReactorCore::calcRates)

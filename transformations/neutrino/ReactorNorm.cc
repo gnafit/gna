@@ -11,9 +11,9 @@ ReactorNormAbsolute::ReactorNormAbsolute(const std::vector<std::string> &isoname
 {
   variable_(&m_norm, "Norm");
   auto norm = transformation_("isotopes")
-    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
-        for (size_t i = 0; i < rets.size(); ++i) {
-          rets[i] = DataType().points().shape(1);
+    .types(TypesFunctions::ifSame, [](TypesFunctionArgs fargs) {
+        for (size_t i = 0; i < fargs.rets.size(); ++i) {
+          fargs.rets[i] = DataType().points().shape(1);
         }
       })
     .func([](ReactorNormAbsolute *obj, FunctionArgs fargs) {
@@ -40,9 +40,9 @@ ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
   variable_(&m_targetProtons, "TargetProtons");
   variable_(&m_L, "L");
   auto norm = transformation_("isotopes")
-    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
-        for (size_t i = 0; i < rets.size(); ++i) {
-          rets[i] = DataType().points().shape(1);
+    .types(TypesFunctions::ifSame, [](TypesFunctionArgs fargs) {
+        for (size_t i = 0; i < fargs.rets.size(); ++i) {
+          fargs.rets[i] = DataType().points().shape(1);
         }
       })
     .func(&ReactorNorm::calcIsotopeNorms)

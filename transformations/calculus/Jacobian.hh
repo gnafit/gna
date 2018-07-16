@@ -18,7 +18,7 @@ public:
             ;
     }
 
-    void calcTypes(Atypes args, Rtypes rets);
+    void calcTypes(TypesFunctionArgs fargs);
     void calcJacobian(FunctionArgs fargs);
     void dump();
     void append(Parameter<double>* par) {

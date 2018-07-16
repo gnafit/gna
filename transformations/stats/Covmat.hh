@@ -10,21 +10,19 @@ public:
     : m_fixed(false)
   {
     transformation_("cov")
-      .types(TypesFunctions::ifSameShape, [](Atypes args, Rtypes rets) {
-          rets[0] = DataType().points().shape(args[0].size(), args[0].size());
-        })
-      .func(&Covmat::calculateCov)
       .input("stat")
       .output("cov")
+      .types(TypesFunctions::ifSameShape, TypesFunctions::toMatrix<0,0,0>)
+      .func(&Covmat::calculateCov)
     ;
     transformation_("inv")
-      .types(TypesFunctions::pass<0>)
-      .func(&Covmat::calculateInv)
       .input("cov")
       .output("inv")
+      .types(TypesFunctions::ifSquare<0>, TypesFunctions::pass<0>)
+      .func(&Covmat::calculateInv)
       ;
     transformation_("cholesky")
-      .types(TypesFunctions::pass<0>, &Covmat::prepareCholesky)
+      .types(TypesFunctions::ifSquare<0>, TypesFunctions::pass<0>, &Covmat::prepareCholesky)
       .func(&Covmat::calculateCholesky)
       .input("cov")
       .output("L")
@@ -33,7 +31,7 @@ public:
   void calculateCov(FunctionArgs fargs);
   void calculateInv(FunctionArgs fargs);
 
-  void prepareCholesky(Atypes args, Rtypes rets);
+  void prepareCholesky(TypesFunctionArgs fargs);
   void calculateCholesky(FunctionArgs fargs);
 
   void rank1(SingleOutput &data);

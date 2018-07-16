@@ -60,7 +60,8 @@ void Normalize::doNormalize_segment(FunctionArgs fargs){
  * @exception SourceTypeError in case the start is outside of the data limits.
  * @exception SourceTypeError in case the end is outside of the data limits.
  */
-void Normalize::checkLimits(Atypes args, Rtypes rets) {
+void Normalize::checkLimits(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
     auto& dtype = args[0];
     if( dtype.shape.size()!=1u ){
         throw args.error(dtype, "Accept only 1d arrays in case a segment is specified");

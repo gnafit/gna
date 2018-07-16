@@ -27,13 +27,13 @@ void EnergyResolution::add(){
     .input("Nvis")
     .output("Nrec")
     .types(TypesFunctions::pass<0>,TypesFunctions::ifHist<0>,
-           [index](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
+           [index](EnergyResolution *obj, TypesFunctionArgs fargs) {
              if(index==0){
-               obj->m_datatype = args[0];
+               obj->m_datatype = fargs.args[0];
                obj->fillCache();
              }
              else{
-               if( args[0]!=obj->m_datatype ) {
+               if( fargs.args[0]!=obj->m_datatype ) {
                  throw std::runtime_error("Inconsistent histogram in EnergyResolution");
                }
              }

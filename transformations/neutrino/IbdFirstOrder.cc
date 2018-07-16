@@ -19,9 +19,7 @@ IbdFirstOrder::IbdFirstOrder()
   transformation_("Enu")
     .input("Ee")
     .input("ctheta")
-    .types([](Atypes args, Rtypes rets) {
-        rets[0] = DataType().points().shape(args[0].size(), args[1].size());
-      })
+    .types(TypesFunctions::toMatrix<0,1,0>)
     .output("Enu")
     .func(&IbdFirstOrder::calc_Enu);
   transformation_("xsec")

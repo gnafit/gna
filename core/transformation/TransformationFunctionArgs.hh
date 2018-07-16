@@ -2,6 +2,8 @@
 
 #include "Args.hh"
 #include "Rets.hh"
+#include "Atypes.hh"
+#include "Rtypes.hh"
 
 namespace TransformationTypes
 {
@@ -11,6 +13,13 @@ namespace TransformationTypes
 
     Args args;
     Rets rets;
+  };
+
+  struct TypesFunctionArgs {
+    TypesFunctionArgs(Entry* e) : args(e), rets(e) {  }
+
+    Atypes args;
+    Rtypes rets;
   };
 }
 

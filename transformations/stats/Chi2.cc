@@ -10,7 +10,9 @@ void Chi2::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov) {
   t_["chi2"].input(cov);
 }
 
-void Chi2::checkTypes(Atypes args, Rtypes rets) {
+void Chi2::checkTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%3 != 0) {
     throw args.undefined();
   }

@@ -18,7 +18,7 @@ public:
 
   void add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov);
 
-  void checkTypes(Atypes args, Rtypes rets);
+  void checkTypes(TypesFunctionArgs fargs);
   void calculateChi2(FunctionArgs fargs);
 
   virtual double value() override {

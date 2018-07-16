@@ -1,8 +1,6 @@
 #pragma once
 
 #include "TransformationEntry.hh"
-#include "Atypes.hh"
-#include "Rtypes.hh"
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
@@ -58,7 +56,7 @@ namespace TransformationTypes {
      *
      * @copydoc TypesFunction
      */
-    typedef std::function<void(T*, Atypes, Rtypes)> MemTypesFunction;
+    typedef std::function<void(T*, TypesFunctionArgs fargs)> MemTypesFunction;
 
     /**
      * @brief Constructor.
@@ -217,7 +215,7 @@ namespace TransformationTypes {
     Initializer<T> types(MemTypesFunction func) {
       using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
-      m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1, _2));
+      m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1));
       return *this;
     }
 

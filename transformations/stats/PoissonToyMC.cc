@@ -19,7 +19,9 @@ void PoissonToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void PoissonToyMC::calcTypes(Atypes args, Rtypes rets) {
+void PoissonToyMC::calcTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < args.size(); i+=1) {
     if (args[i].shape.size() != 1) {
       throw rets.error(rets[0], "non-vector theory");
