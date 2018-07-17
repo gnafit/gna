@@ -62,23 +62,20 @@ namespace MultiThreading {
     size_t try_to_find_worker(Task in_task);
 
     size_t worker_count;
-//    void set_max_thread_num(int k);
+    size_t m_max_thread_number;
 
 //  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;
     std::vector< std::vector<Task> > m_global_wait_list;
-    size_t m_max_thread_number;
-    std::mutex tp_add_mutex;
-    std::condition_variable cv_tp_add_mutex;
-//    std::condition_variable cv_add;
-    std::mutex tp_thr_add_mutex;
-//    std::condition_variable cv_thr_add;
-    std::mutex tp_waitlist_mutex;
-//    std::condition_variable cv_waitlist;
-    std::mutex tp_pop_mutex;
-//    std::condition_variable cv_pop;
 
+
+    std::mutex tp_m_workers_mutex;
+    std::mutex tp_threads_mutex;
+    std::mutex tp_waitlist_mutex;
+
+    std::condition_variable cv_tp_m_workers_mutex;
+    std::condition_variable cv_tp_threads_mutex;
   };
 
 
