@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <vector>
 
 namespace TransformationTypes
 {
@@ -25,4 +26,6 @@ namespace TransformationTypes
    * @param TypesFunctionArgs -- container with transformation types (Atypes, Rtypes).
    */
   typedef std::function<void(TypesFunctionArgs)> TypesFunction;
+
+  typedef std::vector<TypesFunction> TypesFunctionsContainer;
 }

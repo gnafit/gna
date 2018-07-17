@@ -1,7 +1,7 @@
 #pragma once
 
+#include <map>
 #include "TransformationFunction.hh"
-//#include "Itypes.hh"
 
 namespace TransformationTypes
 {
@@ -10,6 +10,9 @@ namespace TransformationTypes
 
   struct FunctionDescriptor {
     Function fun;
+    TypesFunctionsContainer typefuns;
 
   };
+
+  typedef std::map<std::string, FunctionDescriptor> FunctionDescriptorsContainer;
 }

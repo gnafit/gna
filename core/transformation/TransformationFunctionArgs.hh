@@ -4,6 +4,7 @@
 #include "Rets.hh"
 #include "Atypes.hh"
 #include "Rtypes.hh"
+#include "Itypes.hh"
 
 namespace TransformationTypes
 {
@@ -20,6 +21,7 @@ namespace TransformationTypes
 
     Atypes args;
     Rtypes rets;
+    Itypes ints;
   };
 }
 

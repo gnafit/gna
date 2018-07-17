@@ -76,8 +76,8 @@ namespace TransformationTypes
 
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.
-    std::vector<TypesFunction> typefuns;                 ///< Vector of TypeFunction objects.
-    std::map<std::string, FunctionDescriptor> functions; ///< Vector of TypeFunction objects.
+    TypesFunctionsContainer typefuns;                    ///< Vector of TypeFunction objects.
+    FunctionDescriptorsContainer functions;              ///< Vector of TypeFunction objects.
 
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
@@ -88,6 +88,7 @@ namespace TransformationTypes
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
+    void initInternals(TypeFunctionsContainer& itypefuns);
   }; /* struct Entry */
 
 } /* TransformationTypes */

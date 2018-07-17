@@ -258,12 +258,53 @@ const Data<double> &Entry::data(int i) {
 }
 
 void Entry::switchFunction(const std::string& name){
-    auto it = functions.find(name);
-    if(it==functions.end()){
-      auto fmt = format("invalid function name %1%");
-      throw std::runtime_error((fmt%name.data()).str());
+  auto it = functions.find(name);
+  if(it==functions.end()){
+    auto fmt = format("invalid function name %1%");
+    throw std::runtime_error((fmt%name.data()).str());
+  }
+  fun = it->second.fun;
+
+  initInternals(it->second.typefuns);
+}
+
+void Entry::initInternals(TypeFunctionsContainer& itypefuns){
+  storages.resize(0);
+
+  TypesFunctionArgs fargs(this);
+  auto& ints=fargs.ints;
+  bool success = false;
+  TR_DPRINTF("evaluating storage types for %s: \n", name.c_str());
+  try {
+    for (auto& typefun: itypefuns) {
+      typefun(fargs);
     }
-    fun = it->second.fun;
-    // allocate_internals()
+    success = true;
+  } catch (const TypeError &exc) {
+    TR_DPRINTF("types[%s]: failed\n", name.c_str());
+    throw std::runtime_error(
+      (format("Transformation: storage type updates failed for `%1%': %2%") % name % exc.what()).str()
+      );
+  } catch (const Atypes::Undefined&) {
+    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
+  }
+  if (success) {
+    //TR_DPRINTF("types[%s]: success\n", name.c_str());
+    //for (size_t i = 0; i < storages.size(); ++i) {
+      //if (!ints[i].buffer && storages[i].data && storages[i].data->type == ints[i]) {
+        //continue;
+      //}
+      //if (ints[i].defined()) {
+        //storages[i].data.reset(new Data<double>(ints[i]));
+      //}
+      //else{
+        //storages[i].data.reset();
+      //}
+      //TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
+//#ifdef TRANSFORMATION_DEBUG
+      //sinks[i].data->type.dump();
+//#endif // TRANSFORMATION_DEBUG
+    }
+  }
 }
 
