@@ -44,9 +44,9 @@ Entry::Entry(const std::string &name, const Base *parent)
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const Entry &other, const Base *parent)
-  : name(other.name), label(other.label),
+  : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), parent(parent), initializing(0), frozen(false)
+    fun(), typefuns(), initializing(0), frozen(false)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
