@@ -1,16 +1,11 @@
 #pragma once
 
 #include <boost/ptr_container/ptr_vector.hpp>
-#include "Source.hh"
-#include "Sink.hh"
 
 namespace TransformationTypes
 {
   struct TypesFunctionArgs;
   struct FunctionArgs;
-
-  typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source pointers.
-  typedef boost::ptr_vector<Sink>   SinksContainer;     ///< Container for Sink pointers.
 
   /**
    * @brief Function, that does the actual calculation.

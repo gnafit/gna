@@ -20,6 +20,7 @@ set (SOURCES
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
   core/transformation/Rtypes.cc
+  core/transformation/Itypes.cc
   core/transformation/Source.cc
   core/transformation/TransformationBase.cc
   core/transformation/TransformationEntry.cc
@@ -77,9 +78,11 @@ set (HEADERS
   Exceptions.hh
   Sink.hh
   Source.hh
+  Storage.hh
   Args.hh
   Rets.hh
   Rtypes.hh
+  Itypes.hh
   Atypes.hh
   TypesFunctions.hh
   EntryHandle.hh
@@ -90,6 +93,7 @@ set (HEADERS
   TransformationBase.hh
   TransformationFunction.hh
   TransformationFunctionArgs.hh
+  FunctionDescriptor.hh
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationDescriptor.hh
