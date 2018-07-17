@@ -30,9 +30,12 @@ class bundlesum_v01(TransformationBundle):
         chaininput = self.cfg.get('chaininput', None)
         if chaininput and not isinstance(chaininput, str):
             raise Exception( 'chaininput should be a string' )
+        obsname = self.cfg.get('observable', None)
         for name in names:
             ns = self.common_namespace(name)
             osum = R.Sum(ns=ns)
+            if obsname:
+                osum.sum.setLabel( '{} sum:\n{}'.format(obsname, ns.name) )
 
             if chaininput:
                 inp = osum.add(chaininput)
@@ -46,7 +49,6 @@ class bundlesum_v01(TransformationBundle):
 
                 if debug:
                     print( '    add {} ({}) {}'.format(bundlename, type(bundle).__name__, bundle.outputs[name].name()) )
-                data = bundle.outputs[name].data().sum()
                 osum.add(bundle.outputs[name])
 
             """Save transformations"""

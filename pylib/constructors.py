@@ -11,6 +11,13 @@ from converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from converters import list_to_stdvector as stdvector
 
+def wrap_constructor1(obj, dtype='d'):
+    """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
+    def method(array, *args, **kwargs):
+        array = N.ascontiguousarray(array, dtype=dtype)
+        return R.SegmentWise(array.size, array, *args, **kwargs)
+    return method
+
 """Construct Points object from numpy array"""
 def Points( array, *args, **kwargs ):
     """Convert array to Points"""

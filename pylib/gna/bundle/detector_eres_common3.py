@@ -18,6 +18,7 @@ class detector_eres_common3(TransformationBundle):
                 eres = R.EnergyResolution(False, ns=self.common_namespace)
                 for i, ns in enumerate(self.namespaces):
                     eres.add()
+                    eres.transformations[i].setLabel('Energy resolution:\n'+ns.name)
 
                     """Save transformations"""
                     self.transformations_out[ns.name] = eres.transformations[i]
@@ -31,6 +32,7 @@ class detector_eres_common3(TransformationBundle):
             elif self.mode=='uncorrelated':
                 for ns in self.namespaces:
                     eres = R.EnergyResolution(ns=ns)
+                    eres.smear.setLabel('Energy resolution')
 
                     """Save transformations"""
                     self.objects[('eres', ns.name)]   = eres
@@ -44,6 +46,12 @@ class detector_eres_common3(TransformationBundle):
                 raise Exception( 'Invalid mode '+self.mode )
 
     def define_variables(self):
-        for name, unc in self.cfg.pars.items():
-            self.common_namespace.reqparameter(name, cfg=unc)
+        descriptions=[
+                'spatial/temporal resolution',
+                'photon statistics',
+                'dark noise'
+                ]
+        for i, (name, unc) in enumerate(self.cfg.pars.items()):
+            par = self.common_namespace.reqparameter(name, cfg=unc)
+            par.setLabel( 'Energy resolution ({})'.format(descriptions[i]) )
 

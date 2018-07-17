@@ -190,7 +190,7 @@ b, = execute_bundle( cfg=bkg, common_namespace=ns )
 bfn, = execute_bundle( cfg=bkg.bkg_fn, common_namespace=ns )
 
 print( 'Parameters:' )
-env.globalns.printparameters()
+env.globalns.printparameters(labels=True)
 
 print( 'Observables:' )
 env.globalns.printobservables()

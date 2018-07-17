@@ -1,14 +1,14 @@
-#ifndef GAUSSIANPEAKWITHBACKGROUND_H
-#define GAUSSIANPEAKWITHBACKGROUND_H
+#pragma once
 
 #include <boost/math/constants/constants.hpp>
 #include <cmath>
 
 #include "GNAObject.hh"
 #include "ParametricLazy.hpp"
+#include "TypesFunctions.hh"
 
 class GaussianPeakWithBackground: public GNAObject,
-                                  public Transformation<GaussianPeakWithBackground> {
+                                  public TransformationBind<GaussianPeakWithBackground> {
 public:
   GaussianPeakWithBackground(double n=1) {
     variable_(&m_b, "BackgroundRate");
@@ -20,10 +20,10 @@ public:
     m_w_scaled = mkdep(m_w*std::sqrt( n ));
     m_E0_scaled = mkdep(m_E0*n);
 
-    transformation_(this, "rate")
+    transformation_("rate")
       .input("E")
       .output("rate")
-      .types(Atypes::pass<0,0>)
+      .types(TypesFunctions::pass<0,0>)
       .func(&GaussianPeakWithBackground::calcRate)
       ;
   }
@@ -37,5 +37,3 @@ protected:
   variable<double> m_b, m_mu, m_E0, m_w;
   dependant<double> m_w_scaled, m_E0_scaled;
 };
-
-#endif // GAUSSIANPEAKWITHBACKGROUND_H

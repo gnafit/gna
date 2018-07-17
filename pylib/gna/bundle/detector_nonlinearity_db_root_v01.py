@@ -48,11 +48,13 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # a weighted sum of input curves
         #
         with self.common_namespace:
-            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), ns=self.common_namespace )
+            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), C.stdvector(['weight_'+n for n in self.cfg.names]), ns=self.common_namespace )
         self.objects['lsnl_factor']=corr_lsnl
+        corr_lsnl.sum.setLabel('NL:\ncorrelated')
 
-        for y, name in zip( newy, self.cfg.names ):
+        for i, (y, name) in enumerate(zip( newy, self.cfg.names )):
             pts = C.Points( y, ns=self.common_namespace )
+            pts.points.setLabel((i and 'NL correction' or 'NL nominal')+':\n'+name)
             corr_lsnl.sum[name]( pts )
 
             self.objects[('curves', name)] = pts
@@ -64,16 +66,20 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     correlated part multiplicated by the scale factor"""
                     labels = C.stdvector([self.pars[ns.name]])
                     corr = R.WeightedSum(labels, labels, ns=ns)
+                    corr.sum.setLabel('NL uncorrelated:\n'+ns.name)
                     corr.sum.inputs[0]( corr_lsnl.sum )
 
                     """Finally, original bin edges multiplied by the correction factor"""
                     newe = R.Product(ns=ns)
                     newe.multiply( self.edges )
                     newe.multiply( corr.sum )
+                    newe.product.setLabel('NL absolute:\n'+ns.name)
 
                     """Construct the nonlinearity calss"""
                     nonlin = R.HistNonlinearity(self.debug, ns=ns)
                     nonlin.set(self.edges, newe.product)
+                    nonlin.smear.setLabel('NL:\n'+ns.name)
+                    nonlin.matrix.setLabel('NL matrix:\n'+ns.name)
 
                     """Provide output transformations"""
                     self.transformations_out[ns.name] = nonlin.smear
@@ -102,15 +108,18 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         return self.build_graphs( graphs )
 
     def define_variables(self):
-        self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
+        par = self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
+        par.setLabel( 'Nominal nonlinearity curve weight' )
         for name in self.cfg.names[1:]:
-            self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
+            par = self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
+            par.setLabel( 'Correction nonlinearity weight for '+name )
 
         if self.cfg.par.central!=1:
             raise Exception('Relative energy scale parameter should have central value of 1 by definition')
         for ns in self.namespaces:
             parname = self.cfg.parname.format(ns.name)
             par = self.common_namespace.reqparameter( parname, cfg=self.cfg.par )
+            par.setLabel( 'Uncorrelated energy scale for '+ns.name )
             self.pars[ns.name]=parname
 
 def interpolate( (x, y), edges):

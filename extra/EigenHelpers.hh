@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <Eigen/Dense>
 #include <Eigen/Core>
@@ -19,4 +20,3 @@ namespace EigenHelpers{
         return Eigen::IOFormat(Eigen::StreamPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
     }
 }
-

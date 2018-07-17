@@ -1,5 +1,4 @@
-#ifndef UNCERTAINPARAMETER_H
-#define UNCERTAINPARAMETER_H
+#pragma once
 
 #include <string>
 #include <limits>
@@ -35,7 +34,7 @@ protected:
 
 template <typename T>
 class Variable: public GNASingleObject,
-                public Transformation<Variable<T>>
+                public TransformationBind<Variable<T>>
 {
 public:
   Variable(const std::string &name)
@@ -50,6 +49,9 @@ public:
   const std::string &name() const { return m_name; }
   virtual T value() { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
+
+  const std::string& label() const noexcept { return transformations[0].label(); }
+  void setLabel(const std::string& label) { transformations[0].setLabel(label); }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
@@ -60,7 +62,7 @@ template <>
 inline Variable<double>::Variable(const std::string &name)
   : m_varhandle(variable_(&m_var, name)), m_name(name)
 {
-  transformation_(this, "value")
+  transformation_("value")
     .output(name)
     .types([](Atypes, Rtypes rets) {
         rets[0] = DataType().points().shape(1);
@@ -196,6 +198,11 @@ public:
       }
   }
 
+  virtual T normalValue(T reldiff)
+    { return this->central() + reldiff*this->m_sigma; }
+
+  virtual void setNormalValue(T reldiff)
+    { this->set(this->normalValue(reldiff)); }
 protected:
   T m_sigma;
   using CovStorage = std::map<const GaussianParameter<T>*, T>;
@@ -244,5 +251,3 @@ inline T UniformAngleParameter<T>::cast(const std::string &v) const {
   T b = boost::lexical_cast<T>(v.substr(pipos+2));
   return a*pi/b;
 }
-
-#endif // UNCERTAINPARAMETER_H
