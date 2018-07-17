@@ -256,3 +256,14 @@ const Data<double> &Entry::data(int i) {
   touch();
   return *sink.data;
 }
+
+void Entry::switchFunction(const std::string& name){
+    auto it = functions.find(name);
+    if(it==functions.end()){
+      auto fmt = format("invalid function name %1%");
+      throw std::runtime_error((fmt%name.data()).str());
+    }
+    fun = it->second.fun;
+    // allocate_internals()
+}
+

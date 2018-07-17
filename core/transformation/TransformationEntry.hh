@@ -84,6 +84,7 @@ namespace TransformationTypes
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                         ///< If Entry is frozen, it is not updated even if tainted.
 
+    void switchFunction(const std::string& name);
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.

@@ -9,7 +9,7 @@ namespace TransformationTypes
   typedef boost::ptr_vector<Storage> StoragesContainer;  ///< Container for Storage pointers.
 
   struct FunctionDescriptor {
-    Function* fun;
+    Function fun;
 
   };
 }

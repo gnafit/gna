@@ -6,11 +6,6 @@ set(LIBNAME GlobalNuAnalysis2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 set (SOURCES
-  core/GNAObject.cc
-  core/ParametersGroup.cc
-  core/Parametrized.cc
-  core/TransformationDescriptor.cc
-  core/UncertainParameter.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
   core/transformation/Atypes.cc
@@ -26,6 +21,11 @@ set (SOURCES
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/GNAObject.cc
+  core/ParametersGroup.cc
+  core/Parametrized.cc
+  core/TransformationDescriptor.cc
+  core/UncertainParameter.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
