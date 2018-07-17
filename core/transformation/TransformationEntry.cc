@@ -14,6 +14,8 @@
 #include "Rtypes.hh"
 #include "TransformationErrors.hh"
 
+#include "ThreadPool.hh"
+
 using TransformationTypes::Base;
 using TransformationTypes::Entry;
 
@@ -26,6 +28,12 @@ using TransformationTypes::OutputHandle;
 using TransformationTypes::InputHandle;
 
 using TransformationTypes::TypeError;
+
+//using MultiThreading;
+
+class Task;
+MultiThreading::ThreadPool tpool(4);
+
 
 /**
  * @brief Constructor.
@@ -133,8 +141,9 @@ void Entry::evaluate() {
 void Entry::update() {
   Status status = Status::Success;
   try {
-    evaluate();
-    tainted = false;
+    tpool.add_task(this);
+    //evaluate();
+    //tainted = false;
   } catch (const SinkTypeError&) {
     status = Status::Failed;
   }

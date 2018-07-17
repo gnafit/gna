@@ -8,8 +8,6 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set (SOURCES
   core/GNAObject.cc
   core/ParametersGroup.cc
-  core/TransformationBase.cc
-  core/Transformation.cc
   core/ThreadPool.cc
   core/Parametrized.cc
   core/TransformationDescriptor.cc
@@ -98,7 +96,6 @@ set (HEADERS
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
-  Transformation.hh
   GNAObject.hh
   UncertainParameter.hh
   Prediction.hh
@@ -119,12 +116,14 @@ set (HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
+  Exp.hh
   SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
   Rebin.hh
+  VarArray.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
@@ -156,6 +155,7 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
+  ThreadPool.hh
   )
 
 include_directories(core/transformation/
@@ -200,7 +200,6 @@ include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
     message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
-    # include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
@@ -208,7 +207,6 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
-# include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
@@ -219,3 +217,5 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
+
+

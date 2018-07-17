@@ -7,12 +7,20 @@
 #include <cstdio>
 #include <unistd.h>
 #include <functional>
-#include "TransformationBase.hh"
+#include "TransformationEntry.hh"
 #include "GNAObject.hh"
 #include "ThreadPool.hh"
 #include <algorithm>
 #include <numeric>
 #include <future>
+
+//struct Entry;
+
+bool MultiThreading::Task::done() { 
+	std::cout << "DONE FUNC src size " << m_entry->sources.size() << " "; 
+	return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); 
+}
+
 
 void MultiThreading::Task::run_task() {
 	std::cout << "runtask-before-lock-taskmtx ";
