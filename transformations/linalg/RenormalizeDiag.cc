@@ -52,7 +52,7 @@ double zero_to_one( double x ){
     return x==0.0 ? 1.0 : x;
 }
 
-void RenormalizeDiag::renormalizeOffdiagUpper(FunctionArgs fargs) {
+void RenormalizeDiag::renormalizeOffdiagUpper(FunctionArgs& fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;
@@ -67,7 +67,7 @@ void RenormalizeDiag::renormalizeOffdiagUpper(FunctionArgs fargs) {
     retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeDiagUpper(FunctionArgs fargs) {
+void RenormalizeDiag::renormalizeDiagUpper(FunctionArgs& fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;
@@ -81,7 +81,7 @@ void RenormalizeDiag::renormalizeDiagUpper(FunctionArgs fargs) {
     retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeOffdiag(FunctionArgs fargs) {
+void RenormalizeDiag::renormalizeOffdiag(FunctionArgs& fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;
@@ -95,7 +95,7 @@ void RenormalizeDiag::renormalizeOffdiag(FunctionArgs fargs) {
     retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeDiag(FunctionArgs fargs) {
+void RenormalizeDiag::renormalizeDiag(FunctionArgs& fargs) {
     auto& arg=fargs.args[0].mat;
     auto& ret=fargs.rets[0].mat;
     auto& retarr=fargs.rets[0].arr2d;

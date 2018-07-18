@@ -121,7 +121,8 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
-  return fun(FunctionArgs(this));
+  auto fargs = FunctionArgs(this);
+  return fun(fargs);
 }
 
 /**
@@ -180,6 +181,7 @@ void Entry::dump(size_t level) const {
  */
 void Entry::evaluateTypes() {
   TypesFunctionArgs fargs(this);
+  StorageTypesFunctionArgs sargs(fargs);
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
@@ -188,7 +190,7 @@ void Entry::evaluateTypes() {
     }
     auto& itypefuns=functions[funcname].typefuns;
     for (auto &typefun: itypefuns) {
-      typefun(fargs);
+      typefun(sargs);
     }
     success = true;
   } catch (const TypeError &exc) {
@@ -224,8 +226,7 @@ void Entry::evaluateTypes() {
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
-
-    initInternals(fargs);
+    initInternals(sargs);
   }
 }
 
@@ -275,7 +276,7 @@ void Entry::switchFunction(const std::string& name){
   evaluateTypes();
 }
 
-void Entry::initInternals(TypesFunctionArgs& fargs){
+void Entry::initInternals(StorageTypesFunctionArgs& fargs){
   storages.clear();
   auto& itypes=fargs.ints;
   for (size_t i(0); i<itypes.size(); ++i) {

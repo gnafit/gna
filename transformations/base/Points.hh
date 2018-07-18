@@ -88,11 +88,11 @@ protected:
   void init() {
     transformation_("points")                                      /// Initialize the transformation points.
       .output("points")                                            /// Add an output points.
-      .types([](Points *obj, TypesFunctionArgs fargs) {            /// Define the TypesFunction:
+      .types([](Points *obj, TypesFunctionArgs& fargs) {           /// Define the TypesFunction:
           fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
           fargs.rets[0].preallocated(obj->m_points.data());        ///   - tell the DataType that the buffer is preallocated (m_points).
         })
-      .func([](FunctionArgs fargs){})                              /// Assign empty Function.
+      .func([](FunctionArgs& fargs){})                             /// Assign empty Function.
       .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   Eigen::ArrayXd m_points;                                         ///< The array holding the raw 1d data buffer.

@@ -41,12 +41,12 @@ void GaussLegendre::init() {
   transformation_("points")
     .output("x")
     .output("xedges")
-    .types([](GaussLegendre *obj, TypesFunctionArgs fargs) {
+    .types([](GaussLegendre *obj, TypesFunctionArgs& fargs) {
         auto& rets=fargs.rets;
         rets[0] = DataType().points().shape(obj->m_points.size());
         rets[1] = DataType().points().shape(obj->m_edges.size());
       })
-    .func([](GaussLegendre *obj, FunctionArgs fargs) {
+    .func([](GaussLegendre *obj, FunctionArgs& fargs) {
         auto& rets=fargs.rets;
         rets[0].x = obj->m_points;
         rets[1].x = Eigen::Map<const Eigen::ArrayXd>(&obj->m_edges[0], obj->m_edges.size());
@@ -61,10 +61,10 @@ GaussLegendreHist::GaussLegendreHist(const GaussLegendre *base)
   transformation_("hist")
     .input("f")
     .output("hist")
-    .types(TypesFunctions::ifSame, [](GaussLegendreHist *obj, TypesFunctionArgs fargs) {
+    .types(TypesFunctions::ifSame, [](GaussLegendreHist *obj, TypesFunctionArgs& fargs) {
         fargs.rets[0] = DataType().hist().bins(obj->m_base->m_orders.size()).edges(obj->m_base->m_edges);
       })
-    .func([](GaussLegendreHist *obj, FunctionArgs fargs) {
+    .func([](GaussLegendreHist *obj, FunctionArgs& fargs) {
         auto& ret=fargs.rets[0].x;
         ArrayXd prod = fargs.args[0].x*obj->m_base->m_weights;
         auto *data = prod.data();

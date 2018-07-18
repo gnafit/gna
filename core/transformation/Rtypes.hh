@@ -43,6 +43,13 @@ namespace TransformationTypes
     DataType &operator[](int i);
 
     /**
+     * @brief Get i-th Sink DataType.
+     * @param i -- Sink index.
+     * @return i-th Sink DataType.
+     */
+    const DataType &operator[](int i) const;
+
+    /**
      * @brief Get number of Sink instances.
      * @return number of sinks.
      */

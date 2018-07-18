@@ -30,11 +30,11 @@ public:
 protected:
   void init();
 
-  void pointsTypes(TypesFunctionArgs fargs);
-  void points(FunctionArgs fargs);
+  void pointsTypes(TypesFunctionArgs& fargs);
+  void points(FunctionArgs& fargs);
 
-  void histTypes(TypesFunctionArgs fargs);
-  void hist(FunctionArgs fargs);
+  void histTypes(TypesFunctionArgs& fargs);
+  void hist(FunctionArgs& fargs);
 
   std::vector<double> m_xedges;
   std::vector<int> m_xorders;

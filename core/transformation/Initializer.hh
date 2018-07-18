@@ -27,7 +27,7 @@ namespace TransformationTypes {
    *   .input("source")
    *   .output("target")
    *   .types(TypesFunctions::pass<0,0>)
-   *   .func([](FunctionArgs fargs){ fargs.rets[0].x = fargs.args[0].x; })
+   *   .func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x; })
    *   ;
    * ```
    * Initializer is usually used in the transformation's constructor and the scope is limited with
@@ -48,7 +48,7 @@ namespace TransformationTypes {
      *
      * @copydoc Function
      */
-    typedef std::function<void(T*, FunctionArgs)> MemFunction;
+    typedef std::function<void(T*, FunctionArgs&)> MemFunction;
     /**
      * @brief Function, that does the input types checking and output types derivation (reference to a member function).
      *
@@ -56,7 +56,7 @@ namespace TransformationTypes {
      *
      * @copydoc TypesFunction
      */
-    typedef std::function<void(T*, TypesFunctionArgs fargs)> MemTypesFunction;
+    typedef std::function<void(T*, TypesFunctionArgs& fargs)> MemTypesFunction;
 
     /**
      * @brief Constructor.
@@ -247,7 +247,7 @@ namespace TransformationTypes {
      * @param func -- the TypesFunction to be added.
      * @return `*this`.
      */
-    Initializer<T> storage(TypesFunction func) {
+    Initializer<T> storage(StorageTypesFunction func) {
       storage("main", func);
       return *this;
     }
@@ -259,7 +259,7 @@ namespace TransformationTypes {
      * @exception runtime_error in case function is not found.
      * @return `*this`.
      */
-    Initializer<T> storage(const std::string& name, TypesFunction func) {
+    Initializer<T> storage(const std::string& name, StorageTypesFunction func) {
       auto it = m_entry->functions.find(name);
       if(it==m_entry->functions.end()){
         auto fmt = format("invalid function name %1%");

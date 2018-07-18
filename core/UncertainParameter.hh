@@ -64,10 +64,10 @@ inline Variable<double>::Variable(const std::string &name)
 {
   transformation_("value")
     .output(name)
-    .types([](TypesFunctionArgs fargs) {
+    .types([](TypesFunctionArgs& fargs) {
         fargs.rets[0] = DataType().points().shape(1);
       })
-    .func([](Variable<double> *obj, FunctionArgs fargs) {
+    .func([](Variable<double> *obj, FunctionArgs& fargs) {
         fargs.rets[0].arr(0) = obj->m_var.value();
       })
     .finalize();

@@ -14,7 +14,7 @@ using TransformationTypes::Rtypes;
  *
  * @exception std::runtime_error in case the number of inputs and outputs is >1 and not the same.
  */
-void TypesFunctions::passAll(TypesFunctionArgs fargs) {
+void TypesFunctions::passAll(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (args.size() == 1) {
@@ -41,7 +41,7 @@ void TypesFunctions::passAll(TypesFunctionArgs fargs) {
  *
  * @exception SourceTypeError in case input types are not the same.
  */
-void TypesFunctions::ifSame(TypesFunctionArgs fargs) {
+void TypesFunctions::ifSame(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
@@ -61,7 +61,7 @@ void TypesFunctions::ifSame(TypesFunctionArgs fargs) {
  *
  * @exception SourceTypeError in case input shapes are not the same.
  */
-void TypesFunctions::ifSameShape(TypesFunctionArgs fargs) {
+void TypesFunctions::ifSameShape(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {

@@ -89,7 +89,7 @@ namespace TransformationTypes
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
-    void initInternals(TypesFunctionArgs& fargs);
+    void initInternals(StorageTypesFunctionArgs& fargs);
 
   }; /* struct Entry */
 

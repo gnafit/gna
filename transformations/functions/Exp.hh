@@ -18,6 +18,6 @@ class Exp: public GNASingleObject,
 public:
     Exp();                              ///< Constructor.
 
-    void calculate(FunctionArgs fargs); ///< Calculate the value of function.
+    void calculate(FunctionArgs& fargs); ///< Calculate the value of function.
 protected:
 };

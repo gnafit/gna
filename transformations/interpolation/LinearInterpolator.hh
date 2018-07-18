@@ -33,7 +33,7 @@ public:
   }
 protected:
   void indexBins();
-  void interpolate(FunctionArgs fargs);
+  void interpolate(FunctionArgs& fargs);
 
   std::vector<double> m_xs;
   std::vector<double> m_ys;

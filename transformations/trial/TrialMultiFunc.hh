@@ -18,7 +18,7 @@ public:
       .input("inp")
       .output("out")
       .types(TypesFunctions::passAll)
-      .func([](FunctionArgs fargs){
+      .func([](FunctionArgs& fargs){
             printf("Calculate: \n");
             printf("  write input to output\n");
             fargs.rets[0].x = fargs.args[0].x;
@@ -27,10 +27,10 @@ public:
             printf("  output: ");
             cout<<fargs.rets[0].x<<endl;
             })
-      .storage([](TypesFunctionArgs fargs){
+      .storage([](StorageTypesFunctionArgs& fargs){
              printf("Initialize main storage (nothing): %i\n", (int)fargs.ints.size());
              })
-      .func("secondary", [](FunctionArgs fargs){
+      .func("secondary", [](FunctionArgs& fargs){
             printf("Calculate: \n");
             printf("  write input to output, x2\n");
             printf("  write input to storage\n");
@@ -43,12 +43,12 @@ public:
             printf("  storage: ");
             cout<<fargs.ints[0].x<<endl;
             })
-      .storage("secondary", [](TypesFunctionArgs fargs){
+      .storage("secondary", [](StorageTypesFunctionArgs& fargs){
             printf("Initialize secondary storage (clone arg[0]): %i\n", (int)fargs.ints.size());
             fargs.ints[0] = fargs.args[0];
             printf("  after: %i\n", (int)fargs.ints.size());
             })
-      .func("thirdparty", [](FunctionArgs fargs){
+      .func("thirdparty", [](FunctionArgs& fargs){
             printf("Calculate: \n");
             printf("  write input to storage 0\n");
             printf("  write 3 to storage 1\n");
@@ -64,7 +64,7 @@ public:
             printf("  output: ");
             cout<<fargs.rets[0].x<<endl;
             })
-      .storage("thirdparty", [](TypesFunctionArgs fargs){
+      .storage("thirdparty", [](StorageTypesFunctionArgs& fargs){
             printf("Initialize secondary storage (clone arg[0], make 1x1 points): %i\n", (int)fargs.ints.size());
             fargs.ints[0] = fargs.args[0];
             fargs.ints[1] = DataType().points().shape(1);

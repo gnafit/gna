@@ -11,7 +11,7 @@ Sum::Sum() {
            TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
            TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
            )                                           ///<
-    .func([](FunctionArgs fargs) {                     ///<   - provide the calculation function:
+    .func([](FunctionArgs& fargs) {                    ///<   - provide the calculation function:
         auto& args=fargs.args;                         ///<     * extract transformation inputs
         auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
         ret = args[0].x;                               ///<     * assign (copy) the first input to output
