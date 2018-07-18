@@ -76,6 +76,8 @@ namespace TransformationTypes
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
     taintflag tainted() { return m_entry->tainted; }        ///< Return the Entry's taintflag status.
 
+    void switchFunction(const std::string& name) { m_entry->switchFunction(name); }
+
     bool check() const { return m_entry->check(); }         ///< Call Entry::check(). @copydoc Entry::check()
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.

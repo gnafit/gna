@@ -14,6 +14,7 @@ set (SOURCES
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
+  core/transformation/Ints.cc
   core/transformation/Rtypes.cc
   core/transformation/Itypes.cc
   core/transformation/Source.cc
@@ -81,6 +82,7 @@ set (HEADERS
   Storage.hh
   Args.hh
   Rets.hh
+  Ints.hh
   Rtypes.hh
   Itypes.hh
   Atypes.hh
@@ -105,6 +107,7 @@ set (HEADERS
   UncertainParameter.hh
   Prediction.hh
   CovariatedPrediction.hh
+  TrialMultiFunc.hh
   Product.hh
   Sum.hh
   WeightedSum.hh
@@ -164,6 +167,7 @@ set (HEADERS
 
 include_directories(core/transformation/
                     core/
+                    transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
                     transformations/calculus/

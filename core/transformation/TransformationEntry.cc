@@ -180,11 +180,14 @@ void Entry::dump(size_t level) const {
  */
 void Entry::evaluateTypes() {
   TypesFunctionArgs fargs(this);
-  auto& rets=fargs.rets;
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
+      typefun(fargs);
+    }
+    auto& itypefuns=functions[funcname].typefuns;
+    for (auto &typefun: itypefuns) {
       typefun(fargs);
     }
     success = true;
@@ -199,6 +202,7 @@ void Entry::evaluateTypes() {
   if (success) {
     std::set<Entry*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
+    auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
       if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
@@ -220,6 +224,8 @@ void Entry::evaluateTypes() {
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
+
+    initInternals(fargs);
   }
 }
 
@@ -265,46 +271,22 @@ void Entry::switchFunction(const std::string& name){
   }
   fun = it->second.fun;
 
-  initInternals(it->second.typefuns);
+  funcname=name;
+  evaluateTypes();
 }
 
-void Entry::initInternals(TypeFunctionsContainer& itypefuns){
-  storages.resize(0);
-
-  TypesFunctionArgs fargs(this);
-  auto& ints=fargs.ints;
-  bool success = false;
-  TR_DPRINTF("evaluating storage types for %s: \n", name.c_str());
-  try {
-    for (auto& typefun: itypefuns) {
-      typefun(fargs);
-    }
-    success = true;
-  } catch (const TypeError &exc) {
-    TR_DPRINTF("types[%s]: failed\n", name.c_str());
-    throw std::runtime_error(
-      (format("Transformation: storage type updates failed for `%1%': %2%") % name % exc.what()).str()
-      );
-  } catch (const Atypes::Undefined&) {
-    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
-  }
-  if (success) {
-    //TR_DPRINTF("types[%s]: success\n", name.c_str());
-    //for (size_t i = 0; i < storages.size(); ++i) {
-      //if (!ints[i].buffer && storages[i].data && storages[i].data->type == ints[i]) {
-        //continue;
-      //}
-      //if (ints[i].defined()) {
-        //storages[i].data.reset(new Data<double>(ints[i]));
-      //}
-      //else{
-        //storages[i].data.reset();
-      //}
-      //TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
-//#ifdef TRANSFORMATION_DEBUG
-      //sinks[i].data->type.dump();
-//#endif // TRANSFORMATION_DEBUG
-    }
+void Entry::initInternals(TypesFunctionArgs& fargs){
+  storages.clear();
+  auto& itypes=fargs.ints;
+  for (size_t i(0); i<itypes.size(); ++i) {
+    auto& int_dtype=itypes[i];
+    auto* storage = new Storage(this);
+    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), storage->name.c_str());
+#ifdef TRANSFORMATION_DEBUG
+    int_dtype.dump();
+#endif // TRANSFORMATION_DEBUG
+    storage->data.reset(new Data<double>(int_dtype));
+    storages.push_back(storage);
   }
 }
 

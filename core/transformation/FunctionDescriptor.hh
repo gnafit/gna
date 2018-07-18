@@ -11,7 +11,6 @@ namespace TransformationTypes
   struct FunctionDescriptor {
     Function fun;
     TypesFunctionsContainer typefuns;
-
   };
 
   typedef std::map<std::string, FunctionDescriptor> FunctionDescriptorsContainer;

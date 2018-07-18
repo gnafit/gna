@@ -163,10 +163,33 @@ namespace TransformationTypes {
      */
     Initializer<T> func(Function func) {
       m_mfunc = nullptr;
-      m_entry->fun = func;
+      m_entry->functions["main"]={func, {}};
+      m_entry->fun=func;
+      m_entry->funcname="main";
       return *this;
     }
 
+    /**
+     * @brief Set the Entry::fun Function.
+     * @param name -- a name of a function.
+     * @param fun -- the Function that defines the transformation.
+     * @return `*this`.
+     */
+    Initializer<T> func(const std::string& name, Function func) {
+      m_mfunc = nullptr;
+      m_entry->functions[name]={func, {}};
+      return *this;
+    }
+
+    /**
+     * @brief Switch to a particular function implementation.
+     * @param name -- the function name.
+     * @return `*this`.
+     */
+    Initializer<T> switchFunc(const std::string& name) {
+      m_entry->switchFunction(name);
+      return *this;
+    }
 
     /**
      * @brief Set Entry label.
@@ -216,6 +239,33 @@ namespace TransformationTypes {
       using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
       m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1));
+      return *this;
+    }
+
+    /**
+     * @brief Add new TypesFunction for the 'main' to initialize the storage
+     * @param func -- the TypesFunction to be added.
+     * @return `*this`.
+     */
+    Initializer<T> storage(TypesFunction func) {
+      storage("main", func);
+      return *this;
+    }
+
+    /**
+     * @brief Add new TypesFunction to a particular function to initialize the storage
+     * @param name -- function name to add the storage initializer.
+     * @param func -- the TypesFunction to be added.
+     * @exception runtime_error in case function is not found.
+     * @return `*this`.
+     */
+    Initializer<T> storage(const std::string& name, TypesFunction func) {
+      auto it = m_entry->functions.find(name);
+      if(it==m_entry->functions.end()){
+        auto fmt = format("invalid function name %1%");
+        throw std::runtime_error((fmt%name.data()).str());
+      }
+      it->second.typefuns.emplace_back(func);
       return *this;
     }
 

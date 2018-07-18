@@ -19,18 +19,15 @@ namespace TransformationTypes
   struct Storage: public boost::noncopyable {
     /**
      * @brief Constructor.
-     * @param name -- Storage name.
      * @param entry -- Entry pointer Storage belongs to.
      */
-    Storage(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+    Storage(Entry *entry) : entry(entry) { }
     /**
      * @brief Clone constructor.
-     * @param name -- other Storage to get the name from.
      * @param entry -- Entry pointer Storage belongs to.
      */
     Storage(const Storage &other, Entry *entry)
-      : name(other.name), label(other.label), entry(entry) { }
+      : entry(entry) { }
 
     std::string name;                           ///< Storage's name.
     std::string label;                          ///< Storage's label.

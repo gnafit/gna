@@ -14,12 +14,11 @@ using TransformationTypes::StorageTypeError;
  * @exception std::runtime_error in case invalid index is queried.
  */
 DataType &Itypes::operator[](int i) {
-  auto ii=static_cast<size_t>(i);
-  if( ii >= m_types->size() ){
-    m_types->resize(ii);
-    //m_entry->storages.resize(ii);
+  auto newsize=static_cast<size_t>(i)+1;
+  if( newsize > m_types->size() ){
+    m_types->resize(newsize);
   }
-  if (i < 0) {
+  else if (i < 0) {
     throw std::runtime_error(
       (format("invalid access to return type %1%, nstorages: %2%")
               % i % m_types->size()).str());

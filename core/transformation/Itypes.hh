@@ -23,7 +23,7 @@ namespace TransformationTypes
      * @param e -- Entry instance.
      */
     Itypes(const Entry *e)
-      : m_entry(e), m_types(new std::vector<DataType>(e->sources.size()))
+      : m_entry(e), m_types(new std::vector<DataType>())
       { }
 
     /**
