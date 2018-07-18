@@ -48,10 +48,11 @@ namespace MultiThreading {
   public:
     ThreadPool (int maxthr = 0);
     ~ThreadPool () {
-	std::cout << "thr num = " << threads.size() <<std::endl;
+	std::cerr << "thr num = " << threads.size() <<std::endl;
 	for (auto &thr : threads) {
 	    thr.join();
 	}
+	std::cerr << "destructor ends " << std::endl;
     }
 
     int whoami();
