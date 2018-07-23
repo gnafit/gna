@@ -22,10 +22,10 @@ bool MultiThreading::Task::done() {
 }
 
 void MultiThreading::Task::run_task() {
-        using namespace std::chrono_literals;
-	if (m_entry->tainted && !m_entry->frozen) {
-		std::unique_lock<std::mutex> t_lck(task_mtx);
-
+        using namespace std::chrono_literals; 
+	std::unique_lock<std::mutex> t_lck(task_mtx);
+	if (m_entry->tainted && !m_entry->frozen && !m_entry->running) {
+		
 		std::cerr << "RUNNING STAT = " << m_entry->running
 				  << std::endl;
 		auto now = std::chrono::system_clock::now();
@@ -42,9 +42,10 @@ void MultiThreading::Task::run_task() {
 				m_entry->tainted = false;
 			}
 			m_entry->mark_not_running();
-			task_cv.notify_one();
 		}
 	}
+	t_lck.unlock();
+	task_cv.notify_one();
 }
 
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
@@ -63,6 +64,16 @@ void MultiThreading::Worker::work() {  // runs task stack
 				  //     w_lck.unlock();
 }
 
+
+void MultiThreading::ThreadPool::stop() {
+	std::cerr << "thr num = " << threads.size() <<std::endl;
+	for (auto &thr : threads) {
+	    thr.join();
+	}
+	std::cerr << "stopped" << std::endl;
+}
+
+
 MultiThreading::ThreadPool::ThreadPool(int maxthr)
     : m_max_thread_number(maxthr) {
 	// Mother thread creation
@@ -75,19 +86,24 @@ MultiThreading::ThreadPool::ThreadPool(int maxthr)
 
 int MultiThreading::ThreadPool::whoami() {
 	std::cerr << "in-whoami" << std::endl;
-	std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
+ 	tp_m_workers_mutex.lock();
+	//std::unique_lock<std::mutex> lock(tp_m_workers_mutex, std::adopt_lock);
 	size_t thr_size = m_workers.size();
 	for (size_t i = 0; i < thr_size; i++) {
-		if (m_workers[i].thr_head == std::this_thread::get_id())
+		if (m_workers[i].thr_head == std::this_thread::get_id()) {
+			tp_m_workers_mutex.unlock();
+			std::cerr <<  i << " unlck " <<std::endl;
 			return i;
+                }
 	}
+	tp_m_workers_mutex.unlock();
 	return -1;
 }
 
 void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task,
 					    size_t index) {
 	//        {
-	std::unique_lock<std::mutex> lock(tp_m_workers_mutex);
+	std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
 	m_workers.push_back(Worker(*this));
 	m_workers[index].thr_head = std::this_thread::get_id();
 	std::cerr << "New worker ID = " << std::this_thread::get_id()

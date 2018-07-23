@@ -85,6 +85,10 @@ namespace TransformationTypes
     void freeze() { frozen = true; }                    ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
     void unfreeze() { frozen = false; }                 ///< Unfreeze the Entry. Enables the taintflag propagation.
 
+    void mark_running() {running = true; }
+    void mark_not_running() {running = false; }
+ 
+
     bool check() const;                                 ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
 
@@ -98,6 +102,7 @@ namespace TransformationTypes
     const Base *parent;                                 ///< Base class, containing the transformation Entry.
     int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
+    bool running=false;                                 ///< If Entry is running, it is locked in multithreading case.
 
   private:
     template <typename InsT, typename OutsT>

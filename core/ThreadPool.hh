@@ -48,12 +48,10 @@ namespace MultiThreading {
   public:
     ThreadPool (int maxthr = 0);
     ~ThreadPool () {
-	std::cerr << "thr num = " << threads.size() <<std::endl;
-	for (auto &thr : threads) {
-	    thr.join();
-	}
-	std::cerr << "destructor ends " << std::endl;
+	stop();
     }
+
+    void stop();
 
     int whoami();
     void add_task(Task task);
@@ -91,6 +89,7 @@ namespace MultiThreading {
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
+    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
     std::stack<Task> *task_stack;
 
