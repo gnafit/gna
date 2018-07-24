@@ -58,6 +58,12 @@ namespace TransformationTypes {
      */
     typedef std::function<void(T*, TypesFunctionArgs& fargs)> MemTypesFunction;
 
+    typedef std::vector<std::tuple<size_t, MemTypesFunction>> MemTypesFunctionMap;
+
+    typedef std::function<void(T*, StorageTypesFunctionArgs& fargs)> MemStorageTypesFunction;
+
+    typedef std::map<std::string, std::vector<std::tuple<size_t, MemStorageTypesFunction>>> MemStorageTypesFunctionMap;
+
     /**
      * @brief Constructor.
      *
@@ -252,6 +258,11 @@ namespace TransformationTypes {
       return *this;
     }
 
+    Initializer<T> storage(MemStorageTypesFunction func) {
+      storage("main", func);
+      return *this;
+    }
+
     /**
      * @brief Add new TypesFunction to a particular function to initialize the storage
      * @param name -- function name to add the storage initializer.
@@ -260,12 +271,16 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> storage(const std::string& name, StorageTypesFunction func) {
-      auto it = m_entry->functions.find(name);
-      if(it==m_entry->functions.end()){
-        auto fmt = format("invalid function name %1%");
-        throw std::runtime_error((fmt%name.data()).str());
-      }
-      it->second.typefuns.emplace_back(func);
+      auto& fd = m_entry->functions.at(name);
+      fd.typefuns.emplace_back(func);
+      return *this;
+    }
+
+    Initializer<T> storage(const std::string& name, MemStorageTypesFunction func) {
+      using namespace std::placeholders;
+      auto& fd = m_entry->functions.at(name);
+      m_mstfuncs.emplace_back(fd.typefuns.size(), func);
+      fd.typefuns.push_back(std::bind(func, m_obj->obj(), _1));
       return *this;
     }
 
@@ -365,12 +380,13 @@ namespace TransformationTypes {
     }
 
   protected:
-    Entry *m_entry;                  ///< New Entry pointer.
-    TransformationBind<T> *m_obj;    ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
+    Entry *m_entry;                        ///< New Entry pointer.
+    TransformationBind<T> *m_obj;          ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
 
-    MemFunction m_mfunc;             ///< MemFunction object.
-    std::vector<std::tuple<size_t, MemTypesFunction>> m_mtfuncs; ///< MemTypesFunction objects.
+    MemFunction m_mfunc;                   ///< MemFunction object.
+    MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
+    MemStorageTypesFunctionMap m_mstfuncs; ///< MemTypesFunction objects.
 
-    bool m_nosubscribe;              ///< Flag forbidding automatic subscription to Base taintflag emissions.
+    bool m_nosubscribe;                    ///< Flag forbidding automatic subscription to Base taintflag emissions.
   }; /* class Initializer */
 }

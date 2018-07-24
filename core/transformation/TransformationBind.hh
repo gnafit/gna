@@ -64,6 +64,10 @@ private:
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
   typedef typename Initializer::MemFunction MemFunction;
   typedef typename Initializer::MemTypesFunction MemTypesFunction;
+  typedef typename Initializer::MemStorageTypesFunction MemStorageTypesFunction;
+
+  typedef std::list<std::tuple<size_t, size_t, MemTypesFunction>> MemTypesFunctionGMap;
+  typedef std::list<std::tuple<size_t, std::string, size_t, MemStorageTypesFunction>> MemStorageTypesFunctionGMap;
 
   /**
    * @brief Return `this` casted to the Derived type (CRTP).
@@ -76,8 +80,9 @@ private:
    */
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 
-  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;                      ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
-  std::list<std::tuple<size_t, size_t, MemTypesFunction>> m_memTypesFuncs;    ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
+  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;  ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
+  MemTypesFunctionGMap m_memTypesFuncs;                   ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
+  MemStorageTypesFunctionGMap m_memStorageFuncs;
 
   /**
    * @brief Add new MemFunction.
@@ -99,19 +104,40 @@ private:
   }
 
   /**
+   * @brief Add new MemTypesFunction.
+   * @param idx -- Entry index.
+   * @param fname -- Function name.
+   * @param fidx -- StorageTypesFunction index (Each Entry may have several StorageTypeFunction objects).
+   * @param func -- the StorageTypesFunction.
+   */
+  void addMemTypesFunction(size_t idx, const std::string& fname, size_t fidx, MemStorageTypesFunction func) {
+    m_memStorageFuncs.emplace_back(idx, fname, fidx, func);
+  }
+
+  /**
    * @brief Bind each of the MemFunction and MemTypesFunction objects to `this` of the transformation.
    * The method replaces the relevant Function and TypesFunction of the Entry by the binded MemFunction and MemTypesFunction.
+   *
+   * @todo Should be tested.
    */
   void rebindMemFunctions() {
     using namespace std::placeholders;
     for (const auto &f: m_memFuncs) {
       auto idx = std::get<0>(f);
-      m_entries[idx].fun = std::bind(std::get<1>(f), obj(), _1, _2);
+      m_entries[idx].fun = std::bind(std::get<1>(f), obj(), _1);
     }
     for (const auto &f: m_memTypesFuncs) {
       auto idx = std::get<0>(f);
       auto fidx = std::get<1>(f);
-      m_entries[idx].typefuns[fidx] = std::bind(std::get<2>(f), obj(), _1, _2);
+      auto func = std::get<2>(f);
+      m_entries[idx].typefuns[fidx] = std::bind(func, obj(), _1);
+    }
+    for (const auto &f: m_memStorageFuncs) {
+      auto  idx  = std::get<0>(f);
+      auto& name = std::get<1>(f);
+      auto  fidx = std::get<2>(f);
+      auto  func = std::get<3>(f);
+      m_entries[idx].functions[name].typefuns[fidx] = std::bind(func, obj(), _1);
     }
   }
 }; /* class TransformationBind */
