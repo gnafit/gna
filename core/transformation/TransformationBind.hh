@@ -80,8 +80,8 @@ private:
    */
   const Derived *obj() const { return static_cast<const Derived*>(this); }
 
-  std::list<std::tuple<size_t, MemFunction>> m_memFuncs;  ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
-  MemTypesFunctionGMap m_memTypesFuncs;                   ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
+  std::list<std::tuple<size_t, std::string, MemFunction>> m_memFuncs;  ///< List with MemFunction objects arranged correspondingly to each Entry from Base.
+  MemTypesFunctionGMap m_memTypesFuncs;                                ///< List with MemTypesFunction objects arranged correspondingly to each Entry from Base.
   MemStorageTypesFunctionGMap m_memStorageFuncs;
 
   /**
@@ -89,8 +89,8 @@ private:
    * @param idx -- Entry index.
    * @param func -- the function.
    */
-  void addMemFunction(size_t idx, MemFunction func) {
-    m_memFuncs.emplace_back(idx, func);
+  void addMemFunction(size_t idx, const std::string& name, MemFunction func) {
+    m_memFuncs.emplace_back(idx, name, func);
   }
 
   /**
@@ -110,7 +110,7 @@ private:
    * @param fidx -- StorageTypesFunction index (Each Entry may have several StorageTypeFunction objects).
    * @param func -- the StorageTypesFunction.
    */
-  void addMemTypesFunction(size_t idx, const std::string& fname, size_t fidx, MemStorageTypesFunction func) {
+  void addMemStorageTypesFunction(size_t idx, const std::string& fname, size_t fidx, MemStorageTypesFunction func) {
     m_memStorageFuncs.emplace_back(idx, fname, fidx, func);
   }
 
@@ -123,8 +123,15 @@ private:
   void rebindMemFunctions() {
     using namespace std::placeholders;
     for (const auto &f: m_memFuncs) {
-      auto idx = std::get<0>(f);
-      m_entries[idx].fun = std::bind(std::get<1>(f), obj(), _1);
+      auto  idx   = std::get<0>(f);
+      auto& name  = std::get<1>(f);
+      auto  mfunc = std::get<2>(f);
+      auto& entry = m_entries[idx];
+      auto  func  = std::bind(mfunc, obj(), _1);
+      entry.functions.at(name).fun = func;
+      if(entry.funcname==name) {
+        entry.fun = func;
+      }
     }
     for (const auto &f: m_memTypesFuncs) {
       auto idx = std::get<0>(f);

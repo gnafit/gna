@@ -49,6 +49,9 @@ namespace TransformationTypes {
      * @copydoc Function
      */
     typedef std::function<void(T*, FunctionArgs&)> MemFunction;
+
+    typedef std::map<std::string, MemFunction> MemFunctionMap;
+
     /**
      * @brief Function, that does the input types checking and output types derivation (reference to a member function).
      *
@@ -128,11 +131,16 @@ namespace TransformationTypes {
       }
       size_t idx = m_obj->addEntry(m_entry);
       m_entry = nullptr;
-      if (m_mfunc) {
-        m_obj->addMemFunction(idx, m_mfunc);
+      for (const auto& kv: m_mfuncs) {
+        m_obj->addMemFunction(idx, kv.first, kv.second);
       }
       for (const auto &f: m_mtfuncs) {
         m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
+      }
+      for (const auto &kv: m_mstfuncs) {
+        for (const auto &f: kv.second){
+          m_obj->addMemStorageTypesFunction(idx, kv.first, std::get<0>(f), std::get<1>(f));
+        }
       }
     }
 
@@ -167,11 +175,8 @@ namespace TransformationTypes {
      * @param fun -- the Function that defines the transformation.
      * @return `*this`.
      */
-    Initializer<T> func(Function func) {
-      m_mfunc = nullptr;
-      m_entry->functions["main"]={func, {}};
-      m_entry->fun=func;
-      m_entry->funcname="main";
+    Initializer<T> func(Function afunc) {
+      func("main", afunc);
       return *this;
     }
 
@@ -179,11 +184,20 @@ namespace TransformationTypes {
      * @brief Set the Entry::fun Function.
      * @param name -- a name of a function.
      * @param fun -- the Function that defines the transformation.
+     * @exception std::runtime error if function with name `name` already exists.
      * @return `*this`.
      */
-    Initializer<T> func(const std::string& name, Function func) {
-      m_mfunc = nullptr;
-      m_entry->functions[name]={func, {}};
+    Initializer<T> func(const std::string& name, Function afunc) {
+      if( m_entry->functions.find(name)!=m_entry->functions.end() ){
+        auto fmt = format("mem function %1% already exists");
+        throw std::runtime_error((fmt%name.data()).str());
+      }
+      m_entry->functions[name]={afunc, {}};
+
+      if(name=="main"){
+        m_entry->fun=afunc;
+        m_entry->funcname="main";
+      }
       return *this;
     }
 
@@ -215,10 +229,16 @@ namespace TransformationTypes {
      * @param fun -- the MemFunction that defines the transformation.
      * @return `*this`.
      */
-    Initializer<T> func(MemFunction func) {
+    Initializer<T> func(MemFunction mfunc) {
+      func("main", mfunc);
+      return *this;
+    }
+
+    Initializer<T> func(const std::string& name, MemFunction mfunc) {
       using namespace std::placeholders;
-      m_mfunc = func;
-      m_entry->fun = std::bind(func, m_obj->obj(), _1);
+      m_mfuncs[name]=mfunc;
+      auto afunc = std::bind(mfunc, m_obj->obj(), _1);
+      func(name, afunc);
       return *this;
     }
 
@@ -383,7 +403,7 @@ namespace TransformationTypes {
     Entry *m_entry;                        ///< New Entry pointer.
     TransformationBind<T> *m_obj;          ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
 
-    MemFunction m_mfunc;                   ///< MemFunction object.
+    MemFunctionMap m_mfuncs;               ///< MemFunction objects.
     MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
     MemStorageTypesFunctionMap m_mstfuncs; ///< MemTypesFunction objects.
 
