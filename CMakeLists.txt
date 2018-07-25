@@ -27,6 +27,7 @@ set (SOURCES
   core/Parametrized.cc
   core/TransformationDescriptor.cc
   core/UncertainParameter.cc
+  transformations/trial/TrialMultiFunc.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc

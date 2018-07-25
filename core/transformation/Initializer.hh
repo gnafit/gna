@@ -299,7 +299,7 @@ namespace TransformationTypes {
     Initializer<T> storage(const std::string& name, MemStorageTypesFunction func) {
       using namespace std::placeholders;
       auto& fd = m_entry->functions.at(name);
-      m_mstfuncs.emplace_back(fd.typefuns.size(), func);
+      m_mstfuncs[name].emplace_back(fd.typefuns.size(), func);
       fd.typefuns.push_back(std::bind(func, m_obj->obj(), _1));
       return *this;
     }
