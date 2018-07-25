@@ -28,6 +28,10 @@ set (SOURCES
   core/TransformationDescriptor.cc
   core/UncertainParameter.cc
   transformations/trial/TrialMultiFunc.cc
+  transformations/base/FillLike.cc
+  transformations/base/Histogram.cc
+  transformations/base/Identity.cc
+  transformations/base/Points.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -40,24 +44,34 @@ set (SOURCES
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
+  transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
+  transformations/integrator/FakeGSLFunction.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/Transpose.cc
+  transformations/neutrino/EvisToEe.cc
   transformations/neutrino/IbdFirstOrder.cc
   transformations/neutrino/IbdInteraction.cc
   transformations/neutrino/IbdZeroOrder.cc
+  transformations/neutrino/Neutrino.cc
+  transformations/neutrino/OscillationVariables.cc
   transformations/neutrino/OscProb2nu.cc
   transformations/neutrino/OscProbMatterUniform.cc
   transformations/neutrino/OscProbPMNS.cc
   transformations/neutrino/OscProbPMNSDecoh.cc
+  transformations/neutrino/PDGVariables.cc
+  transformations/neutrino/PMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
+  transformations/neutrino/Units.cc
   transformations/stats/Chi2.cc
   transformations/stats/CovarianceToyMC.cc
   transformations/stats/CovariatedPrediction.cc
@@ -70,6 +84,7 @@ set (SOURCES
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
   transformations/var/VarArray.cc
+  transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
   )
 

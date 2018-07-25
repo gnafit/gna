@@ -22,8 +22,8 @@ public:
       .func(&Cholesky::calculateCholesky)
     ;
   }
-  void prepareCholesky(TypesFunctionArgs& fargs);
-  void calculateCholesky(FunctionArgs& fargs);
+  inline void prepareCholesky(TypesFunctionArgs& fargs);
+  inline void calculateCholesky(FunctionArgs& fargs);
 
 protected:
   class LLT: public Eigen::LLT<Eigen::MatrixXd> {
