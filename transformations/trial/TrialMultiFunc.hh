@@ -27,19 +27,32 @@ public:
       .types(TypesFunctions::passAll)
       // TypesFunction to define storage, common for all implementations
       .types([](TypesFunctionArgs& fargs){
-
+            fargs.ints[0] = DataType().points().shape(1);
+            printf("Initialize common storage ([0]: 1x1 points): %i\n", (int)fargs.ints.size());
              })
       // MemTypesFunction to define another storage, common for all implementations
       .types(&TrialMultiFunc::memTypesFunction)
-      // Main Function implementation
+      // Main Function implementation:
       .func([](FunctionArgs& fargs){
-            printf("Calculate Function: \n");
-            printf("  write input to output\n");
-            fargs.rets[0].x = fargs.args[0].x;
-            printf("  input: ");
+            printf("Call main Function:");
+            printf(
+                   "\n  - num=1"
+                   "\n  - write num to ints[0]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write args[0]*ints[0] to rets[0]\n"
+                  );
+            fargs.ints[0].x = 1;
+            fargs.ints[1].x = fargs.ints[0].x(0)*fargs.ints[0].x(0);
+            fargs.rets[0].x = fargs.args[0].x*fargs.ints[0].x(0);
+            printf("  input[0]:\n");
             cout<<fargs.args[0].x<<endl;
-            printf("  output: ");
+            printf("  output[0]:\n");
             cout<<fargs.rets[0].x<<endl;
+            printf("  internal[0]:\n");
+            cout<<fargs.ints[0].x<<endl;
+            printf("  internal[1]:\n");
+            cout<<fargs.ints[1].mat<<endl;
             })
       // Main Function's StorageTypesFunction
       .storage([](StorageTypesFunctionArgs& fargs){
@@ -47,23 +60,34 @@ public:
              })
       // Secondary Function implementation
       .func("secondary", [](FunctionArgs& fargs){
-            printf("Calculate secondary Function: \n");
-            printf("  write input to output, x2\n");
-            printf("  write input to storage\n");
-            fargs.rets[0].x = fargs.args[0].x*2;
-            fargs.ints[0].x = fargs.args[0].x;
-            printf("  input: ");
+            printf("Call secondary Function:");
+            printf(
+                   "\n  - num=2"
+                   "\n  - write num to ints[0]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write args[0]*ints[0] to rets[0]"
+                   "\n  - write args[0] to ints[2]\n"
+                  );
+            fargs.ints[0].x = 2;
+            fargs.ints[1].x = fargs.ints[0].x(0)*fargs.ints[0].x(0);
+            fargs.rets[0].x = fargs.args[0].x*fargs.ints[0].x(0);
+            fargs.ints[2].x = fargs.args[0].x;
+            printf("  input[0]:\n");
             cout<<fargs.args[0].x<<endl;
-            printf("  output: ");
+            printf("  output[0]:\n");
             cout<<fargs.rets[0].x<<endl;
-            printf("  storage: ");
+            printf("  internal[0]:\n");
             cout<<fargs.ints[0].x<<endl;
-            })
+            printf("  internal[1]:\n");
+            cout<<fargs.ints[1].mat<<endl;
+            printf("  internal[2]:\n");
+            cout<<fargs.ints[2].x<<endl;
+      })
       // Secondary Function StorageTypesFunction
       .storage("secondary", [](StorageTypesFunctionArgs& fargs){
-            printf("Initialize secondary storage (clone arg[0]): %i\n", (int)fargs.ints.size());
-            fargs.ints[0] = fargs.args[0];
-            printf("  after: %i\n", (int)fargs.ints.size());
+            fargs.ints[2] = fargs.args[0];
+            printf("Initialize secondary storage (clone arg[0] to ints[2]): %i\n", (int)fargs.ints.size());
             })
       // Secondary MemFunction implementation
       .func("secondaryMem", &TrialMultiFunc::memFunction)
@@ -71,39 +95,70 @@ public:
       .storage("secondaryMem", &TrialMultiFunc::memStorageTypesFunction)
       // Third party Function implementation
       .func("thirdparty", [](FunctionArgs& fargs){
-            printf("Calculate: \n");
-            printf("  write input to storage 0\n");
-            printf("  write 3 to storage 1\n");
-            printf("  write input to output, multiply by storage 1\n");
-            fargs.ints[0].x    = fargs.args[0].x;
-            fargs.ints[1].x(0) = 3;
-            fargs.rets[0].x = fargs.ints[0].x*fargs.ints[1].x(0);
-            printf("  input: ");
+            printf("Call third party Function:");
+            printf(
+                   "\n  - num=4"
+                   "\n  - write num to ints[0]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write num*num to ints[1]"
+                   "\n  - write args[0]*ints[0] to rets[0]"
+                   "\n  - write args[0] to ints[2]\n"
+                  );
+            fargs.ints[0].x = 4;
+            fargs.ints[1].x = fargs.ints[0].x(0)*fargs.ints[0].x(0);
+            fargs.rets[0].x = fargs.args[0].x*fargs.ints[0].x(0);
+            fargs.ints[2].x = fargs.args[0].x;
+            printf("  input[0]:\n");
             cout<<fargs.args[0].x<<endl;
-            printf("  storage: ");
-            cout<<fargs.ints[0].x<<" and ";
-            cout<<fargs.ints[1].x<<endl;
-            printf("  output: ");
+            printf("  output[0]:\n");
             cout<<fargs.rets[0].x<<endl;
-            })
+            printf("  internal[0]:\n");
+            cout<<fargs.ints[0].x<<endl;
+            printf("  internal[1]:\n");
+            cout<<fargs.ints[1].mat<<endl;
+            printf("  internal[2]:\n");
+            cout<<fargs.ints[2].x<<endl;
+      })
       // Third party Function StorageTypesFunction
       .storage("thirdparty", [](StorageTypesFunctionArgs& fargs){
-            printf("Initialize secondary storage (clone arg[0], make 1x1 points): %i\n", (int)fargs.ints.size());
-            fargs.ints[0] = fargs.args[0];
-            fargs.ints[1] = DataType().points().shape(1);
-            printf("  after: %i\n", (int)fargs.ints.size());
+               fargs.ints[2] = fargs.args[0];
+               printf("Initialize third party storage (clone arg[0] to ints[2]): %i\n", (int)fargs.ints.size());
             });
   };
 
   void memFunction(FunctionArgs& fargs){
-
+    printf("Call secondary MemFunction:");
+    printf(
+           "\n  - num=3"
+           "\n  - write num to ints[0]"
+           "\n  - write num*num to ints[1]"
+           "\n  - write num*num to ints[1]"
+           "\n  - write args[0]*ints[0] to rets[0]"
+           "\n  - write args[0] to ints[2]\n"
+          );
+    fargs.ints[0].x = 3;
+    fargs.ints[1].x = fargs.ints[0].x(0)*fargs.ints[0].x(0);
+    fargs.rets[0].x = fargs.args[0].x*fargs.ints[0].x(0);
+    fargs.ints[2].x = fargs.args[0].x;
+    printf("  input[0]:\n");
+    cout<<fargs.args[0].x<<endl;
+    printf("  output[0]:\n");
+    cout<<fargs.rets[0].x<<endl;
+    printf("  internal[0]:\n");
+    cout<<fargs.ints[0].x<<endl;
+    printf("  internal[1]:\n");
+    cout<<fargs.ints[1].mat<<endl;
+    printf("  internal[2]:\n");
+    cout<<fargs.ints[2].x<<endl;
   }
 
   void memTypesFunction(TypesFunctionArgs& fargs){
-
+    fargs.ints[1] = DataType().points().shape(2,2);
+    printf("Initialize common storage (mem, [1]: 2x2 points): %i\n", (int)fargs.ints.size());
   }
 
   void memStorageTypesFunction(StorageTypesFunctionArgs& fargs){
-
+      fargs.ints[2] = fargs.args[0];
+      printf("Initialize secondary storage (mem, clone arg[0] to ints[2]): %i\n", (int)fargs.ints.size());
   }
 };

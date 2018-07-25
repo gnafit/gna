@@ -43,6 +43,12 @@ trans.taint()
 print('    result', out.data())
 
 print()
+print('Switch to secondaryMem mode')
+trans.switchFunction('secondaryMem')
+trans.taint()
+print('    result', out.data())
+
+print()
 print('Switch to thirdparty mode')
 trans.switchFunction('thirdparty')
 trans.taint()
