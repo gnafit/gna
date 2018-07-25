@@ -86,6 +86,7 @@ set (SOURCES
   transformations/var/VarArray.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
+  examples/GaussianPeakWithBackground.cc
   )
 
 set (HEADERS
