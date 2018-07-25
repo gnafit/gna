@@ -13,46 +13,15 @@ Sum::Sum(bool gpu = false) : isgpu(gpu) {
            TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
            TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
            )                                           ///<
-    .func(&Sum::makesum)
-#ifdef GNA_CUDA_SUPPORT                                                  ///<
-    .setEntryLocation(gpu? DataLocation::Device : DataLocation::Host)
-#endif
-    ;
-  }
-
-void Sum::makesum(Args args, Rets rets) {
-#ifdef GNA_CUDA_SUPPORT
-  if (isgpu) gpu_sum(args, rets);
-  else
-#endif
-  cpu_sum(args, rets);
+    .func([](FunctionArgs& fargs) {                    ///<   - provide the calculation function:
+        auto& args=fargs.args;                         ///<     * extract transformation inputs
+        auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
+        ret = args[0].x;                               ///<     * assign (copy) the first input to output
+        for (size_t j = 1; j < args.size(); ++j) {     ///<     * iteratively add all the other inputs
+          ret += args[j].x;                            ///<
+        }                                              ///<
+      });                                              ///<
 }
-
-void Sum::cpu_sum(Args args, Rets rets) {
-  rets[0].x = args[0].x;                         ///<     * assign (copy) the first input to output
-  for (size_t i = 1; i < args.size(); i++) {     ///<     * iteratively add all the other inputs
-    rets[0].x += args[i].x;    
-  }
-}
-
-#ifdef GNA_CUDA_SUPPORT
-  void Sum::gpu_sum(Args args, Rets rets) {
-    rets[0].gpuArr->setByDeviceArray(args[0].gpuArr->devicePtr);
-    size_t n = args.size();
-//    for (size_t i = 0; i < rets[0].gpuArr->arrSize; i++) {
-//      printf("%f\n", rets[0].x[i]);
-//    }
-
-    for (size_t i = 1; i < n; i++) {
-      *(rets[0].gpuArr) += *(args[i].gpuArr);
-    }
-
-    rets[0].gpuArr->dump();
-    //for (size_t i = 0; i < rets[0].gpuArr->arrSize; i++) {
-      //printf("%f\n", rets[0].x[i]);
-    //}
-  }
-#endif
 
 /**
  * @brief Add an input and connect it to the output.

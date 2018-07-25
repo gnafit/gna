@@ -6,12 +6,13 @@
 #include <boost/noncopyable.hpp>
 
 #include "Data.hh"
+#include "Parameters.hh"
+#include "TransformationFunction.hh"
+#include "FunctionDescriptor.hh"
+
 #include "Source.hh"
 #include "Sink.hh"
-
-#include "Parameters.hh"
-
-#include "config_vars.h"
+#include "Storage.hh"
 
 #ifdef GNA_CUDA_SUPPORT
 #include "GNAcuDataLocation.hh"
@@ -22,36 +23,12 @@
 namespace TransformationTypes
 {
   class Base;
-  struct Args;
-  struct Rets;
-  struct Atypes;
-  struct Rtypes;
   class InputHandle;
   class OutputHandle;
 
-  typedef boost::ptr_vector<Source> SourcesContainer;   ///< Container for Source pointers.
-  typedef boost::ptr_vector<Sink>   SinksContainer;     ///< Container for Sink pointers.
-
-  /**
-   * @brief Function, that does the actual calculation.
-   *
-   * This function is used to define the transformation via Entry::fun
-   * and is executed via Entry::update() or Entry::touch().
-   *
-   * @param args -- container with transformation inputs (Args).
-   * @param rets -- container with transformation outputs (Args).
-   */
-  typedef std::function<void(Args, Rets)> Function;
-
-  /**
-   * @brief Function, that does the input types checking and output types derivation.
-   *
-   * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
-   *
-   * @param atypes -- container with transformation inputs' types (Atypes).
-   * @param rtypes -- container with transformation outputs' types (Rtypes).
-   */
-  typedef std::function<void(Atypes, Rtypes)> TypesFunction;
+  typedef boost::ptr_vector<Source>  SourcesContainer;   ///< Container for Source pointers.
+  typedef boost::ptr_vector<Sink>    SinksContainer;     ///< Container for Sink pointers.
+  typedef boost::ptr_vector<Storage> StoragesContainer;  ///< Container for Storage pointers.
 
   /**
    * @brief Definition of a single transformation.
@@ -73,25 +50,26 @@ namespace TransformationTypes
    * @date 2015
    */
   struct Entry: public boost::noncopyable {
-    Entry(const std::string &name, const Base *parent); ///< Constructor.
-    Entry(const Entry &other, const Base *parent);      ///< Clone constructor.
+    Entry(const std::string &name, const Base *parent);  ///< Constructor.
+    Entry(const Entry &other, const Base *parent);       ///< Clone constructor.
 
-    InputHandle addSource(const std::string &name);     ///< Initialize and return new Source.
-    OutputHandle addSink(const std::string &name);      ///< Initialize and return new Sink.
+    InputHandle addSource(const std::string &name);      ///< Initialize and return new Source.
+    OutputHandle addSink(const std::string &name);       ///< Initialize and return new Sink.
 
     void evaluate();                                    ///< Do actual calculation by calling Entry::fun.
     void update();                                      ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
     void evaluateTypes();                               ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void updateTypes();                                 ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
-    void touch();                                       ///< Update the transformation if it is not frozen and tainted.
-    const Data<double> &data(int i);                    ///< Evaluates the function if needed and returns i-th data.
+    void touch();                                        ///< Update the transformation if it is not frozen and tainted.
+    const Data<double> &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
-    void freeze() { frozen = true; }                    ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
-    void unfreeze() { frozen = false; }                 ///< Unfreeze the Entry. Enables the taintflag propagation.
+    void freeze() { frozen = true; }                     ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
+    void unfreeze() { frozen = false; }                  ///< Unfreeze the Entry. Enables the taintflag propagation.
 
-    bool check() const;                                 ///< Checks that Data are initialized.
-    void dump(size_t level = 0) const;                  ///< Recursively print Source names and their connection status.
+    bool check() const;                                  ///< Checks that Data are initialized.
+    void dump(size_t level = 0) const;                   ///< Recursively print Source names and their connection status.
+
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc) { 		///< Sets the target (Host or Device) for execution of current transformation
 		m_entryLoc = loc; 
@@ -103,22 +81,34 @@ namespace TransformationTypes
 
     std::string name;                                   ///< Transformation name.
     std::string label;                                  ///< Transformation label.
-    SourcesContainer sources;                           ///< Transformation inputs (sources).
-    SinksContainer sinks;                               ///< Transformation outputs (sinks).
-    Function fun=nullptr;                               ///< The function that does actual calculation.
-    std::vector<TypesFunction> typefuns;                ///< Vector of TypeFunction objects.
-    taintflag tainted;                                  ///< taintflag shows whether the result is up to date.
     const Base *parent;                                 ///< Base class, containing the transformation Entry.
-    int initializing;                                   ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
-    bool frozen;                                        ///< If Entry is frozen, it is not updated even if tainted.
- 
 
+
+    // Data
+    SourcesContainer sources;                            ///< Transformation inputs (sources).
+    SinksContainer sinks;                                ///< Transformation outputs (sinks).
+    StoragesContainer storages;                          ///< Transformation internal Storage instances.
+
+    // Functions
+    Function fun=nullptr;                                ///< The function that does actual calculation.
+    TypesFunctionsContainer typefuns;                    ///< Vector of TypeFunction objects.
+    FunctionDescriptorsContainer functions;              ///< Vector of TypeFunction objects.
+    std::string funcname;
+
+    // Status
+    taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
+    int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
+    bool frozen;                                         ///< If Entry is frozen, it is not updated even if tainted.
+
+    void switchFunction(const std::string& name);
   private:
 #ifdef GNA_CUDA_SUPPORT
     DataLocation m_entryLoc = DataLocation::Host;	///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
 #endif
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
+    void initInternals(StorageTypesFunctionArgs& fargs);
+
   }; /* struct Entry */
 
 } /* TransformationTypes */

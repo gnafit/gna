@@ -23,6 +23,23 @@ DataType &Rtypes::operator[](int i) {
 }
 
 /**
+ * @brief Get i-th Sink DataType (const).
+ *
+ * @param i -- Sink index.
+ * @return i-th Sink DataType.
+ *
+ * @exception std::runtime_error in case invalid index is queried.
+ */
+const DataType &Rtypes::operator[](int i) const {
+  if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
+    throw std::runtime_error(
+      (format("invalid access to return type %1%, nsinks: %2%")
+              % i % m_types->size()).str());
+  }
+  return (*m_types)[i];
+}
+
+/**
  * @brief Sink type exception.
  * @param dt -- incorrect DataType.
  * @param message -- exception message.

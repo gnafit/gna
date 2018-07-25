@@ -12,20 +12,18 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
   transformation_("rebin")
     .input("histin")
     .output("histout")
-    .types([](Rebin *obj, Atypes args, Rtypes rets){
-           if(args[0].kind!=DataKind::Hist){
-             throw std::runtime_error("Rebinner input should be a histogram");
-           }
-           rets[0]=DataType().hist().edges(obj->m_new_edges);
+    .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs& fargs){
+           fargs.rets[0]=DataType().hist().edges(obj->m_new_edges);
            })
     .func(&Rebin::calcSmear);
 }
 
-void Rebin::calcSmear(Args args, Rets rets) {
+void Rebin::calcSmear(FunctionArgs& fargs) {
+  auto& args=fargs.args;
   if( !m_initialized ){
       calcMatrix( args[0].type );
   }
-  rets[0].x = m_sparse_cache * args[0].vec;
+  fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
 void Rebin::calcMatrix(const DataType& type) {

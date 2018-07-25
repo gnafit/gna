@@ -20,7 +20,7 @@ class C14Spectrum: public GNAObject,
         void   fillCache();
         double IntegrateSpectrum(double from, double to);
 
-        void   calcSmear(Args args, Rets rets);
+        void   calcSmear(FunctionArgs fargs);
 
 
         variable<double> m_rho, m_protons, m_e, m_coinc_window;

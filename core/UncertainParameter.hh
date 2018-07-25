@@ -64,11 +64,11 @@ inline Variable<double>::Variable(const std::string &name)
 {
   transformation_("value")
     .output(name)
-    .types([](Atypes, Rtypes rets) {
-        rets[0] = DataType().points().shape(1);
+    .types([](TypesFunctionArgs& fargs) {
+        fargs.rets[0] = DataType().points().shape(1);
       })
-    .func([](Variable<double> *obj, Args, Rets rets) {
-        rets[0].arr(0) = obj->m_var.value();
+    .func([](Variable<double> *obj, FunctionArgs& fargs) {
+        fargs.rets[0].arr(0) = obj->m_var.value();
       })
     .finalize();
 }
@@ -154,7 +154,7 @@ public:
 
   virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
-      if (it == this->m_covariances.end() and (&other != this)) { 
+      if (it == this->m_covariances.end() and (&other != this)) {
           return false;
       } else {
           return true;
@@ -191,7 +191,7 @@ public:
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated"); 
+          auto msg = boost::format("Parameters %1% and %2% are not covariated");
           std::cout << msg % this->name() % other.name() << std::endl;
 #endif
           return static_cast<T>(0.);

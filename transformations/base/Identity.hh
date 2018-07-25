@@ -16,7 +16,7 @@ public:
       .input("source")
       .output("target")
       .types(TypesFunctions::pass<0,0>)
-      .func(&Identity::ident)
+      .func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x; })
 #ifdef GNA_CUDA_SUPPORT
       .setEntryLocation(gpu? DataLocation::Device : DataLocation::Host)
 #endif
@@ -50,4 +50,3 @@ public:
       }
   }
 };
-

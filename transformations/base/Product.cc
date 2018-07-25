@@ -3,7 +3,9 @@
 Product::Product() {
   transformation_("product")
     .output("product")
-    .types([](Atypes args, Rtypes rets) {
+    .types([](TypesFunctionArgs& fargs) {
+        auto& args=fargs.args;
+        auto& rets=fargs.rets;
         DataType dtsingle = DataType().points().shape(1);
         DataType dt = dtsingle;
         for (size_t i = 0; i < args.size(); ++i) {
@@ -17,19 +19,22 @@ Product::Product() {
         }
         rets[0] = dt;
       })
-    .func([](Args args, Rets rets) {
+    .func([](FunctionArgs& fargs) {
+        auto& args=fargs.args;
+        auto& rettype=fargs.rets[0].type;
+        auto& ret=fargs.rets[0].x;
         size_t i;
         for (i = 0; i < args.size(); ++i) {
-          if (args[i].type == rets[0].type) {
-            rets[0].x = args[i].x;
+          if (args[i].type == rettype) {
+            ret = args[i].x;
             break;
           }
         }
         for (size_t j = 0; j < args.size(); ++j) {
           if (args[j].x.size() == 1) {
-            rets[0].x *= args[j].x(0);
+            ret *= args[j].x(0);
           } else if (j != i) {
-            rets[0].x *= args[j].x;
+            ret *= args[j].x;
           }
         }
       });

@@ -7,6 +7,6 @@ class IbdZeroOrder: public IbdInteraction,
 public:
   IbdZeroOrder();
 protected:
-  void calcEnu(Args args, Rets rets);
-  void calcXsec(Args args, Rets rets);
+  void calcEnu(FunctionArgs fargs);
+  void calcXsec(FunctionArgs fargs);
 };

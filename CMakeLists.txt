@@ -5,59 +5,11 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-enable_language(Fortran)
-
-include_directories(core/transformation/
-                    core/
-                    transformations/backgrounds/
-                    transformations/base/
-                    transformations/calculus/
-                    transformations/detector/
-                    transformations/functions/
-                    transformations/hist/
-                    transformations/integrator/
-                    transformations/interpolation/
-                    transformations/linalg/
-                    transformations/neutrino/
-                    transformations/stats/
-                    transformations/var/
-                    extra/
-                    examples/
-		    cuda/
-                   )
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 14)
-message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
-include(dev-tools)
-
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
-
-find_package(Eigen3 REQUIRED NO_MODULE)
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
-
-find_package(Boost 1.40.0 REQUIRED)
-if(Boost_FOUND)
-    message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
-else(Boost_FOUND)
-    message(FATAL_ERROR "Boost >= 1.40.0 not found")
-endif(Boost_FOUND)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-
-find_package(GSL REQUIRED)
-
-cmake_policy(SET CMP0015 NEW)
 
 if(CUDA_SUPPORT)
     find_package( CUDA REQUIRED)
@@ -94,13 +46,7 @@ endif()
 
 configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 include_directories( ${CMAKE_BINARY_DIR}/generated/ )
-
 set (SOURCES
-  core/GNAObject.cc
-  core/ParametersGroup.cc
-  core/Parametrized.cc
-  core/TransformationDescriptor.cc
-  core/UncertainParameter.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
   core/transformation/Atypes.cc
@@ -109,12 +55,24 @@ set (SOURCES
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
+  core/transformation/Ints.cc
   core/transformation/Rtypes.cc
+  core/transformation/Itypes.cc
   core/transformation/Source.cc
   core/transformation/TransformationBase.cc
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/GNAObject.cc
+  core/ParametersGroup.cc
+  core/Parametrized.cc
+  core/TransformationDescriptor.cc
+  core/UncertainParameter.cc
+  transformations/trial/TrialMultiFunc.cc
+  transformations/base/FillLike.cc
+  transformations/base/Histogram.cc
+  transformations/base/Identity.cc
+  transformations/base/Points.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -127,24 +85,34 @@ set (SOURCES
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
+  transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
+  transformations/integrator/FakeGSLFunction.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/Transpose.cc
+  transformations/neutrino/EvisToEe.cc
   transformations/neutrino/IbdFirstOrder.cc
   transformations/neutrino/IbdInteraction.cc
   transformations/neutrino/IbdZeroOrder.cc
+  transformations/neutrino/Neutrino.cc
+  transformations/neutrino/OscillationVariables.cc
   transformations/neutrino/OscProb2nu.cc
   transformations/neutrino/OscProbMatterUniform.cc
   transformations/neutrino/OscProbPMNS.cc
   transformations/neutrino/OscProbPMNSDecoh.cc
+  transformations/neutrino/PDGVariables.cc
+  transformations/neutrino/PMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
+  transformations/neutrino/Units.cc
   transformations/stats/Chi2.cc
   transformations/stats/CovarianceToyMC.cc
   transformations/stats/CovariatedPrediction.cc
@@ -157,21 +125,25 @@ set (SOURCES
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
   transformations/var/VarArray.cc
+  transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
+  examples/GaussianPeakWithBackground.cc 
   ${CUSOURCES}
   )
 
 set (HEADERS
-  config_vars.h
   Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
   Sink.hh
   Source.hh
+  Storage.hh
   Args.hh
   Rets.hh
+  Ints.hh
   Rtypes.hh
+  Itypes.hh
   Atypes.hh
   TypesFunctions.hh
   EntryHandle.hh
@@ -180,6 +152,9 @@ set (HEADERS
   InputHandle.hh
   TransformationDebug.hh
   TransformationBase.hh
+  TransformationFunction.hh
+  TransformationFunctionArgs.hh
+  FunctionDescriptor.hh
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationDescriptor.hh
@@ -191,6 +166,7 @@ set (HEADERS
   UncertainParameter.hh
   Prediction.hh
   CovariatedPrediction.hh
+  TrialMultiFunc.hh
   Product.hh
   Sum.hh
   WeightedSum.hh
@@ -246,14 +222,52 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
-  ${CUHEADERS}
   )
 
+include_directories(core/transformation/
+                    core/
+                    transformations/backgrounds/
+                    transformations/base/
+                    transformations/calculus/
+                    transformations/detector/
+                    transformations/functions/
+                    transformations/hist/
+                    transformations/integrator/
+                    transformations/interpolation/
+                    transformations/linalg/
+                    transformations/neutrino/
+                    transformations/stats/
+                    transformations/var/
+                    extra/
+                    examples/
+		    cuda/
+                   )
 
-find_package(ROOT)
-include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
-link_directories(${ROOT_LIBRARY_DIR})
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 14)
+message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+include(dev-tools)
 
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
+
+find_package(Eigen3 REQUIRED NO_MODULE)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
+
+find_package(Boost 1.40.0 REQUIRED)
+if(Boost_FOUND)
+    message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
+else(Boost_FOUND)
+    message(FATAL_ERROR "Boost >= 1.40.0 not found")
+endif(Boost_FOUND)
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+
+find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
 link_directories(${ROOT_LIBRARY_DIR})
 
@@ -261,7 +275,7 @@ ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
-target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS} )
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT)
+target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)

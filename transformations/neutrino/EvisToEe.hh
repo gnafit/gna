@@ -14,8 +14,8 @@ public:
       .input("Evis")
       .output("Ee")
       .types(TypesFunctions::passAll)
-      .func([](EvisToEe *obj, Args args, Rets rets) {
-          rets[0].x = args[0].x - obj->m_me;
+      .func([](EvisToEe *obj, FunctionArgs fargs) {
+          fargs.rets[0].x = fargs.args[0].x - obj->m_me;
         });
   }
 protected:

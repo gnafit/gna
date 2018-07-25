@@ -5,8 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "Args.hh"
-#include "Rets.hh"
+#include "TransformationFunctionArgs.hh"
 #include "Source.hh"
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
@@ -45,9 +44,9 @@ Entry::Entry(const std::string &name, const Base *parent)
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const Entry &other, const Base *parent)
-  : name(other.name), label(other.label),
+  : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), parent(parent), initializing(0), frozen(false)
+    fun(), typefuns(), initializing(0), frozen(false)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -124,12 +123,14 @@ bool Entry::check() const {
  *
  */
 void Entry::evaluate() {
-  fun(Args(this), Rets(this));
+  auto fargs = FunctionArgs(this);
+  fun(fargs);
 #ifdef GNA_CUDA_SUPPORT
   for(auto& sink : this->sinks){
     if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
   }
 #endif
+
 }
 
 /**
@@ -189,13 +190,17 @@ void Entry::dump(size_t level) const {
  * @exception std::runtime_error in case any of type functions fails.
  */
 void Entry::evaluateTypes() {
-  Atypes args(this);
-  Rtypes rets(this);
+  TypesFunctionArgs fargs(this);
+  StorageTypesFunctionArgs sargs(fargs);
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
-      typefun(args, rets);
+      typefun(fargs);
+    }
+    auto& itypefuns=functions[funcname].typefuns;
+    for (auto &typefun: itypefuns) {
+      typefun(sargs);
     }
     success = true;
   } catch (const TypeError &exc) {
@@ -209,6 +214,7 @@ void Entry::evaluateTypes() {
   if (success) {
     std::set<Entry*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
+    auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
       if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
         continue;
@@ -243,6 +249,7 @@ void Entry::evaluateTypes() {
     for (Entry *dep: deps) {
       dep->evaluateTypes();
     }
+    initInternals(sargs);
   }
 }
 
@@ -285,3 +292,31 @@ const Data<double> &Entry::data(int i) {
 #endif
   return *sink.data;
 }
+
+void Entry::switchFunction(const std::string& name){
+  auto it = functions.find(name);
+  if(it==functions.end()){
+    auto fmt = format("invalid function name %1%");
+    throw std::runtime_error((fmt%name.data()).str());
+  }
+  fun = it->second.fun;
+
+  funcname=name;
+  evaluateTypes();
+}
+
+void Entry::initInternals(StorageTypesFunctionArgs& fargs){
+  storages.clear();
+  auto& itypes=fargs.ints;
+  for (size_t i(0); i<itypes.size(); ++i) {
+    auto& int_dtype=itypes[i];
+    auto* storage = new Storage(this);
+    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), storage->name.c_str());
+#ifdef TRANSFORMATION_DEBUG
+    int_dtype.dump();
+#endif // TRANSFORMATION_DEBUG
+    storage->data.reset(new Data<double>(int_dtype));
+    storages.push_back(storage);
+  }
+}
+

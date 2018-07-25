@@ -7,10 +7,10 @@ class IbdFirstOrder: public IbdInteraction,
 public:
   IbdFirstOrder();
 protected:
-  void calc_Enu(Args args, Rets rets);
+  void calc_Enu(FunctionArgs fargs);
   double Xsec(double Eneu, double ctheta);
-  void calc_Xsec(Args args, Rets rets);
-  void calc_dEnu_wrt_Ee(Args args, Rets rets);
+  void calc_Xsec(FunctionArgs fargs);
+  void calc_dEnu_wrt_Ee(FunctionArgs fargs);
 
   dependant<double> ElectronMass2, NeutronMass2, ProtonMass2;
   dependant<double> DeltaNPE_tilded;

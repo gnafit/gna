@@ -22,11 +22,11 @@ public:
 
   void add(SingleOutput &theory, SingleOutput &data);
 
-  void calcPoissonApprox(Args args, Rets rets);
+  void calcPoissonApprox(FunctionArgs fargs);
 
-  void calcPoisson(Args args, Rets rets);
+  void calcPoisson(FunctionArgs fargs);
 
-  void checkTypes(Atypes args, Rtypes rets);
+  void checkTypes(TypesFunctionArgs fargs);
 
   virtual double value() override {
     return m_transform[0].x[0];

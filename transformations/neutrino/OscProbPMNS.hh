@@ -34,12 +34,12 @@ public:
   OscProbPMNS(Neutrino from, Neutrino to);
 
   template <int I, int J>
-  void calcComponent(Args args, Rets rets);
-  void calcComponentCP(Args args, Rets rets);
-  void calcSum(Args args, Rets rets);
-  void calcFullProb(Args args, Rets rets);
+  void calcComponent(FunctionArgs fargs);
+  void calcComponentCP(FunctionArgs fargs);
+  void calcSum(FunctionArgs fargs);
+  void calcFullProb(FunctionArgs fargs);
 #ifdef GNA_CUDA_SUPPORT
-  void calcFullProbGpu(Args args, Rets rets);
+  void calcFullProbGpu(FunctionArgs fargs);
 #endif
 
 protected:
@@ -53,7 +53,7 @@ public:
 
   OscProbAveraged(Neutrino from, Neutrino to);
 private:
-  void CalcAverage(Args args, Rets rets);
+  void CalcAverage(FunctionArgs fargs);
 };
 
 class OscProbPMNSMult: public OscProbPMNSBase,
@@ -64,8 +64,8 @@ public:
   OscProbPMNSMult(Neutrino from, Neutrino to);
 
   template <int I, int J>
-  void calcComponent(Args args, Rets rets);
-  void calcSum(Args args, Rets rets);
+  void calcComponent(FunctionArgs fargs);
+  void calcSum(FunctionArgs fargs);
 protected:
   variable<double> m_Lavg;
 

@@ -22,7 +22,9 @@ void NormalToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void NormalToyMC::calcTypes(Atypes args, Rtypes rets) {
+void NormalToyMC::calcTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%2 != 0) {
     throw args.undefined();
   }
@@ -40,7 +42,9 @@ void NormalToyMC::calcTypes(Atypes args, Rtypes rets) {
   }
 }
 
-void NormalToyMC::calcToyMC(Args args, Rets rets) {
+void NormalToyMC::calcToyMC(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].arr;
     for (int j = 0; j < out.size(); ++j) {

@@ -34,12 +34,12 @@ public:
 
   Segment resolveSegment(Atypes args, const Segment &iseg);
   void resolveCovarianceActions(Atypes args);
-  void calculateTypes(Atypes args, Rtypes rets);
-  void calculatePrediction(Args args, Rets rets);
-  void calculateCovbaseTypes(Atypes args, Rtypes rets);
-  void calculateCovbase(Args args, Rets rets);
-  void calculateCovTypes(Atypes args, Rtypes rets);
-  void calculateCov(Args args, Rets rets);
+  void calculateTypes(TypesFunctionArgs fargs);
+  void calculatePrediction(FunctionArgs fargs);
+  void calculateCovbaseTypes(TypesFunctionArgs fargs);
+  void calculateCovbase(FunctionArgs fargs);
+  void calculateCovTypes(TypesFunctionArgs fargs);
+  void calculateCov(FunctionArgs fargs);
   void addSystematicCovMatrix(SingleOutput& sys_covmat);
 
   size_t size() const;
@@ -69,7 +69,7 @@ protected:
 /**
    * @brief Stores LLT decomposition matrix and provides access to it
    * @param size -- size of a matrix to be allocated.
-*/ 
+*/
  /* TODO: Also would need change to play along with floats. */
   class LLT: public Eigen::LLT<Eigen::MatrixXd> {
   public:
