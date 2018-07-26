@@ -68,13 +68,14 @@ GpuArray<T>::GpuArray(T* inHostPtr) {
 template <typename T>
 GpuArray<T>::GpuArray(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
+	type = VecGpu;
 	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
 	syncFlag = SyncFlag::Unsynchronized;
 #ifdef CU_DEBUG
 	std::cout << "GPU Array is created by size (constructor)" << std::endl;
 #endif
 	cudaError_t err;
-	arrSize = inSize;
+	setArrSize(inSize);
 	size_t alloc_size = sizeof(T) * inSize;
 	err = cudaMalloc((void**)&devicePtr, alloc_size);
 	if (err != cudaSuccess) {
@@ -88,6 +89,33 @@ GpuArray<T>::GpuArray(size_t inSize, T* inHostPtr) {
 		dataLoc = DataLocation::InitializedOnly;
 	}
 }
+
+
+template <typename T>
+GpuArray<T>::GpuArray(size_t mat_rows, size_t mat_cols,  T* inHostPtr) {
+        hostPtr = inHostPtr;
+	type = MatGpu;
+	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
+	syncFlag = SyncFlag::Unsynchronized;
+#ifdef CU_DEBUG
+	std::cout << "GPU Array is created by size (constructor)" << std::endl;
+#endif
+	cudaError_t err;
+	setMatSize(mat_rows, mat_cols);
+	size_t alloc_size = sizeof(T) * arrSize;
+	err = cudaMalloc((void**)&devicePtr, alloc_size);
+	if (err != cudaSuccess) {
+#ifdef CU_DEBUG
+		printf("ERROR: unable to  allocate!\n");
+		std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
+#endif
+		dataLoc = DataLocation::Crashed;
+	} else {
+		deviceMemAllocated = true;
+		dataLoc = DataLocation::InitializedOnly;
+	}
+}
+
 
 template <typename T>
 DataLocation GpuArray<T>::Init(size_t inSize, T* inHostPtr) {
