@@ -23,7 +23,6 @@ public:
 	~GpuArray();
 
         DataLocation Init(size_t inSize, T* inHostPtr = nullptr); 	///< Initialization
-        inline void setSize(size_t inSize) { arrSize = inSize; }	
 	/**
 	* Copies data (H2D) from inHostArr to GPU array pointer.
 	*/
@@ -57,7 +56,7 @@ public:
 	void synchronize(); 
 	T* getArrayPtr() { return devicePtr; }
         inline void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
-	size_t getArraySize() { arrSize = rows * columns; return arrSize; }
+	size_t getArraySize() { return arrSize; }
 
         void negate();
 	GpuArray<T>& operator+=(GpuArray<T> &rhs);
@@ -81,6 +80,10 @@ public:
 	bool deviceMemAllocated{false};
 	DataLocation dataLoc;         ///< Shows where actual data is placed or whether it inited or crashed.	
 	SyncFlag syncFlag;            ///< May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
+
+private:
+	void setArrSize(size_t inSize);
+	void setMatSize(size_t mat_rows, size_t mat_cols);
 };
 
 #endif /* GNACUGPUARRAY_H */

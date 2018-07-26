@@ -383,6 +383,26 @@ void GpuArray<T>::dump() {
 	std::cout << std::endl;
 }
 
+template <typename T>
+void GpuArray<T>::setArrSize(size_t inSize) {
+	arrSize = inSize;
+	if (order == row_major) {
+		rows = inSize;
+		cols = 1;
+	}
+	else {
+		columns = inSize;
+		rows = 1;
+	}
+}
+
+template <typename T>
+void GpuArray<T>::setMatSize(size_t mat_rows, size_t mat_cols) {
+	rows = mat_rows;
+	columns = mat_cols;
+	arrSize = rows * columns;
+}
+
 template class GpuArray<double>;
 //template class GpuArray<float>;
 //template class GpuArray<int>;
