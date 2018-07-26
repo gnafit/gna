@@ -2,8 +2,8 @@
 #include <cuda_runtime.h>
 #include <iostream>
 #include <functional>
-#include "GNAcuGpuArray.hh"
-#include "GNAcuDataLocation.hh"
+#include "GpuArray.hh"
+#include "DataLocation.hh"
 
 #define GridSize(size) (size/CU_BLOCK_SIZE + 1)
 
@@ -55,7 +55,7 @@ __global__ void vecMinusUnar(T* arrPtr, size_t arrSize) {
 }
 
 template <typename T>
-GNAcuGpuArray<T>::GNAcuGpuArray(T* inHostPtr) {
+GpuArray<T>::GpuArray(T* inHostPtr) {
 #ifdef CU_DEBUG
 	std::cout << "GPUArray is created but not inited " << std::endl;
 #endif
@@ -66,7 +66,7 @@ GNAcuGpuArray<T>::GNAcuGpuArray(T* inHostPtr) {
 }
 
 template <typename T>
-GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize, T* inHostPtr) {
+GpuArray<T>::GpuArray(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
 	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
 	syncFlag = SyncFlag::Unsynchronized;
@@ -90,7 +90,7 @@ GNAcuGpuArray<T>::GNAcuGpuArray(size_t inSize, T* inHostPtr) {
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::Init(size_t inSize, T* inHostPtr) {
+DataLocation GpuArray<T>::Init(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
 	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
 	syncFlag = SyncFlag::Unsynchronized;
@@ -115,12 +115,12 @@ DataLocation GNAcuGpuArray<T>::Init(size_t inSize, T* inHostPtr) {
 }
 
 template <typename T>
-GNAcuGpuArray<T>::~GNAcuGpuArray() {
+GpuArray<T>::~GpuArray() {
 	cudaFree(devicePtr);
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
+DataLocation GpuArray<T>::setByHostArray(T* inHostArr) {
 	cudaError_t err;
 	err = cudaMemcpy(devicePtr, inHostArr, sizeof(T) * arrSize, cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
@@ -136,7 +136,7 @@ DataLocation GNAcuGpuArray<T>::setByHostArray(T* inHostArr) {
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
+DataLocation GpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 	cudaError_t err;
 	err = cudaMemcpy(devicePtr, inDeviceArr, sizeof(T) * arrSize, cudaMemcpyDeviceToDevice);
 	if (err != cudaSuccess) {
@@ -152,14 +152,14 @@ DataLocation GNAcuGpuArray<T>::setByDeviceArray(T* inDeviceArr) {
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::setByValue(T value) {
+DataLocation GpuArray<T>::setByValue(T value) {
 	setByValueGPU<T><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, value, arrSize);
 	dataLoc = DataLocation::Device;
         return dataLoc;
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::getContentToCPU(T* dst) {
+DataLocation GpuArray<T>::getContentToCPU(T* dst) {
 	cudaError_t err;
 	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize, cudaMemcpyDeviceToHost);
 	if (err != cudaSuccess) {
@@ -175,7 +175,7 @@ DataLocation GNAcuGpuArray<T>::getContentToCPU(T* dst) {
 }
 
 template <typename T>
-DataLocation GNAcuGpuArray<T>::getContent(T* dst) {
+DataLocation GpuArray<T>::getContent(T* dst) {
 	cudaError_t err;
 	err = cudaMemcpy(dst, devicePtr, sizeof(T) * arrSize,
 			 cudaMemcpyDeviceToDevice);
@@ -192,7 +192,7 @@ DataLocation GNAcuGpuArray<T>::getContent(T* dst) {
 }
 
 template <typename T> 
-void GNAcuGpuArray<T>::sync_H2D() {
+void GpuArray<T>::sync_H2D() {
 #ifdef CU_DEBUG_3
     	printf("Sync to H2D\n");
 #endif
@@ -225,7 +225,7 @@ void GNAcuGpuArray<T>::sync_H2D() {
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::sync_D2H() {
+void GpuArray<T>::sync_D2H() {
 #ifdef CU_DEBUG_3
 	printf("Sync D2H\n");
 #endif
@@ -247,7 +247,7 @@ void GNAcuGpuArray<T>::sync_D2H() {
 
 
 template <typename T>
-void GNAcuGpuArray<T>::sync(DataLocation loc) {
+void GpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
@@ -271,7 +271,7 @@ Copies the actual data to the loc location
 
 
 template <typename T>
-void GNAcuGpuArray<T>::synchronize() {
+void GpuArray<T>::synchronize() {
 /**
 Makes data the same on GPU and CPU
 */
@@ -297,7 +297,7 @@ Makes data the same on GPU and CPU
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+=(GNAcuGpuArray<F> &rhs) {
+GpuArray<F>& GpuArray<F>::operator+=(GpuArray<F> &rhs) {
 	int smallest_size = arrSize;
 	if (arrSize != rhs.getArraySize()) {
 #ifdef CU_DEBUG
@@ -314,7 +314,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator+=(GNAcuGpuArray<F> &rhs) {
 }
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
+GpuArray<F>& GpuArray<F>::operator-=(GpuArray<F> &rhs) {
 	int smallest_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
                 if(arrSize > rhs.getArraySize()) { smallest_size = rhs.getArraySize(); }
@@ -333,14 +333,14 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator-=(GNAcuGpuArray<F> &rhs) {
 
 
 template <typename F>
-void GNAcuGpuArray<F>::negate() {
+void GpuArray<F>::negate() {
 	vecMinusUnar<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, arrSize);
         dataLoc = DataLocation::Device;
 }
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
+GpuArray<F>& GpuArray<F>::operator*=(GpuArray<F> &rhs) {
         size_t res_size = arrSize;
         if (arrSize != rhs.getArraySize()) {
 		if(arrSize > rhs.getArraySize()) {res_size = rhs.getArraySize(); }
@@ -358,7 +358,7 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(GNAcuGpuArray<F> &rhs) {
 
 
 template <typename F>
-GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
+GpuArray<F>& GpuArray<F>::operator*=(F rhs) {
         vecMult<F><<<GridSize(arrSize), CU_BLOCK_SIZE>>>(devicePtr, devicePtr, rhs,
                                    arrSize);
         dataLoc = DataLocation::Device;
@@ -367,14 +367,14 @@ GNAcuGpuArray<F>& GNAcuGpuArray<F>::operator*=(F rhs) {
 
 
 template <typename T>
-GNAcuGpuArray<T> GNAcuGpuArray<T>::operator=(GNAcuGpuArray<T> rhs) {
-	GNAcuGpuArray<T> ret(rhs.arrSize);
+GpuArray<T> GpuArray<T>::operator=(GpuArray<T> rhs) {
+	GpuArray<T> ret(rhs.arrSize);
 	ret.setByDeviceArray(rhs.getArrayPtr());
         return ret;
 }
 
 template <typename T>
-void GNAcuGpuArray<T>::dump() {
+void GpuArray<T>::dump() {
 	T* tmp = new T[arrSize];
 	getContentToCPU(tmp);
 	for (int i = 0; i < arrSize; i++) {
@@ -383,7 +383,7 @@ void GNAcuGpuArray<T>::dump() {
 	std::cout << std::endl;
 }
 
-template class GNAcuGpuArray<double>;
-//template class GNAcuGpuArray<float>;
-//template class GNAcuGpuArray<int>;
-//template class GNAcuGpuArray<bool>;
+template class GpuArray<double>;
+//template class GpuArray<float>;
+//template class GpuArray<int>;
+//template class GpuArray<bool>;

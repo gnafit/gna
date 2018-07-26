@@ -1,10 +1,9 @@
 #ifndef GNACUGPUARRAY_H
 #define GNACUGPUARRAY_H
 
-#include "GNAcuDataLocation.hh"
+#include "DataLocation.hh"
 #include "cuda_config_vars.h"
 #include <iostream>
-//#include "../../core/Data.hh"
 
 
 
@@ -17,11 +16,11 @@
  * @date 2018
  */
 template <typename T>
-class GNAcuGpuArray {
+class GpuArray {
 public: 
-	GNAcuGpuArray(T* inHostPtr = nullptr);				///< constructor without initialization, sets SyncFlag to Unsynchronized 
-        GNAcuGpuArray(size_t inSize, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
-	~GNAcuGpuArray();
+	GpuArray(T* inHostPtr = nullptr);				///< constructor without initialization, sets SyncFlag to Unsynchronized 
+        GpuArray(size_t inSize, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
+	~GpuArray();
 
         DataLocation Init(size_t inSize, T* inHostPtr = nullptr); 	///< Initialization
         inline void setSize(size_t inSize) { arrSize = inSize; }	
@@ -61,11 +60,11 @@ public:
 	size_t getArraySize() { return arrSize; }
 
         void negate();
-	GNAcuGpuArray<T>& operator+=(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator-=(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator*=(GNAcuGpuArray<T> &rhs);
-        GNAcuGpuArray<T>& operator*=(T rhs);
-        GNAcuGpuArray<T> operator=(GNAcuGpuArray<T> rhs);
+	GpuArray<T>& operator+=(GpuArray<T> &rhs);
+        GpuArray<T>& operator-=(GpuArray<T> &rhs);
+        GpuArray<T>& operator*=(GpuArray<T> &rhs);
+        GpuArray<T>& operator*=(T rhs);
+        GpuArray<T> operator=(GpuArray<T> rhs);
 	void dump(); 						///< Shows data from GPU
 
 	inline void setLocation( DataLocation loc ) { dataLoc = loc; syncFlag =  SyncFlag::Unsynchronized; }
