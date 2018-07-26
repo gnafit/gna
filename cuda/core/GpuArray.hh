@@ -4,7 +4,7 @@
 #include "DataLocation.hh"
 #include "cuda_config_vars.h"
 #include <iostream>
-
+#include "GpuArrayTypes.hh"
 
 
 /**
@@ -57,7 +57,7 @@ public:
 	void synchronize(); 
 	T* getArrayPtr() { return devicePtr; }
         inline void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
-	size_t getArraySize() { return arrSize; }
+	size_t getArraySize() { arrSize = rows * columns; return arrSize; }
 
         void negate();
 	GpuArray<T>& operator+=(GpuArray<T> &rhs);
@@ -74,6 +74,10 @@ public:
 	T* devicePtr;
 	T* hostPtr;
         size_t arrSize;
+	size_t rows;
+	size_t columns;
+	StorageOrder order;
+	ArrayType type;
 	bool deviceMemAllocated{false};
 	DataLocation dataLoc;         ///< Shows where actual data is placed or whether it inited or crashed.	
 	SyncFlag syncFlag;            ///< May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
