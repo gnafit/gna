@@ -87,6 +87,7 @@ private:
   /**
    * @brief Add new MemFunction.
    * @param idx -- Entry index.
+   * @param name -- the name of a function.
    * @param func -- the function.
    */
   void addMemFunction(size_t idx, const std::string& name, MemFunction func) {
@@ -104,7 +105,7 @@ private:
   }
 
   /**
-   * @brief Add new MemTypesFunction.
+   * @brief Add new MemStorageTypesFunction that will initialize the storage for a particular named Function.
    * @param idx -- Entry index.
    * @param fname -- Function name.
    * @param fidx -- StorageTypesFunction index (Each Entry may have several StorageTypeFunction objects).

@@ -30,14 +30,19 @@ namespace TransformationTypes
    *   - has zero or more inputs: Source instances.
    *   - has one or more outputs: Sink instances.
    *   - has a function Entry::fun that defines the transformation.
-   *   - may have several type functions (Entry::typefuns), that check the input types
-   *     and derive the output types.
+   *   - may have several type functions (Entry::typefuns), that check the
+   *     input types, derive the output types and the types of internal data to be allocated.
    *
    * Entry has a taintflag (Entry::taintflag), then defines whether the Entry's Sink instances
    * contain up to date output data.
    *
    * Entry will call the transformation function Entry::fun before returning
    * Data in case Entry is tainted or any of the Inputs is tainted.
+   *
+   * Entry::fun may have several different implementations that can be used for example to define
+   * the GPU version of the transformation. The implementations are named and
+   * stored in the Entry::functions container. The active function Entry::fun may be switched to any
+   * function in Entry::functions via Entry::switchFunction() method.
    *
    * @author Dmitry Taychenachev
    * @date 2015
@@ -76,19 +81,19 @@ namespace TransformationTypes
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.
     TypesFunctionsContainer typefuns;                    ///< Vector of TypeFunction objects.
-    FunctionDescriptorsContainer functions;              ///< Vector of TypeFunction objects.
-    std::string funcname;
+    FunctionDescriptorsContainer functions;              ///< Map with FunctionDescriptor instances, containing several Function implementations.
+    std::string funcname;                                ///< Active Function name.
 
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
     bool frozen;                                         ///< If Entry is frozen, it is not updated even if tainted.
 
-    void switchFunction(const std::string& name);
+    void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
     template <typename InsT, typename OutsT>
-    void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the clones for inputs and outputs.
-    void initInternals(StorageTypesFunctionArgs& fargs);
+    void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
+    void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
 
   }; /* struct Entry */
 

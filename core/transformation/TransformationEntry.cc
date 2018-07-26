@@ -167,15 +167,29 @@ void Entry::dump(size_t level) const {
 }
 
 /**
- * @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+ * @brief Evaluate output types based on input types, allocate memory.
  *
- * evaluateTypes() calls each of the TypeFunction functions which determine
- * the consistency of the inputs and derive the types (DataType) of the outputs.
+ * evaluateTypes() calls:
+ *   - each of the TypeFunction functions;
+ *   - each of the current functions StorageTypesFunction functions.
+ *
+ * TypeFunction may do the following:
+ *   - determine the consistency of the input data types;
+ *   - derive the output data types;
+ *   - derive the necessary Storage data types, that are common for all the Entry::functions.
+ *
+ * A list of StorageTypesFunction functions is associated with each function
+ * from the Entry::functions. Different transformation implementation may require different
+ * internal storage to be allocated. StorateTypesFunctions may derive the necessary internal
+ * storage to be allocated.
  *
  * In case any output DataType has been changed or created:
  *   - the corresponding Data instance is created. Memory allocation happens here.
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
+ *
+ * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
+ * in any case. Should be fixed.
  *
  * @exception std::runtime_error in case any of type functions fails.
  */
@@ -264,6 +278,15 @@ const Data<double> &Entry::data(int i) {
   return *sink.data;
 }
 
+/**
+ * @brief Use Function `name` as Entry::fun.
+ *
+ * The method replaces the transformation function Entry::fun with another function from the
+ * Entry::functions map. The function triggers Entry::evaluateTypes() function.
+ *
+ * @param name -- function name.
+ * @exception std::runtime_error in case the function `name` does not exist.
+ */
 void Entry::switchFunction(const std::string& name){
   auto it = functions.find(name);
   if(it==functions.end()){
@@ -276,6 +299,13 @@ void Entry::switchFunction(const std::string& name){
   evaluateTypes();
 }
 
+/**
+ * @brief Initialize the Data for the internal storage.
+ *
+ * Initializes the Data instance with proper shape for each DataType in Itypes.
+ *
+ * @param fargs -- Storage TypesFunction arguments.
+ */
 void Entry::initInternals(StorageTypesFunctionArgs& fargs){
   storages.clear();
   auto& itypes=fargs.ints;

@@ -10,7 +10,7 @@
 namespace TransformationTypes
 {
   /**
-   * @brief
+   * @brief Acess the transformation Storage data types.
    *
    * @author Maxim Gonchar
    * @date 17.07.2018
