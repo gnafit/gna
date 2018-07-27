@@ -86,5 +86,4 @@ private:
 	void setArrSize(size_t inSize);
 	void setMatSize(size_t mat_rows, size_t mat_cols);
 };
-
 #endif /* GNACUGPUARRAY_H */
