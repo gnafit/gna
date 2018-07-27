@@ -1,6 +1,8 @@
 #include "GpuBasics.hh"
 #include "cuda.h"
 
+#include <iostream>
+
 void copyH2D(double** dst, double** src, size_t N) {
 	cudaError_t err;
 	err =
