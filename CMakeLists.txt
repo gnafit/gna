@@ -31,7 +31,7 @@ if(CUDA_SUPPORT)
          CuChi2.hh
          GNAcuOscProbFull.h
 #	 GNAcuRootMath.h
-         GNAcuGpuArray.hh
+         GpuArray.hh
          GNAcuOscProbMem.hh
         )
 else()

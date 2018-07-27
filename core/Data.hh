@@ -15,8 +15,8 @@
 #include "config_vars.h"
 
 #ifdef GNA_CUDA_SUPPORT 
-#include "GNAcuGpuArray.hh"
-#include "GNAcuDataLocation.hh"
+#include "GpuArray.hh"
+#include "DataLocation.hh"
 #include "cuda_config_vars.h"
 #endif // GNA_CUDA_SUPPORT
 
@@ -625,7 +625,7 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
 #ifdef GNA_CUDA_SUPPORT
-  std::unique_ptr<GNAcuGpuArray<T>> gpuArr{nullptr};
+  std::unique_ptr<GpuArray<T>> gpuArr{nullptr};
 #endif
 
 };
@@ -638,7 +638,7 @@ DataLocation Data<T>::require_gpu() {
 Allocate GPU memory in case of GPU array is not inited yet
 */
   if (gpuArr == nullptr) {
-    gpuArr.reset(new GNAcuGpuArray<T>());
+    gpuArr.reset(new GpuArray<T>());
   }
   if (gpuArr->deviceMemAllocated) {
 #ifdef CU_DEBUG_2

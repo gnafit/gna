@@ -319,4 +319,3 @@ void Entry::initInternals(StorageTypesFunctionArgs& fargs){
     storages.push_back(storage);
   }
 }
-
