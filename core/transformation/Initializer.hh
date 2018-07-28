@@ -120,7 +120,7 @@ namespace TransformationTypes {
         return;
       }
       if (m_entry->initializing == 0) {
-        add();
+        this->add();
       }
     }
     /**
@@ -198,7 +198,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> func(Function afunc) {
-      func("main", afunc);
+      this->func("main", afunc);
       return *this;
     }
 
@@ -256,7 +256,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> func(MemFunction mfunc) {
-      func("main", mfunc);
+      this->func("main", mfunc);
       return *this;
     }
 
@@ -272,10 +272,8 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> func(const std::string& name, MemFunction mfunc) {
-      using namespace std::placeholders;
       m_mfuncs[name]=mfunc;
-      auto afunc = std::bind(mfunc, m_obj->obj(), _1);
-      func(name, afunc);
+      this->func(name, m_obj->template bind<>(mfunc));
       return *this;
     }
 
@@ -299,9 +297,8 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> types(MemTypesFunction func) {
-      using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
-      m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1));
+      m_entry->typefuns.push_back(m_obj->template bind<>(func));
       return *this;
     }
 
@@ -311,7 +308,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> storage(StorageTypesFunction func) {
-      storage("main", func);
+      this->storage("main", func);
       return *this;
     }
 
@@ -321,7 +318,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> storage(MemStorageTypesFunction func) {
-      storage("main", func);
+      this->storage("main", func);
       return *this;
     }
 
@@ -346,10 +343,9 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> storage(const std::string& name, MemStorageTypesFunction func) {
-      using namespace std::placeholders;
       auto& fd = m_entry->functions.at(name);
       m_mstfuncs[name].emplace_back(fd.typefuns.size(), func);
-      fd.typefuns.push_back(std::bind(func, m_obj->obj(), _1));
+      fd.typefuns.push_back(m_obj->template bind<>(func));
       return *this;
     }
 
@@ -375,8 +371,8 @@ namespace TransformationTypes {
      */
     template <typename FuncA, typename FuncB>
     Initializer<T> types(FuncA func1, FuncB func2) {
-      types(func1);
-      types(func2);
+      this->types(func1);
+      this->types(func2);
       return *this;
     }
 
@@ -392,9 +388,9 @@ namespace TransformationTypes {
      */
     template <typename FuncA, typename FuncB, typename FuncC>
     Initializer<T> types(FuncA func1, FuncB func2, FuncC func3) {
-      types(func1);
-      types(func2);
-      types(func3);
+      this->types(func1);
+      this->types(func2);
+      this->types(func3);
       return *this;
     }
 
@@ -431,8 +427,8 @@ namespace TransformationTypes {
      */
     template <typename Changeable, typename... Rest>
     Initializer<T> depends(Changeable v, Rest... rest) {
-      depends(v);
-      return depends(rest...);
+      this->depends(v);
+      return this->depends(rest...);
     }
 
     /**
