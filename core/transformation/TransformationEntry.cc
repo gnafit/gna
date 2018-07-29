@@ -220,20 +220,22 @@ void Entry::evaluateTypes() {
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
-      if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
+      auto& ret  = rets[i];
+      auto& sink = sinks[i];
+      if (!ret.buffer && sink.data && sink.data->type==ret) {
         continue;
       }
-      if (rets[i].defined()) {
-        sinks[i].data.reset(new Data<double>(rets[i]));
+      if (ret.defined()) {
+        sink.data.reset(new Data<double>(ret));
       }
       else{
-        sinks[i].data.reset();
+        sink.data.reset();
       }
-      TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
+      TR_DPRINTF("types[%s, %s]: ", name.c_str(), sink.name.c_str());
 #ifdef TRANSFORMATION_DEBUG
-      sinks[i].data->type.dump();
+      sink.data->type.dump();
 #endif // TRANSFORMATION_DEBUG
-      for (Source *depsrc: sinks[i].sources) {
+      for (Source *depsrc: sink.sources) {
         deps.insert(depsrc->entry);
       }
     }
@@ -307,17 +309,41 @@ void Entry::switchFunction(const std::string& name){
  * @param fargs -- Storage TypesFunction arguments.
  */
 void Entry::initInternals(StorageTypesFunctionArgs& fargs){
-  storages.clear();
   auto& itypes=fargs.ints;
+
+  // Truncate storages in case less storages is required
+  if(storages.size()>itypes.size()){
+    storages.resize(itypes.size());
+  }
   for (size_t i(0); i<itypes.size(); ++i) {
     auto& int_dtype=itypes[i];
-    auto* storage = new Storage(this);
-    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), storage->name.c_str());
+
+    // in case the Storage is allocated for current index
+    // check if new allocation is unnecessary
+    if(i<storages.size()){
+      auto& storage = storages[i];
+      if (!int_dtype.buffer && storage.data && storage.data->type==int_dtype) {
+        continue;
+      }
+    }
+
+    // create new storage and allocate memory (if needed)
+    auto* newstorage = new Storage(this);
+    newstorage->data.reset(new Data<double>(int_dtype));
+
+    // debug
+    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), newstorage->name.c_str());
 #ifdef TRANSFORMATION_DEBUG
     int_dtype.dump();
 #endif // TRANSFORMATION_DEBUG
-    storage->data.reset(new Data<double>(int_dtype));
-    storages.push_back(storage);
+
+    // replace existing Storage or extend the storages
+    if(i<storages.size()){
+      storages.replace(i, newstorage);
+    }
+    else{
+      storages.push_back(newstorage);
+    }
   }
 }
 

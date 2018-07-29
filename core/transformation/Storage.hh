@@ -20,8 +20,9 @@ namespace TransformationTypes
     /**
      * @brief Constructor.
      * @param entry -- Entry pointer Storage belongs to.
+     * @exception std::runtime_error in case entry==nullptr
      */
-    Storage(Entry *entry) : entry(entry) { }
+    Storage(Entry *entry=nullptr) : entry(entry) { if(!entry) throw std::runtime_error("Storage initialized without entry"); }
     /**
      * @brief Clone constructor.
      * @param entry -- Entry pointer Storage belongs to.
