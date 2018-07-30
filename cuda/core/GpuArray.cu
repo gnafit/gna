@@ -5,6 +5,8 @@
 #include "GpuArray.hh"
 #include "DataLocation.hh"
 
+#include "GpuArrayTypes.hh" 
+
 #define GridSize(size) (size/CU_BLOCK_SIZE + 1)
 
 

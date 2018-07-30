@@ -8,4 +8,4 @@ enum class StorageOrder {
 enum class ArrayType {
 	VecGpu = 0,
 	MatGpu
-}
+};

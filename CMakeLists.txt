@@ -5,10 +5,8 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
+configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 
 if(CUDA_SUPPORT)
@@ -25,14 +23,18 @@ if(CUDA_SUPPORT)
         link_directories(cuda/)
     ENDIF()
     set (CUSOURCES
-         cuda/core/CuChi2.cc
+#         cuda/core/CuChi2.cc
+#	 cuda/core/GpuArgs.cc
         )
     set (CUHEADERS
-         CuChi2.hh
-         GNAcuOscProbFull.h
+	 GpuArrayTypes.hh
+	 GpuBasics.hh
+#	 GpuArgs.hh
+#         CuChi2.hh
+#         GNAcuOscProbFull.h
 #	 GNAcuRootMath.h
          GpuArray.hh
-         GNAcuOscProbMem.hh
+#         GNAcuOscProbMem.hh
         )
 else()
     set(CUDA_SUPPORT 0)
@@ -44,8 +46,7 @@ if (NOT CUDA_DEBUG_INFO )
     set(CUDA_DEBUG_INFO 0)
 endif()
 
-configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
-include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+
 set (SOURCES
   core/transformation/Accessor.cc
   core/transformation/Args.cc
@@ -63,6 +64,7 @@ set (SOURCES
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/transformation/GpuArgs.cc
   core/GNAObject.cc
   core/ParametersGroup.cc
   core/Parametrized.cc
@@ -127,7 +129,7 @@ set (SOURCES
   transformations/var/VarArray.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
-  examples/GaussianPeakWithBackground.cc 
+  examples/GaussianPeakWithBackground.cc
   ${CUSOURCES}
   )
 
@@ -222,10 +224,13 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
+  GpuArgs.hh 
+  ${CUHEADERS}
   )
 
 include_directories(core/transformation/
                     core/
+                    transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
                     transformations/calculus/
@@ -242,6 +247,11 @@ include_directories(core/transformation/
                     examples/
 		    cuda/
                    )
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
