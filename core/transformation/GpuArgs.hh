@@ -13,7 +13,7 @@ namespace TransformationTypes {
 
 	struct GpuArgs {
 		GpuArgs(const Args &cpu_args) : m_cpu_args(cpu_args) {	// TODO make ptr to array of ptrs
-			size_t tmp_size = size();
+/*			size_t tmp_size = size();
 			double** tmp = (double**)malloc( tmp_size *sizeof(double*) );
 			size_t a_size = size();
 			for (size_t i = 0; i < a_size; i++) {
@@ -21,7 +21,7 @@ namespace TransformationTypes {
 			}
 			copyH2D(m_gpu_args, tmp, tmp_size);
 			fill_size_vec();
-		}
+*/		}
 		const Data<double> &operator[](int i) const { return m_cpu_args[i]; } //TODO get corresponding element in m_cpu_args
 		size_t size() const { return m_cpu_args.size(); }
 	private:
