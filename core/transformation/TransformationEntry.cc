@@ -124,13 +124,7 @@ bool Entry::check() const {
  */
 void Entry::evaluate() {
   auto fargs = FunctionArgs(this);
-  fun(fargs);
-#ifdef GNA_CUDA_SUPPORT
-  for(auto& sink : this->sinks){
-    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
-  }
-#endif
-
+  return fun(fargs);
 }
 
 /**
@@ -175,10 +169,21 @@ void Entry::dump(size_t level) const {
 }
 
 /**
- * @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+ * @brief Evaluate output types based on input types, allocate memory.
  *
- * evaluateTypes() calls each of the TypeFunction functions which determine
- * the consistency of the inputs and derive the types (DataType) of the outputs.
+ * evaluateTypes() calls:
+ *   - each of the TypeFunction functions;
+ *   - each of the current functions StorageTypesFunction functions.
+ *
+ * TypeFunction may do the following:
+ *   - determine the consistency of the input data types;
+ *   - derive the output data types;
+ *   - derive the necessary Storage data types, that are common for all the Entry::functions.
+ *
+ * A list of StorageTypesFunction functions is associated with each function
+ * from the Entry::functions. Different transformation implementation may require different
+ * internal storage to be allocated. StorateTypesFunctions may derive the necessary internal
+ * storage to be allocated.
  *
  * In case any output DataType has been changed or created:
  *   - the corresponding Data instance is created. Memory allocation happens here.
@@ -186,6 +191,9 @@ void Entry::dump(size_t level) const {
  *   also executed.
  *
  * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
+ *
+ * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
+ * in any case. Should be fixed.
  *
  * @exception std::runtime_error in case any of type functions fails.
  */
@@ -216,20 +224,22 @@ void Entry::evaluateTypes() {
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
-      if (!rets[i].buffer && sinks[i].data && sinks[i].data->type == rets[i]) {
+      auto& ret  = rets[i];
+      auto& sink = sinks[i];
+      if (!ret.buffer && sink.data && sink.data->type==ret) {
         continue;
       }
-      if (rets[i].defined()) {
-        sinks[i].data.reset(new Data<double>(rets[i]));
+      if (ret.defined()) {
+        sink.data.reset(new Data<double>(ret));
       }
       else{
-        sinks[i].data.reset();
+        sink.data.reset();
       }
-      TR_DPRINTF("types[%s, %s]: ", name.c_str(), sinks[i].name.c_str());
+      TR_DPRINTF("types[%s, %s]: ", name.c_str(), sink.name.c_str());
 #ifdef TRANSFORMATION_DEBUG
-      sinks[i].data->type.dump();
+      sink.data->type.dump();
 #endif // TRANSFORMATION_DEBUG
-      for (Source *depsrc: sinks[i].sources) {
+      for (Source *depsrc: sink.sources) {
         deps.insert(depsrc->entry);
       }
     }
@@ -293,6 +303,15 @@ const Data<double> &Entry::data(int i) {
   return *sink.data;
 }
 
+/**
+ * @brief Use Function `name` as Entry::fun.
+ *
+ * The method replaces the transformation function Entry::fun with another function from the
+ * Entry::functions map. The function triggers Entry::evaluateTypes() function.
+ *
+ * @param name -- function name.
+ * @exception std::runtime_error in case the function `name` does not exist.
+ */
 void Entry::switchFunction(const std::string& name){
   auto it = functions.find(name);
   if(it==functions.end()){
@@ -305,17 +324,49 @@ void Entry::switchFunction(const std::string& name){
   evaluateTypes();
 }
 
+/**
+ * @brief Initialize the Data for the internal storage.
+ *
+ * Initializes the Data instance with proper shape for each DataType in Itypes.
+ *
+ * @param fargs -- Storage TypesFunction arguments.
+ */
 void Entry::initInternals(StorageTypesFunctionArgs& fargs){
   storages.clear();
   auto& itypes=fargs.ints;
+
+  // Truncate storages in case less storages is required
+  if(storages.size()>itypes.size()){
+    storages.resize(itypes.size());
+  }
   for (size_t i(0); i<itypes.size(); ++i) {
     auto& int_dtype=itypes[i];
-    auto* storage = new Storage(this);
-    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), storage->name.c_str());
+
+    // in case the Storage is allocated for current index
+    // check if new allocation is unnecessary
+    if(i<storages.size()){
+      auto& storage = storages[i];
+      if (!int_dtype.buffer && storage.data && storage.data->type==int_dtype) {
+        continue;
+      }
+    }
+
+    // create new storage and allocate memory (if needed)
+    auto* newstorage = new Storage(this);
+    newstorage->data.reset(new Data<double>(int_dtype));
+
+    // debug
+    TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), newstorage->name.c_str());
 #ifdef TRANSFORMATION_DEBUG
     int_dtype.dump();
 #endif // TRANSFORMATION_DEBUG
-    storage->data.reset(new Data<double>(int_dtype));
-    storages.push_back(storage);
+
+    // replace existing Storage or extend the storages
+    if(i<storages.size()){
+      storages.replace(i, newstorage);
+    }
+    else{
+      storages.push_back(newstorage);
+    }
   }
 }

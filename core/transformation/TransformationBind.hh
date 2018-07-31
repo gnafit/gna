@@ -2,6 +2,7 @@
 
 #include <list>
 #include <tuple>
+#include <functional>
 
 #include "TransformationBase.hh"
 #include "Initializer.hh"
@@ -87,6 +88,7 @@ private:
   /**
    * @brief Add new MemFunction.
    * @param idx -- Entry index.
+   * @param name -- the name of a function.
    * @param func -- the function.
    */
   void addMemFunction(size_t idx, const std::string& name, MemFunction func) {
@@ -104,7 +106,7 @@ private:
   }
 
   /**
-   * @brief Add new MemTypesFunction.
+   * @brief Add new MemStorageTypesFunction that will initialize the storage for a particular named Function.
    * @param idx -- Entry index.
    * @param fname -- Function name.
    * @param fidx -- StorageTypesFunction index (Each Entry may have several StorageTypeFunction objects).
@@ -115,36 +117,48 @@ private:
   }
 
   /**
+   * @brief Bind MemFunction/MemTypesFunction/MemStorageTypesFunction to a particular class instance
+   * @param function -- MemFunction, MemTypesFunction or MemStorageTypesFunction
+   * @return Function, TypesFunction or StorageTypesFunction bound to this, respectively
+   */
+  template<class FunctionArgsType>
+  std::function<void(FunctionArgsType&)> bind(std::function<void(Derived*, FunctionArgsType&)> func){
+    auto* ptr=this->obj();
+    return [func,ptr](FunctionArgsType& fargs){
+      func(ptr, fargs);
+    };
+  }
+
+  /**
    * @brief Bind each of the MemFunction and MemTypesFunction objects to `this` of the transformation.
    * The method replaces the relevant Function and TypesFunction of the Entry by the binded MemFunction and MemTypesFunction.
    *
    * @todo Should be tested.
    */
   void rebindMemFunctions() {
-    using namespace std::placeholders;
     for (const auto &f: m_memFuncs) {
       auto  idx   = std::get<0>(f);
       auto& name  = std::get<1>(f);
-      auto  mfunc = std::get<2>(f);
+      auto& mfunc = std::get<2>(f);
       auto& entry = m_entries[idx];
-      auto  func  = std::bind(mfunc, obj(), _1);
+      auto& func  = this->template bind<>(mfunc);
       entry.functions.at(name).fun = func;
       if(entry.funcname==name) {
         entry.fun = func;
       }
     }
     for (const auto &f: m_memTypesFuncs) {
-      auto idx = std::get<0>(f);
-      auto fidx = std::get<1>(f);
-      auto func = std::get<2>(f);
-      m_entries[idx].typefuns[fidx] = std::bind(func, obj(), _1);
+      auto  idx = std::get<0>(f);
+      auto  fidx = std::get<1>(f);
+      auto& func = std::get<2>(f);
+      m_entries[idx].typefuns[fidx] = this->template bind<>(func);
     }
     for (const auto &f: m_memStorageFuncs) {
       auto  idx  = std::get<0>(f);
       auto& name = std::get<1>(f);
       auto  fidx = std::get<2>(f);
-      auto  func = std::get<3>(f);
-      m_entries[idx].functions[name].typefuns[fidx] = std::bind(func, obj(), _1);
+      auto& func = std::get<3>(f);
+      m_entries[idx].functions[name].typefuns[fidx] = this->template bind<>(func);
     }
   }
 }; /* class TransformationBind */

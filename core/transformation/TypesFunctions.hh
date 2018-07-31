@@ -56,8 +56,8 @@ struct TypesFunctions
  * @tparam Arg -- index of Arg to read the type.
  * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case of invalid index is passed for args.
  * @exception SinkTypeError in case of invalid index is passed rets.
@@ -96,8 +96,8 @@ inline void TypesFunctions::toMatrix(TransformationTypes::TypesFunctionArgs& far
  *
  * Raises an exception otherwise.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input types are not the same.
  */
@@ -115,8 +115,8 @@ void TypesFunctions::ifSame2(TransformationTypes::TypesFunctionArgs& fargs) {
  *
  * Raises an exception otherwise.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input shapes are not the same.
  */
@@ -135,8 +135,8 @@ void TypesFunctions::ifSameShape2(TransformationTypes::TypesFunctionArgs& fargs)
  *
  * Raises an exception otherwise.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input shapes are not the same.
  */
@@ -159,8 +159,8 @@ void TypesFunctions::ifBinsEdges(TransformationTypes::TypesFunctionArgs& fargs) 
  * @tparam Arg -- index of Arg to read the type.
  * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case of invalid index is passed for args.
  * @exception SinkTypeError in case of invalid index is passed rets.
@@ -189,8 +189,8 @@ inline void TypesFunctions::binsToEdges(TransformationTypes::TypesFunctionArgs& 
  * @tparam Arg -- index of Arg to read the type.
  * @tparam Ret -- index of Ret to write the type (by default Ret=Arg)
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case of invalid index is passed for args.
  * @exception SinkTypeError in case of invalid index is passed rets.
@@ -220,8 +220,8 @@ inline void TypesFunctions::edgesToBins(TransformationTypes::TypesFunctionArgs& 
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not a histogram.
  */
@@ -241,8 +241,8 @@ inline void TypesFunctions::ifHist(TransformationTypes::TypesFunctionArgs& fargs
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not an array.
  */
@@ -262,8 +262,8 @@ inline void TypesFunctions::ifPoints(TransformationTypes::TypesFunctionArgs& far
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not N-dimensional.
  */
@@ -284,8 +284,8 @@ inline void TypesFunctions::ifNd(TransformationTypes::TypesFunctionArgs& fargs) 
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not 1-dimensional.
  */
@@ -302,8 +302,8 @@ inline void TypesFunctions::if1d(TransformationTypes::TypesFunctionArgs& fargs) 
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not 2-dimensional.
  */
@@ -320,8 +320,8 @@ inline void TypesFunctions::if2d(TransformationTypes::TypesFunctionArgs& fargs) 
  *
  * @tparam Arg -- index of Arg to check.
  *
- * @param args -- source types.
- * @param rets -- output types.
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
  *
  * @exception SourceTypeError in case input data is not square (NxN).
  */

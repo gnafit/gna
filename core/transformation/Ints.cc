@@ -4,9 +4,9 @@ using TransformationTypes::Ints;
 using TransformationTypes::CalculationError;
 
 /**
- * @brief Get i-th Sink Data.
- * @param i -- index of a Sink.
- * @return i-th Sink's Data as output.
+ * @brief Get i-th Storage Data.
+ * @param i -- index of a Storage.
+ * @return i-th Storage's Data.
  *
  * @exception CalculationError in case invalid index is queried.
  * @exception CalculationError in case output data is not initialized.

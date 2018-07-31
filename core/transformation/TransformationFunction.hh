@@ -20,7 +20,7 @@ namespace TransformationTypes
   typedef std::function<void(FunctionArgs&)> Function;
 
   /**
-   * @brief Function, that does the input types checking and output types derivation.
+   * @brief TypesFunction, that does the input types checking and output types derivation.
    *
    * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
    *
@@ -31,7 +31,7 @@ namespace TransformationTypes
   typedef std::vector<TypesFunction> TypesFunctionsContainer;
 
   /**
-   * @brief Function, that does the storage types derivation
+   * @brief StorageTypesFunction, that does the storage types derivation
    *
    * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
    * Unlike the TypesFunction the StorageTypesFunction is not able to modify Rets (outputs).

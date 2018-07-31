@@ -83,10 +83,12 @@ public:
             cout<<fargs.ints[1].mat<<endl;
             printf("  internal[2]:\n");
             cout<<fargs.ints[2].x<<endl;
+            printf("  internal[2] (2d):\n");
+            cout<<fargs.ints[2].arr2d<<endl;
       })
       // Secondary Function StorageTypesFunction
       .storage("secondary", [](StorageTypesFunctionArgs& fargs){
-            fargs.ints[2] = fargs.args[0];
+            fargs.ints[2] = DataType().points().shape(fargs.args[0].shape[0], 1);
             printf("Initialize secondary storage (clone arg[0] to ints[2]): %i\n", (int)fargs.ints.size());
             })
       // Secondary MemFunction implementation
@@ -150,6 +152,8 @@ public:
     cout<<fargs.ints[1].mat<<endl;
     printf("  internal[2]:\n");
     cout<<fargs.ints[2].x<<endl;
+    printf("  internal[2] (2d):\n");
+    cout<<fargs.ints[2].arr2d<<endl;
   }
 
   void memTypesFunction(TypesFunctionArgs& fargs){
@@ -158,7 +162,7 @@ public:
   }
 
   void memStorageTypesFunction(StorageTypesFunctionArgs& fargs){
-      fargs.ints[2] = fargs.args[0];
+      fargs.ints[2] = DataType().points().shape(1, fargs.args[0].shape[0]);
       printf("Initialize secondary storage (mem, clone arg[0] to ints[2]): %i\n", (int)fargs.ints.size());
   }
 };

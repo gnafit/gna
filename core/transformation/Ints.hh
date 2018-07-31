@@ -7,7 +7,7 @@
 namespace TransformationTypes
 {
   /**
-   * @brief Access the transformation outputs.
+   * @brief Access the transformation Storage instances.
    *
    * Ints instance is passed to the Entry::fun function and is used to store internal data of the transformation.
    *
@@ -25,7 +25,7 @@ namespace TransformationTypes
     /**
      * @brief Get i-th Storage Data.
      * @param i -- index of a Storage.
-     * @return i-th Storage's Data as output.
+     * @return i-th Storage's Data.
      */
     Data<double> &operator[](int i) const;
 

@@ -50,6 +50,9 @@ namespace TransformationTypes {
      */
     typedef std::function<void(T*, FunctionArgs&)> MemFunction;
 
+    /**
+     * @brief A container for the named MemFunction instances.
+     */
     typedef std::map<std::string, MemFunction> MemFunctionMap;
 
     /**
@@ -61,10 +64,28 @@ namespace TransformationTypes {
      */
     typedef std::function<void(T*, TypesFunctionArgs& fargs)> MemTypesFunction;
 
+    /**
+     * @brief A container for the named MemTypesFunction instances.
+     *
+     * Each pair is a number of the corresponding TypesFunction in Entry::typefuns and the MemTypesFunction.
+     */
     typedef std::vector<std::tuple<size_t, MemTypesFunction>> MemTypesFunctionMap;
 
+    /**
+     * @brief Function, that does the internal types derivation (reference to a member function).
+     *
+     * First argument is the actual transformation classe's `this` allowing to use member functions.
+     *
+     * @copydoc StorageTypesFunction
+     */
     typedef std::function<void(T*, StorageTypesFunctionArgs& fargs)> MemStorageTypesFunction;
 
+    /**
+     * @brief A container for the named StorageMemTypesFunction instances.
+     *
+     * For each Function with name `name` there is a vector of pairs.
+     * Each pair is a number of the corresponding StorageTypesFunction in Entry::functions[name] and the MemStorageTypesFunction.
+     */
     typedef std::map<std::string, std::vector<std::tuple<size_t, MemStorageTypesFunction>>> MemStorageTypesFunctionMap;
 
     /**
@@ -99,7 +120,7 @@ namespace TransformationTypes {
         return;
       }
       if (m_entry->initializing == 0) {
-        add();
+        this->add();
       }
     }
     /**
@@ -111,10 +132,11 @@ namespace TransformationTypes {
      *   - passes TypesFunctions::passAll() as TypeFunction if no TypeFunction objects are provided.
      *   - subscribes the Entry to the Base's taint flag unless Initializer::m_nosubscribe is set.
      *   - adds the Entry to the Base.
-     *   - adds MemFunction and MemTypesFunction objects to the TransformationBind Initializer::m_obj.
+     *   - adds MemFunction, MemTypesFunction and StorageMemTypesFunction
+     *     objects to the TransformationBind instance Initializer::m_obj.
      *
-     * @note while Function and TypeFunction objects are kept within Entry
-     * instance, MemFunction and MemTypesFunction instances are managed via
+     * @note while Function, TypeFunction and StorageTypesFunction objects are kept within Entry
+     * instance, MemFunction, MemTypesFunction and MemStorageTypesFunction instances are managed via
      * TransformationBind instance (Initializer::m_obj).
      */
     void add() {
@@ -171,17 +193,21 @@ namespace TransformationTypes {
     }
 
     /**
-     * @brief Set the Entry::fun Function.
+     * @brief Set the main Function.
      * @param fun -- the Function that defines the transformation.
      * @return `*this`.
      */
     Initializer<T> func(Function afunc) {
-      func("main", afunc);
+      this->func("main", afunc);
       return *this;
     }
 
     /**
-     * @brief Set the Entry::fun Function.
+     * @brief Set the named Function.
+     *
+     * The method adds a function Function to the Entry::functions storage by name.
+     * If the name is main, the function is used as default Entry::fun.
+     *
      * @param name -- a name of a function.
      * @param fun -- the Function that defines the transformation.
      * @exception std::runtime error if function with name `name` already exists.
@@ -222,23 +248,32 @@ namespace TransformationTypes {
     }
 
     /**
-     * @brief Set the Entry::fun from a MemFunction.
+     * @brief Set the main function bound to a MemFunction.
      *
-     * The method sets Entry::fun to the fun with first argument binded to `this` of the transformation.
+     * The method sets Entry::functions['main'] to the function with first argument bound to `this` of the transformation.
      *
      * @param fun -- the MemFunction that defines the transformation.
      * @return `*this`.
      */
     Initializer<T> func(MemFunction mfunc) {
-      func("main", mfunc);
+      this->func("main", mfunc);
       return *this;
     }
 
+    /**
+     * @brief Set the named Function bound to a MemFunction.
+     *
+     * The method adds a function Function to the Entry::functions storage by name.
+     * The added function is bound to a passed MemFunction and `this` of the transformation.
+     * If the name is main, the function is used as default Entry::fun.
+     *
+     * @param name -- a name of a function.
+     * @param fun -- the Function that defines the transformation.
+     * @return `*this`.
+     */
     Initializer<T> func(const std::string& name, MemFunction mfunc) {
-      using namespace std::placeholders;
       m_mfuncs[name]=mfunc;
-      auto afunc = std::bind(mfunc, m_obj->obj(), _1);
-      func(name, afunc);
+      this->func(name, m_obj->template bind<>(mfunc));
       return *this;
     }
 
@@ -262,29 +297,33 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> types(MemTypesFunction func) {
-      using namespace std::placeholders;
       m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
-      m_entry->typefuns.push_back(std::bind(func, m_obj->obj(), _1));
+      m_entry->typefuns.push_back(m_obj->template bind<>(func));
       return *this;
     }
 
     /**
-     * @brief Add new TypesFunction for the 'main' to initialize the storage
+     * @brief Add new StorageTypesFunction for the main function to initialize the storage.
      * @param func -- the TypesFunction to be added.
      * @return `*this`.
      */
     Initializer<T> storage(StorageTypesFunction func) {
-      storage("main", func);
-      return *this;
-    }
-
-    Initializer<T> storage(MemStorageTypesFunction func) {
-      storage("main", func);
+      this->storage("main", func);
       return *this;
     }
 
     /**
-     * @brief Add new TypesFunction to a particular function to initialize the storage
+     * @brief Add new StorageTypesFunction bound to the MemStorageTypesFunction.
+     * @param func -- the TypesFunction to be added.
+     * @return `*this`.
+     */
+    Initializer<T> storage(MemStorageTypesFunction func) {
+      this->storage("main", func);
+      return *this;
+    }
+
+    /**
+     * @brief Add new StorageTypesFunction to a particular function to initialize the storage.
      * @param name -- function name to add the storage initializer.
      * @param func -- the TypesFunction to be added.
      * @exception runtime_error in case function is not found.
@@ -296,11 +335,17 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Add new StorageTypesFunction bound the MemStorageTypesFunction;
+     * @param name -- function name to add the storage initializer.
+     * @param func -- the TypesFunction to be added.
+     * @exception runtime_error in case function is not found.
+     * @return `*this`.
+     */
     Initializer<T> storage(const std::string& name, MemStorageTypesFunction func) {
-      using namespace std::placeholders;
       auto& fd = m_entry->functions.at(name);
       m_mstfuncs[name].emplace_back(fd.typefuns.size(), func);
-      fd.typefuns.push_back(std::bind(func, m_obj->obj(), _1));
+      fd.typefuns.push_back(m_obj->template bind<>(func));
       return *this;
     }
 
@@ -326,8 +371,8 @@ namespace TransformationTypes {
      */
     template <typename FuncA, typename FuncB>
     Initializer<T> types(FuncA func1, FuncB func2) {
-      types(func1);
-      types(func2);
+      this->types(func1);
+      this->types(func2);
       return *this;
     }
 
@@ -343,9 +388,9 @@ namespace TransformationTypes {
      */
     template <typename FuncA, typename FuncB, typename FuncC>
     Initializer<T> types(FuncA func1, FuncB func2, FuncC func3) {
-      types(func1);
-      types(func2);
-      types(func3);
+      this->types(func1);
+      this->types(func2);
+      this->types(func3);
       return *this;
     }
 
@@ -382,8 +427,8 @@ namespace TransformationTypes {
      */
     template <typename Changeable, typename... Rest>
     Initializer<T> depends(Changeable v, Rest... rest) {
-      depends(v);
-      return depends(rest...);
+      this->depends(v);
+      return this->depends(rest...);
     }
 
     /**
@@ -420,7 +465,7 @@ namespace TransformationTypes {
 
     MemFunctionMap m_mfuncs;               ///< MemFunction objects.
     MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
-    MemStorageTypesFunctionMap m_mstfuncs; ///< MemTypesFunction objects.
+    MemStorageTypesFunctionMap m_mstfuncs; ///< MemStorageTypesFunction objects.
 
     bool m_nosubscribe;                    ///< Flag forbidding automatic subscription to Base taintflag emissions.
   }; /* class Initializer */
