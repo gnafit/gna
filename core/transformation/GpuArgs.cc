@@ -1,9 +1,9 @@
 #include "GpuArgs.hh"
 
 
-void GpuArgs::fill_size_vec() {
-	for (auto &arg : cpu_args) {
-		gpu_sizes_rows.push_back(tmp[i] = arg->m_entry->gpuArr->rows);
-		gpu_sizes_cols.push_back(tmp[i] = arg->m_entry->gpuArr->columns);
+void TransformationTypes::GpuArgs::fill_size_vec() {
+	for (auto &src : m_cpu_args.m_entry->sources) {
+		gpu_sizes_rows.push_back(src.sink->data->gpuArr->rows);
+		gpu_sizes_cols.push_back(src.sink->data->gpuArr->columns);
 	}
 }

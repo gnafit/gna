@@ -2,7 +2,7 @@
 #define GNACUOSCPROBMEM_H
 
 #include <iostream>
-#include "GNAcuDataLocation.hh"
+#include "DataLocation.hh"
 
 /*enum GpuMemoryState {
 	NotInitialized,

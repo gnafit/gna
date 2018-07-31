@@ -5,11 +5,13 @@
 #include "GpuArray.hh"
 #include "DataLocation.hh"
 
+
+#include "GpuBasics.hh"
 #include "GpuArrayTypes.hh" 
 
 #define GridSize(size) (size/CU_BLOCK_SIZE + 1)
 
-
+//class StorageOrder;
 
 template <typename T>
 __global__ void vecAdd(T* res, T* inA, T* inB, size_t n) {
@@ -70,7 +72,7 @@ GpuArray<T>::GpuArray(T* inHostPtr) {
 template <typename T>
 GpuArray<T>::GpuArray(size_t inSize, T* inHostPtr) {
         hostPtr = inHostPtr;
-	type = VecGpu;
+	type = ArrayType::VecGpu;
 	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
 	syncFlag = SyncFlag::Unsynchronized;
 #ifdef CU_DEBUG
@@ -96,7 +98,7 @@ GpuArray<T>::GpuArray(size_t inSize, T* inHostPtr) {
 template <typename T>
 GpuArray<T>::GpuArray(size_t mat_rows, size_t mat_cols,  T* inHostPtr) {
         hostPtr = inHostPtr;
-	type = MatGpu;
+	type = ArrayType::MatGpu;
 	if(inHostPtr == nullptr)    dataLoc = DataLocation::NoData;
 	syncFlag = SyncFlag::Unsynchronized;
 #ifdef CU_DEBUG
@@ -416,9 +418,9 @@ void GpuArray<T>::dump() {
 template <typename T>
 void GpuArray<T>::setArrSize(size_t inSize) {
 	arrSize = inSize;
-	if (order == row_major) {
+	if (order == StorageOrder::RowMajor) {
 		rows = inSize;
-		cols = 1;
+		columns = 1;
 	}
 	else {
 		columns = inSize;

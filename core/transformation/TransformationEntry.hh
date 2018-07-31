@@ -15,7 +15,7 @@
 #include "Storage.hh"
 
 #ifdef GNA_CUDA_SUPPORT
-#include "GNAcuDataLocation.hh"
+#include "DataLocation.hh"
 #include "cuda_config_vars.h"
 #endif
 
