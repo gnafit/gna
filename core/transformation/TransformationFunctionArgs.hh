@@ -25,11 +25,12 @@ namespace TransformationTypes
    * @date 07.2018
    */
   struct FunctionArgs {
-    FunctionArgs(Entry* e) : args(e), rets(e), ints(e) {  } ///< Constructor.
+    FunctionArgs(Entry* e) : args(e), rets(e), ints(e), gargs(e) {  } ///< Constructor.
 
     Args args; ///< arguments, or transformation inputs (read-only)
     Rets rets; ///< return values, or transformation outputs (writable)
     Ints ints; ///< preallocated data arrays for the transformation's internal usage (writable)
+    GpuArgs gargs;	///< wrapper for args on gpu, access to args via double**
   };
 
   /**
