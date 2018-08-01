@@ -93,6 +93,7 @@ namespace TransformationTypes
     SourcesContainer sources;                            ///< Transformation inputs (sources).
     SinksContainer sinks;                                ///< Transformation outputs (sinks).
     StoragesContainer storages;                          ///< Transformation internal Storage instances.
+    GPUStorage gpustorage;				 ///< Storage for gpu args compared to a single 2d ptr
 
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.
