@@ -3,16 +3,19 @@
 #include "GpuBasics.hh"
 #include "GpuArrayTypes.hh"
 
+//#include "Data.hh" 
+#include "TransformationEntry.hh"
+
 #include <vector>
+#include <iostream>
 
 namespace TransformationTypes {
 
-//	class Entry;
-
 	struct GPUStorage {
-		GPUStorage(const Entry* e ) : m_entry(e) {	}  		///< constructor
+
+		GPUStorage(const Entry* e ) : m_entry(e) { }// std::cout << "Costruct GPUStorage" << std::endl;	}  		///< constructor
 	//	const Data<double> &operator[](int i) const { return m_cpu_args[i]; } 	///< get corresponding element in m_cpu_args
-//		size_t size() const { return m_.size(); }
+		size_t size() const;
 		void initGPUStorage();							///< allocates memory for m_gpu_args, transfers it to GPU
 	private:
 		const Entry* m_entry;

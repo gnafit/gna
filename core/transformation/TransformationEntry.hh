@@ -13,6 +13,7 @@
 #include "Source.hh"
 #include "Sink.hh"
 #include "Storage.hh"
+#include "GPUStorage.hh"
 
 #ifdef GNA_CUDA_SUPPORT
 #include "DataLocation.hh"
@@ -25,6 +26,8 @@ namespace TransformationTypes
   class Base;
   class InputHandle;
   class OutputHandle;
+
+  struct GPUStorage;
 
   typedef boost::ptr_vector<Source>  SourcesContainer;   ///< Container for Source pointers.
   typedef boost::ptr_vector<Sink>    SinksContainer;     ///< Container for Sink pointers.
@@ -93,7 +96,8 @@ namespace TransformationTypes
     SourcesContainer sources;                            ///< Transformation inputs (sources).
     SinksContainer sinks;                                ///< Transformation outputs (sinks).
     StoragesContainer storages;                          ///< Transformation internal Storage instances.
-    GPUStorage gpustorage;				 ///< Storage for gpu args compared to a single 2d ptr
+
+    GPUStorage *gpustorage;				 ///< Storage for gpu args compared to a single 2d ptr
 
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.

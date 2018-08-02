@@ -124,7 +124,13 @@ bool Entry::check() const {
  */
 void Entry::evaluate() {
   auto fargs = FunctionArgs(this);
-  return fun(fargs);
+  fun(fargs);
+#ifdef GNA_CUDA_SUPPORT
+  for(auto& sink : this->sinks){
+    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
+  }
+#endif
+
 }
 
 /**
@@ -190,10 +196,12 @@ void Entry::dump(size_t level) const {
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
  *
+<<<<<<< HEAD
  * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
- *
+=======
  * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
  * in any case. Should be fixed.
+>>>>>>> origin/fcn-signature
  *
  * @exception std::runtime_error in case any of type functions fails.
  */
@@ -245,8 +253,7 @@ void Entry::evaluateTypes() {
     }
 
     // GPU: require GPU memory for previous transformation's sink
-#ifdef GNA_CUDA_SUPPORT
-    gpustorage = new GPUStorage(this); 
+#ifdef GNA_CUDA_SUPPORT 
     if (this->getEntryLocation() == DataLocation::Device) {
       for (auto &source : sources) {
           source.sink->data->require_gpu();
@@ -255,7 +262,6 @@ void Entry::evaluateTypes() {
         sink.data->require_gpu();
       }
     }
-    gpustorage->initGPUStorage();
 #endif
 
     for (Entry *dep: deps) {
@@ -334,7 +340,6 @@ void Entry::switchFunction(const std::string& name){
  * @param fargs -- Storage TypesFunction arguments.
  */
 void Entry::initInternals(StorageTypesFunctionArgs& fargs){
-  storages.clear();
   auto& itypes=fargs.ints;
 
   // Truncate storages in case less storages is required

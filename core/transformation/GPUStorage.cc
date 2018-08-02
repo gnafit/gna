@@ -17,3 +17,7 @@ void TransformationTypes::GPUStorage::initGPUStorage() {
 	copyH2D(m_gpu_args, tmp, tmp_size);
 	fill_size_vec();
 }
+
+size_t TransformationTypes::GPUStorage::size() const { 
+	return m_entry->sources.size(); 
+}
