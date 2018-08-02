@@ -56,6 +56,7 @@ set (SOURCES
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
+  core/transformation/GPUStorage.cc
   core/transformation/Ints.cc
   core/transformation/Rtypes.cc
   core/transformation/Itypes.cc
@@ -64,7 +65,6 @@ set (SOURCES
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
-  core/transformation/GpuArgs.cc
   core/GNAObject.cc
   core/ParametersGroup.cc
   core/Parametrized.cc
@@ -225,6 +225,7 @@ set (HEADERS
   MatrixProduct.hh
   Transpose.hh
   GpuArgs.hh 
+  GPUStorage.hh
   ${CUHEADERS}
   )
 

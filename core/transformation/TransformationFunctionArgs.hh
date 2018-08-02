@@ -6,6 +6,7 @@
 #include "Atypes.hh"
 #include "Rtypes.hh"
 #include "Itypes.hh"
+#include "GpuArgs.hh"
 
 namespace TransformationTypes
 {

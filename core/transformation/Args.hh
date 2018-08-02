@@ -3,10 +3,6 @@
 #include "Data.hh"
 #include "TransformationEntry.hh"
 
-//#include "GpuArgs.hh"
-
-//using GpuTransformationTypes;
-
 namespace TransformationTypes
 {
   /**
@@ -20,8 +16,6 @@ namespace TransformationTypes
    * @date 2015
    */
   struct Args {
-
-  friend struct GpuArgs;
 
   public:
     /**
