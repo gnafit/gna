@@ -131,7 +131,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
-
+/*
 #ifdef GNA_CUDA_SUPPORT
   auto full_formula_gpu = transformation_( "full_osc_prob_gpu")
       .input("Enu")
@@ -140,7 +140,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProbGpu);
 #endif
-
+*/
 
 }
 
