@@ -27,13 +27,13 @@ if(CUDA_SUPPORT)
 #	 cuda/core/GpuArgs.cc
         )
     set (CUHEADERS
-	 GpuArrayTypes.hh
+#	 GpuArrayTypes.hh
 	 GpuBasics.hh
 #	 GpuArgs.hh
 #         CuChi2.hh
 #         GNAcuOscProbFull.h
 #	 GNAcuRootMath.h
-         GpuArray.hh
+#         GpuArray.hh
 #         GNAcuOscProbMem.hh
         )
 else()
@@ -287,6 +287,6 @@ ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES}  ${CUDA_ADD_LIBS} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GpuBasics.hh"
+#include "core/GpuBasics.hh"
 #include "GpuArrayTypes.hh"
 
 //#include "Data.hh" 
@@ -20,6 +20,7 @@ namespace TransformationTypes {
 	private:
 		const Entry* m_entry;
 		double** m_gpu_args;
+		bool inited=false;
 		std::vector<size_t> gpu_sizes_rows;
 		std::vector<size_t> gpu_sizes_cols;
 		void fill_size_vec();	// TODO fill vecs according to gpuArr sizes

@@ -147,7 +147,7 @@ DataLocation GpuArray<T>::Init(size_t inSize, T* inHostPtr) {
 }
 
 template <typename T>
-GpuArray<T>::~GpuArray() {
+void GpuArray<T>::free() {
 	cudaFree(devicePtr);
 }
 

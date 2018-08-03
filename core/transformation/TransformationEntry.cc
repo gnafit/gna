@@ -246,7 +246,6 @@ void Entry::evaluateTypes() {
 
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT
-    gpustorage = new GPUStorage(this); 
     if (this->getEntryLocation() == DataLocation::Device) {
       for (auto &source : sources) {
           source.sink->data->require_gpu();
@@ -254,8 +253,11 @@ void Entry::evaluateTypes() {
       for (auto &sink : sinks) {
         sink.data->require_gpu();
       }
+    
+      gpustorage = new GPUStorage(this); 
+      std::cerr << "afret gpu storage new" << std::endl;
+      gpustorage->initGPUStorage();
     }
-    gpustorage->initGPUStorage();
 #endif
 
     for (Entry *dep: deps) {
