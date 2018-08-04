@@ -12,7 +12,7 @@ class MatrixProduct: public GNAObject, public TransformationBind<MatrixProduct> 
         }
     void multiply(SingleOutput& single);
     private:
-        void checkTypes(TypesFunctionArgs fargs);
-        void product(FunctionArgs fargs);
+        void checkTypes(TypesFunctionArgs& fargs);
+        void product(FunctionArgs& fargs);
 };
 

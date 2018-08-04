@@ -59,7 +59,7 @@ InputDescriptor Prediction::append(SingleOutput &obs) {
  * Sums the sizes of the input arrays/histograms.
  * @exception SinkTypeError in case there are no inputs.
  */
-void Prediction::calculateTypes(TypesFunctionArgs fargs) {
+void Prediction::calculateTypes(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (args.size() == 0) {
@@ -79,7 +79,7 @@ void Prediction::calculateTypes(TypesFunctionArgs fargs) {
  * @brief MemFunction.
  * Copies the data from each input into concatenated output.
  */
-void Prediction::calculatePrediction(FunctionArgs fargs) {
+void Prediction::calculatePrediction(FunctionArgs& fargs) {
   auto& args=fargs.args;
   double *buf=fargs.rets[0].x.data();
 

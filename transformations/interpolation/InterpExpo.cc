@@ -62,7 +62,7 @@ void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpo::do_interpolate(FunctionArgs fargs){
+void InterpExpo::do_interpolate(FunctionArgs& fargs){
   auto& args=fargs.args;
   auto& newx_a=args[0].x;
   auto& x_a=args[1].x;

@@ -1,24 +1,21 @@
 #include "Rebin.hh"
 #include <algorithm>
-#include <functional>
 #include <iterator>
 #include <math.h>
 
-using std::placeholders::_1;
-
 Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_scale{pow(10, rounding)} {
-  std::transform( edges, edges+n, m_new_edges.begin(), std::bind(&Rebin::round, this, _1) );
+  std::transform( edges, edges+n, m_new_edges.begin(), [this](double num){return this->round(num);} );
 
   transformation_("rebin")
     .input("histin")
     .output("histout")
-    .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs fargs){
+    .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs& fargs){
            fargs.rets[0]=DataType().hist().edges(obj->m_new_edges);
            })
     .func(&Rebin::calcSmear);
 }
 
-void Rebin::calcSmear(FunctionArgs fargs) {
+void Rebin::calcSmear(FunctionArgs& fargs) {
   auto& args=fargs.args;
   if( !m_initialized ){
       calcMatrix( args[0].type );
@@ -28,7 +25,7 @@ void Rebin::calcSmear(FunctionArgs fargs) {
 
 void Rebin::calcMatrix(const DataType& type) {
   std::vector<double> edges(type.size()+1);
-  std::transform( type.edges.begin(), type.edges.end(), edges.begin(), std::bind(&Rebin::round, this, _1) );
+  std::transform( type.edges.begin(), type.edges.end(), edges.begin(), [this](double num){return this->round(num);} );
 
   m_sparse_cache.resize( m_new_edges.size()-1, type.size() );
   m_sparse_cache.setZero();

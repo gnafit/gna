@@ -21,7 +21,7 @@ public:
       .func(&GeoNeutrinoFluxNormed::CalcNorm);
   }
 protected:
-  void CalcNorm(FunctionArgs fargs) {
+  void CalcNorm(FunctionArgs& fargs) {
       auto& args=fargs.args;
       const double* events = args[0].x.data();
       const size_t insize = args[0].type.size();

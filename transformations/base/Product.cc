@@ -3,7 +3,7 @@
 Product::Product() {
   transformation_("product")
     .output("product")
-    .types([](TypesFunctionArgs fargs) {
+    .types([](TypesFunctionArgs& fargs) {
         auto& args=fargs.args;
         auto& rets=fargs.rets;
         DataType dtsingle = DataType().points().shape(1);
@@ -19,7 +19,7 @@ Product::Product() {
         }
         rets[0] = dt;
       })
-    .func([](FunctionArgs fargs) {
+    .func([](FunctionArgs& fargs) {
         auto& args=fargs.args;
         auto& rettype=fargs.rets[0].type;
         auto& ret=fargs.rets[0].x;
