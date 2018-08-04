@@ -24,13 +24,14 @@ public:
   Dummy(size_t shape, const char* label, const std::vector<std::string> &labels={}){
     transformation_("dummy")
       .label(label)
-      .types([shape](Atypes args, Rtypes rets) {
+      .types([shape](TypesFunctionArgs& fargs) {
+                auto& rets = fargs.rets;
                 for (size_t i = 0; i < rets.size(); ++i) {
                   rets[i] = DataType().points().shape(shape);
                 }
               }
             )
-    .func([](Args args, Rets rets){});
+    .func([](FunctionArgs& fargs){});
 
     m_vars.resize(labels.size());
     for (size_t i = 0; i < m_vars.size(); ++i) {
