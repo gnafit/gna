@@ -33,8 +33,8 @@ pars+=env.globalns.defparameter('weight.c', central=3, sigma=0.1),
 expr = 'kinint| weight[k] * evis()'
 a = Expression(expr, indices)
 
-print(a.expression_raw)
-print(a.expression)
+print(a.expressions_raw)
+print(a.expressions)
 
 a.parse()
 a.guessname(lib, save=True)
