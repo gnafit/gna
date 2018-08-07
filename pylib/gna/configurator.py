@@ -229,20 +229,12 @@ class NestedDict(object):
                 if meta[self].get('verbose', False):
                     print( 'Skipping nonexistent file', filename )
                 continue
-            print(subst)
 
-            for variant in subst['values']:
-                if variant in filename.split('/'):
-                    folder = variant
-                    break
-            else:
-                folder = None
-
-            dic = self.__load_dic__(filename, dirname=folder, dictonly=True)
+            dic = self.__load_dic__(filename, dictonly=True)
             self.__import__(dic)
             unimportant = True
 
-    def __load_dic__(self, filename, dirname = None, dictonly=False):
+    def __load_dic__(self, filename, dictonly=False):
         print('Loading config file:', filename)
         dic =  runpy.run_path(filename, init_globals )
         for k in init_globals:
