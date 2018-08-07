@@ -22,8 +22,8 @@ public:
       .func(&Cholesky::calculateCholesky)
     ;
   }
-  void prepareCholesky(TypesFunctionArgs fargs);
-  void calculateCholesky(FunctionArgs fargs);
+  inline void prepareCholesky(TypesFunctionArgs& fargs);
+  inline void calculateCholesky(FunctionArgs& fargs);
 
 protected:
   class LLT: public Eigen::LLT<Eigen::MatrixXd> {
@@ -39,7 +39,7 @@ protected:
 /**
  * Check that the input is matrix and the matrix is symmetric
  */
-void Cholesky::prepareCholesky(TypesFunctionArgs fargs) {
+void Cholesky::prepareCholesky(TypesFunctionArgs& fargs) {
   m_llt = LLT(fargs.args[0].shape[0]);
   fargs.rets[0].preallocated(const_cast<double*>(m_llt.matrixRef().data()));
 }
@@ -47,6 +47,6 @@ void Cholesky::prepareCholesky(TypesFunctionArgs fargs) {
 /**
  * Decompose
  */
-void Cholesky::calculateCholesky(FunctionArgs fargs) {
+void Cholesky::calculateCholesky(FunctionArgs& fargs) {
   m_llt.compute(fargs.args[0].mat);
 }

@@ -17,7 +17,7 @@ Exp::Exp() {
 /**
  * @brief Calculate the value of function.
  */
-void Exp::calculate(FunctionArgs fargs){
+void Exp::calculate(FunctionArgs& fargs){
     fargs.rets[0].x = fargs.args[0].x.exp();
 }
 

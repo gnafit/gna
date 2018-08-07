@@ -13,10 +13,10 @@ public:
       .input("hist")
       .output("edges")
       .types(TypesFunctions::ifHist<0>,
-             [](TypesFunctionArgs fargs) {
+             [](TypesFunctionArgs& fargs) {
                fargs.rets[0] = DataType().points().shape(fargs.args[0].edges.size());
              })
-      .func([](FunctionArgs fargs) {
+      .func([](FunctionArgs& fargs) {
               auto& edges = fargs.args[0].type.edges;
               fargs.rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
               fargs.rets.freeze();

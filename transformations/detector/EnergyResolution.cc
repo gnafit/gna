@@ -27,7 +27,7 @@ void EnergyResolution::add(){
     .input("Nvis")
     .output("Nrec")
     .types(TypesFunctions::pass<0>,TypesFunctions::ifHist<0>,
-           [index](EnergyResolution *obj, TypesFunctionArgs fargs) {
+           [index](EnergyResolution *obj, TypesFunctionArgs& fargs) {
              if(index==0){
                obj->m_datatype = fargs.args[0];
                obj->fillCache();
@@ -98,7 +98,7 @@ void EnergyResolution::fillCache() {
 }
 
 /* Apply precalculated cache and actually smear */
-void EnergyResolution::calcSmear(FunctionArgs fargs) {
+void EnergyResolution::calcSmear(FunctionArgs& fargs) {
   fargs.rets[0].x = m_sparse_cache * fargs.args[0].vec;
 }
 

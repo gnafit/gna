@@ -20,7 +20,7 @@ public:
   void add(SingleOutput& hist);
 private:
   void fillCache();
-  void calcSmear(FunctionArgs fargs);
+  void calcSmear(FunctionArgs& fargs);
 
   variable<double> m_a, m_b, m_c;
 

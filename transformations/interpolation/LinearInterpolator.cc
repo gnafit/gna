@@ -27,7 +27,7 @@ void LinearInterpolator::indexBins() {
   m_minbinsize = minbinsize;
 }
 
-void LinearInterpolator::interpolate(FunctionArgs fargs) {
+void LinearInterpolator::interpolate(FunctionArgs& fargs) {
   const auto &xs = fargs.args[0].x;
   auto &ys = fargs.rets[0].x;
   Eigen::ArrayXi idxes = ((xs - m_xs[0]) / m_minbinsize).cast<int>();

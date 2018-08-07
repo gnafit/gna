@@ -22,8 +22,8 @@ class SelfPower: public GNAObject,
 public:
     SelfPower(const char* scalename="sp_scale"); ///< Constructor.
 
-    void calculate(FunctionArgs fargs);          ///< Calculate the value of function with positive power.
-    void calculate_inv(FunctionArgs fargs);      ///< Calculate the value of function with negative power.
+    void calculate(FunctionArgs& fargs);         ///< Calculate the value of function with positive power.
+    void calculate_inv(FunctionArgs& fargs);     ///< Calculate the value of function with negative power.
 protected:
     variable<double> m_scale;                    ///< The scale (a) variable.
 };

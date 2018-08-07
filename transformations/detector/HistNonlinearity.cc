@@ -25,7 +25,7 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(TypesFunctions::ifSame,
-         [](HistNonlinearity *obj, TypesFunctionArgs fargs) {
+         [](HistNonlinearity *obj, TypesFunctionArgs& fargs) {
          obj->m_size = fargs.args[0].shape[0]-1;
          obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
          if( obj->m_propagate_matrix ){
@@ -60,13 +60,13 @@ void HistNonlinearity::set( SingleOutput& ntrue ){
     t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
-void HistNonlinearity::calcSmear(FunctionArgs fargs) {
+void HistNonlinearity::calcSmear(FunctionArgs& fargs) {
   auto& args=fargs.args;
   args[1]; // Needed to trigger updating
   fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
-void HistNonlinearity::calcMatrix(FunctionArgs fargs) {
+void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   m_sparse_cache.setZero();
 
   auto& args=fargs.args;

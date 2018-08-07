@@ -36,7 +36,7 @@ SegmentWise::SegmentWise() {
  *
  * For each edge from the bin edges it find an index of the point, that is higher or equal to it.
  */
-void SegmentWise::determineSegments(FunctionArgs fargs){
+void SegmentWise::determineSegments(FunctionArgs& fargs){
   double* segment = fargs.rets[0].buffer;                /// The output array pointer.
 
   auto& edges_a = fargs.args[1].x;                       /// The edges data,

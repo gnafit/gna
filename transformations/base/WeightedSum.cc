@@ -40,7 +40,7 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &lab
   }
 }
 
-void WeightedSum::sum(FunctionArgs fargs){
+void WeightedSum::sum(FunctionArgs& fargs){
     auto& args=fargs.args;
     auto& ret=fargs.rets[0].x;
     ret = m_vars[0]*args[0].x;
@@ -56,7 +56,7 @@ void WeightedSum::sum(FunctionArgs fargs){
     }
 }
 
-void WeightedSum::sumFill(FunctionArgs fargs){
+void WeightedSum::sumFill(FunctionArgs& fargs){
     auto& args=fargs.args;
     auto& ret=fargs.rets[0].x;
     ret = m_fillvalue;

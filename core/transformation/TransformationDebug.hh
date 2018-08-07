@@ -1,5 +1,7 @@
 #pragma once
 
+//#define TRANSFORMATION_DEBUG 1
+
 #ifdef TRANSFORMATION_DEBUG
 #define TR_DPRINTF(...) do {                    \
   fprintf(stderr, __VA_ARGS__);                 \
