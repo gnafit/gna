@@ -30,7 +30,7 @@ public:
                 }
               }
             )
-    .func([](FunctionArgs fargs){});
+    .func([](FunctionArgs& fargs){});
 
     m_vars.resize(labels.size());
     for (size_t i = 0; i < m_vars.size(); ++i) {
