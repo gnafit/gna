@@ -11,6 +11,7 @@ from collections import OrderedDict
 
 cfg = NestedDict(
     bundle = 'dummy',
+    name = 'dymmubundle',
     indices = [
         ('n', 'num',   ['1', '2', '3']),
         ('a', 'alph',  ['a', 'b', 'c']),
