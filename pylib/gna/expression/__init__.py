@@ -122,8 +122,9 @@ class ExpressionContext(object):
         with nextlevel():
             b=execute_bundle( cfg=cfg, context=self )
 
-        printl('provides:', cfg.provides)
-        self.executed_bundes = self.executed_bundes.union( cfg.provides )
+        provides = cfg.get('provides', [])
+        printl('provides:', provides)
+        self.executed_bundes = self.executed_bundes.union( provides )
 
     def get_variable(self, name, *idx):
         pass
