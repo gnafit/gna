@@ -8,12 +8,14 @@ from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
-class reactor_anu_spectra_v01(TransformationBundle):
+class reactor_anu_spectra_v02(TransformationBundle):
     short_names = dict( U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241' )
     debug = False
     def __init__(self, **kwargs):
+        if 'isotopes' in self.cfg and 'indices' in self.cfg:
+            raise Exception('Confusing configuration: has "indices" and "isotopes" in the same time')
         self.isotopes = kwargs['namespaces'] = [self.short_names.get(s,s) for s in kwargs['cfg'].isotopes]
-        super(reactor_anu_spectra_v01, self).__init__( **kwargs )
+        super(reactor_anu_spectra_v02, self).__init__( **kwargs )
 
         self.load_data()
 
@@ -64,9 +66,9 @@ class reactor_anu_spectra_v01(TransformationBundle):
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')
-        for ns in self.namespaces:
-            data = self.load_file(self.cfg.filename, dtype, isotope=ns.name)
-            self.spectra_raw[ns.name] = data
+        for isotope in self.isotopes:
+            data = self.load_file(self.cfg.filename, dtype, isotope=isotope)
+            self.spectra_raw[isotope] = data
 
         """Read parametrization edges"""
         self.model_edges = N.ascontiguousarray( self.cfg.edges, dtype='d' )

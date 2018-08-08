@@ -43,8 +43,8 @@ class oscprob_v01(TransformationBundle):
                 input  = trans['Enu']
 
             if self.context:
-                self.context.set_output(output, self.cfg.name, it)
-                self.context.set_input(input, self.cfg.name, it, clone=0)
+                self.set_output(output, self.cfg.name, it)
+                self.set_input(input, self.cfg.name, it, clone=0)
 
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters
