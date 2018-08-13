@@ -283,13 +283,18 @@ void GpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
+
+
+    std::cerr << "TMP CERR! current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
+
+
   if (dataLoc == loc || syncFlag == SyncFlag::Synchronized) {
 #ifdef CU_DEBUG_2
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl;
 #endif
   } else if((dataLoc == DataLocation::Device && loc == DataLocation::Host)) {
     sync_D2H();
-  } else if((dataLoc == DataLocation::Host && loc == DataLocation::Device)) {
+  } else if((dataLoc == DataLocation::Host || dataLoc == DataLocation::InitializedOnly) && loc == DataLocation::Device) {
     sync_H2D();
   } else if (dataLoc == DataLocation::NoData) {
     throw std::runtime_error("Data is not initialized");
