@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""4 antineutrino spectra for 4 fissile isotopes in the reactor
+
+ Usage:
+   1) Show the figure and save the diagram:
+     ./tests/expressions/reactor_anu_spectra_v02.py -s --dot output/anuspectra_v02.dot
+   2) Show the diagram:
+     xdot output/anuspectra_v02.dot
+ """
+
 from __future__ import print_function
 from load import ROOT as R
 from gna.expression import *
@@ -19,21 +28,18 @@ parser = ArgumentParser()
 parser.add_argument( '-o', '--output', help='output figure' )
 parser.add_argument( '-l', '--log', action='store_true', help='logarithmic scale' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-parser.add_argument( '--set', nargs=2, action='append', default=[], help='set parameter I to value V', metavar=('I', 'V') )
-parser.add_argument( '--rset', nargs=2, action='append', default=[], help='set parameter I to value central+sigma*V', metavar=('I', 'V') )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts=parser.parse_args()
 
 """Init expression"""
 indices = [
-    ('i', 'isotope', ['U5', 'U8', 'Pu9', 'Pu1'])
+    ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241'])
     ]
 
 lib = dict(
 )
 
 expr = 'anuspec[i]( enu() )'
-# expr = 'enu()'
 a = Expression(expr, indices=indices)
 
 print(a.expressions_raw)
@@ -51,37 +57,37 @@ cfg = NestedDict(
             provides = ['enu'],
             args = ( 0.0, 12.01, 0.05 )
             ),
-        isotope = NestedDict(
-            bundle = 'reactor_anu_spectra_v01',
-            isotopes = [ 'U5', 'U8', 'Pu9', 'Pu1' ],
+        anuspec = NestedDict(
+            bundle = 'reactor_anu_spectra_v02',
+            name = 'anuspec',
             filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
 
             strategy = dict( underflow='constant', overflow='extrapolate' ),
             edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
 
-            corrections=NestedDict(
-                    bundle       = 'bundlelist_v01',
-                    bundles_list = [ 'free', 'uncorrelated', 'correlated' ],
-                    free = NestedDict(
-                        bundle  ='reactor_anu_freemodel_v01',
-                        varname = 'avganushape.n{index:02d}',
-                        varmode = 'log', # 'plain'
-                        ),
-                    uncorrelated = NestedDict(
-                        bundle        = 'reactor_anu_uncorr_v01',
-                        uncnames      = '{isotope}_uncorr.uncn{index:02d}',
-                        uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
-                                         'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
-                        ),
-                    correlated = NestedDict(
-                        bundle   = 'reactor_anu_corr_v01',
-                        uncname  = 'isotopes_corr',
-                        parnames = '{isotope}_corr.uncn{index:02d}',
-                        uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
-                                         'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
-                        )
-                    )
+            # corrections=NestedDict(
+                    # bundle       = 'bundlelist_v01',
+                    # bundles_list = [ 'free', 'uncorrelated', 'correlated' ],
+                    # free = NestedDict(
+                        # bundle  ='reactor_anu_freemodel_v01',
+                        # varname = 'avganushape.n{index:02d}',
+                        # varmode = 'log', # 'plain'
+                        # ),
+                    # uncorrelated = NestedDict(
+                        # bundle        = 'reactor_anu_uncorr_v01',
+                        # uncnames      = '{isotope}_uncorr.uncn{index:02d}',
+                        # uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
+                                         # 'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
+                        # ),
+                    # correlated = NestedDict(
+                        # bundle   = 'reactor_anu_corr_v01',
+                        # uncname  = 'isotopes_corr',
+                        # parnames = '{isotope}_corr.uncn{index:02d}',
+                        # uncertainties = ['data/reactor_anu_spectra/Huber/reac_anu_uncertainties_huber_{isotope}_{mode}.dat',
+                                         # 'data/reactor_anu_spectra/Mueller/reac_anu_uncertainties_mueller_{isotope}_{mode}.dat']
+                        # )
+                    # )
             ),
         )
 
@@ -95,70 +101,45 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-# """Init inputs"""
-# points = N.linspace( 0.0, 12.0, 241 )
-# points_t = C.Points(points)
-# points_t.points.setLabel('E (integr)')
-# shared=NestedDict( points=points_t.single() )
+ns = env.globalns('testexp')
+env.globalns.printparameters( labels=True )
 
-# ns = env.globalns('testexp')
+"""Plot result"""
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( L.u('enu') )
+ax.set_ylabel( L.u('anu_yield') )
+ax.set_title( '' )
 
-# """Execute bundle"""
-# b, = execute_bundle( cfg=cfg, common_namespace=ns, shared=shared )
+# ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
 
-# env.globalns.printparameters( labels=True )
+for name, output in context.outputs.anuspec.items():
+    data=output.data().copy()
+    ax.plot( context.outputs.enu.data(), N.ma.array(data, mask=data==0.0), label=L.s(name) )
 
-# """Plot result"""
-# fig = P.figure()
-# ax = P.subplot( 111 )
-# ax.minorticks_on()
-# ax.grid()
-# ax.set_xlabel( L.u('enu') )
-# ax.set_ylabel( L.u('anu_yield') )
-# ax.set_title( '' )
+if opts.log:
+    ax.set_yscale('log')
 
-# # ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
+ax.legend( loc='upper right' )
 
-# for name, output in b.outputs.items():
-    # data=output.data().copy()
-    # ax.plot( points, N.ma.array(data, mask=data==0.0), label=L.s(name) )
+if opts.dot:
+    try:
+        from gna.graphviz import GNADot
 
-# if opts.set or opts.rset:
-    # for var, value in opts.set:
-        # par=ns[var]
-        # par.set(float(value))
-    # for var, value in opts.rset:
-        # par=ns[var]
-        # par.setNormalValue(float(value))
+        kwargs=dict(
+                # splines='ortho'
+                joints=False,
+                )
+        graph = GNADot(context.outputs.enu, **kwargs)
+        graph.write(opts.dot)
+        print( 'Write output to:', opts.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )
+        raise
 
-    # print()
-    # print('Parameters after modification')
-    # env.globalns.printparameters()
+savefig(opts.output)
 
-    # for name, output in b.outputs.items():
-        # data=output.data().copy()
-        # ax.plot( points, N.ma.array(data, mask=data==0.0), '--', label=L.s(name) )
-
-# if opts.log:
-    # ax.set_yscale('log')
-
-# ax.legend( loc='upper right' )
-
-# if opts.dot:
-    # try:
-        # from gna.graphviz import GNADot
-
-        # kwargs=dict(
-                # # splines='ortho'
-                # joints=False,
-                # )
-        # graph = GNADot( b.transformations_out.values()[0], **kwargs )
-        # graph.write(opts.dot)
-        # print( 'Write output to:', opts.dot )
-    # except Exception as e:
-        # print( '\033[31mFailed to plot dot\033[0m' )
-
-# savefig(opts.output)
-
-# if opts.show:
-    # P.show()
+if opts.show:
+    P.show()

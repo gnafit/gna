@@ -172,6 +172,9 @@ class NIndex(object):
     def get_current(self, short):
         return self.indices[short].current
 
+    def ndim(self):
+        return len(self.indices)
+
 class Indexed(object):
     name=''
     indices_locked=False

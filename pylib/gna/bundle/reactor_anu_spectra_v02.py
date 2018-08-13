@@ -12,16 +12,27 @@ class reactor_anu_spectra_v02(TransformationBundle):
     short_names = dict( U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241' )
     debug = False
     def __init__(self, **kwargs):
-        if 'isotopes' in self.cfg and 'indices' in self.cfg:
-            raise Exception('Confusing configuration: has "indices" and "isotopes" in the same time')
-        self.isotopes = kwargs['namespaces'] = [self.short_names.get(s,s) for s in kwargs['cfg'].isotopes]
+        cfg = kwargs['cfg']
+        if not 'indices' in cfg:
+            raise Exception('Invalid configuration: missing "indices" field')
+
+        self.idx = cfg.indices
+        from gna.expression import NIndex
+        if not isinstance(self.idx, NIndex):
+            raise Exception('reac_anu_spectra_v02 should be called from within expression')
+
+        if self.idx.ndim()!=1:
+            raise Exception('reac_anu_spectra_v02 supports only 1d indexing')
+
+        self.isotopes = kwargs['namespaces'] = [it.current_values()[0] for it in self.idx]
+
         super(reactor_anu_spectra_v02, self).__init__( **kwargs )
 
         self.load_data()
 
     def build(self):
         model_edges_t = C.Points( self.model_edges, ns=self.common_namespace )
-        model_edges_t.points.setLabel('E0 (model)')
+        model_edges_t.points.setLabel('E0 (bin edges)')
         self.objects['edges'] = model_edges_t
         self.shared.reactor_anu_edges = model_edges_t.single()
 
@@ -29,10 +40,10 @@ class reactor_anu_spectra_v02(TransformationBundle):
         if self.cfg.get('corrections', None):
             self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
-        newx = self.shared.points
         segments_t=None
-        for isotope in self.isotopes:
-            ns = self.common_namespace(isotope)
+        for it in self.idx:
+            isotope = it.current_values()[0]
+
             spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.common_namespace )
             spectrum_raw_t.points.setLabel('S0(E0):\n'+isotope)
             self.objects[('spectrum_raw', isotope)] = spectrum_raw_t
@@ -48,13 +59,20 @@ class reactor_anu_spectra_v02(TransformationBundle):
 
             interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
             interp_expo_t.interp.setLabel('S(E):\n'+isotope)
+
+            # TODO: Identity is created only to provide single input (the output is connected twice).
+            # Need to think how to eliminate this.
+            newx = R.Identity()
+            self.set_input(newx.identity.source, self.cfg.name, it, clone=0)
+
             if segments_t:
-                interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx)
+                interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx.single())
             else:
-                interp_expo_t.interpolate(model_edges_t, spectrum_t, newx)
+                interp_expo_t.interpolate(model_edges_t, spectrum_t, newx.single())
                 segments_t = interp_expo_t.segments
 
             """Store data"""
+            self.set_output(interp_expo_t.interp.interp, self.cfg.name, it)
             self.objects[('spectrum', isotope)]     = spectrum_t
             self.objects[('interp', isotope)]       = interp_expo_t
             self.transformations_out[isotope]       = interp_expo_t.interp

@@ -25,6 +25,7 @@ class arange(TransformationBundle):
 
         obj = C.Points(self.data)
         trans = obj.points
+        trans.setLabel(tkey)
         output = trans.points
 
         self.set_output(output, self.cfg.name, key)
