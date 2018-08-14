@@ -1,7 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Check the SelfPower transformation"""
+"""Check the 1d integrator (Gauss-Legendre) transformation
+
+The script creates a Gaussian and then integrates it for each bin.
+Usage:
+    1. Simply run and plot:
+        tests/elementary/test_integral_gl1d.py
+
+    2. Create a graph:
+        tests/elementary/test_integral_gl1d.py --dot output/integrator.dot
+    and visualize it:
+        xdot output/integrator.dot
+"""
 
 from __future__ import print_function
 from matplotlib import pyplot as P
@@ -21,6 +32,7 @@ parser.add_argument( '-g', '--gauss', type=float, nargs=2, default=[6.0, 1.0], h
 parser.add_argument( '-m', '--mean', type=float, help='gaussian mean' )
 parser.add_argument( '-b', '--bins', type=float, nargs=3, default=[ 0.0, 12.001, 0.05 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
+parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
 
 mean, sigma = opts.gauss
@@ -35,6 +47,7 @@ print_parameters( ns )
 
 # Initialize the function of interest
 fcn = R.GaussianPeakWithBackground()
+fcn.rate.setLabel('Gaussian\n(function to integrate)')
 # keep its output as variable
 output=fcn.rate.rate
 
@@ -44,11 +57,15 @@ edges = N.arange(*opts.bins, dtype='d')
 
 # create 1d integrator (sample points) for given edges and integration order
 gl_int = R.GaussLegendre( edges, opts.order, edges.size-1 )
+gl_int.points.setLabel('Integrator inputs')
+gl_int.points.x.setLabel('E (points)')
+gl_int.points.xedges.setLabel('E (bin edges)')
 edges = gl_int.points.xedges.data()
 widths = edges[1:]-edges[:-1]
 
 # create the 1d integrator (histogram) for given sample points
 gl_hist = R.GaussLegendreHist( gl_int )
+gl_hist.hist.setLabel('Integrator (histogram)')
 
 # knots = gl_int.points.x.data()
 # y = N.exp(-(knots-mean)**2/2.0/sigma**2)/N.sqrt(2.0*N.pi)/sigma
@@ -62,6 +79,7 @@ fcn.rate.E(gl_int.points.x)
 gl_hist.hist.f( output )
 # read the histogram contents
 hist_output = gl_hist.hist.hist
+hist_output.setLabel('output histogram')
 hist = hist_output.data()
 
 """Plot data"""
@@ -89,5 +107,15 @@ ax.legend( loc=opts.legend)
 diff = hist.sum()-1
 print( 'Integral-1:', diff )
 print( N.fabs(diff)<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
+
+if opts.dot:
+    try:
+        from gna.graphviz import GNADot
+        graph = GNADot(gl_hist.hist)
+        graph.write(opts.dot)
+        print( 'Write output to:', opts.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )
+        raise
 
 P.show()
