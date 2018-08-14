@@ -283,11 +283,6 @@ void GpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
-
-
-    std::cerr << "TMP CERR! current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
-
-
   if (dataLoc == loc || syncFlag == SyncFlag::Synchronized) {
 #ifdef CU_DEBUG_2
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl;

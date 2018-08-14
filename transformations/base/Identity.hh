@@ -25,7 +25,6 @@ public:
 
 #ifdef GNA_CUDA_SUPPORT
   void gpu_test (FunctionArgs& fargs) {
-    //this.setEntryLocation(DataLocation::Device);
     fargs.rets[0].gpuArr->setByDeviceArray(fargs.args[0].gpuArr->devicePtr);
     *(fargs.rets[0].gpuArr) *=15;
     std::cout << "Dump: ";
