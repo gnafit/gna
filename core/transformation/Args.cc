@@ -27,9 +27,7 @@ const Data<double> &Args::operator[](int i) const {
   }
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
-  std::cout << "before sync" << std::endl;
   if (src.sink->data->gpuArr) {
-	std::cout << "in if" << std::endl;
     src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
   }
 #endif

@@ -124,7 +124,12 @@ bool Entry::check() const {
  */
 void Entry::evaluate() {
   auto fargs = FunctionArgs(this);
-  return fun(fargs);
+  fun(fargs);
+#ifdef GNA_CUDA_SUPPORT
+  for(auto& sink : this->sinks){
+    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
+  }
+#endif
 }
 
 /**
@@ -326,6 +331,7 @@ void Entry::switchFunction(const std::string& name){
 
   funcname=name;
   evaluateTypes();
+  std::cerr << "TODO DELETE entry location" << getEntryLocation() << std::endl;
 }
 
 /**
