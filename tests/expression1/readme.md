@@ -22,7 +22,7 @@ Let us forget for a while who has created the variables and outputs and focus on
 In terms of expression a variable is a raw variable, for example `var`. The variables may be multiplied:
 `var1*var2*...` is another variable.
 
-There is not definition of a sum of variables currently.
+There is no definition of a sum of variables currently.
 
 ## Outputs
 
