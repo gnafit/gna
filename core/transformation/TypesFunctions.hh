@@ -123,7 +123,6 @@ void TypesFunctions::ifSame2(TransformationTypes::TypesFunctionArgs& fargs) {
 template <size_t Arg1, size_t Arg2>
 void TypesFunctions::ifSameShape2(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
-  auto& rets=fargs.rets;
   if (args[Arg1].shape != args[Arg2].shape) {
     auto fmt = format("Transformation %1%: inputs %2% and %3% should have same shape");
     throw args.error(args[Arg2], (fmt%args.name()%Arg1%Arg2).str());
@@ -309,8 +308,6 @@ inline void TypesFunctions::if1d(TransformationTypes::TypesFunctionArgs& fargs) 
  */
 template <size_t Arg>
 inline void TypesFunctions::if2d(TransformationTypes::TypesFunctionArgs& fargs) {
-  auto& args=fargs.args;
-  auto& rets=fargs.rets;
   TypesFunctions::ifNd<Arg,2>(fargs);
 }
 /**
