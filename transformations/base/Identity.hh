@@ -17,8 +17,7 @@ public:
       .types(TypesFunctions::pass<0,0>)
       .func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x;})
 #ifdef GNA_CUDA_SUPPORT     //
-      .setEntryLocation(DataLocation::Device)
-      .func("GPU", &Identity::gpu_test)
+      .func("GPU", [this](FunctionArgs& fargs){ Identity::gpu_test(fargs);}, DataLocation::Device)
 #endif
       ;
   };

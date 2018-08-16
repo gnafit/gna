@@ -4,6 +4,10 @@
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
+#ifdef GNA_CUDA_SUPPORT
+#include "DataLocation.hh"
+#endif
+
 template <typename Derived>
 class TransformationBind;
 
@@ -201,6 +205,24 @@ namespace TransformationTypes {
       this->func("main", afunc);
       return *this;
     }
+
+
+#ifdef GNA_CUDA_SUPPORT
+    /**
+     * @brief Set the named function and its target device.
+     * 
+     * See Initializer::func(const std::string& name, Function afunc) for more details. 
+     * Additionally set the location (DataLocation::Host or DataLocation::Device).
+     *
+     * @return `*this`.	
+     */
+    Initializer<T> func(const std::string& name, Function afunc, DataLocation loc) {
+      setEntryLocation(loc);
+      this->func(name, afunc);
+      return *this;
+    }
+#endif
+
 
     /**
      * @brief Set the named Function.
@@ -449,6 +471,7 @@ namespace TransformationTypes {
      * @brief Sets the location for transformation
      *
      * Sets the location flag in Entry:m_entry.
+     * \warning{Deprecated}
      *
      * @return `*this`
      */
