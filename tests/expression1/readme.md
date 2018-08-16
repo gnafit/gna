@@ -73,6 +73,34 @@ same context, they may not have identical names. They are derived or specified b
 user may say that `o1*o2` is called `p`. Then when Expression will create the Product for `o1*o2` it will give it a name
 `p`. The names mey be provided for sums and product.
 
+The names are described by a special dictionary, called library. The library has the following form:
+```python
+lib = dict(
+    obs_spec = dict(expr='norm*spec'),
+    prod12   = dict(expr='var1*var2:j_k_m'),
+    obs_tot  = dict(expr='obs_spec+bkg'),
+    insum    = dict(expr='sum:a_b'),
+    inproduct= dict(expr='prod:n'),
+    totalsum = dict(expr='sum:z')
+)
+```
+where the key is a target name and expr is simplified expression. Simplified expressions should be build via following rules:
+- The order should be the same as in actual expression.
+- No `()` should be used. The variables and outputs have unique names and are not distinguished here.
+- Only simple expressions are supported. To provide a name for `a*(b+c)` one should provide a name for `b+c` (for
+    example `NewName`) and then for `a*NewName`.
+- The regular way is to use raw names without indices, but user may specify the indices. Indices should be provided in
+    sorted order after ':' and separated by '_', like `var2:j_k_m`
+- In order to provide a name for a indexed sum or indexed product the names `sum` and `prod` should be used and indices
+    should be provided explicitly.
+
+In the exampel above:
+- `norm*spec` will be matched to `norm*spec`, `norm*spec()`, `norm()*spec` and `norm()*spec()` with or without indices.
+- `var1*var2:j_k_m` will be matched to `var1*var2[j,k.m]`, `var1*var2[j,k.m]()`, `var1()*var2[j,k.m]` or `var1()*var2[j,k.m]()`.
+    `var1` with or without indices and `var2` only with indices `j`, `k`, `m`.
+- `sum:a_b` will be matched to `sum[a,b]|...` of any argument.
+- `prod:n` will be matched to `prod[n]|...` or any argument.
+
 # Indexing
 
 The expressions are used with indexing in mind. A lot of parts of a model may have different versions, such as different
@@ -164,5 +192,5 @@ from gna.env import env
 env.globalns.printparameters()
 ```
 
-#vim: textwidth=120 wrap spell
+vim: textwidth=120 wrap spell
 
