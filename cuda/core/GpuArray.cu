@@ -200,8 +200,6 @@ DataLocation GpuArray<T>::getContentToCPU(T* dst) {
 		std::cerr << "Err is: " << cudaGetErrorString(err) << std::endl;
 #endif
 		dataLoc = DataLocation::Crashed;
-	} else {
-		dataLoc = DataLocation::Host;
 	}
 	return dataLoc;
 }
@@ -283,13 +281,16 @@ void GpuArray<T>::sync(DataLocation loc) {
 /**
 Copies the actual data to the loc location
 */
+
+
+    std::cerr << "current location state is <" << dataLoc << ">, new data location state is <" << loc << ">" << std::endl;
   if (dataLoc == loc || syncFlag == SyncFlag::Synchronized) {
 #ifdef CU_DEBUG_2
     std::cerr << "Relevant data on "<< loc << "  -- no synchronization needed" << std::endl;
 #endif
   } else if((dataLoc == DataLocation::Device && loc == DataLocation::Host)) {
     sync_D2H();
-  } else if((dataLoc == DataLocation::Host || dataLoc == DataLocation::InitializedOnly) && loc == DataLocation::Device) {
+  } else if((dataLoc == DataLocation::Host || dataLoc == DataLocation::InitializedOnly)  && loc == DataLocation::Device) {
     sync_H2D();
   } else if (dataLoc == DataLocation::NoData) {
     throw std::runtime_error("Data is not initialized");
