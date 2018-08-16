@@ -119,17 +119,10 @@ bool Entry::check() const {
  * @brief Do actual calculation by calling Entry::fun.
  *
  * Does not reset the taintflag.
- * If CUDA enabled, sets the location of relevant data (Host oe Device)
- *
  */
 void Entry::evaluate() {
   auto fargs = FunctionArgs(this);
-  fun(fargs);
-#ifdef GNA_CUDA_SUPPORT
-  for(auto& sink : this->sinks){
-    if (sink.data->gpuArr != nullptr) sink.data->gpuArr->setLocation( this->getEntryLocation() );
-  }
-#endif
+  return fun(fargs);
 }
 
 /**
@@ -249,26 +242,29 @@ void Entry::evaluateTypes() {
       }
     }
 
+    for (Entry *dep: deps) {
+      dep->evaluateTypes();
+    }
+    initInternals(sargs);
+
+
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT
     if (this->getEntryLocation() == DataLocation::Device) {
       for (auto &source : sources) {
           source.sink->data->require_gpu();
+	 //  source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
       }
       for (auto &sink : sinks) {
         sink.data->require_gpu();
+        sink.data->gpuArr->setLocation( this->getEntryLocation() );
       }
-    
       gpustorage = new GPUStorage(this); 
       std::cerr << "afret gpu storage new" << std::endl;
       gpustorage->initGPUStorage();
     }
 #endif
 
-    for (Entry *dep: deps) {
-      dep->evaluateTypes();
-    }
-    initInternals(sargs);
   }
 }
 
@@ -331,7 +327,6 @@ void Entry::switchFunction(const std::string& name){
 
   funcname=name;
   evaluateTypes();
-  std::cerr << "TODO DELETE entry location" << getEntryLocation() << std::endl;
 }
 
 /**
