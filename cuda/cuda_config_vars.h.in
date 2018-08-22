@@ -17,3 +17,4 @@
 #define CU_GRID_SIZE 32
 
 #define CUDA_STREAMS_NUM 2
+#define GPU_STORAGE_BLOCK_SIZE 2

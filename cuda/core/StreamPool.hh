@@ -10,6 +10,10 @@ public:
 	StreamPool();
 	~StreamPool();
 
+	size_t getFreeStreamId();
+
+	cudaStream_t& getStream(size_t index);
+private
 	cudaStream_t* streampool = nullptr;
 	
 };
