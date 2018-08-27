@@ -19,6 +19,14 @@
 
 
 namespace MultiThreading {
+
+  enum class WorkerStatus { 
+    Sleep = 0,
+    Running,
+    Stopped,
+    Crashed
+  };
+
   class Worker;
 
   /**
@@ -63,6 +71,8 @@ namespace MultiThreading {
     size_t worker_count;
     size_t m_max_thread_number;
 
+    bool stopped;
+
 //  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;
@@ -74,7 +84,8 @@ namespace MultiThreading {
     std::mutex tp_waitlist_mutex;
 
     std::condition_variable cv_tp_m_workers_mutex;
-    std::condition_variable cv_tp_threads_mutex;
+    std::condition_variable stop_condition;
+  //  std::condition_variable cv_tp_threads_mutex;
   };
 
 
@@ -85,11 +96,13 @@ namespace MultiThreading {
     void work();
     bool is_free ();
     void add_to_task_stack(Task task);
+    void wait();
 
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
-    std::thread w_thread;
+    size_t thread_index_in_pool = 0;
+//    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
     std::stack<Task> *task_stack;
 
