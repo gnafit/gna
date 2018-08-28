@@ -20,11 +20,16 @@
 
 namespace MultiThreading {
 
+ /*
+  * Show status of the thread corresponding to MultiThreading::Worker 
+  * 
+  *
+  */
   enum class WorkerStatus { 
-    Sleep = 0,
-    Running,
-    Stopped,
-    Crashed
+    Sleep = 0,		///< Free worker, may be woke up and used
+    Running,		///< Worker has tasks in its task stack
+    Stopped,		///< Worker already stopped, can't be used
+    Crashed		///< Smth wrong 
   };
 
   class Worker;
@@ -83,9 +88,9 @@ namespace MultiThreading {
     std::mutex tp_threads_mutex;
     std::mutex tp_waitlist_mutex;
 
-    std::condition_variable cv_tp_m_workers_mutex;
-    std::condition_variable stop_condition;
-  //  std::condition_variable cv_tp_threads_mutex;
+//    std::condition_variable cv_tp_m_workers_mutex;
+//    std::condition_variable stop_condition;
+    std::condition_variable cv_global_wait_list;
   };
 
 
@@ -102,6 +107,7 @@ namespace MultiThreading {
     ThreadPool &pool;
     std::thread::id thr_head;
     size_t thread_index_in_pool = 0;
+    WorkerStatus status = WorkerStatus::Sleep;
 //    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
     std::stack<Task> *task_stack;
