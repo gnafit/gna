@@ -215,16 +215,22 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
 
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
 	size_t src_size = in_task.m_entry->sources.size();
-	for (size_t i = 0; i < src_size; i++) {
-		if ( in_task.m_entry->sources[i].sink->entry->tainted) {
-			Task child_task(std::ref(in_task.m_entry->sources[i].sink->entry));
-			add_task(child_task);
-
-		}			
+	
+	size_t curr_task_worker = add_to_free_worker(in_task);
+	if (src_size > 0) {
+		Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
+		add_to_N_worker(child_task, curr_task_worker);
 	}
 
+	for (size_t i = 1; i < src_size; i++) {
+		if ( in_task.m_entry->sources[i].sink->entry->tainted) {
+			Task child_task(std::ref(in_task.m_entry->sources[i].sink->entry));
+			size_t n_worker = add_to_free_worker(child_task);
+		}			
+	}
+	
 	// TODO barrier	
-	size_t worker_index = try_to_find_worker(in_task);
+	//size_t worker_index = try_to_find_worker(in_task);
 	in_task.run_task(); // TODO to the find worker??? 
 		
 
