@@ -221,14 +221,39 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
  *
  */
 void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task in_task, size_t N) {
+	tp_m_workers_mutex.lock();
 	if (get_workers_count() <= N) {
 		throw std::runtime_error("Not enough workers.");
 	}
-	tp_m_workers_mutex.lock();
 	m_workers[N].task_stack.push(in_task);
 	tp_m_workers_mutex.unlock()
 }
 
+
+/*
+ * Find the worker with an empty stack.
+ * If such such worker is found, push the task into its stack.
+ * If there is no free Workers, push the task into global wait list.
+ */
+size_t MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task in_task) {
+	
+	size_t i = 0; 
+
+	tp_m_workers_mutex.lock();
+	size_t n_workers = get_workers_count();
+	while (i < n_worker &&	m_workers[i].status != WorkerStatus::Sleep)
+		 i++;
+	}	
+	tp_m_workers_mutex.unlock()
+
+	if (i == n_worker) {
+		add_to_global_wait_list(in_task);
+		return -1; // if free worker was not found
+	}
+	
+	add_to_N_worker(in_task, i);
+	return i;
+}
 
 /*
  * Push task into global wait list (single per thread pool)
@@ -250,13 +275,9 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
 	size_t src_size = in_task.m_entry->sources.size();
 	
 	size_t curr_task_worker = add_to_free_worker(in_task);
-	if (src_size > 0) {
+	if (curr_task_worker != -1 && src_size > 0) {
 		Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
-		if (curr_task_worker == -1) {
-			add_to_global_wait_list(child_task);
-		} else {
-			add_to_N_worker(child_task, curr_task_worker);
-		}
+		add_to_N_worker(child_task, curr_task_worker);
 	}
 
 	for (size_t i = 1; i < src_size; i++) {
