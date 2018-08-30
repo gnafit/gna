@@ -274,7 +274,7 @@ void MultiThreading::ThreadPool::add_to_global_wait_list(MultiThreading::Task in
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
 	size_t src_size = in_task.m_entry->sources.size();
 	
-	size_t curr_task_worker = add_to_free_worker(in_task);
+	size_t curr_task_worker = add_to_free_worker(in_task); // if -1, it is already added to the wait list
 	if (curr_task_worker != -1 && src_size > 0) {
 		Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
 		add_to_N_worker(child_task, curr_task_worker);

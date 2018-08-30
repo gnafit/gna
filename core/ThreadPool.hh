@@ -53,6 +53,10 @@ namespace MultiThreading {
     bool done();// { std::cout << "DONE FUNC src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
     TransformationTypes::Entry *m_entry;
+
+    size_t worker_index = -1;
+
+// TODO DELETE
     std::mutex task_mtx;
     std::condition_variable task_cv;
   };
@@ -73,6 +77,12 @@ namespace MultiThreading {
     bool is_pool_full();
     void manage_not_motherthread(Task in_task);
     size_t try_to_find_worker(Task in_task);
+
+    void add_to_N_worker(MultiThreading::Task in_task, size_t N);
+    size_t add_to_free_worker(MultiThreading::Task in_task);
+    void add_to_global_wait_list(MultiThreading::Task in_task);
+    
+
 
     size_t worker_count;
     size_t m_max_thread_number;
