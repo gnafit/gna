@@ -81,7 +81,7 @@ namespace MultiThreading {
 //  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;
-    std::vector< std::vector<Task> > m_global_wait_list;
+    std::queue< Task > m_global_wait_list;
 
 
     std::mutex tp_m_workers_mutex;
@@ -110,7 +110,7 @@ namespace MultiThreading {
     WorkerStatus status = WorkerStatus::Sleep;
 //    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
-    std::stack<Task> *task_stack;
+    std::stack<Task> task_stack;
 
     mutable std::mutex mtx_worker;
     std::condition_variable cv_worker;    
