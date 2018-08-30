@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 #include <stack>
+#include <queue>
 #include <condition_variable> 
 #include "TransformationEntry.hh"
 #include "GNAObject.hh"
@@ -79,9 +80,9 @@ namespace MultiThreading {
     size_t try_to_find_worker(Task in_task);
 
     void add_to_N_worker(MultiThreading::Task in_task, size_t N);
-    size_t add_to_free_worker(MultiThreading::Task in_task);
+    int add_to_free_worker(MultiThreading::Task in_task);
     void add_to_global_wait_list(MultiThreading::Task in_task);
-    
+    size_t get_workers_count();
 
 
     size_t worker_count;
@@ -121,7 +122,7 @@ namespace MultiThreading {
     WorkerStatus status = WorkerStatus::Sleep;
 //    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
-    std::stack<Task> task_stack;
+    std::stack<Task> task_stack ;
 
     mutable std::mutex mtx_worker;
     std::condition_variable cv_worker;    
