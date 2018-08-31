@@ -38,6 +38,7 @@ from gna.env import env
 from matplotlib import pyplot as P
 import numpy as N
 from mpl_tools import bindings
+from gna.labelfmt import formatter as L
 R.GNAObject
 
 #
@@ -119,7 +120,7 @@ cfg = NestedDict(
             # - the integration order for each X bin (or fo all of the bins) (Gauss-Legendre)
             xorders   = 3,
             # - the integration order for all Y bins (Gauss-Legendre)
-            yorder   = 3,
+            yorder   = 5,
             # - this line says that the bundle will create 'evis' and 'ctheta' output in addition to 'kinint2'
             provides = [ 'evis', 'ctheta' ]
             ),
@@ -161,6 +162,25 @@ ax.set_title( 'IBD cross section (1st order)' )
 context.outputs.kinint2.plot_hist( label='Integrated cross section' )
 
 ax.legend(loc='upper left')
+
+# #
+# # Check, that unraveled Enu is always gowing
+# #
+# enu  = context.outputs.enu.data()
+
+# fig = P.figure()
+# ax = P.subplot( 111 )
+# ax.minorticks_on()
+# ax.grid()
+# ax.set_xlabel(L.u('enu'))
+# ax.set_ylabel(L('{enu} step'))
+# ax.set_title(L('Check {enu} step'))
+
+# idx = N.arange(enu.shape[0])
+# for i, e in enumerate(enu.T):
+    # ax.plot(idx, e, '-', label='Slice %i'%i)
+
+# ax.legend(loc='upper left')
 
 if args.show:
     P.show()
