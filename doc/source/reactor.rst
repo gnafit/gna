@@ -21,7 +21,7 @@ following formula:
 
 .. math::
    N_i = \int\limits_{E_i}^{E_{i+1}} d E
-   \int dE_{\bar{\nu}} \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_{ee}(E_{\bar{\nu}}) \sum \limits_k
+   \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_{ee}(E_{\bar{\nu}}) \sum \limits_k
    n_k S_k(E_{\bar{\nu}})
 
 :math:`N_i` is the event number in the :math:`i`-th bin containing
@@ -62,7 +62,7 @@ implemented in code reads:
 
 .. math::
    N_i = \sum_j w_j \int\limits_{E_i}^{E_{i+1}} d E
-   \int dE_{\bar{\nu}} \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_j(E_{\bar{\nu}}) \sum \limits_k
+   \frac{dE}{dE_{\bar{\nu}}}\sigma(E_{\bar{\nu}}) P_j(E_{\bar{\nu}}) \sum \limits_k
    n_k S_k(E_{\bar{\nu}})
 
 
