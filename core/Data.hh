@@ -625,7 +625,7 @@ public:
 
   Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
 #ifdef GNA_CUDA_SUPPORT
-  std::unique_ptr<GpuArray<T>> gpuArr{nullptr};
+  std::unique_ptr<GpuArray<T>> gpuArr{nullptr};    ///< container for data on GPU, view to GPU array
 #endif
 
 };
