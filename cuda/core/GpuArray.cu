@@ -434,6 +434,6 @@ void GpuArray<T>::setMatSize(size_t mat_rows, size_t mat_cols) {
 }
 
 template class GpuArray<double>;
-//template class GpuArray<float>;
-//template class GpuArray<int>;
+template class GpuArray<float>;
+template class GpuArray<int>;
 //template class GpuArray<bool>;

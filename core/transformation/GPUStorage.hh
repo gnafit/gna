@@ -20,7 +20,7 @@ namespace TransformationTypes {
 	private:
 		const Entry* m_entry;
 		double** m_gpu_args;
-		bool inited=false;
+		int initedStorageSize = 0;
 		std::vector<size_t> gpu_sizes_rows;
 		std::vector<size_t> gpu_sizes_cols;
 		void fill_size_vec();	// TODO fill vecs according to gpuArr sizes

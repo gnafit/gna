@@ -19,6 +19,7 @@ template <typename T>
 class GpuArray {
 public: 
 	GpuArray(T* inHostPtr = nullptr);				///< constructor without initialization, sets SyncFlag to Unsynchronized 
+	GpuArray(GpuArray<T> &gpuarray);				///< copy constructor 
         GpuArray(size_t inSize, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
         GpuArray(size_t mat_rows, size_t mat_cols, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
 	~GpuArray() {/* free();*/ }
