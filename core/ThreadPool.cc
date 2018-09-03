@@ -277,38 +277,41 @@ size_t MultiThreading::ThreadPool::get_workers_count() {
  * 
  *
  */
-void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task) {
+void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, int entry_point_stat) {
 	size_t src_size = in_task.m_entry->sources.size();
 	
-	int curr_task_worker = add_to_free_worker(in_task); // if -1, it is already added to the wait list
-	if (curr_task_worker != -1 && src_size > 0) {
-		Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
-		add_to_N_worker(child_task, curr_task_worker);
-	}
+	size_t iter = 1;
+	bool ready_to_run = true;
 
-	for (size_t i = 1; i < src_size; i++) {
-		if ( in_task.m_entry->sources[i].sink->entry->tainted) {
-			Task child_task(std::ref(in_task.m_entry->sources[i].sink->entry));
-			//size_t n_worker = 
-			add_to_free_worker(child_task);
+	if (entry_point_stat < 0) {
+		iter = 0;
+		int curr_task_worker = add_to_free_worker(in_task); // if -1, it is already added to the wait list
+		if (curr_task_worker != -1 && src_size > 0 && !(in_task.m_entry->sources[0].sink->entry->running) && in_task.m_entry->sources[0].sink->entry->tainted)  {
+			Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
+			add_to_N_worker(child_task, curr_task_worker);
+			add_task(child_task, curr_task_worker);
+			ready_to_run = false;
+		}
+	}
+ 
+	for ( ; iter < src_size; iter++) {
+		if ( in_task.m_entry->sources[iter].sink->entry->tainted && !(in_task.m_entry->sources[iter].sink->entry->running)) {
+			Task child_task(std::ref(in_task.m_entry->sources[iter].sink->entry));
+			int n_worker = add_to_free_worker(child_task);
+			if (n_worker != -1) add_task(child_task, n_worker);
+			ready_to_run = false;
 		}			
 	}
-	
+
+	if (ready_to_run) {
+		// TODO how to write runtask for w_is = -1
+		in_task.run_task(entry_point_stat);
+	}
+
+		
 	// TODO barrier	
 	//size_t worker_index = try_to_find_worker(in_task);
 
-//	in_task.run_task(); // TODO to the find worker??? 
-		
-
-/*	if (in_task.done() && worker_index >= 0) {
-		std::cerr << "condition!!" << std::endl;
-		m_workers[whoami()].work();
-		//		m_workers[0].work();
-	} else {
-		std::cerr << "eval only " << std::endl;
-		in_task.run_task();
-	}
-*/
 }
 
 bool MultiThreading::ThreadPool::is_pool_full() {
