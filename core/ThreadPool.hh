@@ -50,7 +50,7 @@ namespace MultiThreading {
 	this->m_entry = task.m_entry;
     }
 
-    void run_task();
+    void run_task(int worker_id);
     bool done();// { std::cout << "DONE FUNC src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
 //  private:
     TransformationTypes::Entry *m_entry;
@@ -73,7 +73,7 @@ namespace MultiThreading {
     void stop();
 
     int whoami();
-    void add_task(Task task);
+    void add_task(Task task, int entry_point_stat = -1);
     void new_worker(Task &task, size_t index);
     bool is_pool_full();
     void manage_not_motherthread(Task in_task);

@@ -21,10 +21,8 @@ bool MultiThreading::Task::done() {
 	return (m_entry->running || !(m_entry->tainted) || (m_entry->sources.size() == 0));
 }
 
-void MultiThreading::Task::run_task() {
+void MultiThreading::Task::run_task(int worker_id) {
 	using namespace std::chrono_literals;
-	// std::unique_lock<std::mutex> t_lck(task_mtx);
-	//if (task_mtx.try_lock()) {
 		if (m_entry->tainted && !m_entry->frozen && !m_entry->running) {
 			std::cerr << "RUNNING STAT = " << m_entry->running
 				  << std::endl;
