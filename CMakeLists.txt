@@ -50,6 +50,7 @@ set (SOURCES
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
+  transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
   transformations/linalg/Cholesky.cc
@@ -138,6 +139,7 @@ set (HEADERS
   Identity.hh
   Dummy.hh
   LinearInterpolator.hh
+  InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
   FillLike.hh

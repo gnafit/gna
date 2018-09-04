@@ -185,9 +185,6 @@ ax.legend(loc='upper left')
 if args.show:
     P.show()
 
-import IPython
-IPython.embed()
-
 #
 # Dump the histogram to a dot graph
 #
