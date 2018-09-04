@@ -16,7 +16,7 @@ using std::fabs;
  * @brief Constructor.
  */
 InSegment::InSegment() {
-  transformation_("segments")                                     /// Define transformation `segments`:
+  transformation_("insegment")                                    /// Define transformation `segments`:
                                                                   ///   - with two inputs:
     .input("points")                                              ///     + `points` - fine x.
     .input("edges")                                               ///     + `edges` - coarse x bins.
