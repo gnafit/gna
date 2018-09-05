@@ -2,9 +2,6 @@
 #include "TypesFunctions.hh"
 
 #include <TMath.h>
-
-//#define DEBUG_INTERPEXPOU
-
 #include <stdexcept>
 
 using std::next;
@@ -41,7 +38,7 @@ InterpExpoU::InterpExpoU() : InSegment() {
 }
 
 void InterpExpoU::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto segments = this->t_["segments"];
+  auto segments = this->t_["insegment"];
   auto sinputs  = segments.inputs();
   auto soutputs = segments.outputs();
   sinputs[0].connect(newx.single());
@@ -99,11 +96,9 @@ void InterpExpoU::do_interpolate(FunctionArgs& fargs){
 
     advance(point, 1);
     advance(result, 1);
+    advance(insegment, 1);
   }
 
-  #ifdef DEBUG_INTERPEXPOU
-  printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
-  #endif
 }
 
 //InterpExpoU::Strategy InterpExpoU::getStrategy(const std::string& strategy){

@@ -17,10 +17,9 @@ parser.add_argument( '-o', '--output' )
 opts = parser.parse_args()
 
 segments   = N.arange(1.0, 10.1, 1.5, dtype='d')
-# segments   = N.arange(1.0, 10.1, 4, dtype='d')
 segments_t = Points(segments)
 
-points = N.linspace(0.0, 12.0, 61)
+points   = N.stack([N.linspace(0.0+i, 12.+i, 61, dtype='d') for i in [0, -0.1, 0.1, 0.3, 0.5]]).T
 points_t = Points(points)
 
 fcn = N.exp( -(segments-segments[0])*0.5 )
@@ -49,7 +48,11 @@ ax.set_ylabel( 'y' )
 ax.set_title( 'Expo' )
 
 ax.plot( segments, fcn, 'o', markerfacecolor='none', label='coarse function' )
-ax.plot( points, res, '.', label='interpolation' )
+
+markers='os*^vh'
+for i, (p, r) in enumerate(zip(points.T, res.T)):
+    ax.plot( p, r, '.', label='interpolation, col %i'%i, marker=markers[i] )
+
 ax.legend(loc='upper right')
 # ax.set_yscale('log')
 

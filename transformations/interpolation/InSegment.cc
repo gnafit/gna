@@ -1,7 +1,7 @@
 #include "InSegment.hh"
 #include "TypesFunctions.hh"
 
-#define DEBUG_INSEGMENT
+//#define DEBUG_INSEGMENT
 
 #include <algorithm>
 #include <cmath>
