@@ -10,7 +10,7 @@
  *   - f(x) = k_i * exp( -(x-x_i)*b_i ) for x in [x_i, x_i+1)
  *   - k = f(x_0)
  *   - b is chosen such that function was continuous:
- *   - b_i = - ln(k_i+1 / k_i) / ( E_i+1 - E-i )
+ *   - b_i = - ln(k_i+1 / k_i) / ( x_i+1 - x_i )
  *
  * The object inherits InSegment that determines the segments to be used for interpolation.
  *
@@ -20,7 +20,7 @@
  *   - interp.newx -- array with points with fine steps to interpolate on.
  *   - interp.x -- array with coarse points.
  *   - interp.y -- values of a function on `x`.
- *   - interp.segments -- segments of `newx` in `x`. See InSegment.
+ *   - interp.insegment -- segments of `newx` in `x`. See InSegment.
  *
  * Outputs:
  *   - interp.interp

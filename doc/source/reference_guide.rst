@@ -97,6 +97,16 @@ Linear algebra
    transformations/Sum.rst
    transformations/WeightedSum.rst
 
+Interpolation
+^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/InSegment.rst
+   transformations/InterpExpoU.rst
+
 Calculus
 ^^^^^^^^
 
