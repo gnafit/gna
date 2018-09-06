@@ -13,43 +13,44 @@
 #include "GNAObject.hh"
 #include "TransformationEntry.hh"
 
-// struct Entry;
-
 bool MultiThreading::Task::done() {
 	std::cerr << "DONE FUNC src size " << m_entry->sources.size()
 		  << std::endl;
 	return (m_entry->running || !(m_entry->tainted) || (m_entry->sources.size() == 0));
 }
 
+
+/*
+ * Run a single task by evaluation of corresponding transformation.
+ * If transformation is running or finished already, nothing is done. 
+ *
+ */
 void MultiThreading::Task::run_task() {
 	// TODO check is task already ready ro run (all inputs are valid)
 	// if not -- wait until ready
+	if (m_entry->running || !m_entry->tainted) return;	
 
+	m_entry->mark_running();
 
-/*	using namespace std::chrono_literals;
-	if (m_entry->tainted && !m_entry->frozen && !m_entry->running) {
-		if (m_entry->tainted) {  // && !m_entry->frozen) {
-			m_entry->mark_running();
-			if (m_entry->tainted) {
-				m_entry->evaluate();
-				std::cerr << "EVA-id = "
-					  << std::this_thread::get_id()
-					  << std::endl;
-				m_entry->tainted = false;
-			}
-			m_entry->mark_not_running();
-		}
-	}
-*/	
-	
+	m_entry->evaluate();
+	m_entry->tainted = false;
+
+	m_entry->mark_not_running();
 }
 
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 	task_stack =  std::stack<Task>();
 }
 
+
+/*
+ * Wake up worker, change its status to WorkerStatus::Run, and run tasks from worker's task stack.
+ * When stack becomes empty, worker changes its status to WorkerStatus::Sleep.
+ *
+ */
 void MultiThreading::Worker::work() {  // runs task stack
 	worker.status = WorkerStatus::Run;
+	worker.wakeup();
 
 	size_t w_size = worker.get_stack_size();
 	while (!task_stack.empty()) {
@@ -57,7 +58,6 @@ void MultiThreading::Worker::work() {  // runs task stack
 		task_stack.pop();
 	}
 
-	
 	worler.sleep();
 	worker.status = WorkerStatus::Sleep;
 }
