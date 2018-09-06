@@ -21,34 +21,27 @@ bool MultiThreading::Task::done() {
 	return (m_entry->running || !(m_entry->tainted) || (m_entry->sources.size() == 0));
 }
 
-void MultiThreading::Task::run_task(int worker_id) {
-	using namespace std::chrono_literals;
-		if (m_entry->tainted && !m_entry->frozen && !m_entry->running) {
-			std::cerr << "RUNNING STAT = " << m_entry->running
-				  << std::endl;
-		//	auto now = std::chrono::system_clock::now();
-			std::cerr << "waiting......................"
-				  << std::endl;
-		//	task_cv.wait_until(t_lck, now + 100ms, [this] {
-		//		return !m_entry->running;
-		//	});
+void MultiThreading::Task::run_task() {
+	// TODO check is task already ready ro run (all inputs are valid)
+	// if not -- wait until ready
 
-			if (m_entry->tainted) {  // && !m_entry->frozen) {
-				m_entry->mark_running();
-				if (m_entry->tainted) {
-					m_entry->evaluate();
-					std::cerr << "EVA-id = "
-						  << std::this_thread::get_id()
-						  << std::endl;
-					m_entry->tainted = false;
-				}
-				m_entry->mark_not_running();
+
+/*	using namespace std::chrono_literals;
+	if (m_entry->tainted && !m_entry->frozen && !m_entry->running) {
+		if (m_entry->tainted) {  // && !m_entry->frozen) {
+			m_entry->mark_running();
+			if (m_entry->tainted) {
+				m_entry->evaluate();
+				std::cerr << "EVA-id = "
+					  << std::this_thread::get_id()
+					  << std::endl;
+				m_entry->tainted = false;
 			}
+			m_entry->mark_not_running();
 		}
-		//t_lck.unlock();
-	//	task_mtx.unlock();
-		//task_cv.notify_one();
-	//}
+	}
+*/	
+	
 }
 
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
@@ -56,18 +49,17 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 }
 
 void MultiThreading::Worker::work() {  // runs task stack
-	Task current_task;
-//	std::lock_guard<std::mutex> task_stack_lock(mtx_worker);
-/*	mtx_worker.lock();
-	if (task_stack->size() != 0) {
-		current_task = task_stack->top();
-		task_stack->pop();
+	worker.status = WorkerStatus::Run;
+
+	size_t w_size = worker.get_stack_size();
+	while (!task_stack.empty()) {
+		task_stack.top().run_task();
+		task_stack.pop();
 	}
-	mtx_worker.unlock();
-	if (pool.stopped) return;
-	current_task.run_task();  // TODO: make it in separate thread
-*/				  //    }
-				  //     w_lck.unlock();
+
+	
+	worler.sleep();
+	worker.status = WorkerStatus::Sleep;
 }
 
 void MultiThreading::ThreadPool::stop() {

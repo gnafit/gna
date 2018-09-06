@@ -50,8 +50,8 @@ namespace MultiThreading {
 	this->m_entry = task.m_entry;
     }
 
-    void run_task(int worker_id);
-    bool done();// { std::cout << "DONE FUNC src size " << m_entry->sources.size() << " "; return (!(m_entry->tainted) || (m_entry->sources.size() == 0)); }
+    void run_task();
+    bool done();
 //  private:
     TransformationTypes::Entry *m_entry;
 
@@ -113,7 +113,9 @@ namespace MultiThreading {
     void work();
     bool is_free ();
     void add_to_task_stack(Task task);
-    void wait();
+    void sleep();
+
+    size_t get_stack_size();
 
 //private:
     ThreadPool &pool;
