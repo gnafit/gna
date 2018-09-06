@@ -39,6 +39,8 @@ where :math:`j` is a segment (bin) of :math:`x` to which :math:`x'_i` belongs to
 :math:`y_j` is the associated value of interpolated function. The :math:`b_j` is thus:
 
 .. math::
-   b_j = - \ln(y_{j+1} / y_j) / ( x_{j+1} - x_j )
+   b_j = - \frac{\ln(y_{j+1} / y_j)}{ x_{j+1} - x_j }.
 
+For the points outside of the :math:`[x_0, x_{N-1}]` interval the function value is extrapolated based on first (last)
+segment for underflow (overflow).
 
