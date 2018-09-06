@@ -13,12 +13,6 @@
 #include "GNAObject.hh"
 #include "TransformationEntry.hh"
 
-bool MultiThreading::Task::done() {
-	std::cerr << "DONE FUNC src size " << m_entry->sources.size()
-		  << std::endl;
-	return (m_entry->running || !(m_entry->tainted) || (m_entry->sources.size() == 0));
-}
-
 
 /*
  * Run a single task by evaluation of corresponding transformation.
@@ -123,21 +117,6 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task,
 		in_task.run_task();
 }
 
-void MultiThreading::ThreadPool::manage_not_motherthread(
-    MultiThreading::Task in_task) {
-	size_t src_size = in_task.m_entry->sources.size();
-	if (src_size > 1) {
-		for (size_t i = 1; i < src_size;
-		     i++) {  // Try to make new thread
-			std::cerr << "SECOND SOURCE! " << i << " size "
-				  << src_size << std::endl;
-			if (in_task.m_entry->sources[i].sink->entry->tainted) {
-				add_task(Task(
-				    in_task.m_entry->sources[i].sink->entry));
-			}
-		}
-	}
-}
 
 size_t MultiThreading::ThreadPool::try_to_find_worker(
     MultiThreading::Task in_task) {
@@ -295,7 +274,7 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, int entr
 
 	if (ready_to_run) {
 		// TODO how to write runtask for w_is = -1
-		in_task.run_task(entry_point_stat);
+		in_task.run_task();
 	}
 
 		

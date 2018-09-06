@@ -51,7 +51,6 @@ namespace MultiThreading {
     }
 
     void run_task();
-    bool done();
 //  private:
     TransformationTypes::Entry *m_entry;
 
@@ -76,7 +75,6 @@ namespace MultiThreading {
     void add_task(Task task, int entry_point_stat = -1);
     void new_worker(Task &task, size_t index);
     bool is_pool_full();
-    void manage_not_motherthread(Task in_task);
     size_t try_to_find_worker(Task in_task);
 
     void add_to_N_worker(MultiThreading::Task in_task, size_t N);
@@ -114,7 +112,7 @@ namespace MultiThreading {
     bool is_free ();
     void add_to_task_stack(Task task);
     void sleep();
-
+    void wakeup();
     size_t get_stack_size();
 
 //private:
