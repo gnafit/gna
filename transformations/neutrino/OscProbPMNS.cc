@@ -61,6 +61,31 @@ double OscProbPMNSBase::weightCP() const {
     );
 }
 
+//OscProbPMNS::OscProbPMNSWeights(Neutrino from, Neutrino to)
+  //: OscProbPMNSBase(from, to)
+//{
+  //std::vector<changeable> deps;
+  //deps.reserve(4+static_cast<int);
+
+    //.input("weight12")
+    //.input("weight13")
+    //.input("weight23")
+    //.input("weight0")
+
+  //for (size_t i = 0; i < varnames.size(); ++i) {
+    //variable_(&m_vars[i], varnames[i]);
+    //deps.push_back(m_vars[i]);
+  //}
+  //m_sum = evaluable_<double>(sumname, [this]() {
+      //double res = m_vars[0];
+      //for (size_t i = 1; i < m_vars.size(); ++i) {
+          //res+=m_vars[i];
+      //}
+      //return res;
+    //}, deps);
+
+//}
+
 OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
     OscProbPMNSBase(from, to)
 {
@@ -172,10 +197,13 @@ void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
 void OscProbPMNS::calcSum(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0].x;
-  ret = 2.0*weight<1,2>()*args[0].x;
-  ret+= 2.0*weight<1,3>()*args[1].x;
-  ret+= 2.0*weight<2,3>()*args[2].x;
-  double coeff0 = 2.0*(-weight<1,2>()-weight<1,3>()-weight<2,3>());
+  auto weight12=weight<1,2>();
+  auto weight13=weight<1,3>();
+  auto weight23=weight<2,3>();
+  ret = 2.0*weight12*args[0].x;
+  ret+= 2.0*weight13*args[1].x;
+  ret+= 2.0*weight23*args[2].x;
+  double coeff0 = -2.0*(weight12+weight13+weight23);
   if (m_alpha == m_beta) {
     coeff0 += 1.0;
   }

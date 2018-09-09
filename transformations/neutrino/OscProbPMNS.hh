@@ -26,6 +26,13 @@ protected:
   int m_alpha, m_beta;
 };
 
+//class OscProbPMNSWeights: public OscProbPMNSBase {
+//public:
+  //OscProbPMNSWeights(Neutrino from, Neutrino to);
+
+  //std::vector<dependant<double>> m_components;
+//};
+
 class OscProbPMNS: public OscProbPMNSBase,
                    public TransformationBind<OscProbPMNS> {
 public:

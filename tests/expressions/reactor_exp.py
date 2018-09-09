@@ -35,18 +35,18 @@ indices = [
     ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
     ]
 
-# indices = [
-    # ('i', 'isotope', ['U235']),
-    # ('r', 'reactor',     ['DB']),
-    # ('d', 'detector',    ['AD11']),
-    # ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    # ]
+indices = [
+    ('i', 'isotope', ['U235']),
+    ('r', 'reactor',     ['DB']),
+    ('d', 'detector',    ['AD11']),
+    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+    ]
 
 #
 # Intermediate options (empty for now)
 #
 lib = dict(
-        cspec_diff = dict(expr='anuspec*ibd_xsec*oscprob'),
+        cspec_diff = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
         cspec_diff_reac = dict(expr='sum:i'),
         cspec_diff_det  = dict(expr='sum:r'),
         spec_diff_det  = dict(expr='sum:c'),
@@ -55,7 +55,7 @@ lib = dict(
 expr =[
         'enu| ee(evis()), ctheta()',
         'jacobian(enu(), ee(), ctheta())',
-        'sum[c]| sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta())'
+        'sum[c]| sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -167,7 +167,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot(context.outputs.ee, joints=True)
+        graph = GNADot(context.outputs.ee, joints=False)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
     except Exception as e:

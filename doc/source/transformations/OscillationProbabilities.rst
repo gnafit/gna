@@ -21,7 +21,7 @@ for the elements of the PMNS matrix. There a few options how it can be done:
     2. ``full_osc_prob`` -- plain full oscillation formula in single
        transformation.
     3. ``average_oscillations`` -- oscillations averaged over energy.
-   
+
 Inputs
 ======
 
@@ -99,4 +99,128 @@ final flavor initialize expressions for required elements of PMNS variables
 (see ``neutrino/PMNSVariables.hh``) and mass splittings (see
 ``neutrino/OscillationVariables.hh``) including effective and exposing it into
 the Python environment.
+
+Formula
+^^^^^^^
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   = \sum_{kj}
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right)
+
+Detach diagonal, sum upper and lower triangles:
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   = \sum_{k}
+   \left| V^{\vphantom{*}}_{\alpha k} \right|^2 \left| V^{\vphantom{*}}_{\beta k} \right|^2
+   +
+   2 \Re
+   \sum_{k>j}
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right)
+
+Open real part:
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   =
+   \left| V^{\vphantom{*}}_{\alpha k} \right|^2 \left| V^{\vphantom{*}}_{\beta k} \right|^2
+   +
+   2
+   &\sum_{k>j}
+   \Re\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \cos\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+   -
+   \\
+   +
+   2
+   &\sum_{k>j}
+   \Im\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+
+Unitarity:
+
+.. math::
+   \left| V^{\vphantom{*}}_{\alpha k} \right|^2 \left| V^{\vphantom{*}}_{\beta k} \right|^2
+   =
+   \delta_{\alpha\beta} -
+   2\sum_{k>j}
+   \Re\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+
+Apply unitarity:
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   =
+   \delta_{\alpha\beta}
+   -
+   2
+   &\sum_{k>j}
+   \Re\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \left[
+   1-
+   \cos\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+   \right]
+   -
+   \\
+   +
+   2
+   &\sum_{k>j}
+   \Im\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+
+Or the other form with half angle:
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   =
+   \delta_{\alpha\beta}
+   -
+   4
+   &\sum_{k>j}
+   \Re\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \sin^2\left(\frac{\Delta m^2_{kj}L}{4E}\right)
+   -
+   \\
+   +
+   2
+   &\sum_{k>j}
+   \Im\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+
+Survival probability:
+
+.. math::
+   P_{\alpha\alpha} (L, E)
+   =
+   1 -
+   4
+   \sum_{k>j}
+   \left| V^{\vphantom{*}}_{\alpha k} \right|^2
+   \left| V^{\vphantom{*}}_{\alpha j} \right|^2
+   \sin^2\left(\frac{\Delta m^2_{kj}L}{4E}\right)
+
+.. math::
+   P_{\alpha\beta} = \sum_{c} \omega^{\alpha\beta}_{c} p^{\alpha\beta}_c(E, L, \Delta m^2_c),
+
+where :math:`c` enumerates components and for 3-neutrino case is :math:`c = 12, 13, 23, 0, \mathrm{CP}`.
+
+.. math::
+   \omega^{\alpha\beta}_{ij} = \Re\left( V^{\vphantom{*}}_{\alpha i} V^{\vphantom{*}}_{\beta j} V^{*}_{\alpha j} V^{*}_{\beta i} \right)
 

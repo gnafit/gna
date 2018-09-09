@@ -177,11 +177,7 @@ class ExpressionContext(object):
         key = self.get_key(name, nidx, clone=clone)
         printl('get {}'.format(type), name, key)
 
-        try:
-            ret = source.get(key, None)
-        except AttributeError:
-            import IPython
-            IPython.embed()
+        ret = source.get(key, None)
         if not ret:
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 
