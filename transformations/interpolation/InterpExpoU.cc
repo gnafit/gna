@@ -53,8 +53,8 @@ void InterpExpoU::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& ne
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpoU::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto soutputs = static_cast<Handle&>(segments).outputs();
+void InterpExpoU::interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+  const auto& soutputs = static_cast<Handle&>(insegment).outputs();
 
   auto interp = this->t_["interp"];
   auto iinputs = interp.inputs();

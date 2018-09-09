@@ -51,7 +51,7 @@ void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& new
 }
 
 void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto soutputs = static_cast<Handle&>(segments).outputs();
+  const auto& soutputs = static_cast<Handle&>(segments).outputs();
 
   auto interp = this->t_["interp"];
   auto iinputs = interp.inputs();

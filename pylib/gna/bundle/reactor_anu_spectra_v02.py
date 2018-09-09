@@ -40,7 +40,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
         if self.cfg.get('corrections', None):
             self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
 
-        segments_t=None
+        insegment_t=None
         for it in self.idx:
             isotope = it.current_values()[0]
 
@@ -57,7 +57,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
             else:
                 spectrum_t = spectrum_raw_t
 
-            interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
+            interp_expo_t = R.InterpExpoU(ns=self.common_namespace)
             interp_expo_t.interp.setLabel('S(E):\n'+isotope)
 
             # TODO: Identity is created only to provide single input (the output is connected twice).
@@ -65,11 +65,11 @@ class reactor_anu_spectra_v02(TransformationBundle):
             newx = R.Identity()
             self.set_input(newx.identity.source, self.cfg.name, it, clone=0)
 
-            if segments_t:
-                interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx.single())
+            if insegment_t:
+                interp_expo_t.interpolate(insegment_t, model_edges_t, spectrum_t, newx.single())
             else:
                 interp_expo_t.interpolate(model_edges_t, spectrum_t, newx.single())
-                segments_t = interp_expo_t.segments
+                insegment_t = interp_expo_t.insegment
 
             """Store data"""
             self.set_output(interp_expo_t.interp.interp, self.cfg.name, it)

@@ -44,7 +44,7 @@ public:
 
   void do_interpolate(FunctionArgs& fargs);                                                                   ///< Do the interpolation.
   void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                     ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
-  void interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx); ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
+  void interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx); ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 
   //void setUnderflow(double value) { m_underflow = value; }                                                 ///< Set value to write into underflow points when strategy=Constant.
   //void setOverflow(double value) { m_overflow = value; }                                                   ///< Set value to write into overflow points when strategy=Constant.
