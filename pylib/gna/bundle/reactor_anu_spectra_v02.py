@@ -22,7 +22,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
             raise Exception('reac_anu_spectra_v02 should be called from within expression')
 
         if self.idx.ndim()!=1:
-            raise Exception('reac_anu_spectra_v02 supports only 1d indexing')
+            raise Exception('reac_anu_spectra_v02 supports only 1d indexing, got %i'%self.indx.ndim())
 
         self.isotopes = kwargs['namespaces'] = [it.current_values()[0] for it in self.idx]
 

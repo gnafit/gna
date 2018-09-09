@@ -111,8 +111,12 @@ class ExpressionContext(object):
 
         printl('build', name, 'via bundle' )
 
-        if indices is not None:
-            cfg.indices=indices
+        if 'indices' in cfg and isinstance(cfg.indices, (list,tuple)):
+            print('\033[35mWarning! %s configuration already has indices (to be fixed)\033[0m'%name)
+            cfg.indices=self.indices.get_sub(cfg.indices)
+        else:
+            if indices is not None:
+                cfg.indices=indices
 
         if name in self.executed_bundes:
             printl('already provided')
@@ -173,7 +177,11 @@ class ExpressionContext(object):
         key = self.get_key(name, nidx, clone=clone)
         printl('get {}'.format(type), name, key)
 
-        ret = source.get(key, None)
+        try:
+            ret = source.get(key, None)
+        except AttributeError:
+            import IPython
+            IPython.embed()
         if not ret:
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 

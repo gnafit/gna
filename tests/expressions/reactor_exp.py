@@ -29,27 +29,33 @@ R.GNAObject
 # Define the indices (empty for current example)
 #
 indices = [
+    ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
     ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
     ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
     ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
     ]
 
-indices = [
-    ('r', 'reactor',     ['DB']),
-    ('d', 'detector',    ['AD11']),
-    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    ]
+# indices = [
+    # ('i', 'isotope', ['U235']),
+    # ('r', 'reactor',     ['DB']),
+    # ('d', 'detector',    ['AD11']),
+    # ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+    # ]
 
 #
 # Intermediate options (empty for now)
 #
-lib = dict()
+lib = dict(
+        cspec_diff = dict(expr='anuspec*ibd_xsec*oscprob'),
+        cspec_diff_reac = dict(expr='sum:i'),
+        cspec_diff_det  = dict(expr='sum:r'),
+        spec_diff_det  = dict(expr='sum:c'),
+        )
 
 expr =[
         'enu| ee(evis()), ctheta()',
         'jacobian(enu(), ee(), ctheta())',
-        # 'kinint2| ibd_xsec(enu(), ctheta()) * jacobian()'
-        'anuspec(enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta())'
+        'sum[c]| sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta())'
         ]
 
 # Initialize the expression and indices
@@ -80,7 +86,8 @@ cfg = NestedDict(
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
             xorders   = 3,
             yorder   = 5,
-            provides = [ 'evis', 'ctheta' ]
+            provides = [ 'evis', 'ctheta' ],
+            indices = list('cdir')
             ),
         ibd_xsec = NestedDict(
             bundle = 'xsec_ibd_v01',
@@ -99,8 +106,7 @@ cfg = NestedDict(
             name = 'anuspec',
             filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-
-            strategy = dict( underflow='constant', overflow='extrapolate' ),
+            # strategy = dict( underflow='constant', overflow='extrapolate' ),
             edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
             ),
         )
@@ -115,44 +121,44 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-#
-# Do some plots
-#
-# Initialize figure
-fig = P.figure()
-ax = P.subplot( 111 )
-ax.minorticks_on()
-ax.grid()
-ax.set_xlabel( 'Visible energy, MeV' )
-ax.set_ylabel( r'$\sigma$' )
-ax.set_title( 'IBD cross section (1st order)' )
-
-# Plot
-context.outputs.kinint2.plot_hist( label='Integrated cross section' )
-
-ax.legend(loc='upper left')
-
 # #
-# # Check, that unraveled Enu is always gowing
+# # Do some plots
 # #
-# enu  = context.outputs.enu.data()
-
+# # Initialize figure
 # fig = P.figure()
 # ax = P.subplot( 111 )
 # ax.minorticks_on()
 # ax.grid()
-# ax.set_xlabel(L.u('enu'))
-# ax.set_ylabel(L('{enu} step'))
-# ax.set_title(L('Check {enu} step'))
+# ax.set_xlabel( 'Visible energy, MeV' )
+# ax.set_ylabel( r'$\sigma$' )
+# ax.set_title( 'IBD cross section (1st order)' )
 
-# idx = N.arange(enu.shape[0])
-# for i, e in enumerate(enu.T):
-    # ax.plot(idx, e, '-', label='Slice %i'%i)
+# # Plot
+# context.outputs.kinint2.plot_hist( label='Integrated cross section' )
 
 # ax.legend(loc='upper left')
 
-if args.show:
-    P.show()
+# # #
+# # # Check, that unraveled Enu is always gowing
+# # #
+# # enu  = context.outputs.enu.data()
+
+# # fig = P.figure()
+# # ax = P.subplot( 111 )
+# # ax.minorticks_on()
+# # ax.grid()
+# # ax.set_xlabel(L.u('enu'))
+# # ax.set_ylabel(L('{enu} step'))
+# # ax.set_title(L('Check {enu} step'))
+
+# # idx = N.arange(enu.shape[0])
+# # for i, e in enumerate(enu.T):
+    # # ax.plot(idx, e, '-', label='Slice %i'%i)
+
+# # ax.legend(loc='upper left')
+
+# if args.show:
+    # P.show()
 
 #
 # Dump the histogram to a dot graph
