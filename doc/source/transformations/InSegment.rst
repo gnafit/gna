@@ -20,6 +20,15 @@ Outputs
 1) ``insegment.insegment`` — array with indices of the same shape as ``insegment.points``.
 2) ``insegment.widths`` — the widths of segments of size :math:`N-1`.
 
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/test_insegment.py
+
 Implementation
 ^^^^^^^^^^^^^^
 

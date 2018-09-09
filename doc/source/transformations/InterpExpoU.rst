@@ -6,7 +6,7 @@ InterpExpoU -- exponential interpolation
 Description
 ^^^^^^^^^^^
 For a function given as :math:`x,y` computes the result of exponential interpolation (linear vs :math:`log(y)`) for a
-given vector of :math:`x'`.
+given vector of :math:`x'`. The values in :math:`x'` may be unsorted.
 
 The class inherits from :ref:`InSegment` and thus contains two transformations: ``insegment``, ``interp``.
 
@@ -26,6 +26,15 @@ Outputs
 ^^^^^^^
 
 1) ``interp.interp`` — the result of the interpolation of shape :math:`S`.
+ 
+Tests
+^^^^^
+
+Use the following commands for the usage example and testing:
+
+.. code:: bash
+
+   ./tests/elementary/InterpExpoU.py
 
 Implementation
 ^^^^^^^^^^^^^^
