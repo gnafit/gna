@@ -71,6 +71,7 @@ set (SOURCES
   transformations/neutrino/OscProbPMNSDecoh.cc
   transformations/neutrino/PDGVariables.cc
   transformations/neutrino/PMNSVariables.cc
+  transformations/neutrino/OscProbPMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
   transformations/neutrino/Units.cc
@@ -166,6 +167,7 @@ set (HEADERS
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
+  OscProbPMNSVariables.hh
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProbPMNSDecoh.hh
