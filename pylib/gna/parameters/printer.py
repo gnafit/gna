@@ -10,18 +10,21 @@ unctypes = ( ROOT.Variable('double'),  )
 namefmt='{name:30}'
 valfmt='={val:11.6g}'
 centralfmt='{central:11.6g}'
+sigmafmt='±{sigma:11.6g}'
 limitsfmt=' ({:11.6g}, {:11.6g})'
-centralsigmafmt='{central:11.6g}±{sigma:11.6g}'
+centralsigmafmt=centralfmt+sigmafmt
 relsigmafmt=' [{relsigma:11.6g}%]'
 
 centralsigma_len=len(centralsigmafmt.format(central=0, sigma=0))
+sigma_len=len(sigmafmt.format(sigma=0))
 relsigma_len=len(relsigmafmt.format(relsigma=0))
 
 centralrel_empty =(centralsigma_len+relsigma_len-1)*' '
+sigmarel_empty =(sigma_len+relsigma_len-1)*' '
 sepstr=' │ '
 fixedstr='[fixed]'
 fixedstr+=' '*(centralsigma_len+relsigma_len-1-len(fixedstr))
-freestr=' [free]'
+freestr =' [free]'
 freestr+=' '*(relsigma_len-len(freestr))
 
 def print_parameters( ns, recursive=True, labels=False ):
@@ -112,6 +115,7 @@ def Parameter__str( self, labels=False  ):
         s+=sepstr+fixedstr
     else:
         s+= sepstr+centralfmt.format(**fmt)
+        s+= sigmarel_empty
 
         if limits.size:
             s+=sepstr
