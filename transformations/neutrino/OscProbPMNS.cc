@@ -23,6 +23,7 @@ OscProbPMNSBase::OscProbPMNSBase(Neutrino from, Neutrino to)
   }
   m_alpha = from.flavor;
   m_beta = to.flavor;
+  m_lepton_charge = from.leptonCharge();
 
   for (size_t i = 0; i < m_pmns->Nnu; ++i) {
     m_pmns->variable_(&m_pmns->V[m_alpha][i]);
@@ -53,7 +54,7 @@ double OscProbPMNSBase::weight() const {
 }
 
 double OscProbPMNSBase::weightCP() const {
-  return std::imag(
+  return m_lepton_charge*std::imag(
     m_pmns->V[m_alpha][0].value()*
     m_pmns->V[m_beta][1].value()*
     std::conj(m_pmns->V[m_alpha][1].value())*

@@ -51,7 +51,7 @@ class ExpressionWithBindings(object):
                 path = dep.resolvepath(seen | {dep}, known)
                 if path is None:
                     return None
-                known.append(dep)
+                known.add(dep)
                 allpath.extend(path)
         return allpath
 

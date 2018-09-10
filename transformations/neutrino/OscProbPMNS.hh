@@ -23,15 +23,8 @@ protected:
   std::unique_ptr<OscillationVariables> m_param;
   std::unique_ptr<PMNSVariables> m_pmns;
 
-  int m_alpha, m_beta;
+  int m_alpha, m_beta, m_lepton_charge;
 };
-
-//class OscProbPMNSWeights: public OscProbPMNSBase {
-//public:
-  //OscProbPMNSWeights(Neutrino from, Neutrino to);
-
-  //std::vector<dependant<double>> m_components;
-//};
 
 class OscProbPMNS: public OscProbPMNSBase,
                    public TransformationBind<OscProbPMNS> {
