@@ -85,12 +85,12 @@ void InterpExpoU::do_interpolate(FunctionArgs& fargs){
   auto result=fargs.rets[0].buffer;                                       /// interpolation write buffer
 
   for(decltype(npoints) i{0}; i<npoints; ++i){
-    auto idx = *insegment;
+    auto idx = static_cast<size_t>(*insegment);
     if( *insegment<0 ){          /// underflow, extrapolate
-      idx=0;
+      idx=0u;
     }
     else if( *insegment>=nseg ){ /// overflow, extrapolate
-      idx=nseg-1;
+      idx=nseg-1u;
     }
     *result = *next(y_buffer, idx) * Exp((*next(x_buffer, idx) - *point)*(*next(b_buffer, idx)));
 

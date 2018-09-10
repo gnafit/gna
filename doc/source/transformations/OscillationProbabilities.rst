@@ -107,7 +107,7 @@ Formula
    P_{\alpha\beta} (L, E)
    = \sum_{kj}
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
-   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right)
+   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right).
 
 Detach diagonal, sum upper and lower triangles:
 
@@ -119,7 +119,7 @@ Detach diagonal, sum upper and lower triangles:
    2 \Re
    \sum_{k>j}
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
-   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right)
+   \exp\left(-i \frac{\Delta m^2_{kj}L}{2E}\right).
 
 Open real part:
 
@@ -142,7 +142,7 @@ Open real part:
    \Im\left(
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
    \right)
-   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right).
 
 Unitarity:
 
@@ -153,7 +153,7 @@ Unitarity:
    2\sum_{k>j}
    \Re\left(
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
-   \right)
+   \right).
 
 Apply unitarity:
 
@@ -179,7 +179,7 @@ Apply unitarity:
    \Im\left(
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
    \right)
-   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right).
 
 Or the other form with half angle:
 
@@ -202,7 +202,40 @@ Or the other form with half angle:
    \Im\left(
    V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
    \right)
-   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right)
+   \sin\left(\frac{\Delta m^2_{kj}L}{2E}\right).
+
+Version with Jarlskog invariant:
+
+.. math::
+   P_{\alpha\beta} (L, E)
+   =
+   \delta_{\alpha\beta}
+   -
+   &4
+   \sum_{k>j}
+   \Re\left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   \sin^2\left(\frac{\Delta m^2_{kj}L}{4E}\right)
+   -
+   \\
+   +
+   &8\mathcal{J}
+   \left(\sum_{\alpha\beta\gamma}\epsilon_{\alpha\beta\gamma}\right)
+   \prod_{k>j}
+   \sin\left(\frac{\Delta m^2_{kj}L}{4E}\right),
+
+where Jarlskog invariant :math:`\mathcal{J}` is defined as follows:
+
+.. math::
+   \Im
+   \left(
+   V^{*}_{\alpha k} V^{\vphantom{*}}_{\beta k} V^{\vphantom{*}}_{\alpha j} V^{*}_{\beta j}
+   \right)
+   = 
+   \mathcal{J}
+   \sum_{\gamma}\epsilon_{\alpha\beta\gamma}
+   \sum_{k} \epsilon_{ijk}.
 
 Survival probability:
 
