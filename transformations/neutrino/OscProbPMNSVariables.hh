@@ -56,6 +56,7 @@ protected:
   }
 
   void setExpressions(ExpressionsProvider &provider) {
+    /// Mode A: incoherent sum + cos
     provider
       .add(&weight0, {&weight12, &weight13, &weight23}, [&](){
            return static_cast<double>(m_alpha==m_beta)-(weight12.value()+weight13.value()+weight23.value());
@@ -85,16 +86,47 @@ protected:
             );
         })
       ;
-      if(m_alpha!=m_beta){
-        provider.add(&weightCP, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&](){
-          return m_lepton_charge*8.0*std::imag(
-            V[m_alpha][0].value()*
-            V[m_beta][1].value()*
-            std::conj(V[m_alpha][1].value())*
-            std::conj(V[m_beta][0].value())
-            );
-          });
-      }
+    /// Mode B: delta + (1-cos) = delta + sin0.5
+    //if (m_alpha==m_beta){
+      //provider
+        //.add(&weight0, {&weight12, &weight13, &weight23}, [&](){return 1.0;});
+    //}
+    //provider
+      //.add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
+          //return 4.0*std::real(
+            //V[m_alpha][0].value()*
+            //V[m_beta][1].value()*
+            //std::conj(V[m_alpha][1].value())*
+            //std::conj(V[m_beta][0].value())
+            //);
+        //})
+      //.add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+          //return 4.0*std::real(
+            //V[m_alpha][0].value()*
+            //V[m_beta][2].value()*
+            //std::conj(V[m_alpha][2].value())*
+            //std::conj(V[m_beta][0].value())
+            //);
+        //})
+      //.add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+          //return 4.0*std::real(
+            //V[m_alpha][1].value()*
+            //V[m_beta][2].value()*
+            //std::conj(V[m_alpha][2].value())*
+            //std::conj(V[m_beta][1].value())
+            //);
+        //})
+      //;
+      //if(m_alpha!=m_beta){
+        //provider.add(&weightCP, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&](){
+          //return m_lepton_charge*8.0*std::imag(
+            //V[m_alpha][0].value()*
+            //V[m_beta][1].value()*
+            //std::conj(V[m_alpha][1].value())*
+            //std::conj(V[m_beta][0].value())
+            //);
+          //});
+      //}
       //.add(&V[0][1], {&Theta12, &Theta13}, [&]() {
           //return sin(Theta12)*cos(Theta13);
         //})

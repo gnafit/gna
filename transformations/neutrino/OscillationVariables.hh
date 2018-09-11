@@ -83,13 +83,13 @@ protected:
               return DeltaMSqMM + Alpha*sin(2*Theta12)
                      - cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
       .add(&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); })
-      .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
-      .add(&CosSq12, {&SinSq12}, [&]() { return 1.0-SinSq12; })
       .add(&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); })
-      .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); })
-      .add(&CosSq13, {&SinSq13}, [&]() { return 1.0-SinSq13; })
       .add(&Theta23, {&SinSq23}, [&]() { return asin(sqrt(SinSq23)); })
+      .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
+      .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); })
       .add(&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); })
+      .add(&CosSq12, {&SinSq12}, [&]() { return 1.0-SinSq12; })
+      .add(&CosSq13, {&SinSq13}, [&]() { return 1.0-SinSq13; })
       .add(&CosSq23, {&SinSq23}, [&]() { return 1.0-SinSq23; })
       ;
   }
