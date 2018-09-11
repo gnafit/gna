@@ -296,8 +296,40 @@ void MultiThreading::Worker::add_to_task_stack(Task task) {
 	std::cerr << "Size of stack now is " << task_stack.size() << std::endl;
 }
 
-
-void MultiThreading::Worker::wait() { 
-	
+/*
+ * Take one task from global queue
+ *
+ */
+void MultiThreading::Worker::bite_global_wait_list() {
+	pool.tp_waitlist_mutex.lock();
+	// Yeah, there is an extra checking if it is empty.
+	// But it has to be here as someone can bite wait list before you
+	// from other thread
+	if (! pool.m_global_wait_list.empty()) {
+		Task curr_task = pool.m_global_wait_list.front();
+		pool.m_global_wait_list.pop();
+		curr_task.run_task();
+	}
+	pool.tp_waitlist_mutex.unlock();
+	sleep();
 }
 
+/*
+ * Keep thread sleeping until there is no task for it.
+ * Stop sleeping in cases of:
+ * - local task stack becomes not empty
+ * - global wait list becomes not empty
+ * 
+ */
+void MultiThreading::Worker::sleep() { 
+	std::unique_lock<std::mutex> 
+                lock(cv_worker);
+             
+	if( !pool.stopped && pool.m_global_wait_list.empty() && task_stack.empty() ) {
+        	cv_worker.wait(lock);
+		wakeup();
+	} else if (! pool.m_global_wait_list.empty() ) {
+		bite_global_wait_list();
+	}
+	//wakeup();
+}
