@@ -16,19 +16,19 @@ curpdg = pdg[2016]
 
 def reqparameters(ns):
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
-                      sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle amplitude sin²θ₁₂')
+                      sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
 
     ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
                       sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting Δm²₂₁')
 
     ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
-                      sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle amplitude sin²θ₁₃ ')
+                      sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
             variants={'normal': 1.0, 'inverted': -1.0}) #, label='Neutrino mass hierarchy: 1 (NH) or -1 (IH)'
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
-                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle amplitude sin²θ₂₃')
+                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
 
     #  ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
                      #  sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1))
@@ -41,6 +41,17 @@ def reqparameters(ns):
     with ns:
         ROOT.OscillationExpressions(ns=ns)
         ROOT.PMNSExpressions(ns=ns)
+
+    ns['DeltaMSq23'].setLabel('Mass splitting (2, 3)')
+    ns['DeltaMSq13'].setLabel('Mass splitting (1, 3)')
+    ns['DeltaMSqMM'].setLabel('Accelerator average mass splitting Δm²(μμ)')
+    ns['Phase'].setLabel('CP violation factor exp(-iδ)')
+    ns['PhaseC'].setLabel('Conjugated CP violation factor exp(+iδ)')
+
+    flavors = [ 'e', 'μ', 'τ' ]
+    for iflavor in range(3):
+        for jmass in range(3):
+            ns['V%i%i'%(iflavor,jmass)].setLabel('PMNS element %s%i'%(flavors[iflavor],jmass))
 
 #  def reqparameters(ns):
     #  ns.reqparameter('SinSq12', central=0.307, sigma=0.017, limits=(0, 1))

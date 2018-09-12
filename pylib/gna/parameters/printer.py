@@ -21,6 +21,7 @@ relsigmafmt=' [{relsigma:11.6g}%]'
 npifmt     =' [{npi:11.6g}π]'
 
 centralsigma_len=len(centralsigmafmt.format(central=0, sigma=0))
+central_len=len(centralfmt.format(central=0))
 sigma_len=len(sigmafmt.format(sigma=0))
 relsigma_len=len(relsigmafmt.format(relsigma=0))
 
@@ -77,15 +78,15 @@ def Variablec__str( self, labels=False  ):
             rval     = self.value().real(),
             ival     = self.value().imag(),
             )
-    label = ''
-    # if not labels or label=='value':
-        # label=''
+    label = self.label()
+    if not labels or label=='value':
+        label=''
 
     s= namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
 
     if labels:
-        s+=sepstr+centralrel_empty+sepstr
+        s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
     if label:
         s+=label
 
@@ -113,7 +114,7 @@ def UniformAngleParameter__str( self, labels=False  ):
         s+= sigma_empty
         s+= npifmt.format(**fmt)
 
-        s+=sepstr+' (-π, π)'
+        s+=sepstr+' (-π, π)                   '
 
     if labels:
         s+=sepstr

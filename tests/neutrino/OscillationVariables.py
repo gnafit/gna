@@ -43,7 +43,7 @@ with ns3:
     re3=R.OscProbPMNSExpressions(R.Neutrino.amu(), R.Neutrino.ae(), ns=ns3)
     materialize(ns3)
 
-ns.printparameters()
+ns.printparameters(labels=True)
 
 import IPython
 IPython.embed()

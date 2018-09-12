@@ -49,12 +49,13 @@ public:
   virtual T value() { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
 
-  const std::string& label() const noexcept { return transformations[0].label(); }
-  void setLabel(const std::string& label) { transformations[0].setLabel(label); }
+  const std::string& label() const noexcept { return m_label; }
+  void setLabel(const std::string& label) { m_label=label; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
+  std::string m_label;
 };
 
 template <>
