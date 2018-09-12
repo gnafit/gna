@@ -107,14 +107,17 @@ namespace MultiThreading {
   class Worker {
   public:
     Worker(ThreadPool &in_pool);
-    Worker(Worker &&worker) : pool(std::move(worker).pool), thr_head(std::move(worker.thr_head)), task_stack(std::move(worker.task_stack)) { }
+    Worker(Worker &&worker) : 	pool(std::move(worker).pool), 
+				thr_head(std::move(worker.thr_head)), 
+				task_stack(std::move(worker.task_stack)) { }
     void work();
     bool is_free ();
     void add_to_task_stack(Task& task);
     void sleep();
     void wakeup();
     size_t get_stack_size();
-
+    void bite_global_wait_list();
+    
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;

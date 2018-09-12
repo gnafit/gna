@@ -141,7 +141,8 @@ void Entry::evaluate() {
 void Entry::update() {
   Status status = Status::Success;
   try {
-    tpool.add_task(this);
+    MultiThreading::Task curr_task(this);
+    tpool.add_task(curr_task);
     //evaluate();
     //tainted = false;
   } catch (const SinkTypeError&) {
