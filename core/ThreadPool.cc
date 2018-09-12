@@ -97,29 +97,28 @@ int MultiThreading::ThreadPool::whoami() {
 	return tmp;
 }
 
-void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task,
-					    size_t index) {
+void MultiThreading::ThreadPool::new_worker(MultiThreading::Task &in_task) {
 	//	std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
 	tp_m_workers_mutex.lock();
 
 	m_workers.emplace_back(Worker(*this));
-	m_workers[index].thread_index_in_pool = index;
 	m_workers[index].thr_head = std::this_thread::get_id();
 	std::cerr << "New worker ID = " << std::this_thread::get_id()
 		  << std::endl;
 
 	tp_m_workers_mutex.unlock();
-
+	sleep();
 // TODO: is it in new thread??
-	if (in_task.done())
+/*	if (in_task.done())
 		m_workers[whoami()].work();
 	else
 		in_task.run_task();
+*/
 }
 
 
 size_t MultiThreading::ThreadPool::try_to_find_worker(
-    MultiThreading::Task in_task) {
+    MultiThreading::Task &in_task) {
 	int worker_index = -1;
 
 	size_t w_size;
@@ -153,8 +152,7 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
 			std::cerr << "THREADS!! " << std::endl;
 			std::lock_guard<std::mutex> lock(tp_threads_mutex);
 			std::lock_guard<std::mutex> lk(tp_m_workers_mutex);
-			threads.emplace_back(
-			    std::thread([&in_task, w_size, this]() {
+			threads.emplace_back(std::thread([&in_task, w_size, this]() {
 				    MultiThreading::ThreadPool::new_worker(
 					std::ref(in_task), w_size - 1);
 			    }));
@@ -189,7 +187,7 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
  * Lock an access to MultiThreading::ThreadPool::m_workers
  *
  */
-void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task in_task, size_t N) {
+void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task& in_task, size_t N) {
 	tp_m_workers_mutex.lock();
 	if (get_workers_count() <= N) {
 		throw std::runtime_error("Not enough workers.");
@@ -204,7 +202,7 @@ void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task in_task, s
  * If such such worker is found, push the task into its stack.
  * If there is no free Workers, push the task into global wait list.
  */
-int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task in_task) {
+int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task& in_task) {
 	
 	int i = 0; 
 
@@ -216,8 +214,15 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task in_task)
 	tp_m_workers_mutex.unlock();
 
 	if (i == static_cast<int>(n_workers)) {
-		add_to_global_wait_list(in_task);
-		return -1; // if free worker was not found
+		if (m_max_thread_number < n_workers) {	
+			threads.emplace_back(std::thread([in_task, this]() {
+				    MultiThreading::ThreadPool::new_worker(
+					in_task);
+			    }));
+		} else {
+			add_to_global_wait_list(in_task);
+			return -1; // if free worker was not found
+		}
 	}
 	
 	add_to_N_worker(in_task, i);
@@ -229,7 +234,7 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task in_task)
  * 
  *
  */
-void MultiThreading::ThreadPool::add_to_global_wait_list(MultiThreading::Task in_task) {
+void MultiThreading::ThreadPool::add_to_global_wait_list(MultiThreading::Task& in_task) {
 	tp_waitlist_mutex.lock();
 	m_global_wait_list.push(in_task);
 	tp_waitlist_mutex.unlock();
@@ -246,7 +251,7 @@ size_t MultiThreading::ThreadPool::get_workers_count() {
  * 
  *
  */
-void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, int entry_point_stat) {
+void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int entry_point_stat) {
 	size_t src_size = in_task.m_entry->sources.size();
 	
 	size_t iter = 1;
@@ -254,8 +259,12 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, int entr
 
 	if (entry_point_stat < 0) {
 		iter = 0;
-		int curr_task_worker = add_to_free_worker(in_task); // if -1, it is already added to the wait list
-		if (curr_task_worker != -1 && src_size > 0 && !(in_task.m_entry->sources[0].sink->entry->running) && in_task.m_entry->sources[0].sink->entry->tainted)  {
+		int curr_task_worker = add_to_free_worker(in_task); 
+		// if -1, it is already added to the wait list
+		 
+		auto& child_entry = in_task.m_entry->sources[0].sink->entry;
+		if (curr_task_worker != -1 && src_size > 0 && 
+				!(child_entry->running) && child_entry->tainted)  {
 			Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
 			add_to_N_worker(child_task, curr_task_worker);
 			add_task(child_task, curr_task_worker);
@@ -264,8 +273,9 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task in_task, int entr
 	}
  
 	for ( ; iter < src_size; iter++) {
-		if ( in_task.m_entry->sources[iter].sink->entry->tainted && !(in_task.m_entry->sources[iter].sink->entry->running)) {
-			Task child_task(std::ref(in_task.m_entry->sources[iter].sink->entry));
+		auto& child_entry = in_task.m_entry->sources[iter].sink->entry;
+		if ( child_entry->tainted && !(child_entry->running)) {
+			Task child_task(std::ref(child_entry));
 			int n_worker = add_to_free_worker(child_task);
 			if (n_worker != -1) add_task(child_task, n_worker);
 			ready_to_run = false;
@@ -291,7 +301,7 @@ bool MultiThreading::ThreadPool::is_pool_full() {
 
 bool MultiThreading::Worker::is_free() { return task_stack.size() == 0; }
 
-void MultiThreading::Worker::add_to_task_stack(Task task) {
+void MultiThreading::Worker::add_to_task_stack(Task&  task) {
 	task_stack.push(task);
 	std::cerr << "Size of stack now is " << task_stack.size() << std::endl;
 }
