@@ -6,13 +6,6 @@ from load import ROOT as R
 from gna.env import env, ExpressionsEntry
 import numpy as N
 
-ns = env.globalns
-ns.defparameter('L', central=1, sigma=0.1)
-
-from gna.parameters.oscillation import reqparameters
-reqparameters(ns)
-ns['Delta'].set(N.pi*1.5)
-
 def materialize(ns):
     for w in ns.keys():
         v=ns[w]
@@ -20,7 +13,17 @@ def materialize(ns):
             continue
         v.get()
 
+ns = env.globalns
+ns.defparameter('L', central=1, sigma=0.1)
+
+from gna.parameters.oscillation import reqparameters
+reqparameters(ns)
+ns['Delta'].set(N.pi*1.5)
 materialize(ns)
+
+checkpmns = ns('checkpmns')
+exprs = R.PMNSExpressionsC(ns=checkpmns)
+materialize(checkpmns)
 
 ns1 = ns('weights_ae_ae')
 with ns1:

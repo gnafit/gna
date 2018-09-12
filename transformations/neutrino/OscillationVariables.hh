@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <complex>
 
 #include "ParametersGroup.hh"
 
@@ -26,10 +27,18 @@ public:
   variable<double> CosSq12;
   variable<double> CosSq13;
   variable<double> CosSq23;
-  variable<double> Delta;
+  variable<double> Sin12;
+  variable<double> Sin13;
+  variable<double> Sin23;
+  variable<double> Cos12;
+  variable<double> Cos13;
+  variable<double> Cos23;
   variable<double> Theta12;
   variable<double> Theta13;
   variable<double> Theta23;
+  variable<double> Delta;
+  variable<std::complex<double>> Phase;
+  variable<std::complex<double>> PhaseC;
 
 protected:
   Fields fields() {
@@ -46,10 +55,18 @@ protected:
       .add(&CosSq12, "CosSq12")
       .add(&CosSq13, "CosSq13")
       .add(&CosSq23, "CosSq23")
-      .add(&Delta, "Delta")
+      .add(&Sin12, "Sin12")
+      .add(&Sin13, "Sin13")
+      .add(&Sin23, "Sin23")
+      .add(&Cos12, "Cos12")
+      .add(&Cos13, "Cos13")
+      .add(&Cos23, "Cos23")
       .add(&Theta12, "Theta12")
       .add(&Theta13, "Theta13")
       .add(&Theta23, "Theta23")
+      .add(&Delta, "Delta")
+      .add(&Phase, "Phase")
+      .add(&PhaseC, "PhaseC")
     ;
   }
   virtual void setExpressions(ExpressionsProvider &provider) {
@@ -57,9 +74,11 @@ protected:
     using std::asin;
     using std::sin;
     using std::pow;
+    using std::exp;
     /* Syntax is the following: parameter to compute, {fields that are needed
      * for computation}, lambda that defines computation  */
     provider
+      // Mass splittings
       .add(&DeltaMSq13,
            {&DeltaMSq23, &Alpha, &DeltaMSq12}, [&]() {
              return DeltaMSq23 + Alpha*DeltaMSq12;
@@ -82,15 +101,31 @@ protected:
       .add(&DeltaMSqEE, {&DeltaMSqMM, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
               return DeltaMSqMM + Alpha*sin(2*Theta12)
                      - cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
-      .add(&Theta12, {&SinSq12}, [&]() { return asin(sqrt(SinSq12)); })
-      .add(&Theta13, {&SinSq13}, [&]() { return asin(sqrt(SinSq13)); })
-      .add(&Theta23, {&SinSq23}, [&]() { return asin(sqrt(SinSq23)); })
+      // Squared sine and cos
       .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
       .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); })
       .add(&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); })
       .add(&CosSq12, {&SinSq12}, [&]() { return 1.0-SinSq12; })
       .add(&CosSq13, {&SinSq13}, [&]() { return 1.0-SinSq13; })
       .add(&CosSq23, {&SinSq23}, [&]() { return 1.0-SinSq23; })
+      // Sine and cos
+      .add(&Sin12, {&SinSq12}, [&]() { return sqrt(SinSq12); })
+      .add(&Sin13, {&SinSq13}, [&]() { return sqrt(SinSq13); })
+      .add(&Sin23, {&SinSq23}, [&]() { return sqrt(SinSq23); })
+      .add(&Cos12, {&CosSq12}, [&]() { return sqrt(CosSq12); })
+      .add(&Cos13, {&CosSq13}, [&]() { return sqrt(CosSq13); })
+      .add(&Cos23, {&CosSq23}, [&]() { return sqrt(CosSq23); })
+      // Angles
+      .add(&Theta12, {&Sin12}, [&]() { return asin(Sin12); })
+      .add(&Theta13, {&Sin13}, [&]() { return asin(Sin13); })
+      .add(&Theta23, {&Sin23}, [&]() { return asin(Sin23); })
+      // CP
+      .add(&Phase, {&Delta}, [&]() {
+          return exp(-std::complex<double>(0, Delta));
+        })
+      .add(&PhaseC, {&Delta}, [&]() { //conjugate
+          return exp(+std::complex<double>(0, Delta));
+        })
       ;
   }
 };

@@ -5,11 +5,15 @@ from load import ROOT
 import numpy as N
 from gna.bindings import patchROOTClass
 
-unctypes = ( ROOT.Variable('double'),  )
+unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
 valfmt='={val:11.6g}'
 centralfmt='{central:11.6g}'
+
+cvalfmt='={rval:11.6g}+i{ival:11.6g}'
+ccentralfmt='{rcentral:11.6g}+i{icentral:11.6g}'
+
 sigmafmt='±{sigma:11.6g}'
 limitsfmt=' ({:11.6g}, {:11.6g})'
 centralsigmafmt=centralfmt+sigmafmt
@@ -64,40 +68,29 @@ def Variable__str( self, labels=False ):
 
     return s
 
-@patchROOTClass( ROOT.Parameter('double'), '__str__' )
-def Parameter__str( self, labels=False  ):
+@patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
+def Variablec__str( self, labels=False  ):
     fmt = dict(
             name    = self.name(),
-            val     = self.value(),
-            central = self.central(),
+            rval     = self.value().real(),
+            ival     = self.value().imag(),
             )
-    limits  = self.limits()
-    label = self.label()
-    if not labels or label=='value':
-        label=''
+    label = ''
+    # if not labels or label=='value':
+        # label=''
 
     s= namefmt.format(**fmt)
-    s+=valfmt.format(**fmt)
-
-    if self.isFixed():
-        s+=sepstr+fixedstr
-    else:
-        s+= sepstr+centralfmt.format(**fmt)
-
-        if limits.size:
-            s+=sepstr
-            for (a,b) in limits:
-                s+=limitsfmt.format(a,b)
+    s+=cvalfmt.format(**fmt)
 
     if labels:
-        s+=sepstr
+        s+=sepstr+centralrel_empty+sepstr
     if label:
         s+=label
 
     return s
 
 @patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
-def Parameter__str( self, labels=False  ):
+def UniformAngleParameter__str( self, labels=False  ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
@@ -130,7 +123,7 @@ def Parameter__str( self, labels=False  ):
     return s
 
 @patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
-def Parameter__str( self, labels=False  ):
+def GaussianParameter__str( self, labels=False  ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
