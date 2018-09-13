@@ -18,7 +18,7 @@ public:
     ;
   }
 
-  void calcDerivative(Args args, Rets rets);
+  void calcDerivative(FunctionArgs fargs);
 protected:
   Parameter<double> *m_x;
   double m_reldelta;

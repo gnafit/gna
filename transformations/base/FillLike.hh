@@ -31,8 +31,8 @@ public:
       .input("a")                                          // - with single input 'a'
       .output("a")                                         // - and single output 'a'
       .types(TypesFunctions::passAll)                      // - the shape of the output is taken from the input
-      .func([](FillLike *obj, Args /*args*/, Rets rets) {  // - The implementation function:
-          rets[0].x.setConstant(obj->m_value);             //   set each element of a single output to m_value.
+      .func([](FillLike *obj, FunctionArgs& fargs) {       // - The implementation function:
+          fargs.rets[0].x.setConstant(obj->m_value);       //   set each element of a single output to m_value.
         });
   }
 protected:

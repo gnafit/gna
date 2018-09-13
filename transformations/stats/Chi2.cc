@@ -10,7 +10,9 @@ void Chi2::add(SingleOutput &theory, SingleOutput &data, SingleOutput &cov) {
   t_["chi2"].input(cov);
 }
 
-void Chi2::checkTypes(Atypes args, Rtypes rets) {
+void Chi2::checkTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%3 != 0) {
     throw args.undefined();
   }
@@ -33,11 +35,13 @@ void Chi2::checkTypes(Atypes args, Rtypes rets) {
   rets[0] = DataType().points().shape(1);
 }
 
-void Chi2::calculateChi2(Args args, Rets rets) {
-  rets[0].arr(0) = 0;
+void Chi2::calculateChi2(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  double res=0.0;
   for (size_t i = 0; i < args.size(); i+=3) {
     VectorXd diff = args[i+0].vec - args[i+1].vec;
     args[i+2].mat.triangularView<Eigen::Lower>().solveInPlace(diff);
-    rets[0].arr(0) += diff.array().square().sum();
+    res += diff.array().square().sum();
   }
+  fargs.rets[0].arr(0)=res;
 }

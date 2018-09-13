@@ -71,17 +71,16 @@ OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
         .func(&OscProbAveraged::CalcAverage);
 }
 
-void OscProbAveraged::CalcAverage(Args args, Rets rets) {
+void OscProbAveraged::CalcAverage(FunctionArgs fargs) {
     double aver_weight = 1.0 - 2.0*(weight<1,2>() + weight<1,3>() + weight<2,3>());
-    rets[0].x = aver_weight * args[0].x;
-
+    fargs.rets[0].x = aver_weight * fargs.args[0].x;
 }
 
 
-OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
+OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)
 {
-  variable_(&m_L, "L");
+  variable_(&m_L, l_name);
   transformation_("comp12")
     .input("Enu")
     .output("comp12")
@@ -125,71 +124,74 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to)
       .func(&OscProbPMNS::calcFullProb);
 }
 
-void OscProbPMNS::calcFullProb(Args args, Rets rets) {
-    auto& Enu = args[0].x;
-    ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
-    ArrayXd comp0(Enu);
-    comp0.setOnes();
-    ArrayXd comp12 = cos(DeltaMSq<1,2>()*tmp);
-    ArrayXd comp13 = cos(DeltaMSq<1,3>()*tmp);
-    ArrayXd comp23 = cos(DeltaMSq<2,3>()*tmp);
-    ArrayXd compCP(Enu);
-    compCP.setZero();
-    if (m_alpha != m_beta) {
-        compCP  = sin(DeltaMSq<1,2>()*tmp/2.);
-        compCP *= sin(DeltaMSq<1,3>()*tmp/2.);
-        compCP *= sin(DeltaMSq<2,3>()*tmp/2.);
-    }
-    rets[0].x  = 2.0*weight<1,2>()*comp12;
-    rets[0].x += 2.0*weight<1,3>()*comp13;
-    rets[0].x += 2.0*weight<2,3>()*comp23;
-    double coeff0 = - 2.0*(weight<1,2>() + weight<1,3>() + weight<2,3>());
-    if (m_alpha == m_beta) {
-      coeff0 += 1.0;
-    }
-    rets[0].x += coeff0*comp0;
-    if (m_alpha != m_beta) {
-      rets[0].x += 8.0*weightCP()*compCP;
-    }
-
+void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
+  auto& ret=fargs.rets[0].x;
+  auto& Enu = fargs.args[0].x;
+  ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
+  ArrayXd comp0(Enu);
+  comp0.setOnes();
+  ArrayXd comp12 = cos(DeltaMSq<1,2>()*tmp);
+  ArrayXd comp13 = cos(DeltaMSq<1,3>()*tmp);
+  ArrayXd comp23 = cos(DeltaMSq<2,3>()*tmp);
+  ArrayXd compCP(Enu);
+  compCP.setZero();
+  if (m_alpha != m_beta) {
+    compCP  = sin(DeltaMSq<1,2>()*tmp/2.);
+    compCP *= sin(DeltaMSq<1,3>()*tmp/2.);
+    compCP *= sin(DeltaMSq<2,3>()*tmp/2.);
+  }
+  ret  = 2.0*weight<1,2>()*comp12;
+  ret += 2.0*weight<1,3>()*comp13;
+  ret += 2.0*weight<2,3>()*comp23;
+  double coeff0 = - 2.0*(weight<1,2>() + weight<1,3>() + weight<2,3>());
+  if (m_alpha == m_beta) {
+    coeff0 += 1.0;
+  }
+  ret += coeff0*comp0;
+  if (m_alpha != m_beta) {
+    ret += 8.0*weightCP()*compCP;
+  }
 }
 
 
 template <int I, int J>
-void OscProbPMNS::calcComponent(Args args, Rets rets) {
-  auto &Enu = args[0].x;
-  rets[0].x = cos(DeltaMSq<I,J>()*km2MeV(m_L)/2.0*Enu.inverse());
+void OscProbPMNS::calcComponent(FunctionArgs fargs) {
+  auto &Enu = fargs.args[0].x;
+  fargs.rets[0].x = cos(DeltaMSq<I,J>()*km2MeV(m_L)/2.0*Enu.inverse());
 }
 
-void OscProbPMNS::calcComponentCP(Args args, Rets rets) {
-  auto &Enu = args[0].x;
+void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
+  auto& ret=fargs.rets[0].x;
+  auto &Enu = fargs.args[0].x;
   ArrayXd tmp = km2MeV(m_L)/4.0*Enu.inverse();
-  rets[0].x = sin(DeltaMSq<1,2>()*tmp);
-  rets[0].x*= sin(DeltaMSq<1,3>()*tmp);
-  rets[0].x*= sin(DeltaMSq<2,3>()*tmp);
+  ret = sin(DeltaMSq<1,2>()*tmp);
+  ret*= sin(DeltaMSq<1,3>()*tmp);
+  ret*= sin(DeltaMSq<2,3>()*tmp);
 }
 
-void OscProbPMNS::calcSum(Args args, Rets rets) {
-  rets[0].x = 2.0*weight<1,2>()*args[0].x;
-  rets[0].x+= 2.0*weight<1,3>()*args[1].x;
-  rets[0].x+= 2.0*weight<2,3>()*args[2].x;
+void OscProbPMNS::calcSum(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& ret=fargs.rets[0].x;
+  ret = 2.0*weight<1,2>()*args[0].x;
+  ret+= 2.0*weight<1,3>()*args[1].x;
+  ret+= 2.0*weight<2,3>()*args[2].x;
   double coeff0 = 2.0*(-weight<1,2>()-weight<1,3>()-weight<2,3>());
   if (m_alpha == m_beta) {
     coeff0 += 1.0;
   }
-  rets[0].x += coeff0*args[3].x;
+  ret += coeff0*args[3].x;
   if (m_alpha != m_beta) {
-    rets[0].x += 8.0*weightCP()*args[4].x;
+    ret += 8.0*weightCP()*args[4].x;
   }
 }
 
-OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
+OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)
 {
   if (m_alpha != m_beta) {
     throw std::runtime_error("OscProbPMNSMult is only for survivals");
   }
-  variable_(&m_Lavg, "Lavg");
+  variable_(&m_Lavg, l_name);
   variable_(&m_weights, "weights");
 
   transformation_("comp12")
@@ -218,21 +220,23 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to)
 }
 
 template <int I, int J>
-void OscProbPMNSMult::calcComponent(Args args, Rets rets) {
+void OscProbPMNSMult::calcComponent(FunctionArgs fargs) {
   double s2 = m_weights.value()[0];
   double s3 = m_weights.value()[1];
   double s4 = m_weights.value()[2];
-  auto &Enu = args[0].x;
+  auto &Enu = fargs.args[0].x;
   ArrayXd phi = DeltaMSq<I,J>()*km2MeV(m_Lavg)/4.0*Enu.inverse();
   ArrayXd phi2 = phi.square();
   ArrayXd a = 1.0 - 2.0*s2*phi2 + 2.0/3.0*s4*phi2.square();
   ArrayXd b = 1.0 - 2.0/3.0*s3*phi2;
-  rets[0].x = a*cos(2.0*b*phi);
+  fargs.rets[0].x = a*cos(2.0*b*phi);
 }
 
-void OscProbPMNSMult::calcSum(Args args, Rets rets) {
-  rets[0].x = weight<1,2>()*args[0].x;
-  rets[0].x+= weight<1,3>()*args[1].x;
-  rets[0].x+= weight<2,3>()*args[2].x;
-  rets[0].x+= (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
+void OscProbPMNSMult::calcSum(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& ret=fargs.rets[0].x;
+  ret = weight<1,2>()*args[0].x;
+  ret+= weight<1,3>()*args[1].x;
+  ret+= weight<2,3>()*args[2].x;
+  ret+= (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
 }

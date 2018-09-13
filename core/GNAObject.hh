@@ -57,6 +57,9 @@ protected:
       transformations(TransformationTypes::Base::m_entries)
   { }
 
+  typedef TransformationTypes::StorageTypesFunctionArgs StorageTypesFunctionArgs;
+  typedef TransformationTypes::TypesFunctionArgs TypesFunctionArgs;
+  typedef TransformationTypes::FunctionArgs FunctionArgs;
   typedef TransformationTypes::Args Args;
   typedef TransformationTypes::Rets Rets;
   typedef TransformationTypes::Atypes Atypes;

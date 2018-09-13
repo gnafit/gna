@@ -4,7 +4,6 @@
 #include <limits>
 #include <utility>
 #include <map>
-#include <unordered_map>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -64,22 +63,14 @@ inline Variable<double>::Variable(const std::string &name)
 {
   transformation_("value")
     .output(name)
-    .types([](Atypes, Rtypes rets) {
-        rets[0] = DataType().points().shape(1);
+    .types([](TypesFunctionArgs& fargs) {
+        fargs.rets[0] = DataType().points().shape(1);
       })
-    .func([](Variable<double> *obj, Args, Rets rets) {
-        rets[0].arr(0) = obj->m_var.value();
+    .func([](Variable<double> *obj, FunctionArgs& fargs) {
+        fargs.rets[0].arr(0) = obj->m_var.value();
       })
     .finalize();
 }
-
-
-/* template <typename T>
- * struct ParameterComparator {
- *     bool operator()(const T& lhs, const T& rhs) const noexcept {
- *         return lhs.value() < rhs.value();
- *     };
- * }; */
 
 template <typename T>
 class Parameter: public Variable<T> {
@@ -87,11 +78,6 @@ public:
   Parameter(const std::string &name)
     : Variable<T>(name)
     { m_par = this->m_varhandle.claim(); }
-
-  static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values in Parameter template");
-
-  friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs) noexcept
-  { return (lhs.value() < rhs.value()) || (lhs.name() < rhs.name());};
 
   virtual void set(T value)
     { m_par = value; }
@@ -102,7 +88,7 @@ public:
   virtual T cast(const T& v) const
     { return v; }
 
-  virtual T central() { return m_central; }
+  virtual T central() const noexcept { return m_central; }
   virtual void setCentral(T value) { m_central = value; }
   virtual void reset() { set(this->central()); }
 
@@ -120,8 +106,7 @@ public:
   virtual const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
-
-  virtual bool influences(SingleOutput &out) const noexcept {
+  bool influences(SingleOutput &out) {
     return out.single().depends(this->getVariable());
   }
 
@@ -135,13 +120,9 @@ protected:
   T m_central;
   T m_step;
   std::vector<std::pair<T, T>> m_limits;
-  /* using CovStorage = std::map<const Parameter<T>*, T>;
-   * CovStorage m_covariances; */
   parameter<T> m_par;
   bool m_fixed = false;
-
 };
-
 
 template <typename T>
 class GaussianParameter: public Parameter<T> {
@@ -154,7 +135,7 @@ public:
 
   virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
-      if (it == this->m_covariances.end() and (&other != this)) { 
+      if (it == this->m_covariances.end() and (&other != this)) {
           return false;
       } else {
           return true;
@@ -191,14 +172,14 @@ public:
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated"); 
+          auto msg = boost::format("Parameters %1% and %2% are not covariated");
           std::cout << msg % this->name() % other.name() << std::endl;
 #endif
           return static_cast<T>(0.);
       }
   }
 
-  virtual T normalValue(T reldiff)
+  virtual T normalValue(T reldiff) const noexcept
     { return this->central() + reldiff*this->m_sigma; }
 
   virtual void setNormalValue(T reldiff)

@@ -6,11 +6,6 @@ set(LIBNAME GlobalNuAnalysis2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 set (SOURCES
-  core/GNAObject.cc
-  core/ParametersGroup.cc
-  core/Parametrized.cc
-  core/TransformationDescriptor.cc
-  core/UncertainParameter.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
   core/transformation/Atypes.cc
@@ -19,12 +14,24 @@ set (SOURCES
   core/transformation/InputHandle.cc
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
+  core/transformation/Ints.cc
   core/transformation/Rtypes.cc
+  core/transformation/Itypes.cc
   core/transformation/Source.cc
   core/transformation/TransformationBase.cc
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/GNAObject.cc
+  core/ParametersGroup.cc
+  core/Parametrized.cc
+  core/TransformationDescriptor.cc
+  core/UncertainParameter.cc
+  transformations/trial/TrialMultiFunc.cc
+  transformations/base/FillLike.cc
+  transformations/base/Histogram.cc
+  transformations/base/Identity.cc
+  transformations/base/Points.cc
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -37,24 +44,35 @@ set (SOURCES
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
+  transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
+  transformations/integrator/FakeGSLFunction.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
+  transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/Transpose.cc
+  transformations/neutrino/EvisToEe.cc
   transformations/neutrino/IbdFirstOrder.cc
   transformations/neutrino/IbdInteraction.cc
   transformations/neutrino/IbdZeroOrder.cc
+  transformations/neutrino/Neutrino.cc
+  transformations/neutrino/OscillationVariables.cc
   transformations/neutrino/OscProb2nu.cc
   transformations/neutrino/OscProbMatterUniform.cc
   transformations/neutrino/OscProbPMNS.cc
   transformations/neutrino/OscProbPMNSDecoh.cc
+  transformations/neutrino/PDGVariables.cc
+  transformations/neutrino/PMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
+  transformations/neutrino/Units.cc
   transformations/stats/Chi2.cc
   transformations/stats/CovarianceToyMC.cc
   transformations/stats/CovariatedPrediction.cc
@@ -67,19 +85,26 @@ set (SOURCES
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
   transformations/var/VarArray.cc
+  transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
+  examples/GaussianPeakWithBackground.cc
   )
 
 set (HEADERS
+  # core/
   Data.hh
   Random.hh
   GeoNeutrinoFluxNormed.hh
   Exceptions.hh
+  # core/transformation/
   Sink.hh
   Source.hh
+  Storage.hh
   Args.hh
   Rets.hh
+  Ints.hh
   Rtypes.hh
+  Itypes.hh
   Atypes.hh
   TypesFunctions.hh
   EntryHandle.hh
@@ -88,6 +113,9 @@ set (HEADERS
   InputHandle.hh
   TransformationDebug.hh
   TransformationBase.hh
+  TransformationFunction.hh
+  TransformationFunctionArgs.hh
+  FunctionDescriptor.hh
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationDescriptor.hh
@@ -95,10 +123,13 @@ set (HEADERS
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
+  # core/
   GNAObject.hh
   UncertainParameter.hh
+  # transformations/
   Prediction.hh
   CovariatedPrediction.hh
+  TrialMultiFunc.hh
   Product.hh
   Sum.hh
   WeightedSum.hh
@@ -106,7 +137,9 @@ set (HEADERS
   Histogram.hh
   HistEdges.hh
   Identity.hh
+  Dummy.hh
   LinearInterpolator.hh
+  InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
   FillLike.hh
@@ -148,7 +181,9 @@ set (HEADERS
   HistSmear.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
+  # examples/
   GaussianPeakWithBackground.hh
+  # extra/
   GridFilter.hh
   EigenHelpers.hh
   ParCovMatrix.hh
@@ -158,6 +193,7 @@ set (HEADERS
 
 include_directories(core/transformation/
                     core/
+                    transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
                     transformations/calculus/

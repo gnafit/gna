@@ -19,11 +19,11 @@ public:
     Normalize();                                    ///< Default constructor.
     Normalize(size_t start, size_t length);         ///< Subhistogram normalization constructor.
 
-    void doNormalize(Args args, Rets rets);         ///< Normalize the whole histogram.
-    void doNormalize_segment(Args args, Rets rets); ///< Normalize subhistogram.
+    void doNormalize(FunctionArgs& fargs);          ///< Normalize the whole histogram.
+    void doNormalize_segment(FunctionArgs& fargs);  ///< Normalize subhistogram.
 
 protected:
-    void checkLimits(Atypes args, Rtypes rets);     ///< typesFunction to check histogram limits.
+    void checkLimits(TypesFunctionArgs& fargs);     ///< typesFunction to check histogram limits.
 
     size_t m_start;                                 ///< Sub-histogram first bin.
     size_t m_length;                                ///< Sub-histogram length.

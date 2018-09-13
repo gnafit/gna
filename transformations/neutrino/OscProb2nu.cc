@@ -17,8 +17,8 @@ OscProb2nu::OscProb2nu()
   transformation_("prob")
     .input("Enu")
     .output("prob")
-    .func([](OscProb2nu *obj, Args args, Rets rets) {
-        obj->probability(args[0].x, rets[0].x);
+    .func([](OscProb2nu *obj, FunctionArgs fargs) {
+        obj->probability(fargs.args[0].x, fargs.rets[0].x);
       });
 }
 

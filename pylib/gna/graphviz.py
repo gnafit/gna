@@ -25,15 +25,19 @@ class GNADot(object):
         kwargs.setdefault('labelfontsize', 10)
         self.joints = kwargs.pop('joints', True)
 
-        self.graph=G.AGraph( directed=True, **kwargs )
+        self.graph=G.AGraph( directed=True, strict=False, **kwargs )
         self.register = set()
         if not isinstance(transformation, (list, tuple)):
             transformation = [transformation]
         for t in transformation:
-            if not isinstance(t, R.TransformationTypes.Handle):
-                raise TypeError('GNADot argument should be of type TransformationDescriptor or TransformationTypes::Handle, got '+type(t).__name__)
+            if isinstance(t, R.TransformationTypes.OutputHandle):
+                entry = R.OpenOutputHandle(t).getEntry()
+            elif isinstance(t, R.TransformationTypes.Handle):
+                entry = R.OpenHandle(t).getEntry()
+            else:
+                raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
 
-            self.walk_back( R.OpenHandle(t).getEntry() )
+            self.walk_back( entry )
         self.write = self.graph.write
 
     def registered( self, *args, **kwargs ):
@@ -132,8 +136,10 @@ class GNADot(object):
 
         """For each source of the Entry walk backward and build the tree"""
         for i, source in enumerate(entry.sources):
-            if not source.materialized():
-                raise Exception('Trying to build a graph with not fully initialized tree')
+            if not source.sink:
+                graph.add_node( uid(source)+' in', shape='point', label='in' )
+                graph.add_edge( uid(source)+' in', uid(entry), **self.get_labels(i, source) )
+                continue
 
             self.walk_back( source.sink.entry )
 
@@ -147,25 +153,19 @@ class GNADot(object):
 
             if sink.sources.size()==0:
                 """In case sink is not connected, draw empty output"""
-                graph.add_node( uid(sink.entry)+' out', shape='point', label='out' )
-                graph.add_edge( uid(sink.entry), uid(sink.entry)+' out', **self.get_labels(i, sink) )
+                graph.add_node( uid(sink)+' out', shape='point', label='out' )
+                graph.add_edge( uid(sink.entry), uid(sink)+' out', **self.get_labels(i, sink) )
                 continue
             elif sink.sources.size()==1 or not self.joints:
                 """In case there is only one connection draw it as is"""
-                for source in sink.sources:
-                    assert source.materialized()
-
+                for j, source in enumerate(sink.sources):
                     graph.add_edge( uid(sink.entry), uid(source.entry), sametail=str(i), **self.get_labels(i, sink, None, source))
-
                     self.walk_back( source.entry )
             else:
                 """In case there is more than one connections, merge them"""
-                joint = graph.add_node( uid(sink), label='', shape='none', width=0, height=0, penwidth=0 )
+                joint = graph.add_node( uid(sink), shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.get_tail_label(None, sink) )
                 graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
                 for j, source in enumerate(sink.sources):
-                    assert source.materialized()
-
-                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, sink, None, source))
-
+                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, None, None, source))
                     self.walk_back( source.entry )
 

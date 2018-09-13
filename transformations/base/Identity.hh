@@ -15,7 +15,7 @@ public:
       .input("source")
       .output("target")
       .types(TypesFunctions::pass<0,0>)
-      .func([](Args args, Rets rets){ rets[0].x = args[0].x; })
+      .func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x; })
       ;
   };
 

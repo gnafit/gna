@@ -26,21 +26,25 @@ print(cfg.b.d)
 print(cfg['b.d'])
 print(cfg.get('b.d'))
 print(cfg.get('b.d', 'none'))
+
 try:
     print(cfg.get('d.d', 'none'))
-    print('\033[31mFAIL!\033[0m')
-except KeyError:
     print('\033[32mOK!\033[0m')
+except KeyError:
+    print('\033[31mFAIL!\033[0m')
+
 try:
     cfg.d
     print('\033[31mFAIL!\033[0m')
 except KeyError:
     print('\033[32mOK!\033[0m')
+
 try:
     cfg['d']
     print('\033[31mFAIL!\033[0m')
 except KeyError:
     print('\033[32mOK!\033[0m')
+
 try:
     cfg['d.e']
     print('\033[31mFAIL!\033[0m')

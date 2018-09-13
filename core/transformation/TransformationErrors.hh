@@ -45,6 +45,19 @@ namespace TransformationTypes
     const Source *source; ///< Source pointer.
   };
 
+  struct Storage;
+  /**
+   * @brief Exception to be returned from Itypes in case of output type error.
+   * @author Maxim Gonchar
+   * @date 17.07.2018
+   */
+  class StorageTypeError: public TypeError {
+  public:
+    StorageTypeError(const Storage *s, const std::string &message); ///< Constructor.
+
+    const Storage *storage; ///< Storage pointer.
+  };
+
   struct Entry;
   /**
    * @brief Exception to be returned from Rets in case of calculation error.

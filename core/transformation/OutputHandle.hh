@@ -44,7 +44,7 @@ namespace TransformationTypes
 
     bool depends(changeable x) const;                                        ///< Check that Sink depends on a changeable.
 
-  private:
+  protected:
     const double *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
     Sink *m_sink;                                                            ///< Pointer to the Sink.
   }; /* class OutputHandle */

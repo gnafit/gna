@@ -11,12 +11,14 @@ ReactorNormAbsolute::ReactorNormAbsolute(const std::vector<std::string> &isoname
 {
   variable_(&m_norm, "Norm");
   auto norm = transformation_("isotopes")
-    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
-        for (size_t i = 0; i < rets.size(); ++i) {
-          rets[i] = DataType().points().shape(1);
+    .types(TypesFunctions::ifSame, [](TypesFunctionArgs fargs) {
+        for (size_t i = 0; i < fargs.rets.size(); ++i) {
+          fargs.rets[i] = DataType().points().shape(1);
         }
       })
-    .func([](ReactorNormAbsolute *obj, Args args, Rets rets) {
+    .func([](ReactorNormAbsolute *obj, FunctionArgs fargs) {
+        auto& args=fargs.args;
+        auto& rets=fargs.rets;
         for (size_t i = 0; i < rets.size(); ++i) {
           rets[i].x[0] = obj->m_norm*args[i].x.sum();
         }
@@ -38,9 +40,9 @@ ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
   variable_(&m_targetProtons, "TargetProtons");
   variable_(&m_L, "L");
   auto norm = transformation_("isotopes")
-    .types(TypesFunctions::ifSame, [](Atypes args, Rtypes rets) {
-        for (size_t i = 0; i < rets.size(); ++i) {
-          rets[i] = DataType().points().shape(1);
+    .types(TypesFunctions::ifSame, [](TypesFunctionArgs fargs) {
+        for (size_t i = 0; i < fargs.rets.size(); ++i) {
+          fargs.rets[i] = DataType().points().shape(1);
         }
       })
     .func(&ReactorNorm::calcIsotopeNorms)
@@ -53,7 +55,9 @@ ReactorNorm::ReactorNorm(const std::vector<std::string> &isonames)
   norm.input("power_rate");
 }
 
-void ReactorNorm::calcIsotopeNorms(Args args, Rets rets) {
+void ReactorNorm::calcIsotopeNorms(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   const auto &livetime = args[rets.size()+0].x;
   const auto &power_rate = args[rets.size()+1].x;
   static double conversionFactor = 1.0e-7/TMath::Qe();

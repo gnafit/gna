@@ -27,13 +27,13 @@ void EnergyResolution::add(){
     .input("Nvis")
     .output("Nrec")
     .types(TypesFunctions::pass<0>,TypesFunctions::ifHist<0>,
-           [index](EnergyResolution *obj, Atypes args, Rtypes /*rets*/) {
+           [index](EnergyResolution *obj, TypesFunctionArgs& fargs) {
              if(index==0){
-               obj->m_datatype = args[0];
+               obj->m_datatype = fargs.args[0];
                obj->fillCache();
              }
              else{
-               if( args[0]!=obj->m_datatype ) {
+               if( fargs.args[0]!=obj->m_datatype ) {
                  throw std::runtime_error("Inconsistent histogram in EnergyResolution");
                }
              }
@@ -98,8 +98,8 @@ void EnergyResolution::fillCache() {
 }
 
 /* Apply precalculated cache and actually smear */
-void EnergyResolution::calcSmear(Args args, Rets rets) {
-  rets[0].x = m_sparse_cache * args[0].vec;
+void EnergyResolution::calcSmear(FunctionArgs& fargs) {
+  fargs.rets[0].x = m_sparse_cache * fargs.args[0].vec;
 }
 
 
