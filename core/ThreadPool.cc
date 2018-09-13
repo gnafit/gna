@@ -62,7 +62,7 @@ void MultiThreading::Worker::work() {  // runs task stack
 void MultiThreading::ThreadPool::stop() {
 	stopped = true;
 	//stop_condition.notify_all();
-	std::cerr << "thr num = " << threads.size() << std::endl;
+	std::cerr << "thr num = " << m_workers.size() << std::endl;
 	for (size_t i = 0; i < m_workers.size(); i++) {
 		std::cerr << i << "thr: " << m_workers[i].thr_head << std::endl;
 	}
@@ -78,7 +78,7 @@ MultiThreading::ThreadPool::ThreadPool(int maxthr)
 	std::cerr << "Thread pool created" << std::endl;
 	if (m_max_thread_number <= 0)
 		m_max_thread_number = std::thread::hardware_concurrency();
-//	m_workers.emplace_back(Worker(*this));
+	m_workers.emplace_back(Worker(*this));
 //	m_workers[0].thr_head = std::this_thread::get_id();
 }
 
@@ -183,7 +183,8 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
 void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task& in_task, size_t N) {
 	tp_m_workers_mutex.lock();
 	if (get_workers_count() <= N) {
-		throw std::runtime_error("Not enough workers.");
+		std::cerr << "workers count = " << get_workers_count() << ", N = " << N <<std::endl;
+		throw std::runtime_error("GNA Thread Pool ERROR: Not enough workers.");
 	}
 	m_workers[N].task_stack.push(in_task);
 	tp_m_workers_mutex.unlock();
@@ -205,9 +206,10 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task& in_task
 		 i++;
 	}	
 	tp_m_workers_mutex.unlock();
-
+	std::cout << "i = " << i << ", n_workers = " << n_workers << std::endl;
+//	std::cout << m_max_thread_number
 	if (i == static_cast<int>(n_workers)) {
-		if (m_max_thread_number < n_workers) {	
+		if (m_max_thread_number > n_workers) {	
 			threads.emplace_back(std::thread([&in_task, this]() {
 				    MultiThreading::ThreadPool::new_worker(in_task);
 			    }));
