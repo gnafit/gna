@@ -75,7 +75,6 @@ namespace MultiThreading {
     void add_task(Task& task, int entry_point_stat = -1);
     void new_worker(Task &task);
     bool is_pool_full();
-    size_t try_to_find_worker(Task& in_task);
 
     void add_to_N_worker(MultiThreading::Task& in_task, size_t N);
     int add_to_free_worker(MultiThreading::Task& in_task);

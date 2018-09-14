@@ -123,69 +123,6 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task& in_task) {
 }
 
 
-size_t MultiThreading::ThreadPool::try_to_find_worker(
-    MultiThreading::Task &in_task) {
-	int worker_index = -1;
-
-	size_t w_size;
-	{
-		std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
-		w_size = m_workers.size();
-	}
-
-	auto curr_id = std::this_thread::get_id();
-	size_t iter = 0;
-	while (iter < w_size && worker_index == -1) {
-		// std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
-		tp_m_workers_mutex.lock();
-		if ((m_workers[iter].is_free())) {
-			{
-				m_workers[iter].add_to_task_stack(in_task);
-				m_workers[iter].thr_head = curr_id;
-				worker_index = iter;
-				std::cerr
-				    << "Fount worker index = " << worker_index
-				    << std::endl;
-			}
-		}
-		iter++;
-		tp_m_workers_mutex.unlock();
-	}
-	std::cerr << "DEBUG TMP " << worker_index << std::endl;
-
-	if (worker_index == -1) {
-		if (w_size < m_max_thread_number) {
-			std::cerr << "THREADS!! " << std::endl;
-			std::lock_guard<std::mutex> lock(tp_threads_mutex);
-			std::lock_guard<std::mutex> lk(tp_m_workers_mutex);
-			threads.emplace_back(std::thread([&in_task, this]() {
-				    MultiThreading::ThreadPool::new_worker(
-					std::ref(in_task));
-			    }));
-			std::cerr << "Waiting-end!!!" << std::endl;
-			worker_index = threads.size() - 1;
-		} else {
-			for (size_t i = 0; i < w_size; i++) {
-				std::lock_guard<std::mutex> lock(
-				    tp_waitlist_mutex);
-				if (m_workers[i].thr_head == curr_id) {
-					std::cerr
-					    << "Task added to wait list, "
-					       "m_global_wait_list size = "
-					    << m_global_wait_list.size()
-					    << " i = " << i << std::endl;
-//					m_global_wait_list[i].emplace_back(
-//					    in_task);
-				}
-			}
-		}
-	}
-	std::cerr << "try-to-find worker_index = " << worker_index
-		  << " size =" << threads.size() << " " << std::endl;
-	return worker_index;
-}
-
-
 /*
  * Add task to the task stack of the Worker number of N.
  * Check correctness of input N. If there is no N-th thread, throw exception.
@@ -194,7 +131,7 @@ size_t MultiThreading::ThreadPool::try_to_find_worker(
  */
 void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task& in_task, size_t N) {
 	tp_m_workers_mutex.lock();
-	if (get_workers_count() <= N) {
+	if (get_workers_count() < N) {
 		std::cerr << "workers count = " << get_workers_count() << ", N = " << N <<std::endl;
 		throw std::runtime_error("GNA Thread Pool ERROR: Not enough workers.");
 	}
@@ -218,19 +155,21 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task& in_task
 	while (i < static_cast<int>(n_workers) && m_workers[i].status != WorkerStatus::Sleep) {
 		 i++;
 	}	
-	tp_m_workers_mutex.unlock();
 	std::cout << "i = " << i << ", n_workers = " << n_workers << std::endl;
 	std::cout << "m_max_thread_number = " << m_max_thread_number << std::endl;
 	if (i == static_cast<int>(n_workers-1)) {
-		if (m_max_thread_number > n_workers) {	
+		if (m_max_thread_number > n_workers) {
+			tp_threads_mutex.lock();	
 			threads.emplace_back(std::thread([&in_task, this]() {
 				    MultiThreading::ThreadPool::new_worker(in_task);
 			    }));
+			tp_threads_mutex.unlock();
 		} else {
 			add_to_global_wait_list(in_task);
 			return -1; // if free worker was not found
 		}
 	}
+	tp_m_workers_mutex.unlock();
 	
 	add_to_N_worker(in_task, i);
 	return i;
@@ -269,7 +208,6 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 		iter = 0;
 		int curr_task_worker = add_to_free_worker(in_task); 
 		// if -1, it is already added to the wait list
-		 
 		auto& child_entry = in_task.m_entry->sources[0].sink->entry;
 		if (curr_task_worker != -1 && src_size > 0 && 
 				!(child_entry->running) && child_entry->tainted)  {
@@ -339,7 +277,8 @@ void MultiThreading::Worker::bite_global_wait_list() {
  * - global wait list becomes not empty
  * 
  */
-void MultiThreading::Worker::sleep() { 
+void MultiThreading::Worker::sleep() {
+	std::cerr << "Sleeping....................................................." << std::endl; 
 	status = WorkerStatus::Sleep;
 	std::unique_lock<std::mutex> 
                 lock(mtx_worker);
@@ -354,6 +293,7 @@ void MultiThreading::Worker::sleep() {
 }
 
 void MultiThreading::Worker::wakeup() {
+	std::cerr << "WAKING UP!!!" << std::endl;
         status = WorkerStatus::Run;
 	// TODO notification?
 }
