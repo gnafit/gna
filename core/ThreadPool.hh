@@ -30,7 +30,7 @@ namespace MultiThreading {
     Sleep = 0,		///< Free worker, may be woke up and used
     InTheWings, 	///< Worker is still sleeping but stack is not empty -- expected to run soon  
     Run,		///< Worker has tasks in its task stack
-    Stopped,		///< Worker already stopped, can't be used
+    Stop,		///< Worker already stopped, can't be used
     Crashed		///< Smth wrong 
   };
 

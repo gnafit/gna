@@ -14,6 +14,21 @@
 #include "TransformationEntry.hh"
 
 
+
+
+inline std::ostream& operator<<(std::ostream& so, MultiThreading::WorkerStatus stat) {
+	switch(stat) {
+		case MultiThreading::WorkerStatus::Sleep: so << "Sleep"; break;	
+		case MultiThreading::WorkerStatus::InTheWings: so << "InTheWings"; break;	
+		case MultiThreading::WorkerStatus::Run: so << "Run"; break;	
+		case MultiThreading::WorkerStatus::Stop: so << "Stop"; break;	
+		case MultiThreading::WorkerStatus::Crashed: so << "Crashed"; break;	
+	}
+	return so;
+}
+
+
+
 /*
  * Run a single task by evaluation of corresponding transformation.
  * If transformation is running or finished already, nothing is done. 
@@ -26,8 +41,8 @@ void MultiThreading::Task::run_task() {
 
 	m_entry->mark_running();
 
-	m_entry->evaluate();
 	m_entry->tainted = false;
+	m_entry->evaluate();
 
 	m_entry->mark_not_running();
 }
@@ -35,9 +50,8 @@ void MultiThreading::Task::run_task() {
 MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
 	task_stack =  std::stack<Task>();
 	thr_head = std::this_thread::get_id();
-	std::cerr << "New worker ID = " << std::this_thread::get_id()
-		  << std::endl;
-	sleep();
+	std::cerr << "New worker ID = " << std::this_thread::get_id() << std::endl;
+//	sleep();
 }
 
 
@@ -64,7 +78,7 @@ void MultiThreading::ThreadPool::stop() {
 	//stop_condition.notify_all();
 	std::cerr << "thr num = " << m_workers.size() << std::endl;
 	for (size_t i = 0; i < m_workers.size(); i++) {
-		std::cerr << i << "thr: " << m_workers[i].thr_head << std::endl;
+		std::cerr << i << "thr: " << m_workers[i].thr_head << " " << m_workers[i].status << std::endl;
 	}
 /*	for (size_t i = 0; i < threads.size(); i++) {
 		threads[i].join();
@@ -74,12 +88,10 @@ void MultiThreading::ThreadPool::stop() {
 
 MultiThreading::ThreadPool::ThreadPool(int maxthr)
     : m_max_thread_number(maxthr), stopped(false) {
-	// Mother thread creation
 	std::cerr << "Thread pool created" << std::endl;
 	if (m_max_thread_number <= 0)
 		m_max_thread_number = std::thread::hardware_concurrency();
 	m_workers.emplace_back(Worker(*this));
-//	m_workers[0].thr_head = std::this_thread::get_id();
 }
 
 int MultiThreading::ThreadPool::whoami() {
@@ -104,7 +116,7 @@ int MultiThreading::ThreadPool::whoami() {
 void MultiThreading::ThreadPool::new_worker(MultiThreading::Task& in_task) {
 	//	std::lock_guard<std::mutex> lock(tp_m_workers_mutex);
 	tp_m_workers_mutex.lock();
-
+	std::cout << "Add new worker!" << std::endl;
 	m_workers.emplace_back(Worker(*this));
 
 	tp_m_workers_mutex.unlock();
@@ -187,6 +199,7 @@ void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task& in_task, 
 		throw std::runtime_error("GNA Thread Pool ERROR: Not enough workers.");
 	}
 	m_workers[N].task_stack.push(in_task);
+	m_workers[N].status = WorkerStatus::InTheWings;
 	tp_m_workers_mutex.unlock();
 }
 
@@ -207,8 +220,8 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task& in_task
 	}	
 	tp_m_workers_mutex.unlock();
 	std::cout << "i = " << i << ", n_workers = " << n_workers << std::endl;
-//	std::cout << m_max_thread_number
-	if (i == static_cast<int>(n_workers)) {
+	std::cout << "m_max_thread_number = " << m_max_thread_number << std::endl;
+	if (i == static_cast<int>(n_workers-1)) {
 		if (m_max_thread_number > n_workers) {	
 			threads.emplace_back(std::thread([&in_task, this]() {
 				    MultiThreading::ThreadPool::new_worker(in_task);
@@ -247,7 +260,8 @@ size_t MultiThreading::ThreadPool::get_workers_count() {
  */
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int entry_point_stat) {
 	size_t src_size = in_task.m_entry->sources.size();
-	
+	std::cerr << "Add_task worker ID = " << std::this_thread::get_id() << std::endl;	
+	std::cerr << "Entry_point_stat = " << entry_point_stat << std::endl;
 	size_t iter = 1;
 	bool ready_to_run = true;
 
