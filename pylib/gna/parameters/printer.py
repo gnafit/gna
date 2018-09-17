@@ -10,7 +10,7 @@ unctypes = ( ROOT.Variable('double'),  )
 namefmt='{name:30}'
 valfmt='={val:11.6g}'
 centralfmt='{central:11.6g}'
-limitsfmt=' ({:g}, {:g})'
+limitsfmt=' ({:11.6g}, {:11.6g})'
 centralsigmafmt='{central:11.6g}±{sigma:11.6g}'
 relsigmafmt=' [{relsigma:11.6g}%]'
 
@@ -69,8 +69,9 @@ def Parameter__str( self, labels=False  ):
             central = self.central(),
             )
     limits  = self.limits()
-    if label:
-        s+=sepstr+label
+    label = self.label()
+    if not labels or label=='value':
+        label=''
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
@@ -80,7 +81,39 @@ def Parameter__str( self, labels=False  ):
     else:
         s+= sepstr+centralfmt.format(**fmt)
 
-        if limits.size():
+        if limits.size:
+            s+=sepstr
+            for (a,b) in limits:
+                s+=limitsfmt.format(a,b)
+
+    if labels:
+        s+=sepstr
+    if label:
+        s+=label
+
+    return s
+
+@patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
+def Parameter__str( self, labels=False  ):
+    fmt = dict(
+            name    = self.name(),
+            val     = self.value(),
+            central = self.central(),
+            )
+    limits = N.array([(0.0, N.pi*2)])
+    label = self.label()
+    if not labels or label=='value':
+        label=''
+
+    s= namefmt.format(**fmt)
+    s+=valfmt.format(**fmt)
+
+    if self.isFixed():
+        s+=sepstr+fixedstr
+    else:
+        s+= sepstr+centralfmt.format(**fmt)
+
+        if limits.size:
             s+=sepstr
             for (a,b) in limits:
                 s+=limitsfmt.format(a,b)

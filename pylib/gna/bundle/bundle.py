@@ -110,6 +110,14 @@ class TransformationBundle(object):
         self.outputs             = NestedDict() # {key: output}            - inputs to be connected (should be consistent with transformations_out)
         self.inputs              = NestedDict() # {key: input}             - open outputs (should be consistent with transformations_in)
 
+        self.context = kwargs.pop('context', None)
+        if self.context is not None:
+            self.set_output = self.context.set_output
+            self.set_input  = self.context.set_input
+        else:
+            self.set_output = lambda *a, **kw: None
+            self.set_input  = lambda *a, **kw: None
+
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
         try:

@@ -31,13 +31,13 @@ class OscProbPMNS: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNS>::transformation_;
 
-  OscProbPMNS(Neutrino from, Neutrino to);
+  OscProbPMNS(Neutrino from, Neutrino to, std::string l_name="L");
 
   template <int I, int J>
-  void calcComponent(Args args, Rets rets);
-  void calcComponentCP(Args args, Rets rets);
-  void calcSum(Args args, Rets rets);
-  void calcFullProb(Args args, Rets rets);
+  void calcComponent(FunctionArgs fargs);
+  void calcComponentCP(FunctionArgs fargs);
+  void calcSum(FunctionArgs fargs);
+  void calcFullProb(FunctionArgs fargs);
 protected:
   variable<double> m_L;
 };
@@ -49,7 +49,7 @@ public:
 
   OscProbAveraged(Neutrino from, Neutrino to);
 private:
-  void CalcAverage(Args args, Rets rets);
+  void CalcAverage(FunctionArgs fargs);
 };
 
 class OscProbPMNSMult: public OscProbPMNSBase,
@@ -57,11 +57,11 @@ class OscProbPMNSMult: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNSMult>::transformation_;
 
-  OscProbPMNSMult(Neutrino from, Neutrino to);
+  OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name="Lavg");
 
   template <int I, int J>
-  void calcComponent(Args args, Rets rets);
-  void calcSum(Args args, Rets rets);
+  void calcComponent(FunctionArgs fargs);
+  void calcSum(FunctionArgs fargs);
 protected:
   variable<double> m_Lavg;
 

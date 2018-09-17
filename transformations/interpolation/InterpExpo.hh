@@ -41,7 +41,7 @@ public:
 
   InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");           ///< Constructor.
 
-  void do_interpolate(Args, Rets);                                                                         ///< Do the interpolation.
+  void do_interpolate(FunctionArgs& fargs);                                                                ///< Do the interpolation.
   void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                  ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
   void interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx); ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 

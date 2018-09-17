@@ -62,7 +62,8 @@ void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpo::do_interpolate(Args args, Rets rets){
+void InterpExpo::do_interpolate(FunctionArgs& fargs){
+  auto& args=fargs.args;
   auto& newx_a=args[0].x;
   auto& x_a=args[1].x;
   auto& y_a=args[2].x;
@@ -80,7 +81,7 @@ void InterpExpo::do_interpolate(Args args, Rets rets){
   auto  ddx_last=next(ddx_current, ddx_d.x.size()-1);
   auto  ddx_next=next(ddx_current);
 
-  auto& interp_a=rets[0].x;
+  auto& interp_a=fargs.rets[0].x;
 
   auto idx_current=static_cast<size_t>(*ddx_current);
   if(idx_current>0u){

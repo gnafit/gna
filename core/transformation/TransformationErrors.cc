@@ -8,6 +8,7 @@
 
 using TransformationTypes::SinkTypeError;
 using TransformationTypes::SourceTypeError;
+using TransformationTypes::StorageTypeError;
 using TransformationTypes::CalculationError;
 
 /**
@@ -35,6 +36,15 @@ std::string errorMessage(const std::string &type, const T *s,
 SinkTypeError::SinkTypeError(const Sink *s, const std::string &message)
   : TypeError(errorMessage("sink", s, message)),
     sink(s)
+{ }
+
+/** @brief Constructor.
+ *  @param s -- Storage with problematic type.
+ *  @param message -- error message.
+ */
+StorageTypeError::StorageTypeError(const Storage *s, const std::string &message)
+  : TypeError(errorMessage("storage", s, message)),
+    storage(s)
 { }
 
 /** @brief Constructor.

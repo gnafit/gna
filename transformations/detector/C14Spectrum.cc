@@ -44,8 +44,8 @@ C14Spectrum::C14Spectrum(int order, int n_pivots): integration_order(order), n_p
                   .input("Nvis")
                   .output("NvisC")
                   .types(TypesFunctions::pass<0>,
-                         [](C14Spectrum *obj, Atypes args, Rtypes /*rets*/) {
-                           obj->m_datatype = args[0];
+                         [](C14Spectrum *obj, TypesFunctionArgs fargs) {
+                           obj->m_datatype = fargs.args[0];
                            obj->fillCache();
                          })
                   .func(&C14Spectrum::calcSmear);
@@ -58,7 +58,7 @@ void C14Spectrum::fillCache()
     m_size = m_datatype.hist().bins();
 
     if (m_size == 0) return;
-    
+
     double coincidence_window = m_coinc_window * ns;
     m_rescache.resize(m_size*m_size);
     m_cacheidx.resize(m_size + 1);
@@ -153,13 +153,15 @@ void C14Spectrum::fillCache()
 }
 
 
-void C14Spectrum::calcSmear(Args args, Rets rets)
+void C14Spectrum::calcSmear(FunctionArgs fargs)
 {
-    const double* events_true = args[0].x.data();
-    double* events_rec = rets[0].x.data();
+    auto& arg=fargs.args[0];
+    auto& ret=fargs.rets[0];
+    const double* events_true = arg.x.data();
+    double* events_rec = ret.x.data();
 
-    size_t insize = args[0].type.size();
-    size_t outsize = rets[0].type.size();
+    size_t insize = arg.type.size();
+    size_t outsize = ret.type.size();
 
     std::copy(events_true, events_true + insize, events_rec);
     double overall_moved = 0.;

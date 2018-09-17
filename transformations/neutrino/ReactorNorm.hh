@@ -18,7 +18,7 @@ class ReactorNorm: public GNAObject,
 public:
   ReactorNorm(const std::vector<std::string> &isonames);
 protected:
-  void calcIsotopeNorms(Args args, Rets rets);
+  void calcIsotopeNorms(FunctionArgs fargs);
 
   variable<double> m_thermalPower;
   std::vector<variable<double>> m_ePerFission;

@@ -29,8 +29,8 @@ class reactor_anu_spectra_v01(TransformationBundle):
 
         newx = self.shared.points
         segments_t=None
-        for ns in self.namespaces:
-            isotope=ns.name
+        for isotope in self.isotopes:
+            ns = self.common_namespace(isotope)
             spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.common_namespace )
             spectrum_raw_t.points.setLabel('S0(E0):\n'+isotope)
             self.objects[('spectrum_raw', isotope)] = spectrum_raw_t

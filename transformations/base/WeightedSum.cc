@@ -40,30 +40,34 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &lab
   }
 }
 
-void WeightedSum::sum(Args args, Rets rets){
-    rets[0].x = m_vars[0]*args[0].x;
+void WeightedSum::sum(FunctionArgs& fargs){
+    auto& args=fargs.args;
+    auto& ret=fargs.rets[0].x;
+    ret = m_vars[0]*args[0].x;
     size_t i = 1;
     for (; i < m_common; ++i) {
-      rets[0].x += m_vars[i]*args[i].x;
+      ret += m_vars[i]*args[i].x;
     }
     for (; i < args.size(); ++i) {
-      rets[0].x += args[i].x;
+      ret += args[i].x;
     }
     for (; i < m_vars.size(); ++i) {
-      rets[0].x += m_vars[i].value();
+      ret += m_vars[i].value();
     }
 }
 
-void WeightedSum::sumFill(Args args, Rets rets){
-    rets[0].x = m_fillvalue;
+void WeightedSum::sumFill(FunctionArgs& fargs){
+    auto& args=fargs.args;
+    auto& ret=fargs.rets[0].x;
+    ret = m_fillvalue;
     size_t i = 0;
     for (; i < m_common; ++i) {
-      rets[0].x += m_vars[i]*args[i].x;
+      ret += m_vars[i]*args[i].x;
     }
     for (; i < args.size(); ++i) {
-      rets[0].x += args[i].x;
+      ret += args[i].x;
     }
     for (; i < m_vars.size(); ++i) {
-      rets[0].x += m_vars[i].value();
+      ret += m_vars[i].value();
     }
 }

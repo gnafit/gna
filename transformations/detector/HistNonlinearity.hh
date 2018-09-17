@@ -21,8 +21,8 @@ public:
   double get_range_min() { return m_range_min; }
   double get_range_max() { return m_range_max; }
 private:
-  void calcSmear(Args args, Rets rets);
-  void calcMatrix(Args args, Rets rets);
+  void calcSmear(FunctionArgs& fargs);
+  void calcMatrix(FunctionArgs& fargs);
 
   DataType m_datatype;
 

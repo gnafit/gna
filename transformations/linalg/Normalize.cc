@@ -39,9 +39,9 @@ Normalize::Normalize(size_t start, size_t length) : m_start{start}, m_length{len
  *
  * Divides each bin to the sum of bins.
  */
-void Normalize::doNormalize(Args args, Rets rets){
-    auto& in=args[0].x;
-    rets[0].x=in/in.sum();
+void Normalize::doNormalize(FunctionArgs& fargs){
+    auto& in=fargs.args[0].x;
+    fargs.rets[0].x=in/in.sum();
 }
 
 /**
@@ -49,9 +49,9 @@ void Normalize::doNormalize(Args args, Rets rets){
  *
  * Divides each bin to the sum of bins in a range [start, start+length-1].
  */
-void Normalize::doNormalize_segment(Args args, Rets rets){
-    auto& in=args[0].x;
-    rets[0].x=in/in.segment(m_start, m_length).sum();
+void Normalize::doNormalize_segment(FunctionArgs& fargs){
+    auto& in=fargs.args[0].x;
+    fargs.rets[0].x=in/in.segment(m_start, m_length).sum();
 }
 
 /**
@@ -60,7 +60,8 @@ void Normalize::doNormalize_segment(Args args, Rets rets){
  * @exception SourceTypeError in case the start is outside of the data limits.
  * @exception SourceTypeError in case the end is outside of the data limits.
  */
-void Normalize::checkLimits(Atypes args, Rtypes rets) {
+void Normalize::checkLimits(TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
     auto& dtype = args[0];
     if( dtype.shape.size()!=1u ){
         throw args.error(dtype, "Accept only 1d arrays in case a segment is specified");

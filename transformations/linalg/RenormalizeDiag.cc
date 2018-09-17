@@ -15,15 +15,7 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
   transformation_("renorm")
       .input("inmat")
       .output("outmat")
-      .types(TypesFunctions::pass<0>,
-         [](Atypes args, Rtypes /*rets*/) {
-           if (args[0].shape.size() != 2) {
-               throw args.error(args[0], "SmearMatrix is not matrix");
-           }
-           if (args[0].shape[0] != args[0].shape[1]) {
-               throw args.error(args[0], "SmearMatrix is not square");
-           }
-         })
+      .types(TypesFunctions::ifSquare<0>, TypesFunctions::pass<0>)
       .func(memberFun);
 }
 
@@ -60,47 +52,59 @@ double zero_to_one( double x ){
     return x==0.0 ? 1.0 : x;
 }
 
-void RenormalizeDiag::renormalizeOffdiagUpper(Args args, Rets rets) {
+void RenormalizeDiag::renormalizeOffdiagUpper(FunctionArgs& fargs) {
+    auto& arg=fargs.args[0].mat;
+    auto& ret=fargs.rets[0].mat;
+    auto& retarr=fargs.rets[0].arr2d;
     if ( m_lower_uninitialized ){
-        rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
+        ret.triangularView<Eigen::StrictlyLower>().setZero();
     }
-    rets[0].mat.triangularView<Eigen::Upper>()=args[0].mat.triangularView<Eigen::Upper>();
-    rets[0].mat.triangularView<Eigen::Upper>()*=m_scale;;
+    ret.triangularView<Eigen::Upper>()=arg.triangularView<Eigen::Upper>();
+    ret.triangularView<Eigen::Upper>()*=m_scale;;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)=args[0].mat.diagonal(i);
+        ret.diagonal(i)=arg.diagonal(i);
     }
-    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
+    retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeDiagUpper(Args args, Rets rets) {
+void RenormalizeDiag::renormalizeDiagUpper(FunctionArgs& fargs) {
+    auto& arg=fargs.args[0].mat;
+    auto& ret=fargs.rets[0].mat;
+    auto& retarr=fargs.rets[0].arr2d;
     if ( m_lower_uninitialized ){
-        rets[0].mat.triangularView<Eigen::StrictlyLower>().setZero();
+        ret.triangularView<Eigen::StrictlyLower>().setZero();
     }
-    rets[0].mat.triangularView<Eigen::Upper>() = args[0].mat.triangularView<Eigen::Upper>();
+    ret.triangularView<Eigen::Upper>() = arg.triangularView<Eigen::Upper>();
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)*=m_scale;
+        ret.diagonal(i)*=m_scale;
     }
-    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
+    retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeOffdiag(Args args, Rets rets) {
-    rets[0].arr = args[0].arr*m_scale;
+void RenormalizeDiag::renormalizeOffdiag(FunctionArgs& fargs) {
+    auto& arg=fargs.args[0].mat;
+    auto& ret=fargs.rets[0].mat;
+    auto& retarr=fargs.rets[0].arr2d;
+    ret = arg*m_scale;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)=args[0].mat.diagonal(i);
+        ret.diagonal(i)=arg.diagonal(i);
         if( i>0 ) {
-            rets[0].mat.diagonal(-i)=args[0].mat.diagonal(-i);
+            ret.diagonal(-i)=arg.diagonal(-i);
         }
     }
-    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
+    retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }
 
-void RenormalizeDiag::renormalizeDiag(Args args, Rets rets) {
-    rets[0].arr = args[0].arr;
+void RenormalizeDiag::renormalizeDiag(FunctionArgs& fargs) {
+    auto& arg=fargs.args[0].mat;
+    auto& ret=fargs.rets[0].mat;
+    auto& retarr=fargs.rets[0].arr2d;
+    ret = arg;
     for (size_t i = 0; i < m_ndiagonals; ++i) {
-        rets[0].mat.diagonal(i)*=m_scale;
+        ret.diagonal(i)*=m_scale;
         if( i>0 ) {
-            rets[0].mat.diagonal(-i)*=m_scale;
+            ret.diagonal(-i)*=m_scale;
         }
     }
-    rets[0].arr2d.rowwise()/=rets[0].arr2d.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
+    retarr.rowwise()/=retarr.colwise().sum().unaryExpr( std::ref(zero_to_one) ).eval();
 }

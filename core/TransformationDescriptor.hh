@@ -92,11 +92,15 @@ public:
   void operator()(const OutputDescriptor &out) const {
     connect(out);
   }
+  void operator()(const TransformationTypes::OutputHandle &out) const {
+    connect(out);
+  }
 
   void connect(GNASingleObject &obj) const;
   void connect(const TransformationDescriptor &obj) const;
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
+  void connect(const TransformationTypes::OutputHandle &out) const;
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandle,
