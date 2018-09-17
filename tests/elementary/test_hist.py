@@ -10,6 +10,7 @@ from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
 from constructors import stdvector, Histogram
 from gna.bindings import DataType
+from mpl_tools import bindings
 
 #
 # Create the an array and bin edges
@@ -36,10 +37,20 @@ print( 'Eigen dump (C++)' )
 identity.dump()
 print()
 
-
 print( 'Result (C++ Data to numpy)' )
 print( res )
 print()
 
 print( 'Datatype:', str(dt) )
 print( 'Edges:', list(dt.edges) )
+
+fig = plt.figure()
+ax = plt.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( 'x label' )
+ax.set_ylabel( 'entrie' )
+ax.set_title( 'Histogram' )
+identity.identity.target.plot_hist()
+
+plt.show()

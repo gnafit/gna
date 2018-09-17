@@ -53,7 +53,7 @@ bin, :math:`N^{\text{vis}}_j` is a true number of events in a *j*-th bin and
 That probability is given by:
 
 .. math::
-    V^{\text{res}}_{ij} = \frac{1}{\sqrt{2 \pi} \sigma(E_j)} \exp \left( - \frac{(E_j - E_i)^2}{2 \sigma(E_j)} \right),
+    V^{\text{res}}_{ij} = \frac{1}{\sqrt{2 \pi} \sigma(E_j)} \exp \left( - \frac{(E_j - E_i)^2}{2 \sigma^2(E_j)} \right),
 
 where :math:`\sigma(E_j)` is:
 
