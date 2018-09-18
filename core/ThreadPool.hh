@@ -53,12 +53,11 @@ namespace MultiThreading {
     void run_task();
 //  private:
     TransformationTypes::Entry *m_entry;
-
-    size_t worker_index = -1;
+    int worker_index = -1;
 
 // TODO DELETE
-    std::mutex task_mtx;
-    std::condition_variable task_cv;
+//    std::mutex task_mtx;
+//    std::condition_variable task_cv;
   };
 
 
@@ -66,7 +65,7 @@ namespace MultiThreading {
   public:
     ThreadPool (int maxthr = 0);
     ~ThreadPool () {
-	stop();
+//	stop();
     }
 
     void stop();
@@ -87,6 +86,9 @@ namespace MultiThreading {
 
     bool stopped;
 
+    int active_tasks;
+
+    TransformationTypes::Entry *entry_point_entry;
 //  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;

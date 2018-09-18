@@ -9,6 +9,7 @@
 #include <map>
 #include <numeric>
 #include <thread>
+#include <mutex>
 #include <vector>
 #include "GNAObject.hh"
 #include "TransformationEntry.hh"
@@ -39,6 +40,8 @@ void MultiThreading::Task::run_task() {
 	// if not -- wait until ready
 	if (m_entry->running || !m_entry->tainted) return;	
 
+	std::cerr << "TASK RUN!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+
 	m_entry->mark_running();
 
 	m_entry->tainted = false;
@@ -61,16 +64,16 @@ MultiThreading::Worker::Worker(ThreadPool &in_pool) : pool(in_pool) {
  *
  */
 void MultiThreading::Worker::work() {  // runs task stack
-//	status = WorkerStatus::Run;
 	wakeup();
 
 	while (!task_stack.empty()) {
 		task_stack.top().run_task();
 		task_stack.pop();
+		pool.active_tasks--;
+		std::cout << "active task -- = " << pool.active_tasks << std::endl;
 	}
 
-	sleep();
-	//worker.status = WorkerStatus::Sleep;
+	sleep(); // TODO Uncomment
 }
 
 void MultiThreading::ThreadPool::stop() {
@@ -80,14 +83,14 @@ void MultiThreading::ThreadPool::stop() {
 	for (size_t i = 0; i < m_workers.size(); i++) {
 		std::cerr << i << "thr: " << m_workers[i].thr_head << " " << m_workers[i].status << std::endl;
 	}
-/*	for (size_t i = 0; i < threads.size(); i++) {
+	for (size_t i = 0; i < threads.size(); i++) {
 		threads[i].join();
 	}
-*/	std::cerr << "stopped" << std::endl;
+	std::cerr << "stopped" << std::endl;
 }
 
 MultiThreading::ThreadPool::ThreadPool(int maxthr)
-    : m_max_thread_number(maxthr), stopped(false) {
+    : m_max_thread_number(maxthr), stopped(false), active_tasks(0) {
 	std::cerr << "Thread pool created" << std::endl;
 	if (m_max_thread_number <= 0)
 		m_max_thread_number = std::thread::hardware_concurrency();
@@ -130,14 +133,15 @@ void MultiThreading::ThreadPool::new_worker(MultiThreading::Task& in_task) {
  *
  */
 void MultiThreading::ThreadPool::add_to_N_worker(MultiThreading::Task& in_task, size_t N) {
-	tp_m_workers_mutex.lock();
+	std::lock_guard<std::mutex> lock1(tp_m_workers_mutex);
+	//std::lock(lock1);
 	if (get_workers_count() < N) {
 		std::cerr << "workers count = " << get_workers_count() << ", N = " << N <<std::endl;
 		throw std::runtime_error("GNA Thread Pool ERROR: Not enough workers.");
 	}
 	m_workers[N].task_stack.push(in_task);
 	m_workers[N].status = WorkerStatus::InTheWings;
-	tp_m_workers_mutex.unlock();
+//	tp_m_workers_mutex.unlock();
 }
 
 
@@ -198,6 +202,10 @@ size_t MultiThreading::ThreadPool::get_workers_count() {
  *
  */
 void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int entry_point_stat) {
+	active_tasks++;
+	if (! entry_point_entry) entry_point_entry = in_task.m_entry;
+
+	std::cout << "Active tasks ++ = " << active_tasks << std::endl;
 	size_t src_size = in_task.m_entry->sources.size();
 	std::cerr << "Add_task worker ID = " << std::this_thread::get_id() << std::endl;	
 	std::cerr << "Entry_point_stat = " << entry_point_stat << std::endl;
@@ -230,7 +238,11 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 
 	if (ready_to_run) {
 		// TODO how to write runtask for w_is = -1
-		in_task.run_task();
+	//	in_task.run_task();
+
+		if (entry_point_stat >= 0 ) m_workers[entry_point_stat].work();
+		//else 
+		
 	}
 
 		
@@ -265,9 +277,12 @@ void MultiThreading::Worker::bite_global_wait_list() {
 		Task curr_task = pool.m_global_wait_list.front();
 		pool.m_global_wait_list.pop();
 		curr_task.run_task();
+		pool.active_tasks--;
+                std::cout << "active task -- = " << pool.active_tasks << std::endl;
+
 	}
 	pool.tp_waitlist_mutex.unlock();
-	sleep();
+	//sleep(); // TODO uncomment
 }
 
 /*
@@ -280,9 +295,9 @@ void MultiThreading::Worker::bite_global_wait_list() {
 void MultiThreading::Worker::sleep() {
 	std::cerr << "Sleeping....................................................." << std::endl; 
 	status = WorkerStatus::Sleep;
-	std::unique_lock<std::mutex> 
-                lock(mtx_worker);
+	std::unique_lock<std::mutex> lock(mtx_worker);
              
+	if (!pool.entry_point_entry->tainted) pool.stop();
 	if( !pool.stopped && pool.m_global_wait_list.empty() && task_stack.empty() ) {
         	cv_worker.wait(lock);
 		wakeup();
