@@ -338,6 +338,15 @@ class namespace(Mapping):
         from gna.parameters.printer import print_parameters
         print_parameters(self, **kwargs)
 
+    def materializeexpressions(self, recursive=False):
+        for v in self.itervalues():
+            if not isinstance(v, ExpressionsEntry):
+                continue
+            v.get()
+
+        if recursive:
+            for ns in self.namespaces.values():
+                ns.materializeexpressions(True)
 
 class nsview(object):
     def __init__(self):

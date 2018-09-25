@@ -13,11 +13,11 @@ class OscProbPMNSVariables: public ParametersGroup {
 public:
   static const size_t Nnu = 3;
 
-  OscProbPMNSVariables(GNAObject *parent, Neutrino from, Neutrino to)
-    : ParametersGroup(parent, fields(from, to))
+  OscProbPMNSVariables(GNAObject *parent, Neutrino from, Neutrino to, const std::vector<std::string>& names={})
+    : ParametersGroup(parent, fields(from, to, names))
     { }
-  OscProbPMNSVariables(GNAObject *parent, std::vector<std::string> params, Neutrino from, Neutrino to)
-    : OscProbPMNSVariables(parent, from, to)
+  OscProbPMNSVariables(GNAObject *parent, std::vector<std::string> params, Neutrino from, Neutrino to, const std::vector<std::string>& names={})
+    : OscProbPMNSVariables(parent, from, to, names)
     { initFields(params); }
 
   variable<std::complex<double>> V[Nnu][Nnu];
@@ -29,7 +29,7 @@ public:
   variable<double> weightCP;
 protected:
 
-  Fields fields(Neutrino from, Neutrino to) {
+  Fields fields(Neutrino from, Neutrino to, const std::vector<std::string>& names) {
     if (from.kind != to.kind) {
       throw std::runtime_error("particle-antiparticle oscillations");
     }
@@ -37,15 +37,26 @@ protected:
     m_beta  = to.flavor;
     m_lepton_charge = from.leptonCharge();
 
+    std::vector<std::string> varnames;
+    if(names.empty()){
+      varnames={"weight0", "weight12" , "weight13" , "weight23"};
+    }
+    else if (names.size()==4u+static_cast<size_t>(m_alpha!=m_beta)){
+      varnames=names;
+    }
+    else{
+      throw std::runtime_error("Should provide 4 component names");
+    }
+
     Fields allvars;
     allvars
-      .add(&weight0, "weight0")
-      .add(&weight12, "weight12")
-      .add(&weight13, "weight13")
-      .add(&weight23, "weight23")
+      .add(&weight0,  varnames[0])
+      .add(&weight12, varnames[1])
+      .add(&weight13, varnames[2])
+      .add(&weight23, varnames[3])
     ;
     if(m_alpha!=m_beta){
-      allvars.add(&weightCP, "weightCP");
+      allvars.add(&weightCP, varnames[4]);
     }
     for (size_t i = 0; i < Nnu; ++i) {
       for (size_t j = 0; j < Nnu; ++j) {
@@ -172,7 +183,7 @@ protected:
 
 class OscProbPMNSExpressions: public ExpressionsProvider {
 public:
-  OscProbPMNSExpressions(Neutrino from, Neutrino to)
-    : ExpressionsProvider(new OscProbPMNSVariables(this, from, to))
+  OscProbPMNSExpressions(Neutrino from, Neutrino to, const std::vector<std::string>& names)
+    : ExpressionsProvider(new OscProbPMNSVariables(this, from, to, names))
     { }
 };

@@ -77,6 +77,23 @@ class OSum(Operation):
         import ROOT as R
         self.set_tinit( R.Sum )
 
+    def build(self, context):
+        # Process sum of weigtedsums
+        if isinstance(self, OSum):
+            if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
+                self.build_wsum(context)
+
+        Operation.build(self, context)
+
+    def build_wsum(self, context):
+        printl('build weighted sum')
+
+        self.wsums=[]
+        wsum=self.objects[0]
+        raise Exception('unimplemented')
+        import IPython
+        IPython.embed()
+
 placeholder=['placeholder']
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):

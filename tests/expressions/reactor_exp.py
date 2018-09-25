@@ -55,7 +55,7 @@ lib = dict(
 expr =[
         'enu| ee(evis()), ctheta()',
         'jacobian(enu(), ee(), ctheta())',
-        'sum[c]| sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
+        'sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -99,7 +99,9 @@ cfg = NestedDict(
             name = 'oscprob',
             input = True,
             size = 10,
-            debug = False
+            debug = False,
+            indices = list('cdr'),
+            provides = ['oscprob', 'pmns']
             ),
         anuspec = NestedDict(
             bundle = 'reactor_anu_spectra_v02',
@@ -117,6 +119,7 @@ a.build(context)
 
 # Print the list of outputs, stored for the expression
 from gna.bindings import OutputDescriptor
+env.globalns.materializeexpressions(True)
 env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )

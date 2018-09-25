@@ -53,7 +53,8 @@ class Expression(object):
         for k, v in ilib.items():
             v['name'] = k
             lib[v['expr']] = v
-        self.tree.guessname(lib, *args, **kwargs)
+        for tree in self.trees:
+            tree.guessname(lib, *args, **kwargs)
 
     def __str__(self):
         return self.expressions_raw
