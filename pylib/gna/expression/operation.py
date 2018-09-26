@@ -79,20 +79,55 @@ class OSum(Operation):
 
     def build(self, context):
         # Process sum of weigtedsums
-        if isinstance(self, OSum):
-            if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
-                self.build_wsum(context)
+        if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
+            return self.build_wsum(context)
 
         Operation.build(self, context)
 
     def build_wsum(self, context):
-        printl('build weighted sum')
+        import ROOT as R
+        self.set_tinit( R.WeightedSum )
 
-        self.wsums=[]
-        wsum=self.objects[0]
-        raise Exception('unimplemented')
-        import IPython
-        IPython.embed()
+        printl('build (osum: weighted) {}:'.format(type(self).__name__), str(self) )
+
+        weight    = self.objects[0].weight
+        subobject = self.objects[0].object
+
+        self.objects_orig = self.objects
+        self.objects = [ subobject ]
+        with nextlevel():
+            IndexedContainer.build(self, context, connect=False)
+
+        from constructors import stdvector
+        with nextlevel():
+            for freeidx in self.indices.iterate():
+                rindices = [ridx for ridx in self.indices_to_reduce.iterate()]
+                names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
+                weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
+
+                tobj, newout = self.new_tobject(self.current_format(freeidx), names, weights)
+                context.set_output(newout, self.name, freeidx)
+
+                for i, (name, reduceidx) in enumerate(zip(names, rindices)):
+                    fullidx = freeidx+reduceidx
+                    inp = context.set_input(tobj.sum.inputs[name], self.name, freeidx, clone=i)
+                    output = subobject.get_output(fullidx, context)
+                    inp(output)
+
+            # from constructors import stdvector
+            # labels  = stdvector([self.object.name])
+            # printl('connect (weighted)')
+            # for idx in self.indices.iterate():
+                # wname = self.weight.current_format(idx)
+                # weights = stdvector([wname])
+
+                # with context.ns:
+                    # tobj, newout = self.new_tobject( self.current_format(idx), labels, weights )
+                # inp = tobj.transformations[0].inputs[0]
+                # context.set_output(newout, self.name, idx)
+                # context.set_input(inp, self.name, idx)
+                # out = self.object.get_output(idx, context)
+                # inp(out)
 
 placeholder=['placeholder']
 class OProd(Operation):

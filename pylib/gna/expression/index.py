@@ -150,15 +150,16 @@ class NIndex(object):
     def autofmt(self):
         autofmt = '}.{'.join(self.names())
         if autofmt:
-            return '.{'+autofmt+'}'
-        return autofmt
+            return '{'+autofmt+'}', '.{'+autofmt+'}'
+        return autofmt, autofmt
 
     def current_format(self, fmt=None, *args, **kwargs):
-        autofmt = self.autofmt()
+        autofmtnd, autofmt = self.autofmt()
         dct = dict( self.current_items('both')+args, **kwargs )
-        autoindex = autofmt.format(**dct)
+        autoindexnd, autoindex = autofmtnd.format(**dct), autofmt.format(**dct)
         if fmt:
             dct['autoindex'] = autoindex
+            dct['autoindexnd'] = autoindexnd
         else:
             return autoindex
         return fmt.format( **dct )

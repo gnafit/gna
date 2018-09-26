@@ -28,6 +28,10 @@ class Variable(Indexed):
     def get_output(self, nidx, context):
         pass
 
+    def __getattr__(self, name):
+        self.name = '.'.join(self.name, name)
+        return self
+
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
         super(Transformation, self).__init__(name, *args, **kwargs)

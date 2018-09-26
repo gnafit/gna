@@ -42,6 +42,13 @@ indices = [
     ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
     ]
 
+indices = [
+    ('i', 'isotope', ['U235']),
+    ('r', 'reactor',     ['DB', 'LA']),
+    ('d', 'detector',    ['AD11', 'AD12']),
+    ('c', 'component',   ['comp0', 'comp12'])
+    ]
+
 #
 # Intermediate options (empty for now)
 #
@@ -49,6 +56,7 @@ lib = dict(
         cspec_diff = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
         cspec_diff_reac = dict(expr='sum:i'),
         cspec_diff_det  = dict(expr='sum:r'),
+        cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
         spec_diff_det  = dict(expr='sum:c'),
         )
 

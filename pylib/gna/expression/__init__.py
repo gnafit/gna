@@ -167,12 +167,14 @@ class ExpressionContext(object):
 
     def set_output(self, output, name, nidx=None, fmt=None, **kwargs):
         self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )
+        return output
 
     def get_input(self, name, nidx=None, clone=None):
         return self.get( self.inputs, name, nidx, 'input', clone=clone )
 
     def set_input(self, input, name, nidx=None, fmt=None, clone=None):
         self.set( self.inputs, input, name, nidx, 'input', fmt, clone)
+        return input
 
     def get(self, source, name, nidx, type, clone=None):
         key = self.get_key(name, nidx, clone=clone)
