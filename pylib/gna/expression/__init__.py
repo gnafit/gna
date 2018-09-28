@@ -15,6 +15,14 @@ class VTContainer(OrderedDict):
         self[key] = newvar
         return newvar
 
+    def __setitem__(self, key, value):
+        if isinstance(value, Indexed):
+            if value.name is undefinedname and key!='__tree__':
+                value.name = key
+
+        OrderedDict.__setitem__(self, key, value)
+        return value
+
 class Expression(object):
     operations = dict(sum=OSum, prod=OProd)
     tree = None
@@ -38,8 +46,10 @@ class Expression(object):
 
         self.trees = []
         for expr in self.expressions:
+            texpr = '__tree__ = '+expr
             try:
-                tree = eval(expr, self.globals)
+                exec(texpr, self.globals)
+                tree = self.globals.pop('__tree__')
             except:
                 print('Failed to evaluate expression:')
                 print(expr)

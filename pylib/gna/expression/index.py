@@ -176,6 +176,15 @@ class NIndex(object):
     def ndim(self):
         return len(self.indices)
 
+class NameUndefined():
+    def __str__(self):
+        return '?'
+
+    def __add__(self, other):
+        return self.__str__()+other
+
+undefinedname = NameUndefined()
+
 class Indexed(object):
     name=''
     indices_locked=False
@@ -226,7 +235,7 @@ class Indexed(object):
         yield self, operation
 
     def ident(self, **kwargs):
-        if self.name=='?':
+        if self.name is undefinedname:
             return self.guessname(**kwargs)
         return self.name
 
@@ -234,7 +243,7 @@ class Indexed(object):
         return '{}:{}'.format(self.ident(**kwargs), self.indices.ident(**kwargs))
 
     def guessname(self, *args, **kwargs):
-        return '?'
+        return undefinedname
 
     def dump(self, yieldself=False):
         for i, (obj, operator) in enumerate(self.walk(yieldself)):

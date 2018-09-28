@@ -13,9 +13,10 @@ class OperationMeta(type):
 class Operation(TCall,NestedTransformation):
     __metaclass__ = OperationMeta
     call_lock=False
-    def __init__(self, name, *indices, **kwargs):
+    def __init__(self, operation, *indices, **kwargs):
+        self.operation=operation
         self.indices_to_reduce = NIndex(*indices)
-        TCall.__init__(self, name)
+        TCall.__init__(self, undefinedname)
         NestedTransformation.__init__(self)
 
     def __str__(self):
@@ -34,7 +35,7 @@ class Operation(TCall,NestedTransformation):
         for o in self.objects:
             o.guessname(lib, save)
 
-        newname=self.name+':'+self.indices_to_reduce.ident()
+        newname=self.operation+':'+self.indices_to_reduce.ident()
         if newname in lib:
             newname = lib[newname]['name']
 

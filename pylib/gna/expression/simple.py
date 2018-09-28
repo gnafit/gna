@@ -11,10 +11,10 @@ class Variable(Indexed):
     def __mul__(self, other):
         if isinstance(other, Transformation):
             from gna.expression.compound import WeightedTransformation
-            return WeightedTransformation('?', self, other)
+            return WeightedTransformation(undefinedname, self, other)
 
         from gna.expression.compound import VProduct
-        return VProduct('?', self, other)
+        return VProduct(undefinedname, self, other)
 
     def __call__(self, *targs):
         from gna.expression.compound import TCall
@@ -42,14 +42,14 @@ class Transformation(Indexed):
     def __mul__(self, other):
         from gna.expression.compound import WeightedTransformation
         if isinstance(other, (Variable, WeightedTransformation)):
-            return WeightedTransformation('?', self, other)
+            return WeightedTransformation(undefinedname, self, other)
 
         from gna.expression.compound import TProduct
-        return TProduct('?', self, other)
+        return TProduct(undefinedname, self, other)
 
     def __add__(self, other):
         from gna.expression.compound import TSum
-        return TSum('?', self, other)
+        return TSum(undefinedname, self, other)
 
     def build(self, context):
         printl('build (trans) {}:'.format(type(self).__name__), str(self) )

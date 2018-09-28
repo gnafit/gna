@@ -292,7 +292,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         self.set_tinit( R.WeightedSum )
 
     def __mul__(self, other):
-        return WeightedTransformation('?', self, other)
+        return WeightedTransformation(undefinedname, self, other)
 
     def build(self, context):
         printl('build (weighted) {}:'.format(type(self).__name__), str(self) )

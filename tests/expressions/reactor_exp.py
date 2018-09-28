@@ -57,13 +57,13 @@ lib = dict(
         cspec_diff_reac = dict(expr='sum:i'),
         cspec_diff_det  = dict(expr='sum:r'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        spec_diff_det  = dict(expr='sum:c'),
+        # spec_diff_det  = dict(expr='sum:c'),
         )
 
 expr =[
         'enu| ee(evis()), ctheta()',
         'jacobian(enu(), ee(), ctheta())',
-        'sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
+        'result = sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
         ]
 
 # Initialize the expression and indices
