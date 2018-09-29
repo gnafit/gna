@@ -62,8 +62,11 @@ lib = dict(
 
 expr =[
         'enu| ee(evis()), ctheta()',
-        'jacobian(enu(), ee(), ctheta())',
-        'result = sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec[i](enu()) * oscprob[c,d,r]( enu() ) * ibd_xsec(enu(), ctheta()) * jacobian()'
+        'jacobian| enu(), ee(), ctheta()',
+        'ibd_xsec(enu(), ctheta())',
+        'oscprob[c,d,r]( enu() )',
+        'anuspec[i](enu())',
+        'result = sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -108,7 +111,6 @@ cfg = NestedDict(
             input = True,
             size = 10,
             debug = False,
-            indices = list('cdr'),
             provides = ['oscprob', 'pmns']
             ),
         anuspec = NestedDict(
