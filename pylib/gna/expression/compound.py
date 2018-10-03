@@ -72,6 +72,11 @@ class IndexedContainer(object):
     def nonempty(self):
         return bool(self.objects)
 
+    @methodname
+    def require(self, context):
+        for obj in self.objects:
+            obj.require(context)
+
     def build(self, context, connect=True):
         if not self.objects:
             return
@@ -175,6 +180,10 @@ class NestedTransformation(object):
         with nextlevel():
             IndexedContainer.build(self, context)
 
+    @methodname
+    def require(self, context):
+        IndexedContainer.require(self, context)
+
 class TCall(IndexedContainer, Transformation):
     inputs_connected = False
     def __init__(self, name, *args, **kwargs):
@@ -226,6 +235,11 @@ class TCall(IndexedContainer, Transformation):
             IndexedContainer.build(self, context)
 
         self.inputs_connected = True
+
+    @methodname
+    def require(self, context):
+        Transformation.require(self, context)
+        IndexedContainer.require(self, context)
 
 class TProduct(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -298,6 +312,11 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
 
     def __mul__(self, other):
         return WeightedTransformation(undefinedname, self, other)
+
+    @methodname
+    def require(self, context):
+        self.object.require(context)
+        self.weight.require(context)
 
     def build(self, context):
         printl('build (weighted) {}:'.format(type(self).__name__), str(self) )

@@ -32,6 +32,10 @@ class Variable(Indexed):
         self.name = '.'.join(self.name, name)
         return self
 
+    @methodname
+    def require(self, context):
+        context.require(self.name, self.indices)
+
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
         super(Transformation, self).__init__(name, *args, **kwargs)
@@ -50,6 +54,10 @@ class Transformation(Indexed):
     def __add__(self, other):
         from gna.expression.compound import TSum
         return TSum(undefinedname, self, other)
+
+    @methodname
+    def require(self, context):
+        context.require(self.name, self.indices)
 
     def build(self, context):
         printl('build (trans) {}:'.format(type(self).__name__), str(self) )
