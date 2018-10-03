@@ -18,9 +18,10 @@ indices = [
     ]
 
 lib = dict(
+    eff_bf = dict( expr='eff*effunc_uncorr' )
 )
 
-expr = 'eff * fcn()'
+expr = [ 'res = effunc_uncorr[d] * eff * fcn()' ]
 a = Expression(expr, indices=indices)
 
 print(a.expressions_raw)
@@ -34,10 +35,14 @@ print()
 cfg = NestedDict(
         eff = NestedDict(
             bundle = 'efficiencies_v01',
+            correlated   = False,
+            uncorrelated = True,
+            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr' ],
+            efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
             ),
         fcn = NestedDict(
             bundle = 'dummy',
-            name = 'dymmubundle',
+            name = 'fcn',
             size = 10,
             debug = False
             )

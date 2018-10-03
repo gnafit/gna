@@ -25,7 +25,7 @@ class dummy(TransformationBundle):
         obj = R.Dummy(self.cfg.size, tkey)
         trans = obj.dummy
         output = obj.add_output('output')
-        if self.cfg.input:
+        if self.cfg.get('input', False):
             ninputs = int(self.cfg.input)
             if ninputs>1:
                 input = tuple(obj.add_input('input_%02d'%i) for i in range(self.cfg.input))

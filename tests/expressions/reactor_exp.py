@@ -56,7 +56,9 @@ lib = dict(
         cspec_diff = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
         cspec_diff_reac = dict(expr='sum:i'),
         cspec_diff_det  = dict(expr='sum:r'),
+        spec_diff_det   = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
+        eff_bf                  = dict(expr='eff*effunc_uncorr')
         # spec_diff_det  = dict(expr='sum:c'),
         )
 
@@ -66,7 +68,7 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
-        'result = sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
+        'result = effunc_uncorr[d] * eff * sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -120,6 +122,13 @@ cfg = NestedDict(
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
             # strategy = dict( underflow='constant', overflow='extrapolate' ),
             edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
+            ),
+        eff = NestedDict(
+            bundle = 'efficiencies_v01',
+            correlated   = False,
+            uncorrelated = True,
+            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr' ],
+            efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
             ),
         )
 #

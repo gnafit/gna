@@ -159,4 +159,15 @@ class TransformationBundle(object):
 
         ns.addobservable(obsname, obj, **kwargs)
 
+    def init_indices(self, indices='indices'):
+        if isinstance(indices, str):
+            self.idx = self.cfg.get(indices, [])
+        else:
+            self.idx = indices
+
+        from gna.expression import NIndex
+        if isinstance(self.idx, NIndex):
+            return
+
+        self.idx = NIndex(fromlist=self.cfg.indices)
 

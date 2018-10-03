@@ -131,10 +131,15 @@ class VProduct(IndexedContainer, Variable):
                     names = [obj.current_format(idx) for obj in self.objects]
                     name = self.current_format(idx)
 
-                    path, head = name.rsplit('.', 1)
-                    ns = context.ns(path)
+                    if '.' in name:
+                        path, head = name.rsplit('.', 1)
+                        ns = context.ns(path)
+                    else:
+                        path, head = '', name
+                        ns = context.ns
                     vp = R.VarProduct( stdvector( names ), head, ns=ns )
-                    ns[head].get()
+                    v=ns[head].get()
+                    v.setLabel( name+' = '+' * '.join(names) )
 
 class NestedTransformation(object):
     tinit = None
@@ -300,6 +305,8 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             IndexedContainer.build(self, context, connect=False)
 
             from constructors import stdvector
+            if self.object.name is undefinedname:
+                raise Exception('May not work with objects with undefined names')
             labels  = stdvector([self.object.name])
             printl('connect (weighted)')
             for idx in self.indices.iterate():
