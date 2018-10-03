@@ -13,13 +13,11 @@ import constructors as C
 import numpy as N
 from gna.configurator import NestedDict, uncertain
 from physlib import percent
+from gna.expression import *
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
-parser.add_argument( '--dot', help='write graphviz output' )
-#  parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-parser.add_argument( '-o', '--output', help='output file' )
-#  parser.add_argument( '-x', '--xlim', nargs=2, type=float, help='xlim' )
+parser.add_argument( '--make-idx', action="store_true", help='Make indices' )
 args = parser.parse_args()
 
 #DYB-like detector positions in meters
@@ -44,11 +42,17 @@ reactors = {
     'LA4' : [ -490.6906, -883.152,  -39.7884 ],
 }
 
+if args.make_idx:
+    indices = [('r', 'reactor', reactors.keys()), ('d', 'detector', ADs.keys())]
+    expr = 'baselines[d,r]()'
+    a =  Expression(expr, indices=indices)
+    a.parse()
+    lib = dict()
+    a.guessname(lib, save=True)
+    a.tree.dump(True)
 
 
-#
-# Initialize bundle
-#
+
 cfg = NestedDict(
     # Bundle name
     bundle = 'baselines',
@@ -57,7 +61,21 @@ cfg = NestedDict(
     # Detector positions
     detectors = ADs
     )
-b, = execute_bundle(cfg=cfg)
+#
+# Initialize bundle
+#
+
+if args.make_idx:
+    cfg_idx = NestedDict(
+            baselines=cfg)
+    context = ExpressionContext(cfg_idx, ns=env.globalns)
+    a.build(context)
+else:
+    b, = execute_bundle(cfg=cfg)
+
+
+
+
 
 env.globalns.printparameters(labels=True)
 
