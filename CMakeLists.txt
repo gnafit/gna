@@ -87,6 +87,7 @@ set (SOURCES
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
   transformations/var/VarArray.cc
+  transformations/var/ArraySum.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
@@ -162,6 +163,7 @@ set (HEADERS
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
+  ArraySum.hh
   Minimizable.hh
   Jacobian.hh
   Neutrino.hh
