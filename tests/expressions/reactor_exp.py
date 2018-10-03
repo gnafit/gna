@@ -100,7 +100,6 @@ cfg = NestedDict(
             xorders   = 3,
             yorder   = 5,
             provides = [ 'evis', 'ctheta' ],
-            # indices = list('cdir')
             ),
         ibd_xsec = NestedDict(
             bundle = 'xsec_ibd_v01',

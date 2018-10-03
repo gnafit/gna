@@ -134,16 +134,16 @@ class ExpressionContext(object):
 
         predefined = cfg.get('indices', None)
         if predefined is None:
+            printl( 'indices: %s[%s]'%(name, str(indices)) )
             cfg.indices=indices
         elif not isinstance(predefined, NIndex):
             raise Exception('Configuration should not contain predefined "indices" field')
         else:
+            printl( 'indices: %s[%s + %s]'%(name, str(predefined), str(indices)) )
             cfg.indices=predefined+indices
 
-        printl( 'indices: %s[%s]'%(name, str(indices)) )
-
     def build(self, name, indices):
-        cfg = self.providers.get(name, None)
+        cfg = self.required.get(name, None)
         if cfg is None:
             if indices:
                 fmt='{name}{autoindex}'
@@ -154,13 +154,6 @@ class ExpressionContext(object):
             raise Exception('Do not know how to build '+name)
 
         printl('build', name, 'via bundle' )
-
-        if 'indices' in cfg and isinstance(cfg.indices, (list,tuple)):
-            print('\033[35mWarning! %s configuration already has indices (to be fixed)\033[0m'%name)
-            cfg.indices=self.indices.get_sub(cfg.indices)
-        else:
-            if indices is not None:
-                cfg.indices=indices
 
         if name in self.executed_bundes:
             printl('already provided')
