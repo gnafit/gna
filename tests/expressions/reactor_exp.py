@@ -53,10 +53,10 @@ indices = [
 # Intermediate options (empty for now)
 #
 lib = dict(
-        cspec_diff = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
-        cspec_diff_reac = dict(expr='sum:i'),
-        cspec_diff_det  = dict(expr='sum:r'),
-        spec_diff_det   = dict(expr='sum:c'),
+        cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
+        cspec_diff_reac         = dict(expr='sum:i'),
+        cspec_diff_det          = dict(expr='sum:r'),
+        spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
         eff_bf                  = dict(expr='eff*effunc_uncorr')
         # spec_diff_det  = dict(expr='sum:c'),
@@ -100,7 +100,6 @@ cfg = NestedDict(
             xorders   = 3,
             yorder   = 5,
             provides = [ 'evis', 'ctheta' ],
-            indices = list('cdir')
             ),
         ibd_xsec = NestedDict(
             bundle = 'xsec_ibd_v01',

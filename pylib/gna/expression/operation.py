@@ -46,6 +46,10 @@ class Operation(TCall,NestedTransformation):
     def make_object(self, *args, **kwargs):
         raise Exception('Unimplemented method called')
 
+    @methodname
+    def require(self, context):
+        IndexedContainer.require(self, context)
+
     def build(self, context):
         printl('build (operation) {}:'.format(type(self).__name__), str(self) )
 

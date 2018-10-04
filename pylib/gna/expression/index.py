@@ -176,6 +176,13 @@ class NIndex(object):
     def ndim(self):
         return len(self.indices)
 
+    def __contains__(self, other):
+        for name in other.indices.keys():
+            if not name in self.indices:
+                return False
+
+        return True
+
 class NameUndefined():
     def __str__(self):
         return '?'
