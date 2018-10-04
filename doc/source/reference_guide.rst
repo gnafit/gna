@@ -81,8 +81,8 @@ Basic types and actions
    transformations/Prediction.rst
    transformations/Rebin.rst
 
-Linear algebra
-^^^^^^^^^^^^^^
+Linear algebra and simple operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -93,6 +93,7 @@ Linear algebra
    transformations/Identity.rst
    transformations/Normalize.rst
    transformations/Product.rst
+   transformations/Ratio.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst
    transformations/WeightedSum.rst

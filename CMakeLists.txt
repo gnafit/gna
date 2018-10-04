@@ -35,6 +35,7 @@ set (SOURCES
   transformations/base/Prediction.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
+  transformations/base/Ratio.cc
   transformations/base/WeightedSum.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -135,6 +136,7 @@ set (HEADERS
   TrialMultiFunc.hh
   Product.hh
   Sum.hh
+  Ratio.hh
   WeightedSum.hh
   Points.hh
   Histogram.hh

@@ -62,9 +62,7 @@ lib = dict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        eff_bf                  = dict(expr='eff*effunc_uncorr'),
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm')
-        # spec_diff_det  = dict(expr='sum:c'),
         )
 
 expr =[
