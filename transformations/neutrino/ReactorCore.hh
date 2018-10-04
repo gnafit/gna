@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REACTORCORE_H
+#define REACTORCORE_H
 
 #include <vector>
 #include <string>
@@ -10,8 +11,10 @@ class ReactorCore: public GNAObject,
 public:
   ReactorCore(const std::vector<std::string> &isonames);
 protected:
-  void calcRates(FunctionArgs fargs);
+  void calcRates(Args args, Rets rets);
 
   variable<double> m_nominalThermalPower;
   std::vector<variable<double>> m_ePerFission;
 };
+
+#endif // REACTORCORE_H

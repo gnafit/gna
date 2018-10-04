@@ -19,3 +19,26 @@ Ratio::Ratio() {
       });                                              ///<
 }
 
+/**
+ * @brief Construct ratio of top and bottom
+ * @param top — nominator
+ * @param bottom — denominator
+ */
+Ratio::Ratio(SingleOutput& top, SingleOutput& bottom) : Ratio() {
+  divide(top, bottom);
+}
+
+
+/**
+ * @brief Bind nomenator, denomenator and return the ratio (output)
+ * @param top — nominator
+ * @param bottom — denominator
+ * @return the ratio output
+ */
+OutputDescriptor Ratio::divide(SingleOutput& top, SingleOutput& bottom){
+  const auto& t = t_[0];
+  const auto& inputs = t.inputs();
+  inputs[0].connect(top.single());
+  inputs[1].connect(bottom.single());
+  return OutputDescriptor(t.outputs()[0]);
+}

@@ -18,5 +18,8 @@
 class Ratio: public GNASingleObject,
              public TransformationBind<Ratio> {
 public:
-  Ratio();                                     ///< Constructor.
+  Ratio();                                        ///< Default constructor.
+  Ratio(SingleOutput& top, SingleOutput& bottom); ///< Construct ratio of top and bottom
+
+  OutputDescriptor divide(SingleOutput& top, SingleOutput& bottom); ///< Bind nomenator, denomenator and return the ratio (output)
 };
