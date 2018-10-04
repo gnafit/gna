@@ -115,4 +115,6 @@ void IbdFirstOrder::calc_dEnu_wrt_Ee(FunctionArgs fargs) {
   ArrayXXd Vectheta = (Ve.matrix()*ctheta.matrix().transpose()).array();
   ArrayXXd ctheta_per_Ve = (Ve.inverse().matrix()*ctheta.matrix().transpose()).array();
   jacobian = (m_pdg->ProtonMass + (1.0-ctheta_per_Ve)*Enu )/( m_pdg->ProtonMass - (1-Vectheta).colwise()*Ee );
+  std::transform(jacobian.data(), jacobian.data() + jacobian.size(), jacobian.data(),
+                [](double E){return (std::isfinite(E) ? E : 0.);}); // FIXME: should be done by using proper Views
 }
