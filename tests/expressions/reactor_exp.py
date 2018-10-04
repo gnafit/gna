@@ -146,44 +146,24 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-# #
-# # Do some plots
-# #
-# # Initialize figure
-# fig = P.figure()
-# ax = P.subplot( 111 )
-# ax.minorticks_on()
-# ax.grid()
-# ax.set_xlabel( 'Visible energy, MeV' )
-# ax.set_ylabel( r'$\sigma$' )
-# ax.set_title( 'IBD cross section (1st order)' )
+#
+# Do some plots
+#
+# Initialize figure
+if args.show:
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    # ax.set_xlabel()
+    # ax.set_ylabel()
+    # ax.set_title()
 
-# # Plot
-# context.outputs.kinint2.plot_hist( label='Integrated cross section' )
+    out = context.outputs.result.AD11
+    out.plot_hist()
 
-# ax.legend(loc='upper left')
-
-# # #
-# # # Check, that unraveled Enu is always gowing
-# # #
-# # enu  = context.outputs.enu.data()
-
-# # fig = P.figure()
-# # ax = P.subplot( 111 )
-# # ax.minorticks_on()
-# # ax.grid()
-# # ax.set_xlabel(L.u('enu'))
-# # ax.set_ylabel(L('{enu} step'))
-# # ax.set_title(L('Check {enu} step'))
-
-# # idx = N.arange(enu.shape[0])
-# # for i, e in enumerate(enu.T):
-    # # ax.plot(idx, e, '-', label='Slice %i'%i)
-
-# # ax.legend(loc='upper left')
-
-# if args.show:
-    # P.show()
+if args.show:
+    P.show()
 
 #
 # Dump the histogram to a dot graph
