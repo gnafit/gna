@@ -27,5 +27,5 @@ ArraySum::ArraySum(std::vector<std::string> names, std::string output_name):
 
 void ArraySum::exposeEvaluable() {
     /* auto a = this->transformations.at(0).data()[0]; */
-    m_accumulated = evaluable_(m_output_name.c_str(), [this]() -> decltype(this->transformations.at(0).data()[0]) {return this->transformations.at(0).data()[0];}, m_deps);
+    m_accumulated = evaluable_<double>(m_output_name.c_str(), [this]() -> decltype(this->transformations.at(0).data()[0]) {return this->transformations.at(0).data()[0];}, m_deps);
 }
