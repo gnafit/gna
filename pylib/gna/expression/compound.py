@@ -77,15 +77,15 @@ class IndexedContainer(object):
         for obj in self.objects:
             obj.require(context)
 
-    def build(self, context, connect=True):
+    def bind(self, context, connect=True):
         if not self.objects:
             return
 
-        printl('build (container) {}:'.format(type(self).__name__), str(self) )
+        printl('bind (container) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
             for obj in self.objects:
-                context.check_outputs(obj)
+                obj.bind(context)
 
             if not connect:
                 return
@@ -124,10 +124,10 @@ class VProduct(IndexedContainer, Variable):
 
         self.set_operator( '*' )
 
-    def build(self, context):
-        printl('build (var) {}:'.format(type(self).__name__), str(self) )
+    def bind(self, context):
+        printl('bind (var) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
             from constructors import stdvector
             import ROOT as R
@@ -162,8 +162,8 @@ class NestedTransformation(object):
         import ROOT as R
         return newobj, R.OutputDescriptor(newobj.single())
 
-    def build(self, context):
-        printl('build (nested) {}:'.format(type(self).__name__), str(self) )
+    def bind(self, context):
+        printl('bind (nested) {}:'.format(type(self).__name__), str(self) )
 
         if self.tinit:
             with nextlevel():
@@ -174,11 +174,14 @@ class NestedTransformation(object):
                     for i, obj in enumerate(self.objects):
                         # if nobj==1:
                             # i=None
-                        inp = tobj.add_input('%02d'%i)
+                        inp = self.add_input(tobj, i)
                         context.set_input(inp, self.name, idx, clone=i)
 
         with nextlevel():
-            IndexedContainer.build(self, context)
+            IndexedContainer.bind(self, context)
+
+    def add_input(self, tobj, idx):
+        return tobj.add_input('%02d'%idx)
 
     @methodname
     def require(self, context):
@@ -218,21 +221,13 @@ class TCall(IndexedContainer, Transformation):
         else:
             return self.__str__()
 
-    def build(self, context):
-        printl('build (call) {}:'.format(type(self).__name__), str(self) )
-        with nextlevel():
-            Transformation.build(self, context)
-            IndexedContainer.build(self, context)
-
-        self.inputs_connected = True
-
-    def connect(self, context):
+    def bind(self, context):
         if self.inputs_connected:
             return
 
-        printl('connect (call) {}:'.format(type(self).__name__), str(self) )
+        printl('bind (call) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context)
+            IndexedContainer.bind(self, context)
 
         self.inputs_connected = True
 
@@ -263,6 +258,28 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         self.set_operator( ' * ' )
         import ROOT as R
         self.set_tinit( R.Product )
+
+class TRatio(NestedTransformation, IndexedContainer, Transformation):
+    def __init__(self, name, *objects, **kwargs):
+        if len(objects)!=2:
+            raise Exception('Expect two objects for TRatio')
+
+        for o in objects:
+            if not isinstance(o, Transformation):
+                raise Exception('Expect Transformation instance')
+
+        NestedTransformation.__init__(self)
+        IndexedContainer.__init__(self, *objects)
+        Transformation.__init__(self, name, *objects, **kwargs)
+
+        self.set_operator( ' / ' )
+        import ROOT as R
+        self.set_tinit( R.Ratio )
+
+    def add_input(self, tobj, idx):
+        if not idx in [0, 1]:
+            raise Exception('Ratio argument indices sould be 0, 1, but not '+str(idx))
+        return tobj.ratio.inputs[idx]
 
 class TSum(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -318,10 +335,10 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         self.object.require(context)
         self.weight.require(context)
 
-    def build(self, context):
-        printl('build (weighted) {}:'.format(type(self).__name__), str(self) )
+    def bind(self, context):
+        printl('bind (weighted) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
             from constructors import stdvector
             if self.object.name is undefinedname:

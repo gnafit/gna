@@ -20,10 +20,8 @@ class Variable(Indexed):
         from gna.expression.compound import TCall
         return TCall(self.name, self, targs=targs)
 
-    def build(self, context):
-        printl('build (var) {}:'.format(type(self).__name__), str(self) )
-        with nextlevel():
-            context.build(self.name, self.indices)
+    def bind(self, context):
+        pass
 
     def get_output(self, nidx, context):
         pass
@@ -43,6 +41,10 @@ class Transformation(Indexed):
     def __str__(self):
         return '{}()'.format(Indexed.__str__(self))
 
+    def __div__(self, other):
+        from gna.expression.compound import TRatio
+        return TRatio(undefinedname, self, other)
+
     def __mul__(self, other):
         from gna.expression.compound import WeightedTransformation
         if isinstance(other, (Variable, WeightedTransformation)):
@@ -59,6 +61,5 @@ class Transformation(Indexed):
     def require(self, context):
         context.require(self.name, self.indices)
 
-    def build(self, context):
-        printl('build (trans) {}:'.format(type(self).__name__), str(self) )
-        context.build(self.name, self.indices)
+    def bind(self, context):
+        pass

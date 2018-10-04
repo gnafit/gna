@@ -45,7 +45,6 @@ class efficiencies_v01(TransformationBundle):
 
     def define_variables(self):
         from gna.configurator import uncertaindict
-        percent=0.01
 
         eff=self.efficiencies['eff']
         if self.mode=='relative':
@@ -59,17 +58,20 @@ class efficiencies_v01(TransformationBundle):
         relunc_uncorr_tot = (relunc_uncorr**2).sum()**0.5
         relunc_corr_tot = (relunc_corr**2).sum()**0.5
 
-        names = self.cfg.get('names', self)
-        self.common_namespace.reqparameter( names['eff'],          central=eff_tot, sigma=0.1, fixed=True, label='absolute efficiency' )
+        self.common_namespace.reqparameter( self.varname('eff'),          central=eff_tot, sigma=0.1, fixed=True, label='absolute efficiency' )
+
+        if self.cfg.get('norm'):
+            self.common_namespace.reqparameter( self.varname('norm'),  central=1.0, sigma=float('inf'), label='global normalization' )
 
         if self.cfg.get('correlated'):
-            self.common_namespace.reqparameter( names['effunc_corr'],  central=1.0, sigma=relunc_corr_tot, label='correlated efficiency uncertainty (relative)' )
+            self.common_namespace.reqparameter( self.varname('effunc_corr'),  central=1.0, sigma=relunc_corr_tot, label='correlated efficiency uncertainty (relative)' )
 
         if self.cfg.get('uncorrelated'):
             for i, it in enumerate(self.idx.iterate()):
-                name = it.current_format( '{name}{autoindex}', name=names['effunc_uncorr']  )
+                name = it.current_format( '{name}{autoindex}', name=self.varname('effunc_uncorr')  )
                 self.common_namespace.reqparameter(name, central=1.0, sigma=relunc_uncorr_tot, label='uncorrelated efficiency uncertainty (relative)'  )
 
-    def __getitem__(self, var):
-        return var
+    def varname(self, var):
+        mapping = self.cfg.get('names', None)
+        return mapping.get(var, var) if mapping else var
 

@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument('-m', '--mode', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 args = parser.parse_args()
 
 #
@@ -28,26 +29,29 @@ R.GNAObject
 #
 # Define the indices (empty for current example)
 #
-indices = [
-    ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
-    ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
-    ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
-    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    ]
-
-indices = [
-    ('i', 'isotope', ['U235']),
-    ('r', 'reactor',     ['DB']),
-    ('d', 'detector',    ['AD11']),
-    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    ]
-
-indices = [
-    ('i', 'isotope', ['U235']),
-    ('r', 'reactor',     ['DB', 'LA']),
-    ('d', 'detector',    ['AD11', 'AD12']),
-    ('c', 'component',   ['comp0', 'comp12'])
-    ]
+if args.mode=='complete':
+    indices = [
+        ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
+        ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ]
+elif args.mode=='minimal':
+    indices = [
+        ('i', 'isotope', ['U235']),
+        ('r', 'reactor',     ['DB']),
+        ('d', 'detector',    ['AD11']),
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ]
+elif args.mode=='small':
+    indices = [
+        ('i', 'isotope', ['U235']),
+        ('r', 'reactor',     ['DB', 'LA']),
+        ('d', 'detector',    ['AD11', 'AD12']),
+        ('c', 'component',   ['comp0', 'comp12'])
+        ]
+else:
+    raise Exception('Unsupported mode '+args.mode)
 
 #
 # Intermediate options (empty for now)
@@ -58,8 +62,7 @@ lib = dict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        eff_bf                  = dict(expr='eff*effunc_uncorr')
-        # spec_diff_det  = dict(expr='sum:c'),
+        norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm')
         )
 
 expr =[
@@ -68,7 +71,7 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
-        'result = effunc_uncorr[d] * eff * sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
+        'result = global_norm *  eff * effunc_uncorr[d] * sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -126,7 +129,11 @@ cfg = NestedDict(
             bundle = 'efficiencies_v01',
             correlated   = False,
             uncorrelated = True,
-            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr' ],
+            norm         = True,
+            names = dict(
+                norm = 'global_norm'
+                ),
+            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr', 'global_norm' ],
             efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
             ),
         )
@@ -142,44 +149,24 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-# #
-# # Do some plots
-# #
-# # Initialize figure
-# fig = P.figure()
-# ax = P.subplot( 111 )
-# ax.minorticks_on()
-# ax.grid()
-# ax.set_xlabel( 'Visible energy, MeV' )
-# ax.set_ylabel( r'$\sigma$' )
-# ax.set_title( 'IBD cross section (1st order)' )
+#
+# Do some plots
+#
+# Initialize figure
+if args.show:
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    # ax.set_xlabel()
+    # ax.set_ylabel()
+    # ax.set_title()
 
-# # Plot
-# context.outputs.kinint2.plot_hist( label='Integrated cross section' )
+    out = context.outputs.result.AD11
+    out.plot_hist()
 
-# ax.legend(loc='upper left')
-
-# # #
-# # # Check, that unraveled Enu is always gowing
-# # #
-# # enu  = context.outputs.enu.data()
-
-# # fig = P.figure()
-# # ax = P.subplot( 111 )
-# # ax.minorticks_on()
-# # ax.grid()
-# # ax.set_xlabel(L.u('enu'))
-# # ax.set_ylabel(L('{enu} step'))
-# # ax.set_title(L('Check {enu} step'))
-
-# # idx = N.arange(enu.shape[0])
-# # for i, e in enumerate(enu.T):
-    # # ax.plot(idx, e, '-', label='Slice %i'%i)
-
-# # ax.legend(loc='upper left')
-
-# if args.show:
-    # P.show()
+if args.show:
+    P.show()
 
 #
 # Dump the histogram to a dot graph
