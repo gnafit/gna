@@ -61,8 +61,17 @@ class baselines(TransformationBundle):
     def define_variables(self):
         '''Create baseline variables in a common_namespace'''
 
-        for reactor, detector in itertools.product(self.reactors.items(), self.detectors.items()):
-            distance = self.compute_distance(reactor[1], detector[1])
-            key = "baseline.{}.{}".format(detector[0], reactor[0])
-            self.common_namespace.reqparameter(key, central=distance,
-                    sigma=0.1, fixed=True, label="Baseline between {} and {}".format(reactor[0], detector[0]))
+        reactor_idx, det_idx = map(self.idx.names().index, ['reactor', 'detector'])
+        for i, it in enumerate(self.idx.iterate()):
+            name = it.current_format('baseline{autoindex}')
+            tokens = name.split(".")[1:]
+            cur_det, cur_reactor = tokens[det_idx], tokens[reactor_idx]
+            detector, reactor = self.detectors[cur_det], self.reactors[cur_reactor]
+
+            distance = self.compute_distance(reactor=reactor, detector=detector)
+            self.common_namespace.reqparameter(name, central=distance,
+                    sigma=0.1, fixed=True, label="Baseline between {} and {}".format(cur_det, cur_reactor))
+
+            inv_key = it.current_format("inv_square_baseline{autoindex}")
+            self.common_namespace.reqparameter(inv_key, central=1/distance**2, sigma=0.1, fixed=True,
+                        label="Inverse square of baseline between {} and {}".format(cur_det, cur_reactor))
