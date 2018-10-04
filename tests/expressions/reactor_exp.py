@@ -62,7 +62,8 @@ lib = dict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        eff_bf                  = dict(expr='eff*effunc_uncorr')
+        eff_bf                  = dict(expr='eff*effunc_uncorr'),
+        norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm')
         # spec_diff_det  = dict(expr='sum:c'),
         )
 
@@ -72,7 +73,7 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
-        'result = effunc_uncorr[d] * eff * sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
+        'result = global_norm *  eff * effunc_uncorr[d] * sum[c]| pmns[c]*sum[r]| sum[i]| kinint2| anuspec() * oscprob() * ibd_xsec() * jacobian()'
         ]
 
 # Initialize the expression and indices
@@ -130,7 +131,11 @@ cfg = NestedDict(
             bundle = 'efficiencies_v01',
             correlated   = False,
             uncorrelated = True,
-            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr' ],
+            norm         = True,
+            names = dict(
+                norm = 'global_norm'
+                ),
+            provides = [ 'eff', 'effunc_corr', 'effunc_uncorr', 'global_norm' ],
             efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
             ),
         )
