@@ -174,11 +174,14 @@ class NestedTransformation(object):
                     for i, obj in enumerate(self.objects):
                         # if nobj==1:
                             # i=None
-                        inp = tobj.add_input('%02d'%i)
+                        inp = self.add_input(tobj, i)
                         context.set_input(inp, self.name, idx, clone=i)
 
         with nextlevel():
             IndexedContainer.bind(self, context)
+
+    def add_input(self, tobj, idx):
+        return tobj.add_input('%02d'%idx)
 
     @methodname
     def require(self, context):
@@ -255,6 +258,28 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         self.set_operator( ' * ' )
         import ROOT as R
         self.set_tinit( R.Product )
+
+class TRatio(NestedTransformation, IndexedContainer, Transformation):
+    def __init__(self, name, *objects, **kwargs):
+        if len(objects)!=2:
+            raise Exception('Expect two objects for TRatio')
+
+        for o in objects:
+            if not isinstance(o, Transformation):
+                raise Exception('Expect Transformation instance')
+
+        NestedTransformation.__init__(self)
+        IndexedContainer.__init__(self, *objects)
+        Transformation.__init__(self, name, *objects, **kwargs)
+
+        self.set_operator( ' / ' )
+        import ROOT as R
+        self.set_tinit( R.Ratio )
+
+    def add_input(self, tobj, idx):
+        if not idx in [0, 1]:
+            raise Exception('Ratio argument indices sould be 0, 1, but not '+str(idx))
+        return tobj.ratio.inputs[idx]
 
 class TSum(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):

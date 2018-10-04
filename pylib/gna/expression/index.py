@@ -16,7 +16,11 @@ class Index(object):
             self.current  = first.current
         else:
             self.short = first
-            self.name, self.variants = args
+            if len(args)>1:
+                self.name, self.variants = args
+            else:
+                self.name=self.short
+                self.variants=kwargs.pop('variants', [self.name])
             args = []
             self.current=kwargs.pop( 'current', None )
 
