@@ -45,7 +45,6 @@ class efficiencies_v01(TransformationBundle):
 
     def define_variables(self):
         from gna.configurator import uncertaindict
-        percent=0.01
 
         eff=self.efficiencies['eff']
         if self.mode=='relative':

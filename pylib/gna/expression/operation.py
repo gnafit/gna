@@ -50,17 +50,17 @@ class Operation(TCall,NestedTransformation):
     def require(self, context):
         IndexedContainer.require(self, context)
 
-    def build(self, context):
-        printl('build (operation) {}:'.format(type(self).__name__), str(self) )
+    def bind(self, context):
+        printl('bind (operation) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
         if not self.tinit:
             return
 
         with nextlevel():
-            printl('connect (operation)', str(self))
+            printl('def (operation)', str(self))
             with nextlevel():
                 for freeidx in self.indices.iterate():
                     tobj, newout = self.new_tobject(self.current_format(freeidx))
@@ -82,18 +82,18 @@ class OSum(Operation):
         import ROOT as R
         self.set_tinit( R.Sum )
 
-    def build(self, context):
+    def bind(self, context):
         # Process sum of weigtedsums
         if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
-            return self.build_wsum(context)
+            return self.bind_wsum(context)
 
-        Operation.build(self, context)
+        Operation.bind(self, context)
 
-    def build_wsum(self, context):
+    def bind_wsum(self, context):
         import ROOT as R
         self.set_tinit( R.WeightedSum )
 
-        printl('build (osum: weighted) {}:'.format(type(self).__name__), str(self) )
+        printl('bind (osum: weighted) {}:'.format(type(self).__name__), str(self) )
 
         weight    = self.objects[0].weight
         subobject = self.objects[0].object
@@ -101,7 +101,7 @@ class OSum(Operation):
         self.objects_orig = self.objects
         self.objects = [ subobject ]
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
         from constructors import stdvector
         with nextlevel():

@@ -83,9 +83,12 @@ class Expression(object):
 
         context.set_indices(self.indices)
         for tree in self.trees:
-            tree.require(context)
+            creq = tree.require(context)
+
+        context.build_bundles()
+
         for tree in self.trees:
-            tree.build(context)
+            tree.bind(context)
 
 class ExpressionContext(object):
     indices = None
@@ -122,7 +125,7 @@ class ExpressionContext(object):
                     fmt='{name}{autoindex}'
                     for it in indices.iterate():
                         self.require(it.current_format(fmt, name=name), None)
-                    return
+                    return self.required
 
                 raise Exception('Do not know how to build '+name)
 
@@ -130,7 +133,7 @@ class ExpressionContext(object):
 
         if not indices:
             printl( 'indices: %s'%(name) )
-            return
+            return self.required
 
         predefined = cfg.get('indices', None)
         if predefined is None:
@@ -142,44 +145,25 @@ class ExpressionContext(object):
             printl( 'indices: %s[%s + %s]'%(name, str(predefined), str(indices)) )
             cfg.indices=predefined+indices
 
-    def build(self, name, indices):
-        cfg = self.required.get(name, None)
-        if cfg is None:
-            if indices:
-                fmt='{name}{autoindex}'
-                for it in indices.iterate():
-                    self.build(it.current_format(fmt, name=name), None)
-                return
+        return self.required
 
-            raise Exception('Do not know how to build '+name)
+    def build_bundles(self):
+        done = set()
+        for cfg in self.required.values():
+            if cfg in done:
+                continue
+            self.build_bundle(cfg)
+            done.add(cfg)
 
-        printl('build', name, 'via bundle' )
-
-        if name in self.executed_bundes:
-            printl('already provided')
-            return
+    def build_bundle(self, cfg):
+        printl('build bundle', cfg.bundle )
 
         from gna.bundle import execute_bundle
         with nextlevel():
             b=execute_bundle( cfg=cfg, context=self )
 
-        provides = cfg.get('provides', [])
-        printl('provides:', provides)
-        self.executed_bundes = self.executed_bundes.union( provides )
-
     def get_variable(self, name, *idx):
         pass
-
-    def check_outputs(self, obj):
-        printl( 'check', obj )
-        with nextlevel():
-            if obj.name in self.outputs or obj.name in self.ns.storage or obj.name in self.ns.namespaces:
-                printl( 'found' )
-                if hasattr(obj, 'connect'):
-                    obj.connect(self)
-                return
-
-            obj.build(self)
 
     def get_key(self, name, nidx, fmt=None, clone=None):
         if nidx is None:

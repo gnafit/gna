@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument('-m', '--mode', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 args = parser.parse_args()
 
 #
@@ -28,26 +29,29 @@ R.GNAObject
 #
 # Define the indices (empty for current example)
 #
-indices = [
-    ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
-    ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
-    ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
-    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    ]
-
-indices = [
-    ('i', 'isotope', ['U235']),
-    ('r', 'reactor',     ['DB']),
-    ('d', 'detector',    ['AD11']),
-    ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
-    ]
-
-indices = [
-    ('i', 'isotope', ['U235']),
-    ('r', 'reactor',     ['DB', 'LA']),
-    ('d', 'detector',    ['AD11', 'AD12']),
-    ('c', 'component',   ['comp0', 'comp12'])
-    ]
+if args.mode=='complete':
+    indices = [
+        ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
+        ('r', 'reactor',     ['DB', 'LA1', 'LA2']),
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ]
+elif args.mode=='minimal':
+    indices = [
+        ('i', 'isotope', ['U235']),
+        ('r', 'reactor',     ['DB']),
+        ('d', 'detector',    ['AD11']),
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ]
+elif args.mode=='small':
+    indices = [
+        ('i', 'isotope', ['U235']),
+        ('r', 'reactor',     ['DB', 'LA']),
+        ('d', 'detector',    ['AD11', 'AD12']),
+        ('c', 'component',   ['comp0', 'comp12'])
+        ]
+else:
+    raise Exception('Unsupported mode '+args.mode)
 
 #
 # Intermediate options (empty for now)
