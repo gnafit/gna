@@ -3,22 +3,29 @@
 #include <functional>
 
 
-SumToEvaluable::SumToEvaluable(const std::vector<double>& arr, std::string name): m_arr(arr), m_name(std::move(name)) {
-    std::vector<changeable> deps;
-    m_accumulated = evaluable_<double>(m_name.c_str(), [this]() {
-            return std::accumulate(m_arr.begin(), m_arr.end(), 0.);
-            }, deps);
-}
 
-ArraySum::ArraySum() {
-    transformation_("sum")
+ArraySum::ArraySum(std::vector<std::string> names, std::string output_name):
+    m_names(std::move(names)), m_output_name(std::move(output_name)) {
+
+    m_vars.resize(m_names.size());
+    for (size_t i=0; i < m_vars.size(); ++i) {
+        variable_(&m_vars[i], m_names[i].c_str());
+        m_deps.push_back(m_vars[i]);
+    }
+
+    auto trans = transformation_("arrsum")
         .input("arr")
         .output("accumulated")
-        .types([](ArraySum* obj, TypesFunctionArgs fargs){
+        .types([](ArraySum* obj, TypesFunctionArgs& fargs){
                 fargs.rets[0] = DataType().points().shape(1);})
         .func([](ArraySum* obj, FunctionArgs fargs) {
-                auto result = fargs.args[0].arr.sum();
-                fargs.rets[0].arr = result;
+                double result = fargs.args[0].arr.sum();
+                std::cout << result << std::endl;
+                fargs.rets[0].arr(0) = result;
                });
 }
 
+void ArraySum::exposeEvaluable() {
+    /* auto a = this->transformations.at(0).data()[0]; */
+    m_accumulated = evaluable_(m_output_name.c_str(), [this]() -> decltype(this->transformations.at(0).data()[0]) {return this->transformations.at(0).data()[0];}, m_deps);
+}

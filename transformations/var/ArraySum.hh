@@ -7,17 +7,13 @@
 class ArraySum: public GNAObject,
                 public TransformationBind<ArraySum> {
 public:
-      ArraySum();
-};
-    
+      ArraySum(std::vector<std::string> names, std::string output_name);
 
-class SumToEvaluable: public GNAObject,
-                      public TransformationBind<SumToEvaluable> {
-public:
-    SumToEvaluable(const std::vector<double>& arr, std::string name);
+      void exposeEvaluable();
 private:
-    std::vector<double> m_arr;
-    std::string m_name;
-    dependant<double> m_accumulated;
+      std::vector<std::string> m_names;
+      std::vector<variable<double>> m_vars;
+      std::string m_output_name;
+      std::vector<changeable> m_deps;
+      dependant<double> m_accumulated;
 };
-
