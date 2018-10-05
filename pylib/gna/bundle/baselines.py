@@ -21,12 +21,9 @@ class baselines(TransformationBundle):
                 self.idx = NIndex(fromlist=self.cfg.indices)
 
             # Check that naming in index and data is consistent
-            self.constistency_check() 
+            self.constistency_check()
         except KeyError:
             pass
-      
-
-
 
     def build(self):
         '''Deliberately empty'''
@@ -43,12 +40,12 @@ class baselines(TransformationBundle):
 
         from_kwargs = set(chain(self.reactors.keys(), self.detectors.keys()))
         from_idx = set(chain.from_iterable((i.variants for i in self.idx.indices.itervalues())))
-        if from_idx == from_kwargs:
-            return True
-        else:
-            raise Exception("Reactors and detectors in indices and from "
-                    "configuration does not match.\n From indices {} \n and "
-                    "from configuration {}".format(from_idx, from_kwargs))
+        # if from_idx == from_kwargs:
+            # return True
+        # else:
+            # raise Exception("Reactors and detectors in indices and from "
+                    # "configuration does not match.\n From indices {} \n and "
+                    # "from configuration {}".format(from_idx, from_kwargs))
 
     def compute_distance(self, reactor, detector):
         '''Computes distance between pair of reactor and detector. Coordinates
@@ -63,15 +60,14 @@ class baselines(TransformationBundle):
 
         reactor_idx, det_idx = map(self.idx.names().index, ['reactor', 'detector'])
         for i, it in enumerate(self.idx.iterate()):
-            name = it.current_format('baseline{autoindex}')
-            tokens = name.split(".")[1:]
-            cur_det, cur_reactor = tokens[det_idx], tokens[reactor_idx]
+            name = it.current_format('{name}{autoindex}', name='baseline')
+            cur_det, cur_reactor = it.get_current('d'), it.get_current('r')
             detector, reactor = self.detectors[cur_det], self.reactors[cur_reactor]
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
             self.common_namespace.reqparameter(name, central=distance,
-                    sigma=0.1, fixed=True, label="Baseline between {} and {}".format(cur_det, cur_reactor))
+                    sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
 
-            inv_key = it.current_format("inv_square_baseline{autoindex}")
-            self.common_namespace.reqparameter(inv_key, central=1/distance**2, sigma=0.1, fixed=True,
-                        label="Inverse square of baseline between {} and {}".format(cur_det, cur_reactor))
+            inv_key = it.current_format("{name}{autoindex}", name='baselineweight')
+            self.common_namespace.reqparameter(inv_key, central=0.25/distance**2/np.pi, sigma=0.1, fixed=True,
+                        label="1/(4πL²) for {} and {}, m⁻²".format(cur_det, cur_reactor))

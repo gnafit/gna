@@ -17,6 +17,7 @@ def balanced_pair(s, start=0):
     return start+i
 
 def open_fcn( s ):
+    s = s.replace('\n','')
     while '|' in s:
         start = s.index('|')
         end = balanced_pair( s, start )
