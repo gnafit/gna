@@ -3,29 +3,14 @@
 #include <functional>
 
 
-
-ArraySum::ArraySum(std::vector<std::string> names, std::string output_name):
-    m_names(std::move(names)), m_output_name(std::move(output_name)) {
-
-    m_vars.resize(m_names.size());
-    for (size_t i=0; i < m_vars.size(); ++i) {
-        variable_(&m_vars[i], m_names[i].c_str());
-        m_deps.push_back(m_vars[i]);
-    }
-
-    auto trans = transformation_("arrsum")
-        .input("arr")
-        .output("accumulated")
-        .types([](ArraySum* obj, TypesFunctionArgs& fargs){
-                fargs.rets[0] = DataType().points().shape(1);})
-        .func([](ArraySum* obj, FunctionArgs fargs) {
-                double result = fargs.args[0].arr.sum();
-                std::cout << result << std::endl;
-                fargs.rets[0].arr(0) = result;
-               });
+ArraySum::ArraySum(SingleOutput& out) {
+    auto& taint = out.single().expose_taintflag();
+    std::vector<changeable> deps;
+    deps.push_back(std::ref(taint));
+    m_accumulated = evaluable_<double>("out",
+            [&out, this]() -> decltype(auto) {
+                size_t offset = out.datatype().size();
+                return std::accumulate(out.single().data(), out.single().data() + offset, 0.);}, 
+                m_deps);
 }
 
-void ArraySum::exposeEvaluable() {
-    /* auto a = this->transformations.at(0).data()[0]; */
-    m_accumulated = evaluable_<double>(m_output_name.c_str(), [this]() -> decltype(this->transformations.at(0).data()[0]) {return this->transformations.at(0).data()[0];}, m_deps);
-}

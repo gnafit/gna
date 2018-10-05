@@ -439,6 +439,15 @@ public:
     }
     return *this;
   }
+
+  friend std::ostream& operator<< (std::ostream& out, const taintflag& tf) {
+      if (tf) {
+          out << tf.name() << " is tainted ";
+      } else {
+          out << tf.name() << " not tainted ";
+      }
+      return out;
+  };
 };
 
 class callback: public changeable {
