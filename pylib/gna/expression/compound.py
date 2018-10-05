@@ -255,7 +255,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' * ' )
+        self.set_operator( ' * ', '( ', ' )' )
         import ROOT as R
         self.set_tinit( R.Product )
 
@@ -272,7 +272,7 @@ class TRatio(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *objects)
         Transformation.__init__(self, name, *objects, **kwargs)
 
-        self.set_operator( ' / ' )
+        self.set_operator( ' / ', '( ', ' )' )
         import ROOT as R
         self.set_tinit( R.Ratio )
 
@@ -300,7 +300,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' + ', '(', ')' )
+        self.set_operator( ' + ', '( ', ' )' )
         import ROOT as R
         self.set_tinit( R.Sum )
 
