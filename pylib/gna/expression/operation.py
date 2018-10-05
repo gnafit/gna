@@ -43,9 +43,6 @@ class Operation(TCall,NestedTransformation):
                 self.name = newname
         return newname
 
-    def make_object(self, *args, **kwargs):
-        raise Exception('Unimplemented method called')
-
     @methodname
     def require(self, context):
         IndexedContainer.require(self, context)
@@ -77,7 +74,7 @@ class Operation(TCall,NestedTransformation):
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'sum', *indices, **kwargs)
-        self.set_operator( ' ++ ' )
+        self.set_operator( ' Σ ' )
 
         import ROOT as R
         self.set_tinit( R.Sum )
@@ -138,7 +135,34 @@ placeholder=['placeholder']
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
-        self.set_operator( ' ** ' )
+        self.set_operator( ' Π ' )
 
         import ROOT as R
         self.set_tinit( R.Product )
+
+class OAccumulate(Operation):
+    def __init__(self, *indices, **kwargs):
+        if len(indices)>1:
+            raise Exception('accumulate() supports only 1 argument')
+        if not isinstance(indices[0], TCall):
+            raise Exception('the only argument of accumulate() should be an object, not variable')
+
+        Operation.__init__(self, 'accumulate', *indices, **kwargs)
+        self.set_operator( ' ∫ ' )
+
+        import IPython
+        IPython.embed()
+
+        import ROOT as R
+        self.set_tinit( None )
+
+    def __call__(self):
+        import IPython
+        IPython.embed()
+
+    def bind(self, context):
+        Operation.bind(self, context)
+
+    def __getitem__(self, *args):
+        raise Exception('accumulate operation does not support indexing')
+
