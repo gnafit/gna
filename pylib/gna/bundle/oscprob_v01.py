@@ -59,8 +59,3 @@ class oscprob_v01(TransformationBundle):
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
 
-        for it in self.idx.get_sub( ['r', 'd'] ):
-            key = it.current_format('baseline{autoindex}')
-
-            self.common_namespace.reqparameter( key, central=1, sigma=0.1, fixed=True )
-

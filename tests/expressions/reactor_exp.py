@@ -67,6 +67,7 @@ lib = dict(
         )
 
 expr =[
+        'baseline[d,r]',
         'enu| ee(evis()), ctheta()',
         'jacobian| enu(), ee(), ctheta()',
         'ibd_xsec(enu(), ctheta())',
