@@ -19,13 +19,18 @@ print("Input var array ", var_arr.vararray.points.data())
 
 sum_arr = R.ArraySum(var_arr, ns=ns)
 ns['out'].get()
+output = var_arr.vararray.points
+print('Data:', output.data(), output.data().sum())
+print('trans', sum_arr.arrsum.accumulated.data())
 print("Value of \"out\" evaluable immediately after initialization ", ns['out'].value())
 #  sum_arr.arrsum.arr(var_arr.vararray)
 #  sum_arr.exposeEvaluable(var_arr.vararray)
 #  print(sum_arr.arrsum.accumulated.data())
 print("Change value of var1 variable to 10")
 ns['var1'].set(10)
+print('Data:', output.data(), output.data().sum())
 ns['out'].dump()
+print('trans', sum_arr.arrsum.accumulated.data())
 print("Sum should now be ", np.sum(var_arr.vararray.points.data()))
 
 print("Check the value \"out\" of evaluable now", ns['out'].value())
