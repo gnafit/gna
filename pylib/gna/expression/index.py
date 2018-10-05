@@ -24,6 +24,10 @@ class Index(object):
             args = []
             self.current=kwargs.pop( 'current', None )
 
+        varcheck = set(self.variants)
+        if len(varcheck)!=len(self.variants):
+            raise Exception('There are duplicated indices ({name}): {idxlist!s}'.format(name=self.name, idxlist=self.variants))
+
         if args or kwargs:
             raise Exception( 'Unparsed paramters: {:s}, {:s}'.format(args, kwargs) )
 

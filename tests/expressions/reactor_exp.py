@@ -32,7 +32,7 @@ R.GNAObject
 if args.mode=='complete':
     indices = [
         ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
-        ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA3']),
+        ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
         ]
@@ -53,9 +53,6 @@ elif args.mode=='small':
 else:
     raise Exception('Unsupported mode '+args.mode)
 
-#
-# Intermediate options (empty for now)
-#
 lib = dict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
         cspec_diff_reac         = dict(expr='sum:i'),
