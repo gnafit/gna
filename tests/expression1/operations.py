@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from gna.expression import *
-
+from load import ROOT as R
 
 print('Call method')
 t00 = Variable('t00')()
@@ -45,6 +45,15 @@ print( tp2, '=', tp2.estr() )
 tp2 = ts*ts
 tp2.name = 'prodsum'
 print( tp2, '=', tp2.estr() )
+
+tr1 = t00/t01
+tr1.name = 'ratio'
+print( tr1, '=', tr1.estr() )
+
+
+tr2 = ts2/tp2
+tr2.name = 'ratio'
+print( tr2, '=', tr2.estr() )
 
 print()
 print('ident', 'tp2', tp2.ident())

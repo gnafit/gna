@@ -131,7 +131,7 @@ class ExpressionContext(object):
 
             self.required[name] = cfg
 
-        if not indices:
+        if indices is None:
             printl( 'indices: %s'%(name) )
             return self.required
 
