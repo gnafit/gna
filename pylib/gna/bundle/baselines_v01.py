@@ -5,47 +5,51 @@ from load import ROOT as R
 import numpy as np
 import constructors as C
 from gna.bundle import *
+from gna.configurator import NestedDict
 import itertools
 
 class baselines(TransformationBundle):
     def __init__(self, **kwargs):
         TransformationBundle.__init__( self, **kwargs )
 
-        self.detectors = kwargs['cfg']['detectors']
-        self.reactors = kwargs['cfg']['reactors']
-        #Handle both indexed and indexless cases
-        try:
-            self.idx = self.cfg.indices
-            from gna.expression import NIndex
-            if not isinstance(self.idx, NIndex):
-                self.idx = NIndex(fromlist=self.cfg.indices)
+        self.init_indices()
+        self.init_data()
 
-            # Check that naming in index and data is consistent
-            self.constistency_check()
-        except KeyError:
-            pass
+        #Handle both indexed and indexless cases
 
     def build(self):
         '''Deliberately empty'''
         pass
 
-    def constistency_check(self):
-        '''Checks that sets of detectors and reactor coincide exactly in
-        from indices and from kwargs'''
+    def init_data(self):
+        '''Read configurations of reactors and detectors from either files or
+        dicts'''
 
+        from gna.configurator import configurator
+        def get_data(source):
+            if isinstance(source, str):
+                try:
+                    data = configurator(source)
+                    return data['data']
+                except:
+                    raise Exception('Unable to open or parse file {}'.format(source) ) 
+            elif isinstance(source, NestedDict):
+                return source
 
-        if self.idx is None:
-            return True
-        from itertools import chain
+        self.detectors = get_data(self.cfg.detectors)
+        self.reactors  = get_data(self.cfg.reactors)
+        if any('AD' not in str(key) for key in self.detectors.keys()):
+            print('AD is not in detectors keys! Substituting')
+            new = {}
+            for key, value in self.detectors.items():
+                if 'AD' not in str(key):
+                    new['AD'+str(key)] = value
+                else:
+                    new[str(key)] = value
+            self.detectors = new
+                
+                
 
-        from_kwargs = set(chain(self.reactors.keys(), self.detectors.keys()))
-        from_idx = set(chain.from_iterable((i.variants for i in self.idx.indices.itervalues())))
-        # if from_idx == from_kwargs:
-            # return True
-        # else:
-            # raise Exception("Reactors and detectors in indices and from "
-                    # "configuration does not match.\n From indices {} \n and "
-                    # "from configuration {}".format(from_idx, from_kwargs))
 
     def compute_distance(self, reactor, detector):
         '''Computes distance between pair of reactor and detector. Coordinates
@@ -58,11 +62,15 @@ class baselines(TransformationBundle):
     def define_variables(self):
         '''Create baseline variables in a common_namespace'''
 
-        reactor_idx, det_idx = map(self.idx.names().index, ['reactor', 'detector'])
         for i, it in enumerate(self.idx.iterate()):
             name = it.current_format('{name}{autoindex}', name='baseline')
             cur_det, cur_reactor = it.get_current('d'), it.get_current('r')
-            detector, reactor = self.detectors[cur_det], self.reactors[cur_reactor]
+            try:
+                detector, reactor = self.detectors[cur_det], self.reactors[cur_reactor]
+            except KeyError as e:
+                msg = "Detector {det} or reactor {reac} are missing in the configuration"
+                raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
+
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
             self.common_namespace.reqparameter(name, central=distance,

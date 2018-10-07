@@ -87,7 +87,7 @@ class TransformationBundle(object):
         """Constructor.
 
         Arguments:
-            - cfg — bundle configuration (NesteDict).
+            - cfg — bundle configuration (NestedDict).
 
         Keyword arguments:
             - common_namespace — namespace, common for all transformations.
