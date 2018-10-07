@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include "GNAObject.hh"
 #include <vector>
@@ -10,6 +10,5 @@ public:
       ArraySum(SingleOutput& out);
 private:
       std::string m_output_name;
-      std::vector<changeable> m_deps;
       dependant<double> m_accumulated;
 };

@@ -42,7 +42,7 @@ struct inconstant_data: public inconstant_header {
   std::function<ValueType()> func;
 };
 
-// #define DEBUG_PARAMETERS
+//#define DEBUG_PARAMETERS
 
 #ifdef DEBUG_PARAMETERS
 #define DPRINTF(...) do {                                               \
@@ -51,8 +51,14 @@ struct inconstant_data: public inconstant_header {
     fprintf(stderr, __VA_ARGS__);                                       \
     fprintf(stderr, "\n");                                              \
   } while (0)
+
+#define DPRINTFS(...) do {                                              \
+    fprintf(stderr, __VA_ARGS__);                                       \
+    fprintf(stderr, "\n");                                              \
+  } while (0)
 #else
 #define DPRINTF(...)
+#define DPRINTFS(...)
 #endif
 
 class changeable {
@@ -60,6 +66,7 @@ public:
   void subscribe(changeable d) {
     inconstant_header *hdr = m_data.hdr;
     if (hdr->observers.has(d)) {
+      DPRINTF("%p/%s is already observer", d.m_data.raw, d.name());
       return;
     }
     DPRINTF("%p/%s becomes observer", d.m_data.raw, d.name());
@@ -156,6 +163,7 @@ protected:
   }
   template <typename T>
   void initdeps(T deps) {
+    DPRINTF("subscribing to %i deps", int(deps.size()));
     for (auto dep: deps) {
       dep.subscribe(*this);
     }
@@ -414,12 +422,21 @@ public:
   dependant(std::function<ValueType()> f,
             std::initializer_list<changeable> deps,
             const char *name = nullptr)
-    : base_type(name) { base_type::init(f, deps); }
+    : base_type(name)
+    {
+      base_type::init(f, deps);
+      DPRINTF("constructed dependant");
+    }
   template <typename T>
   dependant(std::function<ValueType()> f,
             std::vector<T> deps,
             const char *name = nullptr)
-    : base_type(name) { base_type::init(f, deps); }
+    : base_type(name)
+    {
+      DPRINTF("construct dependant: %i deps", int(deps.size()));
+      base_type::init(f, deps);
+      DPRINTF("constructed dependant");
+    }
 protected:
   dependant(const base_type &other)
     : base_type(other) { }
