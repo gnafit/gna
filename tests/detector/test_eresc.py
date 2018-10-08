@@ -61,7 +61,7 @@ for eset in [
         phist = singularities( e, edges )
 
         hist = C.Histogram( edges, phist )
-        eres = R.EnergyResolution()
+        eres = R.EnergyResolutionC()
         eres.smear.Nvis( hist.hist )
 
         smeared = eres.smear.Nrec.data()

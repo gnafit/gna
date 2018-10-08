@@ -15,7 +15,7 @@ class detector_eres_common3(TransformationBundle):
     def build(self):
         with self.common_namespace:
             if self.mode=='correlated':
-                eres = R.EnergyResolution(False, ns=self.common_namespace)
+                eres = R.EnergyResolutionC(False, ns=self.common_namespace)
                 for i, ns in enumerate(self.namespaces):
                     eres.add()
                     eres.transformations[i].setLabel('Energy resolution:\n'+ns.name)
@@ -31,7 +31,7 @@ class detector_eres_common3(TransformationBundle):
                 self.objects['eres'] = eres
             elif self.mode=='uncorrelated':
                 for ns in self.namespaces:
-                    eres = R.EnergyResolution(ns=ns)
+                    eres = R.EnergyResolutionC(ns=ns)
                     eres.smear.setLabel('Energy resolution')
 
                     """Save transformations"""

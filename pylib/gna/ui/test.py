@@ -98,7 +98,7 @@ class cmd(basecmd):
             events.multiply(ibd.xsec)
             oscprob.probsum.comp0(events)
         integrator.hist.inputs(oscprob.probsum)
-        eres = ROOT.EnergyResolution(ns="eres")
+        eres = ROOT.EnergyResolutionC(ns="eres")
         eres.smear.inputs(integrator.hist)
         prediction.append(eres.smear)
         import time

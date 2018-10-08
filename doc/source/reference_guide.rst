@@ -164,6 +164,7 @@ Detector related
    :glob:
 
    transformations/EnergyResolution.rst
+   transformations/EnergyResolutionC.rst
    transformations/HistNonlinearity.rst
    transformations/HistSmear.rst
 

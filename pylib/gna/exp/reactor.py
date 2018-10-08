@@ -563,7 +563,7 @@ class ReactorExperimentModel(baseexp):
                 finalsum = inter_sum
 
             with detector.ns:
-                detector.eres = ROOT.EnergyResolution()
+                detector.eres = ROOT.EnergyResolutionC()
             detector.eres.smear.setLabel('Eres')
             detector.eres.smear.inputs(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
