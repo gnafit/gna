@@ -149,25 +149,9 @@ cfg = NestedDict(
             provides = ['livetime_daily', 'efflivetime_daily']
             ),
         baselines = NestedDict(
-            bundle = 'baselines',
-            detectors = OrderedDict([
-                ('AD11', [ 362.8329,    50.4206, -70.8174 ]),
-                ('AD12', [ 358.8044,    54.8583, -70.8135 ]),
-                ('AD21', [   7.6518,  -873.4882, -67.5241 ]),
-                ('AD22', [   9.5968,  -879.149,  -67.5202 ]),
-                ('AD31', [ 936.7486, -1419.013,  -66.4852 ]),
-                ('AD32', [ 941.4493, -1415.305,  -66.4966 ]),
-                ('AD33', [ 940.4612, -1423.737,  -66.4965 ]),
-                ('AD34', [ 945.1678, -1420.0282, -66.4851 ]),
-                ]),
-            reactors = OrderedDict([
-                ('DB1', [  359.2029,  411.4896, -40.2308 ]),
-                ('DB2', [  448.0015,  411.0017, -40.2392 ]),
-                ('LA1', [ -319.666,  -540.7481, -39.7296 ]),
-                ('LA2', [ -267.0633, -469.2051, -39.7230 ]),
-                ('LA3', [ -543.284,  -954.7018, -39.7987 ]),
-                ('LA4', [ -490.6906, -883.152,  -39.7884 ]),
-                ]),
+            bundle = 'baselines_v01',
+            reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
+            detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
             provides = [ 'baseline', 'baselineweight' ]
             )
         )

@@ -54,6 +54,8 @@ def makeparameter(ns, name, cfg=None, **kwargs):
     else:
         ptype = kwargs.get('type', 'gaussian')
 
+    fixed = kwargs.get('fixed', False)
+
     if debug:
         print( 'Defpar {ns}.{name} ({type}):'.format(
             ns=ns.name, name=name, type=ptype
@@ -84,6 +86,9 @@ def makeparameter(ns, name, cfg=None, **kwargs):
 
         if 'relsigma' in kwargs:
             rs = float(kwargs['relsigma'])
+            if rs==0.0:
+                fixed = True
+
             sigma = param.central()*rs
             if 'sigma' in kwargs and sigma != kwargs['sigma']:
                 msg = ("parameter `%s': conflicting relative (%g*%g=%g)"
@@ -95,7 +100,11 @@ def makeparameter(ns, name, cfg=None, **kwargs):
             if debug:
                 print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma,relsigma=rs,perc=rs*100.0), end=' ' )
         elif 'sigma' in kwargs:
-            param.setSigma(param.cast(kwargs['sigma']))
+            sigma = param.cast(kwargs['sigma'])
+            if sigma==0.0:
+                fixed=True
+
+            param.setSigma(sigma)
             if debug:
                 print( u'±{sigma}'.format(sigma=param.sigma() ), end=' ' )
                 if param.central():
@@ -122,7 +131,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         if debug:
             print( '{central} rad'.format( central=param.central() ), end=' ' )
 
-    if 'fixed' in kwargs:
+    if fixed:
         param.setFixed()
         if debug:
             print( 'fixed!', end='' )

@@ -8,7 +8,7 @@ from gna.bundle import *
 from gna.configurator import NestedDict
 import itertools
 
-class baselines(TransformationBundle):
+class baselines_v01(TransformationBundle):
     def __init__(self, **kwargs):
         TransformationBundle.__init__( self, **kwargs )
 
@@ -32,8 +32,8 @@ class baselines(TransformationBundle):
                     data = configurator(source)
                     return data['data']
                 except:
-                    raise Exception('Unable to open or parse file {}'.format(source) ) 
-            elif isinstance(source, NestedDict):
+                    raise Exception('Unable to open or parse file {}'.format(source) )
+            elif isinstance(source, (NestedDict, OrderedDict, dict)):
                 return source
 
         self.detectors = get_data(self.cfg.detectors)
@@ -47,9 +47,6 @@ class baselines(TransformationBundle):
                 else:
                     new[str(key)] = value
             self.detectors = new
-                
-                
-
 
     def compute_distance(self, reactor, detector):
         '''Computes distance between pair of reactor and detector. Coordinates
