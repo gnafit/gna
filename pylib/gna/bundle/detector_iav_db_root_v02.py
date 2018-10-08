@@ -7,10 +7,10 @@ import constructors as C
 from gna.bundle import *
 from collections import OrderedDict
 
-class detector_iav_db_root_v01(TransformationBundle):
+class detector_iav_db_root_v02(TransformationBundle):
     iavmatrix=None
     def __init__(self, **kwargs):
-        super(detector_iav_db_root_v01, self).__init__( **kwargs )
+        super(detector_iav_db_root_v02, self).__init__( **kwargs )
         self.transformations_in = self.transformations_out
 
         self.init_indices()
@@ -49,10 +49,11 @@ class detector_iav_db_root_v01(TransformationBundle):
                 self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
 
     def build(self):
-        from file_reader import read_object_auto
-        self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
+        pass
+        # from file_reader import read_object_auto
+        # self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
 
-        return self.build_mat()
+        # return self.build_mat()
 
     def define_variables(self):
         if self.cfg.scale.mode!='relative':
@@ -61,9 +62,9 @@ class detector_iav_db_root_v01(TransformationBundle):
             raise exception('IAV scale should be 1 by definition')
 
         self.pars = OrderedDict()
-        for ns in self.namespaces:
-            parname = self.cfg.parname.format(ns.name)
-            par = self.common_namespace.reqparameter( parname, cfg=self.cfg.scale )
-            par.setLabel('IAV offdiagonal contribution scale for '+ns.name)
-            self.pars[ns.name]=parname
-
+        for it in self.idx.iterate():
+            parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
+            par = self.common_namespace.reqparameter(parname, cfg=self.cfg.scale)
+            par.setLabel('IAV offdiagonal contribution scale')
+            # self.pars[ns.name]=parname
+        self.common_namespace.printparameters(labels=True)

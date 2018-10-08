@@ -16,7 +16,7 @@ args = parser.parse_args()
 # Import libraries
 #
 from gna.expression import *
-from gna.configurator import uncertaindict
+from gna.configurator import uncertaindict, uncertain
 from gna.bundle import execute_bundle
 from load import ROOT as R
 from gna.env import env
@@ -78,7 +78,8 @@ expr =[
                           baselineweight[r,d]*
                           sum[i]|
                             kinint2|
-                              anuspec() * oscprob() * ibd_xsec() * jacobian()'''
+                              anuspec() * oscprob() * ibd_xsec() * jacobian()''',
+        'iav()'
         ]
 
 # Initialize the expression and indices
@@ -153,7 +154,15 @@ cfg = NestedDict(
             reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
             detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
             provides = [ 'baseline', 'baselineweight' ]
-            )
+            ),
+        iav = NestedDict(
+                bundle     = 'detector_iav_db_root_v02',
+                parname    = 'OffdiagScale',
+                scale      = uncertain(1.0, 4, 'percent'),
+                ndiag      = 1,
+                filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+                matrixname = 'iav_matrix'
+                )
         )
 
 #
