@@ -52,11 +52,11 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
             fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
             thermal_power_per_core = C.Points(thermal_power_daily)
             self.objects[(core_name, 'ThermalPower')]  = thermal_power_per_core
-            self.set_output(thermal_power_per_core.single(), "ThermalPower", idx)
+            self.set_output(thermal_power_per_core.single(), "thermalpower", idx)
             for iso in fission_fractions_daily.dtype.names:
                 fission_per_iso = C.Points(fission_fractions_daily[iso])
-                self.objects[(core_name, 'fission_fraction', iso)] = fission_per_iso
-                self.set_output(fission_per_iso.single(), "fission_fraction.{}".format(iso), idx)
+                self.objects[(core_name, 'fission_fractions', iso)] = fission_per_iso
+                self.set_output(fission_per_iso.single(), "fission_fractions.{}".format(iso), idx)
              
 
 
