@@ -26,24 +26,23 @@ class detector_iav_db_root_v02(TransformationBundle):
         points = C.Points( self.iavmatrix, ns=self.common_namespace )
         points.points.setLabel('IAV matrix\nraw')
         self.objects['matrix'] = points
+        self.set_output(points.single(), 'iavmatrix.raw')
 
         with self.common_namespace:
-            for ns in self.namespaces:
+            for it in self.idx.iterate():
                 renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
                 renormdiag.renorm.inmat( points.points )
                 renormdiag.renorm.setLabel('IAV matrix:\n'+ns.name)
+                self.set_output( renormdiag.single(), 'iavmatrix', it )
 
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
                 esmear.smear.setLabel('IAV effect:\n'+ns.name)
+                self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
+                self.set_output( esmear.single(), 'iav', it )
 
-                """Save transformations"""
-                self.transformations_out[ns.name] = esmear.smear
-                self.inputs[ns.name]              = esmear.smear.Ntrue
-                self.outputs[ns.name]             = esmear.smear.Nvis
-
-                self.objects[('renormdiag',ns.name)] = renormdiag
-                self.objects[('esmear',ns.name)]     = esmear
+                self.objects[('renormdiag',it.current_format())] = renormdiag
+                self.objects[('esmear',it.current_format())]     = esmear
 
                 """Define observables"""
                 self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
