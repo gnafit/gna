@@ -41,6 +41,7 @@ set (SOURCES
   transformations/calculus/Jacobian.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
+  transformations/detector/EnergyResolutionC.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/functions/SelfPower.cc
@@ -185,6 +186,7 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyResolutionC.hh
   HistNonlinearity.hh
   HistSmear.hh
   RenormalizeDiag.hh

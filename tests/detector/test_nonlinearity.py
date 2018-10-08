@@ -92,7 +92,7 @@ fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
-ax.set_xlabel( L.u('Evis') )
+ax.set_xlabel( L.u('evis') )
 ax.set_ylabel( 'Entries' )
 ax.set_title( 'Non-linearity correction' )
 
