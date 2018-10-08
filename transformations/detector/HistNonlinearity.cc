@@ -24,18 +24,9 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")
-      .types(TypesFunctions::ifSame,
-         [](HistNonlinearity *obj, TypesFunctionArgs& fargs) {
-         obj->m_size = fargs.args[0].shape[0]-1;
-         obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
-         if( obj->m_propagate_matrix ){
-           fargs.rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
-         }
-         else{
-           fargs.rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
-         }
-         })
-       .func(&HistNonlinearity::calcMatrix);
+      .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::ifSame)
+      .types(m_propagate_matrix ? TypesFunctions::edgesToMatrix<0,0,0> : TypesFunctions::empty2<0>)
+      .func(&HistNonlinearity::calcMatrix);
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
@@ -67,16 +58,18 @@ void HistNonlinearity::calcSmear(FunctionArgs& fargs) {
 }
 
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
-  m_sparse_cache.setZero();
-
   auto& args=fargs.args;
   auto n = args[0].arr.size();
+  auto bins = n-1;
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
-  auto* end_orig = std::next(edges_orig, n-1);
-  auto* end_mod  = std::next(edges_mod, n-1);
+  auto* end_orig = std::next(edges_orig, bins);
+  auto* end_mod  = std::next(edges_mod, bins);
 
-  DEBUG("n=%li, matrix n=%li\n", n, m_size);
+  m_sparse_cache.resize(bins, bins);
+  m_sparse_cache.setZero();
+
+  DEBUG("n=%li, matrix n=%i\n", n, int(n-1));
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );

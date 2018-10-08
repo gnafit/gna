@@ -233,9 +233,10 @@ def matshow_matrix( self, *args, **kwargs ):
     """Plot TMatrixT using pyplot.matshow"""
     mask = kwargs.pop( 'mask', None )
     colorbar = kwargs.pop( 'colorbar', None )
+    kwargs.setdefault('fignum', False)
 
     buf = R2N.get_buffer_matrix( self, mask=mask )
-    res = P.matshow( buf )
+    res = P.matshow(buf, **kwargs)
     if colorbar:
         cbar = helpers.add_colorbar( res )
         return res,cbar

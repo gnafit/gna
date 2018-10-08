@@ -6,11 +6,20 @@
 
 constexpr double pi = boost::math::constants::pi<double>();
 
-EnergyResolution::EnergyResolution( bool single ) : m_single(single) {
+EnergyResolution::EnergyResolution(bool single, bool propagate_matrix) :
+m_propagate_matrix(propagate_matrix),
+m_single(single)
+{
   variable_(&m_a, "Eres_a");
   variable_(&m_b, "Eres_b");
   variable_(&m_c, "Eres_c");
-  callback_([this] { fillCache(); });
+
+  transformation_("matrix")
+      .input("Edges")
+      .output("FakeMatrix")
+      .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>,
+             m_propagate_matrix ? TypesFunctions::edgesToMatrix<0,0,0> : TypesFunctions::empty2<0>)
+      .func(&EnergyResolution::calcMatrix);
 
   if (single) {
     add();
@@ -23,22 +32,15 @@ void EnergyResolution::add(){
   if(!m_single){
     label = fmt::format("smear_{0}", index);
   }
-  transformation_(label)
+  auto init=transformation_(label)
     .input("Nvis")
+    .input("FakeMatrix")
     .output("Nrec")
-    .types(TypesFunctions::pass<0>,TypesFunctions::ifHist<0>,
-           [index](EnergyResolution *obj, TypesFunctionArgs& fargs) {
-             if(index==0){
-               obj->m_datatype = fargs.args[0];
-               obj->fillCache();
-             }
-             else{
-               if( fargs.args[0]!=obj->m_datatype ) {
-                 throw std::runtime_error("Inconsistent histogram in EnergyResolution");
-               }
-             }
-           })
-  .func(&EnergyResolution::calcSmear);
+    .dont_subscribe()
+    .types(TypesFunctions::pass<0>, TypesFunctions::ifHist<0>)
+    .func(&EnergyResolution::calcSmear);
+
+  t_[label].inputs()[1].connect( t_["matrix"].outputs()[0] );
 }
 
 void EnergyResolution::add(SingleOutput& hist){
@@ -61,24 +63,25 @@ double EnergyResolution::resolution(double Etrue, double Erec) const noexcept {
   return std::exp(-0.5*pow(reldiff, 2))/(twopisqr*sigma);
 }
 
-void EnergyResolution::fillCache() {
-  m_size = m_datatype.hist().bins();
-  if (m_size == 0) {
-    return;
-  }
-  m_sparse_cache.resize(m_size, m_size);
+void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
+  m_sparse_cache.setZero();
+
+  auto& arg = fargs.args[0];
+  auto* edges = arg.buffer;
+  auto bins = arg.type.shape[0]-1;
+  m_sparse_cache.resize(bins, bins);
 
   /* fill the cache matrix with probalilities for number of events to leak to other bins */
   /* colums corressponds to reconstrucred energy and rows to true energy */
-  auto bin_center = [&](size_t index){ return (m_datatype.edges[index+1] + m_datatype.edges[index])/2; };
-  for (size_t etrue = 0; etrue < m_size; ++etrue) {
+  auto bin_center = [edges](size_t index){ return (edges[index+1] + edges[index])/2; };
+  for (size_t etrue = 0; etrue < bins; ++etrue) {
     double Etrue = bin_center(etrue);
-    double dEtrue = m_datatype.edges[etrue+1] - m_datatype.edges[etrue];
+    double dEtrue = edges[etrue+1] - edges[etrue];
 
     bool right_edge_reached{false};
     /* precalculating probabilities for events in given bin to leak to
      * neighbor bins  */
-    for (size_t erec = 0; erec < m_size; ++erec) {
+    for (size_t erec = 0; erec < bins; ++erec) {
       double Erec = bin_center(erec);
       double rEvents = dEtrue*resolution(Etrue, Erec);
 
@@ -95,10 +98,15 @@ void EnergyResolution::fillCache() {
     }
   }
   m_sparse_cache.makeCompressed();
+
+  if ( m_propagate_matrix )
+    fargs.rets[0].mat = m_sparse_cache;
 }
 
 /* Apply precalculated cache and actually smear */
 void EnergyResolution::calcSmear(FunctionArgs& fargs) {
+  auto& args=fargs.args;
+  args[1]; // needed to trigger the matrix update
   fargs.rets[0].x = m_sparse_cache * fargs.args[0].vec;
 }
 

@@ -26,7 +26,6 @@ private:
 
   DataType m_datatype;
 
-  size_t m_size;
   Eigen::SparseMatrix<double> m_sparse_cache;
 
   bool m_initialized{false};
