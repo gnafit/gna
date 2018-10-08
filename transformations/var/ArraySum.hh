@@ -7,8 +7,12 @@
 class ArraySum: public GNAObject,
                 public TransformationBind<ArraySum> {
 public:
-      ArraySum(SingleOutput& out);
+      ArraySum(){};
+      ArraySum(const std::string& name, SingleOutput& out);
+
 private:
+      void initialize(const std::string& name, SingleOutput& out);
+
       std::string m_output_name;
       dependant<double> m_accumulated;
 };
