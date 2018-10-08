@@ -73,13 +73,13 @@ expr =[
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * efflivetime * effunc_uncorr[d] *
+                      iav[d] |
                       sum[c]| pmns[c]*
                         sum[r]|
                           baselineweight[r,d]*
                           sum[i]|
                             kinint2|
                               anuspec() * oscprob() * ibd_xsec() * jacobian()''',
-        'iav()'
         ]
 
 # Initialize the expression and indices

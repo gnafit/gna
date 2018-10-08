@@ -32,7 +32,8 @@ class baselines_v01(TransformationBundle):
                     data = configurator(source)
                     return data['data']
                 except:
-                    raise Exception('Unable to open or parse file {}'.format(source) )
+                   print('Unable to open or parse file {}'.format(source) )
+                   raise
             elif isinstance(source, (NestedDict, OrderedDict, dict)):
                 return source
 

@@ -26,33 +26,30 @@ class detector_iav_db_root_v02(TransformationBundle):
         points = C.Points( self.iavmatrix, ns=self.common_namespace )
         points.points.setLabel('IAV matrix\nraw')
         self.objects['matrix'] = points
-        self.set_output(points.single(), 'iavmatrix.raw')
+        self.set_output(points.single(), ('iavmatrix', 'raw'))
 
         with self.common_namespace:
             for it in self.idx.iterate():
-                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, self.pars[ns.name], ns=ns )
+                parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
+                renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname, ns=self.common_namespace )
                 renormdiag.renorm.inmat( points.points )
-                renormdiag.renorm.setLabel('IAV matrix:\n'+ns.name)
+                renormdiag.renorm.setLabel('IAV matrix')
                 self.set_output( renormdiag.single(), 'iavmatrix', it )
 
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                esmear.smear.setLabel('IAV effect:\n'+ns.name)
+                esmear.smear.setLabel('IAV effect')
                 self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
                 self.set_output( esmear.single(), 'iav', it )
 
                 self.objects[('renormdiag',it.current_format())] = renormdiag
                 self.objects[('esmear',it.current_format())]     = esmear
 
-                """Define observables"""
-                self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
-
     def build(self):
-        pass
-        # from file_reader import read_object_auto
-        # self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
+        from file_reader import read_object_auto
+        self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
 
-        # return self.build_mat()
+        return self.build_mat()
 
     def define_variables(self):
         if self.cfg.scale.mode!='relative':
