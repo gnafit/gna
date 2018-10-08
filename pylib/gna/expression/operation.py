@@ -140,28 +140,33 @@ class OProd(Operation):
         import ROOT as R
         self.set_tinit( R.Product )
 
-class OAccumulate(Operation):
-    def __init__(self, *indices, **kwargs):
-        if len(indices)>1:
+class Accumulate(IndexedContainer, Variable):
+    def __init__(self, name, *args, **kwargs):
+        self.arrsums = []
+        if len(args)>1:
             raise Exception('accumulate() supports only 1 argument')
-        if not isinstance(indices[0], TCall):
+        if not isinstance(args[0], TCall):
             raise Exception('the only argument of accumulate() should be an object, not variable')
 
-        Operation.__init__(self, 'accumulate', *indices, **kwargs)
+        IndexedContainer.__init__(self, *args)
+        Variable.__init__(self, name, *self.objects)
         self.set_operator( ' ∫ ' )
 
-        import IPython
-        IPython.embed()
-
-        import ROOT as R
-        self.set_tinit( None )
-
-    def __call__(self):
-        import IPython
-        IPython.embed()
-
     def bind(self, context):
-        Operation.bind(self, context)
+        import ROOT as R
+        IndexedContainer.bind(self, context, connect=False)
+        obj, = self.objects
+        ns = context.namespace()
+        for it in self.indices.iterate():
+            out = obj.get_output(it, context)
+            varname = self.current_format(it)
+
+            head, tail = varname.rsplit('.', 1)
+            cns = ns(head)
+            arrsum = R.ArraySum(tail, out, ns=cns)
+            var = cns[tail].get()
+            var.setLabel('sum of {}'.format(obj.current_format(it)))
+            self.arrsums.append(arrsum)
 
     def __getitem__(self, *args):
         raise Exception('accumulate operation does not support indexing')

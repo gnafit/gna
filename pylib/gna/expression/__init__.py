@@ -24,7 +24,7 @@ class VTContainer(OrderedDict):
         return value
 
 class Expression(object):
-    operations = dict(sum=OSum, prod=OProd, accumulate=OAccumulate)
+    operations = dict(sum=OSum, prod=OProd, accumulate=Accumulate)
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
         if isinstance(expression, basestring):
@@ -111,6 +111,9 @@ class ExpressionContext(object):
 
             for key in keys:
                 self.providers[key]=value
+
+    def namespace(self):
+        return self.ns
 
     def set_indices(self, indices):
         self.indices = indices

@@ -28,7 +28,7 @@ lib = dict(
 )
 
 # The expression is a forumla
-expr = ['accumulate| arr()']
+expr = ['accumulate| "test", arr[a]()']
 # In order to parse a formula the Expression needs to know how to iterate over indices
 a = Expression(expr, indices=indices)
 
@@ -56,6 +56,11 @@ cfg = NestedDict(
 # Build the expression for given configuration. The output is a context, that contains the inputs and outputs.
 context = ExpressionContext( cfg )
 a.build(context)
+
+print('Variables')
+context.ns.printparameters(labels=True)
+
+print('The sum should be:', context.outputs['arr.a'].data().sum())
 
 from gna.bindings import OutputDescriptor
 # Print inputs
