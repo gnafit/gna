@@ -26,7 +26,7 @@ m_single(single)
   }
 }
 
-void EnergyResolution::add(){
+TransformationDescriptor EnergyResolution::add(){
   int index=static_cast<int>(transformations.size());
   std::string label="smear";
   if(!m_single){
@@ -41,14 +41,16 @@ void EnergyResolution::add(){
     .func(&EnergyResolution::calcSmear);
 
   t_[label].inputs()[1].connect( t_["matrix"].outputs()[0] );
+  return transformations.back();
 }
 
-void EnergyResolution::add(SingleOutput& hist){
+TransformationDescriptor EnergyResolution::add(SingleOutput& hist){
   if( m_single ){
     throw std::runtime_error("May have only single energy resolution transformation in this class instance");
   }
   add();
   transformations.back().inputs[0]( hist.single() );
+  return transformations.back();
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{

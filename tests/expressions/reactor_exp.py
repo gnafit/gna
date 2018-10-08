@@ -70,16 +70,18 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
+        'eres_matrix| evis()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * efflivetime * effunc_uncorr[d] *
+                      eres[d]|
+                      iav[d] |
                       sum[c]| pmns[c]*
                         sum[r]|
                           baselineweight[r,d]*
                           sum[i]|
                             kinint2|
                               anuspec() * oscprob() * ibd_xsec() * jacobian()''',
-        'iav()'
         ]
 
 # Initialize the expression and indices
@@ -162,6 +164,18 @@ cfg = NestedDict(
                 ndiag      = 1,
                 filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
                 matrixname = 'iav_matrix'
+                ),
+        eres = NestedDict(
+                bundle = 'detector_eres_common3_v02',
+                # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                pars = uncertaindict(
+                    [('Eres_a', 0.014764) ,
+                        ('Eres_b', 0.0869) ,
+                        ('Eres_c', 0.0271)],
+                    mode='percent',
+                    uncertainty=30
+                    ),
+                provides = [ 'eres', 'eres_matrix' ]
                 )
         )
 
