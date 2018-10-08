@@ -293,10 +293,6 @@ def bind():
     # setattr( R.TH2, 'pcolormesh', pcolormesh_hist2 )
     # setattr( R.TH2, 'imshow',     imshow_hist2 )
 
-    # setattr( R.TMatrixF, 'matshow', matshow_matrix )
-    # setattr( R.TMatrixD, 'imshow', imshow_matrix )
-    # setattr( R.TMatrixF, 'imshow', imshow_matrix )
-
     # setattr( R.TGraph,            'plot',     graph_plot )
     # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
     # setattr( R.TGraphAsymmErrors, 'errorbar', errorbar_graph_asymm )

@@ -141,6 +141,7 @@ class OProd(Operation):
         self.set_tinit( R.Product )
 
 class Accumulate(IndexedContainer, Variable):
+    bound = False
     def __init__(self, name, *args, **kwargs):
         self.arrsums = []
         if len(args)>1:
@@ -153,10 +154,14 @@ class Accumulate(IndexedContainer, Variable):
         self.set_operator( ' ∫ ' )
 
     def bind(self, context):
+        if self.bound:
+            return
+
         import ROOT as R
         IndexedContainer.bind(self, context, connect=False)
         obj, = self.objects
         ns = context.namespace()
+        from gna.env import ExpressionsEntry
         for it in self.indices.iterate():
             out = obj.get_output(it, context)
             varname = self.current_format(it)
@@ -168,6 +173,5 @@ class Accumulate(IndexedContainer, Variable):
             var.setLabel('sum of {}'.format(obj.current_format(it)))
             self.arrsums.append(arrsum)
 
-    def __getitem__(self, *args):
-        raise Exception('accumulate operation does not support indexing')
+        self.bound = True
 

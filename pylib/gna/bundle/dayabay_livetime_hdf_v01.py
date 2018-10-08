@@ -52,13 +52,9 @@ class dayabay_livetime_hdf_v01(TransformationBundle):
             self.objects[('eff',ad)] = eff
             self.objects[('efflivetime',ad)] = efflivetime
 
-            # Fixme: make evaluable
-            self.common_namespace.reqparameter( it.current_format('{name}{autoindex}', name='livetime'),
-                                                central=data['livetime'].sum(), sigma=0.1, fixed=True,
-                                                label='{ad} livetime, s'.format(ad=ad) )
-            self.common_namespace.reqparameter( it.current_format('{name}{autoindex}', name='efflivetime'),
-                                                central=data['efflivetime'].sum(), sigma=0.1, fixed=True,
-                                                label='{ad} livetime*mueff*multeff, s'.format(ad=ad))
+            self.set_output(livetime.single(), 'livetime_daily', it)
+            self.set_output(eff.single(), 'eff_daily', it)
+            self.set_output(efflivetime.single(), 'efflivetime_daily', it)
 
         ndays_daq = (data_lt>0.0).sum()
         daq.reqparameter('ndays_daq', central=ndays_daq, fixed=True, sigma=0.01,

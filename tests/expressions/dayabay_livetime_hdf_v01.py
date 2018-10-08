@@ -20,7 +20,7 @@ indices = [
 lib = dict(
 )
 
-expr = [ 'livetime[d]' ]
+expr = [ 'livetime=accumulate("livetime", livetime_daily[d]())' ]
 a = Expression(expr, indices=indices)
 
 print(a.expressions_raw)
@@ -32,9 +32,10 @@ a.tree.dump(True)
 
 print()
 cfg = NestedDict(
-        livetime = NestedDict(
+        livetime_daily = NestedDict(
             bundle = 'dayabay_livetime_hdf_v01',
-            file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5'
+            file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
+            provides = ['livetime_daily']
             ),
         )
 context = ExpressionContext(cfg, ns=env.globalns)

@@ -70,7 +70,9 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
-        '''result = global_norm *  eff * efflivetime[d] * effunc_uncorr[d] *
+        'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+        'livetime=accumulate("livetime", livetime_daily[d]())',
+        '''result = global_norm *  eff * efflivetime * effunc_uncorr[d] *
                       sum[c]| pmns[c]*
                         sum[r]|
                           baselineweight[r,d]*
@@ -144,7 +146,7 @@ cfg = NestedDict(
         livetime = NestedDict(
             bundle = 'dayabay_livetime_hdf_v01',
             file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-            provides = ['livetime', 'efflivetime']
+            provides = ['livetime_daily', 'efflivetime_daily']
             ),
         baselines = NestedDict(
             bundle = 'baselines',
