@@ -11,6 +11,11 @@ mapping_idx_to_reactors = {1: "DB1", 2: "DB2", 3: "LA1", 4: "LA2", 5: "LA3", 6: 
 
 class dayabay_reactor_burning_info_v01(TransformationBundle):
     def __init__(self, **kwargs):
+        '''Initialize reactor information such as daily ratios of actual
+        thermal power to nominal, fission fractions per core.
+        Cores are provided by caller through indices.
+        Info is read from npz file.
+        '''
         super(dayabay_reactor_burning_info_v01, self).__init__( **kwargs )
 
         self.init_indices()
@@ -39,20 +44,20 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
         pass
 
     def build(self):
-        #  import IPython
-        #  IPython.embed()
         for idx in self.idx:    
-            isotopes = defaultdict(np.array)
             core_name, = idx.current_values()
             core = self.core_info_daily[core_name]
             days_in_period = np.array(core['days'])
 
-            # replicate thermal powers times corresponding to reactor working time
+            # map fission fractions and thermal powers to days instead of
+            # weeks
             thermal_power_daily = np.repeat(core['power'], days_in_period)
             fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
+
             thermal_power_per_core = C.Points(thermal_power_daily)
-            self.objects[(core_name, 'ThermalPower')]  = thermal_power_per_core
-            self.set_output(thermal_power_per_core.single(), "thermalpower", idx)
+            self.objects[(core_name, 'thermal_power')]  = thermal_power_per_core
+            self.set_output(thermal_power_per_core.single(), "thermal_power", idx)
+
             for iso in fission_fractions_daily.dtype.names:
                 fission_per_iso = C.Points(fission_fractions_daily[iso])
                 self.objects[(core_name, 'fission_fractions', iso)] = fission_per_iso
