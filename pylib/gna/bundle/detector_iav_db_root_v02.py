@@ -33,12 +33,12 @@ class detector_iav_db_root_v02(TransformationBundle):
                 parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
                 renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname, ns=self.common_namespace )
                 renormdiag.renorm.inmat( points.points )
-                renormdiag.renorm.setLabel('IAV matrix')
+                renormdiag.renorm.setLabel(it.current_format('IAV matrix\n{autoindexnd}'))
                 self.set_output( renormdiag.single(), 'iavmatrix', it )
 
                 esmear = R.HistSmear(True)
                 esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                esmear.smear.setLabel('IAV effect')
+                esmear.smear.setLabel(it.current_format('IAV effect\n{autoindexnd}'))
                 self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
                 self.set_output( esmear.single(), 'iav', it )
 
