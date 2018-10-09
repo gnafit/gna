@@ -17,7 +17,16 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("Ntrue")
       .input("FakeMatrix")
       .output("Nvis")
-      .types(TypesFunctions::pass<0,0>)
+      .types(TypesFunctions::pass<0,0>, TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>)
+      .types(TypesFunctions::if2d<1>, TypesFunctions::ifSquare<1>,
+             [](TypesFunctionArgs& fargs){
+             auto& args = fargs.args;
+             auto& vec = args[0];
+             auto& mat = args[1];
+             if( vec.shape[0]!=mat.shape[0] ) {
+               throw args.error(vec, "Inputs are not multiplicable");
+             }
+             })
       .func(&HistNonlinearity::calcSmear);
 
   transformation_("matrix")
@@ -25,7 +34,7 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::ifSame)
-      .types(m_propagate_matrix ? TypesFunctions::edgesToMatrix<0,0,0> : TypesFunctions::empty2<0>)
+      .types(TypesFunctions::edgesToMatrix<0,0,0>)
       .func(&HistNonlinearity::calcMatrix);
 }
 

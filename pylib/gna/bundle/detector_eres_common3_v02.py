@@ -16,7 +16,8 @@ class detector_eres_common3_v02(TransformationBundle):
 
     def build(self):
         with self.common_namespace:
-            eres = self.eres = R.EnergyResolution(False, ns=self.common_namespace)
+            expose_matrix = self.cfg.get('expose_matrix', False)
+            eres = self.eres = R.EnergyResolution(False, expose_matrix, ns=self.common_namespace)
 
             eres.matrix.setLabel('Energy resolution\nmatrix')
             self.set_input(eres.matrix.Edges, 'eres_matrix', clone=0)

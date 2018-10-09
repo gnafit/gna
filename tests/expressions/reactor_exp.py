@@ -70,7 +70,7 @@ expr =[
         'ibd_xsec(enu(), ctheta())',
         'oscprob[c,d,r]( enu() )',
         'anuspec[i](enu())',
-        'eres_matrix| evis()',
+        'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * efflivetime * effunc_uncorr[d] *
@@ -112,7 +112,7 @@ cfg = NestedDict(
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
             xorders   = 3,
             yorder   = 5,
-            provides = [ 'evis', 'ctheta' ],
+            provides = [ 'evis', 'ctheta', 'evis_edges' ],
             ),
         ibd_xsec = NestedDict(
             bundle = 'xsec_ibd_v01',
@@ -175,7 +175,8 @@ cfg = NestedDict(
                     mode='percent',
                     uncertainty=30
                     ),
-                provides = [ 'eres', 'eres_matrix' ]
+                provides = [ 'eres', 'eres_matrix' ],
+                expose_matrix = True
                 )
         )
 
