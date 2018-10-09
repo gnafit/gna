@@ -40,9 +40,14 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 current_core['power'].append(it['power'])
                 current_core['days'].append((it['end'] - it['start'])/sec_per_day)
                 current_core['fission_fractions'].append(it['iso'])
+        
+        self.fission_uncertainty = configurator(self.cfg.fission_uncertainty_info)
 
     def define_variables(self):
-        pass
+        for idx in self.idx:
+            iso_name,  = idx.current_values()
+            print(iso_name)
+
 
     def build(self):
         for idx in self.idx:    
