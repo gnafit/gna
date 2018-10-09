@@ -159,7 +159,14 @@ class NestedTransformation(object):
     def set_tinit(self, obj):
         self.tinit = obj
 
-    def new_tobject(self, label, *args):
+    def new_tobject(self, idx, *args):
+        if isinstance(idx, str):
+            label = idx
+        elif self.label is not None:
+            label = idx.current_format(self.label, name=self.name)
+        else:
+            label = self.current_format(idx)
+
         newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
         self.tobjects.append(newobj)
@@ -172,7 +179,7 @@ class NestedTransformation(object):
         if self.tinit:
             with nextlevel():
                 for idx in self.indices.iterate():
-                    tobj, newout = self.new_tobject(self.current_format(idx))
+                    tobj, newout = self.new_tobject(idx)
                     context.set_output(newout, self.name, idx)
                     nobj = len(self.objects)
                     for i, obj in enumerate(self.objects):
@@ -354,11 +361,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 weights = stdvector([wname])
 
                 with context.ns:
-                    if self.label is not None:
-                        label = idx.current_format(self.label, name=self.name)
-                    else:
-                        label = self.current_format(idx)
-                    tobj, newout = self.new_tobject(label, labels, weights)
+                    tobj, newout = self.new_tobject(idx, labels, weights)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)
