@@ -15,13 +15,14 @@ args = parser.parse_args()
 
 indices = [
     ('r', 'reactor',    ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
+    ('i', 'isotope',    ['U235', 'U238', 'Pu239', 'Pu241'])
     ]
 
 lib = dict(
     reactor_info = dict( expr='reactor_info' )
 )
 
-expr = ['reactor_info[r]']
+expr = ['reactor_info[r, i]']
 a = Expression(expr, indices=indices)
 
 name_mapping = { idx+1: name for idx, name in enumerate(indices[0][-1])}
@@ -40,6 +41,7 @@ cfg = NestedDict(
             correlated   = False,
             uncorrelated = True,
             reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
+            fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py'
             )
         )
 context = ExpressionContext(cfg, ns=env.globalns)
