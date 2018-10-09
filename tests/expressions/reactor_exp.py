@@ -60,7 +60,8 @@ lib = dict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm')
+        # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
+        norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
         )
 
 expr =[
@@ -72,7 +73,8 @@ expr =[
         'anuspec[i](enu())',
         'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
-        'power_livetime_factor=accumulate("power_livetime_factor", efflivetime_daily[d]() * thermal_power[r]() * fission_fractions[i,r]())',
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
+        'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * effunc_uncorr[d] *
                       eres[d]|
@@ -84,6 +86,7 @@ expr =[
                             power_livetime_factor*
                             kinint2|
                               anuspec() * oscprob() * ibd_xsec() * jacobian()''',
+        'nonlinearity[d]()'
         ]
 
 # Initialize the expression and indices
@@ -124,9 +127,6 @@ cfg = NestedDict(
         oscprob = NestedDict(
             bundle = 'oscprob_v01',
             name = 'oscprob',
-            input = True,
-            size = 10,
-            debug = False,
             provides = ['oscprob', 'pmns']
             ),
         anuspec = NestedDict(
@@ -184,7 +184,14 @@ cfg = NestedDict(
                     ),
                 provides = [ 'eres', 'eres_matrix' ],
                 expose_matrix = True
-                )
+                ),
+        nonlinearity = NestedDict(
+                bundle     = 'detector_nonlinearity_db_root_v02',
+                names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+                filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
+                parname    = 'escale',
+                par        = uncertain(1.0, 0.2, 'percent'),
+                ),
         )
 
 #
@@ -228,6 +235,11 @@ if args.dot:
         graph = GNADot(context.outputs.ee, joints=False)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
+
+        graph = GNADot(context.outputs.thermal_power.values(), joints=False)
+        name = args.dot.replace('.dot', '_lt.dot')
+        graph.write(name)
+        print( 'Write output to:', name )
     except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
         raise

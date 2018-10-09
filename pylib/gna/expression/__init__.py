@@ -189,6 +189,9 @@ class ExpressionContext(object):
         return self.get( self.outputs, name, nidx, 'output', clone=clone )
 
     def set_output(self, output, name, nidx=None, fmt=None, **kwargs):
+        import ROOT as R
+        if isinstance(output, R.TransformationTypes.OutputHandle):
+            output = R.OutputDescriptor(output)
         self.set( self.outputs, output, name, nidx, 'output', fmt, **kwargs )
         return output
 
@@ -206,6 +209,9 @@ class ExpressionContext(object):
         ret = source.get(key, None)
         if not ret:
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
+
+        if isinstance(ret, NestedDict):
+            raise Exception('Incomplete index ({!s}) provided (probably). Need at least resolve {!s}'.format(nidx, res.keys()))
 
         return ret
 
