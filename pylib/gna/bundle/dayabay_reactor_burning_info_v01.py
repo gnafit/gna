@@ -45,21 +45,23 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
         pass
 
     def build(self):
-        for idx in self.idx:    
-            iso_name, core_name = idx.current_values()
+        reac, other = self.idx.split( ('r') )
+        for rit in reac.iterate():
+            core_name, = rit.current_values()
             core = self.core_info_daily[core_name]
-
             days_in_period = np.array(core['days'])
 
-            # map fission fractions and thermal powers to days instead of
-            # weeks
             thermal_power_daily = np.repeat(core['power'], days_in_period)
-            fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
-
             thermal_power_per_core = C.Points(thermal_power_daily)
             self.objects[(core_name, 'thermal_power')]  = thermal_power_per_core
-            self.set_output(thermal_power_per_core.single(), "thermal_power", idx)
+            self.set_output(thermal_power_per_core.single(), 'thermal_power', rit)
 
-            fission_per_iso = C.Points(fission_fractions_daily[iso_name])
-            self.objects[(core_name, 'fission_fractions', iso_name)] = fission_per_iso
-            self.set_output(fission_per_iso.single(), "fission_fractions.{}".format(iso_name), idx)
+            for oit in other.iterate():
+                it = rit+oit
+                iso_name = it.indices['i'].current
+
+                # map fission fractions and thermal powers to days instead of weeks
+                fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
+                fission_per_iso = C.Points(fission_fractions_daily[iso_name])
+                self.objects[(core_name, 'fission_fractions', iso_name)] = fission_per_iso
+                self.set_output(fission_per_iso.single(), 'fission_fractions', it)

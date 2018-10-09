@@ -178,6 +178,14 @@ class NIndex(object):
     def get_sub(self, indices):
         return NIndex(*[v for k, v in self.indices.items() if k in indices])
 
+    def split(self, indices):
+        idx=[]
+        other=[]
+        for k, v in self.indices.items():
+            (idx if k in indices else other).append(v)
+
+        return NIndex(*idx), NIndex(*other)
+
     def get_current(self, short):
         return self.indices[short].current
 

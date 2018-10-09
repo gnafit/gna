@@ -60,7 +60,8 @@ lib = dict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm')
+        # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
+        norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
         )
 
 expr =[
@@ -72,7 +73,8 @@ expr =[
         'anuspec[i](enu())',
         'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
-        'power_livetime_factor=accumulate("power_livetime_factor", efflivetime_daily[d]())', # * thermal_power[r]() * fission_fractions[i,r]()
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
+        'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * effunc_uncorr[d] *
                       eres[d]|
