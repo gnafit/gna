@@ -46,15 +46,19 @@ class IndexedContainer(object):
             variants.append(nn+':'+self.indices.ident())
 
         guessed = False
+        label = None
         for var in variants:
             if var in lib:
-                guessed = lib[var]['name']
+                libentry = lib[var]
+                guessed = libentry['name']
+                label   = libentry.get('label', None)
                 break
 
         if guessed:
             newname = guessed
             if save:
                 self.name = newname
+                self.label = label
 
         return newname
 
@@ -350,7 +354,11 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject( self.current_format(idx), labels, weights )
+                    if self.label is not None:
+                        label = idx.current_format(self.label, name=self.name)
+                    else:
+                        label = self.current_format(idx)
+                    tobj, newout = self.new_tobject(label, labels, weights)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)

@@ -16,6 +16,7 @@ public:
   void set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue );
   void set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified );
   void set( SingleOutput& ntrue );
+  void set();
 
   void set_range( double min, double max ) { m_range_min=min; m_range_max=max; }
   double get_range_min() { return m_range_min; }

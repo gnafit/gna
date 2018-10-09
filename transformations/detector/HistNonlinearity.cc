@@ -60,6 +60,10 @@ void HistNonlinearity::set( SingleOutput& ntrue ){
     t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
+void HistNonlinearity::set(){
+    t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
+}
+
 void HistNonlinearity::calcSmear(FunctionArgs& fargs) {
   auto& args=fargs.args;
   args[1]; // Needed to trigger updating

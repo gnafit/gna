@@ -5,6 +5,7 @@ from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
 from gna.env import env
+import re
 
 class VTContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
@@ -34,6 +35,8 @@ class Expression(object):
         else:
             raise Exception('Unsupported expression: {!r}'.format(expression))
 
+        rexpr = re.compile('\n\s+')
+        self.expressions_raw = [ rexpr.sub('', e) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
         self.globals=VTContainer(self.operations)

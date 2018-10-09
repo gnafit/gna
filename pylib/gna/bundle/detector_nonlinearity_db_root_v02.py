@@ -9,6 +9,7 @@ from converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
 from gna.configurator import NestedDict
+from collections import OrderedDict
 from gna.bundle import *
 
 class detector_nonlinearity_db_root_v02(TransformationBundle):
@@ -16,12 +17,12 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
     def __init__(self, **kwargs):
         super(detector_nonlinearity_db_root_v02, self).__init__( **kwargs )
 
-        self.edges = kwargs.pop('edges', self.shared.get('edges', None))
-        if not self.edges:
-            raise Exception('detector_nonlinearity_db_root_v02 expects bin edges to be passed as argument or shared')
+        self.init_indices()
+        if self.idx.ndim()!=2:
+            raise Exception('detector_nonlinearity_db_root_v02 supports only 2d indexing: detector and lsnl component')
+
         self.storage=NestedDict()
         self.pars=NestedDict()
-
         self.transformations_in = self.transformations_out
 
     def build_graphs( self, graphs ):
@@ -29,70 +30,54 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
         # Interpolate curves on the default binning
         # (extrapolate as well)
         #
-        newx = self.edges.data()
-        self.storage['edges'] = newx
-        newy = []
+        self.newx_out = self.context.outputs[self.cfg.edges]
+        newx = self.newx_out.data()
+        newy = OrderedDict()
         for xy, name in zip(graphs, self.cfg.names):
             f = interpolate( xy, newx )
-            newy.append(f)
+            newy[name]=f
             self.storage[name] = f.copy()
 
         #
         # All curves but first are the corrections to the nominal
         #
-        for f in newy[1:]:
-            f-=newy[0]
+        newy_values = newy.values()
+        for f in newy_values[1:]:
+            f-=newy_values[0]
 
-        #
+        idxl, idxother = self.idx.split( ('l') )
+        idxd, idxother = idxother.split( ('d') )
+
         # Correlated part of the energy nonlinearity factor
         # a weighted sum of input curves
-        #
-        with self.common_namespace:
-            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), C.stdvector(['weight_'+n for n in self.cfg.names]), ns=self.common_namespace )
-        self.objects['lsnl_factor']=corr_lsnl
-        corr_lsnl.sum.setLabel('NL:\ncorrelated')
-
-        for i, (y, name) in enumerate(zip( newy, self.cfg.names )):
+        for i, itl in enumerate(idxl.iterate()):
+            name, = itl.current_values()
+            if not name in newy:
+                raise Exception('The nonlinearity curve {} is not provided'.format(name))
+            y = newy[name]
             pts = C.Points( y, ns=self.common_namespace )
-            pts.points.setLabel((i and 'NL correction' or 'NL nominal')+':\n'+name)
-            corr_lsnl.sum[name]( pts )
-
+            if i:
+                label=itl.current_format('NL correction {autoindexnd}')
+            else:
+                label=itl.current_format('NL nominal ({autoindexnd})')
+            pts.points.setLabel(label)
+            self.set_output(pts.single(), 'lsnl_component', itl)
             self.objects[('curves', name)] = pts
 
         with self.common_namespace:
-            for i, ns in enumerate(self.namespaces):
-                with ns:
-                    """Uncorrelated between detectors part of the energy nonlinearity factor
-                    correlated part multiplicated by the scale factor"""
-                    labels = C.stdvector([self.pars[ns.name]])
-                    corr = R.WeightedSum(labels, labels, ns=ns)
-                    corr.sum.setLabel('NL uncorrelated:\n'+ns.name)
-                    corr.sum.inputs[0]( corr_lsnl.sum )
+            for i, itd in enumerate(idxd.iterate()):
+                """Finally, original bin edges multiplied by the correction factor"""
+                """Construct the nonlinearity calss"""
+                nonlin = R.HistNonlinearity(self.debug)
+                nonlin.set()
+                nonlin.smear.setLabel(itd.current_format('NL\n{autoindexnd}'))
+                nonlin.matrix.setLabel(itd.current_format('NL matrix\n{autoindexnd}'))
+                self.objects[('nonlinearity',)+itd.current_values()] = nonlin
 
-                    """Finally, original bin edges multiplied by the correction factor"""
-                    newe = R.Product(ns=ns)
-                    newe.multiply( self.edges )
-                    newe.multiply( corr.sum )
-                    newe.product.setLabel('NL absolute:\n'+ns.name)
-
-                    """Construct the nonlinearity calss"""
-                    nonlin = R.HistNonlinearity(self.debug, ns=ns)
-                    nonlin.set(self.edges, newe.product)
-                    nonlin.smear.setLabel('NL:\n'+ns.name)
-                    nonlin.matrix.setLabel('NL matrix:\n'+ns.name)
-
-                    """Provide output transformations"""
-                    self.transformations_out[ns.name] = nonlin.smear
-                    self.inputs[ns.name]              = nonlin.smear.Ntrue
-                    self.outputs[ns.name]             = nonlin.smear.Nvis
-
-                    """Save intermediate transformations"""
-                    self.objects[('factor', ns.name)]       = corr
-                    self.objects[('edges_mod', ns.name)]    = newe
-                    self.objects[('nonlinearity', ns.name)] = nonlin
-
-                    """Define observables"""
-                    self.addcfgobservable(ns, nonlin.smear.Nvis, 'nonlinearity', ignorecheck=True)
+                self.set_input(nonlin.matrix.Edges,         'lsnl_edges', itd, clone=0)
+                self.set_input(nonlin.matrix.EdgesModified, 'lsnl_edges', itd, clone=1)
+                self.set_input(nonlin.smear.Ntrue, 'lsnl', itd, clone=0)
+                self.set_output(nonlin.smear.Nvis, 'lsnl', itd)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )
@@ -108,22 +93,29 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
         return self.build_graphs( graphs )
 
     def define_variables(self):
-        import IPython
-        IPython.embed()
+        idxl, idxother = self.idx.split( ('l') )
+        idxd, idxother = idxother.split( ('d') )
 
-        par = self.common_namespace.reqparameter( 'weight_'+self.cfg.names[0], central=1.0, sigma=0.0, fixed=True )
-        par.setLabel( 'Nominal nonlinearity curve weight' )
-        for name in self.cfg.names[1:]:
-            par = self.common_namespace.reqparameter( 'weight_'+name, central=0.0, sigma=1.0 )
-            par.setLabel( 'Correction nonlinearity weight for '+name )
+        par=None
+        lname = self.cfg.parnames['lsnl']
+        for itl in idxl.iterate():
+            name = itl.current_format('{name}{autoindex}', name = lname)
+            if par is None:
+                par = self.common_namespace.reqparameter(name, central=1.0, sigma=0.0, fixed=True)
+                par.setLabel( itl.current_format('Nominal nonlinearity curve weight ({autoindexnd})') )
+            else:
+                par = self.common_namespace.reqparameter(name, central=0.0, sigma=1.0)
+                par.setLabel( itl.current_format('Correction nonlinearity weight for {autoindexnd}' ))
 
         if self.cfg.par.central!=1:
             raise Exception('Relative energy scale parameter should have central value of 1 by definition')
-        for ns in self.namespaces:
-            parname = self.cfg.parname.format(ns.name)
+
+        ename = self.cfg.parnames['escale']
+        for it in idxd.iterate():
+            parname = it.current_format('{name}{autoindex}', name=ename)
             par = self.common_namespace.reqparameter( parname, cfg=self.cfg.par )
-            par.setLabel( 'Uncorrelated energy scale for '+ns.name )
-            self.pars[ns.name]=parname
+            par.setLabel( 'Uncorrelated energy scale for '+it.current_format('{autoindexnd}') )
+            self.pars[it.current_values()]=parname
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )

@@ -34,7 +34,8 @@ if args.mode=='complete':
         ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
-        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
+        ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.mode=='minimal':
     indices = [
@@ -42,13 +43,15 @@ elif args.mode=='minimal':
         ('r', 'reactor',     ['DB1']),
         ('d', 'detector',    ['AD11']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.mode=='small':
     indices = [
-        ('i', 'isotope', ['U235']),
+        ('i', 'isotope', ['U235', 'U238']),
         ('r', 'reactor',     ['DB1', 'LA1']),
-        ('d', 'detector',    ['AD11', 'AD12']),
-        ('c', 'component',   ['comp0', 'comp12'])
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21']),
+        ('c', 'component',   ['comp0', 'comp12']),
+        ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 else:
     raise Exception('Unsupported mode '+args.mode)
@@ -62,31 +65,41 @@ lib = dict(
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
         # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
+        observation             = dict(expr='eres*norm_bf', label='Observed spectrum\n{detector}'),
+        lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
+        lsnl_correlated         = dict(expr='sum:l'),
+        evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
+        evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
         )
 
 expr =[
         'baseline[d,r]',
         'enu| ee(evis()), ctheta()',
-        'jacobian| enu(), ee(), ctheta()',
-        'ibd_xsec(enu(), ctheta())',
-        'oscprob[c,d,r]( enu() )',
-        'anuspec[i](enu())',
-        'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+        'livetime=accumulate("livetime", livetime_daily[d]())',
         'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
-        'livetime=accumulate("livetime", livetime_daily[d]())',
-        '''result = global_norm *  eff * effunc_uncorr[d] *
+        'eres_matrix| evis_edges()',
+        'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
+        '''result = rebin|
+                      global_norm*
+                      eff*
+                      effunc_uncorr[d]*
                       eres[d]|
-                      iav[d] |
-                      sum[c]| pmns[c]*
-                        sum[r]|
-                          baselineweight[r,d]*
-                          sum[i]|
-                            power_livetime_factor*
-                            kinint2|
-                              anuspec() * oscprob() * ibd_xsec() * jacobian()''',
-        'nonlinearity[d]()'
+                        lsnl[d]|
+                          iav[d]|
+                            sum[c]|
+                              pmns[c]*
+                              sum[r]|
+                                baselineweight[r,d]*
+                                sum[i]|
+                                  power_livetime_factor*
+                                  kinint2|
+                                    anuspec[i](enu())*
+                                    oscprob[c,d,r](enu())*
+                                    ibd_xsec(enu(), ctheta())*
+                                    jacobian(enu(), ee(), ctheta())
+        ''',
         ]
 
 # Initialize the expression and indices
@@ -185,13 +198,23 @@ cfg = NestedDict(
                 provides = [ 'eres', 'eres_matrix' ],
                 expose_matrix = True
                 ),
-        nonlinearity = NestedDict(
+        lsnl = NestedDict(
                 bundle     = 'detector_nonlinearity_db_root_v02',
                 names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
                 filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-                parname    = 'escale',
+                parnames      = dict(
+                    lsnl   = 'lsnl_weight',
+                    escale = 'escale'
+                    ),
                 par        = uncertain(1.0, 0.2, 'percent'),
+                edges      = 'evis_edges',
+                provides   = ['lsnl', 'lsnl_component', 'escale', 'lsnl_weight', 'lsnl_edges']
                 ),
+        rebin = NestedDict(
+                bundle = 'rebin_v02',
+                rounding = 3,
+                edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] ))
+                )
         )
 
 #
@@ -232,7 +255,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot(context.outputs.ee, joints=False)
+        graph = GNADot(context.outputs.ee, joints=True)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
 
