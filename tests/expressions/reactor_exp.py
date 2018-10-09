@@ -47,7 +47,7 @@ elif args.mode=='minimal':
         ]
 elif args.mode=='small':
     indices = [
-        ('i', 'isotope', ['U235', 'U238']),
+        ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21']),
         ('c', 'component',   ['comp0', 'comp12']),
@@ -57,7 +57,8 @@ else:
     raise Exception('Unsupported mode '+args.mode)
 
 lib = dict(
-        cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob'),
+        cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
+                                       label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
         cspec_diff_reac         = dict(expr='sum:i'),
         cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
         cspec_diff_det          = dict(expr='sum:r'),
@@ -242,7 +243,7 @@ if args.show:
     # ax.set_ylabel()
     # ax.set_title()
 
-    out = context.outputs.result.AD11
+    out = context.outputs.observation.AD11
     out.plot_hist()
 
 if args.show:
@@ -255,7 +256,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot(context.outputs.ee, joints=True)
+        graph = GNADot(context.outputs.ee, joints=False)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
 
