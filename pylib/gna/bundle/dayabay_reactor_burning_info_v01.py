@@ -38,13 +38,12 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 current_core['power'].append(it['power'])
                 current_core['days'].append((it['end'] - it['start'])/sec_per_day)
                 current_core['fission_fractions'].append(it['iso'])
-            
 
     def define_variables(self):
         pass
 
     def build(self):
-        for idx in self.idx:    
+        for idx in self.idx:
             core_name, = idx.current_values()
             core = self.core_info_daily[core_name]
             days_in_period = np.array(core['days'])
@@ -62,13 +61,4 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 fission_per_iso = C.Points(fission_fractions_daily[iso])
                 self.objects[(core_name, 'fission_fractions', iso)] = fission_per_iso
                 self.set_output(fission_per_iso.single(), "fission_fractions.{}".format(iso), idx)
-             
-
-
-
-
-        
-
-
-
 
