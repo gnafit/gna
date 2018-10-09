@@ -72,7 +72,7 @@ expr =[
         'anuspec[i](enu())',
         'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
-        'power_livetime_factor=accumulate("power_livetime_factor", efflivetime_daily[d]() * thermal_power[r]() * fission_fractions[i,r]())',
+        'power_livetime_factor=accumulate("power_livetime_factor", efflivetime_daily[d]())', # * thermal_power[r]() * fission_fractions[i,r]()
         'livetime=accumulate("livetime", livetime_daily[d]())',
         '''result = global_norm *  eff * effunc_uncorr[d] *
                       eres[d]|
@@ -124,9 +124,6 @@ cfg = NestedDict(
         oscprob = NestedDict(
             bundle = 'oscprob_v01',
             name = 'oscprob',
-            input = True,
-            size = 10,
-            debug = False,
             provides = ['oscprob', 'pmns']
             ),
         anuspec = NestedDict(
