@@ -34,15 +34,42 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
         self.core_info_daily = defaultdict(lambda: defaultdict(list))
         with np.load(self.cfg.reactor_info) as f:
             self.data = f['power']
-            sec_per_day = 60*60*24
+
+            seconds_per_day = 60*60*24
             for it in self.data:
                 current_core = self.core_info_daily[ self.file_idx_to_reactor[it['core']] ]
                 current_core['power'].append(it['power'])
-                current_core['days'].append((it['end'] - it['start'])/sec_per_day)
+                current_core['days'].append((it['end'] - it['start'])/seconds_per_day)
                 current_core['fission_fractions'].append(it['iso'])
+        
+        self.fission_info = configurator(self.cfg.fission_uncertainty_info)
 
     def define_variables(self):
-        pass
+        ns = self.common_namespace
+        
+        for reacit in self.idx.get_sub("r"):
+            isotope_pac = [] 
+            for isoit in self.idx.get_sub("i"):
+                it = reacit + isoit
+                iso_name = isoit.indices['i'].current
+                reac_name = reacit.indices['r'].current
+
+                iso_idx = self.fission_info['isotopes'].index(iso_name)
+                sigma = self.fission_info['sigma'][iso_idx]
+                ff_name = "fission_fraction" + it.current_format()
+                label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
+
+                isotope_pac.append((ff_name, {'central':1, 'sigma': sigma, 'label':label,}))
+
+            # check the order of isotopes matches corresponding order from
+            # configuration
+            if all(from_conf in from_pack[0] for from_pack, from_conf
+                   in zip(isotope_pac, self.fission_info['isotopes'])):
+                ns.reqparameter_group(*isotope_pac, **{'covmat': self.fission_info['correlation']})
+            else:
+                raise Exception("Orderings of isotopes from indices and data "
+                                "do not match. Check it!")
+
 
     def build(self):
         reac, other = self.idx.split( ('r') )
