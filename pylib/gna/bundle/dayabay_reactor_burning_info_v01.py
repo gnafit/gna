@@ -64,6 +64,6 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 # map fission fractions and thermal powers to days instead of weeks
                 fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
                 fission_per_iso = C.Points(fission_fractions_daily[iso_name])
-                fission_per_iso.points.setLabel( it.current_format('Fission fractions\n{autoindexnd') )
+                fission_per_iso.points.setLabel( it.current_format('Fission fractions\n{autoindexnd}') )
                 self.objects[(core_name, 'fission_fractions', iso_name)] = fission_per_iso
                 self.set_output(fission_per_iso.single(), 'fission_fractions', it)

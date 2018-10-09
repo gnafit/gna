@@ -86,6 +86,7 @@ expr =[
                             power_livetime_factor*
                             kinint2|
                               anuspec() * oscprob() * ibd_xsec() * jacobian()''',
+        'nonlinearity[d]()'
         ]
 
 # Initialize the expression and indices
@@ -183,7 +184,14 @@ cfg = NestedDict(
                     ),
                 provides = [ 'eres', 'eres_matrix' ],
                 expose_matrix = True
-                )
+                ),
+        nonlinearity = NestedDict(
+                bundle     = 'detector_nonlinearity_db_root_v02',
+                names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+                filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
+                parname    = 'escale',
+                par        = uncertain(1.0, 0.2, 'percent'),
+                ),
         )
 
 #
