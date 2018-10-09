@@ -65,6 +65,7 @@ lib = dict(
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
         # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
+        observation             = dict(expr='eres*norm_bf', label='Observed spectrum\n{detector}'),
         lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
         lsnl_correlated         = dict(expr='sum:l'),
         evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
@@ -80,20 +81,24 @@ expr =[
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
-        '''result = global_norm *  eff * effunc_uncorr[d] *
+        '''result = rebin|
+                      global_norm*
+                      eff*
+                      effunc_uncorr[d]*
                       eres[d]|
-                      lsnl[d]|
-                      iav[d] |
-                      sum[c]| pmns[c]*
-                        sum[r]|
-                          baselineweight[r,d]*
-                          sum[i]|
-                            power_livetime_factor*
-                            kinint2|
-                              anuspec[i](enu())*
-                              oscprob[c,d,r](enu())*
-                              ibd_xsec(enu(), ctheta())*
-                              jacobian(enu(), ee(), ctheta())
+                        lsnl[d]|
+                          iav[d]|
+                            sum[c]|
+                              pmns[c]*
+                              sum[r]|
+                                baselineweight[r,d]*
+                                sum[i]|
+                                  power_livetime_factor*
+                                  kinint2|
+                                    anuspec[i](enu())*
+                                    oscprob[c,d,r](enu())*
+                                    ibd_xsec(enu(), ctheta())*
+                                    jacobian(enu(), ee(), ctheta())
         ''',
         ]
 
@@ -205,6 +210,11 @@ cfg = NestedDict(
                 edges      = 'evis_edges',
                 provides   = ['lsnl', 'lsnl_component', 'escale', 'lsnl_weight', 'lsnl_edges']
                 ),
+        rebin = NestedDict(
+                bundle = 'rebin_v02',
+                rounding = 3,
+                edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] ))
+                )
         )
 
 #

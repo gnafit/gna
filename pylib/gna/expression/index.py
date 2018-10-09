@@ -210,6 +210,7 @@ undefinedname = NameUndefined()
 
 class Indexed(object):
     name=''
+    label=None
     indices_locked=False
     fmt=None
     def __init__(self, name, *indices, **kwargs):
