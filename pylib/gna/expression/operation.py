@@ -146,7 +146,7 @@ class Accumulate(IndexedContainer, Variable):
         self.arrsums = []
         if len(args)>1:
             raise Exception('accumulate() supports only 1 argument')
-        if not isinstance(args[0], TCall):
+        if not isinstance(args[0], Transformation):
             raise Exception('the only argument of accumulate() should be an object, not variable')
 
         IndexedContainer.__init__(self, *args)

@@ -38,8 +38,6 @@ print()
 cfg = NestedDict(
         reactor_info = NestedDict(
             bundle = 'dayabay_reactor_burning_info_v01',
-            correlated   = False,
-            uncorrelated = True,
             reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
             fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py'
             )

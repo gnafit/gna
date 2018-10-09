@@ -72,14 +72,16 @@ expr =[
         'anuspec[i](enu())',
         'eres_matrix| evis_edges()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+        'power_livetime_factor=accumulate("power_livetime_factor", efflivetime_daily[d]() * thermal_power[r]() * fission_fractions[i,r]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        '''result = global_norm *  eff * efflivetime * effunc_uncorr[d] *
+        '''result = global_norm *  eff * effunc_uncorr[d] *
                       eres[d]|
                       iav[d] |
                       sum[c]| pmns[c]*
                         sum[r]|
                           baselineweight[r,d]*
                           sum[i]|
+                            power_livetime_factor*
                             kinint2|
                               anuspec() * oscprob() * ibd_xsec() * jacobian()''',
         ]
@@ -157,6 +159,11 @@ cfg = NestedDict(
             detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
             provides = [ 'baseline', 'baselineweight' ]
             ),
+        thermal_power = NestedDict(
+                bundle = 'dayabay_reactor_burning_info_v01',
+                reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
+                provides = ['thermal_power', 'fission_fractions']
+                ),
         iav = NestedDict(
                 bundle     = 'detector_iav_db_root_v02',
                 parname    = 'OffdiagScale',

@@ -118,7 +118,7 @@ class NIndex(object):
 
     def __eq__(self, other):
         if not isinstance(other, NIndex):
-            return False
+            other = NIndex(*other)
         return self.indices==other.indices
 
     # def reduce(self, *indices):
@@ -217,10 +217,12 @@ class Indexed(object):
             self.indices_locked=True
 
     def __getitem__(self, args):
-        if self.indices_locked:
-            raise Exception('May not modify already declared indices')
         if not isinstance(args, tuple):
             args = args,
+        if self.indices_locked:
+            if self.indices==args:
+                return self
+            raise Exception('May not modify already declared indices')
         self.set_indices(*args)
         return self
 
