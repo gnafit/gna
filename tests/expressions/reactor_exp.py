@@ -227,6 +227,11 @@ if args.dot:
         graph = GNADot(context.outputs.ee, joints=False)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
+
+        graph = GNADot(context.outputs.thermal_power.values(), joints=False)
+        name = args.dot.replace('.dot', '_lt.dot')
+        graph.write(name)
+        print( 'Write output to:', name )
     except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
         raise

@@ -45,8 +45,11 @@ class dayabay_livetime_hdf_v01(TransformationBundle):
 
             data_lt = data['livetime']+data_lt
             livetime    = C.Points(data['livetime'])
+            livetime.points.setLabel(it.current_format('Livetime\n{autoindexnd}'))
             eff         = C.Points(data['eff'])
+            eff.points.setLabel(it.current_format('Efficiency (mu*mult)\n{autoindexnd}'))
             efflivetime = R.Product(livetime, eff)
+            efflivetime.product.setLabel(it.current_format('Livetime (eff)\n{autoindexnd}'))
 
             self.objects[('livetime',ad)] = livetime
             self.objects[('eff',ad)] = eff
