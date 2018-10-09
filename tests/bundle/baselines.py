@@ -17,16 +17,17 @@ from gna.expression import *
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
-parser.add_argument( '--make-idx', action="store_true", help='Make indices' )
+# parser.add_argument( '--make-idx', action="store_true", help='Make indices' )
 parser.add_argument('--from-file', action="store_true", help='Read coordinates from files')
 args = parser.parse_args()
+args.make_idx=True
 
 
 if args.from_file:
     reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py'
     detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py'
 else:
-#DYB-like detector positions in meters
+    #DYB-like detector positions in meters
     detectors = {
         'AD11' : [ 362.8329,    50.4206, -70.8174 ],
         'AD12' : [ 358.8044,    54.8583, -70.8135 ],
@@ -64,7 +65,7 @@ if args.make_idx:
 
 cfg = NestedDict(
     # Bundle name
-    bundle = 'baselines',
+    bundle = 'baselines_v01',
     # Reactor positions
     reactors = reactors,
     # Detector positions

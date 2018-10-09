@@ -169,7 +169,7 @@ class TransformationBundle(object):
         if isinstance(self.idx, NIndex):
             return
 
-        self.idx = NIndex(fromlist=self.cfg.indices)
+        self.idx = NIndex(fromlist=self.idx)
 
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))

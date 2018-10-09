@@ -6,6 +6,7 @@ import numpy as np
 import constructors as C
 from gna.bundle import *
 from gna.configurator import NestedDict
+from collections import OrderedDict
 import itertools
 
 class baselines_v01(TransformationBundle):
