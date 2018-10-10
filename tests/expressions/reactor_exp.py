@@ -68,10 +68,21 @@ lib = OrderedDict(
         # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
         observation             = dict(expr='eres*norm_bf', label='Observed spectrum\n{detector}'),
+
         lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
-        lsnl_correlated         = dict(expr='sum:l'),
+        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
         evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
         evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
+
+        oscprob_weighted        = dict(expr='oscprob*pmns'),
+        oscprob_full            = dict(expr='sum:c|oscprob_weighted'),
+
+        anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
+        anuspec_rd              = dict(expr='sum:i|anuspec_weighted'),
+
+        countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
+        countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
+        countrate               = dict(expr='sum:r|countrate_rd')
         )
 
 expr =[
@@ -82,7 +93,10 @@ expr =[
         'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'eres_matrix| evis_edges()',
-        'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
+        'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
+]
+if False:
+    expr.append(
         '''result = rebin|
                       global_norm*
                       eff*
@@ -101,9 +115,9 @@ expr =[
                                     oscprob[c,d,r](enu())*
                                     ibd_xsec(enu(), ctheta())*
                                     jacobian(enu(), ee(), ctheta())
-        ''',
-        ]
-expr[-1]= '''result = rebin|
+        ''')
+elif True:
+    expr.append('''result = rebin|
                       global_norm*
                       eff*
                       effunc_uncorr[d]*
@@ -118,7 +132,7 @@ expr[-1]= '''result = rebin|
                                   (sum[i]| power_livetime_factor*anuspec[i](enu()))*
                                   sum[c]|
                                     pmns[c]*oscprob[c,d,r](enu())
-        '''
+        ''')
 
 # Initialize the expression and indices
 a = Expression(expr, indices)

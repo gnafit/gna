@@ -35,7 +35,9 @@ class Operation(TCall,NestedTransformation):
         for o in self.objects:
             o.guessname(lib, save)
 
-        newname=self.operation+':'+self.indices_to_reduce.ident()
+        cname = TCall.guessname(self)
+        newname='{}:{}|{}'.format(self.operation, self.indices_to_reduce.ident(), cname)
+
         if newname in lib:
             newname = lib[newname]['name']
 
