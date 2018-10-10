@@ -81,6 +81,7 @@ class IndexedContainer(object):
         for obj in self.objects:
             obj.require(context)
 
+    @call_once
     def bind(self, context, connect=True):
         if not self.objects:
             return
@@ -128,6 +129,7 @@ class VProduct(IndexedContainer, Variable):
 
         self.set_operator( '*' )
 
+    @call_once
     def bind(self, context):
         printl('bind (var) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
@@ -166,7 +168,6 @@ class NestedTransformation(object):
             label = idx.current_format(self.label, name=self.name, **kwargs)
         else:
             label = self.current_format(idx, **kwargs)
-        print('LABEL', label, self.label, self.name)
 
         newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
@@ -174,6 +175,7 @@ class NestedTransformation(object):
         import ROOT as R
         return newobj, R.OutputDescriptor(newobj.single())
 
+    @call_once
     def bind(self, context):
         printl('bind (nested) {}:'.format(type(self).__name__), str(self) )
 
@@ -233,6 +235,7 @@ class TCall(IndexedContainer, Transformation):
         else:
             return self.__str__()
 
+    @call_once
     def bind(self, context):
         if self.inputs_connected:
             return
@@ -347,6 +350,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         self.object.require(context)
         self.weight.require(context)
 
+    @call_once
     def bind(self, context):
         printl('bind (weighted) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():

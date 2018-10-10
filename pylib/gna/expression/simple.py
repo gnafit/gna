@@ -4,6 +4,20 @@
 from __future__ import print_function
 from gna.expression.index import *
 
+def call_once(method):
+    def newmethod(self, *args, **kwargs):
+        if not hasattr(self, 'call_once'):
+            self.call_once=set()
+
+        if method in self.call_once:
+            return
+
+        method(self, *args, **kwargs)
+
+        self.call_once.add(method)
+
+    return newmethod
+
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
         super(Variable, self).__init__(name, *args, **kwargs)
@@ -20,6 +34,7 @@ class Variable(Indexed):
         from gna.expression.compound import TCall
         return TCall(self.name, self, targs=targs)
 
+    @call_once
     def bind(self, context):
         pass
 
@@ -61,5 +76,6 @@ class Transformation(Indexed):
     def require(self, context):
         context.require(self.name, self.indices)
 
+    @call_once
     def bind(self, context):
         pass

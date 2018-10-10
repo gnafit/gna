@@ -53,6 +53,7 @@ class Operation(TCall,NestedTransformation):
     def require(self, context):
         IndexedContainer.require(self, context)
 
+    @call_once
     def bind(self, context):
         printl('bind (operation) {}:'.format(type(self).__name__), str(self) )
 
@@ -85,6 +86,7 @@ class OSum(Operation):
         import ROOT as R
         self.set_tinit( R.Sum )
 
+    @call_once
     def bind(self, context):
         # Process sum of weigtedsums
         if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
@@ -159,6 +161,7 @@ class Accumulate(IndexedContainer, Variable):
         Variable.__init__(self, name, *self.objects)
         self.set_operator( ' ∫ ' )
 
+    @call_once
     def bind(self, context):
         if self.bound:
             return
