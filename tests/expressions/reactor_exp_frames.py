@@ -213,7 +213,8 @@ def build_and_plot(expr, obj, suffix):
                 bundle = 'baselines_v01',
                 reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
                 detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
-                provides = [ 'baseline', 'baselineweight' ]
+                provides = [ 'baseline', 'baselineweight' ],
+                units="meters"
                 ),
             thermal_power = NestedDict(
                     bundle = 'dayabay_reactor_burning_info_v01',

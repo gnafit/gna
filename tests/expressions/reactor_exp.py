@@ -24,6 +24,7 @@ from matplotlib import pyplot as P
 import numpy as N
 from mpl_tools import bindings
 from gna.labelfmt import formatter as L
+from collections import OrderedDict
 R.GNAObject
 
 #
@@ -56,7 +57,7 @@ elif args.mode=='small':
 else:
     raise Exception('Unsupported mode '+args.mode)
 
-lib = dict(
+lib = OrderedDict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
         cspec_diff_reac         = dict(expr='sum:i'),
@@ -102,6 +103,22 @@ expr =[
                                     jacobian(enu(), ee(), ctheta())
         ''',
         ]
+expr[-1]= '''result = rebin|
+                      global_norm*
+                      eff*
+                      effunc_uncorr[d]*
+                      eres[d]|
+                        lsnl[d]|
+                          iav[d]|
+                              kinint2|
+                                sum[r]|
+                                  baselineweight[r,d]*
+                                  ibd_xsec(enu(), ctheta())*
+                                  jacobian(enu(), ee(), ctheta())*
+                                  (sum[i]| power_livetime_factor*anuspec[i](enu()))*
+                                  sum[c]|
+                                    pmns[c]*oscprob[c,d,r](enu())
+        '''
 
 # Initialize the expression and indices
 a = Expression(expr, indices)
@@ -171,11 +188,13 @@ cfg = NestedDict(
             bundle = 'baselines_v01',
             reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
             detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
-            provides = [ 'baseline', 'baselineweight' ]
+            provides = [ 'baseline', 'baselineweight' ],
+            units = 'meters'
             ),
         thermal_power = NestedDict(
                 bundle = 'dayabay_reactor_burning_info_v01',
                 reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
+                fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
                 provides = ['thermal_power', 'fission_fractions']
                 ),
         iav = NestedDict(
