@@ -35,18 +35,25 @@ class Operation(TCall,NestedTransformation):
         for o in self.objects:
             o.guessname(lib, save)
 
-        newname=self.operation+':'+self.indices_to_reduce.ident()
+        cname = TCall.guessname(self)
+        newname='{}:{}|{}'.format(self.operation, self.indices_to_reduce.ident(), cname)
+
         if newname in lib:
-            newname = lib[newname]['name']
+            libentry = lib[newname]
+            newname = libentry['name']
+            label   = libentry.get('label', None)
 
             if save:
                 self.name = newname
+                self.set_label(label)
+
         return newname
 
     @methodname
     def require(self, context):
         IndexedContainer.require(self, context)
 
+    @call_once
     def bind(self, context):
         printl('bind (operation) {}:'.format(type(self).__name__), str(self) )
 
@@ -79,6 +86,7 @@ class OSum(Operation):
         import ROOT as R
         self.set_tinit( R.Sum )
 
+    @call_once
     def bind(self, context):
         # Process sum of weigtedsums
         if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
@@ -107,7 +115,7 @@ class OSum(Operation):
                 names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
                 weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
 
-                tobj, newout = self.new_tobject(self.current_format(freeidx), names, weights)
+                tobj, newout = self.new_tobject(freeidx, names, weights, weight_label=weight.name)
                 context.set_output(newout, self.name, freeidx)
 
                 for i, (name, reduceidx) in enumerate(zip(names, rindices)):
@@ -153,6 +161,7 @@ class Accumulate(IndexedContainer, Variable):
         Variable.__init__(self, name, *self.objects)
         self.set_operator( ' ∫ ' )
 
+    @call_once
     def bind(self, context):
         if self.bound:
             return

@@ -32,7 +32,7 @@ R.GNAObject
 #
 if args.mode=='complete':
     indices = [
-        ('i', 'isotope', ['U235', 'U238', 'Pu239', 'Pu241']),
+        ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
@@ -57,6 +57,33 @@ elif args.mode=='small':
 else:
     raise Exception('Unsupported mode '+args.mode)
 
+detectors = ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']
+groups=NestedDict(
+        exp  = { 'dayabay': detectors },
+        det  = { d: (d,) for d in detectors },
+        site = NestedDict([
+            ('EH1', ['AD11', 'AD12']),
+            ('EH2', ['AD21', 'AD22']),
+            ('EH3', ['AD31', 'AD32', 'AD33', 'AD34']),
+            ]),
+        adnum_local = NestedDict([
+            ('1', ['AD11', 'AD21', 'AD31']),
+            ('2', ['AD12', 'AD22', 'AD32']),
+            ('3', ['AD33']),
+            ('4', ['AD34']),
+            ]),
+        adnum_global = NestedDict([
+            ('1', ['AD11']), ('2', ['AD12']),
+            ('3', ['AD21']), ('8', ['AD22']),
+            ('4', ['AD31']), ('5', ['AD32']), ('6', ['AD33']), ('7', ['AD34']),
+            ]),
+        adnum_global_alphan_subst = NestedDict([
+            ('1', ['AD11']), ('2', ['AD12']),
+            ('3', ['AD21', 'AD22']),
+            ('4', ['AD31']), ('5', ['AD32']), ('6', ['AD33', 'AD34']),
+            ])
+        )
+
 lib = OrderedDict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
@@ -65,13 +92,26 @@ lib = OrderedDict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
+
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
-        observation             = dict(expr='eres*norm_bf', label='Observed spectrum\n{detector}'),
+        ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n{detector}'),
+
         lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
-        lsnl_correlated         = dict(expr='sum:l'),
+        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
         evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
         evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
+
+        oscprob_weighted        = dict(expr='oscprob*pmns'),
+        oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
+
+        anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
+        anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
+
+        countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
+        countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
+        countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\nweight: {weight_label}'),
+
+        observation_raw         = dict(expr='bkg_spectrum_acc+ibd')
         )
 
 expr =[
@@ -83,7 +123,11 @@ expr =[
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
-        '''result = rebin|
+        'bkg = bkg_spectrum_acc[d]()'
+]
+if False:
+    expr.append(
+        '''ibd =
                       global_norm*
                       eff*
                       effunc_uncorr[d]*
@@ -101,9 +145,9 @@ expr =[
                                     oscprob[c,d,r](enu())*
                                     ibd_xsec(enu(), ctheta())*
                                     jacobian(enu(), ee(), ctheta())
-        ''',
-        ]
-expr[-1]= '''result = rebin|
+        ''')
+elif True:
+    expr.append('''ibd =
                       global_norm*
                       eff*
                       effunc_uncorr[d]*
@@ -118,7 +162,9 @@ expr[-1]= '''result = rebin|
                                   (sum[i]| power_livetime_factor*anuspec[i](enu()))*
                                   sum[c]|
                                     pmns[c]*oscprob[c,d,r](enu())
-        '''
+        ''')
+
+expr.append( 'observation=rebin| ibd + bkg' )
 
 # Initialize the expression and indices
 a = Expression(expr, indices)
@@ -234,7 +280,32 @@ cfg = NestedDict(
                 bundle = 'rebin_v02',
                 rounding = 3,
                 edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] ))
-                )
+                ),
+        bkg_spectrum_acc = NestedDict(
+            bundle    = 'root_histograms_v02',
+            filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
+            format    = '{site}_AD{adnum_local}_singleTrigEnergy',
+            name      = 'bkg_spectrum_acc',
+            label     = 'Accidentals {detector}\n(norm spectrum)',
+            groups    = groups,
+            normalize = True,
+            ),
+        bkg_spectrum_li=NestedDict(
+                    bundle    = 'root_histograms_v02',
+                    filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'bkg_spectrum_li',
+                    label     = '9Li spectrum\n(norm)'
+                    normalize = True,
+                    ),
+        bkg_spectrum_he= NestedDict(
+                    bundle    = 'root_histograms_v02',
+                    filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'bkg_spectrum_he',
+                    label     = '8he spectrum\n(norm)'
+                    normalize = True,
+                    ),
         )
 
 #

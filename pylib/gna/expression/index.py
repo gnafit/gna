@@ -217,6 +217,9 @@ class Indexed(object):
         self.name=name
         self.set_indices(*indices, **kwargs)
 
+    def set_label(self, label):
+        self.label=label
+
     def set_format(self, fmt):
         self.fmt = fmt
 

@@ -41,11 +41,6 @@ class IndexedContainer(object):
                     expr = self.operator.strip().join(o.ident(lib=lib, save=save) for o in self.objects),
                      )
 
-        # if self.operator==' Σ ':
-            # print(type(self), self.name, self.operator)
-            # import IPython
-            # IPython.embed()
-
         variants=[newnameu, newname]
         for nn in tuple(variants):
             variants.append(nn+':'+self.indices.ident())
@@ -63,7 +58,7 @@ class IndexedContainer(object):
             newname = guessed
             if save:
                 self.name = newname
-                self.label = label
+                self.set_label(label)
 
         return newname
 
@@ -86,6 +81,7 @@ class IndexedContainer(object):
         for obj in self.objects:
             obj.require(context)
 
+    @call_once
     def bind(self, context, connect=True):
         if not self.objects:
             return
@@ -133,6 +129,7 @@ class VProduct(IndexedContainer, Variable):
 
         self.set_operator( '*' )
 
+    @call_once
     def bind(self, context):
         printl('bind (var) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
@@ -164,13 +161,13 @@ class NestedTransformation(object):
     def set_tinit(self, obj):
         self.tinit = obj
 
-    def new_tobject(self, idx, *args):
+    def new_tobject(self, idx, *args, **kwargs):
         if isinstance(idx, str):
             label = idx
         elif self.label is not None:
-            label = idx.current_format(self.label, name=self.name)
+            label = idx.current_format(self.label, name=self.name, **kwargs)
         else:
-            label = self.current_format(idx)
+            label = self.current_format(idx, **kwargs)
 
         newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
@@ -178,6 +175,7 @@ class NestedTransformation(object):
         import ROOT as R
         return newobj, R.OutputDescriptor(newobj.single())
 
+    @call_once
     def bind(self, context):
         printl('bind (nested) {}:'.format(type(self).__name__), str(self) )
 
@@ -237,6 +235,7 @@ class TCall(IndexedContainer, Transformation):
         else:
             return self.__str__()
 
+    @call_once
     def bind(self, context):
         if self.inputs_connected:
             return
@@ -351,6 +350,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         self.object.require(context)
         self.weight.require(context)
 
+    @call_once
     def bind(self, context):
         printl('bind (weighted) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
@@ -366,7 +366,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject(idx, labels, weights)
+                    tobj, newout = self.new_tobject(idx, labels, weights, weight_label=self.weight.name)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)
