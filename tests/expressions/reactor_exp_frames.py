@@ -213,7 +213,8 @@ def build_and_plot(expr, obj, suffix):
                 bundle = 'baselines_v01',
                 reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
                 detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
-                provides = [ 'baseline', 'baselineweight' ]
+                provides = [ 'baseline', 'baselineweight' ],
+                units="meters"
                 ),
             thermal_power = NestedDict(
                     bundle = 'dayabay_reactor_burning_info_v01',
@@ -277,7 +278,7 @@ def build_and_plot(expr, obj, suffix):
         obj = context.outputs[obj]
         if isinstance(obj, NestedDict):
             obj = obj.values()
-        if len(expr)<3:
+        if len(expr)<4:
             label = expr[0]
             if label=='evis()':
                 label=expr[1]
