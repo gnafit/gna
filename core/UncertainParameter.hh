@@ -132,10 +132,10 @@ public:
     : Parameter<T>(name) { }
   std::vector<GaussianParameter<T>*> m_cov_pars{};
 
-  virtual T sigma() const noexcept { return m_sigma; }
-  virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+   T sigma() const noexcept { return m_sigma; }
+   void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
 
-  virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
+   bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
       if (it == this->m_covariances.end() and (&other != this)) {
           return false;
@@ -153,7 +153,7 @@ public:
   }
    
 
-  virtual void setCovariance(GaussianParameter<T>& other, T cov) {
+   void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
         auto msg = boost::format("Covariance of parameters %1% and %2% is set to %3%");
         std::cout << msg % this->name() % other.name() % cov << std::endl;
@@ -167,7 +167,7 @@ public:
   }
   
 
-  virtual void updateCovariance(GaussianParameter<T>& other, T cov) {
+   void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
     auto msg = boost::format("Covariance of parameters %1% and %2% is updated "
                              "to %3% after setting in %1%");
@@ -176,7 +176,7 @@ public:
     this->m_covariances[&other] = cov;
   }
 
-  virtual T getCovariance(const GaussianParameter<T>& other) const noexcept {
+   T getCovariance(const GaussianParameter<T>& other) const noexcept {
       if (this == &other) {return this->sigma()*this->sigma();}
       auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
@@ -190,10 +190,10 @@ public:
       }
   }
 
-  virtual T normalValue(T reldiff) const noexcept
+   T normalValue(T reldiff) const noexcept
     { return this->central() + reldiff*this->m_sigma; }
 
-  virtual void setNormalValue(T reldiff)
+   void setNormalValue(T reldiff)
     { this->set(this->normalValue(reldiff)); }
 protected:
   using CovStorage = std::map<const GaussianParameter<T>*, T>;
