@@ -9,6 +9,8 @@ from gna.configurator import NestedDict
 from collections import OrderedDict
 import itertools
 
+conversion = {"meters": 1./1000, "kilometers": 1.}
+
 class baselines_v01(TransformationBundle):
     def __init__(self, **kwargs):
         TransformationBundle.__init__( self, **kwargs )
@@ -56,7 +58,7 @@ class baselines_v01(TransformationBundle):
 
         assert len(reactor) == len(detector), "Dimensions of reactor and detector doesn't match"
 
-        return np.sqrt(np.sum((np.array(reactor) - np.array(detector))**2))
+        return conversion[self.cfg.units]*(np.sqrt(np.sum((np.array(reactor) - np.array(detector))**2)))
 
     def define_variables(self):
         '''Create baseline variables in a common_namespace'''

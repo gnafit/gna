@@ -69,7 +69,8 @@ cfg = NestedDict(
     # Reactor positions
     reactors = reactors,
     # Detector positions
-    detectors = detectors
+    detectors = detectors,
+    units="meters"
     )
 #
 # Initialize bundle
