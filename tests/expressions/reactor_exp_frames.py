@@ -277,7 +277,7 @@ def build_and_plot(expr, obj, suffix):
         obj = context.outputs[obj]
         if isinstance(obj, NestedDict):
             obj = obj.values()
-        if len(expr)<3:
+        if len(expr)<4:
             label = expr[0]
             if label=='evis()':
                 label=expr[1]
