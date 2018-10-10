@@ -130,6 +130,7 @@ class GaussianParameter: public Parameter<T> {
 public:
   GaussianParameter(const std::string &name)
     : Parameter<T>(name) { }
+  std::vector<GaussianParameter<T>*> m_cov_pars{};
 
   virtual T sigma() const noexcept { return m_sigma; }
   virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
@@ -143,6 +144,14 @@ public:
       }
   }
 
+   std::vector<GaussianParameter<T>*>  getAllCovariatedWith()  {
+      std::vector<GaussianParameter<T>*> tmp;
+          for (const auto& item: this->m_covariances){
+              tmp.push_back(const_cast<GaussianParameter<T>*>(item.first));
+      }
+      return tmp;
+  }
+   
 
   virtual void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
@@ -156,6 +165,7 @@ public:
         this->setSigma(std::sqrt(cov));
     }
   }
+  
 
   virtual void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
@@ -186,8 +196,8 @@ public:
   virtual void setNormalValue(T reldiff)
     { this->set(this->normalValue(reldiff)); }
 protected:
-  T m_sigma;
   using CovStorage = std::map<const GaussianParameter<T>*, T>;
+  T m_sigma;
   CovStorage m_covariances;
 };
 
