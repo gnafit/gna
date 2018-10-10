@@ -58,7 +58,7 @@ class IndexedContainer(object):
             newname = guessed
             if save:
                 self.name = newname
-                self.label = label
+                self.set_label(label)
 
         return newname
 
@@ -159,13 +159,14 @@ class NestedTransformation(object):
     def set_tinit(self, obj):
         self.tinit = obj
 
-    def new_tobject(self, idx, *args):
+    def new_tobject(self, idx, *args, **kwargs):
         if isinstance(idx, str):
             label = idx
         elif self.label is not None:
-            label = idx.current_format(self.label, name=self.name)
+            label = idx.current_format(self.label, name=self.name, **kwargs)
         else:
-            label = self.current_format(idx)
+            label = self.current_format(idx, **kwargs)
+        print('LABEL', label, self.label, self.name)
 
         newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
@@ -361,7 +362,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject(idx, labels, weights)
+                    tobj, newout = self.new_tobject(idx, labels, weights, weight_label=self.weight.name)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)

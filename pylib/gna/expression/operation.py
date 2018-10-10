@@ -39,10 +39,14 @@ class Operation(TCall,NestedTransformation):
         newname='{}:{}|{}'.format(self.operation, self.indices_to_reduce.ident(), cname)
 
         if newname in lib:
-            newname = lib[newname]['name']
+            libentry = lib[newname]
+            newname = libentry['name']
+            label   = libentry.get('label', None)
 
             if save:
                 self.name = newname
+                self.set_label(label)
+
         return newname
 
     @methodname
@@ -109,7 +113,7 @@ class OSum(Operation):
                 names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
                 weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
 
-                tobj, newout = self.new_tobject(self.current_format(freeidx), names, weights)
+                tobj, newout = self.new_tobject(freeidx, names, weights, weight_label=weight.name)
                 context.set_output(newout, self.name, freeidx)
 
                 for i, (name, reduceidx) in enumerate(zip(names, rindices)):

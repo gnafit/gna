@@ -65,7 +65,7 @@ lib = OrderedDict(
         cspec_diff_det          = dict(expr='sum:r'),
         spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-        # norm_bf                 = dict(expr='eff*efflivetime*effunc_uncorr*global_norm'),
+
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
         observation             = dict(expr='eres*norm_bf', label='Observed spectrum\n{detector}'),
 
@@ -75,14 +75,14 @@ lib = OrderedDict(
         evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
 
         oscprob_weighted        = dict(expr='oscprob*pmns'),
-        oscprob_full            = dict(expr='sum:c|oscprob_weighted'),
+        oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
 
         anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
-        anuspec_rd              = dict(expr='sum:i|anuspec_weighted'),
+        anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
 
         countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
         countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-        countrate               = dict(expr='sum:r|countrate_rd')
+        countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\nweight: {weight_label}')
         )
 
 expr =[
