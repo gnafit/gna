@@ -41,10 +41,10 @@ class IndexedContainer(object):
                     expr = self.operator.strip().join(o.ident(lib=lib, save=save) for o in self.objects),
                      )
 
-        if self.operator==' Σ ':
-            print(type(self), self.name, self.operator)
-            import IPython
-            IPython.embed()
+        # if self.operator==' Σ ':
+            # print(type(self), self.name, self.operator)
+            # import IPython
+            # IPython.embed()
 
         variants=[newnameu, newname]
         for nn in tuple(variants):
