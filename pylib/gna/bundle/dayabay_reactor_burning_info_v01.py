@@ -55,17 +55,21 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 reac_name = reacit.indices['r'].current
 
                 iso_idx = self.fission_info['isotopes'].index(iso_name)
-                sigma = self.fission_info['sigma'][iso_idx]
+                relsigma = self.fission_info['sigma'][iso_idx]
                 ff_name = "fission_fraction" + it.current_format()
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
-                isotope_pac.append((ff_name, {'central':1, 'sigma': sigma, 'label':label,}))
+                isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
 
             # check the order of isotopes matches corresponding order from
             # configuration
             if all(from_conf in from_pack[0] for from_pack, from_conf
                    in zip(isotope_pac, self.fission_info['isotopes'])):
-                ns.reqparameter_group(*isotope_pac, **{'covmat': self.fission_info['correlation']})
+                if len(isotope_pac) == len(self.fission_info['isotopes']):
+                    ns.reqparameter_group(*isotope_pac, **{'covmat': self.fission_info['correlation']})
+                else:
+                    ns.reqparameter_group(*isotope_pac)
+
             else:
                 raise Exception("Orderings of isotopes from indices and data "
                                 "do not match. Check it!")
