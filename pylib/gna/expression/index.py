@@ -203,6 +203,9 @@ class NameUndefined():
     def __str__(self):
         return '?'
 
+    def __repr__(self):
+        return 'NameUndefined()'
+
     def __add__(self, other):
         return self.__str__()+other
 
@@ -213,6 +216,7 @@ class Indexed(object):
     label=None
     indices_locked=False
     fmt=None
+    expandable=True
     def __init__(self, name, *indices, **kwargs):
         self.name=name
         self.set_indices(*indices, **kwargs)

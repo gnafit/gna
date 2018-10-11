@@ -38,14 +38,17 @@ class Operation(TCall,NestedTransformation):
         cname = TCall.guessname(self)
         newname='{}:{}|{}'.format(self.operation, self.indices_to_reduce.ident(), cname)
 
+        label=None
         if newname in lib:
             libentry = lib[newname]
             newname = libentry['name']
             label   = libentry.get('label', None)
+        else:
+            newname = '{}{}'.format(self.text_operator, cname)
 
-            if save:
-                self.name = newname
-                self.set_label(label)
+        if save:
+            self.name = newname
+            self.set_label(label)
 
         return newname
 
@@ -81,7 +84,7 @@ class Operation(TCall,NestedTransformation):
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'sum', *indices, **kwargs)
-        self.set_operator( ' Σ ' )
+        self.set_operator( ' Σ ', text='sum_' )
 
         import ROOT as R
         self.set_tinit( R.Sum )
@@ -89,7 +92,7 @@ class OSum(Operation):
     @call_once
     def bind(self, context):
         # Process sum of weigtedsums
-        if len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation):
+        if self.expandable and len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation) and self.objects[0].expandable:
             return self.bind_wsum(context)
 
         Operation.bind(self, context)
@@ -143,7 +146,7 @@ placeholder=['placeholder']
 class OProd(Operation):
     def __init__(self, *indices, **kwargs):
         Operation.__init__(self, 'prod', *indices, **kwargs)
-        self.set_operator( ' Π ' )
+        self.set_operator( ' Π ', text='prod_' )
 
         import ROOT as R
         self.set_tinit( R.Product )
@@ -159,7 +162,7 @@ class Accumulate(IndexedContainer, Variable):
 
         IndexedContainer.__init__(self, *args)
         Variable.__init__(self, name, *self.objects)
-        self.set_operator( ' ∫ ' )
+        self.set_operator( ' ∫ ', text='accumulate_'  )
 
     @call_once
     def bind(self, context):
@@ -183,4 +186,8 @@ class Accumulate(IndexedContainer, Variable):
             self.arrsums.append(arrsum)
 
         self.bound = True
+
+def bracket(obj):
+    obj.expandable = False
+    return obj
 

@@ -7,6 +7,7 @@ from gna.expression.simple import *
 class IndexedContainer(object):
     objects = None
     operator='.'
+    text_operator='_period_'
     left, right = '', ''
     def __init__(self, *objects):
         self.set_objects(*objects)
@@ -22,16 +23,28 @@ class IndexedContainer(object):
                 for sub in  o.walk(yieldself, self.operator.strip()):
                     yield sub
 
-    def set_operator(self, operator, left=None, right=None):
+    def set_operator(self, operator, left=None, right=None, text=None):
         self.operator=operator
         if left is not None:
             self.left = left
         if right is not None:
             self.right = right
+        if text is not None:
+            self.text_operator=text
 
     def guessname(self, lib={}, save=False):
         for o in self.objects:
             o.guessname(lib, save)
+
+        if self.name is not undefinedname:
+            if not self.label:
+                for cfg in lib.values():
+                    if cfg['name']!=self.name:
+                        continue
+                    newlabel = cfg.get('label', None)
+                    if newlabel:
+                        self.label=newlabel
+            return self.name
 
         newname = '{expr}'.format(
                     expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
@@ -56,9 +69,14 @@ class IndexedContainer(object):
 
         if guessed:
             newname = guessed
-            if save:
-                self.name = newname
-                self.set_label(label)
+        else:
+            newname = '{expr}'.format(
+                        expr = self.text_operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
+                        )
+
+        if save:
+            self.name = newname
+            self.set_label(label)
 
         return newname
 
@@ -127,7 +145,7 @@ class VProduct(IndexedContainer, Variable):
         IndexedContainer.__init__(self, *newobjects)
         Variable.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( '*' )
+        self.set_operator( '*', text='_times_' )
 
     @call_once
     def bind(self, context):
@@ -221,7 +239,7 @@ class TCall(IndexedContainer, Transformation):
 
         IndexedContainer.__init__(self, *objects)
         Transformation.__init__(self,name, *(list(args)+list(objects)), **kwargs)
-        self.set_operator( ', ', '(', ')' )
+        self.set_operator( ', ', '(', ')', text='_and_'  )
 
         self.inputs_connected = not self.nonempty()
 
@@ -261,7 +279,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
             if not isinstance(o, Transformation):
                 raise Exception('Expect Transformation instance')
 
-            if isinstance(o, TProduct):
+            if self.expandable and isinstance(o, TProduct) and o.expandable:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -270,7 +288,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' * ', '( ', ' )' )
+        self.set_operator( ' * ', '( ', ' )', text='_times_'  )
         import ROOT as R
         self.set_tinit( R.Product )
 
@@ -287,7 +305,7 @@ class TRatio(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *objects)
         Transformation.__init__(self, name, *objects, **kwargs)
 
-        self.set_operator( ' / ', '( ', ' )' )
+        self.set_operator( ' / ', '( ', ' )', text='_over_'  )
         import ROOT as R
         self.set_tinit( R.Ratio )
 
@@ -306,7 +324,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
             if not isinstance(o, Transformation):
                 raise Exception('Expect Transformation instance')
 
-            if isinstance(o, TSum):
+            if self.expandable and isinstance(o, TSum) and o.expandable:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -315,7 +333,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' + ', '( ', ' )' )
+        self.set_operator( ' + ', '( ', ' )', text='_plus_' )
         import ROOT as R
         self.set_tinit( R.Sum )
 
@@ -323,7 +341,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
     object, weight = None, None
     def __init__(self, name, *objects, **kwargs):
         for other in objects:
-            if isinstance(other, WeightedTransformation):
+            if self.expandable and isinstance(other, WeightedTransformation) and other.expandable:
                 self.object = self.object*other.object if self.object is not None else other.object
                 self.weight = self.weight*other.weight if self.weight is not None else other.weight
             elif isinstance(other, Variable):
@@ -337,7 +355,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         IndexedContainer.__init__(self, self.weight, self.object)
         Transformation.__init__(self, name, self.weight, self.object, **kwargs)
 
-        self.set_operator( ' * ' )
+        self.set_operator( ' * ', text='_times_'  )
 
         import ROOT as R
         self.set_tinit( R.WeightedSum )

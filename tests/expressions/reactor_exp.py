@@ -111,7 +111,12 @@ lib = OrderedDict(
         countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
         countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\nweight: {weight_label}'),
 
-        observation_raw         = dict(expr='bkg_spectrum_acc+ibd')
+        observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum\n{detector}'),
+
+        bkg_spectrum_li_w       = dict(expr='bkg_spectrum_li*frac_li', label='9Li spectrum\n(frac)'),
+        bkg_spectrum_he_w       = dict(expr='bkg_spectrum_he*frac_he', label='8He spectrum\n(frac)'),
+        bkg_spectrum_lihe       = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w', label='8He/9Li spectrum\n(norm)'),
+        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
@@ -123,28 +128,30 @@ expr =[
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
-        'bkg = bkg_spectrum_acc[d]()'
+        'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
+        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe'
 ]
+
 if False:
     expr.append(
         '''ibd =
-                      global_norm*
-                      eff*
-                      effunc_uncorr[d]*
-                      eres[d]|
-                        lsnl[d]|
-                          iav[d]|
-                            sum[c]|
-                              pmns[c]*
-                              sum[r]|
-                                baselineweight[r,d]*
-                                sum[i]|
-                                  power_livetime_factor*
-                                  kinint2|
-                                    anuspec[i](enu())*
-                                    oscprob[c,d,r](enu())*
-                                    ibd_xsec(enu(), ctheta())*
-                                    jacobian(enu(), ee(), ctheta())
+                 global_norm*
+                 eff*
+                 effunc_uncorr[d]*
+                 eres[d]|
+                   lsnl[d]|
+                     iav[d]|
+                       sum[c]|
+                         pmns[c]*
+                         sum[r]|
+                           baselineweight[r,d]*
+                           sum[i]|
+                             power_livetime_factor*
+                             kinint2|
+                               anuspec[i](enu())*
+                               oscprob[c,d,r](enu())*
+                               ibd_xsec(enu(), ctheta())*
+                               jacobian(enu(), ee(), ctheta())
         ''')
 elif True:
     expr.append('''ibd =
@@ -295,7 +302,7 @@ cfg = NestedDict(
                     filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
                     format    = 'h_eVisAllSmeared',
                     name      = 'bkg_spectrum_li',
-                    label     = '9Li spectrum\n(norm)'
+                    label     = '9Li spectrum\n(norm)',
                     normalize = True,
                     ),
         bkg_spectrum_he= NestedDict(
@@ -303,9 +310,17 @@ cfg = NestedDict(
                     filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
                     format    = 'h_eVisAllSmeared',
                     name      = 'bkg_spectrum_he',
-                    label     = '8he spectrum\n(norm)'
+                    label     = '8He spectrum\n(norm)',
                     normalize = True,
                     ),
+        lihe_fractions=NestedDict(
+                bundle = 'var_fractions_v01',
+                names = [ 'li', 'he' ],
+                fractions = uncertaindict(
+                    li = ( 0.95, 0.05, 'relative' )
+                    ),
+                provides = [ 'frac_li', 'frac_he' ]
+                )
         )
 
 #
