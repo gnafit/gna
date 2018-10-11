@@ -209,3 +209,14 @@ class CatDict(OrderedDict):
 
         raise KeyError(key)
 
+    def get(self, key):
+        contains = super(CatDict, self).__contains__
+        if contains(key):
+            return self[key], False, key
+
+        for group in self.categories.groups(key):
+            if super(CatDict, self).__contains__(group):
+                return self[group], True, group
+
+        raise KeyError(key)
+

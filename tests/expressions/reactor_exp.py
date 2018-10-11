@@ -116,7 +116,7 @@ lib = OrderedDict(
         bkg_spectrum_li_w       = dict(expr='bkg_spectrum_li*frac_li', label='9Li spectrum\n(frac)'),
         bkg_spectrum_he_w       = dict(expr='bkg_spectrum_he*frac_he', label='8He spectrum\n(frac)'),
         bkg_spectrum_lihe       = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w', label='8He/9Li spectrum\n(norm)'),
-        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
+        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
@@ -129,7 +129,7 @@ expr =[
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
-        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe'
+        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[d]()'
 ]
 
 if False:
@@ -320,7 +320,21 @@ cfg = NestedDict(
                     li = ( 0.95, 0.05, 'relative' )
                     ),
                 provides = [ 'frac_li', 'frac_he' ]
-                )
+                ),
+        bkg_spectrum_fastn=NestedDict(
+            bundle='dayabay_fastn_v02',
+            parameter='fastn_shape',
+            groups=groups,
+            normalize=(0.7, 12.0),
+            bins=N.linspace(0.0, 12.0, 241),
+            order=2,
+            pars=uncertaindict(
+               [ ('EH1', (67.79, 0.1132)),
+                 ('EH2', (58.30, 0.0817)),
+                 ('EH3', (68.02, 0.0997)) ],
+                mode='relative',
+                ),
+            ),
         )
 
 #
