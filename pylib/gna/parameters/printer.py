@@ -69,7 +69,7 @@ def __extract_covariated(var):
 def print_parameters( ns, recursive=True, labels=False ):
     header = False
     for name, var in ns.iteritems():
-        if isinstance( ns.storage[name], basestring ):
+        if isinstance( ns.storage[name], str ):
             print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
             continue
         if not isinstance( var, unctypes ):
