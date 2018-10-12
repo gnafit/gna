@@ -41,10 +41,6 @@ class Variable(Indexed):
     def get_output(self, nidx, context):
         pass
 
-    def __getattr__(self, name):
-        self.name = '.'.join(self.name, name)
-        return self
-
     @methodname
     def require(self, context):
         context.require(self.name, self.indices)
