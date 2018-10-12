@@ -94,14 +94,14 @@ lib = OrderedDict(
         bkg_spectrum_li_w       = dict(expr='bkg_spectrum_li*frac_li', label='9Li spectrum\n(frac)'),
         bkg_spectrum_he_w       = dict(expr='bkg_spectrum_he*frac_he', label='8He spectrum\n(frac)'),
         bkg_spectrum_lihe       = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w', label='8He/9Li spectrum\n(norm)'),
-        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
+        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_alphan+bkg_specrum_amc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
         'evis_edges',
         'fastn_shape[s]',
         'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
-        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
+        'bkg = bracket| bkg_spectrum_acc[d]() + bkg_spectrum_lihe + bkg_spectrum_fastn[s]() + bkg_spectrum_amc() + bkg_spectrum_alphan[d]()'
 ]
 
 # Initialize the expression and indices
@@ -159,6 +159,23 @@ cfg = NestedDict(
                     label     = '8He spectrum\n(norm)',
                     normalize = True,
                     ),
+        bkg_spectrum_amc = NestedDict(
+            bundle    = 'root_histograms_v02',
+            filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
+            format    = 'hCorrAmCPromptSpec',
+            name      = 'bkg_spectrum_amc',
+            label     = 'AmC spectrum\n(norm)',
+            normalize = True,
+            ),
+        bkg_spectrum_alphan = NestedDict(
+            bundle    = 'root_histograms_v02',
+            filename  = 'data/dayabay/bkg/P12B_alphan_coarse.root',
+            format    = 'AD{adnum_global_alphan_subst}',
+            groups    = groups,
+            name      = 'bkg_spectrum_alphan',
+            label     = 'C(alpha,n) spectrum\n{detector} (norm)',
+            normalize = True,
+            ),
         lihe_fractions=NestedDict(
                 bundle = 'var_fractions_v01',
                 names = [ 'li', 'he' ],
