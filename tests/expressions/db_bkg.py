@@ -99,11 +99,19 @@ lib = OrderedDict(
         bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                                                          label='9Li spectrum\n(frac)'),
         bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                                                          label='8He spectrum\n(frac)'),
         bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',                                              label='8He/9Li spectrum\n(norm)'),
-        lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime',                                                        label='⁹Li/⁸He num {site}\n(best fit)}'),
+        lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime'),
         bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                                                    label='8He/9Li {detector}\n(w: {weight_label})'),
 
+        # Fast neutrons
+        fastn_num_bf      = dict(expr='bkg_rate_fastn*efflivetime'),
+        bkg_fastn         = dict(expr='bkg_spectrum_fastn*lihe_num_bf',                                                   label='Fast neutron {detector}\n(w: {weight_label})'),
+
+        # AmC
+        amc_num_bf        = dict(expr='bkg_rate_amc*efflivetime'),
+        bkg_amc           = dict(expr='bkg_spectrum_amc*lihe_num_bf',                                                     label='AmC {detector}\n(w: {weight_label})'),
+
         # Total
-        bkg               = dict(expr='bkg_acc+bkg_spectrum_alphan+bkg_specrum_amc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
+        bkg               = dict(expr='bkg_acc+bkg_spectrum_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
@@ -111,9 +119,11 @@ expr =[
         'fastn_shape[s]',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        'bkg_lihe = efflivetime[d] * bkg_rate_lihe[s] * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
         'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
-        'bkg = bracket| bkg_acc + bkg_lihe + bkg_spectrum_fastn[s]() + bkg_spectrum_amc() + bkg_spectrum_alphan[d]()'
+        'bkg_lihe  = efflivetime[d] * bkg_rate_lihe[s]  * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
+        'bkg_fastn = efflivetime[d] * bkg_rate_fastn[s] * bkg_spectrum_fastn[s]()',
+        'bkg_amc   = efflivetime[d] * bkg_rate_amc[d] * bkg_spectrum_amc()',
+        'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_spectrum_alphan[d]()'
 ]
 
 # Initialize the expression and indices
@@ -159,21 +169,21 @@ cfg = NestedDict(
             normalize = True,
             ),
         bkg_spectrum_li=NestedDict(
-                    bundle    = 'root_histograms_v02',
-                    filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
-                    format    = 'h_eVisAllSmeared',
-                    name      = 'bkg_spectrum_li',
-                    label     = '9Li spectrum\n(norm)',
-                    normalize = True,
-                    ),
+            bundle    = 'root_histograms_v02',
+            filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
+            format    = 'h_eVisAllSmeared',
+            name      = 'bkg_spectrum_li',
+            label     = '9Li spectrum\n(norm)',
+            normalize = True,
+            ),
         bkg_spectrum_he= NestedDict(
-                    bundle    = 'root_histograms_v02',
-                    filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
-                    format    = 'h_eVisAllSmeared',
-                    name      = 'bkg_spectrum_he',
-                    label     = '8He spectrum\n(norm)',
-                    normalize = True,
-                    ),
+            bundle    = 'root_histograms_v02',
+            filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
+            format    = 'h_eVisAllSmeared',
+            name      = 'bkg_spectrum_he',
+            label     = '8He spectrum\n(norm)',
+            normalize = True,
+            ),
         bkg_spectrum_amc = NestedDict(
             bundle    = 'root_histograms_v02',
             filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
@@ -200,35 +210,35 @@ cfg = NestedDict(
                 provides = [ 'frac_li', 'frac_he' ]
                 ),
         bkg_spectrum_fastn=NestedDict(
-            bundle='dayabay_fastn_v02',
-            parameter='fastn_shape',
-            name='bkg_spectrum_fastn',
-            normalize=(0.7, 12.0),
-            bins='evis_edges',
-            order=2,
-            ),
+                bundle='dayabay_fastn_v02',
+                parameter='fastn_shape',
+                name='bkg_spectrum_fastn',
+                normalize=(0.7, 12.0),
+                bins='evis_edges',
+                order=2,
+                ),
         #
         # Parameters
         #
         fastn_shape=NestedDict(
-            bundle='parameters_1d_v01',
-            parameter='fastn_shape',
-            label='Fast neutron shape parameter for {site}',
-            pars=uncertaindict(
-               [ ('EH1', (67.79, 0.1132)),
-                 ('EH2', (58.30, 0.0817)),
-                 ('EH3', (68.02, 0.0997)) ],
-                mode='relative',
+                bundle='parameters_1d_v01',
+                parameter='fastn_shape',
+                label='Fast neutron shape parameter for {site}',
+                pars=uncertaindict(
+                    [ ('EH1', (67.79, 0.1132)),
+                        ('EH2', (58.30, 0.0817)),
+                        ('EH3', (68.02, 0.0997)) ],
+                    mode='relative',
+                    ),
                 ),
-            ),
         #
         # Livetime
         #
         livetime = NestedDict(
-            bundle = 'dayabay_livetime_hdf_v01',
-            file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-            provides = ['livetime_daily', 'efflivetime_daily']
-            ),
+                bundle = 'dayabay_livetime_hdf_v01',
+                file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
+                provides = ['livetime_daily', 'efflivetime_daily']
+                ),
         #
         # Rates
         #
@@ -261,6 +271,35 @@ cfg = NestedDict(
                     ('EH1', (2.46, 1.06)),
                     ('EH2', (1.72, 0.77)),
                     ('EH3', (0.15, 0.06))],
+                    mode = 'absolute',
+                    ),
+                ),
+        bkg_rate_fastn = NestedDict(
+                bundle    ='parameters_1d_v01',
+                parameter = 'bkg_rate_fastn',
+                label='Fast neutron rate at {site}',
+                pars = uncertaindict([
+                    ('EH1', (0.792, 0.103)),
+                    ('EH2', (0.566, 0.074)),
+                    ('EH3', (0.047, 0.009))],
+                    mode = 'absolute',
+                    ),
+                ),
+        bkg_rate_amc = NestedDict(
+                bundle    ='parameters_1d_v01',
+                parameter = 'bkg_rate_amc',
+                label='AmC rate at {detector}',
+                pars = uncertaindict(
+                    [
+                        ('AD11', (0.18, 0.08)),
+                        ('AD12', (0.18, 0.08)),
+                        ('AD21', (0.16, 0.07)),
+                        ('AD22', (0.15, 0.07)),
+                        ('AD31', (0.07, 0.03)),
+                        ('AD32', (0.06, 0.03)),
+                        ('AD33', (0.07, 0.03)),
+                        ('AD34', (0.05, 0.02)),
+                        ],
                     mode = 'absolute',
                     ),
                 ),
