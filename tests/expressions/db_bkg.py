@@ -96,8 +96,8 @@ lib = OrderedDict(
         bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
 
         # Li/He
-        bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n(frac)'),
-        bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n(frac)'),
+        bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',        label='9Li spectrum\n(frac)'),
+        bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',        label='8He spectrum\n(frac)'),
         bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n(norm)'),
         lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime'),
         bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n(w: {weight_label})'),
@@ -208,6 +208,7 @@ cfg = NestedDict(
             ),
         lihe_fractions=NestedDict(
                 bundle = 'var_fractions_v01',
+                format = 'frac_{component}',
                 names = [ 'li', 'he' ],
                 fractions = uncertaindict(
                     li = ( 0.95, 0.05, 'relative' )

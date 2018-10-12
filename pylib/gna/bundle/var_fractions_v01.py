@@ -29,16 +29,18 @@ class var_fractions_v01(TransformationBundle):
         name_eval=names_eval.pop()
 
         subst = []
+        names = ()
         for name, val in self.cfg.fractions.items():
-            cname = 'frac_'+name
+            cname = self.cfg.format.format(component=name)
+            names+=cname,
             par = self.common_namespace.reqparameter( cname, cfg=val )
             par.setLabel('{} fraction'.format(name))
             subst.append(self.common_namespace.pathto(cname))
 
         label='{} fraction: '.format(name_eval)
-        label+='-'.join(['1']+['frac_'+n for n in names_unc])
+        label+='-'.join(('1',)+names)
 
-        name_eval = 'frac_'+name_eval
+        name_eval = self.cfg.format.format(component=name_eval)
         with self.common_namespace:
             self.vd = R.VarDiff( stdvector(subst), name_eval, 1.0, ns=self.common_namespace)
             par=self.common_namespace[name_eval].get()
