@@ -3,20 +3,35 @@
 from __future__ import print_function
 from load import ROOT
 import numpy as N
-from gna.bindings import patchROOTClass
 
+from collections import defaultdict
+
+from gna.bindings import patchROOTClass
+try:
+    from colorama import Fore, Style
+    colorama_present = True
+except ImportError:
+    colorama_present = False
+    
+def colorize(string, color):
+    return color + str(string) + Style.RESET_ALL
+
+covariance_storage = defaultdict(set)
 unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
-valfmt='={val:11.6g}'
+
+valfmt='={color}{val:11.6g}'
+
 centralfmt='{central:11.6g}'
 
 cvalfmt='={rval:11.6g}+i{ival:11.6g}'
+
 ccentralfmt='{rcentral:11.6g}+i{icentral:11.6g}'
 
-sigmafmt='±{sigma:11.6g}'
+sigmafmt='± {sigma:11.6g}'
 limitsfmt=' ({:11.6g}, {:11.6g})'
-centralsigmafmt=centralfmt+sigmafmt
+centralsigmafmt= centralfmt + sigmafmt
 relsigmafmt=' [{relsigma:11.6g}%]'
 npifmt     =' [{npi:11.6g}π]'
 
@@ -28,11 +43,28 @@ relsigma_len=len(relsigmafmt.format(relsigma=0))
 centralrel_empty =(centralsigma_len+relsigma_len-1)*' '
 sigmarel_empty =(sigma_len+relsigma_len-1)*' '
 sigma_empty =(sigma_len-1)*' '
-sepstr=' │ '
-fixedstr='[fixed]'
+
+if colorama_present:
+    sepstr='{} │ '.format(Style.RESET_ALL)
+else:
+    sepstr=' │ '
+
+if colorama_present:
+    fixedstr = '{}[fixed]'.format(Fore.LIGHTYELLOW_EX)
+else:
+    fixedstr='[fixed]'
+
 fixedstr+=' '*(centralsigma_len+relsigma_len-1-len(fixedstr))
-freestr =' [free]'
+
+if colorama_present:
+    freestr ='{}[free]'.format(Fore.LIGHTYELLOW_EX)
+else:
+    freestr =' [free]'
+
 freestr+=' '*(relsigma_len-len(freestr))
+
+def __extract_covariated(var):
+
 
 def print_parameters( ns, recursive=True, labels=False ):
     header = False
@@ -43,8 +75,13 @@ def print_parameters( ns, recursive=True, labels=False ):
         if not isinstance( var, unctypes ):
             continue
         if not header:
-            print("Variables in namespace '%s'"%ns.path)
+            if colorama_present:
+                print("Variables in namespace {color}'{ns}'{escape}:".format(ns=ns.path,
+                      color=Fore.GREEN, escape=Style.RESET_ALL))
+            else:
+                print("Variables in namespace '%s'"%ns.path)
             header=True
+
         print(end='  ')
         print(var.__str__(labels=labels))
     if recursive:
@@ -56,6 +93,7 @@ def Variable__str( self, labels=False ):
     fmt = dict(
             name    = self.name(),
             val     = self.value(),
+            color = Fore.BLUE if colorama_present else ""
             )
     label = self.label()
     if not labels or label=='value':
@@ -74,9 +112,10 @@ def Variable__str( self, labels=False ):
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
 def Variablec__str( self, labels=False  ):
     fmt = dict(
-            name    = self.name(),
-            rval     = self.value().real(),
-            ival     = self.value().imag(),
+            name  = self.name(),
+            rval  = self.value().real(),
+            ival  = self.value().imag(),
+            color = Fore.BLUE if colorama_present else ""
             )
     label = self.label()
     if not labels or label=='value':
@@ -126,11 +165,13 @@ def UniformAngleParameter__str( self, labels=False  ):
 @patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
 def GaussianParameter__str( self, labels=False  ):
     fmt = dict(
-            name    = self.name(),
+            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
             val     = self.value(),
             central = self.central(),
-            sigma   = self.sigma()
+            sigma   = self.sigma(),
+            color   = Fore.BLUE if colorama_present else ""
             )
+    covariated = self.isCovariated()
     limits  = self.limits()
     label = self.label()
     if not labels or label=='value':
@@ -151,14 +192,22 @@ def GaussianParameter__str( self, labels=False  ):
             else:
                 s+=' '*relsigma_len
 
+        if covariated:
+            s += sepstr
+            s += Fore.LIGHTGREEN_EX if colorama_present else ""
+            s += "Covariated. Looks for it below"
+
         if limits.size():
             s+=sepstr
             for (a,b) in limits:
                 s+=limitsfmt.format(a,b)
 
+
+
+
     if labels:
         s+=sepstr
     if label:
-        s+=label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
     return s
