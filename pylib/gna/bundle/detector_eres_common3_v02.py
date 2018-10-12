@@ -17,7 +17,7 @@ class detector_eres_common3_v02(TransformationBundle):
     def build(self):
         with self.common_namespace:
             expose_matrix = self.cfg.get('expose_matrix', False)
-            eres = self.eres = R.EnergyResolution(False, expose_matrix, ns=self.common_namespace)
+            eres = self.eres = R.EnergyResolution(C.stdvector(self.names), False, expose_matrix, ns=self.common_namespace)
 
             eres.matrix.setLabel('Energy resolution\nmatrix')
             self.set_input(eres.matrix.Edges, 'eres_matrix', clone=0)
@@ -37,7 +37,9 @@ class detector_eres_common3_v02(TransformationBundle):
                 'photon statistics',
                 'dark noise'
                 ]
-        for i, (name, unc) in enumerate(self.cfg.pars.items()):
+        self.names=[]
+        for i, (name, unc) in enumerate(self.cfg.pars.items(nested=True)):
+            self.names.append(name)
             par = self.common_namespace.reqparameter(name, cfg=unc)
             par.setLabel( 'Energy resolution ({})'.format(descriptions[i]) )
 

@@ -277,7 +277,9 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
             if self.expandable and isinstance(o, TProduct) and o.expandable:
                 newobjects+=o.objects
@@ -299,7 +301,9 @@ class TRatio(NestedTransformation, IndexedContainer, Transformation):
 
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
         NestedTransformation.__init__(self)
         IndexedContainer.__init__(self, *objects)
@@ -322,7 +326,9 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
             if self.expandable and isinstance(o, TSum) and o.expandable:
                 newobjects+=o.objects
@@ -390,4 +396,11 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 context.set_input(inp, self.name, idx)
                 out = self.object.get_output(idx, context)
                 inp(out)
+
+    def test_iteration(self):
+        for it in self.indices.iterate():
+            print('index', it.current_format())
+            print('  weight', self.weight.current_format(it))
+            print('  obj', self.object.current_format(it))
+
 
