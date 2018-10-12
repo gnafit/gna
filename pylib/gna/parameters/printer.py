@@ -84,6 +84,9 @@ class CovarianceStore():
 
 
 def print_covariated(cov_store):
+    raw = "\nCorrelations between parameters:"
+    title = colorize(raw, Fore.RED) if colorama_present else raw
+    print(title)
     for par_set in cov_store.storage:
         max_offset = max((len(x.qualifiedName()) for x in par_set))
         for pivot in par_set:
@@ -96,7 +99,7 @@ def print_covariated(cov_store):
                 initial_sep = " "
             s += initial_sep
             for par in par_set:
-                s += '{:g}'.format(par.getCorrelation(pivot))
+                s += '{:6g}'.format(par.getCorrelation(pivot))
                 s += " "
             print(s)
         print("")
