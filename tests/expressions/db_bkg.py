@@ -92,26 +92,30 @@ groups=NestedDict(
 
 lib = OrderedDict(
         # Accidentals
-        acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',                                                label='Acc num {detector}\n(best fit)}'),
-        bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                                                      label='Acc {detector}\n(w: {weight_label})'),
+        acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',             label='Acc num {detector}\n(best fit)}'),
+        bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
 
         # Li/He
-        bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                                                          label='9Li spectrum\n(frac)'),
-        bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                                                          label='8He spectrum\n(frac)'),
-        bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',                                              label='8He/9Li spectrum\n(norm)'),
+        bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n(frac)'),
+        bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n(frac)'),
+        bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n(norm)'),
         lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime'),
-        bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                                                    label='8He/9Li {detector}\n(w: {weight_label})'),
+        bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n(w: {weight_label})'),
 
         # Fast neutrons
         fastn_num_bf      = dict(expr='bkg_rate_fastn*efflivetime'),
-        bkg_fastn         = dict(expr='bkg_spectrum_fastn*lihe_num_bf',                                                   label='Fast neutron {detector}\n(w: {weight_label})'),
+        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n(w: {weight_label})'),
 
         # AmC
         amc_num_bf        = dict(expr='bkg_rate_amc*efflivetime'),
-        bkg_amc           = dict(expr='bkg_spectrum_amc*lihe_num_bf',                                                     label='AmC {detector}\n(w: {weight_label})'),
+        bkg_amc           = dict(expr='bkg_spectrum_amc*amc_num_bf',                   label='AmC {detector}\n(w: {weight_label})'),
+
+        # AlphaN
+        alphan_num_bf     = dict(expr='bkg_rate_alphan*efflivetime'),
+        bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n(w: {weight_label})'),
 
         # Total
-        bkg               = dict(expr='bkg_acc+bkg_spectrum_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}')
+        bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
@@ -123,7 +127,8 @@ expr =[
         'bkg_lihe  = efflivetime[d] * bkg_rate_lihe[s]  * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
         'bkg_fastn = efflivetime[d] * bkg_rate_fastn[s] * bkg_spectrum_fastn[s]()',
         'bkg_amc   = efflivetime[d] * bkg_rate_amc[d] * bkg_spectrum_amc()',
-        'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_spectrum_alphan[d]()'
+        'bkg_alphan   = efflivetime[d] * bkg_rate_alphan[d] * bkg_spectrum_alphan[d]()',
+        'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan'
 ]
 
 # Initialize the expression and indices
@@ -301,6 +306,24 @@ cfg = NestedDict(
                         ('AD34', (0.05, 0.02)),
                         ],
                     mode = 'absolute',
+                    ),
+                ),
+        bkg_rate_alphan = NestedDict(
+                bundle    ='parameters_1d_v01',
+                parameter = 'bkg_rate_alphan',
+                label='C(alpha,n) rate at {detector}',
+                pars = uncertaindict([
+                        ('AD11', (0.08)),
+                        ('AD12', (0.07)),
+                        ('AD21', (0.05)),
+                        ('AD22', (0.07)),
+                        ('AD31', (0.05)),
+                        ('AD32', (0.05)),
+                        ('AD33', (0.05)),
+                        ('AD34', (0.05)),
+                        ],
+                        uncertainty = 50,
+                        mode = 'percent',
                     ),
                 ),
         )
