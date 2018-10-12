@@ -277,7 +277,9 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
             if self.expandable and isinstance(o, TProduct) and o.expandable:
                 newobjects+=o.objects
@@ -299,7 +301,9 @@ class TRatio(NestedTransformation, IndexedContainer, Transformation):
 
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
         NestedTransformation.__init__(self)
         IndexedContainer.__init__(self, *objects)
@@ -322,7 +326,9 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
             if self.expandable and isinstance(o, TSum) and o.expandable:
                 newobjects+=o.objects

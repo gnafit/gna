@@ -45,7 +45,7 @@ elif args.mode=='minimal':
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
         ('d', 'detector',    ['AD11'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',))]))),
         ('s', 'site',        ['EH1']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -55,7 +55,7 @@ elif args.mode=='small':
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21',)) ]))),
         ('s', 'site',        ['EH1', 'EH2']),
         ('c', 'component',   ['comp0', 'comp12']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -135,8 +135,8 @@ expr =[
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
-        'bkg_spectrum_fastn[s]()',
-        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
+        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe'
+        # 'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
 ]
 
 if False:

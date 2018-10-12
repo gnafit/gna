@@ -51,7 +51,7 @@ class Index(object):
 
         for v in self.variants:
             if not v in self.group:
-                raise Exception('Inconsistent sub index')
+                raise Exception('Inconsistent sub index {}'.format(v))
 
         if self.current:
             self.sub.current=self.group[self.current]
@@ -234,6 +234,8 @@ class NIndex(object):
         autofmtnd, autofmt = self.autofmt()
         dct = dict( self.current_items('both')+args, **kwargs )
         autoindexnd, autoindex = autofmtnd.format(**dct), autofmt.format(**dct)
+        if not fmt and 'name' in kwargs:
+            fmt='{name}{autoindex}'
         if fmt:
             dct['autoindex'] = autoindex
             dct['autoindexnd'] = autoindexnd

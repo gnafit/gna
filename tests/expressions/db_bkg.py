@@ -45,7 +45,7 @@ elif args.mode=='minimal':
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
         ('d', 'detector',    ['AD11'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12'))]))),
         ('s', 'site',        ['EH1']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -54,8 +54,8 @@ elif args.mode=='small':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
-        ('d', 'detector',    ['AD11', 'AD12', 'AD21'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22'],
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')) ]))),
         ('s', 'site',        ['EH1', 'EH2']),
         ('c', 'component',   ['comp0', 'comp12']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -98,8 +98,10 @@ lib = OrderedDict(
         )
 
 expr =[
-        'bkg_spectrum_fastn[s]()',
-        # 'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
+        'evis_edges',
+        'fastn_shape[s]',
+        'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
+        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
 ]
 
 # Initialize the expression and indices
@@ -124,6 +126,14 @@ a.tree.dump(True)
 print()
 # Here is the configuration
 cfg = NestedDict(
+        kinint2 = NestedDict(
+            bundle   = 'integral_2d1d_v01',
+            variables = ('evis', 'ctheta'),
+            edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
+            xorders   = 3,
+            yorder   = 5,
+            provides = [ 'evis', 'ctheta', 'evis_edges' ],
+            ),
         bkg_spectrum_acc = NestedDict(
             bundle    = 'root_histograms_v02',
             filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
@@ -157,18 +167,23 @@ cfg = NestedDict(
                     ),
                 provides = [ 'frac_li', 'frac_he' ]
                 ),
-        bkg_spectrum_fastn=NestedDict(
-            bundle='dayabay_fastn_v02',
+        fastn_shape=NestedDict(
+            bundle='parameters_1d_v01',
             parameter='fastn_shape',
-            normalize=(0.7, 12.0),
-            bins=N.linspace(0.0, 12.0, 241),
-            order=2,
             pars=uncertaindict(
                [ ('EH1', (67.79, 0.1132)),
                  ('EH2', (58.30, 0.0817)),
                  ('EH3', (68.02, 0.0997)) ],
                 mode='relative',
                 ),
+            ),
+        bkg_spectrum_fastn=NestedDict(
+            bundle='dayabay_fastn_v02',
+            parameter='fastn_shape',
+            name='bkg_spectrum_fastn',
+            normalize=(0.7, 12.0),
+            bins='evis_edges',
+            order=2,
             ),
         )
 
@@ -206,15 +221,15 @@ if args.show:
 #
 # Dump the histogram to a dot graph
 #
-# if args.dot:
-    # try:
-        # from gna.graphviz import GNADot
+if args.dot:
+    try:
+        from gna.graphviz import GNADot
 
-        # graph = GNADot(context.outputs.ee, joints=False)
-        # graph.write(args.dot)
-        # print( 'Write output to:', args.dot )
-    # except Exception as e:
-        # print( '\033[31mFailed to plot dot\033[0m' )
-        # raise
+        graph = GNADot(context.outputs.bkg.AD11, joints=False)
+        graph.write(args.dot)
+        print( 'Write output to:', args.dot )
+    except Exception as e:
+        print( '\033[31mFailed to plot dot\033[0m' )
+        raise
 
 
