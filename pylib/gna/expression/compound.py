@@ -391,3 +391,10 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 out = self.object.get_output(idx, context)
                 inp(out)
 
+    def test_iteration(self):
+        for it in self.indices.iterate():
+            print('index', it.current_format())
+            print('  weight', self.weight.current_format(it))
+            print('  obj', self.object.current_format(it))
+
+

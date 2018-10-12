@@ -18,7 +18,6 @@ class dayabay_fastn_v02(TransformationBundle):
         if self.idx.ndim()!=1:
             raise self.exception('Expect 1d indexing')
 
-        self.groups = Categories(self.cfg.get('groups', {}), recursive=True)
         self.bindings=OrderedDict()
 
     def build(self):
@@ -55,21 +54,10 @@ class dayabay_fastn_v02(TransformationBundle):
                 # self.outputs[ns.name]                = normalize.normalize.out
 
     def define_variables(self):
-        uncs = CatDict(self.groups, self.cfg.pars)
-        ns = self.common_namespace(self.cfg.parameter)
-        for stage in (0,1):
-            for it in self.idx.iterate():
-                itname, = it.current_values()
+        for it in self.idx.iterate():
+            itname, = it.current_values()
 
-                parcfg, ingroup, groupname = uncs.get(itname)
-
-                if stage:
-                    if ingroup:
-                        with ns:
-                            par = R.VarProduct(C.stdvector((groupname,)), itname, ns=ns)
-                            par = ns[itname].get()
-                            par.setLabel('={}'.format(ns.pathto(groupname)))
-                else:
-                    label = 'Fast neutron shape parameter for '+groupname
-                    par = ns.reqparameter(groupname, cfg=parcfg)
-                    par.setLabel(label)
+            name = it.current_format('{name}{autoindex}', name=self.cfg.parameter)
+            label = it.current_format('Fast neutron shape parameter for {site}')
+            par = self.common_namespace.reqparameter(name, cfg=parcfg)
+            par.setLabel(label)

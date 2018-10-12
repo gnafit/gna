@@ -34,7 +34,9 @@ if args.mode=='complete':
     indices = [
         ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
-        ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']),
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34'],
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+        ('s', 'site',        ['EH1', 'EH2', 'EH3']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
@@ -42,7 +44,9 @@ elif args.mode=='minimal':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
-        ('d', 'detector',    ['AD11']),
+        ('d', 'detector',    ['AD11'],
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+        ('s', 'site',        ['EH1']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
@@ -50,7 +54,9 @@ elif args.mode=='small':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
-        ('d', 'detector',    ['AD11', 'AD12', 'AD21']),
+        ('d', 'detector',    ['AD11', 'AD12', 'AD21'],
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+        ('s', 'site',        ['EH1', 'EH2']),
         ('c', 'component',   ['comp0', 'comp12']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
@@ -129,7 +135,8 @@ expr =[
         'eres_matrix| evis_edges()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
-        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[d]()'
+        'bkg_spectrum_fastn[s]()',
+        'bkg = bracket| bkg_spectrum_acc[d]()+bkg_spectrum_lihe+bkg_spectrum_fastn[s]()'
 ]
 
 if False:
@@ -324,7 +331,6 @@ cfg = NestedDict(
         bkg_spectrum_fastn=NestedDict(
             bundle='dayabay_fastn_v02',
             parameter='fastn_shape',
-            groups=groups,
             normalize=(0.7, 12.0),
             bins=N.linspace(0.0, 12.0, 241),
             order=2,

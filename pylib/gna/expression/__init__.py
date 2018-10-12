@@ -80,6 +80,10 @@ class Expression(object):
         for short, idx in self.indices.indices.items():
             self.globals[short] = idx
 
+            sub=idx.sub
+            if sub:
+                self.globals[sub.short]=sub
+
     def build(self, context):
         if not self.tree:
             raise Exception('Expression is not initialized, call parse() method first')
