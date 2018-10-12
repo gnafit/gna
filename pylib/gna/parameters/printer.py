@@ -4,7 +4,8 @@ from __future__ import print_function
 from load import ROOT
 import numpy as N
 
-from collections import defaultdict
+from itertools import chain, tee, cycle
+import itertools
 
 from gna.bindings import patchROOTClass
 try:
@@ -16,7 +17,6 @@ except ImportError:
 def colorize(string, color):
     return color + str(string) + Style.RESET_ALL
 
-covariance_storage = defaultdict(set)
 unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
@@ -64,9 +64,53 @@ else:
 freestr+=' '*(relsigma_len-len(freestr))
 
 def __extract_covariated(var):
+    pass
+
+class CovarianceStore():
+    def __init__(self):
+        self.storage = list()
+
+    def add_to_store(self, par):
+        if not any(self.__in_store(par)):
+            self.storage.append(set(chain((par,), par.getAllCovariatedWith())))
+        else:
+            return
+    
+
+    def __in_store(self, par):
+        for par_set in self.storage:
+            for item in par_set:
+                yield par == item
 
 
-def print_parameters( ns, recursive=True, labels=False ):
+def print_covariated(cov_store):
+    for par_set in cov_store.storage:
+        max_offset = max((len(x.qualifiedName()) for x in par_set))
+        for pivot in par_set:
+            full_name = pivot.qualifiedName()
+            s = colorize(full_name, Fore.CYAN) if colorama_present else full_name
+            current_offset = len(full_name)
+            if max_offset != current_offset:
+                initial_sep = " "*(max_offset-current_offset +1)
+            else:
+                initial_sep = " "
+            s += initial_sep
+            for par in par_set:
+                s += '{:g}'.format(par.getCorrelation(pivot))
+                s += " "
+            print(s)
+        print("")
+
+
+def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
+    '''Pretty prints parameters in a given namespace. Prints parameters
+    and then outputs covariance matrices for covariated pars. '''
+    if cov_storage is None:
+        cov_storage = CovarianceStore()
+        top_level = True
+    else:
+        top_level = False
+
     header = False
     for name, var in ns.iteritems():
         if isinstance( ns.storage[name], str ):
@@ -76,17 +120,22 @@ def print_parameters( ns, recursive=True, labels=False ):
             continue
         if not header:
             if colorama_present:
-                print("Variables in namespace {color}'{ns}'{escape}:".format(ns=ns.path,
-                      color=Fore.GREEN, escape=Style.RESET_ALL))
+                print("Variables in namespace '{}':".format(colorize(ns.path, color=Fore.GREEN)))
             else:
                 print("Variables in namespace '%s'"%ns.path)
             header=True
+
+        if var.isCovariated():
+            cov_storage.add_to_store(var)
 
         print(end='  ')
         print(var.__str__(labels=labels))
     if recursive:
         for sns in ns.namespaces.itervalues():
-            print_parameters( sns, recursive=recursive, labels=labels )
+            print_parameters( sns, recursive=recursive, labels=labels, cov_storage=cov_storage )
+
+    if top_level:
+        print_covariated(cov_storage)
 
 @patchROOTClass( ROOT.Variable('double'), '__str__' )
 def Variable__str( self, labels=False ):
@@ -207,6 +256,7 @@ def GaussianParameter__str( self, labels=False  ):
 
     if labels:
         s+=sepstr
+
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 

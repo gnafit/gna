@@ -48,20 +48,21 @@ public:
   virtual T value() { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
 
-  const std::string &name() const { return m_name; }
+  std::string name() const noexcept { return m_name; }
 
-  const std::string& inNamespace() const noexcept { return m_namespace; }
+  std::string inNamespace() const noexcept { return m_namespace; }
   void setNamespace(const std::string& ns_name) { m_namespace = ns_name; };
-  std::string fullName() const { return m_namespace + "." + m_name; };
+  std::string qualifiedName() const { return m_namespace + "." + m_name; };
 
-  const std::string& label() const noexcept { return m_label; }
+  std::string label() const noexcept { return m_label; }
   void setLabel(const std::string& label) { m_label=label; }
+  void setLabel(std::string&& label) { m_label = label; }
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
   std::string m_label;
-  std::string m_namespace = "";
+  std::string m_namespace;
 };
 
 template <>
@@ -191,6 +192,20 @@ public:
       auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
           return search->second;
+      } else  {
+#ifdef COVARIANCE_DEBUG
+          auto msg = boost::format("Parameters %1% and %2% are not covariated");
+          std::cout << msg % this->name() % other.name() << std::endl;
+#endif
+          return static_cast<T>(0.);
+      }
+  }
+
+  T getCorrelation(const GaussianParameter<T>& other) const noexcept {
+      if (this == &other) {return static_cast<T>(1);}
+      auto search = m_covariances.find(&other);
+      if (search != m_covariances.end()) {
+          return search->second / (this->sigma() * other.sigma());
       } else  {
 #ifdef COVARIANCE_DEBUG
           auto msg = boost::format("Parameters %1% and %2% are not covariated");
