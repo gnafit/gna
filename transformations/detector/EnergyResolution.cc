@@ -6,13 +6,22 @@
 
 constexpr double pi = boost::math::constants::pi<double>();
 
+
 EnergyResolution::EnergyResolution(bool single, bool propagate_matrix) :
+EnergyResolution({"Eres_a" , "Eres_b" , "Eres_c"}, single, propagate_matrix){
+
+}
+
+EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, bool single, bool propagate_matrix) :
 m_propagate_matrix(propagate_matrix),
 m_single(single)
 {
-  variable_(&m_a, "Eres_a");
-  variable_(&m_b, "Eres_b");
-  variable_(&m_c, "Eres_c");
+  if(pars.size()!=3u){
+    throw std::runtime_error("Energy resolution should have exactly 3 parameters");
+  }
+  variable_(&m_a, pars[0]);
+  variable_(&m_b, pars[1]);
+  variable_(&m_c, pars[2]);
 
   transformation_("matrix")
       .input("Edges")

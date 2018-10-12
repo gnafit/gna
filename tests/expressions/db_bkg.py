@@ -120,11 +120,11 @@ lib = OrderedDict(
 
 expr =[
         'evis_edges',
-        'fastn_shape[s]',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
         'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
         'bkg_lihe  = efflivetime[d] * bkg_rate_lihe[s]  * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
+        'fastn_shape[s]',
         'bkg_fastn = efflivetime[d] * bkg_rate_fastn[s] * bkg_spectrum_fastn[s]()',
         'bkg_amc   = efflivetime[d] * bkg_rate_amc[d] * bkg_spectrum_amc()',
         'bkg_alphan   = efflivetime[d] * bkg_rate_alphan[d] * bkg_spectrum_alphan[d]()',

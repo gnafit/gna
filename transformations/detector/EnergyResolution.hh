@@ -8,7 +8,8 @@
 class EnergyResolution: public GNAObject,
                         public TransformationBind<EnergyResolution> {
 public:
-  EnergyResolution( bool single=true, bool propagate_matrix=false );
+  EnergyResolution(const std::vector<std::string>& pars, bool single=true, bool propagate_matrix=false);
+  EnergyResolution(bool single=true, bool propagate_matrix=false);
 
   double relativeSigma(double Etrue) const noexcept;
   double resolution(double Etrue, double Erec) const noexcept;

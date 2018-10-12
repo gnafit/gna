@@ -176,8 +176,13 @@ class NestedDict(object):
     def values(self):
         return self.__storage__.values()
 
-    def items(self):
-        return self.__storage__.items()
+    def items(self, nested=False):
+        for k, v in self.__storage__.items():
+            if nested and isinstance(v, NestedDict):
+                for nk, nv in v.items(nested=True):
+                    yield '.'.join((k,nk)), nv
+            else:
+                yield k, v
 
     def __contains__(self, key):
         key, listkey=process_key(key)
