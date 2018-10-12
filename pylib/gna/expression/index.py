@@ -232,7 +232,7 @@ class NIndex(object):
 
     def current_format(self, fmt=None, *args, **kwargs):
         autofmtnd, autofmt = self.autofmt()
-        dct = dict( self.current_items('both')+args, **kwargs )
+        dct = dict( self.current_items('both', include_sub=True)+args, **kwargs )
         autoindexnd, autoindex = autofmtnd.format(**dct), autofmt.format(**dct)
         if not fmt and 'name' in kwargs:
             fmt='{name}{autoindex}'
@@ -241,6 +241,7 @@ class NIndex(object):
             dct['autoindexnd'] = autoindexnd
         else:
             return autoindex
+
         return fmt.format( **dct )
 
     def get_relevant_index(self, short):

@@ -311,6 +311,18 @@ class uncertain(object):
         self.uncertainty   = uncertainty
         self.mode    = mode
 
+    def get_unc(self):
+        if self.mode=='relative':
+            relunc = self.uncertainty
+        elif self.mode=='relative':
+            relunc = self.uncertainty/self.central
+        elif self.mode=='fixed':
+            return None
+        else:
+            raise Exception('Unsupported mode '+self.mode)
+
+        return uncertain(1.0, relunc, mode='absolute')
+
     def __str__(self):
         res = '{central:.6g}'.format(central=self.central)
 

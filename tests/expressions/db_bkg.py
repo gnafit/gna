@@ -91,17 +91,29 @@ groups=NestedDict(
         )
 
 lib = OrderedDict(
-        bkg_spectrum_li_w       = dict(expr='bkg_spectrum_li*frac_li', label='9Li spectrum\n(frac)'),
-        bkg_spectrum_he_w       = dict(expr='bkg_spectrum_he*frac_he', label='8He spectrum\n(frac)'),
-        bkg_spectrum_lihe       = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w', label='8He/9Li spectrum\n(norm)'),
-        bkg                     = dict(expr='bkg_spectrum_acc+bkg_spectrum_alphan+bkg_specrum_amc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
+        # Accidentals
+        acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',                                                label='Acc num {detector}\n(best fit)}'),
+        bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                                                      label='Acc {detector}\n(w: {weight_label})'),
+
+        # Li/He
+        bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                                                          label='9Li spectrum\n(frac)'),
+        bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                                                          label='8He spectrum\n(frac)'),
+        bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',                                              label='8He/9Li spectrum\n(norm)'),
+        lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime',                                                        label='⁹Li/⁸He num {site}\n(best fit)}'),
+        bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                                                    label='8He/9Li {detector}\n(w: {weight_label})'),
+
+        # Total
+        bkg               = dict(expr='bkg_acc+bkg_spectrum_alphan+bkg_specrum_amc+bkg_spectrum_fastn+bkg_spectrum_lihe', label='Background spectrum\n{detector}')
         )
 
 expr =[
         'evis_edges',
         'fastn_shape[s]',
-        'bkg_spectrum_lihe = bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
-        'bkg = bracket| bkg_spectrum_acc[d]() + bkg_spectrum_lihe + bkg_spectrum_fastn[s]() + bkg_spectrum_amc() + bkg_spectrum_alphan[d]()'
+        'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+        'livetime=accumulate("livetime", livetime_daily[d]())',
+        'bkg_lihe = efflivetime[d] * bkg_rate_lihe[s] * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
+        'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
+        'bkg = bracket| bkg_acc + bkg_lihe + bkg_spectrum_fastn[s]() + bkg_spectrum_amc() + bkg_spectrum_alphan[d]()'
 ]
 
 # Initialize the expression and indices
@@ -134,6 +146,9 @@ cfg = NestedDict(
             yorder   = 5,
             provides = [ 'evis', 'ctheta', 'evis_edges' ],
             ),
+        #
+        # Spectra
+        #
         bkg_spectrum_acc = NestedDict(
             bundle    = 'root_histograms_v02',
             filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
@@ -184,16 +199,6 @@ cfg = NestedDict(
                     ),
                 provides = [ 'frac_li', 'frac_he' ]
                 ),
-        fastn_shape=NestedDict(
-            bundle='parameters_1d_v01',
-            parameter='fastn_shape',
-            pars=uncertaindict(
-               [ ('EH1', (67.79, 0.1132)),
-                 ('EH2', (58.30, 0.0817)),
-                 ('EH3', (68.02, 0.0997)) ],
-                mode='relative',
-                ),
-            ),
         bkg_spectrum_fastn=NestedDict(
             bundle='dayabay_fastn_v02',
             parameter='fastn_shape',
@@ -202,6 +207,63 @@ cfg = NestedDict(
             bins='evis_edges',
             order=2,
             ),
+        #
+        # Parameters
+        #
+        fastn_shape=NestedDict(
+            bundle='parameters_1d_v01',
+            parameter='fastn_shape',
+            label='Fast neutron shape parameter for {site}',
+            pars=uncertaindict(
+               [ ('EH1', (67.79, 0.1132)),
+                 ('EH2', (58.30, 0.0817)),
+                 ('EH3', (68.02, 0.0997)) ],
+                mode='relative',
+                ),
+            ),
+        #
+        # Livetime
+        #
+        livetime = NestedDict(
+            bundle = 'dayabay_livetime_hdf_v01',
+            file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
+            provides = ['livetime_daily', 'efflivetime_daily']
+            ),
+        #
+        # Rates
+        #
+        bkg_rate_acc = NestedDict(
+                bundle    ='parameters_1d_v01',
+                parameter = 'bkg_rate_acc',
+                label='Acc rate at {detector}',
+                pars = uncertaindict(
+                    [
+                        ( 'AD11', 8.463602 ),
+                        ( 'AD12', 8.464611 ),
+                        ( 'AD21', 6.290756 ),
+                        ( 'AD22', 6.180896 ),
+                        ( 'AD31', 1.273798 ),
+                        ( 'AD32', 1.189542 ),
+                        ( 'AD33', 1.197807 ),
+                        ( 'AD34', 0.983096 ),
+                        ],
+                    uncertainty = 1.0,
+                    mode = 'percent',
+                    ),
+                separate_uncertainty='acc_norm',
+                provides = ['acc_norm']
+                ),
+        bkg_rate_lihe = NestedDict(
+                bundle    ='parameters_1d_v01',
+                parameter = 'bkg_rate_lihe',
+                label='⁹Li/⁸He rate at {site}',
+                pars = uncertaindict([
+                    ('EH1', (2.46, 1.06)),
+                    ('EH2', (1.72, 0.77)),
+                    ('EH3', (0.15, 0.06))],
+                    mode = 'absolute',
+                    ),
+                ),
         )
 
 #

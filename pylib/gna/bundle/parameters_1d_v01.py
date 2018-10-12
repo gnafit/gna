@@ -19,11 +19,21 @@ class parameters_1d_v01(TransformationBundle):
             raise self.exception('Expect 1d indexing')
 
     def define_variables(self):
+        sepunc = self.cfg.get('separate_uncertainty', False)
         for it in self.idx.iterate():
             itname, = it.current_values()
             parcfg = self.cfg.pars[itname]
 
-            name = it.current_format('{name}{autoindex}', name=self.cfg.parameter)
-            label = it.current_format('Fast neutron shape parameter for {site}')
+            name = it.current_format(name=self.cfg.parameter)
+            label = it.current_format(self.cfg.label)
+
+            if parcfg.mode!='fixed' and sepunc:
+                uncname = it.current_format(name=sepunc)
+                unccfg = parcfg.get_unc()
+                uncpar = self.common_namespace.reqparameter(uncname, cfg=unccfg)
+                uncpar.setLabel(label+' (norm)')
+
+                parcfg.mode='fixed'
+
             par = self.common_namespace.reqparameter(name, cfg=parcfg)
             par.setLabel(label)
