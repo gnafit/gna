@@ -45,9 +45,14 @@ public:
 
   virtual ~Variable() { }
 
-  const std::string &name() const { return m_name; }
   virtual T value() { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
+
+  const std::string &name() const { return m_name; }
+
+  const std::string& inNamespace() const noexcept { return m_namespace; }
+  void setNamespace(const std::string& ns_name) { m_namespace = ns_name; };
+  std::string fullName() const { return m_namespace + "." + m_name; };
 
   const std::string& label() const noexcept { return m_label; }
   void setLabel(const std::string& label) { m_label=label; }
@@ -56,6 +61,7 @@ protected:
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
   std::string m_label;
+  std::string m_namespace = "";
 };
 
 template <>
@@ -143,6 +149,10 @@ public:
           return true;
       }
   }
+
+   bool isCovariated() const noexcept {
+       return !m_covariances.empty();
+   }
 
    std::vector<GaussianParameter<T>*>  getAllCovariatedWith()  {
       std::vector<GaussianParameter<T>*> tmp;

@@ -142,5 +142,6 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         param.setLabel(kwargs['label'])
     if debug:
         print()
+    param.setNamespace(ns.path)
     return param
 
