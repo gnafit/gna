@@ -128,8 +128,11 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
                 print("Variables in namespace '%s'"%ns.path)
             header=True
 
-        if var.isCovariated():
-            cov_storage.add_to_store(var)
+        try:
+            if var.isCovariated():
+                cov_storage.add_to_store(var)
+        except AttributeError:
+            pass
 
         print(end='  ')
         print(var.__str__(labels=labels))
