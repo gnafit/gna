@@ -88,8 +88,8 @@ class ExpressionsEntry(object):
             raise KeyError()
         for expr in path:
             v = expr.get()
-        if self._label is not None:
-            v.setLabel(self._label)
+            if self._label is not None:
+                v.setLabel(self._label)
         return v
 
     def resolvepath(self, seen, known):
