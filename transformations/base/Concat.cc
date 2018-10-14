@@ -1,37 +1,37 @@
-#include "Prediction.hh"
+#include "Concat.hh"
 
 /**
  * @brief Default constructor.
  *
  * Outputs:
- *   `prediction.prediction` -- the concatenated arrays.
+ *   `concat.concat` -- the concatenated arrays.
  */
-Prediction::Prediction() {
-  transformation_("prediction")
-    .output("prediction")
-    .types(&Prediction::calculateTypes)
-    .func(&Prediction::calculatePrediction)
+Concat::Concat() {
+  transformation_("concat")
+    .output("concat")
+    .types(&Concat::calculateTypes)
+    .func(&Concat::calculateConcat)
     ;
-  m_transform = t_["prediction"];
+  m_transform = t_["concat"];
 }
 
 /**
  * @brief Copy constructor.
- * Copies the transformation from the other instance of Prediction.
- * @param other -- the other Prediction instance.
+ * Copies the transformation from the other instance of Concat.
+ * @param other -- the other Concat instance.
  */
-Prediction::Prediction(const Prediction &other)
-  : m_transform(t_["prediction"])
+Concat::Concat(const Concat &other)
+  : m_transform(t_["concat"])
 {
 }
 
 /**
  * @brief Copy assignment.
- * Copies the transformation from the other instance of Prediction.
- * @param other -- the other Prediction instance.
+ * Copies the transformation from the other instance of Concat.
+ * @param other -- the other Concat instance.
  */
-Prediction &Prediction::operator=(const Prediction &other) {
-  m_transform = t_["prediction"];
+Concat &Concat::operator=(const Concat &other) {
+  m_transform = t_["concat"];
   return *this;
 }
 
@@ -40,8 +40,8 @@ Prediction &Prediction::operator=(const Prediction &other) {
  * @param name -- new input name.
  * @return InputDescriptor for newly created input.
  */
-InputDescriptor Prediction::append(const char* name) {
-  return InputDescriptor(t_["prediction"].input(name));
+InputDescriptor Concat::append(const char* name) {
+  return InputDescriptor(t_["concat"].input(name));
 }
 
 /**
@@ -50,8 +50,8 @@ InputDescriptor Prediction::append(const char* name) {
  * @param obs -- SingleOutput instance.
  * @return InputDescriptor for newly created input.
  */
-InputDescriptor Prediction::append(SingleOutput &obs) {
-  return InputDescriptor(t_["prediction"].input(obs));
+InputDescriptor Concat::append(SingleOutput &obs) {
+  return InputDescriptor(t_["concat"].input(obs));
 }
 
 /**
@@ -59,7 +59,7 @@ InputDescriptor Prediction::append(SingleOutput &obs) {
  * Sums the sizes of the input arrays/histograms.
  * @exception SinkTypeError in case there are no inputs.
  */
-void Prediction::calculateTypes(TypesFunctionArgs& fargs) {
+void Concat::calculateTypes(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (args.size() == 0) {
@@ -79,7 +79,7 @@ void Prediction::calculateTypes(TypesFunctionArgs& fargs) {
  * @brief MemFunction.
  * Copies the data from each input into concatenated output.
  */
-void Prediction::calculatePrediction(FunctionArgs& fargs) {
+void Concat::calculateConcat(FunctionArgs& fargs) {
   auto& args=fargs.args;
   double *buf=fargs.rets[0].x.data();
 
@@ -94,13 +94,13 @@ void Prediction::calculatePrediction(FunctionArgs& fargs) {
  * @brief The size of the output.
  * @return the size of the output.
  */
-size_t Prediction::size() const {
+size_t Concat::size() const {
   return m_transform[0].type.size();
 }
 
 /**
  * @brief Force update of the calculation.
  */
-void Prediction::update() const {
+void Concat::update() const {
   m_transform.update(0);
 }

@@ -32,7 +32,7 @@ set (SOURCES
   transformations/base/Histogram.cc
   transformations/base/Identity.cc
   transformations/base/Points.cc
-  transformations/base/Prediction.cc
+  transformations/base/Concat.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
   transformations/base/Ratio.cc
@@ -132,7 +132,7 @@ set (HEADERS
   GNAObject.hh
   UncertainParameter.hh
   # transformations/
-  Prediction.hh
+  Concat.hh
   CovariatedPrediction.hh
   TrialMultiFunc.hh
   Product.hh

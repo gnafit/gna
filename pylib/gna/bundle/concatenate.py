@@ -11,7 +11,7 @@ class concatenate(TransformationBundle):
         self.transformations_in = self.transformations_out
 
     def build(self):
-        concat = R.Prediction(ns=self.common_namespace)
+        concat = R.Concat(ns=self.common_namespace)
         for ns in self.namespaces:
             """Create and store the input"""
             self.inputs[ns.name] = concat.append(ns.name)

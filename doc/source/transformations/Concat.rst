@@ -1,12 +1,12 @@
-.. _Prediction:
+.. _Concat:
 
-Prediction transformation
+Concat transformation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Description
 ^^^^^^^^^^^
 
-The transformation Prediction concatenates the input arrays into single output array.
+The transformation Concat concatenates the input arrays into single output array.
 
 Inputs
 ^^^^^^

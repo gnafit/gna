@@ -151,6 +151,14 @@ class OProd(Operation):
         import ROOT as R
         self.set_tinit( R.Product )
 
+class OConcat(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'concat', *indices, **kwargs)
+        self.set_operator( ' ⊕ ', text='concat_' )
+
+        import ROOT as R
+        self.set_tinit( R.Product )
+
 class Accumulate(IndexedContainer, Variable):
     bound = False
     def __init__(self, name, *args, **kwargs):
