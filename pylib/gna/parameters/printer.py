@@ -140,7 +140,6 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
             pass
 
         print(end='  ')
-        print(type(var))
         print(var.__str__(labels=labels))
     if recursive:
         for sns in ns.namespaces.itervalues():
