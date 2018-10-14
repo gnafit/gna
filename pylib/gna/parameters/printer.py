@@ -178,7 +178,6 @@ def Variablec__str( self, labels=False  ):
             ival  = self.value().imag(),
             color = Fore.BLUE if colorama_present else ""
             )
-    print()
     label = self.label()
     if not labels or label=='value':
         label=''
