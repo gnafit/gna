@@ -49,6 +49,9 @@ def reqparameters(ns):
     ns['PhaseC'].setLabel('Conjugated CP violation factor exp(+iδ)')
 
     flavors = [ 'e', 'μ', 'τ' ]
-    for iflavor in range(3):
-        for jmass in range(3):
-            ns['V{0}{1}'.format(iflavor,jmass)].setLabel('PMNS element {0}{1}'.format(flavors[iflavor], jmass))
+    with ns:
+        for iflavor in range(3):
+            for jmass in range(3):
+                name = 'V{0}{1}'.format(iflavor,jmass)
+                ns[name].get()
+                ns[name].setLabel('PMNS element {0}{1}'.format(flavors[iflavor], jmass))
