@@ -40,7 +40,7 @@ Concat &Concat::operator=(const Concat &other) {
  * @param name -- new input name.
  * @return InputDescriptor for newly created input.
  */
-InputDescriptor Concat::append(const char* name) {
+InputDescriptor Concat::add_input(const char* name) {
   return InputDescriptor(t_["concat"].input(name));
 }
 
@@ -50,7 +50,7 @@ InputDescriptor Concat::append(const char* name) {
  * @param obs -- SingleOutput instance.
  * @return InputDescriptor for newly created input.
  */
-InputDescriptor Concat::append(SingleOutput &obs) {
+InputDescriptor Concat::add_input(SingleOutput &obs) {
   return InputDescriptor(t_["concat"].input(obs));
 }
 

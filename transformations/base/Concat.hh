@@ -19,8 +19,11 @@ public:
 
   Concat &operator=(const Concat &other);       ///< Copy assignment.
 
-  InputDescriptor append(const char* name);     ///< Add a named input.
-  InputDescriptor append(SingleOutput &out);    ///< Add an input and connect an output to it.
+  InputDescriptor append(const char* name) { return add_input(name); } ///< Add a named input.
+  InputDescriptor append(SingleOutput &out){ return add_input(out); }  ///< Add an input and connect an output to it.
+
+  InputDescriptor add_input(const char* name);  ///< Add a named input.
+  InputDescriptor add_input(SingleOutput &out); ///< Add an input and connect an output to it.
 
   void calculateTypes(TypesFunctionArgs& fargs); ///< MemTypesFunction.
   void calculateConcat(FunctionArgs& fargs);     ///< MemFunction.

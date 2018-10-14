@@ -206,6 +206,7 @@ elif True:
         ''')
 
 expr.append( 'observation=rebin| ibd + bkg' )
+expr.append( 'total=concat[d]| observation' )
 
 # Initialize the expression and indices
 a = Expression(expr, indices)
@@ -370,6 +371,7 @@ cfg = NestedDict(
         lihe_fractions=NestedDict(
                 bundle = 'var_fractions_v01',
                 names = [ 'li', 'he' ],
+                format = 'frac_{component}',
                 fractions = uncertaindict(
                     li = ( 0.95, 0.05, 'relative' )
                     ),

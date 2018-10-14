@@ -157,7 +157,7 @@ class OConcat(Operation):
         self.set_operator( ' ⊕ ', text='concat_' )
 
         import ROOT as R
-        self.set_tinit( R.Product )
+        self.set_tinit( R.Concat )
 
 class Accumulate(IndexedContainer, Variable):
     bound = False
