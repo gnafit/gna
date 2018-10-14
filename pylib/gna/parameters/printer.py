@@ -21,7 +21,7 @@ unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
 
-valfmt='={color}{val:11.6g}'
+valfmt='={val:11.6g}'
 
 centralfmt='{central:11.6g}'
 
@@ -75,6 +75,9 @@ class CovarianceStore():
             self.storage.append(set(chain((par,), par.getAllCovariatedWith())))
         else:
             return
+
+    def __len__(self):
+        return len(self.storage)
     
 
     def __in_store(self, par):
@@ -84,6 +87,8 @@ class CovarianceStore():
 
 
 def print_covariated(cov_store):
+    if len(cov_store) == 0:
+        return
     raw = "\nCorrelations between parameters:"
     title = colorize(raw, Fore.RED) if colorama_present else raw
     print(title)
@@ -135,6 +140,7 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
             pass
 
         print(end='  ')
+        print(type(var))
         print(var.__str__(labels=labels))
     if recursive:
         for sns in ns.namespaces.itervalues():
@@ -146,7 +152,7 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
 @patchROOTClass( ROOT.Variable('double'), '__str__' )
 def Variable__str( self, labels=False ):
     fmt = dict(
-            name    = self.name(),
+            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
             val     = self.value(),
             color = Fore.BLUE if colorama_present else ""
             )
@@ -160,18 +166,19 @@ def Variable__str( self, labels=False ):
     if labels:
         s+=sepstr+centralrel_empty+sepstr
     if label:
-        s+=label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
 def Variablec__str( self, labels=False  ):
     fmt = dict(
-            name  = self.name(),
+            name  = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
             rval  = self.value().real(),
             ival  = self.value().imag(),
             color = Fore.BLUE if colorama_present else ""
             )
+    print()
     label = self.label()
     if not labels or label=='value':
         label=''
@@ -180,19 +187,20 @@ def Variablec__str( self, labels=False  ):
     s+=cvalfmt.format(**fmt)
 
     if labels:
-        s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
+         s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
     if label:
-        s+=label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
     return s
 
 @patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
 def UniformAngleParameter__str( self, labels=False  ):
     fmt = dict(
-            name    = self.name(),
+            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
             val     = self.value(),
             central = self.central(),
-            npi     = self.value()/N.pi
+            npi     = self.value()/N.pi,
+            color   = Fore.BLUE if colorama_present else ""
             )
     label = self.label()
     if not labels or label=='value':
@@ -213,7 +221,7 @@ def UniformAngleParameter__str( self, labels=False  ):
     if labels:
         s+=sepstr
     if label:
-        s+=label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
     return s
 
@@ -250,15 +258,12 @@ def GaussianParameter__str( self, labels=False  ):
         if covariated:
             s += sepstr
             s += Fore.LIGHTGREEN_EX if colorama_present else ""
-            s += "Covariated. Looks for it below"
+            s += "[C]"
 
         if limits.size():
             s+=sepstr
             for (a,b) in limits:
                 s+=limitsfmt.format(a,b)
-
-
-
 
     if labels:
         s+=sepstr

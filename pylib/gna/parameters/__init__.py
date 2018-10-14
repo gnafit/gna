@@ -7,10 +7,11 @@ from gna.configurator import uncertain
 debug=False
 
 class DiscreteParameter(object):
-    def __init__(self, name, variants):
+    def __init__(self, name, variants, **kwargs):
         self.default = None
         self._variable = ROOT.ParameterWrapper("double")(name)
         self._name = name
+        self._namespace = kwargs.get("namespace", "")
         self._variants = variants
         self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
         if  len(self._inverse) != len(self._variants):
@@ -37,6 +38,9 @@ class DiscreteParameter(object):
 
     def getVariable(self):
         return self._variable.getVariable()
+
+    def setNamespace(self, name):
+        self._namespace = name
 
 def makeparameter(ns, name, cfg=None, **kwargs):
     if 'target' in kwargs:
