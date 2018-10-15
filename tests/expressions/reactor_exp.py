@@ -495,6 +495,9 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
+from gna.graph.walk import GraphWalker
+walker = GraphWalker( context.outputs.evis )
+
 #
 # Do some plots
 #

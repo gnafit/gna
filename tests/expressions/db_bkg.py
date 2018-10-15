@@ -342,6 +342,30 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
+from gna.graph.walk import GraphWalker
+walker = GraphWalker(context.outputs.concat_common)
+
+import time
+def measure(fcn, n=1, dummy=None):
+    t1 = time.clock()
+    for i in xrange(n):
+        fcn()
+    t1 = time.clock()-t1
+
+    if not dummy:
+        def dummy():
+            pass
+
+    t2 = time.clock()
+    for i in xrange(n):
+        dummy()
+    t2 = time.clock()-t2
+
+    return t1-t2
+
+def fcn():
+
+
 #
 # Do some plots
 #
