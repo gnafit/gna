@@ -42,18 +42,32 @@ namespace MultiThreading {
   class Task {
   public:
     Task() {}
-    Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) { } 
-    Task(Task &&task) : m_entry(std::move(task.m_entry)) {}
-    Task(const Task &task) : m_entry(task.m_entry) {}
+    Task(TransformationTypes::Entry *in_entry) : m_entry( in_entry ) {
+	count_all_inputs();
+    } 
+    Task(Task &&task) : m_entry(std::move(task.m_entry)), 
+			inputs(task.inputs), 
+			ready_inputs(task.ready_inputs) {}
+    Task(const Task &task) : m_entry(task.m_entry),
+				inputs(task.inputs),
+				ready_inputs(task.ready_inputs) {}
 
-    void operator=(const Task& task) {
-	this->m_entry = task.m_entry;
+    Task& operator=(const Task& task) {
+	if (this != &task){  
+		this->m_entry = task.m_entry;
+		this->inputs = task.inputs;
+		this->ready_inputs = task.ready_inputs;
+	}
+	return *this;
     }
 
     void run_task();
+    void count_all_inputs();
 //  private:
     TransformationTypes::Entry *m_entry;
-    int worker_index = -1;
+    size_t inputs;
+    size_t ready_inputs;
+//    int worker_index = -1;
 
 // TODO DELETE
 //    std::mutex task_mtx;
@@ -100,7 +114,7 @@ namespace MultiThreading {
     std::mutex tp_waitlist_mutex;
 
 //    std::condition_variable cv_tp_m_workers_mutex;
-//    std::condition_variable stop_condition;
+    std::condition_variable stop_condition;
     std::condition_variable cv_global_wait_list;
   };
 
@@ -111,6 +125,13 @@ namespace MultiThreading {
     Worker(Worker &&worker) : 	pool(std::move(worker).pool), 
 				thr_head(std::move(worker.thr_head)), 
 				task_stack(std::move(worker.task_stack)) { }
+//    Worker(const Worker& worker) : pool(worker.pool),
+//				   thr_head(worker.thr_head) {
+//	std::copy(worker.task_stack.begin(), worker.task_stack.end(), this.task_stack.begin());
+//    }
+
+//    Worker& operator=(const Worker& other);
+    ~Worker() { }
     void work();
     bool is_free ();
     void add_to_task_stack(Task& task);
@@ -118,11 +139,13 @@ namespace MultiThreading {
     void wakeup();
     size_t get_stack_size();
     void bite_global_wait_list();
+    bool is_ready();
     
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
     size_t thread_index_in_pool = 0;
+    bool ready_to_run = false;
     WorkerStatus status = WorkerStatus::Sleep;
 //    std::thread w_thread;
 //  std::vector<std::thread::id> mother_thread_ids;
