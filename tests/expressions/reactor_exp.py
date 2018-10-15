@@ -10,6 +10,8 @@ parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument('-m', '--mode', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
+parser.add_argument('--stats', action='store_true', help='show statistics')
+parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
 args = parser.parse_args()
 
 #
@@ -514,17 +516,17 @@ from gna.bindings import OutputDescriptor
 env.globalns.materializeexpressions(True)
 env.globalns.printparameters( labels=True )
 print( 'outputs:' )
+if 'outputs'
 print( context.outputs )
+print( context.outputs.keys() )
 
-from gna.graph import *
-out=context.outputs.concat_total
-walker = GraphWalker(out, context.outputs.thermal_power.DB1)
-report(out.data, fmt='Initial execution time: {total} s')
-report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
-stats = walker.get_stats()
-memstats = walker.get_mem_stats()
-print('Statistics', stats)
-print('Statistics', memstats)
+if args.stats:
+    from gna.graph import *
+    out=context.outputs.concat_total
+    walker = GraphWalker(out, context.outputs.thermal_power.DB1)
+    report(out.data, fmt='Initial execution time: {total} s')
+    report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
+    print('Statistics', walker.get_stats())
 
 #
 # Do some plots
@@ -539,7 +541,6 @@ if args.show:
     # ax.set_ylabel()
     # ax.set_title()
 
-    context.outputs.concat_total.data()
     out = context.outputs.observation_raw.AD11
     out.plot_hist()
 

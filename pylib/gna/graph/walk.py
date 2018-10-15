@@ -95,6 +95,8 @@ class GraphWalker(object):
                 edges   = self.get_edges()
                 )
 
+        stats.update(self.get_mem_stats())
+
         if fmt:
             return fmt.format(**stats)
 

@@ -7,6 +7,20 @@ from collections import OrderedDict
 from gna.expression.printl import *
 from gna.grouping import Groups
 
+debugmethods=False
+if debugmethods:
+    def methodname(fcn):
+        def newfcn(self, *args, **kwargs):
+            printl('methodname', type(self).__name__, getattr(self, 'name', '?'), fcn.__name__, *args, **kwargs)
+            with nextlevel():
+                return fcn(self, *args, **kwargs)
+        return newfcn
+else:
+    def methodname(fcn):
+        return fcn
+    def printl(*args, **kwargs):
+        pass
+
 class Index(object):
     sub, group = None, None
     def __init__(self, *args, **kwargs):
