@@ -49,22 +49,13 @@ if colorama_present:
 else:
     sepstr=' │ '
 
-if colorama_present:
-    fixedstr = '{}[fixed]'.format(Fore.LIGHTYELLOW_EX)
-else:
-    fixedstr='[fixed]'
+fixedstr='[fixed]'
+fixedstr_len = (centralsigma_len+relsigma_len-1-len(fixedstr))
+fixedstr = (fixedstr_len/2)*' ' + fixedstr + (fixedstr_len/2)*" "
 
-fixedstr+=' '*(centralsigma_len+relsigma_len-1-len(fixedstr))
-
-if colorama_present:
-    freestr ='{}[free]'.format(Fore.LIGHTYELLOW_EX)
-else:
-    freestr =' [free]'
+freestr =' [free]'
 
 freestr+=' '*(relsigma_len-len(freestr))
-
-def __extract_covariated(var):
-    pass
 
 class CovarianceStore():
     def __init__(self):
@@ -242,11 +233,12 @@ def GaussianParameter__str( self, labels=False  ):
     s+=valfmt.format(**fmt)
 
     if self.isFixed():
-        s+=sepstr+fixedstr
+        s += sepstr
+        s += Fore.LIGHTYELLOW_EX + fixedstr if colorama_present else fixedstr
     else:
         s+=sepstr + centralsigmafmt.format(**fmt)
         if N.isinf(fmt['sigma']):
-            s+=freestr
+            s += Fore.LIGHTYELLOW_EX + freestr if colorama_present else freestr
         else:
             if fmt['central']:
                 s+=relsigmafmt.format(relsigma=fmt['sigma']/fmt['central']*100.0)
