@@ -10,9 +10,10 @@ parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '-o', '--output', help='output figure name' )
-parser.add_argument('-m', '--mode', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 parser.add_argument('--stats', action='store_true', help='show statistics')
 parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
+parser.add_argument('-i', '--indices', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
+parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
 args = parser.parse_args()
 
 #
@@ -33,7 +34,7 @@ R.GNAObject
 #
 # Define the indices (empty for current example)
 #
-if args.mode=='complete':
+if args.indices=='complete':
     indices = [
         ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
@@ -43,7 +44,7 @@ if args.mode=='complete':
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
-elif args.mode=='minimal':
+elif args.indices=='minimal':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
@@ -53,7 +54,7 @@ elif args.mode=='minimal':
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
-elif args.mode=='small':
+elif args.indices=='small':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
@@ -64,7 +65,7 @@ elif args.mode=='small':
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 else:
-    raise Exception('Unsupported mode '+args.mode)
+    raise Exception('Unsupported indices '+args.indices)
 
 detectors = ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']
 groups=NestedDict(
@@ -122,6 +123,13 @@ lib = OrderedDict(
 
         observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum\n{detector}'),
 
+        iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
+        reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
+        reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
+        ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
+        ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
+        ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
+
         # Accidentals
         acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',             label='Acc num {detector}\n(best fit)}'),
         bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
@@ -169,7 +177,7 @@ expr =[
         'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan'
 ]
 
-if False:
+if args.mode=='dyboscar':
     expr.append(
         '''ibd =
                  global_norm*
@@ -190,7 +198,7 @@ if False:
                                  ibd_xsec(enu(), ctheta())*
                                  jacobian(enu(), ee(), ctheta())
         ''')
-elif True:
+elif args.mode=='mid':
     expr.append(
         '''ibd =
                  global_norm*
@@ -211,7 +219,7 @@ elif True:
                                ibd_xsec(enu(), ctheta())*
                                jacobian(enu(), ee(), ctheta())
         ''')
-elif True:
+elif args.mode=='simple':
     expr.append('''ibd =
                       global_norm*
                       eff*
@@ -228,6 +236,8 @@ elif True:
                                   sum[c]|
                                     pmns[c]*oscprob[c,d,r](enu())
         ''')
+else:
+    raise Exception('unsupported mode '+args.mode)
 
 expr.append( 'observation=rebin| ibd + bkg' )
 expr.append( 'total=concat[d]| observation' )
@@ -554,12 +564,12 @@ if args.show or args.output:
         savefig(args.output, suffix=suffix)
 
     outputs = context.outputs
-    outputs.kinint2.AD11.plot_hist(label='True spectrum')
-    step('_01_true')
-    outputs.iav.AD11.plot_hist(label='+IAV')
-    step('_02_iav')
-    outputs.lsnl.AD11.plot_hist(label='+LSNL')
-    step('_03_lsnl')
+    # outputs.kinint2.AD11.plot_hist(label='True spectrum')
+    # step('_01_true')
+    # outputs.iav.AD11.plot_hist(label='+IAV')
+    # step('_02_iav')
+    # outputs.lsnl.AD11.plot_hist(label='+LSNL')
+    # step('_03_lsnl')
     outputs.eres.AD11.plot_hist(label='+eres')
     step('_04_eres')
 
