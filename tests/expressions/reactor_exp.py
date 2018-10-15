@@ -47,7 +47,7 @@ elif args.mode=='minimal':
         ('d', 'detector',    ['AD11'],
                              dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',))]))),
         ('s', 'site',        ['EH1']),
-        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.mode=='small':
@@ -172,6 +172,27 @@ if False:
                  global_norm*
                  eff*
                  effunc_uncorr[d]*
+                 sum[c]|
+                   pmns[c]*
+                   eres[d]|
+                     lsnl[d]|
+                       iav[d]|
+                           sum[r]|
+                             baselineweight[r,d]*
+                             sum[i]|
+                               power_livetime_factor*
+                               kinint2|
+                                 anuspec[i](enu())*
+                                 oscprob[c,d,r](enu())*
+                                 ibd_xsec(enu(), ctheta())*
+                                 jacobian(enu(), ee(), ctheta())
+        ''')
+elif True:
+    expr.append(
+        '''ibd =
+                 global_norm*
+                 eff*
+                 effunc_uncorr[d]*
                  eres[d]|
                    lsnl[d]|
                      iav[d]|
@@ -234,8 +255,8 @@ cfg = NestedDict(
             bundle   = 'integral_2d1d_v01',
             variables = ('evis', 'ctheta'),
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-            xorders   = 3,
-            yorder   = 5,
+            xorders   = 2,
+            yorder   = 3,
             provides = [ 'evis', 'ctheta', 'evis_edges' ],
             ),
         ibd_xsec = NestedDict(
@@ -495,8 +516,13 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-from gna.graph.walk import GraphWalker
-walker = GraphWalker( context.outputs.evis )
+from gna.graph import *
+out=context.outputs.concat_total
+walker = GraphWalker(out, context.outputs.thermal_power.DB1)
+report(out.data, fmt='Initial execution time: {total} s')
+report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
+stats = walker.get_stats()
+print('Statistics', stats)
 
 #
 # Do some plots
@@ -511,7 +537,8 @@ if args.show:
     # ax.set_ylabel()
     # ax.set_title()
 
-    out = context.outputs.observation.AD11
+    context.outputs.concat_total.data()
+    out = context.outputs.observation_raw.AD11
     out.plot_hist()
 
 if args.show:

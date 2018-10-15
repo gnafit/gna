@@ -342,29 +342,11 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-from gna.graph.walk import GraphWalker
-walker = GraphWalker(context.outputs.concat_common)
-
-import time
-def measure(fcn, n=1, dummy=None):
-    t1 = time.clock()
-    for i in xrange(n):
-        fcn()
-    t1 = time.clock()-t1
-
-    if not dummy:
-        def dummy():
-            pass
-
-    t2 = time.clock()
-    for i in xrange(n):
-        dummy()
-    t2 = time.clock()-t2
-
-    return t1-t2
-
-def fcn():
-
+from gna.graph import *
+out=context.outputs.concat_common
+walker = GraphWalker(out)
+report(out.data, fmt='Initial execution time: {total} s')
+report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
 
 #
 # Do some plots
@@ -384,7 +366,7 @@ if args.show:
 
 if args.show:
     P.show()
-
+#
 #
 # Dump the histogram to a dot graph
 #
