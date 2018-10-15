@@ -58,7 +58,7 @@ class Operation(TCall,NestedTransformation):
 
     @call_once
     def bind(self, context):
-        printl('bind (operation) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (operation) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
@@ -67,7 +67,7 @@ class Operation(TCall,NestedTransformation):
             return
 
         with nextlevel():
-            printl('def (operation)', str(self))
+            printl_debug('def (operation)', str(self))
             with nextlevel():
                 for freeidx in self.indices.iterate():
                     tobj, newout = self.new_tobject(self.current_format(freeidx))
@@ -101,7 +101,7 @@ class OSum(Operation):
         import ROOT as R
         self.set_tinit( R.WeightedSum )
 
-        printl('bind (osum: weighted) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (osum: weighted) {}:'.format(type(self).__name__), str(self) )
 
         weight    = self.objects[0].weight
         subobject = self.objects[0].object
@@ -129,7 +129,7 @@ class OSum(Operation):
 
             # from constructors import stdvector
             # labels  = stdvector([self.object.name])
-            # printl('connect (weighted)')
+            # printl_debug('connect (weighted)')
             # for idx in self.indices.iterate():
                 # wname = self.weight.current_format(idx)
                 # weights = stdvector([wname])

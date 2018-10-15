@@ -15,10 +15,11 @@ if debugmethods:
             with nextlevel():
                 return fcn(self, *args, **kwargs)
         return newfcn
+    printl_debug = printl
 else:
     def methodname(fcn):
         return fcn
-    def printl(*args, **kwargs):
+    def printl_debug(*args, **kwargs):
         pass
 
 class Index(object):

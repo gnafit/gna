@@ -142,17 +142,17 @@ class ExpressionContext(object):
             self.required[name] = cfg
 
         if indices is None:
-            printl( 'indices: %s'%(name) )
+            printl_debug( 'indices: %s'%(name) )
             return self.required
 
         predefined = cfg.get('indices', None)
         if predefined is None:
-            printl( 'indices: %s[%s]'%(name, str(indices)) )
+            printl_debug( 'indices: %s[%s]'%(name, str(indices)) )
             cfg.indices=indices
         elif not isinstance(predefined, NIndex):
             raise Exception('Configuration should not contain predefined "indices" field')
         else:
-            printl( 'indices: %s[%s + %s]'%(name, str(predefined), str(indices)) )
+            printl_debug( 'indices: %s[%s + %s]'%(name, str(predefined), str(indices)) )
             cfg.indices=predefined+indices
 
         return self.required
@@ -166,7 +166,7 @@ class ExpressionContext(object):
             done.add(cfg)
 
     def build_bundle(self, cfg):
-        printl('build bundle', cfg.bundle )
+        printl_debug('build bundle', cfg.bundle )
 
         from gna.bundle import execute_bundle
         with nextlevel():
@@ -211,7 +211,7 @@ class ExpressionContext(object):
 
     def get(self, source, name, nidx, type, clone=None):
         key = self.get_key(name, nidx, clone=clone)
-        printl('get {}'.format(type), name, key)
+        printl_debug('get {}'.format(type), name, key)
 
         ret = source.get(key, None)
         if not ret:
@@ -224,16 +224,16 @@ class ExpressionContext(object):
 
     def set(self, target, io, name, nidx, type, fmt=None, clone=None):
         key = self.get_key( name, nidx, fmt, clone )
-        printl('set {}'.format(type), name, key)
+        printl_debug('set {}'.format(type), name, key)
         target[key]=io
 
     def set_variable(self, name, nidx, var, **kwargs):
         key = '.'.join(self.get_key( name, nidx ))
-        printl('set variable', name, key)
+        printl_debug('set variable', name, key)
         self.ns.reqparameter(key, cfg=var, **kwargs)
 
     # def connect(self, source, sink, nidx, fmtsource=None, fmtsink=None):
-        # printl( 'connect: {}->{} ({:s})'.format( source, sink, nidx ) )
+        # printl_debug( 'connect: {}->{} ({:s})'.format( source, sink, nidx ) )
         # with nextlevel():
             # output = self.get_output( source, nidx )
             # input  = self.get_input( sink, nidx )

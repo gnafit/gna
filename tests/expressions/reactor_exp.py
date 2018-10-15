@@ -516,9 +516,13 @@ from gna.bindings import OutputDescriptor
 env.globalns.materializeexpressions(True)
 env.globalns.printparameters( labels=True )
 print( 'outputs:' )
-if 'outputs'
-print( context.outputs )
+if 'outputs' in args.print:
+    print( context.outputs )
 print( context.outputs.keys() )
+
+if 'inputs' in args.print:
+    print( context.inputs )
+print( context.inputs.keys() )
 
 if args.stats:
     from gna.graph import *

@@ -104,7 +104,7 @@ class IndexedContainer(object):
         if not self.objects:
             return
 
-        printl('bind (container) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (container) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
             for obj in self.objects:
@@ -113,10 +113,10 @@ class IndexedContainer(object):
             if not connect:
                 return
 
-            printl('connect (container)', str(self))
+            printl_debug('connect (container)', str(self))
             with nextlevel():
                 for idx in self.indices.iterate():
-                    printl( 'index', idx )
+                    printl_debug( 'index', idx )
                     with nextlevel():
                         nobj = len(self.objects)
                         for i, obj in enumerate(self.objects):
@@ -149,7 +149,7 @@ class VProduct(IndexedContainer, Variable):
 
     @call_once
     def bind(self, context):
-        printl('bind (var) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (var) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
@@ -195,7 +195,7 @@ class NestedTransformation(object):
 
     @call_once
     def bind(self, context):
-        printl('bind (nested) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (nested) {}:'.format(type(self).__name__), str(self) )
 
         if self.tinit:
             with nextlevel():
@@ -258,7 +258,7 @@ class TCall(IndexedContainer, Transformation):
         if self.inputs_connected:
             return
 
-        printl('bind (call) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (call) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
             IndexedContainer.bind(self, context)
 
@@ -376,7 +376,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
 
     @call_once
     def bind(self, context):
-        printl('bind (weighted) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (weighted) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
@@ -384,7 +384,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             if self.object.name is undefinedname:
                 raise Exception('May not work with objects with undefined names')
             labels  = stdvector([self.object.name])
-            printl('connect (weighted)')
+            printl_debug('connect (weighted)')
             for idx in self.indices.iterate():
                 wname = self.weight.current_format(idx)
                 weights = stdvector([wname])
