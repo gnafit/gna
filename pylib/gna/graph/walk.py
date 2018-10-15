@@ -101,3 +101,17 @@ class GraphWalker(object):
             return fmt.format(**stats)
 
         return stats
+
+    def get_times(self, n):
+        times = N.zeros(len(self.cache_entries))
+        for i, entry in enumerate(self.cache_entries):
+            res = self.benchmark(entry, n)
+            times[i]=res
+
+        return times
+
+    def benchmark(self, entry, n):
+        entry.evaluate()
+
+        from gna.graph.timeit import timeit
+        return timeit(entry.evaluate, n, lambda:None)/n

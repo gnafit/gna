@@ -545,6 +545,10 @@ if args.stats:
     report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
     print('Statistics', walker.get_stats())
 
+    times = walker.get_times(100)
+    import IPython
+    IPython.embed()
+
 #
 # Do some plots
 #
