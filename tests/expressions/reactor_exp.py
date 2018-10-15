@@ -269,7 +269,7 @@ cfg = NestedDict(
             variables = ('evis', 'ctheta'),
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
             xorders   = 2,
-            yorder   = 3,
+            yorder   = 2,
             provides = [ 'evis', 'ctheta', 'evis_edges' ],
             ),
         ibd_xsec = NestedDict(
@@ -545,9 +545,7 @@ if args.stats:
     report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
     print('Statistics', walker.get_stats())
 
-    times = walker.get_times(100)
-    import IPython
-    IPython.embed()
+    # times = walker.get_times(100)
 
 #
 # Do some plots
