@@ -515,7 +515,9 @@ a.build(context)
 # Print the list of outputs, stored for the expression
 from gna.bindings import OutputDescriptor
 env.globalns.materializeexpressions(True)
-env.globalns.printparameters( labels=True )
+parstats=dict()
+env.globalns.printparameters(labels=True, stats=parstats)
+print('Parameters stats:', parstats)
 print( 'outputs:' )
 if 'outputs' in args.print:
     print( context.outputs )

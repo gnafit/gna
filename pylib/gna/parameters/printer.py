@@ -101,7 +101,7 @@ def print_covariated(cov_store):
         print("")
 
 
-def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=dict() ):
+def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=None):
     '''Pretty prints parameters in a given namespace. Prints parameters
     and then outputs covariance matrices for covariated pars. '''
     if cov_storage is None:
@@ -132,12 +132,34 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=
 
         print(end='  ')
         print(var.__str__(labels=labels))
+        varstats(var, stats)
     if recursive:
         for sns in ns.namespaces.itervalues():
-            print_parameters( sns, recursive=recursive, labels=labels, cov_storage=cov_storage )
+            print_parameters(sns, recursive=recursive, labels=labels, cov_storage=cov_storage, stats=stats)
 
     if top_level:
         print_covariated(cov_storage)
+
+def varstats(var, stats):
+    if stats is None:
+        return
+
+    def increment(name):
+        stats[name]=stats.get(name, 0)+1
+
+    if stats is not None:
+        tv=type(var).__name__
+        increment('total')
+        if tv.startswith('GaussianParameter') or tv.startswith('UniformAngleParameter'):
+            if var.isFixed():
+                increment('fixed')
+            else:
+                increment('variable')
+                increment(hasattr(var, 'sigma') and N.isinf(var.sigma()) and 'free' or 'constrained')
+        elif tv.startswith('Variable'):
+            increment('evaluable')
+        else:
+            increment('unknown')
 
 @patchROOTClass( ROOT.Variable('double'), '__str__' )
 def Variable__str( self, labels=False ):
