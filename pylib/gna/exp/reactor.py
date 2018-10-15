@@ -409,7 +409,7 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             integrator.points.setLabel('integrator 1d')
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
@@ -419,7 +419,7 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             integrator.points.setLabel('integrator 2d')
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
@@ -563,9 +563,10 @@ class ReactorExperimentModel(baseexp):
                 finalsum = inter_sum
 
             with detector.ns:
-                detector.eres = ROOT.EnergyResolutionC()
+                detector.eres = ROOT.EnergyResolution()
+            detector.eres.matrix.Edges( self.integrator.points.xedges)
             detector.eres.smear.setLabel('Eres')
-            detector.eres.smear.inputs(finalsum)
+            detector.eres.smear.Nvis(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
         det_ns = self.ns("detectors")(detector.name)
