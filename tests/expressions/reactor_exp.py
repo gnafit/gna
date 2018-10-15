@@ -189,7 +189,7 @@ if False:
                                  ibd_xsec(enu(), ctheta())*
                                  jacobian(enu(), ee(), ctheta())
         ''')
-elif True:
+elif False:
     expr.append(
         '''ibd =
                  global_norm*
@@ -545,8 +545,13 @@ if args.show:
     # ax.set_ylabel()
     # ax.set_title()
 
-    out = context.outputs.observation_raw.AD11
-    out.plot_hist()
+    outputs = context.outputs
+    outputs.kinint2.AD11.plot_hist(label='True spectrum')
+    outputs.iav.AD11.plot_hist(label='+IAV')
+    outputs.lsnl.AD11.plot_hist(label='+LSNL')
+    outputs.eres.AD11.plot_hist(label='+eres')
+
+    ax.legend(loc='upper right')
 
 if args.show:
     P.show()

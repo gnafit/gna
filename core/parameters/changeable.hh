@@ -75,6 +75,10 @@ public:
     return !m_data.raw;
   }
   void taint() const {
+    if(m_data.hdr->tainted){
+      DPRINTF("already tainted (do not propagate)");
+      return;
+    }
     DPRINTF("got tainted");
     notify();
     m_data.hdr->tainted = true;
