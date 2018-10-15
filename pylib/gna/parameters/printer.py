@@ -13,7 +13,7 @@ try:
     colorama_present = True
 except ImportError:
     colorama_present = False
-    
+
 def colorize(string, color):
     return color + str(string) + Style.RESET_ALL
 
@@ -69,7 +69,7 @@ class CovarianceStore():
 
     def __len__(self):
         return len(self.storage)
-    
+
 
     def __in_store(self, par):
         for par_set in self.storage:
@@ -101,7 +101,7 @@ def print_covariated(cov_store):
         print("")
 
 
-def print_parameters( ns, recursive=True, labels=False, cov_storage=None ):
+def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=dict() ):
     '''Pretty prints parameters in a given namespace. Prints parameters
     and then outputs covariance matrices for covariated pars. '''
     if cov_storage is None:
