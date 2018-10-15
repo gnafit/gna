@@ -3,6 +3,7 @@
 from __future__ import print_function
 import ROOT as R
 from collections import deque
+import numpy as N
 
 class GraphWalker(object):
     def __init__(self, *args):
@@ -74,8 +75,17 @@ class GraphWalker(object):
         return edges
 
     def get_mem_stats(self):
+        nbytes, nelements = 0, 0
+        for sink in self.cache_sinks:
+            data = sink.data
+            size = data.type.size()
 
-        for sink
+            esize = N.finfo(data.buffer.typecode).bits//8
+
+            nelements+=size
+            nbytes+=size*esize
+
+        return dict(bytes=nbytes, elements=nelements)
 
     def get_stats(self, fmt=None):
         stats = dict(

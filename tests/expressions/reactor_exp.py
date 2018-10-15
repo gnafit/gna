@@ -522,7 +522,9 @@ walker = GraphWalker(out, context.outputs.thermal_power.DB1)
 report(out.data, fmt='Initial execution time: {total} s')
 report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
 stats = walker.get_stats()
+memstats = walker.get_mem_stats()
 print('Statistics', stats)
+print('Statistics', memstats)
 
 #
 # Do some plots

@@ -75,17 +75,17 @@ public:
     return !m_data.raw;
   }
   void taint() const {
-    //if(m_data.hdr->tainted){
-      //DPRINTF("already tainted (do not propagate)");
-      //return;
-    //}
-    DPRINTF("got tainted");
-    notify();
-    m_data.hdr->tainted = true;
     if (m_data.hdr->changed) {
       DPRINTF("calling changed callback");
       m_data.hdr->changed();
     }
+    if(m_data.hdr->tainted){
+      DPRINTF("already tainted (do not propagate further)");
+      return;
+    }
+    DPRINTF("got tainted");
+    notify();
+    m_data.hdr->tainted = true;
   }
   bool depends(changeable other) const {
     std::deque<changeable> queue;
