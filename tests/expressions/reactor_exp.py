@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument( '-o', '--output', help='output figure name' )
 parser.add_argument('-m', '--mode', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 parser.add_argument('--stats', action='store_true', help='show statistics')
 parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
@@ -536,7 +537,8 @@ if args.stats:
 # Do some plots
 #
 # Initialize figure
-if args.show:
+if args.show or args.output:
+    from mpl_tools.helpers import savefig
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
@@ -545,13 +547,20 @@ if args.show:
     # ax.set_ylabel()
     # ax.set_title()
 
+    def step(suffix):
+        ax.legend(loc='upper right')
+        savefig(args.output, suffix)
+
     outputs = context.outputs
     outputs.kinint2.AD11.plot_hist(label='True spectrum')
+    step('_01_true')
     outputs.iav.AD11.plot_hist(label='+IAV')
+    step('_02_iav')
     outputs.lsnl.AD11.plot_hist(label='+LSNL')
+    step('_03_lsnl')
     outputs.eres.AD11.plot_hist(label='+eres')
+    step('_04_eres')
 
-    ax.legend(loc='upper right')
 
 if args.show:
     P.show()
