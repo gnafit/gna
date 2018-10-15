@@ -226,11 +226,31 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
+option(GENERATE_PROFILE OFF)
+option(USE_PROFILE OFF)
+
+
+set(PGO_COMPILE_FLAG "")
+set(PGO_LINK_FLAG "")
+
+if(GENERATE_PROFILE)
+    set(PGO_COMPILE_FLAG "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+    set(PGO_LINK_FLAG "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+    message(STATUS "Building with collection of PGO profiling enabled")
+endif()
+
+if(USE_PROFILE)
+    set(PGO_COMPILE_FLAG "-fprofile-use=${CMAKE_BINARY_DIR}/profile-data -fprofile-correction")
+    message(STATUS "Build using collected PGO profiling info")
+endif()
+
+
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+set(CMAKE_CXX_FLAGS "${PGO_COMPILE_FLAG}")
 include(dev-tools)
 
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
@@ -262,3 +282,4 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
+target_link_libraries(${LIBNAME} PRIVATE ${PGO_LINK_FLAG})
