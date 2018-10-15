@@ -190,7 +190,7 @@ if False:
                                  ibd_xsec(enu(), ctheta())*
                                  jacobian(enu(), ee(), ctheta())
         ''')
-elif False:
+elif True:
     expr.append(
         '''ibd =
                  global_norm*
@@ -549,7 +549,7 @@ if args.show or args.output:
 
     def step(suffix):
         ax.legend(loc='upper right')
-        savefig(args.output, suffix)
+        savefig(args.output, suffix=suffix)
 
     outputs = context.outputs
     outputs.kinint2.AD11.plot_hist(label='True spectrum')
