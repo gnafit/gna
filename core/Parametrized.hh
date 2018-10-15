@@ -10,8 +10,10 @@
 
 #include <boost/format.hpp>
 
-#include "Parameters.hh"
 #include "SimpleDict.hh"
+#include "dependant.hh"
+#include "taintflag.hh"
+#include "callback.hh"
 
 class ParametersGroup;
 class GNAObject;

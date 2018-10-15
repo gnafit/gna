@@ -201,7 +201,8 @@ set (HEADERS
   Transpose.hh
   )
 
-include_directories(core/transformation/
+include_directories(core/parameters/
+                    core/transformation/
                     core/
                     transformations/trial/
                     transformations/backgrounds/

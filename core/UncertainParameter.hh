@@ -9,8 +9,8 @@
 #include <boost/format.hpp>
 #include <boost/math/constants/constants.hpp>
 
-#include "Parameters.hh"
 #include "GNAObject.hh"
+#include "parameter.hh"
 
 /* #define COVARIANCE_DEBUG */
 
@@ -162,7 +162,7 @@ public:
       }
       return tmp;
   }
-   
+
 
    void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
@@ -176,7 +176,7 @@ public:
         this->setSigma(std::sqrt(cov));
     }
   }
-  
+
 
    void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG

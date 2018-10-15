@@ -5,7 +5,8 @@
 #include <boost/noncopyable.hpp>
 
 #include "Data.hh"
-#include "Parameters.hh"
+#include "variable.hh"
+#include "taintflag.hh"
 #include "TransformationFunction.hh"
 #include "FunctionDescriptor.hh"
 
