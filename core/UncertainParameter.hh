@@ -45,7 +45,7 @@ public:
 
   virtual ~Variable() { }
 
-  virtual T value() { return m_var.value(); }
+  virtual T value() const noexcept { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
 
   std::string name() const noexcept { return m_name; }
@@ -93,17 +93,17 @@ public:
   virtual T cast(const std::string& v) const
     { return boost::lexical_cast<T>(v); }
 
-  virtual T cast(const T& v) const
+  virtual T cast(const T& v) const noexcept
     { return v; }
 
   virtual T central() const noexcept { return m_central; }
-  virtual void setCentral(T value) { m_central = value; }
+  virtual void setCentral(T value) noexcept { m_central = value; }
   virtual void reset() { set(this->central()); }
 
-  virtual T step() { return m_step; }
-  virtual void setStep(T step) { m_step = step; }
+  virtual T step() const noexcept { return m_step; }
+  virtual void setStep(T step) noexcept { m_step = step; }
 
-  virtual T relativeValue(T diff)
+  virtual T relativeValue(T diff) const noexcept
     { return this->value() + diff*this->m_step; }
   virtual void setRelativeValue(T diff)
     { set(relativeValue(diff)); }
@@ -114,7 +114,7 @@ public:
   virtual const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
-  bool influences(SingleOutput &out) {
+  bool influences(SingleOutput &out) const {
     return out.single().depends(this->getVariable());
   }
 
@@ -140,7 +140,7 @@ public:
   std::vector<GaussianParameter<T>*> m_cov_pars{};
 
    T sigma() const noexcept { return m_sigma; }
-   void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+   void setSigma(T sigma) noexcept { this->m_sigma=sigma; this->setStep(sigma*0.1); }
 
    bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
@@ -155,7 +155,7 @@ public:
        return !m_covariances.empty();
    }
 
-   std::vector<GaussianParameter<T>*>  getAllCovariatedWith()  {
+   std::vector<GaussianParameter<T>*>  getAllCovariatedWith() const {
       std::vector<GaussianParameter<T>*> tmp;
           for (const auto& item: this->m_covariances){
               tmp.push_back(const_cast<GaussianParameter<T>*>(item.first));
