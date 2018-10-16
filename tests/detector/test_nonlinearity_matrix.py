@@ -48,7 +48,7 @@ ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 histedges = R.HistEdges()
 histedges.histedges.hist( ntrue.hist )
 
-nl = R.HistNonlinearity(True)
+nl = R.HistNonlinearity(True, True)
 nl.set( histedges.histedges, pedges_m, ntrue )
 
 

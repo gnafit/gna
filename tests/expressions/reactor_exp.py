@@ -97,10 +97,10 @@ groups=NestedDict(
 lib = OrderedDict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
-        cspec_diff_reac         = dict(expr='sum:i'),
+        # cspec_diff_reac         = dict(expr='sum:i'),
         cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
-        cspec_diff_det          = dict(expr='sum:r'),
-        spec_diff_det           = dict(expr='sum:c'),
+        # cspec_diff_det          = dict(expr='sum:r'),
+        # spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
@@ -154,7 +154,11 @@ lib = OrderedDict(
         bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n(w: {weight_label})'),
 
         # Total background
-        bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}')
+        bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}'),
+
+        # dybOscar mode
+        eres_cw           = dict(expr='eres*pmns'),
+        # eres_w            = dict(expr='sum:c|eres_cw'),
         )
 
 expr =[
@@ -185,18 +189,18 @@ if args.mode=='dyboscar':
                  effunc_uncorr[d]*
                  sum[c]|
                    pmns[c]*
-                       eres[d]|
-                       lsnl[d]|
+                   eres[d]|
+                     lsnl[d]|
                        iav[d]|
-                           sum[r]|
-                             baselineweight[r,d]*
-                             sum[i]|
-                               power_livetime_factor*
-                               kinint2|
-                                 anuspec[i](enu())*
-                                 oscprob[c,d,r](enu())*
-                                 ibd_xsec(enu(), ctheta())*
-                                 jacobian(enu(), ee(), ctheta())
+                         sum[r]|
+                           baselineweight[r,d]*
+                           sum[i]|
+                             power_livetime_factor*
+                             kinint2|
+                               anuspec[i](enu())*
+                               oscprob[c,d,r](enu())*
+                               ibd_xsec(enu(), ctheta())*
+                               jacobian(enu(), ee(), ctheta())
         ''')
 elif args.mode=='mid':
     expr.append(
@@ -572,7 +576,12 @@ if args.show or args.output:
     # step('_02_iav')
     # outputs.lsnl.AD11.plot_hist(label='+LSNL')
     # step('_03_lsnl')
-    outputs.eres.AD11.plot_hist(label='+eres')
+    # outputs.eres.AD11.plot_hist(label='+eres')
+    if args.mode=='dyboscar':
+        out = outputs.sum_sum_sum_eres_cw
+    else:
+        out = outputs.eres
+    out.AD11.plot_hist(label='+eres')
     step('_04_eres')
 
 

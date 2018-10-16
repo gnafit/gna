@@ -8,7 +8,7 @@
 class HistNonlinearity: public GNAObject,
                         public TransformationBind<HistNonlinearity> {
 public:
-  HistNonlinearity( bool propagate_matrix=false );
+  HistNonlinearity(bool single=true, bool propagate_matrix=false);
 
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }
@@ -17,6 +17,8 @@ public:
   void set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified );
   void set( SingleOutput& ntrue );
   void set();
+
+  TransformationDescriptor add();
 
   void set_range( double min, double max ) { m_range_min=min; m_range_max=max; }
   double get_range_min() { return m_range_min; }
@@ -34,4 +36,6 @@ private:
 
   double m_range_min{-1.e+100};
   double m_range_max{+1.e+100};
+
+  bool m_single; /// restricts HistNonlinearity to contain only one transformation
 };

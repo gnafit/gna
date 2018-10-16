@@ -1,6 +1,7 @@
 #include "HistNonlinearity.hh"
 #include "TypesFunctions.hh"
 #include <algorithm>
+#include <fmt/format.h>
 
 //#define DEBUG_ENL
 
@@ -12,23 +13,10 @@
 #define  DEBUG(...)
 #endif
 
-HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
-  transformation_("smear")
-      .input("Ntrue")
-      .input("FakeMatrix")
-      .output("Nvis")
-      .types(TypesFunctions::pass<0,0>, TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>)
-      .types(TypesFunctions::if2d<1>, TypesFunctions::ifSquare<1>,
-             [](TypesFunctionArgs& fargs){
-             auto& args = fargs.args;
-             auto& vec = args[0];
-             auto& mat = args[1];
-             if( vec.shape[0]!=mat.shape[0] ) {
-               throw args.error(vec, "Inputs are not multiplicable");
-             }
-             })
-      .func(&HistNonlinearity::calcSmear);
-
+HistNonlinearity::HistNonlinearity(bool single, bool propagate_matrix) :
+m_propagate_matrix(propagate_matrix),
+m_single(single)
+{
   transformation_("matrix")
       .input("Edges")
       .input("EdgesModified")
@@ -36,32 +24,78 @@ HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix
       .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::ifSame)
       .types(TypesFunctions::edgesToMatrix<0,0,0>)
       .func(&HistNonlinearity::calcMatrix);
+
+  if (single) {
+    add();
+  }
+}
+
+TransformationDescriptor HistNonlinearity::add(){
+  int index=static_cast<int>(transformations.size());
+  std::string label="smear";
+  if(!m_single){
+    label = fmt::format("smear_{0}", index);
+  }
+  auto init=transformation_(label)
+    .input("Ntrue")
+    .input("FakeMatrix")
+    .output("Nvis")
+    .dont_subscribe()
+    .types(TypesFunctions::pass<0>, TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>)
+    .types(TypesFunctions::if2d<1>, TypesFunctions::ifSquare<1>,
+           [](TypesFunctionArgs& fargs){
+           auto& args = fargs.args;
+           auto& vec = args[0];
+           auto& mat = args[1];
+           if( vec.shape[0]!=mat.shape[0] ) {
+             throw args.error(vec, "Inputs are not multiplicable");
+           }
+           })
+    .func(&HistNonlinearity::calcSmear);
+
+  if(!m_single) {
+    t_[label].inputs()[1].connect( t_["matrix"].outputs()[0] );
+  }
+  return transformations.back();
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
-    if( m_initialized )
-        throw std::runtime_error("HistNonlinearity is already initialized");
-    m_initialized = true;
+  if(!m_single){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  if( m_initialized )
+    throw std::runtime_error("HistNonlinearity is already initialized");
+  m_initialized = true;
 
-    t_["matrix"].inputs()[0].connect( bin_edges.single() );
-    t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
-    t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
+  t_["matrix"].inputs()[0].connect( bin_edges.single() );
+  t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
+  t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
-    set( bin_edges, bin_edges_modified );
-    t_["smear"].inputs()[0].connect( ntrue.single() );
+  if(!m_single){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  set( bin_edges, bin_edges_modified );
+  t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
 void HistNonlinearity::set( SingleOutput& ntrue ){
-    if( !m_initialized )
-        throw std::runtime_error("HistNonlinearity is not initialized");
+  if(!m_single){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  if( !m_initialized )
+      throw std::runtime_error("HistNonlinearity is not initialized");
 
-    t_["smear"].inputs()[0].connect( ntrue.single() );
+  t_["smear"].inputs()[0].connect( ntrue.single() );
 }
 
 void HistNonlinearity::set(){
-    t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
+  if(!m_single){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+
+  t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
 }
 
 void HistNonlinearity::calcSmear(FunctionArgs& fargs) {

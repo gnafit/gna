@@ -27,4 +27,3 @@ def open_fcn( s ):
 
     return s
 
-
