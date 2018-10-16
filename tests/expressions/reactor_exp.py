@@ -185,8 +185,8 @@ if args.mode=='dyboscar':
                  effunc_uncorr[d]*
                  sum[c]|
                    pmns[c]*
-                   eres[d]|
-                     lsnl[d]|
+                       eres[d]|
+                       lsnl[d]|
                        iav[d]|
                            sum[r]|
                              baselineweight[r,d]*
