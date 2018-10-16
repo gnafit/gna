@@ -243,7 +243,7 @@ def GaussianParameter__str( self, labels=False  ):
             val     = self.value(),
             central = self.central(),
             sigma   = self.sigma(),
-            color   = Fore.YELLOW if colorama_present else ""
+            color   = Fore.BLUE if colorama_present else ""
             )
     covariated = self.isCovariated()
     limits  = self.limits()
