@@ -44,6 +44,7 @@ set (SOURCES
   transformations/detector/EnergyResolutionC.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
+  transformations/detector/HistSmearSparse.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/hist/HistEdges.cc
@@ -189,6 +190,7 @@ set (HEADERS
   EnergyResolutionC.hh
   HistNonlinearity.hh
   HistSmear.hh
+  HistSmearSparse.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
   # examples/
