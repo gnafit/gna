@@ -21,11 +21,11 @@ unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
 
-valfmt='={val:11.6g}'
+valfmt='={color}{val:11.6g}'
 
 centralfmt='{central:11.6g}'
 
-cvalfmt='={rval:11.6g}+i{ival:11.6g}'
+cvalfmt='={color}{rval:11.6g}+i{ival:11.6g}'
 
 ccentralfmt='{rcentral:11.6g}+i{icentral:11.6g}'
 
