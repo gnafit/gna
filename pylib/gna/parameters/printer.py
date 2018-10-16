@@ -21,11 +21,11 @@ unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
 
 namefmt='{name:30}'
 
-valfmt='={val:11.6g}'
+valfmt='={color}{val:11.6g}'
 
 centralfmt='{central:11.6g}'
 
-cvalfmt='={rval:11.6g}+i{ival:11.6g}'
+cvalfmt='={color}{rval:11.6g}+i{ival:11.6g}'
 
 ccentralfmt='{rcentral:11.6g}+i{icentral:11.6g}'
 
@@ -221,7 +221,7 @@ def GaussianParameter__str( self, labels=False  ):
             val     = self.value(),
             central = self.central(),
             sigma   = self.sigma(),
-            color   = Fore.BLUE if colorama_present else ""
+            color   = Fore.YELLOW if colorama_present else ""
             )
     covariated = self.isCovariated()
     limits  = self.limits()
