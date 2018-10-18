@@ -27,6 +27,14 @@ def Points( array, *args, **kwargs ):
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s, *args, **kwargs )
 
+"""Construct Bins object from numpy array"""
+def Bins( array, *args, **kwargs ):
+    """Convert array to Points"""
+    if len(array.shape)!=1:
+        raise Exception( 'Edges should be 1d array' )
+    a = N.ascontiguousarray(array, dtype='d')
+    return R.Bins( a, a.size-1, *args, **kwargs )
+
 """Construct Histogram object from two arrays: edges and data"""
 def Histogram( edges, data, *args, **kwargs ):
     edges = N.ascontiguousarray(edges, dtype='d')

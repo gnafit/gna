@@ -14,6 +14,7 @@ parser.add_argument('--stats', action='store_true', help='show statistics')
 parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
 parser.add_argument('-i', '--indices', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
+parser.add_argument('-t', '--title', default='', help='figure title')
 args = parser.parse_args()
 
 #
@@ -561,9 +562,9 @@ if args.show or args.output:
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    # ax.set_xlabel()
-    # ax.set_ylabel()
-    # ax.set_title()
+    ax.set_xlabel( L.u('evis') )
+    ax.set_ylabel( 'Arbitrary units' )
+    ax.set_title(args.title)
 
     def step(suffix):
         ax.legend(loc='upper right')
@@ -581,7 +582,7 @@ if args.show or args.output:
         out = outputs.sum_sum_sum_eres_cw
     else:
         out = outputs.eres
-    out.AD11.plot_hist(label='+eres')
+    out.AD11.plot_hist(label='EH1 AD1')
     step('_04_eres')
 
 

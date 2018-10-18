@@ -32,6 +32,7 @@ set (SOURCES
   transformations/base/Histogram.cc
   transformations/base/Identity.cc
   transformations/base/Points.cc
+  transformations/base/Bins.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -140,6 +141,7 @@ set (HEADERS
   Sum.hh
   Ratio.hh
   WeightedSum.hh
+  Bins.hh
   Points.hh
   Histogram.hh
   HistEdges.hh
