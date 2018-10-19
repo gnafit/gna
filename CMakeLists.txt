@@ -51,6 +51,7 @@ set (SOURCES
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
   transformations/integrator/FakeGSLFunction.cc
+  transformations/integrator/SamplerGL.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
@@ -186,6 +187,7 @@ set (HEADERS
   IbdFirstOrder.hh
   ReactorNorm.hh
   ReactorGroup.hh
+  SamplerGL.hh
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
@@ -221,6 +223,7 @@ include_directories(core/parameters/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
+                    transformations/legacy/integrator/
                     extra/
                     examples/
                    )
