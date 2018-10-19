@@ -1,77 +1,69 @@
-#include <gsl/gsl_integration.h>
+#include "SamplerGL.hh"
+
 #include <Eigen/Dense>
 #include <map>
 #include <iterator>
 
-#include "SamplerGL.hh"
+#include "GSLSamplerGL.hh"
 #include "TypesFunctions.hh"
 
 using namespace Eigen;
+using namespace std;
 
-class GSLSamplerGL{
-public:
-   GSLSamplerGL(){};
-  ~GSLSamplerGL();
-
-  void fill(size_t n, double a, double b, double* x, double* w);
-private:
-  gsl_integration_glfixed_table* get_table(size_t n);
-  std::map<size_t,gsl_integration_glfixed_table*> m_tables;
-};
-
-GSLSamplerGL::~GSLSamplerGL(){
-  for(auto& kv: m_tables){
-    gsl_integration_glfixed_table_free(kv.second);
-  }
+SamplerGL::SamplerGL(size_t bins, int orders, double* edges) : SamplerBase(bins, orders, edges)
+{
+  init();
 }
 
-void GSLSamplerGL::fill(size_t n, double a, double b, double* x, double* w){
-  auto* table=get_table(n);
-  for (size_t j = 0; j<n; ++j) {
-    gsl_integration_glfixed_point(a, b, j, x, w, table);
-    std::advance(x,1);
-    std::advance(w,1);
-  }
+SamplerGL::SamplerGL(size_t bins, int* orders, double* edges) : SamplerBase(bins, orders, edges)
+{
+  init();
 }
 
-gsl_integration_glfixed_table* GSLSamplerGL::get_table(size_t n){
-    const auto& it=m_tables.find(n);
-    if(it==m_tables.end()){
-      return m_tables[n]=gsl_integration_glfixed_table_alloc(n);
-    }
-    return it->second;
-}
 void SamplerGL::init() {
-  transformation_("points")
-    .input("edges")
-    .output("abscissas")
-    .output("weights")
-    .types(&TypesFunctions::if1d<1>, &SamplerGL::check)
-    .func(&SamplerGL::compute)
-    ;
+  auto trans=transformation_("points")
+      .output("x")
+      .output("xedges")
+      .types(&SamplerGL::check)
+      .func(&SamplerGL::compute)
+      ;
+
+  if(m_edges.size()){
+    trans.finalize();
+  }
+  else{
+    trans.input("edges") //hist with edges
+      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+  }
 }
 
 void SamplerGL::check(TypesFunctionArgs& fargs){
   auto& rets=fargs.rets;
-  size_t npoints=static_cast<size_t>(m_orders.sum());
-  rets[0] = rets[1] = DataType().points().shape(npoints);
+  rets[0] = DataType().points().shape(static_cast<size_t>(m_orders.sum()));
 
-  if(fargs.args[0].shape[0]-1!=m_orders.size()){
-    throw fargs.args.error(fargs.args[0], "Number of edges is inconsistent with number of bins");
+  auto& args=fargs.args;
+  if(args.size() && !m_edges.size()){
+    auto& edges=fargs.args[0].edges;
+    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
   }
+  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
 }
 
 void SamplerGL::compute(FunctionArgs& fargs){
-  auto& edges=fargs.args[0].x;
+  auto* edge_a=m_edges.data();
+  auto* edge_b{next(edge_a)};
   auto& rets=fargs.rets;
-  auto *abscissa(rets[0].buffer), *weight(rets[1].buffer);
+  auto *abscissa(rets[0].buffer), *weight(m_weights.data());
+  rets[1].x = m_edges.cast<double>();
 
   GSLSamplerGL sampler;
   for (size_t i = 0; i < m_orders.size(); ++i) {
-    size_t n = m_orders[i];
-    sampler.fill(n, edges[i], edges[i+1], abscissa, weight);
-    std::advance(abscissa, n);
-    std::advance(weight, n);
+    size_t n = static_cast<size_t>(m_orders[i]);
+    sampler.fill(n, *edge_a, *edge_b, abscissa, weight);
+    advance(abscissa, n);
+    advance(weight, n);
+    advance(edge_a, 1);
+    advance(edge_b, 1);
   }
 }
 
