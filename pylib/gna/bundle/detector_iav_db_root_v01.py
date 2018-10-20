@@ -40,13 +40,13 @@ class detector_iav_db_root_v01(TransformationBundle):
                 """Save transformations"""
                 self.transformations_out[ns.name] = esmear.smear
                 self.inputs[ns.name]              = esmear.smear.Ntrue
-                self.outputs[ns.name]             = esmear.smear.Nvis
+                self.outputs[ns.name]             = esmear.smear.Nrec
 
                 self.objects[('renormdiag',ns.name)] = renormdiag
                 self.objects[('esmear',ns.name)]     = esmear
 
                 """Define observables"""
-                self.addcfgobservable(ns, esmear.smear.Nvis, 'iav', ignorecheck=True)
+                self.addcfgobservable(ns, esmear.smear.Nrec, 'iav', ignorecheck=True)
 
     def build(self):
         from file_reader import read_object_auto

@@ -70,7 +70,7 @@ esmear.smear.inputs.Ntrue( hist.hist )
 
 for i, value in enumerate([ 1.0, 0.5, 2.0 ]):
     par.set( value )
-    smeared = esmear.smear.Nvis.data()
+    smeared = esmear.smear.Nrec.data()
     print( 'Sum check for {} (diff): {}'.format( value, phist.sum()-smeared.sum() ) )
 
     # bars = P.bar( edges[:-1], phist, binwidth, align='edge' )

@@ -62,7 +62,7 @@ for eset in [
 
         hist = C.Histogram( edges, phist )
         eres = R.EnergyResolutionC()
-        eres.smear.Nvis( hist.hist )
+        eres.smear.Nrec( hist.hist )
 
         smeared = eres.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
