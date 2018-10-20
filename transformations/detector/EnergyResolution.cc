@@ -13,8 +13,7 @@ EnergyResolution({"Eres_a" , "Eres_b" , "Eres_c"}, single, propagate_matrix){
 }
 
 EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, bool single, bool propagate_matrix) :
-m_propagate_matrix(propagate_matrix),
-m_single(single)
+HistSmearSparse(single, propagate_matrix)
 {
   if(pars.size()!=3u){
     throw std::runtime_error("Energy resolution should have exactly 3 parameters");
@@ -30,44 +29,8 @@ m_single(single)
       .func(&EnergyResolution::calcMatrix);
 
   if (single) {
-    add();
+    add(true);
   }
-}
-
-TransformationDescriptor EnergyResolution::add(){
-  int index=static_cast<int>(transformations.size());
-  std::string label="smear";
-  if(!m_single){
-    label = fmt::format("smear_{0}", index);
-  }
-  auto init=transformation_(label)
-    .input("Nvis")
-    .input("FakeMatrix")
-    .output("Nrec")
-    .dont_subscribe()
-    .types(TypesFunctions::pass<0>, TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>)
-    .types(TypesFunctions::if2d<1>, TypesFunctions::ifSquare<1>,
-           [](TypesFunctionArgs& fargs){
-           auto& args = fargs.args;
-           auto& vec = args[0];
-           auto& mat = args[1];
-           if( vec.shape[0]!=mat.shape[0] ) {
-             throw args.error(vec, "Inputs are not multiplicable");
-           }
-           })
-    .func(&EnergyResolution::calcSmear);
-
-  t_[label].inputs()[1].connect( t_["matrix"].outputs()[0] );
-  return transformations.back();
-}
-
-TransformationDescriptor EnergyResolution::add(SingleOutput& hist){
-  if( m_single ){
-    throw std::runtime_error("May have only single energy resolution transformation in this class instance");
-  }
-  add();
-  transformations.back().inputs[0]( hist.single() );
-  return transformations.back();
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{
@@ -121,13 +84,4 @@ void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
   if ( m_propagate_matrix )
     fargs.rets[0].mat = m_sparse_cache;
 }
-
-/* Apply precalculated cache and actually smear */
-void EnergyResolution::calcSmear(FunctionArgs& fargs) {
-  auto& args=fargs.args;
-  args[1]; // needed to trigger the matrix update
-  fargs.rets[0].x = m_sparse_cache * fargs.args[0].vec;
-}
-
-
 

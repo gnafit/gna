@@ -4,22 +4,34 @@
 #include <string.h>
 
 
-HistSmearSparse::HistSmearSparse(bool single) :
+HistSmearSparse::HistSmearSparse(bool single, bool propagate_matrix) :
+m_propagate_matrix(propagate_matrix),
 m_single(single)
 {
-  if (single) {
-    add_smear();
-  }
 }
 
-TransformationDescriptor HistSmearSparse::add_smear(SingleOutput& matrix){
-  auto ret=add_smear();
+TransformationDescriptor HistSmearSparse::add(SingleOutput& matrix){
+  auto ret=add();
   ret.inputs[1].connect(matrix.single());
   return ret;
 }
 
-TransformationDescriptor HistSmearSparse::add_smear(){
-  int index=static_cast<int>(transformations.size());
+TransformationDescriptor HistSmearSparse::add(bool connect_matrix){
+  if(connect_matrix){
+    auto matout=transformations.front().outputs[0];
+    return add(matout);
+  }
+  else{
+    return add();
+  }
+}
+
+TransformationDescriptor HistSmearSparse::add(){
+  if(m_single && transformations.size()>2){
+    throw std::runtime_error("May have only single smearing transformation in this class instance");
+  }
+
+  int index=static_cast<int>(transformations.size())-1;
   std::string label="smear";
   if(!m_single){
     label = fmt::format("smear_{0}", index);
@@ -27,7 +39,7 @@ TransformationDescriptor HistSmearSparse::add_smear(){
   auto init=transformation_(label)
     .input("Ntrue")
     .input("FakeMatrix")
-    .output("Nvis")
+    .output("Nrec")
     .dont_subscribe()
     .types(TypesFunctions::pass<0>, TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>)
     .types(TypesFunctions::if2d<1>, TypesFunctions::ifSquare<1>,

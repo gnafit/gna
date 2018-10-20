@@ -22,7 +22,7 @@ class detector_eres_common3(TransformationBundle):
 
                     """Save transformations"""
                     self.transformations_out[ns.name] = eres.transformations[i]
-                    self.inputs[ns.name]              = eres.transformations[i].Nvis
+                    self.inputs[ns.name]              = eres.transformations[i].Ntrue
                     self.outputs[ns.name]             = eres.transformations[i].Nrec
 
                     """Define observables"""
@@ -37,7 +37,7 @@ class detector_eres_common3(TransformationBundle):
                     """Save transformations"""
                     self.objects[('eres', ns.name)]   = eres
                     self.transformations_out[ns.name] = eres.smear
-                    self.inputs[ns.name]              = eres.smear.Nvis
+                    self.inputs[ns.name]              = eres.smear.Ntrue
                     self.outputs[ns.name]             = eres.smear.Nrec
 
                     """Define observables"""

@@ -7,7 +7,7 @@ from collections import OrderedDict
 from gna.expression.printl import *
 from gna.grouping import Groups
 
-debugmethods=False
+debugmethods=True
 if debugmethods:
     def methodname(fcn):
         def newfcn(self, *args, **kwargs):

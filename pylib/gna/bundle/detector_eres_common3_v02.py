@@ -24,7 +24,7 @@ class detector_eres_common3_v02(TransformationBundle):
             self.set_output(eres.matrix.FakeMatrix, 'eres_matrix')
 
             for i, it in enumerate(self.idx.iterate()):
-                trans = eres.add()
+                trans = eres.add(True)
                 label = it.current_format('Energy resolution\n{autoindexnd}')
                 trans.setLabel(label)
 

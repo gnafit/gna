@@ -31,6 +31,10 @@ public:
     return T(m_container->back());
   }
 
+  T front() const {
+    return T(m_container->front());
+  }
+
   T operator[](const std::string &name) const {
     auto it = std::find_if(m_container->begin(), m_container->end(),
                            [&](typename Container::const_reference e) {

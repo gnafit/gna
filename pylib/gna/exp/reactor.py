@@ -566,7 +566,7 @@ class ReactorExperimentModel(baseexp):
                 detector.eres = ROOT.EnergyResolution()
             detector.eres.matrix.Edges( self.integrator.points.xedges)
             detector.eres.smear.setLabel('Eres')
-            detector.eres.smear.Nvis(finalsum)
+            detector.eres.smear.Ntrue(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
         det_ns = self.ns("detectors")(detector.name)
