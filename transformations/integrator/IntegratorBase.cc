@@ -1,4 +1,4 @@
-#include "SamplerBase.hh"
+#include "IntegratorBase.hh"
 
 #include <iostream>
 #include <iterator>
@@ -6,27 +6,27 @@
 using namespace Eigen;
 using namespace std;
 
-SamplerBase::SamplerBase(size_t bins, int orders, double* edges) :
+IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges) :
 m_orders(bins)
 {
     m_orders.setConstant(orders);
     init_base(edges);
 }
 
-SamplerBase::SamplerBase(size_t bins, int *orders, double* edges) :
+IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges) :
 m_orders(Map<const ArrayXi>(orders, bins))
 {
     init_base(edges);
 }
 
-void SamplerBase::init_base(double* edges) {
+void IntegratorBase::init_base(double* edges) {
     m_weights.resize(m_orders.sum());
 
     transformation_("hist")
         .input("f")
         .output("hist")
-        .types(TypesFunctions::if1d<0>, TypesFunctions::ifPoints<0>, &SamplerBase::check_base)
-        .func(&SamplerBase::integrate)
+        .types(TypesFunctions::if1d<0>, TypesFunctions::ifPoints<0>, &IntegratorBase::check_base)
+        .func(&IntegratorBase::integrate)
         ;
 
     if(edges){
@@ -34,7 +34,7 @@ void SamplerBase::init_base(double* edges) {
     }
 }
 
-void SamplerBase::set_shared_edge(){
+void IntegratorBase::set_shared_edge(){
     if(m_shared_edge){
         throw std::runtime_error("may not set shared edge twice");
     }
@@ -42,7 +42,7 @@ void SamplerBase::set_shared_edge(){
     m_weights.resize(m_weights.size()+1);
 }
 
-void SamplerBase::check_base(TypesFunctionArgs& fargs){
+void IntegratorBase::check_base(TypesFunctionArgs& fargs){
     fargs.rets[0]=DataType().hist().edges(m_edges.size(), m_edges.data());
 
     if (fargs.args[0].shape[0] != m_weights.size()){
@@ -55,7 +55,7 @@ void SamplerBase::check_base(TypesFunctionArgs& fargs){
     }
 }
 
-void SamplerBase::integrate(FunctionArgs& fargs){
+void IntegratorBase::integrate(FunctionArgs& fargs){
     auto* ret=fargs.rets[0].buffer;
     auto& fun=fargs.args[0].x;
 
@@ -76,7 +76,7 @@ void SamplerBase::integrate(FunctionArgs& fargs){
     }
 }
 
-void SamplerBase::dump(){
+void IntegratorBase::dump(){
     std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
     std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;
     std::cout<<"Weights: "<<m_weights.transpose()<<std::endl;

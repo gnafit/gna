@@ -1,51 +1,50 @@
-#include "SamplerGL.hh"
+#include "IntegratorGL.hh"
 
 #include <Eigen/Dense>
 #include <map>
 #include <iterator>
 
-#include "GSLSamplerGL.hh"
 #include "TypesFunctions.hh"
 
 using namespace Eigen;
 using namespace std;
 
-SamplerGL::SamplerGL(size_t bins, int orders, double* edges, const std::string& mode) : SamplerBase(bins, orders, edges)
+IntegratorGL::IntegratorGL(size_t bins, int orders, double* edges, const std::string& mode) : IntegratorBase(bins, orders, edges)
 {
   init(mode);
 }
 
-SamplerGL::SamplerGL(size_t bins, int* orders, double* edges, const std::string& mode) : SamplerBase(bins, orders, edges)
+IntegratorGL::IntegratorGL(size_t bins, int* orders, double* edges, const std::string& mode) : IntegratorBase(bins, orders, edges)
 {
   init(mode);
 }
 
-void SamplerGL::init(const std::string& mode) {
+void IntegratorGL::init(const std::string& mode) {
   m_mode = mode;
 
   auto trans=transformation_("points")
       .output("x")
       .output("xedges")
-      .types(&SamplerGL::check)
+      .types(&IntegratorGL::check)
       ;
 
   if(m_mode=="gl"){
-    trans.func(&SamplerGL::compute_gl);
+    trans.func(&IntegratorGL::compute_gl);
   }
   else if(m_mode=="rect_left"){
-    trans.func(&SamplerGL::compute_rect);
+    trans.func(&IntegratorGL::compute_rect);
     m_rect_offset=-1;
   }
   else if(m_mode=="rect"){
-    trans.func(&SamplerGL::compute_rect);
+    trans.func(&IntegratorGL::compute_rect);
     m_rect_offset=0;
   }
   else if(m_mode=="rect_right"){
-    trans.func(&SamplerGL::compute_rect);
+    trans.func(&IntegratorGL::compute_rect);
     m_rect_offset=1;
   }
   else if(m_mode=="trap"){
-    trans.func(&SamplerGL::compute_trap);
+    trans.func(&IntegratorGL::compute_trap);
     set_shared_edge();
   }
   else{
@@ -61,7 +60,7 @@ void SamplerGL::init(const std::string& mode) {
   }
 }
 
-void SamplerGL::check(TypesFunctionArgs& fargs){
+void IntegratorGL::check(TypesFunctionArgs& fargs){
   auto& rets=fargs.rets;
   rets[0] = DataType().points().shape(m_weights.size());
 
@@ -73,7 +72,7 @@ void SamplerGL::check(TypesFunctionArgs& fargs){
   rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
 }
 
-void SamplerGL::compute_gl(FunctionArgs& fargs){
+void IntegratorGL::compute_gl(FunctionArgs& fargs){
   auto* edge_a=m_edges.data();
   auto* edge_b{next(edge_a)};
   auto& rets=fargs.rets;
@@ -91,7 +90,7 @@ void SamplerGL::compute_gl(FunctionArgs& fargs){
   }
 }
 
-void SamplerGL::compute_trap(FunctionArgs& fargs){
+void IntegratorGL::compute_trap(FunctionArgs& fargs){
   auto& rets=fargs.rets;
   rets[1].x = m_edges.cast<double>();
   auto& abscissa=rets[0].x;
@@ -121,7 +120,7 @@ void SamplerGL::compute_trap(FunctionArgs& fargs){
   m_weights.tail(1)=samplewidths.tail(1)*0.5;
 }
 
-void SamplerGL::compute_rect(FunctionArgs& fargs){
+void IntegratorGL::compute_rect(FunctionArgs& fargs){
   auto& rets=fargs.rets;
   rets[1].x = m_edges.cast<double>();
   auto& abscissa=rets[0].x;

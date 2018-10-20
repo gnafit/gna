@@ -51,9 +51,11 @@ set (SOURCES
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
   transformations/integrator/FakeGSLFunction.cc
-  transformations/integrator/SamplerBase.cc
-  transformations/integrator/SamplerGL.cc
   transformations/integrator/GSLSamplerGL.cc
+  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/IntegratorGL.cc
+  transformations/integrator/IntegratorRect.cc
+  transformations/integrator/IntegratorTrap.cc
   transformations/integrator/GaussLegendre.cc
   transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
@@ -189,8 +191,10 @@ set (HEADERS
   IbdFirstOrder.hh
   ReactorNorm.hh
   ReactorGroup.hh
-  SamplerBase.hh
-  SamplerGL.hh
+  IntegratorBase.hh
+  IntegratorGL.hh
+  IntegratorRect.hh
+  IntegratorTrap.hh
   GSLSamplerGL.hh
   GaussLegendre.hh
   GaussLegendre2d.hh

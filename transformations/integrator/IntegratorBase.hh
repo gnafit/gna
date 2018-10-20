@@ -3,15 +3,15 @@
 #include "GNAObject.hh"
 #include <Eigen/Dense>
 
-class SamplerBase : public GNAObject,
-                    public TransformationBind<SamplerBase>
+class IntegratorBase : public GNAObject,
+                    public TransformationBind<IntegratorBase>
 {
 public:
   void dump();
 
 protected:
-  SamplerBase(size_t bins, int orders, double* edges=0);
-  SamplerBase(size_t bins, int* orders, double* edges=0);
+  IntegratorBase(size_t bins, int orders, double* edges=0);
+  IntegratorBase(size_t bins, int* orders, double* edges=0);
 
   Eigen::ArrayXi m_orders;
   Eigen::ArrayXd m_weights;

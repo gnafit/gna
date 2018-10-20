@@ -22,4 +22,3 @@ gsl_integration_glfixed_table* GSLSamplerGL::get_table(size_t n){
     }
     return it->second;
 }
-

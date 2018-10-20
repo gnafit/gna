@@ -72,12 +72,18 @@ a, b = edges[0], edges[-1]
 integral = (N.exp(alpha*b) - N.exp(alpha*a))/alpha
 
 # create 1d integrator (sample points) for given edges and integration order
+integrators = dict(gl=R.IntegratorGL, rect=R.IntegratorRect, trap=R.IntegratorTrap)
+Integrator = integrators[ opts.mode.split('_', 1)[0] ]
+if '_' in opts.mode:
+    iopts = opts.mode.rsplit('_', 1)[-1],
+else:
+    iopts = tuple()
 if opts.input_edges:
     edges_in = Histogram(edges, edges[:-1])
-    integrator = R.SamplerGL(edges.size-1, opts.order, None, opts.mode)
+    integrator = Integrator(edges.size-1, opts.order, None, *iopts)
     integrator.points.edges(edges_in)
 else:
-    integrator = R.SamplerGL(edges.size-1, opts.order, edges, opts.mode)
+    integrator = Integrator(edges.size-1, opts.order, edges, *iopts)
 
 integrator.points.setLabel('Integrator inputs')
 integrator.points.x.setLabel('E (points)')
