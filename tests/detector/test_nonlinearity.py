@@ -85,7 +85,7 @@ histedges.histedges.hist( hist.hist )
 nl = R.HistNonlinearity()
 nl.set( histedges.histedges, pedges_m, hist )
 
-smeared = nl.smear.Nvis.data()
+smeared = nl.smear.Nrec.data()
 print( 'Sum check (diff): {}'.format( phist.sum()-smeared.sum() ) )
 
 fig = P.figure()

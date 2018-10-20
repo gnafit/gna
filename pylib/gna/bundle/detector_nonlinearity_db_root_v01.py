@@ -84,7 +84,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     """Provide output transformations"""
                     self.transformations_out[ns.name] = nonlin.smear
                     self.inputs[ns.name]              = nonlin.smear.Ntrue
-                    self.outputs[ns.name]             = nonlin.smear.Nvis
+                    self.outputs[ns.name]             = nonlin.smear.Nrec
 
                     """Save intermediate transformations"""
                     self.objects[('factor', ns.name)]       = corr
@@ -92,7 +92,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
                     self.objects[('nonlinearity', ns.name)] = nonlin
 
                     """Define observables"""
-                    self.addcfgobservable(ns, nonlin.smear.Nvis, 'nonlinearity', ignorecheck=True)
+                    self.addcfgobservable(ns, nonlin.smear.Nrec, 'nonlinearity', ignorecheck=True)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

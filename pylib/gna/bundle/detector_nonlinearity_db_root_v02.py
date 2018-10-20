@@ -76,11 +76,11 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
 
                 for itother in idxother.iterate():
                     it = itd+itother
-                    trans = nonlin.add()
+                    trans = nonlin.add(True)
                     trans.setLabel(it.current_format('NL\n{autoindexnd}'))
 
                     self.set_input(trans.Ntrue, 'lsnl', it, clone=0)
-                    self.set_output(trans.Nvis, 'lsnl', it)
+                    self.set_output(trans.Nrec, 'lsnl', it)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

@@ -17,6 +17,7 @@ public:
   TransformationDescriptor add(bool connect_matrix);
   TransformationDescriptor add();
 
+  bool single() {return m_single;}
 protected:
   Eigen::SparseMatrix<double> m_sparse_cache;
   bool m_propagate_matrix{false};
