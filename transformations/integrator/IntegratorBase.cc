@@ -6,21 +6,23 @@
 using namespace Eigen;
 using namespace std;
 
-IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges) :
-m_orders(bins)
+IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges, bool shared_edge) :
+m_orders(bins),
+m_shared_edge(static_cast<size_t>(shared_edge))
 {
     m_orders.setConstant(orders);
     init_base(edges);
 }
 
-IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges) :
-m_orders(Map<const ArrayXi>(orders, bins))
+IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges, bool shared_edge) :
+m_orders(Map<const ArrayXi>(orders, bins)),
+m_shared_edge(static_cast<size_t>(shared_edge))
 {
     init_base(edges);
 }
 
 void IntegratorBase::init_base(double* edges) {
-    m_weights.resize(m_orders.sum());
+    m_weights.resize(m_orders.sum()+m_shared_edge);
 
     transformation_("hist")
         .input("f")
@@ -32,14 +34,6 @@ void IntegratorBase::init_base(double* edges) {
     if(edges){
         m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
     }
-}
-
-void IntegratorBase::set_shared_edge(){
-    if(m_shared_edge){
-        throw std::runtime_error("may not set shared edge twice");
-    }
-    m_shared_edge=1;
-    m_weights.resize(m_weights.size()+1);
 }
 
 void IntegratorBase::check_base(TypesFunctionArgs& fargs){
@@ -76,6 +70,34 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
     }
 }
 
+void IntegratorBase::init_sampler() {
+  auto trans=transformation_("points")
+      .output("x")
+      .output("xedges")
+      .types(&IntegratorBase::check_sampler)
+      .func(&IntegratorBase::sample)
+      ;
+
+  if(m_edges.size()){
+    trans.finalize();
+  }
+  else{
+    trans.input("edges") //hist with edges
+      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+  }
+}
+
+void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
+  auto& rets=fargs.rets;
+  rets[0] = DataType().points().shape(m_weights.size());
+
+  auto& args=fargs.args;
+  if(args.size() && !m_edges.size()){
+    auto& edges=fargs.args[0].edges;
+    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
+  }
+  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
+}
 void IntegratorBase::dump(){
     std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
     std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;

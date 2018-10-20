@@ -116,7 +116,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
-# ax.set_title( 'Integrate Gaussian (%g, %g) with order %i'%( mean, sigma, opts.order ) )
+ax.set_title( 'Integrate exponential (%s)'%(opts.mode) )
 
 baropts = dict(alpha=0.5)
 # plot function versus sample points

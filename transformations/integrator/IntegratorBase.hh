@@ -4,20 +4,24 @@
 #include <Eigen/Dense>
 
 class IntegratorBase : public GNAObject,
-                    public TransformationBind<IntegratorBase>
+                       public TransformationBind<IntegratorBase>
 {
 public:
   void dump();
 
 protected:
-  IntegratorBase(size_t bins, int orders, double* edges=0);
-  IntegratorBase(size_t bins, int* orders, double* edges=0);
+  IntegratorBase(size_t bins, int orders, double* edges=0, bool shared_edge=false);
+  IntegratorBase(size_t bins, int* orders, double* edges=0, bool shared_edge=false);
 
   Eigen::ArrayXi m_orders;
   Eigen::ArrayXd m_weights;
   Eigen::ArrayXd m_edges;
 
-  void set_shared_edge();
+  virtual void sample(FunctionArgs&)=0;
+
+protected:
+  void init_sampler();
+  void check_sampler(TypesFunctionArgs& fargs);
 
 private:
   void init_base(double* edges);

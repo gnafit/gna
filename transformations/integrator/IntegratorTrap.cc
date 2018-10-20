@@ -8,47 +8,17 @@
 using namespace Eigen;
 using namespace std;
 
-IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges)
+IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges, true)
 {
-  init();
+  init_sampler();
 }
 
-IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges)
+IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges, true)
 {
-  init();
+  init_sampler();
 }
 
-void IntegratorTrap::init() {
-  set_shared_edge();
-  auto trans=transformation_("points")
-      .output("x")
-      .output("xedges")
-      .types(&IntegratorTrap::check)
-      .func(&IntegratorTrap::compute_trap)
-      ;
-
-  if(m_edges.size()){
-    trans.finalize();
-  }
-  else{
-    trans.input("edges") //hist with edges
-      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
-  }
-}
-
-void IntegratorTrap::check(TypesFunctionArgs& fargs){
-  auto& rets=fargs.rets;
-  rets[0] = DataType().points().shape(m_weights.size());
-
-  auto& args=fargs.args;
-  if(args.size() && !m_edges.size()){
-    auto& edges=fargs.args[0].edges;
-    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
-  }
-  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
-}
-
-void IntegratorTrap::compute_trap(FunctionArgs& fargs){
+void IntegratorTrap::sample(FunctionArgs& fargs) {
   auto& rets=fargs.rets;
   rets[1].x = m_edges.cast<double>();
   auto& abscissa=rets[0].x;

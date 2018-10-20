@@ -12,44 +12,15 @@ using namespace std;
 
 IntegratorGL::IntegratorGL(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges)
 {
-  init();
+  init_sampler();
 }
 
 IntegratorGL::IntegratorGL(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges)
 {
-  init();
+  init_sampler();
 }
 
-void IntegratorGL::init() {
-  auto trans=transformation_("points")
-      .output("x")
-      .output("xedges")
-      .types(&IntegratorGL::check)
-      .func(&IntegratorGL::compute_gl)
-      ;
-
-  if(m_edges.size()){
-    trans.finalize();
-  }
-  else{
-    trans.input("edges") //hist with edges
-      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
-  }
-}
-
-void IntegratorGL::check(TypesFunctionArgs& fargs){
-  auto& rets=fargs.rets;
-  rets[0] = DataType().points().shape(m_weights.size());
-
-  auto& args=fargs.args;
-  if(args.size() && !m_edges.size()){
-    auto& edges=fargs.args[0].edges;
-    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
-  }
-  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
-}
-
-void IntegratorGL::compute_gl(FunctionArgs& fargs){
+void IntegratorGL::sample(FunctionArgs& fargs){
   auto* edge_a=m_edges.data();
   auto* edge_b{next(edge_a)};
   auto& rets=fargs.rets;

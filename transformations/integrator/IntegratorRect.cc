@@ -21,13 +21,6 @@ IntegratorRect::IntegratorRect(size_t bins, int* orders, double* edges, const st
 void IntegratorRect::init(const std::string& mode) {
   m_mode = mode;
 
-  auto trans=transformation_("points")
-      .output("x")
-      .output("xedges")
-      .types(&IntegratorRect::check)
-      .func(&IntegratorRect::compute_rect)
-      ;
-
   if(m_mode=="left"){
     m_rect_offset=-1;
   }
@@ -41,28 +34,10 @@ void IntegratorRect::init(const std::string& mode) {
     throw std::runtime_error("invalid rectangular integration mode");
   }
 
-  if(m_edges.size()){
-    trans.finalize();
-  }
-  else{
-    trans.input("edges") //hist with edges
-      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
-  }
+  init_sampler();
 }
 
-void IntegratorRect::check(TypesFunctionArgs& fargs){
-  auto& rets=fargs.rets;
-  rets[0] = DataType().points().shape(m_weights.size());
-
-  auto& args=fargs.args;
-  if(args.size() && !m_edges.size()){
-    auto& edges=fargs.args[0].edges;
-    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
-  }
-  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
-}
-
-void IntegratorRect::compute_rect(FunctionArgs& fargs){
+void IntegratorRect::sample(FunctionArgs& fargs){
   auto& rets=fargs.rets;
   rets[1].x = m_edges.cast<double>();
   auto& abscissa=rets[0].x;
