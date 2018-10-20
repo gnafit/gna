@@ -44,6 +44,10 @@ void SamplerGL::init(const std::string& mode) {
     trans.func(&SamplerGL::compute_rect);
     m_rect_offset=1;
   }
+  else if(m_mode=="trap"){
+    trans.func(&SamplerGL::compute_trap);
+    set_shared_edge();
+  }
   else{
     throw std::runtime_error("invalid integration mode");
   }
@@ -59,7 +63,7 @@ void SamplerGL::init(const std::string& mode) {
 
 void SamplerGL::check(TypesFunctionArgs& fargs){
   auto& rets=fargs.rets;
-  rets[0] = DataType().points().shape(static_cast<size_t>(m_orders.sum()));
+  rets[0] = DataType().points().shape(m_weights.size());
 
   auto& args=fargs.args;
   if(args.size() && !m_edges.size()){
@@ -85,6 +89,36 @@ void SamplerGL::compute_gl(FunctionArgs& fargs){
     advance(edge_a, 1);
     advance(edge_b, 1);
   }
+}
+
+void SamplerGL::compute_trap(FunctionArgs& fargs){
+  auto& rets=fargs.rets;
+  rets[1].x = m_edges.cast<double>();
+  auto& abscissa=rets[0].x;
+
+  auto nbins=m_edges.size()-1;
+  auto& binwidths=m_edges.tail(nbins) - m_edges.head(nbins);
+  ArrayXd samplewidths=binwidths/m_orders.cast<double>();
+
+  auto* edge_a=m_edges.data();
+  auto* edge_b{next(edge_a)};
+
+  size_t offset=0;
+  for (size_t i = 0; i < m_orders.size(); ++i) {
+    auto n=m_orders[i]+1;
+    abscissa.segment(offset, n)=ArrayXd::LinSpaced(n, *edge_a, *edge_b);
+
+    auto swidth=samplewidths[i];
+    m_weights[offset]=swidth*0.5;
+    if(n>2) {
+      m_weights.segment(offset+1, n-2)=swidth;
+    }
+
+    offset+=n-1;
+    advance(edge_a, 1);
+    advance(edge_b, 1);
+  }
+  m_weights.tail(1)=samplewidths.tail(1)*0.5;
 }
 
 void SamplerGL::compute_rect(FunctionArgs& fargs){
@@ -131,4 +165,3 @@ void SamplerGL::compute_rect(FunctionArgs& fargs){
     offset+=n;
   }
 }
-

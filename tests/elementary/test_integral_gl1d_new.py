@@ -33,7 +33,7 @@ parser.add_argument( '-m', '--mean', type=float, help='gaussian mean' )
 parser.add_argument( '-b', '--bins', type=float, nargs=3, default=[ 0.0, 12.001, 0.05 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '-l', '--legend', default='upper left', help='legend location' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
-parser.add_argument( '-M', '--mode', default='gl', choices=['gl', 'rect_left', 'rect', 'rect_right'], help='integration mode' )
+parser.add_argument( '-M', '--mode', default='gl', choices=['gl', 'rect_left', 'rect', 'rect_right', 'trap'], help='integration mode' )
 parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
@@ -99,12 +99,13 @@ ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
 ax.set_title( 'Integrate Gaussian (%g, %g) with order %i'%( mean, sigma, opts.order ) )
 
+baropts = dict(alpha=0.5)
 # plot function versus sample points
 ax.plot( integrator.points.x.data(), fcn.rate.rate.data(), '-', label='function' )
 # plot histogram using GNA to matplotlib interface
-hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), color='none', edgecolor='blue' )
+hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), **baropts)
 # plot histogram manually
-plot_bar( edges, hist/widths, label='histogram/binwidth', color='none', edgecolor='green' )
+plot_bar( edges, hist/widths, label='histogram/binwidth', **baropts)
 
 # add legend
 ax.legend(loc=opts.legend)

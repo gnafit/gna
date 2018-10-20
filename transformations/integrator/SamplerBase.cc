@@ -20,10 +20,6 @@ m_orders(Map<const ArrayXi>(orders, bins))
 }
 
 void SamplerBase::init_base(double* edges) {
-    if( (m_orders<=0).any() ){
-        std::cerr<<m_orders<<std::endl;
-        throw std::runtime_error("All integration orders should be >1");
-    }
     m_weights.resize(m_orders.sum());
 
     transformation_("hist")
@@ -38,8 +34,25 @@ void SamplerBase::init_base(double* edges) {
     }
 }
 
+void SamplerBase::set_shared_edge(){
+    if(m_shared_edge){
+        throw std::runtime_error("may not set shared edge twice");
+    }
+    m_shared_edge=1;
+    m_weights.resize(m_weights.size()+1);
+}
+
 void SamplerBase::check_base(TypesFunctionArgs& fargs){
     fargs.rets[0]=DataType().hist().edges(m_edges.size(), m_edges.data());
+
+    if (fargs.args[0].shape[0] != m_weights.size()){
+        throw fargs.args.error(fargs.args[0], "inconsistent function size");
+    }
+
+    if((m_orders<1).any()){
+        std::cerr<<m_orders<<std::endl;
+        throw std::runtime_error("All integration orders should be >=1");
+    }
 }
 
 void SamplerBase::integrate(FunctionArgs& fargs){
@@ -50,9 +63,14 @@ void SamplerBase::integrate(FunctionArgs& fargs){
     auto* data = prod.data();
     auto* order = m_orders.data();
     for (size_t i = 0; i < m_orders.size(); ++i) {
-        auto* data_next=std::next(data, *order);
+        auto* data_next=std::next(data, *order+m_shared_edge);
         *ret = std::accumulate(data, data_next, 0.0);
-        data=data_next;
+        if(m_shared_edge){
+            data=prev(data_next);
+        }
+        else{
+            data=data_next;
+        }
         advance(order,1);
         advance(ret,1);
     }

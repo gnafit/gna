@@ -14,8 +14,10 @@ public:
 protected:
   void init(const std::string& mode);
   void check(TypesFunctionArgs& fargs);
+
   void compute_gl(FunctionArgs& fargs);
   void compute_rect(FunctionArgs& fargs);
+  void compute_trap(FunctionArgs& fargs);
 
   std::string m_mode;
   int m_rect_offset{0};
