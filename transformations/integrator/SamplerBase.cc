@@ -59,7 +59,7 @@ void SamplerBase::integrate(FunctionArgs& fargs){
 }
 
 void SamplerBase::dump(){
-    std::cout<<"Edges: "<<m_edges<<std::endl;
-    std::cout<<"Orders: "<<m_orders<<std::endl;
-    std::cout<<"Weights: "<<m_weights<<std::endl;
+    std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
+    std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;
+    std::cout<<"Weights: "<<m_weights.transpose()<<std::endl;
 }

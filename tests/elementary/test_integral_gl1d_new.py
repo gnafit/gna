@@ -31,8 +31,10 @@ parser.add_argument( '-o', '--order', type=int, default=3, help='integration ord
 parser.add_argument( '-g', '--gauss', type=float, nargs=2, default=[6.0, 1.0], help='gaussian mean and sigma' )
 parser.add_argument( '-m', '--mean', type=float, help='gaussian mean' )
 parser.add_argument( '-b', '--bins', type=float, nargs=3, default=[ 0.0, 12.001, 0.05 ], help='Bins: arange arguments (min, max, step)' )
-parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
+parser.add_argument( '-l', '--legend', default='upper left', help='legend location' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
+parser.add_argument( '-M', '--mode', default='gl', choices=['gl', 'rect_left', 'rect', 'rect_right'], help='integration mode' )
+parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
 
@@ -59,10 +61,11 @@ edges = N.arange(*opts.bins, dtype='d')
 # create 1d integrator (sample points) for given edges and integration order
 if opts.input_edges:
     edges_in = Histogram(edges, edges[:-1])
-    integrator = R.SamplerGL(edges.size-1, opts.order)
+    integrator = R.SamplerGL(edges.size-1, opts.order, None, opts.mode)
     integrator.points.edges(edges_in)
 else:
-    integrator = R.SamplerGL(edges.size-1, opts.order, edges)
+    integrator = R.SamplerGL(edges.size-1, opts.order, edges, opts.mode)
+
 integrator.points.setLabel('Integrator inputs')
 integrator.points.x.setLabel('E (points)')
 integrator.points.xedges.setLabel('E (bin edges)')
@@ -81,6 +84,11 @@ hist_output = integrator.hist.hist
 hist_output.setLabel('output histogram')
 hist = hist_output.data()
 
+if opts.dump:
+    integrator.dump()
+    print('Abscissas:', integrator.points.x.data())
+    print('Widths:', widths)
+
 """Plot data"""
 # init figure
 fig = P.figure()
@@ -92,14 +100,14 @@ ax.set_ylabel( 'f(x)' )
 ax.set_title( 'Integrate Gaussian (%g, %g) with order %i'%( mean, sigma, opts.order ) )
 
 # plot function versus sample points
-ax.plot( integrator.points.x.data(), fcn.rate.rate.data(), label='function' )
+ax.plot( integrator.points.x.data(), fcn.rate.rate.data(), '-', label='function' )
 # plot histogram using GNA to matplotlib interface
-hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), alpha=0.5 )
+hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), color='none', edgecolor='blue' )
 # plot histogram manually
-plot_bar( edges, hist/widths, label='histogram/binwidth', alpha=0.5 )
+plot_bar( edges, hist/widths, label='histogram/binwidth', color='none', edgecolor='green' )
 
 # add legend
-ax.legend( loc=opts.legend)
+ax.legend(loc=opts.legend)
 
 # Our function of interest is a guassian and should give 1 when integrated
 # Test it by summing the histogram bins
