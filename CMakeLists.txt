@@ -42,7 +42,6 @@ set (SOURCES
   transformations/calculus/Jacobian.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
-  transformations/detector/EnergyResolutionC.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
@@ -56,8 +55,6 @@ set (SOURCES
   transformations/integrator/IntegratorGL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
-  transformations/integrator/GaussLegendre.cc
-  transformations/integrator/GaussLegendre2d.cc
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
@@ -98,6 +95,9 @@ set (SOURCES
   transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
+  transformations/legacy/EnergyResolutionC.cc
+  transformations/legacy/GaussLegendre.cc
+  transformations/legacy/GaussLegendre2d.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
   )
@@ -231,7 +231,7 @@ include_directories(core/parameters/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
-                    transformations/legacy/integrator/
+                    transformations/legacy/
                     extra/
                     examples/
                    )
