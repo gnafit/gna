@@ -12,7 +12,7 @@ The transformation may be configured within :ref:`detector_eres_common3` bundle.
 Inputs
 ^^^^^^
 
-1. ``'smear.Nvis'`` — one-dimensional histogram of number of events :math:`N_{\text{vis}}`.
+1. ``'smear.Ntrue'`` — one-dimensional histogram of number of events :math:`N_{\text{vis}}`.
 
 Outputs
 ^^^^^^^
