@@ -80,7 +80,8 @@ void MultiThreading::Worker::work() {  // runs task stack
 	//while (!task_stack.empty()) {
 	while (task_stack.size() > 0) {
 	
-		std::cerr << "BEFORE BEFORE POP, stack size = " << task_stack.size() << std::endl;
+		std::cerr << "BEFORE BEFORE POP, stack size = " << task_stack.size() 
+				<< " who am I " << whoami_worker() << std::endl;
 		task_stack.top().run_task();
 		std::cerr << "BEFORE POP, stack size = " << task_stack.size() << std::endl;
 		if (task_stack.size() > 0)  task_stack.pop(); // we need it in case of new chain from runtask
@@ -88,6 +89,19 @@ void MultiThreading::Worker::work() {  // runs task stack
 	}
 
 //	sleep(); // TODO Uncomment
+}
+
+
+size_t MultiThreading::Worker::whoami_worker() {
+
+	size_t who = 999;
+	size_t size = pool.get_workers_count();
+	for (size_t i = 0; i <  size; i++) {
+		if (&pool.m_workers[i] == this) {
+			who = i;
+		}
+	}
+	return who;
 }
 
 void MultiThreading::ThreadPool::stop() {
@@ -235,8 +249,6 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 	size_t src_size = in_task.m_entry->sources.size();
 //	std::cerr << "Entry_point_stat = " << entry_point_stat << " src_size = " << src_size << std::endl;
 
-//	size_t iter = 1;
-	bool children_are_ready = true;
 	int curr_task_worker = entry_point_stat;
 
 /*	for (size_t i = 0; i < m_workers.size(); i++) {
@@ -244,10 +256,30 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
         }
 */
 	std::cout << "!1111!!!1111111111111111111111entry_point_stat  = " << entry_point_stat << std::endl;
+
+/* TODO uncomm
+	for (size_t iter = 1; iter < src_size; iter++) {
+                std::cout << iter << std::endl;
+                auto& child_entry = in_task.m_entry->sources[iter].sink->entry;
+                if ( child_entry->tainted && !(child_entry->running)) {
+                        children_are_ready = false;
+                }
+                Task child_task(std::ref(child_entry));
+                std::cout << "!!! 3" << std::endl;
+                curr_task_worker = add_to_free_worker(child_task); // SMTH WITH LOCK HERE
+                std::cout << "curr_task_worker " << curr_task_worker << std::endl;  
+
+                std::cout << "child's children number = " << child_task.inputs << std::endl; 
+
+                if (curr_task_worker >= 0)  add_task(child_task, curr_task_worker);
+                std::cout << " CHILDs CURRENT TASK WORKER = " << curr_task_worker << std::endl;
+                //}                     
+        }
+
+*/
+
+
 	if (entry_point_stat < 0) {
-			// WHY THIS CONDITION!!!!?????
-			// to avoid double adding myself
-	//	iter = 0;
 		curr_task_worker = add_to_free_worker(in_task);
 		std::cout << "CURRENT_WORKER = " <<  curr_task_worker << std::endl;  
 	}
@@ -262,64 +294,23 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 			Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
 			add_to_N_worker(child_task, curr_task_worker);
 			add_task(child_task, curr_task_worker);
-			children_are_ready = false;
 
 			std::cout << "child's children number = " << child_task.inputs << std::endl; 
 		}
 
-//	iter = 0;
-//	std::cout << "before FOR iter = " << iter << " srcsize = " << src_size << std::endl;
-/*	for (; iter < src_size; iter++) {
-		std::cout << iter << std::endl;
-		auto& child_entry = in_task.m_entry->sources[iter].sink->entry;
-		if ( child_entry->tainted && !(child_entry->running)) {
-			children_are_ready = false;
-		}
-		Task child_task(std::ref(child_entry));
-		std::cout << "!!! 3" << std::endl;
-		curr_task_worker = add_to_free_worker(child_task); // SMTH WITH LOCK HERE
-		std::cout << "curr_task_worker " << curr_task_worker << std::endl;  
 
-		std::cout << "child's children number = " << child_task.inputs << std::endl; 
-
-		if (curr_task_worker >= 0)  add_task(child_task, curr_task_worker);
-		std::cout << " CHILDs CURRENT TASK WORKER = " << curr_task_worker << std::endl;
-		//}			
-	}
-*/	
 	for (size_t i = 0; i < m_workers.size(); i++) {
 		std::cout << "worker " << i << " size: " << m_workers[i].task_stack.size() << std::endl;  
 	}
-	std::cout << "READY??? " << children_are_ready << std::endl;	
+
 
 	std::cout << "waitlist_size = " << m_global_wait_list.size() << std::endl;
 
-	if (children_are_ready) {
-		// TODO how to write runtask for w_is = -1
-//		std::cerr << "entry_point_stat = " << entry_point_stat << std::endl;
-//		std::cerr << "curr_task_worker = " << curr_task_worker << std::endl;
-	//	ready_to_run = true;
+	if (curr_task_worker >= 0 ) {
+		m_workers[curr_task_worker].ready_to_run = true;
+		m_workers[curr_task_worker].work();
+	} 
 		
-	//	if (entry_point_stat >= 0 ) {
-		if (curr_task_worker >= 0 ) {
-		//	m_workers[entry_point_stat].ready_to_run = true;
-
-			m_workers[curr_task_worker].ready_to_run = true;
-
-		//	m_workers[entry_point_stat].work();
-			m_workers[curr_task_worker].work();
-		} 
-		/*else if (entry_point_stat >= 0){
-			m_workers[entry_point_stat].ready_to_run = true;
-			m_workers[entry_point_stat].work();
-		}*/
-		//else 
-		
-	}
-
-		
-	// TODO barrier	
-	//size_t worker_index = try_to_find_worker(in_task);
 
 }
 

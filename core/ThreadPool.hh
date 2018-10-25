@@ -140,7 +140,9 @@ namespace MultiThreading {
     size_t get_stack_size();
     void bite_global_wait_list();
     bool is_ready();
-    
+
+    size_t whoami_worker(); 	///< returns current worker's number 
+
 //private:
     ThreadPool &pool;
     std::thread::id thr_head;
