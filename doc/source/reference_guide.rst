@@ -40,16 +40,16 @@ Helper classes
 
    cppclasses/*
 
-Transformation bundles
-----------------------
+..  Transformation bundles
+    ----------------------
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
+    .. toctree::
+       :maxdepth: 1
+       :glob:
 
-   python_modules/TransformationBundle.rst
-   python_modules/NestedDict.rst
-   bundles/*
+       python_modules/TransformationBundle.rst
+       python_modules/NestedDict.rst
+       bundles/*
 
 Transformations
 ---------------
