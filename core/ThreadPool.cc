@@ -203,7 +203,7 @@ int MultiThreading::ThreadPool::add_to_free_worker(MultiThreading::Task& in_task
 				    MultiThreading::ThreadPool::new_worker(in_task);
 			    }));
 		*/
-			new_worker(in_task);
+			new_worker(in_task); // TODO clean up in_task
 			std::cout << "INSIDE 6" << std::endl; 
 			tplock.unlock();
 		} else {
@@ -257,14 +257,14 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 */
 	std::cout << "!1111!!!1111111111111111111111entry_point_stat  = " << entry_point_stat << std::endl;
 
-/* TODO uncomm
+// TODO uncomm
 	for (size_t iter = 1; iter < src_size; iter++) {
                 std::cout << iter << std::endl;
-                auto& child_entry = in_task.m_entry->sources[iter].sink->entry;
-                if ( child_entry->tainted && !(child_entry->running)) {
-                        children_are_ready = false;
-                }
-                Task child_task(std::ref(child_entry));
+                auto& child_entry = *in_task.m_entry->sources[iter].sink->entry;
+               // if ( child_entry->tainted && !(child_entry->running)) {
+                //        children_are_ready = false;
+                //}
+                Task child_task(child_entry);
                 std::cout << "!!! 3" << std::endl;
                 curr_task_worker = add_to_free_worker(child_task); // SMTH WITH LOCK HERE
                 std::cout << "curr_task_worker " << curr_task_worker << std::endl;  
@@ -276,7 +276,6 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
                 //}                     
         }
 
-*/
 
 
 	if (entry_point_stat < 0) {
@@ -284,14 +283,14 @@ void MultiThreading::ThreadPool::add_task(MultiThreading::Task& in_task, int ent
 		std::cout << "CURRENT_WORKER = " <<  curr_task_worker << std::endl;  
 	}
 		// if -1, it is already added to the wait list
-		
-	auto& child_entry = in_task.m_entry->sources[0].sink->entry;
+	// TODO add check	
+	auto& child_entry = *in_task.m_entry->sources[0].sink->entry;
 	
 	if (curr_task_worker != -1 && src_size > 0  && 
 				!(child_entry->running) && child_entry->tainted)  {
 		
-	//if ( src_size > 0 )  {
-			Task child_task(std::ref(in_task.m_entry->sources[0].sink->entry));
+	//if ( src_size > 0 )  { // TODO * instead of std ref
+			Task child_task(in_task.m_entry->sources[0].sink->entry);
 			add_to_N_worker(child_task, curr_task_worker);
 			add_task(child_task, curr_task_worker);
 

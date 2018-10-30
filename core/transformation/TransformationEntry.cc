@@ -32,7 +32,7 @@ using TransformationTypes::TypeError;
 //using MultiThreading;
 
 class Task;
-MultiThreading::ThreadPool tpool(4);
+MultiThreading::ThreadPool tpool(8);
 
 
 /**

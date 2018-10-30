@@ -102,7 +102,7 @@ namespace MultiThreading {
 
     int active_tasks;
 
-    TransformationTypes::Entry *entry_point_entry;
+    TransformationTypes::Entry *entry_point_entry{nullptr};
 //  private:
     std::vector< Worker > m_workers = {};  // every worker has it's own task stack
     std::vector< std::thread > threads;
