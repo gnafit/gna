@@ -7,6 +7,8 @@ class IntegratorBase : public GNAObject,
                        public TransformationBind<IntegratorBase>
 {
 public:
+  TransformationDescriptor add();
+
   void dump();
 
 protected:

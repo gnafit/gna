@@ -1,5 +1,7 @@
 #include "IntegratorBase.hh"
+#include "fmt/format.h"
 
+#include <string>
 #include <iostream>
 #include <iterator>
 
@@ -23,17 +25,24 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 
 void IntegratorBase::init_base(double* edges) {
     m_weights.resize(m_orders.sum()+m_shared_edge);
+    if(edges){
+        m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
+    }
+}
 
-    transformation_("hist")
+TransformationDescriptor IntegratorBase::add(){
+    int num=transformations.size()-1;
+    std::string name="hist";
+    if(num){
+      name = fmt::format("{0}_{02:d}", name, num);
+    }
+    transformation_(name)
         .input("f")
         .output("hist")
         .types(TypesFunctions::if1d<0>, TypesFunctions::ifPoints<0>, &IntegratorBase::check_base)
         .func(&IntegratorBase::integrate)
         ;
-
-    if(edges){
-        m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
-    }
+    return transformations.back();
 }
 
 void IntegratorBase::check_base(TypesFunctionArgs& fargs){

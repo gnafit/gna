@@ -88,7 +88,6 @@ else:
 integrator.points.setLabel('Integrator inputs')
 integrator.points.x.setLabel('E (points)')
 integrator.points.xedges.setLabel('E (bin edges)')
-integrator.hist.setLabel('Integrator (histogram)')
 
 edges = integrator.points.xedges.data()
 widths = edges[1:]-edges[:-1]
@@ -97,9 +96,11 @@ widths = edges[1:]-edges[:-1]
 # pass sample points as input to the function 'energy'
 fcn_input(integrator.points.x)
 # pass the function output to the histogram builder (integrator)
-integrator.hist.f( fcn_output )
+integrator_hist = integrator.add()
+integrator_hist.f( fcn_output )
+integrator_hist.setLabel('Integrator (histogram)')
 # read the histogram contents
-hist_output = integrator.hist.hist
+hist_output = integrator_hist.hist
 hist_output.setLabel('output histogram')
 hist = hist_output.data()
 
