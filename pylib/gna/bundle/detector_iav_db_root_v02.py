@@ -29,21 +29,25 @@ class detector_iav_db_root_v02(TransformationBundle):
         self.set_output(points.single(), ('iavmatrix', 'raw'))
 
         with self.common_namespace:
-            for it in self.idx.iterate():
-                parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
+            idxdet, idxother = self.idx.split( 'd' )
+            for itdet in idxdet.iterate():
+                parname = itdet.current_format('{name}{autoindex}', name=self.cfg.parname)
                 renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname, ns=self.common_namespace )
                 renormdiag.renorm.inmat( points.points )
-                renormdiag.renorm.setLabel(it.current_format('IAV matrix\n{autoindexnd}'))
-                self.set_output( renormdiag.single(), 'iavmatrix', it )
+                renormdiag.renorm.setLabel(itdet.current_format('IAV matrix\n{autoindexnd}'))
+                self.set_output( renormdiag.single(), 'iavmatrix', itdet )
 
-                esmear = R.HistSmear(True)
-                esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                esmear.smear.setLabel(it.current_format('IAV effect\n{autoindexnd}'))
-                self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
-                self.set_output( esmear.single(), 'iav', it )
+                for itother in idxother.iterate():
+                    it = itdet+itother
+                    esmear = R.HistSmear(True)
+                    esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
+                    esmear.smear.setLabel(it.current_format('IAV effect\n{autoindexnd}'))
+                    self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
+                    self.set_output( esmear.single(), 'iav', it )
 
-                self.objects[('renormdiag',it.current_format())] = renormdiag
-                self.objects[('esmear',it.current_format())]     = esmear
+                    self.objects[('esmear',it.current_format())]     = esmear
+
+                self.objects[('renormdiag',itdet.current_format())] = renormdiag
 
     def build(self):
         from file_reader import read_object_auto
@@ -58,8 +62,10 @@ class detector_iav_db_root_v02(TransformationBundle):
             raise exception('IAV scale should be 1 by definition')
 
         self.pars = OrderedDict()
-        for it in self.idx.iterate():
+        idx = self.idx.get_sub('d')
+        for it in idx.iterate():
             parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
             par = self.common_namespace.reqparameter(parname, cfg=self.cfg.scale)
             par.setLabel('IAV offdiagonal contribution scale')
             # self.pars[ns.name]=parname
+

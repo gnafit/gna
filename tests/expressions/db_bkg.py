@@ -44,10 +44,10 @@ elif args.mode=='minimal':
     indices = [
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
-        ('d', 'detector',    ['AD11'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12'))]))),
-        ('s', 'site',        ['EH1']),
-        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23'])
+        ('d', 'detector',    ['AD11', 'AD21'],
+                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',)), ('EH2', ('AD21',))]))),
+        ('s', 'site',        ['EH1', 'EH2']),
+        ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.mode=='small':
@@ -94,6 +94,7 @@ lib = OrderedDict(
         # Accidentals
         acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',             label='Acc num {detector}\n(best fit)}'),
         bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
+        bkg_acc_sum       = dict(expr='sum:d|bkg_acc',                                 label='Acc\n(w: {weight_label})'),
 
         # Li/He
         bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',        label='9Li spectrum\n(frac)'),
@@ -131,6 +132,9 @@ expr =[
         'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
         'common = concat[d]| bkg'
 ]
+expr = ['efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+        'bkg_acc = acc_norm[d] * bkg_rate_acc[d] * efflivetime[d] * bkg_spectrum_acc[d]()',
+        'sum[d]| bkg_acc']
 
 # Initialize the expression and indices
 a = Expression(expr, indices)
@@ -342,11 +346,11 @@ env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
 
-from gna.graph import *
-out=context.outputs.concat_common
-walker = GraphWalker(out)
-report(out.data, fmt='Initial execution time: {total} s')
-report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
+# from gna.graph import *
+# out=context.outputs.concat_commibkg
+# walker = GraphWalker(out)
+# report(out.data, fmt='Initial execution time: {total} s')
+# report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
 
 #
 # Do some plots
@@ -374,7 +378,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot(context.outputs.bkg.AD11, joints=False)
+        graph = GNADot(context.outputs.bkg_acc.values(), joints=False)
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
     except Exception as e:

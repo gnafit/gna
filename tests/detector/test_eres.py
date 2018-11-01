@@ -75,7 +75,7 @@ for eset in [
         edges_o = R.HistEdges(hist)
         eres = R.EnergyResolution(True, True)
         eres.matrix.Edges( edges_o )
-        eres.smear.Nvis( hist )
+        eres.smear.Ntrue( hist )
 
         smeared = eres.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )

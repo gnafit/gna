@@ -46,6 +46,8 @@ class Operation(TCall,NestedTransformation):
         else:
             newname = '{}{}'.format(self.text_operator, cname)
 
+        print(newname, label, save)
+
         if save:
             self.name = newname
             self.set_label(label)
@@ -70,7 +72,7 @@ class Operation(TCall,NestedTransformation):
             printl_debug('def (operation)', str(self))
             with nextlevel():
                 for freeidx in self.indices.iterate():
-                    tobj, newout = self.new_tobject(self.current_format(freeidx))
+                    tobj, newout = self.new_tobject(freeidx)
                     context.set_output(newout, self.name, freeidx)
                     with nextlevel():
                         for opidx in self.indices_to_reduce.iterate():

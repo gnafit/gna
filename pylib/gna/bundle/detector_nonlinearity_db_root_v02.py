@@ -18,8 +18,8 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
         super(detector_nonlinearity_db_root_v02, self).__init__( **kwargs )
 
         self.init_indices()
-        if self.idx.ndim()!=2:
-            raise Exception('detector_nonlinearity_db_root_v02 supports only 2d indexing: detector and lsnl component')
+        if self.idx.ndim()<2:
+            raise Exception('detector_nonlinearity_db_root_v02 supports at least 2d indexing: detector and lsnl component')
 
         self.storage=NestedDict()
         self.pars=NestedDict()
@@ -68,16 +68,19 @@ class detector_nonlinearity_db_root_v02(TransformationBundle):
             for i, itd in enumerate(idxd.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
                 """Construct the nonlinearity calss"""
-                nonlin = R.HistNonlinearity(self.debug)
-                nonlin.set()
-                nonlin.smear.setLabel(itd.current_format('NL\n{autoindexnd}'))
+                nonlin = R.HistNonlinearity(False, self.debug)
                 nonlin.matrix.setLabel(itd.current_format('NL matrix\n{autoindexnd}'))
                 self.objects[('nonlinearity',)+itd.current_values()] = nonlin
-
                 self.set_input(nonlin.matrix.Edges,         'lsnl_edges', itd, clone=0)
                 self.set_input(nonlin.matrix.EdgesModified, 'lsnl_edges', itd, clone=1)
-                self.set_input(nonlin.smear.Ntrue, 'lsnl', itd, clone=0)
-                self.set_output(nonlin.smear.Nvis, 'lsnl', itd)
+
+                for itother in idxother.iterate():
+                    it = itd+itother
+                    trans = nonlin.add(True)
+                    trans.setLabel(it.current_format('NL\n{autoindexnd}'))
+
+                    self.set_input(trans.Ntrue, 'lsnl', it, clone=0)
+                    self.set_output(trans.Nrec, 'lsnl', it)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

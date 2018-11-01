@@ -111,7 +111,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared = smear.Nvis.data().copy()
+smeared = smear.Nrec.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 
 plot_hist( edges, phist, label='original' )

@@ -14,6 +14,7 @@ parser.add_argument('--stats', action='store_true', help='show statistics')
 parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
 parser.add_argument('-i', '--indices', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
+parser.add_argument('-t', '--title', default='', help='figure title')
 args = parser.parse_args()
 
 #
@@ -97,10 +98,10 @@ groups=NestedDict(
 lib = OrderedDict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
-        cspec_diff_reac         = dict(expr='sum:i'),
+        # cspec_diff_reac         = dict(expr='sum:i'),
         cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
-        cspec_diff_det          = dict(expr='sum:r'),
-        spec_diff_det           = dict(expr='sum:c'),
+        # cspec_diff_det          = dict(expr='sum:r'),
+        # spec_diff_det           = dict(expr='sum:c'),
         cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
         norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
@@ -154,7 +155,11 @@ lib = OrderedDict(
         bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n(w: {weight_label})'),
 
         # Total background
-        bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}')
+        bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}'),
+
+        # dybOscar mode
+        eres_cw           = dict(expr='eres*pmns'),
+        # eres_w            = dict(expr='sum:c|eres_cw'),
         )
 
 expr =[
@@ -188,15 +193,15 @@ if args.mode=='dyboscar':
                    eres[d]|
                      lsnl[d]|
                        iav[d]|
-                           sum[r]|
-                             baselineweight[r,d]*
-                             sum[i]|
-                               power_livetime_factor*
-                               kinint2|
-                                 anuspec[i](enu())*
-                                 oscprob[c,d,r](enu())*
-                                 ibd_xsec(enu(), ctheta())*
-                                 jacobian(enu(), ee(), ctheta())
+                         sum[r]|
+                           baselineweight[r,d]*
+                           sum[i]|
+                             power_livetime_factor*
+                             kinint2|
+                               anuspec[i](enu())*
+                               oscprob[c,d,r](enu())*
+                               ibd_xsec(enu(), ctheta())*
+                               jacobian(enu(), ee(), ctheta())
         ''')
 elif args.mode=='mid':
     expr.append(
@@ -286,7 +291,7 @@ cfg = NestedDict(
             bundle = 'reactor_anu_spectra_v02',
             name = 'anuspec',
             filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                            'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
             # strategy = dict( underflow='constant', overflow='extrapolate' ),
             edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
             ),
@@ -557,9 +562,9 @@ if args.show or args.output:
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    # ax.set_xlabel()
-    # ax.set_ylabel()
-    # ax.set_title()
+    ax.set_xlabel( L.u('evis') )
+    ax.set_ylabel( 'Arbitrary units' )
+    ax.set_title(args.title)
 
     def step(suffix):
         ax.legend(loc='upper right')
@@ -572,7 +577,12 @@ if args.show or args.output:
     # step('_02_iav')
     # outputs.lsnl.AD11.plot_hist(label='+LSNL')
     # step('_03_lsnl')
-    outputs.eres.AD11.plot_hist(label='+eres')
+    # outputs.eres.AD11.plot_hist(label='+eres')
+    if args.mode=='dyboscar':
+        out = outputs.sum_sum_sum_eres_cw
+    else:
+        out = outputs.eres
+    out.AD11.plot_hist(label='EH1 AD1')
     step('_04_eres')
 
 

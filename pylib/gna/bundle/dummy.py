@@ -24,6 +24,10 @@ class dummy(TransformationBundle):
 
         obj = R.Dummy(self.cfg.size, tkey)
         trans = obj.dummy
+
+        if 'label' in self.cfg:
+            trans.setLabel(key.current_format(self.cfg.label, name=self.cfg.name))
+
         output = obj.add_output('output')
         if self.cfg.get('input', False):
             ninputs = int(self.cfg.input)

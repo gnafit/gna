@@ -32,6 +32,7 @@ set (SOURCES
   transformations/base/Histogram.cc
   transformations/base/Identity.cc
   transformations/base/Points.cc
+  transformations/base/Bins.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
@@ -39,18 +40,22 @@ set (SOURCES
   transformations/base/WeightedSum.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
+  transformations/detector/FakeGSLFunction.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
-  transformations/detector/EnergyResolutionC.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
+  transformations/detector/HistSmearSparse.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
-  transformations/integrator/FakeGSLFunction.cc
-  transformations/integrator/GaussLegendre.cc
-  transformations/integrator/GaussLegendre2d.cc
+  transformations/integrator/GSLSamplerGL.cc
+  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/Integrator21Base.cc
+  transformations/integrator/IntegratorGL.cc
+  transformations/integrator/IntegratorRect.cc
+  transformations/integrator/IntegratorTrap.cc
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
@@ -91,6 +96,9 @@ set (SOURCES
   transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
+  transformations/legacy/EnergyResolutionC.cc
+  transformations/legacy/GaussLegendre.cc
+  transformations/legacy/GaussLegendre2d.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
   )
@@ -139,6 +147,7 @@ set (HEADERS
   Sum.hh
   Ratio.hh
   WeightedSum.hh
+  Bins.hh
   Points.hh
   Histogram.hh
   HistEdges.hh
@@ -183,12 +192,19 @@ set (HEADERS
   IbdFirstOrder.hh
   ReactorNorm.hh
   ReactorGroup.hh
+  IntegratorBase.hh
+  Integrator21Base.hh
+  IntegratorGL.hh
+  IntegratorRect.hh
+  IntegratorTrap.hh
+  GSLSamplerGL.hh
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
   HistSmear.hh
+  HistSmearSparse.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
   # examples/
@@ -217,6 +233,7 @@ include_directories(core/parameters/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
+                    transformations/legacy/
                     extra/
                     examples/
                    )

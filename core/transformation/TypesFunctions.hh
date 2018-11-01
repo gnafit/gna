@@ -242,7 +242,6 @@ inline void TypesFunctions::binsToEdges(TransformationTypes::TypesFunctionArgs& 
     auto fmt = boost::format("Transformation %1%: invalid Ret index (%2% out of %3%)");
     throw rets.error( DataType::undefined(), (fmt%rets.name()%Ret%rets.size()).str() );
   }
-  TypesFunctions::ifPoints<Arg>(fargs);
   TypesFunctions::if1d<Arg>(fargs);
   rets[Ret] = args[Arg];
   rets[Ret].shape[0]+=1;

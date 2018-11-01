@@ -35,8 +35,9 @@ class Expression(object):
         else:
             raise Exception('Unsupported expression: {!r}'.format(expression))
 
+        cexpr = re.compile('\s*#.*')
         rexpr = re.compile('\n\s+')
-        self.expressions_raw = [ rexpr.sub('', e) for e in self.expressions_raw ]
+        self.expressions_raw = [ rexpr.sub('', cexpr.sub('', e)) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
         self.globals=VTContainer(self.operations)
