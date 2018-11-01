@@ -54,6 +54,7 @@ set (SOURCES
   transformations/integrator/IntegratorBase.cc
   transformations/integrator/Integrator21Base.cc
   transformations/integrator/IntegratorGL.cc
+  transformations/integrator/Integrator21GL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
   transformations/interpolation/LinearInterpolator.cc
@@ -195,6 +196,7 @@ set (HEADERS
   IntegratorBase.hh
   Integrator21Base.hh
   IntegratorGL.hh
+  Integrator21GL.hh
   IntegratorRect.hh
   IntegratorTrap.hh
   GSLSamplerGL.hh
