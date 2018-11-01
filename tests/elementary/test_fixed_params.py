@@ -31,7 +31,5 @@ def test_fixed():
     assert 'probe1' in with_fixed and 'probe_fixed' in with_fixed
     print('True!\n')
 
-#  def test2():
-    #  assert False
 if __name__ == "__main__":
     fixed_test()

@@ -16,32 +16,39 @@ from gna.bindings import DataType
 #
 # Create the matrix
 #
-mat = N.arange(12, dtype='d').reshape(3, 4)
+def test_points():
+    mat = N.arange(12, dtype='d').reshape(3, 4)
 
-print( 'Input matrix (numpy)' )
-print( mat )
-print()
+    print( 'Input matrix (numpy)' )
+    print( mat )
+    print()
 
-#
-# Create transformations
-#
-points = Points(mat)
-identity = R.Identity()
+    #
+    # Create transformations
+    #
+    points = Points(mat)
+    identity = R.Identity()
 
-identity.identity.source( points.points.points )
-res = identity.identity.target.data()
-dt  = identity.identity.target.datatype()
+    identity.identity.source( points.points.points )
+    res = identity.identity.target.data()
+    dt  = identity.identity.target.datatype()
 
-#
-# Dump
-#
-print( 'Eigen dump (C++)' )
-identity.dump()
-print()
+    assert N.allclose(mat, res) 
 
-print( 'Result (C++ Data to numpy)' )
-print( res )
-print()
+    #
+    # Dump
+    #
+    print( 'Eigen dump (C++)' )
+    identity.dump()
+    print()
 
-print( 'Datatype:', str(dt) )
+    print( 'Result (C++ Data to numpy)' )
+    print( res )
+    print()
+
+    print( 'Datatype:', str(dt) )
+
+
+if __name__ == "__main__":
+    test_points()
 
