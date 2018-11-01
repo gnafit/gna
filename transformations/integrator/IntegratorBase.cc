@@ -35,7 +35,7 @@ TransformationDescriptor IntegratorBase::add(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
-      name = fmt::format("{0}_{02:d}", name, num);
+      name = fmt::format("{0}_{1:02d}", name, num);
     }
     transformation_(name)
         .input("f")

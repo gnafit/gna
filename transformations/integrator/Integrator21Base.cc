@@ -40,8 +40,8 @@ void Integrator21Base::init_base(double* xedges) {
 TransformationDescriptor Integrator21Base::add(){
     int num=transformations.size()-1;
     std::string name="hist";
-    if(num){
-      name = fmt::format("{0}_{02:d}", name, num);
+    if(num>0){
+      name = fmt::format("{0}_{1:02d}", name, num);
     }
     transformation_(name)
         .input("f")
@@ -94,6 +94,8 @@ void Integrator21Base::init_sampler() {
       .output("x")
       .output("y")
       .output("xedges")
+      .output("xmesh")
+      .output("ymesh")
       .types(&Integrator21Base::check_sampler)
       .func(&Integrator21Base::sample)
       ;
@@ -112,6 +114,9 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
   rets[0] = DataType().points().shape(m_xweights.size());
   rets[1] = DataType().points().shape(m_yweights.size());
 
+  rets[3] = DataType().points().shape(m_xweights.size(), m_yweights.size());
+  rets[4] = DataType().points().shape(m_xweights.size(), m_yweights.size());
+
   auto& args=fargs.args;
   if(args.size() && !m_xedges.size()){
     auto& edges=fargs.args[0].edges;
@@ -127,4 +132,5 @@ void Integrator21Base::dump(){
     std::cout<<"Y edges: "<<m_ymin<<" "<<m_ymax<<std::endl;
     std::cout<<"Y order: "<<m_yorder<<std::endl;
     std::cout<<"Y weights: "<<m_yweights.transpose()<<std::endl;
+
 }
