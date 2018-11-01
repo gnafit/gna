@@ -40,6 +40,7 @@ set (SOURCES
   transformations/base/WeightedSum.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
+  transformations/detector/FakeGSLFunction.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
   transformations/detector/HistNonlinearity.cc
@@ -49,10 +50,9 @@ set (SOURCES
   transformations/functions/Exp.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
-  transformations/integrator/FakeGSLFunction.cc
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
-  #transformations/integrator/Integrator21Base.cc
+  transformations/integrator/Integrator21Base.cc
   transformations/integrator/IntegratorGL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
@@ -193,7 +193,7 @@ set (HEADERS
   ReactorNorm.hh
   ReactorGroup.hh
   IntegratorBase.hh
-  #Integrator21Base.hh
+  Integrator21Base.hh
   IntegratorGL.hh
   IntegratorRect.hh
   IntegratorTrap.hh
