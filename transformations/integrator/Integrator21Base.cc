@@ -33,6 +33,8 @@ void Integrator21Base::init_base(double* xedges) {
     if(xedges){
         m_xedges=Map<const ArrayXd>(xedges, m_xorders.size()+1);
     }
+
+    add();
 }
 
 TransformationDescriptor Integrator21Base::add(){
@@ -88,35 +90,41 @@ void Integrator21Base::integrate(FunctionArgs& fargs){
 }
 
 void Integrator21Base::init_sampler() {
-  //auto trans=transformation_("points")
-      //.output("x")
-      //.output("xedges")
-      //.types(&Integrator21Base::check_sampler)
-      //.func(&Integrator21Base::sample)
-      //;
+  auto trans=transformation_("points")
+      .output("x")
+      .output("y")
+      .output("xedges")
+      .types(&Integrator21Base::check_sampler)
+      .func(&Integrator21Base::sample)
+      ;
 
-  //if(m_edges.size()){
-    //trans.finalize();
-  //}
-  //else{
-    //trans.input("edges") //hist with edges
-      //.types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
-  //}
+  if(m_xedges.size()){
+    trans.finalize();
+  }
+  else{
+    trans.input("edges") //hist with edges
+      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>);
+  }
 }
 
 void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
-  //auto& rets=fargs.rets;
-  //rets[0] = DataType().points().shape(m_weights.size());
+  auto& rets=fargs.rets;
+  rets[0] = DataType().points().shape(m_xweights.size());
+  rets[1] = DataType().points().shape(m_yweights.size());
 
-  //auto& args=fargs.args;
-  //if(args.size() && !m_edges.size()){
-    //auto& edges=fargs.args[0].edges;
-    //m_edges=Map<const ArrayXd>(edges.data(), edges.size());
-  //}
-  //rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
+  auto& args=fargs.args;
+  if(args.size() && !m_xedges.size()){
+    auto& edges=fargs.args[0].edges;
+    m_xedges=Map<const ArrayXd>(edges.data(), edges.size());
+  }
+  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
 }
+
 void Integrator21Base::dump(){
-    //std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
-    //std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;
-    //std::cout<<"Weights: "<<m_weights.transpose()<<std::endl;
+    std::cout<<"X edges: "<<m_xedges.transpose()<<std::endl;
+    std::cout<<"X orders: "<<m_xorders.transpose()<<std::endl;
+    std::cout<<"X weights: "<<m_xweights.transpose()<<std::endl;
+    std::cout<<"Y edges: "<<m_ymin<<" "<<m_ymax<<std::endl;
+    std::cout<<"Y order: "<<m_yorder<<std::endl;
+    std::cout<<"Y weights: "<<m_yweights.transpose()<<std::endl;
 }
