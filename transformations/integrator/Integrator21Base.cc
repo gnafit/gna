@@ -1,4 +1,5 @@
 #include "Integrator21Base.hh"
+#include "fmt/format.h"
 
 #include <iostream>
 #include <iterator>
@@ -8,10 +9,10 @@ using namespace std;
 
 Integrator21Base::Integrator21Base(size_t xbins, int xorders, double* xedges, int yorder, double ymin, double ymax) :
 m_xorders(xbins),
-m_yweights(yorder),
 m_yorder(yorder),
 m_ymin(ymin),
 m_ymax(ymax),
+m_yweights(yorder)
 {
     m_xorders.setConstant(xorders);
     init_base(xedges);
@@ -19,61 +20,71 @@ m_ymax(ymax),
 
 Integrator21Base::Integrator21Base(size_t xbins, int* xorders, double* xedges, int yorder, double ymin, double ymax) :
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
-m_yweights(yorder),
 m_yorder(yorder),
-m_ymin(xmin),
-m_ymax(xmax),
+m_ymin(ymin),
+m_ymax(ymax),
+m_yweights(yorder)
 {
     init_base(xedges);
 }
 
 void Integrator21Base::init_base(double* xedges) {
-    m_xweights.resize(m_orders.sum());
-
-    transformation_("hist")
-        .input("f")
-        .output("hist")
-        .types(TypesFunctions::ifPoints<0>, &Integrator21Base::check_base)
-        .func(&Integrator21Base::integrate)
-        ;
-
+    m_xweights.resize(m_xorders.sum());
     if(xedges){
         m_xedges=Map<const ArrayXd>(xedges, m_xorders.size()+1);
     }
 }
 
+TransformationDescriptor Integrator21Base::add(){
+    int num=transformations.size()-1;
+    std::string name="hist";
+    if(num){
+      name = fmt::format("{0}_{02:d}", name, num);
+    }
+    transformation_(name)
+        .input("f")
+        .output("hist")
+        .types(TypesFunctions::ifPoints<0>, &Integrator21Base::check_base)
+        .func(&Integrator21Base::integrate)
+        ;
+    return transformations.back();
+}
+
 void Integrator21Base::check_base(TypesFunctionArgs& fargs){
-    //fargs.rets[0]=DataType().hist().edges(m_edges.size(), m_edges.data());
+    fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
 
-    //if (fargs.args[0].shape[0] != m_weights.size()){
-        //throw fargs.args.error(fargs.args[0], "inconsistent function size");
-    //}
+    auto& shape=fargs.args[0].shape;
+    if (shape[0]!=m_xweights.size() || shape[1]!=m_yweights.size()){
+        throw fargs.args.error(fargs.args[0],
+                               fmt::format("Inconsistent function size {:d}x{:d}, "
+                                           "should be {:d}x{:d}",
+                                           shape[0], shape[1], m_xweights.size(), m_yweights.size()
+                                           )
+                               );
+    }
 
-    //if((m_orders<1).any()){
-        //std::cerr<<m_orders<<std::endl;
-        //throw std::runtime_error("All integration orders should be >=1");
-    //}
+    if((m_xorders<1).any() || m_yorder<1){
+        std::cerr<<"X orders: "<<m_xorders<<std::endl;
+        std::cerr<<"Y order: "<<m_yorder<<std::endl;
+        throw std::runtime_error("All integration orders should be >=1");
+    }
 }
 
 void Integrator21Base::integrate(FunctionArgs& fargs){
-    //auto* ret=fargs.rets[0].buffer;
-    //auto& fun=fargs.args[0].x;
+    size_t shape[2]={static_cast<size_t>(m_xweights.size()), static_cast<size_t>(m_yweights.size())};
 
-    //ArrayXd prod = fargs.args[0].x*m_weights;
-    //auto* data = prod.data();
-    //auto* order = m_orders.data();
-    //for (size_t i = 0; i < m_orders.size(); ++i) {
-        //auto* data_next=std::next(data, *order+m_shared_edge);
-        //*ret = std::accumulate(data, data_next, 0.0);
-        //if(m_shared_edge){
-            //data=prev(data_next);
-        //}
-        //else{
-            //data=data_next;
-        //}
-        //advance(order,1);
-        //advance(ret,1);
-    //}
+    auto& arg=fargs.args[0];
+    auto& ret=fargs.rets[0];
+
+    Map<const ArrayXXd, Aligned> pts(arg.x.data(), shape[0], shape[1]);
+    ArrayXd prod = (pts.rowwise()*m_yweights.transpose()).rowwise().sum()*m_xweights;
+    auto* data_start = prod.data();
+    for (size_t i = 0; i < m_xorders.size(); ++i) {
+        size_t n = m_xorders[i];
+        auto* data_end=std::next(data_start, n);
+        ret.x(i) = std::accumulate(data_start, data_end, 0.0);
+        data_start=data_end;
+    }
 }
 
 void Integrator21Base::init_sampler() {

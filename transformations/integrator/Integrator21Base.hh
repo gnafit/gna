@@ -7,6 +7,8 @@ class Integrator21Base : public GNAObject,
                        public TransformationBind<Integrator21Base>
 {
 public:
+  TransformationDescriptor add();
+
   void dump();
 
 protected:
@@ -16,11 +18,11 @@ protected:
   Eigen::ArrayXi m_xorders;
   Eigen::ArrayXd m_xedges;
   Eigen::ArrayXd m_xweights;
-  Eigen::ArrayXd m_yweights;
 
   int m_yorder;
-  double ymin;
-  double ymax;
+  double m_ymin;
+  double m_ymax;
+  Eigen::ArrayXd m_yweights;
 
   virtual void sample(FunctionArgs&)=0;
 
