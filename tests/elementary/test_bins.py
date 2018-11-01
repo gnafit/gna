@@ -12,18 +12,23 @@ from load import ROOT as R
 import constructors as C
 from gna.bindings import DataType
 
-edges = N.logspace(0, 4, 20, base=2)
-bins = C.Bins(edges)
+def test_bins():
+    edges = N.logspace(0, 4, 20, base=2)
+    bins = C.Bins(edges)
 
-def cmp(text, a, b):
-    good = N.isclose(a,b).all()
-    if good:
-        print(text, '\033[32mOK\033[0m', a)
-    else:
-        print(text, '\033[32mFAIL!\033[0m', a, b)
-    print('')
+    def cmp(text, a, b):
+        good = N.allclose(a,b)
+        assert good, ''.join(('\033[32mFAIL!\033[0m', a, b))
+        if good:
+            print(text, '\033[32mOK\033[0m', a)
+        else:
+            print(text, '\033[32mFAIL!\033[0m', a, b)
+        print('')
 
-tr=bins.bins
-cmp('edges', tr.edges.data(), edges)
-cmp('centers', tr.centers.data(), (edges[:-1]+edges[1:])*0.5)
-cmp('widths', tr.widths.data(), (edges[1:]-edges[:-1]))
+    tr=bins.bins
+    cmp('edges', tr.edges.data(), edges)
+    cmp('centers', tr.centers.data(), (edges[:-1]+edges[1:])*0.5)
+    cmp('widths', tr.widths.data(), (edges[1:]-edges[:-1]))
+
+if __name__ == "__main__":
+    test_bins()

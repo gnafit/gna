@@ -33,7 +33,7 @@ def test_points():
     res = identity.identity.target.data()
     dt  = identity.identity.target.datatype()
 
-    assert N.allclose(mat, res) 
+    assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
     #
     # Dump
