@@ -9,6 +9,7 @@ public:
   ~GSLSamplerGL();
 
   void fill(size_t n, double a, double b, double* x, double* w);
+  void fill_bins(size_t nbins, int* orders, double* edges, double* abscissa, double* weight);
 
 private:
   gsl_integration_glfixed_table* get_table(size_t n);

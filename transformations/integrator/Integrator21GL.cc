@@ -23,24 +23,10 @@ Integrator21Base(xbins, xorders, xedges, yorder, ymin, ymax)
 }
 
 void Integrator21GL::sample(FunctionArgs& fargs){
-  auto* edge_a=m_xedges.data();
-  auto* edge_b{next(edge_a)};
   auto& rets=fargs.rets;
-  auto *abscissa(rets[0].buffer), *weight(m_xweights.data());
-  rets[1].x = m_xedges.cast<double>();
-
   GSLSamplerGL sampler;
-  for (size_t i = 0; i < m_xorders.size(); ++i) {
-    size_t n = static_cast<size_t>(m_xorders[i]);
-    sampler.fill(n, *edge_a, *edge_b, abscissa, weight);
-    advance(abscissa, n);
-    advance(weight, n);
-    advance(edge_a, 1);
-    advance(edge_b, 1);
-  }
-
-  abscissa=rets[1].buffer;
-  weight=m_yweights.data();
-  sampler.fill(m_yorder, m_ymin, m_ymax, abscissa, weight);
+  sampler.fill_bins(m_xorders.size(), m_xorders.data(), m_xedges.data(), rets[0].buffer, m_xweights.data());
+  sampler.fill(m_yorder, m_ymin, m_ymax, rets[1].buffer, m_yweights.data());
+  rets[2].x = m_xedges.cast<double>();
 }
 

@@ -21,20 +21,9 @@ IntegratorGL::IntegratorGL(size_t bins, int* orders, double* edges) : Integrator
 }
 
 void IntegratorGL::sample(FunctionArgs& fargs){
-  auto* edge_a=m_edges.data();
-  auto* edge_b{next(edge_a)};
   auto& rets=fargs.rets;
-  auto *abscissa(rets[0].buffer), *weight(m_weights.data());
-  rets[1].x = m_edges.cast<double>();
-
   GSLSamplerGL sampler;
-  for (size_t i = 0; i < m_orders.size(); ++i) {
-    size_t n = static_cast<size_t>(m_orders[i]);
-    sampler.fill(n, *edge_a, *edge_b, abscissa, weight);
-    advance(abscissa, n);
-    advance(weight, n);
-    advance(edge_a, 1);
-    advance(edge_b, 1);
-  }
+  sampler.fill_bins(m_orders.size(), m_orders.data(), m_edges.data(), rets[0].buffer, m_weights.data());
+  rets[1].x = m_edges.cast<double>();
 }
 
