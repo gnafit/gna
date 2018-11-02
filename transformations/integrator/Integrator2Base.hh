@@ -23,6 +23,8 @@ protected:
   Eigen::ArrayXd m_yedges;
   Eigen::ArrayXd m_yweights;
 
+  Eigen::ArrayXXd m_weights;
+
   virtual void sample(FunctionArgs&)=0;
 
 protected:

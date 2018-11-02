@@ -49,7 +49,7 @@ TransformationDescriptor Integrator2Base::add(){
     }
     transformation_(name)
         .input("f")
-        .input("hist")
+        .output("hist")
         .types(TypesFunctions::ifPoints<0>, TypesFunctions::if2d<0>, &Integrator2Base::check_base)
         .func(&Integrator2Base::integrate)
         ;
@@ -82,18 +82,23 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
     auto& arg=fargs.args[0];
     auto& ret=fargs.rets[0];
 
-    Map<const ArrayXXd, Aligned> pts(arg.x.data(), shape[0], shape[1]);
-    ArrayXd prod = (pts.rowwise()*m_yweights.transpose()).rowwise().sum()*m_xweights;
+    ArrayXXd prod = arg.arr2d*m_weights;
     size_t x_offset=0;
     for (size_t ix = 0; ix < m_xorders.size(); ++ix) {
         size_t nx = m_xorders[ix];
         size_t y_offset=0;
         for (size_t iy = 0; iy < m_yorders.size(); ++iy) {
-            size_t ny = m_xorders[iy];
+            size_t ny = m_yorders[iy];
             ret.x(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
-            x_offset+=nx;
+            cout<<"expect "<<m_xweights.size()<<"  "<<m_yweights.size()<<endl;
+            cout<<"size "<<prod.rows()<<"  "<<prod.cols()<<endl;
+            cout<<"offset "<<x_offset<<"  "<<y_offset<<endl;
+            cout<<"i, j "<<ix<<"  "<<iy<<endl;
+            cout<<"nx, ny "<<nx<<"  "<<ny<<"  "<<endl;
+            cout<<prod.block(x_offset, y_offset, nx, ny)<<endl<<endl;
             y_offset+=ny;
         }
+        x_offset+=nx;
     }
 }
 

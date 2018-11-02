@@ -30,6 +30,8 @@ void Integrator2GL::sample(FunctionArgs& fargs){
   sampler.fill_bins(m_xorders.size(), m_xorders.data(), m_xedges.data(), x.buffer, m_xweights.data());
   sampler.fill_bins(m_yorders.size(), m_yorders.data(), m_yedges.data(), y.buffer, m_yweights.data());
 
+  m_weights = m_xweights.matrix() * m_yweights.matrix().transpose();
+
   rets[2].x = m_xedges.cast<double>();
   rets[3].x = m_yedges.cast<double>();
 

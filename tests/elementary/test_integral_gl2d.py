@@ -28,15 +28,15 @@ from mpl_toolkits.mplot3d import Axes3D
 
 """Parse arguments"""
 parser = ArgumentParser()
-parser.add_argument( '-o', '--orders', type=int, nargs=2, default=(5,5), help='integration order' )
+parser.add_argument( '-o', '--orders', type=int, nargs=2, default=(5,6), help='integration order' )
 parser.add_argument( '-x', '--xbins', type=float, nargs=3, default=[ 0.0, 7.001, 1.0 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 8.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
-parser.add_argument( '--ab', type=float, nargs=2, default=(2.0, 3.0), help='function parameters' )
+parser.add_argument( '--ab', type=float, nargs=2, default=(1.0, 2.0), help='function parameters' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
 parser.add_argument( '-M', '--mode', default='gl2', choices=['gl2', 'gl21'], help='integration mode' )
 # parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
-# parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
-# parser.add_argument( '--dot', help='write graphviz output' )
+parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
+parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
 
 """Initialize the integrator"""
@@ -83,7 +83,6 @@ xwidths = xedges[1:]-xedges[:-1]
 xmesh = integrator.points.xmesh.data()
 ymesh = integrator.points.ymesh.data()
 
-
 """Make function"""
 a, b = opts.ab
 def fcn(x, y):
@@ -123,6 +122,16 @@ def integr(x, y):
 fcn_values = fcn(xmesh, ymesh)
 integrals  = integr(xedges, yedges)
 
+fcn_o = Points(fcn_values)
+fcn_output=fcn_o.single()
+integrator.hist.f(fcn_output)
+hist_output = integrator.hist.hist
+hist_output.setLabel('output histogram')
+hist = hist_output.data()
+
+import IPython
+IPython.embed()
+
 """Self test of integration"""
 from scipy.integrate import dblquad
 ix, iy = 4, 2
@@ -144,7 +153,12 @@ print( 'Analytic:', int_a1, int_a2 )
 print( 'Diff (scipy-analytic):', int_s-int_a1 )
 print( 'Diff (analytic):', int_a1-int_a2 )
 
-"""Plot the function"""
+if opts.dump:
+    integrator.dump()
+    # print('Abscissas:', integrator.points.x.data())
+    # print('Widths:', widths)
+
+"""Plot data"""
 fig = P.figure()
 ax = P.subplot( 111, projection='3d' )
 ax.minorticks_on()
@@ -154,61 +168,37 @@ ax.set_ylabel( '' )
 ax.set_title( '' )
 ax.plot_wireframe(xmesh, ymesh, fcn_values)
 
-P.show()
+# # init figure
+# fig = P.figure()
+# ax = P.subplot( 111 )
+# ax.minorticks_on()
+# ax.grid()
+# ax.set_xlabel( 'x' )
+# ax.set_ylabel( 'f(x)' )
+# ax.set_title( 'Integrate exponential (%s)'%(opts.mode) )
 
-import IPython
-IPython.embed()
-
-"""Make fake gaussian data"""
-# pass sample points as input to the function 'energy'
-if mode21:
-    fcn_input(integrator.points.xmesh)
-else:
-    fcn_input(integrator.points.x)
-# pass the function output to the histogram builder (integrator)
-integrator.hist.f( fcn_output )
-# read the histogram contents
-hist_output = integrator.hist.hist
-hist_output.setLabel('output histogram')
-hist = hist_output.data()
-
-if opts.dump:
-    integrator.dump()
-    print('Abscissas:', integrator.points.x.data())
-    print('Widths:', widths)
-
-"""Plot data"""
-# init figure
-fig = P.figure()
-ax = P.subplot( 111 )
-ax.minorticks_on()
-ax.grid()
-ax.set_xlabel( 'x' )
-ax.set_ylabel( 'f(x)' )
-ax.set_title( 'Integrate exponential (%s)'%(opts.mode) )
-
-baropts = dict(alpha=0.5)
-# plot function versus sample points
-ax.plot( integrator.points.x.data(), fcn_output.data(), '-', label='function' )
-# plot histogram using GNA to matplotlib interface
-hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), **baropts)
-# plot histogram manually
-plot_bar( edges, hist/widths, label='histogram/binwidth', **baropts)
+# baropts = dict(alpha=0.5)
+# # plot function versus sample points
+# ax.plot( integrator.points.x.data(), fcn_output.data(), '-', label='function' )
+# # plot histogram using GNA to matplotlib interface
+# hist_output.plot_bar(label='histogram (sum=%g)'%hist.sum(), **baropts)
+# # plot histogram manually
+# plot_bar( edges, hist/widths, label='histogram/binwidth', **baropts)
 
 # add legend
-ax.legend(loc=opts.legend)
+# ax.legend(loc=opts.legend)
 
-# Our function of interest is a guassian and should give 1 when integrated
-# Test it by summing the histogram bins
-diff = hist.sum()-integral
-print('Integral (analytic)', integral)
-print('Integral (analytic, sum)', integrals.sum())
-print('Diff (Integral - %g):'%integral, diff)
-# print('Integrals (analytic)', integrals)
-# print('Integrals (calc)', hist)
-adiff = N.fabs(integrals-hist).sum()
-print('Diffs (abssum):', adiff)
-print( N.fabs(diff)<1.e-8 and adiff<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
+# # Our function of interest is a guassian and should give 1 when integrated
+# # Test it by summing the histogram bins
+# diff = hist.sum()-integral
+# print('Integral (analytic)', integral)
+# print('Integral (analytic, sum)', integrals.sum())
+# print('Diff (Integral - %g):'%integral, diff)
+# # print('Integrals (analytic)', integrals)
+# # print('Integrals (calc)', hist)
+# adiff = N.fabs(integrals-hist).sum()
+# print('Diffs (abssum):', adiff)
+# print( N.fabs(diff)<1.e-8 and adiff<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
 
 if opts.dot:
     try:
