@@ -80,12 +80,16 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
 
     Map<const ArrayXXd, Aligned> pts(arg.x.data(), shape[0], shape[1]);
     ArrayXd prod = (pts.rowwise()*m_yweights.transpose()).rowwise().sum()*m_xweights;
-    auto* data_start = prod.data();
-    for (size_t i = 0; i < m_xorders.size(); ++i) {
-        size_t n = m_xorders[i];
-        auto* data_end=std::next(data_start, n);
-        ret.x(i) = std::accumulate(data_start, data_end, 0.0);
-        data_start=data_end;
+    size_t x_offset=0;
+    for (size_t ix = 0; ix < m_xorders.size(); ++ix) {
+        size_t nx = m_xorders[ix];
+        size_t y_offset=0;
+        for (size_t iy = 0; iy < m_yorders.size(); ++iy) {
+            size_t ny = m_xorders[iy];
+            ret.x(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
+            x_offset+=nx;
+            y_offset+=ny;
+        }
     }
 }
 
