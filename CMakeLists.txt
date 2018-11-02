@@ -53,6 +53,7 @@ set (SOURCES
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
   transformations/integrator/Integrator21Base.cc
+  transformations/integrator/Integrator2Base.cc
   transformations/integrator/IntegratorGL.cc
   transformations/integrator/Integrator21GL.cc
   transformations/integrator/IntegratorRect.cc
@@ -195,6 +196,7 @@ set (HEADERS
   ReactorGroup.hh
   IntegratorBase.hh
   Integrator21Base.hh
+  Integrator2Base.hh
   IntegratorGL.hh
   Integrator21GL.hh
   IntegratorRect.hh
