@@ -68,7 +68,7 @@ struct DataType {
    * @param other instance of DataType.
    */
   DataType(const DataType& other) :
-  kind{other.kind}, shape(other.shape), edges(other.edges)
+  kind{other.kind}, shape(other.shape), edges(other.edges), edgesNd(other.edgesNd)
   { }
 
   bool operator==(const DataType &other) const;                 ///< Check if data types are identical.
@@ -113,7 +113,7 @@ struct DataType {
   std::vector<size_t> shape;                                   ///< Data dimensions.
 
   std::vector<double> edges = {};                              ///< Bin edges for 1D histogram.
-  std::vector<std::vector<double>> edgesNd = {{}};             ///< Bin edges for ND histogram.
+  std::vector<std::vector<double>> edgesNd = {{}};             ///< Bin edges for ND histogram. TODO: resolve redundancy of edges and edgesNd
   //std::pair<double, double> bounds = {
     //-std::numeric_limits<double>::infinity(),
      //std::numeric_limits<double>::infinity()
@@ -468,7 +468,7 @@ public:
    */
   DataType::Hist<T> &edges(const std::vector<double> &xedges, const std::vector<double> &yedges) {
     m_type.edges = xedges;
-    m_type.resize(2);
+    m_type.edgesNd.resize(2);
     m_type.edgesNd[0]=xedges;
     m_type.edgesNd[1]=yedges;
     return bins(xedges.size()-1, yedges.size()-1);
@@ -484,7 +484,7 @@ public:
    */
   DataType::Hist<T> &edges(size_t nx, double* xedges, size_t ny, double* yedges) {
     m_type.edges.assign(xedges, xedges+nx);
-    m_type.resize(2);
+    m_type.edgesNd.resize(2);
     m_type.edgesNd[0]=m_type.edges;
     m_type.edgesNd[1].assign(yedges, yedges+ny);
     return bins(nx-1, ny-1);

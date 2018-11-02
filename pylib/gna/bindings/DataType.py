@@ -32,7 +32,7 @@ def DataType__Hist____str__(self):
         # else:
             # suffix='variable width'
 
-        return 'hist2d, {:3d}x{:3d}={:d} bins, edges {}->{} and {}->{}'.format(
+        return 'hist2d, {:d}x{:d}={:d} bins, edges {}->{} and {}->{}'.format(
                 dt.shape[0], dt.shape[1], dt.size(), edges1[0], edges1[-1], edges2[0], edges2[-1])
 
     return 'histogram, undefined'

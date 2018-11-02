@@ -45,15 +45,15 @@ TransformationDescriptor Integrator2Base::add(){
     }
     transformation_(name)
         .input("f")
-        .output("hist")
-        .types(TypesFunctions::ifPoints<0>, &Integrator2Base::check_base)
+        .input("hist")
+        .types(TypesFunctions::ifPoints<0>, TypesFunctions::if2d<0>, &Integrator2Base::check_base)
         .func(&Integrator2Base::integrate)
         ;
     return transformations.back();
 }
 
 void Integrator2Base::check_base(TypesFunctionArgs& fargs){
-    fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+    fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data(), m_yedges.size(), m_yedges.data());
 
     auto& shape=fargs.args[0].shape;
     if (shape[0]!=m_xweights.size() || shape[1]!=m_yweights.size()){
@@ -65,7 +65,7 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
                                );
     }
 
-    if((m_xorders<1).any() || m_yorders<1).any()){
+    if((m_xorders<1).any() || (m_yorders<1).any()){
         std::cerr<<"X orders: "<<m_xorders<<std::endl;
         std::cerr<<"Y orders: "<<m_yorders<<std::endl;
         throw std::runtime_error("All integration orders should be >=1");

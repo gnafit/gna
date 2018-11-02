@@ -44,6 +44,16 @@ def Histogram( edges, data, *args, **kwargs ):
 
     return R.Histogram( data.size, edges, data, *args, **kwargs )
 
+"""Construct Histogram2d object from two arrays: edges and data"""
+def Histogram2d( xedges, yedges, data, *args, **kwargs ):
+    xedges = N.ascontiguousarray(xedges, dtype='d')
+    yedges = N.ascontiguousarray(yedges, dtype='d')
+    data   = N.ascontiguousarray(data,   dtype='d').ravel(order='F')
+    if (xedges.size-1)*(yedges.size-1)!=data.size:
+        raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
+
+    return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
+
 """Construct the GaussLegendre transformation based on bin edges and order(s)"""
 def GaussLegendre(edges, orders, *args, **kwargs):
     edges = N.ascontiguousarray(edges, dtype='d')

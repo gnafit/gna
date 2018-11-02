@@ -30,6 +30,7 @@ set (SOURCES
   transformations/trial/TrialMultiFunc.cc
   transformations/base/FillLike.cc
   transformations/base/Histogram.cc
+  transformations/base/Histogram2d.cc
   transformations/base/Identity.cc
   transformations/base/Points.cc
   transformations/base/Bins.cc
@@ -152,6 +153,7 @@ set (HEADERS
   Bins.hh
   Points.hh
   Histogram.hh
+  Histogram2d.hh
   HistEdges.hh
   Identity.hh
   Dummy.hh
