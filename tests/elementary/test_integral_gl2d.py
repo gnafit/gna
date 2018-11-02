@@ -24,71 +24,140 @@ from gna.env import env
 from argparse import ArgumentParser
 from gna.parameters.printer import print_parameters
 from mpl_tools import bindings
+from mpl_toolkits.mplot3d import Axes3D
 
 """Parse arguments"""
 parser = ArgumentParser()
-parser.add_argument( '-o', '--order', type=int, default=3, help='integration order' )
-parser.add_argument( '-b', '--bins', type=float, nargs=3, default=[ 0.0, 12.001, 0.05 ], help='Bins: arange arguments (min, max, step)' )
-parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
+parser.add_argument( '-o', '--orders', type=int, nargs=2, default=(5,5), help='integration order' )
+parser.add_argument( '-x', '--xbins', type=float, nargs=3, default=[ 0.0, 7.001, 1.0 ], help='Bins: arange arguments (min, max, step)' )
+parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 8.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
+parser.add_argument( '--ab', type=float, nargs=2, default=(2.0, 3.0), help='function parameters' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
-parser.add_argument( '-M', '--mode', default='gl', choices=['gl', 'rect_left', 'rect', 'rect_right', 'trap', 'gl21'], help='integration mode' )
-parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
-parser.add_argument( '--dot', help='write graphviz output' )
+parser.add_argument( '-M', '--mode', default='gl2', choices=['gl2', 'gl21'], help='integration mode' )
+# parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
+# parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
+# parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
-
-
-"""Initialize the function and environment"""
-ns = env.globalns
-ns.defparameter( 'alpha', central=-0.5, sigma=0.1 )
-print_parameters( ns )
-
-names = stdvector(('alpha',))
-fcn_we = R.WeightedSum(names, names)
-fcn_input=fcn_we.sum.alpha
-
-fcn_e = R.Exp()
-fcn_e.exp.points(fcn_we.sum.sum)
-fcn_output = fcn_e.exp.result
 
 """Initialize the integrator"""
 # create array with bin edges
-edges = N.arange(*opts.bins, dtype='d')
+xedges = N.arange(*opts.xbins, dtype='d')
+yedges = N.arange(*opts.ybins, dtype='d')
 
-alpha=ns['alpha'].value()
-a, b = edges[0], edges[-1]
-integral = (N.exp(alpha*b) - N.exp(alpha*a))/alpha
-aa, bb = edges[:-1], edges[1:]
-integrals = (N.exp(alpha*bb) - N.exp(alpha*aa))/alpha
+# create 2d integrator (sample points) for given edges and integration order
+integrators = dict(gl2=R.Integrator2GL, gl21=R.Integrator21GL)
+Integrator = integrators[opts.mode]
 
-#21d mode
-mode21 = opts.mode=='gl21'
+mode21= opts.mode=='gl21'
 
-# create 1d integrator (sample points) for given edges and integration order
-integrators = dict(gl=R.IntegratorGL, rect=R.IntegratorRect, trap=R.IntegratorTrap, gl21=R.Integrator21GL)
-Integrator = integrators[ opts.mode.split('_', 1)[0] ]
-if '_' in opts.mode:
-    iopts = opts.mode.rsplit('_', 1)[-1],
-elif mode21:
-    iopts = (3, 0.0, 1.0)
+if not mode21:
+    if opts.input_edges:
+        xedges_in = Histogram(xedges, xedges[:-1])
+        yedges_in = Histogram(yedges, yedges[:-1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], None, yedges.size-1, opts.orders[1], None)
+        integrator.points.xedges(xedges_in)
+        integrator.points.yedges(yedges_in)
+    else:
+        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, yedges.size-1, opts.orders[1], yedges)
 else:
-    iopts = tuple()
-
-if opts.input_edges:
-    edges_in = Histogram(edges, edges[:-1])
-    integrator = Integrator(edges.size-1, opts.order, None, *iopts)
-    integrator.points.edges(edges_in)
-else:
-    integrator = Integrator(edges.size-1, opts.order, edges, *iopts)
+    if yedges.sizes!=2:
+        raise Exception('In GL21 mode there should be only one bin over second axis')
+    if opts.input_edges:
+        xedges_in = Histogram(xedges, xedges[:-1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], None, opts.orders[1], yedges[0], yedges[1])
+        integrator.points.xedges(xedges_in)
+    else:
+        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, opts.orders[1], yedges[0], yedges[1])
 
 integrator.points.setLabel('Integrator inputs')
-integrator.points.x.setLabel('E (points)')
-integrator.points.xedges.setLabel('E (bin edges)')
-if mode21:
-    integrator.points.y.setLabel('Y')
+integrator.points.y.setLabel('X (points)')
+integrator.points.xedges.setLabel('X (edges)')
+integrator.points.y.setLabel('Y (points)')
+if not mode21:
+    integrator.points.yedges.setLabel('Y (edges)')
 integrator.hist.setLabel('Integrator (histogram)')
 
-edges = integrator.points.xedges.data()
-widths = edges[1:]-edges[:-1]
+xedges = integrator.points.xedges.data()
+xwidths = xedges[1:]-xedges[:-1]
+
+xmesh = integrator.points.xmesh.data()
+ymesh = integrator.points.ymesh.data()
+
+
+"""Make function"""
+a, b = opts.ab
+def fcn(x, y):
+    return N.sin(a*x+b*y)
+
+def fcn_int(x1, x2, y1, y2):
+    weight = -1.0/(a*b)
+
+    s1 = N.sin( a*x2 + b*y2 )
+    s2 = N.sin( a*x1 + b*y1 )
+    s3 = N.sin( a*x2 + b*y1 )
+    s4 = N.sin( a*x1 + b*y2 )
+
+    return weight*(s1+s2-s3-s4)
+
+# def fcn(x, y):
+    # return a*x+b*y
+
+# def fcn_int(x1, x2, y1, y2):
+    # return 0.5*(y2-y1)*(x2-x1)*(a*(x2+x1)+b*(y2+y1))
+
+# def fcn(x, y):
+    # return a + x*0.0
+
+# def fcn_int(x1, x2, y1, y2):
+    # return a*(x2-x1)*(y2-y1)
+
+def integr(x, y):
+    x, y = N.meshgrid(x, y, indexing='ij')
+    x1 = x[:-1,:-1]
+    x2 = x[1: ,1:]
+    y1 = y[:-1,:-1]
+    y2 = y[1:,1: ]
+
+    return fcn_int(x1, x2, y1, y2)
+
+fcn_values = fcn(xmesh, ymesh)
+integrals  = integr(xedges, yedges)
+
+"""Self test of integration"""
+from scipy.integrate import dblquad
+ix, iy = 4, 2
+x1, x2 = xedges[ix:ix+2]
+y1, y2 = yedges[iy:iy+2]
+
+int_s  = dblquad(lambda y, x: fcn(x, y), x1, x2, y1, y2)[0]
+int_a1 = integr( [x1, x2], [y1, y2] )[0,0]
+int_a2 = integrals[ix, iy]
+
+print(integrals)
+
+print('Integration self check')
+print( 'a, b', a, b )
+print( 'x', x1, x2 )
+print( 'y', y1, y2 )
+print( 'Scipy:', int_s)
+print( 'Analytic:', int_a1, int_a2 )
+print( 'Diff (scipy-analytic):', int_s-int_a1 )
+print( 'Diff (analytic):', int_a1-int_a2 )
+
+"""Plot the function"""
+fig = P.figure()
+ax = P.subplot( 111, projection='3d' )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( '' )
+ax.set_ylabel( '' )
+ax.set_title( '' )
+ax.plot_wireframe(xmesh, ymesh, fcn_values)
+
+P.show()
+
+import IPython
+IPython.embed()
 
 """Make fake gaussian data"""
 # pass sample points as input to the function 'energy'
