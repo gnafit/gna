@@ -29,6 +29,9 @@ void Integrator21GL::sample(FunctionArgs& fargs){
   auto& y=rets[1];
   sampler.fill_bins(m_xorders.size(), m_xorders.data(), m_xedges.data(), x.buffer, m_xweights.data());
   sampler.fill(m_yorder, m_ymin, m_ymax, y.buffer, m_yweights.data());
+
+  m_weights = m_xweights.matrix() * m_yweights.matrix().transpose();
+
   rets[2].x = m_xedges.cast<double>();
 
   rets[3].mat = x.vec.replicate(1, m_yweights.size());

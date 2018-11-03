@@ -24,6 +24,8 @@ protected:
   double m_ymax;
   Eigen::ArrayXd m_yweights;
 
+  Eigen::ArrayXXd m_weights;
+
   virtual void sample(FunctionArgs&)=0;
 
 protected:
