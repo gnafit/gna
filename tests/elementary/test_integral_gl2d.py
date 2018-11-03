@@ -129,9 +129,7 @@ hist = hist_output.data()
 
 """Self test of integration"""
 from scipy.integrate import dblquad
-ix, iy = 4, 2
-if mode21:
-    iy=0
+ix, iy = 4, min(yedges.size-2, 2)
 x1, x2 = xedges[ix:ix+2]
 y1, y2 = yedges[iy:iy+2]
 
@@ -155,7 +153,10 @@ print( integrals )
 print('Numeric integrals')
 print( hist )
 
-OK = N.allclose(integrals.T[0], hist)
+if mode21:
+    OK = N.allclose(integrals.T[0], hist)
+else:
+    OK = N.allclose(integrals, hist)
 print(OK and '\033[32mIntegration is OK\033[0m' or '\033[31mIntegration failed\033[0m')
 
 if opts.dump:

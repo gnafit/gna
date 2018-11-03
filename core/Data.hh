@@ -12,6 +12,7 @@
 #include <type_traits>
 
 #include <Eigen/Dense>
+#include <unsupported/Eigen/CXX11/Tensor>
 
 /**
  * @brief Data status flag.
