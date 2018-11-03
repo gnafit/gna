@@ -89,13 +89,7 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
         size_t y_offset=0;
         for (size_t iy = 0; iy < m_yorders.size(); ++iy) {
             size_t ny = m_yorders[iy];
-            ret.x(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
-            cout<<"expect "<<m_xweights.size()<<"  "<<m_yweights.size()<<endl;
-            cout<<"size "<<prod.rows()<<"  "<<prod.cols()<<endl;
-            cout<<"offset "<<x_offset<<"  "<<y_offset<<endl;
-            cout<<"i, j "<<ix<<"  "<<iy<<endl;
-            cout<<"nx, ny "<<nx<<"  "<<ny<<"  "<<endl;
-            cout<<prod.block(x_offset, y_offset, nx, ny)<<endl<<endl;
+            ret.arr2d(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
             y_offset+=ny;
         }
         x_offset+=nx;

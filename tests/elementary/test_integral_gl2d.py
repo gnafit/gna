@@ -129,9 +129,6 @@ hist_output = integrator.hist.hist
 hist_output.setLabel('output histogram')
 hist = hist_output.data()
 
-import IPython
-IPython.embed()
-
 """Self test of integration"""
 from scipy.integrate import dblquad
 ix, iy = 4, 2
@@ -142,8 +139,6 @@ int_s  = dblquad(lambda y, x: fcn(x, y), x1, x2, y1, y2)[0]
 int_a1 = integr( [x1, x2], [y1, y2] )[0,0]
 int_a2 = integrals[ix, iy]
 
-print(integrals)
-
 print('Integration self check')
 print( 'a, b', a, b )
 print( 'x', x1, x2 )
@@ -152,6 +147,16 @@ print( 'Scipy:', int_s)
 print( 'Analytic:', int_a1, int_a2 )
 print( 'Diff (scipy-analytic):', int_s-int_a1 )
 print( 'Diff (analytic):', int_a1-int_a2 )
+
+print()
+print('Integration check')
+print('Analytic integrals')
+print( integrals )
+print('Numeric integrals')
+print( hist )
+
+OK = N.allclose(integrals, hist)
+print(OK and '\033[32mIntegration is OK\033[0m' or '\033[31mIntegration failed\033[0m')
 
 if opts.dump:
     integrator.dump()
