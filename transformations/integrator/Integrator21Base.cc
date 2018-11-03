@@ -78,8 +78,7 @@ void Integrator21Base::integrate(FunctionArgs& fargs){
     auto& arg=fargs.args[0];
     auto& ret=fargs.rets[0];
 
-    Map<const ArrayXXd, Aligned> pts(arg.x.data(), shape[0], shape[1]);
-    ArrayXd prod = (pts.rowwise()*m_yweights.transpose()).rowwise().sum()*m_xweights;
+    ArrayXd prod = (arg.arr2d*m_weights).rowwise().sum();
     auto* data_start = prod.data();
     for (size_t i = 0; i < m_xorders.size(); ++i) {
         size_t n = m_xorders[i];

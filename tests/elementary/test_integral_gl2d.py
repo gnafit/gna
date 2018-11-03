@@ -19,7 +19,7 @@ from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_bar
 import numpy as N
 from load import ROOT as R
-from constructors import Points, Histogram, stdvector
+from constructors import Points, Histogram, Histogram2d, stdvector
 from gna.env import env
 from argparse import ArgumentParser
 from gna.parameters.printer import print_parameters
@@ -52,15 +52,13 @@ mode21= opts.mode=='gl21'
 
 if not mode21:
     if opts.input_edges:
-        xedges_in = Histogram(xedges, xedges[:-1])
-        yedges_in = Histogram(yedges, yedges[:-1])
-        integrator = Integrator(xedges.size-1, opts.orders[0], None, yedges.size-1, opts.orders[1], None)
-        integrator.points.xedges(xedges_in)
-        integrator.points.yedges(yedges_in)
+        edges_in = Histogram2d(xedges, yedges, xedges[:-1,None]*yedges[:-1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], yedges.size-1, opts.orders[1])
+        integrator.points.edges(edges_in)
     else:
         integrator = Integrator(xedges.size-1, opts.orders[0], xedges, yedges.size-1, opts.orders[1], yedges)
 else:
-    if yedges.sizes!=2:
+    if yedges.size!=2:
         raise Exception('In GL21 mode there should be only one bin over second axis')
     if opts.input_edges:
         xedges_in = Histogram(xedges, xedges[:-1])
@@ -132,6 +130,8 @@ hist = hist_output.data()
 """Self test of integration"""
 from scipy.integrate import dblquad
 ix, iy = 4, 2
+if mode21:
+    iy=0
 x1, x2 = xedges[ix:ix+2]
 y1, y2 = yedges[iy:iy+2]
 
@@ -155,7 +155,7 @@ print( integrals )
 print('Numeric integrals')
 print( hist )
 
-OK = N.allclose(integrals, hist)
+OK = N.allclose(integrals.T[0], hist)
 print(OK and '\033[32mIntegration is OK\033[0m' or '\033[31mIntegration failed\033[0m')
 
 if opts.dump:

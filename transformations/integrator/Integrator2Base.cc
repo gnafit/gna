@@ -109,10 +109,8 @@ void Integrator2Base::init_sampler() {
       ;
 
   if(!m_xedges.size() && !m_yedges.size()){
-    trans.input("xedges") //hist with edges
-         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>)
-         .input("yedges") //hist with edges
-         .types(TypesFunctions::if1d<1>, TypesFunctions::ifHist<1>, TypesFunctions::binsToEdges<1,3>);
+    trans.input("edges") //hist with edges
+         .types(TypesFunctions::if2d<0>, TypesFunctions::ifHist<0>);
   }
   else {
     trans.finalize();
@@ -129,10 +127,10 @@ void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
 
   auto& args=fargs.args;
   if(args.size() && !m_xedges.size()){
-    auto& args=fargs.args;
-    auto& xedges=args[0].edges;
+    auto& arg=args[0];
+    auto& xedges=arg.edgesNd[0];
     m_xedges=Map<const ArrayXd>(xedges.data(), xedges.size());
-    auto& yedges=args[1].edges;
+    auto& yedges=arg.edgesNd[1];
     m_yedges=Map<const ArrayXd>(yedges.data(), yedges.size());
   }
   rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());

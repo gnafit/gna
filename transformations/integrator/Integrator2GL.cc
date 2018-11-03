@@ -10,6 +10,14 @@
 using namespace Eigen;
 using namespace std;
 
+Integrator2GL::Integrator2GL(size_t xbins, int xorders, size_t ybins, int  yorders) :
+Integrator2GL(xbins, xorders, nullptr, ybins, yorders, nullptr)
+{}
+
+Integrator2GL::Integrator2GL(size_t xbins, int* xorders, size_t ybins, int* yorders) :
+Integrator2GL(xbins, xorders, nullptr, ybins, yorders, nullptr)
+{}
+
 Integrator2GL::Integrator2GL(size_t xbins, int xorders, double* xedges, size_t ybins, int  yorders, double* yedges) :
 Integrator2Base(xbins, xorders, xedges, ybins, yorders, yedges)
 {
