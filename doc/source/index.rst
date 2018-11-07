@@ -15,6 +15,7 @@ Contents:
    reactor
    inputs
    fc
+   tutorial
    reference_guide
    authors
    acknowledgements

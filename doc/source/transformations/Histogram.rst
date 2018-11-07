@@ -1,7 +1,7 @@
 .. _Histogram:
 
-Histogram transformation
-~~~~~~~~~~~~~~~~~~~~~~~~
+Histogram
+~~~~~~~~~
 
 Description
 ^^^^^^^^^^^

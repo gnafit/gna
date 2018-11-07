@@ -22,6 +22,8 @@ weights = [ 'w1', 'w2' ]
 p1 = env.globalns.defparameter( weights[0], central=1.0, sigma=0.1 )
 p2 = env.globalns.defparameter( weights[1], central=1.0, sigma=0.1 )
 
+env.globalns.printparameters()
+
 """Initialize transformations"""
 points1 = Points( arr1 )
 points2 = Points( arr2 )
