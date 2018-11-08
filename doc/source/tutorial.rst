@@ -64,13 +64,11 @@ GNA contains a set of helper tools to simplify calling C++ functions from python
 wrappers for often used C++ classes' enabling the user to pass numpy arrays and python lists. The following code
 converts the python list of strings to ``std::vector<std::string>``:
 
-.. code-block:: python
+.. literalinclude:: ../../macro/tutorial/basic/00_stdvector.py
     :linenos:
-
-    from __future__ import print_function
-    import constructors as C
-    vec = C.stdvector( ['str1', 'str2', 'str3'] )
-    print(vec, list(vec))
+    :lines: 4-
+    :emphasize-lines: 3
+    :caption: :download:`00_stdvector.py <../../macro/tutorial/basic/00_stdvector.py>`
 
 The code produces the following output:
 
@@ -91,25 +89,11 @@ Points
 The :ref:`Points <Points>` transformation is used to represent 1d/2d array as transformation output. The ``Points``
 instance is created with ``numpy`` array passed as input:
 
-.. code-block:: python
+.. literalinclude:: ../../macro/tutorial/basic/01_points.py
     :linenos:
-
-    from __future__ import print_function
-    import constructors as C
-    import numpy as N
-    # Create numpy array
-    narray = N.arange(12).reshape(3,4)
-    # Create a points instance with data, stored in `narray`
-    parray = C.Points(narray)
-
-    # Import helper library to make print output more informative
-    from gna import printing
-    # Access the output `points` of transformation `points` of the object `parray`
-    print('Output:', parray.points.points)
-    # Access and print relevant DataType
-    print('DataType:', parray.points.points.datatype())
-    # Access the actual data
-    print('Data:\n', parray.points.points.data())
+    :lines: 4-
+    :emphasize-lines: 7,12,14,16
+    :caption: :download:`01_points.py <../../macro/tutorial/basic/01_points.py>`
 
 The code produces the following output:
 
@@ -127,6 +111,23 @@ The code produces the following output:
 Histogram
 """""""""
 
-The :ref:`Histogram` transformation stores a 1-dimensional histogrammed data. TBC... 
+The :ref:`Histogram` transformation stores a 1-dimensional histogrammed data. It is very similar to the 1d version of
+`Points` with the only difference: its DataType stores the bin edges.
 
-.. It is very similar
+.. literalinclude:: ../../macro/tutorial/basic/02_hist.py
+    :linenos:
+    :lines: 4-
+    :emphasize-lines: 12,17,20,21,23
+    :caption: :download:`02_hist.py <../../macro/tutorial/basic/02_hist.py>`
+
+On line 21 `datatype.edges` C++ vector is converted to to the python list.
+
+The code produces the following output:
+
+.. code-block:: txt
+    :linenos:
+
+    Output: [out] hist: hist,  12 bins, edges 1.0->7.0, width 0.5
+    DataType: hist,  12 bins, edges 1.0->7.0, width 0.5
+    Bin edges: [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]
+    Data: [  0. 100. 324. 576. 784. 900. 900. 784. 576. 324. 100.   0.]
