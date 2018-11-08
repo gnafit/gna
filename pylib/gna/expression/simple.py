@@ -4,6 +4,20 @@
 from __future__ import print_function
 from gna.expression.index import *
 
+def call_once(method):
+    def newmethod(self, *args, **kwargs):
+        if not hasattr(self, 'call_once'):
+            self.call_once=set()
+
+        if method in self.call_once:
+            return
+
+        method(self, *args, **kwargs)
+
+        self.call_once.add(method)
+
+    return newmethod
+
 class Variable(Indexed):
     def __init__(self, name, *args, **kwargs):
         super(Variable, self).__init__(name, *args, **kwargs)
@@ -11,22 +25,25 @@ class Variable(Indexed):
     def __mul__(self, other):
         if isinstance(other, Transformation):
             from gna.expression.compound import WeightedTransformation
-            return WeightedTransformation('?', self, other)
+            return WeightedTransformation(undefinedname, self, other)
 
         from gna.expression.compound import VProduct
-        return VProduct('?', self, other)
+        return VProduct(undefinedname, self, other)
 
     def __call__(self, *targs):
         from gna.expression.compound import TCall
         return TCall(self.name, self, targs=targs)
 
-    def build(self, context):
-        printl('build (var) {}:'.format(type(self).__name__), str(self) )
-        with nextlevel():
-            context.build(self.name, self.indices)
+    @call_once
+    def bind(self, context):
+        pass
 
     def get_output(self, nidx, context):
         pass
+
+    @methodname
+    def require(self, context):
+        context.require(self.name, self.indices)
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -35,18 +52,26 @@ class Transformation(Indexed):
     def __str__(self):
         return '{}()'.format(Indexed.__str__(self))
 
+    def __div__(self, other):
+        from gna.expression.compound import TRatio
+        return TRatio(undefinedname, self, other)
+
     def __mul__(self, other):
         from gna.expression.compound import WeightedTransformation
         if isinstance(other, (Variable, WeightedTransformation)):
-            return WeightedTransformation('?', self, other)
+            return WeightedTransformation(undefinedname, self, other)
 
         from gna.expression.compound import TProduct
-        return TProduct('?', self, other)
+        return TProduct(undefinedname, self, other)
 
     def __add__(self, other):
         from gna.expression.compound import TSum
-        return TSum('?', self, other)
+        return TSum(undefinedname, self, other)
 
-    def build(self, context):
-        printl('build (trans) {}:'.format(type(self).__name__), str(self) )
-        context.build(self.name, self.indices)
+    @methodname
+    def require(self, context):
+        context.require(self.name, self.indices)
+
+    @call_once
+    def bind(self, context):
+        pass

@@ -9,12 +9,12 @@ from mpl_tools import helpers
 from matplotlib import pyplot as P
 from gna.bindings import DataType
 
-def if1d(output):
+def ifNd(output, ndim):
     dtype = output.datatype()
-    if dtype.shape.size()==1:
+    if dtype.shape.size()==ndim:
         return
 
-    raise Exception('Output is supposed to be 1d: '+str(dtype))
+    raise Exception('Output is supposed to be %id: '%ndim+str(dtype))
 
 def ifHist(output):
     dtype = output.datatype()
@@ -22,6 +22,13 @@ def ifHist(output):
         return
 
     raise Exception('Output is supposed to be hist: '+str(dtype))
+
+def ifPoints(output):
+    dtype = output.datatype()
+    if dtype.kind==1:
+        return
+
+    raise Exception('Output is supposed to be points: '+str(dtype))
 
 def plot_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal output using pyplot.plot
@@ -34,13 +41,13 @@ def plot_hist1( output, *args, **kwargs ):
 
     returns pyplot.plot() result
     """
-    if1d(output)
+    ifNd(output, 1)
     ifHist(output)
 
     if kwargs.pop( 'autolabel', None ):
         kwargs['label'] = h.GetTitle()
 
-    height=output.data()
+    height=output.data().copy()
     lims=N.array(output.datatype().edges)
 
     return helpers.plot_hist( lims, height, *args, **kwargs )
@@ -58,14 +65,14 @@ def bar_hist1( output, *args, **kwargs ):
     returns pyplot.bar() result
     """
     # autolabel=True guesses plot label with histogram's title
-    if1d(output)
+    ifNd(output, 1)
     ifHist(output)
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
     # if kwargs.pop( 'autolabel', None ):
         # kwargs['label'] = h.GetTitle()
 
-    height=output.data()
+    height=output.data().copy()
     lims  = N.array(output.datatype().edges)
     left  = lims[:-1]
     width = lims[1:] - left
@@ -244,18 +251,24 @@ def bar_hist1( output, *args, **kwargs ):
 
     # return P.plot( x, y, *args, **kwargs )
 
-# def matshow_matrix( self, *args, **kwargs ):
-    # """Plot TMatrixT using pyplot.matshow"""
-    # mask = kwargs.pop( 'mask', None )
-    # colorbar = kwargs.pop( 'colorbar', None )
+def matshow(output, *args, **kwargs):
+    """Plot matrix using pyplot.matshow"""
+    ifNd(output, 2)
+    ifPoints(output)
 
-    # buf = R2N.get_buffer_matrix( self, mask=mask )
-    # res = P.matshow( buf )
-    # if colorbar:
-        # cbar = helpers.add_colorbar( res )
-        # return res,cbar
+    mask = kwargs.pop( 'mask', None )
+    colorbar = kwargs.pop( 'colorbar', None )
+    kwargs.setdefault( 'fignum', False )
 
-    # return res
+    buf = output.data()
+    if mask is not None:
+        buf = N.ma.array(buf, mask=buf==mask)
+    res = P.matshow(buf, **kwargs)
+    if colorbar:
+        cbar = helpers.add_colorbar( res )
+        return res, cbar
+
+    return res
 
 # def imshow_matrix( self, *args, **kwargs ):
     # """Plot TMatrixT using pyplot.imshow"""
@@ -273,16 +286,12 @@ def bar_hist1( output, *args, **kwargs ):
 def bind():
     setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
+    setattr( R.SingleOutput, 'matshow', matshow )
     # setattr( R.TH1, 'errorbar', errorbar_hist1 )
 
     # setattr( R.TH2, 'pcolorfast', pcolorfast_hist2 )
     # setattr( R.TH2, 'pcolormesh', pcolormesh_hist2 )
     # setattr( R.TH2, 'imshow',     imshow_hist2 )
-
-    # setattr( R.TMatrixD, 'matshow', matshow_matrix )
-    # setattr( R.TMatrixF, 'matshow', matshow_matrix )
-    # setattr( R.TMatrixD, 'imshow', imshow_matrix )
-    # setattr( R.TMatrixF, 'imshow', imshow_matrix )
 
     # setattr( R.TGraph,            'plot',     graph_plot )
     # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )

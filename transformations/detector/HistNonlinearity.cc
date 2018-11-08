@@ -1,6 +1,7 @@
 #include "HistNonlinearity.hh"
 #include "TypesFunctions.hh"
 #include <algorithm>
+#include <fmt/format.h>
 
 //#define DEBUG_ENL
 
@@ -12,71 +13,73 @@
 #define  DEBUG(...)
 #endif
 
-HistNonlinearity::HistNonlinearity( bool propagate_matrix ) : m_propagate_matrix(propagate_matrix) {
-  transformation_("smear")
-      .input("Ntrue")
-      .input("FakeMatrix")
-      .output("Nvis")
-      .types(TypesFunctions::pass<0,0>)
-      .func(&HistNonlinearity::calcSmear);
-
+HistNonlinearity::HistNonlinearity(bool single, bool propagate_matrix) :
+HistSmearSparse(single, propagate_matrix)
+{
   transformation_("matrix")
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")
-      .types(TypesFunctions::ifSame,
-         [](HistNonlinearity *obj, TypesFunctionArgs& fargs) {
-         obj->m_size = fargs.args[0].shape[0]-1;
-         obj->m_sparse_cache.resize(obj->m_size, obj->m_size);
-         if( obj->m_propagate_matrix ){
-           fargs.rets[0] = obj->m_datatype = DataType().points().shape( obj->m_size, obj->m_size );
-         }
-         else{
-           fargs.rets[0] = obj->m_datatype = DataType().points().shape( 0, 0 );
-         }
-         })
-       .func(&HistNonlinearity::calcMatrix);
+      .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::ifSame)
+      .types(TypesFunctions::edgesToMatrix<0,0,0>)
+      .func(&HistNonlinearity::calcMatrix);
+
+  if (single) {
+    add(true);
+  }
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
-    if( m_initialized )
-        throw std::runtime_error("HistNonlinearity is already initialized");
-    m_initialized = true;
+  if(!single()){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  if( m_initialized )
+    throw std::runtime_error("HistNonlinearity is already initialized");
+  m_initialized = true;
 
-    t_["matrix"].inputs()[0].connect( bin_edges.single() );
-    t_["matrix"].inputs()[1].connect( bin_edges_modified.single() );
-    t_["smear"].inputs()[1].connect( t_["matrix"].outputs()[0] );
+  transformations["matrix"].inputs[0].connect( bin_edges.single() );
+  transformations["matrix"].inputs[1].connect( bin_edges_modified.single() );
 }
 
 void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
-    set( bin_edges, bin_edges_modified );
-    t_["smear"].inputs()[0].connect( ntrue.single() );
+  if(!single()){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  set( bin_edges, bin_edges_modified );
+  transformations["smear"].inputs[0].connect( ntrue.single() );
 }
 
 void HistNonlinearity::set( SingleOutput& ntrue ){
-    if( !m_initialized )
-        throw std::runtime_error("HistNonlinearity is not initialized");
+  if(!single()){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+  if( !m_initialized )
+      throw std::runtime_error("HistNonlinearity is not initialized");
 
-    t_["smear"].inputs()[0].connect( ntrue.single() );
+  transformations["smear"].inputs[0].connect( ntrue.single() );
 }
 
-void HistNonlinearity::calcSmear(FunctionArgs& fargs) {
-  auto& args=fargs.args;
-  args[1]; // Needed to trigger updating
-  fargs.rets[0].x = m_sparse_cache * args[0].vec;
+void HistNonlinearity::set(){
+  if(!single()){
+    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
+  }
+
+  transformations["smear"].inputs[1].connect( transformations["matrix"].outputs[0] );
 }
 
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
-  m_sparse_cache.setZero();
-
   auto& args=fargs.args;
   auto n = args[0].arr.size();
+  auto bins = n-1;
   auto* edges_orig = args[0].arr.data();
   auto* edges_mod  = args[1].arr.data();
-  auto* end_orig = std::next(edges_orig, n-1);
-  auto* end_mod  = std::next(edges_mod, n-1);
+  auto* end_orig = std::next(edges_orig, bins);
+  auto* end_mod  = std::next(edges_mod, bins);
 
-  DEBUG("n=%li, matrix n=%li\n", n, m_size);
+  m_sparse_cache.resize(bins, bins);
+  m_sparse_cache.setZero();
+
+  DEBUG("n=%li, matrix n=%i\n", n, int(n-1));
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );

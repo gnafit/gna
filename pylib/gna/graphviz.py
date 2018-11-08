@@ -23,7 +23,7 @@ class GNADot(object):
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)
-        self.joints = kwargs.pop('joints', True)
+        self.joints = kwargs.pop('joints', False)
 
         self.graph=G.AGraph( directed=True, strict=False, **kwargs )
         self.register = set()

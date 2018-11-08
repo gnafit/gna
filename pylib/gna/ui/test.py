@@ -66,7 +66,7 @@ class cmd(basecmd):
         edges = np.linspace(0, 10, 500)
         orders = np.array([5]*(len(edges)-1), dtype=int)
 
-        prediction = ROOT.Prediction()
+        prediction = ROOT.Concat()
         integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         ibd = ROOT.IbdFirstOrder()
         ibd.Enu.inputs(integrator.points.x)
@@ -98,7 +98,7 @@ class cmd(basecmd):
             events.multiply(ibd.xsec)
             oscprob.probsum.comp0(events)
         integrator.hist.inputs(oscprob.probsum)
-        eres = ROOT.EnergyResolution(ns="eres")
+        eres = ROOT.EnergyResolutionC(ns="eres")
         eres.smear.inputs(integrator.hist)
         prediction.append(eres.smear)
         import time
@@ -114,7 +114,7 @@ class cmd(basecmd):
         # print ibd0
 
         return
-        # prediction = ROOT.Prediction()
+        # prediction = ROOT.Concat()
         # integrator = ROOT.GaussLegendre2d(edges, orders, len(orders), -1.0, 1.0, 5)
         # events = ROOT.Product()
         # events.multiply(ibd.jacobian)

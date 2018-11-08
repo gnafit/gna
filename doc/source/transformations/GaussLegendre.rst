@@ -41,6 +41,9 @@ Outputs
 1) ``points.x`` — array of sample points :math:`x_i`.
 2) ``points.xedges`` — bin edges.
 
+Tests
+^^^^^
+
 Use the following commands for the usage example and testing:
 
 .. code:: bash

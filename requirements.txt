@@ -1,0 +1,11 @@
+colorama
+h5py
+ipython
+matplotlib
+numpy
+pytest
+PyYAML
+scipy
+seaborn
+Sphinx
+sphinxcontrib-websupport

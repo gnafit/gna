@@ -78,11 +78,11 @@ Basic types and actions
    transformations/HistEdges.rst
    transformations/Histogram.rst
    transformations/Points.rst
-   transformations/Prediction.rst
+   transformations/Concat.rst
    transformations/Rebin.rst
 
-Linear algebra
-^^^^^^^^^^^^^^
+Linear algebra and simple operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -93,9 +93,20 @@ Linear algebra
    transformations/Identity.rst
    transformations/Normalize.rst
    transformations/Product.rst
+   transformations/Ratio.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst
    transformations/WeightedSum.rst
+
+Interpolation
+^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/InSegment.rst
+   transformations/InterpExpoU.rst
 
 Calculus
 ^^^^^^^^
@@ -153,6 +164,7 @@ Detector related
    :glob:
 
    transformations/EnergyResolution.rst
+   transformations/EnergyResolutionC.rst
    transformations/HistNonlinearity.rst
    transformations/HistSmear.rst
 

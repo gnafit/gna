@@ -51,7 +51,7 @@ class ExpressionWithBindings(object):
                 path = dep.resolvepath(seen | {dep}, known)
                 if path is None:
                     return None
-                known.append(dep)
+                known.add(dep)
                 allpath.extend(path)
         return allpath
 
@@ -68,9 +68,16 @@ class ExpressionWithBindings(object):
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
 
 class ExpressionsEntry(object):
+    _label = None
     def __init__(self, ns):
         self.ns = ns
         self.exprs = []
+
+    def setLabel(self, label):
+        self._label = label
+
+    def label(self):
+        return self._label
 
     def add(self, obj, expr, bindings):
         self.exprs.append(ExpressionWithBindings(self.ns, obj, expr, bindings))
@@ -81,6 +88,8 @@ class ExpressionsEntry(object):
             raise KeyError()
         for expr in path:
             v = expr.get()
+            if self._label is not None:
+                v.setLabel(self._label)
         return v
 
     def resolvepath(self, seen, known):
@@ -329,6 +338,15 @@ class namespace(Mapping):
         from gna.parameters.printer import print_parameters
         print_parameters(self, **kwargs)
 
+    def materializeexpressions(self, recursive=False):
+        for v in self.itervalues():
+            if not isinstance(v, ExpressionsEntry):
+                continue
+            v.get()
+
+        if recursive:
+            for ns in self.namespaces.values():
+                ns.materializeexpressions(True)
 
 class nsview(object):
     def __init__(self):

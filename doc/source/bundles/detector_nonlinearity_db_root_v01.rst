@@ -71,8 +71,8 @@ The bundle provides the input and output of the :ref:`HistNonlinearity` by names
 .. code-block:: python
 
     self.inputs[ns.name]  = nonlin.smear.Ntrue
-    self.outputs[ns.name] = nonlin.smear.Nvis
-    ns.addobservable('nonlinearity', nonlin.smear.Nvis, ignorecheck=True)
+    self.outputs[ns.name] = nonlin.smear.Nrec
+    ns.addobservable('nonlinearity', nonlin.smear.Nrec, ignorecheck=True)
 
 .. attention::
 

@@ -10,8 +10,10 @@
 
 #include <boost/format.hpp>
 
-#include "Parameters.hh"
 #include "SimpleDict.hh"
+#include "dependant.hh"
+#include "taintflag.hh"
+#include "callback.hh"
 
 class ParametersGroup;
 class GNAObject;
@@ -224,6 +226,7 @@ namespace ParametrizedTypes {
         }
       }
     }
+    DPRINTFS("make evaluable: %i deps", int(sources.size()));
     dependant<T> dep = dependant<T>(func, sources, name.c_str());
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
     return dep;

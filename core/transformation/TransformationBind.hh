@@ -59,14 +59,14 @@ public:
   TransformationTypes::Initializer<Derived> transformation_(const std::string &name) {
     return TransformationTypes::Initializer<Derived>(this, name);
   }
-
-private:
+protected:
   friend class TransformationTypes::Initializer<Derived>;
   typedef typename TransformationTypes::Initializer<Derived> Initializer;
   typedef typename Initializer::MemFunction MemFunction;
   typedef typename Initializer::MemTypesFunction MemTypesFunction;
   typedef typename Initializer::MemStorageTypesFunction MemStorageTypesFunction;
 
+private:
   typedef std::list<std::tuple<size_t, size_t, MemTypesFunction>> MemTypesFunctionGMap;
   typedef std::list<std::tuple<size_t, std::string, size_t, MemStorageTypesFunction>> MemStorageTypesFunctionGMap;
 
