@@ -13,4 +13,5 @@ For installation guidelines and documentation look at `doc/`:
 
 > Access the docs with `firefox -new-window doc/build/html/index.html`
 
+
 You will need TeX distribution and [`Sphinx`](http://www.sphinx-doc.org/en/stable/) installed for that.

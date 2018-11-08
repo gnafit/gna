@@ -131,3 +131,11 @@ The code produces the following output:
     DataType: hist,  12 bins, edges 1.0->7.0, width 0.5
     Bin edges: [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]
     Data: [  0. 100. 324. 576. 784. 900. 900. 784. 576. 324. 100.   0.]
+
+Histogram2d
+"""""""""""
+
+Plotting outputs via matplotlib
+"""""""""""""""""""""""""""""""
+
+
