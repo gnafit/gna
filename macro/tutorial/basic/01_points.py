@@ -3,9 +3,9 @@
 
 from __future__ import print_function
 import constructors as C
-import numpy as N
+import numpy as np
 # Create numpy array
-narray = N.arange(12).reshape(3,4)
+narray = np.arange(12).reshape(3,4)
 # Create a points instance with data, stored in `narray`
 parray = C.Points(narray)
 

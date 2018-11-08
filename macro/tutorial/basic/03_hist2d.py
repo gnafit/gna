@@ -3,13 +3,13 @@
 
 from __future__ import print_function
 import constructors as C
-import numpy as N
+import numpy as np
 # Create numpy arrays for bin edges
 nbinsx, nbinsy = 12, 8
-edgesx = N.linspace(0, nbinsx, nbinsx+1)
-edgesy = N.linspace(0, nbinsy, nbinsy+1)
+edgesx = np.linspace(0, nbinsx, nbinsx+1)
+edgesy = np.linspace(0, nbinsy, nbinsy+1)
 # Create fake data array
-narray = N.arange(nbinsx*nbinsy).reshape(nbinsx, nbinsy)
+narray = np.arange(nbinsx*nbinsy).reshape(nbinsx, nbinsy)
 narray = narray**2 * narray[::-1,::-1]**2
 
 # Create a histogram instance with data, stored in `narray`

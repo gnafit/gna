@@ -3,12 +3,12 @@
 
 from __future__ import print_function
 import constructors as C
-import numpy as N
+import numpy as np
 # Create numpy array for data points
 nbins = 12
-narray = N.arange(nbins)**2 * N.arange(nbins)[::-1]**2
+narray = np.arange(nbins)**2 * np.arange(nbins)[::-1]**2
 # Create numpy array for bin edges
-edges  = N.linspace(1.0, 7.0, nbins+1)
+edges  = np.linspace(1.0, 7.0, nbins+1)
 
 # Create a histogram instance with data, stored in `narray`
 # and edges, sotred in `edges`
