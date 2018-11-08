@@ -14,10 +14,10 @@ The data is allocated on the transformations' outputs while inputs are simple vi
 Transformations may depend on a number of variables.
 
 The main object in GNA is ``GNAObject`` which holds the following information:
-- A list of transformations, accessible by name or by index.
-- A list of variables the transformations depend on.
+    1. A list of transformations, accessible by name or by index.
+    2. A list of variables the transformations depend on.
 
-The typical syntax include:
+The typical syntax includes:
 
 .. code-block:: python
     :linenos:
