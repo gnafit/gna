@@ -3,9 +3,9 @@
 
 from __future__ import print_function
 import constructors as C
-import numpy as N
+import numpy as np
 # Create numpy array
-narray = N.arange(12).reshape(3,4)
+narray = np.arange(12)
 # Create a points instance with data, stored in `narray`
 parray = C.Points(narray)
 
@@ -19,6 +19,16 @@ print('DataType:', parray.points.points.datatype())
 print('Data:\n', parray.points.points.data())
 
 from matplotlib import pyplot as plt
-parray.points.points.plot()
+fig = plt.figure()
+ax = plt.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( 'x label' )
+ax.set_ylabel( 'y label' )
+ax.set_title( 'Plot title' )
+
+parray.points.points.plot('-o', label='plot 1')
+
+ax.legend(loc='upper left')
 plt.show()
 

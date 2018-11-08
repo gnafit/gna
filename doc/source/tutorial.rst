@@ -170,6 +170,18 @@ The code produces the following output:
 
 Plotting outputs via matplotlib
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TBD
+
+Plotting points (1d)
+""""""""""""""""""""
+TBD
+
+.. literalinclude:: ../../macro/tutorial/basic/04_points1_plot.py
+    :linenos:
+    :lines: 4-
+    :emphasize-lines: 27
+    :caption: :download:`04_points1_plot.py <../../macro/tutorial/basic/04_points1_plot.py>`
+
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^

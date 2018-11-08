@@ -30,22 +30,30 @@ def ifPoints(output):
 
     raise Exception('Output is supposed to be points: '+str(dtype))
 
+def plot_points1( output, *args, **kwargs ):
+    """Plot 1-dimensinal array using pyplot.plot
+
+    executes pyplot.plot(y, *args, **kwargs) with first argument overridden
+    all other arguments are passed as is.
+
+    returns pyplot.plot() result
+    """
+    ifNd(output, 1)
+    ifPoints(output)
+
+    points=output.data().copy()
+    return P.plot(points, *args, **kwargs)
+
 def plot_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
-    all other arguments passes as is.
-
-    Options:
-        autolabel=True guesses plot label with histogram's title
+    all other arguments are passed as is.
 
     returns pyplot.plot() result
     """
     ifNd(output, 1)
     ifHist(output)
-
-    if kwargs.pop( 'autolabel', None ):
-        kwargs['label'] = h.GetTitle()
 
     height=output.data().copy()
     lims=N.array(output.datatype().edges)
@@ -56,7 +64,7 @@ def bar_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal histogram using pyplot.bar
 
     executes pyplot.bar(left, height, width, *args, **kwargs) with first two arguments overridden
-    all other arguments passes as is.
+    all other arguments are passed as is.
 
     Options:
         divide=N - divide bin width by N
@@ -64,13 +72,10 @@ def bar_hist1( output, *args, **kwargs ):
 
     returns pyplot.bar() result
     """
-    # autolabel=True guesses plot label with histogram's title
     ifNd(output, 1)
     ifHist(output)
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
-    # if kwargs.pop( 'autolabel', None ):
-        # kwargs['label'] = h.GetTitle()
 
     height=output.data().copy()
     lims  = N.array(output.datatype().edges)
@@ -88,18 +93,13 @@ def bar_hist1( output, *args, **kwargs ):
     # """Plot 1-dimensinal histogram using pyplot.errorbar
 
     # executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with first four arguments overridden
-    # all other arguments passes as is.
-
-    # Options:
-        # autolabel=True guesses plot label with histogram's title
+    # all other arguments are passed as is.
 
     # Uses histgram's errors if they are defined. Uses sqrt(N) otherwise.
 
     # returns pyplot.errorbar() result
     # """
-    # if kwargs.pop( 'autolabel', None ):
-        # kwargs['label'] = h.GetTitle()
-
+    #
     # noyerr, mask, = [ kwargs.pop(x) if x in kwargs else None for x in ['noyerr', 'mask'] ]
     # centers = R2N.get_bin_centers_axis( h.GetXaxis())
     # hwidths = R2N.get_bin_widths_axis( h.GetXaxis())*0.5
@@ -122,7 +122,7 @@ def bar_hist1( output, *args, **kwargs ):
     # """Plot 2-dimensinal histogram using pyplot.pcolormesh
 
     # executes pyplot.pcolormesh(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments passes as is.
+    # all other arguments are passed as is.
 
     # Options:
         # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
@@ -151,7 +151,7 @@ def bar_hist1( output, *args, **kwargs ):
     # """Plot 2-dimensinal histogram using ax.pcolorfast
 
     # executes ax.pcolorfast(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments passes as is.
+    # all other arguments are passed as is.
 
     # Options:
         # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
@@ -186,7 +186,7 @@ def bar_hist1( output, *args, **kwargs ):
     # """Plot 2-dimensinal histogram using pyplot.imshow
 
     # executes pyplot.imshow(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments passes as is.
+    # all other arguments are passed as is.
 
     # Options:
         # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
@@ -284,9 +284,10 @@ def matshow(output, *args, **kwargs):
     # return res
 
 def bind():
+    setattr( R.SingleOutput, 'plot',      plot_points1 )
     setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
-    setattr( R.SingleOutput, 'matshow', matshow )
+    setattr( R.SingleOutput, 'matshow',   matshow )
     # setattr( R.TH1, 'errorbar', errorbar_hist1 )
 
     # setattr( R.TH2, 'pcolorfast', pcolorfast_hist2 )
