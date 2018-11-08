@@ -4,7 +4,7 @@
 #include "SegmentWise.hh"
 
 /**
- * @brief Exponential interpolation.
+ * @brief Exponential interpolation (ordered).
  *
  * For a given `x`, `y` and `newx` computes `newy` via exponential:
  *   - f(x) = k_i * exp( -(x-x_i)*b_i ) for x in [x_i, x_i+1)
@@ -17,7 +17,7 @@
  * @note No check is performed on the value of `b`.
  *
  * Inputs:
- *   - interp.newx -- array with points with fine steps to interpolate on.
+ *   - interp.newx -- array with points with fine steps to interpolate on (sorted).
  *   - interp.x -- array with coarse points.
  *   - interp.y -- values of a function on `x`.
  *   - interp.segments -- segments of `newx` in `x`. See SegmentWise.

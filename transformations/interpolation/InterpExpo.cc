@@ -51,7 +51,7 @@ void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& new
 }
 
 void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto soutputs = static_cast<Handle&>(segments).outputs();
+  const auto& soutputs = static_cast<Handle&>(segments).outputs();
 
   auto interp = this->t_["interp"];
   auto iinputs = interp.inputs();
@@ -74,7 +74,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 
   auto k_current=y_a.data();
   auto b_current=b_a.data();
-  auto e0_current=x_a.data();
+  auto x0_current=x_a.data();
 
   auto& ddx_d=args[3];
   auto  ddx_current=ddx_d.buffer;
@@ -93,7 +93,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
         #endif
         break;
       case Extrapolate:
-        interp_a.head(idx_current) = *k_current * ((*e0_current - newx_a.head(idx_current))*(*b_current)).exp();
+        interp_a.head(idx_current) = *k_current * ((*x0_current - newx_a.head(idx_current))*(*b_current)).exp();
         #ifdef DEBUG_INTERPEXPO
         printf("Fill %i->%i (%i): fcn (head)\n", (int)0, (int)idx_current, (int)idx_current);
         #endif
@@ -112,7 +112,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 
     k_current=next(k_current);
     b_current=next(b_current);
-    e0_current=next(e0_current);
+    x0_current=next(x0_current);
 
     return true;
   };
@@ -129,14 +129,14 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
     #ifdef DEBUG_INTERPEXPO
     printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
     #endif
-    interp_a.segment(idx_current, length) = *k_current * ((*e0_current - newx_a.segment(idx_current, length))*(*b_current)).exp();
+    interp_a.segment(idx_current, length) = *k_current * ((*x0_current - newx_a.segment(idx_current, length))*(*b_current)).exp();
 
     iterate=next_iter();
   }
 
   auto nleft=interp_a.size()-static_cast<long int>(idx_current);
   if(nleft){
-    switch (m_underflow_strategy) {
+    switch (m_overflow_strategy) {
       case Constant:
         interp_a.tail(nleft)=m_overflow;
         #ifdef DEBUG_INTERPEXPO
@@ -144,7 +144,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
         #endif
         break;
       case Extrapolate:
-        interp_a.tail(nleft) = *k_current * ((*e0_current - newx_a.tail(nleft))*(*b_current)).exp();
+        interp_a.tail(nleft) = *k_current * ((*x0_current - newx_a.tail(nleft))*(*b_current)).exp();
         #ifdef DEBUG_INTERPEXPO
         printf("Fill %i->%i (%i): fcn (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft);
         #endif

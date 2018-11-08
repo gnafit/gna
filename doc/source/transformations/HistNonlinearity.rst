@@ -143,5 +143,5 @@ Inputs
 Outputs
 """""""
 
-1. ``'smear.Nvis'`` one-dimensional smeared histo of number of events :math:`N_{\text{vis}}`
+1. ``'smear.Nrec'`` one-dimensional smeared histo of number of events :math:`N_{\text{vis}}`
 

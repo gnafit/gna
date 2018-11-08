@@ -13,6 +13,9 @@ class nextlevel():
         global printlevel
         printlevel-=1
 
+def current_level():
+    return printlevel
+
 def printl(*args, **kwargs):
     prefix = kwargs.pop('prefix', ())
 
@@ -20,3 +23,4 @@ def printl(*args, **kwargs):
         print( *prefix, end='' )
     print('    '*printlevel, sep='', end='')
     print(*args, **kwargs)
+

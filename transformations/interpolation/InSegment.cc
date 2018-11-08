@@ -1,7 +1,7 @@
 #include "InSegment.hh"
 #include "TypesFunctions.hh"
 
-#define DEBUG_INSEGMENT
+//#define DEBUG_INSEGMENT
 
 #include <algorithm>
 #include <cmath>
@@ -16,7 +16,7 @@ using std::fabs;
  * @brief Constructor.
  */
 InSegment::InSegment() {
-  transformation_("segments")                                     /// Define transformation `segments`:
+  transformation_("insegment")                                    /// Define transformation `segments`:
                                                                   ///   - with two inputs:
     .input("points")                                              ///     + `points` - fine x.
     .input("edges")                                               ///     + `edges` - coarse x bins.
@@ -54,19 +54,19 @@ void InSegment::determineSegments(FunctionArgs& fargs){
   auto  point=point_first;
 
   while(point<point_end){                                /// Iterate over all the points.
-    if (*point<*edge_first-m_tolerance){
+    if (*point<*edge_first-m_tolerance){                 /// Check if the point below the lower limit
       *insegment = -1;
     }
-    else if (*point>=*edge_last){
+    else if (*point>=*edge_last){                        /// Check if the point is above the upper limit
       *insegment = static_cast<double>(nedges-1);
     }
     else{
       auto seg_next = lower_bound(edge_first, edge_end, *point); /// Find edge, that is greater or equal the current point.
-      auto seg = prev(seg_next);
-      if(seg_next<edge_end && fabs(*point-*seg_next)<m_tolerance){
-        seg=seg_next;
+      auto seg = prev(seg_next);                                 /// Fund the current bin
+      if(seg_next<edge_end && fabs(*point-*seg_next)<m_tolerance){ /// If the point is below the next bin edge on less-then-tolerance
+        seg=seg_next;                                            /// Assign the point to the next bin
       }
-      *insegment = static_cast<double>(distance(edge_first, seg));
+      *insegment = static_cast<double>(distance(edge_first, seg)); /// Store the data
     }
 
     #ifdef DEBUG_INSEGMENT
@@ -77,7 +77,7 @@ void InSegment::determineSegments(FunctionArgs& fargs){
     printf("\n");
     #endif
 
-    advance(point, 1);
-    advance(insegment, 1);
+    advance(point, 1);     /// Step to next point
+    advance(insegment, 1); /// Step the write pointer
   }
 }

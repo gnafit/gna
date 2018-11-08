@@ -63,7 +63,7 @@ cfg = NestedDict(
             filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
 
-            strategy = dict( underflow='constant', overflow='extrapolate' ),
+            # strategy = dict( underflow='constant', overflow='extrapolate' ),
             edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
 
             # corrections=NestedDict(

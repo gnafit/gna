@@ -7,6 +7,7 @@ from gna.expression.simple import *
 class IndexedContainer(object):
     objects = None
     operator='.'
+    text_operator='_period_'
     left, right = '', ''
     def __init__(self, *objects):
         self.set_objects(*objects)
@@ -22,16 +23,28 @@ class IndexedContainer(object):
                 for sub in  o.walk(yieldself, self.operator.strip()):
                     yield sub
 
-    def set_operator(self, operator, left=None, right=None):
+    def set_operator(self, operator, left=None, right=None, text=None):
         self.operator=operator
         if left is not None:
             self.left = left
         if right is not None:
             self.right = right
+        if text is not None:
+            self.text_operator=text
 
     def guessname(self, lib={}, save=False):
         for o in self.objects:
             o.guessname(lib, save)
+
+        if self.name is not undefinedname:
+            if not self.label:
+                for cfg in lib.values():
+                    if cfg['name']!=self.name:
+                        continue
+                    newlabel = cfg.get('label', None)
+                    if newlabel:
+                        self.label=newlabel
+            return self.name
 
         newname = '{expr}'.format(
                     expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
@@ -46,15 +59,24 @@ class IndexedContainer(object):
             variants.append(nn+':'+self.indices.ident())
 
         guessed = False
+        label = None
         for var in variants:
             if var in lib:
-                guessed = lib[var]['name']
+                libentry = lib[var]
+                guessed = libentry['name']
+                label   = libentry.get('label', None)
                 break
 
         if guessed:
             newname = guessed
-            if save:
-                self.name = newname
+        else:
+            newname = '{expr}'.format(
+                        expr = self.text_operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
+                        )
+
+        if save:
+            self.name = newname
+            self.set_label(label)
 
         return newname
 
@@ -72,23 +94,29 @@ class IndexedContainer(object):
     def nonempty(self):
         return bool(self.objects)
 
-    def build(self, context, connect=True):
+    @methodname
+    def require(self, context):
+        for obj in self.objects:
+            obj.require(context)
+
+    @call_once
+    def bind(self, context, connect=True):
         if not self.objects:
             return
 
-        printl('build (container) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (container) {}:'.format(type(self).__name__), str(self) )
 
         with nextlevel():
             for obj in self.objects:
-                context.check_outputs(obj)
+                obj.bind(context)
 
             if not connect:
                 return
 
-            printl('connect (container)', str(self))
+            printl_debug('connect (container)', str(self))
             with nextlevel():
                 for idx in self.indices.iterate():
-                    printl( 'index', idx )
+                    printl_debug( 'index', idx )
                     with nextlevel():
                         nobj = len(self.objects)
                         for i, obj in enumerate(self.objects):
@@ -117,12 +145,13 @@ class VProduct(IndexedContainer, Variable):
         IndexedContainer.__init__(self, *newobjects)
         Variable.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( '*' )
+        self.set_operator( '*', text='_times_' )
 
-    def build(self, context):
-        printl('build (var) {}:'.format(type(self).__name__), str(self) )
+    @call_once
+    def bind(self, context):
+        printl_debug('bind (var) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
             from constructors import stdvector
             import ROOT as R
@@ -131,10 +160,15 @@ class VProduct(IndexedContainer, Variable):
                     names = [obj.current_format(idx) for obj in self.objects]
                     name = self.current_format(idx)
 
-                    path, head = name.rsplit('.', 1)
-                    ns = context.ns(path)
+                    if '.' in name:
+                        path, head = name.rsplit('.', 1)
+                        ns = context.ns(path)
+                    else:
+                        path, head = '', name
+                        ns = context.ns
                     vp = R.VarProduct( stdvector( names ), head, ns=ns )
-                    ns[head].get()
+                    v=ns[head].get()
+                    v.setLabel( name+' = '+' * '.join(names) )
 
 class NestedTransformation(object):
     tinit = None
@@ -145,30 +179,45 @@ class NestedTransformation(object):
     def set_tinit(self, obj):
         self.tinit = obj
 
-    def new_tobject(self, label, *args):
+    def new_tobject(self, idx, *args, **kwargs):
+        if isinstance(idx, str):
+            label = idx
+        elif self.label is not None:
+            label = idx.current_format(self.label, name=self.name, **kwargs)
+        else:
+            label = self.current_format(idx, **kwargs)
+
         newobj = self.tinit(*args)
         newobj.transformations[0].setLabel(label)
         self.tobjects.append(newobj)
         import ROOT as R
         return newobj, R.OutputDescriptor(newobj.single())
 
-    def build(self, context):
-        printl('build (nested) {}:'.format(type(self).__name__), str(self) )
+    @call_once
+    def bind(self, context):
+        printl_debug('bind (nested) {}:'.format(type(self).__name__), str(self) )
 
         if self.tinit:
             with nextlevel():
                 for idx in self.indices.iterate():
-                    tobj, newout = self.new_tobject(self.current_format(idx))
+                    tobj, newout = self.new_tobject(idx)
                     context.set_output(newout, self.name, idx)
                     nobj = len(self.objects)
                     for i, obj in enumerate(self.objects):
                         # if nobj==1:
                             # i=None
-                        inp = tobj.add_input('%02d'%i)
+                        inp = self.add_input(tobj, i)
                         context.set_input(inp, self.name, idx, clone=i)
 
         with nextlevel():
-            IndexedContainer.build(self, context)
+            IndexedContainer.bind(self, context)
+
+    def add_input(self, tobj, idx):
+        return tobj.add_input('%02d'%idx)
+
+    @methodname
+    def require(self, context):
+        IndexedContainer.require(self, context)
 
 class TCall(IndexedContainer, Transformation):
     inputs_connected = False
@@ -190,7 +239,7 @@ class TCall(IndexedContainer, Transformation):
 
         IndexedContainer.__init__(self, *objects)
         Transformation.__init__(self,name, *(list(args)+list(objects)), **kwargs)
-        self.set_operator( ', ', '(', ')' )
+        self.set_operator( ', ', '(', ')', text='_and_'  )
 
         self.inputs_connected = not self.nonempty()
 
@@ -204,23 +253,21 @@ class TCall(IndexedContainer, Transformation):
         else:
             return self.__str__()
 
-    def build(self, context):
-        printl('build (call) {}:'.format(type(self).__name__), str(self) )
-        with nextlevel():
-            Transformation.build(self, context)
-            IndexedContainer.build(self, context)
-
-        self.inputs_connected = True
-
-    def connect(self, context):
+    @call_once
+    def bind(self, context):
         if self.inputs_connected:
             return
 
-        printl('connect (call) {}:'.format(type(self).__name__), str(self) )
+        printl_debug('bind (call) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context)
+            IndexedContainer.bind(self, context)
 
         self.inputs_connected = True
+
+    @methodname
+    def require(self, context):
+        Transformation.require(self, context)
+        IndexedContainer.require(self, context)
 
 class TProduct(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -230,9 +277,11 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
-            if isinstance(o, TProduct):
+            if self.expandable and isinstance(o, TProduct) and o.expandable:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -241,9 +290,33 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' * ' )
+        self.set_operator( ' * ', '( ', ' )', text='_times_'  )
         import ROOT as R
         self.set_tinit( R.Product )
+
+class TRatio(NestedTransformation, IndexedContainer, Transformation):
+    def __init__(self, name, *objects, **kwargs):
+        if len(objects)!=2:
+            raise Exception('Expect two objects for TRatio')
+
+        for o in objects:
+            if not isinstance(o, Transformation):
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
+
+        NestedTransformation.__init__(self)
+        IndexedContainer.__init__(self, *objects)
+        Transformation.__init__(self, name, *objects, **kwargs)
+
+        self.set_operator( ' / ', '( ', ' )', text='_over_'  )
+        import ROOT as R
+        self.set_tinit( R.Ratio )
+
+    def add_input(self, tobj, idx):
+        if not idx in [0, 1]:
+            raise Exception('Ratio argument indices sould be 0, 1, but not '+str(idx))
+        return tobj.ratio.inputs[idx]
 
 class TSum(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
@@ -253,9 +326,11 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         newobjects = []
         for o in objects:
             if not isinstance(o, Transformation):
-                raise Exception('Expect Transformation instance')
+                raise Exception('Expect Transformation instance, got {} ({})'.format(
+                    hasattr(o, 'name') and o.name or '', type(o).__name__
+                    ))
 
-            if isinstance(o, TSum):
+            if self.expandable and isinstance(o, TSum) and o.expandable:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -264,7 +339,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
         IndexedContainer.__init__(self, *newobjects)
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
-        self.set_operator( ' + ', '(', ')' )
+        self.set_operator( ' + ', '( ', ' )', text='_plus_' )
         import ROOT as R
         self.set_tinit( R.Sum )
 
@@ -272,7 +347,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
     object, weight = None, None
     def __init__(self, name, *objects, **kwargs):
         for other in objects:
-            if isinstance(other, WeightedTransformation):
+            if self.expandable and isinstance(other, WeightedTransformation) and other.expandable:
                 self.object = self.object*other.object if self.object is not None else other.object
                 self.weight = self.weight*other.weight if self.weight is not None else other.weight
             elif isinstance(other, Variable):
@@ -286,31 +361,46 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         IndexedContainer.__init__(self, self.weight, self.object)
         Transformation.__init__(self, name, self.weight, self.object, **kwargs)
 
-        self.set_operator( ' * ' )
+        self.set_operator( ' * ', text='_times_'  )
 
         import ROOT as R
         self.set_tinit( R.WeightedSum )
 
     def __mul__(self, other):
-        return WeightedTransformation('?', self, other)
+        return WeightedTransformation(undefinedname, self, other)
 
-    def build(self, context):
-        printl('build (weighted) {}:'.format(type(self).__name__), str(self) )
+    @methodname
+    def require(self, context):
+        self.object.require(context)
+        self.weight.require(context)
+
+    @call_once
+    def bind(self, context):
+        printl_debug('bind (weighted) {}:'.format(type(self).__name__), str(self) )
         with nextlevel():
-            IndexedContainer.build(self, context, connect=False)
+            IndexedContainer.bind(self, context, connect=False)
 
             from constructors import stdvector
+            if self.object.name is undefinedname:
+                raise Exception('May not work with objects with undefined names')
             labels  = stdvector([self.object.name])
-            printl('connect (weighted)')
+            printl_debug('connect (weighted)')
             for idx in self.indices.iterate():
                 wname = self.weight.current_format(idx)
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject( self.current_format(idx), labels, weights )
+                    tobj, newout = self.new_tobject(idx, labels, weights, weight_label=self.weight.name)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)
                 out = self.object.get_output(idx, context)
                 inp(out)
+
+    def test_iteration(self):
+        for it in self.indices.iterate():
+            print('index', it.current_format())
+            print('  weight', self.weight.current_format(it))
+            print('  obj', self.object.current_format(it))
+
 

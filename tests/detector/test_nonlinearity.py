@@ -85,14 +85,14 @@ histedges.histedges.hist( hist.hist )
 nl = R.HistNonlinearity()
 nl.set( histedges.histedges, pedges_m, hist )
 
-smeared = nl.smear.Nvis.data()
+smeared = nl.smear.Nrec.data()
 print( 'Sum check (diff): {}'.format( phist.sum()-smeared.sum() ) )
 
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
-ax.set_xlabel( L.u('Evis') )
+ax.set_xlabel( L.u('evis') )
 ax.set_ylabel( 'Entries' )
 ax.set_title( 'Non-linearity correction' )
 

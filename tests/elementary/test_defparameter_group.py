@@ -12,30 +12,18 @@ import itertools
 # Necessary evil, it triggers import of all other symbols from shared library
 ROOT.GNAObject
 
-test_ns = env.ns("test")
-covmat = np.array([[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]])
+def test_defpar_group():
+    test_ns = env.ns("test")
+    covmat = np.array([[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]])
 
-pars = test_ns.defparameter_group(('par1', {'central': 1.0, 'relsigma': 0.1}),
-                                  ('par2', {'central': 2.0, 'relsigma': 0.1}),
-                                  ('par3', {'central': 3.0, 'relsigma': 0.1}),
-                                  **{'covmat': covmat, })
-for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
-    cov_from_pars = pars[first].getCovariance(pars[second])
-    cov_direct = pars[first].sigma() * pars[second].sigma() * covmat[first, second]
-    assert np.allclose(cov_from_pars, cov_direct), "Covs doesn't match!"
+    pars = test_ns.defparameter_group(('par1', {'central': 1.0, 'relsigma': 0.1}),
+                                      ('par2', {'central': 2.0, 'relsigma': 0.1}),
+                                      ('par3', {'central': 3.0, 'relsigma': 0.1}),
+                                      **{'covmat': covmat, })
+    for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+        cov_from_pars = pars[first].getCovariance(pars[second])
+        cov_direct = pars[first].sigma() * pars[second].sigma() * covmat[first, second]
+        assert np.allclose(cov_from_pars, cov_direct), "Covs doesn't match!"
 
-extra_pars = test_ns.defparameter_group(('extra1', {'central': 1.0, 'relsigma': 0.1}),
-                                  ('extra2', {'central': 2.0, 'relsigma': 0.1}),
-                                  ('extra3', {'central': 3.0, 'relsigma': 0.1}),
-                                  **{'covmat_cfg': 'test_cov', })
-
-covmat_cfg = cfg['covariances']['test_cov']['cov_mat']
-try:
-    covmat_cfg[0,0]
-except TypeError:
-    covmat_cfg = np.array(covmat_cfg)
-
-for first, second in itertools.combinations_with_replacement(range(len(extra_pars)), 2):
-    extra_from_pars = extra_pars[first].getCovariance(extra_pars[second])
-    extra_direct = extra_pars[first].sigma() * extra_pars[second].sigma() * covmat_cfg[first, second]
-    assert np.allclose(extra_from_pars, extra_direct), "Covs doesn't match!"
+if __name__ == "__main__":
+    test_defpar_group()

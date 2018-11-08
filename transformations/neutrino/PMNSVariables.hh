@@ -89,9 +89,94 @@ protected:
   }
 };
 
+class PMNSVariablesC: public ParametersGroup {
+public:
+  static const size_t Nnu = 3;
+
+  PMNSVariablesC(GNAObject *parent)
+    : ParametersGroup(parent, fields())
+    { }
+  PMNSVariablesC(GNAObject *parent, std::vector<std::string> params)
+    : PMNSVariablesC(parent)
+    { initFields(params); }
+
+  variable<double> Sin12;
+  variable<double> Sin13;
+  variable<double> Sin23;
+  variable<double> Cos12;
+  variable<double> Cos13;
+  variable<double> Cos23;
+  variable<std::complex<double>> Phase;
+  variable<std::complex<double>> PhaseC;
+  variable<std::complex<double>> V[Nnu][Nnu];
+protected:
+  Fields fields() {
+    Fields allvars;
+    allvars
+      .add(&Sin12, "Sin12") .add(&Sin13, "Sin13") .add(&Sin23, "Sin23")
+      .add(&Cos12, "Cos12") .add(&Cos13, "Cos13") .add(&Cos23, "Cos23")
+      .add(&Phase, "Phase")
+      .add(&PhaseC, "PhaseC")
+    ;
+    for (size_t i = 0; i < Nnu; ++i) {
+      for (size_t j = 0; j < Nnu; ++j) {
+        allvars.add(&V[i][j], (boost::format("V%1%%2%") % i % j).str());
+      }
+    }
+    return allvars;
+  }
+  void setExpressions(ExpressionsProvider &provider) {
+    using std::exp;
+    provider
+      .add(&V[0][0], {&Cos12, &Cos13}, [&]() {
+          return Cos12.value()*Cos13;
+        })
+      .add(&V[0][1], {&Sin12, &Cos13}, [&]() {
+          return Sin12.value()*Cos13;
+        })
+      .add(&V[0][2], {&Sin13, &Phase}, [&]() {
+          return Sin13.value()*Phase.value();
+        })
+      .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
+          return
+            -Sin12.value()*Cos23
+            -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
+        })
+      .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
+          return
+             Cos12.value()*Cos23
+            -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
+        })
+      .add(&V[1][2], {&Cos13, &Sin23}, [&]() {
+          return Sin23.value()*Cos13;
+        })
+      .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
+          return
+            Sin12.value()*Sin23
+            -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
+        })
+      .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
+          return
+            -Cos12.value()*Sin23
+            -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
+        })
+      .add(&V[2][2], {&Cos13, &Cos23}, [&]() {
+          return Cos23.value()*Cos13;
+        })
+    ;
+  }
+};
+
 class PMNSExpressions: public ExpressionsProvider {
 public:
   PMNSExpressions()
     : ExpressionsProvider(new PMNSVariables(this))
+    { }
+};
+
+class PMNSExpressionsC: public ExpressionsProvider {
+public:
+  PMNSExpressionsC()
+    : ExpressionsProvider(new PMNSVariablesC(this))
     { }
 };

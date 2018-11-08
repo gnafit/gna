@@ -27,6 +27,14 @@ def Points( array, *args, **kwargs ):
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s, *args, **kwargs )
 
+"""Construct Bins object from numpy array"""
+def Bins( array, *args, **kwargs ):
+    """Convert array to Points"""
+    if len(array.shape)!=1:
+        raise Exception( 'Edges should be 1d array' )
+    a = N.ascontiguousarray(array, dtype='d')
+    return R.Bins( a, a.size-1, *args, **kwargs )
+
 """Construct Histogram object from two arrays: edges and data"""
 def Histogram( edges, data, *args, **kwargs ):
     edges = N.ascontiguousarray(edges, dtype='d')
@@ -35,6 +43,16 @@ def Histogram( edges, data, *args, **kwargs ):
         raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
 
     return R.Histogram( data.size, edges, data, *args, **kwargs )
+
+"""Construct Histogram2d object from two arrays: edges and data"""
+def Histogram2d( xedges, yedges, data, *args, **kwargs ):
+    xedges = N.ascontiguousarray(xedges, dtype='d')
+    yedges = N.ascontiguousarray(yedges, dtype='d')
+    data   = N.ascontiguousarray(data,   dtype='d').ravel(order='F')
+    if (xedges.size-1)*(yedges.size-1)!=data.size:
+        raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
+
+    return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
 
 """Construct the GaussLegendre transformation based on bin edges and order(s)"""
 def GaussLegendre(edges, orders, *args, **kwargs):

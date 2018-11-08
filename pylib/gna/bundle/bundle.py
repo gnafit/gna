@@ -87,7 +87,7 @@ class TransformationBundle(object):
         """Constructor.
 
         Arguments:
-            - cfg — bundle configuration (NesteDict).
+            - cfg — bundle configuration (NestedDict).
 
         Keyword arguments:
             - common_namespace — namespace, common for all transformations.
@@ -159,4 +159,18 @@ class TransformationBundle(object):
 
         ns.addobservable(obsname, obj, **kwargs)
 
+    def init_indices(self, indices='indices'):
+        if isinstance(indices, str):
+            self.idx = self.cfg.get(indices, [])
+        else:
+            self.idx = indices
+
+        from gna.expression import NIndex
+        if isinstance(self.idx, NIndex):
+            return
+
+        self.idx = NIndex(fromlist=self.idx)
+
+    def exception(self, message):
+        return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
 

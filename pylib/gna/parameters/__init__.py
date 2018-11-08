@@ -7,10 +7,11 @@ from gna.configurator import uncertain
 debug=False
 
 class DiscreteParameter(object):
-    def __init__(self, name, variants):
+    def __init__(self, name, variants, **kwargs):
         self.default = None
         self._variable = ROOT.ParameterWrapper("double")(name)
         self._name = name
+        self._namespace = kwargs.get("namespace", "")
         self._variants = variants
         self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
         if  len(self._inverse) != len(self._variants):
@@ -38,6 +39,9 @@ class DiscreteParameter(object):
     def getVariable(self):
         return self._variable.getVariable()
 
+    def setNamespace(self, name):
+        self._namespace = name
+
 def makeparameter(ns, name, cfg=None, **kwargs):
     if 'target' in kwargs:
         return kwargs['target']
@@ -53,6 +57,8 @@ def makeparameter(ns, name, cfg=None, **kwargs):
             kwargs['uncertainty_type'] = cfg.mode
     else:
         ptype = kwargs.get('type', 'gaussian')
+
+    fixed = kwargs.get('fixed', False)
 
     if debug:
         print( 'Defpar {ns}.{name} ({type}):'.format(
@@ -84,6 +90,9 @@ def makeparameter(ns, name, cfg=None, **kwargs):
 
         if 'relsigma' in kwargs:
             rs = float(kwargs['relsigma'])
+            if rs==0.0:
+                fixed = True
+
             sigma = param.central()*rs
             if 'sigma' in kwargs and sigma != kwargs['sigma']:
                 msg = ("parameter `%s': conflicting relative (%g*%g=%g)"
@@ -95,7 +104,11 @@ def makeparameter(ns, name, cfg=None, **kwargs):
             if debug:
                 print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma,relsigma=rs,perc=rs*100.0), end=' ' )
         elif 'sigma' in kwargs:
-            param.setSigma(param.cast(kwargs['sigma']))
+            sigma = param.cast(kwargs['sigma'])
+            if sigma==0.0:
+                fixed=True
+
+            param.setSigma(sigma)
             if debug:
                 print( u'±{sigma}'.format(sigma=param.sigma() ), end=' ' )
                 if param.central():
@@ -122,7 +135,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         if debug:
             print( '{central} rad'.format( central=param.central() ), end=' ' )
 
-    if 'fixed' in kwargs:
+    if fixed:
         param.setFixed()
         if debug:
             print( 'fixed!', end='' )
@@ -133,5 +146,6 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         param.setLabel(kwargs['label'])
     if debug:
         print()
+    param.setNamespace(ns.path)
     return param
 

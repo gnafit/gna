@@ -22,4 +22,8 @@ public:
               fargs.rets.freeze();
             });
   };
+
+  HistEdges(SingleOutput& out) : HistEdges() {
+    t_[0].inputs()[0].connect(out.single());
+  }
 };

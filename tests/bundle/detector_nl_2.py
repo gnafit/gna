@@ -96,8 +96,8 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared1 = nonlin1.smear.Nvis.data().copy()
-smeared2 = nonlin2.smear.Nvis.data().copy()
+smeared1 = nonlin1.smear.Nrec.data().copy()
+smeared2 = nonlin2.smear.Nrec.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared1.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared2.sum() ) )
 

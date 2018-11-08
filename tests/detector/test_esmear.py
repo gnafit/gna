@@ -75,7 +75,7 @@ for eset in [
         esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )
 
-        smeared = esmear.smear.Nvis.data()
+        smeared = esmear.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
 
         # bars = P.bar( edges[:-1], phist, binwidth, align='edge' )

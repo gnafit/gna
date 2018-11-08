@@ -26,8 +26,8 @@ class oscprob_v01(TransformationBundle):
             oscprobkey = dist_it.current_format('{autoindex}')[1:]
             oscprob = self.objects.get( oscprobkey, None )
             if not oscprob:
-                # with self.common_namespace(distenv):
-                oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                with self.common_namespace('pmns'):
+                    oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), dist)
 
             component = it.get_current('c')
             if component=='comp0':
@@ -48,10 +48,14 @@ class oscprob_v01(TransformationBundle):
 
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters
-        reqparameters(self.common_namespace)
+        ns_pmns=self.common_namespace('pmns')
+        reqparameters(ns_pmns)
 
-        for it in self.idx.get_sub( ['r', 'd'] ):
-            key = it.current_format('baseline{autoindex}')
+        names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
+        with ns_pmns:
+            R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
+            ns_pmns.materializeexpressions()
 
-            self.common_namespace.reqparameter( key, central=1, sigma=0.1, fixed=True )
+        for i, vname in enumerate(names):
+            ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
 

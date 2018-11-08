@@ -30,29 +30,41 @@ set (SOURCES
   transformations/trial/TrialMultiFunc.cc
   transformations/base/FillLike.cc
   transformations/base/Histogram.cc
+  transformations/base/Histogram2d.cc
   transformations/base/Identity.cc
   transformations/base/Points.cc
-  transformations/base/Prediction.cc
+  transformations/base/Bins.cc
+  transformations/base/Concat.cc
   transformations/base/Product.cc
   transformations/base/Sum.cc
+  transformations/base/Ratio.cc
   transformations/base/WeightedSum.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
+  transformations/detector/FakeGSLFunction.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
+  transformations/detector/HistSmearSparse.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
-  transformations/integrator/FakeGSLFunction.cc
-  transformations/integrator/GaussLegendre.cc
-  transformations/integrator/GaussLegendre2d.cc
+  transformations/integrator/GSLSamplerGL.cc
+  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/Integrator21Base.cc
+  transformations/integrator/Integrator2Base.cc
+  transformations/integrator/IntegratorGL.cc
+  transformations/integrator/Integrator21GL.cc
+  transformations/integrator/Integrator2GL.cc
+  transformations/integrator/IntegratorRect.cc
+  transformations/integrator/IntegratorTrap.cc
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/interpolation/InterpExpoU.cc
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
@@ -70,6 +82,7 @@ set (SOURCES
   transformations/neutrino/OscProbPMNSDecoh.cc
   transformations/neutrino/PDGVariables.cc
   transformations/neutrino/PMNSVariables.cc
+  transformations/neutrino/OscProbPMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
   transformations/neutrino/Units.cc
@@ -85,7 +98,11 @@ set (SOURCES
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
   transformations/var/VarArray.cc
+  transformations/var/ArraySum.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
+  transformations/legacy/EnergyResolutionC.cc
+  transformations/legacy/GaussLegendre.cc
+  transformations/legacy/GaussLegendre2d.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
   )
@@ -127,14 +144,17 @@ set (HEADERS
   GNAObject.hh
   UncertainParameter.hh
   # transformations/
-  Prediction.hh
+  Concat.hh
   CovariatedPrediction.hh
   TrialMultiFunc.hh
   Product.hh
   Sum.hh
+  Ratio.hh
   WeightedSum.hh
+  Bins.hh
   Points.hh
   Histogram.hh
+  Histogram2d.hh
   HistEdges.hh
   Identity.hh
   Dummy.hh
@@ -142,6 +162,7 @@ set (HEADERS
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
+  InterpExpoU.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh
@@ -159,11 +180,13 @@ set (HEADERS
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
+  ArraySum.hh
   Minimizable.hh
   Jacobian.hh
   Neutrino.hh
   OscillationVariables.hh
   PMNSVariables.hh
+  OscProbPMNSVariables.hh
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProbPMNSDecoh.hh
@@ -174,11 +197,22 @@ set (HEADERS
   IbdFirstOrder.hh
   ReactorNorm.hh
   ReactorGroup.hh
+  IntegratorBase.hh
+  Integrator21Base.hh
+  Integrator2Base.hh
+  IntegratorGL.hh
+  Integrator21GL.hh
+  Integrator2GL.hh
+  IntegratorRect.hh
+  IntegratorTrap.hh
+  GSLSamplerGL.hh
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyResolutionC.hh
   HistNonlinearity.hh
   HistSmear.hh
+  HistSmearSparse.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
   # examples/
@@ -191,7 +225,8 @@ set (HEADERS
   Transpose.hh
   )
 
-include_directories(core/transformation/
+include_directories(core/parameters/
+                    core/transformation/
                     core/
                     transformations/trial/
                     transformations/backgrounds/
@@ -206,6 +241,7 @@ include_directories(core/transformation/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
+                    transformations/legacy/
                     extra/
                     examples/
                    )
@@ -215,11 +251,31 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
+option(GENERATE_PROFILE OFF)
+option(USE_PROFILE OFF)
+
+
+set(PGO_COMPILE_FLAG "")
+set(PGO_LINK_FLAG "")
+
+if(GENERATE_PROFILE)
+    set(PGO_COMPILE_FLAG "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+    set(PGO_LINK_FLAG "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+    message(STATUS "Building with collection of PGO profiling enabled")
+endif()
+
+if(USE_PROFILE)
+    set(PGO_COMPILE_FLAG "-fprofile-use=${CMAKE_BINARY_DIR}/profile-data -fprofile-correction")
+    message(STATUS "Build using collected PGO profiling info")
+endif()
+
+
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe")
+set(CMAKE_CXX_FLAGS "${PGO_COMPILE_FLAG}")
 include(dev-tools)
 
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
@@ -251,3 +307,4 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
+target_link_libraries(${LIBNAME} PRIVATE ${PGO_LINK_FLAG})

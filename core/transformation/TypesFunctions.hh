@@ -12,6 +12,12 @@ struct TypesFunctions
   template <size_t Arg, size_t Ret = Arg>
   static void pass(TransformationTypes::TypesFunctionArgs& fargs);         ///< Assigns shape of Arg-th input to Ret-th output.
 
+  template <size_t Ret>
+  static void empty1(TransformationTypes::TypesFunctionArgs& fargs);       ///< Ret-th output shape {0}.
+
+  template <size_t Ret>
+  static void empty2(TransformationTypes::TypesFunctionArgs& fargs);       ///< Ret-th output shape {0x0}.
+
   template <size_t Arg, size_t Ret = Arg>
   static void binsToEdges(TransformationTypes::TypesFunctionArgs& fargs);  ///< Assigns shape of Arg-th input to Ret-th output with size=N+1.
 
@@ -20,6 +26,9 @@ struct TypesFunctions
 
   template <size_t Arg1, size_t Arg2, size_t Ret>
   static void toMatrix(TransformationTypes::TypesFunctionArgs& fargs);     ///< Assigns shape of Ret-th output = [Arg1.size(), Arg2.size()] (ignoring Arg1/Arg2 shape)
+
+  template <size_t Arg1, size_t Arg2, size_t Ret>
+  static void edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of Ret-th output = [Arg1.size()-1, Arg2.size()-1] (ignoring Arg1/Arg2 shape)
 
   static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
   static void ifSameShape(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape.
@@ -39,6 +48,9 @@ struct TypesFunctions
 
   template <size_t Arg, size_t Ndim>
   static void ifNd(TransformationTypes::TypesFunctionArgs& fargs);         ///< Checks if Arg-th input is N-dimensional.
+
+  template <size_t Arg>
+  static void ifEmpty(TransformationTypes::TypesFunctionArgs& fargs);      ///< Checks if Arg-th input has zero size.
 
   template <size_t Arg>
   static void if1d(TransformationTypes::TypesFunctionArgs& fargs);         ///< Checks if Arg-th input is 1-dimensional.
@@ -78,6 +90,46 @@ inline void TypesFunctions::pass(TransformationTypes::TypesFunctionArgs& fargs) 
 }
 
 /**
+ * @brief Sets Ret-th output to shape 0.
+ *
+ * @tparam Ret -- index of Ret to write the type
+ *
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
+ *
+ * @exception SinkTypeError in case of invalid index is passed for rets.
+ */
+template <size_t Ret>
+inline void TypesFunctions::empty1(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& rets=fargs.rets;
+  if (Ret >= rets.size()) {
+    auto fmt = boost::format("Transformation %1%: invalid Ret index (%2% out of %3%)");
+    throw rets.error(DataType::undefined(), (fmt%rets.name()%Ret%rets.size()).str() );
+  }
+  rets[Ret] = DataType().points().shape(0);
+}
+
+/**
+ * @brief Sets Ret-th output to shape 0x0.
+ *
+ * @tparam Ret -- index of Ret to write the type
+ *
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
+ *
+ * @exception SinkTypeError in case of invalid index is passed for rets.
+ */
+template <size_t Ret>
+inline void TypesFunctions::empty2(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& rets=fargs.rets;
+  if (Ret >= rets.size()) {
+    auto fmt = boost::format("Transformation %1%: invalid Ret index (%2% out of %3%)");
+    throw rets.error(DataType::undefined(), (fmt%rets.name()%Ret%rets.size()).str() );
+  }
+  rets[Ret] = DataType().points().shape(0,0);
+}
+
+/**
  * @brief Assigns shape of Ret-th output = [Arg1.size(), Arg2.size()] (ignoring Arg1/Arg2 shape)
  *
  * @tparam Arg1 -- index of Arg1 to read the size.
@@ -89,6 +141,20 @@ inline void TypesFunctions::pass(TransformationTypes::TypesFunctionArgs& fargs) 
 template <size_t Arg1, size_t Arg2, size_t Ret>
 inline void TypesFunctions::toMatrix(TransformationTypes::TypesFunctionArgs& fargs) {
   fargs.rets[Ret] = DataType().points().shape(fargs.args[Arg1].size(), fargs.args[Arg2].size());
+}
+
+/**
+ * @brief Assigns shape of Ret-th output = [Arg1.size()-1, Arg2.size()-1] (ignoring Arg1/Arg2 shape)
+ *
+ * @tparam Arg1 -- index of Arg1 to read the size.
+ * @tparam Arg2 -- index of Arg2 to read the size.
+ * @tparam Ret -- index of Ret to write the type.
+ *
+ * @param fargs -- input/output types.
+ */
+template <size_t Arg1, size_t Arg2, size_t Ret>
+inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs) {
+  fargs.rets[Ret] = DataType().points().shape(fargs.args[Arg1].size()-1, fargs.args[Arg2].size()-1);
 }
 
 /**
@@ -176,7 +242,6 @@ inline void TypesFunctions::binsToEdges(TransformationTypes::TypesFunctionArgs& 
     auto fmt = boost::format("Transformation %1%: invalid Ret index (%2% out of %3%)");
     throw rets.error( DataType::undefined(), (fmt%rets.name()%Ret%rets.size()).str() );
   }
-  TypesFunctions::ifPoints<Arg>(fargs);
   TypesFunctions::if1d<Arg>(fargs);
   rets[Ret] = args[Arg];
   rets[Ret].shape[0]+=1;
@@ -293,6 +358,27 @@ inline void TypesFunctions::if1d(TransformationTypes::TypesFunctionArgs& fargs) 
   TypesFunctions::ifNd<Arg,1>(fargs);
 }
 
+/**
+ * @brief Checks if Arg-th input has 0 size.
+ *
+ * Raises an exception otherwise.
+ *
+ * @tparam Arg -- index of Arg to check.
+ *
+ * @param fargs.args -- source types.
+ * @param fargs.rets -- output types.
+ *
+ * @exception SourceTypeError in case input data is not 1-dimensional.
+ */
+template <size_t Arg>
+inline void TypesFunctions::ifEmpty(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto size=args[Arg].size();
+  if (size!=0u) {
+    auto fmt = boost::format("Transformation %1%: Arg %2% should has 0 elements");
+    throw args.error(args[Arg], (fmt%args.name()%Arg).str());
+  }
+}
 
 /**
  * @brief Checks if Arg-th input is 2d.

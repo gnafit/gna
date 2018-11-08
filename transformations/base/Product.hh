@@ -14,7 +14,26 @@
 class Product: public GNASingleObject,
                public TransformationBind<Product> {
 public:
-  Product();                                    ///< Constructor
+  Product();                                         ///< Constructor
+
+  /**
+   * @brief Construct a Product of two outputs
+   * @param data1 -- first SingleOutput instance.
+   * @param data2 -- second SingleOutput instance.
+   */
+  Product(SingleOutput& data1, SingleOutput& data2) : Product() {
+    multiply(data1, data2);
+  }
+
+  /**
+   * @brief Construct a Product of three outputs
+   * @param data1 -- first SingleOutput instance.
+   * @param data2 -- second SingleOutput instance.
+   * @param data3 -- third SingleOutput instance.
+   */
+  Product(SingleOutput& data1, SingleOutput& data2, SingleOutput& data3) : Product() {
+    multiply(data1, data2, data3);
+  }
 
   InputDescriptor add_input(const char* name);  ///< Add an input by name and leave unconnected.
   /** @brief Add an input by name and leave unconnected. */

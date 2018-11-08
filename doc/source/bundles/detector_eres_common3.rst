@@ -35,7 +35,7 @@ also defined for the corresponding namespace:
 
 .. code-block:: python
 
-    self.inputs[ns.name]              = eres.smear.Nvis
+    self.inputs[ns.name]              = eres.smear.Ntrue
     self.outputs[ns.name]             = eres.smear.Nrec
     ns.addobservable('eres', eres.smear.Nrec, ignorecheck=True)
 

@@ -9,8 +9,8 @@
 VarProduct::VarProduct(const std::vector<std::string>& varnames, const std::string& productname)
   : m_vars(varnames.size())
 {
-  if (m_vars.size()<2u) {
-    throw std::runtime_error("You must specify at least two variables for VarProduct");
+  if (m_vars.size()<1u) {
+    throw std::runtime_error("You must specify at least one variable for VarProduct");
   }
 
   std::vector<changeable> deps;

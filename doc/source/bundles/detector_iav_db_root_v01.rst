@@ -41,8 +41,8 @@ also defined for the corresponding namespace:
 .. code-block:: python
 
     self.inputs[ns.name]  = esmear.smear.Ntrue
-    self.outputs[ns.name] = esmear.smear.Nvis
-    ns.addobservable('iav', esmear.smear.Nvis, ignorecheck=True)
+    self.outputs[ns.name] = esmear.smear.Nrec
+    ns.addobservable('iav', esmear.smear.Nrec, ignorecheck=True)
 
 .. attention::
 

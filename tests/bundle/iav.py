@@ -70,9 +70,9 @@ ax.set_xlabel( r'$E_\nu$, MeV' )
 ax.set_ylabel( 'entries' )
 ax.set_title( 'IAV effect' )
 
-smeared = smear.Nvis.data().copy()
+smeared = smear.Nrec.data().copy()
 par.set( 2.0 )
-smeared2 = smear.Nvis.data().copy()
+smeared2 = smear.Nrec.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 
