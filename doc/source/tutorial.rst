@@ -77,6 +77,14 @@ The code produces the following output:
 
     <ROOT.vector<string> object at 0x55b4546e8be0>, ['str1', 'str2', 'str3']
 
+GNA introduces convenience pythonic methods for its types that may be loaded as follows:
+
+
+.. code-block:: python
+
+    from gna.bindings import common
+
+They include the methods for printing and plotting with matplotlib.
 
 Simple transformations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -170,18 +178,30 @@ The code produces the following output:
 
 Plotting outputs via matplotlib
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TBD
+
+GNA defines a set of convenience methods to plot the transformation outputs with matplotlib. The methods are wrappers
+for regular `matplotlib <https://matplotlib.org/api/pyplot_api.html>`_ commands. For the complete matplotlib
+documentation please refer the official `site <https://matplotlib.org/api/pyplot_api.html>`_.
 
 Plotting points (1d)
 """"""""""""""""""""
-TBD
 
-.. literalinclude:: ../../macro/tutorial/basic/04_points1_plot.py
+A ``plot(...)`` method is defined implementing `plot(y, ...)
+<https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>` call.
+
+.. literalinclude:: ../../macro/tutorial/basic/04_points_plot.py
     :linenos:
-    :lines: 4-
-    :emphasize-lines: 27
+    :lines: 4-31,38
+    :emphasize-lines: 25,26
     :caption: :download:`04_points1_plot.py <../../macro/tutorial/basic/04_points1_plot.py>`
 
+When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
+The latter produces the blue line on the following figure while the former produces orange, green and red lines.
+
+.. figure:: ../img/tutorial/04_points_plot.png
+    :alt: 
+
+    A example of using ``output.plot()`` method for 1d and 2d arrays.
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^

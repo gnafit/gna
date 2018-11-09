@@ -17,7 +17,7 @@ narray = narray**2 * narray[::-1,::-1]**2
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
 # Import helper library to make print output more informative
-from gna import printing
+from gna.bindings import common
 # Access the output `points` of transformation `points` of the object `parray`
 print('Output:', hist.hist.hist)
 # Access and print relevant DataType

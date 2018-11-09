@@ -30,19 +30,45 @@ def ifPoints(output):
 
     raise Exception('Output is supposed to be points: '+str(dtype))
 
-def plot_points1( output, *args, **kwargs ):
-    """Plot 1-dimensinal array using pyplot.plot
+def plot_points( output, *args, **kwargs ):
+    """Plot array using pyplot.plot
 
-    executes pyplot.plot(y, *args, **kwargs) with first argument overridden
+    executes pyplot.plot(y, *args, **kwargs) with first argument overridden,
     all other arguments are passed as is.
 
     returns pyplot.plot() result
     """
-    ifNd(output, 1)
     ifPoints(output)
 
-    points=output.data().copy()
+    if kwargs.pop('transpose', False):
+        points=output.data().T.copy()
+    else:
+        points=output.data().copy()
+
     return P.plot(points, *args, **kwargs)
+
+def plot_vs_points(outputy, outputx, *args, **kwargs):
+    """Plot array using pyplot.plot
+
+    executes pyplot.plot(y, *args, **kwargs) with first argument overridden,
+    all other arguments are passed as is.
+
+    returns pyplot.plot() result
+    """
+    ifPoints(outputx)
+    ifPoints(outputy)
+
+    if kwargs.pop('transpose', False):
+        pointsx=outputx.data().T.copy()
+        pointsy=outputy.data().T.copy()
+    else:
+        pointsx=outputx.data().copy()
+        pointsy=outputy.data().copy()
+
+    return P.plot(pointsx, pointsy, *args, **kwargs)
+
+def vs_plot_points(outputx, outputy, *arsg, **kwargs):
+    return plot_vs_points(outputy, outputx, *args, **kwargs)
 
 def plot_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal output using pyplot.plot
@@ -284,7 +310,9 @@ def matshow(output, *args, **kwargs):
     # return res
 
 def bind():
-    setattr( R.SingleOutput, 'plot',      plot_points1 )
+    setattr( R.SingleOutput, 'plot',      plot_points )
+    setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
+    setattr( R.SingleOutput, 'vs_plot',   vs_plot_points )
     setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
     setattr( R.SingleOutput, 'matshow',   matshow )

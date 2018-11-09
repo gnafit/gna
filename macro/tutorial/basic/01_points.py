@@ -10,7 +10,7 @@ narray = np.arange(12).reshape(3,4)
 parray = C.Points(narray)
 
 # Import helper library to make print output more informative
-from gna import printing
+from gna.bindings import common
 # Access the output `points` of transformation `points` of the object `parray`
 print('Output:', parray.points.points)
 # Access and print relevant DataType
