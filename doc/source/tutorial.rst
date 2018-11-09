@@ -205,9 +205,9 @@ The latter produces the blue line on the following figure while the former produ
 
 .. table:: Keyword options
 
-    +-------------+---------------------------------+
-    | `transpose` | transpose array before plotting |
-    +-------------+---------------------------------+
+    +------------------+---------------------------------+
+    | `transpose=True` | transpose array before plotting |
+    +------------------+---------------------------------+
 
 Plotting arrays vs other arrays (1d)
 """"""""""""""""""""""""""""""""""""
@@ -229,9 +229,9 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 .. table:: Keyword options
 
-    +-------------+----------------------------------+
-    | `transpose` | transpose arrays before plotting |
-    +-------------+----------------------------------+
+    +------------------+----------------------------------+
+    | `transpose=True` | transpose arrays before plotting |
+    +------------------+----------------------------------+
 
 Plotting matrices as colormaps
 """"""""""""""""""""""""""""""
@@ -239,6 +239,35 @@ Plotting matrices as colormaps
 The
 A ``matshow(...)`` method is defined implementing
 `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
+This method works with both histograms and arrays. When applied to histograms it ignores bin edges definitions and plots
+the matrix anyway.
+
+.. literalinclude:: ../../macro/tutorial/basic/06_matshow.py
+    :linenos:
+    :lines: 4-25,31
+    :emphasize-lines: 21
+    :caption: :download:`06_matshow.py <../../macro/tutorial/basic/06_matshow.py>`
+
+.. figure:: ../img/tutorial/06_matshow.png
+
+    A example ``output2d.matshow()`` method for outputs.
+
+.. table:: Keyword options
+
+    +------------------+--------------------------------------------------------------------------------------+
+    | `colorbar=True`  | add a colorbar                                                                       |
+    +------------------+--------------------------------------------------------------------------------------+
+    | `mask`           | do not colorize values, equal to `mask`. `mask=0.0` will produce ROOT-like colormaps |
+    +------------------+--------------------------------------------------------------------------------------+
+    | `transpose=True` | transpose arrays before plotting                                                     |
+    +------------------+--------------------------------------------------------------------------------------+
+
+.. note::
+
+    Unlike in matplotlib ``output.matshow()`` will not create extra figure by default. See `fignum` option description
+    in `matshow() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ documentation.
+
+
 
 
 Compound transformaions

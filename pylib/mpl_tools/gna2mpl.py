@@ -280,7 +280,9 @@ def matshow(output, *args, **kwargs):
     colorbar = kwargs.pop( 'colorbar', None )
     kwargs.setdefault( 'fignum', False )
 
-    buf = output.data()
+    buf = output.data().copy()
+    if kwargs.pop('transpose', False):
+        buf = buf.T
     if mask is not None:
         buf = N.ma.array(buf, mask=buf==mask)
     res = P.matshow(buf, **kwargs)
