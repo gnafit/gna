@@ -287,7 +287,7 @@ Plotting 1d histograms
     :linenos:
     :lines: 4-43,49
     :emphasize-lines: 25,37
-    :caption: :download:`06_matshow.py <../../macro/tutorial/basic/06_matshow.py>`
+    :caption: :download:`07_hist_plot.py <../../macro/tutorial/basic/07_hist_plot.py>`
 
 .. figure:: ../img/tutorial/07_hist_plot.png
 
