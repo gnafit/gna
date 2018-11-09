@@ -241,7 +241,7 @@ Plotting matrices as colormaps
 """"""""""""""""""""""""""""""
 
 The
-A ``matshow(...)`` method is defined implementing
+A ``plot_matshow(...)`` method is defined implementing
 `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
 This method works with both histograms and arrays. When applied to histograms it ignores bin edges definitions and plots
 the matrix anyway.
@@ -254,7 +254,7 @@ the matrix anyway.
 
 .. figure:: ../img/tutorial/06_matshow.png
 
-    A example ``output2d.matshow()`` method for outputs.
+    A example ``output2d.plot_matshow()`` method for outputs.
 
 .. table:: Keyword options
 
@@ -292,6 +292,36 @@ Plotting 1d histograms
 .. figure:: ../img/tutorial/07_hist_plot.png
 
     A example ``output.plot_hist()`` and ``output.bar()`` method for outputs.
+
+Overlapping histograms
+""""""""""""""""""""""
+
+.. literalinclude:: ../../macro/tutorial/basic/08_hists_plot.py
+    :linenos:
+    :lines: 4-22,27-40,75
+    :emphasize-lines: 29-31
+    :caption: :download:`08_hists_plot.py <../../macro/tutorial/basic/08_hists_plot.py>`
+
+.. figure:: ../img/tutorial/08_hists_plot_hist.png
+
+.. literalinclude:: ../../macro/tutorial/basic/08_hists_plot.py
+    :linenos:
+    :lines: 43-56,75
+    :emphasize-lines: 10-12
+    :caption: :download:`08_hists_plot.py <../../macro/tutorial/basic/08_hists_plot.py>`
+
+.. figure:: ../img/tutorial/08_hists_plot_bar1.png
+
+.. literalinclude:: ../../macro/tutorial/basic/08_hists_plot.py
+    :linenos:
+    :lines: 59-72,75
+    :emphasize-lines: 10-12
+    :caption: :download:`08_hists_plot.py <../../macro/tutorial/basic/08_hists_plot.py>`
+
+.. figure:: ../img/tutorial/08_hists_plot_bar2.png
+
+
+
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^
