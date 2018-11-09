@@ -53,9 +53,6 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    ifPoints(outputx)
-    ifPoints(outputy)
-
     if kwargs.pop('transpose', False):
         pointsx=outputx.data().T.copy()
         pointsy=outputy.data().T.copy()

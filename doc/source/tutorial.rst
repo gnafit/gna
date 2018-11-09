@@ -194,15 +194,42 @@ The method works the same way for both arrays and histograms.
     :linenos:
     :lines: 4-31,38
     :emphasize-lines: 25,26
-    :caption: :download:`04_points1_plot.py <../../macro/tutorial/basic/04_points1_plot.py>`
+    :caption: :download:`04_points_plot.py <../../macro/tutorial/basic/04_points_plot.py>`
 
 When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
 The latter produces the blue line on the following figure while the former produces orange, green and red lines.
 
 .. figure:: ../img/tutorial/04_points_plot.png
-    :alt: 
 
     A example ``output.plot()`` method for outputs with 1d and 2d arrays.
+
+.. table:: Keyword options
+
+    +-------------+---------------------------------+
+    | `transpose` | transpose array before plotting |
+    +-------------+---------------------------------+
+
+Plotting arrays vs other arrays (1d)
+""""""""""""""""""""""""""""""""""""
+
+If `X` vs `Y` is desired ``outputy.plot_vs(outputx, ...)`` syntax may be used. Matplotlib 
+`plot(x, y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ function is used.
+
+.. literalinclude:: ../../macro/tutorial/basic/05_points_plot_vs.py
+    :linenos:
+    :lines: 4-27,34
+    :emphasize-lines: 22
+    :caption: :download:`05_points_plot_vs.py <../../macro/tutorial/basic/05_points_plot_vs.py>`
+
+.. figure:: ../img/tutorial/05_points_plot_vs.png
+
+    A example ``output_x.plot_vs(output_y)`` method for outputs.
+
+.. table:: Keyword options
+
+    +-------------+----------------------------------+
+    | `transpose` | transpose arrays before plotting |
+    +-------------+----------------------------------+
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^
