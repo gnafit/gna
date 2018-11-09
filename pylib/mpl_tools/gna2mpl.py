@@ -38,8 +38,6 @@ def plot_points( output, *args, **kwargs ):
 
     returns pyplot.plot() result
     """
-    ifPoints(output)
-
     if kwargs.pop('transpose', False):
         points=output.data().T.copy()
     else:

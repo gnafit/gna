@@ -14,10 +14,10 @@ The data is allocated on the transformations' outputs while inputs are simple vi
 Transformations may depend on a number of variables.
 
 The main object in GNA is ``GNAObject`` which holds the following information:
-- A list of transformations, accessible by name or by index.
-- A list of variables the transformations depend on.
+    1. A list of transformations, accessible by name or by index.
+    2. A list of variables the transformations depend on.
 
-The typical syntax include:
+The typical syntax includes:
 
 .. code-block:: python
     :linenos:
@@ -183,11 +183,12 @@ GNA defines a set of convenience methods to plot the transformation outputs with
 for regular `matplotlib <https://matplotlib.org/api/pyplot_api.html>`_ commands. For the complete matplotlib
 documentation please refer the official `site <https://matplotlib.org/api/pyplot_api.html>`_.
 
-Plotting points (1d)
+Plotting arrays (1d)
 """"""""""""""""""""
 
-A ``plot(...)`` method is defined implementing `plot(y, ...)
-<https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>` call.
+A ``plot(...)`` method is defined implementing 
+`plot(y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ call passing output contents as `y`.
+The method works the same way for both arrays and histograms.
 
 .. literalinclude:: ../../macro/tutorial/basic/04_points_plot.py
     :linenos:
@@ -201,7 +202,7 @@ The latter produces the blue line on the following figure while the former produ
 .. figure:: ../img/tutorial/04_points_plot.png
     :alt: 
 
-    A example of using ``output.plot()`` method for 1d and 2d arrays.
+    A example ``output.plot()`` method for outputs with 1d and 2d arrays.
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^
