@@ -186,7 +186,7 @@ documentation please refer the official `site <https://matplotlib.org/api/pyplot
 Plotting arrays (1d)
 """"""""""""""""""""
 
-A ``plot(...)`` method is defined implementing 
+A ``plot(...)`` method is defined implementing
 `plot(y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ call passing output contents as `y`.
 The method works the same way for both arrays and histograms.
 
@@ -212,8 +212,10 @@ The latter produces the blue line on the following figure while the former produ
 Plotting arrays vs other arrays (1d)
 """"""""""""""""""""""""""""""""""""
 
-If `X` vs `Y` is desired ``outputy.plot_vs(outputx, ...)`` syntax may be used. Matplotlib 
+If `X` vs `Y` is desired ``output_y.plot_vs(output_x, ...)`` syntax may be used. Matplotlib
 `plot(x, y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ function is used.
+
+The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed order is desired.
 
 .. literalinclude:: ../../macro/tutorial/basic/05_points_plot_vs.py
     :linenos:
@@ -230,6 +232,14 @@ If `X` vs `Y` is desired ``outputy.plot_vs(outputx, ...)`` syntax may be used. M
     +-------------+----------------------------------+
     | `transpose` | transpose arrays before plotting |
     +-------------+----------------------------------+
+
+Plotting matrices as colormaps
+""""""""""""""""""""""""""""""
+
+The
+A ``matshow(...)`` method is defined implementing
+`matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
+
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -248,6 +258,9 @@ Defining variables
 
 WeightedSum transformation
 """"""""""""""""""""""""""
+
+Interpolation
+^^^^^^^^^^^^^
 
 Integration
 ^^^^^^^^^^^

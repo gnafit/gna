@@ -275,7 +275,6 @@ def bar_hist1( output, *args, **kwargs ):
 def matshow(output, *args, **kwargs):
     """Plot matrix using pyplot.matshow"""
     ifNd(output, 2)
-    ifPoints(output)
 
     mask = kwargs.pop( 'mask', None )
     colorbar = kwargs.pop( 'colorbar', None )
