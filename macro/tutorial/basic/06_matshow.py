@@ -21,7 +21,7 @@ ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 ax.set_title( 'Plot title' )
 
-parray2.points.points.matshow(colorbar=True, mask=0.0)
+parray2.points.points.matshow(mask=0.0, colorbar=True)
 
 from mpl_tools.helpers import savefig
 from sys import argv

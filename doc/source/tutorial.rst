@@ -55,6 +55,10 @@ The typical syntax includes:
 .. note:: Any ambiguity will trigger the exception. For example, if transformation has input and output with similar
           name `thename`, shortcut :code:`trans.thename` is forbidden.
 
+Each input and output has methods ``data()`` and ``datatype()``:
+  - ``data()`` returns numpy view on the relevant data with proper shape.
+  - ``datatype()`` returns ``DataType`` object with information on data shape and bin edges (for histogram).
+
 Let us no see the actual code examples.
 
 Utilites
@@ -254,21 +258,40 @@ the matrix anyway.
 
 .. table:: Keyword options
 
-    +------------------+--------------------------------------------------------------------------------------+
-    | `colorbar=True`  | add a colorbar                                                                       |
-    +------------------+--------------------------------------------------------------------------------------+
-    | `mask`           | do not colorize values, equal to `mask`. `mask=0.0` will produce ROOT-like colormaps |
-    +------------------+--------------------------------------------------------------------------------------+
-    | `transpose=True` | transpose arrays before plotting                                                     |
-    +------------------+--------------------------------------------------------------------------------------+
+    +----------------------+------------------------------------------------------------------------------------------------------------------------------+
+    | `colorbar=True`      | add a colorbar                                                                                                               |
+    +----------------------+------------------------------------------------------------------------------------------------------------------------------+
+    | `colorbar=dict(...)` | add a colorbar and pass the options to `colorbar() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.colorbar>`_ |
+    +----------------------+------------------------------------------------------------------------------------------------------------------------------+
+    | `mask`               | do not colorize values, equal to `mask`. `mask=0.0` will produce ROOT-like colormaps                                         |
+    +----------------------+------------------------------------------------------------------------------------------------------------------------------+
+    | `transpose=True`     | transpose arrays before plotting                                                                                             |
+    +----------------------+------------------------------------------------------------------------------------------------------------------------------+
 
 .. note::
 
     Unlike in matplotlib ``output.matshow()`` will not create extra figure by default. See `fignum` option description
     in `matshow() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ documentation.
 
+Plotting 1d histograms
+""""""""""""""""""""""
 
+..
+    The
+    A ``matshow(...)`` method is defined implementing
+    `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
+    This method works with both histograms and arrays. When applied to histograms it ignores bin edges definitions and plots
+    the matrix anyway.
 
+.. literalinclude:: ../../macro/tutorial/basic/07_hist_plot.py
+    :linenos:
+    :lines: 4-43,49
+    :emphasize-lines: 25,37
+    :caption: :download:`06_matshow.py <../../macro/tutorial/basic/06_matshow.py>`
+
+.. figure:: ../img/tutorial/07_hist_plot.png
+
+    A example ``output.plot_hist()`` and ``output.bar()`` method for outputs.
 
 Compound transformaions
 ^^^^^^^^^^^^^^^^^^^^^^^

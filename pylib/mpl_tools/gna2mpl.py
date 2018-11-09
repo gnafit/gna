@@ -287,7 +287,10 @@ def matshow(output, *args, **kwargs):
         buf = N.ma.array(buf, mask=buf==mask)
     res = P.matshow(buf, **kwargs)
     if colorbar:
-        cbar = helpers.add_colorbar( res )
+        if isinstance(colorbar, dict):
+            cbar = helpers.add_colorbar(res, **colorbar)
+        else:
+            cbar = helpers.add_colorbar(res)
         return res, cbar
 
     return res
@@ -309,7 +312,7 @@ def bind():
     setattr( R.SingleOutput, 'plot',      plot_points )
     setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
     setattr( R.SingleOutput, 'vs_plot',   vs_plot_points )
-    setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
+    setattr( R.SingleOutput, 'bar',       bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
     setattr( R.SingleOutput, 'matshow',   matshow )
     # setattr( R.TH1, 'errorbar', errorbar_hist1 )
