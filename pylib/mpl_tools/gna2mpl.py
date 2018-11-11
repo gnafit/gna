@@ -168,73 +168,99 @@ def bar_hist1( output, *args, **kwargs ):
 
     # return res
 
-# def pcolorfast_hist2( h, *args, **kwargs ):
-    # """Plot 2-dimensinal histogram using ax.pcolorfast
+def get_hist2d_data(output, kwargs):
+    ifNd(output, 2)
+    ifHist(output)
 
-    # executes ax.pcolorfast(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments are passed as is.
+    mask      = kwargs.pop( 'mask', None )
+    transpose = kwargs.pop( 'transpose', False )
 
-    # Options:
-        # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
-        # colorbar - if true, plot colorbar with height aligned to the axes height
+    dtype=output.datatype()
+    xedges, yedges = dtype.edgesNd[0], dtype.edgesNd[1]
 
-    # returns ax.pcolorfast()[, pyplot.colorbar] result
-    # """
-    # mask = kwargs.pop( 'mask', None )
-    # colorbar = kwargs.pop( 'colorbar', None )
+    buf = output.data().copy()
+    if mask is not None:
+        buf = N.ma.array(buf, mask=buf==mask)
 
-    # xax = h.GetXaxis()
-    # yax = h.GetYaxis()
-    # if xax.GetXbins().GetSize()>0 or yax.GetXbins().GetSize()>0:
-        # print( 'Can not draw 2D a histogram with variable bin widths' )
-        # print( 'Use pcolormesh method instead' )
-        # return
-    # x = [ xax.GetXmin(), xax.GetXmax() ]
-    # y = [ yax.GetXmin(), yax.GetXmax() ]
+    if transpose:
+        buf = buf.T
+        xedges, yedges=yedges, xedges
 
-    # buf = R2N.get_buffer_hist2( h,  mask=mask ).copy()
+    return buf, xedges, yedges
 
-    # ax = P.gca()
-    # res = ax.pcolorfast( x, y, buf, *args, **kwargs )
+def get_bin_width(edges):
+    edges = N.array(edges)
+    widths = edges[1:]-edges[:-1]
 
-    # if colorbar:
-        # cbar = helpers.add_colorbar( res )
-        # return res, cbar
+    status = N.allclose(widths, widths[0])
+    if not status:
+        print('Widths', widths)
+        raise Exception('Bin widths are not equal')
 
-    # return res
+    return widths[0]
 
-# def imshow_hist2( h, *args, **kwargs ):
-    # """Plot 2-dimensinal histogram using pyplot.imshow
+def get_hist2d_data_eq(output, kwargs):
+    buf, xedges, yedges = get_hist2d_data(output, kwargs)
 
-    # executes pyplot.imshow(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments are passed as is.
+    xw = get_bin_width(xedges)
+    yw = get_bin_width(yedges)
 
-    # Options:
-        # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
-        # colorbar - if true, plot colorbar with height aligned to the axes height
+    return buf, xw, xedges, yw, yedges
 
-    # returns pyplot.imshow()[, pyplot.colorbar] result
-    # """
-    # mask = kwargs.pop( 'mask', None )
-    # colorbar = kwargs.pop( 'colorbar', None )
+def colorbar_or_not(res, cbaropt):
+    if cbaropt:
+        if isinstance(cbaropt, dict):
+            cbar = helpers.add_colorbar(res, **colorbar)
+        else:
+            cbar = helpers.add_colorbar(res)
+        return res, cbar
 
-    # xax = h.GetXaxis()
-    # yax = h.GetYaxis()
-    # if xax.GetXbins().GetSize()>0 or yax.GetXbins().GetSize()>0:
-        # print( 'Can not draw 2D a histogram with variable bin widths' )
-        # print( 'Use pcolormesh method or draweHist2Dmesh function instead' )
-        # return
-    # extent = [ xax.GetXmin(), xax.GetXmax(), yax.GetXmin(), yax.GetXmax()  ]
+    return res
 
-    # buf = R2N.get_buffer_hist2( h,  mask=mask ).copy()
+def pcolorfast_hist2(output, *args, **kwargs):
+    kwargs['transpose'] = ~kwargs.get('transpose', False)
+    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    colorbar  = kwargs.pop( 'colorbar', None )
+    x = [xedges[0], xedges[-1]]
+    y = [yedges[0], yedges[-1]]
 
-    # kwargs.setdefault( 'origin', 'lower' )
-    # res = P.imshow( buf, *args, extent=extent, **kwargs )
-    # if colorbar:
-        # cbar = helpers.add_colorbar( res )
-        # return res,cbar
+    ax = P.gca()
+    res = ax.pcolorfast( x, y, buf, *args, **kwargs )
 
-    # return res
+    return colorbar_or_not(res, colorbar)
+
+def pcolormesh_hist2(output, *args, **kwargs):
+    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    colorbar  = kwargs.pop( 'colorbar', None )
+
+    x, y = N.meshgrid(xedges, yedges, indexing='ij')
+
+    res = P.pcolormesh(x, y, buf, *args, **kwargs)
+
+    return colorbar_or_not(res, colorbar)
+
+def pcolor_hist2(output, *args, **kwargs):
+    buf, xedges, yedges = get_hist2d_data(output ,kwargs)
+    colorbar  = kwargs.pop( 'colorbar', None )
+
+    x, y = N.meshgrid(xedges, yedges, indexing='ij')
+
+    res = P.pcolor(x, y, buf, *args, **kwargs)
+
+    return colorbar_or_not(res, colorbar)
+
+def imshow_hist2(output, *args, **kwargs):
+    kwargs['transpose'] = ~kwargs.get('transpose', False)
+    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    colorbar  = kwargs.pop( 'colorbar', None )
+
+    extent = [ xedges[0], xedges[-1], yedges[0], yedges[-1] ]
+    kwargs.setdefault( 'origin', 'lower' )
+    kwargs.setdefault( 'extent', extent )
+
+    res = P.imshow(buf, *args, **kwargs)
+
+    return colorbar_or_not(res, colorbar)
 
 # def graph_plot( g, *args, **kwargs ):
     # """Plot TGraph using pyplot.plot"""
@@ -295,19 +321,6 @@ def matshow(output, *args, **kwargs):
 
     return res
 
-# def imshow_matrix( self, *args, **kwargs ):
-    # """Plot TMatrixT using pyplot.imshow"""
-    # mask = kwargs.pop( 'mask', None )
-    # colorbar = kwargs.pop( 'colorbar', None )
-
-    # buf = R2N.get_buffer_matrix( self, mask=mask )
-    # res = P.imshow( buf )
-    # if colorbar:
-        # cbar = helpers.add_colorbar( res )
-        # return res,cbar
-
-    # return res
-
 def bind():
     setattr( R.SingleOutput, 'plot',      plot_points )
     setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
@@ -317,9 +330,10 @@ def bind():
     setattr( R.SingleOutput, 'plot_matshow', matshow )
     # setattr( R.TH1, 'errorbar', errorbar_hist1 )
 
-    # setattr( R.TH2, 'pcolorfast', pcolorfast_hist2 )
-    # setattr( R.TH2, 'pcolormesh', pcolormesh_hist2 )
-    # setattr( R.TH2, 'imshow',     imshow_hist2 )
+    setattr( R.SingleOutput, 'plot_pcolorfast', pcolorfast_hist2 )
+    setattr( R.SingleOutput, 'plot_pcolormesh', pcolormesh_hist2 )
+    setattr( R.SingleOutput, 'plot_pcolor',     pcolor_hist2 )
+    setattr( R.SingleOutput, 'plot_imshow',     imshow_hist2 )
 
     # setattr( R.TGraph,            'plot',     graph_plot )
     # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
