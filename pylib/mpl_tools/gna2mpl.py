@@ -139,34 +139,17 @@ def bar_hist1( output, *args, **kwargs ):
         # kwargs['fmt']='none'
     # return P.errorbar( centers, height, yerr, hwidths, *args, **kwargs )
 
-# def pcolormesh_hist2( h, *args, **kwargs ):
-    # """Plot 2-dimensinal histogram using pyplot.pcolormesh
 
-    # executes pyplot.pcolormesh(x, y, C, *args, **kwargs) with first two arguments overridden
-    # all other arguments are passed as is.
+def get_2d_buffer(output, transpose=False, mask=None):
+    buf = output.data().copy()
 
-    # Options:
-        # mask=F - exclude value F from plotting (set mask=0 to avoid plotting 0.0)
-        # colorbar - if true, plot colorbar with height aligned to the axes height
+    if mask is not None:
+        buf = N.ma.array(buf, mask=buf==mask)
 
-    # returns pyplot.pcolormesh()[, pyplot.colorbar] result
-    # """
-    # mask = kwargs.pop( 'mask', None )
-    # colorbar = kwargs.pop( 'colorbar', None )
+    if transpose:
+        buf = buf.T
 
-    # x1 = R2N.get_bin_edges_axis(h.GetXaxis())
-    # y1 = R2N.get_bin_edges_axis(h.GetYaxis())
-
-    # x, y = N.meshgrid( x1, y1 )
-
-    # buf = R2N.get_buffer_hist2( h, mask=mask ).copy()
-
-    # res = P.pcolormesh( x, y, buf, *args, **kwargs )
-    # if colorbar:
-        # cbar = helpers.add_colorbar( res )
-        # return res, cbar
-
-    # return res
+    return buf
 
 def get_hist2d_data(output, kwargs):
     ifNd(output, 2)
@@ -176,20 +159,15 @@ def get_hist2d_data(output, kwargs):
     transpose = kwargs.pop( 'transpose', False )
 
     dtype=output.datatype()
-    xedges, yedges = dtype.edgesNd[0], dtype.edgesNd[1]
-
-    buf = output.data().copy()
-    if mask is not None:
-        buf = N.ma.array(buf, mask=buf==mask)
-
+    xedges, yedges = N.array(dtype.edgesNd[0]), N.array(dtype.edgesNd[1])
     if transpose:
-        buf = buf.T
         xedges, yedges=yedges, xedges
+
+    buf = get_2d_buffer(output, transpose=transpose, mask=mask)
 
     return buf, xedges, yedges
 
 def get_bin_width(edges):
-    edges = N.array(edges)
     widths = edges[1:]-edges[:-1]
 
     status = N.allclose(widths, widths[0])
@@ -221,8 +199,8 @@ def pcolorfast_hist2(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
     buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
-    x = [xedges[0], xedges[-1]]
-    y = [yedges[0], yedges[-1]]
+    x = [yedges[0], yedges[-1]]
+    y = [xedges[0], xedges[-1]]
 
     ax = P.gca()
     res = ax.pcolorfast( x, y, buf, *args, **kwargs )
@@ -230,7 +208,7 @@ def pcolorfast_hist2(output, *args, **kwargs):
     return colorbar_or_not(res, colorbar)
 
 def pcolormesh_hist2(output, *args, **kwargs):
-    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    buf, xedges, yedges = get_hist2d_data(output ,kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
@@ -249,16 +227,59 @@ def pcolor_hist2(output, *args, **kwargs):
 
     return colorbar_or_not(res, colorbar)
 
+def surface_hist2(output, *args, **kwargs):
+    Z, xedges, yedges = get_hist2d_data(output ,kwargs)
+
+    xc=(xedges[1:]+xedges[:-1])*0.5
+    yc=(yedges[1:]+yedges[:-1])
+
+    X, Y = N.meshgrid(xc, yc, indexing='ij')
+
+    ax = P.gca()
+    res = ax.plot_surface(X, Y, Z, *args, **kwargs)
+
+    return res
+
+def bar3d_hist2(output, *args, **kwargs):
+    Zw, xedges, yedges = get_hist2d_data(output ,kwargs)
+
+    xw=xedges[1:]-xedges[:-1]
+    yw=yedges[1:]-yedges[:-1]
+
+    X, Y = N.meshgrid(xedges[:-1], yedges[:-1], indexing='ij')
+    Z = N.zeros_like(Zw)
+
+    Xw, Yw = N.meshgrid(xw, yw, indexing='ij')
+
+    ax = P.gca()
+    res = ax.bar3d(X.ravel(), Y.ravel(), Z.ravel(), Xw.ravel(), Yw.ravel(), Zw.ravel(), *args, **kwargs)
+
+    return res
+
 def imshow_hist2(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
     buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
-    extent = [ xedges[0], xedges[-1], yedges[0], yedges[-1] ]
+    extent = [ yedges[0], yedges[-1], xedges[0], xedges[-1] ]
     kwargs.setdefault( 'origin', 'lower' )
     kwargs.setdefault( 'extent', extent )
 
     res = P.imshow(buf, *args, **kwargs)
+
+    return colorbar_or_not(res, colorbar)
+
+def matshow(output, *args, **kwargs):
+    """Plot matrix using pyplot.matshow"""
+    ifNd(output, 2)
+
+    mask = kwargs.pop( 'mask', None )
+    colorbar = kwargs.pop( 'colorbar', None )
+    kwargs.setdefault( 'fignum', False )
+
+    buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask)
+
+    res = P.matshow(buf, **kwargs)
 
     return colorbar_or_not(res, colorbar)
 
@@ -298,29 +319,6 @@ def imshow_hist2(output, *args, **kwargs):
 
     # return P.plot( x, y, *args, **kwargs )
 
-def matshow(output, *args, **kwargs):
-    """Plot matrix using pyplot.matshow"""
-    ifNd(output, 2)
-
-    mask = kwargs.pop( 'mask', None )
-    colorbar = kwargs.pop( 'colorbar', None )
-    kwargs.setdefault( 'fignum', False )
-
-    buf = output.data().copy()
-    if kwargs.pop('transpose', False):
-        buf = buf.T
-    if mask is not None:
-        buf = N.ma.array(buf, mask=buf==mask)
-    res = P.matshow(buf, **kwargs)
-    if colorbar:
-        if isinstance(colorbar, dict):
-            cbar = helpers.add_colorbar(res, **colorbar)
-        else:
-            cbar = helpers.add_colorbar(res)
-        return res, cbar
-
-    return res
-
 def bind():
     setattr( R.SingleOutput, 'plot',      plot_points )
     setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
@@ -334,6 +332,9 @@ def bind():
     setattr( R.SingleOutput, 'plot_pcolormesh', pcolormesh_hist2 )
     setattr( R.SingleOutput, 'plot_pcolor',     pcolor_hist2 )
     setattr( R.SingleOutput, 'plot_imshow',     imshow_hist2 )
+
+    setattr( R.SingleOutput, 'plot_bar3d',      bar3d_hist2 )
+    setattr( R.SingleOutput, 'plot_surface',    surface_hist2 )
 
     # setattr( R.TGraph,            'plot',     graph_plot )
     # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )

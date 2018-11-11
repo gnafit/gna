@@ -27,7 +27,7 @@ oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
-ax.set_title( 'Plot title (left)' )
+ax.set_title( 'pcolorfast' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
@@ -36,7 +36,7 @@ hist.hist.hist.plot_pcolorfast(mask=0.0, colorbar=True)
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
-ax.set_title( 'Plot title (left)' )
+ax.set_title( 'pcolormesh' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
@@ -45,7 +45,7 @@ hist.hist.hist.plot_pcolormesh(mask=0.0, colorbar=True)
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
-ax.set_title( 'Plot title (left)' )
+ax.set_title( 'pcolor' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
@@ -54,12 +54,33 @@ hist.hist.hist.plot_pcolor(mask=0.0, colorbar=True)
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
-ax.set_title( 'Plot title (left)' )
+ax.set_title( 'imshow' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_imshow(mask=0.0, colorbar=True)
+
+fig = plt.figure()
+ax = plt.subplot( 111 )
+ax.set_title( 'matshow' )
+ax.minorticks_on()
+ax.set_xlabel( 'x label' )
+ax.set_ylabel( 'y label' )
+
+hist.hist.hist.plot_matshow(mask=0.0, colorbar=True)
+
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+fig = plt.figure()
+ax = plt.subplot( 111, projection='3d' )
+ax.set_title( 'Plot title' )
+ax.minorticks_on()
+ax.set_xlabel( 'x label' )
+ax.set_ylabel( 'y label' )
+
+# hist.hist.hist.plot_bar3d()
+hist.hist.hist.plot_surface(cmap='viridis')
 
 savefig(oname)
 
