@@ -76,7 +76,7 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
  * @return InputHandle for the new Source.
  */
 InputHandle Entry::addSource(const std::string &name) {
-  Source *s = new Source(name, this);
+  auto *s = new Source(name, this);
   sources.push_back(s);
   return InputHandle(*s);
 }
@@ -88,7 +88,7 @@ InputHandle Entry::addSource(const std::string &name) {
  * @return Source for the new Sink.
  */
 OutputHandle Entry::addSink(const std::string &name) {
-  Sink *s = new Sink(name, this);
+  auto *s = new Sink(name, this);
   sinks.push_back(s);
   return OutputHandle(*s);
 }

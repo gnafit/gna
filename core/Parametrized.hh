@@ -171,7 +171,7 @@ namespace ParametrizedTypes {
 
     template <typename T>
     VariableHandle<T> variable_(const std::string &name) {
-      Entry *e = new Entry(parameter<T>(name.c_str()), name, this);
+      auto *e = new Entry(parameter<T>(name.c_str()), name, this);
       m_entries.push_back(e);
       e->par.subscribe(m_taintflag);
       e->field = &e->var;
