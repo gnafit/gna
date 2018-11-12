@@ -8,13 +8,13 @@
 class GNAObject: public virtual TransformationTypes::Base,
                  public ParametrizedTypes::Base {
 public:
-  typedef ParametrizedTypes::VariablesContainer VariablesContainer;
-  typedef ParametrizedTypes::EvaluablesContainer EvaluablesContainer;
-  typedef TransformationTypes::EntryContainer TransformationsContainer;
-  typedef SimpleDict<VariableDescriptor, VariablesContainer> Variables;
-  typedef SimpleDict<EvaluableDescriptor, EvaluablesContainer> Evaluables;
-  typedef SimpleDict<TransformationDescriptor,
-                     TransformationsContainer> Transformations;
+  using VariablesContainer = ParametrizedTypes::VariablesContainer;
+  using EvaluablesContainer = ParametrizedTypes::EvaluablesContainer;
+  using TransformationsContainer = TransformationTypes::EntryContainer;
+  using Variables = SimpleDict<VariableDescriptor, VariablesContainer>;
+  using Evaluables = SimpleDict<EvaluableDescriptor, EvaluablesContainer>;
+  using Transformations = SimpleDict<TransformationDescriptor, TransformationsContainer>;
+
   GNAObject()
     : TransformationTypes::Base(),
       ParametrizedTypes::Base(),
@@ -57,18 +57,18 @@ protected:
       transformations(TransformationTypes::Base::m_entries)
   { }
 
-  typedef TransformationTypes::StorageTypesFunctionArgs StorageTypesFunctionArgs;
-  typedef TransformationTypes::TypesFunctionArgs TypesFunctionArgs;
-  typedef TransformationTypes::FunctionArgs FunctionArgs;
-  typedef TransformationTypes::Args Args;
-  typedef TransformationTypes::Rets Rets;
-  typedef TransformationTypes::Atypes Atypes;
-  typedef TransformationTypes::Rtypes Rtypes;
-  typedef TransformationTypes::Function Function;
-  typedef TransformationTypes::TypesFunction TypesFunction;
-  typedef TransformationTypes::Entry Entry;
-  typedef TransformationTypes::Accessor Accessor;
-  typedef TransformationTypes::Handle Handle;
+  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgs;
+  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgs;
+  using FunctionArgs = TransformationTypes::FunctionArgs;
+  using Args = TransformationTypes::Args;
+  using Rets = TransformationTypes::Rets;
+  using Atypes = TransformationTypes::Atypes;
+  using Rtypes = TransformationTypes::Rtypes;
+  using Function = TransformationTypes::Function;
+  using TypesFunction = TransformationTypes::TypesFunction;
+  using Entry = TransformationTypes::Entry;
+  using Accessor = TransformationTypes::Accessor;
+  using Handle = TransformationTypes::Handle;
 };
 
 class GNASingleObject: public GNAObject,

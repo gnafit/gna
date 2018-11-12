@@ -11,10 +11,10 @@ class ParametersGroup {
   friend class ExpressionsProvider;
   friend class Reparametrizer;
 protected:
-  typedef ParametrizedTypes::VariableHandle<void> Handle;
-  typedef variable<void> *Field;
-  typedef Handle(ParametersGroup::*Factory)(Field, const std::string&);
-  typedef std::vector<Field> FieldsVector;
+  using Handle = ParametrizedTypes::VariableHandle<void>;
+  using Field = variable<void>*;
+  using Factory = Handle (ParametersGroup::*)(Field, const std::string &);
+  using FieldsVector =  std::vector<Field>;
   friend class Fields;
   class Fields: public std::map<std::string, std::tuple<Field, Factory>> {
   public:

@@ -3,7 +3,7 @@
 
 #include "CovariatedPrediction.hh"
 
-typedef CovariatedPrediction::Segment Segment;
+using Segment = CovariatedPrediction::Segment;
 
 CovariatedPrediction::CovariatedPrediction()
   : m_finalized(false)

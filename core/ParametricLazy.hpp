@@ -111,7 +111,7 @@ struct ParametersTransform
 
 template <typename ReturnType, typename Expr, bool Free>
 class DependantEvaluable {
-  typedef dependant<ReturnType> evaluable_type;
+  using evaluable_type = dependant<ReturnType>;
 
 public:
   static evaluable_type get(Expr const &e) {

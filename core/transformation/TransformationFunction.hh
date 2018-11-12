@@ -17,7 +17,7 @@ namespace TransformationTypes
    *
    * @param FunctionArgs -- container with transformation inputs (Args), outputs (Rets) and storages (Ints).
    */
-  typedef std::function<void(FunctionArgs&)> Function;
+  using Function = std::function<void (FunctionArgs &)>;
 
   /**
    * @brief TypesFunction, that does the input types checking and output types derivation.
@@ -26,9 +26,9 @@ namespace TransformationTypes
    *
    * @param TypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).
    */
-  typedef std::function<void(TypesFunctionArgs&)> TypesFunction;
+  using TypesFunction = std::function<void (TypesFunctionArgs &)>;
 
-  typedef std::vector<TypesFunction> TypesFunctionsContainer;
+  using TypesFunctionsContainer = std::vector<TypesFunction>;
 
   /**
    * @brief StorageTypesFunction, that does the storage types derivation
@@ -38,7 +38,7 @@ namespace TransformationTypes
    *
    * @param StorageTypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).
    */
-  typedef std::function<void(StorageTypesFunctionArgs&)> StorageTypesFunction;
+  using StorageTypesFunction = std::function<void (StorageTypesFunctionArgs &)>;
 
-  typedef std::vector<StorageTypesFunction> StorageTypesFunctionsContainer;
+  using StorageTypesFunctionsContainer = std::vector<StorageTypesFunction>;
 }

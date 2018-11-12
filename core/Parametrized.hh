@@ -88,7 +88,7 @@ namespace ParametrizedTypes {
   template <typename T>
   class VariableHandle: public VariableHandle<void> {
     friend class Base;
-    typedef VariableHandle<void> BaseClass;
+    using BaseClass = VariableHandle<void>;
   public:
     VariableHandle(Entry &entry)
       : BaseClass(entry) { }
@@ -119,8 +119,8 @@ namespace ParametrizedTypes {
     return *this;
   }
 
-  typedef boost::view_clone_allocator view_clone_allocator;
-  typedef boost::ptr_vector<Entry, view_clone_allocator> SourcesContainer;
+  using view_clone_allocator = boost::view_clone_allocator;
+  using SourcesContainer = boost::ptr_vector<Entry, view_clone_allocator>;
   class EvaluableEntry: public boost::noncopyable {
   public:
     EvaluableEntry(const std::string &name, const SourcesContainer &sources,
@@ -154,8 +154,8 @@ namespace ParametrizedTypes {
     std::cerr << std::endl;
   }
 
-  typedef boost::ptr_vector<Entry> VariablesContainer;
-  typedef boost::ptr_vector<EvaluableEntry> EvaluablesContainer;
+  using VariablesContainer = boost::ptr_vector<Entry>;
+  using EvaluablesContainer = boost::ptr_vector<EvaluableEntry>;
 
   class Base {
     friend class ::ParametersGroup;
@@ -235,7 +235,7 @@ namespace ParametrizedTypes {
 
 class VariableDescriptor: public ParametrizedTypes::VariableHandle<void> {
 public:
-  typedef ParametrizedTypes::VariableHandle<void> BaseClass;
+  using BaseClass = ParametrizedTypes::VariableHandle<void>;
 
   VariableDescriptor(const BaseClass &other)
     : BaseClass(other)
@@ -270,10 +270,10 @@ public:
 
 class EvaluableDescriptor: public ParametrizedTypes::EvaluableHandle<void> {
 public:
-  typedef ParametrizedTypes::EvaluableHandle<void> BaseClass;
+  using BaseClass = ParametrizedTypes::EvaluableHandle<void>;
 
-  typedef ParametrizedTypes::SourcesContainer SourcesContainer;
-  typedef SimpleDict<VariableDescriptor, SourcesContainer> Sources;
+  using SourcesContainer = ParametrizedTypes::SourcesContainer;
+  using Sources = SimpleDict<VariableDescriptor, SourcesContainer>;
 
   EvaluableDescriptor(const BaseClass &other)
     : BaseClass(other),

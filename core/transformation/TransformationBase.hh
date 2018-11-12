@@ -19,7 +19,7 @@ namespace TransformationTypes {
   template<typename T>
   class Initializer;
 
-  typedef boost::ptr_vector<Entry> EntryContainer; ///< Container for Entry pointers.
+  using EntryContainer = boost::ptr_vector<Entry>; ///< Container for Entry pointers.
 
   /**
    * @brief Base transformation class handling.
