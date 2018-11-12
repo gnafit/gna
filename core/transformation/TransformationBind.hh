@@ -26,7 +26,7 @@
 template <typename Derived>
 class TransformationBind: public virtual TransformationTypes::Base {
 public:
-  TransformationBind() { }                                                   ///< Default constructor.
+  TransformationBind() = default;                                                   ///< Default constructor.
   /**
    * @brief Clone constructor.
    *

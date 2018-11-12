@@ -165,7 +165,7 @@ namespace ParametrizedTypes {
     Base &operator=(const Base &other);
 
   protected:
-    Base() { }
+    Base() = default;
     void copyEntries(const Base &other);
     void subscribe_(taintflag flag);
 
@@ -240,9 +240,7 @@ public:
   VariableDescriptor(const BaseClass &other)
     : BaseClass(other)
   { }
-  VariableDescriptor(const VariableDescriptor &other)
-    : BaseClass(other)
-  { }
+  VariableDescriptor(const VariableDescriptor &other) = default;
   VariableDescriptor(ParametrizedTypes::Entry &entry)
     : BaseClass(entry)
   { }

@@ -14,7 +14,7 @@ namespace TransformationTypes
    */
   class Accessor {
   public:
-    Accessor() { };                                       ///< Default constructor.
+    Accessor() = default;                                 ///< Default constructor.
     Accessor(Base &parent): m_parent(&parent) { }         ///< Constructor. @param parent -- Base instance to access its Entry instances.
     Handle operator[](int idx) const;                     ///< Get a Handle for the i-th Entry.
     Handle operator[](const std::string &name) const;     ///< Get a Handle for the Entry by name.

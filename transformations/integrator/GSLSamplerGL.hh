@@ -5,7 +5,7 @@
 
 class GSLSamplerGL{
 public:
-   GSLSamplerGL(){};
+   GSLSamplerGL()= default;;
   ~GSLSamplerGL();
 
   void fill(size_t n, double a, double b, double* x, double* w);

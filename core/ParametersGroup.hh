@@ -26,7 +26,7 @@ protected:
   };
 public:
   ParametersGroup(GNAObject *parent, const Fields &fields);
-  virtual ~ParametersGroup() { }
+  virtual ~ParametersGroup() = default;
 
   void dump();
 
