@@ -6,8 +6,8 @@
 class IntegratorGL: public TransformationBind<IntegratorGL>,
                     public IntegratorBase {
 public:
-  IntegratorGL(size_t bins, int orders, double* edges=0);
-  IntegratorGL(size_t bins, int* orders, double* edges=0);
+  IntegratorGL(size_t bins, int orders, double* edges=nullptr);
+  IntegratorGL(size_t bins, int* orders, double* edges=nullptr);
 
   void sample(FunctionArgs& fargs) final;
 };
