@@ -66,7 +66,7 @@ protected:
     return allvars;
   }
 
-  void setExpressions(ExpressionsProvider &provider) {
+  void setExpressions(ExpressionsProvider &provider) override {
     /// Mode A: incoherent sum + cos
     provider
       .add(&weight0, {&weight12, &weight13, &weight23}, [&](){

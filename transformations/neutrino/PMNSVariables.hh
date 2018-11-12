@@ -40,7 +40,7 @@ protected:
     }
     return allvars;
   }
-  void setExpressions(ExpressionsProvider &provider) {
+  void setExpressions(ExpressionsProvider &provider) override {
     using std::sin;
     using std::cos;
     using std::exp;
@@ -125,7 +125,7 @@ protected:
     }
     return allvars;
   }
-  void setExpressions(ExpressionsProvider &provider) {
+  void setExpressions(ExpressionsProvider &provider) override {
     using std::exp;
     provider
       .add(&V[0][0], {&Cos12, &Cos13}, [&]() {

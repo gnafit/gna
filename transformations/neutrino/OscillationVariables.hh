@@ -69,7 +69,7 @@ protected:
       .add(&PhaseC, "PhaseC")
     ;
   }
-  virtual void setExpressions(ExpressionsProvider &provider) {
+  void setExpressions(ExpressionsProvider &provider) override {
     using std::sqrt;
     using std::asin;
     using std::sin;

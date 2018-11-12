@@ -21,7 +21,7 @@ public:
   void checkTypes(TypesFunctionArgs fargs);
   void calculateChi2(FunctionArgs fargs);
 
-  virtual double value() override {
+  double value() override {
     return m_transform[0].x[0];
   }
 protected:

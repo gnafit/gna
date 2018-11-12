@@ -43,7 +43,7 @@ public:
     : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
 
-  virtual ~Variable() = default;
+  ~Variable() override = default;
 
   virtual T value() const noexcept { return m_var.value(); }
   virtual const variable<T> &getVariable() const noexcept { return m_var; }
