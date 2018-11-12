@@ -10,7 +10,7 @@ public:
   KeyError(const std::string &key, const std::string &object = "")
     : key(key), object(object) { }
 
-  const char *what() const throw() override { return key.c_str(); }
+  const char *what() const noexcept override { return key.c_str(); }
 
   std::string key;
   std::string object;
@@ -23,7 +23,7 @@ public:
     indexstr = boost::lexical_cast<std::string>(index);
   }
 
-  const char *what() const throw() override { return indexstr.c_str(); }
+  const char *what() const noexcept override { return indexstr.c_str(); }
 
   int index;
   std::string indexstr;
