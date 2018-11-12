@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from __future__ import print_function
 import constructors as C
 import numpy as np
@@ -25,26 +24,40 @@ from mpl_tools.helpers import savefig
 from sys import argv
 oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
 
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
 fig = plt.figure()
-ax = plt.subplot( 111 )
-ax.set_title( 'pcolormesh' )
+ax = plt.subplot( 111, projection='3d' )
+ax.set_title( 'surface' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_pcolormesh(mask=0.0, colorbar=True)
+hist.hist.hist.plot_surface(cmap='viridis', colorbar=True)
 
-savefig(oname, suffix='_pcolormesh')
+savefig(oname, suffix='_surface')
 
 fig = plt.figure()
-ax = plt.subplot( 111 )
-ax.set_title( 'pcolor' )
+ax = plt.subplot( 111, projection='3d' )
+ax.set_title( 'bar3d' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_pcolor(mask=0.0, colorbar=True)
+hist.hist.hist.plot_bar3d(cmap=True, colorbar=True)
 
-savefig(oname, suffix='_pcolor')
+savefig(oname, suffix='_bar3d')
+
+fig = plt.figure()
+ax = plt.subplot( 111, projection='3d' )
+ax.set_title( 'bar3d' )
+ax.minorticks_on()
+ax.set_xlabel( 'x label' )
+ax.set_ylabel( 'y label' )
+
+hist.hist.hist.plot_wireframe(cmap=True, colorbar=True)
+
+savefig(oname, suffix='_wireframe')
 
 plt.show()
+
