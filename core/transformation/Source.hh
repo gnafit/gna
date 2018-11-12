@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <boost/format.hpp>
+#include <utility>
 using boost::format;
 
 #include "Sink.hh"
@@ -26,8 +27,8 @@ namespace TransformationTypes
      * @param name -- Source name.
      * @param entry -- Entry pointer Source belongs to.
      */
-    Source(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+    Source(std::string name, Entry *entry)
+      : name(std::move(name)), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.

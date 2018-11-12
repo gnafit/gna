@@ -1,3 +1,4 @@
+#include <utility>
 #include <vector>
 
 #include <boost/format.hpp>
@@ -7,8 +8,8 @@ using boost::format;
 
 #include "ParametersGroup.hh"
 
-ParametersGroup::ParametersGroup(GNAObject *parent, const Fields &fields)
-  : m_parent(parent), m_fields(fields)
+ParametersGroup::ParametersGroup(GNAObject *parent, Fields fields)
+  : m_parent(parent), m_fields(std::move(fields))
 {
 }
 

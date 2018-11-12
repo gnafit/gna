@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -10,9 +11,9 @@ class GaussLegendre: public GNAObject,
                      public TransformationBind<GaussLegendre> {
   friend class GaussLegendreHist;
 public:
-  GaussLegendre(const std::vector<double> &edges,
-                const std::vector<int> &orders)
-  : m_edges(edges), m_orders(orders)
+  GaussLegendre(std::vector<double> edges,
+                std::vector<int> orders)
+  : m_edges(std::move(edges)), m_orders(std::move(orders))
   {
     init();
   }

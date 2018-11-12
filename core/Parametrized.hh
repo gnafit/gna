@@ -26,7 +26,7 @@ namespace ParametrizedTypes {
       Free = 0, Claimed, Bound,
     };
 
-    Entry(parameter<void> par, const std::string &name, const Base *parent);
+    Entry(parameter<void> par, std::string name, const Base *parent);
     Entry(const Entry &other, const Base *parent);
 
     void bind(variable<void> var);
@@ -123,7 +123,7 @@ namespace ParametrizedTypes {
   using SourcesContainer = boost::ptr_vector<Entry, view_clone_allocator>;
   class EvaluableEntry: public boost::noncopyable {
   public:
-    EvaluableEntry(const std::string &name, const SourcesContainer &sources,
+    EvaluableEntry(std::string name, const SourcesContainer &sources,
                    dependant<void> dependant, const Base *parent);
     EvaluableEntry(const EvaluableEntry &other, const Base *parent);
 

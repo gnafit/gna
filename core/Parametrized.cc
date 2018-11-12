@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <iostream>
+#include <utility>
 
 #include <fmt/format.h>
 
@@ -11,8 +12,8 @@ using ParametrizedTypes::EvaluableEntry;
 using ParametrizedTypes::EvaluableHandle;
 using ParametrizedTypes::Base;
 
-Entry::Entry(parameter<void> par, const std::string &name, const Base *parent)
-  : name(name), required(true),
+Entry::Entry(parameter<void> par, std::string name, const Base *parent)
+  : name(std::move(name)), required(true),
     par(par), var(par), state(Free), claimer(nullptr),
     parent(parent)
 {
@@ -48,11 +49,11 @@ parameter<void> Entry::claim(Base *other) {
   return par;
 }
 
-EvaluableEntry::EvaluableEntry(const std::string &name,
+EvaluableEntry::EvaluableEntry(std::string name,
                                const SourcesContainer &sources,
                                dependant<void> dependant,
                                const Base *parent)
-  : name(name), sources(sources), dep(dependant), parent(parent)
+  : name(std::move(name)), sources(sources), dep(dependant), parent(parent)
 {
 }
 

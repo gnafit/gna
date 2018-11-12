@@ -4,11 +4,12 @@
 #include <string>
 
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 class KeyError: public std::exception {
 public:
-  KeyError(const std::string &key, const std::string &object = "")
-    : key(key), object(object) { }
+  KeyError(std::string key, std::string object = "")
+    : key(std::move(key)), object(std::move(object)) { }
 
   const char *what() const noexcept override { return key.c_str(); }
 
@@ -18,8 +19,8 @@ public:
 
 class IndexError: public std::exception {
 public:
-  IndexError(int index, const std::string &object = "")
-    : index(index), object(object) {
+  IndexError(int index, std::string object = "")
+    : index(index), object(std::move(object)) {
     indexstr = boost::lexical_cast<std::string>(index);
   }
 
