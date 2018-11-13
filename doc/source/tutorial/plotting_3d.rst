@@ -16,8 +16,8 @@ matplotlib function passing output data as `X`, `Y` and `Z`.
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
    :linenos:
-   :lines: 4-22,28-38,63
-   :emphasize-lines: 20,23,29
+   :lines: 4-23,29-39,64
+   :emphasize-lines: 21,24,30
    :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
 
 In order the surface was colorized ``cmap`` option should be passed with a valid colormap name (use `viridis`).
@@ -43,7 +43,7 @@ By default the bars are not colorized: ``cmap=True`` may be used to colorize the
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
    :linenos:
-   :lines: 48
+   :lines: 49
    :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot3d_bar3d.png
@@ -62,7 +62,7 @@ By default wire frame is not colorized: ``cmap=True`` may be used to colorize th
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
    :linenos:
-   :lines: 59
+   :lines: 60
    :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot3d_wireframe.png

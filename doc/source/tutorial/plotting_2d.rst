@@ -14,8 +14,8 @@ axis.
 
 .. literalinclude:: ../../../macro/tutorial/basic/06_matshow.py
     :linenos:
-    :lines: 4-25,31
-    :emphasize-lines: 21
+    :lines: 4-26,32
+    :emphasize-lines: 22
     :caption: :download:`06_matshow.py <../../../macro/tutorial/basic/06_matshow.py>`
 
 .. figure:: ../../img/tutorial/06_matshow.png
@@ -60,8 +60,8 @@ Y.
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
     :linenos:
-    :lines: 4-23,28-36, 61
-    :emphasize-lines: 28
+    :lines: 4-24,29-37,62
+    :emphasize-lines: 29
     :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_equal_pcolorfast.png
@@ -78,7 +78,7 @@ The second method ``plot_imshow()`` is using
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
     :linenos:
-    :lines: 46
+    :lines: 47
     :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_equal_imshow.png
@@ -95,7 +95,7 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
     :linenos:
-    :lines: 57
+    :lines: 58
     :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_equal_matshow.png
@@ -117,8 +117,8 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot.py
    :linenos:
-   :lines: 4-23,28-36,50
-   :emphasize-lines: 28
+   :lines: 4-24,29-37,51
+   :emphasize-lines: 29
    :caption: :download:`09_hist2d_plot.py <../../../macro/tutorial/basic/09_hist2d_plot.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_pcolormesh.png

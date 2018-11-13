@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from gna import tutorial
 import constructors as C
 import numpy as np
 from gna.bindings import common

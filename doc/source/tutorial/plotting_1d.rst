@@ -14,8 +14,8 @@ The method works the same way for both arrays and histograms.
 
 .. literalinclude:: ../../../macro/tutorial/basic/04_points_plot.py
     :linenos:
-    :lines: 4-31,38
-    :emphasize-lines: 25,26
+    :lines: 4-32,39
+    :emphasize-lines: 26,27
     :caption: :download:`04_points_plot.py <../../../macro/tutorial/basic/04_points_plot.py>`
 
 When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
@@ -42,8 +42,8 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 .. literalinclude:: ../../../macro/tutorial/basic/05_points_plot_vs.py
     :linenos:
-    :lines: 4-27,34
-    :emphasize-lines: 22
+    :lines: 4-28,33
+    :emphasize-lines: 23
     :caption: :download:`05_points_plot_vs.py <../../../macro/tutorial/basic/05_points_plot_vs.py>`
 
 .. figure:: ../../img/tutorial/05_points_plot_vs.png
@@ -70,8 +70,8 @@ histogram that affects how the edges of first and last bins are plotted: they ar
 
 .. literalinclude:: ../../../macro/tutorial/basic/07_hist_plot.py
     :linenos:
-    :lines: 4-43,49
-    :emphasize-lines: 25,37
+    :lines: 4-44,50
+    :emphasize-lines: 26,38
     :caption: :download:`07_hist_plot.py <../../../macro/tutorial/basic/07_hist_plot.py>`
 
 .. figure:: ../../img/tutorial/07_hist_plot.png
@@ -96,13 +96,13 @@ Line plots
 Multiple `plot_hist()` are plotted as regular plots.
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
-    :linenos:
-    :lines: 4-22,27-40,75
-    :emphasize-lines: 29-31
-    :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
+   :linenos:
+   :lines: 4-23,28-41,76
+   :emphasize-lines: 30-32
+   :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_hist.png
-    :align: center
+   :align: center
 
    Several histograms superimposed in ``plot_hist()`` version.
 
@@ -115,7 +115,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
-    :lines: 43-56,75
+    :lines: 44-57,76
     :emphasize-lines: 10-12
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
@@ -134,7 +134,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
-    :lines: 59-72,75
+    :lines: 60-73,76
     :emphasize-lines: 10-12
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
