@@ -1,5 +1,5 @@
-Plotting outputs via matplotlib 2d: plots and histograms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Plotting outputs in 2d: plots and histograms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 GNA defines a set of convenience methods to plot the transformation outputs with matplotlib. The methods are wrappers
 for regular `matplotlib <https://matplotlib.org/api/pyplot_api.html>`_ commands. For the complete matplotlib
@@ -22,6 +22,7 @@ When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6
 The latter produces the blue line on the following figure while the former produces orange, green and red lines.
 
 .. figure:: ../../img/tutorial/04_points_plot.png
+    :align: center
 
     A example ``output.plot()`` method for outputs with 1d and 2d arrays.
 
@@ -46,6 +47,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
     :caption: :download:`05_points_plot_vs.py <../../../macro/tutorial/basic/05_points_plot_vs.py>`
 
 .. figure:: ../../img/tutorial/05_points_plot_vs.png
+    :align: center
 
     A example ``output_x.plot_vs(output_y)`` method for outputs.
 
@@ -73,6 +75,7 @@ histogram that affects how the edges of first and last bins are plotted: they ar
     :caption: :download:`07_hist_plot.py <../../../macro/tutorial/basic/07_hist_plot.py>`
 
 .. figure:: ../../img/tutorial/07_hist_plot.png
+    :align: center
 
     A example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
 
@@ -94,6 +97,7 @@ Both plotting methods may be used for plotting multiple histograms. Multiple `pl
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_hist.png
+    :align: center
 
    Several histograms superimposed in ``plot_hist()`` version.
 
@@ -107,6 +111,7 @@ transparency by setting ``alpha`` option below 1.
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar1.png
+    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
 
@@ -122,6 +127,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar2.png
+    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with shrunk bins.
 

@@ -217,7 +217,7 @@ def colorbar_or_not_3d(res, cbaropt, mappable=None, cmap=None):
 
 def pcolorfast_hist2(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
-    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
     x = [yedges[0], yedges[-1]]
     y = [xedges[0], xedges[-1]]
@@ -228,7 +228,7 @@ def pcolorfast_hist2(output, *args, **kwargs):
     return colorbar_or_not(res, colorbar)
 
 def pcolormesh_hist2(output, *args, **kwargs):
-    buf, xedges, yedges = get_hist2d_data(output ,kwargs)
+    buf, xedges, yedges = get_hist2d_data(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
@@ -238,7 +238,7 @@ def pcolormesh_hist2(output, *args, **kwargs):
     return colorbar_or_not(res, colorbar)
 
 def pcolor_hist2(output, *args, **kwargs):
-    buf, xedges, yedges = get_hist2d_data(output ,kwargs)
+    buf, xedges, yedges = get_hist2d_data(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
@@ -249,7 +249,7 @@ def pcolor_hist2(output, *args, **kwargs):
 
 def imshow_hist2(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
-    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output ,kwargs)
+    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     extent = [ yedges[0], yedges[-1], xedges[0], xedges[-1] ]
@@ -275,7 +275,7 @@ def matshow(output, *args, **kwargs):
     return colorbar_or_not(res, colorbar)
 
 def surface_hist2(output, *args, **kwargs):
-    Z, xedges, yedges = get_hist2d_data(output ,kwargs)
+    Z, xedges, yedges = get_hist2d_data(output, kwargs)
 
     xc=(xedges[1:]+xedges[:-1])*0.5
     yc=(yedges[1:]+yedges[:-1])
@@ -333,7 +333,7 @@ def wireframe_hist2(output, *args, **kwargs):
     return res
 
 def bar3d_hist2(output, *args, **kwargs):
-    Zw, xedges, yedges = get_hist2d_data(output ,kwargs)
+    Zw, xedges, yedges = get_hist2d_data(output, kwargs)
 
     xw=xedges[1:]-xedges[:-1]
     yw=yedges[1:]-yedges[:-1]

@@ -1,14 +1,16 @@
-Plotting outputs via matplotlib 2d: 2d histograms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Plotting outputs in 2d: 2d histograms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. _matplotlib_matrices:
 
 Matrices
 """"""""
 
-The
-A ``plot_matshow(...)`` method is defined implementing
+The ``plot_matshow(...)`` method is defined implementing
 `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
 This method works with both histograms and arrays. When applied to histograms it ignores bin edges definitions and plots
-the matrix anyway.
+the matrix anyway: first dimension defines rows, second - columns; the rows are plotted over Y axis and columns of X
+axis.
 
 .. literalinclude:: ../../../macro/tutorial/basic/06_matshow.py
     :linenos:
@@ -17,8 +19,11 @@ the matrix anyway.
     :caption: :download:`06_matshow.py <../../../macro/tutorial/basic/06_matshow.py>`
 
 .. figure:: ../../img/tutorial/06_matshow.png
+    :align: center
 
     A example ``output2d.plot_matshow()`` method for outputs.
+
+.. _matplotlib_matrices_options:
 
 .. table:: Keyword options
 
@@ -41,23 +46,53 @@ the matrix anyway.
 2d histograms with constant binning
 """""""""""""""""""""""""""""""""""
 
+There are several options to plot 2d histograms as histograms, i.e. with first dimension over X and second dimension
+over Y. In case the histogram has bins of equal width ``plot_pcolorfast()`` or ``plot_imshow()`` may be used. Both
+methods support the same extra options as :ref:`matshow <matplotlib_matrices_options>`.
+
+``plot_pcolorfast(...)`` method implements a
+`pcolorfast(X, Y, C, ...) <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolorfast.html?highlight=pcolorfast#matplotlib.axes.Axes.pcolorfast>`_ 
+call passing output contents as `X`, `Y` and `C`. Below see an example of Gaussian with width 10 for X and width 3 for
+Y.
+
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
     :linenos:
+    :lines: 4-23,28-36, 61
+    :emphasize-lines: 28
+    :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
+
+.. figure:: ../../img/tutorial/09_hist2d_plot_equal_pcolorfast.png
+    :align: center
+
+    2d histogram plotted via ``plot_pcolorfast()`` method.
+
+The second method ``plot_imshow()`` is using
+`imshow(X, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.imshow>`_ passing output data as `X`. The
+``imshow()`` method is designed to show images and thus it sets the equal visual size for `x` and `y` intervals [#]_.
+
+.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
+    :linenos:
+    :lines: 46
+    :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
+
+.. figure:: ../../img/tutorial/09_hist2d_plot_equal_imshow.png
+   :align: center
+
+   2d histogram plotted via ``plot_imshow()`` method.
+
+The relevant plot, produced by the ``plot_matshow()`` may be found below.
+
+.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
+    :linenos:
+    :lines: 57
     :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_equal_matshow.png
+   :align: center
 
-   Histogram as matrix.
+   2d histogram, plotted as matrix.
 
-
-.. figure:: ../../img/tutorial/09_hist2d_plot_equal_imshow.png
-
-   Histogram as image.
-
-
-.. figure:: ../../img/tutorial/09_hist2d_plot_equal_pcolorfast.png
-
-   Histogram.
+.. [#] Similar effect may be achieved to any plot with ``ax.set_aspect('equal')``.
 
 2d histograms with variable binning
 """""""""""""""""""""""""""""""""""
@@ -67,6 +102,7 @@ the matrix anyway.
     :caption: :download:`09_hist2d_plot.py <../../../macro/tutorial/basic/09_hist2d_plot.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_pcolormesh.png
+   :align: center
 
    Histogram with variable binning.
 
