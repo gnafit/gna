@@ -18,14 +18,15 @@ from gna.expression import *
 from argparse import ArgumentParser
 parser = ArgumentParser()
 # parser.add_argument( '--make-idx', action="store_true", help='Make indices' )
-parser.add_argument('--from-file', action="store_true", help='Read coordinates from files')
+parser.add_argument('--from-files', action="store_true", help='Read coordinates from files')
 args = parser.parse_args()
 args.make_idx=True
 
 
-if args.from_file:
+if args.from_files:
     reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py'
     detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py'
+    snf_pools  = 'data/dayabay/snf/coordinates/coordinates_docDB_11112.py'
 else:
     #DYB-like detector positions in meters
     detectors = {
@@ -53,7 +54,8 @@ else:
 if args.make_idx:
     indices = [('r', 'reactor', ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
                ('d', 'detector', ['AD11', 'AD12', 'AD21', 'AD22', 'AD31',
-                                  'AD32', 'AD33', 'AD34'] )]
+                                  'AD32', 'AD33', 'AD34'])
+              ]
     expr = 'baselines[d,r]()'
     a =  Expression(expr, indices=indices)
     a.parse()
@@ -70,6 +72,8 @@ cfg = NestedDict(
     reactors = reactors,
     # Detector positions
     detectors = detectors,
+    # SNF pools,
+    snf_pools=snf_pools,
     units="meters"
     )
 #
