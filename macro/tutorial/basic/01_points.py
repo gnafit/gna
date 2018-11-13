@@ -17,3 +17,5 @@ print('Output:', parray.points.points)
 print('DataType:', parray.points.points.datatype())
 # Access the actual data
 print('Data:\n', parray.points.points.data())
+
+parray.print()

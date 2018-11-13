@@ -6,10 +6,10 @@ from gna.bindings import DataType
 import ROOT as R
 from printing import printl, nextlevel
 
-@patchROOTClass(R.OutputDescriptor, '__str__')
-def OutputDescriptor____str__(self):
-    return '[out] {}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+@patchROOTClass(R.InputDescriptor, '__str__')
+def InputDescriptor____str__(self):
+    return '[in]  {}'.format(self.name())
 
 @patchROOTClass
-def OutputDescriptor__print(self):
+def InputDescriptor__print(self):
     printl(str(self))
