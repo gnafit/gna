@@ -14,12 +14,12 @@ instance is created with ``numpy`` array passed as input:
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 7,12,14,16
+    :emphasize-lines: 7,10,12,14
     :caption: :download:`01_points.py <../../../macro/tutorial/basic/01_points.py>`
 
 The code produces the following output:
 
-.. code-block:: txt
+.. code-block:: text
     :linenos:
 
     Output: [out] points: array 2d, shape 3x4, size  12
@@ -46,7 +46,7 @@ On line 21 `datatype.edges` C++ vector is converted to to the python list.
 
 The code produces the following output:
 
-.. code-block:: txt
+.. code-block:: text
     :linenos:
 
     Output: [out] hist: hist,  12 bins, edges 1.0->7.0, width 0.5
@@ -68,7 +68,7 @@ datatype has two sets of bin edges.
 
 The code produces the following output:
 
-.. code-block:: txt
+.. code-block:: text
     :linenos:
 
     Output: [out] hist: hist2d, 12x8=96 bins, edges 0.0->12.0 and 0.0->8.0

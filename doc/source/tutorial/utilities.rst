@@ -16,7 +16,7 @@ converts the python list of strings to ``std::vector<std::string>``:
 
 The code produces the following output:
 
-.. code-block:: txt
+.. code-block:: text
     :linenos:
 
     <ROOT.vector<string> object at 0x55b4546e8be0>, ['str1', 'str2', 'str3']
@@ -39,6 +39,4 @@ option:
 
     ./macro/tutorial/basic/04_points_plot.py --batch
 
-
-
-
+The batch mode will be triggered automatically in case ``$DISPLAY`` environment variable is not set.

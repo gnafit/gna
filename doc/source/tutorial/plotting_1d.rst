@@ -120,7 +120,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar1.png
-    :align: center
+   :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
 
@@ -139,7 +139,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar2.png
-    :align: center
+   :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with shrunk bins.
 
