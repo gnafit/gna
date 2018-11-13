@@ -88,7 +88,12 @@ histogram that affects how the edges of first and last bins are plotted: they ar
 Overlapping histograms
 """"""""""""""""""""""
 
-Both plotting methods may be used for plotting multiple histograms. Multiple `plot_hist()` are plotted as regular plots.
+Both plotting methods may be used for plotting multiple histograms. 
+
+Line plots
+''''''''''
+
+Multiple `plot_hist()` are plotted as regular plots.
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
@@ -101,8 +106,12 @@ Both plotting methods may be used for plotting multiple histograms. Multiple `pl
 
    Several histograms superimposed in ``plot_hist()`` version.
 
-For the bar version there are two ways to plot overlapping histograms. First one is to modify the histograms'
-transparency by setting ``alpha`` option below 1.
+For the bar version there are two ways to plot overlapping histograms. 
+
+Bars' transparency
+''''''''''''''''''
+
+First one is to modify the histograms' transparency by setting ``alpha`` option below 1.
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
@@ -114,6 +123,9 @@ transparency by setting ``alpha`` option below 1.
     :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
+
+Bars' width
+'''''''''''
 
 The second option is controlled by ``divide`` and ``shift`` options. ``divide`` is an integer factor dividing the bin
 width. Setting ``divide=3`` will shrink the bin width three times. The option ``shift`` defines where to plot the shrunk

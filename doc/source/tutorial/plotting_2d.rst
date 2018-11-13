@@ -50,6 +50,9 @@ There are several options to plot 2d histograms as histograms, i.e. with first d
 over Y. In case the histogram has bins of equal width ``plot_pcolorfast()`` or ``plot_imshow()`` may be used. Both
 methods support the same extra options as :ref:`matshow <matplotlib_matrices_options>`.
 
+pcolorfast
+''''''''''
+
 ``plot_pcolorfast(...)`` method implements a
 `pcolorfast(X, Y, C, ...) <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolorfast.html?highlight=pcolorfast#matplotlib.axes.Axes.pcolorfast>`_ 
 call passing output contents as `X`, `Y` and `C`. Below see an example of Gaussian with width 10 for X and width 3 for
@@ -66,6 +69,9 @@ Y.
 
     2d histogram plotted via ``plot_pcolorfast()`` method.
 
+imshow
+''''''
+
 The second method ``plot_imshow()`` is using
 `imshow(X, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.imshow>`_ passing output data as `X`. The
 ``imshow()`` method is designed to show images and thus it sets the equal visual size for `x` and `y` intervals [#]_.
@@ -80,6 +86,11 @@ The second method ``plot_imshow()`` is using
 
    2d histogram plotted via ``plot_imshow()`` method.
 
+.. [#] Similar effect may be achieved to any plot with ``ax.set_aspect('equal')``.
+
+matshow
+'''''''
+
 The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
@@ -92,7 +103,7 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
    2d histogram, plotted as matrix.
 
-.. [#] Similar effect may be achieved to any plot with ``ax.set_aspect('equal')``.
+.. _matplotlib_hist2d_var:
 
 2d histograms with variable binning
 """""""""""""""""""""""""""""""""""

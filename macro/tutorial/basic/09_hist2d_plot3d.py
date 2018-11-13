@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
 from __future__ import print_function
 import constructors as C
 import numpy as np
@@ -24,7 +25,7 @@ from mpl_tools.helpers import savefig
 from sys import argv
 oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
 
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+from mpl_toolkits.mplot3d import Axes3D
 
 fig = plt.figure()
 ax = plt.subplot( 111, projection='3d' )
@@ -60,4 +61,3 @@ hist.hist.hist.plot_wireframe(cmap=True, colorbar=True)
 savefig(oname, suffix='_wireframe')
 
 plt.show()
-

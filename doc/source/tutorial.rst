@@ -11,30 +11,13 @@ Tutorial (Under construction)
    tutorial/plotting_2d
    tutorial/plotting_3d
 
+   tutorial/compound_transformations
+   tutorial/plotting_graphs
+   tutorial/variables
+   tutorial/interpolation
+   tutorial/integration
 
-Compound transformaions
-^^^^^^^^^^^^^^^^^^^^^^^
 
-Sum
-"""
-
-Product
-"""""""
-
-Variables
-^^^^^^^^^
-
-Defining variables
-""""""""""""""""""
-
-WeightedSum transformation
-""""""""""""""""""""""""""
-
-Interpolation
-^^^^^^^^^^^^^
-
-Integration
-^^^^^^^^^^^
 
 
 
