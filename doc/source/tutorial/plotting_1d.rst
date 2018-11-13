@@ -57,12 +57,14 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 Plotting histograms
 """""""""""""""""""
-..
-    The
-    A ``matshow(...)`` method is defined implementing
-    `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
-    This method works with both histograms and arrays. When applied to histograms it ignores bin edges definitions and plots
-    the matrix anyway.
+
+There are two options to plot 1d histograms provided. First one ``plot_hist()`` is producing regular line plot via 
+`pyplot.plot() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_, the second one ``plot_bar()`` is
+passing data to `pyplot.bar() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.bar>`_. See the example
+below.
+
+The ``plot_hist()`` has an extra option ``zero_level``, which is by default 0. The options set the ground level for the
+histogram that affects how the edges of first and last bins are plotted: they are drawn till the ``zero_level``.
 
 .. literalinclude:: ../../../macro/tutorial/basic/07_hist_plot.py
     :linenos:
@@ -72,10 +74,18 @@ Plotting histograms
 
 .. figure:: ../../img/tutorial/07_hist_plot.png
 
-    A example ``output.plot_hist()`` and ``output.bar()`` method for outputs.
+    A example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
+
+.. table:: Keyword options for ``plot_hist()``
+
+    +------------------+---------------------------------------+
+    | `zero_level=0.0` | set the ground level of the histogram |
+    +------------------+---------------------------------------+
 
 Overlapping histograms
 """"""""""""""""""""""
+
+Both plotting methods may be used for plotting multiple histograms. Multiple `plot_hist()` are plotted as regular plots.
 
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
@@ -85,6 +95,11 @@ Overlapping histograms
 
 .. figure:: ../../img/tutorial/08_hists_plot_hist.png
 
+   Several histograms superimposed in ``plot_hist()`` version.
+
+For the bar version there are two ways to plot overlapping histograms. First one is to modify the histograms'
+transparency by setting ``alpha`` option below 1.
+
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
     :lines: 43-56,75
@@ -93,6 +108,13 @@ Overlapping histograms
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar1.png
 
+   Several histograms superimposed in ``plot_bar()`` version with transparency.
+
+The second option is controlled by ``divide`` and ``shift`` options. ``divide`` is an integer factor dividing the bin
+width. Setting ``divide=3`` will shrink the bin width three times. The option ``shift`` defines where to plot the shrunk
+bin within it's old width: ``shift=0`` shifts it to the left side, ``shift=1`` to the center and ``shift=2`` to the
+right side. It is possible to plot overlapping histograms without bins actually overlapping.
+
 .. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
     :linenos:
     :lines: 59-72,75
@@ -100,3 +122,13 @@ Overlapping histograms
     :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/08_hists_plot_bar2.png
+
+   Several histograms superimposed in ``plot_bar()`` version with shrunk bins.
+
+.. table:: Keyword options for ``plot_bar()``
+
+    +------------+------------------------------------+
+    | `divide=N` | Divide each bin width by `N`       |
+    +------------+------------------------------------+
+    | `shift=M`  | Shift each bin by N widths (`M<N`) |
+    +------------+------------------------------------+

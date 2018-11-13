@@ -37,7 +37,7 @@ ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 plt.ticklabel_format(style='sci', axis='y', scilimits=(2,2))
 
-hist.hist.hist.bar(label='histogram 1 (bar)', alpha=0.6)
+hist.hist.hist.plot_bar(label='histogram 1 (bar)', alpha=0.6)
 
 ax.legend()
 
