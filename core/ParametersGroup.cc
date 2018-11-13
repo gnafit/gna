@@ -14,7 +14,7 @@ ParametersGroup::ParametersGroup(GNAObject *parent, Fields fields)
 }
 
 void ParametersGroup::initFields(const std::vector<std::string> &params) {
-  for (auto pname: params) {
+  for (const auto& pname: params) {
     variable_(pname);
   }
 }
@@ -42,7 +42,7 @@ void ParametersGroup::dump() {
   for (const auto &pair: m_fields) {
     Field field = std::get<0>(pair.second);
     fprintf(stderr, "variable %s[%p]: %p\n",
-            pair.first.c_str(), (void*)field, field->rawdata());
+            pair.first.c_str(), static_cast<void*>(field), field->rawdata());
   }
 }
 

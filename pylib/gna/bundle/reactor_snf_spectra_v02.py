@@ -48,3 +48,6 @@ class reactor_snf_spectra_v02(TransformationBundle):
         self.objects['snf_spectra'] = snf_ratio
         self.set_output(snf_ratio.single(), "snf_ratio")
         
+    def define_variables(self):
+        self.common_namespace.reqparameter("snf_rate", central=0.03,
+                relsigma=1., label="SNF rate normalization")
