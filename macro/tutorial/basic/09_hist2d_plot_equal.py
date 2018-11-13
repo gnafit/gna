@@ -32,7 +32,7 @@ ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_pcolorfast(mask=0.0, colorbar=True)
+hist.hist.hist.plot_pcolorfast(colorbar=True)
 
 savefig(oname, suffix='_pcolorfast')
 
@@ -43,7 +43,7 @@ ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_imshow(mask=0.0, colorbar=True)
+hist.hist.hist.plot_imshow(colorbar=True)
 
 savefig(oname, suffix='_imshow')
 
@@ -54,7 +54,7 @@ ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_matshow(mask=0.0, colorbar=True)
+hist.hist.hist.plot_matshow(colorbar=True)
 
 savefig(oname, suffix='_matshow')
 

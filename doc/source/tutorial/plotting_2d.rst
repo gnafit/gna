@@ -97,12 +97,21 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 2d histograms with variable binning
 """""""""""""""""""""""""""""""""""
 
+In case histograms have bins of variable size ``plot_pcolormesh()`` method should be used. It is using
+`pcolormesh(X, Y, C, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.pcolormesh>`_ call passing
+output data as `X`, `Y` and `C`. The method essentially works for the constant binning histograms as well.
+The method supports the same extra options as :ref:`matshow <matplotlib_matrices_options>`.
+
+We will use a Gaussian with width 150 for X and 0.1 for Y.
+
 .. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot.py
-    :linenos:
-    :caption: :download:`09_hist2d_plot.py <../../../macro/tutorial/basic/09_hist2d_plot.py>`
+   :linenos:
+   :lines: 4-23,28-36,50
+   :emphasize-lines: 28
+   :caption: :download:`09_hist2d_plot.py <../../../macro/tutorial/basic/09_hist2d_plot.py>`
 
 .. figure:: ../../img/tutorial/09_hist2d_plot_pcolormesh.png
    :align: center
 
-   Histogram with variable binning.
+   2d histogram with variable binning.
 

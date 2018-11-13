@@ -32,7 +32,7 @@ ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_pcolormesh(mask=0.0, colorbar=True)
+hist.hist.hist.plot_pcolormesh(colorbar=True)
 
 savefig(oname, suffix='_pcolormesh')
 
@@ -43,7 +43,7 @@ ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
 
-hist.hist.hist.plot_pcolor(mask=0.0, colorbar=True)
+hist.hist.hist.plot_pcolor(colorbar=True)
 
 savefig(oname, suffix='_pcolor')
 
