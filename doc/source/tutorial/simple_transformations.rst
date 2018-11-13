@@ -14,7 +14,7 @@ instance is created with ``numpy`` array passed as input:
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 7,10,12,14
+    :emphasize-lines: 7,10,12,14,16
     :caption: :download:`01_points.py <../../../macro/tutorial/basic/01_points.py>`
 
 The code produces the following output:
