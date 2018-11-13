@@ -24,11 +24,11 @@ The typical syntax includes:
 
     # There are several ways to access the transformation 'tname' from obj
     # 1. By keyword from a dictionary
-    trans = obj.transformrations['tname']
+    trans = obj.transformations['tname']
     # 2. By attribute (syntactic sugar for 1.)
-    trans = obj.transformrations.tname
+    trans = obj.transformations.tname
     # 3. By index from a dictionary
-    trans = obj.transformrations[0]
+    trans = obj.transformations[0]
     # 4. Or even more shorter versions or 2.
     trans = obj['tname']
     trans = obj.tname
