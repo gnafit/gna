@@ -158,7 +158,7 @@ applicable to any ``GNAObject``.
 .. [#] ``ROOT.Points`` constructor may be used directly, but with more complex signature.
 .. [#] It worth noting that while in general the description of the taint mechanism is valid, the transformation
        ``Points`` have no inputs and does not depend on any variables. Therefore, after first execution its
-       ``taintflag`` will be `true` forever.
+       ``taintflag`` will be `false` forever.
 
 Histogram
 """""""""
