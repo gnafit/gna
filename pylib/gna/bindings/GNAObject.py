@@ -17,5 +17,6 @@ def GNAObject__print(self):
         with nextlevel():
             # printl('Transformations:')
             for i, t in enumerate(self.transformations.itervalues()):
+                printl('{:2d}'.format(i), end=' ')
                 t.print()
 

@@ -13,13 +13,10 @@ def TransformationDescriptor____str__(self):
 @patchROOTClass
 def TransformationDescriptor__print(self):
     printl(str(self))
-    if self.inputs.size():
-        with nextlevel():
-            # printl('Outputs:')
-            for i, inp in enumerate(self.inputs.itervalues()):
-                inp.print()
-    if self.outputs.size():
-        with nextlevel():
-            # printl('Outputs:')
-            for i, o in enumerate(self.outputs.itervalues()):
-                o.print()
+    with nextlevel():
+        for i, inp in enumerate(self.inputs.itervalues()):
+            printl('{:2d}'.format(i), end=' ')
+            inp.print()
+        for i, o in enumerate(self.outputs.itervalues()):
+            printl('{:2d}'.format(i), end=' ')
+            o.print()

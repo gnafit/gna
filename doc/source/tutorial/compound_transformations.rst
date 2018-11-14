@@ -1,3 +1,5 @@
+.. _tutorial_compound_transformations:
+
 Compound transformaions (TBD)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

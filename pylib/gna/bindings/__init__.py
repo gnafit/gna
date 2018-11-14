@@ -173,6 +173,9 @@ def patchDescriptor(cls):
     cls.__hash__ = __hash__
     cls.__eq__ = __eq__
 
+def importcommon():
+    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
+
 @hygienic
 def wrapPoints(cls):
     class WrappedClass(cls):
@@ -253,6 +256,8 @@ def setup(ROOT):
         return cls
     t.__getattr__ = patchclass
 
+    importcommon()
+
 def patchROOTClass( object=None, method=None ):
     """Decorator to override ROOT class methods. Usage
     @patchclass
@@ -288,4 +293,3 @@ def patchROOTClass( object=None, method=None ):
         return converter( cfcn )
 
     return converter
-

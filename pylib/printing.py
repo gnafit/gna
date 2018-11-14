@@ -3,7 +3,8 @@
 from __future__ import print_function
 
 printlevel = 0
-printmargin = '    '
+singlemargin = '    '
+marginflag = False
 
 class nextlevel():
     def __enter__(self):
@@ -17,13 +18,37 @@ class nextlevel():
 def current_level():
     return printlevel
 
-def printl(*args, **kwargs):
-    prefix = kwargs.pop('prefix', ())
+def printmargin(kwargs):
+    global marginflag
+    prefix = kwargs.pop('prefix', None)
+    postfix = kwargs.pop('postfix', None)
+    prefixopts = kwargs.pop('prefixopts', dict(end=''))
+    postfixopts = kwargs.pop('postfixopts', dict(end=' '))
+    if marginflag:
+        return
 
     if prefix:
-        print( *prefix, end='' )
+        print(*prefix, **prefixopts)
 
-    print(printmargin*printlevel, sep='', end='')
+    print(singlemargin*printlevel, sep='', end='')
+
+    if postfix:
+        print(*postfix, **postfixopts)
+
+    marginflag=True
+
+def resetmarginflag(*args, **kwargs):
+    global marginflag
+
+    for arg in args+(kwargs.pop('sep', ''), kwargs.pop('end', '\n')):
+        if '\n' in arg:
+            marginflag=False
+            return
+
+def printl(*args, **kwargs):
+    printmargin(kwargs)
     print(*args, **kwargs)
+    resetmarginflag(*args, **kwargs)
+
 
 
