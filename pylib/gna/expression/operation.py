@@ -113,7 +113,7 @@ class OSum(Operation):
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
-        from constructors import stdvector
+        from gna.constructors import stdvector
         with nextlevel():
             for freeidx in self.indices.iterate():
                 rindices = [ridx for ridx in self.indices_to_reduce.iterate()]
@@ -129,7 +129,7 @@ class OSum(Operation):
                     output = subobject.get_output(fullidx, context)
                     inp(output)
 
-            # from constructors import stdvector
+            # from gna.constructors import stdvector
             # labels  = stdvector([self.object.name])
             # printl_debug('connect (weighted)')
             # for idx in self.indices.iterate():

@@ -6,8 +6,8 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-from converters import convert
-import constructors as C
+from gna.converters import convert
+import gna.constructors as C
 
 mu      = N.array( [ 100.0 ] )
 mu_p    = C.Points(mu)

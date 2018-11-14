@@ -6,7 +6,7 @@ import numpy as np
 from gna.bundle import *
 from gna.env import env
 from scipy.interpolate import interp1d
-import constructors as C 
+import gna.constructors as C 
 
 class reactor_snf_spectra_v02(TransformationBundle):
     def __init__(self, **kwargs):

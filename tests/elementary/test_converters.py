@@ -4,7 +4,7 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
-from converters import *
+from gna.converters import *
 from pprint import pprint
 
 print( 'List converters' )

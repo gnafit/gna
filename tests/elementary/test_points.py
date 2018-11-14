@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from constructors import stdvector, Points
+from gna.constructors import stdvector, Points
 from gna.bindings import DataType
 
 #

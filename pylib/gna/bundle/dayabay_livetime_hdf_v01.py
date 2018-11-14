@@ -3,7 +3,7 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-import constructors as C
+import gna.constructors as C
 from gna.bundle import *
 from collections import OrderedDict
 import h5py as H

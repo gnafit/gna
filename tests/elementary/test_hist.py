@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from constructors import stdvector, Histogram
+from gna.constructors import stdvector, Histogram
 from gna.bindings import DataType
 from mpl_tools import bindings
 

@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import constructors as C
+import gna.constructors as C
 import numpy as np
 from collections import OrderedDict
 from gna.bundle import *

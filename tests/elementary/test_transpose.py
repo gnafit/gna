@@ -3,7 +3,7 @@
 from __future__ import print_function
 import load
 import ROOT
-from converters import convert
+from gna.converters import convert
 import numpy as np
 from gna.env import env
 

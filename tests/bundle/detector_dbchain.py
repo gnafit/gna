@@ -10,8 +10,8 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
+import gna.constructors as C
+from gna.converters import convert
 from gna.configurator import NestedDict, uncertaindict, uncertain
 import itertools as I
 from physlib import percent

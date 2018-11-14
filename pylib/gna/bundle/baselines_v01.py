@@ -3,7 +3,7 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as np
-import constructors as C
+import gna.constructors as C
 from gna.bundle import *
 from gna.configurator import NestedDict
 from collections import OrderedDict
@@ -47,11 +47,8 @@ class baselines_v01(TransformationBundle):
 
         try:
             self.snf_pools = get_data(self.cfg.snf_pools)
-        except:
-            if self.cfg.snf_pools is None:
-                pass
-            else:
-                raise 
+        except KeyError:
+            pass
         
 
         if any('AD' not in str(key) for key in self.detectors.keys()):

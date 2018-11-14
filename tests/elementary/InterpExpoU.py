@@ -4,7 +4,7 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-from constructors import Points
+from gna.constructors import Points
 from matplotlib import pyplot as P
 from mpl_tools.helpers import savefig
 

@@ -7,7 +7,7 @@ from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from gna.configurator import NestedDict
-from constructors import stdvector
+from gna.constructors import stdvector
 
 from gna.bundle import *
 from gna.bundle.connections import pairwise

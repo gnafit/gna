@@ -19,7 +19,7 @@ from gna.bundle import execute_bundle
 from gna.env import env
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_hist, plot_bar, savefig
-import constructors as C
+import gna.constructors as C
 from gna.labelfmt import formatter as L
 
 """Parse arguments"""
