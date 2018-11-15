@@ -56,7 +56,7 @@ void Integrator21Base::check_base(TypesFunctionArgs& fargs){
     fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
 
     auto& shape=fargs.args[0].shape;
-    if (shape[0]!=m_xweights.size() || shape[1]!=m_yweights.size()){
+    if (shape[0]!=static_cast<size_t>(m_xweights.size()) || shape[1]!=static_cast<size_t>(m_yweights.size())){
         throw fargs.args.error(fargs.args[0],
                                fmt::format("Inconsistent function size {:d}x{:d}, "
                                            "should be {:d}x{:d}",
@@ -73,14 +73,12 @@ void Integrator21Base::check_base(TypesFunctionArgs& fargs){
 }
 
 void Integrator21Base::integrate(FunctionArgs& fargs){
-    size_t shape[2]={static_cast<size_t>(m_xweights.size()), static_cast<size_t>(m_yweights.size())};
-
     auto& arg=fargs.args[0];
     auto& ret=fargs.rets[0];
 
     ArrayXd prod = (arg.arr2d*m_weights).rowwise().sum();
     auto* data_start = prod.data();
-    for (size_t i = 0; i < m_xorders.size(); ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(m_xorders.size()); ++i) {
         size_t n = m_xorders[i];
         auto* data_end=std::next(data_start, n);
         ret.x(i) = std::accumulate(data_start, data_end, 0.0);

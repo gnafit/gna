@@ -60,7 +60,7 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
     fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data(), m_yedges.size(), m_yedges.data());
 
     auto& shape=fargs.args[0].shape;
-    if (shape[0]!=m_xweights.size() || shape[1]!=m_yweights.size()){
+    if (shape[0]!=static_cast<size_t>(m_xweights.size()) || shape[1]!=static_cast<size_t>(m_yweights.size())){
         throw fargs.args.error(fargs.args[0],
                                fmt::format("Inconsistent function size {:d}x{:d}, "
                                            "should be {:d}x{:d}",
@@ -77,17 +77,16 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 }
 
 void Integrator2Base::integrate(FunctionArgs& fargs){
-    size_t shape[2]={static_cast<size_t>(m_xweights.size()), static_cast<size_t>(m_yweights.size())};
 
     auto& arg=fargs.args[0];
     auto& ret=fargs.rets[0];
 
     ArrayXXd prod = arg.arr2d*m_weights;
     size_t x_offset=0;
-    for (size_t ix = 0; ix < m_xorders.size(); ++ix) {
+    for (size_t ix = 0; ix < static_cast<size_t>(m_xorders.size()); ++ix) {
         size_t nx = m_xorders[ix];
         size_t y_offset=0;
-        for (size_t iy = 0; iy < m_yorders.size(); ++iy) {
+        for (size_t iy = 0; iy < static_cast<size_t>(m_yorders.size()); ++iy) {
             size_t ny = m_yorders[iy];
             ret.arr2d(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
             y_offset+=ny;

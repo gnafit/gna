@@ -31,7 +31,7 @@ void IntegratorTrap::sample(FunctionArgs& fargs) {
   auto* edge_b{next(edge_a)};
 
   size_t offset=0;
-  for (size_t i = 0; i < m_orders.size(); ++i) {
+  for (size_t i = 0; i < static_cast<size_t>(m_orders.size()); ++i) {
     auto n=m_orders[i]+1;
     abscissa.segment(offset, n)=ArrayXd::LinSpaced(n, *edge_a, *edge_b);
 

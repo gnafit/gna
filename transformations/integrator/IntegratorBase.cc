@@ -49,7 +49,7 @@ TransformationDescriptor IntegratorBase::add(){
 void IntegratorBase::check_base(TypesFunctionArgs& fargs){
     fargs.rets[0]=DataType().hist().edges(m_edges.size(), m_edges.data());
 
-    if (fargs.args[0].shape[0] != m_weights.size()){
+    if (fargs.args[0].shape[0] != static_cast<size_t>(m_weights.size())){
         throw fargs.args.error(fargs.args[0], "inconsistent function size");
     }
 
@@ -61,12 +61,11 @@ void IntegratorBase::check_base(TypesFunctionArgs& fargs){
 
 void IntegratorBase::integrate(FunctionArgs& fargs){
     auto* ret=fargs.rets[0].buffer;
-    auto& fun=fargs.args[0].x;
 
     ArrayXd prod = fargs.args[0].x*m_weights;
     auto* data = prod.data();
     auto* order = m_orders.data();
-    for (size_t i = 0; i < m_orders.size(); ++i) {
+    for (int i = 0; i < m_orders.size(); ++i) {
         auto* data_next=std::next(data, *order+m_shared_edge);
         *ret = std::accumulate(data, data_next, 0.0);
         if(m_shared_edge){
