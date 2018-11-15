@@ -13,9 +13,9 @@ edges  = np.linspace(1.0, 7.0, nbins+1)
 # Create a histogram instance with data, stored in `narray`
 # and edges, sotred in `edges`
 hist = C.Histogram(edges, narray)
+hist.print()
+print()
 
-# Import helper library to make print output more informative
-from gna.bindings import common
 # Access the output `points` of transformation `points` of the object `parray`
 print('Output:', hist.hist.hist)
 # Access and print relevant DataType
