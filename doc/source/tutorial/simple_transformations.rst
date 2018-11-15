@@ -169,15 +169,23 @@ The :ref:`Histogram` transformation stores a 1-dimensional histogrammed data. It
 .. literalinclude:: ../../../macro/tutorial/basic/02_hist.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 12,17,20,21,23
+    :emphasize-lines: 12,13,21
     :caption: :download:`02_hist.py <../../../macro/tutorial/basic/02_hist.py>`
 
-On line 21 `datatype.edges` C++ vector is converted to to the python list.
+The work flow for a histogram is very similar to the one of the array. The object has a single transformation `hist`
+with a single output `hist`.
+
+The main difference is that ``DataType`` of the histogram now has histogram edges defined. On the line 21
+`datatype.edges` C++ vector is accessed and converted to to the python list.
 
 The code produces the following output:
 
 .. code-block:: text
     :linenos:
+
+    [obj] Histogram: 1 transformation(s)
+         0 [trans] hist: 0 input(s), 1 output(s)
+             0 [out] hist: hist,  12 bins, edges 1.0->7.0, width 0.5
 
     Output: [out] hist: hist,  12 bins, edges 1.0->7.0, width 0.5
     DataType: hist,  12 bins, edges 1.0->7.0, width 0.5
@@ -193,13 +201,20 @@ datatype has two sets of bin edges.
 .. literalinclude:: ../../../macro/tutorial/basic/03_hist2d.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 14,19,22-24,26
+    :emphasize-lines: 14,15,23,24
     :caption: :download:`03_hist2d.py <../../../macro/tutorial/basic/03_hist2d.py>`
+
+And again the general work flow is very similar. When it comes to the multiple axes their bin edges may be accessed via
+``edgesNd`` member of the ``DataType`` by axis index: see lines 23 and 24.
 
 The code produces the following output:
 
 .. code-block:: text
     :linenos:
+
+    [obj] Histogram2d: 1 transformation(s)
+         0 [trans] hist: 0 input(s), 1 output(s)
+             0 [out] hist: hist2d, 12x8=96 bins, edges 0.0->12.0 and 0.0->8.0
 
     Output: [out] hist: hist2d, 12x8=96 bins, edges 0.0->12.0 and 0.0->8.0
     DataType: hist2d, 12x8=96 bins, edges 0.0->12.0 and 0.0->8.0
