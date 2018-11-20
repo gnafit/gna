@@ -16,14 +16,23 @@ protected:
   using Factory = Handle (ParametersGroup::*)(Field, const std::string &);
   using FieldsVector =  std::vector<Field>;
   friend class Fields;
-  class Fields: public std::map<std::string, std::tuple<Field, Factory>> {
+
+  class Fields  {
   public:
     template <typename T>
     Fields &add(variable<T> *field, const std::string &name) {
-      (*this)[name] = std::make_tuple(field, &ParametersGroup::factory<T>);
+      m_map[name] = std::make_tuple(field, &ParametersGroup::factory<T>);
       return *this;
     }
+
+  using FieldsStorage = std::map<std::string, std::tuple<Field, Factory>>;
+  const FieldsStorage& expose() const noexcept {return m_map;};
+  size_t count(std::string entry) const noexcept {return m_map.count(entry);}; 
+  FieldsStorage::value_type::second_type& operator[](std::string mem) noexcept {return m_map[mem];};
+  private:
+    FieldsStorage m_map;
   };
+
 public:
   ParametersGroup(GNAObject *parent, Fields fields);
   virtual ~ParametersGroup() = default;

@@ -28,7 +28,7 @@ void ParametersGroup::checkField(const std::string &name) {
 }
 
 const std::string &ParametersGroup::fieldName(Field field) const {
-  for (const auto &pair: m_fields) {
+  for (const auto &pair: m_fields.expose()) {
     if (std::get<0>(pair.second) == field) {
       return pair.first;
     }
@@ -39,7 +39,7 @@ const std::string &ParametersGroup::fieldName(Field field) const {
 }
 
 void ParametersGroup::dump() {
-  for (const auto &pair: m_fields) {
+  for (const auto &pair: m_fields.expose()) {
     Field field = std::get<0>(pair.second);
     fprintf(stderr, "variable %s[%p]: %p\n",
             pair.first.c_str(), static_cast<void*>(field), field->rawdata());
