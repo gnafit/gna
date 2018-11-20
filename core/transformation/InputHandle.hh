@@ -35,7 +35,7 @@ namespace TransformationTypes
     void  setLabel(const std::string& label) const { m_source->label=label; }  ///< Set Source's label.
 
     const void *rawptr() const { return static_cast<const void*>(m_source); } ///< Return Source's pointer as void pointer.
-    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.
+    size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.
 
     bool materialized() const { return m_source->materialized(); }            ///< Call Source::materialized(). @copydoc Source::materialized()
   protected:
