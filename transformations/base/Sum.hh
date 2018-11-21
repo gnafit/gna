@@ -14,7 +14,7 @@
 class Sum: public GNASingleObject,
            public TransformationBind<Sum> {
 public:
-  Sum();                                     ///< Constructor.
+  Sum();                                        ///< Constructor.
 
   InputDescriptor add_input(const char* name);  ///< Add an input by name and leave unconnected.
 
