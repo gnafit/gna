@@ -101,6 +101,8 @@ public:
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
   void connect(const TransformationTypes::OutputHandle &out) const;
+
+  inline const OutputDescriptor output() const;
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandle,
@@ -121,5 +123,10 @@ public:
   static OutputDescriptor invalid(const std::string name);
 
   TransformationTypes::OutputHandle single() override { return *this; }
+
+  typedef std::vector<OutputDescriptor*> OutputDescriptors;
 };
 
+const OutputDescriptor InputDescriptor::output() const {
+  return OutputDescriptor(BaseClass::output());
+}

@@ -1,5 +1,6 @@
 from __future__ import print_function
 import ROOT
+import constructors as C
 from collections import defaultdict, namedtuple
 import numpy as np
 
@@ -42,7 +43,7 @@ class Dataset(object):
         numpy array into points.
         """
         if not isinstance(type(obj), ROOT.PyRootType):
-            obj = ROOT.Points(obj)
+            obj = C.Points(obj)
         return obj
 
     def covariate(self, obs1, obs2, cov):

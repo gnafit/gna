@@ -23,10 +23,22 @@ The ``Sum`` object is created without arguments:
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
     :lines: 13
 
-It may have any number of inputs. Each input is binded with method ``add(output)``:
+It may have any number of inputs. Each input is binded with method ``add(output)``, as it is done in:
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
     :lines: 17
+
+The printout of the ``Sum`` instance now contains list of all bound inputs:
+
+.. code-block:: text
+   [obj] Sum: 1 transformation(s)
+        0 [trans] sum: 5 input(s), 1 output(s)
+            0 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            1 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            2 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            3 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            4 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            0 [out] sum: array 2d, shape 3x4, size  12
 
 The outputs should be of the same type and shape. The code produces the following output:
 
@@ -59,17 +71,27 @@ The outputs should be of the same type and shape. The code produces the followin
 
    [obj] Sum: 1 transformation(s)
         0 [trans] sum: 5 input(s), 1 output(s)
-            0 [in]  points
-            1 [in]  points
-            2 [in]  points
-            3 [in]  points
-            4 [in]  points
+            0 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            1 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            2 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            3 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            4 [in]  points -> [out] points: array 2d, shape 3x4, size  12
             0 [out] sum: array 2d, shape 3x4, size  12
 
    Sum result:
    [[10. 15. 20. 25.]
     [30. 35. 40. 45.]
     [50. 55. 60. 65.]]
+
+Ways to costruct Sum and add inputs
+"""""""""""""""""""""""""""""""""""
+
+There several ways to add inputs to the ``Sum`` instance. One of the was shown in the previous example. Each element of
+the sum is added directly via ``add(output)`` method.
+
+.. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
+    :lines: 17
+
 
 Product
 """""""

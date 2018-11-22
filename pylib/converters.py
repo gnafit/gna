@@ -121,9 +121,10 @@ def list_to_stdvector( lst, dtype='auto' ):
     """Convert a list to the std::vector<dtype>"""
     if dtype=='auto':
         dtype = get_cpp_type( lst )
-    ret = R.vector(dtype)( len( lst ) )
-    for i, v in enumerate( lst ):
-        ret[i] = v
+    ret = R.vector(dtype)()
+    ret.reserve(len(lst))
+    for v in lst:
+        ret.push_back(v)
     return ret
 
 @save_converter( N.ndarray, R.vector )

@@ -176,22 +176,6 @@ def patchDescriptor(cls):
 def importcommon():
     from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
-@hygienic
-def wrapPoints(cls):
-    class WrappedClass(cls):
-        def __init__(self, *args, **kwargs):
-            if len(args) == 1:
-                arr = args[0]
-                if isinstance(arr, np.ndarray) or isinstance(arr, list):
-                    shape = np.array(arr).shape
-                    arr = np.ascontiguousarray(arr, dtype=np.float64)
-                    shapevec = ROOT.vector("size_t")()
-                    for x in shape:
-                        shapevec.push_back(x)
-                    return super(WrappedClass, self).__init__(arr, shapevec, **kwargs)
-            super(WrappedClass, self).__init__(*args, **kwargs)
-    return WrappedClass
-
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
@@ -237,9 +221,6 @@ def setup(ROOT):
             return cls
         if issubclass(cls, GNAObject):
             wrapped = wrapGNAclass(cls)
-            if cls.__name__ == 'Points':
-                wrapped = wrapPoints(wrapped)
-                patchSingle( wrapped )
             return wrapped
         if 'Class' not in cls.__dict__:
             t = cls.__class__

@@ -8,7 +8,7 @@ from printing import printl, nextlevel
 
 @patchROOTClass(R.InputDescriptor, '__str__')
 def InputDescriptor____str__(self):
-    return '[in]  {}'.format(self.name())
+    return '[in]  {} -> {!s}'.format(self.name(), self.output())
 
 @patchROOTClass
 def InputDescriptor__print(self):

@@ -27,6 +27,14 @@ def Points( array, *args, **kwargs ):
     s = array_to_stdvector_size_t( array.shape )
     return R.Points( a, s, *args, **kwargs )
 
+"""Construct Sum object from list of SingleOutputs"""
+def Sum(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.Sum(*args, **kwargs)
+
+    outputs = stdvector(outputs, 'OutputDescriptor*')
+    return R.Sum(outputs, *args, **kwargs)
+
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
     """Convert array to Points"""

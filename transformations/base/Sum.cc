@@ -22,6 +22,15 @@ Sum::Sum() {
 }
 
 /**
+ * @brief Construct Sum from vector of SingleOutput instances
+ */
+Sum::Sum(const OutputDescriptor::OutputDescriptors& outputs) : Sum(){
+  for(auto& output : outputs){
+    this->add(*output);
+  }
+}
+
+/**
  * @brief Add an input and connect it to the output.
  *
  * The input name is derived from the output name.

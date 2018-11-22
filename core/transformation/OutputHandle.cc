@@ -7,7 +7,7 @@ using TransformationTypes::OutputHandle;
  * @copydoc Entry::check()
  */
 bool OutputHandle::check() const {
-  return m_sink->entry->check();
+  return m_sink->entry->check() && m_sink->data;
 }
 
 /**
