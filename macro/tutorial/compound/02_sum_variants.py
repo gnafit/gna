@@ -39,7 +39,9 @@ print()
 
 # Access the cacluation result:
 print('Results:')
-print(tsum_constructor.sum.sum.data(), end='\n')
-print(tsum_add.sum.sum.data(), end='\n')
-print(tsum_add_input.sum.sum.data(), end='\n')
+print(tsum_constructor.sum.sum.data())
+print()
+print(tsum_add.sum.sum.data())
+print()
+print(tsum_add_input.sum.sum.data())
 
