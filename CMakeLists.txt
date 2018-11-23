@@ -260,7 +260,6 @@ set(PGO_LINK_FLAG "")
 
 if(GENERATE_PROFILE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
-    set(PGO_LINK_FLAG "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
     message(STATUS "Building with collection of PGO profiling enabled")
 endif()
 
@@ -309,11 +308,12 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
+target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
 
 if(GENERATE_PROFILE)
-    target_link_libraries(${LIBNAME} PRIVATE ${PGO_LINK_FLAG})
+    target_link_libraries(${LIBNAME} PRIVATE "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
-    target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only "-fsanitize=undefined")
+    target_link_libraries(${LIBNAME} PRIVATE "-fsanitize=undefined")
 endif()
