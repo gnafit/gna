@@ -1,5 +1,7 @@
 # Global Neutrino Analysis Toolkit
 
+[![Docs status](https://git.jinr.ru/gna/gna/badges/master/pipeline.svg)](https://git.jinr.ru/gna/gna/commits/master)
+
 For installation guidelines and documentation look at `doc/`: 
 > `cd doc/`
 
