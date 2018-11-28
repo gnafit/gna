@@ -12,16 +12,16 @@ A ``plot(...)`` method is defined implementing
 `plot(y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ call passing output contents as `y`.
 The method works the same way for both arrays and histograms.
 
-.. literalinclude:: ../../../macro/tutorial/basic/04_points_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/01_points_plot.py
     :linenos:
     :lines: 4-32,39
     :emphasize-lines: 26,27
-    :caption: :download:`04_points_plot.py <../../../macro/tutorial/basic/04_points_plot.py>`
+    :caption: :download:`01_points_plot.py <../../../macro/tutorial/plotting/01_points_plot.py>`
 
 When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
 The latter produces the blue line on the following figure while the former produces orange, green and red lines.
 
-.. figure:: ../../img/tutorial/04_points_plot.png
+.. figure:: ../../img/tutorial/01_points_plot.png
     :align: center
 
     A example ``output.plot()`` method for outputs with 1d and 2d arrays.
@@ -40,13 +40,13 @@ If `X` vs `Y` is desired ``output_y.plot_vs(output_x, ...)`` syntax may be used.
 
 The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed order is desired.
 
-.. literalinclude:: ../../../macro/tutorial/basic/05_points_plot_vs.py
+.. literalinclude:: ../../../macro/tutorial/plotting/02_points_plot_vs.py
     :linenos:
     :lines: 4-28,33
     :emphasize-lines: 23
-    :caption: :download:`05_points_plot_vs.py <../../../macro/tutorial/basic/05_points_plot_vs.py>`
+    :caption: :download:`02_points_plot_vs.py <../../../macro/tutorial/plotting/02_points_plot_vs.py>`
 
-.. figure:: ../../img/tutorial/05_points_plot_vs.png
+.. figure:: ../../img/tutorial/02_points_plot_vs.png
     :align: center
 
     A example ``output_x.plot_vs(output_y)`` method for outputs.
@@ -68,13 +68,13 @@ below.
 The ``plot_hist()`` has an extra option ``zero_level``, which is by default 0. The options set the ground level for the
 histogram that affects how the edges of first and last bins are plotted: they are drawn till the ``zero_level``.
 
-.. literalinclude:: ../../../macro/tutorial/basic/07_hist_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/04_hist_plot.py
     :linenos:
     :lines: 4-44,50
     :emphasize-lines: 26,38
-    :caption: :download:`07_hist_plot.py <../../../macro/tutorial/basic/07_hist_plot.py>`
+    :caption: :download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
 
-.. figure:: ../../img/tutorial/07_hist_plot.png
+.. figure:: ../../img/tutorial/04_hist_plot.png
     :align: center
 
     A example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
@@ -95,13 +95,13 @@ Line plots
 
 Multiple `plot_hist()` are plotted as regular plots.
 
-.. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
    :linenos:
    :lines: 4-23,28-41,76
    :emphasize-lines: 30-32
-   :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
+   :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/08_hists_plot_hist.png
+.. figure:: ../../img/tutorial/05_hists_plot_hist.png
    :align: center
 
    Several histograms superimposed in ``plot_hist()`` version.
@@ -113,13 +113,13 @@ Bars' transparency
 
 First one is to modify the histograms' transparency by setting ``alpha`` option below 1.
 
-.. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
     :lines: 44-57,76
     :emphasize-lines: 10-12
-    :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
+    :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/08_hists_plot_bar1.png
+.. figure:: ../../img/tutorial/05_hists_plot_bar1.png
    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
@@ -132,13 +132,13 @@ width. Setting ``divide=3`` will shrink the bin width three times. The option ``
 bin within it's old width: ``shift=0`` shifts it to the left side, ``shift=1`` to the center and ``shift=2`` to the
 right side. It is possible to plot overlapping histograms without bins actually overlapping.
 
-.. literalinclude:: ../../../macro/tutorial/basic/08_hists_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
     :lines: 60-73,76
     :emphasize-lines: 10-12
-    :caption: :download:`08_hists_plot.py <../../../macro/tutorial/basic/08_hists_plot.py>`
+    :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/08_hists_plot_bar2.png
+.. figure:: ../../img/tutorial/05_hists_plot_bar2.png
    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with shrunk bins.

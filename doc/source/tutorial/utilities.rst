@@ -37,6 +37,6 @@ option:
 
 .. code-block:: bash
 
-    ./macro/tutorial/basic/04_points_plot.py --batch
+    ./macro/tutorial/plotting/04_points_plot.py --batch
 
 The batch mode will be triggered automatically in case ``$DISPLAY`` environment variable is not set.

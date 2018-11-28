@@ -12,13 +12,13 @@ This method works with both histograms and arrays. When applied to histograms it
 the matrix anyway: first dimension defines rows, second - columns; the rows are plotted over Y axis and columns of X
 axis.
 
-.. literalinclude:: ../../../macro/tutorial/basic/06_matshow.py
+.. literalinclude:: ../../../macro/tutorial/plotting/03_matshow.py
     :linenos:
     :lines: 4-26,32
     :emphasize-lines: 22
-    :caption: :download:`06_matshow.py <../../../macro/tutorial/basic/06_matshow.py>`
+    :caption: :download:`03_matshow.py <../../../macro/tutorial/plotting/03_matshow.py>`
 
-.. figure:: ../../img/tutorial/06_matshow.png
+.. figure:: ../../img/tutorial/03_matshow.png
     :align: center
 
     A example ``output2d.plot_matshow()`` method for outputs.
@@ -58,13 +58,13 @@ pcolorfast
 call passing output contents as `X`, `Y` and `C`. Below see an example of Gaussian with width 10 for X and width 3 for
 Y.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
     :lines: 4-24,29-37,62
     :emphasize-lines: 29
-    :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
+    :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot_equal_pcolorfast.png
+.. figure:: ../../img/tutorial/06_hist2d_plot_equal_pcolorfast.png
     :align: center
 
     2d histogram plotted via ``plot_pcolorfast()`` method.
@@ -76,12 +76,12 @@ The second method ``plot_imshow()`` is using
 `imshow(X, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.imshow>`_ passing output data as `X`. The
 ``imshow()`` method is designed to show images and thus it sets the equal visual size for `x` and `y` intervals [#]_.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
     :lines: 47
-    :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
+    :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot_equal_imshow.png
+.. figure:: ../../img/tutorial/06_hist2d_plot_equal_imshow.png
    :align: center
 
    2d histogram plotted via ``plot_imshow()`` method.
@@ -93,12 +93,12 @@ matshow
 
 The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot_equal.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
     :lines: 58
-    :caption: :download:`09_hist2d_plot_equal.py <../../../macro/tutorial/basic/09_hist2d_plot_equal.py>`
+    :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot_equal_matshow.png
+.. figure:: ../../img/tutorial/06_hist2d_plot_equal_matshow.png
    :align: center
 
    2d histogram, plotted as matrix.
@@ -115,13 +115,13 @@ The method supports the same extra options as :ref:`matshow <matplotlib_matrices
 
 We will use a Gaussian with width 150 for X and 0.1 for Y.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot.py
    :linenos:
    :lines: 4-24,29-37,51
    :emphasize-lines: 29
-   :caption: :download:`09_hist2d_plot.py <../../../macro/tutorial/basic/09_hist2d_plot.py>`
+   :caption: :download:`06_hist2d_plot.py <../../../macro/tutorial/plotting/06_hist2d_plot.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot_pcolormesh.png
+.. figure:: ../../img/tutorial/06_hist2d_plot_pcolormesh.png
    :align: center
 
    2d histogram with variable binning.

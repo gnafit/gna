@@ -14,15 +14,15 @@ The method ``plot_surface`` is using
 `plot_surface(X, Y, Z, ...) <https://matplotlib.org/api/_as_gen/mpl_toolkits.mplot3d.axes3d.Axes3D.html?highlight=plot_surface#mpl_toolkits.mplot3d.axes3d.Axes3D.plot_surface>`_ 
 matplotlib function passing output data as `X`, `Y` and `Z`. 
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
    :lines: 4-23,29-39,64
    :emphasize-lines: 21,24,30
-   :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
+   :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
 In order the surface was colorized ``cmap`` option should be passed with a valid colormap name (use `viridis`).
 
-.. figure:: ../../img/tutorial/09_hist2d_plot3d_surface.png
+.. figure:: ../../img/tutorial/06_hist2d_plot3d_surface.png
    :align: center
 
    2d histogram, plotted via ``plot_surface()`` method.
@@ -41,12 +41,12 @@ matplotlib function passing output data as `X`, `Y`, `Z`, `dX`, `dY`, `dZ`.
 
 By default the bars are not colorized: ``cmap=True`` may be used to colorize the bars with default colormap.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
    :lines: 49
-   :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
+   :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot3d_bar3d.png
+.. figure:: ../../img/tutorial/06_hist2d_plot3d_bar3d.png
    :align: center
 
    2d histogram, plotted via ``plot_bar3d()`` method.
@@ -60,12 +60,12 @@ matplotlib function passing output data as `X`, `Y`, and `Z`.
 
 By default wire frame is not colorized: ``cmap=True`` may be used to colorize the wires with default colormap.
 
-.. literalinclude:: ../../../macro/tutorial/basic/09_hist2d_plot3d.py
+.. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
    :lines: 60
-   :caption: :download:`09_hist2d_plot3d.py <../../../macro/tutorial/basic/09_hist2d_plot3d.py>`
+   :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
-.. figure:: ../../img/tutorial/09_hist2d_plot3d_wireframe.png
+.. figure:: ../../img/tutorial/06_hist2d_plot3d_wireframe.png
    :align: center
 
    2d histogram, plotted via ``plot_wireframe()`` method.
