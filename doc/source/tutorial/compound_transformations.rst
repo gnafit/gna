@@ -184,3 +184,59 @@ See that in case three the names of the inputs are defined as user has specified
 Product
 """""""
 
+The ``Product`` transformation is very similar to the ``Sum``. The example, one to one similar to the example from the
+previous section may be found below. The main differences are that there is a method ``multiply(output)`` for binding
+outputs. The object defines transformation `product` with output, named `prodcut`.
+
+.. literalinclude:: ../../../macro/tutorial/compound/03_product_variants.py
+    :linenos:
+    :lines: 4-
+    :caption: :download:`03_product_variants.py <../../../macro/tutorial/compound/03_product_variants.py>`
+
+The script produces the following output. Check it and compare with the output of the ``Sum`` example from the previous
+section.
+
+.. code-block:: text
+
+   Product, configured via constructor
+   [obj] Product: 1 transformation(s)
+        0 [trans] product: 5 input(s), 1 output(s)
+            0 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            1 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            2 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            3 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            4 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            0 [out] product: array 2d, shape 3x4, size  12
+
+   Product, configured via multiply() method
+   [obj] Product: 1 transformation(s)
+        0 [trans] product: 5 input(s), 1 output(s)
+            0 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            1 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            2 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            3 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            4 [in]  points -> [out] points: array 2d, shape 3x4, size  12
+            0 [out] product: array 2d, shape 3x4, size  12
+
+   Product, configured via add_input() method
+   [obj] Product: 1 transformation(s)
+        0 [trans] product: 5 input(s), 1 output(s)
+            0 [in]  input_00 -> [out] points: array 2d, shape 3x4, size  12
+            1 [in]  input_01 -> [out] points: array 2d, shape 3x4, size  12
+            2 [in]  input_02 -> [out] points: array 2d, shape 3x4, size  12
+            3 [in]  input_03 -> [out] points: array 2d, shape 3x4, size  12
+            4 [in]  input_04 -> [out] points: array 2d, shape 3x4, size  12
+            0 [out] product: array 2d, shape 3x4, size  12
+
+   Results:
+   [[0.0000e+00 1.2000e+02 7.2000e+02 2.5200e+03]
+    [6.7200e+03 1.5120e+04 3.0240e+04 5.5440e+04]
+    [9.5040e+04 1.5444e+05 2.4024e+05 3.6036e+05]]
+
+   [[0.0000e+00 1.2000e+02 7.2000e+02 2.5200e+03]
+    [6.7200e+03 1.5120e+04 3.0240e+04 5.5440e+04]
+    [9.5040e+04 1.5444e+05 2.4024e+05 3.6036e+05]]
+
+   [[0.0000e+00 1.2000e+02 7.2000e+02 2.5200e+03]
+    [6.7200e+03 1.5120e+04 3.0240e+04 5.5440e+04]
+    [9.5040e+04 1.5444e+05 2.4024e+05 3.6036e+05]]

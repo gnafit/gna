@@ -14,7 +14,8 @@
 class Product: public GNASingleObject,
                public TransformationBind<Product> {
 public:
-  Product();                                         ///< Constructor
+  Product();                                               ///< Constructor
+  Product(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Product from vector of outputs
 
   /**
    * @brief Construct a Product of two outputs
@@ -36,6 +37,7 @@ public:
   }
 
   InputDescriptor add_input(const char* name);  ///< Add an input by name and leave unconnected.
+
   /** @brief Add an input by name and leave unconnected. */
   InputDescriptor multiply(const char* name){
     return add_input(name);

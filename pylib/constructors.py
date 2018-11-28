@@ -35,6 +35,14 @@ def Sum(outputs=None, *args, **kwargs):
     outputs = stdvector(outputs, 'OutputDescriptor*')
     return R.Sum(outputs, *args, **kwargs)
 
+"""Construct Product object from list of SingleOutputs"""
+def Product(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.Product(*args, **kwargs)
+
+    outputs = stdvector(outputs, 'OutputDescriptor*')
+    return R.Product(outputs, *args, **kwargs)
+
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
     """Convert array to Points"""

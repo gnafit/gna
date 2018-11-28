@@ -41,6 +41,15 @@ Product::Product() {
 }
 
 /**
+ * @brief Construct Product from vector of SingleOutput instances
+ */
+Product::Product(const OutputDescriptor::OutputDescriptors& outputs) : Product(){
+  for(auto& output : outputs){
+    this->multiply(*output);
+  }
+}
+
+/**
  * @brief Add an input and connect it to the output.
  *
  * The input name is derived from the output name.
