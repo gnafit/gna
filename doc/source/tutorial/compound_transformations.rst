@@ -7,6 +7,8 @@ Now let us switch to the transformations with inputs. Transformation with inputs
 arguments. We are still working with transformations that do not depend on variables, therefore the result of the
 following transformations will be computed only once.
 
+.. _tutorial_sum:
+
 Sum
 """
 

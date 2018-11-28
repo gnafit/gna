@@ -21,7 +21,7 @@ axis.
 .. figure:: ../../img/tutorial/03_matshow.png
     :align: center
 
-    A example ``output2d.plot_matshow()`` method for outputs.
+    An example ``output2d.plot_matshow()`` method for outputs.
 
 .. _matplotlib_matrices_options:
 

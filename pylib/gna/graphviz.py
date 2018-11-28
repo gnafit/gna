@@ -10,6 +10,20 @@ def uid( obj1, obj2=None ):
         res = obj1.__repr__().replace('*', '')
     return res
 
+def savegraph(obj, fname, *args, **kwargs):
+    verbose = kwargs.pop('verbose', True)
+
+    gdot = GNADot(obj)
+
+    if verbose:
+        print('Write output file:', fname)
+
+    if fname.endswith('.dot'):
+        gdot.write(fname)
+    else:
+        gdot.layout(prog='dot')
+        gdot.draw(fname)
+
 class GNADot(object):
     markhead, marktail = True, True
     # headfmt = '{index:d}: {label}'
@@ -38,7 +52,10 @@ class GNADot(object):
                 raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
 
             self.walk_back( entry )
+
+        self.layout = self.graph.layout
         self.write = self.graph.write
+        self.draw = self.graph.draw
 
     def registered( self, *args, **kwargs ):
         id = uid( *args )

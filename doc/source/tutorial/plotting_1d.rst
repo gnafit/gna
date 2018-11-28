@@ -24,7 +24,7 @@ The latter produces the blue line on the following figure while the former produ
 .. figure:: ../../img/tutorial/01_points_plot.png
     :align: center
 
-    A example ``output.plot()`` method for outputs with 1d and 2d arrays.
+    An example ``output.plot()`` method for outputs with 1d and 2d arrays.
 
 .. table:: Keyword options
 
@@ -49,7 +49,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 .. figure:: ../../img/tutorial/02_points_plot_vs.png
     :align: center
 
-    A example ``output_x.plot_vs(output_y)`` method for outputs.
+    An example ``output_x.plot_vs(output_y)`` method for outputs.
 
 .. table:: Keyword options
 
@@ -77,7 +77,7 @@ histogram that affects how the edges of first and last bins are plotted: they ar
 .. figure:: ../../img/tutorial/04_hist_plot.png
     :align: center
 
-    A example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
+    An example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
 
 .. table:: Keyword options for ``plot_hist()``
 
