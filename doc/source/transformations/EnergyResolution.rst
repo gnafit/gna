@@ -23,8 +23,8 @@ Variables
 ^^^^^^^^^
 
 1. ``Eres_a`` — :math:`a`,
-1. ``Eres_b`` — :math:`b`,
-1. ``Eres_c`` — :math:`c`
+2. ``Eres_b`` — :math:`b`,
+3. ``Eres_c`` — :math:`c`
 
 are the parameters of the energy resolution formula. See below.
 

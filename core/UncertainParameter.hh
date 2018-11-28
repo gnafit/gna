@@ -121,6 +121,8 @@ public:
   virtual bool isFixed() const noexcept { return this->m_fixed; }
   virtual void setFixed() noexcept { this->m_fixed = true; }
 
+  virtual bool isFree() const noexcept { return this->m_free; }
+  virtual void setFree() noexcept { this->m_free = true; }
 
   virtual const parameter<T>& getParameter() const noexcept { return m_par; }
 
@@ -130,6 +132,7 @@ protected:
   std::vector<std::pair<T, T>> m_limits;
   parameter<T> m_par;
   bool m_fixed = false;
+  bool m_free = false;
 };
 
 template <typename T>
