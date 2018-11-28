@@ -117,6 +117,7 @@ As we now can access the transformation output, we may request the data it holds
 The ``data()`` method triggers the transformation function which does the calculation and returns a numpy view on the
 result, contained in ``parray.points.points``. Accessing the ``data()`` for the second time will do one of the following
 things:
+
   - Return the same view on a cached data in case no calculation is required.
   - If some of the prerequisites of the output has changed the transformation function will be called again updating the
     result. The view on the updated data is returned then.

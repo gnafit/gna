@@ -20,7 +20,7 @@ formula:
 
     R_{ij} = S_{ij} \sum_{k=1}^5 P_{ij}^k.
 
-Five matrices :ref:`P` are added together within ``Sum`` transformation. The result is then scaled by ``Product``
+Five matrices :math:`P` are added together within ``Sum`` transformation. The result is then scaled by ``Product``
 transformation. The corresponding graph may be found below.
 
 .. figure:: ../../img/tutorial/07_graphviz.png
