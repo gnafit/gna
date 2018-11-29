@@ -155,7 +155,10 @@ def varstats(var, stats):
                 increment('fixed')
             else:
                 increment('variable')
-                increment(hasattr(var, 'sigma') and N.isinf(var.sigma()) and 'free' or 'constrained')
+                if var.isFree():
+                    increment('free')
+                else:
+                    increment('constrained')
         elif tv.startswith('Variable'):
             increment('evaluable')
         else:
@@ -259,7 +262,7 @@ def GaussianParameter__str( self, labels=False  ):
         s += Fore.LIGHTYELLOW_EX + fixedstr if colorama_present else fixedstr
     else:
         s+=sepstr + centralsigmafmt.format(**fmt)
-        if N.isinf(fmt['sigma']):
+        if self.isFree():
             s += Fore.LIGHTYELLOW_EX + freestr if colorama_present else freestr
         else:
             if fmt['central']:

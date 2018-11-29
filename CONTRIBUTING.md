@@ -19,3 +19,35 @@ Commits to the `master` branch are commonly prohibited. Please, contribute your 
   - Make sure that functions marked with `noexcept` do NOT throw any exceptions: 
     no dynamic allocations inside of functions, functions called don't throw also and etc.
   - `constexpr` everything you can
+
+# RST documentation style
+
+## RST sections structure
+
+```rst
+#########
+Part name
+#########
+
+************
+Chapter name
+************
+
+Section name
+============
+
+Subsection name
+---------------
+
+Subsubsection name
+^^^^^^^^^^^^^^^^^^
+
+Paragraph name
+""""""""""""""
+
+Subparagraph name
+'''''''''''''''''
+
+Subsubparagraph name
+++++++++++++++++++++
+```
