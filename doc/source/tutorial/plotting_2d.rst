@@ -126,3 +126,5 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
    2d histogram with variable binning.
 
+
+

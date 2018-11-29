@@ -4,6 +4,7 @@
 #include <limits>
 #include <utility>
 #include <map>
+#include <cmath>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -122,7 +123,7 @@ public:
   virtual void setFixed() noexcept { this->m_fixed = true; }
 
   virtual bool isFree() const noexcept { return this->m_free; }
-  virtual void setFree() noexcept { this->m_free = true; }
+  virtual void setFree(bool free=true) noexcept { this->m_free = free; }
 
   virtual const parameter<T>& getParameter() const noexcept { return m_par; }
 
@@ -143,7 +144,15 @@ public:
   std::vector<GaussianParameter<T>*> m_cov_pars{};
 
    T sigma() const noexcept { return m_sigma; }
-   void setSigma(T sigma) noexcept { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+   void setSigma(T sigma) noexcept {
+     this->m_sigma=sigma;
+     if(std::isinf(sigma)){
+       this->setFree();
+     }else{
+       this->setFree(false);
+       this->setStep(sigma*0.1);
+     }
+   }
 
    bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
