@@ -208,7 +208,7 @@ This result may be printed to the terminal:
      norm                 =          2 │           1±         0.1 [         10%] │ Normalization
      phase                =-0.00318531 │      1.5708              [-0.00101391π] │  (-π, π)                    │ Phase angle
 
-Note, that the value slightly higher than :math:`2\pi` as converted to the value close to 0 for the angle.
+Note, that the value slightly below than :math:`2\pi` was converted to the value close to 0 for the angle.
 
 ..
         .. code-block:: text
