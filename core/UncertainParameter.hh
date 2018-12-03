@@ -97,8 +97,9 @@ public:
     this->set(value);
   }
 
-  virtual inline T pop() {
-    this->set(m_stack.pop());
+  virtual void pop() {
+    this->set(m_stack.top());
+    m_stack.pop();
     return this->value();
   }
 
