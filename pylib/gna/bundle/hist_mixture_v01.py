@@ -36,7 +36,7 @@ class hist_mixture_v01(TransformationBundle):
         for ns in self.namespaces:
             weights = [ ns.pathto('frac_'+name) for name in names ]
 
-            ws = R.WeightedSum( stdvector(names), stdvector(weights), ns=ns )
+            ws = R.WeightedSum( stdvector(weights), stdvector(names), ns=ns )
             ws.sum.setLabel('Mixture\n'+ns.name)
 
             for name, spectrum in self.bundles.items():

@@ -37,7 +37,7 @@ class reactor_snf_spectra_v01(TransformationBundle):
         sumweights = C.stdvector([self.parname])
 
         with self.common_namespace:
-            spec_o = R.WeightedSum(isonames, parnames, ns=self.common_namespace )
+            spec_o = R.WeightedSum(parnames, isonames, ns=self.common_namespace )
 
         self.objects['anue_spec_raw']=spec_o
         spec_o.sum.setLabel('anue spectrum\n(for SNF)')
@@ -52,7 +52,7 @@ class reactor_snf_spectra_v01(TransformationBundle):
 
         for ns in self.namespaces:
             with ns:
-                spec_scaled_o = R.WeightedSum(sumnames, sumweights, ns=ns)
+                spec_scaled_o = R.WeightedSum(sumweights, sumnames, ns=ns)
 
             self.objects[('spec_scaled', ns.name)]=spec_scaled_o
 

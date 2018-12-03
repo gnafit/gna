@@ -9,8 +9,8 @@ Calculate weighted sum of arrays.
 
 Arguments
 ^^^^^^^^^
-1) ``labels`` — vector of arrays' names of size :math:`N`.
-2) ``weight_labels`` — vector of weights' names, empty or of size :math:`N`.
+2) ``weights`` — vector of weights' names, empty or of size :math:`N`.
+1) ``inputs`` — vector of inputs' names of size :math:`N`.
 
 Inputs
 ^^^^^^
@@ -27,8 +27,7 @@ Variables
 ^^^^^^^^^
 
 The transformation depends on :math:`N` weighting variables :math:`\omega_i`.
-Variable names are read from ``weight_labels`` if it is not empty. Otherwise weight labels are defined as
-`"weight_"+label[i]`.
+Variable names are read from ``weights``.
 
 Outputs
 ^^^^^^^

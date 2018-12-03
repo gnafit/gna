@@ -390,7 +390,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 weights = stdvector([wname])
 
                 with context.ns:
-                    tobj, newout = self.new_tobject(idx, labels, weights, weight_label=self.weight.name)
+                    tobj, newout = self.new_tobject(idx, weights, labels, weight_label=self.weight.name)
                 inp = tobj.transformations[0].inputs[0]
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)

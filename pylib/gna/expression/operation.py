@@ -120,7 +120,7 @@ class OSum(Operation):
                 names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
                 weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
 
-                tobj, newout = self.new_tobject(freeidx, names, weights, weight_label=weight.name)
+                tobj, newout = self.new_tobject(freeidx, weights, names, weight_label=weight.name)
                 context.set_output(newout, self.name, freeidx)
 
                 for i, (name, reduceidx) in enumerate(zip(names, rindices)):

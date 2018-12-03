@@ -210,16 +210,35 @@ This result may be printed to the terminal:
 
 Note, that the value slightly below than :math:`2\pi` was converted to the value close to 0 for the angle.
 
-..
-        .. code-block:: text
+There is an extra method that enables the user to change the value of the normally distributed variable in a normalized
+way, in other words the use may set the number of sigmas the value deviates from the central value with the following
+command:
 
-           Variables in namespace '':
-             norm                 =        1.1 │           1±         0.1 [         10%] │ Normalization
-             phase                =      -3.13 │      1.5708              [   -0.99631π] │  (-π, π)                    │ Phase angle
+.. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
+    :lines: 29
 
-           Norm 1.1
-           Phase -3.13
+Setting the deviation by :math:`1\sigma` produces the following result.
+
+.. code-block:: text
+
+    norm                 =        1.1 │           1±         0.1 [         10%] │ Normalization
+
+Finally, the values of the variables may be read back by the ``value()`` method:
+
+.. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
+    :lines: 35-38
+
+Here is the output of the code:
+
+.. code-block:: text
+
+   Norm 1.1
+   Phase -3.13
 
 WeightedSum transformation
 """"""""""""""""""""""""""
+
+After getting familiar with how variables are defined it is the time to start using them with transformations. The first
+transformation we will consider is :ref:`WeightedSum`.
+
 

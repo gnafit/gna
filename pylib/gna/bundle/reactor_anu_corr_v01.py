@@ -23,7 +23,7 @@ class reactor_anu_corr_v01(TransformationBundle):
         for name, vars in self.corr_vars.items():
             with self.common_namespace:
                 corr_sigma_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
-                corrpar_t = R.WeightedSum(1.0, C.stdvector(['offset']), C.stdvector([self.cfg.uncname]))
+                corrpar_t = R.WeightedSum(1.0, C.stdvector([self.cfg.uncname]), C.stdvector(['offset']))
                 corrpar_i = corrpar_t.sum.inputs
                 corrpar_i['offset']( corr_sigma_t )
 
