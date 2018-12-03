@@ -15,7 +15,7 @@ ns = env.globalns
 # Create a parameter in the global namespace
 w1 = ns.defparameter('a', central=1.0, free=True, label='weight 1')
 w2 = ns.defparameter('b', central=0.1, free=True, label='weight 2')
-w3 = ns.defparameter('c', central=0.1, free=True, label='weight 3')
+w3 = ns.defparameter('c', central=0.05, free=True, label='weight 3')
 
 # Print the list of parameters
 ns.printparameters(labels=True)

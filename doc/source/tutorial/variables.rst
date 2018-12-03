@@ -292,7 +292,7 @@ After initializing the object we make four plots:
 
     A set of ``WeightedSum`` plots for different values of the parameters.
 
-First (blue) line corresponds to the initial parameters :math:`a=1.0`, :math:`b=0.1` and :math:`c=0.1`. Then we switch
+First (blue) line corresponds to the initial parameters :math:`a=1.0`, :math:`b=0.1` and :math:`c=0.05`. Then we switch
 of fast oscillating components with
 
 .. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
