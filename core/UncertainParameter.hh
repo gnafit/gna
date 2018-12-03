@@ -4,6 +4,7 @@
 #include <limits>
 #include <utility>
 #include <map>
+#include <stack>
 #include <cmath>
 
 #include <boost/lexical_cast.hpp>
@@ -91,6 +92,16 @@ public:
   virtual void set(T value)
     { m_par = value; }
 
+  virtual void push(T value) {
+    m_stack.push(this->value());
+    this->set(value);
+  }
+
+  virtual inline T pop() {
+    this->set(m_stack.pop());
+    return this->value();
+  }
+
   virtual T cast(const std::string& v) const
     { return boost::lexical_cast<T>(v); }
 
@@ -134,6 +145,8 @@ protected:
   parameter<T> m_par;
   bool m_fixed = false;
   bool m_free = false;
+
+  std::stack<T> m_stack;
 };
 
 template <typename T>

@@ -49,6 +49,7 @@ set (SOURCES
   transformations/detector/HistSmearSparse.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
+  transformations/functions/Sin.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
   transformations/integrator/GSLSamplerGL.cc
@@ -170,6 +171,7 @@ set (HEADERS
   Chi2.hh
   Poisson.hh
   Exp.hh
+  Sin.hh
   SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh

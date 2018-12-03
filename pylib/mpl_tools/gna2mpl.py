@@ -53,12 +53,18 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    if kwargs.pop('transpose', False):
-        pointsx=outputx.data().T.copy()
-        pointsy=outputy.data().T.copy()
+    if isinstance(outputx, (N.ndarray, list)):
+        pointsx=outputx
     else:
         pointsx=outputx.data().copy()
+
+    if isinstance(outputy, (N.ndarray, list)):
+        pointsy=outputy
+    else:
         pointsy=outputy.data().copy()
+
+    if kwargs.pop('transpose', False):
+        pointsx, pointsy=pointsx.T, pointsy.T
 
     return P.plot(pointsx, pointsy, *args, **kwargs)
 

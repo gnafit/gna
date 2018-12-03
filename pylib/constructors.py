@@ -35,6 +35,18 @@ def Sum(outputs=None, *args, **kwargs):
     outputs = stdvector(outputs, 'OutputDescriptor*')
     return R.Sum(outputs, *args, **kwargs)
 
+"""Construct WeightedSum object from lists of weights and input names/outputs"""
+def WeightedSum(weights, inputs=None, *args, **kwargs):
+    weights = stdvector(weights)
+    if inputs is None:
+        inputs=weights
+    elif isinstance(inputs[0], str):
+        inputs = stdvector(inputs)
+    else:
+        inputs = stdvector(inputs, 'OutputDescriptor*')
+
+    return R.WeightedSum(weights, inputs, *args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
     if outputs is None:

@@ -57,6 +57,12 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
     | `transpose=True` | transpose arrays before plotting |
     +------------------+----------------------------------+
 
+.. note::
+
+    The argument of ``plot_vs()`` and ``vs_plot()`` methods may be numpy array as well.
+
+
+
 Plotting histograms
 """""""""""""""""""
 
