@@ -40,7 +40,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
-ax.set_title( r'$a\sin(x)+b\sin(16x)+c\cos(16x)$' )
+ax.set_title(r'$a\,\sin(x)+b\,\sin(16x)+c\,\cos(16x)$')
 
 label = 'a={}, b={}, c={}'.format(w1.value(), w2.value(), w3.value())
 wsum.sum.sum.plot_vs(x, label=label)

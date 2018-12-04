@@ -15,9 +15,9 @@ ns = env.globalns
 # Create a parameter in the global namespace
 ns.defparameter('a', central=1.0,  free=True, label='weight 1 (global)')
 ns.defparameter('b', central=-0.1, free=True, label='weight 2 (global)')
-ns.defparameter('subst.a', central=0.5,  free=True, label='weight 1 (local)')
-ns.defparameter('subst.b', central=0.00, free=True, label='weight 2 (local)')
-ns.defparameter('subst.c', central=0.05, free=True, label='weight 3 (local)')
+ns.defparameter('group.a', central=0.5,  free=True, label='weight 1 (local)')
+ns.defparameter('group.b', central=0.00, free=True, label='weight 2 (local)')
+ns.defparameter('group.c', central=0.05, free=True, label='weight 3 (local)')
 
 # Print the list of parameters
 ns.printparameters(labels=True)
@@ -31,11 +31,11 @@ a3 = C.Points(np.cos(16.0*x))
 outputs = [a.points.points for a in (a1, a2, a3)]
 
 # Initialize the WeightedSum with list of variables and list of outputs
-weights1 = ['a', 'b', 'subst.c']
+weights1 = ['a', 'b', 'group.c']
 wsum1 = C.WeightedSum(weights1, outputs)
 
 weights2 = ['a', 'b', 'c']
-with ns('subst'):
+with ns('group'):
     wsum2 = C.WeightedSum(weights2, outputs)
 
 # Do some plotting
@@ -45,7 +45,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
-ax.set_title( r'$a\sin(x)+b\sin(16x)+c\cos(16x)$' )
+ax.set_title( r'$a\,\sin(x)+b\,\sin(16x)+c\,\cos(16x)$' )
 
 wsum1.sum.sum.plot_vs(x, label='Weighted sum 1')
 wsum2.sum.sum.plot_vs(x, label='Weighted sum 2')

@@ -16,39 +16,36 @@ ignored_classes = [
         'TypesFunctions',
         ]
 
-def hygienic(decorator):
-    def new_decorator(original):
-        wrapped = decorator(original)
-        wrapped.__name__ = original.__name__
-        wrapped.__doc__ = original.__doc__
-        wrapped.__module__ = original.__module__
-        wrapped.__original__ = original
-        return wrapped
-    return new_decorator
-
-@hygienic
 def wrapGNAclass(cls):
-    class WrappedClass(cls):
-        def __init__(self, *args, **kwargs):
-            super(WrappedClass, self).__init__(*args)
-            if not self:
-                return
-            bind = kwargs.pop('bind', True)
-            freevars = kwargs.pop('freevars', ())
-            bindings = kwargs.pop('bindings', {})
-            ns = kwargs.pop('ns', None)
-            if kwargs:
-                msg = "unknown keywords %s in constructor of %r"
-                msg = msg % (', '.join(kwargs.keys()), self)
-                raise Exception(msg)
-            env.register(self, bind=bind, freevars=freevars,
-                         ns=ns, bindings=bindings)
-        def __getattr__(self, attr):
-            try:
-                return self[attr]
-            except KeyError:
-                raise AttributeError(attr)
-    return WrappedClass
+    def newinit(self, *args, **kwargs):
+        self.__original_init__(*args)
+        if not self:
+            return
+        bind = kwargs.pop('bind', True)
+        freevars = kwargs.pop('freevars', ())
+        bindings = kwargs.pop('bindings', {})
+        ns = kwargs.pop('ns', None)
+        if kwargs:
+            msg = "unknown keywords %s in constructor of %r"
+            msg = msg % (', '.join(kwargs.keys()), self)
+            raise Exception(msg)
+        env.register(self, bind=bind, freevars=freevars,
+                     ns=ns, bindings=bindings)
+
+    def newgetattr(self, attr):
+        try:
+            return self[attr]
+        except KeyError:
+            raise AttributeError(attr)
+
+    cls.__original_init__, cls.__init__ = cls.__init__, newinit
+
+    if hasattr(cls, '__getattr__'):
+        cls.__original_getattr__, cls.__getattr__ = cls.__getattr__, newgetattr
+    else:
+        cls.__original_getattr__, cls.__getattr__ = None, newgetattr
+
+    return cls
 
 def patchSimpleDict(cls):
     def itervalues(self):
