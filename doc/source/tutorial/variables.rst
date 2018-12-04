@@ -1,5 +1,5 @@
-Variables (TBD)
-^^^^^^^^^^^^^^^
+Variables
+^^^^^^^^^
 
 Combining objects that do not change is not very interesting task. The GNA was designed in order to work with models
 with large number of parameters. In the simplest case the variables represent weights in a sum of arrays
