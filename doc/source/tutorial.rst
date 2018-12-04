@@ -13,5 +13,5 @@ Tutorial (Under construction)
    tutorial/compound_transformations
    tutorial/plotting_graphs
    tutorial/variables
-   tutorial/interpolation
    tutorial/integration
+   tutorial/interpolation
