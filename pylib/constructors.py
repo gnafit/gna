@@ -95,3 +95,4 @@ def Rebin( edges, rounding, *args, **kwargs ):
         raise Exception('Rebin rounding should be an integer')
     edges = N.ascontiguousarray(edges, dtype='d')
     return R.Rebin(edges.size, edges, int( rounding), *args, **kwargs )
+

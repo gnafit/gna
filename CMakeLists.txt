@@ -50,6 +50,7 @@ set (SOURCES
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/functions/Sin.cc
+  transformations/functions/Cos.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
   transformations/integrator/GSLSamplerGL.cc
@@ -172,6 +173,7 @@ set (HEADERS
   Poisson.hh
   Exp.hh
   Sin.hh
+  Cos.hh
   SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh
