@@ -286,4 +286,6 @@ def GaussianParameter__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
+    s += Style.RESET_ALL
+
     return s
