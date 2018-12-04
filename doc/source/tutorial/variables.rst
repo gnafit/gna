@@ -185,7 +185,7 @@ In the example we have defined two parameters:
      norm                 =          1 │           1±         0.1 [         10%] │ Normalization
      phase                =     1.5708 │      1.5708              [        0.5π] │  (-π, π)                    │ Phase angle
 
-The parameter instances may be obtained by assigning the result of the ``defparameter()``/``reqparameter()`` call 
+The parameter instances may be obtained by assigning the result of the ``defparameter()``/``reqparameter()`` call
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
     :lines: 13
@@ -239,6 +239,75 @@ WeightedSum transformation
 """"""""""""""""""""""""""
 
 After getting familiar with how variables are defined it is the time to start using them with transformations. The first
-transformation we will consider is :ref:`WeightedSum`.
+transformation we will consider is :ref:`WeightedSum`. ``WeightedSum`` transformation implements the following sum:
 
+.. math::
+    S = \sum_{i=1}^{N} \omega_i A_i,
 
+where :math:`A_i` is an array bound to the transformation input :math:`i`, :math:`\omega_i` is a weight bound to the
+transformation from the namespace. Let us look at the example:
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :linenos:
+    :lines: 4-64, 70
+    :emphasize-lines: 30
+    :caption: :download:`04_weightedsum.py <../../../macro/tutorial/variables/04_weightedsum.py>`
+
+The example implements the following formula:
+
+.. math::
+
+   S = a\sin(x)+b\sin(16x)+c\cos(16x),
+
+where :math:`a`, :math:`b` and :math:`c` are variables, initialized as follows:
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :lines: 16-18
+
+The ``WeightedSum`` constructor is similar to the one for ``Sum`` with the only addition: a list of variables names
+should be passed as the first argument:
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :lines: 32-33
+
+The second argument is either list of outputs or list of names to give to the inputs. In the latter case the inputs
+should be bounded to outputs of other transformations manually as it was done in tutorials for transformations
+:ref:`tutorial_sum` and :ref:`tutorial_product`.
+
+The contents of the ``WeightedSum`` from the example above is the following:
+
+.. code-block:: text
+
+   [obj] WeightedSum: 1 transformation(s)
+        0 [trans] sum: 3 input(s), 1 output(s)
+            0 [in]  a -> [out] points: array 1d, shape 500, size 500
+            1 [in]  b -> [out] points: array 1d, shape 500, size 500
+            2 [in]  c -> [out] points: array 1d, shape 500, size 500
+            0 [out] sum: array 1d, shape 500, size 500
+
+After initializing the object we make four plots:
+
+.. figure:: ../../img/tutorial/04_weightedsum.png
+    :align: center
+
+    A set of ``WeightedSum`` plots for different values of the parameters.
+
+First (blue) line corresponds to the initial parameters :math:`a=1.0`, :math:`b=0.1` and :math:`c=0.05`. Then we switch
+of fast oscillating components with
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :lines: 48-49
+
+Here we have used `push(value)` method, that sets the value of the parameter and saves the previous one. The previous
+value may then be retrieved by `pop()` method.
+
+The second line (orange) corresponds to the main frequency. Then we disable main frequency and enable the first
+secondary frequency by:
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :lines: 53-54
+
+The green line corresponds to this. The last minor component (red) is plotted after changing the parameters:
+
+.. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
+    :lines: 58-59

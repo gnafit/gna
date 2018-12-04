@@ -20,3 +20,13 @@ def GNAObject__print(self):
                 printl('{:2d}'.format(i), end=' ')
                 t.print()
 
+@patchROOTClass
+def GNAObject__print(self):
+    printl(str(self))
+    if self.transformations.size():
+        with nextlevel():
+            # printl('Transformations:')
+            for i, t in enumerate(self.transformations.itervalues()):
+                printl('{:2d}'.format(i), end=' ')
+                t.print()
+

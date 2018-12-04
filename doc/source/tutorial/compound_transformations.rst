@@ -183,6 +183,8 @@ The example script prints the inputs and outputs for each case:
 
 See that in case three the names of the inputs are defined as user has specified.
 
+.. _tutorial_product:
+
 Product
 """""""
 
