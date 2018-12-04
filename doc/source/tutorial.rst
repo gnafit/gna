@@ -4,7 +4,7 @@ Tutorial (Under construction)
 -----------------------------
 
 .. toctree::
-   :glob:
+   :numbered:
 
    tutorial/introduction
    tutorial/utilities
@@ -13,5 +13,4 @@ Tutorial (Under construction)
    tutorial/compound_transformations
    tutorial/plotting_graphs
    tutorial/variables
-   tutorial/integration
-   tutorial/interpolation
+   tutorial/complex_transformations

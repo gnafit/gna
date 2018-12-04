@@ -1,7 +1,7 @@
 .. _tutorial_compound_transformations:
 
-Compound transformaions
-^^^^^^^^^^^^^^^^^^^^^^^
+Sum and product: transformations with inputs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Now let us switch to the transformations with inputs. Transformation with inputs is in a sense a function with
 arguments. We are still working with transformations that do not depend on variables, therefore the result of the
