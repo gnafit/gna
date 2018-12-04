@@ -1,21 +1,21 @@
-Increasing complexity
+Increasing complexity (TBD)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Indexing (TBD)
+""""""""""""""
+
+Bundles and replication (TBD)
+"""""""""""""""""""""""""""""
+
+Mathematical expressions (TBD)
+""""""""""""""""""""""""""""""
+
+Command line UI (TBD)
 ^^^^^^^^^^^^^^^^^^^^^
 
-Indexing
-""""""""
+Loading model from the UI (TBD)
+"""""""""""""""""""""""""""""""
 
-Bundles and replication
-"""""""""""""""""""""""
-
-Mathematical expressions
-""""""""""""""""""""""""
-
-Command line UI
-^^^^^^^^^^^^^^^
-
-Loading model from the UI
-"""""""""""""""""""""""""
-
-Fitting
-"""""""
+Fitting (TBD)
+"""""""""""""
 
