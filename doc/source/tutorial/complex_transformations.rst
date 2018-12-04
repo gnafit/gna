@@ -19,7 +19,17 @@ of the input.
 
 Let us look in more details.
 
+Integration
+"""""""""""
+
 .. toctree::
 
-   integration.rst
-   interpolation.rst
+    integration_intro
+    integration_1d
+
+Interpolation (TBD)
+"""""""""""""""""""
+
+.. toctree::
+
+   interpolation

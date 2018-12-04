@@ -1,6 +1,3 @@
-Integration
-"""""""""""
-
 Introduction
 ''''''''''''
 
@@ -82,8 +79,4 @@ transformations:
     #. Integrator transformation. The transformations receives the output of the integrand transformation :math:`y_i` as
        well as the integration weights from the sampler. Integrator implements the convolution and produces the
        histogram :math:`H` as the output. Integrator implementation does not depend on actual sampler used.
-
-Example of 1d integration
-'''''''''''''''''''''''''
-
 
