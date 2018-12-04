@@ -16,7 +16,7 @@ ignored_classes = [
         'TypesFunctions',
         ]
 
-def wrapGNAclass(cls):
+def patchGNAclass(cls):
     def newinit(self, *args, **kwargs):
         self.__original_init__(*args)
         if not self:
@@ -217,7 +217,7 @@ def setup(ROOT):
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
         if issubclass(cls, GNAObject):
-            wrapped = wrapGNAclass(cls)
+            wrapped = patchGNAclass(cls)
             return wrapped
         if 'Class' not in cls.__dict__:
             t = cls.__class__

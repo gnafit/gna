@@ -285,6 +285,13 @@ The contents of the ``WeightedSum`` from the example above is the following:
             2 [in]  c -> [out] points: array 1d, shape 500, size 500
             0 [out] sum: array 1d, shape 500, size 500
 
+   Variables, relative to namespace "":
+       a                    =          1 │           1±         inf [free]         │ weight 1
+       b                    =        0.1 │         0.1±         inf [free]         │ weight 2
+       c                    =       0.05 │        0.05±         inf [free]         │ weight 3
+
+Note, that ``print()`` method now prints the variables on which ``GNAObject`` depends.
+
 After initializing the object we make four plots:
 
 .. figure:: ../../img/tutorial/04_weightedsum.png
@@ -311,3 +318,68 @@ The green line corresponds to this. The last minor component (red) is plotted af
 
 .. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
     :lines: 58-59
+
+Working with nested namespaces
+""""""""""""""""""""""""""""""
+
+Now let us repeat the example above in a different setting.
+
+.. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
+    :linenos:
+    :lines: 4-57,63
+    :emphasize-lines: 35-36
+    :caption: :download:`05_weightedsum_nested.py <../../../macro/tutorial/variables/05_weightedsum_nested.py>`
+
+We define two sets of variables. Parameters :math:`a` and :math:`b` in the global namespace and parameters :math:`a`,
+:math:`b` and :math:`c` in namespace `group`.
+
+.. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
+    :lines: 16-21
+
+Then we create two instances of ``WeightedSum`` with similar inputs, but depending on different variables. First:
+
+.. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
+   :lines: 34-35
+
+depends on variables :math:`a` and :math:`b` from global namespace and variable :math:`c` from namespace `group`. The
+dependence is reflected by the output:
+
+.. code-block:: text
+
+   Variables, relative to namespace "":
+   a                    =          1 │           1±         inf [free]         │ weight 1 (global)
+   b                    =       -0.1 │        -0.1±         inf [free]         │ weight 2 (global)
+   c                    =       0.05 │        0.05±         inf [free]         │ weight 3 (local) [group.c]
+
+Note the full path `group.c` printed for the variable :math:`c`.
+
+The second ``WeightedSum`` is created in a nested namespace `group`:
+
+.. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
+    :lines: 37-39
+
+Note that since the variables are now taken from the namespace `group` the local path `c` is used for variable
+:math:`c`. The switching to the group `group` is done via `with ns('group'):` statement. All the code within the scope
+of the `with` statement will work with variables from the namespace `group`.
+
+The printout of the second ``WeightedSum`` now refers to the variables from the `group`:
+
+.. code-block:: text
+
+    Variables, relative to namespace "group":
+    a                    =        0.5 │         0.5±         inf [free]         │ weight 1 (local)
+    b                    =          0 │           0±         inf [free]         │ weight 2 (local)
+    c                    =       0.05 │        0.05±         inf [free]         │ weight 3 (local)
+
+Instances of ``WeightedSum`` depend on different sets of variables. We then plot them with
+
+.. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
+    :lines: 53-54
+
+.. figure:: ../../img/tutorial/05_weightedsum_nested.png
+    :align: center
+
+    A set of ``WeightedSum`` plots for different values of the parameters.
+
+To make the legend we have used ``variablevalues()`` method. It returns the dictionary with *short* variable names and
+values and can be used within string formatting functions.
