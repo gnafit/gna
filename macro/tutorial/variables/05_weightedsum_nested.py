@@ -38,6 +38,9 @@ weights2 = ['a', 'b', 'c']
 with ns('group'):
     wsum2 = C.WeightedSum(weights2, outputs)
 
+wsum1.print(); print()
+wsum2.print(); print()
+
 # Do some plotting
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -47,8 +50,8 @@ ax.set_xlabel( 'x' )
 ax.set_ylabel( 'f(x)' )
 ax.set_title( r'$a\,\sin(x)+b\,\sin(16x)+c\,\cos(16x)$' )
 
-wsum1.sum.sum.plot_vs(x, label='Weighted sum 1')
-wsum2.sum.sum.plot_vs(x, label='Weighted sum 2')
+wsum1.sum.sum.plot_vs(x, label='Weighted sum 1: a={a}, b={b}, c={c}'.format(**wsum1.variablevalues()))
+wsum2.sum.sum.plot_vs(x, label='Weighted sum 2: a={a}, b={b}, c={c}'.format(**wsum2.variablevalues()))
 
 ax.legend(loc='lower right')
 

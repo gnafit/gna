@@ -1,10 +1,10 @@
 Plotting outputs in 2d: 2d histograms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""
 
 .. _matplotlib_matrices:
 
 Matrices
-""""""""
+''''''''
 
 The ``plot_matshow(...)`` method is defined implementing
 `matshow(A, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.matshow>`_ call passing output contents as `A`.
@@ -44,14 +44,14 @@ axis.
 
 
 2d histograms with constant binning
-"""""""""""""""""""""""""""""""""""
+'''''''''''''''''''''''''''''''''''
 
 There are several options to plot 2d histograms as histograms, i.e. with first dimension over X and second dimension
 over Y. In case the histogram has bins of equal width ``plot_pcolorfast()`` or ``plot_imshow()`` may be used. Both
 methods support the same extra options as :ref:`matshow <matplotlib_matrices_options>`.
 
 pcolorfast
-''''''''''
+++++++++++
 
 ``plot_pcolorfast(...)`` method implements a
 `pcolorfast(X, Y, C, ...) <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.pcolorfast.html?highlight=pcolorfast#matplotlib.axes.Axes.pcolorfast>`_ 
@@ -70,7 +70,7 @@ Y.
     2d histogram plotted via ``plot_pcolorfast()`` method.
 
 imshow
-''''''
+++++++
 
 The second method ``plot_imshow()`` is using
 `imshow(X, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.imshow>`_ passing output data as `X`. The
@@ -89,7 +89,7 @@ The second method ``plot_imshow()`` is using
 .. [#] Similar effect may be achieved to any plot with ``ax.set_aspect('equal')``.
 
 matshow
-'''''''
++++++++
 
 The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
@@ -106,7 +106,7 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 .. _matplotlib_hist2d_var:
 
 2d histograms with variable binning
-"""""""""""""""""""""""""""""""""""
+'''''''''''''''''''''''''''''''''''
 
 In case histograms have bins of variable size ``plot_pcolormesh()`` method should be used. It is using
 `pcolormesh(X, Y, C, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.pcolormesh>`_ call passing
@@ -125,6 +125,4 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
    :align: center
 
    2d histogram with variable binning.
-
-
 

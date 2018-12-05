@@ -17,15 +17,6 @@ class namespacedict(OrderedDict):
         self[key] = value
         return value
 
-def findname(name, curns):
-    """@todo remove findname usage"""
-    # if '.' in name:
-        # nsname, name = name.rsplit('.', 1)
-        # ns = env.globalns(nsname)
-    # else:
-        # ns = curns
-    return curns[name]
-
 class ExpressionWithBindings(object):
     def __init__(self, ns, obj, expr, bindings):
         self.ns = ns
@@ -42,7 +33,7 @@ class ExpressionWithBindings(object):
                 if dep in known:
                     continue
                 try:
-                    dep = findname(dep, env.nsview)
+                    dep = env.nsview[dep]
                 except KeyError:
                     return None
             if isinstance(dep, ExpressionsEntry):
@@ -63,7 +54,7 @@ class ExpressionWithBindings(object):
                 continue
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
             if isinstance(dep, basestring):
-                dep = findname(dep, env.nsview)
+                dep = env.nsview[dep]
             v.bind(dep.getVariable())
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
 
@@ -171,7 +162,7 @@ class namespace(Mapping):
 
         v = self.storage[name]
         if isinstance(v, basestring):
-            return findname(v, env.nsview)
+            return env.nsview[v]
         return v
 
     def __setitem__(self, name, value):
@@ -376,9 +367,12 @@ class nsview(object):
                 print('none')
         raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
 
+    def currentns(self):
+        return self.nses[0]
+
 class parametersview(object):
     def __getitem__(self, name):
-        res = findname(name, env.nsview)
+        res = env.nsview[name]
         return res
 
     @contextmanager
@@ -459,6 +453,7 @@ class _environment(object):
             self.globalns.objs.append(obj)
         else:
             ns.objs.append(obj)
+        obj.currentns = self.nsview.currentns()
         bindings = self._bindings+[kwargs.pop("bindings", OrderedDict())]
         if ns:
             ns.addexpressions(obj, bindings=bindings)
@@ -476,7 +471,7 @@ class _environment(object):
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
             if isinstance(param, basestring):
-                param = findname(param, self.nsview)
+                param = self.nsview[param]
             if isinstance(param, ExpressionsEntry):
                 param = param.get()
             if param is not None:
@@ -535,6 +530,6 @@ class _environment(object):
             nspath, obsname = objspec.rsplit("/", 1)
             return self.ns(nspath).observables[obsname]
         else:
-            return findname(objspec, self.globalns)
+            return self.globalns[objspec]
 
 env = _environment()

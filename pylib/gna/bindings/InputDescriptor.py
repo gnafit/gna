@@ -9,9 +9,9 @@ from printing import printl, nextlevel
 @patchROOTClass(R.InputDescriptor, '__str__')
 def InputDescriptor____str__(self):
     if self.materialized():
-        return '[in]  {} -> {!s}'.format(self.name(), self.output())
+        return '[in]  {} <- {!s}'.format(self.name(), self.output())
     else:
-        return '[in]  {} -> ...'.format(self.name())
+        return '[in]  {} <- ...'.format(self.name())
 
 @patchROOTClass
 def InputDescriptor__print(self):

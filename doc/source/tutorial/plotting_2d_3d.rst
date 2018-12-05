@@ -1,14 +1,14 @@
 Plotting outputs in 3d: 2d histograms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""""""""""""
 
 2d histograms
-"""""""""""""
+'''''''''''''
 
 2d histograms as in :ref:`example <matplotlib_hist2d_var>` may be plotted in 3d. Three methods are provided for this
 purpose. All the methods support the same extra options as :ref:`matshow <matplotlib_matrices_options>`.
 
 Surface
-'''''''
++++++++
 
 The method ``plot_surface`` is using
 `plot_surface(X, Y, Z, ...) <https://matplotlib.org/api/_as_gen/mpl_toolkits.mplot3d.axes3d.Axes3D.html?highlight=plot_surface#mpl_toolkits.mplot3d.axes3d.Axes3D.plot_surface>`_ 
@@ -33,7 +33,7 @@ In order the surface was colorized ``cmap`` option should be passed with a valid
     subplot (line 23).
 
 3d bars
-'''''''
++++++++
 
 The method ``plot_bar3d`` is using
 `bar3d(X, Y, Z, dX, dY, dZ, ...) <https://matplotlib.org/api/_as_gen/mpl_toolkits.mplot3d.axes3d.Axes3D.html?highlight=bar3d#mpl_toolkits.mplot3d.axes3d.Axes3D.bar3d>`_ 
@@ -52,7 +52,7 @@ By default the bars are not colorized: ``cmap=True`` may be used to colorize the
    2d histogram, plotted via ``plot_bar3d()`` method.
 
 Wireframe
-'''''''''
++++++++++
 
 The method ``plot_wireframe`` is using
 `plot_wireframe(X, Y, Z, ...) <https://matplotlib.org/api/_as_gen/mpl_toolkits.mplot3d.axes3d.Axes3D.html?highlight=plot_wireframe#mpl_toolkits.mplot3d.axes3d.Axes3D.plot_wireframe>`_ 
@@ -69,3 +69,4 @@ By default wire frame is not colorized: ``cmap=True`` may be used to colorize th
    :align: center
 
    2d histogram, plotted via ``plot_wireframe()`` method.
+

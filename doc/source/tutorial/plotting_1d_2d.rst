@@ -1,12 +1,12 @@
 Plotting outputs in 2d: plots and histograms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""""
 
 GNA defines a set of convenience methods to plot the transformation outputs with matplotlib. The methods are wrappers
 for regular `matplotlib <https://matplotlib.org/api/pyplot_api.html>`_ commands. For the complete matplotlib
 documentation please refer the official `site <https://matplotlib.org/api/pyplot_api.html>`_.
 
 Plotting arrays
-"""""""""""""""
+'''''''''''''''
 
 A ``plot(...)`` method is defined implementing
 `plot(y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ call passing output contents as `y`.
@@ -33,7 +33,7 @@ The latter produces the blue line on the following figure while the former produ
     +------------------+---------------------------------+
 
 Plotting arrays vs other arrays
-"""""""""""""""""""""""""""""""
+'''''''''''''''''''''''''''''''
 
 If `X` vs `Y` is desired ``output_y.plot_vs(output_x, ...)`` syntax may be used. Matplotlib
 `plot(x, y, ...) <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_ function is used.
@@ -64,7 +64,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 
 Plotting histograms
-"""""""""""""""""""
+'''''''''''''''''''
 
 There are two options to plot 1d histograms provided. First one ``plot_hist()`` is producing regular line plot via 
 `pyplot.plot() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_, the second one ``plot_bar()`` is
@@ -92,12 +92,12 @@ histogram that affects how the edges of first and last bins are plotted: they ar
     +------------------+---------------------------------------+
 
 Overlapping histograms
-""""""""""""""""""""""
+''''''''''''''''''''''
 
 Both plotting methods may be used for plotting multiple histograms. 
 
 Line plots
-''''''''''
+++++++++++
 
 Multiple `plot_hist()` are plotted as regular plots.
 
@@ -115,7 +115,7 @@ Multiple `plot_hist()` are plotted as regular plots.
 For the bar version there are two ways to plot overlapping histograms. 
 
 Bars' transparency
-''''''''''''''''''
+++++++++++++++++++
 
 First one is to modify the histograms' transparency by setting ``alpha`` option below 1.
 
@@ -131,7 +131,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
 
 Bars' width
-'''''''''''
++++++++++++
 
 The second option is controlled by ``divide`` and ``shift`` options. ``divide`` is an integer factor dividing the bin
 width. Setting ``divide=3`` will shrink the bin width three times. The option ``shift`` defines where to plot the shrunk
@@ -156,3 +156,4 @@ right side. It is possible to plot overlapping histograms without bins actually 
     +------------+------------------------------------+
     | `shift=M`  | Shift each bin by N widths (`M<N`) |
     +------------+------------------------------------+
+

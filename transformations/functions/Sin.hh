@@ -16,7 +16,8 @@
 class Sin: public GNASingleObject,
            public TransformationBind<Sin> {
 public:
-    Sin();                              ///< Constructor.
+    Sin();                               ///< Constructor.
+    Sin(OutputDescriptor& output);
 
     void calculate(FunctionArgs& fargs); ///< Calculate the value of function.
 protected:
