@@ -25,14 +25,14 @@ void IntegratorTrap::sample(FunctionArgs& fargs) {
 
   auto nbins=m_edges.size()-1;
   auto& binwidths=m_edges.tail(nbins) - m_edges.head(nbins);
-  ArrayXd samplewidths=binwidths/m_orders.cast<double>();
+  ArrayXd samplewidths=binwidths/(m_orders.cast<double>()-1.0);
 
   auto* edge_a=m_edges.data();
   auto* edge_b{next(edge_a)};
 
   size_t offset=0;
   for (size_t i = 0; i < static_cast<size_t>(m_orders.size()); ++i) {
-    auto n=m_orders[i]+1;
+    auto n=m_orders[i];
     abscissa.segment(offset, n)=ArrayXd::LinSpaced(n, *edge_a, *edge_b);
 
     auto swidth=samplewidths[i];

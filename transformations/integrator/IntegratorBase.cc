@@ -24,7 +24,12 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 }
 
 void IntegratorBase::init_base(double* edges) {
-    m_weights.resize(m_orders.sum()+m_shared_edge);
+    if(m_shared_edge){
+      m_weights.resize(m_orders.sum()-m_orders.size()+m_shared_edge);
+    }
+    else{
+      m_weights.resize(m_orders.sum());
+    }
     if(edges){
         m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
     }
@@ -53,9 +58,14 @@ void IntegratorBase::check_base(TypesFunctionArgs& fargs){
         throw fargs.args.error(fargs.args[0], "inconsistent function size");
     }
 
-    if((m_orders<1).any()){
+    if((m_orders<(1+m_shared_edge)).any()){
         std::cerr<<m_orders<<std::endl;
-        throw std::runtime_error("All integration orders should be >=1");
+        if(m_shared_edge){
+          throw std::runtime_error("All integration orders should be >=2");
+        }
+        else{
+          throw std::runtime_error("All integration orders should be >=1");
+        }
     }
 }
 
@@ -66,7 +76,7 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
     auto* data = prod.data();
     auto* order = m_orders.data();
     for (int i = 0; i < m_orders.size(); ++i) {
-        auto* data_next=std::next(data, *order+m_shared_edge);
+        auto* data_next=std::next(data, *order);
         *ret = std::accumulate(data, data_next, 0.0);
         if(m_shared_edge){
             data=prev(data_next);
