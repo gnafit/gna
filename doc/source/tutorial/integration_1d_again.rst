@@ -7,6 +7,7 @@ Now let us repeat the previous study with several changes:
 #. Check that changing variables affects the integration.
 #. Use an alternative way of bin edges specification.
 #. Use an alternative way of binding the function output.
+#. Use an alternative integration method.
 
 Here is the code:
 
@@ -28,7 +29,8 @@ it is more convenient to provide bin edges via input.
     :lines: 37-38
 
 Note that the integrator is created without bins passed as an argument. Only in this case the `points.edges` input is
-created. The variable `orders` now contains a numpy array with integers.
+created. The variable `orders` now contains a numpy array with integers. Instead of Gauss-Legendre in this example we
+will use the trapezoidal integration.
 
 Then we use the similar function as we have used in the previous example. Instead of binding it directly we use a method
 ``add_input(output)``. This method may be used several times. On each execution it will create and bind a new input. A

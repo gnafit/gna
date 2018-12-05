@@ -64,21 +64,29 @@ def Bins( array, *args, **kwargs ):
     return R.Bins( a, a.size-1, *args, **kwargs )
 
 """Construct Histogram object from two arrays: edges and data"""
-def Histogram( edges, data, *args, **kwargs ):
+def Histogram( edges, data=None, *args, **kwargs ):
     edges = N.ascontiguousarray(edges, dtype='d')
-    data  = N.ascontiguousarray(data,  dtype='d')
-    if (edges.size-1)!=data.size:
-        raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
+    reqsize = (edges.size-1)
+    if data is None:
+        data  = N.zeros(reqsize, dtype='d')
+    else:
+        if reqsize!=data.size:
+            raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
+        data  = N.ascontiguousarray(data,  dtype='d')
 
     return R.Histogram( data.size, edges, data, *args, **kwargs )
 
 """Construct Histogram2d object from two arrays: edges and data"""
-def Histogram2d( xedges, yedges, data, *args, **kwargs ):
+def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
     xedges = N.ascontiguousarray(xedges, dtype='d')
     yedges = N.ascontiguousarray(yedges, dtype='d')
-    data   = N.ascontiguousarray(data,   dtype='d').ravel(order='F')
-    if (xedges.size-1)*(yedges.size-1)!=data.size:
-        raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
+    reqsize = (xedges.size-1)*(yedges.size-1)
+    if data is None:
+        data = N.zeros(reqsize, dtype='d')
+    else:
+        if reqsize!=data.size:
+            raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
+        data = N.ascontiguousarray(data,   dtype='d').ravel(order='F')
 
     return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
 
