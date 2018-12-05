@@ -1,7 +1,7 @@
 .. _Points:
 
-Points transformation
-~~~~~~~~~~~~~~~~~~~~~
+Points
+~~~~~~
 
 Description
 ^^^^^^^^^^^

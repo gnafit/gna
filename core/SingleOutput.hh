@@ -3,6 +3,8 @@
 #include "Data.hh"
 #include "OutputHandle.hh"
 
+#include <vector>
+
 /**
  * @brief The object with single output.
  *

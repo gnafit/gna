@@ -9,6 +9,7 @@ import gna.parameters.oscillation
 import itertools
 from gna.exp import baseexp
 from gna.env import env
+import constructors as C
 
 
 year=365*24*60*60.0
@@ -299,15 +300,15 @@ class ReactorExperimentModel(baseexp):
             for isoname in reactor.fission_fractions:
                 bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
             norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
-            lt=ROOT.Points(detector.livetime)
+            lt=C.Points(detector.livetime)
             lt.points.setLabel('livetime:\n'+detector.name)
             norm.isotopes.livetime(lt)
-            pr=ROOT.Points(reactor.power_rate)
+            pr=C.Points(reactor.power_rate)
             pr.points.setLabel('power:\n'+reactor.name)
             norm.isotopes.power_rate(pr)
             norm.isotopes.setLabel('norm:\n{} to {}'.format(reactor.name, detector.name))
             for isoname, frac in reactor.fission_fractions.iteritems():
-                ff=ROOT.Points(frac)
+                ff=C.Points(frac)
                 ff.points.setLabel('fission frac:\n{} at {}'.format(isoname, reactor.name))
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](ff)
         elif normtype == 'manual':

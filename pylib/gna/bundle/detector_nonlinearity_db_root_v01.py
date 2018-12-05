@@ -48,7 +48,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundle):
         # a weighted sum of input curves
         #
         with self.common_namespace:
-            corr_lsnl = R.WeightedSum( C.stdvector(self.cfg.names), C.stdvector(['weight_'+n for n in self.cfg.names]), ns=self.common_namespace )
+            corr_lsnl = R.WeightedSum( C.stdvector(['weight_'+n for n in self.cfg.names]), C.stdvector(self.cfg.names), ns=self.common_namespace )
         self.objects['lsnl_factor']=corr_lsnl
         corr_lsnl.sum.setLabel('NL:\ncorrelated')
 

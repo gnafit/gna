@@ -155,7 +155,10 @@ def varstats(var, stats):
                 increment('fixed')
             else:
                 increment('variable')
-                increment(hasattr(var, 'sigma') and N.isinf(var.sigma()) and 'free' or 'constrained')
+                if var.isFree():
+                    increment('free')
+                else:
+                    increment('constrained')
         elif tv.startswith('Variable'):
             increment('evaluable')
         else:
@@ -180,6 +183,7 @@ def Variable__str( self, labels=False ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
+    s += Style.RESET_ALL if colorama_present else "" 
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
@@ -202,6 +206,7 @@ def Variablec__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
+    s += Style.RESET_ALL if colorama_present else ""
     return s
 
 @patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
@@ -234,6 +239,7 @@ def UniformAngleParameter__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
+    s += Style.RESET_ALL if colorama_present else ""
     return s
 
 @patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
@@ -259,7 +265,7 @@ def GaussianParameter__str( self, labels=False  ):
         s += Fore.LIGHTYELLOW_EX + fixedstr if colorama_present else fixedstr
     else:
         s+=sepstr + centralsigmafmt.format(**fmt)
-        if N.isinf(fmt['sigma']):
+        if self.isFree():
             s += Fore.LIGHTYELLOW_EX + freestr if colorama_present else freestr
         else:
             if fmt['central']:
@@ -282,5 +288,8 @@ def GaussianParameter__str( self, labels=False  ):
 
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+
+    s += Style.RESET_ALL if colorama_present else ""
+
 
     return s

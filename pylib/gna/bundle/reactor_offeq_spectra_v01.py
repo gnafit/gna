@@ -42,7 +42,7 @@ class reactor_offeq_spectra_v01(TransformationBundle):
         for ns in self.namespaces:
             for isotope, corr in offeqs.items():
                 with ns:
-                    spec_o = R.WeightedSum(sumnames, sumweights, ns=ns)
+                    spec_o = R.WeightedSum(sumweights, sumnames, ns=ns)
 
                 self.objects[('spec_scaled', ns.name, isotope)]=spec_o
 

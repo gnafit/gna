@@ -75,7 +75,7 @@ class cmd(basecmd):
         ibd.jacobian.Enu(ibd.Enu)
         ibd.jacobian.Ee(integrator.points.x)
         ibd.jacobian.ctheta(integrator.points.y)
-        spectrum = ROOT.WeightedSum(vec(spectra.keys()), vec([a+'_weight' for a in spectra.keys()]))
+        spectrum = ROOT.WeightedSum(vec([a+'_weight' for a in spectra.keys()]), vec(spectra.keys()))
         for isoname, (fname, weight) in spectra.iteritems():
             isotope = loadspectrum(fname)
             isotope.f.inputs(ibd.Enu)

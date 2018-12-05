@@ -22,12 +22,14 @@ weights = [ 'w1', 'w2' ]
 p1 = env.globalns.defparameter( weights[0], central=1.0, sigma=0.1 )
 p2 = env.globalns.defparameter( weights[1], central=1.0, sigma=0.1 )
 
+env.globalns.printparameters()
+
 """Initialize transformations"""
 points1 = Points( arr1 )
 points2 = Points( arr2 )
 
 """Mode1: a1*w1+a2*w2"""
-ws = R.WeightedSum( stdvector(labels), stdvector(weights) )
+ws = R.WeightedSum( stdvector(weights), stdvector(labels) )
 ws.sum.arr1(points1.points)
 ws.sum.arr2(points2.points)
 
@@ -42,7 +44,7 @@ p2.set(1)
 print()
 
 """Mode2: a1*w1+a2"""
-ws = R.WeightedSum( stdvector(labels), stdvector(weights[:1]) )
+ws = R.WeightedSum( stdvector(weights[:1]), stdvector(labels) )
 ws.sum.arr1(points1.points)
 ws.sum.arr2(points2.points)
 
@@ -56,23 +58,8 @@ p1.set(1)
 p2.set(1)
 print()
 
-"""Mode3: a1*w1+w2"""
-ws = R.WeightedSum( stdvector(labels[:1]), stdvector(weights) )
-ws.sum.arr1(points1.points)
-
-print( 'Mode3: a1*w1+w2' )
-print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p1.set(2)
-print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p2.set(2)
-print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p1.set(1)
-p2.set(1)
-print()
-
-
 """Mode4: c+a1*w1+a1*w2"""
-ws = R.WeightedSum( -10, stdvector(labels), stdvector(weights) )
+ws = R.WeightedSum( -10, stdvector(weights), stdvector(labels) )
 ws.sum.arr1(points1.points)
 ws.sum.arr2(points2.points)
 

@@ -17,8 +17,7 @@ from gna.expression import *
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
-# parser.add_argument( '--make-idx', action="store_true", help='Make indices' )
-parser.add_argument('--from-files', action="store_true", help='Read coordinates from files')
+parser.add_argument('--from-file', action="store_true", help='Read coordinates from files')
 args = parser.parse_args()
 args.make_idx=True
 

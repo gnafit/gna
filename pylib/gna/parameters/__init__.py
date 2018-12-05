@@ -59,6 +59,22 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         ptype = kwargs.get('type', 'gaussian')
 
     fixed = kwargs.get('fixed', False)
+    free  = kwargs.get('free',  False)
+    if free and fixed:
+        raise Exception('Parameter {} may not be free and fixed in the same time')
+
+    if fixed:
+        if not 'relsigma' in kwargs:
+            kwargs.setdefault('sigma', 1.e-6)
+    elif free:
+        if not 'relsigma' in kwargs and not 'sigma' in kwargs:
+            kwargs['sigma']=float('inf')
+            if not 'step' in kwargs:
+                central = kwargs['central']
+                if central:
+                    kwargs.setdefault('step', 0.1*central)
+                else:
+                    kwargs.setdefault('step', 0.1)
 
     if debug:
         print( 'Defpar {ns}.{name} ({type}):'.format(
@@ -139,6 +155,15 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         param.setFixed()
         if debug:
             print( 'fixed!', end='' )
+    elif free:
+        param.setFree()
+        if debug:
+            print( 'free!', end='' )
+    if 'step' in kwargs:
+        param.setStep(kwargs['step'])
+        if debug:
+            print( 'step={}'.format(kwargs['step']), end='' )
+
     param.reset()
     param.ns = ns
 
