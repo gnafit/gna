@@ -37,6 +37,7 @@ namespace TransformationTypes
     const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.
 
     bool materialized() const { return m_source->materialized(); }            ///< Call Source::materialized(). @copydoc Source::materialized()
+    bool bound() const { return m_source->sink!=nullptr; }                    ///< Return true if the source is bound to the sink.
 
   protected:
     const OutputHandle output() const { return OutputHandle(*const_cast<Sink*>(m_source->sink)); }

@@ -147,3 +147,10 @@ Instances of ``WeightedSum`` depend on different sets of variables. We then plot
 To make the legend we have used ``variablevalues()`` method. It returns the dictionary with *short* variable names and
 values and can be used within string formatting functions.
 
+.. note::
+
+    ``variablevalues()`` and ``print()`` methods take care only on the variables the transformation depends directly. It
+    knows nothing about variables the input transformation depend on.
+
+
+

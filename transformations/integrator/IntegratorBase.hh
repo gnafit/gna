@@ -9,6 +9,12 @@ class IntegratorBase : public GNAObject,
 public:
   TransformationDescriptor add();
 
+  void set_edges(OutputDescriptor& hist);
+  InputDescriptor  add_input();
+  OutputDescriptor add_input(OutputDescriptor& fcn_output);
+  OutputDescriptor add_input(InputDescriptor& fcn_input, OutputDescriptor& fcn_output);
+  OutputDescriptor add_input(OutputDescriptor& hist, InputDescriptor& fcn_input, OutputDescriptor& fcn_output);
+
   void dump();
 
 protected:

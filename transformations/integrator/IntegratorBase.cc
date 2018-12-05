@@ -25,34 +25,38 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 
 void IntegratorBase::init_base(double* edges) {
     if(m_shared_edge){
-      m_weights.resize(m_orders.sum()-m_orders.size()+m_shared_edge);
+        m_weights.resize(m_orders.sum()-m_orders.size()+m_shared_edge);
     }
     else{
-      m_weights.resize(m_orders.sum());
+        m_weights.resize(m_orders.sum());
     }
     if(edges){
         m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
     }
-    add();
 }
 
 TransformationDescriptor IntegratorBase::add(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
-      name = fmt::format("{0}_{1:02d}", name, num);
+        name = fmt::format("{0}_{1:02d}", name, num);
     }
     transformation_(name)
         .input("f")
         .output("hist")
         .types(TypesFunctions::if1d<0>, TypesFunctions::ifPoints<0>, &IntegratorBase::check_base)
+        .types(TypesFunctions::ifSame)
         .func(&IntegratorBase::integrate)
         ;
     return transformations.back();
 }
 
 void IntegratorBase::check_base(TypesFunctionArgs& fargs){
-    fargs.rets[0]=DataType().hist().edges(m_edges.size(), m_edges.data());
+    auto& rets=fargs.rets;
+    for(size_t i(0); i<rets.size(); ++i)
+    {
+        rets[i]=DataType().hist().edges(m_edges.size(), m_edges.data());;
+    }
 
     if (fargs.args[0].shape[0] != static_cast<size_t>(m_weights.size())){
         throw fargs.args.error(fargs.args[0], "inconsistent function size");
@@ -70,55 +74,101 @@ void IntegratorBase::check_base(TypesFunctionArgs& fargs){
 }
 
 void IntegratorBase::integrate(FunctionArgs& fargs){
-    auto* ret=fargs.rets[0].buffer;
+    auto& args=fargs.args;
+    auto& rets=fargs.rets;
+    for (size_t i = 0; i < args.size(); ++i) {
+        auto* ret=rets[i].buffer;
 
-    ArrayXd prod = fargs.args[0].x*m_weights;
-    auto* data = prod.data();
-    auto* order = m_orders.data();
-    for (int i = 0; i < m_orders.size(); ++i) {
-        auto* data_next=std::next(data, *order);
-        *ret = std::accumulate(data, data_next, 0.0);
-        if(m_shared_edge){
-            data=prev(data_next);
+        ArrayXd prod = args[i].x*m_weights;
+        auto* data = prod.data();
+        auto* order = m_orders.data();
+        for (int i = 0; i < m_orders.size(); ++i) {
+            auto* data_next=std::next(data, *order);
+            *ret = std::accumulate(data, data_next, 0.0);
+            if(m_shared_edge){
+                data=prev(data_next);
+            }
+            else{
+                data=data_next;
+            }
+            advance(order,1);
+            advance(ret,1);
         }
-        else{
-            data=data_next;
-        }
-        advance(order,1);
-        advance(ret,1);
     }
 }
 
 void IntegratorBase::init_sampler() {
-  auto trans=transformation_("points")
-      .output("x")
-      .output("xedges")
-      .types(&IntegratorBase::check_sampler)
-      .func(&IntegratorBase::sample)
-      ;
+    auto trans=transformation_("points")
+        .output("x")
+        .output("xedges")
+        .types(&IntegratorBase::check_sampler)
+        .func(&IntegratorBase::sample)
+        ;
 
-  if(m_edges.size()){
-    trans.finalize();
-  }
-  else{
-    trans.input("edges") //hist with edges
-      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
-  }
+    if(m_edges.size()){
+        trans.finalize();
+    }
+    else{
+        trans.input("edges") //hist with edges
+          .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+    }
+
+    add();
 }
 
 void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
-  auto& rets=fargs.rets;
-  rets[0] = DataType().points().shape(m_weights.size());
+    auto& rets=fargs.rets;
+    rets[0] = DataType().points().shape(m_weights.size());
 
-  auto& args=fargs.args;
-  if(args.size() && !m_edges.size()){
-    auto& edges=fargs.args[0].edges;
-    m_edges=Map<const ArrayXd>(edges.data(), edges.size());
-  }
-  rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
+    auto& args=fargs.args;
+    if(args.size() && !m_edges.size()){
+        auto& edges=fargs.args[0].edges;
+        m_edges=Map<const ArrayXd>(edges.data(), edges.size());
+    }
+    rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
 }
+
 void IntegratorBase::dump(){
     std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
     std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;
     std::cout<<"Weights: "<<m_weights.transpose()<<std::endl;
+}
+
+InputDescriptor IntegratorBase::add_input(){
+    auto hist=transformations.back();
+    auto input=hist.inputs.back();
+    if(input.bound()){
+        auto ninputs=hist.inputs.size();
+        input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
+        hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
+    }
+
+    return input;
+}
+
+OutputDescriptor IntegratorBase::add_input(OutputDescriptor& fcn_output){
+    auto input=add_input();
+    input(fcn_output);
+    return OutputDescriptor(transformations.back().outputs.back());
+}
+
+OutputDescriptor IntegratorBase::add_input(InputDescriptor& fcn_input, OutputDescriptor& fcn_output){
+    auto x=transformations.front().outputs.front();
+    fcn_input(x);
+
+    return add_input(fcn_output);
+}
+
+
+OutputDescriptor IntegratorBase::add_input(OutputDescriptor& hist_output, InputDescriptor& fcn_input, OutputDescriptor& fcn_output){
+    set_edges(hist_output);
+    return add_input(fcn_input, fcn_output);
+}
+
+void IntegratorBase::set_edges(OutputDescriptor& hist_output){
+    auto& inputs=transformations.front().inputs;
+    if(!inputs.size()){
+        throw std::runtime_error("Can not bind bin edges since bin edges were provided in the constructor.");
+    }
+    inputs.front()(hist_output);
 }

@@ -20,6 +20,7 @@ The example script is below. We will use the Gauss-Legendre quadrature rule with
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
     :linenos:
     :lines: 4-
+    :emphasize-lines: 29-30,33-34,38
     :caption: :download:`01_integral1d.py <../../../macro/tutorial/complex/01_integral1d.py>`
 
 Before going into details let us first look at the graph that follows the procedure described in
@@ -47,7 +48,7 @@ with integers. Since we are using raw [#]_ constructor we explicitly have specif
 
 In the last line we get the output with integration points.
 
-The function :ref:`integral_1d_function` is defined as follows:
+The function :eq:`integral_1d_function` is defined as follows:
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
     :lines: 36-39
@@ -69,17 +70,17 @@ The status of the integrator object with two transformations is the following:
 .. code-block:: text
 
    [obj] IntegratorGL: 2 transformation(s), 0 variables
-    0 [trans] hist: 1 input(s), 1 output(s)
-        0 [in]  f <- [out] sum: array 1d, shape 90, size  90
-        0 [out] hist: hist,  30 bins, edges -3.14159265359->3.14159265359, width 0.209439510239
-    1 [trans] points: 0 input(s), 2 output(s)
+    0 [trans] points: 0 input(s), 2 output(s)
         0 [out] x: array 1d, shape 90, size  90
         1 [out] xedges: array 1d, shape 31, size  31
+    1 [trans] hist: 1 input(s), 1 output(s)
+        0 [in]  f <- [out] sum: array 1d, shape 90, size  90
+        0 [out] hist: hist,  30 bins, edges -3.14159265359->3.14159265359, width 0.209439510239
 
 31 bin edges, 30 bins, 3 points per bin: 90 integration points in total.
 
 In order to cross check the integrator let us also implement the analytical solution for antiderivative :math:`F` from
-:ref:`integral_1d_int`.
+:eq:`integral_1d_int`.
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
     :lines: 63-65
@@ -90,7 +91,7 @@ integrals as differences. The result our the computations is shown on the figure
 .. figure:: ../../img/tutorial/01_integral1d.png
     :align: center
 
-    The Gauss-Legendre quadrature application to the function :ref:`integral_1d_function`.
+    The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function`.
 
 The line-marker plot represents the value of the function computed at the integration points. Dashed lines show the bin
 edges. One may see that since Gauss-Legendre quadrature is used the integration points are located unevenly within
@@ -117,6 +118,19 @@ alignment within the interval. The default is `center`.
    integrator = R.IntegratorRect(nbins, orders, x_edges, 'left')
    integrator = R.IntegratorRect(nbins, orders, x_edges, 'center')
    integrator = R.IntegratorRect(nbins, orders, x_edges, 'right')
+
+A final note on the integration order. For each integrator order means the number of points needed to integrate a single
+bin. Therefore for :math:`N` bins each integrated with order of :math:`O_i` the total number of integration points will
+be:
+
+.. math::
+
+   N_p = \sum\limits_i^N O_i.
+
+In case of the trapezoidal rule :math:`N-1` points are on the adjacent bin edges. Thus the total number of points is:
+
+.. math::
+   N_p = \sum\limits_i^N O_i - (N-1).
 
 .. [#] The constructors defined in C++ require the C++ datatypes to be passed. Numpy arrays should have the appropriate
        datatype specified, `'d'` for doubles and `'i'` for integers. On the other hand, the constructors defined in the

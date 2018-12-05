@@ -26,6 +26,7 @@ Integration
 
     integration_intro
     integration_1d
+    integration_1d_again
 
 Interpolation (TBD)
 """""""""""""""""""
