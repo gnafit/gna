@@ -52,8 +52,6 @@ print()
 
 # Label transformations
 integrator.points.setLabel('Sampler\n(Gauss-Legendre)')
-# integrator.points.x.setLabel('x')
-# integrator.points.xedges.setLabel('          bin edges')
 integrator.hist.setLabel('Integrator\n(convolution)')
 cos_arg.sum.setLabel('kx')
 sin_t.sin.setLabel('sin(x)')
@@ -105,11 +103,11 @@ ax.autoscale(enable=False, axis='y')
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 
+# Save figure and graph as images
 from mpl_tools.helpers import savefig
 from sys import argv
 oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
 savefig(oname+'.png')
-
 from gna.graphviz import savegraph
 savegraph(fcn.sum, oname+'_graph.png')
 

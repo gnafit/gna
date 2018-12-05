@@ -1,3 +1,5 @@
+.. _tutorial_integration_intro:
+
 Introduction
 ''''''''''''
 
