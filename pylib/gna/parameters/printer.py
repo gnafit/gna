@@ -183,7 +183,7 @@ def Variable__str( self, labels=False ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
-    s += Style.RESET_ALL
+    s += Style.RESET_ALL if colorama_present else "" 
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
@@ -206,7 +206,7 @@ def Variablec__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
-    s += Style.RESET_ALL
+    s += Style.RESET_ALL if colorama_present else ""
     return s
 
 @patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
@@ -239,7 +239,7 @@ def UniformAngleParameter__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
-    s += Style.RESET_ALL
+    s += Style.RESET_ALL if colorama_present else ""
     return s
 
 @patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
@@ -289,6 +289,7 @@ def GaussianParameter__str( self, labels=False  ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
-    s += Style.RESET_ALL
+    s += Style.RESET_ALL if colorama_present else ""
+
 
     return s
