@@ -284,7 +284,7 @@ def surface_hist2(output, *args, **kwargs):
     Z, xedges, yedges = get_hist2d_data(output, kwargs)
 
     xc=(xedges[1:]+xedges[:-1])*0.5
-    yc=(yedges[1:]+yedges[:-1])
+    yc=(yedges[1:]+yedges[:-1])*0.5
 
     X, Y = N.meshgrid(xc, yc, indexing='ij')
 
@@ -321,6 +321,30 @@ def wireframe_hist2(output, *args, **kwargs):
     yc=(yedges[1:]+yedges[:-1])
 
     X, Y = N.meshgrid(xc, yc, indexing='ij')
+
+    colors, cmap = apply_colors(Z, kwargs, 'facecolors')
+    colorbar = kwargs.pop('colorbar', False)
+
+    ax = P.gca()
+    if colors is not None:
+        kwargs['rcount']=Z.shape[0]
+        kwargs['ccount']=Z.shape[1]
+        kwargs['shade']=False
+        res = ax.plot_surface(X, Y, Z, **kwargs)
+        res.set_facecolor((0,0,0,0))
+
+        return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
+
+    res = ax.plot_wireframe(X, Y, Z, *args, **kwargs)
+    return res
+
+def wireframe_points_vs(output, xmesh, ymesh, *args, **kwargs):
+    transpose=kwargs.pop('transpose', False)
+    Z = get_2d_buffer(output, transpose=transpose, mask=kwargs.pop('mask', None))
+
+    X, Y = xmesh, ymesh
+    if transpose:
+        X, Y = Y.T, X.T
 
     colors, cmap = apply_colors(Z, kwargs, 'facecolors')
     colorbar = kwargs.pop('colorbar', False)
@@ -420,6 +444,8 @@ def bind():
     setattr( R.SingleOutput, 'plot_bar3d',      bar3d_hist2 )
     setattr( R.SingleOutput, 'plot_surface',    surface_hist2 )
     setattr( R.SingleOutput, 'plot_wireframe',  wireframe_hist2 )
+
+    setattr( R.SingleOutput, 'plot_wireframe_vs',  wireframe_points_vs )
 
     # setattr( R.TGraph,            'plot',     graph_plot )
     # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
