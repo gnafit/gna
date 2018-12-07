@@ -18,6 +18,11 @@ public:
     return *this;
   }
 
+  taintflag set(bool value){
+    *this=value;
+    return *this;
+  }
+
   friend std::ostream& operator<< (std::ostream& out, const taintflag& tf) {
       if (tf) {
           out << tf.name() << " is tainted ";

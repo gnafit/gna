@@ -82,6 +82,12 @@ public:
   bool isnull() const {
     return !m_data.raw;
   }
+  bool tainted() const {
+    return m_data.hdr->tainted;
+  }
+  TaintStatus taintstatus() const {
+    return m_data.hdr->status;
+  }
   void taint() const {
     //if(m_data.hdr->tainted){
       //DPRINTF("already tainted (do not propagate)");
