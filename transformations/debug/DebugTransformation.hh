@@ -10,8 +10,7 @@
 class DebugTransformation: public GNASingleObject,
                            public TransformationBind<DebugTransformation> {
 public:
-    DebugTransformation();
-    DebugTransformation(const std::string& a_message, const std::string& a_message_types="", double a_sleep_seconds=0.0);
+    DebugTransformation(const std::string& name, double a_sleep_seconds=0.0);
 
     TransformationDescriptor add_transformation();
     InputDescriptor          add_input();
@@ -20,12 +19,14 @@ public:
     void typesFunction(TypesFunctionArgs& fargs);
     void function(FunctionArgs& fargs);
 
-    std::string message="Executing transformation function";
-    std::string message_types="Executing types function";
-    std::string sleep_message_pre="Sleep...";
+    std::string name;
+    std::string message="    debug: executing transformation function (#{})";
+    std::string message_types="    debug: executing types function (#{})";
+    std::string sleep_message_pre="    debug: sleep for {} second(s)...";
     std::string sleep_message_post=" done.";
     double      sleep_seconds=0.0;
 
     size_t count_function=0;
     size_t count_types=0;
 };
+

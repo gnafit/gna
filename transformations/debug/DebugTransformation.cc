@@ -1,30 +1,53 @@
 #include "DebugTransformation.hh"
-#include "fmt/format.h"
 
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <string>
+#include "fmt/format.h"
 
-DebugTransformation::DebugTransformation(){
-    add_transformation();
+template<typename T>
+std::string message_format(const std::string& message, T arg){
+    auto text=message;
+    if(text.find("{")!=std::string::npos){
+        text = fmt::format(text, arg);
+    }
+    return text;
 }
 
-DebugTransformation::DebugTransformation(const std::string& a_message, const std::string& a_message_types, double a_sleep_seconds) :
-message(a_message),
-message_types(a_message_types),
+void message_print(const std::string& name, const std::string& message, bool endl=true){
+    std::cout<<message;
+    if(name.size()) {
+        std::cout<<" ["<<name<<"]";
+    }
+    if(endl){
+        std::cout<<std::endl;
+    }
+    else{
+        std::cout<<std::flush;
+    }
+}
+
+template<typename T>
+void fmtprint(const std::string& name, const std::string& message, T arg, bool endl=true){
+    if(message.size()==0u){
+        return;
+    }
+    message_print(name, message_format<>(message, arg), endl);
+}
+
+
+DebugTransformation::DebugTransformation(const std::string& a_name, double a_sleep_seconds):
+name(a_name),
 sleep_seconds(a_sleep_seconds)
 {
-    if(sleep_seconds){
-        sleep_message_pre=fmt::format("Sleep for {0:f} seconds...", sleep_seconds);
-    }
     add_transformation();
 }
-
 
 TransformationDescriptor DebugTransformation::add_transformation(){
     std::string tname="debug";
     if(transformations.size()>0){
-        tname = fmt::format("{0}_{1:02d}", tname, transformations.size());
+        tname = fmt::format("{0}_{1:02d}", tname, transformations.size()+1);
     }
     transformation_(tname)
         .input("source")
@@ -41,7 +64,7 @@ InputDescriptor DebugTransformation::add_input(){
     auto trans=transformations.back();
     auto input=trans.inputs.back();
     if(input.bound()){
-        auto ninputs=trans.inputs.size();
+        auto ninputs=trans.inputs.size()+1;
         input=trans.input(fmt::format("{0}_{1:02d}", "source", ninputs));
         trans.output(fmt::format("{0}_{1:02d}", "target", ninputs));
     }
@@ -57,9 +80,7 @@ OutputDescriptor DebugTransformation::add_input(OutputDescriptor output){
 
 void DebugTransformation::typesFunction(TypesFunctionArgs& fargs){
     ++count_types;
-    if(message_types.size()){
-        std::cout<<message_types<<std::endl;
-    }
+    fmtprint<>(name, message_types, count_types);
 }
 
 void DebugTransformation::function(FunctionArgs& fargs){
@@ -70,19 +91,13 @@ void DebugTransformation::function(FunctionArgs& fargs){
     }
 
     ++count_function;
-    if(message.size()){
-        std::cout<<message<<std::endl;
-    }
-
+    fmtprint<>(name, message, count_function);
     if(sleep_seconds) {
-        if(sleep_message_pre.size()){
-            std::cout<<sleep_message_pre<<std::flush;
-        }
+        fmtprint<>("", sleep_message_pre, sleep_seconds, false);
         std::this_thread::sleep_for(std::chrono::nanoseconds(static_cast<size_t>(sleep_seconds*1.e9)));
-
-        if(sleep_message_post.size()){
-            std::cout<<sleep_message_post<<std::endl;
-        }
+        fmtprint<>(name, sleep_message_post, sleep_seconds, true);
     }
 
 }
+
+

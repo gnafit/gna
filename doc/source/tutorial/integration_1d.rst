@@ -1,3 +1,5 @@
+.. _tutorial_integration:
+
 1d integration
 ''''''''''''''
 

@@ -43,7 +43,7 @@ TransformationDescriptor Integrator2Base::add_transformation(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
-      name = fmt::format("{0}_{1:02d}", name, num);
+      name = fmt::format("{0}_{1:02d}", name, num+1);
     }
     transformation_(name)
         .input("f")
@@ -79,20 +79,25 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 }
 
 void Integrator2Base::integrate(FunctionArgs& fargs){
-    auto& arg=fargs.args[0];
-    auto& ret=fargs.rets[0];
+    auto& args=fargs.args;
+    auto& rets=fargs.rets;
 
-    ArrayXXd prod = arg.arr2d*m_weights;
-    size_t x_offset=0;
-    for (size_t ix = 0; ix < static_cast<size_t>(m_xorders.size()); ++ix) {
-        size_t nx = m_xorders[ix];
-        size_t y_offset=0;
-        for (size_t iy = 0; iy < static_cast<size_t>(m_yorders.size()); ++iy) {
-            size_t ny = m_yorders[iy];
-            ret.arr2d(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
-            y_offset+=ny;
-        }
-        x_offset+=nx;
+    for (size_t i = 0; i < args.size(); ++i) {
+      auto& arg=args[i].arr2d;
+      auto& ret=rets[i].arr2d;
+
+      ArrayXXd prod = arg*m_weights;
+      size_t x_offset=0;
+      for (size_t ix = 0; ix < static_cast<size_t>(m_xorders.size()); ++ix) {
+          size_t nx = m_xorders[ix];
+          size_t y_offset=0;
+          for (size_t iy = 0; iy < static_cast<size_t>(m_yorders.size()); ++iy) {
+              size_t ny = m_yorders[iy];
+              ret(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
+              y_offset+=ny;
+          }
+          x_offset+=nx;
+      }
     }
 }
 
@@ -161,7 +166,7 @@ InputDescriptor Integrator2Base::add_input(){
     auto hist=transformations.back();
     auto input=hist.inputs.back();
     if(input.bound()){
-        auto ninputs=hist.inputs.size();
+        auto ninputs=hist.inputs.size()+1;
         input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
         hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
     }

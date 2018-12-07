@@ -35,3 +35,10 @@ Interpolation (TBD)
 .. toctree::
 
    interpolation
+
+Other topics
+""""""""""""
+
+.. toctree::
+
+   topology

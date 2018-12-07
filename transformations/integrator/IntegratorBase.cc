@@ -39,7 +39,7 @@ TransformationDescriptor IntegratorBase::add_transformation(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
-        name = fmt::format("{0}_{1:02d}", name, num);
+        name = fmt::format("{0}_{1:02d}", name, num+1);
     }
     transformation_(name)
         .input("f")
@@ -138,7 +138,7 @@ InputDescriptor IntegratorBase::add_input(){
     auto hist=transformations.back();
     auto input=hist.inputs.back();
     if(input.bound()){
-        auto ninputs=hist.inputs.size();
+        auto ninputs=hist.inputs.size()+1;
         input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
         hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
     }
