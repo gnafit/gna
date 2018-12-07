@@ -7,7 +7,11 @@ class Integrator2Base : public GNAObject,
                         public TransformationBind<Integrator2Base>
 {
 public:
-  TransformationDescriptor add();
+  TransformationDescriptor add_transformation();
+
+  void set_edges(OutputDescriptor& hist2_output);
+  InputDescriptor  add_input();
+  OutputDescriptor add_input(OutputDescriptor& fcn_output);
 
   void dump();
 

@@ -39,7 +39,7 @@ void Integrator2Base::init_base(double* xedges, double* yedges) {
     }
 }
 
-TransformationDescriptor Integrator2Base::add(){
+TransformationDescriptor Integrator2Base::add_transformation(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
@@ -49,13 +49,17 @@ TransformationDescriptor Integrator2Base::add(){
         .input("f")
         .output("hist")
         .types(TypesFunctions::ifPoints<0>, TypesFunctions::if2d<0>, &Integrator2Base::check_base)
+        .types(TypesFunctions::ifSame)
         .func(&Integrator2Base::integrate)
         ;
     return transformations.back();
 }
 
 void Integrator2Base::check_base(TypesFunctionArgs& fargs){
-    fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data(), m_yedges.size(), m_yedges.data());
+    auto& rets=fargs.rets;
+    for(size_t i(0); i<rets.size(); ++i){
+      rets[i]=DataType().hist().edges(m_xedges.size(), m_xedges.data(), m_yedges.size(), m_yedges.data());
+    }
 
     auto& shape=fargs.args[0].shape;
     if (shape[0]!=static_cast<size_t>(m_xweights.size()) || shape[1]!=static_cast<size_t>(m_yweights.size())){
@@ -75,7 +79,6 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 }
 
 void Integrator2Base::integrate(FunctionArgs& fargs){
-
     auto& arg=fargs.args[0];
     auto& ret=fargs.rets[0];
 
@@ -113,7 +116,7 @@ void Integrator2Base::init_sampler() {
     trans.finalize();
   }
 
-  add();
+  add_transformation();
 }
 
 void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
@@ -144,4 +147,30 @@ void Integrator2Base::dump(){
     std::cout<<"Y edges:   "<<m_yedges.transpose()<<std::endl;
     std::cout<<"Y orders:  "<<m_yorders.transpose()<<std::endl;
     std::cout<<"Y weights: "<<m_yweights.transpose()<<std::endl<<std::endl;
+}
+
+void Integrator2Base::set_edges(OutputDescriptor& hist2_output){
+    auto& inputs=transformations.front().inputs;
+    if(!inputs.size()){
+        throw std::runtime_error("Can not bind bin edges since bin edges were provided in the constructor.");
+    }
+    inputs.front()(hist2_output);
+}
+
+InputDescriptor Integrator2Base::add_input(){
+    auto hist=transformations.back();
+    auto input=hist.inputs.back();
+    if(input.bound()){
+        auto ninputs=hist.inputs.size();
+        input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
+        hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
+    }
+
+    return input;
+}
+
+OutputDescriptor Integrator2Base::add_input(OutputDescriptor& fcn_output){
+    auto input=add_input();
+    input(fcn_output);
+    return OutputDescriptor(transformations.back().outputs.back());
 }

@@ -35,7 +35,7 @@ void IntegratorBase::init_base(double* edges) {
     }
 }
 
-TransformationDescriptor IntegratorBase::add(){
+TransformationDescriptor IntegratorBase::add_transformation(){
     int num=transformations.size()-1;
     std::string name="hist";
     if(num>0){
@@ -113,7 +113,7 @@ void IntegratorBase::init_sampler() {
           .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
     }
 
-    add();
+    add_transformation();
 }
 
 void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
