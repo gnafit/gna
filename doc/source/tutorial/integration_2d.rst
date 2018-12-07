@@ -54,7 +54,17 @@ In order to have all the possible pairs we need to define two matrices (meshes) 
    y_1 & y_2 & \dots & y_M \\
    \end{pmatrix}
 
-The value of the function is then computed as :math:`f(X_\text{mesh}, Y_\text{mesh})`, on each pair of values.
+The value of the function is then computed as :math:`f_{ij}=f(X_\text{mesh}, Y_\text{mesh})`, on each pair of values.
+The output histogram is then defined as:
+
+.. math::
+   :label: quad2_again
+
+   H_{km}
+   \approx
+    \sum\limits_{i\in k,\\j\in m}
+    \omega_{ij}
+    f_{ij}.
 
 2d integral example
 +++++++++++++++++++

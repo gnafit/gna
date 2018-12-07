@@ -31,7 +31,6 @@ set (SOURCES
   transformations/base/FillLike.cc
   transformations/base/Histogram.cc
   transformations/base/Histogram2d.cc
-  transformations/base/Identity.cc
   transformations/base/Points.cc
   transformations/base/Bins.cc
   transformations/base/Concat.cc
@@ -102,6 +101,9 @@ set (SOURCES
   transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
+  transformations/debug/DebugTransformation.cc
+  transformations/debug/Dummy.cc
+  transformations/debug/Identity.cc
   transformations/legacy/EnergyResolutionC.cc
   transformations/legacy/GaussLegendre.cc
   transformations/legacy/GaussLegendre2d.cc
@@ -158,8 +160,9 @@ set (HEADERS
   Histogram.hh
   Histogram2d.hh
   HistEdges.hh
-  Identity.hh
+  DebugTransformation.hh
   Dummy.hh
+  Identity.hh
   LinearInterpolator.hh
   InSegment.hh
   SegmentWise.hh
@@ -245,6 +248,7 @@ include_directories(core/parameters/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
+                    transformations/debug/
                     transformations/legacy/
                     extra/
                     examples/

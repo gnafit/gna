@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include "GNAObject.hh"
 #include "TypesFunctions.hh"
 #include <vector>
 

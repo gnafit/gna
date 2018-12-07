@@ -13,7 +13,7 @@ class SimpleDict: public SimpleDictBase {
 public:
   SimpleDict(Container &container): m_container(&container) { }
 
-  size_t size() const {
+  size_t size() const noexcept {
     return m_container->size();
   }
 
@@ -44,6 +44,10 @@ public:
       return T::invalid(name);
     }
     return *it;
+  }
+
+  bool empty() const noexcept {
+    return m_container->empty();
   }
 private:
   Container *m_container;
