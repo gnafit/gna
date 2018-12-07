@@ -33,7 +33,7 @@ using TransformationTypes::TypeError;
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), label(name), parent(parent), initializing(0), frozen(false)
+  : name(name), label(name), parent(parent), initializing(0)
 { }
 
 /**
@@ -46,7 +46,7 @@ Entry::Entry(const std::string &name, const Base *parent)
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), initializing(0), frozen(false)
+    fun(), typefuns(), initializing(0)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -253,7 +253,7 @@ void Entry::updateTypes() {
 
 /** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
-  if (tainted && !frozen) {
+  if (tainted) {
     update();
   }
 }

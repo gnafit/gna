@@ -71,7 +71,7 @@ namespace TransformationTypes
     void update(int i) const { (void)m_entry->data(i); }
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
-    void unfreeze() { m_entry->frozen = false; }            ///< @copybrief Entry::unfreeze().
+    void unfreeze() { m_entry->unfreeze(); }                ///< @copybrief Entry::unfreeze().
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
     taintflag tainted() { return m_entry->tainted; }        ///< Return the Entry's taintflag status.
