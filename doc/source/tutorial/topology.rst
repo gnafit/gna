@@ -14,7 +14,7 @@ two examples. Each example defines integrals of two functions:
    f_2(x) = a_2 \sin(x) + b_2 \cos(k_1 x).
 
 The functions depend on different parameters. The only difference between examples is that first one does integration
-with two distinct transformations while the second reuses the single transformation to integrate both functions.
+with two distinct transformations while the second reuses a single transformation to integrate both functions.
 Examples are based on the code from tutorials :ref:`tutorial_integration` and :ref:`tutorial_integration_again`.
 
 Example 1: separate transformations
@@ -37,11 +37,11 @@ It produces the following graph.
     handled by distinct integrator.
 
 As before the procedure starts from the bins and integration points definition. The integration points then go to the
-transformation implementing :math:`sin(x)` which is same for both functions. Cosines are computed in separate branches.a
+transformation implementing :math:`sin(x)` which is same for both functions. Cosines are computed in separate branches.
 The functions and integrations are then done in separate branches as well.
 
 Note there are 4 debug transformations before and after each integration. Debug transformations print to the terminal,
-when the transformation their functions are executed. This will help us track the update procedure.
+when the transformation their functions are executed. This will help us track the procedure of graph execution.
 
 They are created with the following commands:
 
@@ -239,10 +239,10 @@ efficiency:
   #. Having separate transformations for each operation provides very good granularity. Such a cases will be efficient
      when there are a lot of parameters and the parameters are changed one at a time making a good use of caching and
      lazy evaluation.
-  #. Merging *a lot* of transformations together is potentially efficient in a cases, when the overhead of function
-     execution is more important then the impact of granularity, i.e. for usage on GPUs. In this case it may happen to
-     be more efficient to compute a lot of branches in the same call than taking care on which of them are required to
-     be recalculated.
+  #. Merging *a lot* of transformations together is potentially efficient in cases, when the overhead of function
+     execution itself is more important then the impact of granularity and the array sizes, i.e. for usage on GPUs. In
+     this case it may happen to be more efficient to compute a lot of branches in the same call than taking care on
+     which of them are required to be recalculated.
 
 As soon as we are planning to provide the GPU support we will take care on changing the graph structure. Most of the
 objects will be provided with methods similar `add_transformation()` and `add_input()` and ability to switch between
