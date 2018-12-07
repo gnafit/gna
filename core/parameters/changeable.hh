@@ -20,11 +20,19 @@ struct references {
   size_t bufsize = 0;
 };
 
+enum class TaintStatus {
+  Normal = 0,    ///<
+  Frozen,        ///<
+  FrozenTainted, ///<
+  FrozenForever  ///<
+};
+
 struct inconstant_header {
   const char *name = nullptr;
   references observers;
   references emitters;
   bool tainted = true;
+  TaintStatus status=TaintStatus::Normal;
   std::function<void()> changed;
   const std::type_info *type = nullptr;
 };
@@ -80,11 +88,49 @@ public:
       //return;
     //}
     DPRINTF("got tainted");
+    if(m_data.hdr->status!=TaintStatus::Normal){
+      if(m_data.hdr->status==TaintStatus::Frozen){
+        m_data.hdr->status=TaintStatus::FrozenTainted;
+      }
+      return;
+    }
     notify();
     m_data.hdr->tainted = true;
     if (m_data.hdr->changed) {
       DPRINTF("calling changed callback");
       m_data.hdr->changed();
+    }
+  }
+  void freeze(){
+    if(m_data.hdr->status==TaintStatus::Normal){
+      if(!m_data.hdr->tainted){
+        m_data.hdr->status=TaintStatus::Frozen;
+      }else{
+        throw std::runtime_error("can not freeze tainted changeable");
+      }
+    }
+  }
+  void freeze_forever(){
+    if(m_data.hdr->status!=TaintStatus::Normal){
+      m_data.hdr->status=TaintStatus::FrozenForever;
+      return;
+    }
+    if(m_data.hdr->tainted){
+      throw std::runtime_error("can not freeze tainted changeable");
+    }
+    m_data.hdr->status=TaintStatus::FrozenForever;
+  }
+  void unfreeze(){
+    if(m_data.hdr->status==TaintStatus::Normal){
+      return;
+    }
+    if(m_data.hdr->status==TaintStatus::FrozenForever){
+      throw std::runtime_error("can not unfreeze, frozen forever");
+    }
+    auto wastainted = m_data.hdr->status==TaintStatus::FrozenTainted;
+    m_data.hdr->status=TaintStatus::Normal;
+    if(wastainted){
+      taint();
     }
   }
   bool depends(changeable other) const {
