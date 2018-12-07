@@ -215,8 +215,8 @@ namespace TransformationTypes {
      */
     Initializer<T> func(const std::string& name, Function afunc) {
       if( m_entry->functions.find(name)!=m_entry->functions.end() ){
-        auto fmt = format("mem function %1% already exists");
-        throw std::runtime_error((fmt%name.data()).str());
+        auto msg = fmt::format("mem function {0} already exists", name.data());
+        throw std::runtime_error(msg);
       }
       m_entry->functions[name]={afunc, {}};
 

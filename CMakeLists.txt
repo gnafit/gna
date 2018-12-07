@@ -298,6 +298,7 @@ else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM "fmt")
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)

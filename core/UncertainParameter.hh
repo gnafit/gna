@@ -9,6 +9,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+#include "fmt/format.h"
 #include <boost/math/constants/constants.hpp>
 
 #include "GNAObject.hh"
@@ -192,8 +193,8 @@ public:
 
    void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-        auto msg = boost::format("Covariance of parameters %1% and %2% is set to %3%");
-        std::cout << msg % this->name() % other.name() % cov << std::endl;
+     fmt::print("Covariance of parameters {0} and {1} is set to {2}",
+                 this->name(), other.name(), cov);
 #endif
     if (&other != this) {
         this->m_covariances[&other] = cov;
@@ -206,9 +207,8 @@ public:
 
    void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-    auto msg = boost::format("Covariance of parameters %1% and %2% is updated "
-                             "to %3% after setting in %1%");
-    std::cout << msg % this->name() % other.name() % cov << std::endl;
+       fmt::print("Covariance of parameters {0} and {1} is updated "
+                 "to {2} after setting in {0}", this->name(), other.name(), cov);
 #endif
     this->m_covariances[&other] = cov;
   }
@@ -220,8 +220,7 @@ public:
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated");
-          std::cout << msg % this->name() % other.name() << std::endl;
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
 #endif
           return static_cast<T>(0.);
       }
@@ -234,8 +233,7 @@ public:
           return search->second / (this->sigma() * other.sigma());
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated");
-          std::cout << msg % this->name() % other.name() << std::endl;
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
 #endif
           return static_cast<T>(0.);
       }

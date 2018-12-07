@@ -8,7 +8,7 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <boost/format.hpp>
+#include "fmt/format.h"
 
 #include "SimpleDict.hh"
 #include "dependant.hh"
@@ -111,8 +111,7 @@ namespace ParametrizedTypes {
   VariableHandle<T> &VariableHandle<T>::defvalue(const T& defvalue) {
     if (m_entry->state != Entry::State::Free) {
       throw std::runtime_error(
-        (boost::format("setting default value for non-free paremeter `%1%'")
-         % m_entry->name).str());
+        (fmt::format("setting default value for non-free paremeter `{0}'", m_entry->name)));
     }
     m_entry->par = defvalue;
     m_entry->required = false;
@@ -246,12 +245,12 @@ public:
   { }
   static VariableDescriptor invalid(const int& idx) {
       throw std::runtime_error(
-      (boost::format("Variable: invalid entry, idx == `%1%'") % idx).str());
+      (fmt::format("Variable: invalid entry, idx == `{0}'", idx)));
 
   };
   static VariableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
-      (boost::format("Variable: invalid entry, name == `%1%'") % name).str());
+      (fmt::format("Variable: invalid entry, name == `{0}'", name)));
   }
 
   void bind(variable<void> var) { BaseClass::bind(var); }
@@ -285,7 +284,7 @@ public:
   { }
   static EvaluableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
-      (boost::format("Evaluable: invalid entry, name == `%1%'") % name).str());
+      (fmt::format("Evaluable: invalid entry, name == `{0}'", name)));
   }
 
   variable<void> &get() { return BaseClass::m_entry->dep; }

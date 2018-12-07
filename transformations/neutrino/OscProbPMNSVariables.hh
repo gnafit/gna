@@ -4,7 +4,7 @@
 #include <vector>
 #include <complex>
 
-#include <boost/format.hpp>
+#include "fmt/format.h"
 
 #include "ParametersGroup.hh"
 #include "Neutrino.hh"
@@ -60,7 +60,7 @@ protected:
     }
     for (size_t i = 0; i < Nnu; ++i) {
       for (size_t j = 0; j < Nnu; ++j) {
-        allvars.add(&V[i][j], (boost::format("V%1%%2%") % i % j).str());
+        allvars.add(&V[i][j], (fmt::format("V{0}{1}", i, j)));
       }
     }
     return allvars;

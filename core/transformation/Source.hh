@@ -3,9 +3,9 @@
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <iostream>
-#include <boost/format.hpp>
+#include "fmt/format.h"
 #include <utility>
-using boost::format;
+using fmt::format;
 
 #include "Sink.hh"
 #include "TransformationDebug.hh"

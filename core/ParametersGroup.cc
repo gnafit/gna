@@ -1,8 +1,7 @@
 #include <utility>
 #include <vector>
-
-#include <boost/format.hpp>
-using boost::format;
+#include "fmt/format.h"
+using fmt::format;
 
 #include <cstdio>
 
@@ -22,7 +21,7 @@ void ParametersGroup::initFields(const std::vector<std::string> &params) {
 void ParametersGroup::checkField(const std::string &name) {
   if (m_fields.count(name) == 0) {
     throw std::runtime_error(
-      (format("Parametrized::Group: unknown parameter `%1%'") % name).str()
+      (fmt::format("Parametrized::Group: unknown parameter `{0}'", name))
       );
   }
 }
@@ -34,15 +33,16 @@ const std::string &ParametersGroup::fieldName(Field field) const {
     }
   }
   throw std::runtime_error(
-    (format("Parametrized::Group: unknown field `%1%'") % field).str()
+    (fmt::format("Parametrized::Group: unknown field `{0}'", field->name() ))
     );
 }
 
 void ParametersGroup::dump() {
   for (const auto &pair: m_fields.expose()) {
     Field field = std::get<0>(pair.second);
-    fprintf(stderr, "variable %s[%p]: %p\n",
-            pair.first.c_str(), static_cast<void*>(field), field->rawdata());
+    fmt::print(stderr, "variable {0}[{1}]: {2}\n", pair.first.c_str(), static_cast<void*>(field), field->rawdata());
+    /* fprintf(stderr, "variable %s[%p]: %p\n",
+     *         pair.first.c_str(), static_cast<void*>(field), field->rawdata()); */
   }
 }
 
