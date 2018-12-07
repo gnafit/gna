@@ -34,7 +34,7 @@ the required values of :math:`x` and :math:`y` for all the bins as 1d arrays:
    y = {y_1, y_2, \dotsc, x_M}.
 
 In order to have all the possible pairs we need to define two matrices (meshes) of size :math:`N\times M`. Values of
-:math:`x` goe over first dimension (rows) while values of :math:`y` go to the second dimension (columns).
+:math:`x` go over first dimension (rows) while values of :math:`y` go to the second dimension (columns).
 
 .. math::
    :label: quad2_mesh
@@ -126,10 +126,7 @@ The status of the integrator object may be found below:
 .. code-block:: text
 
    [obj] Integrator2GL: 2 transformation(s), 0 variables
-        0 [trans] hist: 1 input(s), 1 output(s)
-            0 [in]  f <- [out] result: array 2d, shape 80x90, size 7200
-            0 [out] hist: hist2d, 20x30=600 bins, edges -3.14159265359->3.14159265359 and 0.0->6.28318530718
-        1 [trans] points: 1 input(s), 6 output(s)
+        0 [trans] points: 1 input(s), 6 output(s)
             0 [in]  edges <- [out] hist: hist2d, 20x30=600 bins, edges -3.14159265359->3.14159265359 and 0.0->6.28318530718
             0 [out] x: array 1d, shape 80, size  80
             1 [out] y: array 1d, shape 90, size  90
@@ -137,6 +134,9 @@ The status of the integrator object may be found below:
             3 [out] yedges: array 1d, shape 31, size  31
             4 [out] xmesh: array 2d, shape 80x90, size 7200
             5 [out] ymesh: array 2d, shape 80x90, size 7200
+        1 [trans] hist: 1 input(s), 1 output(s)
+            0 [in]  f <- [out] result: array 2d, shape 80x90, size 7200
+            0 [out] hist: hist2d, 20x30=600 bins, edges -3.14159265359->3.14159265359 and 0.0->6.28318530718
 
 The transformation `points` contains 1d arrays with edges for X and Y axes (`xedges` and `yedges`), 1d arrays with
 integration points for X and Y axes (`x` and `y`). Finally it contains the 2d meshes (`xmesh` and `ymesh`) as defined in

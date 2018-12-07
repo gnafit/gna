@@ -37,8 +37,6 @@ void Integrator2Base::init_base(double* xedges, double* yedges) {
     if(yedges){
         m_yedges=Map<const ArrayXd>(yedges, m_yorders.size()+1);
     }
-
-    add();
 }
 
 TransformationDescriptor Integrator2Base::add(){
@@ -114,6 +112,8 @@ void Integrator2Base::init_sampler() {
   else {
     trans.finalize();
   }
+
+  add();
 }
 
 void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
