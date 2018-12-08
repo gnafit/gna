@@ -108,7 +108,11 @@ public:
   }
   void freeze(){
     if(m_data.hdr->status==TaintStatus::Normal){
-      m_data.hdr->status=TaintStatus::Frozen;
+      if(!m_data.hdr->tainted){
+        m_data.hdr->status=TaintStatus::Frozen;
+      }else{
+        throw std::runtime_error("can not freeze tainted changeable");
+      }
     }
   }
   void unfreeze(){

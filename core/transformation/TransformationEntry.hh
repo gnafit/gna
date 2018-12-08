@@ -63,9 +63,6 @@ namespace TransformationTypes
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
     const Data<double> &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
-    void freeze() { tainted.freeze(); }                  ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
-    void unfreeze() { tainted.unfreeze(); }              ///< Unfreeze the Entry. Enables the taintflag propagation.
-
     bool check() const;                                  ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                   ///< Recursively print Source names and their connection status.
 

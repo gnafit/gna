@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include "changeable.hh"
 
 class taintflag: public changeable {

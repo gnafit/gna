@@ -109,6 +109,7 @@ set (SOURCES
   transformations/legacy/GaussLegendre2d.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
+  unittest/parameters.cc
   )
 
 set (HEADERS
@@ -230,6 +231,7 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
+  parameters.hh
   )
 
 include_directories(core/parameters/
@@ -252,6 +254,7 @@ include_directories(core/parameters/
                     transformations/legacy/
                     extra/
                     examples/
+                    unittest/
                    )
 
 if(NOT CMAKE_BUILD_TYPE)

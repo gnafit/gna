@@ -78,5 +78,11 @@ def test1():
     printall()
     reset()
 
+    print('Try freezing tainted flag', end=': ')
+    t1c.taint()
+    res=R.GNAUnitTest.freeze(t1c)
+    print(res and 'OK' or 'FAIL!')
+
+
 if __name__ == "__main__":
     test1()
