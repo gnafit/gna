@@ -78,15 +78,5 @@ def test1():
     printall()
     reset()
 
-    print('Freeze t2b forever')
-    t2b.freeze_forever()
-    printall()
-    reset()
-
-    print('Unfreeze t2b')
-    t2b.unfreeze()
-    printall()
-    reset()
-
 if __name__ == "__main__":
     test1()

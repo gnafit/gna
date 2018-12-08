@@ -33,6 +33,7 @@ public:
       .types(TypesFunctions::passAll)                      // - the shape of the output is taken from the input
       .func([](FillLike *obj, FunctionArgs& fargs) {       // - The implementation function:
           fargs.rets[0].x.setConstant(obj->m_value);       //   set each element of a single output to m_value.
+          fargs.rets.freeze();
         });
   }
 protected:

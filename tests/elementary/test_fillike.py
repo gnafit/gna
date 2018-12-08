@@ -31,15 +31,18 @@ points2 = Points( arr2 )
 """Mode1: a1*w1+a2*w2"""
 ws = WeightedSum(weights, [points1.points.points, points2.points.points])
 
+dbg1 = R.DebugTransformation('wsum')
+dbg1.debug.source(ws.sum.sum)
+
 fl = R.FillLike(2.0)
-fl.fill.inputs[0](ws.sum.sum)
+fl.fill.inputs[0](dbg1.debug.target)
 
-dbg = R.DebugTransformation('fl')
-dbg.debug.source(fl.fill.outputs[0])
+dbg2 = R.DebugTransformation('fill')
+dbg2.debug.source(fl.fill.outputs[0])
 
-print(dbg.debug.target.data())
+print(dbg2.debug.target.data())
 print()
 
 print('Change parameter')
 p1.set(2.0)
-print(dbg.debug.target.data())
+print(dbg2.debug.target.data())

@@ -24,7 +24,6 @@ enum class TaintStatus {
   Normal = 0,    ///<
   Frozen,        ///<
   FrozenTainted, ///<
-  FrozenForever  ///<
 };
 
 struct inconstant_header {
@@ -109,29 +108,12 @@ public:
   }
   void freeze(){
     if(m_data.hdr->status==TaintStatus::Normal){
-      if(!m_data.hdr->tainted){
-        m_data.hdr->status=TaintStatus::Frozen;
-      }else{
-        throw std::runtime_error("can not freeze tainted changeable");
-      }
+      m_data.hdr->status=TaintStatus::Frozen;
     }
-  }
-  void freeze_forever(){
-    if(m_data.hdr->status!=TaintStatus::Normal){
-      m_data.hdr->status=TaintStatus::FrozenForever;
-      return;
-    }
-    if(m_data.hdr->tainted){
-      throw std::runtime_error("can not freeze tainted changeable");
-    }
-    m_data.hdr->status=TaintStatus::FrozenForever;
   }
   void unfreeze(){
     if(m_data.hdr->status==TaintStatus::Normal){
       return;
-    }
-    if(m_data.hdr->status==TaintStatus::FrozenForever){
-      throw std::runtime_error("can not unfreeze, frozen forever");
     }
     auto wastainted = m_data.hdr->status==TaintStatus::FrozenTainted;
     m_data.hdr->status=TaintStatus::Normal;
