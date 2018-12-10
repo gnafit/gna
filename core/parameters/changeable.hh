@@ -200,19 +200,13 @@ protected:
     if (nsubs == 0) {
       return;
     }
-    static int nlevel=0;
 
-    printf("%3i%*sstart notify %s\n", nlevel, 2*nlevel, "", name());
-    ++nlevel;
     for (size_t i = 0; i < nsubs; ++i) {
       if (observers[i].isnull()) {
         continue;
       }
-      printf("%3i%*staint %i %s\n", nlevel, 2*nlevel, "", int(i), observers[i].name());
       observers[i].taint();
     }
-    --nlevel;
-    printf("%3i%*send notify %s\n", nlevel, 2*nlevel, "", name());
   }
   template <typename T>
   void initdeps(T deps) {

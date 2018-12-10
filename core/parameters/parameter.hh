@@ -41,7 +41,6 @@ public:
   }
   void set(ValueType v) {
     DPRINTF("setting to %e", v);
-    printf("setting %s to %e\n", this->name(), v);
     auto &d = base_type::data();
     if (d.value != v) {
       d.value = v;
