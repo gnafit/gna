@@ -21,10 +21,10 @@ def wrap_constructor1(obj, dtype='d'):
 """Construct Points object from numpy array"""
 def Points( array, *args, **kwargs ):
     """Convert array to Points"""
-    if len(array.shape)>2:
-        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     a = N.ascontiguousarray(array, dtype='d').ravel( order='F' )
-    s = array_to_stdvector_size_t( array.shape )
+    if len(a.shape)>2:
+        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
+    s = array_to_stdvector_size_t( a.shape )
     return R.Points( a, s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
@@ -58,9 +58,9 @@ def Product(outputs=None, *args, **kwargs):
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
     """Convert array to Points"""
-    if len(array.shape)!=1:
-        raise Exception( 'Edges should be 1d array' )
     a = N.ascontiguousarray(array, dtype='d')
+    if len(a.shape)!=1:
+        raise Exception( 'Edges should be 1d array' )
     return R.Bins( a, a.size-1, *args, **kwargs )
 
 """Construct Histogram object from two arrays: edges and data"""
