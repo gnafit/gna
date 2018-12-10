@@ -564,11 +564,14 @@ class ReactorExperimentModel(baseexp):
                 finalsum = inter_sum
 
             with detector.ns:
-                detector.eres = ROOT.EnergyResolution()
+                detector.eres = ROOT.EnergyResolution(True, False)
             detector.eres.matrix.Edges( self.integrator.points.xedges)
             detector.eres.smear.setLabel('Eres')
             detector.eres.smear.Ntrue(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
+
+            import IPython
+            IPython.embed()
 
         det_ns = self.ns("detectors")(detector.name)
 

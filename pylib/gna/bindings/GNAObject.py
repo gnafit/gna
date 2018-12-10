@@ -32,6 +32,7 @@ def GNAObject__printtransformations(self):
 
 @patchROOTClass
 def GNAObject__printvariables(self):
+    from gna.parameters import printer
     ns = self.currentns
 
     printl('Variables, relative to namespace "{}":'.format(ns.name))

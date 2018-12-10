@@ -6,9 +6,9 @@
 
 class taintflag: public changeable {
 public:
-  taintflag() { init(); }
-  taintflag(std::initializer_list<changeable> deps) { init(deps); }
-  taintflag(std::vector<changeable> deps) { init(deps); }
+  taintflag(const char* name="", bool autoname=false) { init(name, autoname); }
+  taintflag(std::initializer_list<changeable> deps, const char* name="") { init(deps, name); }
+  taintflag(std::vector<changeable> deps, const char* name="") { init(deps, name); }
   operator bool() const {
     return m_data.hdr->tainted;
   }
@@ -32,5 +32,9 @@ public:
       }
       return out;
   };
+
+  void set_pass_through(){
+    m_data.hdr->status=TaintStatus::PassThrough;
+  }
 };
 

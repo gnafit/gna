@@ -74,7 +74,7 @@ namespace TransformationTypes
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
-    taintflag tainted() { return m_entry->tainted; }        ///< Return the Entry's taintflag status.
+    bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
 
     /**
      * @brief Switch the active Function.

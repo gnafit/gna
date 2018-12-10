@@ -23,8 +23,8 @@ template <typename ValueType>
 class parameter: public variable<ValueType> {
   typedef variable<ValueType> base_type;
 public:
-  parameter() : base_type() {
-    base_type::m_data.raw = new inconstant_data<ValueType>;
+  parameter(const char *name="") : base_type() {
+    base_type::m_data.raw = new inconstant_data<ValueType>(name);
   }
   parameter(const parameter<ValueType> &other)
     : base_type(other) { }
@@ -32,10 +32,6 @@ public:
     : variable<ValueType>(other) { }
   static parameter<ValueType> null() {
     return parameter<ValueType>(base_type::null());
-  }
-  parameter(const char *name)
-    : parameter() {
-    base_type::data().name = name;
   }
   parameter(std::initializer_list<const char*> name)
     : base_type(*name.begin()) { }
@@ -45,6 +41,7 @@ public:
   }
   void set(ValueType v) {
     DPRINTF("setting to %e", v);
+    printf("setting %s to %e\n", this->name(), v);
     auto &d = base_type::data();
     if (d.value != v) {
       d.value = v;

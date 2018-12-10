@@ -33,7 +33,7 @@ using TransformationTypes::TypeError;
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), label(name), parent(parent), initializing(0)
+  : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0)
 { }
 
 /**
@@ -46,7 +46,7 @@ Entry::Entry(const std::string &name, const Base *parent)
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), initializing(0)
+    fun(), typefuns(), tainted(other.name.c_str()), initializing(0)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
