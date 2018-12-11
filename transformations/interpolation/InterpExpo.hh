@@ -31,7 +31,7 @@
  * @date 02.2017
  */
 class InterpExpo: public InSegment,
-                   public TransformationBind<InterpExpo> {
+                  public TransformationBind<InterpExpo> {
 public:
   //enum Strategy { ///< Extrapolation strategy.
     //Constant = 0, ///< Fill with constant value.
@@ -39,11 +39,11 @@ public:
   //};
   using TransformationBind<InterpExpo>::transformation_;
 
-  //InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");           ///< Constructor.
-  InterpExpo();                                                                                              ///< Constructor.
+  //InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");             ///< Constructor.
+  InterpExpo();                                                                                                ///< Constructor.
 
-  void do_interpolate(FunctionArgs& fargs);                                                                   ///< Do the interpolation.
-  void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                     ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
+  void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
+  void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                      ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
   void interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx); ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 
   //void setUnderflow(double value) { m_underflow = value; }                                                 ///< Set value to write into underflow points when strategy=Constant.
