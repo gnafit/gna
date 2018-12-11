@@ -31,7 +31,7 @@ print( 'Edges', segments )
 print( 'Points', points )
 print( 'Fcn', fcn )
 
-ie = R.InterpExpo(opts.underflow, opts.overflow)
+ie = R.InterpExpoSorted(opts.underflow, opts.overflow)
 ie.interpolate(segments_t, fcn_t, points_t)
 seg_idx = ie.segments.segments.data()
 print( 'Segments', seg_idx )

@@ -64,7 +64,6 @@ set (SOURCES
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
-  transformations/interpolation/InterpExpo.cc
   transformations/interpolation/InterpExpoU.cc
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
@@ -107,6 +106,7 @@ set (SOURCES
   transformations/legacy/EnergyResolutionC.cc
   transformations/legacy/GaussLegendre.cc
   transformations/legacy/GaussLegendre2d.cc
+  transformations/legacy/InterpExpoSorted.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
   )
@@ -166,7 +166,6 @@ set (HEADERS
   LinearInterpolator.hh
   InSegment.hh
   SegmentWise.hh
-  InterpExpo.hh
   InterpExpoU.hh
   FillLike.hh
   Derivative.hh
@@ -213,8 +212,6 @@ set (HEADERS
   IntegratorRect.hh
   IntegratorTrap.hh
   GSLSamplerGL.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
@@ -230,6 +227,10 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
+  # legacy
+  GaussLegendre.hh
+  GaussLegendre2d.hh
+  InterpExpoSorted.hh
   )
 
 include_directories(core/parameters/

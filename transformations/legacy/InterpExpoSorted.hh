@@ -25,21 +25,21 @@
  * Outputs:
  *   - interp.interp
  *
- * The connection may be done via InterpExpo::interpolate() method.
+ * The connection may be done via InterpExpoSorted::interpolate() method.
  *
  * @author Maxim Gonchar
  * @date 02.2017
  */
-class InterpExpo: public SegmentWise,
-                  public TransformationBind<InterpExpo> {
+class InterpExpoSorted: public SegmentWise,
+                  public TransformationBind<InterpExpoSorted> {
 public:
   enum Strategy { ///< Extrapolation strategy.
     Constant = 0, ///< Fill with constant value.
     Extrapolate   ///< Extrapolate using first/last segment function.
   };
-  using TransformationBind<InterpExpo>::transformation_;
+  using TransformationBind<InterpExpoSorted>::transformation_;
 
-  InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");           ///< Constructor.
+  InterpExpoSorted(const std::string& underflow_strategy="", const std::string& overflow_strategy="");           ///< Constructor.
 
   void do_interpolate(FunctionArgs& fargs);                                                                ///< Do the interpolation.
   void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                  ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
@@ -51,8 +51,8 @@ public:
   void setUnderflowStrategy(const std::string& strategy)  { m_underflow_strategy=getStrategy(strategy); }  ///< Set strategy to use for underflow points: 'constant' or 'extrapolate'.
   void setOverflowStrategy(const std::string& strategy)   { m_overflow_strategy=getStrategy(strategy); }   ///< Set strategy to use for overflow points: 'constant' or 'extrapolate'.
 
-  void setUnderflowStrategy(Strategy strategy)  { m_underflow_strategy=strategy; }                         ///< Set strategy to use for underflow points: `InterpExpo::Constant` or `InterpExpo::Extrapolate`.
-  void setOverflowStrategy(Strategy strategy)   { m_overflow_strategy=strategy; }                          ///< Set strategy to use for overflow points:  `InterpExpo::Constant` or `InterpExpo::Extrapolate`.
+  void setUnderflowStrategy(Strategy strategy)  { m_underflow_strategy=strategy; }                         ///< Set strategy to use for underflow points: `InterpExpoSorted::Constant` or `InterpExpoSorted::Extrapolate`.
+  void setOverflowStrategy(Strategy strategy)   { m_overflow_strategy=strategy; }                          ///< Set strategy to use for overflow points:  `InterpExpoSorted::Constant` or `InterpExpoSorted::Extrapolate`.
 
   Strategy getStrategy(const std::string& strategy);                                                       ///< Convert strategy from string to Strategy.
 protected:

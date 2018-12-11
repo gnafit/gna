@@ -1,14 +1,14 @@
-#include "InterpExpo.hh"
+#include "InterpExpoSorted.hh"
 #include "TypesFunctions.hh"
 
-//#define DEBUG_INTERPEXPO
+//#define DEBUG_INTERPEXPOSORTED
 
 #include <stdexcept>
 
 using std::next;
 using std::prev;
 
-InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : SegmentWise() {
+InterpExpoSorted::InterpExpoSorted(const std::string& underflow_strategy, const std::string& overflow_strategy) : SegmentWise() {
   transformation_("interp")
     .input("newx")             /// 0
     .input("x")                /// 1
@@ -23,7 +23,7 @@ InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string&
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)
     .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifSame2<1,3>, TypesFunctions::ifBinsEdges<4,3>)
     .types(TypesFunctions::pass<0,0>)
-    .func(&InterpExpo::do_interpolate)
+    .func(&InterpExpoSorted::do_interpolate)
     ;
 
   if(underflow_strategy.length()){
@@ -34,7 +34,7 @@ InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string&
   }
 }
 
-void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+void InterpExpoSorted::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   auto segments = this->t_["segments"];
   auto sinputs  = segments.inputs();
   auto soutputs = segments.outputs();
@@ -50,7 +50,7 @@ void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& new
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+void InterpExpoSorted::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   const auto& soutputs = static_cast<Handle&>(segments).outputs();
 
   auto interp = this->t_["interp"];
@@ -62,7 +62,7 @@ void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpo::do_interpolate(FunctionArgs& fargs){
+void InterpExpoSorted::do_interpolate(FunctionArgs& fargs){
   auto& args=fargs.args;
   auto& newx_a=args[0].x;
   auto& x_a=args[1].x;
@@ -88,13 +88,13 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
     switch (m_underflow_strategy) {
       case Constant:
         interp_a.head(idx_current) = m_underflow;
-        #ifdef DEBUG_INTERPEXPO
+        #ifdef DEBUG_INTERPEXPOSORTED
         printf("Fill %i->%i (%i): %g (head)\n", (int)0, (int)idx_current, (int)idx_current, m_underflow);
         #endif
         break;
       case Extrapolate:
         interp_a.head(idx_current) = *k_current * ((*x0_current - newx_a.head(idx_current))*(*b_current)).exp();
-        #ifdef DEBUG_INTERPEXPO
+        #ifdef DEBUG_INTERPEXPOSORTED
         printf("Fill %i->%i (%i): fcn (head)\n", (int)0, (int)idx_current, (int)idx_current);
         #endif
         break;
@@ -126,7 +126,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
       continue;
     }
 
-    #ifdef DEBUG_INTERPEXPO
+    #ifdef DEBUG_INTERPEXPOSORTED
     printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
     #endif
     interp_a.segment(idx_current, length) = *k_current * ((*x0_current - newx_a.segment(idx_current, length))*(*b_current)).exp();
@@ -139,13 +139,13 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
     switch (m_overflow_strategy) {
       case Constant:
         interp_a.tail(nleft)=m_overflow;
-        #ifdef DEBUG_INTERPEXPO
+        #ifdef DEBUG_INTERPEXPOSORTED
         printf("Fill %i->%i (%i): %g (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft, m_overflow);
         #endif
         break;
       case Extrapolate:
         interp_a.tail(nleft) = *k_current * ((*x0_current - newx_a.tail(nleft))*(*b_current)).exp();
-        #ifdef DEBUG_INTERPEXPO
+        #ifdef DEBUG_INTERPEXPOSORTED
         printf("Fill %i->%i (%i): fcn (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft);
         #endif
         break;
@@ -153,7 +153,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
   }
 }
 
-InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
+InterpExpoSorted::Strategy InterpExpoSorted::getStrategy(const std::string& strategy){
   if(strategy=="constant"){
     return Constant;
   }
