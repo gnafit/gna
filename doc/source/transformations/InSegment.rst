@@ -6,7 +6,7 @@ InSegment transformation
 Description
 ^^^^^^^^^^^
 Return the indices of the segments to which each value in input array belongs. The InSegment transformation is used for
-example in exponential interpolator :ref:`InterpExpoU <InterpExpoU>`.
+example in exponential interpolator :ref:`InterpExpo <InterpExpo>`.
 
 Inputs
 ^^^^^^

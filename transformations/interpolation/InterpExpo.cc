@@ -1,4 +1,4 @@
-#include "InterpExpoU.hh"
+#include "InterpExpo.hh"
 #include "TypesFunctions.hh"
 
 #include <TMath.h>
@@ -9,9 +9,9 @@ using std::prev;
 using std::advance;
 using TMath::Exp;
 
-//InterpExpoU::InterpExpoU(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
+//InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
 
-InterpExpoU::InterpExpoU() : InSegment() {
+InterpExpo::InterpExpo() : InSegment() {
   transformation_("interp")
     .input("newx")             /// 0
     .input("x")                /// 1
@@ -26,7 +26,7 @@ InterpExpoU::InterpExpoU() : InSegment() {
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)     /// widths is an 1d array
     .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifBinsEdges<4,1>)
     .types(TypesFunctions::pass<0,0>)
-    .func(&InterpExpoU::do_interpolate)
+    .func(&InterpExpo::do_interpolate)
     ;
 
   //if(underflow_strategy.length()){
@@ -37,7 +37,7 @@ InterpExpoU::InterpExpoU() : InSegment() {
   //}
 }
 
-void InterpExpoU::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   auto segments = this->t_["insegment"];
   auto sinputs  = segments.inputs();
   auto soutputs = segments.outputs();
@@ -53,7 +53,7 @@ void InterpExpoU::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& ne
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpoU::interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+void InterpExpo::interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   const auto& soutputs = static_cast<Handle&>(insegment).outputs();
 
   auto interp = this->t_["interp"];
@@ -65,7 +65,7 @@ void InterpExpoU::interpolate(TransformationDescriptor& insegment, SingleOutput&
   iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpoU::do_interpolate(FunctionArgs& fargs){
+void InterpExpo::do_interpolate(FunctionArgs& fargs){
   auto& args=fargs.args;                                                  /// name inputs
 
   auto& points_a=args[0].x;                                               /// new x points
@@ -101,7 +101,7 @@ void InterpExpoU::do_interpolate(FunctionArgs& fargs){
 
 }
 
-//InterpExpoU::Strategy InterpExpoU::getStrategy(const std::string& strategy){
+//InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
   //if(strategy=="constant"){
     //return Constant;
   //}

@@ -64,7 +64,7 @@ set (SOURCES
   transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
-  transformations/interpolation/InterpExpoU.cc
+  transformations/interpolation/InterpExpo.cc
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
@@ -166,7 +166,7 @@ set (HEADERS
   LinearInterpolator.hh
   InSegment.hh
   SegmentWise.hh
-  InterpExpoU.hh
+  InterpExpo.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh

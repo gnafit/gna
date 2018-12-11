@@ -57,7 +57,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
             else:
                 spectrum_t = spectrum_raw_t
 
-            interp_expo_t = R.InterpExpoU(ns=self.common_namespace)
+            interp_expo_t = R.InterpExpo(ns=self.common_namespace)
             interp_expo_t.interp.setLabel('S(E):\n'+isotope)
 
             # TODO: Identity is created only to provide single input (the output is connected twice).

@@ -1,6 +1,6 @@
-.. _InterpExpoU:
+.. _InterpExpo:
 
-InterpExpoU -- exponential interpolation
+InterpExpo -- exponential interpolation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Description
@@ -34,7 +34,7 @@ Use the following commands for the usage example and testing:
 
 .. code:: bash
 
-   ./tests/elementary/InterpExpoU.py
+   ./tests/elementary/test_InterpExpo.py
 
 Implementation
 ^^^^^^^^^^^^^^
