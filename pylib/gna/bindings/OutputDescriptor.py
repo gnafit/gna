@@ -8,7 +8,7 @@ from printing import printl, nextlevel
 
 @patchROOTClass(R.OutputDescriptor, '__str__')
 def OutputDescriptor____str__(self):
-    return '[out] {}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+    return '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
 
 @patchROOTClass
 def OutputDescriptor__print(self):
