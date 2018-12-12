@@ -32,26 +32,6 @@ void TypesFunctions::passAll(TypesFunctionArgs& fargs) {
 }
 
 /**
- * @brief Checks that all inputs are of the same type (shape and content description).
- *
- * Raises an exception otherwise.
- *
- * @param args -- source types.
- * @param rets -- output types.
- *
- * @exception SourceTypeError in case input types are not the same.
- */
-void TypesFunctions::ifSame(TypesFunctionArgs& fargs) {
-  auto& args=fargs.args;
-  for (size_t i = 1; i < args.size(); ++i) {
-    if (args[i] != args[0]) {
-      auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
-      throw args.error(args[i], (fmt%args.name()%0%i).str());
-    }
-  }
-}
-
-/**
  * @brief Checks that all inputs are of the same shape.
  *
  * Raises an exception otherwise.

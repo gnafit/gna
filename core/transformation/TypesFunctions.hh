@@ -30,7 +30,10 @@ struct TypesFunctions
   template <size_t Arg1, size_t Arg2, size_t Ret>
   static void edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of Ret-th output = [Arg1.size()-1, Arg2.size()-1] (ignoring Arg1/Arg2 shape)
 
-  static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
+  template <int Arg1=0, int Arg2=-1>
+  static void ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Checks that all inputs are of the same type (shape and content description).
+
+  constexpr static const auto ifSame=ifSameInRange<0,-1>;
   static void ifSameShape(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape.
 
   template <size_t Arg1, size_t Arg2>
@@ -155,6 +158,34 @@ inline void TypesFunctions::toMatrix(TransformationTypes::TypesFunctionArgs& far
 template <size_t Arg1, size_t Arg2, size_t Ret>
 inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs) {
   fargs.rets[Ret] = DataType().points().shape(fargs.args[Arg1].size()-1, fargs.args[Arg2].size()-1);
+}
+
+
+/**
+ * @brief Checks that all inputs in a range are of the same type (shape and content description).
+ *
+ * @tparam Arg1 -- index of Arg1 to start comparison from.
+ * @tparam Arg2 -- index of Arg2 to end comparison (inclusive).
+ *
+ * Raises an exception otherwise.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input types are not the same.
+ */
+template <int Arg1=0, int Arg2=-1>
+void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& compare_to=args[Arg1];
+  size_t start=Arg1+1;
+  size_t end=Arg2<0 ? args.size()-Arg2+1 : Arg2+1;
+  for (size_t i = start; i < end; ++i) {
+    if (args[i] != compare_to) {
+      auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
+      throw args.error(args[i], (fmt%args.name()%0%i).str());
+    }
+  }
 }
 
 /**
