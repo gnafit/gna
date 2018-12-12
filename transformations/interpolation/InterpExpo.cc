@@ -13,7 +13,7 @@ using TMath::Exp;
 //InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
 
 InterpExpo::InterpExpo() : InSegment() {
-  add_transformation();
+  add_transformation(false);
 
   //if(underflow_strategy.length()){
     //this->setUnderflowStrategy(underflow_strategy);
@@ -23,7 +23,7 @@ InterpExpo::InterpExpo() : InSegment() {
   //}
 }
 
-TransformationDescriptor InterpExpo::add_transformation(){
+TransformationDescriptor InterpExpo::add_transformation(bool bind){
   int num=transformations.size();
   std::string name="interp";
   if(num>1){
@@ -45,7 +45,11 @@ TransformationDescriptor InterpExpo::add_transformation(){
     .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passToRange<0,0,-1>)
     .func(&InterpExpo::do_interpolate)
     ;
-    return transformations.back();
+
+  if(bind){
+    bind_transformations();
+  }
+  return transformations.back();
 }
 
 void InterpExpo::set(SingleOutput& x, SingleOutput& newx){
@@ -69,37 +73,29 @@ InputDescriptor InterpExpo::add_input(){
 
 OutputDescriptor InterpExpo::add_input(SingleOutput& y){
   auto input=add_input();
-  input(y);
+  input.connect(y.single());
   return OutputDescriptor(transformations.back().outputs.back());
 }
 
-void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  set(x, newx);
-  auto segments = this->t_["insegment"];
-  auto sinputs  = segments.inputs();
-  auto soutputs = segments.outputs();
-  sinputs[0].connect(newx.single());
-  sinputs[1].connect(x.single());
+void InterpExpo::bind_transformations(){
+  auto segments=transformations.front();
+  auto interp=transformations.back();
 
-  auto interp = this->t_["interp"];
-  auto iinputs = interp.inputs();
-  iinputs[0].connect(newx.single());
-  iinputs[1].connect(x.single());
-  iinputs[2].connect(soutputs[0]);
-  iinputs[3].connect(soutputs[1]);
-  iinputs[4].connect(y.single());
+  auto& seg_inputs=segments.inputs;
+  auto& outputs=segments.outputs;
+  auto& inputs=interp.inputs;
+
+  seg_inputs[0].output()>>inputs[0];
+  seg_inputs[1].output()>>inputs[1];
+  outputs[0]>>inputs[2];
+  outputs[1]>>inputs[3];
 }
 
-void InterpExpo::interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  const auto& soutputs = static_cast<Handle&>(insegment).outputs();
-
-  auto interp = this->t_["interp"];
-  auto iinputs = interp.inputs();
-  iinputs[0].connect(newx.single());
-  iinputs[1].connect(x.single());
-  iinputs[2].connect(soutputs[0]);
-  iinputs[3].connect(soutputs[1]);
-  iinputs[4].connect(y.single());
+OutputDescriptor InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+  set(x, newx);
+  auto output=add_input(y);
+  bind_transformations();
+  return output;
 }
 
 void InterpExpo::do_interpolate(FunctionArgs& fargs){
@@ -118,7 +114,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
   for (size_t ret = 0; ret < rets.size(); ++ret) {
     auto insegment=insegment_start;                                       /// insegment buffer
     auto point=points_a.data();                                           /// point read buffer
-    auto x_buffer=x_a.data();                                              /// x's buffer
+    auto x_buffer=x_a.data();                                             /// x's buffer
 
     auto& y_a=args[4+ret].x;                                              /// y of segments, exponent scale
     auto  y_buffer=y_a.data();                                            /// y's buffer

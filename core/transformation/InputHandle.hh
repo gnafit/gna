@@ -28,6 +28,7 @@ namespace TransformationTypes
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
 
     void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
+    void operator<< (const OutputHandle& out) { connect(out); }
 
     const std::string &name() const { return m_source->name; }                 ///< Get Source's name.
     const std::string &label() const { return m_source->label; }               ///< Get Source's label.
@@ -39,10 +40,11 @@ namespace TransformationTypes
     bool materialized() const { return m_source->materialized(); }            ///< Call Source::materialized(). @copydoc Source::materialized()
     bool bound() const { return m_source->sink!=nullptr; }                    ///< Return true if the source is bound to the sink.
 
-  protected:
     const OutputHandle output() const { return OutputHandle(*const_cast<Sink*>(m_source->sink)); }
+  protected:
     Source *m_source; ///< Pointer to the Source.
   }; /* class InputHandle */
 
+  inline void operator>>(const OutputHandle& output, const InputHandle& input) { input.connect(output); }
 } /* TransformationTypes */
 
