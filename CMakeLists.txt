@@ -110,6 +110,7 @@ set (SOURCES
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
   unittest/parameters.cc
+  unittest/transformations.cc
   )
 
 set (HEADERS
@@ -234,6 +235,7 @@ set (HEADERS
   InterpExpoSorted.hh
   # unit tests
   parameters.hh
+  transformations.hh
   )
 
 include_directories(core/parameters/

@@ -33,7 +33,7 @@ struct TypesFunctions
   template <int Arg1=0, int Arg2=-1>
   static void ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Checks that all inputs are of the same type (shape and content description).
 
-  constexpr static const auto ifSame=ifSameInRange<0,-1>;
+  static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
   static void ifSameShape(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape.
 
   template <size_t Arg1, size_t Arg2>
