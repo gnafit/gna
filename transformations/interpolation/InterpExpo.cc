@@ -25,7 +25,7 @@ InterpExpo::InterpExpo() : InSegment() {
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
     .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
-    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passAllInRange<4,-1,0>);
+    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passAllInRange<4,-1,0>)
     .func(&InterpExpo::do_interpolate)
     ;
 
@@ -78,7 +78,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 
   auto insegment_start=args[2].buffer;                                    /// insegment buffer
 
-  for (int ret = 0; ret < rets.size(); ++ret) {
+  for (size_t ret = 0; ret < rets.size(); ++ret) {
     auto insegment=insegment_start;                                       /// insegment buffer
     auto point=points_a.data();                                           /// point read buffer
     auto x_buffer=x_a.data();                                              /// x's buffer

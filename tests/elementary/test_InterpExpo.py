@@ -36,6 +36,8 @@ ie.interpolate(segments_t, fcn_t, points_t)
 seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )
 
+ie.print()
+
 res = ie.interp.interp.data()
 print( 'Result', res )
 

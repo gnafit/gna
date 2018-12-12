@@ -182,7 +182,7 @@ void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs
   auto& args=fargs.args;
   auto& compare_to=args[Arg1];
   size_t start=Arg1+1;
-  size_t end=Arg2<0 ? args.size()-Arg2+1 : Arg2+1;
+  size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
   for (size_t i = start; i < end; ++i) {
     if (args[i] != compare_to) {
       auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
@@ -467,16 +467,16 @@ inline void TypesFunctions::ifSquare(TransformationTypes::TypesFunctionArgs& far
  * @exception std::runtime_error in case Ret index is out of range.
  */
 template <int Arg1=0, int Arg2, size_t Ret1>
-inline void TypesFunctions::passAllInRange(TypesFunctions::TypesFunctionArgs& fargs) {
+inline void TypesFunctions::passAllInRange(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
-  size_t start=Arg1+1;
-  size_t end=Arg2<0 ? args.size()-Arg2+1 : Arg2+1;
+  size_t start=Arg1;
+  size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
   size_t ret=Ret1;
   for (size_t i = start; i < end; ++i) {
     if(ret>=rets.size()){
       auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
-      throw std::runtime_error((fmt % args.name()).str(), ret, rets.size());
+      throw std::runtime_error((fmt % args.name() % ret % rets.size()).str());
     }
     rets[ret] = args[i];
     ++ret;
