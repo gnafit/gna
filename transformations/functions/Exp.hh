@@ -16,7 +16,7 @@
 class Exp: public GNASingleObject,
            public TransformationBind<Exp> {
 public:
-    Exp();                              ///< Constructor.
+    Exp();                               ///< Constructor.
 
     void calculate(FunctionArgs& fargs); ///< Calculate the value of function.
 protected:

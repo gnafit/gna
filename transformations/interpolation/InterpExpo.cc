@@ -1,5 +1,6 @@
 #include "InterpExpo.hh"
 #include "TypesFunctions.hh"
+#include "fmt/format.h"
 
 #include <TMath.h>
 #include <stdexcept>
@@ -12,7 +13,23 @@ using TMath::Exp;
 //InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
 
 InterpExpo::InterpExpo() : InSegment() {
-  transformation_("interp")
+  add_transformation();
+
+  //if(underflow_strategy.length()){
+    //this->setUnderflowStrategy(underflow_strategy);
+  //}
+  //if(overflow_strategy.length()){
+    //this->setOverflowStrategy(overflow_strategy);
+  //}
+}
+
+TransformationDescriptor InterpExpo::add_transformation(){
+  int num=transformations.size();
+  std::string name="interp";
+  if(num>1){
+      name = fmt::format("{0}_{1:02d}", name, num);
+  }
+  transformation_(name)
     .input("newx")             /// 0
     .input("x")                /// 1
     .input("insegment")        /// 2
@@ -28,16 +45,36 @@ InterpExpo::InterpExpo() : InSegment() {
     .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passToRange<0,0,-1>)
     .func(&InterpExpo::do_interpolate)
     ;
+    return transformations.back();
+}
 
-  //if(underflow_strategy.length()){
-    //this->setUnderflowStrategy(underflow_strategy);
-  //}
-  //if(overflow_strategy.length()){
-    //this->setOverflowStrategy(overflow_strategy);
-  //}
+void InterpExpo::set(SingleOutput& x, SingleOutput& newx){
+  auto segments = transformations.front();
+  auto sinputs  = segments.inputs;
+  sinputs[0].connect(newx.single());
+  sinputs[1].connect(x.single());
+}
+
+InputDescriptor InterpExpo::add_input(){
+    auto interp=transformations.back();
+    auto input=interp.inputs.back();
+    if(input.bound()){
+        auto ninputs=interp.inputs.size()+1;
+        input=interp.input(fmt::format("{0}_{1:02d}", "y", ninputs));
+        interp.output(fmt::format("{0}_{1:02d}", "interp", ninputs));
+    }
+
+    return input;
+}
+
+OutputDescriptor InterpExpo::add_input(SingleOutput& y){
+  auto input=add_input();
+  input(y);
+  return OutputDescriptor(transformations.back().outputs.back());
 }
 
 void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+  set(x, newx);
   auto segments = this->t_["insegment"];
   auto sinputs  = segments.inputs();
   auto soutputs = segments.outputs();

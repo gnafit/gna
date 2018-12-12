@@ -42,7 +42,11 @@ public:
   //InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");             ///< Constructor.
   InterpExpo();                                                                                                ///< Constructor.
 
-  void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
+  TransformationDescriptor add_transformation();
+  void set(SingleOutput& x, SingleOutput& newx);
+  InputDescriptor  add_input();
+  OutputDescriptor add_input(SingleOutput& y);
+
   void interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                      ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
   void interpolate(TransformationDescriptor& insegment, SingleOutput& x, SingleOutput& y, SingleOutput& newx); ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 
@@ -56,6 +60,8 @@ public:
   //void setOverflowStrategy(Strategy strategy)   { m_overflow_strategy=strategy; }                          ///< Set strategy to use for overflow points:  `InterpExpo::Constant` or `InterpExpo::Extrapolate`.
 
   //Strategy getStrategy(const std::string& strategy);                                                       ///< Convert strategy from string to Strategy.
+
+  void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
 protected:
   //double m_underflow{0.0};                                                                                 ///< Value to write into underflow points when strategy=Constant.
   //double m_overflow{0.0};                                                                                  ///< Value to write into overflow points when strategy=Constant.
