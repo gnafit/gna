@@ -9,6 +9,9 @@ struct TypesFunctions
 {
   static void passAll(TransformationTypes::TypesFunctionArgs& fargs);      ///< Assigns shape of each input to corresponding output.
 
+  template <int Arg1=0, int Arg2, size_t Ret1>
+  static void passAllInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of each input to corresponding output.
+
   template <size_t Arg, size_t Ret = Arg>
   static void pass(TransformationTypes::TypesFunctionArgs& fargs);         ///< Assigns shape of Arg-th input to Ret-th output.
 
@@ -164,10 +167,10 @@ inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs
 /**
  * @brief Checks that all inputs in a range are of the same type (shape and content description).
  *
+ * Raises an exception otherwise.
+ *
  * @tparam Arg1 -- index of Arg1 to start comparison from.
  * @tparam Arg2 -- index of Arg2 to end comparison (inclusive).
- *
- * Raises an exception otherwise.
  *
  * @param args -- source types.
  * @param rets -- output types.
@@ -446,5 +449,36 @@ inline void TypesFunctions::ifSquare(TransformationTypes::TypesFunctionArgs& far
   if (shape.size()!=2 || shape[0]!=shape[1] ) {
     auto fmt = boost::format("Transformation %1%: Arg %2% should be NxN, got %3%x%4%");
     throw args.error(args[Arg], (fmt%args.name()%Arg%shape[0]%shape[1]).str());
+  }
+}
+
+/**
+ * @brief Assigns shape of each input to corresponding output.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @tparam Arg1 -- index of Arg to start comparison with.
+ * @tparam Arg2 -- index of Arg to stop comparison with (inclusive).
+ * @tparam Ret1 -- index of Ret to start writing to.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case Ret index is out of range.
+ */
+template <int Arg1=0, int Arg2, size_t Ret1>
+inline void TypesFunctions::passAllInRange(TypesFunctions::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  size_t start=Arg1+1;
+  size_t end=Arg2<0 ? args.size()-Arg2+1 : Arg2+1;
+  size_t ret=Ret1;
+  for (size_t i = start; i < end; ++i) {
+    if(ret>=rets.size()){
+      auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
+      throw std::runtime_error((fmt % args.name()).str(), ret, rets.size());
+    }
+    rets[ret] = args[i];
+    ++ret;
   }
 }
