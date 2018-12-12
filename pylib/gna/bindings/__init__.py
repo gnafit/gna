@@ -11,6 +11,7 @@ ignored_classes = [
         'EigenHelpers',
         'DataType',
         'GNA',
+        'GNAUnitTest',
         'TransformationTypes',
         'ParametrizedTypes',
         'TypesFunctions',

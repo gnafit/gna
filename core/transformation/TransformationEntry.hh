@@ -63,9 +63,6 @@ namespace TransformationTypes
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
     const Data<double> &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
-    void freeze() { frozen = true; }                     ///< Freeze the Entry. While entry is frozen the taintflag is not propagated. Entry is always up to date.
-    void unfreeze() { frozen = false; }                  ///< Unfreeze the Entry. Enables the taintflag propagation.
-
     bool check() const;                                  ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                   ///< Recursively print Source names and their connection status.
 
@@ -88,7 +85,6 @@ namespace TransformationTypes
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
-    bool frozen;                                         ///< If Entry is frozen, it is not updated even if tainted.
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:

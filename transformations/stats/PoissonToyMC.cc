@@ -42,6 +42,8 @@ void PoissonToyMC::calcToyMC(FunctionArgs fargs) {
     }
   }
 
-  if(m_autofreeze)
+  if(m_autofreeze) {
+    rets.untaint();
     rets.freeze();
+  }
 }

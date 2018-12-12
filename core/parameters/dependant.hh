@@ -32,7 +32,7 @@ public:
     : base_type(base_type::null()) { }
   dependant(std::function<ValueType()> f,
             std::initializer_list<changeable> deps,
-            const char *name = nullptr)
+            const char *name = "")
     : base_type(name)
     {
       base_type::init(f, deps);
@@ -41,7 +41,7 @@ public:
   template <typename T>
   dependant(std::function<ValueType()> f,
             std::vector<T> deps,
-            const char *name = nullptr)
+            const char *name = "")
     : base_type(name)
     {
       DPRINTF("construct dependant: %i deps", int(deps.size()));

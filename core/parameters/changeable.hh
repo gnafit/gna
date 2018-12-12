@@ -5,6 +5,7 @@
 #include <deque>
 #include <set>
 #include <cstring>
+#include <string>
 
 class changeable;
 
@@ -20,18 +21,34 @@ struct references {
   size_t bufsize = 0;
 };
 
+enum class TaintStatus {
+  Normal = 0,    ///<
+  Frozen,        ///<
+  FrozenTainted, ///<
+  PassThrough    ///<
+};
+
 struct inconstant_header {
-  const char *name = nullptr;
+  inconstant_header(const char* aname="", bool autoname=false) : name(aname){
+    static size_t ih_counter=0;
+    autoname = autoname || !name.size();
+    if(autoname){
+      name=name+"_"+std::to_string(ih_counter);
+      ++ih_counter;
+    }
+  }
+  std::string name = "";
   references observers;
   references emitters;
   bool tainted = true;
-  std::function<void()> changed;
+  TaintStatus status=TaintStatus::Normal;
+  std::function<void()> on_taint;
   const std::type_info *type = nullptr;
 };
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data() {
+  inconstant_data(const char* name="", bool autoname=false) : inconstant_header(name, autoname) {
     type = &typeid(ValueType);
   }
   ValueType value;
@@ -51,19 +68,23 @@ public:
     DPRINTF("%p/%s becomes observer", d.m_data.raw, d.name());
     hdr->observers.add(d);
     d.m_data.hdr->emitters.add(*this);
+    if(m_data.hdr->tainted){
+      DPRINTF("taint %p/%s", d.m_data.raw, d.name());
+      d.taint();
+    }
   }
   void unsubscribe(changeable d) {
     m_data.hdr->observers.remove(d);
     d.m_data.hdr->emitters.remove(*this);
   }
-  const void *rawdata() const {
+  void *rawdata() const {
     return m_data.raw;
   }
-  const void *rawptr() const {
+  void *rawptr() const {
     return rawdata();
   }
   const char *name() const {
-    return m_data.hdr->name;
+    return m_data.hdr->name.c_str();
   }
   bool operator==(changeable const &other) {
     return m_data.raw == other.m_data.raw;
@@ -74,17 +95,56 @@ public:
   bool isnull() const {
     return !m_data.raw;
   }
+  bool tainted() const {
+    return m_data.hdr->tainted;
+  }
+  bool frozen() const {
+    return m_data.hdr->status==TaintStatus::Frozen || m_data.hdr->status==TaintStatus::FrozenTainted;
+  }
+  TaintStatus taintstatus() const {
+    return m_data.hdr->status;
+  }
   void taint() const {
-    //if(m_data.hdr->tainted){
-      //DPRINTF("already tainted (do not propagate)");
-      //return;
-    //}
+    if(frozen()){
+      m_data.hdr->status=TaintStatus::FrozenTainted;
+      return;
+    }
+    else{
+      if(m_data.hdr->tainted && m_data.hdr->status!=TaintStatus::PassThrough){
+        DPRINTF("already tainted (do not propagate)");
+        return;
+      }
+    }
     DPRINTF("got tainted");
     notify();
     m_data.hdr->tainted = true;
-    if (m_data.hdr->changed) {
-      DPRINTF("calling changed callback");
-      m_data.hdr->changed();
+    if (m_data.hdr->on_taint) {
+      DPRINTF("calling on_taint callback");
+      m_data.hdr->on_taint();
+    }
+  }
+  void freeze(){
+    switch(m_data.hdr->status){
+      case TaintStatus::Normal:
+        if(!m_data.hdr->tainted){
+          m_data.hdr->status=TaintStatus::Frozen;
+        }else{
+          throw std::runtime_error("can not freeze tainted changeable");
+        }
+        break;
+      case TaintStatus::PassThrough:
+        throw std::runtime_error("can not freeze PassThrough changeable");
+        break;
+      default:
+        break;
+    }
+  }
+  void unfreeze(){
+    if(!frozen()) return;
+    auto wastainted = m_data.hdr->status==TaintStatus::FrozenTainted;
+    m_data.hdr->status=TaintStatus::Normal;
+    if(wastainted){
+      taint();
     }
   }
   bool depends(changeable other) const {
@@ -125,6 +185,9 @@ public:
       }
     }
     assign(other);
+    if(m_data.hdr->tainted){
+      notify();
+    }
   }
   void assign(changeable other) {
     m_data.raw = other.m_data.raw;
@@ -137,6 +200,7 @@ protected:
     if (nsubs == 0) {
       return;
     }
+
     for (size_t i = 0; i < nsubs; ++i) {
       if (observers[i].isnull()) {
         continue;
@@ -151,13 +215,13 @@ protected:
       dep.subscribe(*this);
     }
   }
-  void init() {
-    m_data.raw = new inconstant_header;
+  void init(const char* name="", bool autoname=false) {
+    m_data.raw = new inconstant_header(name, autoname);
     DPRINTF("constructed header");
   }
   template <typename T>
-  void init(T deps) {
-    init();
+  void init(T deps, const char* name="") {
+    init(name);
     for (auto dep: deps) {
       dep.subscribe(*this);
     }
@@ -178,6 +242,9 @@ inline bool references::has(changeable obj) const {
 }
 
 inline void references::add(changeable obj) {
+  if(has(obj)){
+    return;
+  }
   if (bufsize <= cnt) {
     size_t newsize = cnt + 8 + bufsize/2;
     resize(newsize);

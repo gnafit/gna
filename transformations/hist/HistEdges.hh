@@ -18,8 +18,10 @@ public:
              })
       .func([](FunctionArgs& fargs) {
               auto& edges = fargs.args[0].type.edges;
-              fargs.rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
-              fargs.rets.freeze();
+              auto& rets = fargs.rets;
+              rets[0].x = Eigen::Map<const Eigen::ArrayXd>(&edges[0], edges.size());
+              rets.untaint();
+              rets.freeze();
             });
   };
 

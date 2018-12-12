@@ -109,6 +109,7 @@ set (SOURCES
   transformations/legacy/InterpExpoSorted.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
+  unittest/parameters.cc
   )
 
 set (HEADERS
@@ -231,6 +232,8 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   InterpExpoSorted.hh
+  # unit tests
+  parameters.hh
   )
 
 include_directories(core/parameters/
@@ -253,6 +256,7 @@ include_directories(core/parameters/
                     transformations/legacy/
                     extra/
                     examples/
+                    unittest/
                    )
 
 if(NOT CMAKE_BUILD_TYPE)

@@ -11,6 +11,7 @@ void Covmat::calculateCov(FunctionArgs fargs) {
     cov += args[i].vec*args[i].vec.transpose();
   }
   if (m_fixed) {
+    rets.untaint();
     rets.freeze();
   }
 }
