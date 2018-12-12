@@ -7,10 +7,13 @@
 
 struct TypesFunctions
 {
-  static void passAll(TransformationTypes::TypesFunctionArgs& fargs);      ///< Assigns shape of each input to corresponding output.
+  static void passAll(TransformationTypes::TypesFunctionArgs& fargs);       ///< Assigns shape of each input to corresponding output.
 
-  template <int Arg1=0, int Arg2, size_t Ret1>
+  template <int Arg1=0, int Arg2=-1, int Ret1=0>
   static void passAllInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of each input to corresponding output.
+
+  template <int Arg=0, int Ret1=0, int Ret2=-1>
+  static void passToRange(TransformationTypes::TypesFunctionArgs& fargs);  ///< Assigns shape of each input to corresponding output.
 
   template <size_t Arg, size_t Ret = Arg>
   static void pass(TransformationTypes::TypesFunctionArgs& fargs);         ///< Assigns shape of Arg-th input to Ret-th output.
@@ -466,19 +469,49 @@ inline void TypesFunctions::ifSquare(TransformationTypes::TypesFunctionArgs& far
  *
  * @exception std::runtime_error in case Ret index is out of range.
  */
-template <int Arg1=0, int Arg2, size_t Ret1>
+template <int Arg1, int Arg2, int Ret1>
 inline void TypesFunctions::passAllInRange(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
-  size_t start=Arg1;
-  size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
-  size_t ret=Ret1;
+  size_t start=Arg1<0 ? args.size()+Arg1   : Arg1;
+  size_t end  =Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
+  size_t ret  =Ret1<0 ? rets.size()+Ret1   : Ret1;
   for (size_t i = start; i < end; ++i) {
     if(ret>=rets.size()){
       auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
-      throw std::runtime_error((fmt % args.name() % ret % rets.size()).str());
+      throw std::runtime_error((fmt % rets.name() % ret % rets.size()).str());
     }
     rets[ret] = args[i];
     ++ret;
+  }
+}
+
+/**
+ * @brief Assigns shape of input to each of outputs in a range.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @tparam Arg1 -- index of Arg to pass;
+ * @tparam Ret1 -- index of Ret to start writing to.
+ * @tparam Ret2 -- index of Ret to stop writing to (inclusive).
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case Ret index is out of range.
+ */
+template <int Arg1, int Ret1, int Ret2>
+inline void TypesFunctions::passToRange(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  size_t arg  =Arg1<0 ? args.size()+Arg1   : Arg1;
+  size_t start=Ret1<0 ? rets.size()+Ret1   : Ret1;
+  size_t end  =Ret2<0 ? rets.size()+Ret2+1 : Ret2+1;
+  for (size_t i = start; i < end; ++i) {
+    if(i>=rets.size()){
+      auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
+      throw std::runtime_error((fmt % rets.name() % i % rets.size()).str());
+    }
+    rets[i] = args[arg];
   }
 }

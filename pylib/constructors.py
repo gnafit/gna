@@ -11,6 +11,19 @@ from converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from converters import list_to_stdvector as stdvector
 
+def Outputs(outputs):
+    handles=[]
+    for output in outputs:
+        is not isinstance(output, 'OutputHandle')
+           and isinstance(output, 'SingleOutput'):
+               output=output.single()
+        else:
+            raise Exception('Expect OutputHandle or SingleOutput object')
+        handles.append(output)
+
+    return stdvector(handles, 'TransformationTypes::OutputHandle*')
+
+
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
     def method(array, *args, **kwargs):
@@ -32,8 +45,7 @@ def Sum(outputs=None, *args, **kwargs):
     if outputs is None:
         return R.Sum(*args, **kwargs)
 
-    outputs = stdvector(outputs, 'OutputDescriptor*')
-    return R.Sum(outputs, *args, **kwargs)
+    return R.Sum(Outputs(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
@@ -43,7 +55,7 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
     elif isinstance(inputs[0], str):
         inputs = stdvector(inputs)
     else:
-        inputs = stdvector(inputs, 'OutputDescriptor*')
+        inputs = Outputs(outputs)
 
     return R.WeightedSum(weights, inputs, *args, **kwargs)
 
@@ -52,8 +64,7 @@ def Product(outputs=None, *args, **kwargs):
     if outputs is None:
         return R.Product(*args, **kwargs)
 
-    outputs = stdvector(outputs, 'OutputDescriptor*')
-    return R.Product(outputs, *args, **kwargs)
+    return R.Product(Outputs(outputs), *args, **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
