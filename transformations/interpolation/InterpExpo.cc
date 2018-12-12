@@ -25,7 +25,7 @@ InterpExpo::InterpExpo() : InSegment() {
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
     .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
-    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passAllInRange<4,-1,0>)
+    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passToRange<0,0,-1>)
     .func(&InterpExpo::do_interpolate)
     ;
 

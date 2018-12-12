@@ -11,18 +11,20 @@ from converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from converters import list_to_stdvector as stdvector
 
-def Outputs(outputs):
-    handles=[]
+def OutputDescriptors(outputs):
+    descriptors=[]
     for output in outputs:
-        is not isinstance(output, 'OutputHandle')
-           and isinstance(output, 'SingleOutput'):
-               output=output.single()
+        if isinstance(output, R.OutputDescriptor):
+            output = output
+        elif isinstance(output, R.TransformationTypes.OutputHandle):
+            output = R.OutputDescriptor(output)
+        elif isinstance(output, R.SingleOutput):
+            output=R.OutputDescriptor(output.single())
         else:
             raise Exception('Expect OutputHandle or SingleOutput object')
-        handles.append(output)
+        descriptors.append(output)
 
-    return stdvector(handles, 'TransformationTypes::OutputHandle*')
-
+    return stdvector(descriptors, 'OutputDescriptor*')
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -45,7 +47,7 @@ def Sum(outputs=None, *args, **kwargs):
     if outputs is None:
         return R.Sum(*args, **kwargs)
 
-    return R.Sum(Outputs(outputs), *args, **kwargs)
+    return R.Sum(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
@@ -55,7 +57,7 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
     elif isinstance(inputs[0], str):
         inputs = stdvector(inputs)
     else:
-        inputs = Outputs(outputs)
+        inputs = OutputDescriptors(inputs)
 
     return R.WeightedSum(weights, inputs, *args, **kwargs)
 
@@ -64,7 +66,7 @@ def Product(outputs=None, *args, **kwargs):
     if outputs is None:
         return R.Product(*args, **kwargs)
 
-    return R.Product(Outputs(outputs), *args, **kwargs)
+    return R.Product(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
