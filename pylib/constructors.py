@@ -33,6 +33,10 @@ def wrap_constructor1(obj, dtype='d'):
         return R.SegmentWise(array.size, array, *args, **kwargs)
     return method
 
+"""Construct VarArray object from vector of strings"""
+def VarArray(varnames, *args, **kwargs):
+    return R.VarArray(stdvector(varnames), *args, **kwargs)
+
 """Construct Points object from numpy array"""
 def Points( array, *args, **kwargs ):
     """Convert array to Points"""
