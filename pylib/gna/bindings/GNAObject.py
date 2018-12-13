@@ -62,7 +62,7 @@ def SingleOutput__single(self):
 def GNAObject__single(self):
     transf = self.transformations
     if transf.size()!=1:
-        raise Exception('Can not call single() on object with %i transformations', self.transformations.size())
+        raise Exception('Can not call single() on object with %i transformations'%(self.transformations.size()))
 
     return transf.front().single()
 
@@ -70,15 +70,23 @@ def GNAObject__single(self):
 def GNAObject__single_input(self):
     transf = self.transformations
     if transf.size()!=1:
-        raise Exception('Can not call single_input() on object with %i transformations', self.transformations.size())
+        raise Exception('Can not call single_input() on object with %i transformations'%(self.transformations.size()))
 
     return transf.front().single_input()
 
 @patchROOTClass(R.GNAObject, '__rshift__')
 def GNAObject______rshift__(obj, inputs):
+    '''output(self)>>inputs(arg)'''
     obj.single()>>inputs
 
 
 @patchROOTClass(R.GNAObject, '__rlshift__')
 def GNAObject______rlshift__(obj, inputs):
+    '''inputs(argument)<<outputs(self)'''
     obj.single()>>inputs
+
+@patchROOTClass(R.GNAObject, '__lshift__')
+def GNAObject______lshift__(obj, output):
+    '''inputs(obj)<<output(arg)'''
+    output>>obj.single_input()
+

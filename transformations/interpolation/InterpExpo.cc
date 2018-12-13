@@ -23,6 +23,17 @@ InterpExpo::InterpExpo() : InSegment() {
   //}
 }
 
+InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& newx) : InterpExpo()
+{
+  set(x, newx);
+  bind_transformations();
+}
+
+InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpExpo()
+{
+  interpolate(x, y, newx);
+}
+
 TransformationDescriptor InterpExpo::add_transformation(bool bind){
   int num=transformations.size();
   std::string name="interp";
@@ -63,7 +74,7 @@ InputDescriptor InterpExpo::add_input(){
     auto interp=transformations.back();
     auto input=interp.inputs.back();
     if(input.bound()){
-        auto ninputs=interp.inputs.size()+1;
+        auto ninputs=interp.inputs.size()-3;
         input=interp.input(fmt::format("{0}_{1:02d}", "y", ninputs));
         interp.output(fmt::format("{0}_{1:02d}", "interp", ninputs));
     }

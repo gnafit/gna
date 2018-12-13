@@ -4,6 +4,7 @@ from __future__ import print_function
 from gna.env import env
 import numpy as np
 import ROOT
+import itertools as it
 
 # Protect the following classes/namespaces from being wrapped
 ignored_classes = [
@@ -22,6 +23,7 @@ def patchGNAclass(cls):
         self.__original_init__(*args)
         if not self:
             return
+        labels = kwargs.pop('labels', [])
         bind = kwargs.pop('bind', True)
         freevars = kwargs.pop('freevars', ())
         bindings = kwargs.pop('bindings', {})
@@ -32,6 +34,11 @@ def patchGNAclass(cls):
             raise Exception(msg)
         env.register(self, bind=bind, freevars=freevars,
                      ns=ns, bindings=bindings)
+
+        if isinstance(labels, str):
+            labels = [labels]
+        for trans, label in zip(self.transformations.values(), labels):
+            trans.setLabel(label)
 
     def newgetattr(self, attr):
         try:

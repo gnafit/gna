@@ -78,61 +78,94 @@ def test_single_05():
         assert False
 
 def test_binding_01():
+    # 3->3
     points, dbg = make(1, 1)
     points.points.points >> dbg.debug.source
     check(dbg)
 
 def test_binding_02():
+    # 3->3
     points, dbg = make(1, 1)
     dbg.debug.source << points.points.points
-    print('    ', end='')
     check(dbg)
 
 def test_binding_03():
+    # 3->2
     points, dbg1, dbg2 = make(1, 2)
     points.points.points >> dbg1.debug
     dbg2.debug << points.points.points
     check(dbg1, dbg2)
 
 def test_binding_04():
+    # 3->1
     points, dbg1, dbg2 = make(1, 2)
     points.points.points >> dbg1
     dbg2 << points.points.points
     check(dbg1, dbg2)
 
 def test_binding_05():
-    points, dbg1, dbg2, dbg3 = make(1, 3)
-    points.points.points >> (dbg1, dbg2, dbg3)
-    check(dbg1, dbg2, dbg3)
+    # 2->2
+    points, dbg1, dbg2 = make(1, 2)
+    points.points >> dbg1.debug
+    dbg2.debug << points.points
+    check(dbg1, dbg2)
 
 def test_binding_06():
-    points, dbg1, dbg2, dbg3 = make(1, 3)
-    (dbg1, dbg2, dbg3) << points.points.points
-    check(dbg1, dbg2, dbg3)
+    # 2->1
+    points, dbg1, dbg2 = make(1, 2)
+    points.points >> dbg1
+    dbg2 << points.points
+    check(dbg1, dbg2)
 
 def test_binding_07():
+    # 1->1
     points, dbg1, dbg2 = make(1, 2)
-    points.points >> dbg1.debug.source
-    dbg2.debug.source << points.points
+    points >> dbg1
+    dbg2 << points
     check(dbg1, dbg2)
 
 def test_binding_08():
+    # 1->2
+    points, dbg1, dbg2 = make(1, 2)
+    points >> dbg1.debug
+    dbg2.debug << points
+    check(dbg1, dbg2)
+
+def test_binding_9():
+    # 1->3
     points, dbg1, dbg2 = make(1, 2)
     points >> dbg1.debug.source
     dbg2.debug.source << points
     check(dbg1, dbg2)
 
-def test_binding_09():
+def test_binding_10():
+    # 2->3
+    points, dbg1, dbg2 = make(1, 2)
+    points.points >> dbg1.debug.source
+    dbg2.debug.source << points.points
+    check(dbg1, dbg2)
+
+def test_binding_11():
+    points, dbg1, dbg2, dbg3 = make(1, 3)
+    points.points.points >> (dbg1, dbg2, dbg3)
+    check(dbg1, dbg2, dbg3)
+
+def test_binding_12():
+    points, dbg1, dbg2, dbg3 = make(1, 3)
+    (dbg1, dbg2, dbg3) << points.points.points
+    check(dbg1, dbg2, dbg3)
+
+def test_binding_13():
     points, dbg1, dbg2, dbg3 = make(1, 3)
     points >> (dbg1, dbg2, dbg3)
     check(dbg1, dbg2, dbg3)
 
-def test_binding_10():
+def test_binding_14():
     points, dbg1, dbg2, dbg3 = make(1, 3)
     (dbg1, dbg2, dbg3) << points
     check(dbg1, dbg2, dbg3)
 
-def test_binding_11():
+def test_binding_15():
     points, dbg1, dbg2, dbg3 = make(1, 3)
     dbg1.add_transformation()
     try:
@@ -142,7 +175,7 @@ def test_binding_11():
     else:
         assert False
 
-def test_binding_12():
+def test_binding_16():
     points1, points2, dbg1, dbg2, dbg3 = make(2, 3)
     points1>>dbg1
     dbg1.add_input()

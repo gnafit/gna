@@ -29,8 +29,8 @@ Integration
     integration_1d_again
     integration_2d
 
-Interpolation (TBD)
-"""""""""""""""""""
+Interpolation
+"""""""""""""
 
 .. toctree::
 

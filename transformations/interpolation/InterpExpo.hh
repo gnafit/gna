@@ -41,6 +41,8 @@ public:
 
   //InterpExpo(const std::string& underflow_strategy="", const std::string& overflow_strategy="");             ///< Constructor.
   InterpExpo();                                                                                                ///< Constructor.
+  InterpExpo(SingleOutput& x, SingleOutput& newx);                                                             ///< Constructor.
+  InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                            ///< Constructor.
 
   TransformationDescriptor add_transformation(bool bind=true);
   void bind_transformations();

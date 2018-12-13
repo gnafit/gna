@@ -48,6 +48,8 @@ class GNADot(object):
                 entry = R.OpenOutputHandle(t).getEntry()
             elif isinstance(t, R.TransformationTypes.Handle):
                 entry = R.OpenHandle(t).getEntry()
+            elif isinstance(t, R.SingleOutput):
+                entry = R.OpenOutputHandle(t.single()).getEntry()
             else:
                 raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
 
