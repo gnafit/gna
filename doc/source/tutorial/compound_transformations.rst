@@ -245,6 +245,8 @@ section.
     [6.7200e+03 1.5120e+04 3.0240e+04 5.5440e+04]
     [9.5040e+04 1.5444e+05 2.4024e+05 3.6036e+05]]
 
+.. _tutorial_binding_syntax:
+
 Simplified syntax for working with inputs and outputs
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
