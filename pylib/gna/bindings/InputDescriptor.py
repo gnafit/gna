@@ -16,3 +16,5 @@ def InputDescriptor____str__(self):
 @patchROOTClass
 def InputDescriptor__print(self):
     printl(str(self))
+
+del R.TransformationTypes.InputHandle.__lshift__

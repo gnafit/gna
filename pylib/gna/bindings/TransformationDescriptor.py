@@ -36,3 +36,12 @@ def TransformationDescriptor__single_input(self):
         raise Exception('Can not call single_input() on transformation %s with %i inputs', self.name(), inputs.size())
 
     return inputs.front()
+
+@patchROOTClass(R.TransformationDescriptor, '__rshift__')
+def TransformationDescriptor______rshift__(transf, inputs):
+    transf.single()>>inputs
+
+
+@patchROOTClass(R.TransformationDescriptor, '__rlshift__')
+def TransformationDescriptor______rlshift__(transf, inputs):
+    transf.single()>>inputs

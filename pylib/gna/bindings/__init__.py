@@ -164,7 +164,7 @@ def patchDescriptor(cls):
     cls.__eq__ = __eq__
 
 def importcommon():
-    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject, SingleOutput
+    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:

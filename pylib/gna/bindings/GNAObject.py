@@ -53,7 +53,12 @@ def GNAObject__variablevalues(self):
     ns = self.currentns
     return dict([(ns[k].name(), ns[k].value()) for k in self.variables.iterkeys()])
 
+R.SingleOutput.__single_orig = R.SingleOutput.single
 @patchROOTClass
+def SingleOutput__single(self):
+    R.OutputDescriptor(self.__single_orig())
+
+@patchROOTClass([R.GNAObject, R.GNASingleObject, R.SingleOutput], 'single')
 def GNAObject__single(self):
     transf = self.transformations
     if transf.size()!=1:
@@ -68,3 +73,12 @@ def GNAObject__single_input(self):
         raise Exception('Can not call single_input() on object with %i transformations', self.transformations.size())
 
     return transf.front().single_input()
+
+@patchROOTClass(R.GNAObject, '__rshift__')
+def GNAObject______rshift__(obj, inputs):
+    obj.single()>>inputs
+
+
+@patchROOTClass(R.GNAObject, '__rlshift__')
+def GNAObject______rlshift__(obj, inputs):
+    obj.single()>>inputs
