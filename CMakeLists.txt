@@ -109,8 +109,8 @@ set (SOURCES
   transformations/legacy/InterpExpoSorted.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
-  unittest/parameters.cc
-  unittest/transformations.cc
+  unittest/unit_parameters.cc
+  unittest/unit_transformations.cc
   )
 
 set (HEADERS
@@ -234,8 +234,8 @@ set (HEADERS
   GaussLegendre2d.hh
   InterpExpoSorted.hh
   # unit tests
-  parameters.hh
-  transformations.hh
+  unit_parameters.hh
+  unit_transformations.hh
   )
 
 include_directories(core/parameters/

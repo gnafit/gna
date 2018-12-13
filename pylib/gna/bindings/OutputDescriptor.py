@@ -14,3 +14,22 @@ def OutputDescriptor____str__(self):
 def OutputDescriptor__print(self):
     printl(str(self))
 
+@patchROOTClass
+def OutputDescriptor__single(self):
+    return self
+
+@patchROOTClass(R.OutputDescriptor, '__rshift__')
+def OutputDescriptor______rshift__(output, inputs):
+    if isinstance(inputs, R.InputDescriptor):
+        inputs.connect(output)
+    elif isinstance(inputs, (list, tuple)):
+        for inp in inputs:
+            OutputDescriptor______rshift__(output, inp)
+    elif isinstance(inputs, (R.GNAObject, R.TransformationDescriptor)):
+        OutputDescriptor______rshift__(output, inputs.single_input())
+    else:
+        raise Exception('Failed to connect {} to {}'.format(output.name(), inputs))
+
+@patchROOTClass(R.OutputDescriptor, '__rlshift__')
+def OutputDescriptor______rlshift__(output, inputs):
+    OutputDescriptor______rshift__(output, inputs)

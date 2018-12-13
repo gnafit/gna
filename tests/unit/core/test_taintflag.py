@@ -161,6 +161,5 @@ def test_taintflag_14():
         raise Exception('freeze failed')
 
 if __name__ == "__main__":
-    for name, fcn in globals().items():
-        if name.startswith('test_'):
-            fcn()
+    for fcn in sorted([fcn for name, fcn in globals().items() if name.startswith('test_')]):
+        fcn()

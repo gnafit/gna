@@ -52,3 +52,19 @@ def GNAObject__printvariables(self):
 def GNAObject__variablevalues(self):
     ns = self.currentns
     return dict([(ns[k].name(), ns[k].value()) for k in self.variables.iterkeys()])
+
+@patchROOTClass
+def GNAObject__single(self):
+    transf = self.transformations
+    if transf.size()!=1:
+        raise Exception('Can not call single() on object with %i transformations', self.transformations.size())
+
+    return transf.front().single()
+
+@patchROOTClass
+def GNAObject__single_input(self):
+    transf = self.transformations
+    if transf.size()!=1:
+        raise Exception('Can not call single_input() on object with %i transformations', self.transformations.size())
+
+    return transf.front().single_input()

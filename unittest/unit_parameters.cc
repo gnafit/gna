@@ -1,4 +1,4 @@
-#include "parameters.hh"
+#include "unit_parameters.hh"
 #include "taintflag.hh"
 
 bool GNAUnitTest::freeze(changeable* obj){

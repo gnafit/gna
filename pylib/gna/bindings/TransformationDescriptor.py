@@ -20,3 +20,19 @@ def TransformationDescriptor__print(self):
         for i, o in enumerate(self.outputs.itervalues()):
             printl('{:2d}'.format(i), end=' ')
             o.print()
+
+@patchROOTClass
+def TransformationDescriptor__single(self):
+    outputs = self.outputs
+    if outputs.size()!=1:
+        raise Exception('Can not call single() on transformation %s with %i outputs', self.name(), outputs.size())
+
+    return outputs.front()
+
+@patchROOTClass
+def TransformationDescriptor__single_input(self):
+    inputs = self.inputs
+    if inputs.size()!=1:
+        raise Exception('Can not call single_input() on transformation %s with %i inputs', self.name(), inputs.size())
+
+    return inputs.front()
