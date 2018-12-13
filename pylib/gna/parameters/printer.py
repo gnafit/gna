@@ -127,7 +127,7 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=
         try:
             if var.isCovariated():
                 cov_storage.add_to_store(var)
-        except AttributeError:
+        except (AttributeError, TypeError):
             pass
 
         print(end='  ')
