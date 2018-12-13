@@ -28,9 +28,8 @@ protected:
     d.func = f;
     this->initdeps(deps);
   }
-  evaluable(const char *name = 0) {
-    base_type::m_data.raw = new inconstant_data<ValueType>;
-    base_type::m_data.hdr->name = name;
+  evaluable(const char *name = "") {
+    base_type::m_data.raw = new inconstant_data<ValueType>(name);
     DPRINTF("constructed evaluable");
   }
   evaluable(const base_type &other)

@@ -244,3 +244,102 @@ section.
    [[0.0000e+00 1.2000e+02 7.2000e+02 2.5200e+03]
     [6.7200e+03 1.5120e+04 3.0240e+04 5.5440e+04]
     [9.5040e+04 1.5444e+05 2.4024e+05 3.6036e+05]]
+
+.. _tutorial_binding_syntax:
+
+Simplified syntax for working with inputs and outputs
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Now let us review the python syntax used to bind transformations together. Let us start with an array with one element:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 4-9
+    :caption: :download:`04_syntax.py <../../../macro/tutorial/compound/04_syntax.py>`
+
+By default points is an object with one transformation and one output, which may be accessed as follows:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 11-13
+
+The method ``single()`` may be used to return the single output of a single object:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 14
+
+Which is equivalent to:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 13
+
+Transformation also has a method ``single()`` which returns the single output of a transformation. Both methods raise an
+exception if single output can not be returned or the output is not single.
+
+The default way to connect the output to the input is to use ``input.connect(output)`` method:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 16-19
+
+`Single` notation may also be used in a similar way:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 21-24
+
+Here the method ``single_input()`` returns a single input of a single transformation.
+
+There exist robust operators ``>>`` and ``<<`` that may be used to connect output to input as ``output>>input``:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 26-29
+
+or as ``input<<output``:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 31-34
+
+Operators ``<<`` and ``>>`` may take care in cases when there is a single input/output in the transformation:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 36-39
+
+or when there is a single transformation in the object:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 41-44
+
+The short version may go either on the left hand side, rite hand side or both sides of the expression.
+
+More then one inputs may be passed. In this case the output is connected to each of the inputs, like this:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 46-50
+
+or like this:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 52-56
+
+In the above example we created a chain that passes as single value transformation to transformation. In the last two
+examples we have doubled the value twice. Therefore the output should contain the value four times larger:
+
+.. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
+    :linenos:
+    :lines: 57-
+
+Which is confirmed by the output:
+
+.. code-block:: text
+
+   Expect: 4.938
+   Got:    4.938

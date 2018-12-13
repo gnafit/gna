@@ -3,13 +3,14 @@ from gna.env import env
 from gna.config import cfg
 import ROOT
 
+ParameterDouble = ROOT.Parameter("double")
 def __is_independent(par):
-    return isinstance(par, ROOT.Parameter("double"))
+    return isinstance(par, ParameterDouble)
 
 def get_parameters(params, drop_fixed=True, drop_free=True):
     pars = []
     for candidate in params:
-        if isinstance(candidate, ROOT.Parameter('double')):
+        if __is_independent(candidate):
             pars.append(candidate)
             continue
         try:
@@ -28,4 +29,6 @@ def get_parameters(params, drop_fixed=True, drop_free=True):
 
     if drop_free:
         pars = [par for par in pars if not par.isFree()]
+
+    return pars
 

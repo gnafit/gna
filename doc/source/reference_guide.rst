@@ -108,7 +108,7 @@ Interpolation
    :glob:
 
    transformations/InSegment.rst
-   transformations/InterpExpoU.rst
+   transformations/InterpExpo.rst
 
 Calculus
 ^^^^^^^^

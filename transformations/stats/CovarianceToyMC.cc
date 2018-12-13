@@ -54,6 +54,8 @@ void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
     }
     out = args[i+0].vec + args[i+1].mat.triangularView<Eigen::Lower>()*out;
   }
-  if(m_autofreeze)
+  if(m_autofreeze) {
+    rets.untaint();
     rets.freeze();
+  }
 }

@@ -44,7 +44,7 @@ class reactor_anu_spectra_v01(TransformationBundle):
             else:
                 spectrum_t = spectrum_raw_t
 
-            interp_expo_t = R.InterpExpo(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
+            interp_expo_t = R.InterpExpoSorted(self.cfg.strategy['underflow'], self.cfg.strategy['overflow'], ns=self.common_namespace)
             interp_expo_t.interp.setLabel('S(E):\n'+isotope)
             if segments_t:
                 interp_expo_t.interpolate(segments_t, model_edges_t, spectrum_t, newx)

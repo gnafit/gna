@@ -59,6 +59,7 @@ public:
   std::string label() const noexcept { return m_label; }
   void setLabel(const std::string& label) { m_label=label; }
   void setLabel(std::string&& label) { m_label = label; }
+
 protected:
   variable<T> m_var;
   ParametrizedTypes::VariableHandle<T> m_varhandle;

@@ -6,7 +6,7 @@
 #include "TransformationBind.hh"
 
 class GNAObject: public virtual TransformationTypes::Base,
-                 public ParametrizedTypes::Base {
+                 public virtual ParametrizedTypes::Base {
 public:
   typedef ParametrizedTypes::VariablesContainer VariablesContainer;
   typedef ParametrizedTypes::EvaluablesContainer EvaluablesContainer;

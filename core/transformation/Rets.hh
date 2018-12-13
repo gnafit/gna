@@ -49,14 +49,21 @@ namespace TransformationTypes
      *
      * While entry is frozen the taintflag is not propagated. Entry is always up to date.
      */
-    void freeze()  { m_entry->freeze(); }
+    void freeze()  { m_entry->tainted.freeze(); }
+
+    /**
+     * @brief Untaint the Entry.
+     *
+     * Set Entry's taintflag to false.
+     */
+    void untaint()  { m_entry->tainted=false; }
 
     /**
      * @brief Unfreeze the Entry.
      *
      * Enables the taintflag propagation.
      */
-    void unfreeze()  { m_entry->unfreeze(); }
+    void unfreeze()  { m_entry->tainted.unfreeze(); }
 
   private:
     Entry *m_entry; ///< Entry instance to access Sinks.

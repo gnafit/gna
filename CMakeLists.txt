@@ -65,7 +65,6 @@ set (SOURCES
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpExpo.cc
-  transformations/interpolation/InterpExpoU.cc
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
@@ -107,8 +106,11 @@ set (SOURCES
   transformations/legacy/EnergyResolutionC.cc
   transformations/legacy/GaussLegendre.cc
   transformations/legacy/GaussLegendre2d.cc
+  transformations/legacy/InterpExpoSorted.cc
   extra/GridFilter.cc
   examples/GaussianPeakWithBackground.cc
+  unittest/unit_parameters.cc
+  unittest/unit_transformations.cc
   )
 
 set (HEADERS
@@ -167,7 +169,6 @@ set (HEADERS
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
-  InterpExpoU.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh
@@ -213,8 +214,6 @@ set (HEADERS
   IntegratorRect.hh
   IntegratorTrap.hh
   GSLSamplerGL.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
@@ -230,6 +229,13 @@ set (HEADERS
   ParCovMatrix.hh
   MatrixProduct.hh
   Transpose.hh
+  # legacy
+  GaussLegendre.hh
+  GaussLegendre2d.hh
+  InterpExpoSorted.hh
+  # unit tests
+  unit_parameters.hh
+  unit_transformations.hh
   )
 
 include_directories(core/parameters/
@@ -252,6 +258,7 @@ include_directories(core/parameters/
                     transformations/legacy/
                     extra/
                     examples/
+                    unittest/
                    )
 
 if(NOT CMAKE_BUILD_TYPE)

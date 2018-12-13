@@ -7,7 +7,13 @@
 
 struct TypesFunctions
 {
-  static void passAll(TransformationTypes::TypesFunctionArgs& fargs);      ///< Assigns shape of each input to corresponding output.
+  static void passAll(TransformationTypes::TypesFunctionArgs& fargs);       ///< Assigns shape of each input to corresponding output.
+
+  template <int Arg1=0, int Arg2=-1, int Ret1=0>
+  static void passAllInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of each input to corresponding output.
+
+  template <int Arg=0, int Ret1=0, int Ret2=-1>
+  static void passToRange(TransformationTypes::TypesFunctionArgs& fargs);  ///< Assigns shape of each input to corresponding output.
 
   template <size_t Arg, size_t Ret = Arg>
   static void pass(TransformationTypes::TypesFunctionArgs& fargs);         ///< Assigns shape of Arg-th input to Ret-th output.
@@ -29,6 +35,9 @@ struct TypesFunctions
 
   template <size_t Arg1, size_t Arg2, size_t Ret>
   static void edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of Ret-th output = [Arg1.size()-1, Arg2.size()-1] (ignoring Arg1/Arg2 shape)
+
+  template <int Arg1=0, int Arg2=-1>
+  static void ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Checks that all inputs are of the same type (shape and content description).
 
   static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
   static void ifSameShape(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape.
@@ -155,6 +164,34 @@ inline void TypesFunctions::toMatrix(TransformationTypes::TypesFunctionArgs& far
 template <size_t Arg1, size_t Arg2, size_t Ret>
 inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs) {
   fargs.rets[Ret] = DataType().points().shape(fargs.args[Arg1].size()-1, fargs.args[Arg2].size()-1);
+}
+
+
+/**
+ * @brief Checks that all inputs in a range are of the same type (shape and content description).
+ *
+ * Raises an exception otherwise.
+ *
+ * @tparam Arg1 -- index of Arg1 to start comparison from.
+ * @tparam Arg2 -- index of Arg2 to end comparison (inclusive).
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input types are not the same.
+ */
+template <int Arg1, int Arg2>
+void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& compare_to=args[Arg1];
+  size_t start=Arg1+1;
+  size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
+  for (size_t i = start; i < end; ++i) {
+    if (args[i] != compare_to) {
+      auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
+      throw args.error(args[i], (fmt%args.name()%0%i).str());
+    }
+  }
 }
 
 /**
@@ -415,5 +452,66 @@ inline void TypesFunctions::ifSquare(TransformationTypes::TypesFunctionArgs& far
   if (shape.size()!=2 || shape[0]!=shape[1] ) {
     auto fmt = boost::format("Transformation %1%: Arg %2% should be NxN, got %3%x%4%");
     throw args.error(args[Arg], (fmt%args.name()%Arg%shape[0]%shape[1]).str());
+  }
+}
+
+/**
+ * @brief Assigns shape of each input to corresponding output.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @tparam Arg1 -- index of Arg to start comparison with.
+ * @tparam Arg2 -- index of Arg to stop comparison with (inclusive).
+ * @tparam Ret1 -- index of Ret to start writing to.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case Ret index is out of range.
+ */
+template <int Arg1, int Arg2, int Ret1>
+inline void TypesFunctions::passAllInRange(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  size_t start=Arg1<0 ? args.size()+Arg1   : Arg1;
+  size_t end  =Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
+  size_t ret  =Ret1<0 ? rets.size()+Ret1   : Ret1;
+  for (size_t i = start; i < end; ++i) {
+    if(ret>=rets.size()){
+      auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
+      throw std::runtime_error((fmt % rets.name() % ret % rets.size()).str());
+    }
+    rets[ret] = args[i];
+    ++ret;
+  }
+}
+
+/**
+ * @brief Assigns shape of input to each of outputs in a range.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @tparam Arg1 -- index of Arg to pass;
+ * @tparam Ret1 -- index of Ret to start writing to.
+ * @tparam Ret2 -- index of Ret to stop writing to (inclusive).
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case Ret index is out of range.
+ */
+template <int Arg1, int Ret1, int Ret2>
+inline void TypesFunctions::passToRange(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  size_t arg  =Arg1<0 ? args.size()+Arg1   : Arg1;
+  size_t start=Ret1<0 ? rets.size()+Ret1   : Ret1;
+  size_t end  =Ret2<0 ? rets.size()+Ret2+1 : Ret2+1;
+  for (size_t i = start; i < end; ++i) {
+    if(i>=rets.size()){
+      auto fmt = format("Transformation %1%: ret %2% is out of limits (%3%)");
+      throw std::runtime_error((fmt % rets.name() % i % rets.size()).str());
+    }
+    rets[i] = args[arg];
   }
 }
