@@ -180,7 +180,7 @@ inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs
  *
  * @exception SourceTypeError in case input types are not the same.
  */
-template <int Arg1=0, int Arg2=-1>
+template <int Arg1, int Arg2>
 void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& compare_to=args[Arg1];
