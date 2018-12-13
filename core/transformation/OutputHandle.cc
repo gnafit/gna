@@ -17,3 +17,4 @@ bool OutputHandle::check() const {
 void OutputHandle::dump() const {
   return m_sink->entry->dump(0);
 }
+

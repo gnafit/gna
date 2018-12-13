@@ -28,7 +28,7 @@ namespace TransformationTypes
     InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
 
     void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
-    void operator<< (const OutputHandle& out) { connect(out); }
+    void operator<<(const OutputHandle& out) const { connect(out); }
 
     const std::string &name() const { return m_source->name; }                 ///< Get Source's name.
     const std::string &label() const { return m_source->label; }               ///< Get Source's label.

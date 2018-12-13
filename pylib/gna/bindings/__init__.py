@@ -150,14 +150,6 @@ def patchTransformationDescriptor(cls):
     cls.__getattr__ = __getattr__
     cls.__getitem__ = __getitem__
 
-def patchSingle(single):
-    if not hasattr(single, 'single'):
-        return
-    oldsingle = single.single
-    def newsingle(self):
-        return ROOT.OutputDescriptor(oldsingle(self))
-    single.single = newsingle
-
 def patchStatistic(cls):
     def __call__(self):
         return self.value()
@@ -208,8 +200,6 @@ def setup(ROOT):
     ]
     for cls in dataproviders:
         patchDataProvider(cls)
-
-    patchSingle( ROOT.GNASingleObject )
 
     GNAObject = ROOT.GNAObject
     def patchcls(cls):
