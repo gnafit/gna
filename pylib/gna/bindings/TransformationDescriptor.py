@@ -25,7 +25,7 @@ def TransformationDescriptor__print(self):
 def TransformationDescriptor__single(self):
     outputs = self.outputs
     if outputs.size()!=1:
-        raise Exception('Can not call single() on transformation %s with %i outputs', self.name(), outputs.size())
+        raise Exception('Can not call single() on transformation %s with %i outputs'%(self.name(), outputs.size()))
 
     return outputs.front()
 
@@ -33,15 +33,21 @@ def TransformationDescriptor__single(self):
 def TransformationDescriptor__single_input(self):
     inputs = self.inputs
     if inputs.size()!=1:
-        raise Exception('Can not call single_input() on transformation %s with %i inputs', self.name(), inputs.size())
+        raise Exception('Can not call single_input() on transformation %s with %i inputs'%(self.name(), inputs.size()))
 
     return inputs.front()
 
 @patchROOTClass(R.TransformationDescriptor, '__rshift__')
 def TransformationDescriptor______rshift__(transf, inputs):
+    '''output(transf)>>inputs(arg)'''
     transf.single()>>inputs
-
 
 @patchROOTClass(R.TransformationDescriptor, '__rlshift__')
 def TransformationDescriptor______rlshift__(transf, inputs):
+    '''inputs(arg)<<output(transf)'''
     transf.single()>>inputs
+
+@patchROOTClass(R.TransformationDescriptor, '__lshift__')
+def TransformationDescriptor______lshift__(self, output):
+    '''inputs(self)<<output(arg)'''
+    output>>self.single_input()
