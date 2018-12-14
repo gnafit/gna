@@ -116,35 +116,30 @@ def bar_hist1( output, *args, **kwargs ):
     kwargs.setdefault( 'align', 'edge' )
     return P.bar( left, height, width, *args, **kwargs )
 
-# def errorbar_hist1( h, *args, **kwargs ):
-    # """Plot 1-dimensinal histogram using pyplot.errorbar
+def errorbar_hist1(output, yerr=None, *args, **kwargs):
+    """Plot 1-dimensinal histogram using pyplot.errorbar
 
-    # executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with first four arguments overridden
-    # all other arguments are passed as is.
+    executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with x, y and xerr overridden
+    all other arguments passes as is.
 
-    # Uses histgram's errors if they are defined. Uses sqrt(N) otherwise.
+    returns pyplot.errorbar() result
+    """
+    ifNd(output, 1)
+    ifHist(output)
 
-    # returns pyplot.errorbar() result
-    # """
-    #
-    # noyerr, mask, = [ kwargs.pop(x) if x in kwargs else None for x in ['noyerr', 'mask'] ]
-    # centers = R2N.get_bin_centers_axis( h.GetXaxis())
-    # hwidths = R2N.get_bin_widths_axis( h.GetXaxis())*0.5
-    # height=R2N.get_buffer_hist1( h ).copy()
-    # if not mask is None:
-        # height = N.ma.array( height, mask=mask )
+    Y=output.data().copy()
+    lims  = N.array(output.datatype().edges)
+    X   =(lims[1:]+lims[:-1])*0.5
+    Xerr=(lims[1:]-lims[:-1])*0.5
 
-    # yerr = None
-    # if not noyerr:
-        # yerr2 = R2N.get_err_buffer_hist1( h )
-        # if yerr2 is None:
-            # yerr2 = height
-        # yerr = yerr2**0.5
+    if isinstance(yerr, str) and yerr=='stat':
+        Yerr=Y**0.5
+    else:
+        Yerr=yerr
 
-    # if not 'fmt' in kwargs:
-        # kwargs['fmt']='none'
-    # return P.errorbar( centers, height, yerr, hwidths, *args, **kwargs )
+    kwargs.setdefault('fmt', 'none')
 
+    return P.errorbar(X, Y, Yerr, Xerr, *args, **kwargs)
 
 def get_2d_buffer(output, transpose=False, mask=None):
     buf = output.data().copy()
@@ -390,51 +385,14 @@ def bar3d_hist2(output, *args, **kwargs):
 
     return colorbar_or_not_3d(res, colorbar, Zw, cmap=cmap)
 
-
-# def graph_plot( g, *args, **kwargs ):
-    # """Plot TGraph using pyplot.plot"""
-    # x, y = R2N.get_buffers_graph( g )
-    # return P.plot( x, y, *args, **kwargs )
-
-# def errorbar_graph( g, *args, **kwargs ):
-    # """Plot TGraphErrors using pyplot.errorbar"""
-    # x, y = R2N.get_buffers_graph( g )
-    # ex, ey = R2N.get_err_buffers_graph( g )
-    # if ( ex==0.0 ).all(): ex = None
-    # if ( ey==0.0 ).all(): ey = None
-    # return P.errorbar( x, y, ey, ex, *args, **kwargs )
-# ##end def
-
-# def errorbar_graph_asymm( g, *args, **kwargs ):
-    # """Plot TGraphErrors using pyplot.errorbar"""
-    # x, y = R2N.get_buffers_graph( g )
-    # exl, exh, eyl, eyh = R2N.get_err_buffers_graph_asymm( g )
-    # ex = N.array( ( exl, exh ) )
-    # ey = N.array( ( eyl, eyh ) )
-    # if ( ex==0.0 ).all(): ex = None
-    # if ( ey==0.0 ).all(): ey = None
-    # return P.errorbar( x, y, ey, ex, *args, **kwargs )
-
-# def spline_plot( spline, *args, **kwargs ):
-    # """Plot TSpline using pyplot.plot"""
-    # xmin = kwargs.pop( 'xmin', spline.GetXmin() )
-    # xmax = kwargs.pop( 'xmax', spline.GetXmax() )
-    # n    = kwargs.pop( 'n', spline.GetNp() )
-
-    # x = N.linspace( xmin, xmax, n )
-    # fcn = N.frompyfunc( spline.Eval, 1, 1 )
-    # y = fcn( x )
-
-    # return P.plot( x, y, *args, **kwargs )
-
 def bind():
     setattr( R.SingleOutput, 'plot',      plot_points )
     setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
     setattr( R.SingleOutput, 'vs_plot',   vs_plot_points )
     setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
+    setattr( R.SingleOutput, 'plot_errorbar', errorbar_hist1 )
     setattr( R.SingleOutput, 'plot_matshow', matshow )
-    # setattr( R.TH1, 'errorbar', errorbar_hist1 )
 
     setattr( R.SingleOutput, 'plot_pcolorfast', pcolorfast_hist2 )
     setattr( R.SingleOutput, 'plot_pcolormesh', pcolormesh_hist2 )

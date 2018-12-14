@@ -14,7 +14,7 @@
 class Product: public GNASingleObject,
                public TransformationBind<Product> {
 public:
-  Product();                                               ///< Constructor
+  Product();                                                   ///< Constructor
   Product(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Product from vector of outputs
 
   /**
