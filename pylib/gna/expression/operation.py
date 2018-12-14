@@ -117,7 +117,7 @@ class OSum(Operation):
         with nextlevel():
             for freeidx in self.indices.iterate():
                 rindices = [ridx for ridx in self.indices_to_reduce.iterate()]
-                names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
+                names    = stdvector([(ridx+freeidx).current_format('{autoindex}') for ridx in rindices])
                 weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
 
                 tobj, newout = self.new_tobject(freeidx, weights, names, weight_label=weight.name)

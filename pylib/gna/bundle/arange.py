@@ -21,7 +21,7 @@ class arange(TransformationBundle):
             self.make_trans( i, key )
 
     def make_trans(self, i, key):
-        tkey = key.current_format('{name}{autoindex}', name=self.cfg.name)
+        tkey = key.current_format(name=self.cfg.name)
 
         obj = C.Points(self.data)
         trans = obj.points

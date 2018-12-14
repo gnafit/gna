@@ -74,7 +74,7 @@ class baselines_v01(TransformationBundle):
         '''Create baseline variables in a common_namespace'''
 
         for i, it in enumerate(self.idx.iterate()):
-            name = it.current_format('{name}{autoindex}', name='baseline')
+            name = it.current_format(name='baseline')
             cur_det, cur_reactor = it.get_current('d'), it.get_current('r')
             try:
                 detector, reactor = self.detectors[cur_det], self.reactors[cur_reactor]

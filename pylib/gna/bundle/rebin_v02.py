@@ -15,7 +15,7 @@ class rebin_v02(TransformationBundle):
         for it in self.idx.iterate():
             rebin = self.objects[('rebin',)+it.current_values()] = C.Rebin( self.cfg.edges, self.cfg.rounding)
 
-            rebin.rebin.setLabel(it.current_format('Rebin\n{autoindexnd}'))
+            rebin.rebin.setLabel(it.current_format('Rebin\n{autoindex}'))
             self.set_input(rebin.rebin.histin, 'rebin', it, clone=0)
             self.set_output(rebin.rebin.histout, 'rebin', it)
 

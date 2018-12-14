@@ -8,11 +8,15 @@ from gna.env import env
 import re
 
 class VTContainer(OrderedDict):
+    indices=None
     def __init__(self, *args, **kwargs):
         super(VTContainer, self).__init__(*args, **kwargs)
 
+    def set_indices(self, indices):
+        self.indices=indices
+
     def __missing__(self, key):
-        newvar = Variable(key)
+        newvar = Variable(key, order=self.indices.order)
         self[key] = newvar
         return newvar
 
@@ -41,7 +45,6 @@ class Expression(object):
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
         self.globals=VTContainer(self.operations)
-        self.indices=OrderedDict()
         self.defindices(indices, **kwargs)
 
     def parse(self):
@@ -84,6 +87,7 @@ class Expression(object):
             sub=idx.sub
             if sub:
                 self.globals[sub.short]=sub
+        self.globals.set_indices(self.indices)
 
     def build(self, context):
         if not self.tree:
@@ -133,9 +137,8 @@ class ExpressionContext(object):
             cfg = self.providers.get(name, None)
             if cfg is None:
                 if indices:
-                    fmt='{name}{autoindex}'
                     for it in indices.iterate():
-                        self.require(it.current_format(fmt, name=name), None)
+                        self.require(it.current_format(name=name), None)
                     return self.required
 
                 raise Exception('Do not know how to build '+name)

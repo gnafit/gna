@@ -7,7 +7,7 @@ from collections import OrderedDict
 from gna.expression.printl import *
 from gna.grouping import Groups
 
-debugmethods=True
+debugmethods=False
 if debugmethods:
     def methodname(fcn):
         def newfcn(self, *args, **kwargs):
@@ -122,13 +122,16 @@ class Index(object):
         overriding[main]=sub
 
 class NIndex(object):
+    name_position=0
     def __init__(self, *indices, **kwargs):
         self.indices = OrderedDict()
         self.overriding={}
         self.overridden={}
+        self.order=[]
+        self.order_indices=[]
 
         for idx in indices:
-            self |= idx
+            self._append_indices(idx)
 
         ignore = kwargs.pop('ignore', None)
         if ignore:
@@ -141,31 +144,54 @@ class NIndex(object):
             args, sub=args[:3], args[3:]
             sub=sub and sub[0] or None
             idx = Index(*args, sub=sub)
-            self |= idx
+            self._append_indices(idx)
 
-        self.arrange()
+        self.arrange(kwargs.pop('order', None), kwargs.pop('name_position', 0))
 
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
+
+    def orders_consistent(self, order1, order2, exception=False):
+        if not order1 or order1==['name']:
+            return True
+        if not order2 or order2==['name']:
+            return True
+
+        ret=order1==order2
+
+        if exception and not ret:
+            print('Order 1', order1)
+            print('Order 2', order2)
+            raise Exception('Index orders are inconsistent')
+
+        return ret
 
     def __add__(self, other):
         if not isinstance(other, NIndex):
             raise Exception('Unsupported add() type')
 
-        return NIndex(self, other)
+        self.orders_consistent(self.order, other.order, True)
 
-    def __ior__(self, other):
+        return NIndex(self, other, order=self.order)
+
+    def _append_indices(self, other):
         if isinstance(other, Index):
             self.set_new(other.short, other)
         elif isinstance(other, str):
             self.set_new(other, Index(other, other, variants=None))
         else:
+            neworder = None
             if isinstance(other, NIndex):
                 others = other.indices.values()
+                neworder=other.order
             elif isinstance(other, Indexed):
                 others = other.indices.indices.values()
+                neworder=other.indices.order
             else:
                 raise Exception( 'Unsupported index type '+type(other).__name__ )
+
+            self.orders_consistent(self.order, neworder, True)
+            self.order=neworder
 
             for other in others:
                 self.set_new(other.short, other)
@@ -184,17 +210,31 @@ class NIndex(object):
             if oshort in self.indices:
                 del self.indices[oshort]
 
-    def __sub__(self, other):
-        return NIndex(self, ignore=other.indices.keys())
+    def make_inheritor(self, *args, **kwargs):
+        kwargs.setdefault('order', self.order)
+        return NIndex(*args, **kwargs)
 
-    def arrange(self):
-        self.indices = OrderedDict( [(k, self.indices[k]) for k in sorted(self.indices.keys())] )
+    def __sub__(self, other):
+        return self.make_inheritor(self, ignore=other.indices.keys())
+
+    def arrange(self, order, name_position=0):
+        if order:
+            if order=='sorted':
+                self.order = sorted(self.indices.keys())
+                self.order.insert(name_position, 'name')
+            else:
+                self.order = order
+        else:
+            self.order = self.indices.keys()
+            self.order.insert(name_position, 'name')
+
+        self.order_indices=list(self.order)
+        self.order_indices.remove('name')
+
+        self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
 
     def __str__(self):
         return ', '.join( self.indices.keys() )
-
-    def __add__(self, other):
-        return NIndex(self, other)
 
     def __bool__(self):
         return bool(self.indices)
@@ -206,24 +246,22 @@ class NIndex(object):
             other = NIndex(*other)
         return self.indices==other.indices
 
-    # def reduce(self, *indices):
-        # if not set(indices.keys()).issubset(self.indices.keys()):
-            # raise Exception( "NIndex.reduce should be called on a subset of indices, got {:s} in {:s}".format(indices.keys(), self.indices.keys()) )
-
-        # return NIndex(*(set(self.indices)-set(indices))) #legacy
-
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
 
-    def names(self, short=False):
-        if short:
-            return [idx.short for idx in self.indices.values()]
-        else:
-            return [idx.name for idx in self.indices.values()]
+    def names(self, short=False, with_name=False):
+        ret = []
+        for k in self.order:
+            idx = self.indices.get(k, None)
+            if idx is not None:
+                ret.append(short and idx.short or idx.name)
+            elif with_name and k=='name':
+                ret.append(k)
+        return ret
 
     def iterate(self, fix={}, **kwargs):
         for it in I.product(*(idx.iterate(fix=fix) for idx in self.indices.values())):
-            yield NIndex(*(Index(idx) for idx in it))
+            yield self.make_inheritor(*(Index(idx) for idx in it))
 
     __iter__ = iterate
 
@@ -239,23 +277,24 @@ class NIndex(object):
             res+=args+tuple(kwargs.items())
         return res
 
-    def autofmt(self):
-        autofmt = '}.{'.join(self.names())
-        if autofmt:
-            return '{'+autofmt+'}', '.{'+autofmt+'}'
-        return autofmt, autofmt
+    def make_format_string(self, with_name):
+        names=self.names(False, with_name)
+        autofmt = '}.{'.join(names)
+        return autofmt and '{%s}'%autofmt or ''
 
     def current_format(self, fmt=None, *args, **kwargs):
-        autofmtnd, autofmt = self.autofmt()
+        fmtauto = self.make_format_string(False)
+
         dct = dict( self.current_items('both', include_sub=True)+args, **kwargs )
-        autoindexnd, autoindex = autofmtnd.format(**dct), autofmt.format(**dct)
+        indexauto = fmtauto.format(**dct)
+
         if not fmt and 'name' in kwargs:
-            fmt='{name}{autoindex}'
+            fmt = self.make_format_string(True)
+
         if fmt:
-            dct['autoindex'] = autoindex
-            dct['autoindexnd'] = autoindexnd
+            dct['autoindex'] = indexauto
         else:
-            return autoindex
+            return indexauto
 
         return fmt.format( **dct )
 
@@ -271,18 +310,22 @@ class NIndex(object):
         return self.indices[oshort].sub
 
     def get_relevant(self, nidx):
-        return NIndex(*[nidx.get_relevant_index(s) for s in self.indices.keys()])
+        return self.make_inheritor(*[nidx.get_relevant_index(s) for s in self.indices.keys()])
 
     def get_sub(self, indices):
-        return NIndex(*[v for k, v in self.indices.items() if k in indices])
+        sub_indices=[v for k, v in self.indices.items() if k in indices]
+        return self.make_inheritor(*sub_indices)
 
     def split(self, indices):
         idx=[]
         other=[]
-        for k, v in self.indices.items():
-            (idx if k in indices else other).append(v)
+        for (k, v) in self.indices.items():
+            if k in indices:
+                idx.append(v)
+            else:
+                other.append(v)
 
-        return NIndex(*idx), NIndex(*other)
+        return self.make_inheritor(*idx), self.make_inheritor(*other)
 
     def get_current(self, short):
         return self.indices[short].current
@@ -315,9 +358,19 @@ class Indexed(object):
     indices_locked=False
     fmt=None
     expandable=True
+    indices=None
     def __init__(self, name, *indices, **kwargs):
         self.name=name
-        self.set_indices(*indices, **kwargs)
+
+        indices1=[]
+        for idx in indices:
+            if isinstance(idx, Indexed):
+                idx=idx.indices
+            indices1.append(idx)
+
+        self.set_indices(*indices1, **kwargs)
+
+        print('Indices', self.name, self.indices.order, self.indices.indices.keys())
 
     def set_label(self, label):
         self.label=label
@@ -388,7 +441,5 @@ class Indexed(object):
 
     def current_format(self, nidx, fmt=None, *args, **kwargs):
         nidx = self.indices.get_relevant(nidx)
-        if not fmt:
-            fmt = '{name}{autoindex}'
         return nidx.current_format( fmt, *args, name=self.name, **kwargs )
 

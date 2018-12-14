@@ -25,7 +25,7 @@ class detector_eres_common3_v02(TransformationBundle):
 
             for i, it in enumerate(self.idx.iterate()):
                 trans = eres.add(True)
-                label = it.current_format('Energy resolution\n{autoindexnd}')
+                label = it.current_format('Energy resolution\n{autoindex}')
                 trans.setLabel(label)
 
                 self.set_input(trans.inputs[0], 'eres', it, clone=0)

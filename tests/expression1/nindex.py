@@ -56,7 +56,7 @@ print()
 
 print( 'Iterate nidx (semi autofmt)' )
 for i, it in enumerate(ndx):
-    print( i, it.current_format( '{name}.{autoindex}', name='testname' ) )
+    print( i, it.current_format(name='testname') )
 print()
 
 

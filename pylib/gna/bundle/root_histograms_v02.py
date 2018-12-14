@@ -50,7 +50,7 @@ class root_histograms_v02(TransformationBundle):
                 print()
 
             hist=Histogram(edges, data)
-            fmt = self.cfg.get('label', 'hist {name}\n{autoindexnd}')
+            fmt = self.cfg.get('label', 'hist {name}\n{autoindex}')
             hist.hist.setLabel(it.current_format(fmt, name=self.cfg.name))
             self.set_output(hist.single(), self.cfg.name, it)
 

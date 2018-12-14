@@ -47,7 +47,7 @@ class Variable(Indexed):
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
-        super(Transformation, self).__init__(name, *args, **kwargs)
+        Indexed.__init__(self, name, *args, **kwargs)
 
     def __str__(self):
         return '{}()'.format(Indexed.__str__(self))

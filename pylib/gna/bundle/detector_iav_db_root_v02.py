@@ -31,17 +31,17 @@ class detector_iav_db_root_v02(TransformationBundle):
         with self.common_namespace:
             idxdet, idxother = self.idx.split( 'd' )
             for itdet in idxdet.iterate():
-                parname = itdet.current_format('{name}{autoindex}', name=self.cfg.parname)
+                parname = itdet.current_format(name=self.cfg.parname)
                 renormdiag = R.RenormalizeDiag( ndiag, 1, 1, parname, ns=self.common_namespace )
                 renormdiag.renorm.inmat( points.points )
-                renormdiag.renorm.setLabel(itdet.current_format('IAV matrix\n{autoindexnd}'))
+                renormdiag.renorm.setLabel(itdet.current_format('IAV matrix\n{autoindex}'))
                 self.set_output( renormdiag.single(), 'iavmatrix', itdet )
 
                 for itother in idxother.iterate():
                     it = itdet+itother
                     esmear = R.HistSmear(True)
                     esmear.smear.inputs.SmearMatrix( renormdiag.renorm )
-                    esmear.smear.setLabel(it.current_format('IAV effect\n{autoindexnd}'))
+                    esmear.smear.setLabel(it.current_format('IAV effect\n{autoindex}'))
                     self.set_input( esmear.smear.Ntrue, 'iav', it, clone=0 )
                     self.set_output( esmear.single(), 'iav', it )
 
@@ -64,7 +64,7 @@ class detector_iav_db_root_v02(TransformationBundle):
         self.pars = OrderedDict()
         idx = self.idx.get_sub('d')
         for it in idx.iterate():
-            parname = it.current_format('{name}{autoindex}', name=self.cfg.parname)
+            parname = it.current_format(name=self.cfg.parname)
             par = self.common_namespace.reqparameter(parname, cfg=self.cfg.scale)
             par.setLabel('IAV offdiagonal contribution scale')
             # self.pars[ns.name]=parname

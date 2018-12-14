@@ -21,7 +21,7 @@ class oscprob_v01(TransformationBundle):
 
         for i, it in enumerate(self.idx.iterate()):
             dist_it = it.get_sub( ('d', 'r') )
-            dist = dist_it.current_format('baseline{autoindex}')
+            dist = dist_it.current_format(name='baseline')
 
             oscprobkey = dist_it.current_format('{autoindex}')[1:]
             oscprob = self.objects.get( oscprobkey, None )
