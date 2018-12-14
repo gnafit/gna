@@ -16,7 +16,9 @@ class VTContainer(OrderedDict):
         self.indices=indices
 
     def __missing__(self, key):
+        print('create', key)
         newvar = Variable(key, order=self.indices.order)
+        print('done', key, newvar.indices.order)
         self[key] = newvar
         return newvar
 
@@ -24,6 +26,10 @@ class VTContainer(OrderedDict):
         if isinstance(value, Indexed):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
+            value.indices.arrange_as(self.indices)
+            print('set', key, value.name, value.indices.order)
+        else:
+            print('set', key)
 
         OrderedDict.__setitem__(self, key, value)
         return value

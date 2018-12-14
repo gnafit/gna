@@ -146,7 +146,7 @@ class NIndex(object):
             idx = Index(*args, sub=sub)
             self._append_indices(idx)
 
-        self.arrange(kwargs.pop('order', None), kwargs.pop('name_position', 0))
+        self.arrange(kwargs.pop('order', self.order), kwargs.pop('name_position', 0))
 
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
@@ -191,6 +191,7 @@ class NIndex(object):
                 raise Exception( 'Unsupported index type '+type(other).__name__ )
 
             self.orders_consistent(self.order, neworder, True)
+            print('Change order from', self.order, 'to', neworder)
             self.order=neworder
 
             for other in others:
@@ -232,6 +233,12 @@ class NIndex(object):
         self.order_indices.remove('name')
 
         self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
+
+    def arrange_as(self, nindex):
+        if not isinstance(nindex, NIndex):
+            raise Exception('Expect NIndex as argument')
+
+        self.arrange(nindex.order)
 
     def __str__(self):
         return ', '.join( self.indices.keys() )
@@ -390,7 +397,11 @@ class Indexed(object):
             if self.indices==args:
                 return self
             raise Exception('May not modify already declared indices')
-        self.set_indices(*args)
+
+        if self.indices is not None:
+            self.set_indices(*args, order=self.indices.order)
+        else:
+            self.set_indices(*args)
         return self
 
     def __add__(self, other):
