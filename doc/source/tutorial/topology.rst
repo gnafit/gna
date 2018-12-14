@@ -1,3 +1,5 @@
+.. _tutorial_topology:
+
 Lazy evaluation and graph structure
 '''''''''''''''''''''''''''''''''''
 

@@ -58,7 +58,6 @@ The value of the function is then computed as :math:`f_{ij}=f(X_\text{mesh}, Y_\
 The output histogram is then defined as:
 
 .. math::
-   :label: quad2_again
 
    H_{km}
    \approx
@@ -158,7 +157,7 @@ is passed to the sine object.
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
     :lines: 45-46
 
-These two lines implement the function :ref:`integral_2d_function`. The output of this function is passed to the
+These two lines implement the function :eq:`integral_2d_function`. The output of this function is passed to the
 integrator:
 
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py

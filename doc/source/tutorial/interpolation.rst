@@ -112,6 +112,26 @@ inputs of `insegment` and `interp`, then we do the same for fine :math:`z` value
 `insegment` and `widths` from the `insegment` to the `interp`. `y1` is then binded to the first input while `y2` is
 binded to the second input, created by `add_input()` method.
 
+Two input functions may be interpolated by two distinct transformations within the same object.
+See the tutorial :ref:`tutorial_topology` for the more details on usage of `add_input()` and `add_transformation()` methods.
+
+Now we leave all :math:`p_1` values equal to 1 so the first graph represent the initial coarse function. For the second
+curve we set each odd parameter to 2 to compensate the saw-like structure.
+
+.. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
+    :linenos:
+    :lines: 74-75
+
+After plotting `y1` and `y2` let us set each even :math:`p_1` to 0.5 and plot again. The result may be found on the
+picture below.
+
 .. figure:: ../../img/tutorial/05_interpolation.png
     :align: center
+
+    Example of exponential interpolation.
+
+The dashed lines black represent the segment edges, the dashed blue line is the initial coarse function defined on these
+edges. Orange squares represent the interpolated function. They are slightly off the straight line since we have used
+exponential interpolation. Green triangles are for `y2` and the red triangles are for `y1` again after we scaled each
+even parameter down.
 

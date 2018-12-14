@@ -24,7 +24,7 @@ points   = C.Points(points, labels='Fine x\n(shuffled)')
 # Initialize raw function
 y0 = np.exp(1/edges.single().data()**0.5)
 # Make it saw-like by scaling all odd and even points to different sides
-y0[::2]*=1.3
+y0[::2]*=1.4
 y0[1::2]*=0.7
 y0 = C.Points(y0, labels='Coarse y\n(not scaled)')
 
@@ -72,19 +72,24 @@ interpolator.print()
 
 # Change each second parameter for second curve
 for par in pars2.values()[1::2]:
-    par.set(1.96)
+    par.set(2.0)
 
 # Print parameters
 env.globalns.printparameters(labels=True)
 
 # Plot graphs
 fig = plt.figure()
-ax = plt.subplot(111, xlabel='x', ylabel='y', title='interpolation')
+ax = plt.subplot(111, xlabel='x', ylabel='y', title='Interpolation')
 ax.minorticks_on()
 
 y0.points.points.plot_vs(edges.single(), '--', label='Original function')
-interp1.plot_vs(points.single(), '^', label='Interpolation (scale 1)', markerfacecolor='none')
-interp2.plot_vs(points.single(), 'v', label='Interpolation (scale 2)', markerfacecolor='none')
+interp1.plot_vs(points.single(), 's', label='Interpolation (scale 1)', markerfacecolor='none')
+interp2.plot_vs(points.single(), '^', label='Interpolation (scale 2)', markerfacecolor='none')
+
+for par in pars1.values()[::2]:
+    par.set(0.50)
+
+interp1.plot_vs(points.single(), 'v', label='Interpolation (scale 1, modified)', markerfacecolor='none')
 
 ax.autoscale(enable=False, axis='y')
 ymin, ymax = ax.get_ylim()
