@@ -52,6 +52,7 @@ set (SOURCES
   transformations/functions/Cos.cc
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
+  transformations/hist/RebinN.cc
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
   transformations/integrator/Integrator21Base.cc
@@ -184,6 +185,7 @@ set (HEADERS
   NormalToyMC.hh
   PoissonToyMC.hh
   Rebin.hh
+  RebinN.hh
   VarArray.hh
   VarProduct.hh
   VarSum.hh
