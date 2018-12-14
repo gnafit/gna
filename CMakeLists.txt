@@ -271,10 +271,14 @@ if(USE_PROFILE)
 endif()
 
 
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Apple Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++17-extensions")
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ggdb3 -fsanitize=undefined -fno-omit-frame-pointer")
@@ -282,7 +286,7 @@ endif()
 
 include(dev-tools)
 
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -311,7 +315,7 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
-target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
+target_link_libraries(${LIBNAME} PRIVATE fmt)
 
 if(GENERATE_PROFILE)
     target_link_libraries(${LIBNAME} PRIVATE "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
