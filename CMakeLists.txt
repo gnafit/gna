@@ -259,6 +259,7 @@ option(GENERATE_PROFILE OFF)
 option(USE_PROFILE OFF)
 
 
+set(BUILD_SHARED_LIBS ON)
 
 if(GENERATE_PROFILE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
@@ -281,7 +282,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "App
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ggdb3 -fsanitize=undefined -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ggdb3 -fno-omit-frame-pointer")
 endif()
 
 include(dev-tools)
@@ -319,8 +320,4 @@ target_link_libraries(${LIBNAME} PRIVATE fmt)
 
 if(GENERATE_PROFILE)
     target_link_libraries(${LIBNAME} PRIVATE "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
-    target_link_libraries(${LIBNAME} PRIVATE "-fsanitize=undefined")
 endif()
