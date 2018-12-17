@@ -1,3 +1,10 @@
+option(NATIVE OFF)
+option(TRANS_DEBUG OFF)
+option(PARAM_DEBUG OFF)
+option(GRIDFILTER_DEBUG OFF)
+option(NONLINEARITY_DEBUG OFF)
+option(COV_DEBUG OFF)
+
 if(NATIVE)
     message(STATUS "Using native set of CPU instructions")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")

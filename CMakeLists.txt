@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
@@ -257,35 +257,28 @@ message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
 option(GENERATE_PROFILE OFF)
 option(USE_PROFILE OFF)
+option(UB_SANITIZE OFF)
+option(LTO OFF)
 
+#Check if LTO is possible
+if(LTO)
+    if(POLICY CMP0069)
+        message(STATUS "in lto check")
+        cmake_policy(SET CMP0069 NEW)
+    endif()
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT output)
+endif()
 
 set(BUILD_SHARED_LIBS ON)
 
-if(GENERATE_PROFILE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
-    message(STATUS "Building with collection of PGO profiling enabled")
-endif()
-
-if(USE_PROFILE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-use=${CMAKE_BINARY_DIR}/profile-data -fprofile-correction")
-    message(STATUS "Build using collected PGO profiling info")
-endif()
-
-
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c++17-extensions")
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -ggdb3 -fno-omit-frame-pointer")
-endif()
-
-include(dev-tools)
+include(compilation_opts)
+include(debug_opts)
 
 add_subdirectory(fmt)
 
@@ -312,6 +305,11 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
+
+if(result)
+    set_property(TARGET ${LIBNAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
@@ -320,4 +318,8 @@ target_link_libraries(${LIBNAME} PRIVATE fmt)
 
 if(GENERATE_PROFILE)
     target_link_libraries(${LIBNAME} PRIVATE "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+endif()
+
+if(UB_SANITIZE)
+    target_link_libraries(${LIBNAME} PRIVATE "-fsanitize=undefined")
 endif()
