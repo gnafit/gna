@@ -125,8 +125,11 @@ class NIndex(object):
     name_position=0
     def __init__(self, *indices, **kwargs):
         self.indices = OrderedDict()
+
         self.overriding={}
         self.overridden={}
+
+        self.order_initial=[]
         self.order=[]
         self.order_indices=[]
 
@@ -140,13 +143,17 @@ class NIndex(object):
                     del self.indices[other]
 
         fromlist = kwargs.pop('fromlist', [])
-        for args in fromlist:
+        name_position=0
+        for i, args in enumerate(fromlist):
+            if isinstance(args, str) and args=='name':
+                name_position=i
+                continue
             args, sub=args[:3], args[3:]
             sub=sub and sub[0] or None
             idx = Index(*args, sub=sub)
             self._append_indices(idx)
 
-        self.arrange(kwargs.pop('order', self.order), kwargs.pop('name_position', 0))
+        self.arrange(kwargs.pop('order', self.order), kwargs.pop('name_position', name_position))
 
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
@@ -176,9 +183,9 @@ class NIndex(object):
 
     def _append_indices(self, other):
         if isinstance(other, Index):
-            self.set_new(other.short, other)
+            self._set_new(other.short, other)
         elif isinstance(other, str):
-            self.set_new(other, Index(other, other, variants=None))
+            self._set_new(other, Index(other, other, variants=None))
         else:
             neworder = None
             if isinstance(other, NIndex):
@@ -191,15 +198,15 @@ class NIndex(object):
                 raise Exception( 'Unsupported index type '+type(other).__name__ )
 
             self.orders_consistent(self.order, neworder, True)
-            print('Change order from', self.order, 'to', neworder)
             self.order=neworder
 
             for other in others:
-                self.set_new(other.short, other)
+                self._set_new(other.short, other)
 
         return self
 
-    def set_new(self, short, other):
+    def _set_new(self, short, other):
+        self.order_initial.append(short)
         if short in self.overridden:
             return
 
@@ -221,16 +228,16 @@ class NIndex(object):
     def arrange(self, order, name_position=0):
         if order:
             if order=='sorted':
-                self.order = sorted(self.indices.keys())
+                self.order = sorted(self.order_initial)
                 self.order.insert(name_position, 'name')
             else:
                 self.order = order
         else:
-            self.order = self.indices.keys()
-            self.order.insert(name_position, 'name')
+            self.order = self.order_initial
+            if not 'name' in self.order:
+                self.order.insert(name_position, 'name')
 
-        self.order_indices=list(self.order)
-        self.order_indices.remove('name')
+        self.order_indices=list((name for name in self.order if name in self.indices))
 
         self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
 
@@ -376,8 +383,6 @@ class Indexed(object):
             indices1.append(idx)
 
         self.set_indices(*indices1, **kwargs)
-
-        print('Indices', self.name, self.indices.order, self.indices.indices.keys())
 
     def set_label(self, label):
         self.label=label

@@ -61,7 +61,6 @@ class baselines_v01(TransformationBundle):
                     new[str(key)] = value
             self.detectors = new
 
-
     def compute_distance(self, reactor, detector):
         '''Computes distance between pair of reactor and detector. Coordinates
         of both of them should have the same shape, i.e. either 1d or 3d'''
@@ -83,25 +82,9 @@ class baselines_v01(TransformationBundle):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
-
             self.common_namespace.reqparameter(name, central=distance,
                     sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
 
-
-            inv_key = it.current_format("{name}{autoindex}", name='baselineweight')
-
+            inv_key = it.current_format(name='baselineweight')
             self.common_namespace.reqparameter(inv_key, central=0.25/distance**2/np.pi, sigma=0.1, fixed=True,
                         label="1/(4πL²) for {} and {}, m⁻²".format(cur_det, cur_reactor))
-
-            try:
-                snf_pool =  self.snf_pools[cur_reactor]
-                distance_snf = self.compute_distance(reactor=snf_pool, detector=detector)
-
-                self.common_namespace.reqparameter(name+"_snf", central=distance_snf, sigma=0.1,
-                        fixed=True, label="Baseline between {} and {} SNF pool, m".format(cur_det, cur_reactor))
-
-                self.common_namespace.reqparameter(inv_key+"_snf",
-                        central=0.25/distance_snf**2/np.pi, sigma=0.1, fixed=True,
-                            label="1/(4πL²) for {} and {} SNF pool, m⁻²".format(cur_det, cur_reactor))
-            except:
-                continue

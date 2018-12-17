@@ -13,9 +13,10 @@ class OperationMeta(type):
 class Operation(TCall,NestedTransformation):
     __metaclass__ = OperationMeta
     call_lock=False
+    order_from=None
     def __init__(self, operation, *indices, **kwargs):
         self.operation=operation
-        self.indices_to_reduce = NIndex(*indices)
+        self.indices_to_reduce = NIndex(*indices, order=self.order)
         TCall.__init__(self, undefinedname)
         NestedTransformation.__init__(self)
 

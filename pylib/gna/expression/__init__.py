@@ -6,6 +6,7 @@ from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
 from gna.env import env
 import re
+import inspect
 
 class VTContainer(OrderedDict):
     indices=None
@@ -16,9 +17,7 @@ class VTContainer(OrderedDict):
         self.indices=indices
 
     def __missing__(self, key):
-        print('create', key)
         newvar = Variable(key, order=self.indices.order)
-        print('done', key, newvar.indices.order)
         self[key] = newvar
         return newvar
 
@@ -27,9 +26,8 @@ class VTContainer(OrderedDict):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
             value.indices.arrange_as(self.indices)
-            print('set', key, value.name, value.indices.order)
-        else:
-            print('set', key)
+        elif inspect.isclass(value) and issubclass(value, Operation):
+            value.order=list(self.indices.order)
 
         OrderedDict.__setitem__(self, key, value)
         return value
@@ -50,8 +48,13 @@ class Expression(object):
         self.expressions_raw = [ rexpr.sub('', cexpr.sub('', e)) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
-        self.globals=VTContainer(self.operations)
+        self.globals=VTContainer()
         self.defindices(indices, **kwargs)
+        self.set_operations()
+
+    def set_operations(self):
+        for name, op in self.operations.iteritems():
+            self.globals[name]=op
 
     def parse(self):
         if self.tree:

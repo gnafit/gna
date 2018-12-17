@@ -37,31 +37,32 @@ R.GNAObject
 #
 if args.indices=='complete':
     indices = [
-        ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
-        ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
+        ('s', 'site',        ['EH1', 'EH2', 'EH3']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34'],
                              dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
-        ('s', 'site',        ['EH1', 'EH2', 'EH3']),
+        ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
+        ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.indices=='minimal':
     indices = [
-        ('i', 'isotope', ['U235']),
-        ('r', 'reactor',     ['DB1']),
+        ('s', 'site',        ['EH1']),
         ('d', 'detector',    ['AD11'],
                              dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',))]))),
-        ('s', 'site',        ['EH1']),
+        ('r', 'reactor',     ['DB1']),
+        ('i', 'isotope', ['U235']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
 elif args.indices=='small':
     indices = [
-        ('i', 'isotope', ['U235']),
-        ('r', 'reactor',     ['DB1', 'LA1']),
+        ('s', 'site',        ['EH1', 'EH2']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21'],
                              dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21',)) ]))),
-        ('s', 'site',        ['EH1', 'EH2']),
+        'name',
+        ('r', 'reactor',     ['DB1', 'LA1']),
+        ('i', 'isotope', ['U235']),
         ('c', 'component',   ['comp0', 'comp12']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]

@@ -56,7 +56,7 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
 
                 iso_idx = self.fission_info['isotopes'].index(iso_name)
                 relsigma = self.fission_info['relsigma'][iso_idx]
-                ff_name = "fission_fraction" + it.current_format()
+                ff_name = it.current_format(name='fission_fraction')
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
                 isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
