@@ -182,6 +182,7 @@ class NIndex(object):
         return NIndex(self, other, order=self.order)
 
     def _append_indices(self, other):
+        from gna.expression.indexed import Indexed
         if isinstance(other, Index):
             self._set_new(other.short, other)
         elif isinstance(other, str):
@@ -192,8 +193,8 @@ class NIndex(object):
                 others = other.indices.values()
                 neworder=other.order
             elif isinstance(other, Indexed):
-                others = other.indices.indices.values()
-                neworder=other.indices.order
+                others = other.nindex.indices.values()
+                neworder=other.nindex.order
             else:
                 raise Exception( 'Unsupported index type '+type(other).__name__ )
 
@@ -240,12 +241,6 @@ class NIndex(object):
         self.order_indices=list((name for name in self.order if name in self.indices))
 
         self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
-
-    def arrange_as(self, nindex):
-        if not isinstance(nindex, NIndex):
-            raise Exception('Expect NIndex as argument')
-
-        self.arrange(nindex.order)
 
     def __str__(self):
         return ', '.join( self.indices.keys() )
@@ -365,97 +360,4 @@ class NameUndefined():
         return self.__str__()+other
 
 undefinedname = NameUndefined()
-
-class Indexed(object):
-    name=''
-    label=None
-    indices_locked=False
-    fmt=None
-    expandable=True
-    indices=None
-    def __init__(self, name, *indices, **kwargs):
-        self.name=name
-
-        indices1=[]
-        for idx in indices:
-            if isinstance(idx, Indexed):
-                idx=idx.indices
-            indices1.append(idx)
-
-        self.set_indices(*indices1, **kwargs)
-
-    def set_label(self, label):
-        self.label=label
-
-    def set_format(self, fmt):
-        self.fmt = fmt
-
-    def set_indices(self, *indices, **kwargs):
-        self.indices=NIndex(*indices, **kwargs)
-        if indices:
-            self.indices_locked=True
-
-    def __getitem__(self, args):
-        if not isinstance(args, tuple):
-            args = args,
-        if self.indices_locked:
-            if self.indices==args:
-                return self
-            raise Exception('May not modify already declared indices')
-
-        if self.indices is not None:
-            self.set_indices(*args, order=self.indices.order)
-        else:
-            self.set_indices(*args)
-        return self
-
-    def __add__(self, other):
-        raise Exception('not implemented')
-
-    def __str__(self):
-        if self.indices:
-            return '{}[{}]'.format(self.name, str(self.indices))
-        else:
-            return self.name
-
-    def estr(self, expand=100):
-        return self.__str__()
-
-    def __eq__(self, other):
-        if not isinstance(other, Indexed):
-            return False
-        if self.name!=other.name:
-            return False
-        return self.indices==other.indices
-
-    def walk(self, yieldself=False, operation=''):
-        yield self, operation
-
-    def ident(self, **kwargs):
-        if self.name is undefinedname:
-            return self.guessname(**kwargs)
-        return self.name
-
-    def ident_full(self, **kwargs):
-        return '{}:{}'.format(self.ident(**kwargs), self.indices.ident(**kwargs))
-
-    def guessname(self, *args, **kwargs):
-        return undefinedname
-
-    def dump(self, yieldself=False):
-        for i, (obj, operator) in enumerate(self.walk(yieldself)):
-            printl(operator, obj, prefix=('% 3i'%i, '% 2i'%current_level()) )
-
-    def get_output(self, nidx, context):
-        return context.get_output(self.name, self.get_relevant( nidx ))
-
-    def get_input(self, nidx, context, clone=None):
-        return context.get_input(self.name, self.get_relevant( nidx ), clone=clone)
-
-    def get_relevant(self, nidx):
-        return self.indices.get_relevant(nidx)
-
-    def current_format(self, nidx, fmt=None, *args, **kwargs):
-        nidx = self.indices.get_relevant(nidx)
-        return nidx.current_format( fmt, *args, name=self.name, **kwargs )
 

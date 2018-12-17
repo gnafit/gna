@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.expression.index import *
+from gna.expression.indexed import *
 
 def call_once(method):
     def newmethod(self, *args, **kwargs):
@@ -43,7 +43,7 @@ class Variable(Indexed):
 
     @methodname
     def require(self, context):
-        context.require(self.name, self.indices)
+        context.require(self.name, self.nindex)
 
 class Transformation(Indexed):
     def __init__(self, name, *args, **kwargs):
@@ -70,7 +70,7 @@ class Transformation(Indexed):
 
     @methodname
     def require(self, context):
-        context.require(self.name, self.indices)
+        context.require(self.name, self.nindex)
 
     @call_once
     def bind(self, context):

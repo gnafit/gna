@@ -9,15 +9,15 @@ import re
 import inspect
 
 class VTContainer(OrderedDict):
-    indices=None
+    _order=None
     def __init__(self, *args, **kwargs):
         super(VTContainer, self).__init__(*args, **kwargs)
 
     def set_indices(self, indices):
-        self.indices=indices
+        self._order=indices.order
 
     def __missing__(self, key):
-        newvar = Variable(key, order=self.indices.order)
+        newvar = Variable(key, order=self._order)
         self[key] = newvar
         return newvar
 
@@ -25,9 +25,9 @@ class VTContainer(OrderedDict):
         if isinstance(value, Indexed):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
-            value.indices.arrange_as(self.indices)
+            value.nindex.arrange(self._order)
         elif inspect.isclass(value) and issubclass(value, Operation):
-            value.order=list(self.indices.order)
+            value.order=self._order
 
         OrderedDict.__setitem__(self, key, value)
         return value
@@ -89,20 +89,20 @@ class Expression(object):
         return 'Expression("{}")'.format(self.expressions_raw)
 
     def defindices(self, defs):
-        self.indices = NIndex(fromlist=defs)
-        for short, idx in self.indices.indices.items():
+        self.nindex = NIndex(fromlist=defs)
+        for short, idx in self.nindex.indices.items():
             self.globals[short] = idx
 
             sub=idx.sub
             if sub:
                 self.globals[sub.short]=sub
-        self.globals.set_indices(self.indices)
+        self.globals.set_indices(self.nindex)
 
     def build(self, context):
         if not self.tree:
             raise Exception('Expression is not initialized, call parse() method first')
 
-        context.set_indices(self.indices)
+        context.set_indices(self.nindex)
         for tree in self.trees:
             creq = tree.require(context)
 
@@ -137,7 +137,7 @@ class ExpressionContext(object):
         return self.ns
 
     def set_indices(self, indices):
-        self.indices = indices
+        self.nindex = indices
 
     @methodname
     def require(self, name, indices):
