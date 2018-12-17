@@ -263,7 +263,6 @@ option(LTO OFF)
 #Check if LTO is possible
 if(LTO)
     if(POLICY CMP0069)
-        message(STATUS "in lto check")
         cmake_policy(SET CMP0069 NEW)
     endif()
     include(CheckIPOSupported)
