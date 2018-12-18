@@ -23,7 +23,7 @@ else:
         pass
 
 class Index(object):
-    sub, group = None, None
+    slave, master, group = None, None, None
     def __init__(self, *args, **kwargs):
         first, args = args[0], args[1:]
         if isinstance(first, Index):
@@ -31,8 +31,8 @@ class Index(object):
             self.name     = first.name
             self.variants = first.variants
             self.current  = first.current
-            if first.sub:
-                self.sub      = Index(first.sub)
+            if first.slave:
+                self.slave    = Index(first.slave, master=self)
                 self.group    = first.group
         else:
             self.short = first
@@ -48,33 +48,37 @@ class Index(object):
             if len(varcheck)!=len(self.variants):
                 raise Exception('There are duplicated indices ({name}): {idxlist!s}'.format(name=self.name, idxlist=self.variants))
 
-            sub = kwargs.pop('sub', None)
-            if sub:
-                self.set_sub(sub)
+            slave = kwargs.pop('slave', None)
+            if slave:
+                self.set_slave(slave)
+
+        self.master=kwargs.pop('master', None)
 
         if args or kwargs:
             raise Exception( 'Unparsed paramters: {:s}, {:s}'.format(args, kwargs) )
 
-    def set_sub(self, sub):
-        short = sub['short']
-        name = sub['name']
-        map = sub['map']
+    def set_slave(self, slave):
+        short = slave['short']
+        name = slave['name']
+        map = slave['map']
+        if isinstance(map, (list,tuple)):
+            map=OrderedDict(map)
         variants = list(map.keys())
 
-        self.sub = Index(short, name, variants)
+        self.slave = Index(short, name, variants, master=self)
         self.group = Groups(map)
 
         for v in self.variants:
             if not v in self.group:
-                raise Exception('Inconsistent sub index {}'.format(v))
+                raise Exception('Inconsistent slave index {}'.format(v))
 
         if self.current:
-            self.sub.current=self.group[self.current]
+            self.slave.current=self.group[self.current]
 
     def set_current(self, c):
         self.current = c
-        if self.sub:
-            self.sub.current=self.group[self.current]
+        if self.slave:
+            self.slave.current=self.group[self.current]
 
     def iterate(self, fix={}):
         if self.variants is None:
@@ -98,7 +102,7 @@ class Index(object):
     def __str__(self):
         return '{name} ({short}): {variants:s}'.format( **self.__dict__ )
 
-    def current_items(self, mode='short', include_sub=False):
+    def current_items(self, mode='short', include_slaves=False):
         res=tuple()
         if mode in ('short', 'both'):
             res+=(self.short, self.current),
@@ -108,26 +112,33 @@ class Index(object):
         if not res:
             raise Exception( 'Unknown mode '+mode )
 
-        if include_sub and self.sub:
-            res+=self.sub.current_items(mode)
+        if include_slaves and self.slave:
+            res+=self.slave.current_items(mode)
 
         return res
 
-    def configure_override(self, overridden, overriding):
-        if not self.sub:
+    def current_values(self, include_slaves=False):
+        res=(self.current,)
+
+        if include_slaves and self.slave:
+            res+=self.slave.current_values(include_slaves)
+
+        return res
+
+    def configure_override(self, slaveof, masterof):
+        if not self.slave:
             return
 
-        main, sub = self.short, self.sub.short
-        overridden[sub]=main
-        overriding[main]=sub
+        slaveof[self.short]=self.slave
+        masterof[self.slave.short]=self
 
 class NIndex(object):
     name_position=0
     def __init__(self, *indices, **kwargs):
         self.indices = OrderedDict()
 
-        self.overriding={}
-        self.overridden={}
+        self.slaveof={}
+        self.masterof={}
 
         self.order_initial=[]
         self.order=[]
@@ -148,9 +159,9 @@ class NIndex(object):
             if isinstance(args, str) and args=='name':
                 name_position=i
                 continue
-            args, sub=args[:3], args[3:]
-            sub=sub and sub[0] or None
-            idx = Index(*args, sub=sub)
+            args, slave=args[:3], args[3:]
+            slave=slave and slave[0] or None
+            idx = Index(*args, slave=slave)
             self._append_indices(idx)
 
         self.arrange(kwargs.pop('order', self.order), kwargs.pop('name_position', name_position))
@@ -208,16 +219,16 @@ class NIndex(object):
 
     def _set_new(self, short, other):
         self.order_initial.append(short)
-        if short in self.overridden:
+        if short in self.masterof:
             return
 
         self.indices[short]=other
-        other.configure_override( overriding=self.overriding, overridden=self.overridden )
+        other.configure_override(slaveof=self.slaveof, masterof=self.masterof)
 
-        if short in self.overriding:
-            oshort=self.overriding[short]
-            if oshort in self.indices:
-                del self.indices[oshort]
+        if short in self.slaveof:
+            slave=self.slaveof[short]
+            if slave.short in self.indices:
+                del self.indices[slave.short]
 
     def make_inheritor(self, *args, **kwargs):
         kwargs.setdefault('order', self.order)
@@ -274,17 +285,40 @@ class NIndex(object):
 
     __iter__ = iterate
 
-    def current_values(self):
-        return tuple(idx.current for idx in self.indices.values())
+    def current_values(self, name=None, include_slaves=False):
+        ret = tuple()
+        for short in self.order:
+            idx = self.indices.get(short, None)
+            if idx is not None:
+                ret+=(idx.current,)
+                continue
 
-    def current_items(self, mode='short', *args, **kwargs):
-        res=()
-        include_sub=kwargs.pop('include_sub', None)
-        for v in self.indices.values():
-            res+=v.current_items(mode, *args, include_sub=include_sub)
-        if mode=='both':
-            res+=args+tuple(kwargs.items())
-        return res
+            if include_slaves:
+                idx = self.masterof.get(short, None)
+                if idx:
+                    ret+=(idx.current,)
+                    continue
+
+            if name is not None and short=='name':
+                ret+=(name,)
+
+        return ret
+
+    def current_items(self, mode='short', include_slaves=False):
+        ret = tuple()
+        for short in self.order:
+            idx = self.indices.get(short, None)
+            if idx is not None:
+                ret+=idx.current_items(mode)
+                continue
+
+            if include_slaves:
+                idx = self.masterof.get(short, None)
+                if idx:
+                    ret+=idx.current_items(mode)
+                    continue
+
+        return ret
 
     def make_format_string(self, with_name):
         names=self.names(False, with_name)
@@ -294,7 +328,7 @@ class NIndex(object):
     def current_format(self, fmt=None, *args, **kwargs):
         fmtauto = self.make_format_string(False)
 
-        dct = dict( self.current_items('both', include_sub=True)+args, **kwargs )
+        dct = dict( self.current_items('both', include_slaves=True)+args, **kwargs )
         indexauto = fmtauto.format(**dct)
 
         if not fmt and 'name' in kwargs:
@@ -307,34 +341,54 @@ class NIndex(object):
 
         return fmt.format( **dct )
 
-    def get_relevant_index(self, short):
+    def get_relevant_index(self, short, exception=True):
         idx = self.indices.get(short, None)
         if idx is not None:
             return idx
 
-        oshort = self.overridden.get(short, None)
-        if oshort is None:
-            raise Exception('Can not find relevant index for {} in {}.format(short, self.indices.keys())')
+        master = self.masterof.get(short, None)
+        if master is None:
+            if exception:
+                raise Exception('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
+            else:
+                return None
 
-        return self.indices[oshort].sub
+        return master.slave
 
-    def get_relevant(self, nidx):
-        return self.make_inheritor(*[nidx.get_relevant_index(s) for s in self.indices.keys()])
+    def get_relevant(self, indices):
+        if isinstance(indices, NIndex):
+            return self.make_inheritor(*[indices.get_relevant_index(s) for s in self.indices.keys()])
 
-    def get_sub(self, indices):
-        sub_indices=[v for k, v in self.indices.items() if k in indices]
-        return self.make_inheritor(*sub_indices)
+        lst=()
+        for s in indices:
+            idx=self.get_relevant_index(s, exception=False)
+            if idx:
+                lst+=idx,
+        return self.make_inheritor(*lst)
+
+    def get_subset(self, indices):
+        if isinstance(indices, NIndex):
+            return self.make_inheritor(*[self.get_relevant_index(s) for s in indices.indices.keys()])
+
+        return self.make_inheritor(*[self.get_relevant_index(s) for s in indices])
 
     def split(self, indices):
-        idx=[]
-        other=[]
-        for (k, v) in self.indices.items():
-            if k in indices:
-                idx.append(v)
-            else:
-                other.append(v)
+        majors, minors, used=(), (), ()
 
-        return self.make_inheritor(*idx), self.make_inheritor(*other)
+        for short in indices:
+            major=self.get_relevant_index(short)
+            majors+=major,
+            used+=short,
+            if major.master:
+                used+=major.master.short,
+
+        for short, idx in self.indices.iteritems():
+            if short in used:
+                continue
+
+            minors+=idx,
+
+        return self.make_inheritor(*majors), self.make_inheritor(*minors)
 
     def get_current(self, short):
         return self.indices[short].current
