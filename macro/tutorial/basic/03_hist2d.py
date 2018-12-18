@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import constructors as C
+import gna.constructors as C
 import numpy as np
 # Create numpy arrays for bin edges
 nbinsx, nbinsy = 12, 8

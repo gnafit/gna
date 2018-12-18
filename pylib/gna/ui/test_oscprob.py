@@ -1,6 +1,6 @@
 from gna.ui import basecmd
 import ROOT
-import constructors as C
+import gna.constructors as C
 import gna.parameters.oscillation
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages

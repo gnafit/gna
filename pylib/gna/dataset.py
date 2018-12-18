@@ -1,6 +1,6 @@
 from __future__ import print_function
 import ROOT
-import constructors as C
+import gna.constructors as C
 from collections import defaultdict, namedtuple
 import numpy as np
 

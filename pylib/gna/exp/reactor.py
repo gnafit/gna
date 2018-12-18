@@ -9,7 +9,7 @@ import gna.parameters.oscillation
 import itertools
 from gna.exp import baseexp
 from gna.env import env
-import constructors as C
+import gna.constructors as C
 
 
 year=365*24*60*60.0

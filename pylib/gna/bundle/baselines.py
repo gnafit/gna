@@ -3,7 +3,7 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as np
-import constructors as C
+import gna.constructors as C
 from gna.bundle import *
 import itertools
 
@@ -21,10 +21,10 @@ class baselines(TransformationBundle):
                 self.idx = NIndex(fromlist=self.cfg.indices)
 
             # Check that naming in index and data is consistent
-            self.constistency_check() 
+            self.constistency_check()
         except KeyError:
             pass
-      
+
 
 
 

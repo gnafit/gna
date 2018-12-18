@@ -4,7 +4,7 @@ import ROOT
 import numpy as np
 import scipy.misc
 from scipy.stats import poisson
-import constructors as C
+import gna.constructors as C
 
 class cmd(basecmd):
     @classmethod
