@@ -91,7 +91,7 @@ class integral_1d_v01(TransformationBundle):
             # Create a histogram instance, that will convert an integrator output to the histogram
             hist = R.GaussLegendreHist(self.integrator)
             # label it (graphviz)
-            hist.hist.setLabel( it.current_format('hist{autoindex}') )
+            hist.hist.setLabel(it.current_format(name='hist'))
 
             # register the input and output
             self.set_input( hist.hist.f,    self.cfg.name, it, clone=0)

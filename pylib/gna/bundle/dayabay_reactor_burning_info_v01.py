@@ -47,16 +47,16 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
     def define_variables(self):
         ns = self.common_namespace
 
-        for reacit in self.idx.get_sub("r"):
+        for reacit in self.idx.get_subset("r"):
             isotope_pac = []
-            for isoit in self.idx.get_sub("i"):
+            for isoit in self.idx.get_subset("i"):
                 it = reacit + isoit
                 iso_name = isoit.indices['i'].current
                 reac_name = reacit.indices['r'].current
 
                 iso_idx = self.fission_info['isotopes'].index(iso_name)
                 relsigma = self.fission_info['relsigma'][iso_idx]
-                ff_name = "fission_fraction" + it.current_format()
+                ff_name = it.current_format(name='fission_fraction')
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
                 isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
@@ -84,7 +84,7 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
 
             thermal_power_daily = np.repeat(core['power'], days_in_period)
             thermal_power_per_core = C.Points(thermal_power_daily)
-            thermal_power_per_core.points.setLabel( rit.current_format('Thermal power\n{autoindexnd}') )
+            thermal_power_per_core.points.setLabel( rit.current_format('Thermal power\n{autoindex}') )
             self.objects[(core_name, 'thermal_power')]  = thermal_power_per_core
             self.set_output(thermal_power_per_core.single(), 'thermal_power', rit)
 
@@ -95,6 +95,6 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
                 # map fission fractions and thermal powers to days instead of weeks
                 fission_fractions_daily = np.repeat(core['fission_fractions'], days_in_period)
                 fission_per_iso = C.Points(fission_fractions_daily[iso_name])
-                fission_per_iso.points.setLabel( it.current_format('Fission fractions\n{autoindexnd}') )
+                fission_per_iso.points.setLabel( it.current_format('Fission fractions\n{autoindex}') )
                 self.objects[(core_name, 'fission_fractions', iso_name)] = fission_per_iso
                 self.set_output(fission_per_iso.single(), 'fission_fractions', it)

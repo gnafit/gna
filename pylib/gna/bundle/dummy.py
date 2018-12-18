@@ -20,7 +20,7 @@ class dummy(TransformationBundle):
             self.make_trans( i, key )
 
     def make_trans(self, i, key):
-        tkey = key.current_format('{name}{autoindex}', name=self.cfg.name)
+        tkey = key.current_format(name=self.cfg.name)
 
         obj = R.Dummy(self.cfg.size, tkey)
         trans = obj.dummy

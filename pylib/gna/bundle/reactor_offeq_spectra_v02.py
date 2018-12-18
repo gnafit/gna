@@ -33,13 +33,13 @@ class reactor_offeq_spectra_v02(TransformationBundle):
         with self.ns:
             self.ibd = R.IbdZeroOrder()
         self.ibd.Enu.inputs(edges)
-        
+
 
 
     def load_data(self):
         """Read raw input spectra"""
         data_template = self.cfg.offeq_data
-        for isotope in self.idx.get_sub('i'):
+        for isotope in self.idx.get_subset('i'):
             iso_name, = isotope.current_values()
             datapath = data_template.format(isotope=iso_name)
             try:
@@ -49,7 +49,7 @@ class reactor_offeq_spectra_v02(TransformationBundle):
             assert len(self.offeq_raw_spectra) != 0, "No data loaded"
 
     def build(self):
-        for isotope in self.idx.get_sub('i'):
+        for isotope in self.idx.get_subset('i'):
             iso_name, = isotope.current_values()
             try:
                 energy, spectra = self.offeq_raw_spectra[iso_name]
@@ -65,7 +65,7 @@ class reactor_offeq_spectra_v02(TransformationBundle):
 
             self.objects[name] = offeq_histo
             self.set_output(offeq_histo.hist.hist, name, isotope)
-            
+
 
     def define_variables(self):
         for it in self.idx:

@@ -13,14 +13,15 @@ class OperationMeta(type):
 class Operation(TCall,NestedTransformation):
     __metaclass__ = OperationMeta
     call_lock=False
+    order_from=None
     def __init__(self, operation, *indices, **kwargs):
         self.operation=operation
-        self.indices_to_reduce = NIndex(*indices)
+        self.nindex_to_reduce = NIndex(*indices, order=self.order)
         TCall.__init__(self, undefinedname)
         NestedTransformation.__init__(self)
 
     def __str__(self):
-        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.indices_to_reduce)
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce)
 
     def __call__(self, *args):
         if self.call_lock:
@@ -28,7 +29,7 @@ class Operation(TCall,NestedTransformation):
         self.call_lock=True
 
         self.set_objects(*args)
-        self.set_indices(*args, ignore=self.indices_to_reduce.indices.keys())
+        self.set_indices(*args, ignore=self.nindex_to_reduce.indices.keys())
         return self
 
     def guessname(self, lib={}, save=False):
@@ -36,7 +37,7 @@ class Operation(TCall,NestedTransformation):
             o.guessname(lib, save)
 
         cname = TCall.guessname(self)
-        newname='{}:{}|{}'.format(self.operation, self.indices_to_reduce.ident(), cname)
+        newname='{}:{}|{}'.format(self.operation, self.nindex_to_reduce.ident(), cname)
 
         label=None
         if newname in lib:
@@ -71,11 +72,11 @@ class Operation(TCall,NestedTransformation):
         with nextlevel():
             printl_debug('def (operation)', str(self))
             with nextlevel():
-                for freeidx in self.indices.iterate():
+                for freeidx in self.nindex.iterate():
                     tobj, newout = self.new_tobject(freeidx)
                     context.set_output(newout, self.name, freeidx)
                     with nextlevel():
-                        for opidx in self.indices_to_reduce.iterate():
+                        for opidx in self.nindex_to_reduce.iterate():
                             fullidx = freeidx+opidx
                             for i, obj in enumerate(self.objects):
                                 output = obj.get_output(fullidx, context)
@@ -115,9 +116,9 @@ class OSum(Operation):
 
         from gna.constructors import stdvector
         with nextlevel():
-            for freeidx in self.indices.iterate():
-                rindices = [ridx for ridx in self.indices_to_reduce.iterate()]
-                names    = stdvector([(ridx+freeidx).current_format('{autoindexnd}') for ridx in rindices])
+            for freeidx in self.nindex.iterate():
+                rindices = [ridx for ridx in self.nindex_to_reduce.iterate()]
+                names    = stdvector([(ridx+freeidx).current_format('{autoindex}') for ridx in rindices])
                 weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
 
                 tobj, newout = self.new_tobject(freeidx, weights, names, weight_label=weight.name)
@@ -132,7 +133,7 @@ class OSum(Operation):
             # from gna.constructors import stdvector
             # labels  = stdvector([self.object.name])
             # printl_debug('connect (weighted)')
-            # for idx in self.indices.iterate():
+            # for idx in self.nindex.iterate():
                 # wname = self.weight.current_format(idx)
                 # weights = stdvector([wname])
 
@@ -184,7 +185,7 @@ class Accumulate(IndexedContainer, Variable):
         obj, = self.objects
         ns = context.namespace()
         from gna.env import ExpressionsEntry
-        for it in self.indices.iterate():
+        for it in self.nindex.iterate():
             out = obj.get_output(it, context)
             varname = self.current_format(it)
 

@@ -68,7 +68,7 @@ class efficiencies_v01(TransformationBundle):
 
         if self.cfg.get('uncorrelated'):
             for i, it in enumerate(self.idx.iterate()):
-                name = it.current_format( '{name}{autoindex}', name=self.varname('effunc_uncorr')  )
+                name = it.current_format(name=self.varname('effunc_uncorr'))
                 self.common_namespace.reqparameter(name, central=1.0, sigma=relunc_uncorr_tot, label='uncorrelated efficiency uncertainty (relative)'  )
 
     def varname(self, var):

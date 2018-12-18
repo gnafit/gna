@@ -54,7 +54,7 @@ class integral_2d1d_v01(TransformationBundle):
 
         for i, it in enumerate(self.idx.iterate()):
             hist = R.GaussLegendre2dHist(self.integrator)
-            hist.hist.setLabel( it.current_format('hist{autoindex}') )
+            hist.hist.setLabel(it.current_format(name='hist'))
 
             self.set_input( hist.hist.f,    self.cfg.name, it, clone=0)
             self.set_output(hist.hist.hist, self.cfg.name, it)

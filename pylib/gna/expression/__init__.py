@@ -6,13 +6,18 @@ from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
 from gna.env import env
 import re
+import inspect
 
 class VTContainer(OrderedDict):
+    _order=None
     def __init__(self, *args, **kwargs):
         super(VTContainer, self).__init__(*args, **kwargs)
 
+    def set_indices(self, indices):
+        self._order=indices.order
+
     def __missing__(self, key):
-        newvar = Variable(key)
+        newvar = Variable(key, order=self._order)
         self[key] = newvar
         return newvar
 
@@ -20,6 +25,9 @@ class VTContainer(OrderedDict):
         if isinstance(value, Indexed):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
+            value.nindex.arrange(self._order)
+        elif inspect.isclass(value) and issubclass(value, Operation):
+            value.order=self._order
 
         OrderedDict.__setitem__(self, key, value)
         return value
@@ -40,9 +48,13 @@ class Expression(object):
         self.expressions_raw = [ rexpr.sub('', cexpr.sub('', e)) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
-        self.globals=VTContainer(self.operations)
-        self.indices=OrderedDict()
+        self.globals=VTContainer()
         self.defindices(indices, **kwargs)
+        self.set_operations()
+
+    def set_operations(self):
+        for name, op in self.operations.iteritems():
+            self.globals[name]=op
 
     def parse(self):
         if self.tree:
@@ -77,19 +89,20 @@ class Expression(object):
         return 'Expression("{}")'.format(self.expressions_raw)
 
     def defindices(self, defs):
-        self.indices = NIndex(fromlist=defs)
-        for short, idx in self.indices.indices.items():
+        self.nindex = NIndex(fromlist=defs)
+        for short, idx in self.nindex.indices.items():
             self.globals[short] = idx
 
-            sub=idx.sub
-            if sub:
-                self.globals[sub.short]=sub
+            slave=idx.slave
+            if slave:
+                self.globals[slave.short]=slave
+        self.globals.set_indices(self.nindex)
 
     def build(self, context):
         if not self.tree:
             raise Exception('Expression is not initialized, call parse() method first')
 
-        context.set_indices(self.indices)
+        context.set_indices(self.nindex)
         for tree in self.trees:
             creq = tree.require(context)
 
@@ -124,7 +137,7 @@ class ExpressionContext(object):
         return self.ns
 
     def set_indices(self, indices):
-        self.indices = indices
+        self.nindex = indices
 
     @methodname
     def require(self, name, indices):
@@ -133,9 +146,8 @@ class ExpressionContext(object):
             cfg = self.providers.get(name, None)
             if cfg is None:
                 if indices:
-                    fmt='{name}{autoindex}'
                     for it in indices.iterate():
-                        self.require(it.current_format(fmt, name=name), None)
+                        self.require(it.current_format(name=name), None)
                     return self.required
 
                 raise Exception('Do not know how to build '+name)

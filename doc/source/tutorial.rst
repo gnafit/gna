@@ -14,6 +14,7 @@ Tutorial (Under construction)
    tutorial/plotting_graphs
    tutorial/variables
    tutorial/complex_transformations
+   tutorial/bundles
    tutorial/tbd
 
 

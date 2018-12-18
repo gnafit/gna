@@ -56,7 +56,7 @@ class IndexedContainer(object):
 
         variants=[newnameu, newname]
         for nn in tuple(variants):
-            variants.append(nn+':'+self.indices.ident())
+            variants.append(nn+':'+self.nindex.ident())
 
         guessed = False
         label = None
@@ -115,7 +115,7 @@ class IndexedContainer(object):
 
             printl_debug('connect (container)', str(self))
             with nextlevel():
-                for idx in self.indices.iterate():
+                for idx in self.nindex.iterate():
                     printl_debug( 'index', idx )
                     with nextlevel():
                         nobj = len(self.objects)
@@ -156,7 +156,7 @@ class VProduct(IndexedContainer, Variable):
             from gna.constructors import stdvector
             import ROOT as R
             with context.ns:
-                for idx in self.indices.iterate():
+                for idx in self.nindex.iterate():
                     names = [obj.current_format(idx) for obj in self.objects]
                     name = self.current_format(idx)
 
@@ -199,7 +199,7 @@ class NestedTransformation(object):
 
         if self.tinit:
             with nextlevel():
-                for idx in self.indices.iterate():
+                for idx in self.nindex.iterate():
                     tobj, newout = self.new_tobject(idx)
                     context.set_output(newout, self.name, idx)
                     nobj = len(self.objects)
@@ -385,7 +385,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 raise Exception('May not work with objects with undefined names')
             labels  = stdvector([self.object.name])
             printl_debug('connect (weighted)')
-            for idx in self.indices.iterate():
+            for idx in self.nindex.iterate():
                 wname = self.weight.current_format(idx)
                 weights = stdvector([wname])
 
@@ -398,7 +398,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 inp(out)
 
     def test_iteration(self):
-        for it in self.indices.iterate():
+        for it in self.nindex.iterate():
             print('index', it.current_format())
             print('  weight', self.weight.current_format(it))
             print('  obj', self.object.current_format(it))
