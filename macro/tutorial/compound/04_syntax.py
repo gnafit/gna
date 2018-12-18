@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import constructors as C
+import gna.constructors as C
 
 number = 1.2345
 p0 = C.Points([number])

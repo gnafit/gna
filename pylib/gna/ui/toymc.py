@@ -1,6 +1,6 @@
 from gna.ui import basecmd, append_typed
 import ROOT
-import constructors as C
+import gna.constructors as C
 import numpy as np
 
 class cmd(basecmd):

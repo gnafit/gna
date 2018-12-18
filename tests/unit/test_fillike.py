@@ -6,7 +6,7 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
-from constructors import Points, WeightedSum
+from gna.constructors import Points, WeightedSum
 from gna.env import env
 
 def compare(a, b, message):

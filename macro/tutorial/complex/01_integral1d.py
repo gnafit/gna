@@ -4,7 +4,7 @@
 from __future__ import print_function
 import load
 from gna.env import env
-import constructors as C
+import gna.constructors as C
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.gridspec as gridspec
