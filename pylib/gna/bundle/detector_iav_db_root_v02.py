@@ -62,7 +62,7 @@ class detector_iav_db_root_v02(TransformationBundle):
             raise exception('IAV scale should be 1 by definition')
 
         self.pars = OrderedDict()
-        idx = self.idx.get_sub('d')
+        idx = self.idx.get_subset('d')
         for it in idx.iterate():
             parname = it.current_format(name=self.cfg.parname)
             par = self.common_namespace.reqparameter(parname, cfg=self.cfg.scale)

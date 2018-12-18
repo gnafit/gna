@@ -93,9 +93,9 @@ class Expression(object):
         for short, idx in self.nindex.indices.items():
             self.globals[short] = idx
 
-            sub=idx.sub
-            if sub:
-                self.globals[sub.short]=sub
+            slave=idx.slave
+            if slave:
+                self.globals[slave.short]=slave
         self.globals.set_indices(self.nindex)
 
     def build(self, context):

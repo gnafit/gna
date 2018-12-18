@@ -47,9 +47,9 @@ class dayabay_reactor_burning_info_v01(TransformationBundle):
     def define_variables(self):
         ns = self.common_namespace
 
-        for reacit in self.idx.get_sub("r"):
+        for reacit in self.idx.get_subset("r"):
             isotope_pac = []
-            for isoit in self.idx.get_sub("i"):
+            for isoit in self.idx.get_subset("i"):
                 it = reacit + isoit
                 iso_name = isoit.indices['i'].current
                 reac_name = reacit.indices['r'].current

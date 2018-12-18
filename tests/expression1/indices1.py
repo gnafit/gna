@@ -31,25 +31,25 @@ for it in n2:
     print(it.current_format(name='fake'))
 
 
-n3 = nidx.get_sub(('z', 'd'))
+n3 = nidx.get_subset(('z', 'd'))
 print()
 print('Iterate n3')
 for it in n3:
     print(it.current_format(name='fake'))
 
-n4 = nidx.get_sub([])
+n4 = nidx.get_subset([])
 print()
 print('Iterate n4')
 for it in n4:
     print(it.current_format(name='fake'))
 
-n5 = nidx.get_sub(['d', 'c'])
+n5 = nidx.get_subset(['d', 'c'])
 print()
 print('Iterate n5')
 for it in n5:
     print(it.current_format(name='fake'))
 
-n6 = nidx.get_sub(['r', 'c'])
+n6 = nidx.get_subset(['r', 'c'])
 print()
 print('Iterate n6')
 for it in n6:
