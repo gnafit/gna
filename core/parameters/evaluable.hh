@@ -20,7 +20,7 @@ protected:
 
 template <typename ValueType>
 class evaluable: public variable<ValueType> {
-  typedef variable<ValueType> base_type;
+  using base_type = variable<ValueType>;
 protected:
   template <typename T>
   void init(std::function<ValueType()> f, T deps) {

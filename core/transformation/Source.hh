@@ -3,8 +3,9 @@
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <iostream>
-#include <boost/format.hpp>
-using boost::format;
+#include "fmt/format.h"
+#include <utility>
+using fmt::format;
 
 #include "Sink.hh"
 #include "TransformationDebug.hh"
@@ -26,8 +27,8 @@ namespace TransformationTypes
      * @param name -- Source name.
      * @param entry -- Entry pointer Source belongs to.
      */
-    Source(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+    Source(std::string name, Entry *entry)
+      : name(std::move(name)), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.

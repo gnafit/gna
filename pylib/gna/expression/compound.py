@@ -153,7 +153,7 @@ class VProduct(IndexedContainer, Variable):
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
-            from constructors import stdvector
+            from gna.constructors import stdvector
             import ROOT as R
             with context.ns:
                 for idx in self.indices.iterate():
@@ -380,7 +380,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
-            from constructors import stdvector
+            from gna.constructors import stdvector
             if self.object.name is undefinedname:
                 raise Exception('May not work with objects with undefined names')
             labels  = stdvector([self.object.name])

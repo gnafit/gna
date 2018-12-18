@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <vector>
 
 #include <Eigen/Dense>
@@ -10,10 +11,10 @@ class GaussLegendre2d: public GNAObject,
                        public TransformationBind<GaussLegendre2d> {
   friend class GaussLegendre2dHist;
 public:
-  GaussLegendre2d(const std::vector<double> &xedges,
-                  const std::vector<int> &xorders,
+  GaussLegendre2d(std::vector<double> xedges,
+                  std::vector<int> xorders,
                   double ymin, double ymax, int yorder)
-  : m_xedges(xedges), m_xorders(xorders),
+  : m_xedges(std::move(xedges)), m_xorders(std::move(xorders)),
     m_ymin(ymin), m_ymax(ymax), m_yorder(yorder)
   {
     init();

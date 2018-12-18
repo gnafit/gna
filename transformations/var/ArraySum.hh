@@ -7,7 +7,7 @@
 class ArraySum: public GNAObject,
                 public TransformationBind<ArraySum> {
 public:
-      ArraySum(){};
+      ArraySum()= default;
       ArraySum(const std::string& name, SingleOutput& out);
 
 private:

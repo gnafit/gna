@@ -5,7 +5,7 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.env import env
 from gna.parameters.printer import print_parameters
-from converters import convert
+from gna.converters import convert
 
 ns = env.globalns
 names = [ 'one', 'two', 'three', 'four', 'five' ]

@@ -9,7 +9,7 @@ from __future__ import print_function
 from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
-import constructors as C
+import gna.constructors as C
 from gna.bindings import DataType
 
 def test_bins():

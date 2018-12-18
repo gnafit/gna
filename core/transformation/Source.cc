@@ -22,10 +22,8 @@ void Source::connect(Sink *newsink) {
   if (sink) {
     std::cerr << this << " " << name << " " << sink->entry->name << "\n";
     throw std::runtime_error(
-      (format("Transformation: source `%1%' is already connected to sink `%2%',"
-              " won't connect to `%3%'") % name % sink->name % newsink->name)
-       .str()
-      );
+      (fmt::format("Transformation: source `{0}' is already connected to sink `{1}',"
+              " won't connect to `{2}'", name, sink->name, newsink->name)));
   }
   //if (false) {
     //throw std::runtime_error("Transformation: connecting incompatible types");

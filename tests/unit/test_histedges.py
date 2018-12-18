@@ -5,7 +5,7 @@ from __future__ import print_function
 from matplotlib import pyplot as P
 import numpy as N
 from load import ROOT as R
-import constructors as C
+import gna.constructors as C
 
 def test_histedges():
     edges = N.linspace(0.0, 10.0, 11)

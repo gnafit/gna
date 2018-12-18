@@ -7,7 +7,7 @@ from __future__ import print_function
 from matplotlib import pyplot as P
 import numpy as N
 from load import ROOT as R
-from constructors import Points
+from gna.constructors import Points
 from gna.env import env
 
 """Initialize parameters and data"""

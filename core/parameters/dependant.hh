@@ -21,7 +21,7 @@ protected:
 
 template <typename ValueType>
 class dependant: public evaluable<ValueType> {
-  typedef evaluable<ValueType> base_type;
+  using base_type = evaluable<ValueType>;
 public:
   dependant(const variable<ValueType> &other)
     : base_type(other) { }

@@ -21,7 +21,7 @@ protected:
 
 template <typename ValueType>
 class parameter: public variable<ValueType> {
-  typedef variable<ValueType> base_type;
+  using base_type = variable<ValueType>;
 public:
   parameter(const char *name="") : base_type() {
     base_type::m_data.raw = new inconstant_data<ValueType>(name);

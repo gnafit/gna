@@ -20,9 +20,9 @@ namespace TransformationTypes
   class InputHandle;
   class OutputHandle;
 
-  typedef boost::ptr_vector<Source>  SourcesContainer;   ///< Container for Source pointers.
-  typedef boost::ptr_vector<Sink>    SinksContainer;     ///< Container for Sink pointers.
-  typedef boost::ptr_vector<Storage> StoragesContainer;  ///< Container for Storage pointers.
+  using SourcesContainer = boost::ptr_vector<Source>;   ///< Container for Source pointers.
+  using SinksContainer = boost::ptr_vector<Sink>;     ///< Container for Sink pointers.
+  using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
 
   /**
    * @brief Definition of a single transformation.

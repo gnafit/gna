@@ -18,8 +18,8 @@ public:
   void dump();
 
 protected:
-  IntegratorBase(size_t bins, int orders, double* edges=0, bool shared_edge=false);
-  IntegratorBase(size_t bins, int* orders, double* edges=0, bool shared_edge=false);
+  IntegratorBase(size_t bins, int orders, double* edges=nullptr, bool shared_edge=false);
+  IntegratorBase(size_t bins, int* orders, double* edges=nullptr, bool shared_edge=false);
 
   Eigen::ArrayXi m_orders;
   Eigen::ArrayXd m_weights;

@@ -6,7 +6,7 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
-from constructors import Points, stdvector
+from gna.constructors import Points, stdvector
 from gna.env import env
 
 """Initialize inpnuts"""

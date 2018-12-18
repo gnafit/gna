@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 #include <vector>
 #include <memory>
@@ -613,11 +613,11 @@ inline void DataType::dump() const {
  */
 template <typename T>
 class Data {
-  typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> VectorXT;
+  using ArrayXT = Eigen::Array<T, Eigen::Dynamic, 1> ;
+  using VectorXT = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
-  typedef Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> ArrayXXT;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> MatrixXT;
+  using ArrayXXT = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
+  using MatrixXT = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 public:
   /**
    * @brief Constructor.

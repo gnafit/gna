@@ -193,7 +193,7 @@ public:
     m_data.raw = other.m_data.raw;
   }
 protected:
-  changeable() { }
+  changeable() = default;
   void notify() const {
     size_t nsubs = m_data.hdr->observers.cnt;
     changeable *observers = m_data.hdr->observers.objs;

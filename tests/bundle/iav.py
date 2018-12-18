@@ -9,7 +9,7 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
+import gna.constructors as C
 import numpy as N
 from gna.configurator import NestedDict, uncertain
 from physlib import percent

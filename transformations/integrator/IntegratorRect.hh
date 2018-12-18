@@ -6,8 +6,8 @@
 class IntegratorRect: public TransformationBind<IntegratorRect>,
                       public IntegratorBase {
 public:
-  IntegratorRect(size_t bins, int orders, double* edges=0, const std::string& mode="center");
-  IntegratorRect(size_t bins, int* orders, double* edges=0, const std::string& mode="center");
+  IntegratorRect(size_t bins, int orders, double* edges=nullptr, const std::string& mode="center");
+  IntegratorRect(size_t bins, int* orders, double* edges=nullptr, const std::string& mode="center");
 
   void sample(FunctionArgs& fargs) final;
 

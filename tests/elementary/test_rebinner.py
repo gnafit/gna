@@ -7,9 +7,9 @@ import numpy as N
 from load import ROOT as R
 from gna.env import env
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
-from converters import convert
+from gna.converters import convert
 from argparse import ArgumentParser
-import constructors as C
+import gna.constructors as C
 
 from argparse import ArgumentParser
 parser = ArgumentParser()

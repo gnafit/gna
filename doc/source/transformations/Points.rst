@@ -18,7 +18,7 @@ In Python ``Points`` instance may be constructed from the numpy array:
 
 .. code-block:: ipython
 
-   from constructors import Points
+   from gna.constructors import Points
    p = Points(array)
 
 Outputs

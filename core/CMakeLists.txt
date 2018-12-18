@@ -1,0 +1,62 @@
+set(CORE_SOURCES 
+  core/transformation/Accessor.cc
+  core/transformation/Args.cc
+  core/transformation/Atypes.cc
+  core/transformation/EntryHandle.cc
+  core/transformation/OutputHandle.cc
+  core/transformation/InputHandle.cc
+  core/transformation/Initializer.hh
+  core/transformation/Rets.cc
+  core/transformation/Ints.cc
+  core/transformation/Rtypes.cc
+  core/transformation/Itypes.cc
+  core/transformation/Source.cc
+  core/transformation/TransformationBase.cc
+  core/transformation/TransformationEntry.cc
+  core/transformation/TransformationErrors.cc
+  core/transformation/TypesFunctions.cc
+  core/GNAObject.cc
+  core/ParametersGroup.cc
+  core/Parametrized.cc
+  core/TransformationDescriptor.cc
+  core/UncertainParameter.cc
+  PARENT_SCOPE
+ )
+
+set(CORE_HEADERS 
+  # core/
+  Data.hh
+  Random.hh
+  Exceptions.hh
+  # core/transformation/
+  Sink.hh
+  Source.hh
+  Storage.hh
+  Args.hh
+  Rets.hh
+  Ints.hh
+  Rtypes.hh
+  Itypes.hh
+  Atypes.hh
+  TypesFunctions.hh
+  EntryHandle.hh
+  OutputHandle.hh
+  OpenHandle.hh
+  InputHandle.hh
+  TransformationDebug.hh
+  TransformationBase.hh
+  TransformationFunction.hh
+  TransformationFunctionArgs.hh
+  FunctionDescriptor.hh
+  TransformationEntry.hh
+  TransformationErrors.hh
+  TransformationDescriptor.hh
+  TransformationBind.hh
+  SingleOutput.hh
+  Initializer.hh
+  Accessor.hh
+  # core/
+  GNAObject.hh
+  UncertainParameter.hh
+  PARENT_SCOPE
+ )

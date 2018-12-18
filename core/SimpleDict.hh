@@ -5,7 +5,7 @@
 
 class SimpleDictBase {
 public:
-  virtual ~SimpleDictBase() { }
+  virtual ~SimpleDictBase() = default;
 };
 
 template <typename T, typename Container>

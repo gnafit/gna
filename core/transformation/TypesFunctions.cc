@@ -22,8 +22,8 @@ void TypesFunctions::passAll(TypesFunctionArgs& fargs) {
       rets[i] = args[0];
     }
   } else if (args.size() != rets.size()) {
-    auto fmt = format("Transformation %1%: nargs != nrets");
-    throw std::runtime_error((fmt % args.name()).str());
+    auto msg = fmt::format("Transformation {0}: nargs != nrets", args.name());
+    throw std::runtime_error(msg);
   } else {
     for (size_t i = 0; i < args.size(); ++i) {
       rets[i] = args[i];
@@ -45,8 +45,8 @@ void TypesFunctions::ifSame(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i] != args[0]) {
-      auto fmt = format("Transformation %1%: all inputs should have same type, %2% and %3% differ");
-      throw args.error(args[i], (fmt%args.name()%0%i).str());
+      auto msg = fmt::format("Transformation {0}: all inputs should have same type, {1} and {2} differ", args.name(), 0, i);
+      throw args.error(args[i], msg);
     }
   }
 }
@@ -65,8 +65,8 @@ void TypesFunctions::ifSameShape(TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   for (size_t i = 1; i < args.size(); ++i) {
     if (args[i].shape != args[0].shape) {
-      auto fmt = format("Transformation %1%: all inputs should have same shape, %2% and %3% differ");
-      throw args.error(args[i], (fmt%args.name()%0%i).str());
+      auto msg = fmt::format("Transformation {0}: all inputs should have same shape, {1} and {2} differ", args.name(), 0, i);
+      throw args.error(args[i], msg);
     }
   }
 }

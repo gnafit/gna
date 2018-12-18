@@ -9,7 +9,7 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
+import gna.constructors as C
 import numpy as N
 from gna.configurator import NestedDict, uncertain
 from physlib import percent
@@ -22,9 +22,10 @@ args = parser.parse_args()
 args.make_idx=True
 
 
-if args.from_file:
+if args.from_files:
     reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py'
     detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py'
+    snf_pools  = 'data/dayabay/snf/coordinates/coordinates_docDB_11112.py'
 else:
     #DYB-like detector positions in meters
     detectors = {
@@ -52,7 +53,8 @@ else:
 if args.make_idx:
     indices = [('r', 'reactor', ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
                ('d', 'detector', ['AD11', 'AD12', 'AD21', 'AD22', 'AD31',
-                                  'AD32', 'AD33', 'AD34'] )]
+                                  'AD32', 'AD33', 'AD34'])
+              ]
     expr = 'baselines[d,r]()'
     a =  Expression(expr, indices=indices)
     a.parse()
@@ -69,6 +71,8 @@ cfg = NestedDict(
     reactors = reactors,
     # Detector positions
     detectors = detectors,
+    # SNF pools,
+    snf_pools=snf_pools,
     units="meters"
     )
 #

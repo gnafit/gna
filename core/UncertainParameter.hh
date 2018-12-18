@@ -8,11 +8,12 @@
 #include <cmath>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
+#include "fmt/format.h"
 #include <boost/math/constants/constants.hpp>
 
 #include "GNAObject.hh"
-#include "parameter.hh"
+#include "parameters/parameter.hh"
+
 
 /* #define COVARIANCE_DEBUG */
 
@@ -45,10 +46,10 @@ public:
     : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
 
-  virtual ~Variable() { }
+  ~Variable() override = default;
 
   virtual T value() const noexcept { return m_var.value(); }
-  virtual const variable<T> &getVariable() const noexcept { return m_var; }
+  const variable<T> &getVariable() const noexcept { return m_var; }
 
   std::string name() const noexcept { return m_name; }
 
@@ -61,7 +62,7 @@ public:
   void setLabel(std::string&& label) { m_label = label; }
 
 protected:
-  variable<T> m_var;
+  variable<T> m_var{};
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
   std::string m_label;
@@ -93,12 +94,12 @@ public:
   virtual void set(T value)
     { m_par = value; }
 
-  virtual void push(T value) {
+  void push(T value) {
     m_stack.push(this->value());
     this->set(value);
   }
 
-  virtual void pop() {
+  void pop() {
     this->set(m_stack.top());
     m_stack.pop();
     return this->value();
@@ -110,35 +111,35 @@ public:
   virtual T cast(const T& v) const noexcept
     { return v; }
 
-  virtual T central() const noexcept { return m_central; }
-  virtual void setCentral(T value) noexcept { m_central = value; }
-  virtual void reset() { set(this->central()); }
+  T central() const noexcept { return m_central; }
+  void setCentral(T value) noexcept { m_central = value; }
+  void reset() { set(this->central()); }
 
-  virtual T step() const noexcept { return m_step; }
-  virtual void setStep(T step) noexcept { m_step = step; }
+  T step() const noexcept { return m_step; }
+  void setStep(T step) noexcept { m_step = step; }
 
-  virtual T relativeValue(T diff) const noexcept
+  T relativeValue(T diff) const noexcept
     { return this->value() + diff*this->m_step; }
-  virtual void setRelativeValue(T diff)
+  void setRelativeValue(T diff)
     { set(relativeValue(diff)); }
 
-  virtual void addLimits(T min, T max)
+  void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
 
-  virtual const std::vector<std::pair<T, T>>& limits() const
+  const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
   bool influences(SingleOutput &out) const {
     return out.single().depends(this->getVariable());
   }
 
-  virtual bool isFixed() const noexcept { return this->m_fixed; }
-  virtual void setFixed() noexcept { this->m_fixed = true; }
+  bool isFixed() const noexcept { return this->m_fixed; }
+  void setFixed() noexcept { this->m_fixed = true; }
 
-  virtual bool isFree() const noexcept { return this->m_free; }
-  virtual void setFree(bool free=true) noexcept { this->m_free = free; }
+  bool isFree() const noexcept { return this->m_free; }
+  void setFree(bool free=true) noexcept { this->m_free = free; }
 
-  virtual const parameter<T>& getParameter() const noexcept { return m_par; }
+  const parameter<T>& getParameter() const noexcept { return m_par; }
 
 protected:
   T m_central;
@@ -193,8 +194,8 @@ public:
 
    void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-        auto msg = boost::format("Covariance of parameters %1% and %2% is set to %3%");
-        std::cout << msg % this->name() % other.name() % cov << std::endl;
+     fmt::print("Covariance of parameters {0} and {1} is set to {2}",
+                 this->name(), other.name(), cov);
 #endif
     if (&other != this) {
         this->m_covariances[&other] = cov;
@@ -207,9 +208,8 @@ public:
 
    void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-    auto msg = boost::format("Covariance of parameters %1% and %2% is updated "
-                             "to %3% after setting in %1%");
-    std::cout << msg % this->name() % other.name() % cov << std::endl;
+       fmt::print("Covariance of parameters {0} and {1} is updated "
+                 "to {2} after setting in {0}", this->name(), other.name(), cov);
 #endif
     this->m_covariances[&other] = cov;
   }
@@ -221,8 +221,7 @@ public:
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated");
-          std::cout << msg % this->name() % other.name() << std::endl;
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
 #endif
           return static_cast<T>(0.);
       }
@@ -235,8 +234,7 @@ public:
           return search->second / (this->sigma() * other.sigma());
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated");
-          std::cout << msg % this->name() % other.name() << std::endl;
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
 #endif
           return static_cast<T>(0.);
       }

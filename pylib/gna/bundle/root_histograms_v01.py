@@ -6,7 +6,7 @@ import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
-from constructors import Histogram
+from gna.constructors import Histogram
 from gna.configurator import NestedDict
 from gna.grouping import Categories
 

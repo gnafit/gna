@@ -8,8 +8,8 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
+import gna.constructors as C
+from gna.converters import convert
 import numpy as N
 from gna.configurator import NestedDict, uncertain
 from gna.bundle import execute_bundle

@@ -48,12 +48,12 @@ namespace TransformationTypes {
      *
      * @copydoc Function
      */
-    typedef std::function<void(T*, FunctionArgs&)> MemFunction;
+    using MemFunction = std::function<void (T *, FunctionArgs &)>;
 
     /**
      * @brief A container for the named MemFunction instances.
      */
-    typedef std::map<std::string, MemFunction> MemFunctionMap;
+    using MemFunctionMap = std::map<std::string, MemFunction>;
 
     /**
      * @brief Function, that does the input types checking and output types derivation (reference to a member function).
@@ -62,14 +62,14 @@ namespace TransformationTypes {
      *
      * @copydoc TypesFunction
      */
-    typedef std::function<void(T*, TypesFunctionArgs& fargs)> MemTypesFunction;
+    using MemTypesFunction = std::function<void (T *, TypesFunctionArgs &)>;
 
     /**
      * @brief A container for the named MemTypesFunction instances.
      *
      * Each pair is a number of the corresponding TypesFunction in Entry::typefuns and the MemTypesFunction.
      */
-    typedef std::vector<std::tuple<size_t, MemTypesFunction>> MemTypesFunctionMap;
+    using MemTypesFunctionMap = std::vector<std::tuple<size_t, MemTypesFunction>>;
 
     /**
      * @brief Function, that does the internal types derivation (reference to a member function).
@@ -78,7 +78,7 @@ namespace TransformationTypes {
      *
      * @copydoc StorageTypesFunction
      */
-    typedef std::function<void(T*, StorageTypesFunctionArgs& fargs)> MemStorageTypesFunction;
+    using MemStorageTypesFunction = std::function<void (T *, StorageTypesFunctionArgs &)>;
 
     /**
      * @brief A container for the named StorageMemTypesFunction instances.
@@ -86,7 +86,7 @@ namespace TransformationTypes {
      * For each Function with name `name` there is a vector of pairs.
      * Each pair is a number of the corresponding StorageTypesFunction in Entry::functions[name] and the MemStorageTypesFunction.
      */
-    typedef std::map<std::string, std::vector<std::tuple<size_t, MemStorageTypesFunction>>> MemStorageTypesFunctionMap;
+    using MemStorageTypesFunctionMap = std::map<std::string, std::vector<std::tuple<size_t, MemStorageTypesFunction>>>;
 
     /**
      * @brief Constructor.
@@ -215,8 +215,8 @@ namespace TransformationTypes {
      */
     Initializer<T> func(const std::string& name, Function afunc) {
       if( m_entry->functions.find(name)!=m_entry->functions.end() ){
-        auto fmt = format("mem function %1% already exists");
-        throw std::runtime_error((fmt%name.data()).str());
+        auto msg = fmt::format("mem function {0} already exists", name.data());
+        throw std::runtime_error(msg);
       }
       m_entry->functions[name]={afunc, {}};
 
