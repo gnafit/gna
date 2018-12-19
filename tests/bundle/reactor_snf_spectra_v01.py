@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+Broken: subbundle removed
+
+!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function

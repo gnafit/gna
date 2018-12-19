@@ -11,7 +11,6 @@ from gna.configurator import NestedDict
 from gna.grouping import Categories
 
 from gna.bundle import *
-from gna.bundle.connections import pairwise
 
 class root_histograms_v02(TransformationBundle):
     def __init__(self, *args, **kwargs):

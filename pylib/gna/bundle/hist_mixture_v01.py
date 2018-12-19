@@ -10,7 +10,6 @@ from gna.configurator import NestedDict
 from gna.constructors import stdvector
 
 from gna.bundle import *
-from gna.bundle.connections import pairwise
 
 class hist_mixture_v01(TransformationBundle):
     def __init__(self, **kwargs):
