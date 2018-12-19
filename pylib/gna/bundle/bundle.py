@@ -37,18 +37,19 @@ def init_bundle(**kwargs):
         cfg = kwargs['cfg']
         names = cfg.bundle
 
-    if not isinstance( names, (list, tuple) ):
+        if isinstance(names, (dict, NestedDict)):
+            names, version=(names['name'],), names.get('version', None)
+            if version:
+                names+=str(version),
+            names = '_'.join(names),
+
+    if not isinstance(names, (list, tuple)):
         names = names,
 
     bundles = ()
     for name in names:
-        if ':' in name:
-            name, args = name.split(':', 1)
-            args = args.split(':')
-        else:
-            args=[]
         bundleclass = get_bundle(name)
-        bundle = bundleclass(*args, **kwargs)
+        bundle = bundleclass(**kwargs)
         bundles+=bundle,
 
     if not bundles:
@@ -57,7 +58,7 @@ def init_bundle(**kwargs):
     return bundles
 
 def execute_bundle(**kwargs):
-    bundles = init_bundle(**kwargs )
+    bundles = init_bundle(**kwargs)
     for bundle in bundles:
         bundle.execute()
     return bundles
@@ -173,4 +174,109 @@ class TransformationBundle(object):
 
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
+
+class TransformationBundleV01(object):
+    """
+    cfg = {
+        bundle = name or {
+            name    = string                                             # Bundle name (may contain version)
+            version = string (optional)                                  # Bundle version (will be added to bundle name)
+            names   = { localname: globalname, localname1: globalname1 } # Map to change the predefined names
+            nidx    = NIndex or NIndex configuration list (optional)     # Multiindex, if not passed, empty index is created
+            major   = [ 'short1', 'short2', ... ]                        # A subset of indices considered to be major
+        }
+    }
+    """
+    def __init__(self, cfg, **kwargs):
+        from gna.expression import NIndex
+        self.cfg = cfg
+
+        # Read bundle configuration
+        self.bundlecfg = cfg.get('bundle', '')
+
+        # If only name is provided, make a dictionary
+        if isinstance(self.bundlecfg, str):
+            self.bundlecfg=dict(name=self.bundlecfg)
+
+        # Create dictionary to map names if needed
+        self.bundlecfg.setdefault('names', {})
+
+        # Init multidimensional index
+        self.nidx=self.bundlecfg.get('nidx', [])
+        if isinstance(self.nidx, (tuple,list)):
+            self.nidx=NIndex(fromlist=self.nidx)
+        assert isinstance(self.nidx, NIndex)
+
+        # If information about major indexes is provided, split nidx into major and minor parts
+        major = self.bundlecfg.get('major', None)
+        if major is not None:
+            self.nidx_major, self.nidx_minor = self.nidx.split( major )
+        else:
+            self.nidx_major, self.nidx_minor = self.nidx, None
+
+        # Init namespace and context
+        # TODO: make it inheritable
+        self.context   = NestedDict(inputs={}, outputs={})
+        self.namespace = env.globalns
+
+        assert not kwargs
+
+    def execute(self):
+        """Calls sequentially the methods to define variables and build the computational chain."""
+        try:
+            self.define_variables()
+        except Exception as e:
+            print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
+            import sys
+            raise e, None, sys.exc_info()[2]
+
+        try:
+            self.build()
+        except Exception as e:
+            print( 'Failed to build the bundle %s'%(type(self).__name__) )
+            import sys
+            raise e, None, sys.exc_info()[2]
+
+    def build(self):
+        """Builds the computational chain. Should handle each namespace in namespaces."""
+        pass
+
+    def define_variables(self):
+        """Defines the variables necessary for the computational chain. Should handle each namespace."""
+        pass
+
+    def exception(self, message):
+        return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
+
+    def get_path(self, name, nidx, argument_number=None):
+        name=bundlecfg['names'].get(localname, localname)
+        path = nidx.current_values(name=name)
+        if argument_number is not None:
+            path+=('{:02d}'.format(int(clone)),)
+        return path
+
+    __mod__ = get_path
+
+    def reqparameter(self, name, nidx, *args, **kwargs):
+        return self.namespace.reqparameter(self%(name, nidx), *args, **kwargs)
+
+    def set_output(self, name, nidx, output):
+        self.outputs[self%(name, nidx)]=output
+
+    def set_input(self, name, nidx, input, argument_number=None):
+        self.inputs[self%(name, nidx, argument_number)]=input
+
+    def check_nidx_dim(self, dmin, dmax=float('inf'), nidx='both'):
+        if nidx=='both':
+            nidx=self.nidx
+        elif nidx=='major':
+            nidx=self.nidx_major
+        elif nidx=='minor':
+            nidx=self.nidx_minor
+        else:
+            raise self.exception('Unknown nidx type '+nidx)
+
+        ndim = nidx.ndim();
+        if not dmin<=ndim<=dmax:
+            raise self.exception('Ndim %i does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
 
