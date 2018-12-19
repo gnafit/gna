@@ -135,3 +135,10 @@ edges. Orange squares represent the interpolated function. They are slightly off
 exponential interpolation. Green triangles are for `y2` and the red triangles are for `y1` again after we scaled each
 even parameter down.
 
+.. note::
+
+    There is ``InterLinear`` object implementing linear interpolation. The syntax and transformations are similar to
+    ones from the ``InterpExpo``.
+
+
+

@@ -46,7 +46,8 @@ void InSegment::determineSegments(FunctionArgs& fargs){
   auto  edge_last= next(edge_first, nedges-1);           /// the last edge.
   auto  edge_end = next(edge_first, nedges);             /// the end of the edges array.
 
-  fargs.rets[1].x=edges_a.tail(nedges-1) - edges_a.head(nedges-1); /// Determine bin widths.
+  auto nbins = nedges-1;
+  fargs.rets[1].x=edges_a.tail(nbins) - edges_a.head(nbins); /// Determine bin widths.
 
   auto& points_d=fargs.args[0];                          /// The points data,
   auto  point_first=points_d.buffer;                     /// points array pointer (current),

@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument( '-m', '--mode', default='expo', choices=['expo', 'linear'], help='Interpolation mode' )
 # parser.add_argument( '-U', '--underflow', default="", choices=['constant', 'extrapolate'] )
 # parser.add_argument( '-O', '--overflow', default="", choices=['constant', 'extrapolate'] )
 parser.add_argument( '-o', '--output' )
@@ -31,7 +32,10 @@ print( 'Points', points )
 print( 'Fcn', fcn )
 
 # ie = R.InterpExpo(opts.underflow, opts.overflow)
-ie = R.InterpExpo()
+if opts.mode=='expo':
+    ie = R.InterpExpo()
+else:
+    ie = R.InterpLinear()
 ie.interpolate(segments_t, fcn_t, points_t)
 seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )
@@ -49,11 +53,12 @@ ax.set_xlabel( 'x' )
 ax.set_ylabel( 'y' )
 ax.set_title( 'Expo' )
 
-ax.plot( segments, fcn, 'o', markerfacecolor='none', label='coarse function' )
+ax.plot( segments, fcn, 'o-', markerfacecolor='none', label='coarse function', linewidth=0.5, alpha=0.5 )
 
 markers='os*^vh'
 for i, (p, r) in enumerate(zip(points.T, res.T)):
-    ax.plot( p, r, '.', label='interpolation, col %i'%i, marker=markers[i] )
+    ax.plot( p, r, '.', label='interpolation, col %i'%i, marker=markers[i], markersize=1.5 )
+    break
 
 ax.legend(loc='upper right')
 # ax.set_yscale('log')

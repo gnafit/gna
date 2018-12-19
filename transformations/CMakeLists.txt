@@ -1,5 +1,4 @@
 set(TRANSFORMATION_SOURCES
-  transformations/trial/TrialMultiFunc.cc
   transformations/base/FillLike.cc
   transformations/base/Histogram.cc
   transformations/base/Histogram2d.cc
@@ -33,9 +32,9 @@ set(TRANSFORMATION_SOURCES
   transformations/integrator/Integrator2GL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
-  transformations/interpolation/LinearInterpolator.cc
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
+  transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
@@ -75,17 +74,18 @@ set(TRANSFORMATION_SOURCES
   transformations/debug/Identity.cc
   transformations/debug/DebugTransformation.cc
   transformations/debug/Dummy.cc
+  transformations/debug/TrialMultiFunc.cc
   transformations/legacy/EnergyResolutionC.cc
   transformations/legacy/GaussLegendre.cc
   transformations/legacy/GaussLegendre2d.cc
   transformations/legacy/InterpExpoSorted.cc
+  transformations/legacy/LinearInterpolator.cc
   PARENT_SCOPE
 )
 
 set(TRANSFORMATION_HEADERS
   Concat.hh
   CovariatedPrediction.hh
-  TrialMultiFunc.hh
   Product.hh
   Sum.hh
   Ratio.hh
@@ -95,10 +95,10 @@ set(TRANSFORMATION_HEADERS
   Histogram.hh
   Histogram2d.hh
   HistEdges.hh
-  LinearInterpolator.hh
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
+  InterpLinear.hh
   FillLike.hh
   Derivative.hh
   Covmat.hh
@@ -155,12 +155,15 @@ set(TRANSFORMATION_HEADERS
   Transpose.hh
   GeoNeutrinoFluxNormed.hh
   # Debug
-  Identity.hh
   DebugTransformation.hh
+  Dummy.hh
+  Identity.hh
+  TrialMultiFunc.hh
   # Legacy
   IntegratorGL.hh
   Integrator21GL.hh
   Integrator2GL.hh
   InterpExpoSorted.hh
+  LinearInterpolator.hh
   PARENT_SCOPE
 )
