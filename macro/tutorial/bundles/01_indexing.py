@@ -24,21 +24,29 @@ nidx = NIndex(fromlist=[
     ('i', 'index', ['1', '2', '3'])
     ])
 
+for i, nit in enumerate(nidx):
+    print('  iteration', i, end=': ')
+    print('    values:   ', nit.current_values())
+print()
+
+
 print('Test 1d index')
 for i, nit in enumerate(nidx):
-    print('  iteration', i)
+    print('  iteration', i, end=': ')
     print('    index:    ', nit.current_format())
-    print('    full name:', nit.current_format(name='var'))
-    print('    values:   ', nit.current_values())
+print()
 
-    print()
+for i, nit in enumerate(nidx):
+    print('  iteration', i, end=': ')
+    print('    full name:', nit.current_format(name='var'))
+print()
 
 #
 # 2d index
 #
 nidx = NIndex(fromlist=[
     ('i', 'index', ['1', '2', '3']),
-    ('j', 'element', ['a', 'b', 'c'])
+    ('j', 'element', ['a', 'b'])
     ])
 
 print('Test 2d index')
@@ -85,11 +93,11 @@ for i_major, nit_major in enumerate(nidx_major):
 
     for j_minor, nit_minor in enumerate(nidx_minor):
         print('      minor iteration', j_minor)
-        print('        minor values:   ', nit_minor.current_values())
+        print('        minor values:  ', nit_minor.current_values())
 
         nit = nit_major + nit_minor
-        print('        full name:', nit.current_format(name='var'))
-        print('        custom label:', nit.current_format('Flux from {source} to {detector} element {element} ({clone})'))
+        print('        full name:     ', nit.current_format(name='var'))
+        print('        custom label:  ', nit.current_format('Flux from {source} to {detector} element {element} ({clone})'))
 
     print()
     break
@@ -104,16 +112,16 @@ nidx = NIndex(fromlist=[
     ('e', 'element', ['e1', 'e2', 'e3'], dict(short='g', name='group', map=[('g1', ('e1', 'e2')), ('g2', ('e3',)) ]))
     ])
 
-print('Test 4d index and separated iteration')
+print('Test 4d index and dependant indices')
 nidx_major, nidx_minor=nidx.split(('d', 'g'))
-nidx_e=nidx.get_relevant('e')
+nidx_e=nidx.get_subset('e')
 for i_major, nit_major in enumerate(nidx_major):
     print('  major iteration', i_major)
     print('    major values:   ', nit_major.current_values())
 
     for j_minor, nit_minor in enumerate(nidx_minor):
         nit = nit_major + nit_minor
-        print('        full values:', nit.current_values())
+        print('      full values %i:'%j_minor, nit.current_values())
 
     print()
 
@@ -125,6 +133,7 @@ for i_major, nit_major in enumerate(nidx_major):
 
     for j_minor, nit_minor in enumerate(nidx_minor):
         nit = nit_major + nit_minor
-        print('        full values:', nit.current_values())
+        print('      full values %i:     '%j_minor, nit.current_values())
+        print('      formatted string %i:'%j_minor, nit.current_format('Element {element} in group {group}'))
 
     print()

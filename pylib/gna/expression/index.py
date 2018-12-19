@@ -310,13 +310,11 @@ class NIndex(object):
             idx = self.indices.get(short, None)
             if idx is not None:
                 ret+=idx.current_items(mode)
-                continue
 
             if include_slaves:
-                idx = self.masterof.get(short, None)
+                idx = self.slaveof.get(short, None)
                 if idx:
                     ret+=idx.current_items(mode)
-                    continue
 
         return ret
 
