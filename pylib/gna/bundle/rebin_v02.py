@@ -6,9 +6,9 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class rebin_v02(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(rebin_v02, self).__init__( **kwargs )
+class rebin_v02(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(rebin_v02, self).__init__( *args, **kwargs )
         self.init_indices()
 
     def build(self):

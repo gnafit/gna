@@ -6,9 +6,9 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class dummy(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(dummy, self).__init__( **kwargs )
+class dummy(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(dummy, self).__init__( *args, **kwargs )
 
     def build(self):
         from gna.expression import NIndex

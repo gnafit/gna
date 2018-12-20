@@ -12,9 +12,9 @@ from gna.grouping import Categories
 
 from gna.bundle import *
 
-class root_histograms_v02(TransformationBundle):
+class root_histograms_v02(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
-        TransformationBundle.__init__(self, *args, **kwargs)
+        TransformationBundleLegacy.__init__(self, *args, **kwargs)
         self.init_indices()
         if self.idx.ndim()>1:
             raise self.exception('expect 0d/1d index')

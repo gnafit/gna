@@ -6,7 +6,7 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class xsec_ibd_v01(TransformationBundle):
+class xsec_ibd_v01(TransformationBundleLegacy):
     ## @brief Inverse Beta Decay (IBD) cross section by Vogel&Beacom (arxiv: 9903.554)
     #
     # IBD: bar(νe) + p → n + e+
@@ -59,8 +59,8 @@ class xsec_ibd_v01(TransformationBundle):
     #       provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
     #       )
     # @endcode
-    def __init__(self, **kwargs):
-        TransformationBundle.__init__( self, **kwargs )
+    def __init__(self, *args, **kwargs):
+        TransformationBundleLegacy.__init__( self, *args, **kwargs )
 
         # check that order is sane
         if not self.cfg.order in [0, 1]:

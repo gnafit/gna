@@ -6,9 +6,9 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class arange(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(arange, self).__init__( **kwargs )
+class arange(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(arange, self).__init__( *args, **kwargs )
 
     def build(self):
         from gna.expression import NIndex

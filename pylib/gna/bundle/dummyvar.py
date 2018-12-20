@@ -7,9 +7,9 @@ import gna.constructors as C
 from gna.bundle import *
 from gna.expression import NIndex
 
-class dummyvar(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(dummyvar, self).__init__( **kwargs )
+class dummyvar(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(dummyvar, self).__init__( *args, **kwargs )
 
     def define_variables(self):
         idx = self.cfg.indices

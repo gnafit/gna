@@ -6,9 +6,9 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class oscprob_v01(TransformationBundle):
-    def __init__(self, **kwargs):
-        TransformationBundle.__init__( self, **kwargs )
+class oscprob_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        TransformationBundleLegacy.__init__( self, *args, **kwargs )
 
         self.idx = self.cfg.indices
         from gna.expression import NIndex

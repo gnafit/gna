@@ -8,10 +8,10 @@ from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
-class reactor_anu_uncorr_v01(TransformationBundle):
+class reactor_anu_uncorr_v01(TransformationBundleLegacy):
     debug = False
-    def __init__(self, **kwargs):
-        super(reactor_anu_uncorr_v01, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(reactor_anu_uncorr_v01, self).__init__( *args, **kwargs )
 
         self.edges = self.shared.reactor_anu_edges.data()
         self.bundles=OrderedDict( self=self )

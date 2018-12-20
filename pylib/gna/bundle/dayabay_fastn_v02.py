@@ -11,9 +11,9 @@ from gna.grouping import CatDict, Categories
 
 from gna.bundle import *
 
-class dayabay_fastn_v02(TransformationBundle):
+class dayabay_fastn_v02(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
-        TransformationBundle.__init__(self, *args, **kwargs)
+        TransformationBundleLegacy.__init__(self, *args, **kwargs)
         self.init_indices()
         if self.idx.ndim()!=1:
             raise self.exception('Expect 1d indexing')

@@ -12,13 +12,13 @@ from gna.grouping import Categories
 
 from gna.bundle import *
 
-class root_histograms_v01(TransformationBundle):
-    def __init__(self, **kwargs):
+class root_histograms_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
         variants   = kwargs['cfg'].get('variants', (), types=(list,tuple,dict,NestedDict))
         if variants:
             kwargs['namespaces'] = list(variants)
 
-        super(root_histograms_v01, self).__init__( **kwargs )
+        super(root_histograms_v01, self).__init__( *args, **kwargs )
 
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 

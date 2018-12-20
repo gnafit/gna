@@ -7,10 +7,10 @@ import gna.constructors as C
 from gna.bundle import *
 from collections import OrderedDict
 
-class detector_iav_db_root_v01(TransformationBundle):
+class detector_iav_db_root_v01(TransformationBundleLegacy):
     iavmatrix=None
-    def __init__(self, **kwargs):
-        super(detector_iav_db_root_v01, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(detector_iav_db_root_v01, self).__init__( *args, **kwargs )
         self.transformations_in = self.transformations_out
 
         self.init_indices()

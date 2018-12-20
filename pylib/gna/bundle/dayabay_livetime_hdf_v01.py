@@ -8,9 +8,9 @@ from gna.bundle import *
 from collections import OrderedDict
 import h5py as H
 
-class dayabay_livetime_hdf_v01(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(dayabay_livetime_hdf_v01, self).__init__( **kwargs )
+class dayabay_livetime_hdf_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(dayabay_livetime_hdf_v01, self).__init__( *args, **kwargs )
 
         self.init_indices()
         if not self.idx.ndim()==1:

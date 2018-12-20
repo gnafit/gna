@@ -12,12 +12,12 @@ from gna.grouping import Categories, CatDict
 
 from gna.bundle import *
 
-class bkg_weighted_hist_v01(TransformationBundle):
-    def __init__(self, **kwargs):
+class bkg_weighted_hist_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
         variants  = kwargs['cfg'].get('variants', None)
         if variants is not None:
             kwargs['namespaces'] = list(variants)
-        super(bkg_weighted_hist_v01, self).__init__( **kwargs )
+        super(bkg_weighted_hist_v01, self).__init__( *args, **kwargs )
 
         try:
             self.cfg.setdefault( 'name', self.cfg.parent_key() )

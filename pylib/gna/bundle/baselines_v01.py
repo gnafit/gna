@@ -11,9 +11,9 @@ import itertools
 
 conversion = {"meters": 1./1000, "kilometers": 1.}
 
-class baselines_v01(TransformationBundle):
-    def __init__(self, **kwargs):
-        TransformationBundle.__init__( self, **kwargs )
+class baselines_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        TransformationBundleLegacy.__init__( self, *args, **kwargs )
 
         self.init_indices()
         self.init_data()
@@ -49,7 +49,7 @@ class baselines_v01(TransformationBundle):
             self.snf_pools = get_data(self.cfg.snf_pools)
         except KeyError:
             pass
-        
+
 
         if any('AD' not in str(key) for key in self.detectors.keys()):
             print('AD is not in detectors keys! Substituting')

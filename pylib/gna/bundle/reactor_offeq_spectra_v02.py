@@ -9,9 +9,9 @@ from gna.bundle import *
 from scipy.interpolate import interp1d
 from gna.env import env
 
-class reactor_offeq_spectra_v02(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(reactor_offeq_spectra_v02, self).__init__( **kwargs )
+class reactor_offeq_spectra_v02(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(reactor_offeq_spectra_v02, self).__init__( *args, **kwargs )
 
         self.offeq_raw_spectra = dict()
         self.enu_trans = None

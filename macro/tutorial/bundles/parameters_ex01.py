@@ -2,11 +2,11 @@
 
 from __future__ import print_function
 
-from gna.bundle.bundle import TransformationBundleV01
+from gna.bundle.bundle import TransformationBundle
 
-class parameters_ex01(TransformationBundleV01):
+class parameters_ex01(TransformationBundle):
     def __init__(self, *args, **kwargs):
-        TransformationBundleV01.__init__(self, *args, **kwargs)
+        TransformationBundle.__init__(self, *args, **kwargs)
 
     def define_variables(self):
         parname = self.cfg.parameter

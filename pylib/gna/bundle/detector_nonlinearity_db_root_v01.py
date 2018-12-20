@@ -11,10 +11,10 @@ from gna.env import env, namespace
 from gna.configurator import NestedDict
 from gna.bundle import *
 
-class detector_nonlinearity_db_root_v01(TransformationBundle):
+class detector_nonlinearity_db_root_v01(TransformationBundleLegacy):
     debug = False
-    def __init__(self, **kwargs):
-        super(detector_nonlinearity_db_root_v01, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(detector_nonlinearity_db_root_v01, self).__init__( *args, **kwargs )
 
         self.edges = kwargs.pop('edges', self.shared.get('edges', None))
         if not self.edges:

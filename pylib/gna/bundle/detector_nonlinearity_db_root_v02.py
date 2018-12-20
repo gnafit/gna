@@ -12,10 +12,10 @@ from gna.configurator import NestedDict
 from collections import OrderedDict
 from gna.bundle import *
 
-class detector_nonlinearity_db_root_v02(TransformationBundle):
+class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
     debug = False
-    def __init__(self, **kwargs):
-        super(detector_nonlinearity_db_root_v02, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(detector_nonlinearity_db_root_v02, self).__init__( *args, **kwargs )
 
         self.init_indices()
         if self.idx.ndim()<2:

@@ -11,9 +11,9 @@ from gna.constructors import stdvector
 
 from gna.bundle import *
 
-class var_fractions_v01(TransformationBundle):
+class var_fractions_v01(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
-        TransformationBundle.__init__(self, *args, **kwargs)
+        TransformationBundleLegacy.__init__(self, *args, **kwargs)
         self.init_indices()
         if self.idx.ndim()!=0:
             raise self.exception('Does not support indexing, got {!s}'.format(self.idx))

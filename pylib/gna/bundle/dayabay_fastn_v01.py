@@ -11,9 +11,9 @@ from gna.grouping import CatDict, Categories
 
 from gna.bundle import *
 
-class dayabay_fastn_v01(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(dayabay_fastn_v01, self).__init__( **kwargs )
+class dayabay_fastn_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(dayabay_fastn_v01, self).__init__( *args, **kwargs )
         self.namespaces = [self.common_namespace(var) for var in self.cfg.pars.keys()]
         self.groups = Categories(self.cfg.get('groups', {}), recursive=True)
         self.bindings=OrderedDict()

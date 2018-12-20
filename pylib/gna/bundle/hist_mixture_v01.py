@@ -11,12 +11,12 @@ from gna.constructors import stdvector
 
 from gna.bundle import *
 
-class hist_mixture_v01(TransformationBundle):
-    def __init__(self, **kwargs):
+class hist_mixture_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
         variants  = kwargs['cfg'].get('variants', None)
         if variants is not None:
             kwargs['namespaces'] = list(variants)
-        super(hist_mixture_v01, self).__init__( **kwargs )
+        super(hist_mixture_v01, self).__init__( *args, **kwargs )
 
         if len(self.cfg.spectra)<2:
             raise Exception( 'hist_mixture_v01 should have at least 2 spectra defined' )

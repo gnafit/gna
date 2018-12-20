@@ -7,10 +7,10 @@ import gna.constructors as C
 from gna.bundle import *
 from collections import OrderedDict
 
-class efficiencies_v01(TransformationBundle):
+class efficiencies_v01(TransformationBundleLegacy):
     mode = 'correlated' # 'uncorrelated'
-    def __init__(self, **kwargs):
-        super(efficiencies_v01, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(efficiencies_v01, self).__init__( *args, **kwargs )
 
         self.init_indices()
         self.init_data()

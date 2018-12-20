@@ -7,9 +7,9 @@ import gna.constructors as C
 from gna.bundle import *
 import itertools
 
-class baselines(TransformationBundle):
-    def __init__(self, **kwargs):
-        TransformationBundle.__init__( self, **kwargs )
+class baselines(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        TransformationBundleLegacy.__init__( self, *args, **kwargs )
 
         self.detectors = kwargs['cfg']['detectors']
         self.reactors = kwargs['cfg']['reactors']

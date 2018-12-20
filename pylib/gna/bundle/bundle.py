@@ -67,8 +67,8 @@ def execute_bundle(cfg, *args, **kwargs):
     bundle.execute()
     return bundle
 
-class TransformationBundle(object):
-    """TransformationBundle is a base class for implementing a Bundle.
+class TransformationBundleLegacy(object):
+    """TransformationBundleLegacy is a base class for implementing a Bundle.
 
     Bundle is an object that is able to configure and construct a part of a computational chain.
     Bundles should be designed to be backwards compatible. Once bundle is added to the master, its
@@ -88,7 +88,7 @@ class TransformationBundle(object):
         self.outputs             - {key: output}            - inputs to be connected (should be consistent with transformations_out)
         self.inputs              - {key: input}             - open outputs (should be consistent with transformations_in)
     """
-    def __init__(self, cfg, **kwargs):
+    def __init__(self, cfg, *args, **kwargs):
         """Constructor.
 
         Arguments:
@@ -179,7 +179,7 @@ class TransformationBundle(object):
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
 
-class TransformationBundleV01(object):
+class TransformationBundle(object):
     """
     cfg = {
         bundle = name or {

@@ -8,12 +8,12 @@ from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
-class reactor_fission_fractions_const_v01(TransformationBundle):
+class reactor_fission_fractions_const_v01(TransformationBundleLegacy):
     short_names = dict( U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241' )
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.isotopes = [self.short_names.get(s,s) for s in kwargs['cfg'].isotopes]
         self.reactors = kwargs['namespaces'] = kwargs['cfg'].reactors
-        super(reactor_fission_fractions_const_v01, self).__init__( **kwargs )
+        super(reactor_fission_fractions_const_v01, self).__init__( *args, **kwargs )
 
     def define_variables(self):
         for reactor in self.cfg.reactors:

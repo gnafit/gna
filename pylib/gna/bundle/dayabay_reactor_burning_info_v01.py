@@ -10,14 +10,14 @@ from gna.configurator import configurator
 
 mapping_idx_to_reactors = {1: "DB1", 2: "DB2", 3: "LA1", 4: "LA2", 5: "LA3", 6: "LA4"}
 
-class dayabay_reactor_burning_info_v01(TransformationBundle):
-    def __init__(self, **kwargs):
+class dayabay_reactor_burning_info_v01(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
         '''Initialize reactor information such as daily ratios of actual
         thermal power to nominal, fission fractions per core.
         Cores are provided by caller through indices.
         Info is read from npz file.
         '''
-        super(dayabay_reactor_burning_info_v01, self).__init__( **kwargs )
+        super(dayabay_reactor_burning_info_v01, self).__init__( *args, **kwargs )
 
         self.init_indices()
         if not self.idx.ndim()==2:

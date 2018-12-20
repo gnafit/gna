@@ -6,10 +6,10 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class detector_eres_common3(TransformationBundle):
+class detector_eres_common3(TransformationBundleLegacy):
     mode = 'correlated' # 'uncorrelated'
-    def __init__(self, **kwargs):
-        super(detector_eres_common3, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(detector_eres_common3, self).__init__( *args, **kwargs )
         self.transformations_in = self.transformations_out
 
     def build(self):

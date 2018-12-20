@@ -6,7 +6,7 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class integral_1d_v01(TransformationBundle):
+class integral_1d_v01(TransformationBundleLegacy):
     # @brief 1d integral bundle
     #
     # Integral_1d bundle. Creates necessary transformations to integrate 1d function into 1d histogram
@@ -28,8 +28,8 @@ class integral_1d_v01(TransformationBundle):
     #         provides = [ 'evis' ]
     #         ),
     #     @endcode
-    def __init__(self, **kwargs):
-        TransformationBundle.__init__( self, **kwargs )
+    def __init__(self, *args, **kwargs):
+        TransformationBundleLegacy.__init__( self, *args, **kwargs )
         self.check_cfg()
 
     def check_cfg(self):

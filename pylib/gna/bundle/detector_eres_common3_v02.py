@@ -6,10 +6,10 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class detector_eres_common3_v02(TransformationBundle):
+class detector_eres_common3_v02(TransformationBundleLegacy):
     common_matrix=True
-    def __init__(self, **kwargs):
-        super(detector_eres_common3_v02, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(detector_eres_common3_v02, self).__init__( *args, **kwargs )
         self.transformations_in = self.transformations_out
 
         self.init_indices()

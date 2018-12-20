@@ -11,9 +11,9 @@ from gna.grouping import CatDict, Categories
 
 from gna.bundle import *
 
-class parameters_1d_v01(TransformationBundle):
+class parameters_1d_v01(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
-        TransformationBundle.__init__(self, *args, **kwargs)
+        TransformationBundleLegacy.__init__(self, *args, **kwargs)
         self.init_indices()
         if self.idx.ndim()!=1:
             raise self.exception('Expect 1d indexing')

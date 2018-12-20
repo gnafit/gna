@@ -6,9 +6,9 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import *
 
-class rebin(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(rebin, self).__init__( **kwargs )
+class rebin(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(rebin, self).__init__( *args, **kwargs )
         self.transformations_in = self.transformations_out
 
     def build(self):

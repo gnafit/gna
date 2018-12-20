@@ -11,7 +11,7 @@ from gna.grouping import CatDict, Categories
 
 from gna.bundle.bundle import *
 
-class parameters_v01(TransformationBundleV01):
+class parameters_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundleV01.__init__(self, *args, **kwargs)
 

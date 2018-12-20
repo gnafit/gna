@@ -6,11 +6,11 @@ import numpy as np
 from gna.bundle import *
 from gna.env import env
 from scipy.interpolate import interp1d
-import gna.constructors as C 
+import gna.constructors as C
 
-class reactor_snf_spectra_v02(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(reactor_snf_spectra_v02, self).__init__(**kwargs)
+class reactor_snf_spectra_v02(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(reactor_snf_spectra_v02, self).__init__(*args, **kwargs)
 
         self.init_indices()
         self.make_anue_energy_bins()
@@ -35,7 +35,7 @@ class reactor_snf_spectra_v02(TransformationBundle):
 
 
     def init_data(self):
-        '''Read interpolated SNF ratio from file'''  
+        '''Read interpolated SNF ratio from file'''
         print(self.cfg)
         self.ratio_energy , self.ratio = np.loadtxt(self.cfg.data_path, unpack=True)
         f = interp1d(self.ratio_energy, self.ratio, bounds_error=False, fill_value=0.0 )
@@ -47,7 +47,7 @@ class reactor_snf_spectra_v02(TransformationBundle):
 
         self.objects['snf_spectra'] = snf_ratio
         self.set_output(snf_ratio.single(), "snf_ratio")
-        
+
     def define_variables(self):
         self.common_namespace.reqparameter("snf_rate", central=0.03,
                 relsigma=1., label="SNF rate normalization")

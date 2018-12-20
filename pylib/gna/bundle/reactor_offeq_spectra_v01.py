@@ -8,11 +8,11 @@ from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
-class reactor_offeq_spectra_v01(TransformationBundle):
+class reactor_offeq_spectra_v01(TransformationBundleLegacy):
     parname = 'offeq_scale'
     debug = False
-    def __init__(self, **kwargs):
-        super(reactor_offeq_spectra_v01, self).__init__( **kwargs )
+    def __init__(self, *args, **kwargs):
+        super(reactor_offeq_spectra_v01, self).__init__( *args, **kwargs )
 
         self.load_data()
 

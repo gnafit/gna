@@ -8,11 +8,10 @@ from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
-class reactor_anu_spectra_v02(TransformationBundle):
+class reactor_anu_spectra_v02(TransformationBundleLegacy):
     short_names = dict( U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241' )
     debug = False
-    def __init__(self, **kwargs):
-        cfg = kwargs['cfg']
+    def __init__(self, cfg, *args, **kwargs):
         if not 'indices' in cfg:
             raise Exception('Invalid configuration: missing "indices" field')
 
@@ -26,7 +25,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
 
         self.isotopes = kwargs['namespaces'] = [it.current_values()[0] for it in self.idx]
 
-        super(reactor_anu_spectra_v02, self).__init__( **kwargs )
+        super(reactor_anu_spectra_v02, self).__init__( cfg, *args, **kwargs )
 
         self.load_data()
 

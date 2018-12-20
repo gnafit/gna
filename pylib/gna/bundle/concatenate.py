@@ -5,9 +5,9 @@ from load import ROOT as R
 import numpy as N
 from gna.bundle import *
 
-class concatenate(TransformationBundle):
-    def __init__(self, **kwargs):
-        super(concatenate, self).__init__( **kwargs )
+class concatenate(TransformationBundleLegacy):
+    def __init__(self, *args, **kwargs):
+        super(concatenate, self).__init__( *args, **kwargs )
         self.transformations_in = self.transformations_out
 
     def build(self):
