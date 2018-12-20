@@ -141,7 +141,7 @@ class namespace(Mapping):
             if nsname=='':
                 return self
             parts = nsname.split('.')
-        else:
+        elif isinstance(nsname, (list,tuple)):
             parts = nsname
         if not parts:
             return self
@@ -155,22 +155,39 @@ class namespace(Mapping):
             if nsname not in self.namespaces:
                 self.namespaces[nsname] = otherns.namespaces[nsname]
 
-    def __getitem__(self, name):
-        if '.' in name:
-            path, head = name.rsplit('.', 1)
-            return self(path)[head]
+    def get_proper_ns(self, name):
+        if isinstance(name, (tuple, list)):
+            path, head = name[:-1], name[-1]
+        else:
+            path, head = (), name
 
-        v = self.storage[name]
+        if '.' in head:
+            newpath = tuple(head.split('.'))
+            path+=newpath[:-1]
+            head = newpath[-1]
+
+        if path:
+            return self(path), head
+        else:
+            return None, head
+
+    def __getitem__(self, name):
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage[head]
         if isinstance(v, basestring):
             return env.nsview[v]
         return v
 
     def __setitem__(self, name, value):
-        if '.' in name:
-            path, head = name.rsplit('.', 1)
-            return self(path).__setitem__(head, value)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            ns.__setitem__(head, value)
 
-        self.storage[name] = value
+        self.storage[head] = value
 
     def __iter__(self):
         return self.storage.iterkeys()
@@ -193,9 +210,10 @@ class namespace(Mapping):
         return pars
 
     def defparameter(self, name, *args, **kwargs):
-        if '.' in name:
-            path, name = name.rsplit('.', 1)
-            return self(path).defparameter(name, *args, **kwargs)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.defparamter(head, *args, **kwargs)
+
         if name in self.storage:
             raise Exception("{} is already defined in {}".format(name, self.path))
         target = self.matchrule(name)
@@ -209,47 +227,30 @@ class namespace(Mapping):
         return p
 
     def reqparameter(self, name, *args, **kwargs):
-        def without_status(name, **kwargs):
-            if '.' in name:
-                path, name = name.rsplit('.', 1)
-                return self(path).reqparameter(name, *args, **kwargs)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.reqparameter(head, *args, **kwargs)
 
-            try:
-                par = self[name]
-                return par
-            except KeyError:
-                pass
+        par = None
+        try:
+            par = self[name]
+        except KeyError:
+            pass
+
+        if not par:
             try:
                 par = env.nsview[name]
-                return par
             except KeyError:
                 pass
-            return self.defparameter(name, *args, **kwargs)
 
-        def with_status(name, **kwargs):
-            if '.' in name:
-                path, name = name.rsplit('.', 1)
-                return self(path).reqparameter(name, *args, **kwargs)
-
-            found = False
-            try:
-                par = self[name]
-                found = True
-                return par, found
-            except KeyError:
-                pass
-            try:
-                par = env.nsview[name]
-                found = True
-                return par, found
-            except KeyError:
-                pass
-            return self.defparameter(name, *args, **kwargs), found
+        found=bool(par)
+        if not par:
+            par = self.defparameter(name, *args, **kwargs)
 
         if kwargs.get('with_status'):
-            return with_status(name, **kwargs)
-        else:
-            return without_status(name, **kwargs)
+            return par, found
+
+        return par
 
     def reqparameter_group(self, *args, **kwargs):
         import gna.parameters.covariance_helpers as ch

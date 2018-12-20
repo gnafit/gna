@@ -248,23 +248,30 @@ class TransformationBundleV01(object):
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
 
-    def get_path(self, name, nidx, argument_number=None):
-        name=bundlecfg['names'].get(localname, localname)
-        path = nidx.current_values(name=name)
+    def get_path(self, localname, nidx=None, argument_number=None, join=False):
+        name=self.bundlecfg['names'].get(localname, localname)
+
+        if nidx is None:
+            path = name,
+        else:
+            path = nidx.current_values(name=name)
+
         if argument_number is not None:
             path+=('{:02d}'.format(int(clone)),)
+
+        if join:
+            path = '.'.join(path)
+
         return path
 
-    __mod__ = get_path
-
     def reqparameter(self, name, nidx, *args, **kwargs):
-        return self.namespace.reqparameter(self%(name, nidx), *args, **kwargs)
+        return self.namespace.reqparameter(self.get_path(name, nidx, join=False), *args, **kwargs)
 
     def set_output(self, name, nidx, output):
-        self.outputs[self%(name, nidx)]=output
+        self.outputs[self.get_path(name, nidx)]=output
 
     def set_input(self, name, nidx, input, argument_number=None):
-        self.inputs[self%(name, nidx, argument_number)]=input
+        self.inputs[self.get_path(name, nidx, argument_number)]=input
 
     def check_nidx_dim(self, dmin, dmax=float('inf'), nidx='both'):
         if nidx=='both':

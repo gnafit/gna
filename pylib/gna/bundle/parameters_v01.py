@@ -16,18 +16,14 @@ class parameters_v01(TransformationBundleV01):
         TransformationBundleV01.__init__(self, *args, **kwargs)
 
     def define_variables(self):
-        print(self.nidx.ndim())
-        print(self.nidx.ident())
-        import IPython
-        IPython.embed()
-
-        # sepunc = self.cfg.get('separate_uncertainty', False)
-        # for it in self.idx.iterate():
-            # itname, = it.current_values()
-            # parcfg = self.cfg.pars[itname]
-
-            # name = it.current_format(name=self.cfg.parameter)
-            # label = it.current_format(self.cfg.label)
+        sepunc = self.cfg.get('separate_uncertainty', False)
+        parname = self.cfg.parameter
+        pars = self.cfg.pars
+        labelfmt = self.cfg.get('label', '')
+        for it in self.nidx:
+            nidx_values = it.current_values()
+            parcfg = pars[nidx_values]
+            label = it.current_format(labelfmt) if labelfmt else ''
 
             # if parcfg.mode!='fixed' and sepunc:
                 # uncname = it.current_format(name=sepunc)
@@ -37,5 +33,4 @@ class parameters_v01(TransformationBundleV01):
 
                 # parcfg.mode='fixed'
 
-            # par = self.common_namespace.reqparameter(name, cfg=parcfg)
-            # par.setLabel(label)
+            par = self.reqparameter(parname, it, cfg=parcfg, label=label)
