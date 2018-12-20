@@ -181,9 +181,9 @@ class ExpressionContext(object):
     def build_bundle(self, cfg):
         printl_debug('build bundle', cfg.bundle )
 
-        from gna.bundle import execute_bundle
+        from gna.bundle import execute_bundles
         with nextlevel():
-            b=execute_bundle( cfg=cfg, context=self )
+            b=execute_bundles( cfg=cfg, context=self )
 
     def get_variable(self, name, *idx):
         pass

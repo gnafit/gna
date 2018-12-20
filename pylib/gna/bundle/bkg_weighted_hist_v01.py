@@ -28,7 +28,7 @@ class bkg_weighted_hist_v01(TransformationBundle):
         self.groups = Categories( self.cfg.get('groups', {}), recursive=True )
 
     def build(self):
-        self.bundles, = execute_bundle(cfg=self.cfg.spectra, shared=self.shared)
+        self.bundles, = execute_bundles(cfg=self.cfg.spectra, shared=self.shared)
 
         spectra = CatDict(self.groups, self.bundles.outputs)
         transs = CatDict(self.groups, self.bundles.transformations_out)

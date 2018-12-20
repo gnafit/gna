@@ -57,11 +57,16 @@ def init_bundle(**kwargs):
 
     return bundles
 
-def execute_bundle(**kwargs):
+def execute_bundles(**kwargs):
     bundles = init_bundle(**kwargs)
     for bundle in bundles:
         bundle.execute()
     return bundles
+
+def execute_bundle(cfg):
+    bundle = init_bundle(cfg=cfg)[0]
+    bundle.execute()
+    return bundle
 
 class TransformationBundle(object):
     """TransformationBundle is a base class for implementing a Bundle.
@@ -212,7 +217,7 @@ class TransformationBundleV01(object):
         if major is not None:
             self.nidx_major, self.nidx_minor = self.nidx.split( major )
         else:
-            self.nidx_major, self.nidx_minor = self.nidx, None
+            self.nidx_major, self.nidx_minor = self.nidx, self.nidx.get_subset(())
 
         # Init namespace and context
         # TODO: make it inheritable

@@ -5,7 +5,7 @@ import numpy as np
 from load import ROOT
 from gna.expression import *
 from gna.configurator import uncertaindict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from argparse import ArgumentParser
 from gna.env import env
 ROOT.GNAObject

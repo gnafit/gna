@@ -16,21 +16,25 @@ class parameters_v01(TransformationBundleV01):
         TransformationBundleV01.__init__(self, *args, **kwargs)
 
     def define_variables(self):
-        sepunc = self.cfg.get('separate_uncertainty', False)
+        separate_uncertainty = self.cfg.get('separate_uncertainty', False)
         parname = self.cfg.parameter
         pars = self.cfg.pars
         labelfmt = self.cfg.get('label', '')
-        for it in self.nidx:
-            nidx_values = it.current_values()
-            parcfg = pars[nidx_values]
-            label = it.current_format(labelfmt) if labelfmt else ''
 
-            # if parcfg.mode!='fixed' and sepunc:
-                # uncname = it.current_format(name=sepunc)
-                # unccfg = parcfg.get_unc()
-                # uncpar = self.common_namespace.reqparameter(uncname, cfg=unccfg)
-                # uncpar.setLabel(label+' (norm)')
+        for it_major in self.nidx_major:
+            major_values = it_major.current_values()
+            parcfg = pars[major_values]
 
-                # parcfg.mode='fixed'
+            for it_minor in self.nidx_minor:
+                it=it_major+it_minor
+                label = it.current_format(labelfmt) if labelfmt else ''
 
-            par = self.reqparameter(parname, it, cfg=parcfg, label=label)
+                if separate_uncertainty:
+                    if parcfg.mode=='fixed':
+                        raise self.exception('Can not separate uncertainty for fixed parameters')
+
+                    unccfg = parcfg.get_unc()
+                    uncpar = self.reqparameter(separate_uncertainty, it, cfg=unccfg, label=label+' (norm)')
+                    parcfg.mode='fixed'
+
+                par = self.reqparameter(parname, it, cfg=parcfg, label=label)

@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from gna.expression import *
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from load import ROOT as R
 R.GNAObject
 

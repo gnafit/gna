@@ -13,11 +13,15 @@ cfg = NestedDict(
                    nidx=[
                        ('s', 'source',   ['SA', 'SB']),
                        'name',
-                       ('d', 'detector', ['D1', 'D2', 'D3'])
-                       ]
+                       ('d', 'detector', ['D1', 'D2', 'D3']),
+                       # ('e', 'element', ['e0', 'e1'])
+                       ],
+                   # major=('s', 'd')
                    ),
     parameter = 'rate0',
-    label='Background rate at {detector}',
+    # label='Flux normalization {source}->{detector} ({element})',
+    label='Flux normalization {source}->{detector}',
+    # separate_uncertainty = 'norm0',
     pars = uncertaindict(
         [
             ( 'SA.D1', 1.0 ),

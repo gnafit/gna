@@ -4,7 +4,7 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist
@@ -31,7 +31,7 @@ cfg = NestedDict(
         filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
         )
-b, = execute_bundle( cfg=cfg, namespaces=['AD1', 'AD2', 'AD3'] )
+b, = execute_bundles( cfg=cfg, namespaces=['AD1', 'AD2', 'AD3'] )
 (smear1, smear2, smear3) = b.transformations_out.values()
 
 env.globalns.printparameters(labels=True)

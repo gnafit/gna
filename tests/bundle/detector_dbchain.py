@@ -6,7 +6,7 @@ Broken, use expressions
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 import numpy as N
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
@@ -99,7 +99,7 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 # Define the chain
 #
 shared = NestedDict( edges=points.single() )
-b, = execute_bundle(cfg=cfg.detector, namespaces=namespaces, shared=shared)
+b, = execute_bundles(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
 print('Parameters:')
 env.globalns.printparameters(labels=True)

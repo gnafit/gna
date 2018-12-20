@@ -23,7 +23,7 @@ class hist_mixture_v01(TransformationBundle):
 
     def build(self):
         self.bundles = OrderedDict([
-                (name, execute_bundle(cfg=cfg, namespaces=None, shared=self.shared)[0])
+                (name, execute_bundles(cfg=cfg, namespaces=None, shared=self.shared)[0])
                 for name, cfg in self.cfg.spectra.items()
             ])
 

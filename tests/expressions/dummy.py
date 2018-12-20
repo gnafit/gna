@@ -4,7 +4,7 @@
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from gna.env import env
 from gna.configurator import NestedDict, uncertain
 from collections import OrderedDict
@@ -25,6 +25,6 @@ cfg = NestedDict(
 
 ns = env.globalns
 shared = NestedDict()
-b, = execute_bundle( common_namespace=ns, cfg=cfg, shared=shared )
+b, = execute_bundles( common_namespace=ns, cfg=cfg, shared=shared )
 
 print( shared )

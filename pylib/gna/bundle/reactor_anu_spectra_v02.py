@@ -38,7 +38,7 @@ class reactor_anu_spectra_v02(TransformationBundle):
 
         self.corrections=None
         if self.cfg.get('corrections', None):
-            self.corrections, = execute_bundle(cfg=self.cfg.corrections, shared=self.shared)
+            self.corrections, = execute_bundles(cfg=self.cfg.corrections, shared=self.shared)
 
         insegment_t=None
         for it in self.idx:

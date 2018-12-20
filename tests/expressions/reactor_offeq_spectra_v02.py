@@ -6,7 +6,7 @@ from load import ROOT as R
 from gna.expression import *
 import numpy as np
 from gna.configurator import NestedDict, uncertain, uncertaindict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from gna.env import env
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_hist, plot_bar, savefig

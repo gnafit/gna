@@ -12,7 +12,7 @@ import gna.constructors as C
 from gna.converters import convert
 import numpy as N
 from gna.configurator import NestedDict, uncertain
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from physlib import percent
 
 from argparse import ArgumentParser
@@ -53,7 +53,7 @@ hist = C.Histogram( edges, phist )
 #
 # Initialize bundle
 #
-b, = execute_bundle( edges=points.single(), cfg=cfg )
+b, = execute_bundles( edges=points.single(), cfg=cfg )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 

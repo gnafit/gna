@@ -32,7 +32,7 @@ args = parser.parse_args()
 #
 from gna.expression import *
 from gna.configurator import uncertaindict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from load import ROOT as R
 from gna.env import env
 from matplotlib import pyplot as P
