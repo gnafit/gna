@@ -169,6 +169,10 @@ class NIndex(object):
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
+    def __str__(self):
+        s = ['%s=%s'%(v.short, v.current) if v.current is not None else v.short for v in self.indices.values()]
+        return 'NIndex(%s)'%( ', '.join(s) )
+
     def orders_consistent(self, order1, order2, exception=False):
         if not order1 or order1==['name']:
             return True
@@ -253,8 +257,8 @@ class NIndex(object):
 
         self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
 
-    def __str__(self):
-        return ', '.join( self.indices.keys() )
+    # def __str__(self):
+        # return ', '.join( self.indices.keys() )
 
     def __bool__(self):
         return bool(self.indices)

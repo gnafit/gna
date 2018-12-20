@@ -31,10 +31,9 @@ def get_bundle(name):
 
     return bundle
 
-def init_bundle(**kwargs):
+def init_bundle(cfg, *args, **kwargs):
     names = kwargs.pop('name', None)
     if not names:
-        cfg = kwargs['cfg']
         names = cfg.bundle
 
         if isinstance(names, (dict, NestedDict)):
@@ -49,7 +48,7 @@ def init_bundle(**kwargs):
     bundles = ()
     for name in names:
         bundleclass = get_bundle(name)
-        bundle = bundleclass(**kwargs)
+        bundle = bundleclass(cfg, *args, **kwargs)
         bundles+=bundle,
 
     if not bundles:
@@ -57,14 +56,14 @@ def init_bundle(**kwargs):
 
     return bundles
 
-def execute_bundles(**kwargs):
-    bundles = init_bundle(**kwargs)
+def execute_bundles(cfg, *args, **kwargs):
+    bundles = init_bundle(cfg, **kwargs)
     for bundle in bundles:
         bundle.execute()
     return bundles
 
-def execute_bundle(cfg):
-    bundle = init_bundle(cfg=cfg)[0]
+def execute_bundle(cfg, *args, **kwargs):
+    bundle = init_bundle(cfg, *args, **kwargs)[0]
     bundle.execute()
     return bundle
 
@@ -192,7 +191,7 @@ class TransformationBundleV01(object):
         }
     }
     """
-    def __init__(self, cfg, **kwargs):
+    def __init__(self, cfg, *args, **kwargs):
         from gna.expression import NIndex
         self.cfg = cfg
 
@@ -220,9 +219,10 @@ class TransformationBundleV01(object):
             self.nidx_major, self.nidx_minor = self.nidx, self.nidx.get_subset(())
 
         # Init namespace and context
-        # TODO: make it inheritable
-        self.context   = NestedDict(inputs={}, outputs={})
-        self.namespace = env.globalns
+        self.context   = kwargs.pop('context', None)
+        self.namespace = kwargs.pop('namespace', env.globalns)
+        if self.context is None:
+            self.context = NestedDict(inputs={}, outputs={}, objects={})
 
         assert not kwargs
 
@@ -270,7 +270,7 @@ class TransformationBundleV01(object):
         return path
 
     def reqparameter(self, name, nidx, *args, **kwargs):
-        return self.namespace.reqparameter(self.get_path(name, nidx, join=False), *args, **kwargs)
+        return self.namespace.reqparameter(self.get_path(name, nidx), *args, **kwargs)
 
     def set_output(self, name, nidx, output):
         self.outputs[self.get_path(name, nidx)]=output

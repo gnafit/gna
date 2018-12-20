@@ -214,16 +214,16 @@ class namespace(Mapping):
         if ns:
             return ns.defparamter(head, *args, **kwargs)
 
-        if name in self.storage:
-            raise Exception("{} is already defined in {}".format(name, self.path))
-        target = self.matchrule(name)
+        if head in self.storage:
+            raise Exception("{} is already defined in {}".format(head, self.path))
+        target = self.matchrule(head)
         if not target:
             target = kwargs.pop('target', None)
         if target:
             p = target
         else:
-            p = parameters.makeparameter(self, name, *args, **kwargs)
-        self[name] = p
+            p = parameters.makeparameter(self, head, *args, **kwargs)
+        self[head] = p
         return p
 
     def reqparameter(self, name, *args, **kwargs):
@@ -233,19 +233,19 @@ class namespace(Mapping):
 
         par = None
         try:
-            par = self[name]
+            par = self[head]
         except KeyError:
             pass
 
         if not par:
             try:
-                par = env.nsview[name]
+                par = env.nsview[head]
             except KeyError:
                 pass
 
         found=bool(par)
         if not par:
-            par = self.defparameter(name, *args, **kwargs)
+            par = self.defparameter(head, *args, **kwargs)
 
         if kwargs.get('with_status'):
             return par, found
