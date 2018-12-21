@@ -52,9 +52,14 @@ def makeparameter(ns, name, cfg=None, **kwargs):
             kwargs['uncertainty'] = 0.1
             kwargs['uncertainty_type'] = 'absolute'
             kwargs['fixed'] = True
+        elif cfg.mode=='free':
+            kwargs['uncertainty'] = float('inf')
+            kwargs['uncertainty_type'] = 'absolute'
+            kwargs['free'] = True
         else:
             kwargs['uncertainty'] = cfg.uncertainty
             kwargs['uncertainty_type'] = cfg.mode
+        kwargs['label']=cfg.label
     else:
         ptype = kwargs.get('type', 'gaussian')
 

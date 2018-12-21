@@ -300,10 +300,13 @@ def configurator(filename=None, dic={}, **kwargs):
     return self
 
 class uncertain(object):
-    def __init__(self, central, uncertainty=None, mode='fixed'):
-        assert mode in ['absolute', 'relative', 'percent', 'fixed'], 'Unsupported uncertainty mode '+mode
+    def __init__(self, central, uncertainty, mode='', label=''):
+        if isinstance(uncertainty, str):
+            uncertainty, mode, label=None, uncertainty, mode
 
-        assert (mode=='fixed')==(uncertainty is None), 'Inconsistent mode and uncertainty'
+        assert mode in ['absolute', 'relative', 'percent', 'fixed', 'free'], 'Unsupported uncertainty mode '+mode
+
+        assert (mode in ['fixed', 'free'])==(uncertainty is None), 'Inconsistent mode and uncertainty'
 
         if mode=='percent':
             mode='relative'
@@ -312,9 +315,10 @@ class uncertain(object):
         if mode=='relative':
             assert central!=0, 'Central value should differ from 0 for relative uncertainty'
 
-        self.central = central
-        self.uncertainty   = uncertainty
-        self.mode    = mode
+        self.central     = central
+        self.uncertainty = uncertainty
+        self.mode        = mode
+        self.label       = label
 
     def get_unc(self):
         if self.mode=='relative':
@@ -323,6 +327,8 @@ class uncertain(object):
             relunc = self.uncertainty/self.central
         elif self.mode=='fixed':
             return None
+        elif self.mode=='free':
+            return float('inf')
         else:
             raise Exception('Unsupported mode '+self.mode)
 
@@ -352,12 +358,13 @@ class uncertain(object):
         return 'uncertain({central!r}, {uncertainty!r}, {mode!r})'.format( **self.__dict__ )
 
 def uncertaindict(*args, **kwargs):
-    common = dict(
-        central = kwargs.pop( 'central', None ),
-        uncertainty   = kwargs.pop( 'uncertainty',   None ),
-        mode    = kwargs.pop( 'mode',    None ),
-    )
-    missing = [ s for s in ['central', 'uncertainty', 'mode'] if not common[s] ]
+    common = dict()
+    missing = []
+    for s in ['central', 'uncertainty', 'mode', 'label']:
+        if s in kwargs:
+            common[s]=kwargs.pop(s)
+        else:
+            missing.append(s)
     res  = OrderedDict( *args, **kwargs )
 
     for k, v in res.items():
