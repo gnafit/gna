@@ -45,7 +45,7 @@ public:
   InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                            ///< Constructor.
 
   TransformationDescriptor add_transformation(bool bind=true);
-  void bind_transformations();
+  void bind_transformations(bool bind_inputs=true);
   void set(SingleOutput& x, SingleOutput& newx);
   InputDescriptor  add_input();
   OutputDescriptor add_input(SingleOutput& y);

@@ -123,9 +123,13 @@ class IndexedContainer(object):
                             # if nobj==1:
                                 # i=None
                             output = obj.get_output(idx, context)
-                            input  = self.get_input(idx, context, clone=i)
-                            if not input.materialized(): #Fixme: should be configurable
-                                input(output)
+                            inputs  = self.get_input(idx, context, clone=i)
+
+                            if not isinstance(inputs, (list,tuple)):
+                                inputs = inputs,
+                            for input in inputs:
+                                if not input.materialized(): #Fixme: should be configurable
+                                    output >> input
 
 class VProduct(IndexedContainer, Variable):
     def __init__(self, name, *objects, **kwargs):
@@ -395,7 +399,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
                 context.set_output(newout, self.name, idx)
                 context.set_input(inp, self.name, idx)
                 out = self.object.get_output(idx, context)
-                inp(out)
+                out >> inp
 
     def test_iteration(self):
         for it in self.nindex.iterate():

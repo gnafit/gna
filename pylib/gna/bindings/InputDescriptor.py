@@ -18,3 +18,8 @@ def InputDescriptor__print(self):
     printl(str(self))
 
 del R.TransformationTypes.InputHandle.__lshift__
+
+@patchROOTClass(R.InputDescriptor, '__gt__')
+@patchROOTClass(R.InputDescriptor, '__lt__')
+def InputDescriptor______cmp__(a,b):
+    raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

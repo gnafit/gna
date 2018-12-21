@@ -64,7 +64,7 @@ class Expression(object):
         for expr in self.expressions:
             texpr = '__tree__ = '+expr
             try:
-                exec(texpr, self.globals)
+                exec(texpr, self.globals, self.globals)
                 tree = self.globals.pop('__tree__')
             except:
                 print('Failed to evaluate expression:')

@@ -51,3 +51,8 @@ def TransformationDescriptor______rlshift__(transf, inputs):
 def TransformationDescriptor______lshift__(self, output):
     '''inputs(self)<<output(arg)'''
     output>>self.single_input()
+
+@patchROOTClass(R.TransformationDescriptor, '__gt__')
+@patchROOTClass(R.TransformationDescriptor, '__lt__')
+def TransformationDescriptor______cmp__(a,b):
+    raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

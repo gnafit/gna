@@ -90,3 +90,7 @@ def GNAObject______lshift__(obj, output):
     '''inputs(obj)<<output(arg)'''
     output>>obj.single_input()
 
+@patchROOTClass(R.GNAObject, '__gt__')
+@patchROOTClass(R.GNAObject, '__lt__')
+def GNAObject______cmp__(a,b):
+    raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

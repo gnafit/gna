@@ -58,7 +58,7 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
     ;
 
   if(bind){
-    bind_transformations();
+    bind_transformations(false);
   }
   return transformations.back();
 }
@@ -82,13 +82,13 @@ InputDescriptor InterpExpo::add_input(){
     return input;
 }
 
-OutputDescriptor InterpExpo::add_input(SingleOutput& y){
+OutputDescriptor InterpExpo::add_input(SingleOutput& y){g
   auto input=add_input();
   input.connect(y.single());
   return OutputDescriptor(transformations.back().outputs.back());
 }
 
-void InterpExpo::bind_transformations(){
+void InterpExpo::bind_transformations(bool bind_inputs){
   auto segments=transformations.front();
   auto interp=transformations.back();
 
@@ -96,8 +96,10 @@ void InterpExpo::bind_transformations(){
   auto& outputs=segments.outputs;
   auto& inputs=interp.inputs;
 
-  seg_inputs[0].output()>>inputs[0];
-  seg_inputs[1].output()>>inputs[1];
+  if(bind_inputs) {
+    seg_inputs[0].output()>>inputs[0];
+    seg_inputs[1].output()>>inputs[1];
+  }
   outputs[0]>>inputs[2];
   outputs[1]>>inputs[3];
 }

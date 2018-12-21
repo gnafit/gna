@@ -39,8 +39,14 @@ class reactor_anu_spectra_v02(TransformationBundleLegacy):
         if self.cfg.get('corrections', None):
             self.corrections, = execute_bundles(cfg=self.cfg.corrections, shared=self.shared)
 
-        insegment_t=None
-        for it in self.idx:
+        self.interp_expo = interp_expo = R.InterpExpo(ns=self.common_namespace)
+        sampler = interp_expo.transformations.front()
+        model_edges_t >> sampler.inputs.edges
+        sampler_input = sampler.inputs.points
+        interp_expo.bind_transformations(False)
+
+        interp_expo_t = interp_expo.transformations.back()
+        for i, it in enumerate(self.idx):
             isotope = it.current_values()[0]
 
             spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.common_namespace )
@@ -56,26 +62,25 @@ class reactor_anu_spectra_v02(TransformationBundleLegacy):
             else:
                 spectrum_t = spectrum_raw_t
 
-            interp_expo_t = R.InterpExpo(ns=self.common_namespace)
-            interp_expo_t.interp.setLabel('S(E):\n'+isotope)
+            if i>0:
+                interp_expo_t = interp_expo.add_transformation(False)
+                interp_expo.bind_transformations(False)
 
-            # TODO: Identity is created only to provide single input (the output is connected twice).
-            # Need to think how to eliminate this.
-            newx = R.Identity()
-            self.set_input(newx.identity.source, self.cfg.name, it, clone=0)
+            model_edges_t >> interp_expo_t.inputs.x
+            interp_output = interp_expo.add_input(spectrum_t)
+            interp_input  = interp_expo_t.inputs.newx
 
-            if insegment_t:
-                interp_expo_t.interpolate(insegment_t, model_edges_t, spectrum_t, newx.single())
+            if i>0:
+                self.set_input(interp_input, self.cfg.name, it, clone=0)
             else:
-                interp_expo_t.interpolate(model_edges_t, spectrum_t, newx.single())
-                insegment_t = interp_expo_t.insegment
+                self.set_input((sampler_input, interp_input), self.cfg.name, it, clone=0)
+
+            interp_expo_t.setLabel('S(E):\n'+isotope)
 
             """Store data"""
-            self.set_output(interp_expo_t.interp.interp, self.cfg.name, it)
+            self.set_output(interp_output, self.cfg.name, it)
+
             self.objects[('spectrum', isotope)]     = spectrum_t
-            self.objects[('interp', isotope)]       = interp_expo_t
-            self.transformations_out[isotope]       = interp_expo_t.interp
-            self.outputs[isotope]                   = interp_expo_t.interp.interp
 
     def load_data(self):
         """Read raw input spectra"""

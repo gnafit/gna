@@ -82,7 +82,7 @@ class Operation(TCall,NestedTransformation):
                                 output = obj.get_output(fullidx, context)
                                 inp  = tobj.add_input('%02d'%i)
                                 context.set_input(inp, self.name, fullidx, clone=i)
-                                inp(output)
+                                output >> inp
 
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
@@ -128,7 +128,7 @@ class OSum(Operation):
                     fullidx = freeidx+reduceidx
                     inp = context.set_input(tobj.sum.inputs[name], self.name, freeidx, clone=i)
                     output = subobject.get_output(fullidx, context)
-                    inp(output)
+                    output >> inp
 
             # from gna.constructors import stdvector
             # labels  = stdvector([self.object.name])
@@ -143,7 +143,7 @@ class OSum(Operation):
                 # context.set_output(newout, self.name, idx)
                 # context.set_input(inp, self.name, idx)
                 # out = self.object.get_output(idx, context)
-                # inp(out)
+                # out >> inp
 
 placeholder=['placeholder']
 class OProd(Operation):

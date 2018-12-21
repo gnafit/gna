@@ -100,6 +100,10 @@ from gna.bindings import OutputDescriptor
 env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
+print()
+
+print( 'inputs:' )
+print( context.inputs )
 
 ns = env.globalns('testexp')
 env.globalns.printparameters( labels=True )
@@ -115,9 +119,9 @@ ax.set_title( '' )
 
 # ax.vlines(cfg.edges, 0.0, 2.5, linestyles='--', alpha=0.5, colors='blue')
 
-for name, output in context.outputs.anuspec.items():
-    data=output.data().copy()
-    ax.plot( context.outputs.enu.data(), N.ma.array(data, mask=data==0.0), label=L.s(name) )
+# for name, output in context.outputs.anuspec.items():
+    # data=output.data().copy()
+    # ax.plot( context.outputs.enu.data(), N.ma.array(data, mask=data==0.0), label=L.s(name) )
 
 if opts.log:
     ax.set_yscale('log')
@@ -132,7 +136,7 @@ if opts.dot:
                 # splines='ortho'
                 joints=False,
                 )
-        graph = GNADot(context.outputs.enu, **kwargs)
+        graph = GNADot(context.outputs.anuspec.U235, **kwargs)
         graph.write(opts.dot)
         print( 'Write output to:', opts.dot )
     except Exception as e:

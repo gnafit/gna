@@ -33,3 +33,8 @@ def OutputDescriptor______rshift__(output, inputs):
 @patchROOTClass(R.OutputDescriptor, '__rlshift__')
 def OutputDescriptor______rlshift__(output, inputs):
     OutputDescriptor______rshift__(output, inputs)
+
+@patchROOTClass(R.OutputDescriptor, '__gt__')
+@patchROOTClass(R.OutputDescriptor, '__lt__')
+def OutputDescriptor______cmp__(a,b):
+    raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')
