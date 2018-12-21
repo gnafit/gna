@@ -8,16 +8,13 @@ from gna.configurator import NestedDict, uncertaindict, uncertain
 from gna.env import env
 
 #
-# List of parameters 1
+# Bundle configuration
 #
 cfg = NestedDict(
     bundle = dict(
-        # Bundle name
         name='parameters',
-        # Bundle version
         version='ex01',
         ),
-    # Parameters definition
     pars = uncertaindict(
         [
             ( 'par_a',   (1.0, 1.0,  'percent') ),
@@ -28,6 +25,13 @@ cfg = NestedDict(
             ],
         ),
 )
-b1 = execute_bundle(cfg)
-env.globalns.printparameters(labels=True)
 
+#
+# Execute bundle configuration
+#
+b1 = execute_bundle(cfg)
+
+#
+# Print the parameters
+#
+env.globalns.printparameters(labels=True)

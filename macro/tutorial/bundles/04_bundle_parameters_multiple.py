@@ -44,7 +44,7 @@ cfg1 = NestedDict(
         ),
 )
 b1 = execute_bundle(cfg1, namespace=env.globalns('bundle1'))
-env.globalns('bundle1').printparameters(labels=True)
+env.globalns('bundle1').printparameters(labels=True); print()
 
 #
 # List of parameters 2
@@ -76,7 +76,7 @@ cfg2 = NestedDict(
         ),
 )
 b2 = execute_bundle(cfg2, namespace=env.globalns('bundle2'))
-env.globalns('bundle2').printparameters(labels=True)
+env.globalns('bundle2').printparameters(labels=True); print()
 
 #
 # List of parameters 3 (0d)
@@ -90,4 +90,4 @@ cfg3 = NestedDict(
     pars = uncertain( -1.0, uncertainty=4.0, mode='percent')
 )
 b3 = execute_bundle(cfg3, namespace=env.globalns('bundle3'))
-env.globalns('bundle3').printparameters(labels=True)
+env.globalns.printparameters(labels=True)

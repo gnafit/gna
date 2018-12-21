@@ -19,6 +19,8 @@ outputs; or it may make nothing but simply bind inputs and outputs already defin
 
 .. toctree::
 
+    bundles_intro
     bundles_parameters
+    bundles_parameters_replication
 
 

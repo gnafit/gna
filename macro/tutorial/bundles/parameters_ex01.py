@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-
 from gna.bundle.bundle import TransformationBundle
 
 class parameters_ex01(TransformationBundle):
@@ -11,8 +10,5 @@ class parameters_ex01(TransformationBundle):
         self.check_nidx_dim(0,0)
 
     def define_variables(self):
-        pars = self.cfg.pars
-
-        for parname, parcfg in pars.items(nested=True):
-            label=''
-            self.reqparameter(parname, None, cfg=parcfg, label=label)
+        for parname, parcfg in self.cfg.pars.items(nested=True):
+            self.reqparameter(parname, None, cfg=parcfg)
