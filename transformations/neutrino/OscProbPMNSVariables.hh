@@ -183,7 +183,7 @@ protected:
 
 class OscProbPMNSExpressions: public ExpressionsProvider {
 public:
-  OscProbPMNSExpressions(Neutrino from, Neutrino to, const std::vector<std::string>& names)
+  OscProbPMNSExpressions(Neutrino from, Neutrino to, const std::vector<std::string>& names={})
     : ExpressionsProvider(new OscProbPMNSVariables(this, from, to, names))
     { }
 };

@@ -81,50 +81,50 @@ protected:
       // Mass splittings
       .add(&DeltaMSq13,
            {&DeltaMSq23, &Alpha, &DeltaMSq12}, [&]() {
-             return DeltaMSq23 + Alpha*DeltaMSq12;
+             return DeltaMSq23.value() + Alpha.value()*DeltaMSq12.value();
            })
       .add(&DeltaMSq23,
            {&DeltaMSq13, &Alpha, &DeltaMSq12}, [&]() {
-             return DeltaMSq13 - Alpha*DeltaMSq12;
+             return DeltaMSq13.value() - Alpha.value()*DeltaMSq12.value();
            })
       .add(&DeltaMSq23,
            {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
-             return DeltaMSqEE + Alpha*(SinSq12 - 1)*DeltaMSq12;
+             return DeltaMSqEE.value() + Alpha.value()*(SinSq12.value() - 1)*DeltaMSq12.value();
            })
       .add(&DeltaMSqEE,
            {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
-             return DeltaMSq23 - Alpha*(SinSq12 - 1)*DeltaMSq12;
+             return DeltaMSq23.value() - Alpha.value()*(SinSq12.value() - 1)*DeltaMSq12.value();
            })
       .add(&DeltaMSqMM, {&DeltaMSqEE, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
-              return DeltaMSqEE - Alpha*sin(2*Theta12)
-                     + cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
+              return DeltaMSqEE.value() - Alpha.value()*sin(2*Theta12.value())
+                     + cos(Delta.value())*sin(Theta13.value())*sin(2*Theta12.value())*tan(Theta23.value())*DeltaMSq12.value();})
       .add(&DeltaMSqEE, {&DeltaMSqMM, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
-              return DeltaMSqMM + Alpha*sin(2*Theta12)
-                     - cos(Delta)*sin(Theta13)*sin(2*Theta12)*tan(Theta23)*DeltaMSq12;})
+              return DeltaMSqMM.value() + Alpha.value()*sin(2*Theta12.value())
+                     - cos(Delta.value())*sin(Theta13.value())*sin(2*Theta12.value())*tan(Theta23.value())*DeltaMSq12.value();})
       // Squared sine and cos
-      .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12), 2); })
-      .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13), 2); })
-      .add(&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23), 2); })
-      .add(&CosSq12, {&SinSq12}, [&]() { return 1.0-SinSq12; })
-      .add(&CosSq13, {&SinSq13}, [&]() { return 1.0-SinSq13; })
-      .add(&CosSq23, {&SinSq23}, [&]() { return 1.0-SinSq23; })
+      .add(&SinSq12, {&Theta12}, [&]() { return pow(sin(Theta12.value()), 2); })
+      .add(&SinSq13, {&Theta13}, [&]() { return pow(sin(Theta13.value()), 2); })
+      .add(&SinSq23, {&Theta23}, [&]() { return pow(sin(Theta23.value()), 2); })
+      .add(&CosSq12, {&SinSq12}, [&]() { return 1.0-SinSq12.value(); })
+      .add(&CosSq13, {&SinSq13}, [&]() { return 1.0-SinSq13.value(); })
+      .add(&CosSq23, {&SinSq23}, [&]() { return 1.0-SinSq23.value(); })
       // Sine and cos
-      .add(&Sin12, {&SinSq12}, [&]() { return sqrt(SinSq12); })
-      .add(&Sin13, {&SinSq13}, [&]() { return sqrt(SinSq13); })
-      .add(&Sin23, {&SinSq23}, [&]() { return sqrt(SinSq23); })
-      .add(&Cos12, {&CosSq12}, [&]() { return sqrt(CosSq12); })
-      .add(&Cos13, {&CosSq13}, [&]() { return sqrt(CosSq13); })
-      .add(&Cos23, {&CosSq23}, [&]() { return sqrt(CosSq23); })
+      .add(&Sin12, {&SinSq12}, [&]() { return sqrt(SinSq12.value()); })
+      .add(&Sin13, {&SinSq13}, [&]() { return sqrt(SinSq13.value()); })
+      .add(&Sin23, {&SinSq23}, [&]() { return sqrt(SinSq23.value()); })
+      .add(&Cos12, {&CosSq12}, [&]() { return sqrt(CosSq12.value()); })
+      .add(&Cos13, {&CosSq13}, [&]() { return sqrt(CosSq13.value()); })
+      .add(&Cos23, {&CosSq23}, [&]() { return sqrt(CosSq23.value()); })
       // Angles
-      .add(&Theta12, {&Sin12}, [&]() { return asin(Sin12); })
-      .add(&Theta13, {&Sin13}, [&]() { return asin(Sin13); })
-      .add(&Theta23, {&Sin23}, [&]() { return asin(Sin23); })
+      .add(&Theta12, {&Sin12}, [&]() { return asin(Sin12.value()); })
+      .add(&Theta13, {&Sin13}, [&]() { return asin(Sin13.value()); })
+      .add(&Theta23, {&Sin23}, [&]() { return asin(Sin23.value()); })
       // CP
       .add(&Phase, {&Delta}, [&]() {
-          return exp(-std::complex<double>(0, Delta));
+          return exp(-std::complex<double>(0, Delta.value()));
         })
       .add(&PhaseC, {&Delta}, [&]() { //conjugate
-          return exp(+std::complex<double>(0, Delta));
+          return exp(+std::complex<double>(0, Delta.value()));
         })
       ;
   }

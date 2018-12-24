@@ -46,44 +46,44 @@ protected:
     using std::exp;
     provider
       .add(&V[0][0], {&Theta12, &Theta13}, [&]() {
-          return cos(Theta12)*cos(Theta13);
+          return cos(Theta12.value())*cos(Theta13.value());
         })
       .add(&V[0][1], {&Theta12, &Theta13}, [&]() {
-          return sin(Theta12)*cos(Theta13);
+          return sin(Theta12.value())*cos(Theta13.value());
         })
       .add(&V[0][2], {&Theta13, &Delta}, [&]() {
-          auto phase = exp(-std::complex<double>(0, Delta));
-          return sin(Theta13)*phase;
+          auto phase = exp(-std::complex<double>(0, Delta.value()));
+          return sin(Theta13.value())*phase;
         })
       .add(&V[1][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-          auto phase = exp(std::complex<double>(0, Delta));
+          auto phase = exp(std::complex<double>(0, Delta.value()));
           return
-            -sin(Theta12)*cos(Theta23)
-            -cos(Theta12)*sin(Theta23)*sin(Theta13)*phase;
+            -sin(Theta12.value())*cos(Theta23.value())
+            -cos(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
         })
       .add(&V[1][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-          auto phase = exp(std::complex<double>(0, Delta));
+          auto phase = exp(std::complex<double>(0, Delta.value()));
           return
-             cos(Theta12)*cos(Theta23)
-            -sin(Theta12)*sin(Theta23)*sin(Theta13)*phase;
+             cos(Theta12.value())*cos(Theta23.value())
+            -sin(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
         })
       .add(&V[1][2], {&Theta13, &Theta23}, [&]() {
-          return sin(Theta23)*cos(Theta13);
+          return sin(Theta23.value())*cos(Theta13.value());
         })
       .add(&V[2][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-          auto phase = exp(std::complex<double>(0, Delta));
+          auto phase = exp(std::complex<double>(0, Delta.value()));
           return
-            sin(Theta12)*sin(Theta23)
-            -cos(Theta12)*cos(Theta23)*sin(Theta13)*phase;
+            sin(Theta12.value())*sin(Theta23.value())
+            -cos(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
         })
       .add(&V[2][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-          auto phase = exp(std::complex<double>(0, Delta));
+          auto phase = exp(std::complex<double>(0, Delta.value()));
           return
-            -cos(Theta12)*sin(Theta23)
-            -sin(Theta12)*cos(Theta23)*sin(Theta13)*phase;
+            -cos(Theta12.value())*sin(Theta23.value())
+            -sin(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
         })
       .add(&V[2][2], {&Theta13, &Theta23}, [&]() {
-          return cos(Theta23)*cos(Theta13);
+          return cos(Theta23.value())*cos(Theta13.value());
         })
     ;
   }
@@ -129,39 +129,39 @@ protected:
     using std::exp;
     provider
       .add(&V[0][0], {&Cos12, &Cos13}, [&]() {
-          return Cos12.value()*Cos13;
+          return Cos12.value()*Cos13.value();
         })
       .add(&V[0][1], {&Sin12, &Cos13}, [&]() {
-          return Sin12.value()*Cos13;
+          return Sin12.value()*Cos13.value();
         })
       .add(&V[0][2], {&Sin13, &Phase}, [&]() {
           return Sin13.value()*Phase.value();
         })
       .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
-            -Sin12.value()*Cos23
+            -Sin12.value()*Cos23.value()
             -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
         })
       .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
-             Cos12.value()*Cos23
+             Cos12.value()*Cos23.value()
             -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
         })
       .add(&V[1][2], {&Cos13, &Sin23}, [&]() {
-          return Sin23.value()*Cos13;
+          return Sin23.value()*Cos13.value();
         })
       .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
-            Sin12.value()*Sin23
+            Sin12.value()*Sin23.value()
             -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
         })
       .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
-            -Cos12.value()*Sin23
+            -Cos12.value()*Sin23.value()
             -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
         })
       .add(&V[2][2], {&Cos13, &Cos23}, [&]() {
-          return Cos23.value()*Cos13;
+          return Cos23.value()*Cos13.value();
         })
     ;
   }

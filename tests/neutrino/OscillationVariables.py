@@ -14,6 +14,10 @@ reqparameters(ns)
 ns['Delta'].set(N.pi*1.5)
 env.globalns.materializeexpressions()
 
+print('Variables before:')
+env.globalns.printparameters(labels=True)
+print()
+
 checkpmns = ns('checkpmns')
 exprs = R.PMNSExpressionsC(ns=checkpmns)
 checkpmns.materializeexpressions()
@@ -37,7 +41,4 @@ with ns3:
     re3=R.OscProbPMNSExpressions(R.Neutrino.amu(), R.Neutrino.ae(), ns=ns3)
 
 ns.printparameters(labels=True)
-
-import IPython
-IPython.embed()
 
