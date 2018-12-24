@@ -27,7 +27,7 @@ protected:
 
   using FieldsStorage = std::map<std::string, std::tuple<Field, Factory>>;
   const FieldsStorage& expose() const noexcept {return m_map;};
-  size_t count(std::string entry) const noexcept {return m_map.count(entry);}; 
+  size_t count(std::string entry) const noexcept {return m_map.count(entry);};
   FieldsStorage::value_type::second_type& operator[](std::string mem) noexcept {return m_map[mem];};
   private:
     FieldsStorage m_map;

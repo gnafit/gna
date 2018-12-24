@@ -39,7 +39,7 @@ protected:
 
     std::vector<std::string> varnames;
     if(names.empty()){
-      varnames={"weight0", "weight12" , "weight13" , "weight23"};
+      varnames={"weight0", "weight12" , "weight13" , "weight23", "weightCP"};
     }
     else if (names.size()==4u+static_cast<size_t>(m_alpha!=m_beta)){
       varnames=names;
