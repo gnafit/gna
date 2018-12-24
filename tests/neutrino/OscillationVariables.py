@@ -37,8 +37,8 @@ ns1 = ns('weights_ae_ae')
 print('Init OP ae-ae')
 with ns1:
     re1=R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), ns=ns1)
-print('Materialize expresions')
-ns1.materializeexpressions()
+    print('Materialize expresions')
+    ns1.materializeexpressions()
 # w12 = 2 sqr c12*s12*c13*c13
 # w13 = 2 sqr c12*c13*s13
 # w23 = 2 sqr s12*c13*s13
@@ -47,15 +47,15 @@ ns2 = ns('weights_mu_e')
 print('Init OP mu-e')
 with ns2:
     re2=R.OscProbPMNSExpressions(R.Neutrino.mu(), R.Neutrino.e(), ns=ns2)
-print('Materialize expresions')
-ns2.materializeexpressions()
+    print('Materialize expresions')
+    ns2.materializeexpressions()
 
 ns3 = ns('weights_amu_ae')
 print('Init OP amu-ae')
 with ns3:
     re3=R.OscProbPMNSExpressions(R.Neutrino.amu(), R.Neutrino.ae(), ns=ns3)
-print('Materialize expresions')
-ns3.materializeexpressions()
+    print('Materialize expresions')
+    ns3.materializeexpressions()
 
 print()
 print('Print final')
