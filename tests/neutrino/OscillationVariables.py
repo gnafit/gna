@@ -6,6 +6,11 @@ from load import ROOT as R
 from gna.env import env, ExpressionsEntry
 import numpy as N
 
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-c', '--pmnsc', action='store_true' )
+opts = parser.parse_args()
+
 ns = env.globalns
 ns.defparameter('L', central=1, sigma=0.1)
 
@@ -18,9 +23,11 @@ print('Variables before:')
 env.globalns.printparameters(labels=True)
 print()
 
-checkpmns = ns('checkpmns')
-exprs = R.PMNSExpressionsC(ns=checkpmns)
-checkpmns.materializeexpressions()
+if opts.pmnsc:
+    checkpmns = ns('checkpmns')
+    exprs = R.PMNSExpressionsC(ns=checkpmns)
+    print('materialize expressions')
+    checkpmns.materializeexpressions()
 
 ns1 = ns('weights_ae_ae')
 ns1.materializeexpressions()
