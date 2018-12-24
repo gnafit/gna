@@ -82,7 +82,7 @@ InputDescriptor InterpExpo::add_input(){
     return input;
 }
 
-OutputDescriptor InterpExpo::add_input(SingleOutput& y){g
+OutputDescriptor InterpExpo::add_input(SingleOutput& y){
   auto input=add_input();
   input.connect(y.single());
   return OutputDescriptor(transformations.back().outputs.back());
