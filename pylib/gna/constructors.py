@@ -6,10 +6,10 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-from converters import array_to_stdvector_size_t
+from gna.converters import array_to_stdvector_size_t
 
 """Construct std::vector object from an array"""
-from converters import list_to_stdvector as stdvector
+from gna.converters import list_to_stdvector as stdvector
 
 def OutputDescriptors(outputs):
     descriptors=[]

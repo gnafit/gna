@@ -5,7 +5,7 @@ from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
 from collections import OrderedDict
-from converters import convert
+from gna.converters import convert
 from gna.configurator import NestedDict
 from gna.grouping import CatDict, Categories
 

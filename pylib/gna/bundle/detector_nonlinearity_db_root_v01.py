@@ -5,7 +5,7 @@ from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
 import gna.constructors as C
-from converters import convert
+from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
 from gna.configurator import NestedDict

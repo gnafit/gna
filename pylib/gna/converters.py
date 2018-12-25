@@ -29,7 +29,7 @@ nicknames = {
 
 def convert(obj, totype, debug=False, **kwargs):
     """Converto object obj to type totype.
-    The converter is chosen from converters dictionary based on the type(obj) or one of it's base classes.
+    The converter is chosen from gna.converters dictionary based on the type(obj) or one of it's base classes.
 
     :obj: object to convert
     :totype: the target type
