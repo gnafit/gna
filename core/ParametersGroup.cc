@@ -8,7 +8,7 @@ using fmt::format;
 #include "ParametersGroup.hh"
 
 ParametersGroup::ParametersGroup(GNAObject *parent, Fields fields)
-  : m_parent(parent), m_fields(std::move(fields))
+  : m_parent(dynamic_cast<ParametrizedTypes::Base*>(parent)), m_fields(std::move(fields))
 {
 }
 

@@ -67,7 +67,7 @@ protected:
   const std::string &fieldName(Field field) const;
   virtual void setExpressions(ExpressionsProvider &/*provider*/) { }
 
-  GNAObject *m_parent;
+  ParametrizedTypes::Base* m_parent;
   Fields m_fields;
 };
 
