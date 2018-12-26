@@ -10,8 +10,8 @@ class EnergyResolution: public HistSmearSparse,
                         public TransformationBind<EnergyResolution> {
 public:
   using TransformationBind<EnergyResolution>::transformation_;
-  EnergyResolution(const std::vector<std::string>& pars, bool single=true, bool propagate_matrix=false);
-  EnergyResolution(bool single=true, bool propagate_matrix=false);
+  EnergyResolution(const std::vector<std::string>& pars, bool propagate_matrix=false);
+  EnergyResolution(bool propagate_matrix=false);
 
   double relativeSigma(double Etrue) const noexcept;
   double resolution(double Etrue, double Erec) const noexcept;

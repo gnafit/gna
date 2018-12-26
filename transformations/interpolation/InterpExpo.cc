@@ -53,7 +53,7 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
     .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
-    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passToRange<0,0,-1>)
+    .types(TypesFunctions::ifSameInRange<4,-1,false>, TypesFunctions::passToRange<0,0,-1,false>)
     .func(&InterpExpo::do_interpolate)
     ;
 

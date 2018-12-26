@@ -3,27 +3,23 @@
 #include <vector>
 
 #include "GNAObject.hh"
+#include "GNAObjectBind1N.hh"
 #include "Eigen/Sparse"
 
-class HistSmearSparse: public GNAObject,
+class HistSmearSparse: public GNAObjectBind1N,
                        public TransformationBind<HistSmearSparse> {
 public:
-  HistSmearSparse(bool single=true, bool propagate_matrix=false);
+  HistSmearSparse(bool propagate_matrix=false);
 
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }
 
-  TransformationDescriptor add(SingleOutput& matrix);
-  TransformationDescriptor add(bool connect_matrix);
-  TransformationDescriptor add();
+  TransformationDescriptor add_transformation(const std::string& name="");
 
-  bool single() {return m_single;}
 protected:
   Eigen::SparseMatrix<double> m_sparse_cache;
   bool m_propagate_matrix{false};
 
 private:
   void calcSmear(FunctionArgs& fargs);
-
-  bool m_single; /// restricts HistSmearSparse to contain only one transformation
 };

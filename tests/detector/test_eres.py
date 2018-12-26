@@ -73,9 +73,11 @@ for eset in [
 
         hist = C.Histogram( edges, phist )
         edges_o = R.HistEdges(hist)
-        eres = R.EnergyResolution(True, True)
+        eres = R.EnergyResolution(True)
         eres.matrix.Edges( edges_o )
         eres.smear.Ntrue( hist )
+
+        eres.print()
 
         smeared = eres.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
@@ -132,7 +134,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Energy resolution convertsion matrix (trans)' )
 
-eres.matrix.FakeMatrix.matshow(colorbar=True, mask=0.0, extent=[edges[0], edges[-1], edges[-1], edges[0]])
+eres.matrix.FakeMatrix.plot_matshow(colorbar=True, mask=0.0, extent=[edges[0], edges[-1], edges[-1], edges[0]])
 
 savefig( opts.output, suffix='_mat' )
 

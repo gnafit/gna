@@ -12,7 +12,7 @@ struct TypesFunctions
   template <int Arg1=0, int Arg2=-1, int Ret1=0>
   static void passAllInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of each input to corresponding output.
 
-  template <int Arg=0, int Ret1=0, int Ret2=-1>
+  template <int Arg=0, int Ret1=0, int Ret2=-1, bool ignore_bound_error=false>
   static void passToRange(TransformationTypes::TypesFunctionArgs& fargs);  ///< Assigns shape of each input to corresponding output.
 
   template <size_t Arg, size_t Ret = Arg>
@@ -36,7 +36,7 @@ struct TypesFunctions
   template <size_t Arg1, size_t Arg2, size_t Ret>
   static void edgesToMatrix(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of Ret-th output = [Arg1.size()-1, Arg2.size()-1] (ignoring Arg1/Arg2 shape)
 
-  template <int Arg1=0, int Arg2=-1>
+  template <int Arg1=0, int Arg2=-1, bool ignore_bound_error=false>
   static void ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs); ///< Checks that all inputs are of the same type (shape and content description).
 
   static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
@@ -180,12 +180,22 @@ inline void TypesFunctions::edgesToMatrix(TransformationTypes::TypesFunctionArgs
  *
  * @exception SourceTypeError in case input types are not the same.
  */
-template <int Arg1, int Arg2>
+template <int Arg1, int Arg2, bool ignore_bound_error>
 void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& compare_to=args[Arg1];
   size_t start=Arg1+1;
   size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
+
+  if( start>=args.size() || end>=args.size() ){
+    if(ignore_bound_error){
+      return;
+    }
+    else{
+      throw std::runtime_error(fmt::format("Transformation {0}: start {1} or end {2} is out of limits ({3})", args.name(),  start, end, args.size() ));
+    }
+  }
+
   for (size_t i = start; i < end; ++i) {
     if (args[i] != compare_to) {
       auto msg = fmt::format("Transformation {0}: all inputs should have same type, {1} and {2} differ", args.name(), Arg1, i);
@@ -501,17 +511,32 @@ inline void TypesFunctions::passAllInRange(TransformationTypes::TypesFunctionArg
  *
  * @exception std::runtime_error in case Ret index is out of range.
  */
-template <int Arg1, int Ret1, int Ret2>
+template <int Arg1, int Ret1, int Ret2, bool ignore_bound_error>
 inline void TypesFunctions::passToRange(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   size_t arg  =Arg1<0 ? args.size()+Arg1   : Arg1;
   size_t start=Ret1<0 ? rets.size()+Ret1   : Ret1;
   size_t end  =Ret2<0 ? rets.size()+Ret2+1 : Ret2+1;
+
+  if(arg>=args.size()){
+    if(ignore_bound_error){
+      return;
+    }
+    else{
+      throw std::runtime_error(fmt::format("Transformation {0}: arg {1} is out of limits ({2})", rets.name(), arg, args.size() ));
+    }
+  }
+
   for (size_t i = start; i < end; ++i) {
     if(i>=rets.size()){
-      auto msg = fmt::format("Transformation {0}: ret {1} is out of limits ({2})", rets.name(), i, rets.size() );
-      throw std::runtime_error(msg);
+      if(ignore_bound_error){
+        return;
+      }
+      else{
+        auto msg = fmt::format("Transformation {0}: ret {1} is out of limits ({2})", rets.name(), i, rets.size() );
+        throw std::runtime_error(msg);
+      }
     }
     rets[i] = args[arg];
   }

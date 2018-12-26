@@ -16,6 +16,7 @@ set(CORE_SOURCES
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
   core/GNAObject.cc
+  core/GNAObjectBind1N.cc
   core/ParametersGroup.cc
   core/Parametrized.cc
   core/TransformationDescriptor.cc
@@ -57,6 +58,7 @@ set(CORE_HEADERS
   Accessor.hh
   # core/
   GNAObject.hh
+  GNAObjectBind1N.hh
   UncertainParameter.hh
   PARENT_SCOPE
  )

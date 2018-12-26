@@ -13,8 +13,8 @@
 #define  DEBUG(...)
 #endif
 
-HistNonlinearity::HistNonlinearity(bool single, bool propagate_matrix) :
-HistSmearSparse(single, propagate_matrix)
+HistNonlinearity::HistNonlinearity(bool propagate_matrix) :
+HistSmearSparse(propagate_matrix)
 {
   transformation_("matrix")
       .input("Edges")
@@ -24,47 +24,17 @@ HistSmearSparse(single, propagate_matrix)
       .types(TypesFunctions::edgesToMatrix<0,0,0>)
       .func(&HistNonlinearity::calcMatrix);
 
-  if (single) {
-    add(true);
-  }
+  add_transformation();
 }
 
-void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified ){
-  if(!single()){
-    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
-  }
+void HistNonlinearity::set(SingleOutput& bin_edges, SingleOutput& bin_edges_modified){
   if( m_initialized )
     throw std::runtime_error("HistNonlinearity is already initialized");
   m_initialized = true;
 
-  transformations["matrix"].inputs[0].connect( bin_edges.single() );
-  transformations["matrix"].inputs[1].connect( bin_edges_modified.single() );
-}
-
-void HistNonlinearity::set( SingleOutput& bin_edges, SingleOutput& bin_edges_modified, SingleOutput& ntrue ){
-  if(!single()){
-    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
-  }
-  set( bin_edges, bin_edges_modified );
-  transformations["smear"].inputs[0].connect( ntrue.single() );
-}
-
-void HistNonlinearity::set( SingleOutput& ntrue ){
-  if(!single()){
-    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
-  }
-  if( !m_initialized )
-      throw std::runtime_error("HistNonlinearity is not initialized");
-
-  transformations["smear"].inputs[0].connect( ntrue.single() );
-}
-
-void HistNonlinearity::set(){
-  if(!single()){
-    throw std::runtime_error("HistNonlinearity::set(...) may be used only in 'single' mode");
-  }
-
-  transformations["smear"].inputs[1].connect( transformations["matrix"].outputs[0] );
+  auto inputs = transformations.front().inputs;
+  bin_edges.single()          >> inputs[0];
+  bin_edges_modified.single() >> inputs[1];
 }
 
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {

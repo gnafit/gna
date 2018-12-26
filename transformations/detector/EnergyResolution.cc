@@ -7,13 +7,13 @@
 constexpr double pi = boost::math::constants::pi<double>();
 
 
-EnergyResolution::EnergyResolution(bool single, bool propagate_matrix) :
-EnergyResolution({"Eres_a" , "Eres_b" , "Eres_c"}, single, propagate_matrix){
+EnergyResolution::EnergyResolution(bool propagate_matrix) :
+EnergyResolution({"Eres_a" , "Eres_b" , "Eres_c"}, propagate_matrix){
 
 }
 
-EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, bool single, bool propagate_matrix) :
-HistSmearSparse(single, propagate_matrix)
+EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, bool propagate_matrix) :
+HistSmearSparse(propagate_matrix)
 {
   if(pars.size()!=3u){
     throw std::runtime_error("Energy resolution should have exactly 3 parameters");
@@ -28,9 +28,8 @@ HistSmearSparse(single, propagate_matrix)
       .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::edgesToMatrix<0,0,0>)
       .func(&EnergyResolution::calcMatrix);
 
-  if (single) {
-    add(true);
-  }
+  add_transformation();
+  add_input();
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{
@@ -84,4 +83,3 @@ void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
   if ( m_propagate_matrix )
     fargs.rets[0].mat = m_sparse_cache;
 }
-
