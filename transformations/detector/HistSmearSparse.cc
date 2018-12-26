@@ -15,7 +15,7 @@ TransformationDescriptor HistSmearSparse::add_transformation(const std::string& 
     .input("FakeMatrix")
     .dont_subscribe()
     .types(TypesFunctions::if2d<0>, TypesFunctions::ifSquare<0>)
-    .types(TypesFunctions::ifHist<1>, TypesFunctions::ifSameInRange<1,-1,false>, TypesFunctions::passToRange<1,0,-1,false>)
+    .types(TypesFunctions::ifHist<1>, TypesFunctions::ifSameInRange<1,-1,true>, TypesFunctions::passToRange<1,0,-1,true>)
     .types([](TypesFunctionArgs& fargs){
            auto& args = fargs.args;
            auto& mat = args[0];

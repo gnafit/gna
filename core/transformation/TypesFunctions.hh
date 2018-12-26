@@ -187,7 +187,7 @@ void TypesFunctions::ifSameInRange(TransformationTypes::TypesFunctionArgs& fargs
   size_t start=Arg1+1;
   size_t end=Arg2<0 ? args.size()+Arg2+1 : Arg2+1;
 
-  if( start>=args.size() || end>=args.size() ){
+  if( start>=args.size() || end>args.size() ){
     if(ignore_bound_error){
       return;
     }
