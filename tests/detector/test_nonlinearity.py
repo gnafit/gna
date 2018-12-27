@@ -83,7 +83,13 @@ histedges = R.HistEdges()
 histedges.histedges.hist( hist.hist )
 
 nl = R.HistNonlinearity()
-nl.set( histedges.histedges, pedges_m, hist )
+nl.print()
+
+import IPython
+IPython.embed()
+nl.set(histedges.histedges, pedges_m.points)
+
+nl.add_input(hist)
 
 smeared = nl.smear.Nrec.data()
 print( 'Sum check (diff): {}'.format( phist.sum()-smeared.sum() ) )

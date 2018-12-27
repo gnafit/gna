@@ -46,6 +46,17 @@ public:
     return *it;
   }
 
+  bool contains(const std::string &name) const {
+    auto it = std::find_if(m_container->begin(), m_container->end(),
+                           [&](typename Container::const_reference e) {
+                             return e.name == name;
+                           });
+    if (it == m_container->end()) {
+      return false;
+    }
+    return true;
+  }
+
   bool empty() const noexcept {
     return m_container->empty();
   }

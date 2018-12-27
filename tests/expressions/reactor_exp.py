@@ -12,6 +12,7 @@ parser.add_argument( '-s', '--show', action='store_true', help='show the figure'
 parser.add_argument( '-o', '--output', help='output figure name' )
 parser.add_argument('--stats', action='store_true', help='show statistics')
 parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
+parser.add_argument('-e', '--embed', action='store_true', help='embed')
 parser.add_argument('-i', '--indices', default='small', choices=['complete', 'small', 'minimal'], help='Set the indices coverage')
 parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
 parser.add_argument('-t', '--title', default='', help='figure title')
@@ -542,6 +543,10 @@ print( context.outputs.keys() )
 if 'inputs' in args.print:
     print( context.inputs )
 print( context.inputs.keys() )
+
+if args.embed:
+    import IPython
+    IPython.embed()
 
 if args.stats:
     from gna.graph import *

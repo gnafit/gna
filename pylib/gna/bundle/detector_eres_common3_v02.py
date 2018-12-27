@@ -23,14 +23,16 @@ class detector_eres_common3_v02(TransformationBundleLegacy):
             self.set_input(eres.matrix.Edges, 'eres_matrix', clone=0)
             self.set_output(eres.matrix.FakeMatrix, 'eres_matrix')
 
+            trans = eres.smear
             for i, it in enumerate(self.idx.iterate()):
                 if i:
                     trans = eres.add_transformation()
+                    eres.add_input()
                 label = it.current_format('Energy resolution\n{autoindex}')
                 trans.setLabel(label)
 
-                self.set_input(trans.inputs[0], 'eres', it, clone=0)
-                self.set_output(trans.outputs[0], 'eres', it)
+                self.set_input(trans.inputs.back(), 'eres', it, clone=0)
+                self.set_output(trans.outputs.back(), 'eres', it)
 
     def define_variables(self):
         descriptions=[

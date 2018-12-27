@@ -76,7 +76,7 @@ class detector_nonlinearity_db_root_v01(TransformationBundleLegacy):
                     newe.product.setLabel('NL absolute:\n'+ns.name)
 
                     """Construct the nonlinearity calss"""
-                    nonlin = R.HistNonlinearity(True, self.debug, ns=ns)
+                    nonlin = R.HistNonlinearity(self.debug, ns=ns)
                     nonlin.set(self.edges, newe.product)
                     nonlin.smear.setLabel('NL:\n'+ns.name)
                     nonlin.matrix.setLabel('NL matrix:\n'+ns.name)

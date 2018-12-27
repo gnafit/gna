@@ -68,15 +68,18 @@ class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
             for i, itd in enumerate(idxd.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
                 """Construct the nonlinearity calss"""
-                nonlin = R.HistNonlinearity(False, self.debug)
+                nonlin = R.HistNonlinearity(self.debug)
                 nonlin.matrix.setLabel(itd.current_format('NL matrix\n{autoindex}'))
                 self.objects[('nonlinearity',)+itd.current_values()] = nonlin
                 self.set_input(nonlin.matrix.Edges,         'lsnl_edges', itd, clone=0)
                 self.set_input(nonlin.matrix.EdgesModified, 'lsnl_edges', itd, clone=1)
 
-                for itother in idxother.iterate():
+                trans = nonlin.smear
+                for j, itother in enumerate(idxother.iterate()):
                     it = itd+itother
-                    trans = nonlin.add(True)
+                    if j:
+                        trans = nonlin.add_transformation()
+                        nonlin.add_input()
                     trans.setLabel(it.current_format('NL\n{autoindex}'))
 
                     self.set_input(trans.Ntrue, 'lsnl', it, clone=0)
