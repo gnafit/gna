@@ -564,7 +564,7 @@ class ReactorExperimentModel(baseexp):
                 finalsum = inter_sum
 
             with detector.ns:
-                detector.eres = ROOT.EnergyResolution(True)
+                detector.eres = ROOT.EnergyResolution()
             detector.eres.matrix.Edges( self.integrator.points.xedges)
             detector.eres.smear.setLabel('Eres')
             detector.eres.smear.Ntrue(finalsum)

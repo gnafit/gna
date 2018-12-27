@@ -17,14 +17,15 @@ class detector_eres_common3_v02(TransformationBundleLegacy):
     def build(self):
         with self.common_namespace:
             expose_matrix = self.cfg.get('expose_matrix', False)
-            eres = self.eres = R.EnergyResolution(C.stdvector(self.names), False, expose_matrix, ns=self.common_namespace)
+            eres = self.eres = R.EnergyResolution(C.stdvector(self.names), expose_matrix, ns=self.common_namespace)
 
             eres.matrix.setLabel('Energy resolution\nmatrix')
             self.set_input(eres.matrix.Edges, 'eres_matrix', clone=0)
             self.set_output(eres.matrix.FakeMatrix, 'eres_matrix')
 
             for i, it in enumerate(self.idx.iterate()):
-                trans = eres.add(True)
+                if i:
+                    trans = eres.add_transformation()
                 label = it.current_format('Energy resolution\n{autoindex}')
                 trans.setLabel(label)
 
