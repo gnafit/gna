@@ -253,13 +253,21 @@ class TransformationBundle(object):
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
 
-    def get_path(self, localname, nidx=None, argument_number=None, join=False):
+    def get_path(self, localname, nidx=None, argument_number=None, join=False, extra=None):
         name=self.bundlecfg['names'].get(localname, localname)
 
         if nidx is None:
             path = name,
         else:
             path = nidx.current_values(name=name)
+
+        if extra:
+            if isinstance(extra, str):
+                path+=extra,
+            elif isinstance(extra, (list,tuple)):
+                path+=tuple(extra)
+            else:
+                raise Exception('Unsupported extra field: '+str(extra))
 
         if argument_number is not None:
             path+=('{:02d}'.format(int(clone)),)
@@ -270,13 +278,13 @@ class TransformationBundle(object):
         return path
 
     def reqparameter(self, name, nidx, *args, **kwargs):
-        return self.namespace.reqparameter(self.get_path(name, nidx), *args, **kwargs)
+        return self.namespace.reqparameter(self.get_path(name, nidx, extra=kwargs.pop('extra', None)), *args, **kwargs)
 
-    def set_output(self, name, nidx, output):
-        self.outputs[self.get_path(name, nidx)]=output
+    def set_output(self, name, nidx, output, extra=None):
+        self.outputs[self.get_path(name, nidx, extra=extra)]=output
 
-    def set_input(self, name, nidx, input, argument_number=None):
-        self.inputs[self.get_path(name, nidx, argument_number)]=input
+    def set_input(self, name, nidx, input, argument_number=None, extra=None):
+        self.inputs[self.get_path(name, nidx, argument_number, extra=extra)]=input
 
     def check_nidx_dim(self, dmin, dmax=float('inf'), nidx='both'):
         if nidx=='both':
