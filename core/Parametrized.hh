@@ -164,7 +164,7 @@ namespace ParametrizedTypes {
     Base &operator=(const Base &other);
 
   protected:
-    Base() = default;
+    Base() : m_taintflag("base", true) { m_taintflag.set_pass_through(); }
     void copyEntries(const Base &other);
     void subscribe_(taintflag flag);
 
