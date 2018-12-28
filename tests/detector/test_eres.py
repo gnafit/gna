@@ -74,7 +74,7 @@ for eset in [
         hist = C.Histogram( edges, phist )
         edges_o = R.HistEdges(hist)
         eres = R.EnergyResolution(True)
-        eres.matrix.Edges( edges_o )
+        eres.matrix.Edges( hist )
         eres.smear.Ntrue( hist )
 
         smeared = eres.smear.Nrec.data()

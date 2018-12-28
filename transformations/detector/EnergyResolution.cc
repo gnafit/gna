@@ -25,12 +25,17 @@ HistSmearSparse(propagate_matrix)
   transformation_("matrix")
       .input("Edges")
       .output("FakeMatrix")
-      .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::edgesToMatrix<0,0,0>)
+      .types(TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>, TypesFunctions::toMatrix<0,0,0>)
+      .types(&EnergyResolution::getEdges)
       .func(&EnergyResolution::calcMatrix);
 
   add_transformation();
   add_input();
   set_open_input();
+}
+
+void EnergyResolution::getEdges(TypesFunctionArgs& fargs) {
+  m_edges = fargs.args[0].edges.data();
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{
@@ -49,7 +54,7 @@ void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
   m_sparse_cache.setZero();
 
   auto& arg = fargs.args[0];
-  auto* edges = arg.buffer;
+  auto* edges = m_edges;
   auto bins = arg.type.shape[0]-1;
   m_sparse_cache.resize(bins, bins);
 
