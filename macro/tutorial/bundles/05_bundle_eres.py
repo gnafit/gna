@@ -47,13 +47,10 @@ data[200]=1.0 # 10 MeV
 hist = C.Histogram(edges, data)
 hist.hist.setLabel('Input histogram')
 
-edges_o = C.Points(edges)
-edges_o.points.setLabel('Bin edges')
-
 # Bind outputs
 #
-edges_o >> b.context.inputs.eres_matrix.values()
-hist    >> b.context.inputs.eres.values()
+hist >> b.context.inputs.eres_matrix.values()
+hist >> b.context.inputs.eres.values()
 print( b.context )
 
 from gna.graphviz import savegraph

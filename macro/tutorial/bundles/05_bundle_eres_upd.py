@@ -81,16 +81,13 @@ hist2.hist.setLabel('Input histogram 2')
 hist3 = C.Histogram(edges, data3)
 hist3.hist.setLabel('Input histogram 3')
 
-edges_o = C.Points(edges)
-edges_o.points.setLabel('Bin edges')
-
 #
 # Bind outputs
 #
 suffix = '' if cfg.split_transformations else '_merged'
 savegraph(b.context.outputs.smearing_matrix.values(), oname+suffix+'_graph0.png')
 
-edges_o >> b.context.inputs.smearing_matrix.values(nested=True)
+hist1   >> b.context.inputs.smearing_matrix.values(nested=True)
 hist1   >> b.context.inputs.eres.D1.values(nested=True)
 hist2   >> b.context.inputs.eres.D2.values(nested=True)
 hist3   >> b.context.inputs.eres.D3.values(nested=True)
