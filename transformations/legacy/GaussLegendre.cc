@@ -41,10 +41,12 @@ void GaussLegendre::init() {
   transformation_("points")
     .output("x")
     .output("xedges")
+    .output("xhist")
     .types([](GaussLegendre *obj, TypesFunctionArgs& fargs) {
         auto& rets=fargs.rets;
         rets[0] = DataType().points().shape(obj->m_points.size());
         rets[1] = DataType().points().shape(obj->m_edges.size());
+        rets[2] = DataType().hist().edges(obj->m_edges);
       })
     .func([](GaussLegendre *obj, FunctionArgs& fargs) {
         auto& rets=fargs.rets;

@@ -172,7 +172,7 @@ expr =[
         'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
-        'eres_matrix| evis_edges()',
+        'eres_matrix| evis_hist()',
         'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         # Bkg
         'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
@@ -277,7 +277,7 @@ cfg = NestedDict(
             edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
             xorders   = 2,
             yorder   = 2,
-            provides = [ 'evis', 'ctheta', 'evis_edges' ],
+            provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
             ),
         ibd_xsec = NestedDict(
             bundle = 'xsec_ibd_v01',

@@ -44,11 +44,13 @@ void GaussLegendre2d::init() {
     .output("x")
     .output("y")
     .output("xedges")
+    .output("xhist")
     .types([](GaussLegendre2d *obj, TypesFunctionArgs& fargs) {
         auto& rets=fargs.rets;
         rets[0] = DataType().points().shape(obj->m_xpoints.size());
         rets[1] = DataType().points().shape(obj->m_ypoints.size());
         rets[2] = DataType().points().shape(obj->m_xedges.size());
+        rets[3] = DataType().hist().edges(obj->m_xedges);
       })
     .func([](GaussLegendre2d *obj, FunctionArgs& fargs) {
         auto& rets=fargs.rets;

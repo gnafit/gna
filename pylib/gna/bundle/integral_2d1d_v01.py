@@ -50,6 +50,7 @@ class integral_2d1d_v01(TransformationBundleLegacy):
 
         self.set_output(self.integrator.points.x,      self.cfg.variables[0])
         self.set_output(self.integrator.points.xedges, '%s_edges'%self.cfg.variables[0])
+        self.set_output(self.integrator.points.xhist,  '%s_hist'%self.cfg.variables[0])
         self.set_output(self.integrator.points.y,      self.cfg.variables[1])
 
         for i, it in enumerate(self.idx.iterate()):
