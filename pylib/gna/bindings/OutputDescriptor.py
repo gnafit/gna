@@ -5,6 +5,7 @@ from gna.bindings import patchROOTClass
 from gna.bindings import DataType
 import ROOT as R
 from printing import printl, nextlevel
+import types
 
 @patchROOTClass(R.OutputDescriptor, '__str__')
 def OutputDescriptor____str__(self):
@@ -22,7 +23,7 @@ def OutputDescriptor__single(self):
 def OutputDescriptor______rshift__(output, inputs):
     if isinstance(inputs, R.InputDescriptor):
         inputs.connect(output)
-    elif isinstance(inputs, (list, tuple)):
+    elif isinstance(inputs, (list, tuple,types.GeneratorType)):
         for inp in inputs:
             OutputDescriptor______rshift__(output, inp)
     elif isinstance(inputs, (R.GNAObject, R.TransformationDescriptor)):

@@ -30,6 +30,7 @@ HistSmearSparse(propagate_matrix)
 
   add_transformation();
   add_input();
+  set_open_input();
 }
 
 double EnergyResolution::relativeSigma(double Etrue) const noexcept{

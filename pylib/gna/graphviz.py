@@ -2,6 +2,7 @@ from __future__ import print_function
 from gna.env import env
 import pygraphviz as G
 import ROOT as R
+import types
 
 def uid( obj1, obj2=None ):
     if obj2:
@@ -41,6 +42,8 @@ class GNADot(object):
 
         self.graph=G.AGraph( directed=True, strict=False, **kwargs )
         self.register = set()
+        if isinstance(transformation, (types.GeneratorType)):
+            transformation = list(transformation)
         if not isinstance(transformation, (list, tuple)):
             transformation = [transformation]
         for t in transformation:

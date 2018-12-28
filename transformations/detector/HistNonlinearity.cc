@@ -26,6 +26,7 @@ HistSmearSparse(propagate_matrix)
 
   add_transformation();
   add_input();
+  set_open_input();
 }
 
 void HistNonlinearity::set(SingleOutput& bin_edges, SingleOutput& bin_edges_modified){

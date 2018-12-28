@@ -18,14 +18,14 @@ def process_key(key):
     listkey = None
     if isinstance( key, basestring ):
         if '.' in key:
-            listkey = list(key.split('.'))
+            listkey = tuple(key.split('.'))
     elif isinstance( key, (list, tuple) ):
-        listkey = []
+        listkey = ()
         for sk in key:
             if isinstance(sk, (list, tuple)):
-                listkey+=list(sk)
+                listkey+=tuple(sk)
             else:
-                listkey.append(sk)
+                listkey+=sk,
 
     if listkey:
         return listkey[0], listkey[1:]
@@ -179,25 +179,48 @@ class NestedDict(object):
     def __iter__(self):
         return iter(self.__storage__)
 
-    def values(self):
-        return self.__storage__.values()
+    def values(self, nested=False):
+        for v in self.__storage__.values():
+            if nested and isinstance(v, NestedDict):
+                for nv in v.values(nested=True):
+                    yield nv
+            else:
+                yield v
 
     def items(self, nested=False):
-        for k, v in self.__storage__.items():
-            if nested and isinstance(v, NestedDict):
-                for nk, nv in v.items(nested=True):
-                    yield '.'.join((k,nk)), nv
-            else:
+        if nested:
+            for k, v in self.__storage__.items():
+                if isinstance(v, NestedDict):
+                    for nk, nv in v.items(nested=True):
+                        yield k+nk, nv
+                else:
+                    yield (k,), v
+        else:
+            for k, v in self.__storage__.items():
                 yield k, v
 
-    def __contains__(self, key):
-        key, listkey=process_key(key)
+    def keys(self, nested=False):
+        if nested:
+            for k, v in self.__storage__.items():
+                if isinstance(v, NestedDict):
+                    for nk in v.keys(nested=True):
+                        yield k+nk
+                else:
+                    yield k,
+        else:
+            for k in self.__storage__.keys():
+                yield k
 
+    def __contains__(self, key):
         key, rest=process_key(key)
+
+        if not self.__storage__.__contains__(key):
+            return False
+
         if rest:
             return self.__storage__.get(key).__contains__(rest)
 
-        return self.__storage__.__contains__(key)
+        return True
 
     def __call__(self, key):
         if isinstance( key, (list, tuple) ):

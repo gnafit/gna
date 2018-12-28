@@ -270,7 +270,7 @@ class TransformationBundle(object):
                 raise Exception('Unsupported extra field: '+str(extra))
 
         if argument_number is not None:
-            path+=('{:02d}'.format(int(clone)),)
+            path+=('{:02d}'.format(int(argument_number)),)
 
         if join:
             path = '.'.join(path)
@@ -281,10 +281,16 @@ class TransformationBundle(object):
         return self.namespace.reqparameter(self.get_path(name, nidx, extra=kwargs.pop('extra', None)), *args, **kwargs)
 
     def set_output(self, name, nidx, output, extra=None):
-        self.outputs[self.get_path(name, nidx, extra=extra)]=output
+        path=self.get_path(name, nidx, extra=extra)
+        if path in self.context.outputs:
+            raise Exception('Outputs dictionary already contains '+str(path))
+        self.context.outputs[path]=output
 
     def set_input(self, name, nidx, input, argument_number=None, extra=None):
-        self.inputs[self.get_path(name, nidx, argument_number, extra=extra)]=input
+        path=self.get_path(name, nidx, argument_number, extra=extra)
+        if path in self.context.inputs:
+            raise Exception('Inputs dictionary already contains '+str(path))
+        self.context.inputs[path]=input
 
     def check_nidx_dim(self, dmin, dmax=float('inf'), nidx='both'):
         if nidx=='both':

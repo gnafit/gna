@@ -21,6 +21,7 @@ TransformationDescriptor GNAObjectBind1N::add_transformation(const std::string& 
 }
 
 std::string GNAObjectBind1N::new_name(const std::string& base, size_t num, size_t offset, const std::string& altname){
+    //printf("%s %zu %zu %s\n", base.c_str(), num, offset, altname.c_str());
     if(altname.size()>0u){
         return altname;
     }
@@ -34,21 +35,26 @@ std::string GNAObjectBind1N::new_name(const std::string& base, size_t num, size_
 
 InputDescriptor GNAObjectBind1N::add_input(const std::string& iname, const std::string& oname){
     auto trans=transformations.back();
-    auto input=trans.inputs.back();
 
-    if(input.bound()){
-        auto newname=new_name(m_input_name, trans.inputs.size(), m_input_offset, iname);
-        if(trans.inputs.contains(newname)){
-            throw std::runtime_error(fmt::format("Unable to add input {}. Already in the list.", newname));
+    if(m_open_input){
+        m_open_input = false;
+        auto input=trans.inputs.back();
+        if(!input.bound()){
+            return input;
         }
-        input=trans.input(newname);
-
-        newname=new_name(m_output_name, trans.outputs.size(), m_output_offset, oname);
-        if(trans.outputs.contains(newname)){
-            throw std::runtime_error(fmt::format("Unable to add output {}. Already in the list.", newname));
-        }
-        trans.output(newname);
     }
+
+    auto newname=new_name(m_input_name, trans.inputs.size(), m_input_offset, iname);
+    if(trans.inputs.contains(newname)){
+        throw std::runtime_error(fmt::format("Unable to add input {}. Already in the list.", newname));
+    }
+    auto input=trans.input(newname);
+
+    newname=new_name(m_output_name, trans.outputs.size(), m_output_offset, oname);
+    if(trans.outputs.contains(newname)){
+        throw std::runtime_error(fmt::format("Unable to add output {}. Already in the list.", newname));
+    }
+    trans.output(newname);
 
     return input;
 }
