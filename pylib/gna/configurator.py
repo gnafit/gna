@@ -70,10 +70,10 @@ class NestedDict(object):
         return res+margin+'}'
 
     def __bool__(self):
-        return bool(self.keys())
+        return bool(self.__storage__)
 
     def __len__(self):
-        return len(self.keys())
+        return len(self.__storage__)
 
     def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
@@ -173,9 +173,6 @@ class NestedDict(object):
 
         return self.__storage__.setdefault(key, value)
 
-    def keys(self):
-        return self.__storage__.keys()
-
     def __iter__(self):
         return iter(self.__storage__)
 
@@ -192,7 +189,7 @@ class NestedDict(object):
             for k, v in self.__storage__.items():
                 if isinstance(v, NestedDict):
                     for nk, nv in v.items(nested=True):
-                        yield k+nk, nv
+                        yield (k,)+nk, nv
                 else:
                     yield (k,), v
         else:
@@ -204,7 +201,7 @@ class NestedDict(object):
             for k, v in self.__storage__.items():
                 if isinstance(v, NestedDict):
                     for nk in v.keys(nested=True):
-                        yield k+nk
+                        yield (k,)+nk
                 else:
                     yield k,
         else:

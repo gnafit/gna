@@ -42,6 +42,7 @@ class detector_eres_common3_v02(TransformationBundleLegacy):
                 ]
         self.names=[]
         for i, (name, unc) in enumerate(self.cfg.pars.items(nested=True)):
+            name = '.'.join(name)
             self.names.append(name)
             par = self.common_namespace.reqparameter(name, cfg=unc)
             par.setLabel( 'Energy resolution ({})'.format(descriptions[i]) )

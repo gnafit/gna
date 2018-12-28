@@ -7,7 +7,6 @@ import gna.constructors as C
 from gna.bundle import *
 
 class detector_eres_ex01(TransformationBundle):
-    common_matrix=True
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
 
@@ -32,15 +31,8 @@ class detector_eres_ex01(TransformationBundle):
                 self.set_output('eres', it, trans.outputs.back())
 
     def define_variables(self):
-        descriptions=[
-                'spatial/temporal resolution',
-                'photon statistics',
-                'dark noise'
-                ]
-
         parname = self.cfg.parameter
         parscfg = self.cfg.pars
-        labelfmt = self.cfg.get('label', '')
         self.names = None
 
         for it_major in self.nidx_major:
@@ -55,6 +47,6 @@ class detector_eres_ex01(TransformationBundle):
             for i, (name, unc) in enumerate(pars.items()):
                 it=it_major
 
-                par = self.reqparameter(parname, it, cfg=unc, extra=name, label=descriptions[i])
+                par = self.reqparameter(parname, it, cfg=unc, extra=name)
 
 

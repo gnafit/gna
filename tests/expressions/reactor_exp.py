@@ -538,11 +538,11 @@ print('Parameters stats:', parstats)
 print( 'outputs:' )
 if 'outputs' in args.print:
     print( context.outputs )
-print( context.outputs.keys() )
+print(list( context.outputs.keys() ))
 
 if 'inputs' in args.print:
     print( context.inputs )
-print( context.inputs.keys() )
+print(list( context.inputs.keys() ))
 
 if args.embed:
     import IPython

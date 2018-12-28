@@ -7,7 +7,6 @@ import gna.constructors as C
 from gna.bundle import *
 
 class detector_eres_ex02(TransformationBundle):
-    common_matrix=True
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
 
