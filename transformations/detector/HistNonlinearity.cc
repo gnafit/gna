@@ -17,7 +17,7 @@ HistNonlinearity::HistNonlinearity(bool propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
   transformation_("matrix")
-      .input("Edges")
+      .input("Edges", /*inactive*/true)
       .input("EdgesModified")
       .output("FakeMatrix")
       .types(TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>, TypesFunctions::ifBinsEdges<0,1>)
@@ -46,7 +46,7 @@ void HistNonlinearity::getEdges(TypesFunctionArgs& fargs) {
 
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   auto& args=fargs.args;
-  auto bins = args[0].arr.size();
+  auto bins = args[1].arr.size()-1;
   auto* edges_orig = m_edges;
   auto* edges_mod  = args[1].arr.data();
   auto* end_orig = std::next(edges_orig, bins);

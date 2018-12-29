@@ -30,7 +30,9 @@ void Source::connect(Sink *newsink) {
   //}
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
-  sink->entry->tainted.subscribe(entry->tainted);
+  if( !this->inactive ){
+    sink->entry->tainted.subscribe(entry->tainted);
+  }
   newsink->sources.push_back(this);
   try {
     newsink->entry->evaluateTypes();

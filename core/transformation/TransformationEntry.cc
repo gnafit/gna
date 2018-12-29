@@ -73,10 +73,11 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
  * @brief Initialize and return new input Source.
  *
  * @param name -- new Source's name.
+ * @param inactive -- set source inactive (do not subscribe taintflag)
  * @return InputHandle for the new Source.
  */
-InputHandle Entry::addSource(const std::string &name) {
-  auto *s = new Source(name, this);
+InputHandle Entry::addSource(const std::string &name, bool inactive) {
+  auto *s = new Source(name, this, inactive);
   sources.push_back(s);
   return InputHandle(*s);
 }

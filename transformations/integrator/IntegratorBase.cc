@@ -109,7 +109,7 @@ void IntegratorBase::init_sampler() {
         trans.finalize();
     }
     else{
-        trans.input("edges") //hist with edges
+        trans.input("edges", /*inactive*/true) //hist with edges
           .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
     }
 

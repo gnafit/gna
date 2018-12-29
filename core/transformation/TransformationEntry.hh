@@ -52,7 +52,7 @@ namespace TransformationTypes
     Entry(const std::string &name, const Base *parent);  ///< Constructor.
     Entry(const Entry &other, const Base *parent);       ///< Clone constructor.
 
-    InputHandle addSource(const std::string &name);      ///< Initialize and return new Source.
+    InputHandle addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
     OutputHandle addSink(const std::string &name);       ///< Initialize and return new Sink.
 
     void evaluate();                                     ///< Do actual calculation by calling Entry::fun.

@@ -10,7 +10,7 @@ class HistEdges: public GNASingleObject,
 public:
   HistEdges() {
     transformation_("histedges")
-      .input("hist")
+      .input("hist", /*inactive*/true)
       .output("edges")
       .types(TypesFunctions::ifHist<0>,
              [](TypesFunctionArgs& fargs) {

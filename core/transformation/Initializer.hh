@@ -174,8 +174,8 @@ namespace TransformationTypes {
      * @param name -- input name.
      * @return `*this`.
      */
-    Initializer<T> input(const std::string &name) {
-      m_entry->addSource(name);
+    Initializer<T> input(const std::string &name, bool inactive=false) {
+      m_entry->addSource(name, inactive);
       return *this;
     }
 

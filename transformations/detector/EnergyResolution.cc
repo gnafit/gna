@@ -23,7 +23,7 @@ HistSmearSparse(propagate_matrix)
   variable_(&m_c, pars[2]);
 
   transformation_("matrix")
-      .input("Edges")
+      .input("Edges", /*inactive*/true)
       .output("FakeMatrix")
       .types(TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>, TypesFunctions::toMatrix<0,0,0>)
       .types(&EnergyResolution::getEdges)
@@ -53,9 +53,9 @@ double EnergyResolution::resolution(double Etrue, double Erec) const noexcept {
 void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
   m_sparse_cache.setZero();
 
-  auto& arg = fargs.args[0];
+  auto& ret = fargs.rets[0];
   auto* edges = m_edges;
-  auto bins = arg.type.shape[0]-1;
+  auto bins = ret.type.shape[0];
   m_sparse_cache.resize(bins, bins);
 
   /* fill the cache matrix with probalilities for number of events to leak to other bins */

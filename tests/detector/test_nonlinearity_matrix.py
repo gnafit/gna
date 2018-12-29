@@ -49,7 +49,6 @@ nl = R.HistNonlinearity(True)
 nl.set(ntrue.hist, pedges_m)
 nl.add_input()
 
-
 mat = nl.matrix.FakeMatrix.data()
 print( 'C++' )
 print( mat )
@@ -68,6 +67,15 @@ print( diff )
 print()
 print( (diff==0.0).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
 print(diff)
+
+ntrue.hist.hist.data()
+tflag1a = ntrue.hist.tainted()
+tflag2a = nl.matrix.tainted()
+ntrue.hist.taint()
+tflag1b = ntrue.hist.tainted()
+tflag2b = nl.matrix.tainted()
+print('taints', tflag1a, tflag2a, tflag1b, tflag2b)
+assert not tflag2b
 
 fig = P.figure()
 ax = P.subplot( 111 )

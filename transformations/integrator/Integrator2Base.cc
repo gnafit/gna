@@ -114,7 +114,7 @@ void Integrator2Base::init_sampler() {
       ;
 
   if(!m_xedges.size() && !m_yedges.size()){
-    trans.input("edges") //hist with edges
+    trans.input("edges", /*inactive*/true) //hist with edges
          .types(TypesFunctions::if2d<0>, TypesFunctions::ifHist<0>);
   }
   else {
