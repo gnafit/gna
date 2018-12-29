@@ -18,7 +18,7 @@ cfg = NestedDict(
         name='detector_eres',
         version='ex02',
         nidx=[ ('d', 'detector', ['D1', 'D2', 'D3']),
-               ('z', 'zone', ['z1', 'z2', 'z3'])],
+               ('z', 'zone', ['z1', 'z2'])],
         major=['z'],
         names=dict(
             eres_matrix='smearing_matrix',
@@ -39,8 +39,8 @@ cfg = NestedDict(
          ]
         ),
     labels = dict(
-        matrix    = 'Smearing matrix\n{autoindex}',
-        smear     = 'Energy resolution\n{autoindex}',
+        matrix    = 'Smearing\nmatrix\n{autoindex}',
+        smear     = 'Energy\nresolution\n{autoindex}',
         parameter = '{description} (zone {autoindex})'
         ),
     split_transformations = True
@@ -93,7 +93,7 @@ hist2   >> b.context.inputs.eres.D2.values(nested=True)
 hist3   >> b.context.inputs.eres.D3.values(nested=True)
 print( b.context )
 
-savegraph(edges_o, oname+suffix+'_graph1.png')
+savegraph(hist1, oname+suffix+'_graph1.png')
 
 #
 # Plot

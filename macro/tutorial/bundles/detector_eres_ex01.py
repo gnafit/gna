@@ -19,8 +19,9 @@ class detector_eres_ex01(TransformationBundle):
             eres = C.EnergyResolution(names, ns=self.namespace)
             self.objects.append(eres)
 
+            eres.print()
+
             self.set_input('eres_matrix', it_major, eres.matrix.Edges, argument_number=0)
-            self.set_output('eres_matrix', it_major, eres.matrix.FakeMatrix)
 
             trans = eres.smear
             for i, it_minor in enumerate(self.nidx_minor):

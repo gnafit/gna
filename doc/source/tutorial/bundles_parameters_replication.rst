@@ -1,3 +1,5 @@
+.. _tutorial_parameters_replication:
+
 Replicating parameters
 ''''''''''''''''''''''
 
