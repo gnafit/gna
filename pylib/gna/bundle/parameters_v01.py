@@ -2,18 +2,15 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import numpy as N
-from gna.env import env, namespace
-from collections import OrderedDict
-import gna.constructors as C
-from gna.configurator import NestedDict
-from gna.grouping import CatDict, Categories
-
 from gna.bundle.bundle import *
 
 class parameters_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
-        TransformationBundleV01.__init__(self, *args, **kwargs)
+        TransformationBundle.__init__(self, *args, **kwargs)
+
+    @staticmethod
+    def provides(cfg):
+        return (cfg.parameter), ()
 
     def define_variables(self):
         separate_uncertainty = self.cfg.get('separate_uncertainty', False)

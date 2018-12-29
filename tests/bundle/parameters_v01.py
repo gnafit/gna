@@ -77,3 +77,9 @@ b2 = execute_bundle(cfg2)
 b3 = execute_bundle(cfg3)
 
 env.globalns.printparameters(labels=True)
+
+print('Provides:')
+print(b1.provides(cfg1))
+print(b1.provides(cfg2))
+print(b1.provides(cfg3))
+

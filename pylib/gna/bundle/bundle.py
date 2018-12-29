@@ -242,6 +242,11 @@ class TransformationBundle(object):
             import sys
             raise e, None, sys.exc_info()[2]
 
+    @staticmethod
+    def provides(cfg):
+        print('Warning! Calling default bundle.provides(cfg) static method. Should be overridden.')
+        return (), ()
+
     def build(self):
         """Builds the computational chain. Should handle each namespace in namespaces."""
         pass
