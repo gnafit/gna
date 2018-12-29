@@ -79,15 +79,10 @@ ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
 phist = singularities( ev, edges )
 hist = C.Histogram( edges, phist )
 
-histedges = R.HistEdges()
-histedges.histedges.hist( hist.hist )
-
 nl = R.HistNonlinearity()
 nl.print()
 
-import IPython
-IPython.embed()
-nl.set(histedges.histedges, pedges_m.points)
+nl.set(hist.hist, pedges_m.points)
 
 nl.add_input(hist)
 

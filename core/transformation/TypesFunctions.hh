@@ -255,8 +255,6 @@ void TypesFunctions::ifSameShape2(TransformationTypes::TypesFunctionArgs& fargs)
 template <size_t Arg1, size_t Arg2>
 void TypesFunctions::ifBinsEdges(TransformationTypes::TypesFunctionArgs& fargs) {
   auto& args=fargs.args;
-  TypesFunctions::ifPoints<Arg1>(fargs);
-  TypesFunctions::ifPoints<Arg2>(fargs);
   TypesFunctions::if1d<Arg1>(fargs);
   TypesFunctions::if1d<Arg2>(fargs);
   if (args[Arg1].shape[0] != (args[Arg2].shape[0]-1u)) {

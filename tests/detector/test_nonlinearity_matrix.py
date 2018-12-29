@@ -45,11 +45,8 @@ matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 pedges_m = C.Points( edges_m )
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 
-histedges = R.HistEdges()
-histedges.histedges.hist( ntrue.hist )
-
 nl = R.HistNonlinearity(True)
-nl.set(histedges.histedges, pedges_m)
+nl.set(ntrue.hist, pedges_m)
 nl.add_input()
 
 
@@ -70,6 +67,7 @@ print( diff )
 
 print()
 print( (diff==0.0).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+print(diff)
 
 fig = P.figure()
 ax = P.subplot( 111 )

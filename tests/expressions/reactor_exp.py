@@ -173,7 +173,7 @@ expr =[
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
         'eres_matrix| evis_hist()',
-        'lsnl_edges| evis_edges(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
+        'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         # Bkg
         'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
         'bkg_lihe  = efflivetime[d] * bkg_rate_lihe[s]  * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',

@@ -20,9 +20,12 @@ public:
 private:
   void calcSmear(FunctionArgs& fargs);
   void calcMatrix(FunctionArgs& fargs);
+  void getEdges(TypesFunctionArgs& fargs);
 
   bool m_initialized{false};
 
   double m_range_min{-1.e+100};
   double m_range_max{+1.e+100};
+
+  double const* m_edges=nullptr;
 };

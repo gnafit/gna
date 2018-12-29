@@ -20,8 +20,9 @@ HistSmearSparse(propagate_matrix)
       .input("Edges")
       .input("EdgesModified")
       .output("FakeMatrix")
-      .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>, TypesFunctions::ifSame)
-      .types(TypesFunctions::edgesToMatrix<0,0,0>)
+      .types(TypesFunctions::ifHist<0>, TypesFunctions::if1d<0>, TypesFunctions::ifBinsEdges<0,1>)
+      .types(TypesFunctions::toMatrix<0,0,0>)
+      .types(&HistNonlinearity::getEdges)
       .func(&HistNonlinearity::calcMatrix);
 
   add_transformation();
@@ -39,11 +40,14 @@ void HistNonlinearity::set(SingleOutput& bin_edges, SingleOutput& bin_edges_modi
   bin_edges_modified.single() >> inputs[1];
 }
 
+void HistNonlinearity::getEdges(TypesFunctionArgs& fargs) {
+  m_edges = fargs.args[0].edges.data();
+}
+
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   auto& args=fargs.args;
-  auto n = args[0].arr.size();
-  auto bins = n-1;
-  auto* edges_orig = args[0].arr.data();
+  auto bins = args[0].arr.size();
+  auto* edges_orig = m_edges;
   auto* edges_mod  = args[1].arr.data();
   auto* end_orig = std::next(edges_orig, bins);
   auto* end_mod  = std::next(edges_mod, bins);
