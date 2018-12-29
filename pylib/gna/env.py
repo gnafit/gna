@@ -212,7 +212,7 @@ class namespace(Mapping):
     def defparameter(self, name, *args, **kwargs):
         ns, head = self.get_proper_ns(name)
         if ns:
-            return ns.defparamter(head, *args, **kwargs)
+            return ns.defparameter(head, *args, **kwargs)
 
         if head in self.storage:
             raise Exception("{} is already defined in {}".format(head, self.path))
