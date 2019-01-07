@@ -115,10 +115,10 @@ class ExpressionContext(object):
     indices = None
     executed_bundes = set()
     required = OrderedDict()
-    def __init__(self, cfg, ns=None):
+    def __init__(self, cfg, ns=None, inputs=None, outputs=None):
         self.cfg = cfg
-        self.outputs = NestedDict()
-        self.inputs  = NestedDict()
+        self.outputs = NestedDict() if outputs is None else outputs
+        self.inputs  = NestedDict() if inputs is None else inputs
         self.ns = ns or env.globalns
 
         self.providers = dict()
