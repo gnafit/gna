@@ -1,6 +1,6 @@
 # Paths to look for UI modules
 pkgpaths    = [ './pylib/gna/ui' ]
-bundlepaths = [ './pylib/gna/bundle' ]
+bundlepaths = [ './pylib/gna/bundles', './pylib/gna/bundles_legacy' ]
 covariance_path = ['./tests/covariances']
 
 # Verbosity options
