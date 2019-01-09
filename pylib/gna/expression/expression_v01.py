@@ -115,27 +115,63 @@ class Expression_v01(object):
         for tree in self.trees:
             tree.bind(context)
 
+class ItemProvider(object):
+    """Container for the bundle class, bundle configuration and provided items"""
+    bundle=None
+    def __init__(self, cfg, name=''):
+        self.cfg = cfg
+        self.name=name
+
+        from gna.bundle.bundle import get_bundle
+        self.bundleclass = get_bundle((cfg.bundle.name, cfg.bundle.version))
+
+        variables, objects = self.bundleclass.provides(self.cfg)
+        self.items = variables+objects
+
+    def register_in(self, dct):
+        for key in self.items:
+            dct[key] = self
+
+    def build(self, **kwargs):
+        if self.bundle:
+            return bundle
+
+        self.bundle = self.bundleclass(self.cfg, **kwargs)
+        self.bundle.execute()
+
+    def set_nidx(self, nidx):
+        if nidx is None:
+            printl_debug( 'indices: %s'%(self.name) )
+            return
+
+        bundlecfg = self.cfg.bundle
+        predefined_nidx = bundlecfg.get('nidx', None)
+        if predefined_nidx is None:
+            printl_debug( 'indices: %s[%s]'%(self.name, str(predefined_nidx)) )
+            bundlecfg.nidx = nidx
+        else:
+            if isinstance(predefined_nidx, list):
+                predefined_nidx = NIndex(fromlist=predefined_nidx)
+            elif not isinstance(predefined_nidx, NIndex):
+                raise Exception('Unsupported nidx field')
+
+            printl_debug('indices: %s[%s + %s]'%(self.name, str(predefined_nidx), str(nidx)))
+            bundlecfg.nidx=predefined_nidx+nidx
+
 class ExpressionContext_v01(object):
     indices = None
-    executed_bundes = set()
-    required = OrderedDict()
-    def __init__(self, cfg, ns=None, inputs=None, outputs=None):
-        self.cfg = cfg
+    def __init__(self, bundles, ns=None, inputs=None, outputs=None):
+        self.bundles = bundles
         self.outputs = NestedDict() if outputs is None else outputs
         self.inputs  = NestedDict() if inputs is None else inputs
         self.ns = ns or env.globalns
 
         self.providers = dict()
-        for keys, value in cfg.items():
-            if isinstance(value, NestedDict) and 'provides' in value:
-                value.provides+=[keys]
-                keys=value.provides
+        for name, cfg in self.bundles.items():
+            provider = ItemProvider(cfg, name)
+            provider.register_in(self.providers)
 
-            if not isinstance(keys, (list, tuple)):
-                keys=keys,
-
-            for key in keys:
-                self.providers[key]=value
+        self.required_bundles = OrderedDict()
 
     def namespace(self):
         return self.ns
@@ -144,50 +180,27 @@ class ExpressionContext_v01(object):
         self.nindex = indices
 
     @methodname
-    def require(self, name, indices):
-        cfg = self.required.get(name, None)
-        if cfg is None:
-            cfg = self.providers.get(name, None)
-            if cfg is None:
-                if indices:
-                    for it in indices.iterate():
+    def require(self, name, nidx):
+        provider = self.required_bundles.get(name, None)
+        if provider is None:
+            provider = self.providers.get(name, None)
+            if provider is None:
+                if nidx:
+                    for it in nidx.iterate():
                         self.require(it.current_format(name=name), None)
-                    return self.required
+                    return self.required_bundles
 
                 raise Exception('Do not know how to build '+name)
 
-            self.required[name] = cfg
+            self.required_bundles[name] = provider
 
-        if indices is None:
-            printl_debug( 'indices: %s'%(name) )
-            return self.required
+        provider.set_nidx(nidx)
 
-        predefined = cfg.get('indices', None)
-        if predefined is None:
-            printl_debug( 'indices: %s[%s]'%(name, str(indices)) )
-            cfg.indices=indices
-        elif not isinstance(predefined, NIndex):
-            raise Exception('Configuration should not contain predefined "indices" field')
-        else:
-            printl_debug( 'indices: %s[%s + %s]'%(name, str(predefined), str(indices)) )
-            cfg.indices=predefined+indices
-
-        return self.required
+        return self.required_bundles
 
     def build_bundles(self):
-        done = set()
-        for cfg in self.required.values():
-            if cfg in done:
-                continue
-            self.build_bundle(cfg)
-            done.add(cfg)
-
-    def build_bundle(self, cfg):
-        printl_debug('build bundle', cfg.bundle )
-
-        from gna.bundle import execute_bundles
-        with nextlevel():
-            b=execute_bundles( cfg=cfg, context=self )
+        for provider in self.required_bundles.values():
+            provider.build(inputs=self.inputs, outputs=self.outputs, namespace=self.ns)
 
     def get_variable(self, name, *idx):
         pass

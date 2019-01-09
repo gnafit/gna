@@ -10,6 +10,10 @@ class detector_eres_normal_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
 
+    @staticmethod
+    def _provides(cfg):
+        return (cfg.parameter), ('eres_matrix', 'eres')
+
     def build(self):
         self.objects = []
         for it_major in self.nidx_major:
