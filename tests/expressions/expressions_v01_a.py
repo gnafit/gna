@@ -13,6 +13,26 @@ from gna.bindings import common
 from gna.graphviz import savegraph
 from mpl_tools.helpers import savefig
 
+#
+# Prepare inputs
+#
+emin, emax = 0.0, 12.0
+nbins = 240
+edges = np.linspace(emin, emax, nbins+1, dtype='d')
+peaks = 20, 120, 200
+hists = ()
+
+for i in range(3):
+    data  = np.zeros(nbins, dtype='d')
+
+    for peak in peaks:
+        pos = np.max((peak+20*i, nbins-1))
+        data[pos]=1.0
+
+    hist = C.Histogram(edges, data)
+    hist.hist.setLabel('Input histogram %i'%i)
+    hists += hist,
+
 cfg = NestedDict(
         bundle = dict(
             name = 'expression',
@@ -23,7 +43,7 @@ cfg = NestedDict(
         verbose = 2,
 
         # Expression
-        expr = 'norm1[d] * norm2[z] * eres[z,d]()',
+        expr = 'norm1[d] * norm2[z] * eres[z,d]| hist[z]()',
 
         # Configuration
         bundles = NestedDict(
@@ -85,8 +105,17 @@ cfg = NestedDict(
                     mode = 'fixed',
                     ),
             ),
+            input = NestedDict(
+                    bundle = 'predefined_v01',
+                    name = 'hist',
+                    inputs = None,
+                    outputs = NestedDict(
+                        'z1' = hists[0],
+                        'z2' = hists[1],
+                        'z3' = hists[2]
+                        )
+                    )
         ),
-
 
         # Name comprehension
         lib = dict(
@@ -108,36 +137,6 @@ b.namespace.printparameters
 
 # from sys import argv
 # oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-
-# #
-# # Prepare inputs
-# #
-# emin, emax = 0.0, 12.0
-# nbins = 240
-# edges = np.linspace(emin, emax, nbins+1, dtype='d')
-# data1  = np.zeros(nbins, dtype='d')
-# data1[20]=1.0  # 1 MeV
-# data1[120]=1.0 # 6 MeV
-# data1[200]=1.0 # 10 MeV
-
-# data2  = np.zeros(nbins, dtype='d')
-# data2[40]=1.0  # 2 MeV
-# data2[140]=1.0 # 7 MeV
-# data2[220]=1.0 # 11 MeV
-
-# data3  = np.zeros(nbins, dtype='d')
-# data3[60]=1.0  # 3 MeV
-# data3[160]=1.0 # 8 MeV
-# data3[239]=1.0 # 12 MeV
-
-# hist1 = C.Histogram(edges, data1)
-# hist1.hist.setLabel('Input histogram 1')
-
-# hist2 = C.Histogram(edges, data2)
-# hist2.hist.setLabel('Input histogram 2')
-
-# hist3 = C.Histogram(edges, data3)
-# hist3.hist.setLabel('Input histogram 3')
 
 # #
 # # Bind outputs
