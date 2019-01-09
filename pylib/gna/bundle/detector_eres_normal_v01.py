@@ -23,8 +23,6 @@ class detector_eres_normal_v01(TransformationBundle):
             eres = C.EnergyResolution(names, ns=self.namespace)
             self.objects.append(eres)
 
-            eres.print()
-
             self.set_input('eres_matrix', it_major, eres.matrix.Edges, argument_number=0)
 
             trans = eres.smear

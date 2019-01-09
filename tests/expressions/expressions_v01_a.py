@@ -20,9 +20,10 @@ cfg = NestedDict(
             nidx=[ ('d', 'detector', ['D1', 'D2', 'D3']),
                    ('z', 'zone', ['z1', 'z2'])],
             ),
+        verbose = 2,
 
         # Expression
-        expr = 'eres[z,d]',
+        expr = 'norm1[d] * norm2[z] * eres[z,d]()',
 
         # Configuration
         bundles = NestedDict(
@@ -55,11 +56,42 @@ cfg = NestedDict(
                     parameter = '{description} (zone {autoindex})'
                     ),
                 split_transformations = True
-            )
+            ),
+            norm1 = NestedDict(
+                bundle = 'parameters_v01',
+                parameter = 'norm1',
+                label='Normalization at detector {detector}',
+                pars = uncertaindict(
+                    [
+                        ( 'D1', 1.0 ),
+                        ( 'D2', 2.0 ),
+                        ( 'D3', 3.0 ),
+                        ],
+                    uncertainty = 1.0,
+                    mode = 'percent',
+                    ),
+            ),
+            norm2 = NestedDict(
+                bundle = 'parameters_v01',
+                parameter = 'norm2',
+                label='Normalization at zone {zone}',
+                pars = uncertaindict(
+                    [
+                        ( 'z1', 1.0 ),
+                        ( 'z2', 1.1 ),
+                        ( 'z3', 1.2 ),
+                        ],
+                    uncertainty = None,
+                    mode = 'fixed',
+                    ),
+            ),
         ),
 
+
         # Name comprehension
-        lib = dict()
+        lib = dict(
+                norm = dict( expr='norm1*norm2' )
+                )
 )
 
 b = execute_bundle(cfg)

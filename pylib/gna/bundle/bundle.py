@@ -35,7 +35,7 @@ def get_bundle(name):
 
     return bundle
 
-preprocess_mask = re.compile('(.+?)(_(v\d\d))?')
+preprocess_mask = re.compile('^(.+?)(_(v\d\d))?$')
 def preprocess_bundle_cfg(cfg):
     """Check the 'bundle' field and expand it if needed"""
 
@@ -45,7 +45,7 @@ def preprocess_bundle_cfg(cfg):
         raise Exception('Bundle configuration should contain field "bundle"')
 
     if isinstance(bundle, str):
-        name, _, version = preprocess_mask.match(bundle)
+        name, _, version = preprocess_mask.match(bundle).groups()
         if version is None:
             version=''
 
