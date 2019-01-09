@@ -134,7 +134,7 @@ class ItemProvider(object):
 
     def build(self, **kwargs):
         if self.bundle:
-            return bundle
+            return self.bundle
 
         self.bundle = self.bundleclass(self.cfg, **kwargs)
         self.bundle.execute()

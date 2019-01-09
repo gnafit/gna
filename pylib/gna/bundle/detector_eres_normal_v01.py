@@ -12,7 +12,7 @@ class detector_eres_normal_v01(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return (cfg.parameter), ('eres_matrix', 'eres')
+        return (cfg.parameter,), ('eres_matrix', 'eres')
 
     def build(self):
         self.objects = []

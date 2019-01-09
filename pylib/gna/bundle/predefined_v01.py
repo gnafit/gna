@@ -24,12 +24,14 @@ class predefined_v01(TransformationBundle):
         for it_major in self.nidx_major:
             path = it_major.current_values()
 
-            output = self.cfg.outputs[path]
-            inputs = self.cfg.inputs[path]
+            output = None if self.cfg.outputs is None else self.cfg[('outputs',)+path]
+            inputs = ()   if self.cfg.inputs  is None else self.cfg[('inputs',) +path]
 
             for it_minor in self.nidx_minor:
                 it = it_major + it_minor
-                self.set_output(name, it, output)
+
+                if output:
+                    self.set_output(name, it, output)
 
                 for arg, input in enumerate(inputs):
                     self.set_input(name, it, input, argument_number=arg)

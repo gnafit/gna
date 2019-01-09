@@ -13,6 +13,13 @@ from gna.bindings import common
 from gna.graphviz import savegraph
 from mpl_tools.helpers import savefig
 
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-o', '--output' )
+parser.add_argument( '-g', '--graph' )
+parser.add_argument( '-s', '--show', action='store_true' )
+opts=parser.parse_args()
+
 #
 # Prepare inputs
 #
@@ -26,7 +33,7 @@ for i in range(3):
     data  = np.zeros(nbins, dtype='d')
 
     for peak in peaks:
-        pos = np.max((peak+20*i, nbins-1))
+        pos = np.min((peak+20*i, nbins-1))
         data[pos]=1.0
 
     hist = C.Histogram(edges, data)
@@ -43,7 +50,10 @@ cfg = NestedDict(
         verbose = 2,
 
         # Expression
-        expr = 'norm1[d] * norm2[z] * eres[z,d]| hist[z]()',
+        expr =[
+            'smearing_matrix[z]| hist0()',
+            'norm1[d] * norm2[z] * eres[z,d]| hist[d]()'
+            ],
 
         # Configuration
         bundles = NestedDict(
@@ -106,68 +116,63 @@ cfg = NestedDict(
                     ),
             ),
             input = NestedDict(
-                    bundle = 'predefined_v01',
+                    bundle = NestedDict(name='predefined', version='v01', major='d'),
                     name = 'hist',
                     inputs = None,
                     outputs = NestedDict(
-                        'z1' = hists[0],
-                        'z2' = hists[1],
-                        'z3' = hists[2]
+                        D1 = hists[0].single(),
+                        D2 = hists[1].single(),
+                        D3 = hists[2].single()
                         )
+                    ),
+            hist = NestedDict(
+                    bundle = NestedDict(name='predefined', version='v01'),
+                    name = 'hist0',
+                    inputs = None,
+                    outputs = hists[0].single()
                     )
         ),
 
         # Name comprehension
         lib = dict(
-                norm = dict( expr='norm1*norm2' )
+                norm = dict( expr='norm1*norm2' ),
+                output = dict( expr='norm*eres' )
                 )
 )
 
 b = execute_bundle(cfg)
-env.globalns.printparameters(labels=True); print()
 
 print('Inputs')
 print(b.context.inputs)
+print()
 
 print('Outputs')
 print(b.context.outputs)
+print()
 
 print('Parameters')
-b.namespace.printparameters
+b.namespace.printparameters(labels=True)
+print()
 
-# from sys import argv
-# oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
 
-# #
-# # Bind outputs
-# #
-# suffix = '' if cfg.split_transformations else '_merged'
-# savegraph(b.context.outputs.smearing_matrix.values(), oname+suffix+'_graph0.png')
+if opts.graph:
+    savegraph(b.context.outputs.hist0, opts.graph)
 
-# hist1   >> b.context.inputs.smearing_matrix.values(nested=True)
-# hist1   >> b.context.inputs.eres.D1.values(nested=True)
-# hist2   >> b.context.inputs.eres.D2.values(nested=True)
-# hist3   >> b.context.inputs.eres.D3.values(nested=True)
-# print( b.context )
+if opts.show or opts.output:
+    fig = plt.figure(figsize=(12,12))
 
-# savegraph(hist1, oname+suffix+'_graph1.png')
+    for i, det in enumerate(['D1', 'D2', 'D3']):
+        ax = plt.subplot(221+i, xlabel='E, MeV', ylabel='', title='Energy smearing in '+det)
+        ax.minorticks_on()
+        ax.grid()
 
-# #
-# # Plot
-# #
-# fig = plt.figure(figsize=(12,12))
+        hists[i].hist.hist.plot_hist(label='Original histogram')
+        for i, out in enumerate(b.context.outputs.eres[det].values(nested=True)):
+            out.plot_hist(label='Smeared histogram (%i)'%i)
 
-# hists = [hist1, hist2, hist3]
-# for i, det in enumerate(['D1', 'D2', 'D3']):
-    # ax = plt.subplot(221+i, xlabel='E, MeV', ylabel='', title='Energy smearing in '+det)
-    # ax.minorticks_on()
-    # ax.grid()
+        ax.legend(loc='upper right')
 
-    # hists[i].hist.hist.plot_hist(label='Original histogram')
-    # for i, out in enumerate(b.context.outputs.eres[det].values(nested=True)):
-        # out.plot_hist(label='Smeared histogram (%i)'%i)
+    savefig(opts.output)
 
-    # ax.legend(loc='upper right')
-
-# savefig(oname+'.png')
-# plt.show()
+    if opts.show:
+        plt.show()
