@@ -252,7 +252,7 @@ def _reactor_to_nominal_thermal_power(reac):
     for key in thermal_power_nominals.keys():
        if key in reac:
           return key
-    raise KeyError("No thermal power for such reactor") 
+    raise KeyError("No thermal power for such reactor")
 
 print()
 # Here is the configuration
@@ -295,7 +295,7 @@ cfg = NestedDict(
             efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
             ),
         fission_fractions = NestedDict(
-            bundle = dict(name="parameters", 
+            bundle = dict(name="parameters",
                           version = "v01",
                           nidx = [indices[1], indices[2]]),
                      parameter = "fission_fractions",
@@ -469,7 +469,7 @@ if args.show or args.output:
         out = outputs.sum_sum_sum_eres_cw
     else:
         out = outputs.eres
-    out.AD11.plot_hist(label='EH1 AD1')
+    out.AD1.plot_hist(label='JUNO')
     step('_04_eres')
 
 
