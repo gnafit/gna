@@ -9,8 +9,8 @@ class parameters_v01(TransformationBundle):
         TransformationBundle.__init__(self, *args, **kwargs)
 
     @staticmethod
-    def provides(cfg):
-        return (cfg.parameter), ()
+    def _provides(cfg):
+        return (cfg.parameter,), ()
 
     def define_variables(self):
         separate_uncertainty = self.cfg.get('separate_uncertainty', False)

@@ -5,11 +5,15 @@ from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules
 from gna.configurator import NestedDict
+import re
 
 bundle_modules = {}
 bundles = {}
 
 def get_bundle(name):
+    if isinstance(name, tuple):
+        name = '_'.join((o for o in name if o))
+
     if name in bundles:
         return bundles[name]
 
@@ -31,16 +35,32 @@ def get_bundle(name):
 
     return bundle
 
+preprocess_mask = re.compile('^(.+?)(_(v\d\d))?$')
+def preprocess_bundle_cfg(cfg):
+    """Check the 'bundle' field and expand it if needed"""
+
+    try:
+        bundle = cfg.get('bundle')
+    except KeyError:
+        raise Exception('Bundle configuration should contain field "bundle"')
+
+    if isinstance(bundle, str):
+        name, _, version = preprocess_mask.match(bundle).groups()
+        if version is None:
+            version=''
+
+        bundle = cfg['bundle'] = NestedDict(name=name, version=version)
+
+    bundle.setdefault('names', {})
+
 def init_bundle(cfg, *args, **kwargs):
+    # TODO: remove kwargs['name']
+    preprocess_bundle_cfg(cfg)
+
     names = kwargs.pop('name', None)
     if not names:
-        names = cfg.bundle
-
-        if isinstance(names, (dict, NestedDict)):
-            names, version=(names['name'],), names.get('version', None)
-            if version:
-                names+=str(version),
-            names = '_'.join(names),
+        name, version=cfg.bundle['name'], cfg.bundle['version']
+        names = (name, version),
 
     if not isinstance(names, (list, tuple)):
         names = names,
@@ -193,17 +213,11 @@ class TransformationBundle(object):
     """
     def __init__(self, cfg, *args, **kwargs):
         from gna.expression import NIndex
+        preprocess_bundle_cfg(cfg)
         self.cfg = cfg
 
         # Read bundle configuration
-        self.bundlecfg = cfg.get('bundle', '')
-
-        # If only name is provided, make a dictionary
-        if isinstance(self.bundlecfg, str):
-            self.bundlecfg=dict(name=self.bundlecfg)
-
-        # Create dictionary to map names if needed
-        self.bundlecfg.setdefault('names', {})
+        self.bundlecfg = cfg['bundle']
 
         # Init multidimensional index
         self.nidx=self.bundlecfg.get('nidx', [])
@@ -219,10 +233,10 @@ class TransformationBundle(object):
             self.nidx_major, self.nidx_minor = self.nidx, self.nidx.get_subset(())
 
         # Init namespace and context
-        self.context   = kwargs.pop('context', None)
+        inputs  = kwargs.pop('inputs', {})
+        outputs = kwargs.pop('outputs', {})
         self.namespace = kwargs.pop('namespace', env.globalns)
-        if self.context is None:
-            self.context = NestedDict(inputs={}, outputs={}, objects={})
+        self.context = NestedDict(inputs=inputs, outputs=outputs, objects={})
 
         assert not kwargs
 
@@ -243,9 +257,15 @@ class TransformationBundle(object):
             raise e, None, sys.exc_info()[2]
 
     @staticmethod
-    def provides(cfg):
+    def _provides(cfg):
         print('Warning! Calling default bundle.provides(cfg) static method. Should be overridden.')
-        return (), ()
+        return (), () # variables, objects
+
+    @classmethod
+    def provides(cls, cfg):
+        variables, objects = cls._provides(cfg)
+        names = cfg.bundle.names
+        return tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
 
     def build(self):
         """Builds the computational chain. Should handle each namespace in namespaces."""
