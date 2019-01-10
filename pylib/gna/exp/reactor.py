@@ -594,3 +594,4 @@ class ReactorExperimentModel(baseexp):
         for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
             geo_isons = ns("geo_isotopes")(geo_isoname)
             geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
+

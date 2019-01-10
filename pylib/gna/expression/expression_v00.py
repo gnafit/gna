@@ -113,9 +113,10 @@ class Expression(object):
 
 class ExpressionContext(object):
     indices = None
-    executed_bundes = set()
-    required = OrderedDict()
     def __init__(self, cfg, ns=None, inputs=None, outputs=None):
+        self.executed_bundles = []
+        self.required = OrderedDict()
+
         self.cfg = cfg
         self.outputs = NestedDict() if outputs is None else outputs
         self.inputs  = NestedDict() if inputs is None else inputs
@@ -184,6 +185,8 @@ class ExpressionContext(object):
         from gna.bundle import execute_bundles
         with nextlevel():
             b=execute_bundles( cfg=cfg, context=self )
+
+        self.executed_bundles.append(b)
 
     def get_variable(self, name, *idx):
         pass

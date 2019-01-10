@@ -71,21 +71,57 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 def vs_plot_points(outputx, outputy, *arsg, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
 
-def plot_hist1( output, *args, **kwargs ):
+def get_1d_buffer(output, scale=None):
+    buf = output.data().copy()
+
+    lims  = N.array(output.datatype().edges)
+    width = lims[1:] - lims[:-1]
+    if scale is None:
+        pass
+    elif scale=='width':
+        buf/=width
+    elif isinstance(scale, (float,int)):
+        buf*=float(scale)
+    else:
+        raise Exception('Unsupported scale:', scale)
+
+    return buf, lims, width
+
+def plot_hist1(output, *args, **kwargs):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
     all other arguments are passed as is.
+
+    Options:
+        scale=float or 'width' - multiply bin by a scale or divide by bin width
 
     returns pyplot.plot() result
     """
     ifNd(output, 1)
     ifHist(output)
 
-    height=output.data().copy()
-    lims=N.array(output.datatype().edges)
+    height, lims, _ = get_1d_buffer(output, scale=kwargs.pop('scale',None))
+    return helpers.plot_hist(lims, height, *args, **kwargs)
 
-    return helpers.plot_hist( lims, height, *args, **kwargs )
+def plot_hist1_centers(output, *args, **kwargs):
+    """Plot 1-dimensinal output using pyplot.plot
+
+    executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
+    all other arguments are passed as is.
+
+    Options:
+        scale=float or 'width' - multiply bin by a scale or divide by bin width
+
+    returns pyplot.plot() result
+    """
+    ifNd(output, 1)
+    ifHist(output)
+
+    height, lims, _ = get_1d_buffer(output, scale=kwargs.pop('scale',None))
+    centers = (lims[1:] + lims[:-1])*0.5
+
+    return P.plot(centers, height, *args, **kwargs)
 
 def bar_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal histogram using pyplot.bar
@@ -96,6 +132,7 @@ def bar_hist1( output, *args, **kwargs ):
     Options:
         divide=N - divide bin width by N
         shift=N  - shift bin left edge by N*width
+        scale=float or 'width' - multiply bin by a scale or divide by bin width
 
     returns pyplot.bar() result
     """
@@ -104,10 +141,8 @@ def bar_hist1( output, *args, **kwargs ):
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
 
-    height=output.data().copy()
-    lims  = N.array(output.datatype().edges)
+    height, lims, width = get_1d_buffer(output, scale=kwargs.pop('scale',None))
     left  = lims[:-1]
-    width = lims[1:] - left
 
     if divide:
         width/=divide
@@ -122,20 +157,33 @@ def errorbar_hist1(output, yerr=None, *args, **kwargs):
     executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with x, y and xerr overridden
     all other arguments passes as is.
 
+    Options:
+        yerr=array or 'stat' - Y errors
+        scale=float or 'width' - multiply bin by a scale or divide by bin width
+
     returns pyplot.errorbar() result
     """
     ifNd(output, 1)
     ifHist(output)
 
-    Y=output.data().copy()
-    lims  = N.array(output.datatype().edges)
+    scale = kwargs.pop('scale', None)
+
+    Y, lims, width = get_1d_buffer(output, scale=scale)
+
     X   =(lims[1:]+lims[:-1])*0.5
-    Xerr=(lims[1:]-lims[:-1])*0.5
+    Xerr=width*0.5
 
     if isinstance(yerr, str) and yerr=='stat':
-        Yerr=Y**0.5
+        Yerr=output.data()**0.5
     else:
         Yerr=yerr
+
+    if scale is None or Yerr is None:
+        pass
+    elif scale=='width':
+        Yerr/=width
+    else:
+        Yerr*=scale
 
     kwargs.setdefault('fmt', 'none')
 
@@ -391,6 +439,7 @@ def bind():
     setattr( R.SingleOutput, 'vs_plot',   vs_plot_points )
     setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
     setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
+    setattr( R.SingleOutput, 'plot_hist_centers', plot_hist1_centers )
     setattr( R.SingleOutput, 'plot_errorbar', errorbar_hist1 )
     setattr( R.SingleOutput, 'plot_matshow', matshow )
 

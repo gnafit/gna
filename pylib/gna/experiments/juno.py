@@ -57,7 +57,7 @@ class exp(baseexp):
                 kinint2 = NestedDict(
                     bundle   = 'integral_2d1d_v01',
                     variables = ('evis', 'ctheta'),
-                    edges    = np.linspace(0.0, 12.0, 500, dtype='d'),
+                    edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
                     yorder   = 2,
                     provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
@@ -182,10 +182,11 @@ class exp(baseexp):
                         parameter = "Eper_fission",
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
-                            [('Pu239', (209.99, 0.60, "absolute")),
-                             ('Pu241', (213.60, 0.65, "absolute")),
-                             ('U235',  (201.92, 0.46, "absolute")),
-                             ('U238', (205.52, 0.96, "absolute"))]
+                            [('Pu239', (209.99, 0.60)),
+                             ('Pu241', (213.60, 0.65)),
+                             ('U235',  (201.92, 0.46)),
+                             ('U238', (205.52, 0.96))],
+                            mode='absolute'
                             ),
                         provides=["eper_fission"]
                         ),
@@ -217,7 +218,7 @@ class exp(baseexp):
                 rebin = NestedDict(
                         bundle = 'rebin_v02',
                         rounding = 3,
-                        edges = np.concatenate(( [0.7], np.linspace(1, 8, 200), [12.0] ))
+                        edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] ))
                         ),
                 )
 
@@ -267,6 +268,7 @@ class exp(baseexp):
         outputs = self.context.outputs
         # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
         ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects.AD1, export=False)
+        ns.addobservable("{0}_fine".format(self.detectorname),         outputs.ibd.AD1)
         ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
 
     formula_base = [

@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml
+from gna.bindings import common
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
@@ -25,9 +26,10 @@ class cmd(basecmd):
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar'],
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar'],
                             default='bin_center', metavar='PLOT_TYPE',
                             help='Select plot type')
+        parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')
         parser.add_argument('-l', '--legend', action='append', default=[],
                             metavar=('Legend',),
                             help='Add legend to the plot, note that number of legends must match the number of plots')
@@ -40,8 +42,6 @@ class cmd(basecmd):
                             help='Create new figure')
         parser.add_argument('--xlabel', nargs='+', required=False)
         parser.add_argument('--ylabel', nargs='+', required=False)
-        parser.add_argument('--nbar', type=int, default=1,
-                            help='Divide bar width by', metavar='NBAR')
 
     def run(self):
         self.maps = {'bin_center': edges_to_centers, 'histo': edges_to_histpoints, 'bar': edges_to_barpoints}
@@ -53,6 +53,8 @@ class cmd(basecmd):
             show_legend = False
 
         plot_kwargs = self.opts.plot_kwargs if self.opts.plot_kwargs else {}
+        if self.opts.scale:
+            plot_kwargs.setdefault('scale', 'width')
 
         self.data_storage = [obs.data() for obs in self.opts.plot]
         self.edges_storage = [np.array(obs.datatype().hist().edges()) for obs in self.opts.plot]
@@ -78,20 +80,19 @@ class cmd(basecmd):
             ax.grid(which = 'minor', alpha = 0.3)
             ax.grid(which = 'major', alpha = 0.7)
 
-        for data, edges, legend in zip(self.data_storage, self.edges_storage, self.legends):
-            if (edges.shape[0]-1,) != data.shape:
-                msg = "edges shape mismatch for 1d histogram: edges {0!r} vs values {1!r}"
-                raise Exception(msg.format((edges.shape,), data.shape))
-            x, y, w = self.maps[self.opts.plot_type](edges, data)
+        for output, legend in zip(self.opts.plot, self.legends):
             if self.opts.plot_type=='bar':
-                w/=self.opts.nbar
-                ax.bar(x, y, w, label=legend, **plot_kwargs)
+                output.plot_bar(label=legend, **plot_kwargs)
+            elif self.opts.plot_type in ('histo', 'hist'):
+                output.plot_hist(label=legend, **plot_kwargs)
+            elif self.opts.plot_type=='errorbar':
+                output.plot_errorbar(yerr='stat', label=legend, **plot_kwargs)
             else:
-                ax.plot(x, y, label=legend, **plot_kwargs)
+                output.plot_hist_centers(label=legend, **plot_kwargs)
 
         if show_legend:
             ax.legend(loc='best')
-        
+
         if self.opts.xlabel:
             plt.xlabel(r'{}'.format(self.opts.xlabel[0]),
                     fontsize=self.opts.xlabel[1])

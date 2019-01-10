@@ -40,11 +40,11 @@ void Rebin::calcMatrix(const DataType& type) {
       ++edge_old;
       ++iold;
       if(edge_old==edges.end()){
-        throw std::runtime_error("Bin edges are not consistent (outer)");
+        throw std::runtime_error("Rebin: bin edges are not consistent (outer)");
       }
     }
     if(*edge_new!=*edge_old){
-      throw std::runtime_error("Bin edges are not consistent (inner)");
+      throw std::runtime_error("Rebin: bin edges are not consistent (inner)");
     }
     ++edge_new;
   }
