@@ -47,8 +47,6 @@ class Operation(TCall,NestedTransformation):
         else:
             newname = '{}{}'.format(self.text_operator, cname)
 
-        print(newname, label, save)
-
         if save:
             self.name = newname
             self.set_label(label)

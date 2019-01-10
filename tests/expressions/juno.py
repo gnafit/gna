@@ -55,29 +55,6 @@ elif args.indices=='minimal':
 else:
     raise Exception('Unsupported indices '+args.indices)
 
-reacs = indices[1][2]
-isos  = indices[2][2]
-
-ff =   {
-          'U235':  0.60,
-          'Pu239': 0.27,
-          'U238':  0.07,
-          'Pu241': 0.06,
-       }
-thermal_power_nominals = {
-        "TS": 4.6,
-        "YJ": 2.9,
-        "DYB": 17.4,
-        "HZ": 17.4,
-        }
-
-
-detectors = ['AD1']
-groups=NestedDict(
-        exp  = { 'juno': detectors },
-        det  = { d: (d,) for d in detectors },
-        )
-
 lib = OrderedDict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
@@ -248,12 +225,6 @@ a.tree.dump(True)
 # but without actual implementation. We add the implementation on a next step.
 #
 
-def _reactor_to_nominal_thermal_power(reac):
-    for key in thermal_power_nominals.keys():
-       if key in reac:
-          return key
-    raise KeyError("No thermal power for such reactor")
-
 print()
 # Here is the configuration
 cfg = NestedDict(
@@ -297,11 +268,17 @@ cfg = NestedDict(
         fission_fractions = NestedDict(
             bundle = dict(name="parameters",
                           version = "v01",
-                          nidx = [indices[1], indices[2]]),
+                          nidx = [indices[1], indices[2]],
+                          major = 'i'
+                          ),
                      parameter = "fission_fractions",
                      label = 'Fission fraction of {isotope} in reactor {reactor}',
-                     pars = uncertaindict(
-                        [("{}.{}".format(reac, iso), ff[iso]) for reac in reacs for iso in isos],
+                     pars = uncertaindict([
+                         ('U235',  0.60),
+                         ('Pu239', 0.27),
+                         ('U238',  0.07),
+                         ('Pu241', 0.06)
+                         ],
                         uncertainty = 30.0,
                         mode = 'percent',
                     ),
@@ -342,9 +319,22 @@ cfg = NestedDict(
                               nidx = [indices[1]]),
                 parameter = "thermal_power",
                 label = 'Thermal power of {reactor} in MWt',
-                pars = uncertaindict(
-                    [(reac,
-                        (thermal_power_nominals[_reactor_to_nominal_thermal_power(reac)], "fixed")) for reac in indices[1][2]],
+                pars = uncertaindict([
+                    ('TS1',  4.6),
+                    ('TS2',  4.6),
+                    ('TS3',  4.6),
+                    ('TS4',  4.6),
+                    ('YJ1',  2.9),
+                    ('YJ2',  2.9),
+                    ('YJ3',  2.9),
+                    ('YJ4',  2.9),
+                    ('YJ5',  2.9),
+                    ('YJ6',  2.9),
+                    ('DYB', 17.4),
+                    ('HZ',  17.4),
+                    ],
+                    uncertainty=None,
+                    mode='fixed'
                     ),
                 provides=["thermal_power"]
                 ),

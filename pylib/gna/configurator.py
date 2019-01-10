@@ -48,18 +48,20 @@ class NestedDict(object):
             self.__import__(OrderedDict(sorted(kwargs.items())))
 
     def __repr__(self):
-        return self.__storage__.__repr__().replace('Ordered', 'Nested', 1)
+        return self.__storage__.__repr__().replace('OrderedDict(', 'NestedDict(', 1)
 
-    def __str__(self, margin=''):
+    def __str__(self, margin='', nested=False, width=None):
         if not self.__bool__():
             return '${}'
 
         res='${\n'
         margin+='  '
-        for k, v in self.items():
-            res+='{margin}{key} : '.format( margin=margin, key=k )
+        for k, v in self.items(nested=nested):
+            if nested:
+                k = '.'.join(k)
+            res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
             if isinstance( v, NestedDict ):
-                res+=v.__str__(margin)
+                res+=v.__str__(margin, nested)
             elif isinstance( v, basestring ):
                 res+=repr(v)
             else:

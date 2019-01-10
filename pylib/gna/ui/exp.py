@@ -1,17 +1,29 @@
+from __future__ import print_function
 from gna.ui import basecmd
 import argparse
-import gna.exp
 import os.path
 from pkgutil import iter_modules
+from gna.config import cfg
 
-path = os.path.dirname(gna.exp.__file__)
-expmodules = {name: loader for loader, name, _ in iter_modules([path])}
+expmodules = {name: loader for loader, name, _ in iter_modules(cfg.experimentpaths)}
 
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('experiment', choices=expmodules.keys())
-        parser.add_argument('expargs', nargs=argparse.REMAINDER)
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('experiment', nargs='?', choices=expmodules.keys(), metavar='exp', help='experiment to load')
+        group.add_argument('-L', '--list-experiments', action='store_true', help='list available experiments')
+        parser.add_argument('expargs', nargs=argparse.REMAINDER, help='arguments to pass to the experiment')
+
+    def __init__(self, *args, **kwargs):
+        basecmd.__init__(self, *args, **kwargs)
+
+        if self.opts.list_experiments:
+            print("UI exp list of experiments:")
+            map(print, expmodules.keys())
+
+            from sys import exit
+            exit(0)
 
     def init(self):
         expname = self.opts.experiment
@@ -22,4 +34,4 @@ class cmd(basecmd):
         expcls.initparser(parser, self.env)
         expopts = parser.parse_args(self.opts.expargs)
 
-        expcls(self.env, expopts)
+        self.exp_instance = expcls(self.env, expopts)

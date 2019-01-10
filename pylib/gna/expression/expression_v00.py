@@ -231,7 +231,7 @@ class ExpressionContext(object):
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 
         if isinstance(ret, NestedDict):
-            raise Exception('Incomplete index ({!s}) provided (probably). Need at least resolve {!s}'.format(nidx, res.keys()))
+            raise Exception('Incomplete index ({!s}) provided (probably). Need at least resolve {!s}'.format(nidx, list(ret.keys())))
 
         return ret
 
