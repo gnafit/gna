@@ -233,8 +233,13 @@ class TransformationBundle(object):
             self.nidx_major, self.nidx_minor = self.nidx, self.nidx.get_subset(())
 
         # Init namespace and context
-        inputs  = kwargs.pop('inputs', {})
-        outputs = kwargs.pop('outputs', {})
+        context = kwargs.pop('context', None)
+        if context is None:
+            inputs  = kwargs.pop('inputs', {})
+            outputs = kwargs.pop('outputs', {})
+        else:
+            inputs  = context.inputs
+            outputs = context.outputs
         self.namespace = kwargs.pop('namespace', env.globalns)
         self.context = NestedDict(inputs=inputs, outputs=outputs, objects={})
 
