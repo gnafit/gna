@@ -62,7 +62,7 @@ class exp(baseexp):
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
-                    yorder   = 2,
+                    yorder   = 3,
                     provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
                     ),
                 ibd_xsec = NestedDict(
@@ -197,17 +197,17 @@ class exp(baseexp):
                         provides=["eper_fission"]
                         ),
                 eres = NestedDict(
-                        bundle = dict(name='detector_eres_common3', version='v02'),
+                        bundle = dict(name='detector_eres_normal', version='v01',
+                                      nidx=self.nidx.get_subset('d'), major=''),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
-                        pars = uncertaindict(
-                            [('eres.a', 0.001) ,
-                             ('eres.b', 0.03) ,
-                             ('eres.c', 0.001)],
-                            mode='percent',
-                            uncertainty=30
-                            ),
+                        parameter = 'eres',
+                        pars = uncertaindict([
+                            ('a', (0.000, 'fixed')) ,
+                            ('b', (0.03, 30, 'percent')) ,
+                            ('c', (0.000, 'fixed'))
+                            ]),
                         provides = [ 'eres', 'eres_matrix' ],
-                        expose_matrix = True
+                        expose_matrix = False
                         ),
                 lsnl = NestedDict(
                         bundle     = dict(name='detector_nonlinearity_db_root', version='v02'),
@@ -294,7 +294,7 @@ class exp(baseexp):
                      norm_bf[d]*
                      sum[c]|
                        pmns[c]*
-                       eres[d]|
+                       eres|
                          lsnl[d]|
                              sum[r]|
                                baselineweight[r,d]*
@@ -309,7 +309,7 @@ class exp(baseexp):
 
     formula_ibd_mid = '''ibd =
                      norm_bf[d]*
-                     eres[d]|
+                     eres|
                        lsnl[d]|
                            sum[c]|
                              pmns[c]*
@@ -326,7 +326,7 @@ class exp(baseexp):
 
     formula_ibd_simple = '''ibd =
                             norm_bf[d]*
-                            eres[d]|
+                            eres|
                               lsnl[d]|
                                     kinint2|
                                       sum[r]|

@@ -21,7 +21,7 @@ class cmd(basecmd):
                             action=append_typed(observable))
         parser.add_argument('-J', '--no-joints', action='store_false', dest='joints', help='disable joints')
         parser.add_argument('-s', '--splines', help='splines option [dot]')
-        parser.add_argument('-o', '--output', action='append', dest='outputs', help='output dot/pdf/png file')
+        parser.add_argument('-o', '--output', nargs='+', default=[], dest='outputs', help='output dot/pdf/png file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
         parser.add_argument('-E', '--stderr', action='store_true', help='output to stderr')
 
