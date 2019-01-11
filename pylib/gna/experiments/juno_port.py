@@ -227,9 +227,12 @@ class exp(baseexp):
                         provides   = ['lsnl', 'lsnl_component', 'escale', 'lsnl_weight', 'lsnl_edges']
                         ),
                 rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v02'),
+                        bundle = dict(name='rebin', version='v03',
+                                      nidx=self.nidx.get_subset('d'), major=''),
                         rounding = 3,
-                        edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] ))
+                        edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] )),
+                        name = 'rebin',
+                        label = 'Final histogram\n{detector}'
                         ),
                 )
 
