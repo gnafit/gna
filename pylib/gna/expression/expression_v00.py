@@ -89,7 +89,10 @@ class Expression(object):
         return 'Expression("{}")'.format(self.expressions_raw)
 
     def defindices(self, defs):
-        self.nindex = NIndex(fromlist=defs)
+        if isinstance(defs, NIndex):
+            self.nindex = defs
+        else:
+            self.nindex = NIndex.fromlist(defs)
         for short, idx in self.nindex.indices.items():
             self.globals[short] = idx
 

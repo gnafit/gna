@@ -7,17 +7,21 @@ import gna.constructors as C
 from gna.bundle import *
 from gna.configurator import NestedDict
 from collections import OrderedDict
-imp_majorort itertools
+import itertools
 
 conversion = {"meter": 1./1000, "kilometer": 1.}
 conversion['m']=conversion['meter']
 conversion['km']=conversion['kilometer']
 
-class baselines_v02(TransformationBundle):
+class reactor_baselines_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(2, 2, 'major')
         self.init_data()
+
+        if not self.cfg.unit in conversion:
+            print('Available units:', *conversion.keys())
+            raise Exception('Invalid unit: '+self.cfg.unit)
 
     def init_data(self):
         '''Read configurations of reactors and detectors from either files or
@@ -40,10 +44,8 @@ class baselines_v02(TransformationBundle):
         self.detectors = get_data(self.cfg.detectors)
         self.reactors  = get_data(self.cfg.reactors)
 
-        try:
-            self.snf_pools = get_data(self.cfg.snf_pools)
-        except KeyError:
-            pass
+        snf_pools = self.cfg.get('snf_pools', None)
+        self.snf_pools = snf_pools and get_data(snf_pools) or None
 
         if any('AD' not in str(key) for key in self.detectors.keys()):
             print('AD is not in detectors keys! Substituting')
@@ -64,11 +66,8 @@ class baselines_v02(TransformationBundle):
         return conversion[self.cfg.unit]*(np.sqrt(np.sum((np.array(reactor) - np.array(detector))**2)))
 
     def define_variables(self):
-        '''Create baseline variables in a common_namespace'''
-
         reactor_name, detector_name = self.cfg.bundle.major
-        for i, it_major in enumerate(self.idx_major):
-            name = it_major.current_format(name='baseline')
+        for i, it_major in enumerate(self.nidx_major):
             cur_reactor, cur_det = it_major.get_current(reactor_name), it_major.get_current(detector_name)
             try:
                 reactor, detector = self.reactors[cur_reactor], self.detectors[cur_det]
@@ -77,11 +76,10 @@ class baselines_v02(TransformationBundle):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
-            for it_minor in self.idx_minor:
+            for it_minor in self.nidx_minor:
                 it = it_minor+it_major
-                self.reqparameter(name, it, central=distance,
-                        sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
+                self.reqparameter('baseline', it, central=distance,
+                        sigma=0.1, fixed=True, label="Baseline between {} and {}, km".format(cur_det, cur_reactor))
 
-                inv_key = it.current_format(name='baselineweight')
-                self.common_namespace.reqparameter(inv_key, central=0.25/distance**2/np.pi, sigma=0.1, fixed=True,
-                            label="1/(4πL²) for {} and {}, m⁻²".format(cur_det, cur_reactor))
+                self.reqparameter('baselineweight', it, central=0.25/distance**2/np.pi, fixed=True,
+                                  label="1/(4πL²) for {} and {}, km⁻²".format(cur_det, cur_reactor))

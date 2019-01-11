@@ -22,7 +22,7 @@ args = parser.parse_args()
 args.make_idx=True
 
 
-if args.from_files:
+if args.from_file:
     reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py'
     detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py'
     snf_pools  = 'data/dayabay/snf/coordinates/coordinates_docDB_11112.py'
@@ -49,11 +49,12 @@ else:
         'LA4' : [ -490.6906, -883.152,  -39.7884 ],
     }
 
+    snf_pools = None
+
 
 indices = [('r', 'reactor', ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
            ('d', 'detector', ['AD11', 'AD12', 'AD21', 'AD22', 'AD31',
-                              'AD32', 'AD33', 'AD34'])
-          ]
+                              'AD32', 'AD33', 'AD34'])]
 if args.make_idx:
     expr = 'baselines[d,r]()'
     a =  Expression(expr, indices=indices)
@@ -68,7 +69,7 @@ cfg = NestedDict(
     bundle = dict(
         name = 'reactor_baselines',
         version = 'v01',
-        nindex = indices,
+        nidx = indices,
         major = 'rd' # first for reactor, second for detector
         ),
     # Reactor positions

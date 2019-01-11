@@ -169,6 +169,10 @@ class NIndex(object):
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
 
+    @classmethod
+    def fromlist(cls, lst):
+        return cls(fromlist=lst)
+
     def __str__(self):
         s = ['%s=%s'%(v.short, v.current) if v.current is not None else v.short for v in self.indices.values()]
         return 'NIndex(%s)'%( ', '.join(s) )
