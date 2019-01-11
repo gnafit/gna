@@ -26,8 +26,9 @@ class oscprob_v01(TransformationBundleLegacy):
             oscprobkey = dist_it.current_format('{autoindex}')[1:]
             oscprob = self.objects.get( oscprobkey, None )
             if not oscprob:
-                with self.common_namespace('pmns'):
-                    oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                with self.common_namespace:
+                    with self.common_namespace('pmns'):
+                        oscprob = self.objects[oscprobkey] = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), dist)
 
             component = it.get_current('c')
             if component=='comp0':

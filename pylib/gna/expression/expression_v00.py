@@ -111,8 +111,9 @@ class Expression(object):
 
         context.build_bundles()
 
-        for tree in self.trees:
-            tree.bind(context)
+        with context:
+            for tree in self.trees:
+                tree.bind(context)
 
 class ExpressionContext(object):
     indices = None
@@ -136,6 +137,12 @@ class ExpressionContext(object):
 
             for key in keys:
                 self.providers[key]=value
+
+    def __enter__(self):
+        self.ns.__enter__()
+
+    def __exit__(self, *args, **kwargs):
+        self.ns.__exit__(*args, **kwargs)
 
     def namespace(self):
         return self.ns
@@ -175,12 +182,13 @@ class ExpressionContext(object):
         return self.required
 
     def build_bundles(self):
-        done = set()
-        for cfg in self.required.values():
-            if cfg in done:
-                continue
-            self.build_bundle(cfg)
-            done.add(cfg)
+        with self.ns:
+            done = set()
+            for cfg in self.required.values():
+                if cfg in done:
+                    continue
+                self.build_bundle(cfg)
+                done.add(cfg)
 
     def build_bundle(self, cfg):
         printl_debug('build bundle', cfg.bundle )

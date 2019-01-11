@@ -137,6 +137,9 @@ class namespace(Mapping):
         env.nsview.remove([self])
 
     def __call__(self, nsname):
+        if not nsname:
+            return self
+
         if isinstance(nsname, basestring):
             if nsname=='':
                 return self
@@ -172,6 +175,9 @@ class namespace(Mapping):
             return None, head
 
     def __getitem__(self, name):
+        if not name:
+            return self
+
         ns, head = self.get_proper_ns(name)
 
         if ns:

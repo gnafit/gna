@@ -14,6 +14,7 @@ class cmd(basecmd):
         group.add_argument('experiment', nargs='?', choices=expmodules.keys(), metavar='exp', help='experiment to load')
         group.add_argument('-L', '--list-experiments', action='store_true', help='list available experiments')
         parser.add_argument('expargs', nargs=argparse.REMAINDER, help='arguments to pass to the experiment')
+        parser.add_argument('--ns', help='namespace')
 
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
@@ -30,8 +31,10 @@ class cmd(basecmd):
         expmodule = expmodules[expname].find_module(expname).load_module(expname)
         expcls = getattr(expmodule, 'exp')
 
+        ns = self.env.globalns(self.opts.ns)
+
         parser = argparse.ArgumentParser()
-        expcls.initparser(parser, self.env)
+        expcls.initparser(parser, ns)
         expopts = parser.parse_args(self.opts.expargs)
 
-        self.exp_instance = expcls(self.env, expopts)
+        self.exp_instance = expcls(ns, expopts)

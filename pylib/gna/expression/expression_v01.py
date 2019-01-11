@@ -112,8 +112,9 @@ class Expression_v01(object):
 
         context.build_bundles()
 
-        for tree in self.trees:
-            tree.bind(context)
+        with context:
+            for tree in self.trees:
+                tree.bind(context)
 
 class ItemProvider(object):
     """Container for the bundle class, bundle configuration and provided items"""
@@ -173,6 +174,12 @@ class ExpressionContext_v01(object):
 
         self.required_bundles = OrderedDict()
 
+    def __enter__(self):
+        self.ns.__enter__()
+
+    def __exit__(self, *args, **kwargs):
+        self.ns.__exit__(*args, **kwargs)
+
     def namespace(self):
         return self.ns
 
@@ -199,8 +206,9 @@ class ExpressionContext_v01(object):
         return self.required_bundles
 
     def build_bundles(self):
-        for provider in self.required_bundles.values():
-            provider.build(inputs=self.inputs, outputs=self.outputs, namespace=self.ns)
+        with self.ns:
+            for provider in self.required_bundles.values():
+                provider.build(inputs=self.inputs, outputs=self.outputs, namespace=self.ns)
 
     def get_variable(self, name, *idx):
         pass

@@ -10,19 +10,19 @@ class exp(baseexp):
     detectorname = 'AD1'
 
     @classmethod
-    def initparser(cls, parser, env):
+    def initparser(cls, parser, namespace):
         parser.add_argument( '--dot', help='write graphviz output' )
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
         parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('--stats', action='store_true', help='show statistics')
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
-        parser.add_argument('-c', '--composition', default='minimal', choices=['complete', 'minimal'], help='Set the indices coverage')
+        parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
 
-    def __init__(self, env, opts):
-        baseexp.__init__(self, env, opts)
+    def __init__(self, namespace, opts):
+        baseexp.__init__(self, namespace, opts)
 
         self.init_nidx()
         self.init_formula()
@@ -59,7 +59,7 @@ class exp(baseexp):
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
-                    yorder   = 2,
+                    yorder   = 3,
                     provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
                     ),
                 ibd_xsec = NestedDict(
@@ -194,11 +194,9 @@ class exp(baseexp):
                         bundle = 'detector_eres_common3_v02',
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         pars = uncertaindict(
-                            [('eres.a', 0.001) ,
-                             ('eres.b', 0.03) ,
-                             ('eres.c', 0.001)],
-                            mode='percent',
-                            uncertainty=30
+                            [('eres.a', (0.00, 'fixed')) ,
+                             ('eres.b', (0.03, 30, 'percent')) ,
+                             ('eres.c', (0.00, 'fixed'))],
                             ),
                         provides = [ 'eres', 'eres_matrix' ],
                         expose_matrix = True
@@ -245,7 +243,7 @@ class exp(baseexp):
             print()
 
         # Put the expression into context
-        self.context = ExpressionContext(self.cfg, ns=self.env.globalns)
+        self.context = ExpressionContext(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
         if self.opts.verbose>1:
@@ -261,10 +259,10 @@ class exp(baseexp):
 
         if self.opts.verbose:
             print('Parameters:')
-            self.env.globalns.printparameters(labels=True)
+            self.namespace.printparameters(labels=True)
 
     def register(self):
-        ns = self.env.globalns
+        ns = self.namespace
         outputs = self.context.outputs
         # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
         ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects.AD1, export=False)

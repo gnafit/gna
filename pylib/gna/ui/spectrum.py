@@ -36,6 +36,7 @@ class cmd(basecmd):
         parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
         parser.add_argument('--drawgrid', action='store_true')
+        parser.add_argument('-s', '--show', action='store_true')
         parser.add_argument('--savefig', default='', help='Path to save figure')
         parser.add_argument('--title', nargs='+', help='Title to the figure')
         parser.add_argument('--new-figure', action='store_true',
@@ -105,7 +106,8 @@ class cmd(basecmd):
 
         if self.opts.savefig:
             plt.savefig(self.opts.savefig)
-        else:
+
+        if self.opts.show:
             plt.show()
 
     def make_diff(self):

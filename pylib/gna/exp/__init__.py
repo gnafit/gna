@@ -1,9 +1,9 @@
 class baseexp(object):
     @classmethod
-    def initparser(cls, parser, env):
+    def initparser(cls, parser, namespace):
         pass
 
-    def __init__(self, env, opts):
-        self.env  = env
+    def __init__(self, namespace, opts):
+        self.namespace  = namespace
         self.opts = opts
 

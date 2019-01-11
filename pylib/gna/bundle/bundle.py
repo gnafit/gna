@@ -139,6 +139,7 @@ class TransformationBundleLegacy(object):
         if self.context is not None:
             self.set_output = self.context.set_output
             self.set_input  = self.context.set_input
+            self.common_namespace = self.context.namespace()
         else:
             self.set_output = lambda *a, **kw: None
             self.set_input  = lambda *a, **kw: None
@@ -237,10 +238,11 @@ class TransformationBundle(object):
         if context is None:
             inputs  = kwargs.pop('inputs', {})
             outputs = kwargs.pop('outputs', {})
+            self.namespace = kwargs.pop('namespace', env.globalns)
         else:
             inputs  = context.inputs
             outputs = context.outputs
-        self.namespace = kwargs.pop('namespace', env.globalns)
+            self.namespace = context.namespace()
         self.context = NestedDict(inputs=inputs, outputs=outputs, objects={})
 
         assert not kwargs
