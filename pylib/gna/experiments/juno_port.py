@@ -18,7 +18,7 @@ class exp(baseexp):
         parser.add_argument('--stats', action='store_true', help='show statistics')
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
-        parser.add_argument('-c', '--composition', default='minimal', choices=['complete', 'minimal'], help='Set the indices coverage')
+        parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
 
@@ -58,7 +58,7 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = 'integral_2d1d_v01',
+                    bundle   = dict(name='integral_2d1d', version='v01'),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
@@ -66,17 +66,17 @@ class exp(baseexp):
                     provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
                     ),
                 ibd_xsec = NestedDict(
-                    bundle = 'xsec_ibd_v01',
+                    bundle = dict(name='xsec_ibd', version='v01'),
                     order = 1,
                     provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
                     ),
                 oscprob = NestedDict(
-                    bundle = 'oscprob_v01',
+                    bundle = dict(name='oscprob', version='v01'),
                     name = 'oscprob',
                     provides = ['oscprob', 'pmns']
                     ),
                 anuspec = NestedDict(
-                    bundle = 'reactor_anu_spectra_v02',
+                    bundle = dict(name='reactor_anu_spectra', version='v02'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
@@ -84,7 +84,7 @@ class exp(baseexp):
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
                     ),
                 eff = NestedDict(
-                    bundle = 'efficiencies_v01',
+                    bundle = dict(name='efficiencies', version='v01'),
                     correlated   = False,
                     uncorrelated = True,
                     norm         = True,
@@ -197,7 +197,7 @@ class exp(baseexp):
                         provides=["eper_fission"]
                         ),
                 eres = NestedDict(
-                        bundle = 'detector_eres_common3_v02',
+                        bundle = dict(name='detector_eres_common3', version='v02'),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         pars = uncertaindict(
                             [('eres.a', 0.001) ,
@@ -210,7 +210,7 @@ class exp(baseexp):
                         expose_matrix = True
                         ),
                 lsnl = NestedDict(
-                        bundle     = 'detector_nonlinearity_db_root_v02',
+                        bundle     = dict(name='detector_nonlinearity_db_root', version='v02'),
                         names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
                         filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
                         parnames      = dict(
@@ -222,7 +222,7 @@ class exp(baseexp):
                         provides   = ['lsnl', 'lsnl_component', 'escale', 'lsnl_weight', 'lsnl_edges']
                         ),
                 rebin = NestedDict(
-                        bundle = 'rebin_v02',
+                        bundle = dict(name='rebin', version='v02'),
                         rounding = 3,
                         edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] ))
                         ),
