@@ -66,7 +66,7 @@ class exp(baseexp):
                     provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
                     ),
                 ibd_xsec = NestedDict(
-                    bundle = dict(name='xsec_ibd', version='v01'),
+                    bundle = dict(name='xsec_ibd', version='v02'),
                     order = 1,
                     provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
                     ),
