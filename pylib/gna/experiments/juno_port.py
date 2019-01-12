@@ -78,7 +78,9 @@ class exp(baseexp):
                     provides = ['oscprob', 'pmns']
                     ),
                 anuspec = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v02'),
+                    bundle = dict(name='reactor_anu_spectra', version='v03',
+                                  nidx = self.nidx.get_subset('i')
+                        ),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
