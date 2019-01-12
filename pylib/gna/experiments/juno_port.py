@@ -71,7 +71,9 @@ class exp(baseexp):
                     provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v01'),
+                    bundle = dict(name='oscprob', version='v02',
+                                  nidx = self.nidx.get_subset('rdc'),
+                                  major = 'rdc'),
                     name = 'oscprob',
                     provides = ['oscprob', 'pmns']
                     ),
