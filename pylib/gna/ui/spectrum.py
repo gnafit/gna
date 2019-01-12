@@ -60,9 +60,6 @@ class cmd(basecmd):
         self.data_storage = [obs.data() for obs in self.opts.plot]
         self.edges_storage = [np.array(obs.datatype().hist().edges()) for obs in self.opts.plot]
 
-        if self.opts.difference_plot:
-            self.make_diff()
-
         while len(self.data_storage) > len(self.legends):
             print "Amount of data and amount of data doesn't match. Perhaps it is not what you want. Filling legend with empty strings"
             self.legends.append('')
@@ -91,6 +88,12 @@ class cmd(basecmd):
             else:
                 output.plot_hist_centers(label=legend, **plot_kwargs)
 
+        legends = self.legends[len(self.opts.plot)+1:]
+        if self.opts.difference_plot:
+            output1, output2 = self.opts.difference_plot
+            label = legends[0] if legends else ''
+            output1.plot_hist(diff=output2, label=label, **plot_kwargs)
+
         if show_legend:
             ax.legend(loc='best')
 
@@ -109,16 +112,6 @@ class cmd(basecmd):
 
         if self.opts.show:
             plt.show()
-
-    def make_diff(self):
-            diff = self.opts.difference_plot
-            data = diff[0].data() - diff[1].data()
-            self.data_storage.append(data)
-            edges_0 = np.array(diff[0].datatype().hist().edges())
-            edges_1 = np.array(diff[1].datatype().hist().edges())
-            if not np.array_equal(edges_0, edges_1):
-                raise Exception("You subtract histos with different binning")
-            self.edges_storage.append(edges_0)
 
 def edges_to_centers( edges, heights ):
     return (edges[:-1] + edges[1:])/2, heights, None
