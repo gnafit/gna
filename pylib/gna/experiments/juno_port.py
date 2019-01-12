@@ -215,7 +215,10 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 lsnl = NestedDict(
-                        bundle     = dict(name='detector_nonlinearity_db_root', version='v02'),
+                        bundle     = dict(name='energy_nonlinearity_db_root', version='v02',
+                                          nidx = self.nidx.get_subset('dl'),
+                                          major='dl'
+                            ),
                         names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
                         filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
                         parnames      = dict(

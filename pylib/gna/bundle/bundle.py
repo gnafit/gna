@@ -310,6 +310,9 @@ class TransformationBundle(object):
         return path
 
     def reqparameter(self, name, nidx, *args, **kwargs):
+        label = kwargs.get('label', '')
+        if nidx is not None and '{' in label:
+            kwargs['label'] = nidx.current_format(label)
         return self.namespace.reqparameter(self.get_path(name, nidx, extra=kwargs.pop('extra', None)), *args, **kwargs)
 
     def set_output(self, name, nidx, output, extra=None):
