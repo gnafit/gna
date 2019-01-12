@@ -58,7 +58,7 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v01'),
+                    bundle   = dict(name='integral_2d1d', version='v02', nidx=self.nidx.get_subset('d')),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
