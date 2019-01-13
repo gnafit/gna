@@ -162,6 +162,12 @@ class exp(baseexp):
                             [('AD1', (1.42e33, 'fixed'))],
                             ),
                         ),
+                conversion_factor =  NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter='conversion_factor',
+                        label='Conversion factor from GWt to MeV',
+                        pars = uncertain( 6.241509125883259e+21, 'fixed'),
+                        ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "eper_fission",
@@ -256,8 +262,10 @@ class exp(baseexp):
             'enu| ee(evis()), ctheta()',
             'livetime[d]',
             'efflivetime[d]',
-            'eper_fission[i]',
-            'power_livetime_factor =  efflivetime[d] * thermal_power[r] * fission_fractions[r,i]',
+            #  'eper_fission[i]',
+            'conversion_factor',
+            'power_livetime_factor =  efflivetime[d] * thermal_power[r] * '
+                 'fission_fractions[r,i] * conversion_factor * (sum[i](eper_fission[i]*fission_fractions[r,i]))',
             # Detector effects
             'eres_matrix| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',

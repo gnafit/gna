@@ -160,6 +160,7 @@ class OConcat(Operation):
         import ROOT as R
         self.set_tinit( R.Concat )
 
+
 class Accumulate(IndexedContainer, Variable):
     bound = False
     def __init__(self, name, *args, **kwargs):
@@ -193,6 +194,38 @@ class Accumulate(IndexedContainer, Variable):
             var = cns[tail].get()
             var.setLabel('sum of {}'.format(obj.current_format(it)))
             self.arrsums.append(arrsum)
+
+        self.bound = True
+
+class Inverse(IndexedContainer, Variable):
+    bound = False
+    def __init__(self, name, *args, **kwargs):
+        self.inverses = []
+        if len(args)>1:
+            raise Exception('inverse() supports only 1 argument')
+        #  if not isinstance(args[0], Transformation):
+            #  raise Exception('the only argument of inverse() should be an object, not variable')
+
+        IndexedContainer.__init__(self, *args)
+        Variable.__init__(self, name, *self.objects)
+        self.set_operator( ' / ', text='inverse_'  )
+
+    @call_once
+    def bind(self, context):
+        if self.bound:
+            return
+
+        import ROOT as R
+        IndexedContainer.bind(self, context, connect=False)
+        obj, = self.objects
+        ns = context.namespace()
+        from gna.env import ExpressionsEntry
+        for it in self.nindex.iterate():
+            inp = obj.get_output(it, context)
+            inverse = R.Inverse(out)
+            inverse >> inp 
+            context.set_output(inverse, self.name, it)
+            self.inverses.append(inverse)
 
         self.bound = True
 
