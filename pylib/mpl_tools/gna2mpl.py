@@ -30,6 +30,12 @@ def ifPoints(output):
 
     raise Exception('Output is supposed to be points: '+str(dtype))
 
+def ifSameType(output1, output2):
+    dtype1, dtype2 = output1.datatype(), output2.datatype()
+
+    if dtype1!=dtype2:
+        raise Exception('Outputs are not consistent')
+
 def plot_points( output, *args, **kwargs ):
     """Plot array using pyplot.plot
 
@@ -101,7 +107,16 @@ def plot_hist1(output, *args, **kwargs):
     ifNd(output, 1)
     ifHist(output)
 
-    height, lims, _ = get_1d_buffer(output, scale=kwargs.pop('scale',None))
+    scale = kwargs.pop('scale',None)
+    height, lims, _ = get_1d_buffer(output, scale=scale)
+
+    diff=kwargs.pop('diff', None)
+    if diff is not None:
+        ifSameType(output, diff)
+        height1, lims1, _ = get_1d_buffer(diff, scale)
+
+        height-=height1
+
     return helpers.plot_hist(lims, height, *args, **kwargs)
 
 def plot_hist1_centers(output, *args, **kwargs):

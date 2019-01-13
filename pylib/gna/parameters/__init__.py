@@ -59,7 +59,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         else:
             kwargs['uncertainty'] = cfg.uncertainty
             kwargs['uncertainty_type'] = cfg.mode
-        kwargs['label']=cfg.label
+        kwargs.setdefault('label', cfg.label)
     else:
         ptype = kwargs.get('type', 'gaussian')
 
