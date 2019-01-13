@@ -212,6 +212,8 @@ class TransformationBundle(object):
         }
     }
     """
+
+    _debug = False
     def __init__(self, cfg, *args, **kwargs):
         from gna.expression import NIndex
         preprocess_bundle_cfg(cfg)
@@ -245,6 +247,8 @@ class TransformationBundle(object):
             self.namespace = context.namespace()
         self.context = NestedDict(inputs=inputs, outputs=outputs, objects={})
 
+        self._debug = self.bundlecfg.get('debug', self._debug)
+
         assert not kwargs
 
     def execute(self):
@@ -274,7 +278,14 @@ class TransformationBundle(object):
     def provides(cls, cfg):
         variables, objects = cls._provides(cfg)
         names = cfg.bundle.get('names', {})
-        return tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
+        ret = tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
+
+        if cfg.bundle.get('debug', False):
+            print('Bundle', cls.__name__, 'provides')
+            print('  variables', ret[0])
+            print('  objects', ret[1])
+
+        return ret
 
     def build(self):
         """Builds the computational chain. Should handle each namespace in namespaces."""
@@ -315,18 +326,28 @@ class TransformationBundle(object):
         label = kwargs.get('label', '')
         if nidx is not None and '{' in label:
             kwargs['label'] = nidx.current_format(label)
-        return self.namespace.reqparameter(self.get_path(name, nidx, extra=kwargs.pop('extra', None)), *args, **kwargs)
+
+        path = self.get_path(name, nidx, extra=kwargs.pop('extra', None))
+        if self._debug:
+            print('{name} requires parameter {par}'.format(name=type(self).__name__, par=path))
+        return self.namespace.reqparameter(path, *args, **kwargs)
 
     def set_output(self, name, nidx, output, extra=None):
         path=self.get_path(name, nidx, extra=extra)
         if path in self.context.outputs:
             raise Exception('Outputs dictionary already contains '+str(path))
+
+        if self._debug:
+            print('{name} sets output {output}'.format(name=type(self).__name__, output=path))
         self.context.outputs[path]=output
 
     def set_input(self, name, nidx, input, argument_number=None, extra=None):
         path=self.get_path(name, nidx, argument_number, extra=extra)
         if path in self.context.inputs:
             raise Exception('Inputs dictionary already contains '+str(path))
+
+        if self._debug:
+            print('{name} sets input {input}'.format(name=type(self).__name__, input=path))
         self.context.inputs[path]=input
 
     def check_nidx_dim(self, dmin, dmax=float('inf'), nidx='both'):
