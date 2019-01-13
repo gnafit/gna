@@ -20,6 +20,10 @@ class oscprob_v02(TransformationBundle):
         self.idx_detector = self.nidx_major.get_subset(detector_name)
         self.idx_component = self.nidx_major.get_subset(component_name)
 
+    @staticmethod
+    def _provides(cfg):
+        return ('pmns',), ('oscprob',)
+
     def build(self):
         self.comp0 = R.FillLike(1.0, labels='OP comp0')
 
@@ -48,8 +52,8 @@ class oscprob_v02(TransformationBundle):
                         output = trans[component]
                         input  = trans['Enu']
 
-                    self.set_input(self.cfg.name,  it, input, argument_number=0)
-                    self.set_output(self.cfg.name, it, output)
+                    self.set_input('oscprob',  it, input, argument_number=0)
+                    self.set_output('oscprob', it, output)
 
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters

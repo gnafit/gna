@@ -266,12 +266,14 @@ class TransformationBundle(object):
     @staticmethod
     def _provides(cfg):
         print('Warning! Calling default bundle.provides(cfg) static method. Should be overridden.')
+        print('Bundle configuration:')
+        print(str(cfg))
         return (), () # variables, objects
 
     @classmethod
     def provides(cls, cfg):
         variables, objects = cls._provides(cfg)
-        names = cfg.bundle.names
+        names = cfg.bundle.get('names', {})
         return tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
 
     def build(self):

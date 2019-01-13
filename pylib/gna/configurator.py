@@ -59,7 +59,10 @@ class NestedDict(object):
         for k, v in self.items(nested=nested):
             if nested:
                 k = '.'.join(k)
-            res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
+            if width is None:
+                res+='{margin}{key} : '.format(margin=margin, key=k)
+            else:
+                res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
             if isinstance( v, NestedDict ):
                 res+=v.__str__(margin, nested)
             elif isinstance( v, basestring ):

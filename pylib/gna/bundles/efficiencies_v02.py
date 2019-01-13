@@ -15,6 +15,10 @@ class efficiencies_v02(TransformationBundle):
 
         self.init_data()
 
+    @staticmethod
+    def _provides(cfg):
+        return ('eff', 'effunc_corr', 'effunc_uncorr', 'norm'), ()
+
     def init_data(self):
         from gna.configurator import configurator
 

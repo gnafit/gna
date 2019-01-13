@@ -11,6 +11,10 @@ class rebin_v03(TransformationBundle):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 0, 'major')
 
+    @staticmethod
+    def _provides(cfg):
+        return (), (cfg.name,)
+
     def build(self):
         name = self.cfg.name
         label = self.cfg.get('label', 'Rebin\n{autoindex}')

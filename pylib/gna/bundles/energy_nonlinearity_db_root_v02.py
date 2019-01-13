@@ -29,6 +29,10 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
         self.storage=NestedDict()
 
+    @staticmethod
+    def _provides(cfg):
+        return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_component', 'lsnl_edges')
+
     def build_graphs( self, graphs ):
         #
         # Interpolate curves on the default binning
@@ -101,19 +105,17 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
     def define_variables(self):
         par=None
-        lname = self.cfg.parnames['lsnl']
         for itl in self.component_idx.iterate():
             if par is None:
-                par = self.reqparameter(lname, itl, central=1.0, fixed=True, label='Nominal nonlinearity curve weight ({autoindex})')
+                par = self.reqparameter('lsnl_weight', itl, central=1.0, fixed=True, label='Nominal nonlinearity curve weight ({autoindex})')
             else:
-                par = self.reqparameter(lname, itl, central=0.0, sigma=1.0, label='Correction nonlinearity weight for {autoindex}')
+                par = self.reqparameter('lsnl_weight', itl, central=0.0, sigma=1.0, label='Correction nonlinearity weight for {autoindex}')
 
         if self.cfg.par.central!=1:
             raise Exception('Relative energy scale parameter should have central value of 1 by definition')
 
-        ename = self.cfg.parnames['escale']
         for it in self.detector_idx.iterate():
-            self.reqparameter(ename, it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
+            self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
 def interpolate( (x, y), edges):
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )

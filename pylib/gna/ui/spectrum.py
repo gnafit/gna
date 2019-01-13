@@ -88,7 +88,7 @@ class cmd(basecmd):
             else:
                 output.plot_hist_centers(label=legend, **plot_kwargs)
 
-        legends = self.legends[len(self.opts.plot)+1:]
+        legends = self.legends[len(self.opts.plot):]
         if self.opts.difference_plot:
             output1, output2 = self.opts.difference_plot
             label = legends[0] if legends else ''

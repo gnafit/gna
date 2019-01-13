@@ -274,7 +274,7 @@ cfg = NestedDict(
         kinint2 = NestedDict(
             bundle   = 'integral_2d1d_v01',
             variables = ('evis', 'ctheta'),
-            edges    = N.linspace(0.0, 12.0, 401, dtype='d'),
+            edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
             xorders   = 2,
             yorder   = 2,
             provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],

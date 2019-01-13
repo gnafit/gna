@@ -1,15 +1,21 @@
+# reimplementation of integral_2d1d_v01 for up to date bundles
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
-from gna.bundle import *
+from gna.bundle import TransformationBundle
 
-class integral_2d1d_v01(TransformationBundleLegacy):
+class integral_2d1d_v02(TransformationBundle):
     def __init__(self, *args, **kwargs):
-        TransformationBundleLegacy.__init__(self, *args, **kwargs)
+        TransformationBundle.__init__( self, *args, **kwargs )
         self.check_cfg()
+
+    @staticmethod
+    def _provides(cfg):
+        var0, var1 = cfg.variables
+        return (), ('integral', var0, var1, var0+'_edges', var0+'_hist')
 
     def check_cfg(self):
         if not 'name' in self.cfg:
@@ -18,10 +24,6 @@ class integral_2d1d_v01(TransformationBundleLegacy):
                 raise Exception('"name" option is not provided for integral_1d_v01')
             self.cfg.name = pkey
 
-        self.idx = self.cfg.indices
-        from gna.expression import NIndex
-        if not isinstance(self.idx, NIndex):
-            self.idx = NIndex(fromlist=self.cfg.indices)
         try:
             self.edges = N.ascontiguousarray(self.cfg.edges, dtype='d')
         except:
@@ -48,17 +50,17 @@ class integral_2d1d_v01(TransformationBundleLegacy):
         self.integrator.points.xedges.setLabel('%s edges'%self.cfg.variables[0])
         self.integrator.points.y.setLabel(self.cfg.variables[1])
 
-        self.set_output(self.integrator.points.x,      self.cfg.variables[0])
-        self.set_output(self.integrator.points.xedges, '%s_edges'%self.cfg.variables[0])
-        self.set_output(self.integrator.points.xhist,  '%s_hist'%self.cfg.variables[0])
-        self.set_output(self.integrator.points.y,      self.cfg.variables[1])
+        self.set_output(self.cfg.variables[0],            None, self.integrator.points.x)
+        self.set_output('%s_edges'%self.cfg.variables[0], None, self.integrator.points.xedges)
+        self.set_output('%s_hist'%self.cfg.variables[0],  None, self.integrator.points.xhist)
+        self.set_output(self.cfg.variables[1],            None, self.integrator.points.y)
 
-        for i, it in enumerate(self.idx.iterate()):
+        for i, it in enumerate(self.nidx):
             hist = R.GaussLegendre2dHist(self.integrator)
             hist.hist.setLabel(it.current_format(name='hist'))
 
-            self.set_input( hist.hist.f,    self.cfg.name, it, clone=0)
-            self.set_output(hist.hist.hist, self.cfg.name, it)
+            self.set_input('integral', it, hist.hist.f, argument_number=0)
+            self.set_output('integral', it, hist.hist.hist)
 
     def define_variables(self):
         pass

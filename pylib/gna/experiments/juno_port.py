@@ -37,7 +37,7 @@ class exp(baseexp):
             ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
-            ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
+            ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'])
         ]
         if self.opts.composition=='minimal':
             self.nidx[1][2] = self.nidx[1][2][:1]
@@ -58,27 +58,21 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v01'),
+                    bundle   = dict(name='integral_2d1d', version='v02', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
                     xorders   = 2,
                     yorder   = 3,
-                    provides = [ 'evis', 'ctheta', 'evis_edges', 'evis_hist' ],
                     ),
                 ibd_xsec = NestedDict(
-                    bundle = dict(name='xsec_ibd', version='v01'),
+                    bundle = dict(name='xsec_ibd', version='v02'),
                     order = 1,
-                    provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v02',
-                                  nidx = self.nidx.get_subset('rdc'),
-                                  major = 'rdc'),
-                    name = 'oscprob',
-                    provides = ['oscprob', 'pmns']
+                    bundle = dict(name='oscprob', version='v02', major='rdc'),
                     ),
                 anuspec = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v02'),
+                    bundle = dict(name='reactor_anu_spectra', version='v03'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
@@ -92,19 +86,16 @@ class exp(baseexp):
                         names = dict(
                             norm = 'global_norm'
                             ),
-                        nidx = self.nidx.get_subset('d'),
                         major=''
                         ),
                     correlated   = False,
                     uncorrelated = True,
                     norm         = True,
-                    provides = [ 'eff', 'effunc_corr', 'effunc_uncorr', 'global_norm' ],
                     efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters",
                                   version = "v01",
-                                  nidx = self.nidx.get_subset(('r', 'i')),
                                   major = 'i'
                                   ),
                              parameter = "fission_fractions",
@@ -118,44 +109,31 @@ class exp(baseexp):
                                 uncertainty = 30.0,
                                 mode = 'percent',
                             ),
-                      provides=['fission_fractions']
                     ),
                 livetime = NestedDict(
-                        bundle = dict(name="parameters",
-                                      version = "v01",
-                                      nidx = self.nidx.get_subset(('d',))),
+                        bundle = dict(name="parameters", version = "v01"),
                         parameter = "livetime",
                         label = 'Livetime of {detector} in seconds',
                         pars = uncertaindict(
                             [('AD1', (6*365*seconds_per_day, 'fixed'))],
                             ),
-                        provides=['livetime']
                         ),
                 efflivetime = NestedDict(
-                        bundle = dict(name="parameters",
-                                      version = "v01",
-                                      nidx = self.nidx.get_subset(('d',))),
+                        bundle = dict(name="parameters", version = "v01"),
                         parameter = "efflivetime",
                         label = 'Effective livetime of {detector} in seconds',
                         pars = uncertaindict(
                             [('AD1', (6*365*seconds_per_day*0.8, 'fixed'))],
                             ),
-                        provides=['efflivetime']
                         ),
                 baselines = NestedDict(
-                    bundle = dict(name='reactor_baselines', version='v01',
-                                  nidx = self.nidx.get_subset('rd'),
-                                  major = 'rd'
-                        ),
+                    bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
                     reactors  = 'data/juno_nominal/coordinates_reactors.py',
                     detectors = 'data/juno_nominal/coordinates_det.py',
-                    provides = [ 'baseline', 'baselineweight' ],
                     unit = 'km'
                     ),
                 thermal_power = NestedDict(
-                        bundle = dict(name="parameters",
-                                      version = "v01",
-                                      nidx = self.nidx.get_subset(('r',))),
+                        bundle = dict(name="parameters", version = "v01"),
                         parameter = "thermal_power",
                         label = 'Thermal power of {reactor} in MWt',
                         pars = uncertaindict([
@@ -175,24 +153,18 @@ class exp(baseexp):
                             uncertainty=None,
                             mode='fixed'
                             ),
-                        provides=["thermal_power"]
                         ),
                 target_protons = NestedDict(
-                        bundle = dict(name="parameters",
-                                      version = "v01",
-                                      nidx = self.nidx.get_subset(('d'))),
+                        bundle = dict(name="parameters", version = "v01"),
                         parameter = "target_protons",
                         label = 'Number of protons in {detector}',
                         pars = uncertaindict(
                             [('AD1', (1.42e33, 'fixed'))],
                             ),
-                        provides=["target_protons"]
                         ),
                 eper_fission =  NestedDict(
-                        bundle = dict(name="parameters",
-                                      version = "v01",
-                                      nidx = self.nidx.get_subset(('i', ))),
-                        parameter = "Eper_fission",
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = "eper_fission",
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [('Pu239', (209.99, 0.60)),
@@ -201,11 +173,9 @@ class exp(baseexp):
                              ('U238', (205.52, 0.96))],
                             mode='absolute'
                             ),
-                        provides=["eper_fission"]
                         ),
                 eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01',
-                                      nidx=self.nidx.get_subset('d'), major=''),
+                        bundle = dict(name='detector_eres_normal', version='v01', major=''),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
@@ -217,23 +187,14 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 lsnl = NestedDict(
-                        bundle     = dict(name='energy_nonlinearity_db_root', version='v02',
-                                          nidx = self.nidx.get_subset('dl'),
-                                          major='dl'
-                            ),
+                        bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
                         names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
                         filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-                        parnames      = dict(
-                            lsnl   = 'lsnl_weight',
-                            escale = 'escale'
-                            ),
                         par        = uncertain(1.0, 0.2, 'percent'),
                         edges      = 'evis_edges',
-                        provides   = ['lsnl', 'lsnl_component', 'escale', 'lsnl_weight', 'lsnl_edges']
                         ),
                 rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v03',
-                                      nidx=self.nidx.get_subset('d'), major=''),
+                        bundle = dict(name='rebin', version='v03', major=''),
                         rounding = 3,
                         edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] )),
                         name = 'rebin',
@@ -242,11 +203,11 @@ class exp(baseexp):
                 )
 
     def build(self):
-        from gna.expression import Expression, ExpressionContext
+        from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
         from gna.bundle import execute_bundles
 
         # Initialize the expression and indices
-        self.expression = Expression(self.formula, self.nidx)
+        self.expression = Expression_v01(self.formula, self.nidx)
 
         # Dump the information
         if self.opts.verbose:
@@ -264,7 +225,7 @@ class exp(baseexp):
             print()
 
         # Put the expression into context
-        self.context = ExpressionContext(self.cfg, ns=self.namespace)
+        self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
         if self.opts.verbose>1:
