@@ -42,8 +42,8 @@ class exp(baseexp):
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'])
         ]
         if self.opts.composition=='minimal':
-            self.nidx[1][2] = self.nidx[1][2][:1]
-            self.nidx[2][2] = self.nidx[2][2][:1]
+            self.nidx[3][2] = self.nidx[3][2][:1]
+            self.nidx[4][2] = self.nidx[4][2][:1]
 
         self.nidx = NIndex.fromlist(self.nidx)
 
@@ -200,7 +200,7 @@ class exp(baseexp):
                         rounding = 3,
                         edges = np.concatenate(( [0.7], np.arange(1, 8, 0.02), [12.0] )),
                         name = 'rebin',
-                        label = 'Final histogram\n{detector}'
+                        label = 'Final histogram\n{detector} ({juno_clone})'
                         ),
                 )
 
@@ -229,6 +229,9 @@ class exp(baseexp):
         # Put the expression into context
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
+
+        self.namespace('juno_nh.pmns')['Alpha'].set('normal')
+        self.namespace('juno_ih.pmns')['Alpha'].set('inverted')
 
         if self.opts.verbose>1:
             width = 40
