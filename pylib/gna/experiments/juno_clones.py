@@ -21,6 +21,7 @@ class exp(baseexp):
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-z', '--zones', type=int, help='number of zones to split')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -45,10 +46,17 @@ class exp(baseexp):
             self.nidx[3][2] = self.nidx[3][2][:1]
             self.nidx[4][2] = self.nidx[4][2][:1]
 
+        if self.opts.zones:
+            self.nidx.append( ('z', 'eres_zone', ['zone_%02i'%i for i in range(self.opts.zones)]) )
+
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
         self.formula = self.formula_base
+
+        if self.opts.zones:
+            self.formula.insert(0, 'zone_weight[z]')
+
         versions = dict(
                 simple = self.formula_ibd_simple,
                 dyboscar = self.formula_ibd_do,
@@ -177,7 +185,7 @@ class exp(baseexp):
                             ),
                         ),
                 eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major=''),
+                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive=True),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
@@ -185,7 +193,23 @@ class exp(baseexp):
                             ('b', (0.03, 30, 'percent')) ,
                             ('c', (0.000, 'fixed'))
                             ]),
-                        provides = [ 'eres', 'eres_matrix' ],
+                        expose_matrix = False
+                        ),
+                eresz = NestedDict(
+                        bundle = dict(name='detector_eres_normal', version='v01', major='z'),
+                        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                        parameter = 'eres',
+                        pars = uncertaindict([
+                            ('zone_00.a', (0.000, 'fixed')) ,
+                            ('zone_00.b', (0.02, 30, 'percent')) ,
+                            ('zone_00.c', (0.000, 'fixed')),
+                            ('zone_01.a', (0.000, 'fixed')) ,
+                            ('zone_01.b', (0.03, 30, 'percent')) ,
+                            ('zone_01.c', (0.000, 'fixed')),
+                            ('zone_02.a', (0.000, 'fixed')) ,
+                            ('zone_02.b', (0.04, 30, 'percent')) ,
+                            ('zone_02.c', (0.000, 'fixed')),
+                            ]),
                         expose_matrix = False
                         ),
                 lsnl = NestedDict(
@@ -202,6 +226,9 @@ class exp(baseexp):
                         name = 'rebin',
                         label = 'Final histogram\n{detector} ({juno_clone})'
                         ),
+                zones = NestedDict(
+                        bundle = dict(name='sphere_eq_volume_cuts_v01')
+                        )
                 )
 
     def build(self):
@@ -275,7 +302,7 @@ class exp(baseexp):
             'eper_fission[i]',
             'power_livetime_factor =  efflivetime[d] * thermal_power[r] * fission_fractions[r,i]',
             # Detector effects
-            'eres_matrix| evis_hist()',
+            'eres_matrix[z]| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
             'norm_bf = global_norm* eff* effunc_uncorr[d]'
     ]
@@ -316,16 +343,18 @@ class exp(baseexp):
 
     formula_ibd_simple = '''ibd =
                             norm_bf[d]*
-                            eres|
-                              lsnl[d]|
-                                    kinint2|
-                                      sum[r]|
-                                        baselineweight[r,d]*
-                                        ibd_xsec(enu(), ctheta())*
-                                        jacobian(enu(), ee(), ctheta())*
-                                        (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
-                                        sum[c]|
-                                          pmns[c,j]*oscprob[c,d,r,j](enu())
+                            sum[z]|
+                            zone_weight[z]*
+                                eres[z]|
+                                  lsnl[d]|
+                                        kinint2|
+                                          sum[r]|
+                                            baselineweight[r,d]*
+                                            ibd_xsec(enu(), ctheta())*
+                                            jacobian(enu(), ee(), ctheta())*
+                                            (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                            sum[c]|
+                                              pmns[c,j]*oscprob[c,d,r,j](enu())
             '''
 
     formula_back = [

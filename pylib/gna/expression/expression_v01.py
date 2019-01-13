@@ -124,12 +124,14 @@ class ItemProvider(object):
         self.name=name
 
         from gna.bundle.bundle import get_bundle
-        self.bundleclass = get_bundle((cfg.bundle.name, cfg.bundle.version))
+        self.bundleclass = get_bundle((cfg.bundle.name, cfg.bundle.get('version', None)))
 
         variables, objects = self.bundleclass.provides(self.cfg)
         self.items = variables+objects
 
     def register_in(self, dct):
+        if self.cfg.bundle.get('inactive', False):
+            return
         for key in self.items:
             dct[key] = self
 

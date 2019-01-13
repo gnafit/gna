@@ -6,6 +6,7 @@ import itertools as I
 from collections import OrderedDict
 from gna.expression.printl import *
 from gna.grouping import Groups
+import numpy as N
 
 debugmethods=False
 if debugmethods:
@@ -56,6 +57,9 @@ class Index(object):
 
         if args or kwargs:
             raise Exception( 'Unparsed paramters: {:s}, {:s}'.format(args, kwargs) )
+
+    def get_size(self):
+        return len(self.variants)
 
     def set_slave(self, slave):
         short = slave['short']
@@ -399,8 +403,14 @@ class NIndex(object):
     def get_current(self, short):
         return self.indices[short].current
 
+    def get_index_names(self):
+        return tuple(idx.name for idx in self.indices.values())
+
     def ndim(self):
         return len(self.indices)
+
+    def get_size(self):
+        return N.product([idx.get_size() for idx in self.indices.values()])
 
     def __contains__(self, other):
         for name in other.indices.keys():

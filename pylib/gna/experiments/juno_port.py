@@ -183,7 +183,6 @@ class exp(baseexp):
                             ('b', (0.03, 30, 'percent')) ,
                             ('c', (0.000, 'fixed'))
                             ]),
-                        provides = [ 'eres', 'eres_matrix' ],
                         expose_matrix = False
                         ),
                 lsnl = NestedDict(
