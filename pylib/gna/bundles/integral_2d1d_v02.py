@@ -12,6 +12,11 @@ class integral_2d1d_v02(TransformationBundle):
         TransformationBundle.__init__( self, *args, **kwargs )
         self.check_cfg()
 
+    @staticmethod
+    def _provides(cfg):
+        var0, var1 = cfg.variables
+        return (), ('integral', var0, var1, var0+'_edges', var0+'_hist')
+
     def check_cfg(self):
         if not 'name' in self.cfg:
             pkey = self.cfg.parent_key()
@@ -19,10 +24,6 @@ class integral_2d1d_v02(TransformationBundle):
                 raise Exception('"name" option is not provided for integral_1d_v01')
             self.cfg.name = pkey
 
-        self.idx = self.cfg.indices
-        from gna.expression import NIndex
-        if not isinstance(self.idx, NIndex):
-            self.idx = NIndex(fromlist=self.cfg.indices)
         try:
             self.edges = N.ascontiguousarray(self.cfg.edges, dtype='d')
         except:
@@ -58,8 +59,8 @@ class integral_2d1d_v02(TransformationBundle):
             hist = R.GaussLegendre2dHist(self.integrator)
             hist.hist.setLabel(it.current_format(name='hist'))
 
-            self.set_input(self.cfg.name, it, hist.hist.f, argument_number=0)
-            self.set_output(self.cfg.name, it, hist.hist.hist)
+            self.set_input('integral', it, hist.hist.f, argument_number=0)
+            self.set_output('integral', it, hist.hist.hist)
 
     def define_variables(self):
         pass

@@ -19,6 +19,10 @@ class reactor_anu_spectra_v03(TransformationBundle):
 
         self.shared = NestedDict() # TODO: remove
 
+    @staticmethod
+    def _provides(cfg):
+        return (), (cfg.name,)
+
     def build(self):
         self.load_data()
 

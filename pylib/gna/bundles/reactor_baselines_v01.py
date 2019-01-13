@@ -23,6 +23,10 @@ class reactor_baselines_v01(TransformationBundle):
             print('Available units:', *conversion.keys())
             raise Exception('Invalid unit: '+self.cfg.unit)
 
+    @staticmethod
+    def _provides(cfg):
+        return ('baseline', 'baselineweight'), ()
+
     def init_data(self):
         '''Read configurations of reactors and detectors from either files or
         dicts'''

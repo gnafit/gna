@@ -8,7 +8,7 @@ from gna.bundle import *
 
 class integral_2d1d_v01(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
-        TransformationBundleLegacy.__init__( self, *args, **kwargs )
+        TransformationBundleLegacy.__init__(self, *args, **kwargs)
         self.check_cfg()
 
     def check_cfg(self):

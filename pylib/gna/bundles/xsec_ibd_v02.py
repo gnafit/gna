@@ -43,8 +43,6 @@ class xsec_ibd_v02(TransformationBundle):
     #       # and its parameters:
     #       # - the IBD cross section order (0 for zero-th or 1 the first). First is not yet implemented.
     #       order = 0,
-    #       # this line says that the bundle will provide the 'ee' - positron energy as additional output.
-    #       provides = [ 'ibd_xsec', 'ee', 'enu' ]
     #       )
     #
     # Configuration for 1th order:
@@ -55,8 +53,6 @@ class xsec_ibd_v02(TransformationBundle):
     #       # and its parameters:
     #       # - the IBD cross section order (0 for zero-th or 1 the first). First is not yet implemented.
     #       order = 1,
-    #       # this line says that the bundle will provide the 'ee' - positron energy as additional output.
-    #       provides = [ 'ibd_xsec', 'ee', 'enu', 'jacobian' ]
     #       )
     # @endcode
     def __init__(self, *args, **kwargs):
@@ -66,6 +62,13 @@ class xsec_ibd_v02(TransformationBundle):
         # check that order is sane
         if not self.cfg.order in [0, 1]:
             raise Exception("Unsupported ibe order {} (should be 0 or 1)".format(self.cfg.order))
+
+    @staticmethod
+    def _provides(cfg):
+        if cfg.order:
+            return (), ('ibd_xsec', 'ee', 'enu', 'jacobian')
+        else:
+            return (), ('ibd_xsec', 'ee', 'enu')
 
     def build(self):
         # initalize Evis to Enu converter

@@ -197,6 +197,7 @@ class ExpressionContext_v01(object):
                         self.require(it.current_format(name=name), None)
                     return self.required_bundles
 
+                print('List of available (provided) variables:', list(self.required_bundles.keys()))
                 raise Exception('Do not know how to build '+name)
 
             self.required_bundles[name] = provider
