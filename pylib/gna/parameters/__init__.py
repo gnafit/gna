@@ -14,6 +14,7 @@ class DiscreteParameter(object):
         self._namespace = kwargs.get("namespace", "")
         self._variants = variants
         self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
+        self._label = kwargs.pop('label', '')
         if  len(self._inverse) != len(self._variants):
             msg = "DiscreteParameter variants dict is not a bijection"
             raise Exception(msg)
@@ -41,6 +42,15 @@ class DiscreteParameter(object):
 
     def setNamespace(self, name):
         self._namespace = name
+
+    def getVariants(self):
+        return tuple(self._variants)
+
+    def getLabel(self):
+        return self._label
+
+    def setLabel(self, label):
+        self._label=label
 
 def makeparameter(ns, name, cfg=None, **kwargs):
     if 'target' in kwargs:

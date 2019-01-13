@@ -25,7 +25,7 @@ def reqparameters(ns):
                       sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
-            variants={'normal': 1.0, 'inverted': -1.0}) #, label='Neutrino mass hierarchy: 1 (NH) or -1 (IH)'
+            variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass hierarchy')
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
                       sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
