@@ -262,10 +262,12 @@ class exp(baseexp):
             'enu| ee(evis()), ctheta()',
             'livetime[d]',
             'efflivetime[d]',
-            #  'eper_fission[i]',
+            'eper_fission[i]',
             'conversion_factor',
+            'eper_fission_obj = objectize("eper_fission_obj", eper_fission[i])',
+            'denom = eper_fission_obj[i]() * fission_fractions[r,i]',
             'power_livetime_factor =  efflivetime[d] * thermal_power[r] * '
-                 'fission_fractions[r,i] * conversion_factor * (sum[i](eper_fission[i]*fission_fractions[r,i]))',
+                 'fission_fractions[r,i] * conversion_factor',
             # Detector effects
             'eres_matrix| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',

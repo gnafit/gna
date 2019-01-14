@@ -203,8 +203,8 @@ class Inverse(IndexedContainer, Variable):
         self.inverses = []
         if len(args)>1:
             raise Exception('inverse() supports only 1 argument')
-        #  if not isinstance(args[0], Transformation):
-            #  raise Exception('the only argument of inverse() should be an object, not variable')
+        if not isinstance(args[0], Transformation):
+            raise Exception('the only argument of inverse() should be an object, not variable')
 
         IndexedContainer.__init__(self, *args)
         Variable.__init__(self, name, *self.objects)
@@ -221,11 +221,52 @@ class Inverse(IndexedContainer, Variable):
         ns = context.namespace()
         from gna.env import ExpressionsEntry
         for it in self.nindex.iterate():
-            inp = obj.get_output(it, context)
-            inverse = R.Inverse(out)
-            inverse >> inp 
+            out = obj.get_output(it, context)
+            inverse = R.Inverse()
+            out >> inverse
             context.set_output(inverse, self.name, it)
             self.inverses.append(inverse)
+
+        self.bound = True
+
+class Objectize(IndexedContainer, Variable):
+    bound = False
+    def __init__(self, name, *args, **kwargs):
+        self.var_arrays = []
+        if len(args)>1:
+            raise Exception('objectize() supports only 1 argument')
+        if not isinstance(args[0], Variable):
+            raise Exception('the only argument of objectize() should be an variable')
+
+        IndexedContainer.__init__(self, *args)
+        Variable.__init__(self, name, *self.objects)
+        self.set_operator( ' objectize ', text='objectize_'  )
+
+    @call_once
+    def bind(self, context):
+        if self.bound:
+            return
+
+        import ROOT as R
+        import gna.constructors as C
+        IndexedContainer.bind(self, context, connect=False)
+        obj, = self.objects
+        ns = context.namespace()
+        from gna.env import ExpressionsEntry
+        for it in self.nindex.iterate():
+            varname = self.current_format(it)
+            #  import IPython
+            #  IPython.embed()
+
+            print(varname)
+            head, tail = varname.rsplit('.', 1)
+            cns = ns(obj.name)
+            with cns:
+                var_array = R.VarArray(C.stdvector([tail]), ns=cns, labels='Object repr of {}'.format(obj.current_format(it)))
+            context.set_output(var_array.vararray.points, varname, it)
+            import IPython
+            IPython.embed()
+            self.var_arrays.append(var_array)
 
         self.bound = True
 

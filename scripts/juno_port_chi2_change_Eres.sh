@@ -1,6 +1,7 @@
 #!/bin/sh
 ipython2 --pdb -- gna -- ns --define common.eres.b central=0.03 sigma=0.0 --push common \
     -- exp  --ns juno_ih juno_port -vv \
+    # -- repl \
     -- ns --value juno_ih.pmns.Alpha inverted \
     -- exp --ns juno_nh juno_port -vv \
     -- ns --replace juno_ih.eres.b common.eres.b \
