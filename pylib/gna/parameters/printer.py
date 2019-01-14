@@ -3,6 +3,7 @@
 from __future__ import print_function
 from load import ROOT
 import numpy as N
+from gna.parameters import DiscreteParameter
 
 from itertools import chain, tee, cycle
 import itertools
@@ -17,11 +18,12 @@ except ImportError:
 def colorize(string, color):
     return color + str(string) + Style.RESET_ALL
 
-unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>') )
+unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>'), DiscreteParameter )
 
 namefmt='{name:30}'
 
 valfmt='={color}{val:11.6g}'
+valdfmt='={color}{val:>11s}'
 
 centralfmt='{central:11.6g}'
 
@@ -40,7 +42,8 @@ central_len=len(centralfmt.format(central=0))
 sigma_len=len(sigmafmt.format(sigma=0))
 relsigma_len=len(relsigmafmt.format(relsigma=0))
 
-centralrel_empty =(centralsigma_len+relsigma_len-1)*' '
+central_reg_len = centralsigma_len+relsigma_len-1
+centralrel_empty =(central_reg_len)*' '
 sigmarel_empty =(sigma_len+relsigma_len-1)*' '
 sigma_empty =(sigma_len-1)*' '
 
@@ -56,6 +59,8 @@ fixedstr = (fixedstr_len/2)*' ' + fixedstr + (fixedstr_len/2)*" "
 freestr =' [free]'
 
 freestr+=' '*(relsigma_len-len(freestr))
+
+variants_fmt = ' {variants:^{width}s}'
 
 class CovarianceStore():
     def __init__(self):
@@ -75,7 +80,6 @@ class CovarianceStore():
         for par_set in self.storage:
             for item in par_set:
                 yield par == item
-
 
 def print_covariated(cov_store):
     if len(cov_store) == 0:
@@ -183,7 +187,7 @@ def Variable__str( self, labels=False ):
     if label:
         s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
-    s += Style.RESET_ALL if colorama_present else "" 
+    s += Style.RESET_ALL if colorama_present else ""
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
@@ -291,5 +295,27 @@ def GaussianParameter__str( self, labels=False  ):
 
     s += Style.RESET_ALL if colorama_present else ""
 
+    return s
+
+def DiscreteParameter____str__(self, labels=False):
+    fmt = dict(
+        name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+        val     = self.value(),
+        variants = str(self.getVariants()),
+        color   = Fore.BLUE if colorama_present else ""
+        )
+    label = self.getLabel()
+
+    s= namefmt.format(**fmt)
+    s+=valdfmt.format(**fmt)
+    s+=sepstr+variants_fmt.format(width=central_reg_len-1, **fmt)
+
+    if labels:
+        s+=sepstr
+
+    if label:
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
 
     return s
+DiscreteParameter.__str__ = DiscreteParameter____str__
+

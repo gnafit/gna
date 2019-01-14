@@ -226,10 +226,10 @@ class ExpressionContext_v01(object):
                 ret += '.'+clone
             return ret
 
-        nidx = nidx.current_values()
+        nidx = nidx.current_values(name=name)
         if clone:
             nidx = nidx + (clone,)
-        return (name,)+nidx
+        return nidx
 
     def get_output(self, name, nidx=None, clone=None):
         return self.get( self.outputs, name, nidx, 'output', clone=clone )

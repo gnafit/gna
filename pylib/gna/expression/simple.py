@@ -19,6 +19,7 @@ def call_once(method):
     return newmethod
 
 class Variable(Indexed):
+    callable = None
     def __init__(self, name, *args, **kwargs):
         super(Variable, self).__init__(name, *args, **kwargs)
 
@@ -31,8 +32,12 @@ class Variable(Indexed):
         return VProduct(undefinedname, self, other)
 
     def __call__(self, *targs):
+        if self.callable:
+            return self.callable
+
         from gna.expression.compound import TCall
-        return TCall(self.name, self, targs=targs)
+        self.callable=TCall(self.name, self, targs=targs)
+        return self.callable
 
     @call_once
     def bind(self, context):
