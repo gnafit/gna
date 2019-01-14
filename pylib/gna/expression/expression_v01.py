@@ -33,7 +33,7 @@ class VTContainer_v01(OrderedDict):
         return value
 
 class Expression_v01(object):
-    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket, objectize=Objectize )
+    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket, inverse=OInverse )
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
         if isinstance(expression, basestring):

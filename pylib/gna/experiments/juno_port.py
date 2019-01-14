@@ -100,6 +100,7 @@ class exp(baseexp):
                                   ),
                              parameter = "fission_fractions",
                              label = 'Fission fraction of {isotope} in reactor {reactor}',
+                             objectize=True,
                              pars = uncertaindict([
                                  ('U235',  0.60),
                                  ('Pu239', 0.27),
@@ -166,12 +167,14 @@ class exp(baseexp):
                         bundle = dict(name="parameters", version = "v01"),
                         parameter='conversion_factor',
                         label='Conversion factor from GWt to MeV',
-                        pars = uncertain( 6.241509125883259e+21, 'fixed'),
+		        #taken from transformations/neutrino/ReactorNorm.cc
+                        pars = uncertain( 1.0e-7/1.602176462e-19, 'fixed'),
                         ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "eper_fission",
                         label = 'Energy per fission for {isotope} in MeV',
+                        objectize = True,
                         pars = uncertaindict(
                             [('Pu239', (209.99, 0.60)),
                              ('Pu241', (213.60, 0.65)),
@@ -264,10 +267,9 @@ class exp(baseexp):
             'efflivetime[d]',
             'eper_fission[i]',
             'conversion_factor',
-            'eper_fission_obj = objectize("eper_fission_obj", eper_fission[i])',
-            'denom = eper_fission_obj[i]() * fission_fractions[r,i]',
+            'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
             'power_livetime_factor =  efflivetime[d] * thermal_power[r] * '
-                 'fission_fractions[r,i] * conversion_factor',
+                 'fission_fractions[r,i]() * conversion_factor * target_protons[d] / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',

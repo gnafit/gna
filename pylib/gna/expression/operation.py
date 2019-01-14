@@ -160,6 +160,14 @@ class OConcat(Operation):
         import ROOT as R
         self.set_tinit( R.Concat )
 
+class OInverse(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'inv', *indices, **kwargs)
+        self.set_operator( ' / ', text='inv_' )
+
+        import ROOT as R
+        self.set_tinit( R.Inverse )
+
 
 class Accumulate(IndexedContainer, Variable):
     bound = False
@@ -254,15 +262,14 @@ class Objectize(IndexedContainer, Variable):
         ns = context.namespace()
         from gna.env import ExpressionsEntry
         for it in self.nindex.iterate():
-            varname = self.current_format(it)
-            #  import IPython
-            #  IPython.embed()
+            varname = obj.current_format(it)
+            import IPython
+            IPython.embed()
 
             print(varname)
-            head, tail = varname.rsplit('.', 1)
             cns = ns(obj.name)
             with cns:
-                var_array = R.VarArray(C.stdvector([tail]), ns=cns, labels='Object repr of {}'.format(obj.current_format(it)))
+                var_array = R.VarArray(C.stdvector([varname]), ns=cns, labels='Object repr of {}'.format(obj.current_format(it)))
             context.set_output(var_array.vararray.points, varname, it)
             import IPython
             IPython.embed()

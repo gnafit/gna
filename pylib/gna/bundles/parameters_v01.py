@@ -6,6 +6,7 @@ from gna.bundle.bundle import *
 
 class parameters_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
+        self._par_container = []
         TransformationBundle.__init__(self, *args, **kwargs)
 
     @staticmethod
@@ -38,3 +39,33 @@ class parameters_v01(TransformationBundle):
                     parcfg.mode='fixed'
 
                 par = self.reqparameter(parname, it, cfg=parcfg, label=label)
+
+                if self.cfg.get("objectize"):
+                    import gna.constructors as C
+                    #  import IPython
+                    #  IPython.embed()
+                    with self.namespace:
+                        var_array = R.VarArray(C.stdvector([par.qualifiedName()]))
+                    output = var_array.vararray.points
+
+                    self.set_output(parname, it,  output)
+
+                self._par_container.append(par)
+
+    def build(self):
+        pass
+
+        #  import gna.constructors as C
+        #  for it_major in self.nidx_major:
+            #  major_values = it_major.current_values()
+            #  if major_values:
+                #  parcfg = self.cfg.pars[major_values]
+            #  else:
+                #  parcfg = self.cfg.pars
+
+            #  for it_minor in self.nidx_minor:
+                #  it=it_major+it_minor
+
+                #  self.set_output()
+                #  with self.namespace():
+                    #  var_array = R.VarArray(C.stdvector([varname]), ns=cns, labels='Object repr of {}'.format(obj.current_format(it)))
