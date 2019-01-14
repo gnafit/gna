@@ -61,8 +61,9 @@ class exp(baseexp):
                     bundle   = dict(name='integral_2d1d', version='v02', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.0, 12.001, 0.02),
-                    xorders   = 2,
-                    yorder   = 3,
+                    #  edges    = np.linspace(0.0, 12.001, 601),
+                    xorders   = 3,
+                    yorder   = 2,
                     ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
@@ -77,7 +78,7 @@ class exp(baseexp):
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 eff = NestedDict(
                     bundle = dict(
@@ -136,7 +137,7 @@ class exp(baseexp):
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "thermal_power",
-                        label = 'Thermal power of {reactor} in MWt',
+                        label = 'Thermal power of {reactor} in GWt',
                         pars = uncertaindict([
                             ('TS1',  4.6),
                             ('TS2',  4.6),
@@ -256,7 +257,10 @@ class exp(baseexp):
         ns = self.namespace
         outputs = self.context.outputs
         # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
+        #  import IPython
+        #  IPython.embed()
         ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects.AD1, export=False)
+        ns.addobservable("Enu",    outputs.enu, export=False)
         ns.addobservable("{0}_fine".format(self.detectorname),         outputs.ibd.AD1)
         ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
 
@@ -268,11 +272,11 @@ class exp(baseexp):
             'eper_fission[i]',
             'conversion_factor',
             'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
-            'power_livetime_factor =  efflivetime[d] * thermal_power[r] * '
+            'power_livetime_factor =  livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
-            'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
+            #  'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
             'norm_bf = global_norm* eff* effunc_uncorr[d]'
     ]
 
@@ -313,8 +317,7 @@ class exp(baseexp):
     formula_ibd_simple = '''ibd =
                             norm_bf[d]*
                             eres|
-                              lsnl[d]|
-                                    kinint2|
+                                   kinint2|
                                       sum[r]|
                                         baselineweight[r,d]*
                                         ibd_xsec(enu(), ctheta())*
@@ -327,6 +330,7 @@ class exp(baseexp):
     formula_back = [
             'observation_noeffects = norm_bf[d]*kinint2[d]()',
             'observation=rebin| ibd'
+              #  'observation= ibd'
             ]
 
     lib = dict(
@@ -346,6 +350,7 @@ class exp(baseexp):
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
 
+            power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
 
