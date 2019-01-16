@@ -212,7 +212,7 @@ class exp(baseexp):
             # Spectra
             #
             bkg_spectrum_acc = NestedDict( #TODO
-                bundle    = dict(name='root_histograms_v02'),
+                bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
                 format    = '{site}_AD{adnum_local}_singleTrigEnergy',
                 name      = 'bkg_spectrum_acc',
@@ -221,7 +221,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_li=NestedDict( #TODO
-                bundle    = dict(name='root_histograms_v02'),
+                bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_li',
@@ -229,7 +229,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_he= NestedDict( #TODO
-                bundle    = dict(name='root_histograms_v02'),
+                bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_he',
@@ -237,7 +237,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_amc = NestedDict( #TODO
-                bundle    = dict(name='root_histograms_v02'),
+                bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
                 format    = 'hCorrAmCPromptSpec',
                 name      = 'bkg_spectrum_amc',
@@ -245,7 +245,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_alphan = NestedDict( #TODO
-                bundle    = dict(name='root_histograms_v02'),
+                bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/P12B_alphan_coarse.root',
                 format    = 'AD{adnum_global_alphan_subst}',
                 groups    = self.groups,
