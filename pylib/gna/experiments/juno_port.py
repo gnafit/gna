@@ -82,17 +82,19 @@ class exp(baseexp):
                     ),
                 eff = NestedDict(
                     bundle = dict(
-                        name='efficiencies',
-                        version='v02',
-                        names = dict(
-                            norm = 'global_norm'
-                            ),
-                        major=''
-                        ),
-                    correlated   = False,
-                    uncorrelated = True,
-                    norm         = True,
-                    efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
+                        name='parameters',
+                        version='v01'),
+                     parameter="eff",
+                     label='Detection efficiency',
+                     pars = uncertain(0.8, uncertainty=5, mode='percent')
+                    ),
+                global_norm = NestedDict(
+                    bundle = dict(
+                        name='parameters',
+                        version='v01'),
+                     parameter="global_norm",
+                     label='Global normalization',
+                     pars = uncertain(1, 'free'),
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters",
@@ -118,14 +120,6 @@ class exp(baseexp):
                         label = 'Livetime of {detector} in seconds',
                         pars = uncertaindict(
                             [('AD1', (6*365*seconds_per_day, 'fixed'))],
-                            ),
-                        ),
-                efflivetime = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = "efflivetime",
-                        label = 'Effective livetime of {detector} in seconds',
-                        pars = uncertaindict(
-                            [('AD1', (6*365*seconds_per_day*0.8, 'fixed'))],
                             ),
                         ),
                 baselines = NestedDict(
@@ -196,13 +190,6 @@ class exp(baseexp):
                         provides = [ 'eres', 'eres_matrix' ],
                         expose_matrix = False
                         ),
-                lsnl = NestedDict(
-                        bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
-                        names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-                        filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-                        par        = uncertain(1.0, 0.2, 'percent'),
-                        edges      = 'evis_edges',
-                        ),
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v03', major=''),
                         rounding = 3,
@@ -256,9 +243,7 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
-        # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-        #  import IPython
-        #  IPython.embed()
+        #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
         ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects.AD1, export=False)
         ns.addobservable("Enu",    outputs.enu, export=False)
         ns.addobservable("{0}_fine".format(self.detectorname),         outputs.ibd.AD1)
@@ -268,7 +253,6 @@ class exp(baseexp):
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
             'livetime[d]',
-            'efflivetime[d]',
             'eper_fission[i]',
             'conversion_factor',
             'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
@@ -276,12 +260,11 @@ class exp(baseexp):
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
-            #  'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
-            'norm_bf = global_norm* eff* effunc_uncorr[d]'
+            'norm = global_norm * eff'
     ]
 
     formula_ibd_do = '''ibd =
-                     norm_bf[d]*
+                     norm*
                      sum[c]|
                        pmns[c]*
                        eres|
@@ -298,7 +281,7 @@ class exp(baseexp):
             '''
 
     formula_ibd_mid = '''ibd =
-                     norm_bf[d]*
+                     norm*
                      eres|
                        lsnl[d]|
                            sum[c]|
@@ -315,7 +298,7 @@ class exp(baseexp):
             '''
 
     formula_ibd_simple = '''ibd =
-                            norm_bf[d]*
+                            norm*
                             eres|
                                    kinint2|
                                       sum[r]|
@@ -328,9 +311,8 @@ class exp(baseexp):
             '''
 
     formula_back = [
-            'observation_noeffects = norm_bf[d]*kinint2[d]()',
+            'observation_noeffects = norm*kinint2[d]()',
             'observation=rebin| ibd'
-              #  'observation= ibd'
             ]
 
     lib = dict(
@@ -339,8 +321,8 @@ class exp(baseexp):
             cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
-            ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n{detector}'),
+            norm                 = dict(expr='eff*effunc_uncorr*global_norm'),
+            ibd                     = dict(expr='eres*norm', label='Observed IBD spectrum\n{detector}'),
 
             lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
             lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
