@@ -82,20 +82,6 @@ class exp(baseexp):
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
                     ),
-                eff = NestedDict(
-                    bundle = dict(
-                        name='efficiencies',
-                        version='v02',
-                        names = dict(
-                            norm = 'global_norm'
-                            ),
-                        major=''
-                        ),
-                    correlated   = False,
-                    uncorrelated = True,
-                    norm         = True,
-                    efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
-                    ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters",
                                   version = "v01",
