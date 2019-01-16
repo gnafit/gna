@@ -185,7 +185,7 @@ class exp(baseexp):
                             ),
                         ),
                 eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive=True),
+                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive=False),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
@@ -196,7 +196,7 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 eresz = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major='z'),
+                        bundle = dict(name='detector_eres_normal', version='v01', major='z', inactive=True),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
@@ -343,9 +343,10 @@ class exp(baseexp):
 
     formula_ibd_simple = '''ibd =
                             norm_bf[d]*
-                            sum[z]|
-                            zone_weight[z]*
-                                eres[z]|
+                            # sum[z]|
+                            # zone_weight[z]*
+                            # eres[z]
+                                eres|
                                   lsnl[d]|
                                         kinint2|
                                           sum[r]|

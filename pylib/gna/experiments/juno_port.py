@@ -79,7 +79,7 @@ class exp(baseexp):
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
@@ -87,35 +87,35 @@ class exp(baseexp):
                     bundle = dict(
                         name='parameters',
                         version='v01'),
-                     parameter="eff",
-                     label='Detection efficiency',
-                     pars = uncertain(0.8, uncertainty=5, mode='percent')
+                    parameter="eff",
+                    label='Detection efficiency',
+                    pars = uncertain(0.8, uncertainty=5, mode='percent')
                     ),
                 global_norm = NestedDict(
                     bundle = dict(
                         name='parameters',
                         version='v01'),
-                     parameter="global_norm",
-                     label='Global normalization',
-                     pars = uncertain(1, 'free'),
+                    parameter="global_norm",
+                    label='Global normalization',
+                    pars = uncertain(1, 'free'),
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters",
-                                  version = "v01",
-                                  major = 'i'
-                                  ),
-                             parameter = "fission_fractions",
-                             label = 'Fission fraction of {isotope} in reactor {reactor}',
-                             objectize=True,
-                             pars = uncertaindict([
-                                 ('U235',  0.60),
-                                 ('Pu239', 0.27),
-                                 ('U238',  0.07),
-                                 ('Pu241', 0.06)
-                                 ],
-                                uncertainty = 30.0,
-                                mode = 'percent',
-                            ),
+                        version = "v01",
+                        major = 'i'
+                        ),
+                    parameter = "fission_fractions",
+                    label = 'Fission fraction of {isotope} in reactor {reactor}',
+                    objectize=True,
+                    pars = uncertaindict([
+                        ('U235',  0.60),
+                        ('Pu239', 0.27),
+                        ('U238',  0.07),
+                        ('Pu241', 0.06)
+                        ],
+                        uncertainty = 30.0,
+                        mode = 'percent',
+                        ),
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -126,11 +126,11 @@ class exp(baseexp):
                             ),
                         ),
                 baselines = NestedDict(
-                    bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                    reactors  = 'data/juno_nominal/coordinates_reactors.py',
-                    detectors = 'data/juno_nominal/coordinates_det.py',
-                    unit = 'km'
-                    ),
+                        bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
+                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
+                        detectors = 'data/juno_nominal/coordinates_det.py',
+                        unit = 'km'
+                        ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "thermal_power",
@@ -165,8 +165,8 @@ class exp(baseexp):
                         bundle = dict(name="parameters", version = "v01"),
                         parameter='conversion_factor',
                         label='Conversion factor from GWt to MeV',
-		        #taken from transformations/neutrino/ReactorNorm.cc
-                        pars = uncertain( 1.0e-7/1.602176462e-19, 'fixed'),
+                        #taken from transformations/neutrino/ReactorNorm.cc
+                        pars = uncertain(1.0e-7/1.602176462e-19, 'fixed'),
                         ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -175,9 +175,9 @@ class exp(baseexp):
                         objectize = True,
                         pars = uncertaindict(
                             [('Pu239', (209.99, 0.60)),
-                             ('Pu241', (213.60, 0.65)),
-                             ('U235',  (201.92, 0.46)),
-                             ('U238', (205.52, 0.96))],
+                                ('Pu241', (213.60, 0.65)),
+                                ('U235',  (201.92, 0.46)),
+                                ('U238', (205.52, 0.96))],
                             mode='absolute'
                             ),
                         ),

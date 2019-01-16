@@ -4,7 +4,8 @@ from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
-import numpy as np
+from collections import OrderedDict
+import numpy as N
 
 seconds_per_day = 60*60*24
 class exp(baseexp):
@@ -196,7 +197,7 @@ class exp(baseexp):
             rebin = NestedDict(
                     bundle = dict(name='rebin', version='v03', major=''),
                     rounding = 3,
-                    edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] ))
+                    edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] )),
                     name = 'rebin',
                     label = 'Final histogram\n{detector}'
                     ),
