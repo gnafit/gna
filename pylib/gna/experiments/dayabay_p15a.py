@@ -130,7 +130,7 @@ class exp(baseexp):
                 efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
                 ),
             livetime = NestedDict( #TODO
-                bundle = 'dayabay_livetime_hdf_v01',
+                bundle = dict(name='dayabay_livetime_hdf_v01'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
                 provides = ['livetime_daily', 'efflivetime_daily']
                 ),
@@ -141,7 +141,7 @@ class exp(baseexp):
                 unit = 'm'
                 ),
             thermal_power = NestedDict( #TODO
-                    bundle = 'dayabay_reactor_burning_info_v01',
+                    bundle = dict(name='dayabay_reactor_burning_info_v01'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
                     provides = ['thermal_power', 'fission_fractions']
@@ -174,7 +174,7 @@ class exp(baseexp):
                     # pars = uncertain(1.0e-7/1.602176462e-19, 'fixed'),
                     ),
             iav = NestedDict( #TODO
-                    bundle     = 'detector_iav_db_root_v02',
+                    bundle     = dict(name='detector_iav_db_root_v02'),
                     parname    = 'OffdiagScale',
                     scale      = uncertain(1.0, 4, 'percent'),
                     ndiag      = 1,
@@ -211,7 +211,7 @@ class exp(baseexp):
             #
             # Spectra
             #
-            bkg_spectrum_acc = NestedDict( #TODO
+            bkg_spectrum_acc = NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
                 format    = '{site}_AD{adnum_local}_singleTrigEnergy',
@@ -220,7 +220,7 @@ class exp(baseexp):
                 groups    = self.groups,
                 normalize = True,
                 ),
-            bkg_spectrum_li=NestedDict( #TODO
+            bkg_spectrum_li=NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
@@ -228,7 +228,7 @@ class exp(baseexp):
                 label     = '9Li spectrum\n(norm)',
                 normalize = True,
                 ),
-            bkg_spectrum_he= NestedDict( #TODO
+            bkg_spectrum_he= NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
@@ -236,7 +236,7 @@ class exp(baseexp):
                 label     = '8He spectrum\n(norm)',
                 normalize = True,
                 ),
-            bkg_spectrum_amc = NestedDict( #TODO
+            bkg_spectrum_amc = NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
                 format    = 'hCorrAmCPromptSpec',
@@ -244,7 +244,7 @@ class exp(baseexp):
                 label     = 'AmC spectrum\n(norm)',
                 normalize = True,
                 ),
-            bkg_spectrum_alphan = NestedDict( #TODO
+            bkg_spectrum_alphan = NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/bkg/P12B_alphan_coarse.root',
                 format    = 'AD{adnum_global_alphan_subst}',
@@ -262,8 +262,8 @@ class exp(baseexp):
                         ),
                     provides = [ 'frac_li', 'frac_he' ]
                     ),
-            bkg_spectrum_fastn=NestedDict( #TODO
-                    bundle=dict(name='dayabay_fastn_v02'),
+            bkg_spectrum_fastn=NestedDict(
+                    bundle=dict(name='dayabay_fastn_power_v01'),
                     parameter='fastn_shape',
                     name='bkg_spectrum_fastn',
                     normalize=(0.7, 12.0),
