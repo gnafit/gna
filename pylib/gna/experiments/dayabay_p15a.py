@@ -166,6 +166,13 @@ class exp(baseexp):
                         [('AD1', (1.42e33, 'fixed'))],
                         ),
                     ),
+            conversion_factor =  NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter='conversion_factor',
+                    label='Conversion factor from GWt to MeV',
+                    #taken from transformations/neutrino/ReactorNorm.cc
+                    # pars = uncertain(1.0e-7/1.602176462e-19, 'fixed'),
+                    ),
             iav = NestedDict( #TODO
                     bundle     = 'detector_iav_db_root_v02',
                     parname    = 'OffdiagScale',
@@ -205,7 +212,7 @@ class exp(baseexp):
             # Spectra
             #
             bkg_spectrum_acc = NestedDict( #TODO
-                bundle    = 'root_histograms_v02',
+                bundle    = dict(name='root_histograms_v02'),
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
                 format    = '{site}_AD{adnum_local}_singleTrigEnergy',
                 name      = 'bkg_spectrum_acc',
@@ -214,7 +221,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_li=NestedDict( #TODO
-                bundle    = 'root_histograms_v02',
+                bundle    = dict(name='root_histograms_v02'),
                 filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_li',
@@ -222,7 +229,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_he= NestedDict( #TODO
-                bundle    = 'root_histograms_v02',
+                bundle    = dict(name='root_histograms_v02'),
                 filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_he',
@@ -230,7 +237,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_amc = NestedDict( #TODO
-                bundle    = 'root_histograms_v02',
+                bundle    = dict(name='root_histograms_v02'),
                 filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
                 format    = 'hCorrAmCPromptSpec',
                 name      = 'bkg_spectrum_amc',
@@ -238,7 +245,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             bkg_spectrum_alphan = NestedDict( #TODO
-                bundle    = 'root_histograms_v02',
+                bundle    = dict(name='root_histograms_v02'),
                 filename  = 'data/dayabay/bkg/P12B_alphan_coarse.root',
                 format    = 'AD{adnum_global_alphan_subst}',
                 groups    = self.groups,
@@ -247,7 +254,7 @@ class exp(baseexp):
                 normalize = True,
                 ),
             lihe_fractions=NestedDict( #TODO
-                    bundle = 'var_fractions_v01',
+                    bundle = dict(name='var_fractions_v01'),
                     names = [ 'li', 'he' ],
                     format = 'frac_{component}',
                     fractions = uncertaindict(
@@ -256,7 +263,7 @@ class exp(baseexp):
                     provides = [ 'frac_li', 'frac_he' ]
                     ),
             bkg_spectrum_fastn=NestedDict( #TODO
-                    bundle='dayabay_fastn_v02',
+                    bundle=dict(name='dayabay_fastn_v02'),
                     parameter='fastn_shape',
                     name='bkg_spectrum_fastn',
                     normalize=(0.7, 12.0),

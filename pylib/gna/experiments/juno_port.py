@@ -264,9 +264,6 @@ class exp(baseexp):
     formula_base = [
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
-            'livetime[d]',
-            'eper_fission[i]',
-            'conversion_factor',
             'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
             'power_livetime_factor =  livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] / denom',
