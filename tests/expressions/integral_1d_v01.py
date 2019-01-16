@@ -80,12 +80,6 @@ if args.show:
     P.show()
 
 if args.dot:
-    try:
-        from gna.graphviz import GNADot
+    from gna.graphviz import savegraph
+    savegraph(context.outputs.evis, args.dot)
 
-        graph = GNADot(context.outputs.evis, joints=False)
-        graph.write(args.dot)
-        print( 'Write output to:', args.dot )
-    except Exception as e:
-        print( '\033[31mFailed to plot dot\033[0m' )
-        raise
