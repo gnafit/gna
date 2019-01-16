@@ -61,6 +61,10 @@ public:
   void setLabel(const std::string& label) { m_label=label; }
   void setLabel(std::string&& label) { m_label = label; }
 
+  size_t hash() const {return reinterpret_cast<size_t>(this);}
+
+  
+
 protected:
   variable<T> m_var{};
   ParametrizedTypes::VariableHandle<T> m_varhandle;

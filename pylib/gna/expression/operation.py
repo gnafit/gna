@@ -160,6 +160,15 @@ class OConcat(Operation):
         import ROOT as R
         self.set_tinit( R.Concat )
 
+class OInverse(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'inv', *indices, **kwargs)
+        self.set_operator( ' / ', text='inv_' )
+
+        import ROOT as R
+        self.set_tinit( R.Inverse )
+
+
 class Accumulate(IndexedContainer, Variable):
     bound = False
     def __init__(self, name, *args, **kwargs):

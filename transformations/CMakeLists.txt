@@ -9,6 +9,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Sum.cc
   transformations/base/Ratio.cc
   transformations/base/WeightedSum.cc
+  transformations/base/Inverse.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
   transformations/detector/FakeGSLFunction.cc
@@ -90,6 +91,7 @@ set(TRANSFORMATION_HEADERS
   Sum.hh
   Ratio.hh
   WeightedSum.hh
+  Inverse.hh
   Bins.hh
   Points.hh
   Histogram.hh

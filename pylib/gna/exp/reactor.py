@@ -178,7 +178,7 @@ class ReactorExperimentModel(baseexp):
         reactors -- iterable over Reactor objects, self.makereactors() will be called if None
         detectors -- iterable over Detector objects, self.makedetoctrs() will be called if None
         """
-        super(ReactorExperimentModel, self).__init__(opts)
+        super(ReactorExperimentModel, self).__init__(None, opts)
         self._oscprobs = {}
         self._oscprobcls = self.oscprob_classes[self.opts.oscprob]
         self._isotopes = defaultdict(list)
