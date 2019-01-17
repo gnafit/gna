@@ -5,10 +5,10 @@ from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml
 from gna.bindings import common
+from gna.env import PartNotFoundError
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
-
 
 class cmd(basecmd):
     @classmethod

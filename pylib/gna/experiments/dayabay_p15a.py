@@ -413,7 +413,7 @@ class exp(baseexp):
         #
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-            # ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
+            ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
 
@@ -443,14 +443,13 @@ class exp(baseexp):
         'bkg_fastn = efflivetime[d] * bkg_rate_fastn[s] * bkg_spectrum_fastn[s]()',
         'bkg_amc   = efflivetime[d] * bkg_rate_amc[d] * bkg_spectrum_amc()',
         'bkg_alphan   = efflivetime[d] * bkg_rate_alphan[d] * bkg_spectrum_alphan[d]()',
-        'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan'
+        'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
+        'norm_bf = global_norm* eff* effunc_uncorr[d]'
 
     ]
 
     formula_ibd_do = '''ibd =
-                 global_norm*
-                 eff*
-                 effunc_uncorr[d]*
+                 norm_bf*
                  sum[c]|
                    pmns[c]*
                    eres[d]|
@@ -468,9 +467,7 @@ class exp(baseexp):
         '''
 
     formula_ibd_mid = '''ibd =
-                 global_norm*
-                 eff*
-                 effunc_uncorr[d]*
+                 norm_bf*
                  eres[d]|
                    lsnl[d]|
                      iav[d]|
@@ -488,9 +485,7 @@ class exp(baseexp):
         '''
 
     formula_ibd_simple = '''ibd =
-                      global_norm*
-                      eff*
-                      effunc_uncorr[d]*
+                      norm_bf*
                       eres[d]|
                         lsnl[d]|
                           iav[d]|
@@ -505,6 +500,7 @@ class exp(baseexp):
         '''
 
     formula_back = [
+            'observation_noeffects=norm_bf*eres()',
             'observation=rebin| ibd + bkg',
             'total=concat[d]| observation'
             ]
