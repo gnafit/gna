@@ -7,6 +7,7 @@
 #include "TypesFunctions.hh"
 
 using namespace Eigen;
+using namespace NeutrinoUnits;
 
 OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
   : OscProbPMNSBase(from, to)

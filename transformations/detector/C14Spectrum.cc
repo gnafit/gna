@@ -9,6 +9,8 @@
 #include <cassert>
 #include <iostream>
 
+using namespace NeutrinoUnits;
+
 constexpr auto pi = boost::math::constants::pi<double>();
 constexpr auto alpha = 1./137.035989;
 /* constexpr auto fm_to_keV = 1 / (197.326 * 1e3);   */

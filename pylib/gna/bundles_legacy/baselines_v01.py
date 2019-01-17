@@ -9,7 +9,10 @@ from gna.configurator import NestedDict
 from collections import OrderedDict
 import itertools
 
-conversion = {"meters": 1./1000, "kilometers": 1.}
+Units = R.NeutrinoUnits
+conversion = {"meter": 1.e-3, "kilometer": 1.0}
+conversion['m']=conversion['meter']
+conversion['km']=conversion['kilometer']
 
 class baselines_v01(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
@@ -82,9 +85,10 @@ class baselines_v01(TransformationBundleLegacy):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
+            const = 0.25/np.pi*1.e10 # Convert 1/km2 to 1/cm2
             self.common_namespace.reqparameter(name, central=distance,
                     sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
 
             inv_key = it.current_format(name='baselineweight')
-            self.common_namespace.reqparameter(inv_key, central=0.25/distance**2/np.pi, sigma=0.1, fixed=True,
-                        label="1/(4πL²) for {} and {}, m⁻²".format(cur_det, cur_reactor))
+            self.common_namespace.reqparameter(inv_key, central=const/distance**2, sigma=0.1, fixed=True,
+                        label="1/(4πL²) for {} and {}, cm⁻²".format(cur_det, cur_reactor))

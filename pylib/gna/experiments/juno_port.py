@@ -5,6 +5,7 @@ from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
 import numpy as np
+from load import ROOT as R
 
 seconds_per_day = 60*60*24
 class exp(baseexp):
@@ -166,7 +167,7 @@ class exp(baseexp):
                         parameter='conversion_factor',
                         label='Conversion factor from GWt to MeV',
                         #taken from transformations/neutrino/ReactorNorm.cc
-                        pars = uncertain(1.0e-7/1.602176462e-19, 'fixed'),
+                        pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                         ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
