@@ -129,8 +129,8 @@ class exp(baseexp):
                 norm         = True,
                 efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
                 ),
-            livetime = NestedDict( #TODO
-                bundle = dict(name='dayabay_livetime_hdf_v01'),
+            livetime = NestedDict(
+                bundle = dict(name='dayabay_livetime_hdf_v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
                 provides = ['livetime_daily', 'efflivetime_daily']
                 ),
