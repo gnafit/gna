@@ -14,7 +14,7 @@ class detector_iav_db_root_v03(TransformationBundle):
         self.check_nidx_dim(1,1, 'major')
 
     @staticmethod
-    def _provides(self):
+    def _provides(cfg):
         return (), ('iavmatrix_raw', 'iavmatrix', 'iav')
 
     def build_mat(self):

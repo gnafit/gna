@@ -133,7 +133,6 @@ class exp(baseexp):
             livetime = NestedDict(
                 bundle = dict(name='dayabay_livetime_hdf_v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-                provides = ['livetime_daily', 'efflivetime_daily']
                 ),
             baselines = NestedDict(
                 bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
@@ -174,7 +173,7 @@ class exp(baseexp):
                     #taken from transformations/neutrino/ReactorNorm.cc
                     pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                     ),
-            iav = NestedDict( #TODO
+            iav = NestedDict(
                     bundle     = dict(name='detector_iav_db_root_v03'),
                     parname    = 'OffdiagScale',
                     scale      = uncertain(1.0, 4, 'percent'),
@@ -254,14 +253,13 @@ class exp(baseexp):
                 label     = 'C(alpha,n) spectrum\n{detector} (norm)',
                 normalize = True,
                 ),
-            lihe_fractions=NestedDict( #TODO
-                    bundle = dict(name='var_fractions_v01'),
+            lihe_fractions=NestedDict(
+                    bundle = dict(name='var_fractions_v02'),
                     names = [ 'li', 'he' ],
                     format = 'frac_{component}',
                     fractions = uncertaindict(
                         li = ( 0.95, 0.05, 'relative' )
                         ),
-                    provides = [ 'frac_li', 'frac_he' ]
                     ),
             bkg_spectrum_fastn=NestedDict(
                     bundle=dict(name='dayabay_fastn_power_v01'),

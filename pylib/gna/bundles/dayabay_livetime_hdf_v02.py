@@ -17,7 +17,7 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
         self.init_data()
 
     @staticmethod
-    def _provides(self):
+    def _provides(cfg):
         return ('first_day', 'last_day', 'ndays', 'ndays_daq'), ('livetime_daily', 'eff_daily', 'efflivetime_daily')
 
     def init_data(self):
