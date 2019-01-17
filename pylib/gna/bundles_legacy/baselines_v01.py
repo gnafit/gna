@@ -85,7 +85,7 @@ class baselines_v01(TransformationBundleLegacy):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
-            const = 0.25/np.pi*1.e10 # Convert 1/km2 to 1/cm2
+            const = 0.25/np.pi*1.e-10 # Convert 1/km2 to 1/cm2
             self.common_namespace.reqparameter(name, central=distance,
                     sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
 

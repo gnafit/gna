@@ -82,7 +82,7 @@ class reactor_baselines_v01(TransformationBundle):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
-            const = 0.25/np.pi*1.e10 # Convert 1/km2 to 1/cm2
+            const = 0.25/np.pi*1.e-10 # Convert 1/km2 to 1/cm2
             for it_minor in self.nidx_minor:
                 it = it_minor+it_major
                 self.reqparameter('baseline', it, central=distance,
