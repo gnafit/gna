@@ -135,16 +135,15 @@ class exp(baseexp):
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
                 ),
             baselines = NestedDict(
-                bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
+                bundle = dict(name='reactor_baselines', version='v01', major='rd'),
                 reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
                 detectors = 'data/dayabay/ad/coordinates/coordinates_docDB_9757.py',
                 unit = 'm'
                 ),
-            thermal_power = NestedDict( #TODO
-                    bundle = dict(name='dayabay_reactor_burning_info_v01'),
+            thermal_power = NestedDict(
+                    bundle = dict(name='dayabay_reactor_burning_info_v02', major='ri'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
-                    provides = ['thermal_power', 'fission_fractions']
                     ),
             eper_fission =  NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
@@ -414,9 +413,9 @@ class exp(baseexp):
         #
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects[ad], export=False)
-            ns.addobservable("{0}_fine".format(self.detectorname),         outputs.observation_fine[ad])
-            ns.addobservable("{0}".format(self.detectorname),              outputs.rebin[ad])
+            # ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
+            ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
+            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy

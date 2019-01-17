@@ -35,7 +35,7 @@ class detector_iav_db_root_v03(TransformationBundle):
             renormdiag.renorm.inmat(points.points)
             self.set_output('iavmatrix', itdet, renormdiag.single())
 
-            for itother in idxother.nidx_minor:
+            for itother in self.nidx_minor:
                 it = itdet+itother
                 esmear = R.HistSmear(True, labels=it.current_format('IAV effect\n{autoindex}')) # True for 'upper'
                 esmear.smear.inputs.SmearMatrix(renormdiag.renorm)
@@ -44,7 +44,7 @@ class detector_iav_db_root_v03(TransformationBundle):
 
                 self.context.objects[it.current_values(name='esmear')] = esmear
 
-            self.context.objects[itdet.current_values(names='renormdiag')] = renormdiag
+            self.context.objects[itdet.current_values(name='renormdiag')] = renormdiag
 
     def build(self):
         from file_reader import read_object_auto

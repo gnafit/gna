@@ -28,9 +28,10 @@ class var_fractions_v02(TransformationBundle):
                                  'all: {!s}\nfractions: {!s}'.format(self.cfg.names, names_unc))
         name_eval=names_eval.pop()
 
-        subst = []
+        subst, names = [], ()
         for name, val in self.cfg.fractions.items():
             cname = self.cfg.format.format(name, component=name)
+            names+=cname,
             par = self.reqparameter(cname, None, cfg=val, label='{} fraction'.format(name))
             subst.append(self.namespace.pathto(cname))
 

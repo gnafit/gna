@@ -51,8 +51,8 @@ class root_histograms_v03(TransformationBundle):
             else:
                 print()
 
-            hist=Histogram(edges, data)
-            fmt = self.cfg.get('label', 'hist {name}\n{autoindex}', label=it.current_format(fmt, name=self.cfg.name))
+            fmt = self.cfg.get('label', 'hist {name}\n{autoindex}')
+            hist=Histogram(edges, data, labels=it.current_format(fmt, name=self.cfg.name))
             self.set_output(self.cfg.name, it, hist.single())
 
             self.context.objects[('hist',subst)]    = hist
