@@ -171,7 +171,7 @@ class exp(baseexp):
                     parameter='conversion_factor',
                     label='Conversion factor from GWt to MeV',
                     #taken from transformations/neutrino/ReactorNorm.cc
-                    # pars = uncertain(1.0e-7/1.602176462e-19, 'fixed'),
+                    pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                     ),
             iav = NestedDict( #TODO
                     bundle     = dict(name='detector_iav_db_root_v02'),
