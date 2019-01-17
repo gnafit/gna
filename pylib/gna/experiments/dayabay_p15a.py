@@ -6,6 +6,7 @@ from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
 from collections import OrderedDict
 import numpy as N
+import ROOT as R
 
 seconds_per_day = 60*60*24
 class exp(baseexp):
@@ -174,7 +175,7 @@ class exp(baseexp):
                     pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                     ),
             iav = NestedDict( #TODO
-                    bundle     = dict(name='detector_iav_db_root_v02'),
+                    bundle     = dict(name='detector_iav_db_root_v03'),
                     parname    = 'OffdiagScale',
                     scale      = uncertain(1.0, 4, 'percent'),
                     ndiag      = 1,

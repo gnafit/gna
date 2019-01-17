@@ -16,6 +16,7 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
 
         self.init_data()
 
+    @staticmethod
     def _provides(self):
         return ('first_day', 'last_day', 'ndays', 'ndays_daq'), ('livetime_daily', 'eff_daily', 'efflivetime_daily')
 
@@ -53,9 +54,9 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
             efflivetime = R.Product(livetime, eff)
             efflivetime.product.setLabel(it.current_format('Livetime (eff)\n{autoindex}'))
 
-            self.objects[('livetime',ad)] = livetime
-            self.objects[('eff',ad)] = eff
-            self.objects[('efflivetime',ad)] = efflivetime
+            self.context.objects[('livetime',ad)] = livetime
+            self.context.objects[('eff',ad)] = eff
+            self.context.objects[('efflivetime',ad)] = efflivetime
 
             self.set_output('livetime_daily',    it, livetime.single())
             self.set_output('eff_daily',         it, eff.single())
