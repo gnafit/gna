@@ -24,8 +24,10 @@ def test_arrsum():
     ns[varname].get()
     output = var_arr.vararray.points
     print('Data:', output.data(), output.data().sum())
-    print("Value of %s evaluable immediately after initialization "%varname, ns[varname].value())
+    print("Value of %s evaluable immediately after initialization "%varname, ns[varname].value(), sum_arr.arrsum.sum.data())
+    print()
     assert np.allclose(output.data().sum(), ns[varname].value())
+
     #  sum_arr.arrsum.arr(var_arr.vararray)
     #  sum_arr.exposeEvaluable(var_arr.vararray)
     #  print(sum_arr.arrsum.accumulated.data())
@@ -34,8 +36,9 @@ def test_arrsum():
     print('Data:', output.data(), output.data().sum())
     ns[varname].dump()
     print("Sum should now be ", np.sum(var_arr.vararray.points.data()))
-    print("Check the value %s of evaluable now"%varname, ns['out'].value())
+    print("Check the value %s of evaluable now: "%varname, ns['out'].value(), sum_arr.arrsum.sum.data())
     assert np.allclose(output.data().sum(), ns[varname].value())
+    print()
 
     env.globalns.printparameters()
 

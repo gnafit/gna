@@ -109,6 +109,7 @@ class OutputDescriptor: public TransformationTypes::OutputHandle,
                         public SingleOutput {
 public:
   using BaseClass = TransformationTypes::OutputHandle;
+  using OutputHandle::data;
 
   OutputDescriptor(const BaseClass &other)
     : BaseClass(other)
