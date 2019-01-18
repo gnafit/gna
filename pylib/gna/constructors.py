@@ -65,7 +65,12 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
 
     return R.WeightedSum(weights, inputs, *args, **kwargs)
 
-"""Construct EnergyResolution object from lists of weights and input names/outputs"""
+"""Construct WeightedSumP object from lists outputs"""
+def WeightedSumP(inputs, *args, **kwargs):
+    outputs = OutputDescriptors(inputs)
+    return R.WeightedSumP(outputs, *args, **kwargs)
+
+"""Construct EnergyResolution object from lists of weights"""
 def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 

@@ -161,5 +161,11 @@ def test_taintflag_14():
         raise Exception('freeze failed')
 
 if __name__ == "__main__":
-    for fcn in sorted([fcn for name, fcn in globals().items() if name.startswith('test_')]):
-        fcn()
+    glb = globals()
+    for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
+        print('call ', fcn)
+        glb[fcn]()
+        print()
+
+    print('All tests are OK!')
+

@@ -15,6 +15,9 @@ struct TypesFunctions
   template <int Arg=0, int Ret1=0, int Ret2=-1, bool ignore_bound_error=false>
   static void passToRange(TransformationTypes::TypesFunctionArgs& fargs);  ///< Assigns shape of each input to corresponding output.
 
+  template <int Ret1=0, int Ret2=-1, bool ignore_bound_error=false>
+  static void passNonSingle(TransformationTypes::TypesFunctionArgs& fargs); ///< Assigns shape of the first not 1x1 input to each output in the range.
+
   template <size_t Arg, size_t Ret = Arg>
   static void pass(TransformationTypes::TypesFunctionArgs& fargs);         ///< Assigns shape of Arg-th input to Ret-th output.
 
@@ -41,6 +44,7 @@ struct TypesFunctions
 
   static void ifSame(TransformationTypes::TypesFunctionArgs& fargs);       ///< Checks that all inputs are of the same type (shape and content description).
   static void ifSameShape(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape.
+  static void ifSameShapeOrSingle(TransformationTypes::TypesFunctionArgs& fargs);  ///< Checks that all inputs are of the same shape or 1x1
 
   template <size_t Arg1, size_t Arg2>
   static void ifSame2(TransformationTypes::TypesFunctionArgs& fargs);      ///< Checks that inputs Arg1 and Arg2 are of the same type (shape and content description).
@@ -537,5 +541,46 @@ inline void TypesFunctions::passToRange(TransformationTypes::TypesFunctionArgs& 
       }
     }
     rets[i] = args[arg];
+  }
+}
+
+/**
+ * @brief Assigns shape of first not 1x1 input to each of the outputs in a range.
+ *
+ * In case all the inputs are 1x1, assign 1x1
+ *
+ * @tparam Ret1 -- index of Ret to start writing to.
+ * @tparam Ret2 -- index of Ret to stop writing to (inclusive).
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case Ret index is out of range.
+ */
+template <int Ret1, int Ret2, bool ignore_bound_error>
+inline void TypesFunctions::passNonSingle(TransformationTypes::TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  DataType dt = DataType().points().shape(1);
+  for (size_t i = 0; i < args.size(); ++i) {
+    if(args[i].shape!=dt.shape){
+      dt=args[i];
+      break;
+    }
+  }
+
+  size_t start=Ret1<0 ? rets.size()+Ret1   : Ret1;
+  size_t end  =Ret2<0 ? rets.size()+Ret2+1 : Ret2+1;
+  for (size_t i = start; i < end; ++i) {
+    if(i>=rets.size()){
+      if(ignore_bound_error){
+        return;
+      }
+      else{
+        auto msg = fmt::format("Transformation {0}: ret {1} is out of limits ({2})", rets.name(), i, rets.size() );
+        throw std::runtime_error(msg);
+      }
+    }
+    rets[i] = dt;
   }
 }

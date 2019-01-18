@@ -40,7 +40,8 @@ namespace TransformationTypes
       return m_entry->addSource(name);
     }
 
-    InputHandle input(SingleOutput &output);                 ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandle input(SingleOutput &output);                          ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandle input(const std::string &name, SingleOutput &output); ///< Create a new input and connect to the SingleOutput transformation.
 
     /**
      * @brief Add new named output.

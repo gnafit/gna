@@ -52,7 +52,23 @@ std::vector<OutputHandle> Handle::outputs() const {
 InputHandle Handle::input(SingleOutput &output) {
   OutputHandle outhandle = output.single();
   InputHandle inp = m_entry->addSource(outhandle.name());
-  inp.connect(outhandle);
+  outhandle >> inp;
+  return inp;
+}
+
+/**
+ * @brief Create a new input and connect to the SingleOutput transformation.
+ *
+ * New input name is copied from the output name.
+ *
+ * @param name   -- new input name.
+ * @param output -- SingleOutput transformation.
+ * @return InputHandle for the new input.
+ */
+InputHandle Handle::input(const std::string& name, SingleOutput &output) {
+  OutputHandle outhandle = output.single();
+  InputHandle inp = m_entry->addSource(name);
+  outhandle >> inp;
   return inp;
 }
 
