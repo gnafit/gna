@@ -18,7 +18,8 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('first_day', 'last_day', 'ndays', 'ndays_daq'), ('livetime_daily', 'eff_daily', 'efflivetime_daily')
+        return ('first_day', 'last_day', 'ndays', 'ndays_daq'), \
+               ('eff_daily', 'livetime_daily', 'efflivetime_daily')
 
     def init_data(self):
         self.data = OrderedDict()
@@ -47,20 +48,17 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
                 raise self.exception('Failed to retrieve data for %s from %s'%(ad, self.cfg.file))
 
             data_lt = data['livetime']+data_lt
-            livetime    = C.Points(data['livetime'])
-            livetime.points.setLabel(it.current_format('Livetime\n{autoindex}'))
-            eff         = C.Points(data['eff'])
-            eff.points.setLabel(it.current_format('Efficiency (mu*mult)\n{autoindex}'))
-            efflivetime = R.Product(livetime, eff)
-            efflivetime.product.setLabel(it.current_format('Livetime (eff)\n{autoindex}'))
+            livetime    = C.Points(data['livetime'], labels=it.current_format('Livetime\n{autoindex}'))
+            eff         = C.Points(data['eff'],      labels=it.current_format('Efficiency (mu*mult)\n{autoindex}'))
+            efflivetime = R.Product(livetime, eff,   labels=it.current_format('Livetime (eff)\n{autoindex}'))
 
             self.context.objects[('livetime',ad)] = livetime
             self.context.objects[('eff',ad)] = eff
             self.context.objects[('efflivetime',ad)] = efflivetime
 
-            self.set_output('livetime_daily',    it, livetime.single())
-            self.set_output('eff_daily',         it, eff.single())
-            self.set_output('efflivetime_daily', it, efflivetime.single())
+            self.set_output('eff_daily',           it, eff.single())
+            self.set_output('livetime_daily',      it, livetime.single())
+            self.set_output('efflivetime_daily',   it, efflivetime.single())
 
         ndays_daq = (data_lt>0.0).sum()
         daq.reqparameter('ndays_daq', central=ndays_daq, fixed=True, sigma=0.01,
