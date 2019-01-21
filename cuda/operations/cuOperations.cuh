@@ -5,6 +5,8 @@
 #include <stdio.h>
 
 
+// TODO comple with -fmad=true
+
 
 /* Inverse template function.
  * Float and double are availible.
@@ -26,11 +28,12 @@ __device__ void inverse <double> (double* in, double* out) {
         __drcp_rn(in[idx]); // TODO check if out == 0 by default
 }
 
-/* ************************************ */
 
-
+/* Multiply number k to vector x. 
+ * @return k * x
+ */
 template <typename T>
-__device__ void prodNumToVec(T k, T* x, T* res) {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	
+__device__ void prodNumToVec(T k, T* x, T* res) { 
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	res[idx] = k*x[idx];
 }
