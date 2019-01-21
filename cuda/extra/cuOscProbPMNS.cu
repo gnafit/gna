@@ -33,3 +33,17 @@ __global__ void cuCalcComponent(double* xarg, double* xret, double* intern) {
 				xret);	
 }
 
+
+template <typename T>
+__global__ void cuCalcComponentCP(T* xarg, T* xret, T* intern);
+
+template <>
+__global__ void cuCalcComponentCP(double* xarg, double* xret, double* intern) {
+	inverse(xarg, intern);
+	prodNumToVec ((oscprobArgumentFactor * m_L * 0.5), intern, intern);
+
+	arr_sin(DeltaMSq<1,2>(), intern, xret);
+	mult_by_arr_sin(DeltaMSq<1,3>(), intern, xret);
+	mult_by_arr_sin(DeltaMSq<2,3>(), intern, xret);
+}
+
