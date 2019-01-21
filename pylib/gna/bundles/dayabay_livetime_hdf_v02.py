@@ -18,7 +18,7 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('first_day', 'last_day', 'ndays', 'ndays_daq'), \
+        return ('first_day', 'last_day', 'ndays', 'ndays_daq', 'seconds_in_day', 'days_in_second'), \
                ('eff_daily', 'livetime_daily', 'efflivetime_daily')
 
     def init_data(self):
@@ -39,6 +39,9 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
                           label='Last DAQ day end:    %s'%self.info['str_last_day'] )
         daq.reqparameter('ndays', central=self.info['days'], fixed=True,
                           label='Total number of days' )
+
+        self.reqparameter('seconds_in_day', None, central=24.*60.*60., fixed=True, label='Number of seconds in day')
+        self.reqparameter('days_in_second', None, central=1.0/(24.*60.*60.), fixed=True, label='Number of days in a second')
 
         data_lt = 0.0
         for it in self.nidx:

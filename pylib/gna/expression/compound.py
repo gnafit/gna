@@ -141,7 +141,7 @@ class VProduct(IndexedContainer, Variable):
             if not isinstance(o, Variable):
                 raise Exception('Expect Variable instance')
 
-            if isinstance(o, VProduct):
+            if self.expandable and isinstance(o, VProduct) and o.expandable:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -154,6 +154,7 @@ class VProduct(IndexedContainer, Variable):
     @call_once
     def bind(self, context):
         printl_debug('bind (var) {}:'.format(type(self).__name__), str(self) )
+        from gna.env import ExpressionsEntry, ExpressionWithBindings
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
@@ -171,7 +172,9 @@ class VProduct(IndexedContainer, Variable):
                         path, head = '', name
                         ns = context.ns
                     vp = R.VarProduct( stdvector( names ), head, ns=ns )
-                    v=ns[head].get()
+                    v=ns[head]
+                    if isinstance(v, (ExpressionsEntry, ExpressionWithBindings)):
+                        v=v.get()
                     v.setLabel( name+' = '+' * '.join(names) )
 
 class NestedTransformation(object):

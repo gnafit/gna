@@ -172,6 +172,12 @@ class exp(baseexp):
                     #taken from transformations/neutrino/ReactorNorm.cc
                     pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                     ),
+            nprotons_nominal =  NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter='nprotons_nominal',
+                    label='Daya Bay nominal number of protons (20 tons x GdLS Np/ton)',
+                    pars = uncertain(20.0*7.163e28, 'fixed'),
+                    ),
             iav = NestedDict(
                     bundle     = dict(name='detector_iav_db_root_v03'),
                     parname    = 'OffdiagScale',
@@ -437,19 +443,20 @@ class exp(baseexp):
         'eres_matrix| evis_hist()',
         'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
         # Bkg
-        'bkg_acc = efflivetime * acc_norm[d] * bkg_rate_acc[d] * bkg_spectrum_acc[d]()',
-        'bkg_lihe  = efflivetime[d] * bkg_rate_lihe[s]  * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
         'fastn_shape[s]',
-        'bkg_fastn = efflivetime[d] * bkg_rate_fastn[s] * bkg_spectrum_fastn[s]()',
-        'bkg_amc   = efflivetime[d] * bkg_rate_amc[d] * bkg_spectrum_amc()',
-        'bkg_alphan   = efflivetime[d] * bkg_rate_alphan[d] * bkg_spectrum_alphan[d]()',
+        'bkg_acc      = days_in_second * efflivetime[d] * bkg_rate_acc[d]    * acc_norm[d] * bkg_spectrum_acc[d]()',
+        'bkg_fastn    = days_in_second * efflivetime[d] * bkg_rate_fastn[s]                * bkg_spectrum_fastn[s]()',
+        'bkg_amc      = days_in_second * efflivetime[d] * bkg_rate_amc[d]                  * bkg_spectrum_amc()',
+        'bkg_alphan   = days_in_second * efflivetime[d] * bkg_rate_alphan[d]               * bkg_spectrum_alphan[d]()',
+        'bkg_lihe     = days_in_second * efflivetime[d] * bkg_rate_lihe[s]   * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
         'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
-        'norm_bf = global_norm* eff* effunc_uncorr[d]'
+        'norm_bf = global_norm*eff*effunc_uncorr[d]'
 
     ]
 
     formula_ibd_do = '''ibd =
                  norm_bf*
+                 conversion_factor*nprotons_nominal*
                  sum[c]|
                    pmns[c]*
                    eres[d]|
@@ -468,6 +475,7 @@ class exp(baseexp):
 
     formula_ibd_mid = '''ibd =
                  norm_bf*
+                 conversion_factor*nprotons_nominal*
                  eres[d]|
                    lsnl[d]|
                      iav[d]|
@@ -486,6 +494,7 @@ class exp(baseexp):
 
     formula_ibd_simple = '''ibd =
                       norm_bf*
+                      conversion_factor*nprotons_nominal*
                       eres[d]|
                         lsnl[d]|
                           iav[d]|
@@ -500,7 +509,7 @@ class exp(baseexp):
         '''
 
     formula_back = [
-            'observation_noeffects=norm_bf*eres()',
+            'observation_noeffects=norm_bf*conversion_factor*nprotons_nominal*eres()',
             'observation=rebin| ibd + bkg',
             'total=concat[d]| observation'
             ]
@@ -542,26 +551,26 @@ class exp(baseexp):
             ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
 
             # Accidentals
-            acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',             label='Acc num {detector}\n(best fit)}'),
+            acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n(best fit)}'),
             bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
 
             # Li/He
             bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n(frac)'),
             bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n(frac)'),
             bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n(norm)'),
-            lihe_num_bf       = dict(expr='bkg_rate_lihe*efflivetime'),
+            lihe_num_bf       = dict(expr='bkg_rate_lihe*days_in_second*efflivetime'),
             bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n(w: {weight_label})'),
 
             # Fast neutrons
-            fastn_num_bf      = dict(expr='bkg_rate_fastn*efflivetime'),
+            fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
             bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n(w: {weight_label})'),
 
             # AmC
-            amc_num_bf        = dict(expr='bkg_rate_amc*efflivetime'),
+            amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
             bkg_amc           = dict(expr='bkg_spectrum_amc*amc_num_bf',                   label='AmC {detector}\n(w: {weight_label})'),
 
             # AlphaN
-            alphan_num_bf     = dict(expr='bkg_rate_alphan*efflivetime'),
+            alphan_num_bf     = dict(expr='bkg_rate_alphan*days_in_second*efflivetime'),
             bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n(w: {weight_label})'),
 
             # Total background
