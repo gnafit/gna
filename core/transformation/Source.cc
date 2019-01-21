@@ -22,17 +22,17 @@ void Source::connect(Sink *newsink) {
   if (sink) {
     std::cerr << this << " " << name << " " << sink->entry->name << "\n";
     throw std::runtime_error(
-      (format("Transformation: source `%1%' is already connected to sink `%2%',"
-              " won't connect to `%3%'") % name % sink->name % newsink->name)
-       .str()
-      );
+      (fmt::format("Transformation: source `{0}' is already connected to sink `{1}',"
+              " won't connect to `{2}'", name, sink->name, newsink->name)));
   }
   //if (false) {
     //throw std::runtime_error("Transformation: connecting incompatible types");
   //}
   TR_DPRINTF("connecting source `%s'[%p] on `%s' to sink `%s'[%p] on `%s'\n", name.c_str(), (void*)this, entry->name.c_str(), newsink->name.c_str(), (void*)newsink, newsink->entry->name.c_str());
   sink = newsink;
-  sink->entry->tainted.subscribe(entry->tainted);
+  if( !this->inactive ){
+    sink->entry->tainted.subscribe(entry->tainted);
+  }
   newsink->sources.push_back(this);
   try {
     newsink->entry->evaluateTypes();

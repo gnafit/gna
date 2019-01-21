@@ -4,7 +4,7 @@
 from __future__ import print_function
 from load import ROOT as R
 from gna.configurator import NestedDict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from gna.env import env
 from matplotlib import pyplot as P
 from collections import OrderedDict
@@ -80,7 +80,7 @@ ax.set_ylabel( 'height' )
 ax.set_title( 'Histogram' )
 for spname in cfg.spectra:
     scfg = cfg[spname]
-    b, = execute_bundle(cfg=scfg)
+    b, = execute_bundles(cfg=scfg)
 
     for output, ns in zip(b.outputs.values(), b.namespaces):
         data = output.data()

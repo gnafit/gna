@@ -6,7 +6,7 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
-from constructors import Points
+from gna.constructors import Points
 
 arr = N.linspace( 0.0, 4.0, 81 )
 print( 'Data:', arr )

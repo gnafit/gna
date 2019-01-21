@@ -20,8 +20,8 @@ DataType &Itypes::operator[](int i) {
   }
   else if (i < 0) {
     throw std::runtime_error(
-      (format("invalid access to return type %1%, nstorages: %2%")
-              % i % m_types->size()).str());
+      (fmt::format("invalid access to return type {0}, nstorages: {1}", i, m_types->size())
+       ));
   }
   return (*m_types)[i];
 }

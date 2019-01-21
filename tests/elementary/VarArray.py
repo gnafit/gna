@@ -4,7 +4,7 @@
 from __future__ import print_function
 from load import ROOT as R
 from gna.env import env
-import constructors as C
+import gna.constructors as C
 
 ns = env.globalns
 names = [ 'one', 'two', 'three', 'four', 'five' ]

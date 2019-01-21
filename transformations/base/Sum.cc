@@ -24,6 +24,15 @@ Sum::Sum(bool gpu = false) : isgpu(gpu) {
 }
 
 /**
+ * @brief Construct Sum from vector of SingleOutput instances
+ */
+Sum::Sum(const OutputDescriptor::OutputDescriptors& outputs) : Sum(){
+  for(auto& output : outputs){
+    this->add(*output);
+  }
+}
+
+/**
  * @brief Add an input and connect it to the output.
  *
  * The input name is derived from the output name.
@@ -32,7 +41,7 @@ Sum::Sum(bool gpu = false) : isgpu(gpu) {
  * @return InputDescriptor instance for the newly created input.
  */
 InputDescriptor Sum::add(SingleOutput &out) {
-  return InputDescriptor(t_["sum"].input(out));
+  return InputDescriptor(t_[0].input(out));
 }
 
 /**
@@ -40,6 +49,6 @@ InputDescriptor Sum::add(SingleOutput &out) {
  * @param name -- a name for the new input.
  * @return InputDescriptor instance for the newly created input.
  */
-InputDescriptor Sum::add(const char* name) {
-  return InputDescriptor(t_["sum"].input(name));
+InputDescriptor Sum::add_input(const char* name) {
+  return InputDescriptor(t_[0].input(name));
 }

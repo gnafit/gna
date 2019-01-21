@@ -4,14 +4,16 @@
 #include <limits>
 #include <utility>
 #include <map>
-#include <unordered_map>
+#include <stack>
+#include <cmath>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/format.hpp>
+#include "fmt/format.h"
 #include <boost/math/constants/constants.hpp>
 
-#include "Parameters.hh"
 #include "GNAObject.hh"
+#include "parameters/parameter.hh"
+
 
 /* #define COVARIANCE_DEBUG */
 
@@ -44,18 +46,31 @@ public:
     : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
 
-  virtual ~Variable() { }
+  ~Variable() override = default;
 
-  const std::string &name() const { return m_name; }
-  virtual T value() { return m_var.value(); }
-  virtual const variable<T> &getVariable() const noexcept { return m_var; }
+  virtual T value() const noexcept { return m_var.value(); }
+  const variable<T> &getVariable() const noexcept { return m_var; }
 
-  const std::string& label() const noexcept { return transformations[0].label(); }
-  void setLabel(const std::string& label) { transformations[0].setLabel(label); }
+  std::string name() const noexcept { return m_name; }
+
+  std::string inNamespace() const noexcept { return m_namespace; }
+  void setNamespace(const std::string& ns_name) { m_namespace = ns_name; };
+  std::string qualifiedName() const { return m_namespace + "." + m_name; };
+
+  std::string label() const noexcept { return m_label; }
+  void setLabel(const std::string& label) { m_label=label; }
+  void setLabel(std::string&& label) { m_label = label; }
+
+  size_t hash() const {return reinterpret_cast<size_t>(this);}
+
+  
+
 protected:
-  variable<T> m_var;
+  variable<T> m_var{};
   ParametrizedTypes::VariableHandle<T> m_varhandle;
   std::string m_name;
+  std::string m_label;
+  std::string m_namespace;
 };
 
 template <>
@@ -73,14 +88,6 @@ inline Variable<double>::Variable(const std::string &name)
     .finalize();
 }
 
-
-/* template <typename T>
- * struct ParameterComparator {
- *     bool operator()(const T& lhs, const T& rhs) const noexcept {
- *         return lhs.value() < rhs.value();
- *     };
- * }; */
-
 template <typename T>
 class Parameter: public Variable<T> {
 public:
@@ -88,71 +95,86 @@ public:
     : Variable<T>(name)
     { m_par = this->m_varhandle.claim(); }
 
-  static_assert(std::is_floating_point<T>::value, "Trying to use not floating point values in Parameter template");
-
-  friend bool operator < (const Parameter<T>& lhs, const Parameter<T>& rhs) noexcept
-  { return (lhs.value() < rhs.value()) || (lhs.name() < rhs.name());};
-
   virtual void set(T value)
     { m_par = value; }
+
+  void push(T value) {
+    m_stack.push(this->value());
+    this->set(value);
+  }
+
+  void pop() {
+    this->set(m_stack.top());
+    m_stack.pop();
+    return this->value();
+  }
 
   virtual T cast(const std::string& v) const
     { return boost::lexical_cast<T>(v); }
 
-  virtual T cast(const T& v) const
+  virtual T cast(const T& v) const noexcept
     { return v; }
 
-  virtual T central() { return m_central; }
-  virtual void setCentral(T value) { m_central = value; }
-  virtual void reset() { set(this->central()); }
+  T central() const noexcept { return m_central; }
+  void setCentral(T value) noexcept { m_central = value; }
+  void reset() { set(this->central()); }
 
-  virtual T step() { return m_step; }
-  virtual void setStep(T step) { m_step = step; }
+  T step() const noexcept { return m_step; }
+  void setStep(T step) noexcept { m_step = step; }
 
-  virtual T relativeValue(T diff)
+  T relativeValue(T diff) const noexcept
     { return this->value() + diff*this->m_step; }
-  virtual void setRelativeValue(T diff)
+  void setRelativeValue(T diff)
     { set(relativeValue(diff)); }
 
-  virtual void addLimits(T min, T max)
+  void addLimits(T min, T max)
     { m_limits.push_back(std::make_pair(min, max)); }
 
-  virtual const std::vector<std::pair<T, T>>& limits() const
+  const std::vector<std::pair<T, T>>& limits() const
     { return m_limits; }
 
-
-  virtual bool influences(SingleOutput &out) const noexcept {
+  bool influences(SingleOutput &out) const {
     return out.single().depends(this->getVariable());
   }
 
-  virtual bool isFixed() const noexcept { return this->m_fixed; }
-  virtual void setFixed() noexcept { this->m_fixed = true; }
+  bool isFixed() const noexcept { return this->m_fixed; }
+  void setFixed() noexcept { this->m_fixed = true; }
 
+  bool isFree() const noexcept { return this->m_free; }
+  void setFree(bool free=true) noexcept { this->m_free = free; }
 
-  virtual const parameter<T>& getParameter() const noexcept { return m_par; }
+  const parameter<T>& getParameter() const noexcept { return m_par; }
 
 protected:
   T m_central;
   T m_step;
   std::vector<std::pair<T, T>> m_limits;
-  /* using CovStorage = std::map<const Parameter<T>*, T>;
-   * CovStorage m_covariances; */
   parameter<T> m_par;
   bool m_fixed = false;
+  bool m_free = false;
 
+  std::stack<T> m_stack;
 };
-
 
 template <typename T>
 class GaussianParameter: public Parameter<T> {
 public:
   GaussianParameter(const std::string &name)
     : Parameter<T>(name) { }
+  std::vector<GaussianParameter<T>*> m_cov_pars{};
 
-  virtual T sigma() const noexcept { return m_sigma; }
-  virtual void setSigma(T sigma) { this->m_sigma=sigma; this->setStep(sigma*0.1); }
+   T sigma() const noexcept { return m_sigma; }
+   void setSigma(T sigma) noexcept {
+     this->m_sigma=sigma;
+     if(std::isinf(sigma)){
+       this->setFree();
+     }else{
+       this->setFree(false);
+       this->setStep(sigma*0.1);
+     }
+   }
 
-  virtual bool isCovariated(const GaussianParameter<T>& other) const noexcept {
+   bool isCovariated(const GaussianParameter<T>& other) const noexcept {
       auto it = this->m_covariances.find(&other);
       if (it == this->m_covariances.end() and (&other != this)) {
           return false;
@@ -161,11 +183,23 @@ public:
       }
   }
 
+   bool isCovariated() const noexcept {
+       return !m_covariances.empty();
+   }
 
-  virtual void setCovariance(GaussianParameter<T>& other, T cov) {
+   std::vector<GaussianParameter<T>*>  getAllCovariatedWith() const {
+      std::vector<GaussianParameter<T>*> tmp;
+          for (const auto& item: this->m_covariances){
+              tmp.push_back(const_cast<GaussianParameter<T>*>(item.first));
+      }
+      return tmp;
+  }
+
+
+   void setCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-        auto msg = boost::format("Covariance of parameters %1% and %2% is set to %3%");
-        std::cout << msg % this->name() % other.name() % cov << std::endl;
+     fmt::print("Covariance of parameters {0} and {1} is set to {2}",
+                 this->name(), other.name(), cov);
 #endif
     if (&other != this) {
         this->m_covariances[&other] = cov;
@@ -175,37 +209,49 @@ public:
     }
   }
 
-  virtual void updateCovariance(GaussianParameter<T>& other, T cov) {
+
+   void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
-    auto msg = boost::format("Covariance of parameters %1% and %2% is updated "
-                             "to %3% after setting in %1%");
-    std::cout << msg % this->name() % other.name() % cov << std::endl;
+       fmt::print("Covariance of parameters {0} and {1} is updated "
+                 "to {2} after setting in {0}", this->name(), other.name(), cov);
 #endif
     this->m_covariances[&other] = cov;
   }
 
-  virtual T getCovariance(const GaussianParameter<T>& other) const noexcept {
+   T getCovariance(const GaussianParameter<T>& other) const noexcept {
       if (this == &other) {return this->sigma()*this->sigma();}
       auto search = m_covariances.find(&other);
       if (search != m_covariances.end()) {
           return search->second;
       } else  {
 #ifdef COVARIANCE_DEBUG
-          auto msg = boost::format("Parameters %1% and %2% are not covariated");
-          std::cout << msg % this->name() % other.name() << std::endl;
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
 #endif
           return static_cast<T>(0.);
       }
   }
 
-  virtual T normalValue(T reldiff)
+  T getCorrelation(const GaussianParameter<T>& other) const noexcept {
+      if (this == &other) {return static_cast<T>(1);}
+      auto search = m_covariances.find(&other);
+      if (search != m_covariances.end()) {
+          return search->second / (this->sigma() * other.sigma());
+      } else  {
+#ifdef COVARIANCE_DEBUG
+          fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
+#endif
+          return static_cast<T>(0.);
+      }
+  }
+
+   T normalValue(T reldiff) const noexcept
     { return this->central() + reldiff*this->m_sigma; }
 
-  virtual void setNormalValue(T reldiff)
+   void setNormalValue(T reldiff)
     { this->set(this->normalValue(reldiff)); }
 protected:
-  T m_sigma;
   using CovStorage = std::map<const GaussianParameter<T>*, T>;
+  T m_sigma;
   CovStorage m_covariances;
 };
 

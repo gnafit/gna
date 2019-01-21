@@ -31,7 +31,7 @@
  * Segments with no points have coinciding indices nI=nJ.
  *
  * The transformation is needed in order to implement interpolation,
- * for example InterpExpo.
+ * for example InterpExpoSorted.
  *
  * Inputs:
  *   - segments.points - array (to interpolate on).

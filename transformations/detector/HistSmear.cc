@@ -6,7 +6,7 @@ HistSmear::HistSmear(bool upper) {
   transformation_("smear")
       .input("Ntrue")
       .input("SmearMatrix")
-      .output("Nvis")
+      .output("Nrec")
       .types(TypesFunctions::if1d<0>, TypesFunctions::ifSquare<1>,  TypesFunctions::pass<0,0>)
       .types([](TypesFunctionArgs fargs) {
                auto& args=fargs.args;

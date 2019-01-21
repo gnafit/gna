@@ -53,6 +53,8 @@ void NormalToyMC::calcToyMC(FunctionArgs fargs) {
     out = args[i+0].arr + args[i+1].arr*out;
   }
 
-  if(m_autofreeze)
+  if(m_autofreeze) {
+    rets.untaint();
     rets.freeze();
+  }
 }

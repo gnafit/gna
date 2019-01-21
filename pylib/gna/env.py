@@ -17,15 +17,6 @@ class namespacedict(OrderedDict):
         self[key] = value
         return value
 
-def findname(name, curns):
-    """@todo remove findname usage"""
-    # if '.' in name:
-        # nsname, name = name.rsplit('.', 1)
-        # ns = env.globalns(nsname)
-    # else:
-        # ns = curns
-    return curns[name]
-
 class ExpressionWithBindings(object):
     def __init__(self, ns, obj, expr, bindings):
         self.ns = ns
@@ -42,7 +33,7 @@ class ExpressionWithBindings(object):
                 if dep in known:
                     continue
                 try:
-                    dep = findname(dep, env.nsview)
+                    dep = env.nsview[dep]
                 except KeyError:
                     return None
             if isinstance(dep, ExpressionsEntry):
@@ -51,7 +42,7 @@ class ExpressionWithBindings(object):
                 path = dep.resolvepath(seen | {dep}, known)
                 if path is None:
                     return None
-                known.append(dep)
+                known.add(dep)
                 allpath.extend(path)
         return allpath
 
@@ -63,14 +54,21 @@ class ExpressionWithBindings(object):
                 continue
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
             if isinstance(dep, basestring):
-                dep = findname(dep, env.nsview)
+                dep = env.nsview[dep]
             v.bind(dep.getVariable())
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
 
 class ExpressionsEntry(object):
+    _label = None
     def __init__(self, ns):
         self.ns = ns
         self.exprs = []
+
+    def setLabel(self, label):
+        self._label = label
+
+    def label(self):
+        return self._label
 
     def add(self, obj, expr, bindings):
         self.exprs.append(ExpressionWithBindings(self.ns, obj, expr, bindings))
@@ -81,6 +79,8 @@ class ExpressionsEntry(object):
             raise KeyError()
         for expr in path:
             v = expr.get()
+            if self._label is not None:
+                v.setLabel(self._label)
         return v
 
     def resolvepath(self, seen, known):
@@ -137,11 +137,14 @@ class namespace(Mapping):
         env.nsview.remove([self])
 
     def __call__(self, nsname):
+        if not nsname:
+            return self
+
         if isinstance(nsname, basestring):
             if nsname=='':
                 return self
             parts = nsname.split('.')
-        else:
+        elif isinstance(nsname, (list,tuple)):
             parts = nsname
         if not parts:
             return self
@@ -155,22 +158,42 @@ class namespace(Mapping):
             if nsname not in self.namespaces:
                 self.namespaces[nsname] = otherns.namespaces[nsname]
 
-    def __getitem__(self, name):
-        if '.' in name:
-            path, head = name.rsplit('.', 1)
-            return self(path)[head]
+    def get_proper_ns(self, name):
+        if isinstance(name, (tuple, list)):
+            path, head = name[:-1], name[-1]
+        else:
+            path, head = (), name
 
-        v = self.storage[name]
+        if '.' in head:
+            newpath = tuple(head.split('.'))
+            path+=newpath[:-1]
+            head = newpath[-1]
+
+        if path:
+            return self(path), head
+        else:
+            return None, head
+
+    def __getitem__(self, name):
+        if not name:
+            return self
+
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage[head]
         if isinstance(v, basestring):
-            return findname(v, env.nsview)
+            return env.nsview[v]
         return v
 
     def __setitem__(self, name, value):
-        if '.' in name:
-            path, head = name.rsplit('.', 1)
-            return self(path).__setitem__(head, value)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            ns.__setitem__(head, value)
 
-        self.storage[name] = value
+        self.storage[head] = value
 
     def __iter__(self):
         return self.storage.iterkeys()
@@ -193,63 +216,47 @@ class namespace(Mapping):
         return pars
 
     def defparameter(self, name, *args, **kwargs):
-        if '.' in name:
-            path, name = name.rsplit('.', 1)
-            return self(path).defparameter(name, *args, **kwargs)
-        if name in self.storage:
-            raise Exception("{} is already defined in {}".format(name, self.path))
-        target = self.matchrule(name)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.defparameter(head, *args, **kwargs)
+
+        if head in self.storage:
+            raise Exception("{} is already defined in {}".format(head, self.path))
+        target = self.matchrule(head)
         if not target:
             target = kwargs.pop('target', None)
         if target:
             p = target
         else:
-            p = parameters.makeparameter(self, name, *args, **kwargs)
-        self[name] = p
+            p = parameters.makeparameter(self, head, *args, **kwargs)
+        self[head] = p
         return p
 
     def reqparameter(self, name, *args, **kwargs):
-        def without_status(name, **kwargs):
-            if '.' in name:
-                path, name = name.rsplit('.', 1)
-                return self(path).reqparameter(name, *args, **kwargs)
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.reqparameter(head, *args, **kwargs)
 
-            try:
-                par = self[name]
-                return par
-            except KeyError:
-                pass
-            try:
-                par = env.nsview[name]
-                return par
-            except KeyError:
-                pass
-            return self.defparameter(name, *args, **kwargs)
+        par = None
+        try:
+            par = self[head]
+        except KeyError:
+            pass
 
-        def with_status(name, **kwargs):
-            if '.' in name:
-                path, name = name.rsplit('.', 1)
-                return self(path).reqparameter(name, *args, **kwargs)
+        if not par:
+            try:
+                par = env.nsview[head]
+            except KeyError:
+                pass
 
-            found = False
-            try:
-                par = self[name]
-                found = True
-                return par, found
-            except KeyError:
-                pass
-            try:
-                par = env.nsview[name]
-                found = True
-                return par, found
-            except KeyError:
-                pass
-            return self.defparameter(name, *args, **kwargs), found
+        found=bool(par)
+        if not par:
+            par = self.defparameter(head, *args, **kwargs)
 
         if kwargs.get('with_status'):
-            return with_status(name, **kwargs)
-        else:
-            return without_status(name, **kwargs)
+            return par, found
+
+        return par
 
     def reqparameter_group(self, *args, **kwargs):
         import gna.parameters.covariance_helpers as ch
@@ -329,6 +336,15 @@ class namespace(Mapping):
         from gna.parameters.printer import print_parameters
         print_parameters(self, **kwargs)
 
+    def materializeexpressions(self, recursive=False):
+        for v in self.itervalues():
+            if not isinstance(v, ExpressionsEntry):
+                continue
+            v.get()
+
+        if recursive:
+            for ns in self.namespaces.values():
+                ns.materializeexpressions(True)
 
 class nsview(object):
     def __init__(self):
@@ -358,9 +374,12 @@ class nsview(object):
                 print('none')
         raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
 
+    def currentns(self):
+        return self.nses[0]
+
 class parametersview(object):
     def __getitem__(self, name):
-        res = findname(name, env.nsview)
+        res = env.nsview[name]
         return res
 
     @contextmanager
@@ -441,6 +460,7 @@ class _environment(object):
             self.globalns.objs.append(obj)
         else:
             ns.objs.append(obj)
+        obj.currentns = self.nsview.currentns()
         bindings = self._bindings+[kwargs.pop("bindings", OrderedDict())]
         if ns:
             ns.addexpressions(obj, bindings=bindings)
@@ -458,7 +478,7 @@ class _environment(object):
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
             if isinstance(param, basestring):
-                param = findname(param, self.nsview)
+                param = self.nsview[param]
             if isinstance(param, ExpressionsEntry):
                 param = param.get()
             if param is not None:
@@ -517,6 +537,6 @@ class _environment(object):
             nspath, obsname = objspec.rsplit("/", 1)
             return self.ns(nspath).observables[obsname]
         else:
-            return findname(objspec, self.globalns)
+            return self.globalns[objspec]
 
 env = _environment()

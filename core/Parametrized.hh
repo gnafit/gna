@@ -8,10 +8,12 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <boost/format.hpp>
+#include "fmt/format.h"
 
-#include "Parameters.hh"
 #include "SimpleDict.hh"
+#include "dependant.hh"
+#include "taintflag.hh"
+#include "callback.hh"
 
 class ParametersGroup;
 class GNAObject;
@@ -24,7 +26,7 @@ namespace ParametrizedTypes {
       Free = 0, Claimed, Bound,
     };
 
-    Entry(parameter<void> par, const std::string &name, const Base *parent);
+    Entry(parameter<void> par, std::string name, const Base *parent);
     Entry(const Entry &other, const Base *parent);
 
     void bind(variable<void> var);
@@ -86,7 +88,7 @@ namespace ParametrizedTypes {
   template <typename T>
   class VariableHandle: public VariableHandle<void> {
     friend class Base;
-    typedef VariableHandle<void> BaseClass;
+    using BaseClass = VariableHandle<void>;
   public:
     VariableHandle(Entry &entry)
       : BaseClass(entry) { }
@@ -109,19 +111,18 @@ namespace ParametrizedTypes {
   VariableHandle<T> &VariableHandle<T>::defvalue(const T& defvalue) {
     if (m_entry->state != Entry::State::Free) {
       throw std::runtime_error(
-        (boost::format("setting default value for non-free paremeter `%1%'")
-         % m_entry->name).str());
+        (fmt::format("setting default value for non-free paremeter `{0}'", m_entry->name)));
     }
     m_entry->par = defvalue;
     m_entry->required = false;
     return *this;
   }
 
-  typedef boost::view_clone_allocator view_clone_allocator;
-  typedef boost::ptr_vector<Entry, view_clone_allocator> SourcesContainer;
+  using view_clone_allocator = boost::view_clone_allocator;
+  using SourcesContainer = boost::ptr_vector<Entry, view_clone_allocator>;
   class EvaluableEntry: public boost::noncopyable {
   public:
-    EvaluableEntry(const std::string &name, const SourcesContainer &sources,
+    EvaluableEntry(std::string name, const SourcesContainer &sources,
                    dependant<void> dependant, const Base *parent);
     EvaluableEntry(const EvaluableEntry &other, const Base *parent);
 
@@ -152,8 +153,8 @@ namespace ParametrizedTypes {
     std::cerr << std::endl;
   }
 
-  typedef boost::ptr_vector<Entry> VariablesContainer;
-  typedef boost::ptr_vector<EvaluableEntry> EvaluablesContainer;
+  using VariablesContainer = boost::ptr_vector<Entry>;
+  using EvaluablesContainer = boost::ptr_vector<EvaluableEntry>;
 
   class Base {
     friend class ::ParametersGroup;
@@ -163,13 +164,13 @@ namespace ParametrizedTypes {
     Base &operator=(const Base &other);
 
   protected:
-    Base() { }
+    Base() : m_taintflag("base", true) { m_taintflag.set_pass_through(); }
     void copyEntries(const Base &other);
     void subscribe_(taintflag flag);
 
     template <typename T>
     VariableHandle<T> variable_(const std::string &name) {
-      Entry *e = new Entry(parameter<T>(name.c_str()), name, this);
+      auto *e = new Entry(parameter<T>(name.c_str()), name, this);
       m_entries.push_back(e);
       e->par.subscribe(m_taintflag);
       e->field = &e->var;
@@ -224,6 +225,7 @@ namespace ParametrizedTypes {
         }
       }
     }
+    DPRINTFS("make evaluable: %i deps", int(sources.size()));
     dependant<T> dep = dependant<T>(func, sources, name.c_str());
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
     return dep;
@@ -232,25 +234,23 @@ namespace ParametrizedTypes {
 
 class VariableDescriptor: public ParametrizedTypes::VariableHandle<void> {
 public:
-  typedef ParametrizedTypes::VariableHandle<void> BaseClass;
+  using BaseClass = ParametrizedTypes::VariableHandle<void>;
 
   VariableDescriptor(const BaseClass &other)
     : BaseClass(other)
   { }
-  VariableDescriptor(const VariableDescriptor &other)
-    : BaseClass(other)
-  { }
+  VariableDescriptor(const VariableDescriptor &other) = default;
   VariableDescriptor(ParametrizedTypes::Entry &entry)
     : BaseClass(entry)
   { }
   static VariableDescriptor invalid(const int& idx) {
       throw std::runtime_error(
-      (boost::format("Variable: invalid entry, idx == `%1%'") % idx).str());
+      (fmt::format("Variable: invalid entry, idx == `{0}'", idx)));
 
   };
   static VariableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
-      (boost::format("Variable: invalid entry, name == `%1%'") % name).str());
+      (fmt::format("Variable: invalid entry, name == `{0}'", name)));
   }
 
   void bind(variable<void> var) { BaseClass::bind(var); }
@@ -267,10 +267,10 @@ public:
 
 class EvaluableDescriptor: public ParametrizedTypes::EvaluableHandle<void> {
 public:
-  typedef ParametrizedTypes::EvaluableHandle<void> BaseClass;
+  using BaseClass = ParametrizedTypes::EvaluableHandle<void>;
 
-  typedef ParametrizedTypes::SourcesContainer SourcesContainer;
-  typedef SimpleDict<VariableDescriptor, SourcesContainer> Sources;
+  using SourcesContainer = ParametrizedTypes::SourcesContainer;
+  using Sources = SimpleDict<VariableDescriptor, SourcesContainer>;
 
   EvaluableDescriptor(const BaseClass &other)
     : BaseClass(other),
@@ -284,7 +284,7 @@ public:
   { }
   static EvaluableDescriptor invalid(const std::string name) {
     throw std::runtime_error(
-      (boost::format("Evaluable: invalid entry, name == `%1%'") % name).str());
+      (fmt::format("Evaluable: invalid entry, name == `{0}'", name)));
   }
 
   variable<void> &get() { return BaseClass::m_entry->dep; }

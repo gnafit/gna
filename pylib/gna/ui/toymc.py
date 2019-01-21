@@ -1,5 +1,6 @@
 from gna.ui import basecmd, append_typed
 import ROOT
+import gna.constructors as C
 import numpy as np
 
 class cmd(basecmd):
@@ -30,8 +31,8 @@ b
     def init(self):
         for name, prediction in self.opts.add:
             buf = prediction.data()
-            # data = ROOT.Points(np.random.normal(buf, buf**0.5))
-            data = ROOT.Points(buf.copy())
+            # data = C.Points(np.random.normal(buf, buf**0.5))
+            data = C.Points(buf)
             self.env.parts.data[name] = data
             print 'Asimov', name
 

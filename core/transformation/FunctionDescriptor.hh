@@ -6,7 +6,7 @@
 namespace TransformationTypes
 {
   struct Storage;
-  typedef boost::ptr_vector<Storage> StoragesContainer;  ///< Container for Storage pointers.
+  using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
 
   /**
    * @brief A class to keep transformation function information
@@ -27,5 +27,5 @@ namespace TransformationTypes
     StorageTypesFunctionsContainer typefuns; ///< Container with TypesFunction specifying the storage requirements for this particular function
   };
 
-  typedef std::map<std::string, FunctionDescriptor> FunctionDescriptorsContainer;
+  using FunctionDescriptorsContainer = std::map<std::string, FunctionDescriptor>;
 }

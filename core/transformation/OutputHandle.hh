@@ -40,11 +40,11 @@ namespace TransformationTypes
     const DataType &datatype() const { return m_sink->data->type; }          ///< Return Sink's DataType.
 
     const void *rawptr() const { return static_cast<const void*>(m_sink); }  ///< Return Source's pointer as void pointer.
-    const size_t hash() const { return reinterpret_cast<size_t>(rawptr()); } ///< Return a Source's hash value based on it's pointer address.
+    size_t hash() const { return reinterpret_cast<size_t>(rawptr()); } ///< Return a Source's hash value based on it's pointer address.
 
     bool depends(changeable x) const;                                        ///< Check that Sink depends on a changeable.
 
-  private:
+  protected:
     const double *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
     Sink *m_sink;                                                            ///< Pointer to the Sink.
   }; /* class OutputHandle */

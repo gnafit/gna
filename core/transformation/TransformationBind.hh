@@ -26,7 +26,7 @@
 template <typename Derived>
 class TransformationBind: public virtual TransformationTypes::Base {
 public:
-  TransformationBind() { }                                                   ///< Default constructor.
+  TransformationBind() = default;                                                   ///< Default constructor.
   /**
    * @brief Clone constructor.
    *
@@ -59,16 +59,16 @@ public:
   TransformationTypes::Initializer<Derived> transformation_(const std::string &name) {
     return TransformationTypes::Initializer<Derived>(this, name);
   }
+protected:
+  friend class TransformationTypes::Initializer<Derived>;
+  using Initializer = typename TransformationTypes::Initializer<Derived>;
+  using MemFunction = typename Initializer::MemFunction;
+  using MemTypesFunction = typename Initializer::MemTypesFunction;
+  using MemStorageTypesFunction = typename Initializer::MemStorageTypesFunction;
 
 private:
-  friend class TransformationTypes::Initializer<Derived>;
-  typedef typename TransformationTypes::Initializer<Derived> Initializer;
-  typedef typename Initializer::MemFunction MemFunction;
-  typedef typename Initializer::MemTypesFunction MemTypesFunction;
-  typedef typename Initializer::MemStorageTypesFunction MemStorageTypesFunction;
-
-  typedef std::list<std::tuple<size_t, size_t, MemTypesFunction>> MemTypesFunctionGMap;
-  typedef std::list<std::tuple<size_t, std::string, size_t, MemStorageTypesFunction>> MemStorageTypesFunctionGMap;
+  using MemTypesFunctionGMap = std::list<std::tuple<size_t, size_t, MemTypesFunction>>;
+  using MemStorageTypesFunctionGMap = std::list<std::tuple<size_t, std::string, size_t, MemStorageTypesFunction>>;
 
   /**
    * @brief Return `this` casted to the Derived type (CRTP).

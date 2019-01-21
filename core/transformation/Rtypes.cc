@@ -16,8 +16,7 @@ using TransformationTypes::SinkTypeError;
 DataType &Rtypes::operator[](int i) {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
-      (format("invalid access to return type %1%, nsinks: %2%")
-              % i % m_types->size()).str());
+      (fmt::format("invalid access to return type {0}, nsinks: {1}", i, m_types->size())));
   }
   return (*m_types)[i];
 }
@@ -33,8 +32,7 @@ DataType &Rtypes::operator[](int i) {
 const DataType &Rtypes::operator[](int i) const {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
-      (format("invalid access to return type %1%, nsinks: %2%")
-              % i % m_types->size()).str());
+      (fmt::format("invalid access to return type {0}, nsinks: {1}", i, m_types->size())));
   }
   return (*m_types)[i];
 }

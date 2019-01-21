@@ -14,6 +14,24 @@ import numpy
 meta = WeakKeyDictionary()
 init_globals = dict( percent=0.01, numpy=numpy )
 
+def process_key(key):
+    listkey = None
+    if isinstance( key, basestring ):
+        if '.' in key:
+            listkey = tuple(key.split('.'))
+    elif isinstance( key, (list, tuple) ):
+        listkey = ()
+        for sk in key:
+            if isinstance(sk, (list, tuple)):
+                listkey+=tuple(sk)
+            else:
+                listkey+=sk,
+
+    if listkey:
+        return listkey[0], listkey[1:]
+
+    return key, None
+
 class NestedDict(object):
     __parent__ = None
     def __init__(self, iterable=None, **kwargs):
@@ -30,18 +48,23 @@ class NestedDict(object):
             self.__import__(OrderedDict(sorted(kwargs.items())))
 
     def __repr__(self):
-        return self.__storage__.__repr__().replace('Ordered', 'Nested', 1)
+        return self.__storage__.__repr__().replace('OrderedDict(', 'NestedDict(', 1)
 
-    def __str__(self, margin=''):
+    def __str__(self, margin='', nested=False, width=None):
         if not self.__bool__():
             return '${}'
 
         res='${\n'
         margin+='  '
-        for k, v in self.items():
-            res+='{margin}{key} : '.format( margin=margin, key=k )
+        for k, v in self.items(nested=nested):
+            if nested:
+                k = '.'.join(k)
+            if width is None:
+                res+='{margin}{key} : '.format(margin=margin, key=k)
+            else:
+                res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
             if isinstance( v, NestedDict ):
-                res+=v.__str__(margin)
+                res+=v.__str__(margin, nested)
             elif isinstance( v, basestring ):
                 res+=repr(v)
             else:
@@ -52,10 +75,10 @@ class NestedDict(object):
         return res+margin+'}'
 
     def __bool__(self):
-        return bool(self.keys())
+        return bool(self.__storage__)
 
     def __len__(self):
-        return len(self.keys())
+        return len(self.__storage__)
 
     def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
@@ -75,7 +98,6 @@ class NestedDict(object):
 
         return self.__parent__.parent( n-1 )
 
-
     def parent_key(self):
         if self.__parent__ is None:
             return None
@@ -87,19 +109,20 @@ class NestedDict(object):
         raise KeyError( "Failed to determine own key in the parent dictionary" )
 
     def get(self, key, *args, **kwargs):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                sub = self.__storage__.get(key)
-                if sub is None:
-                    raise KeyError( "No nested key '%s'"%key )
-                return sub.get( rest, *args, **kwargs )
-
-        if isinstance( key, basestring ) and '.' in key:
-            return self.get(key.split('.'), *args, **kwargs)
+        key, rest=process_key(key)
+        if rest:
+            sub = self.__storage__.get(key)
+            if sub is None:
+                if args:
+                    return args[0]
+                raise KeyError( "No nested key '%s'"%key )
+            return sub.get( rest, *args, **kwargs )
 
         types=kwargs.pop('types', None)
-        obj=self.__storage__.get(key, *args, **kwargs)
+        if key is ():
+            obj = self
+        else:
+            obj=self.__storage__.get(key, *args, **kwargs)
         if types:
             if not isinstance(obj, types):
                 if isinstance(types, tuple):
@@ -109,13 +132,12 @@ class NestedDict(object):
         return obj
 
     def __getitem__(self, key):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                return self.__storage__.__getitem__(key).__getitem__( rest )
+        key, rest=process_key(key)
+        if rest:
+            return self.__storage__.__getitem__(key).__getitem__( rest )
 
-        if isinstance( key, basestring ) and '.' in key:
-            return self.__getitem__(key.split('.'))
+        if key is ():
+            return self
 
         return self.__storage__.__getitem__(key)
 
@@ -127,17 +149,13 @@ class NestedDict(object):
         if isinstance(value, NestedDict):
             value._set_parent( self )
 
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                if not key in self.__storage__:
-                    cfg = self.__storage__[key]=NestedDict()
-                    cfg._set_parent( self )
-                    return cfg.set( rest, value )
-                return self.__storage__.get(key).set( rest, value )
-
-        if isinstance( key, basestring ) and '.' in key:
-            return self.set( key.split('.'), value )
+        key, rest=process_key(key)
+        if rest:
+            if not key in self.__storage__:
+                cfg = self.__storage__[key]=NestedDict()
+                cfg._set_parent( self )
+                return cfg.set( rest, value )
+            return self.__storage__.get(key).set( rest, value )
 
         self.__storage__[key] = value
 
@@ -150,44 +168,61 @@ class NestedDict(object):
         if isinstance(value, NestedDict):
             value._set_parent( self )
 
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                if not key in self.__storage__:
-                    cfg = self.__storage__[key]=NestedDict()
-                    cfg._set_parent( self )
-                    return cfg.setdefault( rest, value )
-                return self.__storage__.get(key).setdefault( rest, value )
-
-        if isinstance( key, basestring ):
-            if '.' in key:
-                return self.setdefault(key.split('.'), value)
+        key, rest=process_key(key)
+        if rest:
+            if not key in self.__storage__:
+                cfg = self.__storage__[key]=NestedDict()
+                cfg._set_parent( self )
+                return cfg.setdefault( rest, value )
+            return self.__storage__.get(key).setdefault( rest, value )
 
         return self.__storage__.setdefault(key, value)
-
-    def keys(self):
-        return self.__storage__.keys()
 
     def __iter__(self):
         return iter(self.__storage__)
 
-    def values(self):
-        return self.__storage__.values()
+    def values(self, nested=False):
+        for v in self.__storage__.values():
+            if nested and isinstance(v, NestedDict):
+                for nv in v.values(nested=True):
+                    yield nv
+            else:
+                yield v
 
-    def items(self):
-        return self.__storage__.items()
+    def items(self, nested=False):
+        if nested:
+            for k, v in self.__storage__.items():
+                if isinstance(v, NestedDict):
+                    for nk, nv in v.items(nested=True):
+                        yield (k,)+nk, nv
+                else:
+                    yield (k,), v
+        else:
+            for k, v in self.__storage__.items():
+                yield k, v
+
+    def keys(self, nested=False):
+        if nested:
+            for k, v in self.__storage__.items():
+                if isinstance(v, NestedDict):
+                    for nk in v.keys(nested=True):
+                        yield (k,)+nk
+                else:
+                    yield k,
+        else:
+            for k in self.__storage__.keys():
+                yield k
 
     def __contains__(self, key):
-        if isinstance( key, (list, tuple) ):
-            key, rest = key[0], key[1:]
-            if rest:
-                return self.__storage__.get(key).__contains__(rest)
+        key, rest=process_key(key)
 
-        if isinstance( key, basestring ):
-            if '.' in key:
-                return self.__contains__(key.split('.'))
+        if not self.__storage__.__contains__(key):
+            return False
 
-        return self.__storage__.__contains__(key)
+        if rest:
+            return self.__storage__.get(key).__contains__(rest)
+
+        return True
 
     def __call__(self, key):
         if isinstance( key, (list, tuple) ):
@@ -230,20 +265,12 @@ class NestedDict(object):
                 if meta[self].get('verbose', False):
                     print( 'Skipping nonexistent file', filename )
                 continue
-            print(subst)
 
-            for variant in subst['values']:
-                if variant in filename.split('/'):
-                    folder = variant
-                    break
-            else:
-                folder = None
-
-            dic = self.__load_dic__(filename, dirname=folder, dictonly=True)
+            dic = self.__load_dic__(filename, dictonly=True)
             self.__import__(dic)
             unimportant = True
 
-    def __load_dic__(self, filename, dirname = None, dictonly=False):
+    def __load_dic__(self, filename, dictonly=False):
         print('Loading config file:', filename)
         dic =  runpy.run_path(filename, init_globals )
         for k in init_globals:
@@ -304,10 +331,13 @@ def configurator(filename=None, dic={}, **kwargs):
     return self
 
 class uncertain(object):
-    def __init__(self, central, uncertainty=None, mode='fixed'):
-        assert mode in ['absolute', 'relative', 'percent', 'fixed'], 'Unsupported uncertainty mode '+mode
+    def __init__(self, central, uncertainty, mode='', label=''):
+        if isinstance(uncertainty, str):
+            uncertainty, mode, label=None, uncertainty, mode
 
-        assert (mode=='fixed')==(uncertainty is None), 'Inconsistent mode and uncertainty'
+        assert mode in ['absolute', 'relative', 'percent', 'fixed', 'free'], 'Unsupported uncertainty mode '+mode
+
+        assert (mode in ['fixed', 'free'])==(uncertainty is None), 'Inconsistent mode and uncertainty'
 
         if mode=='percent':
             mode='relative'
@@ -316,9 +346,24 @@ class uncertain(object):
         if mode=='relative':
             assert central!=0, 'Central value should differ from 0 for relative uncertainty'
 
-        self.central = central
-        self.uncertainty   = uncertainty
-        self.mode    = mode
+        self.central     = central
+        self.uncertainty = uncertainty
+        self.mode        = mode
+        self.label       = label
+
+    def get_unc(self):
+        if self.mode=='relative':
+            relunc = self.uncertainty
+        elif self.mode=='relative':
+            relunc = self.uncertainty/self.central
+        elif self.mode=='fixed':
+            return None
+        elif self.mode=='free':
+            return float('inf')
+        else:
+            raise Exception('Unsupported mode '+self.mode)
+
+        return uncertain(1.0, relunc, mode='absolute')
 
     def __str__(self):
         res = '{central:.6g}'.format(central=self.central)
@@ -344,12 +389,13 @@ class uncertain(object):
         return 'uncertain({central!r}, {uncertainty!r}, {mode!r})'.format( **self.__dict__ )
 
 def uncertaindict(*args, **kwargs):
-    common = dict(
-        central = kwargs.pop( 'central', None ),
-        uncertainty   = kwargs.pop( 'uncertainty',   None ),
-        mode    = kwargs.pop( 'mode',    None ),
-    )
-    missing = [ s for s in ['central', 'uncertainty', 'mode'] if not common[s] ]
+    common = dict()
+    missing = []
+    for s in ['central', 'uncertainty', 'mode', 'label']:
+        if s in kwargs:
+            common[s]=kwargs.pop(s)
+        else:
+            missing.append(s)
     res  = OrderedDict( *args, **kwargs )
 
     for k, v in res.items():

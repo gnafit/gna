@@ -18,13 +18,13 @@ class cmd(basecmd):
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)
 
-        loaded_parameters = get_parameters(self.opts.par) 
+        loaded_parameters = get_parameters(self.opts.par)
         statistic_parameters = []
         for par in loaded_parameters:
             if par.influences(self.opts.statistic):
                 statistic_parameters.append(par)
             elif cfg.debug_par_fetching:
-                warnings.warn("parameter {} doesn't influence the statistic and is being dropped".format(par.name())) 
+                warnings.warn("parameter {} doesn't influence the statistic and is being dropped".format(par.name()))
             else:
                 continue
 

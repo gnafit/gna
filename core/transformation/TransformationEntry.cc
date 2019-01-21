@@ -33,7 +33,7 @@ using TransformationTypes::TypeError;
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), label(name), parent(parent), initializing(0), frozen(false)
+  : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0)
 { }
 
 /**
@@ -46,7 +46,7 @@ Entry::Entry(const std::string &name, const Base *parent)
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), initializing(0), frozen(false)
+    fun(), typefuns(), tainted(other.name.c_str()), initializing(0)
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -73,10 +73,11 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
  * @brief Initialize and return new input Source.
  *
  * @param name -- new Source's name.
+ * @param inactive -- set source inactive (do not subscribe taintflag)
  * @return InputHandle for the new Source.
  */
-InputHandle Entry::addSource(const std::string &name) {
-  Source *s = new Source(name, this);
+InputHandle Entry::addSource(const std::string &name, bool inactive) {
+  auto *s = new Source(name, this, inactive);
   sources.push_back(s);
   return InputHandle(*s);
 }
@@ -88,7 +89,7 @@ InputHandle Entry::addSource(const std::string &name) {
  * @return Source for the new Sink.
  */
 OutputHandle Entry::addSink(const std::string &name) {
-  Sink *s = new Sink(name, this);
+  auto *s = new Sink(name, this);
   sinks.push_back(s);
   return OutputHandle(*s);
 }
@@ -212,8 +213,7 @@ void Entry::evaluateTypes() {
   } catch (const TypeError &exc) {
     TR_DPRINTF("types[%s]: failed\n", name.c_str());
     throw std::runtime_error(
-      (format("Transformation: type updates failed for `%1%': %2%") % name % exc.what()).str()
-      );
+      (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
   } catch (const Atypes::Undefined&) {
     TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
@@ -275,7 +275,7 @@ void Entry::updateTypes() {
 
 /** @brief Update the transformation if it is not frozen and tainted. */
 void Entry::touch() {
-  if (tainted && !frozen) {
+  if (tainted) {
     update();
   }
 }
@@ -291,13 +291,13 @@ void Entry::touch() {
  */
 const Data<double> &Entry::data(int i) {
   if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
-    auto fmt = format("invalid sink idx %1%, have %2% sinks");
-    throw CalculationError(this, (fmt % i % sinks.size()).str());
+    auto msg = fmt::format("invalid sink idx {0}, have {1} sinks", i, sinks.size());
+    throw CalculationError(this, msg);
   }
   const Sink &sink = sinks[i];
   if (!sink.data) {
-    auto fmt = format("sink %1% (%2%) have no type");
-    throw CalculationError(this, (fmt % i % sink.name).str());
+    auto msg = fmt::format("sink {0} ({1}) have no type", i, sink.name);
+    throw CalculationError(this, msg);
   }
   touch();
 #ifdef GNA_CUDA_SUPPORT
@@ -320,8 +320,8 @@ const Data<double> &Entry::data(int i) {
 void Entry::switchFunction(const std::string& name){
   auto it = functions.find(name);
   if(it==functions.end()){
-    auto fmt = format("invalid function name %1%");
-    throw std::runtime_error((fmt%name.data()).str());
+    auto msg = fmt::format("invalid function name {0}", name.data());
+    throw std::runtime_error(msg);
   }
   fun = it->second.fun;
 

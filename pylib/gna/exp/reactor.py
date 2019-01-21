@@ -9,6 +9,7 @@ import gna.parameters.oscillation
 import itertools
 from gna.exp import baseexp
 from gna.env import env
+import gna.constructors as C
 
 
 year=365*24*60*60.0
@@ -177,7 +178,7 @@ class ReactorExperimentModel(baseexp):
         reactors -- iterable over Reactor objects, self.makereactors() will be called if None
         detectors -- iterable over Detector objects, self.makedetoctrs() will be called if None
         """
-        super(ReactorExperimentModel, self).__init__(opts)
+        super(ReactorExperimentModel, self).__init__(None, opts)
         self._oscprobs = {}
         self._oscprobcls = self.oscprob_classes[self.opts.oscprob]
         self._isotopes = defaultdict(list)
@@ -299,15 +300,15 @@ class ReactorExperimentModel(baseexp):
             for isoname in reactor.fission_fractions:
                 bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
             norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
-            lt=ROOT.Points(detector.livetime)
+            lt=C.Points(detector.livetime)
             lt.points.setLabel('livetime:\n'+detector.name)
             norm.isotopes.livetime(lt)
-            pr=ROOT.Points(reactor.power_rate)
+            pr=C.Points(reactor.power_rate)
             pr.points.setLabel('power:\n'+reactor.name)
             norm.isotopes.power_rate(pr)
             norm.isotopes.setLabel('norm:\n{} to {}'.format(reactor.name, detector.name))
             for isoname, frac in reactor.fission_fractions.iteritems():
-                ff=ROOT.Points(frac)
+                ff=C.Points(frac)
                 ff.points.setLabel('fission frac:\n{} at {}'.format(isoname, reactor.name))
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](ff)
         elif normtype == 'manual':
@@ -409,7 +410,7 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             integrator.points.setLabel('integrator 1d')
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
@@ -419,7 +420,7 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             integrator.points.setLabel('integrator 2d')
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
@@ -564,8 +565,9 @@ class ReactorExperimentModel(baseexp):
 
             with detector.ns:
                 detector.eres = ROOT.EnergyResolution()
+            detector.eres.matrix.Edges(self.integrator.points.xhist)
             detector.eres.smear.setLabel('Eres')
-            detector.eres.smear.inputs(finalsum)
+            detector.eres.smear.Ntrue(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
         det_ns = self.ns("detectors")(detector.name)
@@ -592,3 +594,4 @@ class ReactorExperimentModel(baseexp):
         for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
             geo_isons = ns("geo_isotopes")(geo_isoname)
             geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
+

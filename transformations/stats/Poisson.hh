@@ -28,7 +28,7 @@ public:
 
   void checkTypes(TypesFunctionArgs fargs);
 
-  virtual double value() override {
+  double value() override {
     return m_transform[0].x[0];
   }
 

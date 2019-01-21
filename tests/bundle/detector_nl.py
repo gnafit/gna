@@ -8,11 +8,11 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
+import gna.constructors as C
+from gna.converters import convert
 import numpy as N
 from gna.configurator import NestedDict, uncertain
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from physlib import percent
 
 from argparse import ArgumentParser
@@ -53,7 +53,7 @@ hist = C.Histogram( edges, phist )
 #
 # Initialize bundle
 #
-b, = execute_bundle( edges=points.single(), cfg=cfg )
+b, = execute_bundles( edges=points.single(), cfg=cfg )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']
 
@@ -111,7 +111,7 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared = smear.Nvis.data().copy()
+smeared = smear.Nrec.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 
 plot_hist( edges, phist, label='original' )

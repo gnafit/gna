@@ -14,13 +14,15 @@
 class Sum: public GNASingleObject,
            public TransformationBind<Sum> {
 public:
-  bool isgpu = false;
-  Sum(bool gpu);            
-  void makesum(Args args, Rets rets);
-  void cpu_sum(Args args, Rets rets);
-#ifdef GNA_CUDA_SUPPORT
-  void gpu_sum(Args args, Rets rets);
-#endif
+  Sum();                                                   ///< Constructor.
+  Sum(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Sum from vector of outputs
+
+  InputDescriptor add_input(const char* name);  ///< Add an input by name and leave unconnected.
+
+  /** @brief Add an input by name and leave unconnected. */
+  InputDescriptor add(const char* name){
+    return add_input(name);
+  }
+
   InputDescriptor add(SingleOutput &data);   ///< Add an input and connect it to the output.
-  InputDescriptor add(const char* name);     ///< Add an input by name and leave unconnected.
 };

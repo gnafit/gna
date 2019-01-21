@@ -1,0 +1,211 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+from gna.expression.compound import *
+
+class OperationMeta(type):
+    def __getitem__(cls, args):
+        if not isinstance(args, tuple):
+            args = args,
+        return cls(*args)
+
+class Operation(TCall,NestedTransformation):
+    __metaclass__ = OperationMeta
+    call_lock=False
+    order_from=None
+    def __init__(self, operation, *indices, **kwargs):
+        self.operation=operation
+        self.nindex_to_reduce = NIndex(*indices, order=self.order)
+        TCall.__init__(self, undefinedname)
+        NestedTransformation.__init__(self)
+
+    def __str__(self):
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce)
+
+    def __call__(self, *args):
+        if self.call_lock:
+            raise Exception('May call Operation only once')
+        self.call_lock=True
+
+        self.set_objects(*args)
+        self.set_indices(*args, ignore=self.nindex_to_reduce.indices.keys())
+        return self
+
+    def guessname(self, lib={}, save=False):
+        for o in self.objects:
+            o.guessname(lib, save)
+
+        cname = TCall.guessname(self)
+        newname='{}:{}|{}'.format(self.operation, self.nindex_to_reduce.ident(), cname)
+
+        label=None
+        if newname in lib:
+            libentry = lib[newname]
+            newname = libentry['name']
+            label   = libentry.get('label', None)
+        else:
+            newname = '{}{}'.format(self.text_operator, cname)
+
+        if save:
+            self.name = newname
+            self.set_label(label)
+
+        return newname
+
+    @methodname
+    def require(self, context):
+        IndexedContainer.require(self, context)
+
+    @call_once
+    def bind(self, context):
+        printl_debug('bind (operation) {}:'.format(type(self).__name__), str(self) )
+
+        with nextlevel():
+            IndexedContainer.bind(self, context, connect=False)
+
+        if not self.tinit:
+            return
+
+        with nextlevel():
+            printl_debug('def (operation)', str(self))
+            with nextlevel():
+                for freeidx in self.nindex.iterate():
+                    tobj, newout = self.new_tobject(freeidx)
+                    context.set_output(newout, self.name, freeidx)
+                    with nextlevel():
+                        for opidx in self.nindex_to_reduce.iterate():
+                            fullidx = freeidx+opidx
+                            for i, obj in enumerate(self.objects):
+                                output = obj.get_output(fullidx, context)
+                                inp  = tobj.add_input('%02d'%i)
+                                context.set_input(inp, self.name, fullidx, clone=i)
+                                output >> inp
+
+class OSum(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'sum', *indices, **kwargs)
+        self.set_operator( ' Σ ', text='sum_' )
+
+        import ROOT as R
+        self.set_tinit( R.Sum )
+
+    @call_once
+    def bind(self, context):
+        # Process sum of weigtedsums
+        if self.expandable and len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation) and self.objects[0].expandable:
+            return self.bind_wsum(context)
+
+        Operation.bind(self, context)
+
+    def bind_wsum(self, context):
+        import ROOT as R
+        self.set_tinit( R.WeightedSum )
+
+        printl_debug('bind (osum: weighted) {}:'.format(type(self).__name__), str(self) )
+
+        weight    = self.objects[0].weight
+        subobject = self.objects[0].object
+
+        self.objects_orig = self.objects
+        self.objects = [ subobject ]
+        with nextlevel():
+            IndexedContainer.bind(self, context, connect=False)
+
+        from gna.constructors import stdvector
+        with nextlevel():
+            for freeidx in self.nindex.iterate():
+                rindices = [ridx for ridx in self.nindex_to_reduce.iterate()]
+                names    = stdvector([(ridx+freeidx).current_format('{autoindex}') for ridx in rindices])
+                weights  = stdvector([weight.current_format(ridx+freeidx) for ridx in rindices])
+
+                tobj, newout = self.new_tobject(freeidx, weights, names, weight_label=weight.name)
+                context.set_output(newout, self.name, freeidx)
+
+                for i, (name, reduceidx) in enumerate(zip(names, rindices)):
+                    fullidx = freeidx+reduceidx
+                    inp = context.set_input(tobj.sum.inputs[name], self.name, freeidx, clone=i)
+                    output = subobject.get_output(fullidx, context)
+                    output >> inp
+
+            # from gna.constructors import stdvector
+            # labels  = stdvector([self.object.name])
+            # printl_debug('connect (weighted)')
+            # for idx in self.nindex.iterate():
+                # wname = self.weight.current_format(idx)
+                # weights = stdvector([wname])
+
+                # with context.ns:
+                    # tobj, newout = self.new_tobject( self.current_format(idx), labels, weights )
+                # inp = tobj.transformations[0].inputs[0]
+                # context.set_output(newout, self.name, idx)
+                # context.set_input(inp, self.name, idx)
+                # out = self.object.get_output(idx, context)
+                # out >> inp
+
+placeholder=['placeholder']
+class OProd(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'prod', *indices, **kwargs)
+        self.set_operator( ' Π ', text='prod_' )
+
+        import ROOT as R
+        self.set_tinit( R.Product )
+
+class OConcat(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'concat', *indices, **kwargs)
+        self.set_operator( ' ⊕ ', text='concat_' )
+
+        import ROOT as R
+        self.set_tinit( R.Concat )
+
+class OInverse(Operation):
+    def __init__(self, *indices, **kwargs):
+        Operation.__init__(self, 'inv', *indices, **kwargs)
+        self.set_operator( ' / ', text='inv_' )
+
+        import ROOT as R
+        self.set_tinit( R.Inverse )
+
+
+class Accumulate(IndexedContainer, Variable):
+    bound = False
+    def __init__(self, name, *args, **kwargs):
+        self.arrsums = []
+        if len(args)>1:
+            raise Exception('accumulate() supports only 1 argument')
+        if not isinstance(args[0], Transformation):
+            raise Exception('the only argument of accumulate() should be an object, not variable')
+
+        IndexedContainer.__init__(self, *args)
+        Variable.__init__(self, name, *self.objects)
+        self.set_operator( ' ∫ ', text='accumulate_'  )
+
+    @call_once
+    def bind(self, context):
+        if self.bound:
+            return
+
+        import ROOT as R
+        IndexedContainer.bind(self, context, connect=False)
+        obj, = self.objects
+        ns = context.namespace()
+        from gna.env import ExpressionsEntry
+        for it in self.nindex.iterate():
+            out = obj.get_output(it, context)
+            varname = self.current_format(it)
+
+            head, tail = varname.rsplit('.', 1)
+            cns = ns(head)
+            arrsum = R.ArraySum(tail, out, ns=cns)
+            var = cns[tail].get()
+            var.setLabel('sum of {}'.format(obj.current_format(it)))
+            self.arrsums.append(arrsum)
+
+        self.bound = True
+
+def bracket(obj):
+    obj.expandable = False
+    return obj
+

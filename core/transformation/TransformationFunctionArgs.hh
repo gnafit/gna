@@ -10,7 +10,7 @@
 
 namespace TransformationTypes
 {
-  class Entry;
+  struct Entry;
 
   /**
    * @brief Transformation Function arguments.

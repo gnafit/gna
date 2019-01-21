@@ -15,6 +15,6 @@ class cmd(basecmd):
         for name, prediction, parname in self.opts.add:
             der = ROOT.Derivative(self.env.pars[parname], self.opts.reldelta)
             der.derivative.inputs(prediction)
-            out = ROOT.Prediction()
+            out = ROOT.Concat()
             out.add(der)
             self.env.parts.prediction[name] = out

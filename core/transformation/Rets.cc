@@ -13,13 +13,13 @@ using TransformationTypes::CalculationError;
  */
 Data<double> &Rets::operator[](int i) const {
   if (i < 0 or static_cast<size_t>(i) > m_entry->sinks.size()) {
-    auto fmt = format("invalid ret idx %1%, have %2% rets");
-    throw this->error((fmt % i % m_entry->sinks.size()).str());
+    auto msg = fmt::format("invalid ret idx {0}, have {1} rets", i, m_entry->sinks.size());
+    throw this->error(msg);
   }
   auto &data = m_entry->sinks[i].data;
   if (!data) {
-    auto fmt = format("ret %1% (%2%) have no type on evaluation");
-    throw this->error((fmt % i % m_entry->sinks[i].name).str());
+    auto msg = format("ret {0} ({1}) have no type on evaluation", i, m_entry->sinks[i].name);
+    throw this->error(msg);
   }
 
   return *m_entry->sinks[i].data;

@@ -66,7 +66,7 @@ where :math:`M_i` is integration order for each :math:`x` bin :math:`i` and :mat
 
 For a given set of bin edges and orders the transformation computes sample points (output) and weights (internal). Given
 the array of all sample points :math:`x` of size :math:`M` and an array of :math:`y` sample points of size :math:`L` the
-function of interest should be computed on each :math:`(x,y)` pair with an output of shape :math:`[M\timexL]`. The
+function of interest should be computed on each :math:`(x,y)` pair with an output of shape :math:`[M\times L]`. The
 resulting matrix should be passed to :ref:`GaussLegendre2dHist <GaussLegendre2dHist>` instance.
 
 For more information on Gauss-Legendre quadrature see https://en.wikipedia.org/wiki/Gaussian_quadrature.

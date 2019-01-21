@@ -23,7 +23,7 @@ protected:
   std::unique_ptr<OscillationVariables> m_param;
   std::unique_ptr<PMNSVariables> m_pmns;
 
-  int m_alpha, m_beta;
+  int m_alpha, m_beta, m_lepton_charge;
 };
 
 class OscProbPMNS: public OscProbPMNSBase,
@@ -31,7 +31,7 @@ class OscProbPMNS: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNS>::transformation_;
 
-  OscProbPMNS(Neutrino from, Neutrino to);
+  OscProbPMNS(Neutrino from, Neutrino to, std::string l_name="L");
 
   template <int I, int J>
   void calcComponent(FunctionArgs fargs);
@@ -61,7 +61,7 @@ class OscProbPMNSMult: public OscProbPMNSBase,
 public:
   using TransformationBind<OscProbPMNSMult>::transformation_;
 
-  OscProbPMNSMult(Neutrino from, Neutrino to);
+  OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name="Lavg");
 
   template <int I, int J>
   void calcComponent(FunctionArgs fargs);

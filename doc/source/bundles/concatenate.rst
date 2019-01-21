@@ -8,13 +8,13 @@ Overview
 
 The bundle concatenates the outputs of all the namespaces into a common array.
 
-The bundle is a wrapper and configurator for the :ref:`Prediction` transformation which should be referred for further
+The bundle is a wrapper and configurator for the :ref:`Concat` transformation which should be referred for further
 documentation.
 
 Inputs, outputs and observables
 """""""""""""""""""""""""""""""
 
-The bundle provides the output of the :ref:`Prediction` by the ``common_namespace`` name. 
+The bundle provides the output of the :ref:`Concat` by the ``common_namespace`` name. 
 The observable is optionally added according to the configuration.
 
 .. code-block:: python

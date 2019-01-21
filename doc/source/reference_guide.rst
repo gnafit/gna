@@ -1,3 +1,5 @@
+.. _reference_guide:
+
 Reference guide
 ===============
 
@@ -40,16 +42,16 @@ Helper classes
 
    cppclasses/*
 
-Transformation bundles
-----------------------
+..  Transformation bundles
+    ----------------------
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
+    .. toctree::
+       :maxdepth: 1
+       :glob:
 
-   python_modules/TransformationBundle.rst
-   python_modules/NestedDict.rst
-   bundles/*
+       python_modules/TransformationBundle.rst
+       python_modules/NestedDict.rst
+       bundles/*
 
 Transformations
 ---------------
@@ -78,11 +80,11 @@ Basic types and actions
    transformations/HistEdges.rst
    transformations/Histogram.rst
    transformations/Points.rst
-   transformations/Prediction.rst
+   transformations/Concat.rst
    transformations/Rebin.rst
 
-Linear algebra
-^^^^^^^^^^^^^^
+Linear algebra and simple operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -93,9 +95,20 @@ Linear algebra
    transformations/Identity.rst
    transformations/Normalize.rst
    transformations/Product.rst
+   transformations/Ratio.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst
    transformations/WeightedSum.rst
+
+Interpolation
+^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/InSegment.rst
+   transformations/InterpExpo.rst
 
 Calculus
 ^^^^^^^^
@@ -153,6 +166,7 @@ Detector related
    :glob:
 
    transformations/EnergyResolution.rst
+   transformations/EnergyResolutionC.rst
    transformations/HistNonlinearity.rst
    transformations/HistSmear.rst
 

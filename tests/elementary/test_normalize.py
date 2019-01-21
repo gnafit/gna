@@ -7,7 +7,7 @@ from __future__ import print_function
 from matplotlib import pyplot as P
 import numpy as N
 from load import ROOT as R
-from constructors import Points
+from gna.constructors import Points
 from gna.env import env
 
 def test( s1, s2, step=1, start=None, length=None ):

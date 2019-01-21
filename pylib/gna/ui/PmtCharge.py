@@ -4,6 +4,7 @@ import ROOT
 import numpy as np
 import scipy.misc
 from scipy.stats import poisson
+import gna.constructors as C
 
 class cmd(basecmd):
     @classmethod
@@ -33,18 +34,18 @@ class cmd(basecmd):
         model = {}
         #ff = np.arange(1,n+1)
         #ff = 1/scipy.misc.factorial(ff)*np.exp(-self.opts.PoissionMean)
-        #ff_points = ROOT.Points(ff)
+        #ff_points = C.Points(ff)
         #print(ff, ff_points)
         with ns:
             for i in xrange(1,n+1):
                 print(i,n)
-                model[i] =  ROOT.GaussianPeakWithBackground(i) 
+                model[i] =  ROOT.GaussianPeakWithBackground(i)
                 model[i].rate.E(integrator.points.x)
          #       print(model[i].rate,model[i].rate.rate,ff_points[i])
                 prod = ROOT.Product()
                 prod.multiply(model[i].rate.rate)
                 poisson_factor = poisson.pmf(i, self.opts.PoissonMean)
-                poisson_factor_prod = ROOT.Points([poisson_factor])
+                poisson_factor_prod = C.Points([poisson_factor])
                 print(type(model[i].rate), poisson_factor,poisson_factor_prod)
                 prod.multiply(poisson_factor_prod)
                 signal.add(prod)

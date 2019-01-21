@@ -15,14 +15,14 @@ class OutputDescriptor;
 class TransformationDescriptor: public TransformationTypes::Handle,
                                 public SingleOutput {
 public:
-  typedef TransformationTypes::Handle BaseClass;
+  using BaseClass = TransformationTypes::Handle;
 
-  typedef TransformationTypes::SourcesContainer SourcesContainer;
-  typedef SimpleDict<InputDescriptor, SourcesContainer> InputsBase;
+  using SourcesContainer = TransformationTypes::SourcesContainer;
+  using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
   class Inputs;
 
-  typedef TransformationTypes::SinksContainer SinksContainer;
-  typedef SimpleDict<OutputDescriptor, SinksContainer> OutputsBase;
+  using SinksContainer = TransformationTypes::SinksContainer;
+  using OutputsBase = SimpleDict<OutputDescriptor, SinksContainer>;
   class Outputs;
 
   class Inputs: public InputsBase {
@@ -66,7 +66,7 @@ public:
 
 class InputDescriptor: public TransformationTypes::InputHandle {
 public:
-  typedef TransformationTypes::InputHandle BaseClass;
+  using BaseClass = TransformationTypes::InputHandle;
 
   InputDescriptor(const BaseClass &other)
     : BaseClass(other)
@@ -92,17 +92,24 @@ public:
   void operator()(const OutputDescriptor &out) const {
     connect(out);
   }
+  void operator()(const TransformationTypes::OutputHandle &out) const {
+    connect(out);
+  }
 
   void connect(GNASingleObject &obj) const;
   void connect(const TransformationDescriptor &obj) const;
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
+  void connect(const TransformationTypes::OutputHandle &out) const;
+
+  inline const OutputDescriptor output() const;
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandle,
                         public SingleOutput {
 public:
-  typedef TransformationTypes::OutputHandle BaseClass;
+  using BaseClass = TransformationTypes::OutputHandle;
+  using OutputHandle::data;
 
   OutputDescriptor(const BaseClass &other)
     : BaseClass(other)
@@ -117,5 +124,10 @@ public:
   static OutputDescriptor invalid(const std::string name);
 
   TransformationTypes::OutputHandle single() override { return *this; }
+
+  typedef std::vector<OutputDescriptor*> OutputDescriptors;
 };
 
+const OutputDescriptor InputDescriptor::output() const {
+  return OutputDescriptor(BaseClass::output());
+}
