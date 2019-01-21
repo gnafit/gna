@@ -4,6 +4,7 @@ from __future__ import print_function
 from gna.env import env
 import numpy as np
 import ROOT
+import itertools as it
 
 # Protect the following classes/namespaces from being wrapped
 ignored_classes = [
@@ -11,43 +12,50 @@ ignored_classes = [
         'EigenHelpers',
         'DataType',
         'GNA',
+        'GNAUnitTest',
+        'NeutrinoUnits',
         'TransformationTypes',
         'ParametrizedTypes',
+        'TypesFunctions',
+        'TMath',
         ]
 
-def hygienic(decorator):
-    def new_decorator(original):
-        wrapped = decorator(original)
-        wrapped.__name__ = original.__name__
-        wrapped.__doc__ = original.__doc__
-        wrapped.__module__ = original.__module__
-        wrapped.__original__ = original
-        return wrapped
-    return new_decorator
+def patchGNAclass(cls):
+    def newinit(self, *args, **kwargs):
+        self.__original_init__(*args)
+        if not self:
+            return
+        labels = kwargs.pop('labels', [])
+        bind = kwargs.pop('bind', True)
+        freevars = kwargs.pop('freevars', ())
+        bindings = kwargs.pop('bindings', {})
+        ns = kwargs.pop('ns', None)
+        if kwargs:
+            msg = "unknown keywords %s in constructor of %r"
+            msg = msg % (', '.join(kwargs.keys()), self)
+            raise Exception(msg)
+        env.register(self, bind=bind, freevars=freevars,
+                     ns=ns, bindings=bindings)
 
-@hygienic
-def wrapGNAclass(cls):
-    class WrappedClass(cls):
-        def __init__(self, *args, **kwargs):
-            super(WrappedClass, self).__init__(*args)
-            if not self:
-                return
-            bind = kwargs.pop('bind', True)
-            freevars = kwargs.pop('freevars', ())
-            bindings = kwargs.pop('bindings', {})
-            ns = kwargs.pop('ns', None)
-            if kwargs:
-                msg = "unknown keywords %s in constructor of %r"
-                msg = msg % (', '.join(kwargs.keys()), self)
-                raise Exception(msg)
-            env.register(self, bind=bind, freevars=freevars,
-                         ns=ns, bindings=bindings)
-        def __getattr__(self, attr):
-            try:
-                return self[attr]
-            except KeyError:
-                raise AttributeError(attr)
-    return WrappedClass
+        if isinstance(labels, str):
+            labels = [labels]
+        for trans, label in zip(self.transformations.values(), labels):
+            trans.setLabel(label)
+
+    def newgetattr(self, attr):
+        try:
+            return self[attr]
+        except KeyError:
+            raise AttributeError(attr)
+
+    cls.__original_init__, cls.__init__ = cls.__init__, newinit
+
+    if hasattr(cls, '__getattr__'):
+        cls.__original_getattr__, cls.__getattr__ = cls.__getattr__, newgetattr
+    else:
+        cls.__original_getattr__, cls.__getattr__ = None, newgetattr
+
+    return cls
 
 def patchSimpleDict(cls):
     def itervalues(self):
@@ -151,14 +159,6 @@ def patchTransformationDescriptor(cls):
     cls.__getattr__ = __getattr__
     cls.__getitem__ = __getitem__
 
-def patchSingle(single):
-    if not hasattr(single, 'single'):
-        return
-    oldsingle = single.single
-    def newsingle(self):
-        return ROOT.OutputDescriptor(oldsingle(self))
-    single.single = newsingle
-
 def patchStatistic(cls):
     def __call__(self):
         return self.value()
@@ -172,21 +172,8 @@ def patchDescriptor(cls):
     cls.__hash__ = __hash__
     cls.__eq__ = __eq__
 
-@hygienic
-def wrapPoints(cls):
-    class WrappedClass(cls):
-        def __init__(self, *args, **kwargs):
-            if len(args) == 1:
-                arr = args[0]
-                if isinstance(arr, np.ndarray) or isinstance(arr, list):
-                    shape = np.array(arr).shape
-                    arr = np.ascontiguousarray(arr, dtype=np.float64)
-                    shapevec = ROOT.vector("size_t")()
-                    for x in shape:
-                        shapevec.push_back(x)
-                    return super(WrappedClass, self).__init__(arr, shapevec, **kwargs)
-            super(WrappedClass, self).__init__(*args, **kwargs)
-    return WrappedClass
+def importcommon():
+    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
@@ -223,8 +210,6 @@ def setup(ROOT):
     for cls in dataproviders:
         patchDataProvider(cls)
 
-    patchSingle( ROOT.GNASingleObject )
-
     GNAObject = ROOT.GNAObject
     def patchcls(cls):
         if not isinstance(cls, ROOT.PyRootType):
@@ -232,10 +217,7 @@ def setup(ROOT):
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
         if issubclass(cls, GNAObject):
-            wrapped = wrapGNAclass(cls)
-            if cls.__name__ == 'Points':
-                wrapped = wrapPoints(wrapped)
-                patchSingle( wrapped )
+            wrapped = patchGNAclass(cls)
             return wrapped
         if 'Class' not in cls.__dict__:
             t = cls.__class__
@@ -251,6 +233,8 @@ def setup(ROOT):
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass
+
+    importcommon()
 
 def patchROOTClass( object=None, method=None ):
     """Decorator to override ROOT class methods. Usage
@@ -287,4 +271,3 @@ def patchROOTClass( object=None, method=None ):
         return converter( cfcn )
 
     return converter
-

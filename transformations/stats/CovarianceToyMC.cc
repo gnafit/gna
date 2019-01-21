@@ -22,7 +22,9 @@ void CovarianceToyMC::nextSample() {
   t_["toymc"].taint();
 }
 
-void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
+void CovarianceToyMC::calcTypes(TypesFunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   if (args.size()%2 != 0) {
     throw args.undefined();
   }
@@ -42,7 +44,9 @@ void CovarianceToyMC::calcTypes(Atypes args, Rtypes rets) {
   }
 }
 
-void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
+void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
   for (size_t i = 0; i < args.size(); i+=2) {
     auto &out = rets[i/2].vec;
     for (int j = 0; j < out.size(); ++j) {
@@ -50,6 +54,8 @@ void CovarianceToyMC::calcToyMC(Args args, Rets rets) {
     }
     out = args[i+0].vec + args[i+1].mat.triangularView<Eigen::Lower>()*out;
   }
-  if(m_autofreeze)
+  if(m_autofreeze) {
+    rets.untaint();
     rets.freeze();
+  }
 }

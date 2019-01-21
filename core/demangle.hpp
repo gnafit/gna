@@ -72,7 +72,7 @@ inline char const * demangle_alloc( char const * name ) BOOST_NOEXCEPT
 {
     int status = 0;
     std::size_t size = 0;
-    return abi::__cxa_demangle( name, NULL, &size, &status );
+    return abi::__cxa_demangle( name, nullptr, &size, &status );
 }
 
 inline void demangle_free( char const * name ) BOOST_NOEXCEPT

@@ -9,9 +9,9 @@ from gna.env import env
 from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
-from converters import convert
+from gna.converters import convert
 from argparse import ArgumentParser
-import constructors as C
+import gna.constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -75,7 +75,7 @@ for eset in [
         esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )
 
-        smeared = esmear.smear.Nvis.data()
+        smeared = esmear.smear.Nrec.data()
         print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
 
         # bars = P.bar( edges[:-1], phist, binwidth, align='edge' )

@@ -19,9 +19,7 @@ IbdFirstOrder::IbdFirstOrder()
   transformation_("Enu")
     .input("Ee")
     .input("ctheta")
-    .types([](Atypes args, Rtypes rets) {
-        rets[0] = DataType().points().shape(args[0].size(), args[1].size());
-      })
+    .types(TypesFunctions::toMatrix<0,1,0>)
     .output("Enu")
     .func(&IbdFirstOrder::calc_Enu);
   transformation_("xsec")
@@ -49,9 +47,9 @@ IbdFirstOrder::IbdFirstOrder()
   }
 }
 
-void IbdFirstOrder::calc_Enu(Args args, Rets rets) {
-  const auto &Ee = args[0].x;
-  const auto &ctheta = args[1].x;
+void IbdFirstOrder::calc_Enu(FunctionArgs fargs) {
+  const auto &Ee = fargs.args[0].x;
+  const auto &ctheta = fargs.args[1].x;
 
   ArrayXd r = Ee / m_pdg->ProtonMass;
   ArrayXd Ve = (1.0 - ElectronMass2 / Ee.square()).sqrt();
@@ -59,7 +57,7 @@ void IbdFirstOrder::calc_Enu(Args args, Rets rets) {
                 [](double E){return (!std::isnan(E) ? E : 0.);});
   ArrayXd Ee0 = Ee + (NeutronMass2-ProtonMass2-ElectronMass2)/m_pdg->ProtonMass*0.5;
   ArrayXXd corr = (1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r).inverse();
-  rets[0].arr2d = corr.colwise()*Ee0;
+  fargs.rets[0].arr2d = corr.colwise()*Ee0;
 }
 
 double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
@@ -89,10 +87,10 @@ double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
   return sigma1a + sigma1b;
 }
 
-void IbdFirstOrder::calc_Xsec(Args args, Rets rets) {
-  const auto &Eneu = args[0].arr2d;
-  const auto &ctheta = args[1].x;
-  auto &xsec = rets[0].arr2d;
+void IbdFirstOrder::calc_Xsec(FunctionArgs fargs) {
+  const auto &Eneu = fargs.args[0].arr2d;
+  const auto &ctheta = fargs.args[1].x;
+  auto &xsec = fargs.rets[0].arr2d;
 
   const double MeV2J = 1.E6 * TMath::Qe();
   const double J2MeV = 1./MeV2J;
@@ -106,14 +104,17 @@ void IbdFirstOrder::calc_Xsec(Args args, Rets rets) {
   }
 }
 
-void IbdFirstOrder::calc_dEnu_wrt_Ee(Args args, Rets rets) {
+void IbdFirstOrder::calc_dEnu_wrt_Ee(FunctionArgs fargs) {
+  auto& args=fargs.args;
   const auto &Enu = args[0].arr2d;
   const auto &Ee = args[1].x;
   const auto &ctheta = args[2].x;
-  auto jacobian = rets[0].arr2d;
+  auto& jacobian = fargs.rets[0].arr2d;
 
   ArrayXd Ve = (1.0 - ElectronMass2 / (Ee*Ee)).sqrt();
   ArrayXXd Vectheta = (Ve.matrix()*ctheta.matrix().transpose()).array();
   ArrayXXd ctheta_per_Ve = (Ve.inverse().matrix()*ctheta.matrix().transpose()).array();
   jacobian = (m_pdg->ProtonMass + (1.0-ctheta_per_Ve)*Enu )/( m_pdg->ProtonMass - (1-Vectheta).colwise()*Ee );
+  std::transform(jacobian.data(), jacobian.data() + jacobian.size(), jacobian.data(),
+                [](double E){return (std::isfinite(E) ? E : 0.);}); // FIXME: should be done by using proper Views
 }

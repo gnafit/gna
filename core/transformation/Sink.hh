@@ -3,6 +3,7 @@
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <memory>
+#include <utility>
 
 #include "Data.hh"
 
@@ -27,8 +28,8 @@ namespace TransformationTypes
      * @param name -- Sink name.
      * @param entry -- Entry pointer Sink belongs to.
      */
-    Sink(const std::string &name, Entry *entry)
-      : name(name), entry(entry) { }
+    Sink(std::string name, Entry *entry)
+      : name(std::move(name)), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Sink to get the name from.

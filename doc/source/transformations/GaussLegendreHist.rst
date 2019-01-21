@@ -25,7 +25,7 @@ Outputs
 
 .. code:: bash
 
-   ./tests/elementary/test_integral_gh1d.py -s
+   ./tests/elementary/test_integral_gl1d.py -s
 
 Implementation
 ^^^^^^^^^^^^^^

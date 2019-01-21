@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 
 #include <vector>
 #include <memory>
@@ -68,7 +68,7 @@ struct DataType {
    * @param other instance of DataType.
    */
   DataType(const DataType& other) :
-  kind{other.kind}, shape(other.shape), edges(other.edges)
+  kind{other.kind}, shape(other.shape), edges(other.edges), edgesNd(other.edgesNd)
   { }
 
   bool operator==(const DataType &other) const;                 ///< Check if data types are identical.
@@ -112,7 +112,8 @@ struct DataType {
   DataKind kind = DataKind::Undefined;                         ///< DataKind: points (array) or histogram?
   std::vector<size_t> shape;                                   ///< Data dimensions.
 
-  std::vector<double> edges = {};                              ///< Bin edges for 1D histogram. @todo Support 2D histograms.
+  std::vector<double> edges = {};                              ///< Bin edges for 1D histogram.
+  std::vector<std::vector<double>> edgesNd = {{}};             ///< Bin edges for ND histogram. TODO: resolve redundancy of edges and edgesNd
   //std::pair<double, double> bounds = {
     //-std::numeric_limits<double>::infinity(),
      //std::numeric_limits<double>::infinity()
@@ -377,6 +378,15 @@ public:
     if (m_type.edges != other.m_type.edges) {
       return false;
     }
+    if(m_type.edgesNd.size() != other.m_type.edgesNd.size()){
+      return false;
+    }
+    for (size_t i = 0; i < m_type.edgesNd.size(); ++i)
+    {
+      if (m_type.edgesNd[i] != other.m_type.edgesNd[i]) {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -384,8 +394,13 @@ public:
    * @brief Prints to stderr the dimensions and bin edges of the data.
    */
   void dump() const {
-    fprintf(stderr, ", bins == [%lu]", m_type.shape[0]);
-    fprintf(stderr, ", Edges[%lu]", edges().size());
+    fprintf(stderr, ", bins X == [%lu]", m_type.shape[0]);
+    if(m_type.shape.size()>1){
+      fprintf(stderr, ", bins Y == [%lu]", m_type.shape[1]);
+    }
+    for (size_t i = 0; i < m_type.edgesNd.size(); ++i) {
+      fprintf(stderr, ", Edges%i[%lu]", int(i), m_type.edgesNd[i].size());
+    }
     fprintf(stderr, "\n");
   }
 
@@ -416,6 +431,17 @@ public:
   }
 
   /**
+   * @brief Set the number of bins (2d).
+   * @param xbins -- the number of X bins.
+   * @param ybins -- the number of Y bins.
+   * @return `*this`.
+   */
+  DataType::Hist<T> &bins(size_t xbins, size_t ybins) {
+    m_type.shape = std::vector<size_t>{xbins, ybins};
+    return setKind();
+  }
+
+  /**
    * @brief Get the number of bins.
    * @return number of bins.
    */
@@ -430,7 +456,38 @@ public:
    */
   DataType::Hist<T> &edges(const std::vector<double> &edges) {
     m_type.edges = edges;
+    m_type.edgesNd[0]=m_type.edges;
     return bins(edges.size()-1);
+  }
+
+  /**
+   * @brief Set the bin edges via std::vector (2d).
+   * @param xedges -- vector with X bin edges.
+   * @param yedges -- vector with Y bin edges.
+   * @return `*this`.
+   */
+  DataType::Hist<T> &edges(const std::vector<double> &xedges, const std::vector<double> &yedges) {
+    m_type.edges = xedges;
+    m_type.edgesNd.resize(2);
+    m_type.edgesNd[0]=xedges;
+    m_type.edgesNd[1]=yedges;
+    return bins(xedges.size()-1, yedges.size()-1);
+  }
+
+  /**
+   * @brief Set the bin edges via double buffers (2d).
+   * @param nx -- number of X bin edges.
+   * @param xedges -- buffer with X bin edges.
+   * @param ny -- number of Y bin edges.
+   * @param yedges -- buffer with Y bin edges.
+   * @return `*this`.
+   */
+  DataType::Hist<T> &edges(size_t nx, double* xedges, size_t ny, double* yedges) {
+    m_type.edges.assign(xedges, xedges+nx);
+    m_type.edgesNd.resize(2);
+    m_type.edgesNd[0]=m_type.edges;
+    m_type.edgesNd[1].assign(yedges, yedges+ny);
+    return bins(nx-1, ny-1);
   }
 
   /**
@@ -441,6 +498,7 @@ public:
    */
   DataType::Hist<T> &edges(size_t n, double* edges) {
     m_type.edges.assign(edges, edges+n);
+    m_type.edgesNd[0]=m_type.edges;
     return bins(n-1);
   }
 
@@ -555,11 +613,11 @@ inline void DataType::dump() const {
  */
 template <typename T>
 class Data {
-  typedef Eigen::Array<T, Eigen::Dynamic, 1> ArrayXT;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> VectorXT;
+  using ArrayXT = Eigen::Array<T, Eigen::Dynamic, 1> ;
+  using VectorXT = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
-  typedef Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic> ArrayXXT;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> MatrixXT;
+  using ArrayXXT = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
+  using MatrixXT = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 public:
   /**
    * @brief Constructor.

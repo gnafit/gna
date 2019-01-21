@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+Broken, use expressions
+
+!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.configurator import NestedDict, uncertain, uncertaindict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from gna.env import env, findname
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_hist, plot_bar
@@ -186,8 +188,8 @@ ns = env.globalns('testexp')
 for det in cfg.detectors:
     detns = ns(det).reqparameter('livetime', central=10, sigma=0.1, fixed=True)
 
-b, = execute_bundle( cfg=bkg, common_namespace=ns )
-bfn, = execute_bundle( cfg=bkg.bkg_fn, common_namespace=ns )
+b, = execute_bundles( cfg=bkg, common_namespace=ns )
+bfn, = execute_bundles( cfg=bkg.bkg_fn, common_namespace=ns )
 
 print( 'Parameters:' )
 env.globalns.printparameters(labels=True)

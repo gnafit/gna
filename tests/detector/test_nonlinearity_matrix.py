@@ -10,9 +10,9 @@ from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
 from matplotlib import pyplot as P
-from converters import convert
+from gna.converters import convert
 from argparse import ArgumentParser
-import constructors as C
+import gna.constructors as C
 
 def rescale_to_matrix( edges_from, edges_to, **kwargs ):
     roundto = kwargs.pop( 'roundto', None )
@@ -45,12 +45,9 @@ matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 pedges_m = C.Points( edges_m )
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 
-histedges = R.HistEdges()
-histedges.histedges.hist( ntrue.hist )
-
 nl = R.HistNonlinearity(True)
-nl.set( histedges.histedges, pedges_m, ntrue )
-
+nl.set(ntrue.hist, pedges_m)
+nl.add_input()
 
 mat = nl.matrix.FakeMatrix.data()
 print( 'C++' )
@@ -69,6 +66,16 @@ print( diff )
 
 print()
 print( (diff==0.0).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+print(diff)
+
+ntrue.hist.hist.data()
+tflag1a = ntrue.hist.tainted()
+tflag2a = nl.matrix.tainted()
+ntrue.hist.taint()
+tflag1b = ntrue.hist.tainted()
+tflag2b = nl.matrix.tainted()
+print('taints', tflag1a, tflag2a, tflag1b, tflag2b)
+assert not tflag2b
 
 fig = P.figure()
 ax = P.subplot( 111 )

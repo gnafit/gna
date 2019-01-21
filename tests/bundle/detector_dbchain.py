@@ -1,17 +1,19 @@
-#!/usr/bin/env python
+Broken, use expressions
+
+!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 import numpy as N
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
+import gna.constructors as C
+from gna.converters import convert
 from gna.configurator import NestedDict, uncertaindict, uncertain
 import itertools as I
 from physlib import percent
@@ -97,7 +99,7 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 # Define the chain
 #
 shared = NestedDict( edges=points.single() )
-b, = execute_bundle(cfg=cfg.detector, namespaces=namespaces, shared=shared)
+b, = execute_bundles(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
 print('Parameters:')
 env.globalns.printparameters(labels=True)

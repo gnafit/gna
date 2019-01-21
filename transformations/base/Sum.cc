@@ -11,12 +11,23 @@ Sum::Sum() {
            TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
            TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
            )                                           ///<
-    .func([](Args args, Rets rets) {                   ///<   - provide the calculation function:
-        rets[0].x = args[0].x;                         ///<     * assign (copy) the first input to output
+    .func([](FunctionArgs& fargs) {                    ///<   - provide the calculation function:
+        auto& args=fargs.args;                         ///<     * extract transformation inputs
+        auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
+        ret = args[0].x;                               ///<     * assign (copy) the first input to output
         for (size_t j = 1; j < args.size(); ++j) {     ///<     * iteratively add all the other inputs
-          rets[0].x += args[j].x;                      ///<
+          ret += args[j].x;                            ///<
         }                                              ///<
       });                                              ///<
+}
+
+/**
+ * @brief Construct Sum from vector of SingleOutput instances
+ */
+Sum::Sum(const OutputDescriptor::OutputDescriptors& outputs) : Sum(){
+  for(auto& output : outputs){
+    this->add(*output);
+  }
 }
 
 /**
@@ -28,7 +39,7 @@ Sum::Sum() {
  * @return InputDescriptor instance for the newly created input.
  */
 InputDescriptor Sum::add(SingleOutput &out) {
-  return InputDescriptor(t_["sum"].input(out));
+  return InputDescriptor(t_[0].input(out));
 }
 
 /**
@@ -36,6 +47,6 @@ InputDescriptor Sum::add(SingleOutput &out) {
  * @param name -- a name for the new input.
  * @return InputDescriptor instance for the newly created input.
  */
-InputDescriptor Sum::add(const char* name) {
-  return InputDescriptor(t_["sum"].input(name));
+InputDescriptor Sum::add_input(const char* name) {
+  return InputDescriptor(t_[0].input(name));
 }

@@ -10,11 +10,11 @@ from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
+import gna.constructors as C
+from gna.converters import convert
 import numpy as N
 from gna.configurator import NestedDict, uncertain
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from physlib import percent
 
 # from argparse import ArgumentParser
@@ -51,7 +51,7 @@ hist = C.Histogram( edges, phist )
 #
 # Initialize bundle
 #
-b, = execute_bundle( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ] )
+b, = execute_bundles( edges=points.single(), cfg=cfg, namespaces=[ 'ad1', 'ad2' ] )
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale1, escale2 = (b.common_namespace('escale')[ns] for ns in [ 'ad1', 'ad2' ])
 
@@ -96,8 +96,8 @@ ax.set_xlabel( '' )
 ax.set_ylabel( '' )
 ax.set_title( 'Non-linearity effect' )
 
-smeared1 = nonlin1.smear.Nvis.data().copy()
-smeared2 = nonlin2.smear.Nvis.data().copy()
+smeared1 = nonlin1.smear.Nrec.data().copy()
+smeared2 = nonlin2.smear.Nrec.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared1.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared2.sum() ) )
 

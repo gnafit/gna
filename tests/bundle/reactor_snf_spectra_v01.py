@@ -1,15 +1,17 @@
-#!/usr/bin/env python
+Broken: subbundle removed
+
+!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.configurator import NestedDict, uncertain, uncertaindict
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 from gna.env import env
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_hist, plot_bar
-import constructors as C
+import gna.constructors as C
 from gna.labelfmt import formatter as L
 
 """Parse arguments"""
@@ -67,7 +69,7 @@ shared=NestedDict( points=points_t.single() )
 ns = env.globalns('testexp')
 
 """Execute bundle"""
-bundles = execute_bundle( cfg=cfg, common_namespace=ns, shared=shared )
+bundles = execute_bundles( cfg=cfg, common_namespace=ns, shared=shared )
 snf = bundles[-1]
 offeq = bundles[-2]
 

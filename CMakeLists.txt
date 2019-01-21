@@ -1,165 +1,23 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-set (SOURCES
-  core/GNAObject.cc
-  core/ParametersGroup.cc
-  core/ThreadPool.cc
-  core/Parametrized.cc
-  core/TransformationDescriptor.cc
-  core/UncertainParameter.cc
-  core/transformation/Accessor.cc
-  core/transformation/Args.cc
-  core/transformation/Atypes.cc
-  core/transformation/EntryHandle.cc
-  core/transformation/OutputHandle.cc
-  core/transformation/InputHandle.cc
-  core/transformation/Initializer.hh
-  core/transformation/Rets.cc
-  core/transformation/Rtypes.cc
-  core/transformation/Source.cc
-  core/transformation/TransformationBase.cc
-  core/transformation/TransformationEntry.cc
-  core/transformation/TransformationErrors.cc
-  core/transformation/TypesFunctions.cc
-  transformations/base/Prediction.cc
-  transformations/base/Product.cc
-  transformations/base/Sum.cc
-  transformations/base/WeightedSum.cc
-  transformations/calculus/Derivative.cc
-  transformations/calculus/Jacobian.cc
-  transformations/detector/C14Spectrum.cc
-  transformations/detector/EnergyResolution.cc
-  transformations/detector/HistNonlinearity.cc
-  transformations/detector/HistSmear.cc
-  transformations/functions/SelfPower.cc
-  transformations/functions/Exp.cc
-  transformations/hist/Rebin.cc
-  transformations/integrator/GaussLegendre.cc
-  transformations/integrator/GaussLegendre2d.cc
-  transformations/interpolation/LinearInterpolator.cc
-  transformations/interpolation/SegmentWise.cc
-  transformations/interpolation/InterpExpo.cc
-  transformations/linalg/Normalize.cc
-  transformations/linalg/RenormalizeDiag.cc
-  transformations/linalg/MatrixProduct.cc
-  transformations/neutrino/IbdFirstOrder.cc
-  transformations/neutrino/IbdInteraction.cc
-  transformations/neutrino/IbdZeroOrder.cc
-  transformations/neutrino/OscProb2nu.cc
-  transformations/neutrino/OscProbMatterUniform.cc
-  transformations/neutrino/OscProbPMNS.cc
-  transformations/neutrino/OscProbPMNSDecoh.cc
-  transformations/neutrino/ReactorGroup.cc
-  transformations/neutrino/ReactorNorm.cc
-  transformations/stats/Chi2.cc
-  transformations/stats/CovarianceToyMC.cc
-  transformations/stats/CovariatedPrediction.cc
-  transformations/stats/Covmat.cc
-  transformations/stats/NormalToyMC.cc
-  transformations/stats/Poisson.cc
-  transformations/stats/PoissonToyMC.cc
-  transformations/stats/ParCovMatrix.cc
-  transformations/var/VarDiff.cc
-  transformations/var/VarProduct.cc
-  transformations/var/VarSum.cc
-  transformations/var/VarArray.cc
-  extra/GridFilter.cc
-  )
+add_subdirectory(core)
+add_subdirectory(transformations)
+add_subdirectory(extra)
+add_subdirectory(examples)
+add_subdirectory(unittest)
 
-set (HEADERS
-  Data.hh
-  Random.hh
-  GeoNeutrinoFluxNormed.hh
-  Exceptions.hh
-  Sink.hh
-  Source.hh
-  Args.hh
-  Rets.hh
-  Rtypes.hh
-  Atypes.hh
-  TypesFunctions.hh
-  EntryHandle.hh
-  OutputHandle.hh
-  OpenHandle.hh
-  InputHandle.hh
-  TransformationDebug.hh
-  TransformationBase.hh
-  TransformationEntry.hh
-  TransformationErrors.hh
-  TransformationDescriptor.hh
-  TransformationBind.hh
-  SingleOutput.hh
-  Initializer.hh
-  Accessor.hh
-  GNAObject.hh
-  UncertainParameter.hh
-  Prediction.hh
-  CovariatedPrediction.hh
-  Product.hh
-  Sum.hh
-  WeightedSum.hh
-  Points.hh
-  Histogram.hh
-  HistEdges.hh
-  Identity.hh
-  LinearInterpolator.hh
-  SegmentWise.hh
-  InterpExpo.hh
-  FillLike.hh
-  Derivative.hh
-  Covmat.hh
-  Cholesky.hh
-  Chi2.hh
-  Poisson.hh
-  Exp.hh
-  SelfPower.hh
-  Normalize.hh
-  CovarianceToyMC.hh
-  NormalToyMC.hh
-  PoissonToyMC.hh
-  Rebin.hh
-  VarArray.hh
-  VarProduct.hh
-  VarSum.hh
-  VarDiff.hh
-  Minimizable.hh
-  Jacobian.hh
-  Neutrino.hh
-  OscillationVariables.hh
-  PMNSVariables.hh
-  OscProb2nu.hh
-  OscProbPMNS.hh
-  OscProbPMNSDecoh.hh
-  OscProbMatterUniform.hh
-  EvisToEe.hh
-  IbdInteraction.hh
-  IbdZeroOrder.hh
-  IbdFirstOrder.hh
-  ReactorNorm.hh
-  ReactorGroup.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
-  EnergyResolution.hh
-  HistNonlinearity.hh
-  HistSmear.hh
-  RenormalizeDiag.hh
-  C14Spectrum.hh
-  GaussianPeakWithBackground.hh
-  GridFilter.hh
-  EigenHelpers.hh
-  ParCovMatrix.hh
-  MatrixProduct.hh
-  Transpose.hh
-  ThreadPool.hh
-  )
+set(SOURCES ${CORE_SOURCES} ${TRANSFORMATION_SOURCES} ${EXTRA_SOURCES} ${EXAMPLES_SOURCES} ${UNITTEST_SOURCES})
+set(HEADERS ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
 
-include_directories(core/transformation/
+include_directories(core/parameters/
+                    core/transformation/
                     core/
+                    transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
                     transformations/calculus/
@@ -172,8 +30,11 @@ include_directories(core/transformation/
                     transformations/neutrino/
                     transformations/stats/
                     transformations/var/
+                    transformations/debug/
+                    transformations/legacy/
                     extra/
                     examples/
+                    unittest/
                    )
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -181,14 +42,31 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
+option(GENERATE_PROFILE OFF)
+option(USE_PROFILE OFF)
+option(UB_SANITIZE OFF)
+option(LTO OFF)
+
+#Check if LTO is possible
+if(LTO)
+    if(POLICY CMP0069)
+        cmake_policy(SET CMP0069 NEW)
+    endif()
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT output)
+endif()
+
+set(BUILD_SHARED_LIBS ON)
+
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe") # -O -g -fsanitize=address")
-include(dev-tools)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
-add_subdirectory(fmt EXCLUDE_FROM_ALL)
+include(compilation_opts)
+include(debug_opts)
+
+add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -204,6 +82,7 @@ else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM "fmt")
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
@@ -212,10 +91,21 @@ link_directories(${ROOT_LIBRARY_DIR})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
+
+if(result)
+    set_property(TARGET ${LIBNAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
-target_link_libraries(${LIBNAME} PRIVATE fmt::fmt-header-only)
+target_link_libraries(${LIBNAME} PRIVATE fmt)
 
+if(GENERATE_PROFILE)
+    target_link_libraries(${LIBNAME} PRIVATE "-fprofile-generate=${CMAKE_BINARY_DIR}/profile-data")
+endif()
 
+if(UB_SANITIZE)
+    target_link_libraries(${LIBNAME} PRIVATE "-fsanitize=undefined")
+endif()

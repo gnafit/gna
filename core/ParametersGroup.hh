@@ -11,22 +11,31 @@ class ParametersGroup {
   friend class ExpressionsProvider;
   friend class Reparametrizer;
 protected:
-  typedef ParametrizedTypes::VariableHandle<void> Handle;
-  typedef variable<void> *Field;
-  typedef Handle(ParametersGroup::*Factory)(Field, const std::string&);
-  typedef std::vector<Field> FieldsVector;
+  using Handle = ParametrizedTypes::VariableHandle<void>;
+  using Field = variable<void>*;
+  using Factory = Handle (ParametersGroup::*)(Field, const std::string &);
+  using FieldsVector =  std::vector<Field>;
   friend class Fields;
-  class Fields: public std::map<std::string, std::tuple<Field, Factory>> {
+
+  class Fields  {
   public:
     template <typename T>
     Fields &add(variable<T> *field, const std::string &name) {
-      (*this)[name] = std::make_tuple(field, &ParametersGroup::factory<T>);
+      m_map[name] = std::make_tuple(field, &ParametersGroup::factory<T>);
       return *this;
     }
+
+  using FieldsStorage = std::map<std::string, std::tuple<Field, Factory>>;
+  const FieldsStorage& expose() const noexcept {return m_map;};
+  size_t count(std::string entry) const noexcept {return m_map.count(entry);};
+  FieldsStorage::value_type::second_type& operator[](std::string mem) noexcept {return m_map[mem];};
+  private:
+    FieldsStorage m_map;
   };
+
 public:
-  ParametersGroup(GNAObject *parent, const Fields &fields);
-  virtual ~ParametersGroup() { }
+  ParametersGroup(GNAObject *parent, Fields fields);
+  virtual ~ParametersGroup() = default;
 
   void dump();
 
@@ -58,7 +67,7 @@ protected:
   const std::string &fieldName(Field field) const;
   virtual void setExpressions(ExpressionsProvider &/*provider*/) { }
 
-  GNAObject *m_parent;
+  ParametrizedTypes::Base* m_parent;
   Fields m_fields;
 };
 

@@ -1,5 +1,6 @@
 from __future__ import print_function
 import ROOT
+import gna.constructors as C
 from collections import defaultdict, namedtuple
 import numpy as np
 
@@ -12,7 +13,7 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
-        self._update_covariances(bases) 
+        self._update_covariances(bases)
 
     def _update_covariances(self, bases):
         from itertools import combinations
@@ -42,7 +43,7 @@ class Dataset(object):
         numpy array into points.
         """
         if not isinstance(type(obj), ROOT.PyRootType):
-            obj = ROOT.Points(obj)
+            obj = C.Points(obj)
         return obj
 
     def covariate(self, obs1, obs2, cov):
@@ -63,7 +64,7 @@ class Dataset(object):
 
     def sortobservables(self, observables, covparameters):
         """Splits observables into such a groups that observables that are
-        all covariated with respect to a covparameters or pull terms 
+        all covariated with respect to a covparameters or pull terms
         """
         to_process = list(observables)
         groups = [[]]
@@ -127,7 +128,7 @@ class Dataset(object):
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 
-    
+
 
 
     def makedata(self, obsblock):
@@ -139,7 +140,7 @@ class Dataset(object):
             return None
         if len(datas) == 1:
             return datas[0]
-        merged = ROOT.Prediction()
+        merged = ROOT.Concat()
         for data in datas:
             merged.append(data)
         return merged

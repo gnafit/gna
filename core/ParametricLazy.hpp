@@ -8,7 +8,7 @@
 #include <boost/fusion/sequence.hpp>
 #include <boost/fusion/container.hpp>
 
-#include "Parameters.hh"
+#include "dependant.hh"
 
 namespace proto = boost::proto;
 namespace mpl = boost::mpl;
@@ -111,7 +111,7 @@ struct ParametersTransform
 
 template <typename ReturnType, typename Expr, bool Free>
 class DependantEvaluable {
-  typedef dependant<ReturnType> evaluable_type;
+  using evaluable_type = dependant<ReturnType>;
 
 public:
   static evaluable_type get(Expr const &e) {

@@ -40,7 +40,8 @@ namespace TransformationTypes
       return m_entry->addSource(name);
     }
 
-    InputHandle input(SingleOutput &output);                 ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandle input(SingleOutput &output);                          ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandle input(const std::string &name, SingleOutput &output); ///< Create a new input and connect to the SingleOutput transformation.
 
     /**
      * @brief Add new named output.
@@ -71,10 +72,20 @@ namespace TransformationTypes
     void update(int i) const { (void)m_entry->data(i); }
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
-    void unfreeze() { m_entry->frozen = false; }            ///< @copybrief Entry::unfreeze().
+    void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
-    taintflag tainted() { return m_entry->tainted; }        ///< Return the Entry's taintflag status.
+    bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
+    taintflag& expose_taintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
+
+    /**
+     * @brief Switch the active Function.
+     *
+     * @copydoc Entry::switchFunction()
+     */
+    void switchFunction(const std::string& name) {
+      m_entry->switchFunction(name);
+    }
 
     bool check() const { return m_entry->check(); }         ///< Call Entry::check(). @copydoc Entry::check()
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()

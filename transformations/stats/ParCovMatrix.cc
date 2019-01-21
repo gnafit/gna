@@ -1,7 +1,7 @@
 #include "ParCovMatrix.hh"
 #include "fmt/ostream.h"
 
-void ParCovMatrix::FillMatrix(Args args, Rets rets) {
+void ParCovMatrix::FillMatrix(FunctionArgs fargs) {
     Eigen::MatrixXd pars_covmat{m_pars.size(), m_pars.size()};
     pars_covmat.setZero();
     for (size_t row{0}; row < m_pars.size(); ++row) {
@@ -12,7 +12,7 @@ void ParCovMatrix::FillMatrix(Args args, Rets rets) {
             pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
         }
     }
-        rets[0].mat = pars_covmat;
+    fargs.rets[0].mat = pars_covmat;
 }
 
 void ParCovMatrix::materialize() {

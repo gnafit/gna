@@ -1,167 +1,169 @@
 #include "InterpExpo.hh"
 #include "TypesFunctions.hh"
+#include "fmt/format.h"
 
-//#define DEBUG_INTERPEXPO
-
+#include <TMath.h>
 #include <stdexcept>
 
 using std::next;
 using std::prev;
+using std::advance;
+using TMath::Exp;
 
-InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : SegmentWise() {
-  transformation_("interp")
+//InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
+
+InterpExpo::InterpExpo() : InSegment() {
+  add_transformation(false);
+
+  //if(underflow_strategy.length()){
+    //this->setUnderflowStrategy(underflow_strategy);
+  //}
+  //if(overflow_strategy.length()){
+    //this->setOverflowStrategy(overflow_strategy);
+  //}
+}
+
+InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& newx) : InterpExpo()
+{
+  set(x, newx);
+  bind_transformations();
+}
+
+InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpExpo()
+{
+  interpolate(x, y, newx);
+}
+
+TransformationDescriptor InterpExpo::add_transformation(bool bind){
+  int num=transformations.size();
+  std::string name="interp";
+  if(num>1){
+      name = fmt::format("{0}_{1:02d}", name, num);
+  }
+  transformation_(name)
     .input("newx")             /// 0
     .input("x")                /// 1
-    .input("y")                /// 2
-    .input("segments")         /// 3
-    .input("widths")           /// 4
-    .output("interp")          ///
-    .types(TypesFunctions::ifPoints<0>, TypesFunctions::if1d<0>)
-    .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)
-    .types(TypesFunctions::ifPoints<2>, TypesFunctions::if1d<2>)
-    .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)
-    .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)
-    .types(TypesFunctions::ifSame2<1,2>, TypesFunctions::ifSame2<1,3>, TypesFunctions::ifBinsEdges<4,3>)
-    .types(TypesFunctions::pass<0,0>)
+    .input("insegment")        /// 2
+    .input("widths")           /// 3
+    .input("y")                /// 4
+    .output("interp")          /// 0
+    .types(TypesFunctions::ifPoints<0>)                                     /// newx is an array of any shape
+    .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)            /// x is an 1d array
+    .types(TypesFunctions::ifPoints<2>, TypesFunctions::ifSameShape2<0,2>)  /// segment index is of shape of newx
+    .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
+    .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
+    .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
+    .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
     ;
 
-  if(underflow_strategy.length()){
-    this->setUnderflowStrategy(underflow_strategy);
+  if(bind){
+    bind_transformations(false);
   }
-  if(overflow_strategy.length()){
-    this->setOverflowStrategy(overflow_strategy);
-  }
+  return transformations.back();
 }
 
-void InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto segments = this->t_["segments"];
-  auto sinputs  = segments.inputs();
-  auto soutputs = segments.outputs();
+void InterpExpo::set(SingleOutput& x, SingleOutput& newx){
+  auto segments = transformations.front();
+  auto sinputs  = segments.inputs;
   sinputs[0].connect(newx.single());
   sinputs[1].connect(x.single());
-
-  auto interp = this->t_["interp"];
-  auto iinputs = interp.inputs();
-  iinputs[0].connect(newx.single());
-  iinputs[1].connect(x.single());
-  iinputs[2].connect(y.single());
-  iinputs[3].connect(soutputs[0]);
-  iinputs[4].connect(soutputs[1]);
 }
 
-void InterpExpo::interpolate(TransformationDescriptor& segments, SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-  auto soutputs = static_cast<Handle&>(segments).outputs();
+InputDescriptor InterpExpo::add_input(){
+    auto interp=transformations.back();
+    auto input=interp.inputs.back();
+    if(input.bound()){
+        auto ninputs=interp.inputs.size()-3;
+        input=interp.input(fmt::format("{0}_{1:02d}", "y", ninputs));
+        interp.output(fmt::format("{0}_{1:02d}", "interp", ninputs));
+    }
 
-  auto interp = this->t_["interp"];
-  auto iinputs = interp.inputs();
-  iinputs[0].connect(newx.single());
-  iinputs[1].connect(x.single());
-  iinputs[2].connect(y.single());
-  iinputs[3].connect(soutputs[0]);
-  iinputs[4].connect(soutputs[1]);
+    return input;
 }
 
-void InterpExpo::do_interpolate(Args args, Rets rets){
-  auto& newx_a=args[0].x;
-  auto& x_a=args[1].x;
-  auto& y_a=args[2].x;
-  auto& widths_a=args[4].x;
+OutputDescriptor InterpExpo::add_input(SingleOutput& y){
+  auto input=add_input();
+  input.connect(y.single());
+  return OutputDescriptor(transformations.back().outputs.back());
+}
 
-  auto nseg=x_a.size()-1;
-  auto& b_a=((y_a.head(nseg)/y_a.tail(nseg)).log()/widths_a).eval();
+void InterpExpo::bind_transformations(bool bind_inputs){
+  auto segments=transformations.front();
+  auto interp=transformations.back();
 
-  auto k_current=y_a.data();
-  auto b_current=b_a.data();
-  auto e0_current=x_a.data();
+  auto& seg_inputs=segments.inputs;
+  auto& outputs=segments.outputs;
+  auto& inputs=interp.inputs;
 
-  auto& ddx_d=args[3];
-  auto  ddx_current=ddx_d.buffer;
-  auto  ddx_last=next(ddx_current, ddx_d.x.size()-1);
-  auto  ddx_next=next(ddx_current);
-
-  auto& interp_a=rets[0].x;
-
-  auto idx_current=static_cast<size_t>(*ddx_current);
-  if(idx_current>0u){
-    switch (m_underflow_strategy) {
-      case Constant:
-        interp_a.head(idx_current) = m_underflow;
-        #ifdef DEBUG_INTERPEXPO
-        printf("Fill %i->%i (%i): %g (head)\n", (int)0, (int)idx_current, (int)idx_current, m_underflow);
-        #endif
-        break;
-      case Extrapolate:
-        interp_a.head(idx_current) = *k_current * ((*e0_current - newx_a.head(idx_current))*(*b_current)).exp();
-        #ifdef DEBUG_INTERPEXPO
-        printf("Fill %i->%i (%i): fcn (head)\n", (int)0, (int)idx_current, (int)idx_current);
-        #endif
-        break;
-    }
+  if(bind_inputs) {
+    seg_inputs[0].output()>>inputs[0];
+    seg_inputs[1].output()>>inputs[1];
   }
+  outputs[0]>>inputs[2];
+  outputs[1]>>inputs[3];
+}
 
-  auto next_iter = [&](){
-    ddx_current=next(ddx_current);
-    ddx_next=next(ddx_next);
-    idx_current=static_cast<size_t>(*ddx_current);
+OutputDescriptor InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+  set(x, newx);
+  auto output=add_input(y);
+  bind_transformations();
+  return output;
+}
 
-    if(ddx_current>=ddx_last){
-      return false;
-    }
+void InterpExpo::do_interpolate(FunctionArgs& fargs){
+  auto& args=fargs.args;                                                  /// name inputs
+  auto& rets=fargs.rets;                                                  /// name outputs
 
-    k_current=next(k_current);
-    b_current=next(b_current);
-    e0_current=next(e0_current);
+  auto& points_a=args[0].x;                                               /// new x points
+  auto  npoints=points_a.size();                                          /// number of points
+  auto& x_a=args[1].x;                                                    /// x of segments
+  auto& widths_a=args[3].x;                                               /// segment widths
 
-    return true;
-  };
-  bool iterate=true;
-  while(iterate){
-    auto idx_next=static_cast<size_t>(*ddx_next);
-    auto length=idx_next-idx_current;
+  auto nseg=x_a.size()-1;                                                 /// number of segments
 
-    if(length==0u){
-      iterate=next_iter();
-      continue;
-    }
+  auto insegment_start=args[2].buffer;                                    /// insegment buffer
 
-    #ifdef DEBUG_INTERPEXPO
-    printf("Fill %i->%i (%i): fcn\n", (int)idx_current, (int)idx_next, (int)length);
-    #endif
-    interp_a.segment(idx_current, length) = *k_current * ((*e0_current - newx_a.segment(idx_current, length))*(*b_current)).exp();
+  for (size_t ret = 0; ret < rets.size(); ++ret) {
+    auto insegment=insegment_start;                                       /// insegment buffer
+    auto point=points_a.data();                                           /// point read buffer
+    auto x_buffer=x_a.data();                                             /// x's buffer
 
-    iterate=next_iter();
-  }
+    auto& y_a=args[4+ret].x;                                              /// y of segments, exponent scale
+    auto  y_buffer=y_a.data();                                            /// y's buffer
 
-  auto nleft=interp_a.size()-static_cast<long int>(idx_current);
-  if(nleft){
-    switch (m_underflow_strategy) {
-      case Constant:
-        interp_a.tail(nleft)=m_overflow;
-        #ifdef DEBUG_INTERPEXPO
-        printf("Fill %i->%i (%i): %g (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft, m_overflow);
-        #endif
-        break;
-      case Extrapolate:
-        interp_a.tail(nleft) = *k_current * ((*e0_current - newx_a.tail(nleft))*(*b_current)).exp();
-        #ifdef DEBUG_INTERPEXPO
-        printf("Fill %i->%i (%i): fcn (tail)\n", (int)idx_current, (int)interp_a.size(), (int)nleft);
-        #endif
-        break;
+    auto  b_a=((y_a.head(nseg)/y_a.tail(nseg)).log()/widths_a).eval();    /// b coefficient
+    auto  b_buffer=b_a.data();                                            /// b buffer
+
+    auto result=rets[ret].buffer;                                         /// interpolation write buffer
+
+    for(decltype(npoints) i{0}; i<npoints; ++i){
+      auto idx = static_cast<size_t>(*insegment);
+      if( *insegment<0 ){          /// underflow, extrapolate
+        idx=0u;
+      }
+      else if( *insegment>=nseg ){ /// overflow, extrapolate
+        idx=nseg-1u;
+      }
+      *result = *next(y_buffer, idx) * Exp((*next(x_buffer, idx) - *point)*(*next(b_buffer, idx)));
+
+      advance(point, 1);
+      advance(result, 1);
+      advance(insegment, 1);
     }
   }
 }
 
-InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
-  if(strategy=="constant"){
-    return Constant;
-  }
-  else if(strategy=="extrapolate"){
-    return Extrapolate;
-  }
-  else{
-    throw std::runtime_error("Unknown underflow/overflow strategy");
-  }
+//InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
+  //if(strategy=="constant"){
+    //return Constant;
+  //}
+  //else if(strategy=="extrapolate"){
+    //return Extrapolate;
+  //}
+  //else{
+    //throw std::runtime_error("Unknown underflow/overflow strategy");
+  //}
 
-  return Constant;
-}
+  //return Constant;
+//}

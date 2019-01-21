@@ -1,4 +1,5 @@
-#pragma once
+#ifndef REACTORCORE_H
+#define REACTORCORE_H
 
 #include <vector>
 #include <string>
@@ -15,3 +16,5 @@ protected:
   variable<double> m_nominalThermalPower;
   std::vector<variable<double>> m_ePerFission;
 };
+
+#endif // REACTORCORE_H

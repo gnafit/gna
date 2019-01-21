@@ -7,10 +7,10 @@ from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as P
 import numpy as N
-from converters import convert
+from gna.converters import convert
 import itertools as I
 from mpl_tools.helpers import savefig, add_colorbar
-import constructors as C
+import gna.constructors as C
 
 mu    = N.array( [ 1.0, 10.0, 100.0 ] )
 sigma = N.matrix( [ 1.0,  1.0, 10.0 ] )

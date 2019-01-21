@@ -11,7 +11,7 @@ public:
   Kind kind;
   Flavor flavor;
 
-  Neutrino(const Neutrino &other): kind(other.kind), flavor(other.flavor) { }
+  Neutrino(const Neutrino &other) = default;
   Neutrino(Kind t, Flavor f): kind(t), flavor(f) { }
   bool operator==(const Neutrino &other) const {
     return flavor == other.flavor && kind == other.kind;

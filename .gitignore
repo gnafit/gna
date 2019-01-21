@@ -38,3 +38,4 @@ config_local
 tags
 .cache
 data/*
+makerst
