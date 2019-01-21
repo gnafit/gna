@@ -93,6 +93,7 @@ namespace TransformationTypes
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
+    bool running=false;					 ///< Running status for scheduler. TODO check if it deprecated
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
