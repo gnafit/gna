@@ -524,6 +524,7 @@ class exp(baseexp):
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
             norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
+            prediction_scale        = dict(expr='conversion_factor*norm_bf*nprotons_nominal'),
             ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n{detector}'),
 
             lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
