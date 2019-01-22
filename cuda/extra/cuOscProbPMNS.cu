@@ -6,18 +6,23 @@
 #include <typeinfo>
 
 #include "cuRootMath.h"
-#include "cuMathFunctions.h"
-#include "cuOperations.cuh" 
+//#include "../operations/cuMathFunctions.h"
+#include "../operations/cuOperations.cuh" 
 #include <cuda.h>
 
 
-template <int I, int J, typename T>
-__global__ void cuCalcComponent(T* xarg, T* xret, T* intern); 
+// TODO del debug values
+
+//#define oscprobArgumentFactor 1.0
+//#define m_L 1.0
+
+
 // TODO define inern as array of the same as xarg size from internals
 
 
-template <>
-__global__ void cuCalcComponent(float* xarg, float* xret, float* intern) { 
+template <int I, int J, typename T=float>
+__global__ void cuCalcComponent 
+		(float* xarg, float* xret, float* intern) { 
 	inverse(xarg, intern);
 	prodNumToVec (cosf(DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5f), 
 				intern,
@@ -25,10 +30,10 @@ __global__ void cuCalcComponent(float* xarg, float* xret, float* intern) {
 }
 
 
-template <>
+template < int I, int J>
 __global__ void cuCalcComponent(double* xarg, double* xret, double* intern) { 
 	inverse(xarg, intern);
-	prodNumToVec (cosf(DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5), 
+	prodNumToVec (cos( DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5), 
 				intern,
 				xret);	
 }
@@ -41,5 +46,9 @@ __global__ void cuCalcComponentCP(T* xarg, T* xret, T* intern) {
 	arr_sin(DeltaMSq<1,2>(), intern, xret);
 	mult_by_arr_sin(DeltaMSq<1,3>(), intern, xret);
 	mult_by_arr_sin(DeltaMSq<2,3>(), intern, xret);
+// for debug
+//	arr_sin(1.0, intern, xret);
+//	mult_by_arr_sin(1.0, intern, xret);
+//	mult_by_arr_sin(1.0, intern, xret);
 }
 
