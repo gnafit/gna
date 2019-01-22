@@ -2,6 +2,13 @@
 #include <iostream>
 #include <chrono>
 
+/*
+* @brief Weighted sum of N vectors of length M into one
+* @return \f$\sum w * x\f$ 
+*
+* @author Ilya Lebedev
+* @date 2018
+*/
 
 template <typename T>
 __global__ void weightedsum(T** array, T** ans_array, T* weights, int n, int m) {
@@ -14,6 +21,13 @@ __global__ void weightedsum(T** array, T** ans_array, T* weights, int n, int m) 
 }
 
 
+/*
+* @brief Weighted sum of N vectors of length M into one
+* @return \f$\sum w * x + k\f$ 
+*
+* @author Ilya Lebedev
+* @date 2018
+*/
 template<typename T>
 __global__ void weightedsumfill(T** array, T** ans_array, T* weights, T k, int n, int m) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
