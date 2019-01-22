@@ -13,9 +13,11 @@ ignored_classes = [
         'DataType',
         'GNA',
         'GNAUnitTest',
+        'NeutrinoUnits',
         'TransformationTypes',
         'ParametrizedTypes',
         'TypesFunctions',
+        'TMath',
         ]
 
 def patchGNAclass(cls):

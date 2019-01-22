@@ -36,8 +36,6 @@ namespace TransformationTypes
     bool check() const; ///< Check the Entry.
     void dump() const;  ///< Dump the Entry.
 
-    taintflag& expose_taintflag() const noexcept { return m_sink->entry->tainted; }; ///< Return taintflag of underlying Entry
-
     const double *data() const;                                              ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
     const DataType &datatype() const { return m_sink->data->type; }          ///< Return Sink's DataType.
 

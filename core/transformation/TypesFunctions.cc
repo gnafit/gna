@@ -71,3 +71,32 @@ void TypesFunctions::ifSameShape(TypesFunctionArgs& fargs) {
   }
 }
 
+
+/**
+ * @brief Checks that all inputs are of the same shape are 1x1.
+ *
+ * Raises an exception otherwise.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception SourceTypeError in case input shapes are not the same.
+ */
+void TypesFunctions::ifSameShapeOrSingle(TypesFunctionArgs& fargs) {
+  auto& args=fargs.args;
+  DataType dtsingle = DataType().points().shape(1);
+  DataType dt = dtsingle;
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (args[i].shape == dtsingle.shape) {
+      continue;
+    }
+    if (dt.shape!=dtsingle.shape && args[i].shape!=dt.shape) {
+      auto msg = fmt::format("Transformation {0}: all inputs should have same shape or be of dimension 1, error on input {1}", args.name(), i);
+      printf("Current data type: ");
+      args[i].dump();
+      throw args.error(args[i], msg);
+    }
+    dt = args[i];
+  }
+  fargs.rets[0] = dt;
+}

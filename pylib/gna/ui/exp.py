@@ -10,8 +10,9 @@ expmodules = {name: loader for loader, name, _ in iter_modules(cfg.experimentpat
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        group = parser.add_mutually_exclusive_group(required=True)
+        group = parser.add_mutually_exclusive_group()
         group.add_argument('experiment', nargs='?', choices=expmodules.keys(), metavar='exp', help='experiment to load')
+        group.add_argument('-e', '--exp', nargs='*', default=(), help='experiment to load')
         group.add_argument('-L', '--list-experiments', action='store_true', help='list available experiments')
         parser.add_argument('expargs', nargs=argparse.REMAINDER, help='arguments to pass to the experiment')
         parser.add_argument('--ns', help='namespace')
@@ -19,16 +20,16 @@ class cmd(basecmd):
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
 
-        if self.opts.list_experiments:
+        self.expname = self.opts.experiment or '_'.join(self.opts.exp)
+        if not self.expname or self.opts.list_experiments:
             print("UI exp list of experiments:")
-            map(print, expmodules.keys())
+            map(lambda l: print('   ', l), expmodules.keys())
 
             from sys import exit
             exit(0)
 
     def init(self):
-        expname = self.opts.experiment
-        expmodule = expmodules[expname].find_module(expname).load_module(expname)
+        expmodule = expmodules[self.expname].find_module(self.expname).load_module(self.expname)
         expcls = getattr(expmodule, 'exp')
 
         ns = self.env.globalns(self.opts.ns)

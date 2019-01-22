@@ -11,7 +11,9 @@ public:
       ArraySum(const std::string& name, SingleOutput& out);
 
 private:
-      void initialize(const std::string& name, SingleOutput& out);
+      void initialize(const std::string& name);
+      void sum(FunctionArgs& fargs);
+      void check(TypesFunctionArgs& fargs);
 
       std::string m_output_name;
       dependant<double> m_accumulated;

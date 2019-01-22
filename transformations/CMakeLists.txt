@@ -9,6 +9,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Sum.cc
   transformations/base/Ratio.cc
   transformations/base/WeightedSum.cc
+  transformations/base/WeightedSumP.cc
   transformations/base/Inverse.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -85,23 +86,26 @@ set(TRANSFORMATION_SOURCES
 )
 
 set(TRANSFORMATION_HEADERS
-  Concat.hh
-  CovariatedPrediction.hh
-  Product.hh
-  Sum.hh
-  Ratio.hh
-  WeightedSum.hh
-  Inverse.hh
+  # Base
   Bins.hh
-  Points.hh
+  Concat.hh
+  FillLike.hh
   Histogram.hh
   Histogram2d.hh
+  Inverse.hh
+  Points.hh
+  Product.hh
+  Ratio.hh
+  Sum.hh
+  WeightedSum.hh
+  WeightedSumP.hh
+  #
+  CovariatedPrediction.hh
   HistEdges.hh
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
   InterpLinear.hh
-  FillLike.hh
   Derivative.hh
   Covmat.hh
   Cholesky.hh
@@ -124,6 +128,7 @@ set(TRANSFORMATION_HEADERS
   Minimizable.hh
   Jacobian.hh
   Neutrino.hh
+  Units.hh
   OscillationVariables.hh
   PMNSVariables.hh
   OscProbPMNSVariables.hh

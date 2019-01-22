@@ -11,7 +11,11 @@ class parameters_v01(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return (cfg.parameter,), ()
+        sepunc = cfg.get('separate_uncertainty', None)
+        if sepunc:
+            return (cfg.parameter, sepunc), ()
+        else:
+            return (cfg.parameter,), ()
 
     def define_variables(self):
         separate_uncertainty = self.cfg.get('separate_uncertainty', False)

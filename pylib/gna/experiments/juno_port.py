@@ -5,6 +5,7 @@ from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
 import numpy as np
+from load import ROOT as R
 
 seconds_per_day = 60*60*24
 class exp(baseexp):
@@ -15,12 +16,12 @@ class exp(baseexp):
         parser.add_argument( '--dot', help='write graphviz output' )
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
         parser.add_argument( '-o', '--output', help='output figure name' )
-        parser.add_argument('--stats', action='store_true', help='show statistics')
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('--stats', action='store_true', help='print stats')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -30,6 +31,9 @@ class exp(baseexp):
         self.init_configuration()
         self.build()
         self.register()
+
+        if self.opts.stats:
+            self.print_stats()
 
     def init_nidx(self):
         self.nidx = [
@@ -76,7 +80,7 @@ class exp(baseexp):
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
@@ -84,35 +88,35 @@ class exp(baseexp):
                     bundle = dict(
                         name='parameters',
                         version='v01'),
-                     parameter="eff",
-                     label='Detection efficiency',
-                     pars = uncertain(0.8, uncertainty=5, mode='percent')
+                    parameter="eff",
+                    label='Detection efficiency',
+                    pars = uncertain(0.8, uncertainty=5, mode='percent')
                     ),
                 global_norm = NestedDict(
                     bundle = dict(
                         name='parameters',
                         version='v01'),
-                     parameter="global_norm",
-                     label='Global normalization',
-                     pars = uncertain(1, 'free'),
+                    parameter="global_norm",
+                    label='Global normalization',
+                    pars = uncertain(1, 'free'),
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters",
-                                  version = "v01",
-                                  major = 'i'
-                                  ),
-                             parameter = "fission_fractions",
-                             label = 'Fission fraction of {isotope} in reactor {reactor}',
-                             objectize=True,
-                             pars = uncertaindict([
-                                 ('U235',  0.60),
-                                 ('Pu239', 0.27),
-                                 ('U238',  0.07),
-                                 ('Pu241', 0.06)
-                                 ],
-                                uncertainty = 30.0,
-                                mode = 'percent',
-                            ),
+                        version = "v01",
+                        major = 'i'
+                        ),
+                    parameter = "fission_fractions",
+                    label = 'Fission fraction of {isotope} in reactor {reactor}',
+                    objectize=True,
+                    pars = uncertaindict([
+                        ('U235',  0.60),
+                        ('Pu239', 0.27),
+                        ('U238',  0.07),
+                        ('Pu241', 0.06)
+                        ],
+                        uncertainty = 30.0,
+                        mode = 'percent',
+                        ),
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -123,11 +127,11 @@ class exp(baseexp):
                             ),
                         ),
                 baselines = NestedDict(
-                    bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                    reactors  = 'data/juno_nominal/coordinates_reactors.py',
-                    detectors = 'data/juno_nominal/coordinates_det.py',
-                    unit = 'km'
-                    ),
+                        bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
+                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
+                        detectors = 'data/juno_nominal/coordinates_det.py',
+                        unit = 'km'
+                        ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "thermal_power",
@@ -162,8 +166,8 @@ class exp(baseexp):
                         bundle = dict(name="parameters", version = "v01"),
                         parameter='conversion_factor',
                         label='Conversion factor from GWt to MeV',
-		        #taken from transformations/neutrino/ReactorNorm.cc
-                        pars = uncertain( 1.0e-7/1.602176462e-19, 'fixed'),
+                        #taken from transformations/neutrino/ReactorNorm.cc
+                        pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                         ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -172,9 +176,9 @@ class exp(baseexp):
                         objectize = True,
                         pars = uncertaindict(
                             [('Pu239', (209.99, 0.60)),
-                             ('Pu241', (213.60, 0.65)),
-                             ('U235',  (201.92, 0.46)),
-                             ('U238', (205.52, 0.96))],
+                                ('Pu241', (213.60, 0.65)),
+                                ('U235',  (201.92, 0.46)),
+                                ('U238', (205.52, 0.96))],
                             mode='absolute'
                             ),
                         ),
@@ -187,7 +191,6 @@ class exp(baseexp):
                             ('b', (0.03, 30, 'percent')) ,
                             ('c', (0.000, 'fixed'))
                             ]),
-                        provides = [ 'eres', 'eres_matrix' ],
                         expose_matrix = False
                         ),
                 rebin = NestedDict(
@@ -236,9 +239,10 @@ class exp(baseexp):
 
             print()
 
-        if self.opts.verbose:
+        if self.opts.verbose or self.opts.stats:
             print('Parameters:')
-            self.namespace.printparameters(labels=True)
+            self.stats = dict()
+            self.namespace.printparameters(labels=True, stats=self.stats)
 
     def register(self):
         ns = self.namespace
@@ -248,6 +252,15 @@ class exp(baseexp):
         ns.addobservable("Enu",    outputs.enu, export=False)
         ns.addobservable("{0}_fine".format(self.detectorname),         outputs.ibd.AD1)
         ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
+
+    def print_stats(self):
+        from gna.graph import GraphWalker, report, taint, taint_dummy
+        out=self.context.outputs.rebin.AD1
+        walker = GraphWalker(out)
+        report(out.data, fmt='Initial execution time: {total} s')
+        report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
+        print('Statistics', walker.get_stats())
+        print('Parameter statistics', self.stats)
 
     formula_base = [
             'baseline[d,r]',

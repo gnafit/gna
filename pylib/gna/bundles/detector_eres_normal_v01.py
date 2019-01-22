@@ -61,8 +61,15 @@ class detector_eres_normal_v01(TransformationBundle):
                 self.set_output('eres', it, trans.outputs.back())
 
     def define_variables(self):
+        descriptions=[
+                'spatial/temporal resolution',
+                'photon statistics',
+                'dark noise'
+                ]
+
         parname = self.cfg.parameter
         parscfg = self.cfg.pars
+        labelfmt = self.cfg.get('label', '')
         self.names = None
 
         for it_major in self.nidx_major:
@@ -78,5 +85,7 @@ class detector_eres_normal_v01(TransformationBundle):
                 it=it_major
 
                 par = self.reqparameter(parname, it, cfg=unc, extra=name)
+                label = it.current_format(labelfmt, description=descriptions[i]) if labelfmt else descriptions[i]
+                self.set_label(par, 'parameter', it_major, '{description} {autoindex}', name=name, description=descriptions[i])
 
 

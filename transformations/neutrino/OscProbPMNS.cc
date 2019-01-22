@@ -8,12 +8,10 @@
 #include "OscillationVariables.hh"
 #include "PMNSVariables.hh"
 #include "TypesFunctions.hh"
+#include "Units.hh"
 
 using namespace Eigen;
-
-static double km2MeV(double km) {
-  return km*1E-3*TMath::Qe()/(TMath::Hbar()*TMath::C());
-}
+using NeutrinoUnits::oscprobArgumentFactor;
 
 OscProbPMNSBase::OscProbPMNSBase(Neutrino from, Neutrino to)
   : m_param(new OscillationVariables(this)), m_pmns(new PMNSVariables(this))
@@ -153,7 +151,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
 void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
   auto& ret=fargs.rets[0].x;
   auto& Enu = fargs.args[0].x;
-  ArrayXd tmp = km2MeV(m_L)/2.0*Enu.inverse();
+  ArrayXd tmp = (oscprobArgumentFactor*m_L*0.5)*Enu.inverse();
   ArrayXd comp0(Enu);
   comp0.setOnes();
   ArrayXd comp12 = cos(DeltaMSq<1,2>()*tmp);
@@ -183,13 +181,13 @@ void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
 template <int I, int J>
 void OscProbPMNS::calcComponent(FunctionArgs fargs) {
   auto &Enu = fargs.args[0].x;
-  fargs.rets[0].x = cos(DeltaMSq<I,J>()*km2MeV(m_L)/2.0*Enu.inverse());
+  fargs.rets[0].x = cos((DeltaMSq<I,J>()*oscprobArgumentFactor*m_L*0.5)*Enu.inverse());
 }
 
 void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
   auto& ret=fargs.rets[0].x;
   auto &Enu = fargs.args[0].x;
-  ArrayXd tmp = km2MeV(m_L)/4.0*Enu.inverse();
+  ArrayXd tmp = (oscprobArgumentFactor*m_L*0.25)*Enu.inverse();
   ret = sin(DeltaMSq<1,2>()*tmp);
   ret*= sin(DeltaMSq<1,3>()*tmp);
   ret*= sin(DeltaMSq<2,3>()*tmp);
@@ -254,7 +252,7 @@ void OscProbPMNSMult::calcComponent(FunctionArgs fargs) {
   double s3 = m_weights.value()[1];
   double s4 = m_weights.value()[2];
   auto &Enu = fargs.args[0].x;
-  ArrayXd phi = DeltaMSq<I,J>()*km2MeV(m_Lavg)/4.0*Enu.inverse();
+  ArrayXd phi = (DeltaMSq<I,J>()*oscprobArgumentFactor*m_Lavg*0.25)*Enu.inverse();
   ArrayXd phi2 = phi.square();
   ArrayXd a = 1.0 - 2.0*s2*phi2 + 2.0/3.0*s4*phi2.square();
   ArrayXd b = 1.0 - 2.0/3.0*s3*phi2;
