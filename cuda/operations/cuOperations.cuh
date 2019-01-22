@@ -45,16 +45,16 @@ __device__ void prodNumToVec(T k, T* x, T* res) {
  */
 
 template <typename T>
-__device__ arr_sin (T k, T* x, T* out);
+__device__ void arr_sin (T k, T* x, T* out);
 
 template <>
-__device__ arr_sin (double k, double* x, double* out) {
+__device__ void arr_sin (double k, double* x, double* out) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	out[idx] = sin(k*x[idx]);
 } 
 
 template <>
-__device__ arr_sin (float k, float* x, float* out) {
+__device__ void arr_sin (float k, float* x, float* out) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	out[idx] = sinf(k*x[idx]);
 } 
@@ -64,18 +64,18 @@ __device__ arr_sin (float k, float* x, float* out) {
  */
 
 template <typename T>
-__device__ mult_by_arr_sin (T k, T* x, T* me);
+__device__ void mult_by_arr_sin (T k, T* x, T* me);
 
 template <>
-__device__ mult_by_arr_sin (float k, float* x, float* me) {
+__device__ void mult_by_arr_sin (float k, float* x, float* me) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        out[idx] = me[idx] * sinf(k*x[idx]);
+        me[idx] = me[idx] * sinf(k*x[idx]);
 }
 
 
 template <>
-__device__ mult_by_arr_sin (double k, double* x, double* me) {
+__device__ void mult_by_arr_sin (double k, double* x, double* me) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        out[idx] = me[idx] * sin(k*x[idx]);
+        me[idx] = me[idx] * sin(k*x[idx]);
 }
 

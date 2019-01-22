@@ -18,20 +18,23 @@ include_directories(extra/ core/)
 set(CUSOURCES
   core/GpuBasics.cu
   core/GpuArray.cu
- # extra/GNAcuMath.cu
-  extra/GNAcuOscProbFull.cu
-  extra/GNAcuOscProbMem.cu
+  extra/cuOscProbPMNS.cu
+
+ # extra/GNAcuOscProbFull.cu
+ # extra/GNAcuOscProbMem.cu
  # core/IdentityGPU.cu
   )
 
 set(CUHEADERS 
+  cuOperations.cuh
   core/GpuBasics.hh
   core/GpuArray.hh 
   core/GpuArrayTypes.hh
+  extra/cuRootMath.h
+
 #  extra/GNAcuMath.h
-  extra/GNAcuOscProbFull.h
-  extra/GNAcuOscProbMem.hh
-  extra/GNAcuRootMath.h
+#  extra/GNAcuOscProbFull.h
+#  extra/GNAcuOscProbMem.hh
   )
 
 configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
