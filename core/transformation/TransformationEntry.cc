@@ -12,6 +12,7 @@
 #include "Atypes.hh"
 #include "Rtypes.hh"
 #include "TransformationErrors.hh"
+#include "GPUFunctionArgs.hh"
 
 using TransformationTypes::Base;
 using TransformationTypes::Entry;
@@ -33,7 +34,9 @@ using TransformationTypes::TypeError;
  * @param parent -- Base class instance to hold the Entry.
  */
 Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0)
+  : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0),
+    cpuargs(new FunctionArgs(this)),
+    gpuargs(new GPUFunctionArgs(this))
 { }
 
 /**
@@ -46,10 +49,20 @@ Entry::Entry(const std::string &name, const Base *parent)
 Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), tainted(other.name.c_str()), initializing(0)
+    fun(), typefuns(), tainted(other.name.c_str()), initializing(0),
+    cpuargs(new FunctionArgs(this)),
+    gpuargs(new GPUFunctionArgs(this))
 {
   initSourcesSinks(other.sources, other.sinks);
 }
+
+
+/**
+ * @brief Destructor.
+ *
+ * The destructor is defined explicitly in order to enable unique_ptr members to delete their objects.
+ */
+Entry::~Entry(){}
 
 /**
  * @brief Initialize the clones for inputs and outputs.
@@ -67,6 +80,7 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
                  [this](const Source &s) { return new Source{s, this}; });
   std::transform(outputs.begin(), outputs.end(), std::back_inserter(sinks),
                  [this](const Sink &s) { return new Sink{s, this}; });
+  gpuargs->evaluateTypes();
 }
 
 /**
@@ -122,8 +136,7 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
-  auto fargs = FunctionArgs(this);
-  return fun(fargs);
+  return fun(*cpuargs);
 }
 
 /**
@@ -244,6 +257,8 @@ void Entry::evaluateTypes() {
     }
     initInternals(sargs);
   }
+
+  gpuargs->evaluateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */

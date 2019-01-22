@@ -1,4 +1,6 @@
 set(CORE_SOURCES 
+  core/transformation/TransformationEntry.cc
+  core/transformation/GPUFunctionArgs.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
   core/transformation/Atypes.cc
@@ -12,7 +14,6 @@ set(CORE_SOURCES
   core/transformation/Itypes.cc
   core/transformation/Source.cc
   core/transformation/TransformationBase.cc
-  core/transformation/TransformationEntry.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
   core/GNAObject.cc
@@ -56,6 +57,8 @@ set(CORE_HEADERS
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
+  # GPU related stuff
+  GPUFunctionArgs.hh
   # core/
   GNAObject.hh
   GNAObjectBind1N.hh

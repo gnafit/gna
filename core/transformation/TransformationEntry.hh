@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <type_traits>
 #include <boost/noncopyable.hpp>
 
@@ -18,10 +19,14 @@ namespace TransformationTypes
 {
   class Base;
   class InputHandle;
-  class OutputHandle;
+  template<typename FloatType> class OutputHandleT;
+  using OutputHandle = OutputHandleT<double>;
 
-  using SourcesContainer = boost::ptr_vector<Source>;   ///< Container for Source pointers.
-  using SinksContainer = boost::ptr_vector<Sink>;     ///< Container for Sink pointers.
+  template<typename FloatType> class GPUFunctionArgsT;
+  using GPUFunctionArgs = GPUFunctionArgsT<double>;
+
+  using SourcesContainer = boost::ptr_vector<Source>;    ///< Container for Source pointers.
+  using SinksContainer = boost::ptr_vector<Sink>;        ///< Container for Sink pointers.
   using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
 
   /**
@@ -51,6 +56,7 @@ namespace TransformationTypes
   struct Entry: public boost::noncopyable {
     Entry(const std::string &name, const Base *parent);  ///< Constructor.
     Entry(const Entry &other, const Base *parent);       ///< Clone constructor.
+    ~Entry();                                            ///< Destructor.
 
     InputHandle addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
     OutputHandle addSink(const std::string &name);       ///< Initialize and return new Sink.
@@ -86,12 +92,15 @@ namespace TransformationTypes
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
 
+    // Function args
+    std::unique_ptr<FunctionArgs>    cpuargs;
+    std::unique_ptr<GPUFunctionArgs> gpuargs;
+
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
     void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
-
   }; /* struct Entry */
 
 } /* TransformationTypes */
