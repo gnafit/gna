@@ -255,9 +255,10 @@ class exp(baseexp):
             'livetime[d]',
             'eper_fission[i]',
             'conversion_factor',
+            'numenator = livetime[d] * thermal_power[r] * '
+                 'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
-            'power_livetime_factor =  livetime[d] * thermal_power[r] * '
-                 'fission_fractions[r,i]() * conversion_factor * target_protons[d] / denom',
+            'power_livetime_factor = numenator / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
             'norm = global_norm * eff'
@@ -332,6 +333,7 @@ class exp(baseexp):
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
 
+            thermal_weight = dict(expr='numenator'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
