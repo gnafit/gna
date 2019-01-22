@@ -19,6 +19,11 @@
 // TODO define inern as array of the same as xarg size from internals
 
 
+/*
+ * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (floats)
+ * 
+ */
+
 template <int I, int J>
 __global__ void cuCalcComponent 
 		(float* xarg, float* xret, float* intern) { 
@@ -29,6 +34,11 @@ __global__ void cuCalcComponent
 }
 
 
+/*
+ * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (doubles)
+ * 
+ */
+
 template < int I, int J>
 __global__ void cuCalcComponent(double* xarg, double* xret, double* intern) { 
 	inverse(xarg, intern);
@@ -37,6 +47,11 @@ __global__ void cuCalcComponent(double* xarg, double* xret, double* intern) {
 				xret);	
 }
 
+
+/*
+ * CUDA version of calcComponentCP function in OscProbPMNS::OscProbPMNS
+ * 
+ */
 
 template <typename T>
 __global__ void cuCalcComponentCP(T* xarg, T* xret, T* intern) {
