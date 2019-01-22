@@ -6,7 +6,6 @@
 #include <typeinfo>
 
 #include "cuRootMath.h"
-//#include "../operations/cuMathFunctions.h"
 #include "../operations/cuOperations.cuh" 
 #include <cuda.h>
 
@@ -20,7 +19,7 @@
 // TODO define inern as array of the same as xarg size from internals
 
 
-template <int I, int J, typename T=float>
+template <int I, int J>
 __global__ void cuCalcComponent 
 		(float* xarg, float* xret, float* intern) { 
 	inverse(xarg, intern);
