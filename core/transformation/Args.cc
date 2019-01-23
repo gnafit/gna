@@ -29,3 +29,16 @@ const Data<double> &Args::operator[](int i) const {
   return *src.sink->data;
 }
 
+/**
+ * @brief Touch all the sources
+ */
+void Args::touch() const {
+  for(auto& source: m_entry->sources){
+    if (!source.materialized()) {
+      auto msg = fmt::format("arg ({1}) have no type on evaluation", source.name);
+      throw CalculationError(m_entry, msg);
+    }
+    source.sink->entry->touch();
+  }
+}
+
