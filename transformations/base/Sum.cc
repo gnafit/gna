@@ -6,7 +6,7 @@
 /**
  * @brief Constructor.
  */
-Sum::Sum(bool gpu = false) : isgpu(gpu) {
+Sum::Sum() {
   transformation_("sum")                               ///< Define the transformation `sum`:
     .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
     .types(                                            ///<   - provide type checking functions:
