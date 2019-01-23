@@ -13,8 +13,8 @@
         	#define CU_DEBUG_3
 	#endif
 //#endif
-#define CU_BLOCK_SIZE 1024
-#define CU_GRID_SIZE 32
+#define CU_BLOCK_SIZE 32
+//#define CU_GRID_SIZE 32
 
 #define CUDA_STREAMS_NUM 2
 #define GPU_STORAGE_BLOCK_SIZE 2
