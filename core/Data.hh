@@ -720,4 +720,3 @@ template class Data<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
   template class Data<float>;
 #endif
-
