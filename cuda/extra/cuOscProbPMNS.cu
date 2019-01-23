@@ -26,7 +26,7 @@
 
 template <int I, int J>
 __global__ void cuCalcComponent 
-		(float* xarg, float* xret, float* intern) { 
+		(float* xarg, float* xret, float* intern) {
 	inverse(xarg, intern);
 	prodNumToVec (cosf(DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5f), 
 				intern,
