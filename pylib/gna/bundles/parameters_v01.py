@@ -49,7 +49,8 @@ class parameters_v01(TransformationBundle):
                     #  import IPython
                     #  IPython.embed()
                     with self.namespace:
-                        var_array = R.VarArray(C.stdvector([par.qualifiedName()]))
+                        var_array = R.VarArray(C.stdvector([par.qualifiedName()]),
+                                labels=par.qualifiedName().split('.',1)[1])
                     output = var_array.vararray.points
 
                     self.set_output(parname, it,  output)

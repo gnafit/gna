@@ -266,11 +266,12 @@ class exp(baseexp):
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
             'livetime[d]',
-            'eper_fission[i]',
+            'eper_fiss_transform = eper_fission[i]()',
             'conversion_factor',
             'numenator = livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'denom = sum[i] | eper_fission[i]()*fission_fractions[r,i]',
+            'eper_fission_weight = eper_fiss_transform * fission_fractions[r,i]',
+            'denom = sum[i] | eper_fission_weight',
             'power_livetime_factor = numenator / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
@@ -335,7 +336,7 @@ class exp(baseexp):
             cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            norm                 = dict(expr='eff*effunc_uncorr*global_norm'),
+            norm                    = dict(expr='eff*effunc_uncorr*global_norm'),
             ibd                     = dict(expr='eres*norm', label='Observed IBD spectrum\n{detector}'),
 
             lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
@@ -345,8 +346,16 @@ class exp(baseexp):
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
+            eper_fiss_transform     = dict(expr='eper_fission_transform',
+                                           label='eper_fission for {isotope}' ),
 
-            thermal_weight = dict(expr='numenator'),
+            fission_fractions       = dict(expr='fission_fractions[r,i]()',
+                                           label="Fission fraction for {isotope} in reactor {reactor}"),
+            eper_fission_weight = dict(expr='eper_fission_weight',
+                                           label="Weighted eper_fission for {isotope} in reactor {reactor}"),
+
+            numenator = dict(expr='numenator', label='thermal_weight.{isotope}.{reactor}'),
+            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
