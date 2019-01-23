@@ -103,9 +103,9 @@ namespace TransformationTypes{
 
     template<typename FloatType>
     void GPUFunctionArgsT<FloatType>::evaluateTypes(){
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
+        //m_args.fillContainers(m_entry->sources);
+        //m_rets.fillContainers(m_entry->sinks);
+        //m_ints.fillContainers(m_entry->storages);
     }
 
     //template<typename FloatType>
