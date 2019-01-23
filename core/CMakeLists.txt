@@ -1,6 +1,7 @@
-set(CORE_SOURCES 
+set(CORE_SOURCES
   core/transformation/TransformationEntry.cc
   core/transformation/GPUFunctionArgs.cc
+  core/transformation/TransformationFunctionArgs.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
   core/transformation/Atypes.cc
@@ -25,7 +26,7 @@ set(CORE_SOURCES
   PARENT_SCOPE
  )
 
-set(CORE_HEADERS 
+set(CORE_HEADERS
   # core/
   Data.hh
   Random.hh

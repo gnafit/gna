@@ -41,5 +41,9 @@ namespace TransformationTypes
     Entry *entry;                        ///< Pointer to the transformation Entry this Storage belongs to.
   };
 
+  template class StorageT<double>;
+  #ifdef PROVIDE_SINGLE_PRECISION
+    template class StorageT<float>;
+  #endif
   using Storage = StorageT<double>;
 } /* TransformationTypes */

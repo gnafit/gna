@@ -16,7 +16,6 @@ def test_01():
     entry = R.OpenHandle(prod.product).getEntry()
     entry.gpuargs.dump()
 
-
 if __name__ == "__main__":
     glb = globals()
     for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):

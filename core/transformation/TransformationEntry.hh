@@ -22,9 +22,6 @@ namespace TransformationTypes
   template<typename FloatType> class OutputHandleT;
   using OutputHandle = OutputHandleT<double>;
 
-  template<typename FloatType> class GPUFunctionArgsT;
-  using GPUFunctionArgs = GPUFunctionArgsT<double>;
-
   using SourcesContainer = boost::ptr_vector<Source>;    ///< Container for Source pointers.
   using SinksContainer = boost::ptr_vector<Sink>;        ///< Container for Sink pointers.
   using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
@@ -93,8 +90,7 @@ namespace TransformationTypes
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
 
     // Function args
-    std::unique_ptr<FunctionArgs>    cpuargs;
-    std::unique_ptr<GPUFunctionArgs> gpuargs;
+    std::unique_ptr<FunctionArgs> functionargs;          ///< Transformation function arguments.
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
