@@ -35,8 +35,7 @@ using TransformationTypes::TypeError;
  */
 Entry::Entry(const std::string &name, const Base *parent)
   : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0),
-    cpuargs(new FunctionArgs(this)),
-    gpuargs(new GPUFunctionArgs(this))
+    functionargs(new FunctionArgs(this))
 { }
 
 /**
@@ -50,8 +49,7 @@ Entry::Entry(const Entry &other, const Base *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
     fun(), typefuns(), tainted(other.name.c_str()), initializing(0),
-    cpuargs(new FunctionArgs(this)),
-    gpuargs(new GPUFunctionArgs(this))
+    functionargs(new FunctionArgs(this))
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -80,7 +78,7 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
                  [this](const Source &s) { return new Source{s, this}; });
   std::transform(outputs.begin(), outputs.end(), std::back_inserter(sinks),
                  [this](const Sink &s) { return new Sink{s, this}; });
-  gpuargs->evaluateTypes();
+  functionargs->updateTypes();
 }
 
 /**
@@ -136,7 +134,7 @@ bool Entry::check() const {
  * Does not reset the taintflag.
  */
 void Entry::evaluate() {
-  return fun(*cpuargs);
+  return fun(*functionargs);
 }
 
 /**
@@ -280,7 +278,8 @@ void Entry::evaluateTypes() {
 
   }
 
-  gpuargs->evaluateTypes();
+  functionargs->requireGPU();
+  functionargs->updateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */

@@ -14,8 +14,7 @@ def test_01():
     print(prod.single().data())
 
     entry = R.OpenHandle(prod.product).getEntry()
-    entry.gpuargs.dump()
-
+    entry.functionargs.gpu.dump()
 
 if __name__ == "__main__":
     glb = globals()

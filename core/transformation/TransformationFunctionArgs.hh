@@ -1,12 +1,13 @@
 #pragma once
 
+#include <memory>
 #include "Args.hh"
 #include "Rets.hh"
 #include "Ints.hh"
 #include "Atypes.hh"
 #include "Rtypes.hh"
 #include "Itypes.hh"
-#include "GpuArgs.hh"
+#include "GPUFunctionArgs.hh"
 
 namespace TransformationTypes
 {
@@ -26,12 +27,20 @@ namespace TransformationTypes
    * @date 07.2018
    */
   struct FunctionArgs {
-    FunctionArgs(Entry* e) : args(e), rets(e), ints(e), gargs(e) {  } ///< Constructor.
+    FunctionArgs(Entry* e) : args(e), rets(e), ints(e), m_entry(e) {  }        ///< Constructor.
+    FunctionArgs(const FunctionArgs& other) : FunctionArgs(other.m_entry) {  } ///< Copy constructor.
 
     Args args; ///< arguments, or transformation inputs (read-only)
     Rets rets; ///< return values, or transformation outputs (writable)
     Ints ints; ///< preallocated data arrays for the transformation's internal usage (writable)
-    GpuArgs gargs;	///< wrapper for args on gpu, access to args via double**
+
+    std::unique_ptr<GPUFunctionArgs> gpu; ///< GPU function arguments
+
+    void requireGPU();                    ///< Initialize GPU function arguments
+    void updateTypes();                   ///< Update arguments and types
+
+    private:
+      Entry *m_entry; ///< Entry instance to access Sinks.
   };
 
   /**

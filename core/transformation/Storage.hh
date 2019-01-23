@@ -35,11 +35,17 @@ namespace TransformationTypes
     DataType*       getData()       {return data.get();}
     const DataType* getData() const {return data.get();}
 
+    bool materialized() const { return (bool)data; } ///< Check if data is initialized
+
     std::string name;                    ///< Storage's name.
     std::string label;                   ///< Storage's label.
     std::unique_ptr<DataType> data;      ///< Storage's Data.
     Entry *entry;                        ///< Pointer to the transformation Entry this Storage belongs to.
   };
 
+  template class StorageT<double>;
+  #ifdef PROVIDE_SINGLE_PRECISION
+    template class StorageT<float>;
+  #endif
   using Storage = StorageT<double>;
 } /* TransformationTypes */

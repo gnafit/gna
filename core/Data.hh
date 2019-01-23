@@ -716,3 +716,8 @@ Allocate GPU memory in case of GPU array is not inited yet
 }
 #endif
 
+template class Data<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class Data<float>;
+#endif
+
