@@ -8,6 +8,14 @@
 #include "TransformationEntry.hh"
 
 namespace TransformationTypes{
+    enum class GPUShape {
+      Ndim = 0,  ///< Number of dimensions (position)
+      Size,      ///< Size
+      Nx,        ///< Size over first dimension (X)
+      Ny,        ///< Size over second dimension (Y)
+      Nz,        ///< Size over third dimension (Z)
+    };
+
     template<typename FloatType>
     struct GPUFunctionData {
         GPUFunctionData(){ }
@@ -101,16 +109,25 @@ namespace TransformationTypes{
         shapes.reserve(4*container.size());
 
         for (size_t i = 0; i < container.size(); ++i) {
-            auto* data=container[i].getData();
-            pointers.push_back(data->buffer);
+            if(container[i].materialized()){
+                auto* data=container[i].getData();
+                pointers.push_back(data->buffer);
 
-            auto& shape=data->type.shape;
-            auto offset=shapes.size();
-            shapes.push_back(shape.size());
-            shapes.push_back(data->type.size());
-            shapes.insert(shapes.end(), shape.begin(), shape.end());
+                auto& shape=data->type.shape;
+                auto offset=shapes.size();
+                shapes.push_back(shape.size());
+                shapes.push_back(data->type.size());
+                shapes.insert(shapes.end(), shape.begin(), shape.end());
 
-            shape_pointers.push_back(&shapes[offset]);
+                shape_pointers.push_back(&shapes[offset]);
+            }
+            else{
+                pointers.push_back(nullptr);
+                auto offset=shapes.size();
+                shapes.push_back(0u);
+                shapes.push_back(0u);
+                shape_pointers.push_back(&shapes[offset]);
+            }
         }
     }
 
@@ -135,27 +152,35 @@ namespace TransformationTypes{
         for (size_t i = 0; i < ndata; ++i) {
             FloatType* data=datas[i];
             size_t* shapedef=datashapes[i];
-            size_t  ndim=shapedef[0];
-            size_t  size=shapedef[1];
-            size_t* shape=std::next(datashapes[i], 2);
-            printf("Data %zu of size %zu, ndim %zu, shape %zu", i, size, ndim, shape[0]);
-            for (size_t j = 1; j<ndim; ++j) {
-                printf("x%zu", shape[j]);
+            size_t  ndim=shapedef[(int)GPUShape::Ndim];
+            size_t  size=shapedef[(int)GPUShape::Size];
+            size_t* shape=std::next(datashapes[i], (int)GPUShape::Nx);
+            printf("Data %zu of size %zu, ndim %zu, ptr %p", i, size, ndim, (void*)data);
+            if(ndim){
+                printf(", shape %zu", shape[0]);
+                for (size_t j = 1; j<ndim; ++j) {
+                    printf("x%zu", shape[j]);
+                }
+                printf("\n");
+                if(ndim==2){
+                    Eigen::Map<Eigen::Array<FloatType,Eigen::Dynamic,Eigen::Dynamic>> view(data, shape[0], shape[1]);
+                    std::cout<<view<<std::endl;
+                }
+                else{
+                    Eigen::Map<Eigen::Array<FloatType,Eigen::Dynamic,1>> view(data, size);
+                    std::cout<<view<<std::endl;
+                }
             }
             printf("\n");
-
-            if(ndim==2){
-                Eigen::Map<Eigen::Array<FloatType,Eigen::Dynamic,Eigen::Dynamic>> view(data, shape[0], shape[1]);
-                std::cout<<view<<std::endl;
-            }
-            else{
-                Eigen::Map<Eigen::Array<FloatType,Eigen::Dynamic,1>> view(data, size);
-                std::cout<<view<<std::endl;
-            }
         }
     }
 
     template class GPUFunctionData<double>;
     template class GPUFunctionArgsT<double>;
+
+    #ifdef PROVIDE_SINGLE_PRECISION
+        template class GPUFunctionData<float>;
+        template class GPUFunctionArgsT<float>;
+    #endif
     using GPUFunctionArgs = GPUFunctionArgsT<double>;
 }

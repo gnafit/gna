@@ -45,10 +45,10 @@ namespace TransformationTypes
      * @return true if input data is allocated.
      */
     bool materialized() const {
-      return sink && sink->data;
+      return sink && sink->materialized();
     }
 
-    const Data<double>* getData() const {return sink->getData();}
+    const Data<double>* getData() const {return sink ? sink->getData() : nullptr;}
 
     std::string name;                             ///< Source's name.
     std::string label;                            ///< Source's label.

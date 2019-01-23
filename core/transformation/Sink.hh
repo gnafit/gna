@@ -41,6 +41,8 @@ namespace TransformationTypes
     SinkT(const SinkT<FloatType> &other, Entry *entry)
       : name(other.name), label(other.label), entry(entry) { }
 
+    bool materialized() const { return (bool)data; } ///< Check if data is initialized
+
     DataType* getData() {return data.get();}
     const DataType* getData() const {return const_cast<const DataType*>(data.get());}
 

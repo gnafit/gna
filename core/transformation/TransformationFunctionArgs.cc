@@ -5,7 +5,7 @@ void TransformationTypes::FunctionArgs::requireGPU(){
 		return;
 	}
 
-	//gpu.reset(new GPUFunctionArgs(m_entry));
+	gpu.reset(new GPUFunctionArgs(m_entry));
 }
 
 void TransformationTypes::FunctionArgs::updateTypes(){

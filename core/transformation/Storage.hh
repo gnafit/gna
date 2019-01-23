@@ -35,6 +35,8 @@ namespace TransformationTypes
     DataType*       getData()       {return data.get();}
     const DataType* getData() const {return data.get();}
 
+    bool materialized() const { return (bool)data; } ///< Check if data is initialized
+
     std::string name;                    ///< Storage's name.
     std::string label;                   ///< Storage's label.
     std::unique_ptr<DataType> data;      ///< Storage's Data.

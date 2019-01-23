@@ -14,7 +14,7 @@ from gna.bindings import DataType
 #
 # Create the matrix
 #
-def test_points():
+def test_points(opts):
     mat = N.arange(12, dtype='d').reshape(3, 4)
 
     print( 'Input matrix (numpy)' )
@@ -26,7 +26,8 @@ def test_points():
     #
     points = Points(mat)
     identity = R.Identity()
-    identity.identity.switchFunction('identity_gpu')
+    if opts.gpuargs:
+        identity.identity.switchFunction('identity_gpuargs')
 
     identity.identity.source( points.points.points )
     res = identity.identity.target.data()
@@ -49,5 +50,8 @@ def test_points():
 
 
 if __name__ == "__main__":
-    test_points()
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('-g', '--gpuargs', action='store_true')
+    test_points(parser.parse_args())
 
