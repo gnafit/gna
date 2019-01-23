@@ -14,7 +14,8 @@ namespace TransformationTypes
    * @date 2015
    */
   class InputHandle {
-    friend class OutputHandle;
+    template<typename FloatType>
+    friend class OutputHandleT;
   public:
     /**
      * @brief Constructor.

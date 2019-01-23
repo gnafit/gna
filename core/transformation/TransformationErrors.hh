@@ -19,7 +19,8 @@ namespace TransformationTypes
       : std::runtime_error(message) { }
   };
 
-  struct Sink;
+  template<typename FloatType> struct SinkT;
+  using Sink = SinkT<double>;
   /**
    * @brief Exception to be returned from Rtypes in case of output type error.
    * @author Dmitry Taychenachev
@@ -45,7 +46,8 @@ namespace TransformationTypes
     const Source *source; ///< Source pointer.
   };
 
-  struct Storage;
+  template<typename FloatType> struct StorageT;
+  using Storage = StorageT<double>;
   /**
    * @brief Exception to be returned from Itypes in case of output type error.
    * @author Maxim Gonchar

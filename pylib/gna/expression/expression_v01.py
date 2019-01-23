@@ -26,6 +26,7 @@ class VTContainer_v01(OrderedDict):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
             value.nindex.arrange(self._order)
+            value.expandable=False
         elif inspect.isclass(value) and issubclass(value, Operation):
             value.order=self._order
 

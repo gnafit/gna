@@ -13,6 +13,8 @@ Units = R.NeutrinoUnits
 conversion = {"meter": 1.e-3, "kilometer": 1.0}
 conversion['m']=conversion['meter']
 conversion['km']=conversion['kilometer']
+conversion['meters']=conversion['meter']
+conversion['kilometers']=conversion['kilometer']
 
 class baselines_v01(TransformationBundleLegacy):
     def __init__(self, *args, **kwargs):
@@ -85,7 +87,7 @@ class baselines_v01(TransformationBundleLegacy):
                 raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
-            const = 0.25/np.pi*1.e-10 # Convert 1/km2 to 1/cm2
+            const = 0.25/np.pi*1.e10 # Convert 1/km2 to 1/cm2
             self.common_namespace.reqparameter(name, central=distance,
                     sigma=0.1, fixed=True, label="Baseline between {} and {}, m".format(cur_det, cur_reactor))
 

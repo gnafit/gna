@@ -16,23 +16,30 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 17.07.2018
    */
-  struct Storage: public boost::noncopyable {
+  template<typename FloatType>
+  struct StorageT: public boost::noncopyable {
+    using DataType = Data<FloatType>;
     /**
      * @brief Constructor.
      * @param entry -- Entry pointer Storage belongs to.
      * @exception std::runtime_error in case entry==nullptr
      */
-    Storage(Entry *entry=nullptr) : entry(entry) { if(!entry) throw std::runtime_error("Storage initialized without entry"); }
+    StorageT(Entry *entry=nullptr) : entry(entry) { if(!entry) throw std::runtime_error("Storage initialized without entry"); }
     /**
      * @brief Clone constructor.
      * @param entry -- Entry pointer Storage belongs to.
      */
-    Storage(const Storage &other, Entry *entry)
+    StorageT(const StorageT<FloatType> &other, Entry *entry)
       : entry(entry) { }
 
-    std::string name;                           ///< Storage's name.
-    std::string label;                          ///< Storage's label.
-    std::unique_ptr<Data<double>> data;         ///< Storage's Data.
-    Entry *entry;                               ///< Pointer to the transformation Entry this Storage belongs to.
+    DataType*       getData()       {return data.get();}
+    const DataType* getData() const {return data.get();}
+
+    std::string name;                    ///< Storage's name.
+    std::string label;                   ///< Storage's label.
+    std::unique_ptr<DataType> data;      ///< Storage's Data.
+    Entry *entry;                        ///< Pointer to the transformation Entry this Storage belongs to.
   };
+
+  using Storage = StorageT<double>;
 } /* TransformationTypes */

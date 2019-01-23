@@ -22,26 +22,34 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Sink: public boost::noncopyable {
+  template<typename FloatType>
+  struct SinkT: public boost::noncopyable {
+    using DataType = Data<FloatType>;
+
     /**
      * @brief Constructor.
      * @param name -- Sink name.
      * @param entry -- Entry pointer Sink belongs to.
      */
-    Sink(std::string name, Entry *entry)
+    SinkT(std::string name, Entry *entry)
       : name(std::move(name)), entry(entry) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Sink to get the name from.
      * @param entry -- Entry pointer Sink belongs to.
      */
-    Sink(const Sink &other, Entry *entry)
+    SinkT(const SinkT<FloatType> &other, Entry *entry)
       : name(other.name), label(other.label), entry(entry) { }
 
-    std::string name;                           ///< Sink's name.
-    std::string label;                          ///< Sink's label.
-    std::unique_ptr<Data<double>> data;         ///< Sink's Data.
-    std::vector<Source*> sources;               ///< Container with Source pointers which use this Sink as their input.
-    Entry *entry;                               ///< Pointer to the transformation Entry this Sink belongs to.
+    DataType* getData() {return data.get();}
+    const DataType* getData() const {return const_cast<const DataType*>(data.get());}
+
+    std::string name;                    ///< Sink's name.
+    std::string label;                   ///< Sink's label.
+    std::unique_ptr<DataType> data;      ///< Sink's Data.
+    std::vector<Source*> sources;        ///< Container with Source pointers which use this Sink as their input.
+    Entry *entry;                        ///< Pointer to the transformation Entry this Sink belongs to.
   };
+
+  using Sink = SinkT<double>;
 } /* TransformationTypes */

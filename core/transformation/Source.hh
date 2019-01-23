@@ -47,6 +47,9 @@ namespace TransformationTypes
     bool materialized() const {
       return sink && sink->data;
     }
+
+    const Data<double>* getData() const {return sink->getData();}
+
     std::string name;                             ///< Source's name.
     std::string label;                            ///< Source's label.
     const Sink *sink = nullptr;                   ///< Pointer to the Sink the Source is connected to.

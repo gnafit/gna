@@ -5,7 +5,9 @@
 
 namespace TransformationTypes
 {
-  struct Storage;
+  template<typename FloatType> struct StorageT;
+  using Storage = StorageT<double>;
+
   using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
 
   /**
