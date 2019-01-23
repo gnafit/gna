@@ -18,7 +18,7 @@ namespace TransformationTypes{
 
     template<typename FloatType>
     struct GPUFunctionData {
-        using SizeType = unsigned int;
+        using SizeType = unsigned int;                                             ///< Integer type (compatible with GPU) to be used for sizes
         GPUFunctionData(){ }
         ~GPUFunctionData(){ deAllocateDevice(); }
 
@@ -39,12 +39,12 @@ namespace TransformationTypes{
 
         void dump(const std::string& type);
 
-        std::vector<FloatType*> h_pointers;              ///< Host Vector of pointers to data buffers (Host)
-        std::vector<SizeType>   h_shapes;                ///< Host Vector of shapes: ndim1 (2), size1 (dim1a*dim1b), dim1a, dim1b, ndim2(1), size2 (dim2), dim2, size3, ...
-        std::vector<SizeType*>  h_shape_pointers_host;   ///< Host Vector of pointers to the relevant dimensions (Host)
-        std::vector<SizeType>   h_offsets;               ///< Host Vector of shape offsets (Host)
+        std::vector<FloatType*> h_pointers;                    ///< Host Vector of pointers to data buffers (Host)
+        std::vector<SizeType>   h_shapes;                      ///< Host Vector of shapes: ndim1 (2), size1 (dim1a*dim1b), dim1a, dim1b, ndim2(1), size2 (dim2), dim2, size3, ...
+        std::vector<SizeType*>  h_shape_pointers_host;         ///< Host Vector of pointers to the relevant dimensions (Host)
+        std::vector<SizeType>   h_offsets;                     ///< Host Vector of shape offsets (Host)
 
-        std::vector<FloatType*> h_pointers_dev;          ///< Host Vector of pointers to data buffers (Device)
+        std::vector<FloatType*> h_pointers_dev;                ///< Host Vector of pointers to data buffers (Device)
         std::vector<SizeType*>  h_shape_pointers_dev;          ///< Host Vector of pointers to the relevant dimensions (Dev)
 
         FloatType**             d_pointers_dev{nullptr};       ///< Device vector of pointers to data buffers (Device)
@@ -64,7 +64,9 @@ namespace TransformationTypes{
 
         }
 
-        void updateTypes();
+        void updateTypesHost();
+        void updateTypesDevice();
+        void updateTypes() { updateTypesHost(); }
         void dump();
 
         SizeType    npars{0u};       // number of parameters
@@ -89,15 +91,25 @@ namespace TransformationTypes{
     };
 
     template<typename FloatType>
-    void GPUFunctionArgsT<FloatType>::updateTypes(){
+    void GPUFunctionArgsT<FloatType>::updateTypesHost(){
         m_args.fillContainers(m_entry->sources);
-        m_args.provideInfoHost(nargs, args, argshapes);
-
         m_rets.fillContainers(m_entry->sinks);
-        m_rets.provideInfoHost(nrets, rets, retshapes);
-
         m_ints.fillContainers(m_entry->storages);
+
+        m_args.provideInfoHost(nargs, args, argshapes);
+        m_rets.provideInfoHost(nrets, rets, retshapes);
         m_ints.provideInfoHost(nints, ints, intshapes);
+    }
+
+    template<typename FloatType>
+    void GPUFunctionArgsT<FloatType>::updateTypesDevice(){
+        m_args.fillContainers(m_entry->sources);
+        m_rets.fillContainers(m_entry->sinks);
+        m_ints.fillContainers(m_entry->storages);
+
+        m_args.provideInfoDevice(nargs, args, argshapes);
+        m_rets.provideInfoDevice(nrets, rets, retshapes);
+        m_ints.provideInfoDevice(nints, ints, intshapes);
     }
 
     template<typename FloatType>
