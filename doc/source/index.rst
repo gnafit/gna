@@ -31,5 +31,6 @@ Contents
    fc
    tutorial
    reference_guide
+   gallery
    authors
    acknowledgements
