@@ -213,7 +213,10 @@ namespace TransformationTypes{
     template<typename DataContainer>
     void GPUFunctionData<FloatType>::fillContainers(DataContainer& container){
         fillContainersHost(container);
-        allocateDevice();
+        //allocateDevice();
+#ifdef GNA_CUDA_SUPPORT
+        fillContainersDevice(container);
+#endif
     }
 
     /**
@@ -248,6 +251,21 @@ namespace TransformationTypes{
                 h_shape_pointers_host.push_back(&h_shapes[offset]);
             }
         }
+    }
+
+    template<typename FloatType>
+    template<typename DataContainer>
+    void GPUFunctionData<FloatType>::fillContainersDevice(DataContainer& container){
+	// TODO
+	for (size_t i = 0; i < container.size(); ++i) {
+	    if(container[i].materialized()){
+		auto offset = h_offsets[i];
+	        h_pointers_dev.push_back(container[i].gpuArr->devicePtr);
+	    }
+	}
+	allocateDevice();
+	
+	
     }
 
     template<typename FloatType>
