@@ -133,19 +133,15 @@ namespace TransformationTypes{
     void GPUFunctionArgsT<FloatType,SizeType>::dump(){
         printf("Dumping GPU args state\n");
 
-        printf("    ");
         m_vars.dump("variables");
         printf("\n");
 
-        printf("    ");
         m_args.dump("sources");
         printf("\n");
 
-        printf("    ");
         m_rets.dump("sinks");
         printf("\n");
 
-        printf("    ");
         m_ints.dump("storages");
         printf("\n");
 

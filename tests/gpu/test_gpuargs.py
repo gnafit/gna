@@ -29,7 +29,10 @@ def test_io(opts):
     identity = R.Identity()
     identity.identity.switchFunction('identity_gpuargs_h')
 
-    identity.identity.source( points.points.points )
+    points.points.points >> identity.identity.source
+
+    identity.print()
+
     res = identity.identity.target.data()
     dt  = identity.identity.target.datatype()
 

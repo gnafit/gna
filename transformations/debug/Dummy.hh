@@ -32,11 +32,10 @@ public:
   }
 
   /** @brief Add an input. */
-  OutputDescriptor add_input(SingleOutput& output, const std::string& name){
+  void add_input(SingleOutput& output, const std::string& name){
     auto out=output.single();
     auto input=add_input(name.size() ? name : out.name());
     output.single() >> input;
-    return OutputDescriptor(transformations.back().outputs.back());
   }
 
   /** @brief Add an output by name */
