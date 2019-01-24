@@ -32,6 +32,11 @@ namespace TransformationTypes
     const Data<double> &operator[](int i) const;
 
     /**
+     * @brief Touch all the sources
+     */
+    void touch() const;
+
+    /**
      * @brief Get number of transformation sources.
      * @return Number of transformation Source instances.
      */

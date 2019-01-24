@@ -30,6 +30,8 @@ void Identity::dump(){
 using TransformationTypes::GPUShape;
 
 void identity_gpu(FunctionArgs& fargs){
+	fargs.args.touch();
+
 	auto* source=fargs.gpu->args[0];
 	auto* dest  =fargs.gpu->rets[0];
 	auto* shape =fargs.gpu->argshapes[0];

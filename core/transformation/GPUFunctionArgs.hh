@@ -33,8 +33,6 @@ namespace TransformationTypes{
         template<typename DataContainer>
         void fillContainersHost(DataContainer& container);                         ///< Read the date from Source/Sink/Storage containers
 
-        void fillContainersDevice();                                               ///< Read the date from Source/Sink/Storage containers
-
         void allocateHost(size_t size);                                            ///< Reallocate memory (Host)
         void allocateDevice();                                                     ///< Reallocate memory (Device)
         void deAllocateDevice();                                                   ///< Deallocate memory (Device)
@@ -74,25 +72,25 @@ namespace TransformationTypes{
         void updateTypes() { updateTypesHost(); }
         void dump();
 
-        SizeType    npars{0u};       // number of parameters
-        FloatType **pars{nullptr};   // list of pointers to parameter values
-        SizeType    nargs{0u};       // number of args
-        FloatType **args{nullptr};   // list of pointers to args
-        SizeType  **argshapes{0u};   //
-        SizeType    nrets{0u};       // number of rets
-        FloatType **rets{nullptr};   // list of pointers to rets
-        SizeType  **retshapes{0u};   //
-        SizeType    nints{0u};       // number of ints
-        FloatType **ints{nullptr};   // list of pointers to ints
-        SizeType  **intshapes{0u};   //
+        SizeType    npars{0u};       ///< number of parameters
+        FloatType **pars{nullptr};   ///< list of pointers to parameter values
+        SizeType    nargs{0u};       ///< number of args
+        FloatType **args{nullptr};   ///< list of pointers to args
+        SizeType  **argshapes{0u};   ///< list of pointers to shapes of args
+        SizeType    nrets{0u};       ///< number of rets
+        FloatType **rets{nullptr};   ///< list of pointers to rets
+        SizeType  **retshapes{0u};   ///< list of pointers to shapes of rets
+        SizeType    nints{0u};       ///< number of ints
+        FloatType **ints{nullptr};   ///< list of pointers to ints
+        SizeType  **intshapes{0u};   ///< list of pointers to shapes of ints
 
     private:
         Entry* m_entry;
 
         std::vector<FloatType*> m_pars;
-        GPUFunctionData<FloatType> m_args;
-        GPUFunctionData<FloatType> m_rets;
-        GPUFunctionData<FloatType> m_ints;
+        GPUFunctionData<FloatType> m_args; ///< Handler for inputs
+        GPUFunctionData<FloatType> m_rets; ///< Handler for outputs
+        GPUFunctionData<FloatType> m_ints; ///< Handler for storages
     };
 
     template<typename FloatType>
@@ -135,6 +133,10 @@ namespace TransformationTypes{
 
     }
 
+    /**
+     * @brief Reset the Host vectors and reserve space for N elements
+     * @param size -- number of inputs/outputs/storages to allocate the memory for
+     */
     template<typename FloatType>
     void GPUFunctionData<FloatType>::allocateHost(size_t size){
         h_pointers.clear();
@@ -150,6 +152,11 @@ namespace TransformationTypes{
         h_shape_pointers_dev.reserve(size);
     }
 
+    /**
+     * @brief Clean the memory allocated on the Device
+     *
+     * This method is also called in the destructor.
+     */
     template<typename FloatType>
     void GPUFunctionData<FloatType>::deAllocateDevice(){
 	size_t sh_size = h_shape_pointers_host.size();
@@ -179,6 +186,14 @@ namespace TransformationTypes{
         }
     }
 
+    /**
+     * @brief Allocate the memory on Device and fill with relevant data
+     *
+     * 1. Allocate the memory for the list of pointers to data (Device). Copy the pointers.
+     * 2. Allocate the memory for the list of shape data (Device). Copy the shape data.
+     * 3. Create host vector with pointers (Device) to the shape, relevant for each source/sink/storage.
+     * 4. Allocate the memory for the list of pointers to shape data (Device). Copy the pointers.
+     */
     template<typename FloatType>
     void GPUFunctionData<FloatType>::allocateDevice(){
         deAllocateDevice();
@@ -206,17 +221,21 @@ namespace TransformationTypes{
 	copyH2D(d_shape_pointers_dev, h_shape_pointers_dev.data(), h_shape_pointers_dev.size());
     }
 
+    /**
+     * @brief Fill the data from the sources/sinks/storages to the Device-friently list of pointers
+     * @param container -- list of source/sink/storage instances
+     */
     template<typename FloatType>
     template<typename DataContainer>
     void GPUFunctionData<FloatType>::fillContainers(DataContainer& container){
         fillContainersHost(container);
-        fillContainersDevice();
+        allocateDevice();
     }
 
-    template<typename FloatType>
-    void GPUFunctionData<FloatType>::fillContainersDevice(){
-    }
-
+    /**
+     * @brief Walk over the list of sinks/sources/storages and fill the data types (Host)
+     * @param container -- list of source/sink/storage instances
+     */
     template<typename FloatType>
     template<typename DataContainer>
     void GPUFunctionData<FloatType>::fillContainersHost(DataContainer& container){
