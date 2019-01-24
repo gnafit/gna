@@ -22,34 +22,33 @@ public:
    * @param label - transformation label.
    * @param labels - variables to bind.
    */
-  Dummy(size_t shape, const char* label, const std::vector<std::string> &labels={}){
-    transformation_("dummy")
-      .label(label)
-      .types([shape](TypesFunctionArgs fargs) {
-                for (size_t i = 0; i < fargs.rets.size(); ++i) {
-                  fargs.rets[i] = DataType().points().shape(shape);
-                }
-              }
-            )
-    .func([](FunctionArgs& fargs){ fargs.args[0].x=1.0; });
-
-    m_vars.resize(labels.size());
-    for (size_t i = 0; i < m_vars.size(); ++i) {
-      variable_(&m_vars[i], labels[i].data());
-    }
-  };
+  Dummy(size_t shape, const char* label, const std::vector<std::string> &labels={});
 
   /** @brief Add an input by name and leave unconnected. */
-  InputDescriptor add_input(const char* name){
-    return InputDescriptor(t_[0].input(name));
+  InputDescriptor add_input(const std::string& name){
+    auto trans = transformations.back();
+    auto input = trans.input(name);
+    return InputDescriptor(input);
+  }
+
+  /** @brief Add an input. */
+  OutputDescriptor add_input(SingleOutput& output, const std::string& name){
+    auto out=output.single();
+    auto input=add_input(name.size() ? name : out.name());
+    output.single() >> input;
+    return OutputDescriptor(transformations.back().outputs.back());
   }
 
   /** @brief Add an output by name */
-  OutputDescriptor add_output(const char* name){
-    auto ret = OutputDescriptor(t_[0].output(name));
-    t_[0].updateTypes();
-    return ret;
+  OutputDescriptor add_output(const std::string& name){
+    auto trans = transformations.back();
+    auto output = trans.output(name);
+    trans.updateTypes();
+    return OutputDescriptor(output);
   }
+
+  void dummy_fcn(FunctionArgs& fargs);
+  void dummy_gpuargs_h(FunctionArgs& fargs);
 
   std::vector<variable<double>> m_vars;
 };

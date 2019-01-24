@@ -2,7 +2,7 @@
 
 using TransformationTypes::FunctionArgs;
 
-void identity_gpu(FunctionArgs& fargs);
+void identity_gpu_h(FunctionArgs& fargs);
 
 Identity::Identity(){
 	transformation_("identity")
@@ -11,7 +11,7 @@ Identity::Identity(){
 		.types(TypesFunctions::pass<0,0>)
 		.func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x; })
 //#ifdef GNA_CUDA_SUPPORT     //
-		.func("identity_gpuargs", identity_gpu/*, DataLocation::Device*/)
+		.func("identity_gpuargs_h", identity_gpu_h/*, DataLocation::Device*/)
 //#endif
 		;
 }
@@ -29,12 +29,14 @@ void Identity::dump(){
 
 using TransformationTypes::GPUShape;
 
-void identity_gpu(FunctionArgs& fargs){
+void identity_gpu_h(FunctionArgs& fargs){
 	fargs.args.touch();
+	auto& gpuargs=fargs.gpu;
+	gpuargs->provideSignatureHost();
 
-	auto* source=fargs.gpu->args[0];
-	auto* dest  =fargs.gpu->rets[0];
-	auto* shape =fargs.gpu->argshapes[0];
+	auto* source=*gpuargs->args;
+	auto* dest  =*gpuargs->rets;
+	auto* shape =*gpuargs->argshapes;
 	auto bytes=shape[(int)GPUShape::Size]*sizeof(decltype(source[0]));
 	//printf("copy %p->%p size %zu\n", (void*)source, (void*)dest, fargs.gpu->argshapes[0][(int)GPUShape::Size]);
 	memcpy(dest, source, bytes);

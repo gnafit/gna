@@ -80,8 +80,8 @@ public:
   void *rawdata() const {
     return m_data.raw;
   }
-  void *rawptr() const {
-    return rawdata();
+  size_t hash() const {
+    return reinterpret_cast<size_t>(rawdata());
   }
   const char *name() const {
     return m_data.hdr->name.c_str();
@@ -158,7 +158,7 @@ public:
       if (ems.has(other)) {
         return true;
       }
-      if (visited.insert(x.rawptr()).second) {
+      if (visited.insert(x.rawdata()).second) {
         for (size_t i = 0; i < ems.cnt; ++i) {
           queue.push_back(ems.objs[i]);
         }

@@ -37,6 +37,10 @@ def wrap_constructor1(obj, dtype='d'):
 def VarArray(varnames, *args, **kwargs):
     return R.VarArray(stdvector(varnames), *args, **kwargs)
 
+"""Construct Dummy object from vector of strings"""
+def Dummy(shape, name, varnames, *args, **kwargs):
+    return R.Dummy(shape, name, stdvector(varnames), *args, **kwargs)
+
 """Construct Points object from numpy array"""
 def Points( array, *args, **kwargs ):
     """Convert array to Points"""

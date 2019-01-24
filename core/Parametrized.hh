@@ -58,6 +58,7 @@ namespace ParametrizedTypes {
       m_entry->required = req;
       return *this;
     }
+    size_t hash() const {return m_entry->par.hash();}
     void dump() const;
   protected:
     void bind(variable<void> var) { m_entry->bind(var); }
@@ -142,6 +143,7 @@ namespace ParametrizedTypes {
 
     const std::string &name() const { return m_entry->name; }
 
+    size_t hash() const {return m_entry->dep.hash();}
     void dump() const;
   protected:
     EvaluableEntry *m_entry;
