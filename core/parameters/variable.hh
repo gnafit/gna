@@ -68,3 +68,9 @@ protected:
     d.tainted = false;
   }
 };
+
+template class variable<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class variable<float>;
+#endif
+

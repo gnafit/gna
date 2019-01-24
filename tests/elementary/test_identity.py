@@ -27,7 +27,7 @@ def test_points(opts):
     points = Points(mat)
     identity = R.Identity()
     if opts.gpuargs:
-        identity.identity.switchFunction('identity_gpuargs')
+        identity.identity.switchFunction('identity_gpuargs_h')
 
     identity.identity.source( points.points.points )
     res = identity.identity.target.data()

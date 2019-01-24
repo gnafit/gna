@@ -53,9 +53,5 @@ namespace TransformationTypes
     Entry *entry;                        ///< Pointer to the transformation Entry this Sink belongs to.
   };
 
-  template class SinkT<double>;
-  #ifdef PROVIDE_SINGLE_PRECISION
-    template class SinkT<float>;
-  #endif
   using Sink = SinkT<double>;
 } /* TransformationTypes */

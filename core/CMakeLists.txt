@@ -1,6 +1,10 @@
 set(CORE_SOURCES
-  core/transformation/TransformationEntry.cc
+  # GPU staff
   core/transformation/GPUFunctionArgs.cc
+  core/transformation/GPUVariablesLocal.cc
+  core/transformation/GPUFunctionData.cc
+  # Transformation
+  core/transformation/TransformationEntry.cc
   core/transformation/TransformationFunctionArgs.cc
   core/transformation/Accessor.cc
   core/transformation/Args.cc
@@ -14,9 +18,12 @@ set(CORE_SOURCES
   core/transformation/Rtypes.cc
   core/transformation/Itypes.cc
   core/transformation/Source.cc
+  core/transformation/Sink.cc
+  core/transformation/Storage.cc
   core/transformation/TransformationBase.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/parameters/fillers.cc
   core/GNAObject.cc
   core/GNAObjectBind1N.cc
   core/ParametersGroup.cc
@@ -58,7 +65,18 @@ set(CORE_HEADERS
   SingleOutput.hh
   Initializer.hh
   Accessor.hh
+  # variables
+  changeable.hh
+  variable.hh
+  parameter.hh
+  taintflag.hh
+  fillers.hh
+  dependant.hh
+  evaluable.hh
+  callback.hh
   # GPU related stuff
+  GPUVariablesLocal.hh
+  GPUFunctionData.hh
   GPUFunctionArgs.hh
   # core/
   GNAObject.hh
