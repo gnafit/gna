@@ -161,24 +161,15 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType>::deAllocateDevice(){
 	size_t sh_size = h_shape_pointers_host.size();
         if(d_pointers_dev){
-            // TODO:
-            //size of h_pointers_dev.size()
-            //d_pointers_dev=nullptr;
 	    for (size_t i =0; i < sh_size; i++) {
 		cuwr_free(d_pointers_dev[i]);
 	    }
 	    cuwr_free(d_pointers_dev);
         }
         if(d_shapes){
-            // TODO:
-            //size of h_shapes.size()
-            //d_shapes=nullptr;
 	    cuwr_free(d_shapes);
         }
         if(d_shape_pointers_dev){
-            // TODO:
-            //size of h_pointers_dev.size()
-            //d_shape_pointers_dev=nullptr;
 	    for (size_t i =0; i < sh_size; i++) {
 		cuwr_free(d_shape_pointers_dev[i]);
 	    }
@@ -198,10 +189,6 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType>::allocateDevice(){
         deAllocateDevice();
 
-        // TODO:
-        // h_pointers_dev -> d_pointers
-        // h_shapes       -> d_shapes
-
 	copyH2D(d_pointers_dev, h_pointers_dev.data(), h_pointers_dev.size());
 	copyH2D(d_shapes, h_shapes.data(), h_shapes.size());
 
@@ -211,10 +198,7 @@ namespace TransformationTypes{
             //h_shape_pointers_dev[i] = next(initial, h_offsets[i]);
         //}
 
-        // TODO:
-        // h_shape_pointers_dev -> d_shape_pointers_dev
-
-	seize_t sh_size = h_shape_pointers_host.size();
+	size_t sh_size = h_shape_pointers_host.size();
 	for (size_t i = 0; i< sh_size; i++) {
 		copyH2D(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
 	}
