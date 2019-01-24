@@ -7,7 +7,7 @@
 #include <Eigen/Dense>
 #include "TransformationEntry.hh"
 
-#ifdef CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
 #endif
 
