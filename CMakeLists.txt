@@ -5,6 +5,41 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+if(CUDA_SUPPORT)
+    find_package( CUDA REQUIRED)
+    include_directories(cuda/extra/ cuda/core/)
+    include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+    if(NOT CUDA_MAT_SIZE_THRESHOLD)
+        set(CUDA_MAT_SIZE_THRESHOLD 100)
+    endif()
+#    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
+    set(CUDA_ADD_LIBS)
+    IF (CUDA_FOUND)
+        add_subdirectory(cuda/)
+        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
+        link_directories(cuda/)
+    ENDIF()
+    set (CUSOURCES
+        )
+    set (CUHEADERS
+  	GpuArray.hh 
+  	GpuArrayTypes.hh
+  	cuInterpExpo.hh
+	GpuBasics.hh
+        )
+else()
+    set(CUDA_SUPPORT 0)
+    set(CUSOURCES "")
+    set(CUHEADERS "")
+endif()
+
+if (NOT CUDA_DEBUG_INFO )
+    set(CUDA_DEBUG_INFO 0)
+endif()
+
+
+
+
 add_subdirectory(core)
 add_subdirectory(transformations)
 add_subdirectory(extra)
@@ -12,7 +47,7 @@ add_subdirectory(examples)
 add_subdirectory(unittest)
 
 set(SOURCES ${CORE_SOURCES} ${TRANSFORMATION_SOURCES} ${EXTRA_SOURCES} ${EXAMPLES_SOURCES} ${UNITTEST_SOURCES})
-set(HEADERS ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
+set(HEADERS ${CUHEADERS} ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
 
 include_directories(core/parameters/
                     core/transformation/
@@ -98,7 +133,7 @@ endif()
 
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS}  -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt)
 

@@ -1,6 +1,6 @@
 #include <iostream>
 #include "cuInterpExpo.hh"
-
+#include "cuda_config_vars.h"
 
 /* Exp interpolation with segment indexes started with -1 in old way. 
  *
