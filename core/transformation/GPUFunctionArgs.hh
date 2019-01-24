@@ -33,6 +33,9 @@ namespace TransformationTypes{
         template<typename DataContainer>
         void fillContainersHost(DataContainer& container);                         ///< Read the date from Source/Sink/Storage containers
 
+        template<typename DataContainer>
+        void fillContainersDevice(DataContainer& container);                       ///< Read the date from gpu arrays of Source/Sink/Storage containers 
+
         void allocateHost(size_t size);                                            ///< Reallocate memory (Host)
         void allocateDevice();                                                     ///< Reallocate memory (Device)
         void deAllocateDevice();                                                   ///< Deallocate memory (Device)

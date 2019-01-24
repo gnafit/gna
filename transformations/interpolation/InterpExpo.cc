@@ -55,6 +55,9 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
+#ifdef GNA_CUDA_SUPPORT 
+    .func("gpu", &InterpExpo::do_interpolate_ongpu)
+#endif
     ;
 
   if(bind){
@@ -152,6 +155,12 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
       advance(insegment, 1);
     }
   }
+}
+
+void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
+    interpExpo_v1(farg.gpu->arg[0], farg.gpu->rets[0], farg.gpu->arg[1], 
+	farg.gpu->arg[4], farg.gpu->arg[2], farg.gpu->arg[3], 
+	farg.gpu->arg[0].size(), farg.gpu->arg[1].size()) // TODO rewrite?
 }
 
 //InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
