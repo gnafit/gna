@@ -7,6 +7,11 @@
 #include <Eigen/Dense>
 #include "TransformationEntry.hh"
 
+#ifdef CUDA_SUPPORT
+#include "GpuBasics.hh"
+#endif
+
+
 namespace TransformationTypes{
     enum class GPUShape {
       Ndim = 0,  ///< Number of dimensions (position)
@@ -147,20 +152,30 @@ namespace TransformationTypes{
 
     template<typename FloatType>
     void GPUFunctionData<FloatType>::deAllocateDevice(){
+	size_t sh_size = h_shape_pointers_host.size();
         if(d_pointers_dev){
             // TODO:
             //size of h_pointers_dev.size()
-            d_pointers_dev=nullptr;
+            //d_pointers_dev=nullptr;
+	    for (size_t i =0; i < sh_size; i++) {
+		cuwr_free(d_pointers_dev[i]);
+	    }
+	    cuwr_free(d_pointers_dev);
         }
         if(d_shapes){
             // TODO:
             //size of h_shapes.size()
-            d_shapes=nullptr;
+            //d_shapes=nullptr;
+	    cuwr_free(d_shapes);
         }
         if(d_shape_pointers_dev){
             // TODO:
             //size of h_pointers_dev.size()
-            d_shape_pointers_dev=nullptr;
+            //d_shape_pointers_dev=nullptr;
+	    for (size_t i =0; i < sh_size; i++) {
+		cuwr_free(d_shape_pointers_dev[i]);
+	    }
+	    cuwr_free(d_shape_pointers_dev);
         }
     }
 
@@ -172,6 +187,9 @@ namespace TransformationTypes{
         // h_pointers_dev -> d_pointers
         // h_shapes       -> d_shapes
 
+	copyH2D(d_pointers_dev, h_pointers_dev.data(), h_pointers_dev.size());
+	copyH2D(d_shapes, h_shapes.data(), h_shapes.size());
+
         // Calculate the pointers to shape of each Data based on offsets
         //auto* initial=d_shapes.data();
         //for (size_t i = 0; i < h_offsets.size(); ++i) {
@@ -180,6 +198,12 @@ namespace TransformationTypes{
 
         // TODO:
         // h_shape_pointers_dev -> d_shape_pointers_dev
+
+	seize_t sh_size = h_shape_pointers_host.size();
+	for (size_t i = 0; i< sh_size; i++) {
+		copyH2D(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
+	}
+	copyH2D(d_shape_pointers_dev, h_shape_pointers_dev.data(), h_shape_pointers_dev.size());
     }
 
     template<typename FloatType>
