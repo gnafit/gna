@@ -4,7 +4,6 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <Eigen/Dense>
 #include "TransformationEntry.hh"
 #include "GPUVariablesLocal.hh"
 #include "GPUFunctionData.hh"
@@ -96,14 +95,11 @@ namespace TransformationTypes{
         m_args.dump("sources");
         printf("\n");
 
-        printf("    ");
         m_rets.dump("sinks");
         printf("\n");
 
-        printf("    ");
         m_ints.dump("storages");
         printf("\n");
-
     }
 
     using GPUFunctionArgs = GPUFunctionArgsT<double>;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+#include <Eigen/Dense>
 
 #ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
