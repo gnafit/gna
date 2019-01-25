@@ -56,11 +56,12 @@ struct inconstant_header {
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data(const char* name="", bool autoname=false) : inconstant_header(name, autoname) {
+  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname), value(size) {
     type = &typeid(ValueType);
   }
-  std::vector<ValueType> value{1};
-  std::function<ValueType()> func;
+  std::vector<ValueType> value;
+  std::function<ValueType()> func{nullptr};
+  std::function<void(std::vector<ValueType>&)> vfunc{nullptr};
 };
 
 #include "parameters_debug.hh"
@@ -80,9 +81,15 @@ public:
       d.taint();
     }
   }
+  void subscirbeto(changeable d){
+    d.subscribe(*this);
+  }
   void unsubscribe(changeable d) {
     m_hdr->observers.remove(d);
     d.m_hdr->emitters.remove(*this);
+  }
+  void unsubscribefrom(changeable d) {
+    d.unsubscribe(*this);
   }
   void *rawdata() const {
     return static_cast<void*>(m_hdr.get());

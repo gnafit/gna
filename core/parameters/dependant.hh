@@ -48,6 +48,25 @@ public:
       base_type::init(f, deps);
       DPRINTF("constructed dependant");
     }
+  template <typename T>
+  dependant(std::function<void(std::vector<ValueType>&)> vf,
+            std::initializer_list<changeable> deps,
+            const char *name = "")
+    : base_type(name)
+    {
+      base_type::init(vf, deps);
+      DPRINTF("constructed dependant");
+    }
+  template <typename T>
+  dependant(std::function<void(std::vector<ValueType>&)> vf,
+            std::vector<T> deps,
+            const char *name = "")
+    : base_type(name)
+    {
+      DPRINTF("construct dependant: %i deps", int(deps.size()));
+      base_type::init(vf, deps);
+      DPRINTF("constructed dependant");
+    }
 protected:
   dependant(const base_type &other)
     : base_type(other) { }

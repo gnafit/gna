@@ -77,11 +77,13 @@ protected:
     if (!d.tainted) {
       return;
     }
-    if (!d.func) {
-      return;
-    }
-    d.value[0] = d.func();
     d.tainted = false;
+    if (d.func) {
+      d.value[0] = d.func();
+    }
+    else if (d.vfunc) {
+      d.vfunc(d.value);
+    }
   }
 };
 

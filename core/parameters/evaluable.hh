@@ -25,11 +25,20 @@ protected:
   template <typename T>
   void init(std::function<ValueType()> f, T deps) {
     auto &d = base_type::data();
+    if(d.value.size()!=1u){
+      throw std::runtime_error("unable to set scalar function for vector data");
+    }
     d.func = f;
     this->initdeps(deps);
   }
-  evaluable(const char *name = "") {
-    base_type::alloc(new inconstant_data<ValueType>(name));
+  template <typename T>
+  void init(std::function<void(std::vector<ValueType>&)> vf, T deps) {
+    auto &d = base_type::data();
+    d.vfunc = vf;
+    this->initdeps(deps);
+  }
+  evaluable(const char *name="", size_t size=1u) {
+    base_type::alloc(new inconstant_data<ValueType>(size, name));
     DPRINTF("constructed evaluable");
   }
   evaluable(const base_type &other)

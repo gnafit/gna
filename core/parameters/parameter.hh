@@ -23,8 +23,8 @@ template <typename ValueType>
 class parameter: public variable<ValueType> {
   using base_type = variable<ValueType>;
 public:
-  parameter(const char *name="") : base_type() {
-    base_type::alloc(new inconstant_data<ValueType>(name));
+  parameter(const char *name="", size_t size=1u) : base_type() {
+    base_type::alloc(new inconstant_data<ValueType>(size, name));
   }
   parameter(const parameter<ValueType> &other)
     : base_type(other) { }
