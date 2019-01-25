@@ -11,5 +11,5 @@ protected:
 
   dependant<double> m_Lavg;
   dependant<double> m_Pavg;
-  dependant<std::array<double, 3>> m_weights;
+  dependant<double> m_weights;
 };
