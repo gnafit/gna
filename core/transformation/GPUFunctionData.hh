@@ -4,6 +4,8 @@
 #include <iostream>
 #include <Eigen/Dense>
 
+
+#include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
 #endif
