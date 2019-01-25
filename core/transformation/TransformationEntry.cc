@@ -270,9 +270,9 @@ void Entry::evaluateTypes() {
         sink.data->require_gpu();
         sink.data->gpuArr->setLocation( this->getEntryLocation() );
       }
-      gpustorage = new GPUStorage(this); 
-      std::cerr << "afret gpu storage new" << std::endl;
-      gpustorage->initGPUStorage();
+      //gpustorage = new GPUStorage(this); 
+      //std::cerr << "afret gpu storage new" << std::endl;
+      //gpustorage->initGPUStorage();
     }
 #endif
 
