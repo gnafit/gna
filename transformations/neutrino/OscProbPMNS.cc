@@ -11,8 +11,8 @@
 #include "Units.hh"
 
 #ifdef GNA_CUDA_SUPPORT 
-#include "extra/GNAcuOscProbFull.h"
-#include "extra/GNAcuOscProbMem.hh"
+//#include "extra/GNAcuOscProbFull.h"
+//#include "extra/GNAcuOscProbMem.hh"
 #endif
 
 #include <chrono>

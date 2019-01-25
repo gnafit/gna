@@ -64,6 +64,7 @@ public:
   //Strategy getStrategy(const std::string& strategy);                                                       ///< Convert strategy from string to Strategy.
 
   void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
+  void do_interpolate_ongpu(FunctionArgs& fargs);                                                              ///< Do the interpolation on GPU.
 protected:
   //double m_underflow{0.0};                                                                                 ///< Value to write into underflow points when strategy=Constant.
   //double m_overflow{0.0};                                                                                  ///< Value to write into overflow points when strategy=Constant.

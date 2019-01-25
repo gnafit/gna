@@ -5,6 +5,11 @@
 #include <TMath.h>
 #include <stdexcept>
 
+
+#ifdef GNA_CUDA_SUPPORT
+#include "cuInterpExpo.hh"
+#endif
+
 using std::next;
 using std::prev;
 using std::advance;
@@ -158,10 +163,17 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 }
 
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
-    interpExpo_v1(farg.gpu->arg[0], farg.gpu->rets[0], farg.gpu->arg[1], 
-	farg.gpu->arg[4], farg.gpu->arg[2], farg.gpu->arg[3], 
-	farg.gpu->arg[0].size(), farg.gpu->arg[1].size()) // TODO rewrite?
+/*    interpExpo_v1(fargs.gpu->arg[0], fargs.gpu->rets[0], fargs.gpu->arg[1], 
+	fargs.gpu->arg[4], fargs.gpu->arg[2], fargs.gpu->arg[3], 
+	fargs.gpu->arg[0].size(), fargs.gpu->arg[1].size()) // TODO rewrite?
+*/
+/*        auto& gpuargs=fargs.gpu;
+    interpExpo_v1(gpuargs->args[0], gpuargs->rets[0], gpuargs->args[1], 
+	gpuargs->args[4], gpuargs->args[2], gpuargs->args[3], 
+	gpuargs->argshapes[0][0], gpuargs->argshapes[1][0]); // TODO rewrite?
+*/	
 }
+
 
 //InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){
   //if(strategy=="constant"){
