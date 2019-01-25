@@ -5,26 +5,28 @@ from __future__ import print_function
 import numpy as N
 from load import ROOT as R
 
-def check(text, before, after, shouldbe, taintflag):
+def check(text, before, after, shouldbe, taintflag, tainted=True):
     if before is not None:
         print('   ', text, 'before', before)
 
+        assert N.all(before!=shouldbe)
+
     print('   ', text, 'after', after, '=', shouldbe)
     print('   ', 'tainted', bool(taintflag))
-    assert after==shouldbe
+    assert N.all(after==shouldbe)
 
     if taintflag is None:
         print()
         return
 
-    assert bool(taintflag)
+    assert bool(taintflag)==tainted
     taintflag.set(False)
     assert not bool(taintflag)
     print()
 
 def test_var_01():
     """Test getters"""
-    print("Test getters (01)")
+    print("Test getters")
     var = R.parameter('double')('testpar')
     taintflag = R.taintflag('tflag')
     var.subscribe(taintflag)
@@ -32,27 +34,53 @@ def test_var_01():
     const = 1.5
     print('Set', const)
     var.set(const)
-    print('Tatinflag', bool(taintflag))
-    taintflag.set(False)
-    print('Tatinflag', bool(taintflag))
+    print('Taintflag', bool(taintflag))
 
-    check('ret scalar', None, var.value(), const, None)
-    check('ret index[0]', None, var.value(0), const, None)
-    check('ret vector', None, list(var.values()), [const], None)
+    check('ret scalar', None, var.value(), const, taintflag, True)
+    check('ret index[0]', None, var.value(0), const, taintflag, False)
+    check('ret vector', None, list(var.values()), [const], taintflag, False)
 
     ret = N.zeros(1, dtype='d')
     before=ret.copy()
     var.values(ret)
-    check('arg C array', before, ret, [const], None)
+    check('arg C array', before, ret, [const], taintflag, False)
 
     ret = R.vector('double')(1)
     before=list(ret)
     var.values(ret)
-    check('arg std vector', before, list(ret), [const], None)
+    check('arg std vector', before, list(ret), [const], taintflag, False)
 
 def test_var_02():
+    """Test getters (vec)"""
+    print("Test getters")
+    const = N.array([1.5, 2.6, 3.7], dtype='d')
+
+    var = R.parameter('double')('testpar', const.size)
+    taintflag = R.taintflag('tflag')
+    var.subscribe(taintflag)
+
+    print('Set', const)
+    var.set(const)
+    print('Taintflag', bool(taintflag))
+
+    check('ret scalar', None, var.value(), const[0], taintflag, True)
+    for i, val in enumerate(const):
+        check('ret index[%i]'%i, None, var.value(i), val, taintflag, False)
+    check('ret vector', None, list(var.values()), const, taintflag, False)
+
+    ret = N.zeros(const.size, dtype='d')
+    before=ret.copy()
+    var.values(ret)
+    check('arg C array', before, ret, const, taintflag, False)
+
+    ret = R.vector('double')(const.size)
+    before=list(ret)
+    var.values(ret)
+    check('arg std vector', before, list(ret), const, taintflag, False)
+
+def test_var_03():
     """Test setters"""
-    print("Test setters (02)")
+    print("Test setters")
     var = R.parameter('double')('testpar')
     taintflag = R.taintflag('tflag')
     var.subscribe(taintflag)
@@ -60,9 +88,21 @@ def test_var_02():
 
     const = 1.5
     var.set(const)
-    const+=1.0
+    check('scalar', None, var.value(), const, taintflag)
 
-    check('scalar', None, var.value(), const, None)
+    const+=1.0
+    var.set(0, const)
+    check('index [0]', None, var.value(), const, taintflag)
+
+    const+=1.0
+    arr = N.array([const], dtype='d')
+    var.set(arr)
+    check('C array', None, var.value(), const, taintflag)
+
+    const+=1.0
+    arr = R.vector('double')(1, const)
+    var.set(arr)
+    check('std vector', None, var.value(), const, taintflag)
 
 if __name__ == "__main__":
     glb = globals()

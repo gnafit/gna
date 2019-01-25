@@ -33,8 +33,9 @@ public:
   static parameter<ValueType> null() {
     return parameter<ValueType>(base_type::null());
   }
-  parameter(std::initializer_list<const char*> name)
-    : base_type(*name.begin()) { }
+  //parameter(std::initializer_list<const char*> name)
+    //: base_type(*name.begin()) { }
+
   parameter<ValueType>& operator=(ValueType v) {
     set(v);
     return *this;
@@ -70,7 +71,7 @@ public:
     auto& values=d.value;
     if( !std::equal(values.begin(), values.end(), other) ){
         base_type::notify();
-        std::copy(other, std::next(other, values.size(), values.data()));
+        std::copy(other, std::next(other, values.size()), values.data());
     }
     d.tainted = false;
   }
