@@ -1,4 +1,6 @@
 set(CORE_SOURCES
+  # Parameters
+  core/parameters/variable.cc
   # GPU staff
   core/transformation/GPUFunctionArgs.cc
   core/transformation/GPUVariablesLocal.cc

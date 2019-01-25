@@ -10,11 +10,11 @@ public:
   taintflag(std::initializer_list<changeable> deps, const char* name="") { init(deps, name); }
   taintflag(std::vector<changeable> deps, const char* name="") { init(deps, name); }
   operator bool() const {
-    return m_data.hdr->tainted;
+    return m_hdr->tainted;
   }
   taintflag &operator=(bool value) {
     if (!value) {
-     m_data.hdr->tainted = false;
+     m_hdr->tainted = false;
     }
     return *this;
   }
@@ -34,7 +34,7 @@ public:
   };
 
   void set_pass_through(){
-    m_data.hdr->status=TaintStatus::PassThrough;
+    m_hdr->status=TaintStatus::PassThrough;
   }
 };
 

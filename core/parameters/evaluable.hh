@@ -29,7 +29,7 @@ protected:
     this->initdeps(deps);
   }
   evaluable(const char *name = "") {
-    base_type::m_data.raw = new inconstant_data<ValueType>(name);
+    base_type::alloc(new inconstant_data<ValueType>(name));
     DPRINTF("constructed evaluable");
   }
   evaluable(const base_type &other)

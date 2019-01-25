@@ -24,7 +24,7 @@ class parameter: public variable<ValueType> {
   using base_type = variable<ValueType>;
 public:
   parameter(const char *name="") : base_type() {
-    base_type::m_data.raw = new inconstant_data<ValueType>(name);
+    base_type::alloc(new inconstant_data<ValueType>(name));
   }
   parameter(const parameter<ValueType> &other)
     : base_type(other) { }
@@ -42,9 +42,35 @@ public:
   void set(ValueType v) {
     DPRINTF("setting to %e", v);
     auto &d = base_type::data();
-    if (d.value != v) {
-      d.value = v;
+    if (d.value[0] != v) {
+      d.value[0] = v;
       base_type::notify();
+    }
+    d.tainted = false;
+  }
+  void set(size_t i, ValueType v) {
+    DPRINTF("setting [%zu] to %e", i, v);
+    auto &d = base_type::data();
+    if (d.value[i] != v) {
+      d.value[i] = v;
+      base_type::notify();
+    }
+    d.tainted = false;
+  }
+  void set(const std::vector<ValueType>& other) {
+    auto &d = base_type::data();
+    if (d.value != other) {
+      d.value = other;
+      base_type::notify();
+    }
+    d.tainted = false;
+  }
+  void set(ValueType* other) {
+    auto &d = base_type::data();
+    auto& values=d.value;
+    if( !std::equal(values.begin(), values.end(), other) ){
+        base_type::notify();
+        std::copy(other, std::next(other, values.size(), values.data()));
     }
     d.tainted = false;
   }
