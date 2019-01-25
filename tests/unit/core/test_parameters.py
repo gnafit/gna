@@ -122,6 +122,39 @@ def test_var_04():
     var.set(vec)
     check('std vector', None, list(var.values()), const, taintflag)
 
+def test_var_05():
+    """Test nested vector"""
+    print("Test setters")
+    const = N.array([1.5, 2.6, 3.7], dtype='d')
+    var = R.parameter('vector<double>')('testpar')
+    var.value().resize(3)
+    taintflag = R.taintflag('tflag')
+    var.subscribe(taintflag)
+    taintflag.set(False)
+
+    vec = C.stdvector(const)
+    var.set(vec)
+
+    check('vec', None, list(var.value()), const, taintflag)
+
+def test_var_06():
+    """Test nested vector"""
+    print("Test setters")
+    const = N.array([1.5, 2.6, 3.7], dtype='d')
+    var = R.parameter('vector<double>')('testpar',2)
+    var.value(0).resize(3)
+    var.value(1).resize(3)
+    taintflag = R.taintflag('tflag')
+    var.subscribe(taintflag)
+    taintflag.set(False)
+
+    vec = C.stdvector(const)
+    var.set(0, vec)
+    vec = C.stdvector(const+1.0)
+    var.set(1, vec)
+
+    check('vec 0', None, list(var.value(0)), const, taintflag)
+    check('vec 1', None, list(var.value(1)), const+1.0, taintflag, False)
 
 if __name__ == "__main__":
     glb = globals()
