@@ -15,6 +15,8 @@
 #include "Sink.hh"
 #include "Storage.hh"
 
+#include "config_vars.h"
+
 namespace TransformationTypes
 {
   class Base;
@@ -92,8 +94,21 @@ namespace TransformationTypes
     // Function args
     std::unique_ptr<FunctionArgs> functionargs;          ///< Transformation function arguments.
 
+#ifdef GNA_CUDA_SUPPORT
+    void setEntryLocation(DataLocation loc) {           ///< Sets the target (Host or Device) for execution of current transformation
+                m_entryLoc = loc;
+    }
+    DataLocation getEntryLocation() const {             ///<  Returns the target (Host or Device) for execution of current transformation
+                return m_entryLoc;
+    }
+#endif
+
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
+#ifdef GNA_CUDA_SUPPORT
+    DataLocation m_entryLoc = DataLocation::Host;       ///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
+#endif
+
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
     void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
