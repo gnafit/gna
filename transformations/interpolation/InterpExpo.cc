@@ -167,8 +167,9 @@ void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
 	fargs.gpu->arg[4], fargs.gpu->arg[2], fargs.gpu->arg[3], 
 	fargs.gpu->arg[0].size(), fargs.gpu->arg[1].size()) // TODO rewrite?
 */
-/*        auto& gpuargs=fargs.gpu;
-    interpExpo_v1(gpuargs->args[0], gpuargs->rets[0], gpuargs->args[1], 
+        auto& gpuargs=fargs.gpu;
+	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->argshapes[0][0], gpuargs->argshapes[1][0] );
+/*    interpExpo_v1(gpuargs->args[0], gpuargs->rets[0], gpuargs->args[1], 
 	gpuargs->args[4], gpuargs->args[2], gpuargs->args[3], 
 	gpuargs->argshapes[0][0], gpuargs->argshapes[1][0]); // TODO rewrite?
 */	
