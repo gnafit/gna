@@ -32,8 +32,8 @@ public:
     : base_type(base_type::null()) { }
   dependant(std::function<ValueType()> f,
             std::initializer_list<changeable> deps,
-            const char *name = "")
-    : base_type(name)
+            const char *name = "", size_t size=1u)
+    : base_type(name, size)
     {
       base_type::init(f, deps);
       DPRINTF("constructed dependant");
@@ -41,18 +41,17 @@ public:
   template <typename T>
   dependant(std::function<ValueType()> f,
             std::vector<T> deps,
-            const char *name = "")
-    : base_type(name)
+            const char *name = "", size_t size=1u)
+    : base_type(name, size)
     {
       DPRINTF("construct dependant: %i deps", int(deps.size()));
       base_type::init(f, deps);
       DPRINTF("constructed dependant");
     }
-  template <typename T>
   dependant(std::function<void(std::vector<ValueType>&)> vf,
             std::initializer_list<changeable> deps,
-            const char *name = "")
-    : base_type(name)
+            const char *name = "", size_t size=1u)
+    : base_type(name, size)
     {
       base_type::init(vf, deps);
       DPRINTF("constructed dependant");
@@ -60,8 +59,8 @@ public:
   template <typename T>
   dependant(std::function<void(std::vector<ValueType>&)> vf,
             std::vector<T> deps,
-            const char *name = "")
-    : base_type(name)
+            const char *name = "", size_t size=1u)
+    : base_type(name, size)
     {
       DPRINTF("construct dependant: %i deps", int(deps.size()));
       base_type::init(vf, deps);
