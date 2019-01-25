@@ -4,6 +4,7 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
+from gna import constructors as C
 
 def check(text, before, after, shouldbe, taintflag, tainted=True):
     if before is not None:
@@ -103,6 +104,24 @@ def test_var_03():
     arr = R.vector('double')(1, const)
     var.set(arr)
     check('std vector', None, var.value(), const, taintflag)
+
+def test_var_04():
+    """Test setters"""
+    print("Test setters")
+    const = N.array([1.5, 2.6, 3.7], dtype='d')
+    var = R.parameter('double')('testpar', const.size)
+    taintflag = R.taintflag('tflag')
+    var.subscribe(taintflag)
+    taintflag.set(False)
+
+    var.set(const)
+    check('C array', None, list(var.values()), const, taintflag)
+
+    const+=1.0
+    vec = C.stdvector(const)
+    var.set(vec)
+    check('std vector', None, list(var.values()), const, taintflag)
+
 
 if __name__ == "__main__":
     glb = globals()
