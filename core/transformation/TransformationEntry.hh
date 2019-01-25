@@ -95,12 +95,8 @@ namespace TransformationTypes
     std::unique_ptr<FunctionArgs> functionargs;          ///< Transformation function arguments.
 
 #ifdef GNA_CUDA_SUPPORT
-    void setEntryLocation(DataLocation loc) {           ///< Sets the target (Host or Device) for execution of current transformation
-                m_entryLoc = loc;
-    }
-    DataLocation getEntryLocation() const {             ///<  Returns the target (Host or Device) for execution of current transformation
-                return m_entryLoc;
-    }
+    void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
+    DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
 #endif
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.

@@ -343,6 +343,25 @@ void Entry::switchFunction(const std::string& name){
   evaluateTypes();
 }
 
+
+#ifdef GNA_CUDA_SUPPORT
+/**
+ *    @brief Sets the target (Host or Device) for execution of current transformation
+ */
+    void Entry::setEntryLocation(DataLocation loc) {       
+                m_entryLoc = loc;
+    }
+
+/** 
+ * @brief Returns the target (Host or Device) for execution of current transformation
+ */
+    DataLocation Entry::getEntryLocation() const {   
+                return m_entryLoc;
+    }
+#endif
+
+
+
 /**
  * @brief Initialize the Data for the internal storage.
  *
