@@ -5,9 +5,11 @@
 #include <TMath.h>
 #include <stdexcept>
 
-
+#include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "cuInterpExpo.hh"
+#include "DataLocation.hh"
+
 #endif
 
 using std::next;
@@ -63,7 +65,7 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
 #ifdef GNA_CUDA_SUPPORT 
-    .func("gpu", &InterpExpo::do_interpolate_ongpu)
+    .func("gpu", &InterpExpo::do_interpolate_ongpu, DataLocation::Device)
 #endif
     ;
 
@@ -165,16 +167,9 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 }
 
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
-/*    interpExpo_v1(fargs.gpu->arg[0], fargs.gpu->rets[0], fargs.gpu->arg[1], 
-	fargs.gpu->arg[4], fargs.gpu->arg[2], fargs.gpu->arg[3], 
-	fargs.gpu->arg[0].size(), fargs.gpu->arg[1].size()) // TODO rewrite?
-*/
         auto& gpuargs=fargs.gpu;
+	std::cout << "INTERP ON GPU" << std::endl;
 	interpExpo_v1(gpuargs->args, gpuargs->rets, (int)gpuargs->argshapes[0][0], (int)gpuargs->argshapes[1][0] );
-/*    interpExpo_v1(gpuargs->args[0], gpuargs->rets[0], gpuargs->args[1], 
-	gpuargs->args[4], gpuargs->args[2], gpuargs->args[3], 
-	gpuargs->argshapes[0][0], gpuargs->argshapes[1][0]); // TODO rewrite?
-*/	
 }
 
 

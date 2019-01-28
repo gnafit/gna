@@ -4,6 +4,8 @@
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
+
+#include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "DataLocation.hh"
 #endif
@@ -216,7 +218,7 @@ namespace TransformationTypes {
      *
      * @return `*this`.	
      */
-    Initializer<T> func(const std::string& name, Function afunc, DataLocation loc) {
+    Initializer<T> func(const std::string &name, Function afunc, DataLocation loc) {
       setEntryLocation(loc);
       this->func(name, afunc);
       return *this;
@@ -298,6 +300,14 @@ namespace TransformationTypes {
       this->func(name, m_obj->template bind<>(mfunc));
       return *this;
     }
+
+#ifdef GNA_CUDA_SUPPORT
+    Initializer<T> func(const std::string& name, MemFunction mfunc, DataLocation loc) {
+      setEntryLocation(loc);
+      this->func(name, mfunc);
+      return *this;
+    }
+#endif
 
     /**
      * @brief Add new TypesFunction to the Entry.

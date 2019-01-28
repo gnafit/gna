@@ -261,7 +261,12 @@ void Entry::evaluateTypes() {
 
     // GPU: require GPU memory for previous transformation's sink
 #ifdef GNA_CUDA_SUPPORT
+
+	std::cout << "BEFORE REQ GPU" << std::endl;
+
     if (this->getEntryLocation() == DataLocation::Device) {
+	
+	std::cout << "DEVICE ENTRY LOC" << std::endl;
       for (auto &source : sources) {
           source.sink->data->require_gpu();
 	 //  source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
