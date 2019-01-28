@@ -61,7 +61,8 @@ namespace TransformationTypes
     const Storage *storage; ///< Storage pointer.
   };
 
-  struct Entry;
+  template<typename SourceType,typename SinkType> struct EntryT;
+  using Entry = EntryT<double,double>;
   /**
    * @brief Exception to be returned from Rets in case of calculation error.
    * @author Dmitry Taychenachev

@@ -20,8 +20,6 @@ namespace TransformationTypes
   class Base;
   template<typename FloatType> class InputHandleT;
   template<typename FloatType> class OutputHandleT;
-  using OutputHandle = OutputHandleT<double>;
-  using InputHandle = InputHandleT<double>;
 
   using SourcesContainer = boost::ptr_vector<Source>;    ///< Container for Source pointers.
   using SinksContainer = boost::ptr_vector<Sink>;        ///< Container for Sink pointers.
@@ -51,13 +49,22 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Entry: public boost::noncopyable {
-    Entry(const std::string &name, const Base *parent);  ///< Constructor.
-    Entry(const Entry &other, const Base *parent);       ///< Clone constructor.
-    ~Entry();                                            ///< Destructor.
+  template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
+  struct EntryT: public boost::noncopyable {
+    using EntryImpl        = EntryT<SourceFloatType,SinkFloatType>;
+    using SourceImpl       = SourceT<SourceFloatType>;
+    using InputHandleImpl  = InputHandleT<SourceFloatType>;
+    using SinkImpl         = SinkT<SinkFloatType>;
+    using OutputHandleImpl = OutputHandleT<SinkFloatType>;
+    using StorageImpl      = StorageT<SourceFloatType>;
+    using DataImpl         = Data<SinkFloatType>;
 
-    InputHandle addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
-    OutputHandle addSink(const std::string &name);       ///< Initialize and return new Sink.
+    EntryT(const std::string &name, const Base *parent); ///< Constructor.
+    EntryT(const EntryImpl &other, const Base *parent);  ///< Clone constructor.
+    ~EntryT();                                           ///< Destructor.
+
+    InputHandleImpl addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
+    OutputHandleImpl addSink(const std::string &name);                            ///< Initialize and return new Sink.
 
     void evaluate();                                     ///< Do actual calculation by calling Entry::fun.
     void update();                                       ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
@@ -65,7 +72,7 @@ namespace TransformationTypes
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
-    const Data<double> &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
+    const Data<SinkFloatType> &data(int i);              ///< Evaluates the function if needed and returns i-th data.
 
     bool check() const;                                  ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                   ///< Recursively print Source names and their connection status.
@@ -100,4 +107,6 @@ namespace TransformationTypes
     void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
   }; /* struct Entry */
 
+
+  using Entry = EntryT<double,double>;
 } /* TransformationTypes */
