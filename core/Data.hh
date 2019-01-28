@@ -695,6 +695,8 @@ DataLocation Data<T>::require_gpu() {
 /**
 Allocate GPU memory in case of GPU array is not inited yet
 */
+
+std::cout << "REQUIRE GPU INVOKE" << std::endl;
   if (gpuArr == nullptr) {
     gpuArr.reset(new GpuArray<T>());
   }

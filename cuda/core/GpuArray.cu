@@ -7,7 +7,8 @@
 
 
 #include "GpuBasics.hh"
-#include "GpuArrayTypes.hh" 
+#include "GpuArrayTypes.hh"
+
 
 #define GridSize(size) (size/CU_BLOCK_SIZE + 1)
 

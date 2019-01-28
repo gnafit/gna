@@ -85,9 +85,10 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType,SizeType>::deAllocateDevice(){
         size_t sh_size = h_shape_pointers_host.size();
         if(d_pointers_dev){
-            for (size_t i =0; i < sh_size; i++) {
+           /* for (size_t i =0; i < sh_size; i++) {
                 cuwr_free<FloatType>(d_pointers_dev[i]);
-            }
+            }*/
+		// Pointers from Gpu arrays will be deleted in GpuArray destructor
             cuwr_free<FloatType*>(d_pointers_dev);
         }
         if(d_shapes){
@@ -119,8 +120,15 @@ namespace TransformationTypes{
         size_t sh_size = h_shape_pointers_host.size();
         for (size_t i = 0; i< sh_size; i++) {
                 copyH2D<SizeType>(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
+
+		if (h_pointers_dev.data() ) { std::cout << "devicePTR here" << std::endl; }
+                else { std::cout << "devPTR not here " << std::endl;}
+
+
         }
         copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
+
+	std::cout << "DEBUG The end of allocate device" << std::endl;
     }
 
     /**
@@ -130,6 +138,7 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     template<typename DataContainer>
     void GPUFunctionData<FloatType,SizeType>::fillContainers(DataContainer& container){
+	std::cout << "fill cont!!!" << std::endl;
         fillContainersHost(container);
 #ifdef GNA_CUDA_SUPPORT
         fillContainersDevice(container);
@@ -176,6 +185,8 @@ namespace TransformationTypes{
         for (size_t i = 0; i < container.size(); ++i) {
             if(container[i].materialized()){
                 h_pointers_dev.push_back(container[i].getData()->gpuArr->devicePtr);
+		if (container[i].getData()->gpuArr->devicePtr ) { std::cout << "devicePTR here" << std::endl; }
+		else { std::cout << "devPTR not here " << std::endl;}
             }
             else{
                 h_pointers_dev.push_back(nullptr);

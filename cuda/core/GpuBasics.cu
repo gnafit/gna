@@ -4,7 +4,7 @@
 #include <iostream>
 
 template<typename T>
-void d_copyH2D(T* dst, T* src, unsigned int N) {
+void copyH2D(T* dst, T* src, unsigned int N) {
 	cudaError_t err;
 	cudaMalloc(&dst, N * sizeof(T*));
 	err =
@@ -15,7 +15,7 @@ void d_copyH2D(T* dst, T* src, unsigned int N) {
 }
 
 template<typename T>
-void d_copyH2D_NOALL(T* dst, T* src, unsigned int N) {
+void copyH2D_NOALL(T* dst, T* src, unsigned int N) {
         cudaError_t err;
         err =
                 cudaMemcpy(dst, src, N * sizeof(T*), cudaMemcpyHostToDevice);
@@ -25,20 +25,20 @@ void d_copyH2D_NOALL(T* dst, T* src, unsigned int N) {
 }
 
 template <typename T>
-void d_cuwr_free(T* ptr) {
+void cuwr_free(T* ptr) {
 	cudaFree(ptr);
 }
 
 
-template <typename T>
- void copyH2D(T* dst, T* src, unsigned int N) {
-        d_copyH2D<T>(dst, src, N);
-}
-
-template <typename T>
-void cuwr_free(T* ptr) {
-	d_cuwr_free(ptr);
-}
+//template <typename T>
+// void copyH2D(T* dst, T* src, unsigned int N) {
+//        d_copyH2D<T>(dst, src, N);
+//}
+//
+//template <typename T>
+//void cuwr_free(T* ptr) {
+//	d_cuwr_free(ptr);
+//}
 
 template void copyH2D<unsigned int>(unsigned int* dst, unsigned int* src, unsigned int N);
 template void copyH2D<double>(double* dst, double* src, unsigned int N);
