@@ -24,7 +24,10 @@ namespace TransformationTypes{
 
         void updateTypesHost();
         void updateTypesDevice();
-        void updateTypes() { updateTypesHost(); }
+        void updateTypes() { 
+		if (m_entry->getEntryLocation() == DataLocation::Host)
+			updateTypesHost();
+		else updateTypesDevice(); }
         void provideSignatureHost();
         void provideSignatureDevice();
         void dump();

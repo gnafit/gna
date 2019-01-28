@@ -9,7 +9,7 @@ configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.
 
 if(CUDA_SUPPORT)
     find_package( CUDA REQUIRED)
-    include_directories(cuda/extra/ cuda/core/)
+    include_directories(cuda/operations/ cuda/extra/ cuda/core/)
     include_directories( ${CMAKE_BINARY_DIR}/generated/ )
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
         set(CUDA_MAT_SIZE_THRESHOLD 100)
