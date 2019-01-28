@@ -3,9 +3,6 @@
 
 #include <stdexcept>
 
-using TransformationTypes::Source;
-using TransformationTypes::Sink;
-
 /**
  * @brief Connect the Source to the Sink.
  *
@@ -18,7 +15,8 @@ using TransformationTypes::Sink;
  *
  * @exception std::runtime_error if there already exists a connected Sink.
  */
-void Source::connect(Sink *newsink) {
+template<typename FloatType>
+void TransformationTypes::SourceT<FloatType>::connect(TransformationTypes::SinkT<FloatType> *newsink) {
   if (sink) {
     std::cerr << this << " " << name << " " << sink->entry->name << "\n";
     throw std::runtime_error(
@@ -44,3 +42,7 @@ void Source::connect(Sink *newsink) {
   }
 }
 
+template class TransformationTypes::SourceT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::SourceT<float>;
+#endif

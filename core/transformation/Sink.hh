@@ -10,7 +10,9 @@
 namespace TransformationTypes
 {
   struct Entry;
-  struct Source;
+
+  template<typename FloatType> struct SourceT;
+  using Source = SourceT<double>;
 
   /**
    * @brief Definition of a single transformation output (Sink).
@@ -49,7 +51,7 @@ namespace TransformationTypes
     std::string name;                    ///< Sink's name.
     std::string label;                   ///< Sink's label.
     std::unique_ptr<DataType> data;      ///< Sink's Data.
-    std::vector<Source*> sources;        ///< Container with Source pointers which use this Sink as their input.
+    std::vector<SourceT<FloatType>*> sources; ///< Container with Source pointers which use this Sink as their input.
     Entry *entry;                        ///< Pointer to the transformation Entry this Sink belongs to.
   };
 

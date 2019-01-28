@@ -17,7 +17,8 @@ namespace TransformationTypes
    */
   template<typename FloatType>
   class OutputHandleT {
-    friend class InputHandle;
+    template<typename FloatType1>
+    friend class InputHandleT;
   public:
     /**
      * @brief Constructor.

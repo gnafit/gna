@@ -1,13 +1,16 @@
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 
-using TransformationTypes::InputHandle;
-using TransformationTypes::OutputHandle;
-
 /**
  * @brief Connect the Source to the other transformation's Sink via its OutputHandle
  * @param out -- OutputHandle view to the Sink to connect to.
  */
-void InputHandle::connect(const OutputHandle &out) const {
+template<typename FloatType>
+void TransformationTypes::InputHandleT<FloatType>::connect(const TransformationTypes::OutputHandleT<FloatType> &out) const {
   return m_source->connect(out.m_sink);
 }
+
+template class TransformationTypes::InputHandleT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::InputHandleT<float>;
+#endif

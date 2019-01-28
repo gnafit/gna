@@ -18,9 +18,10 @@
 namespace TransformationTypes
 {
   class Base;
-  class InputHandle;
+  template<typename FloatType> class InputHandleT;
   template<typename FloatType> class OutputHandleT;
   using OutputHandle = OutputHandleT<double>;
+  using InputHandle = InputHandleT<double>;
 
   using SourcesContainer = boost::ptr_vector<Source>;    ///< Container for Source pointers.
   using SinksContainer = boost::ptr_vector<Sink>;        ///< Container for Sink pointers.
