@@ -86,18 +86,18 @@ namespace TransformationTypes{
         size_t sh_size = h_shape_pointers_host.size();
         if(d_pointers_dev){
             for (size_t i =0; i < sh_size; i++) {
-                cuwr_free(d_pointers_dev[i]);
+                cuwr_free<FloatType>(d_pointers_dev[i]);
             }
-            cuwr_free(d_pointers_dev);
+            cuwr_free<FloatType*>(d_pointers_dev);
         }
         if(d_shapes){
-            cuwr_free(d_shapes);
+            cuwr_free<SizeType>(d_shapes);
         }
         if(d_shape_pointers_dev){
             for (size_t i =0; i < sh_size; i++) {
-                cuwr_free(d_shape_pointers_dev[i]);
+                cuwr_free<SizeType>(d_shape_pointers_dev[i]);
             }
-            cuwr_free(d_shape_pointers_dev);
+            cuwr_free<SizeType*>(d_shape_pointers_dev);
         }
     }
 
@@ -113,19 +113,14 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType,SizeType>::allocateDevice(){
         deAllocateDevice();
 
-        copyH2D<double*>(d_pointers_dev, h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
-        //copyH2D((void**)&d_pointers_dev, (void**)&h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
-        //copyH2Dui(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
-        copyH2D<unsigned int>(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
+        copyH2D<FloatType*>(d_pointers_dev, h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
+        copyH2D<SizeType>(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
 
         size_t sh_size = h_shape_pointers_host.size();
         for (size_t i = 0; i< sh_size; i++) {
                 copyH2D<SizeType>(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
-                //copyH2Dui<SizeType>(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
         }
-       // copyH2D((void**)&d_shape_pointers_dev, (void**)&h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
         copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
-	std::cout << "END Alloc!" << std::endl;
     }
 
     /**
