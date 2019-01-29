@@ -60,27 +60,30 @@ namespace TransformationTypes
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
   struct EntryT: public boost::noncopyable {
+    using EntryType             = EntryT<SourceFloatType,SinkFloatType>;
     using StorageFloatType      = SourceFloatType;
-    using DataImpl              = Data<SinkFloatType>;
-    using EntryImpl             = EntryT<SourceFloatType,SinkFloatType>;
 
-    using SourceImpl            = SourceT<SourceFloatType>;
-    using SourcesContainerImpl  = SourcesContainerT<SourceFloatType>;
-    using InputHandleImpl       = InputHandleT<SourceFloatType>;
+    using SourceDataType        = Data<SourceFloatType>;
+    using SinkDataType          = Data<SinkFloatType>;
+    using StorageDataType       = Data<StorageFloatType>;
 
-    using SinkImpl              = SinkT<SinkFloatType>;
-    using SinksContainerImpl    = SinksContainerT<SinkFloatType>;
-    using OutputHandleImpl      = OutputHandleT<SinkFloatType>;
+    using SourceType            = SourceT<SourceFloatType>;
+    using SourcesContainerType  = SourcesContainerT<SourceFloatType>;
+    using InputHandleType       = InputHandleT<SourceFloatType>;
 
-    using StorageImpl           = StorageT<StorageFloatType>;
-    using StoragesContainerImpl = StoragesContainerT<StorageFloatType>;
+    using SinkType              = SinkT<SinkFloatType>;
+    using SinksContainerType    = SinksContainerT<SinkFloatType>;
+    using OutputHandleType      = OutputHandleT<SinkFloatType>;
+
+    using StorageType           = StorageT<StorageFloatType>;
+    using StoragesContainerType = StoragesContainerT<StorageFloatType>;
 
     EntryT(const std::string &name, const Base *parent); ///< Constructor.
-    EntryT(const EntryImpl &other, const Base *parent);  ///< Clone constructor.
+    EntryT(const EntryType &other, const Base *parent);  ///< Clone constructor.
     ~EntryT();                                           ///< Destructor.
 
-    InputHandleImpl addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
-    OutputHandleImpl addSink(const std::string &name);                            ///< Initialize and return new Sink.
+    InputHandleType addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
+    OutputHandleType addSink(const std::string &name);                            ///< Initialize and return new Sink.
 
     void evaluate();                                     ///< Do actual calculation by calling Entry::fun.
     void update();                                       ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
@@ -88,7 +91,7 @@ namespace TransformationTypes
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
-    const Data<SinkFloatType> &data(int i);              ///< Evaluates the function if needed and returns i-th data.
+    const SinkDataType &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
     bool check() const;                                  ///< Checks that Data are initialized.
     void dump(size_t level = 0) const;                   ///< Recursively print Source names and their connection status.
@@ -99,9 +102,9 @@ namespace TransformationTypes
     const Base *parent;                                  ///< Base class, containing the transformation Entry.
 
     // Data
-    SourcesContainerImpl sources;                        ///< Transformation inputs (sources).
-    SinksContainerImpl sinks;                            ///< Transformation outputs (sinks).
-    StoragesContainerImpl storages;                      ///< Transformation internal Storage instances.
+    SourcesContainerType sources;                        ///< Transformation inputs (sources).
+    SinksContainerType sinks;                            ///< Transformation outputs (sinks).
+    StoragesContainerType storages;                      ///< Transformation internal Storage instances.
 
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.
@@ -120,6 +123,7 @@ namespace TransformationTypes
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
+
     void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
   }; /* struct Entry */
 

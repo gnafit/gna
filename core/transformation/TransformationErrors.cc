@@ -60,8 +60,14 @@ SourceTypeError::SourceTypeError(const Source *s, const std::string &message)
  *  @param e -- Entry where exception happens.
  *  @param message -- error message.
  */
-CalculationError::CalculationError(const Entry *e, const std::string &message)
+template<typename EntryType>
+CalculationError<EntryType>::CalculationError(const EntryType *e, const std::string &message)
   : std::runtime_error(errorMessage("transformation", e, message)),
     entry(e)
 { }
+
+template class TransformationTypes::CalculationError<TransformationTypes::EntryT<double,double>>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::CalculationError<TransformationTypes::EntryT<float,float>>;
+#endif
 

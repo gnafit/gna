@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Data.hh"
-#include "TransformationEntry.hh"
 
 namespace TransformationTypes
 {
+  template<typename SourFloatType, typename SinkFloatType> struct EntryT;
   /**
    * @brief Access the transformation inputs.
    *
@@ -15,32 +15,29 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Args {
+  template <typename SourceFloatType, typename SinkFloatType>
+  struct ArgsT {
   public:
+    using EntryImpl = EntryT<SourceFloatType,SinkFloatType>;
+    using DataImpl  = Data<SourceFloatType>;
     /**
      * @brief Args constructor.
      * @param e -- Entry instance. Args will get access to Entry's sources.
      */
-    Args(const Entry *e): m_entry(e) { }
+    ArgsT(const EntryImpl *e): m_entry(e) { }
 
     /**
      * @brief Get i-th Source Data.
      * @param i -- index of a Source.
      * @return i-th Sources's Data as input (const).
      */
-    const Data<double> &operator[](int i) const;
+    const DataImpl &operator[](int i) const;
 
-    /**
-     * @brief Touch all the sources
-     */
-    void touch() const;
-
-    /**
-     * @brief Get number of transformation sources.
-     * @return Number of transformation Source instances.
-     */
-    size_t size() const { return m_entry->sources.size(); }
+    void touch() const;  ///< Touch all the sources.
+    size_t size() const; ///< Get number of transformation sources.
   private:
-    const Entry *m_entry; ///< Entry instance to access Sources.
+    const EntryImpl *m_entry; ///< Entry instance to access Sources.
   }; /* struct Args */
+
+  using Args = ArgsT<double,double>;
 } /* TransformationTypes */

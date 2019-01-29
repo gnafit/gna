@@ -61,17 +61,16 @@ namespace TransformationTypes
     const Storage *storage; ///< Storage pointer.
   };
 
-  template<typename SourceType,typename SinkType> struct EntryT;
-  using Entry = EntryT<double,double>;
   /**
    * @brief Exception to be returned from Rets in case of calculation error.
    * @author Dmitry Taychenachev
    * @date 2015
    */
+  template<typename EntryType>
   class CalculationError: public std::runtime_error {
   public:
-    CalculationError(const Entry *e, const std::string &message); ///< Constructor.
+    CalculationError(const EntryType *e, const std::string &message); ///< Constructor.
 
-    const Entry *entry; ///< Entry pointer.
+    const EntryType *entry; ///< Entry pointer.
   };
 } /* TransformationTypes */

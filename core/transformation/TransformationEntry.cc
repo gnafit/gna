@@ -96,7 +96,7 @@ template<typename SourceFloatType, typename SinkFloatType>
 InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(const std::string &name, bool inactive) {
   auto *s = new Source(name, this, inactive);
   sources.push_back(s);
-  return InputHandleImpl(*s);
+  return InputHandleType(*s);
 }
 
 /**
@@ -109,7 +109,7 @@ template<typename SourceFloatType, typename SinkFloatType>
 OutputHandleT<SinkFloatType> EntryT<SourceFloatType,SinkFloatType>::addSink(const std::string &name) {
   auto *s = new Sink(name, this);
   sinks.push_back(s);
-  return OutputHandleImpl(*s);
+  return OutputHandleType(*s);
 }
 
 /**
@@ -122,12 +122,12 @@ OutputHandleT<SinkFloatType> EntryT<SourceFloatType,SinkFloatType>::addSink(cons
  */
 template<typename SourceFloatType, typename SinkFloatType>
 bool EntryT<SourceFloatType,SinkFloatType>::check() const {
-  for (const SourceImpl &s: sources) {
+  for (const SourceType &s: sources) {
     if (!s.materialized()) {
       return false;
     }
   }
-  for (const SourceImpl &s: sources) {
+  for (const SourceType &s: sources) {
     if (!s.sink->entry->check()) {
       return false;
     }
@@ -238,7 +238,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   if (success) {
-    std::set<EntryImpl*> deps;
+    std::set<EntryType*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
@@ -248,7 +248,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
         continue;
       }
       if (ret.defined()) {
-        sink.data.reset(new Data<double>(ret));
+        sink.data.reset(new SinkDataType(ret));
       }
       else{
         sink.data.reset();
@@ -261,7 +261,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
         deps.insert(depsrc->entry);
       }
     }
-    for (EntryImpl *dep: deps) {
+    for (EntryType *dep: deps) {
       dep->evaluateTypes();
     }
     initInternals(sargs);
@@ -299,7 +299,7 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
     auto msg = fmt::format("invalid sink idx {0}, have {1} sinks", i, sinks.size());
     throw CalculationError(this, msg);
   }
-  const SinkImpl &sink = sinks[i];
+  const SinkType &sink = sinks[i];
   if (!sink.data) {
     auto msg = fmt::format("sink {0} ({1}) have no type", i, sink.name);
     throw CalculationError(this, msg);
@@ -358,7 +358,7 @@ void EntryT<SourceFloatType,SinkFloatType>::initInternals(StorageTypesFunctionAr
     }
 
     // create new storage and allocate memory (if needed)
-    auto* newstorage = new StorageImpl(this);
+    auto* newstorage = new StorageType(this);
     newstorage->data.reset(new Data<SourceFloatType>(int_dtype));
 
     // debug
