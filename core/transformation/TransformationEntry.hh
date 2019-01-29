@@ -78,6 +78,8 @@ namespace TransformationTypes
     using StorageType           = StorageT<StorageFloatType>;
     using StoragesContainerType = StoragesContainerT<StorageFloatType>;
 
+    using FunctionType          = FunctionT<StorageFloatType,SinkFloatType>;
+
     EntryT(const std::string &name, const Base *parent); ///< Constructor.
     EntryT(const EntryType &other, const Base *parent);  ///< Clone constructor.
     ~EntryT();                                           ///< Destructor.
@@ -107,7 +109,7 @@ namespace TransformationTypes
     StoragesContainerType storages;                      ///< Transformation internal Storage instances.
 
     // Functions
-    Function fun=nullptr;                                ///< The function that does actual calculation.
+    FunctionType fun=nullptr;                            ///< The function that does actual calculation.
     TypesFunctionsContainer typefuns;                    ///< Vector of TypeFunction objects.
     FunctionDescriptorsContainer functions;              ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.

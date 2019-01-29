@@ -4,6 +4,7 @@
 #include "TransformationDescriptor.hh"
 #include "TransformationBase.hh"
 #include "TransformationBind.hh"
+#include "GPUFunctionArgs.hh"
 
 class GNAObject: public virtual TransformationTypes::Base,
                  public virtual ParametrizedTypes::Base {

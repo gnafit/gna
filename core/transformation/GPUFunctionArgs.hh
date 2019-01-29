@@ -103,6 +103,4 @@ namespace TransformationTypes{
         printf("\n");
 
     }
-
-    using GPUFunctionArgs = GPUFunctionArgsT<double>;
 }

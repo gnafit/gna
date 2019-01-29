@@ -5,7 +5,10 @@
 
 namespace TransformationTypes
 {
-  struct FunctionArgs;
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct FunctionArgsT;
+  using FunctionArgs = FunctionArgsT<double,double>;
+
   struct TypesFunctionArgs;
   struct StorageTypesFunctionArgs;
 
@@ -17,7 +20,10 @@ namespace TransformationTypes
    *
    * @param FunctionArgs -- container with transformation inputs (Args), outputs (Rets) and storages (Ints).
    */
-  using Function = std::function<void (FunctionArgs &)>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using FunctionT = std::function<void (FunctionArgsT<SourceFloatType,SinkFloatType>&)>;
+
+  using Function = FunctionT<double,double>;
 
   /**
    * @brief TypesFunction, that does the input types checking and output types derivation.

@@ -7,12 +7,11 @@
 #include "Atypes.hh"
 #include "Rtypes.hh"
 #include "Itypes.hh"
-#include "GPUFunctionArgs.hh"
 
 namespace TransformationTypes
 {
+  template<typename FloatType,typename SizeType> struct GPUFunctionArgsT;
   template<typename SourceType,typename SinkType> struct EntryT;
-  using Entry = EntryT<double,double>;
 
   /**
    * @brief Transformation Function arguments.
@@ -27,22 +26,31 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 07.2018
    */
-  struct FunctionArgs {
-    FunctionArgs(Entry* e) : args(e), rets(e), ints(e), m_entry(e) {  }        ///< Constructor.
-    FunctionArgs(const FunctionArgs& other) : FunctionArgs(other.m_entry) {  } ///< Copy constructor.
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct FunctionArgsT {
+    using EntryType              = EntryT<SourceFloatType,SinkFloatType>;
+    using FunctionArgsType       = FunctionArgsT<SourceFloatType,SinkFloatType>;
+    using GPUFunctionArgsType    = GPUFunctionArgsT<SourceFloatType, unsigned int>;
+    using GPUFunctionArgsPtr     = std::unique_ptr<GPUFunctionArgsType>;
 
-    Args args; ///< arguments, or transformation inputs (read-only)
-    Rets rets; ///< return values, or transformation outputs (writable)
-    Ints ints; ///< preallocated data arrays for the transformation's internal usage (writable)
+    FunctionArgsT(EntryType* e) : args(e), rets(e), ints(e), m_entry(e) {  }         ///< Constructor.
+    FunctionArgsT(const FunctionArgsType& other) : FunctionArgsT(other.m_entry) {  } ///< Copy constructor.
+    ~FunctionArgsT();
 
-    std::unique_ptr<GPUFunctionArgs> gpu; ///< GPU function arguments
+    ArgsT<SourceFloatType,SinkFloatType> args; ///< arguments, or transformation inputs (read-only)
+    RetsT<SourceFloatType,SinkFloatType> rets; ///< return values, or transformation outputs (writable)
+    IntsT<SourceFloatType,SinkFloatType> ints; ///< preallocated data arrays for the transformation's internal usage (writable)
+
+    GPUFunctionArgsPtr gpu; ///< GPU function arguments
 
     void requireGPU();                    ///< Initialize GPU function arguments
     void updateTypes();                   ///< Update arguments and types
 
     private:
-      Entry *m_entry; ///< Entry instance to access Sinks.
+      EntryType *m_entry; ///< Entry instance to access Sinks.
   };
+
+  using FunctionArgs = FunctionArgsT<double,double>;
 
   /**
    * @brief Transformation TypesFunction arguments.
