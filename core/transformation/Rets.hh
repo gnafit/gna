@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Data.hh"
-#include "TransformationEntry.hh"
 #include "TransformationErrors.hh"
 
 namespace TransformationTypes
 {
+  template<typename SourceFloatType, typename SinkFloatType> struct EntryT;
+
   /**
    * @brief Access the transformation outputs.
    *
@@ -16,56 +17,61 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Rets {
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct RetsT {
   public:
+    using EntryType = EntryT<SourceFloatType,SinkFloatType>;
+    using DataType  = Data<SinkFloatType>;
     /**
      * @brief Rets constructor.
      * @param e -- Entry instance. Rets will get access to Entry's sinks.
      */
-    Rets(Entry *e): m_entry(e) { }
+    RetsT(EntryType *e): m_entry(e) { }
 
     /**
      * @brief Get i-th Sink Data.
      * @param i -- index of a Sink.
      * @return i-th Sink's Data as output.
      */
-    Data<double> &operator[](int i) const;
+    DataType &operator[](int i) const;
 
     /**
      * @brief Get number of transformation sinks.
      * @return Number of transformation Sink instances.
      */
-    size_t size() const { return m_entry->sinks.size(); }
+    size_t size() const;
 
     /**
      * @brief Calculation error exception.
      * @param message -- exception message.
      * @return exception.
      */
-    CalculationError<Entry> error(const std::string &message = "") const;
+    CalculationError<EntryType> error(const std::string &message = "") const;
 
     /**
      * @brief Freeze the Entry.
      *
      * While entry is frozen the taintflag is not propagated. Entry is always up to date.
      */
-    void freeze()  { m_entry->tainted.freeze(); }
+    void freeze();
 
     /**
      * @brief Untaint the Entry.
      *
      * Set Entry's taintflag to false.
      */
-    void untaint()  { m_entry->tainted=false; }
+    void untaint();
 
     /**
      * @brief Unfreeze the Entry.
      *
      * Enables the taintflag propagation.
      */
-    void unfreeze()  { m_entry->tainted.unfreeze(); }
+    void unfreeze();
 
   private:
-    Entry *m_entry; ///< Entry instance to access Sinks.
+    EntryType *m_entry; ///< Entry instance to access Sinks.
   };
+
+  using Rets = RetsT<double,double>;
 } /* TransformationTypes */
