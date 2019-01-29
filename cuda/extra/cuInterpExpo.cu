@@ -22,7 +22,6 @@ __global__ void d_interpExpo(double** newx, double** newy, double* x, double* y,
 	} 
 
 	newy[idx][idy] = y[cur_xsegm] * exp( -(newx[idx][idy] - x[cur_xsegm]) *
-	//newy[idx] = y[cur_xsegm] * exp( -(newx[idx] - x[cur_xsegm]) *
 					log(y[cur_xsegm] / y[cur_xsegm+1]) /
 					xwidths[cur_xsegm]
 					);
@@ -80,8 +79,6 @@ void interpExpo_v1(double** args, double** rets, int Nnew, int Nold) {
 	d_interpExpoA<<<dim3(Nnew/CU_BLOCK_SIZE + 1, Nold/CU_BLOCK_SIZE + 1), 
 			dim3(CU_BLOCK_SIZE,CU_BLOCK_SIZE)>>>
 			(args, rets, Nold);
-//	d_interpExpo<<<dim3(newsize/CU_BLOCK_SIZE + 1, oldsize/CU_BLOCK_SIZE + 1), 
-//			dim3(CU_BLOCK_SIZE,CU_BLOCK_SIZE)>>>
-//			(newx, newy, x, y, xsegments, xwidths, oldsize);
+	std::cout << __PRETTY_FUNCTION__ << std::endl ;
 }
 

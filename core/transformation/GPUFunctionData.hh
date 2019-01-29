@@ -23,7 +23,7 @@ namespace TransformationTypes{
     class GPUFunctionData {
     public:
         GPUFunctionData(){ }
-        ~GPUFunctionData(){ deAllocateDevice(); }
+        ~GPUFunctionData(){/* deAllocateDevice();*/ }
 
         template<typename DataContainer>
         void fillContainers(DataContainer& container);                             ///< Read the date from Source/Sink/Storage containers
@@ -83,11 +83,11 @@ namespace TransformationTypes{
      */
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::deAllocateDevice(){
-        size_t sh_size = h_shape_pointers_host.size();
+/*        size_t sh_size = h_shape_pointers_host.size();
         if(d_pointers_dev){ 
-           /* for (size_t i =0; i < sh_size; i++) {
-                cuwr_free<FloatType>(d_pointers_dev[i]);
-            }*/
+           // for (size_t i =0; i < sh_size; i++) {
+           //     cuwr_free<FloatType>(d_pointers_dev[i]);
+           // }
 		// Pointers from Gpu arrays will be deleted in GpuArray destructor
             cuwr_free<FloatType*>(d_pointers_dev);
         }
@@ -100,6 +100,7 @@ namespace TransformationTypes{
             }
             cuwr_free<SizeType*>(d_shape_pointers_dev);
         }
+*/
     }
 
     /**

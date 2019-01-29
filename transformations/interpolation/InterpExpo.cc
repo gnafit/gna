@@ -65,7 +65,7 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
 #ifdef GNA_CUDA_SUPPORT 
-    .func("gpu", &InterpExpo::do_interpolate_ongpu, DataLocation::Device)
+    .func("gpu", &InterpExpo::do_interpolate_ongpu , DataLocation::Device)
 #endif
     ;
 
@@ -168,7 +168,10 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 }
 
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
+	fargs.args.touch();
         auto& gpuargs=fargs.gpu;
+        gpuargs->provideSignatureHost();
+
 	std::cout << "INTERP ON GPU" << std::endl;
 	interpExpo_v1(gpuargs->args, gpuargs->rets, (int)gpuargs->argshapes[0][0], (int)gpuargs->argshapes[1][0] );
 }

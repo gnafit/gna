@@ -273,11 +273,11 @@ std::cout << __func__ << std::endl
 	std::cout << "DEVICE ENTRY LOC" << std::endl;
       for (auto &source : sources) {
           source.sink->data->require_gpu();
-	  // source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
+//	   source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
       }
       for (auto &sink : sinks) {
         sink.data->require_gpu();
-        sink.data->gpuArr->setLocation( this->getEntryLocation() );
+//        sink.data->gpuArr->setLocation( this->getEntryLocation() );
       }
       //gpustorage = new GPUStorage(this); 
       //std::cerr << "afret gpu storage new" << std::endl;
@@ -358,10 +358,6 @@ void Entry::switchFunction(const std::string& name){
  *    @brief Sets the target (Host or Device) for execution of current transformation
  */
     void Entry::setEntryLocation(DataLocation loc) {
-
-		std::cout << __func__ << std::endl
-              << __FUNCTION__ << std::endl
-              << __PRETTY_FUNCTION__ << std::endl;       
                 m_entryLoc = loc;
     }
 

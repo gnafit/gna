@@ -305,7 +305,6 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     Initializer<T> func(const std::string& name, MemFunction mfunc, DataLocation loc) {
-	std::cout << __PRETTY_FUNCTION__ << std::endl;
       setEntryLocation(loc);
       this->func(name, mfunc);
       return *this;
