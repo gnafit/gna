@@ -17,7 +17,7 @@ class TransformationDescriptor: public TransformationTypes::Handle,
 public:
   using BaseClass = TransformationTypes::Handle;
 
-  using SourcesContainer = TransformationTypes::SourcesContainerT<double>;
+  using SourcesContainer = TransformationTypes::SourcesContainerT<double,double>;
   using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
   class Inputs;
 

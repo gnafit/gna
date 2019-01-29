@@ -33,8 +33,8 @@ namespace TransformationTypes
     const Sink *sink; ///< Sink pointer.
   };
 
-  template<typename FloatType> struct SourceT;
-  using Source = SourceT<double>;
+  template<typename SourceFloatType,typename SinkFloatType> struct SourceT;
+  using Source = SourceT<double,double>;
   /**
    * @brief Exception to be returned from Atypes in case of input type error.
    * @author Dmitry Taychenachev

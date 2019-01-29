@@ -18,11 +18,12 @@ namespace TransformationTypes
     template<typename FloatType1>
     friend class OutputHandleT;
   public:
+    using SourceType = SourceT<FloatType,FloatType>;
     /**
      * @brief Constructor.
      * @param s -- Source to access.
      */
-    InputHandleT(SourceT<FloatType> &source): m_source(&source) { }
+    InputHandleT(SourceType &source): m_source(&source) { }
     /**
      * @brief Clone constructor.
      * @param other -- other InputHandleT instance to access its Source.
@@ -44,7 +45,7 @@ namespace TransformationTypes
 
     const OutputHandleT<FloatType> output() const { return OutputHandleT<FloatType>(*const_cast<SinkT<FloatType>*>(m_source->sink)); }
   protected:
-    SourceT<FloatType> *m_source; ///< Pointer to the Source.
+    SourceType *m_source; ///< Pointer to the Source.
   }; /* class InputHandleT */
 
   template<typename FloatType>

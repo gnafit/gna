@@ -19,7 +19,7 @@ std::vector<InputHandle> Handle::inputs() const {
   std::vector<InputHandle> ret;
   auto &sources = m_entry->sources;
   std::transform(sources.begin(), sources.end(), std::back_inserter(ret),
-                 [](Source &s) { return InputHandle(s); });
+                 [](SourceT<double,double> &s) { return InputHandle(s); });
   return ret;
 }
 
@@ -90,7 +90,7 @@ void Handle::dumpObj() const {
   std::cerr << std::endl;
   std::cerr << "    sources (" << m_entry->sources.size() << "):" << std::endl;
   int i = 0;
-  for (Source &s: m_entry->sources) {
+  for (auto &s: m_entry->sources) {
     std::cerr << "      " << i++ << ": " << s.name << ", ";
     if (s.sink) {
       std::cerr << "connected to ";

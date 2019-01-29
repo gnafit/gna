@@ -21,8 +21,8 @@ namespace TransformationTypes
   template<typename FloatType> class InputHandleT;
   template<typename FloatType> class OutputHandleT;
 
-  template<typename FloatType>
-  using SourcesContainerT  = boost::ptr_vector<SourceT<FloatType>>;   ///< Container for Source pointers.
+  template<typename SourceFloatType, typename SinkFloatType>
+  using SourcesContainerT  = boost::ptr_vector<SourceT<SourceFloatType,SinkFloatType>>;   ///< Container for Source pointers.
 
   template<typename FloatType>
   using SinksContainerT    = boost::ptr_vector<SinkT<FloatType>>;     ///< Container for Sink pointers.
@@ -63,8 +63,8 @@ namespace TransformationTypes
     using SinkDataType                       = Data<SinkFloatType>;
     using StorageDataType                    = Data<StorageFloatType>;
 
-    using SourceType                         = SourceT<SourceFloatType>;
-    using SourcesContainerType               = SourcesContainerT<SourceFloatType>;
+    using SourceType                         = SourceT<SourceFloatType,SinkFloatType>;
+    using SourcesContainerType               = SourcesContainerT<SourceFloatType,SinkFloatType>;
     using InputHandleType                    = InputHandleT<SourceFloatType>;
 
     using SinkType                           = SinkT<SinkFloatType>;
