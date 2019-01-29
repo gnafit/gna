@@ -297,12 +297,12 @@ template<typename SourceFloatType, typename SinkFloatType>
 const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
   if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
     auto msg = fmt::format("invalid sink idx {0}, have {1} sinks", i, sinks.size());
-    throw CalculationError(this, msg);
+    throw CalculationError<EntryType>(this, msg);
   }
   const SinkType &sink = sinks[i];
   if (!sink.data) {
     auto msg = fmt::format("sink {0} ({1}) have no type", i, sink.name);
-    throw CalculationError(this, msg);
+    throw CalculationError<EntryType>(this, msg);
   }
   touch();
   return *sink.data;
