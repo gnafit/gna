@@ -5,7 +5,10 @@
 
 using TransformationTypes::Handle;
 using TransformationTypes::InputHandle;
-using TransformationTypes::OutputHandle;
+
+using OutputHandle = TransformationTypes::OutputHandleT<double>;
+using Sink = TransformationTypes::SinkT<double>;
+using Source = TransformationTypes::SourceT<double>;
 
 /**
  * @brief Get vector of inputs.
@@ -19,7 +22,7 @@ std::vector<InputHandle> Handle::inputs() const {
   std::vector<InputHandle> ret;
   auto &sources = m_entry->sources;
   std::transform(sources.begin(), sources.end(), std::back_inserter(ret),
-                 [](SourceT<double> &s) { return InputHandle(s); });
+                 [](Source &s) { return InputHandle(s); });
   return ret;
 }
 
@@ -35,7 +38,7 @@ std::vector<OutputHandle> Handle::outputs() const {
   std::vector<OutputHandle> ret;
   auto &sinks = m_entry->sinks;
   std::transform(sinks.begin(), sinks.end(), std::back_inserter(ret),
-                 [](SinkT<double> &s) { return OutputHandle(s); });
+                 [](Sink &s) { return OutputHandle(s); });
   return ret;
 }
 
@@ -48,7 +51,7 @@ std::vector<OutputHandle> Handle::outputs() const {
  * @return InputHandle for the new input.
  */
 InputHandle Handle::input(SingleOutput &output) {
-  OutputHandle outhandle = output.single();
+  auto outhandle = output.single();
   InputHandle inp = m_entry->addSource(outhandle.name());
   outhandle >> inp;
   return inp;
@@ -64,7 +67,7 @@ InputHandle Handle::input(SingleOutput &output) {
  * @return InputHandle for the new input.
  */
 InputHandle Handle::input(const std::string& name, SingleOutput &output) {
-  OutputHandle outhandle = output.single();
+  auto outhandle = output.single();
   InputHandle inp = m_entry->addSource(name);
   outhandle >> inp;
   return inp;

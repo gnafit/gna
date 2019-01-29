@@ -70,6 +70,7 @@ protected:
   using Entry = TransformationTypes::EntryT<double,double>;
   using Accessor = TransformationTypes::Accessor;
   using Handle = TransformationTypes::Handle;
+  using OutputHandle = TransformationTypes::OutputHandleT<double>;
 };
 
 class GNASingleObject: public GNAObject,
@@ -82,7 +83,7 @@ public:
     : GNAObject(other)
   { }
 
-  TransformationTypes::OutputHandle single() override {
+  OutputHandle single() override {
     return (*this)[0].outputs.single();
   }
   bool check() {

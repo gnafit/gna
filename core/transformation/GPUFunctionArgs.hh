@@ -12,7 +12,8 @@ namespace TransformationTypes{
     template<typename FloatType, typename SizeType=unsigned int>
     class GPUFunctionArgsT {
     public:
-        GPUFunctionArgsT(Entry* entry) : m_entry(entry){
+        using EntryType = EntryT<FloatType,FloatType>;
+        GPUFunctionArgsT(EntryType* entry) : m_entry(entry){
 
         }
 
@@ -43,7 +44,7 @@ namespace TransformationTypes{
         SizeType  **intshapes{0u};   ///< list of pointers to shapes of ints
 
     private:
-        Entry* m_entry;
+        EntryType* m_entry;
 
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs

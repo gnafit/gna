@@ -10,7 +10,6 @@
 namespace TransformationTypes
 {
   template<typename SourceFloatType,typename SinkFloatType> struct EntryT;
-  using Entry = EntryT<double,double>;
 
   template<typename FloatType> struct SourceT;
 

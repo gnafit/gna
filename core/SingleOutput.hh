@@ -5,6 +5,8 @@
 
 #include <vector>
 
+using OutputHandle = TransformationTypes::OutputHandleT<double>;
+
 /**
  * @brief The object with single output.
  *
@@ -16,7 +18,7 @@
 class SingleOutput {
 public:
   virtual ~SingleOutput() = default;                           ///< Destructor.
-  virtual TransformationTypes::OutputHandle single() = 0;      ///< Return the single output.
+  virtual OutputHandle single() = 0;      ///< Return the single output.
   const double *data() { return single().data(); }             ///< Return the single output's Data. The relevant Entry is updated if needed.
   //const double *view() { return single().view(); }           ///< Return the view on a single output's Data.
   const DataType &datatype() { return single().datatype(); }   ///< Return the single output's DataType.

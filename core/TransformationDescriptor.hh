@@ -25,6 +25,8 @@ public:
   using OutputsBase = SimpleDict<OutputDescriptor, SinksContainer>;
   class Outputs;
 
+  using OutputHandle = TransformationTypes::OutputHandleT<double>;
+
   class Inputs: public InputsBase {
   public:
     Inputs(SourcesContainer &container)
@@ -40,8 +42,8 @@ public:
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }
 
-    TransformationTypes::OutputHandle single() override;
-    TransformationTypes::OutputHandle single() const;
+    OutputHandle single() override;
+    OutputHandle single() const;
   };
 
   TransformationDescriptor(const BaseClass &other)
@@ -61,7 +63,7 @@ public:
   const Inputs inputs;
   const Outputs outputs;
 
-  TransformationTypes::OutputHandle single() override;
+  OutputHandle single() override;
 };
 
 class InputDescriptor: public TransformationTypes::InputHandle {
@@ -92,7 +94,7 @@ public:
   void operator()(const OutputDescriptor &out) const {
     connect(out);
   }
-  void operator()(const TransformationTypes::OutputHandle &out) const {
+  void operator()(const OutputHandle &out) const {
     connect(out);
   }
 
@@ -100,15 +102,15 @@ public:
   void connect(const TransformationDescriptor &obj) const;
   void connect(const TransformationDescriptor::Outputs &outs) const;
   void connect(const OutputDescriptor &out) const;
-  void connect(const TransformationTypes::OutputHandle &out) const;
+  void connect(const OutputHandle &out) const;
 
   inline const OutputDescriptor output() const;
 };
 
-class OutputDescriptor: public TransformationTypes::OutputHandle,
+class OutputDescriptor: public TransformationTypes::OutputHandleT<double>,
                         public SingleOutput {
 public:
-  using BaseClass = TransformationTypes::OutputHandle;
+  using BaseClass = TransformationTypes::OutputHandleT<double>;
   using OutputHandleT<double>::data;
 
   OutputDescriptor(const BaseClass &other)
@@ -123,7 +125,7 @@ public:
   static OutputDescriptor invalid(int index);
   static OutputDescriptor invalid(const std::string name);
 
-  TransformationTypes::OutputHandle single() override { return *this; }
+  BaseClass single() override { return *this; }
 
   typedef std::vector<OutputDescriptor*> OutputDescriptors;
 };

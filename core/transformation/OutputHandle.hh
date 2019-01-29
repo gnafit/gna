@@ -51,6 +51,4 @@ namespace TransformationTypes
     const FloatType *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
     SinkT<FloatType> *m_sink;                                                   ///< Pointer to the Sink.
   }; /* class OutputHandleT */
-
-  using OutputHandle = OutputHandleT<double>;
 } /* TransformationTypes */

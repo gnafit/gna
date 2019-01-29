@@ -23,6 +23,7 @@ namespace TransformationTypes
    */
   class Handle {
   public:
+    using OutputHandle = OutputHandleT<double>;
     Handle(): m_entry(nullptr) { }                            ///< Default constructor.
     Handle(Entry &entry) : m_entry(&entry) { }                ///< Constructor. @param entry -- an Entry instance to wrap.
     Handle(const Handle &other): Handle(*other.m_entry) { }   ///< Constructor. @param other -- Handle instance to get Entry to wrap.
