@@ -84,7 +84,7 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::deAllocateDevice(){
         size_t sh_size = h_shape_pointers_host.size();
-        if(d_pointers_dev){
+        if(d_pointers_dev){ 
            /* for (size_t i =0; i < sh_size; i++) {
                 cuwr_free<FloatType>(d_pointers_dev[i]);
             }*/
@@ -127,7 +127,6 @@ namespace TransformationTypes{
 
         }
         copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
-
 	std::cout << "DEBUG The end of allocate device" << std::endl;
     }
 
@@ -138,11 +137,7 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     template<typename DataContainer>
     void GPUFunctionData<FloatType,SizeType>::fillContainers(DataContainer& container){
-	std::cout << "fill cont!!!" << std::endl;
         fillContainersHost(container);
-#ifdef GNA_CUDA_SUPPORT
-        fillContainersDevice(container);
-#endif
     }
 
     /**

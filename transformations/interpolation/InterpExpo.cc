@@ -124,6 +124,7 @@ OutputDescriptor InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, Singl
 }
 
 void InterpExpo::do_interpolate(FunctionArgs& fargs){
+	std::cout << "Interp ON HOST" << std::endl;
   auto& args=fargs.args;                                                  /// name inputs
   auto& rets=fargs.rets;                                                  /// name outputs
 

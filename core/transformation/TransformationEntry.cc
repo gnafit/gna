@@ -264,12 +264,16 @@ void Entry::evaluateTypes() {
 
 	std::cout << "BEFORE REQ GPU" << std::endl;
 
+std::cout << __func__ << std::endl
+              << __FUNCTION__ << std::endl
+              << __PRETTY_FUNCTION__ << std::endl;
+
     if (this->getEntryLocation() == DataLocation::Device) {
 	
 	std::cout << "DEVICE ENTRY LOC" << std::endl;
       for (auto &source : sources) {
           source.sink->data->require_gpu();
-	 //  source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
+	  // source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
       }
       for (auto &sink : sinks) {
         sink.data->require_gpu();
@@ -353,7 +357,11 @@ void Entry::switchFunction(const std::string& name){
 /**
  *    @brief Sets the target (Host or Device) for execution of current transformation
  */
-    void Entry::setEntryLocation(DataLocation loc) {       
+    void Entry::setEntryLocation(DataLocation loc) {
+
+		std::cout << __func__ << std::endl
+              << __FUNCTION__ << std::endl
+              << __PRETTY_FUNCTION__ << std::endl;       
                 m_entryLoc = loc;
     }
 

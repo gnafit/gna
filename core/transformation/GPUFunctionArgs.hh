@@ -64,9 +64,13 @@ namespace TransformationTypes{
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
+#ifdef GNA_CUDA_SUPPORT
+        m_args.fillContainersDevice(m_entry->sources);
+        m_rets.fillContainersDevice(m_entry->sinks);
+        m_ints.fillContainersDevice(m_entry->storages);
+#else
+	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
+#endif
 
         provideSignatureDevice();
     }

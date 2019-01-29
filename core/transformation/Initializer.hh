@@ -257,6 +257,8 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     Initializer<T> switchFunc(const std::string& name) {
+	        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
       m_entry->switchFunction(name);
       return *this;
     }
@@ -303,6 +305,7 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     Initializer<T> func(const std::string& name, MemFunction mfunc, DataLocation loc) {
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
       setEntryLocation(loc);
       this->func(name, mfunc);
       return *this;
@@ -486,6 +489,10 @@ namespace TransformationTypes {
      * @return `*this`
      */
     Initializer<T> setEntryLocation(DataLocation loc) {
+std::cout << __func__ << std::endl
+              << __FUNCTION__ << std::endl
+              << __PRETTY_FUNCTION__ << std::endl;
+
       m_entry->setEntryLocation(loc);
       return *this;
     }

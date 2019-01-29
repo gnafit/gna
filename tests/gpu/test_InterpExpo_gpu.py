@@ -41,7 +41,7 @@ seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )
 
 ie.print()
-ie.interp.switchFunction("gpu");
+ie.interp.switchFunction("main")
 res = ie.interp.interp.data()
 print( 'Result', res )
 
