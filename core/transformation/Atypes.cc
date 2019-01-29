@@ -1,7 +1,8 @@
 #include "Atypes.hh"
 
-using TransformationTypes::Atypes;
-using TransformationTypes::Rtypes;
+#include "TransformationEntry.hh"
+
+using TransformationTypes::AtypesT;
 using TransformationTypes::SourceTypeError;
 
 /**
@@ -10,14 +11,20 @@ using TransformationTypes::SourceTypeError;
  * @param message -- exception message.
  * @return exception.
  */
-SourceTypeError Atypes::error(const DataType &dt, const std::string &message) {
-  const Source *source = nullptr;
+template<typename SourceFloatType, typename SinkFloatType>
+SourceTypeError AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+  const SourceImpl *source = nullptr;
   for (size_t i = 0; i < m_entry->sources.size(); ++i) {
-    if (&m_entry->sources[i].sink->data->type == &dt) {
-      source = &m_entry->sources[i];
+    auto& lsource=m_entry->sources[i];
+    if (&lsource.sink->data->type == &dt) {
+      source = &lsource;
       break;
     }
   }
   return SourceTypeError(source, message);
 }
 
+template class TransformationTypes::AtypesT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::AtypesT<float,float>;
+#endif

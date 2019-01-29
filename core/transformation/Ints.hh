@@ -48,6 +48,4 @@ namespace TransformationTypes
   private:
     EntryType *m_entry; ///< Entry instance to access Storage instances.
   };
-
-  using Ints = IntsT<double,double>;
 } /* TransformationTypes */

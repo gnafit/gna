@@ -10,18 +10,12 @@
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 #include "Atypes.hh"
-#include "Rtypes.hh"
 #include "TransformationErrors.hh"
 #include "GPUFunctionArgs.hh"
 
 using TransformationTypes::Base;
 using TransformationTypes::EntryT;
-
-using TransformationTypes::Atypes;
-using TransformationTypes::Rtypes;
-
-using TransformationTypes::Source;
-using TransformationTypes::Sink;
+using TransformationTypes::AtypesT;
 using TransformationTypes::OutputHandleT;
 using TransformationTypes::InputHandleT;
 
@@ -36,7 +30,7 @@ using TransformationTypes::TypeError;
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Base *parent)
   : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0),
-    functionargs(new FunctionArgs(this))
+    functionargs(new FunctionArgsType(this))
 { }
 
 /**
@@ -51,7 +45,7 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkF
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
     fun(), typefuns(), tainted(other.name.c_str()), initializing(0),
-    functionargs(new FunctionArgs(this))
+    functionargs(new FunctionArgsType(this))
 {
   initSourcesSinks(other.sources, other.sinks);
 }
@@ -79,9 +73,9 @@ template<typename SourceFloatType, typename SinkFloatType>
 template <typename InsT, typename OutsT>
 void EntryT<SourceFloatType,SinkFloatType>::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
   std::transform(inputs.begin(), inputs.end(), std::back_inserter(sources),
-                 [this](const Source &s) { return new Source{s, this}; });
+                 [this](const SourceType &s) { return new SourceType{s, this}; });
   std::transform(outputs.begin(), outputs.end(), std::back_inserter(sinks),
-                 [this](const Sink &s) { return new Sink{s, this}; });
+                 [this](const SinkType &s) { return new SinkType{s, this}; });
   functionargs->updateTypes();
 }
 
@@ -94,7 +88,7 @@ void EntryT<SourceFloatType,SinkFloatType>::initSourcesSinks(const InsT &inputs,
  */
 template<typename SourceFloatType, typename SinkFloatType>
 InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(const std::string &name, bool inactive) {
-  auto *s = new Source(name, this, inactive);
+  auto *s = new SourceType(name, this, inactive);
   sources.push_back(s);
   return InputHandleType(*s);
 }
@@ -107,7 +101,7 @@ InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(c
  */
 template<typename SourceFloatType, typename SinkFloatType>
 OutputHandleT<SinkFloatType> EntryT<SourceFloatType,SinkFloatType>::addSink(const std::string &name) {
-  auto *s = new Sink(name, this);
+  auto *s = new SinkType(name, this);
   sinks.push_back(s);
   return OutputHandleType(*s);
 }
@@ -177,7 +171,7 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
   if (sources.empty()) {
     std::cerr << spacing << "no inputs" << std::endl;
   }
-  for (const Source &s: sources) {
+  for (const SourceType &s: sources) {
     std::cerr << spacing << "Input " << s.name;
     if (!s.sink) {
       std::cerr << " NOT CONNECTED" << std::endl;
@@ -217,8 +211,8 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
-  TypesFunctionArgs fargs(this);
-  StorageTypesFunctionArgs sargs(fargs);
+  TypesFunctionArgsType fargs(this);
+  StorageTypesFunctionArgsType sargs(fargs);
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
@@ -234,7 +228,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     TR_DPRINTF("types[%s]: failed\n", name.c_str());
     throw std::runtime_error(
       (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
-  } catch (const Atypes::Undefined&) {
+  } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
     TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   if (success) {
@@ -338,7 +332,7 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
  * @param fargs -- Storage TypesFunction arguments.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::initInternals(StorageTypesFunctionArgs& fargs){
+void EntryT<SourceFloatType,SinkFloatType>::initInternals(StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>& fargs){
   auto& itypes=fargs.ints;
 
   // Truncate storages in case less storages is required

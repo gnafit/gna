@@ -50,8 +50,6 @@ namespace TransformationTypes
       EntryType *m_entry; ///< Entry instance to access Sinks.
   };
 
-  using FunctionArgs = FunctionArgsT<double,double>;
-
   /**
    * @brief Transformation TypesFunction arguments.
    *
@@ -65,12 +63,14 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 07.2018
    */
-  struct TypesFunctionArgs {
-    TypesFunctionArgs(Entry* e) : args(e), rets(e), ints(e) {  } ///< Constructor.
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct TypesFunctionArgsT {
+    using EntryType = EntryT<SourceFloatType,SinkFloatType>;
+    TypesFunctionArgsT(EntryType* e) : args(e), rets(e), ints(e) {  } ///< Constructor.
 
-    Atypes args; ///< arguments'/inputs' data types (read-only)
-    Rtypes rets; ///< return values'/outputs' data  types (writable)
-    Itypes ints; ///< preallocated storage's data types (writable)
+    AtypesT<SourceFloatType,SinkFloatType> args; ///< arguments'/inputs' data types (read-only)
+    RtypesT<SourceFloatType,SinkFloatType> rets; ///< return values'/outputs' data  types (writable)
+    ItypesT<SourceFloatType,SinkFloatType> ints; ///< preallocated storage's data types (writable)
   };
 
   /**
@@ -87,12 +87,18 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 07.2018
    */
-  struct StorageTypesFunctionArgs {
-    StorageTypesFunctionArgs(TypesFunctionArgs& fargs) : args(fargs.args), rets(fargs.rets), ints(fargs.ints) {  } ///< Constructor.
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct StorageTypesFunctionArgsT {
+    using TypesFunctionArgsType = TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+    StorageTypesFunctionArgsT(TypesFunctionArgsType& fargs) : args(fargs.args), rets(fargs.rets), ints(fargs.ints) {  } ///< Constructor.
 
-    Atypes& args;       ///< arguments'/inputs' data types (read-only)
-    const Rtypes& rets; ///< return values'/outputs' data  types (read-only)
-    Itypes& ints;       ///< preallocated storage's data types (writable)
+    AtypesT<SourceFloatType,SinkFloatType>& args;       ///< arguments'/inputs' data types (read-only)
+    const RtypesT<SourceFloatType,SinkFloatType>& rets; ///< return values'/outputs' data  types (read-only)
+    ItypesT<SourceFloatType,SinkFloatType>& ints;       ///< preallocated storage's data types (writable)
   };
+
+  using FunctionArgs = FunctionArgsT<double,double>;
+  using TypesFunctionArgs = TypesFunctionArgsT<double,double>;
+  using StorageTypesFunctionArgs = StorageTypesFunctionArgsT<double,double>;
 }
 

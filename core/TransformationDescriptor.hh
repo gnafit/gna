@@ -17,11 +17,11 @@ class TransformationDescriptor: public TransformationTypes::Handle,
 public:
   using BaseClass = TransformationTypes::Handle;
 
-  using SourcesContainer = TransformationTypes::SourcesContainer;
+  using SourcesContainer = TransformationTypes::SourcesContainerT<double>;
   using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
   class Inputs;
 
-  using SinksContainer = TransformationTypes::SinksContainer;
+  using SinksContainer = TransformationTypes::SinksContainerT<double>;
   using OutputsBase = SimpleDict<OutputDescriptor, SinksContainer>;
   class Outputs;
 
@@ -117,7 +117,7 @@ public:
   OutputDescriptor(const OutputDescriptor &other)
     : OutputDescriptor(BaseClass(other))
     { }
-  OutputDescriptor(TransformationTypes::Sink &sink)
+  OutputDescriptor(TransformationTypes::SinkT<double> &sink)
     : OutputDescriptor(BaseClass(sink))
     { }
   static OutputDescriptor invalid(int index);

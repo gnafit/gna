@@ -1,8 +1,6 @@
 #include "TypesFunctions.hh"
 
 using TransformationTypes::TypesFunctionArgs;
-using TransformationTypes::Atypes;
-using TransformationTypes::Rtypes;
 
 /**
  * @brief Assigns shape of each input to corresponding output.

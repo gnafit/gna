@@ -43,6 +43,4 @@ namespace TransformationTypes
     std::unique_ptr<DataType> data;      ///< Storage's Data.
     Entry *entry;                        ///< Pointer to the transformation Entry this Storage belongs to.
   };
-
-  using Storage = StorageT<double>;
 } /* TransformationTypes */

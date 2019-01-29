@@ -41,6 +41,12 @@ namespace TransformationTypes {
   template <typename T>
   class Initializer {
   public:
+    using Function = FunctionT<double,double>;
+    using TypesFunction = TypesFunctionT<double,double>;
+    using StorageTypesFunction = StorageTypesFunctionT<double,double>;
+    using FunctionArgs = FunctionArgsT<double,double>;
+    using TypesFunctionArgs = TypesFunctionArgsT<double,double>;
+    using StorageTypesFunctionArgs = StorageTypesFunctionArgsT<double,double>;
     /**
      * @brief Function, that does the actual calculation (reference to a member function).
      *

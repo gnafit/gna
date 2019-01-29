@@ -30,10 +30,6 @@ namespace TransformationTypes
   template<typename FloatType>
   using StoragesContainerT = boost::ptr_vector<StorageT<FloatType>>;  ///< Container for Storage pointers.
 
-  using SourcesContainer  = SourcesContainerT<double>;
-  using SinksContainer    = SinksContainerT<double>;
-  using StoragesContainer = StoragesContainerT<double>;
-
   /**
    * @brief Definition of a single transformation.
    *
@@ -60,25 +56,39 @@ namespace TransformationTypes
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
   struct EntryT: public boost::noncopyable {
-    using EntryType             = EntryT<SourceFloatType,SinkFloatType>;
-    using StorageFloatType      = SourceFloatType;
+    using EntryType                          = EntryT<SourceFloatType,SinkFloatType>;
+    using StorageFloatType                   = SourceFloatType;
 
-    using SourceDataType        = Data<SourceFloatType>;
-    using SinkDataType          = Data<SinkFloatType>;
-    using StorageDataType       = Data<StorageFloatType>;
+    using SourceDataType                     = Data<SourceFloatType>;
+    using SinkDataType                       = Data<SinkFloatType>;
+    using StorageDataType                    = Data<StorageFloatType>;
 
-    using SourceType            = SourceT<SourceFloatType>;
-    using SourcesContainerType  = SourcesContainerT<SourceFloatType>;
-    using InputHandleType       = InputHandleT<SourceFloatType>;
+    using SourceType                         = SourceT<SourceFloatType>;
+    using SourcesContainerType               = SourcesContainerT<SourceFloatType>;
+    using InputHandleType                    = InputHandleT<SourceFloatType>;
 
-    using SinkType              = SinkT<SinkFloatType>;
-    using SinksContainerType    = SinksContainerT<SinkFloatType>;
-    using OutputHandleType      = OutputHandleT<SinkFloatType>;
+    using SinkType                           = SinkT<SinkFloatType>;
+    using SinksContainerType                 = SinksContainerT<SinkFloatType>;
+    using OutputHandleType                   = OutputHandleT<SinkFloatType>;
 
-    using StorageType           = StorageT<StorageFloatType>;
-    using StoragesContainerType = StoragesContainerT<StorageFloatType>;
+    using StorageType                        = StorageT<StorageFloatType>;
+    using StoragesContainerType              = StoragesContainerT<StorageFloatType>;
 
-    using FunctionType          = FunctionT<StorageFloatType,SinkFloatType>;
+    using FunctionArgsType                   = FunctionArgsT<StorageFloatType,SinkFloatType>;
+    using FunctionArgsPtr                    = std::unique_ptr<FunctionArgsType>;
+
+    using TypesFunctionArgsType              = TypesFunctionArgsT<StorageFloatType,SinkFloatType>;
+    using StorageTypesFunctionArgsType       = StorageTypesFunctionArgsT<StorageFloatType,SinkFloatType>;
+
+    using FunctionType                       = FunctionT<StorageFloatType,SinkFloatType>;
+    using TypesFunctionType                  = TypesFunctionT<StorageFloatType,SinkFloatType>;
+    using StorageTypesFunctionType           = StorageTypesFunctionT<StorageFloatType,SinkFloatType>;
+
+    using TypesFunctionsContainerType        = TypesFunctionsContainerT<StorageFloatType,SinkFloatType>;
+    using StorageTypesFunctionsContainerType = StorageTypesFunctionsContainerT<StorageFloatType,SinkFloatType>;
+
+    using FunctionDescriptorType             = FunctionDescriptorT<SourceFloatType,SinkFloatType>;
+    using FunctionDescriptorsContainerType   = FunctionDescriptorsContainerT<SourceFloatType,SinkFloatType>;
 
     EntryT(const std::string &name, const Base *parent); ///< Constructor.
     EntryT(const EntryType &other, const Base *parent);  ///< Clone constructor.
@@ -110,8 +120,8 @@ namespace TransformationTypes
 
     // Functions
     FunctionType fun=nullptr;                            ///< The function that does actual calculation.
-    TypesFunctionsContainer typefuns;                    ///< Vector of TypeFunction objects.
-    FunctionDescriptorsContainer functions;              ///< Map with FunctionDescriptor instances, containing several Function implementations.
+    TypesFunctionsContainerType typefuns;                ///< Vector of TypeFunction objects.
+    FunctionDescriptorsContainerType functions;          ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.
 
     // Status
@@ -119,14 +129,14 @@ namespace TransformationTypes
     int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
 
     // Function args
-    std::unique_ptr<FunctionArgs> functionargs;          ///< Transformation function arguments.
+    FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
 
-    void initInternals(StorageTypesFunctionArgs& fargs);             ///< Initialize the Data for the internal storage.
+    void initInternals(StorageTypesFunctionArgsType& fargs);         ///< Initialize the Data for the internal storage.
   }; /* struct Entry */
 
 

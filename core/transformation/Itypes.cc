@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-using TransformationTypes::Itypes;
+using TransformationTypes::ItypesT;
 using TransformationTypes::StorageTypeError;
 
 /**
@@ -13,7 +13,8 @@ using TransformationTypes::StorageTypeError;
  *
  * @exception std::runtime_error in case invalid index is queried.
  */
-DataType &Itypes::operator[](int i) {
+template<typename SourceFloatType, typename SinkFloatType>
+DataType &ItypesT<SourceFloatType,SinkFloatType>::operator[](int i) {
   auto newsize=static_cast<size_t>(i)+1;
   if( newsize > m_types->size() ){
     m_types->resize(newsize);
@@ -32,8 +33,9 @@ DataType &Itypes::operator[](int i) {
  * @param message -- exception message.
  * @return exception.
  */
-StorageTypeError Itypes::error(const DataType &dt, const std::string &message) {
-  const Storage *storage = nullptr;
+template<typename SourceFloatType, typename SinkFloatType>
+StorageTypeError ItypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+  const StorageImpl *storage = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
     if (&(*m_types)[i] == &dt) {
       storage = &m_entry->storages[i];
@@ -43,3 +45,7 @@ StorageTypeError Itypes::error(const DataType &dt, const std::string &message) {
   return StorageTypeError(storage, message);
 }
 
+template class TransformationTypes::ItypesT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::ItypesT<float,float>;
+#endif

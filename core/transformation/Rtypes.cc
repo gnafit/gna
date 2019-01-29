@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-using TransformationTypes::Rtypes;
+using TransformationTypes::RtypesT;
 using TransformationTypes::SinkTypeError;
 
 /**
@@ -13,7 +13,8 @@ using TransformationTypes::SinkTypeError;
  *
  * @exception std::runtime_error in case invalid index is queried.
  */
-DataType &Rtypes::operator[](int i) {
+template<typename SourceFloatType, typename SinkFloatType>
+DataType &RtypesT<SourceFloatType,SinkFloatType>::operator[](int i) {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
       (fmt::format("invalid access to return type {0}, nsinks: {1}", i, m_types->size())));
@@ -29,7 +30,8 @@ DataType &Rtypes::operator[](int i) {
  *
  * @exception std::runtime_error in case invalid index is queried.
  */
-const DataType &Rtypes::operator[](int i) const {
+template<typename SourceFloatType, typename SinkFloatType>
+const DataType &RtypesT<SourceFloatType,SinkFloatType>::operator[](int i) const {
   if (i < 0 || static_cast<size_t>(i) >= m_types->size()) {
     throw std::runtime_error(
       (fmt::format("invalid access to return type {0}, nsinks: {1}", i, m_types->size())));
@@ -43,8 +45,9 @@ const DataType &Rtypes::operator[](int i) const {
  * @param message -- exception message.
  * @return exception.
  */
-SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
-  const Sink *sink = nullptr;
+template<typename SourceFloatType, typename SinkFloatType>
+SinkTypeError RtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+  const SinkImpl *sink = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
     if (&(*m_types)[i] == &dt) {
       sink = &m_entry->sinks[i];
@@ -54,3 +57,7 @@ SinkTypeError Rtypes::error(const DataType &dt, const std::string &message) {
   return SinkTypeError(sink, message);
 }
 
+template class TransformationTypes::RtypesT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::RtypesT<float,float>;
+#endif

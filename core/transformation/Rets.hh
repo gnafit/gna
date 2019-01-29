@@ -72,6 +72,4 @@ namespace TransformationTypes
   private:
     EntryType *m_entry; ///< Entry instance to access Sinks.
   };
-
-  using Rets = RetsT<double,double>;
 } /* TransformationTypes */

@@ -57,7 +57,5 @@ namespace TransformationTypes
     Entry *entry;                                 ///< Entry pointer the Source belongs to.
     bool inactive=false;                          ///< Source is inactive (taintflag will not be subscribed)
   };
-
-  using Source = SourceT<double>;
 } /* namespace TransformationTypes */
 

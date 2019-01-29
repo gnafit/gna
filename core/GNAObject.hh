@@ -58,16 +58,16 @@ protected:
       transformations(TransformationTypes::Base::m_entries)
   { }
 
-  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgs;
-  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgs;
-  using FunctionArgs = TransformationTypes::FunctionArgs;
-  using Args = TransformationTypes::Args;
-  using Rets = TransformationTypes::Rets;
-  using Atypes = TransformationTypes::Atypes;
-  using Rtypes = TransformationTypes::Rtypes;
-  using Function = TransformationTypes::Function;
-  using TypesFunction = TransformationTypes::TypesFunction;
-  using Entry = TransformationTypes::Entry;
+  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<double,double>;
+  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<double,double>;
+  using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+  using Args = TransformationTypes::ArgsT<double,double>;
+  using Rets = TransformationTypes::RetsT<double,double>;
+  using Atypes = TransformationTypes::AtypesT<double,double>;
+  using Rtypes = TransformationTypes::RtypesT<double,double>;
+  using Function = TransformationTypes::FunctionT<double,double>;
+  using TypesFunction = TransformationTypes::TypesFunctionT<double,double>;
+  using Entry = TransformationTypes::EntryT<double,double>;
   using Accessor = TransformationTypes::Accessor;
   using Handle = TransformationTypes::Handle;
 };

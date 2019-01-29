@@ -6,8 +6,6 @@
 using TransformationTypes::Handle;
 using TransformationTypes::InputHandle;
 using TransformationTypes::OutputHandle;
-using TransformationTypes::Sink;
-using TransformationTypes::Source;
 
 /**
  * @brief Get vector of inputs.
@@ -37,7 +35,7 @@ std::vector<OutputHandle> Handle::outputs() const {
   std::vector<OutputHandle> ret;
   auto &sinks = m_entry->sinks;
   std::transform(sinks.begin(), sinks.end(), std::back_inserter(ret),
-                 [](Sink &s) { return OutputHandle(s); });
+                 [](SinkT<double> &s) { return OutputHandle(s); });
   return ret;
 }
 
@@ -105,7 +103,7 @@ void Handle::dumpObj() const {
   }
   std::cerr << "    sinks (" << m_entry->sinks.size() << "):" << std::endl;
   i = 0;
-  for (Sink &s: m_entry->sinks) {
+  for (auto &s: m_entry->sinks) {
     std::cerr << "      " << i++ << ": " << s.name << ", ";
     std::cerr << s.sources.size() << " consumers";
     std::cerr << ", type: ";

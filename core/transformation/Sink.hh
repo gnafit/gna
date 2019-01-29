@@ -55,6 +55,4 @@ namespace TransformationTypes
     std::vector<SourceT<FloatType>*> sources; ///< Container with Source pointers which use this Sink as their input.
     Entry *entry;                        ///< Pointer to the transformation Entry this Sink belongs to.
   };
-
-  using Sink = SinkT<double>;
 } /* TransformationTypes */

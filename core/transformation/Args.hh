@@ -38,6 +38,4 @@ namespace TransformationTypes
   private:
     const EntryImpl *m_entry; ///< Entry instance to access Sources.
   }; /* struct Args */
-
-  using Args = ArgsT<double,double>;
 } /* TransformationTypes */
