@@ -1,5 +1,6 @@
 #include "Rets.hh"
 
+using TransformationTypes::EntryT;
 using TransformationTypes::Rets;
 using TransformationTypes::CalculationError;
 
@@ -30,6 +31,6 @@ Data<double> &Rets::operator[](int i) const {
  * @param message -- exception message.
  * @return exception.
  */
-CalculationError Rets::error(const std::string &message) const {
-  return CalculationError(this->m_entry, message);
+CalculationError<EntryT<double,double>> Rets::error(const std::string &message) const {
+  return CalculationError<EntryT<double,double>>(this->m_entry, message);
 }

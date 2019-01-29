@@ -40,7 +40,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    CalculationError error(const std::string &message = "") const;
+    CalculationError<Entry> error(const std::string &message = "") const;
 
   private:
     Entry *m_entry; ///< Entry instance to access Storage instances.

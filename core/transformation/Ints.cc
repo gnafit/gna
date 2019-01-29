@@ -1,5 +1,6 @@
 #include "Ints.hh"
 
+using TransformationTypes::Entry;
 using TransformationTypes::Ints;
 using TransformationTypes::CalculationError;
 
@@ -30,6 +31,6 @@ Data<double> &Ints::operator[](int i) const {
  * @param message -- exception message.
  * @return exception.
  */
-CalculationError Ints::error(const std::string &message) const {
-  return CalculationError(this->m_entry, message);
+CalculationError<Entry> Ints::error(const std::string &message) const {
+  return CalculationError<Entry>(this->m_entry, message);
 }
