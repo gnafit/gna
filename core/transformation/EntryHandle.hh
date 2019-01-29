@@ -3,7 +3,9 @@
 #include <string>
 #include <vector>
 
+#include "taintflag.hh"
 #include "Data.hh"
+#include "TransformationEntry.hh"
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 

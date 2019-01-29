@@ -1,4 +1,4 @@
-ainclude "VarArray.hh"
+#include "VarArray.hh"
 
 using std::next;
 

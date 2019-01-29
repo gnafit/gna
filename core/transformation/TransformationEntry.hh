@@ -21,9 +21,18 @@ namespace TransformationTypes
   template<typename FloatType> class InputHandleT;
   template<typename FloatType> class OutputHandleT;
 
-  using SourcesContainer  = boost::ptr_vector<Source>;   ///< Container for Source pointers.
-  using SinksContainer    = boost::ptr_vector<Sink>;     ///< Container for Sink pointers.
-  using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
+  template<typename FloatType>
+  using SourcesContainerT  = boost::ptr_vector<SourceT<FloatType>>;   ///< Container for Source pointers.
+
+  template<typename FloatType>
+  using SinksContainerT    = boost::ptr_vector<SinkT<FloatType>>;     ///< Container for Sink pointers.
+
+  template<typename FloatType>
+  using StoragesContainerT = boost::ptr_vector<StorageT<FloatType>>;  ///< Container for Storage pointers.
+
+  using SourcesContainer  = SourcesContainerT<double>;
+  using SinksContainer    = SinksContainerT<double>;
+  using StoragesContainer = StoragesContainerT<double>;
 
   /**
    * @brief Definition of a single transformation.
@@ -51,13 +60,20 @@ namespace TransformationTypes
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
   struct EntryT: public boost::noncopyable {
-    using EntryImpl        = EntryT<SourceFloatType,SinkFloatType>;
-    using SourceImpl       = SourceT<SourceFloatType>;
-    using InputHandleImpl  = InputHandleT<SourceFloatType>;
-    using SinkImpl         = SinkT<SinkFloatType>;
-    using OutputHandleImpl = OutputHandleT<SinkFloatType>;
-    using StorageImpl      = StorageT<SourceFloatType>;
-    using DataImpl         = Data<SinkFloatType>;
+    using StorageFloatType      = SourceFloatType;
+    using DataImpl              = Data<SinkFloatType>;
+    using EntryImpl             = EntryT<SourceFloatType,SinkFloatType>;
+
+    using SourceImpl            = SourceT<SourceFloatType>;
+    using SourcesContainerImpl  = SourcesContainerT<SourceFloatType>;
+    using InputHandleImpl       = InputHandleT<SourceFloatType>;
+
+    using SinkImpl              = SinkT<SinkFloatType>;
+    using SinksContainerImpl    = SinksContainerT<SinkFloatType>;
+    using OutputHandleImpl      = OutputHandleT<SinkFloatType>;
+
+    using StorageImpl           = StorageT<StorageFloatType>;
+    using StoragesContainerImpl = StoragesContainerT<StorageFloatType>;
 
     EntryT(const std::string &name, const Base *parent); ///< Constructor.
     EntryT(const EntryImpl &other, const Base *parent);  ///< Clone constructor.
@@ -83,9 +99,9 @@ namespace TransformationTypes
     const Base *parent;                                  ///< Base class, containing the transformation Entry.
 
     // Data
-    SourcesContainer sources;                            ///< Transformation inputs (sources).
-    SinksContainer sinks;                                ///< Transformation outputs (sinks).
-    StoragesContainer storages;                          ///< Transformation internal Storage instances.
+    SourcesContainerImpl sources;                        ///< Transformation inputs (sources).
+    SinksContainerImpl sinks;                            ///< Transformation outputs (sinks).
+    StoragesContainerImpl storages;                      ///< Transformation internal Storage instances.
 
     // Functions
     Function fun=nullptr;                                ///< The function that does actual calculation.
