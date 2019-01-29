@@ -377,3 +377,7 @@ void EntryT<SourceFloatType,SinkFloatType>::initInternals(StorageTypesFunctionAr
   }
 }
 
+template class TransformationTypes::EntryT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::EntryT<float>;
+#endif
