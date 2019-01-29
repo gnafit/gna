@@ -9,10 +9,10 @@
 
 namespace TransformationTypes
 {
-  template<typename SourceType,typename SinkType> struct EntryT;
+  template<typename SourceFloatType,typename SinkFloatType> struct EntryT;
   using Entry = EntryT<double,double>;
 
-  template<typename SourceFloatType, typename SinkFloatType> struct SourceT;
+  template<typename FloatType> struct SourceT;
 
   /**
    * @brief Definition of a single transformation output (Sink).
@@ -27,7 +27,7 @@ namespace TransformationTypes
   template<typename FloatType>
   struct SinkT: public boost::noncopyable {
     using EntryType = EntryT<FloatType,FloatType>;
-    using SourceType = SourceT<FloatType,FloatType>;
+    using SourceType = SourceT<FloatType>;
     using SinkType = SinkT<FloatType>;
     using DataType = Data<FloatType>;
     using DataPtr  = std::unique_ptr<DataType>;

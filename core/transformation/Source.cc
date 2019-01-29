@@ -18,8 +18,8 @@ using TransformationTypes::SourceT;
  *
  * @exception std::runtime_error if there already exists a connected Sink.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-void SourceT<SourceFloatType,SinkFloatType>::connect(SinkT<SinkFloatType> *newsink) {
+template<typename FloatType>
+void SourceT<FloatType>::connect(SinkT<FloatType> *newsink) {
   if (sink) {
     std::cerr << this << " " << name << " " << sink->entry->name << "\n";
     throw std::runtime_error(
@@ -45,7 +45,7 @@ void SourceT<SourceFloatType,SinkFloatType>::connect(SinkT<SinkFloatType> *newsi
   }
 }
 
-template class TransformationTypes::SourceT<double,double>;
+template class TransformationTypes::SourceT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::SourceT<float,float>;
+  template class TransformationTypes::SourceT<float>;
 #endif

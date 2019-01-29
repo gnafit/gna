@@ -17,7 +17,7 @@ class TransformationDescriptor: public TransformationTypes::Handle,
 public:
   using BaseClass = TransformationTypes::Handle;
 
-  using SourcesContainer = TransformationTypes::SourcesContainerT<double,double>;
+  using SourcesContainer = TransformationTypes::SourcesContainerT<double>;
   using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
   class Inputs;
 
@@ -74,7 +74,7 @@ public:
   InputDescriptor(const InputDescriptor &other)
     : InputDescriptor(BaseClass(other))
     { }
-  InputDescriptor(TransformationTypes::Source &source)
+  InputDescriptor(TransformationTypes::SourceT<double> &source)
     : InputDescriptor(BaseClass(source))
     { }
   static InputDescriptor invalid(int index);

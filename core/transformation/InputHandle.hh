@@ -18,7 +18,7 @@ namespace TransformationTypes
     template<typename FloatType1>
     friend class OutputHandleT;
   public:
-    using SourceType = SourceT<FloatType,FloatType>;
+    using SourceType = SourceT<FloatType>;
     /**
      * @brief Constructor.
      * @param s -- Source to access.

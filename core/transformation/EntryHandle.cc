@@ -19,7 +19,7 @@ std::vector<InputHandle> Handle::inputs() const {
   std::vector<InputHandle> ret;
   auto &sources = m_entry->sources;
   std::transform(sources.begin(), sources.end(), std::back_inserter(ret),
-                 [](SourceT<double,double> &s) { return InputHandle(s); });
+                 [](SourceT<double> &s) { return InputHandle(s); });
   return ret;
 }
 

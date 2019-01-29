@@ -21,12 +21,12 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  template<typename SourceFloatType,typename SinkFloatType>
+  template<typename FloatType>
   struct SourceT: public boost::noncopyable {
-    using EntryType  = EntryT<SourceFloatType,SinkFloatType>;
-    using SourceType = SourceT<SourceFloatType,SinkFloatType>;
-    using SinkType   = SinkT<SinkFloatType>;
-    using DataType   = Data<SinkFloatType>;
+    using EntryType  = EntryT<FloatType,FloatType>;
+    using SourceType = SourceT<FloatType>;
+    using SinkType   = SinkT<FloatType>;
+    using DataType   = Data<FloatType>;
     /**
      * @brief Constructor.
      * @param name -- Source name.
