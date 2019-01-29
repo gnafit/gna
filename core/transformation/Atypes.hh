@@ -22,7 +22,7 @@ namespace TransformationTypes
   template<typename SourceFloatType, typename SinkFloatType>
   struct AtypesT {
     using EntryImpl  = EntryT<SourceFloatType,SinkFloatType>;
-    using SourceImpl = SourceT<SourceFloatType>;
+    using SourceImpl = SourceT<SourceFloatType,SinkFloatType>;
     using SinkImpl   = SinkT<SourceFloatType>;
 
     /**

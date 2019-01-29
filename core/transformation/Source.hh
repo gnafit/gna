@@ -21,25 +21,29 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  template<typename FloatType>
+  template<typename SourceFloatType,typename SinkFloatType>
   struct SourceT: public boost::noncopyable {
+    using EntryType  = EntryT<SourceFloatType,SinkFloatType>;
+    using SourceType = SourceT<SourceFloatType,SinkFloatType>;
+    using SinkType   = SinkT<SinkFloatType>;
+    using DataType   = Data<SinkFloatType>;
     /**
      * @brief Constructor.
      * @param name -- Source name.
      * @param entry -- Entry pointer Source belongs to.
      * @param inactive -- if true, source becomes inactive and will not be subscribed to other taintflags.
      */
-    SourceT(std::string name, Entry *entry, bool inactive=false)
+    SourceT(std::string name, EntryType *entry, bool inactive=false)
       : name(std::move(name)), entry(entry), inactive(inactive) { }
     /**
      * @brief Clone constructor.
      * @param name -- other Source to get the name from.
      * @param entry -- Entry pointer Source belongs to.
      */
-    SourceT(const Source &other, Entry *entry)
+    SourceT(const SourceType &other, EntryType *entry)
       : name(other.name), label(other.label), entry(entry), inactive(other.inactive) { }
 
-    void connect(SinkT<FloatType> *newsink);      ///< Connect the Source to the Sink.
+    void connect(SinkType *newsink);      ///< Connect the Source to the Sink.
 
     /**
      * @brief Check if the input data is allocated.
@@ -49,12 +53,12 @@ namespace TransformationTypes
       return sink && sink->materialized();
     }
 
-    const Data<FloatType>* getData() const {return sink ? sink->getData() : nullptr;}
+    const DataType* getData() const {return sink ? sink->getData() : nullptr;}
 
     std::string name;                             ///< Source's name.
     std::string label;                            ///< Source's label.
-    const SinkT<FloatType> *sink = nullptr;       ///< Pointer to the Sink the Source is connected to.
-    Entry *entry;                                 ///< Entry pointer the Source belongs to.
+    const SinkType *sink = nullptr;               ///< Pointer to the Sink the Source is connected to.
+    EntryType *entry;                             ///< Entry pointer the Source belongs to.
     bool inactive=false;                          ///< Source is inactive (taintflag will not be subscribed)
   };
 } /* namespace TransformationTypes */
