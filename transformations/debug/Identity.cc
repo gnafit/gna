@@ -57,8 +57,4 @@ void identity_gpu_d(FunctionArgs& fargs){
 	auto** shape =gpuargs->argshapes;
 	auto** rshape =gpuargs->retshapes;
 	printf("%p %p %p %p\n", (void*)source, (void*)dest, (void*)shape, (void*)rshape);
-	//auto bytes=shape[(int)GPUShape::Size]*sizeof(decltype(source[0]));
-	////printf("copy %p->%p size %zu\n", (void*)source, (void*)dest, fargs.gpu->argshapes[0][(int)GPUShape::Size]);
-	//memcpy(dest, source, bytes);
-	//fargs.gpu->dump();
 }

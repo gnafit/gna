@@ -24,6 +24,18 @@ void copyH2D_NOALL(T* dst, T* src, unsigned int N) {
         }
 }
 
+
+
+template<typename T>
+void copyD2D_NA(T* dst, T* src, unsigned int N) {
+        cudaError_t err;
+        err =
+                cudaMemcpy(dst, src, N * sizeof(T), cudaMemcpyDeviceToDevice);
+        if (err != cudaSuccess) {
+                std::cerr << "Err is " << cudaGetErrorString(err) << std::endl;
+        }
+}
+
 template <typename T>
 void cuwr_free(T* &ptr) {
 	cudaFree(ptr);
@@ -50,3 +62,9 @@ template void copyH2D<unsigned int*>(unsigned int** &dst, unsigned int** src, un
 template void copyH2D<double*>(double** &dst, double** src, unsigned int N);
 template void cuwr_free<unsigned int*>(unsigned int** &ptr);
 template void cuwr_free<double*>(double** &ptr);
+
+
+template void copyD2D_NA<unsigned int*>(unsigned int** dst, unsigned int** src, unsigned int N);
+template void copyD2D_NA<double*>(double** dst, double** src, unsigned int N);
+template void copyD2D_NA<unsigned int>(unsigned int* dst, unsigned int* src, unsigned int N);
+template void copyD2D_NA<double>(double* dst, double* src, unsigned int N);
