@@ -29,6 +29,7 @@ if(CUDA_SUPPORT)
   	GpuArrayTypes.hh
   	cuInterpExpo.hh
 	GpuBasics.hh
+	cuElementary.hh
         )
 else()
     set(CUDA_SUPPORT 0)

@@ -18,11 +18,8 @@ include_directories(extra/ core/)
 set(CUSOURCES
   core/GpuBasics.cu
   core/GpuArray.cu
-#  extra/cuOscProbPMNS.cu
   extra/cuInterpExpo.cu
- # extra/GNAcuOscProbFull.cu
- # extra/GNAcuOscProbMem.cu
- # core/IdentityGPU.cu
+  operations/sum.cu
   )
 
 set(CUHEADERS 
@@ -31,7 +28,8 @@ set(CUHEADERS
   core/GpuArray.hh 
   core/GpuArrayTypes.hh
   extra/cuRootMath.h
- # extra/cuInterpExpo.hh
+  extra/cuInterpExpo.hh
+  core/cuElementary.hh
 #  extra/GNAcuMath.h
 #  extra/GNAcuOscProbFull.h
 #  extra/GNAcuOscProbMem.hh
