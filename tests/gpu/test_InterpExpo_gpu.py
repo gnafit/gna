@@ -36,12 +36,12 @@ if opts.mode=='expo':
     ie = R.InterpExpo()
 else:
     ie = R.InterpLinear()
+ie.interp.switchFunction("gpu")
 ie.interpolate(segments_t, fcn_t, points_t)
 seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )
 
 ie.print()
-#ie.interp.switchFunction("gpu")
 res = ie.interp.interp.data()
 print( 'Result', res )
 
