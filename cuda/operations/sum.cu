@@ -1,7 +1,9 @@
 #include <cuda.h>
 #include <iostream>
 #include <chrono>
+#include "cuElementary.hh"
 
+#include "cuda_config_vars.h" 
 
 /*
 * @brief Summation of N vectors of length M into one
@@ -11,7 +13,7 @@
 * @date 2018
 */
 template <typename T>
-__global__ void sum(T** array, T** ans_array, int n, int m) {
+__global__ void sum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
 	if (x >= m) return;
 	ans_array[0][x] = array[0][x];
@@ -20,3 +22,9 @@ __global__ void sum(T** array, T** ans_array, int n, int m) {
 	}
 }
 
+template <typename T>
+void cusum(T** array, T** ans_array, unsigned int n, unsigned int m) {
+	sum<<<n/CU_BLOCK_SIZE+1, m/CU_BLOCK_SIZE+1>>>(array, ans_array, n, m);
+}
+
+template void cusum<double>(double** array, double** ans_array, unsigned int n, unsigned int m);

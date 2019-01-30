@@ -2,6 +2,14 @@
 #include "TypesFunctions.hh"
 #include "GNAObject.hh" 
 
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"                             
+#include "DataLocation.hh"
+#endif
+
+using TransformationTypes::FunctionArgs;
+void sum_ongpu(FunctionArgs& fargs);
 
 /**
  * @brief Constructor.
@@ -20,7 +28,9 @@ Sum::Sum() {
         for (size_t j = 1; j < args.size(); ++j) {     ///<     * iteratively add all the other inputs
           ret += args[j].x;                            ///<
         }                                              ///<
-      });                                              ///<
+      })
+     .func("gpu", sum_ongpu, DataLocation::Device)
+	;                                              ///<
 }
 
 /**
@@ -51,4 +61,14 @@ InputDescriptor Sum::add(SingleOutput &out) {
  */
 InputDescriptor Sum::add_input(const char* name) {
   return InputDescriptor(t_[0].input(name));
+}
+
+void sum_ongpu(FunctionArgs& fargs) {
+	fargs.args.touch();
+	auto& gpuargs=fargs.gpu;
+	gpuargs->provideSignatureDevice();
+	auto** source=gpuargs->args;
+        auto** dest  =gpuargs->rets;
+//        auto** shape =gpuargs->argshapes;
+	cusum(source, dest, 2,2);
 }

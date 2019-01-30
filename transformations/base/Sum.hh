@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GNAObject.hh"
+#include "TypesFunctions.hh"
 
 /**
  * @brief Calculate the element-wise sum of the inputs.
