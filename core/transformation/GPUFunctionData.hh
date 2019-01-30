@@ -175,8 +175,6 @@ namespace TransformationTypes{
         for (size_t i = 0; i < container.size(); ++i) {
             if(container[i].materialized()){
                 h_pointers_dev.push_back(container[i].getData()->gpuArr->devicePtr);
-		if (container[i].getData()->gpuArr->devicePtr ) { std::cout << "devicePTR here" << std::endl; }
-		else { std::cout << "devPTR not here " << std::endl;}
             }
             else{
                 h_pointers_dev.push_back(nullptr);
