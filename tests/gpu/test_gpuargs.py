@@ -27,7 +27,10 @@ def test_io(opts):
     #
     points = Points(mat)
     identity = R.Identity()
-    identity.identity.switchFunction('identity_gpuargs_h')
+    if opts.function=='host':
+        identity.identity.switchFunction('identity_gpuargs_h')
+    else:
+        identity.identity.switchFunction('identity_gpuargs_d')
 
     points.points.points >> identity.identity.source
 
@@ -94,6 +97,8 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
     # parser.add_argument('-g', '--gpuargs', action='store_true')
+    parser.add_argument('function', default='host', nargs='?',
+                                    choices=['host', 'device'])
 
     test_io(parser.parse_args())
     test_vars(parser.parse_args())

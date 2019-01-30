@@ -72,8 +72,6 @@ namespace TransformationTypes{
 
         h_pointers_dev.clear();
         h_pointers_dev.reserve(size);
-        h_shape_pointers_dev.clear();
-        h_shape_pointers_dev.reserve(size);
     }
 
     /**
@@ -83,24 +81,25 @@ namespace TransformationTypes{
      */
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::deAllocateDevice(){
-/*        size_t sh_size = h_shape_pointers_host.size();
-        if(d_pointers_dev){ 
-           // for (size_t i =0; i < sh_size; i++) {
-           //     cuwr_free<FloatType>(d_pointers_dev[i]);
-           // }
-		// Pointers from Gpu arrays will be deleted in GpuArray destructor
-            cuwr_free<FloatType*>(d_pointers_dev);
-        }
-        if(d_shapes){
-            cuwr_free<SizeType>(d_shapes);
-        }
-        if(d_shape_pointers_dev){
-            for (size_t i =0; i < sh_size; i++) {
-                cuwr_free<SizeType>(d_shape_pointers_dev[i]);
-            }
-            cuwr_free<SizeType*>(d_shape_pointers_dev);
-        }
-*/
+	//size_t sh_size = h_shape_pointers_host.size();
+	if(d_pointers_dev){
+	    //for (size_t i =0; i < sh_size; i++) {
+		//cuwr_free<FloatType>(d_pointers_dev[i]);
+	    //}
+            //Pointers from Gpu arrays will be deleted in GpuArray destructor
+	    cuwr_free<FloatType*>(d_pointers_dev);
+	}
+	if(d_shapes){
+	    cuwr_free<SizeType>(d_shapes);
+	}
+	if(d_shape_pointers_dev){
+	    //for (size_t i =0; i < sh_size; i++) {
+		//cuwr_free<SizeType>(d_shape_pointers_dev[i]);
+	    //}
+	    cuwr_free<SizeType*>(d_shape_pointers_dev);
+	}
+        h_shape_pointers_dev.clear();
+        h_shape_pointers_dev.reserve(h_pointers.size());
     }
 
     /**
@@ -118,17 +117,12 @@ namespace TransformationTypes{
         copyH2D<FloatType*>(d_pointers_dev, h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
         copyH2D<SizeType>(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
 
-        size_t sh_size = h_shape_pointers_host.size();
-        for (size_t i = 0; i< sh_size; i++) {
-                copyH2D<SizeType>(h_shape_pointers_dev[i],h_shape_pointers_host[i], h_shapes[h_offsets[i]]);
-
-		if (h_pointers_dev.data() ) { std::cout << "devicePTR here" << std::endl; }
-                else { std::cout << "devPTR not here " << std::endl;}
-
-
-        }
+	for (size_t i = 0; i<h_shape_pointers_host.size(); i++) {
+	    h_shape_pointers_dev.push_back(std::next(d_shapes, h_offsets[i]));
+	}
         copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
 	std::cout << "DEBUG The end of allocate device" << std::endl;
+	printf("allocated %p %p %p %zu\n", (void*)d_pointers_dev, (void*)d_shapes, (void*)d_shape_pointers_dev, h_shape_pointers_dev.size());
     }
 
     /**

@@ -41,5 +41,5 @@ configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_
 include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})
-cuda_add_cublas_to_target(cuGNA)
+#cuda_add_cublas_to_target(cuGNA)
 

@@ -18,13 +18,14 @@ if(CUDA_SUPPORT)
     set(CUDA_ADD_LIBS)
     IF (CUDA_FOUND)
         add_subdirectory(cuda/)
-        set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
+        #set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
+        set (CUDA_ADD_LIBS cuGNA)
         link_directories(cuda/)
     ENDIF()
     set (CUSOURCES
         )
     set (CUHEADERS
-  	GpuArray.hh 
+  	GpuArray.hh
   	GpuArrayTypes.hh
   	cuInterpExpo.hh
 	GpuBasics.hh
