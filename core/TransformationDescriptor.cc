@@ -4,6 +4,8 @@
 #include "Exceptions.hh"
 #include "GNAObject.hh"
 
+using OutputHandle = TransformationTypes::OutputHandleT<double>;
+
 using std::string;
 
 using Input = InputDescriptor;
@@ -20,7 +22,7 @@ void connect(const Inputs &inputs, const Outputs &outputs) {
   }
 }
 
-TransformationTypes::OutputHandle Outputs::single() const {
+OutputHandle Outputs::single() const {
   if (size() > 1) {
     throw std::runtime_error("too much outputs for one input");
   } else if (size() < 1) {
@@ -29,11 +31,11 @@ TransformationTypes::OutputHandle Outputs::single() const {
   return at(0);
 }
 
-TransformationTypes::OutputHandle Outputs::single() {
+OutputHandle Outputs::single() {
   return static_cast<const Outputs*>(this)->single();
 }
 
-TransformationTypes::OutputHandle TransformationDescriptor::single() {
+OutputHandle TransformationDescriptor::single() {
   return outputs.single();
 }
 
@@ -69,7 +71,7 @@ void InputDescriptor::connect(const OutputDescriptor &out) const {
   return BaseClass::connect(out);
 }
 
-void InputDescriptor::connect(const TransformationTypes::OutputHandle &out) const {
+void InputDescriptor::connect(const OutputHandle &out) const {
   return BaseClass::connect(out);
 }
 

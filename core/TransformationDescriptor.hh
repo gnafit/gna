@@ -66,9 +66,10 @@ public:
   OutputHandle single() override;
 };
 
-class InputDescriptor: public TransformationTypes::InputHandle {
+class InputDescriptor: public TransformationTypes::InputHandleT<double> {
 public:
-  using BaseClass = TransformationTypes::InputHandle;
+  using BaseClass = TransformationTypes::InputHandleT<double>;
+  using OutputHandle = TransformationTypes::OutputHandleT<double>;
 
   InputDescriptor(const BaseClass &other)
     : BaseClass(other)

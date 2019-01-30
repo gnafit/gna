@@ -175,6 +175,10 @@ def patchDescriptor(cls):
 def importcommon():
     from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
+def legacytypes():
+    ROOT.TransformationTypes.OutputHandle=ROOT.TransformationTypes.OutputHandleT('double')
+    ROOT.TransformationTypes.InputHandle=ROOT.TransformationTypes.InputHandleT('double')
+
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
@@ -235,6 +239,7 @@ def setup(ROOT):
     t.__getattr__ = patchclass
 
     importcommon()
+    legacytypes()
 
 def patchROOTClass( object=None, method=None ):
     """Decorator to override ROOT class methods. Usage
