@@ -4,7 +4,6 @@
 #include "TransformationDebug.hh"
 
 using TransformationTypes::Accessor;
-using TransformationTypes::Base;
 using TransformationTypes::Handle;
 
 /**

@@ -17,7 +17,7 @@
 
 namespace TransformationTypes
 {
-  class Base;
+  template<typename SourceFloatType, typename SinkFloatType> class BaseT;
   template<typename FloatType> class InputHandleT;
   template<typename FloatType> class OutputHandleT;
 
@@ -56,6 +56,7 @@ namespace TransformationTypes
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
   struct EntryT: public boost::noncopyable {
+    using BaseType                           = BaseT<SourceFloatType,SinkFloatType>;
     using EntryType                          = EntryT<SourceFloatType,SinkFloatType>;
     using StorageFloatType                   = SourceFloatType;
 
@@ -90,8 +91,8 @@ namespace TransformationTypes
     using FunctionDescriptorType             = FunctionDescriptorT<SourceFloatType,SinkFloatType>;
     using FunctionDescriptorsContainerType   = FunctionDescriptorsContainerT<SourceFloatType,SinkFloatType>;
 
-    EntryT(const std::string &name, const Base *parent); ///< Constructor.
-    EntryT(const EntryType &other, const Base *parent);  ///< Clone constructor.
+    EntryT(const std::string &name, const BaseType *parent); ///< Constructor.
+    EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
     ~EntryT();                                           ///< Destructor.
 
     InputHandleType addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
@@ -111,7 +112,7 @@ namespace TransformationTypes
     // Names, labels and meta
     std::string name;                                    ///< Transformation name.
     std::string label;                                   ///< Transformation label.
-    const Base *parent;                                  ///< Base class, containing the transformation Entry.
+    const BaseType *parent;                              ///< Base class, containing the transformation Entry.
 
     // Data
     SourcesContainerType sources;                        ///< Transformation inputs (sources).

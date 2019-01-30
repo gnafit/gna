@@ -13,7 +13,7 @@
 #include "TransformationErrors.hh"
 #include "GPUFunctionArgs.hh"
 
-using TransformationTypes::Base;
+using TransformationTypes::BaseT;
 using TransformationTypes::EntryT;
 using TransformationTypes::AtypesT;
 using TransformationTypes::OutputHandleT;
@@ -28,7 +28,7 @@ using TransformationTypes::TypeError;
  * @param parent -- Base class instance to hold the Entry.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Base *parent)
+EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0),
     functionargs(new FunctionArgsType(this))
 { }
@@ -41,7 +41,7 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Bas
  * @param parent -- Base class instance to hold the Entry.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const Base *parent)
+EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
     fun(), typefuns(), tainted(other.name.c_str()), initializing(0),

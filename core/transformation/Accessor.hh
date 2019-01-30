@@ -4,7 +4,7 @@
 
 namespace TransformationTypes
 {
-  class Base;
+  template<typename SourceFloatType, typename SinkFloatType> class BaseT;
   class Handle;
   /**
    * @brief Accessor gives an access to the Base's Entry instances by wrapping them into Handle.
@@ -14,6 +14,8 @@ namespace TransformationTypes
    */
   class Accessor {
   public:
+    using Base = BaseT<double,double>;
+
     Accessor() = default;                                 ///< Default constructor.
     Accessor(Base &parent): m_parent(&parent) { }         ///< Constructor. @param parent -- Base instance to access its Entry instances.
     Handle operator[](int idx) const;                     ///< Get a Handle for the i-th Entry.
