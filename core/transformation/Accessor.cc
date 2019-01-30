@@ -4,15 +4,18 @@
 #include "TransformationDebug.hh"
 
 using TransformationTypes::Accessor;
-using TransformationTypes::Handle;
+using TransformationTypes::HandleT;
+
+using SourceFloatType=double;
+using SinkFloatType=double;
 
 /**
  * @brief Get a Handle for the i-th Entry.
  * @param idx -- index of the Entry.
  * @return Handle for the Entry.
  */
-Handle Accessor::operator[](int idx) const {
-  return Handle(m_parent->getEntry(idx));
+HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](int idx) const {
+  return HandleT<SourceFloatType,SinkFloatType>(m_parent->getEntry(idx));
 }
 
 /**
@@ -20,9 +23,9 @@ Handle Accessor::operator[](int idx) const {
  * @param name -- Entry's name.
  * @return Handle for the Entry.
  */
-Handle Accessor::operator[](const std::string &name) const {
+HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](const std::string &name) const {
   TR_DPRINTF("accessing %s on %p\n", name.c_str(), (void*)m_parent);
-  return Handle(m_parent->getEntry(name));
+  return HandleT<SourceFloatType,SinkFloatType>(m_parent->getEntry(name));
 }
 
 /**

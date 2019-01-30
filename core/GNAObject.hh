@@ -58,19 +58,22 @@ protected:
       transformations(TransformationTypes::Base::m_entries)
   { }
 
-  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<double,double>;
-  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<double,double>;
-  using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
-  using Args = TransformationTypes::ArgsT<double,double>;
-  using Rets = TransformationTypes::RetsT<double,double>;
-  using Atypes = TransformationTypes::AtypesT<double,double>;
-  using Rtypes = TransformationTypes::RtypesT<double,double>;
-  using Function = TransformationTypes::FunctionT<double,double>;
-  using TypesFunction = TransformationTypes::TypesFunctionT<double,double>;
-  using Entry = TransformationTypes::EntryT<double,double>;
+  using SourceFloatType=double;
+  using SinkFloatType=double;
+
+  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+  using FunctionArgs = TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>;
+  using Args = TransformationTypes::ArgsT<SourceFloatType,SinkFloatType>;
+  using Rets = TransformationTypes::RetsT<SourceFloatType,SinkFloatType>;
+  using Atypes = TransformationTypes::AtypesT<SourceFloatType,SinkFloatType>;
+  using Rtypes = TransformationTypes::RtypesT<SourceFloatType,SinkFloatType>;
+  using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
+  using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
+  using Entry = TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
   using Accessor = TransformationTypes::Accessor;
-  using Handle = TransformationTypes::Handle;
-  using OutputHandle = TransformationTypes::OutputHandleT<double>;
+  using HandleT = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
+  using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
 };
 
 class GNASingleObject: public GNAObject,

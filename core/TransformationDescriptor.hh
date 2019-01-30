@@ -12,20 +12,24 @@ class GNASingleObject;
 class InputDescriptor;
 class OutputDescriptor;
 
-class TransformationDescriptor: public TransformationTypes::Handle,
+using SourceFloatType=double;
+using SinkFloatType=double;
+using Handle=TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
+
+class TransformationDescriptor: public TransformationTypes::HandleT<SourceFloatType,SinkFloatType>,
                                 public SingleOutput {
 public:
-  using BaseClass = TransformationTypes::Handle;
+  using BaseClass = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
 
-  using SourcesContainer = TransformationTypes::SourcesContainerT<double>;
+  using SourcesContainer = TransformationTypes::SourcesContainerT<SourceFloatType>;
   using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
   class Inputs;
 
-  using SinksContainer = TransformationTypes::SinksContainerT<double>;
+  using SinksContainer = TransformationTypes::SinksContainerT<SinkFloatType>;
   using OutputsBase = SimpleDict<OutputDescriptor, SinksContainer>;
   class Outputs;
 
-  using OutputHandle = TransformationTypes::OutputHandleT<double>;
+  using OutputHandle = TransformationTypes::OutputHandleT<SourceFloatType>;
 
   class Inputs: public InputsBase {
   public:
@@ -47,7 +51,7 @@ public:
   };
 
   TransformationDescriptor(const BaseClass &other)
-    : Handle(other),
+    : HandleT<SourceFloatType,SinkFloatType>(other),
       inputs(m_entry->sources),
       outputs(m_entry->sinks)
     { }
@@ -66,10 +70,10 @@ public:
   OutputHandle single() override;
 };
 
-class InputDescriptor: public TransformationTypes::InputHandleT<double> {
+class InputDescriptor: public TransformationTypes::InputHandleT<SinkFloatType> {
 public:
-  using BaseClass = TransformationTypes::InputHandleT<double>;
-  using OutputHandle = TransformationTypes::OutputHandleT<double>;
+  using BaseClass = TransformationTypes::InputHandleT<SourceFloatType>;
+  using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
 
   InputDescriptor(const BaseClass &other)
     : BaseClass(other)
@@ -77,7 +81,7 @@ public:
   InputDescriptor(const InputDescriptor &other)
     : InputDescriptor(BaseClass(other))
     { }
-  InputDescriptor(TransformationTypes::SourceT<double> &source)
+  InputDescriptor(TransformationTypes::SourceT<SourceFloatType> &source)
     : InputDescriptor(BaseClass(source))
     { }
   static InputDescriptor invalid(int index);
@@ -108,11 +112,11 @@ public:
   inline const OutputDescriptor output() const;
 };
 
-class OutputDescriptor: public TransformationTypes::OutputHandleT<double>,
+class OutputDescriptor: public TransformationTypes::OutputHandleT<SinkFloatType>,
                         public SingleOutput {
 public:
-  using BaseClass = TransformationTypes::OutputHandleT<double>;
-  using OutputHandleT<double>::data;
+  using BaseClass = TransformationTypes::OutputHandleT<SinkFloatType>;
+  using OutputHandleT<SinkFloatType>::data;
 
   OutputDescriptor(const BaseClass &other)
     : BaseClass(other)
@@ -120,7 +124,7 @@ public:
   OutputDescriptor(const OutputDescriptor &other)
     : OutputDescriptor(BaseClass(other))
     { }
-  OutputDescriptor(TransformationTypes::SinkT<double> &sink)
+  OutputDescriptor(TransformationTypes::SinkT<SinkFloatType> &sink)
     : OutputDescriptor(BaseClass(sink))
     { }
   static OutputDescriptor invalid(int index);
