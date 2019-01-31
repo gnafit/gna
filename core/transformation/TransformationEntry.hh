@@ -139,7 +139,4 @@ namespace TransformationTypes
 
     void initInternals(StorageTypesFunctionArgsType& fargs);         ///< Initialize the Data for the internal storage.
   }; /* struct Entry */
-
-
-  using Entry = EntryT<double,double>;
 } /* TransformationTypes */

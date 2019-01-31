@@ -1,6 +1,6 @@
 #include "TypesFunctions.hh"
 
-using TransformationTypes::TypesFunctionArgs;
+using TypesFunctionArgs = TypesFunctions::TypesFunctionArgs;
 
 /**
  * @brief Assigns shape of each input to corresponding output.

@@ -9,9 +9,10 @@
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 
+template <typename FloatType> class SingleOutputT;
+
 namespace TransformationTypes
 {
-  template <typename FloatType> class SingleOutputT;
   /**
    * @brief User-end Entry wrapper.
    *

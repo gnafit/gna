@@ -55,7 +55,5 @@ namespace TransformationTypes
 #ifdef PROVIDE_SINGLE_PRECISION
   template void operator>><float>(const OutputHandleT<float>& output, const InputHandleT<float>& input);
 #endif
-
-  using InputHandle = InputHandleT<double>;
 } /* TransformationTypes */
 

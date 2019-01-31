@@ -82,12 +82,13 @@ class GNASingleObjectT: public GNAObjectT<SourceFloatType,SinkFloatType>,
                         public SingleOutputT<SinkFloatType> {
 public:
   using GNAObjectType = GNAObjectT<SourceFloatType,SinkFloatType>;
+  using GNASingleObjectType = GNASingleObjectT<SourceFloatType,SinkFloatType>;
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
   using SingleTransformation = typename GNAObjectType::SingleTransformation;
   GNASingleObjectT()
     : GNAObjectT<SourceFloatType,SinkFloatType>(SingleTransformation())
   { }
-  GNASingleObjectT(const GNASingleObject &other)
+  GNASingleObjectT(const GNASingleObjectType &other)
     : GNAObjectT<SourceFloatType,SinkFloatType>(other)
   { }
 

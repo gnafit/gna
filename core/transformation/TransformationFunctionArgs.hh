@@ -96,9 +96,5 @@ namespace TransformationTypes
     const RtypesT<SourceFloatType,SinkFloatType>& rets; ///< return values'/outputs' data  types (read-only)
     ItypesT<SourceFloatType,SinkFloatType>& ints;       ///< preallocated storage's data types (writable)
   };
-
-  using FunctionArgs = FunctionArgsT<double,double>;
-  using TypesFunctionArgs = TypesFunctionArgsT<double,double>;
-  using StorageTypesFunctionArgs = StorageTypesFunctionArgsT<double,double>;
 }
 

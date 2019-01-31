@@ -36,7 +36,7 @@ Data<SinkFloatType> &RetsT<SourceFloatType,SinkFloatType>::operator[](int i) con
  */
 template<typename SourceFloatType, typename SinkFloatType>
 CalculationError<EntryT<SourceFloatType,SinkFloatType>> RetsT<SourceFloatType,SinkFloatType>::error(const std::string &message) const {
-  return CalculationError<EntryT<double,double>>(this->m_entry, message);
+  return CalculationError<EntryT<SourceFloatType,SinkFloatType>>(this->m_entry, message);
 }
 
 /**
