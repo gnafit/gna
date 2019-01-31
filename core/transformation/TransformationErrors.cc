@@ -33,7 +33,8 @@ std::string errorMessage(const std::string &type, const T *s,
  *  @param s -- Sink with problematic type.
  *  @param message -- error message.
  */
-SinkTypeError::SinkTypeError(const Sink *s, const std::string &message)
+template<typename SinkType>
+SinkTypeError<SinkType>::SinkTypeError(const SinkType *s, const std::string &message)
   : TypeError(errorMessage("sink", s, message)),
     sink(s)
 { }
@@ -42,7 +43,8 @@ SinkTypeError::SinkTypeError(const Sink *s, const std::string &message)
  *  @param s -- Storage with problematic type.
  *  @param message -- error message.
  */
-StorageTypeError::StorageTypeError(const Storage *s, const std::string &message)
+template<typename StorageType>
+StorageTypeError<StorageType>::StorageTypeError(const StorageType *s, const std::string &message)
   : TypeError(errorMessage("storage", s, message)),
     storage(s)
 { }
@@ -51,7 +53,8 @@ StorageTypeError::StorageTypeError(const Storage *s, const std::string &message)
  *  @param s -- Source with problematic type.
  *  @param message -- error message.
  */
-SourceTypeError::SourceTypeError(const Source *s, const std::string &message)
+template<typename SourceType>
+SourceTypeError<SourceType>::SourceTypeError(const SourceType *s, const std::string &message)
   : TypeError(errorMessage("source", s, message)),
     source(s)
 { }
@@ -67,7 +70,13 @@ CalculationError<EntryType>::CalculationError(const EntryType *e, const std::str
 { }
 
 template class TransformationTypes::CalculationError<TransformationTypes::EntryT<double,double>>;
+template class TransformationTypes::SourceTypeError<TransformationTypes::SourceT<double>>;
+template class TransformationTypes::SinkTypeError<TransformationTypes::SinkT<double>>;
+template class TransformationTypes::StorageTypeError<TransformationTypes::StorageT<double>>;
 #ifdef PROVIDE_SINGLE_PRECISION
   template class TransformationTypes::CalculationError<TransformationTypes::EntryT<float,float>>;
+  template class TransformationTypes::SourceTypeError<TransformationTypes::SourceT<float>>;
+  template class TransformationTypes::SinkTypeError<TransformationTypes::SinkT<float>>;
+  template class TransformationTypes::StorageTypeError<TransformationTypes::StorageT<float>>;
 #endif
 

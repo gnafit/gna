@@ -30,6 +30,10 @@ void TypesFunctions::passAllT(TypesFunctionArgsT<FloatType,FloatType>& fargs) {
     }
   }
 }
+template void TypesFunctions::passAllT<double>(TypesFunctionArgsT<double,double>& fargs);
+#ifdef PROVIDE_SINGLE_PRECISION
+  template void TypesFunctions::passAllT<float>(TypesFunctionArgsT<float,float>& fargs);
+#endif
 
 /**
  * @brief Assigns shape of each input to corresponding output.

@@ -3,6 +3,7 @@
 #include "TransformationEntry.hh"
 
 using TransformationTypes::AtypesT;
+using TransformationTypes::SourceT;
 using TransformationTypes::SourceTypeError;
 
 /**
@@ -12,7 +13,7 @@ using TransformationTypes::SourceTypeError;
  * @return exception.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-SourceTypeError AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+SourceTypeError<SourceT<SourceFloatType>> AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
   const SourceImpl *source = nullptr;
   for (size_t i = 0; i < m_entry->sources.size(); ++i) {
     auto& lsource=m_entry->sources[i];
@@ -21,7 +22,7 @@ SourceTypeError AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt
       break;
     }
   }
-  return SourceTypeError(source, message);
+  return SourceTypeError<SourceImpl>(source, message);
 }
 
 template class TransformationTypes::AtypesT<double,double>;

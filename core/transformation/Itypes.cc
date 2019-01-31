@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 using TransformationTypes::ItypesT;
+using TransformationTypes::StorageT;
 using TransformationTypes::StorageTypeError;
 
 /**
@@ -34,7 +35,7 @@ DataType &ItypesT<SourceFloatType,SinkFloatType>::operator[](int i) {
  * @return exception.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-StorageTypeError ItypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+StorageTypeError<StorageT<SourceFloatType>> ItypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
   const StorageImpl *storage = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
     if (&(*m_types)[i] == &dt) {
@@ -42,7 +43,7 @@ StorageTypeError ItypesT<SourceFloatType,SinkFloatType>::error(const DataType &d
       break;
     }
   }
-  return StorageTypeError(storage, message);
+  return StorageTypeError<StorageT<SourceFloatType>>(storage, message);
 }
 
 template class TransformationTypes::ItypesT<double,double>;

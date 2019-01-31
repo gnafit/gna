@@ -65,7 +65,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SinkTypeError error(const DataType &dt, const std::string &message = "");
+    SinkTypeError<SinkImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name

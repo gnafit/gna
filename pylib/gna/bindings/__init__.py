@@ -114,7 +114,7 @@ def patchDataProvider(cls):
     def data(self):
         buf = origdata(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
+        return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
     cls.data = data
     cls.__data_raw__ = origdata
     # cls.__view_raw__ = origview

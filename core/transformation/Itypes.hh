@@ -49,7 +49,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    StorageTypeError error(const DataType &dt, const std::string &message = "");
+    StorageTypeError<StorageImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name

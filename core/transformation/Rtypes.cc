@@ -3,6 +3,7 @@
 #include <stdexcept>
 
 using TransformationTypes::RtypesT;
+using TransformationTypes::SinkT;
 using TransformationTypes::SinkTypeError;
 
 /**
@@ -46,7 +47,7 @@ const DataType &RtypesT<SourceFloatType,SinkFloatType>::operator[](int i) const 
  * @return exception.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-SinkTypeError RtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+SinkTypeError<SinkT<SourceFloatType>> RtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
   const SinkImpl *sink = nullptr;
   for (size_t i = 0; i < m_types->size(); ++i) {
     if (&(*m_types)[i] == &dt) {
@@ -54,7 +55,7 @@ SinkTypeError RtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, 
       break;
     }
   }
-  return SinkTypeError(sink, message);
+  return SinkTypeError<SinkImpl>(sink, message);
 }
 
 template class TransformationTypes::RtypesT<double,double>;

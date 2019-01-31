@@ -60,7 +60,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SourceTypeError error(const DataType &dt, const std::string &message = "");
+    SourceTypeError<SourceImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name

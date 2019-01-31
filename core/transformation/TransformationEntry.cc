@@ -150,7 +150,7 @@ void EntryT<SourceFloatType,SinkFloatType>::update() {
   try {
     evaluate();
     tainted = false;
-  } catch (const SinkTypeError&) {
+  } catch (const SinkTypeError<SinkType>&) {
     status = Status::Failed;
   }
   for (auto &sink: sinks) {
@@ -251,11 +251,11 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 #ifdef TRANSFORMATION_DEBUG
       sink.data->type.dump();
 #endif // TRANSFORMATION_DEBUG
-      for (Source *depsrc: sink.sources) {
+      for (auto *depsrc: sink.sources) {
         deps.insert(depsrc->entry);
       }
     }
-    for (EntryType *dep: deps) {
+    for (auto *dep: deps) {
       dep->evaluateTypes();
     }
     initInternals(sargs);
