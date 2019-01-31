@@ -42,13 +42,22 @@ def Dummy(shape, name, varnames, *args, **kwargs):
     return R.Dummy(shape, name, stdvector(varnames), *args, **kwargs)
 
 """Construct Points object from numpy array"""
-def Points( array, *args, **kwargs ):
+def Points(array, *args, **kwargs):
     """Convert array to Points"""
     a = N.ascontiguousarray(array, dtype='d')
     if len(a.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( a.shape )
     return R.Points( a.ravel( order='F' ), s, *args, **kwargs )
+
+"""Construct Points object from numpy array"""
+def PointsF(array, *args, **kwargs):
+    """Convert array to Points"""
+    a = N.ascontiguousarray(array, dtype='f')
+    if len(a.shape)>2:
+        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
+    s = array_to_stdvector_size_t( a.shape )
+    return R.PointsT('float')( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):

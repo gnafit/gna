@@ -43,14 +43,15 @@ namespace TransformationTypes{
         FloatType **ints{nullptr};   ///< list of pointers to ints
         SizeType  **intshapes{0u};   ///< list of pointers to shapes of ints
 
-    private:
-        EntryType* m_entry;
-
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs
         GPUFunctionData<FloatType,SizeType>   m_rets; ///< Handler for outputs
         GPUFunctionData<FloatType,SizeType>   m_ints; ///< Handler for storages
+
+    private:
+        EntryType* m_entry;
     };
+
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesHost(){

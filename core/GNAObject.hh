@@ -16,7 +16,8 @@ public:
   using Evaluables = SimpleDict<EvaluableDescriptor, EvaluablesContainer>;
   using TransformationBaseType = TransformationTypes::BaseT<SourceFloatType,SinkFloatType>;
   using TransformationsContainer = typename TransformationBaseType::EntryContainerType;
-  using Transformations = SimpleDict<TransformationDescriptor, TransformationsContainer>;
+  using TransformationDescriptorType = TransformationDescriptorT<SourceFloatType,SinkFloatType>;
+  using Transformations = SimpleDict<TransformationDescriptorType, TransformationsContainer>;
   using GNAObjectType = GNAObjectT<SourceFloatType,SinkFloatType>;
 
   GNAObjectT()
@@ -38,12 +39,12 @@ public:
     ParametrizedTypes::Base::subscribe_(flag);
   }
 
-  TransformationDescriptor operator[](size_t idx) {
-    return TransformationDescriptor(TransformationBaseType::getEntry(idx));
+  TransformationDescriptorType operator[](size_t idx) {
+    return TransformationDescriptorType(TransformationBaseType::getEntry(idx));
   }
 
-  TransformationDescriptor operator[](const std::string &name) {
-    return TransformationDescriptor(TransformationBaseType::getEntry(name));
+  TransformationDescriptorType operator[](const std::string &name) {
+    return TransformationDescriptorType(TransformationBaseType::getEntry(name));
   }
 
   void dumpObj();
