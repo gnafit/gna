@@ -50,7 +50,7 @@ std::vector<OutputHandleT<SinkFloatType>> HandleT<SourceFloatType,SinkFloatType>
  * @return InputHandle for the new input.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(SingleOutput &output) {
+InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(SingleOutputT<SourceFloatType> &output) {
   auto outhandle = output.single();
   auto inp = m_entry->addSource(outhandle.name());
   outhandle >> inp;
@@ -67,7 +67,7 @@ InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(Sing
  * @return InputHandle for the new input.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(const std::string& name, SingleOutput &output) {
+InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(const std::string& name, SingleOutputT<SourceFloatType> &output) {
   auto outhandle = output.single();
   auto inp = m_entry->addSource(name);
   outhandle >> inp;
@@ -81,7 +81,7 @@ InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(cons
  * @return OutputHandle for the new output.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-OutputHandleT<SinkFloatType> HandleT<SourceFloatType,SinkFloatType>::output(SingleOutput &out) {
+OutputHandleT<SinkFloatType> HandleT<SourceFloatType,SinkFloatType>::output(SingleOutputT<SourceFloatType> &out) {
   return output(out.single().name());
 }
 
@@ -116,3 +116,8 @@ void HandleT<SourceFloatType,SinkFloatType>::dumpObj() const {
     s.data->type.dump();
   }
 }
+
+template class TransformationTypes::HandleT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::HandleT<float,float>;
+#endif

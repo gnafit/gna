@@ -7,17 +7,20 @@
 #include "SingleOutput.hh"
 #include "SimpleDict.hh"
 
-class GNASingleObject;
-
 class InputDescriptor;
 class OutputDescriptor;
 
 using SourceFloatType=double;
 using SinkFloatType=double;
+
+template<typename SourceFloatType, typename SinkFloatType>
+class GNASingleObjectT;
+using GNASingleObject = GNASingleObjectT<SourceFloatType,SinkFloatType>;
+
 using Handle=TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
 
 class TransformationDescriptor: public TransformationTypes::HandleT<SourceFloatType,SinkFloatType>,
-                                public SingleOutput {
+                                public SingleOutputT<SinkFloatType> {
 public:
   using BaseClass = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
 
@@ -41,7 +44,7 @@ public:
   };
 
   class Outputs: public OutputsBase,
-                 public SingleOutput {
+                 public SingleOutputT<SinkFloatType> {
   public:
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }
@@ -113,7 +116,7 @@ public:
 };
 
 class OutputDescriptor: public TransformationTypes::OutputHandleT<SinkFloatType>,
-                        public SingleOutput {
+                        public SingleOutputT<SinkFloatType> {
 public:
   using BaseClass = TransformationTypes::OutputHandleT<SinkFloatType>;
   using OutputHandleT<SinkFloatType>::data;

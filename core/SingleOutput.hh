@@ -5,8 +5,6 @@
 
 #include <vector>
 
-using OutputHandle = TransformationTypes::OutputHandleT<double>;
-
 /**
  * @brief The object with single output.
  *
@@ -15,12 +13,16 @@ using OutputHandle = TransformationTypes::OutputHandleT<double>;
  * @author Dmitry Taychenachev
  * @date 2015
  */
-class SingleOutput {
+template <typename FloatType>
+class SingleOutputT {
 public:
-  virtual ~SingleOutput() = default;                           ///< Destructor.
-  virtual OutputHandle single() = 0;      ///< Return the single output.
+  using OutputHandle = TransformationTypes::OutputHandleT<FloatType>;
+
+  virtual ~SingleOutputT() = default;                          ///< Destructor.
+  virtual OutputHandle single() = 0;                           ///< Return the single output.
   const double *data() { return single().data(); }             ///< Return the single output's Data. The relevant Entry is updated if needed.
   //const double *view() { return single().view(); }           ///< Return the view on a single output's Data.
   const DataType &datatype() { return single().datatype(); }   ///< Return the single output's DataType.
 };
 
+using SingleOutput = SingleOutputT<double>;

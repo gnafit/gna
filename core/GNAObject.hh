@@ -6,29 +6,32 @@
 #include "TransformationBind.hh"
 #include "GPUFunctionArgs.hh"
 
-class GNAObject: public virtual TransformationTypes::Base,
-                 public virtual ParametrizedTypes::Base {
+template <typename SourceFloatType,typename SinkFloatType>
+class GNAObjectT: public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType>,
+                  public virtual ParametrizedTypes::Base {
 public:
   using VariablesContainer = ParametrizedTypes::VariablesContainer;
   using EvaluablesContainer = ParametrizedTypes::EvaluablesContainer;
-  using TransformationsContainer = TransformationTypes::EntryContainer;
   using Variables = SimpleDict<VariableDescriptor, VariablesContainer>;
   using Evaluables = SimpleDict<EvaluableDescriptor, EvaluablesContainer>;
+  using TransformationBaseType = TransformationTypes::BaseT<SourceFloatType,SinkFloatType>;
+  using TransformationsContainer = typename TransformationBaseType::EntryContainerType;
   using Transformations = SimpleDict<TransformationDescriptor, TransformationsContainer>;
+  using GNAObjectType = GNAObjectT<SourceFloatType,SinkFloatType>;
 
-  GNAObject()
-    : TransformationTypes::Base(),
+  GNAObjectT()
+    : TransformationBaseType(),
       ParametrizedTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
-      transformations(TransformationTypes::Base::m_entries)
+      transformations(TransformationBaseType::m_entries)
     { }
-  GNAObject(const GNAObject &other)
-    : TransformationTypes::Base(other),
+  GNAObjectT(const GNAObjectType &other)
+    : TransformationBaseType(other),
       ParametrizedTypes::Base(other),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
-      transformations(TransformationTypes::Base::m_entries)
+      transformations(TransformationBaseType::m_entries)
     { }
 
   void subscribe(taintflag flag) {
@@ -36,11 +39,11 @@ public:
   }
 
   TransformationDescriptor operator[](size_t idx) {
-    return TransformationDescriptor(TransformationTypes::Base::getEntry(idx));
+    return TransformationDescriptor(TransformationBaseType::getEntry(idx));
   }
 
   TransformationDescriptor operator[](const std::string &name) {
-    return TransformationDescriptor(TransformationTypes::Base::getEntry(name));
+    return TransformationDescriptor(TransformationBaseType::getEntry(name));
   }
 
   void dumpObj();
@@ -50,16 +53,13 @@ public:
   Transformations transformations;
 protected:
   class SingleTransformation { };
-  GNAObject(SingleTransformation)
-    : TransformationTypes::Base(1),
+  GNAObjectT(SingleTransformation)
+    : TransformationBaseType(1),
       ParametrizedTypes::Base(),
       variables(ParametrizedTypes::Base::m_entries),
       evaluables(m_eventries),
-      transformations(TransformationTypes::Base::m_entries)
+      transformations(TransformationBaseType::m_entries)
   { }
-
-  using SourceFloatType=double;
-  using SinkFloatType=double;
 
   using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;
   using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
@@ -71,19 +71,24 @@ protected:
   using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
   using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
   using Entry = TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
-  using Accessor = TransformationTypes::Accessor;
-  using HandleT = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
+  using Accessor = TransformationTypes::AccessorT<SourceFloatType,SinkFloatType>;
+  using Handle = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
+  using TransformationBaseType::t_;
 };
 
-class GNASingleObject: public GNAObject,
-                       public SingleOutput {
+template<typename SourceFloatType, typename SinkFloatType>
+class GNASingleObjectT: public GNAObjectT<SourceFloatType,SinkFloatType>,
+                        public SingleOutputT<SinkFloatType> {
 public:
-  GNASingleObject()
-    : GNAObject(SingleTransformation())
+  using GNAObjectType = GNAObjectT<SourceFloatType,SinkFloatType>;
+  using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
+  using SingleTransformation = typename GNAObjectType::SingleTransformation;
+  GNASingleObjectT()
+    : GNAObjectT<SourceFloatType,SinkFloatType>(SingleTransformation())
   { }
-  GNASingleObject(const GNASingleObject &other)
-    : GNAObject(other)
+  GNASingleObjectT(const GNASingleObject &other)
+    : GNAObjectT<SourceFloatType,SinkFloatType>(other)
   { }
 
   OutputHandle single() override {
@@ -96,3 +101,7 @@ public:
     (*this)[0].dump();
   }
 };
+
+using GNAObject = GNAObjectT<double,double>;
+using GNASingleObject = GNASingleObjectT<double,double>;
+

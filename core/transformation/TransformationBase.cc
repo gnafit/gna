@@ -4,8 +4,6 @@
 
 using TransformationTypes::EntryT;
 using TransformationTypes::BaseT;
-using TransformationTypes::Accessor;
-using TransformationTypes::Initializer;
 
 /**
  * @brief Clone constructor.
@@ -26,7 +24,7 @@ BaseT<SourceFloatType,SinkFloatType>::BaseT(const BaseT<SourceFloatType,SinkFloa
  */
 template<typename SourceFloatType, typename SinkFloatType>
 BaseT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::operator=(const BaseT<SourceFloatType,SinkFloatType> &other) {
-  t_ = Accessor(*this);
+  t_ = AccessorType(*this);
   m_entries.reserve(other.m_entries.size());
   this->copyEntries(other);
   return *this;

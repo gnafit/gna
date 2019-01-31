@@ -3,18 +3,16 @@
 #include "TransformationBase.hh"
 #include "TransformationDebug.hh"
 
-using TransformationTypes::Accessor;
+using TransformationTypes::AccessorT;
 using TransformationTypes::HandleT;
-
-using SourceFloatType=double;
-using SinkFloatType=double;
 
 /**
  * @brief Get a Handle for the i-th Entry.
  * @param idx -- index of the Entry.
  * @return Handle for the Entry.
  */
-HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](int idx) const {
+template<typename SourceFloatType, typename SinkFloatType>
+HandleT<SourceFloatType,SinkFloatType> AccessorT<SourceFloatType,SinkFloatType>::operator[](int idx) const {
   return HandleT<SourceFloatType,SinkFloatType>(m_parent->getEntry(idx));
 }
 
@@ -23,7 +21,8 @@ HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](int idx) const {
  * @param name -- Entry's name.
  * @return Handle for the Entry.
  */
-HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](const std::string &name) const {
+template<typename SourceFloatType, typename SinkFloatType>
+HandleT<SourceFloatType,SinkFloatType> AccessorT<SourceFloatType,SinkFloatType>::operator[](const std::string &name) const {
   TR_DPRINTF("accessing %s on %p\n", name.c_str(), (void*)m_parent);
   return HandleT<SourceFloatType,SinkFloatType>(m_parent->getEntry(name));
 }
@@ -32,6 +31,12 @@ HandleT<SourceFloatType,SinkFloatType> Accessor::operator[](const std::string &n
  * @brief Get number of Entry instances.
  * @return number of Entry instances.
  */
-size_t Accessor::size() const {
+template<typename SourceFloatType, typename SinkFloatType>
+size_t AccessorT<SourceFloatType,SinkFloatType>::size() const {
   return m_parent->m_entries.size();
 }
+
+template class TransformationTypes::AccessorT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::AccessorT<float,float>;
+#endif

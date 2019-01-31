@@ -9,9 +9,9 @@
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 
-class SingleOutput;
 namespace TransformationTypes
 {
+  template <typename FloatType> class SingleOutputT;
   /**
    * @brief User-end Entry wrapper.
    *
@@ -29,6 +29,7 @@ namespace TransformationTypes
     using OutputHandleType = OutputHandleT<SinkFloatType>;
     using InputHandleType  = InputHandleT<SourceFloatType>;
     using DataType         = Data<SinkFloatType>;
+    using SingleOutputType = SingleOutputT<SourceFloatType>;
 
     HandleT(): m_entry(nullptr) { }                                 ///< Default constructor.
     HandleT(EntryType &entry) : m_entry(&entry) { }                 ///< Constructor. @param entry -- an Entry instance to wrap.
@@ -49,8 +50,8 @@ namespace TransformationTypes
       return m_entry->addSource(name);
     }
 
-    InputHandleType input(SingleOutput &output);                          ///< Create a new input and connect to the SingleOutput transformation.
-    InputHandleType input(const std::string &name, SingleOutput &output); ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(SingleOutputType &output);                          ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(const std::string &name, SingleOutputType &output); ///< Create a new input and connect to the SingleOutput transformation.
 
     /**
      * @brief Add new named output.
@@ -61,7 +62,7 @@ namespace TransformationTypes
     OutputHandleType output(const std::string &name) {
       return m_entry->addSink(name);
     }
-    OutputHandleType output(SingleOutput &output);               ///< Create a new output with a same name as SingleOutput's output.
+    OutputHandleType output(SingleOutputType &output);               ///< Create a new output with a same name as SingleOutput's output.
 
     /**
      * @brief Return i-th Entry's Sink's data.

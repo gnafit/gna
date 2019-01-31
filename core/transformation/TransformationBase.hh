@@ -16,10 +16,8 @@
  * @date 2015
  */
 namespace TransformationTypes {
-  template<typename T>
-  class Initializer;
-
-  using EntryContainer = boost::ptr_vector<Entry>; ///< Container for Entry pointers.
+  template<typename T,typename SourceFloatType, typename SinkFloatType>
+  class InitializerT;
 
   /**
    * @brief Base transformation class handling.
@@ -38,13 +36,16 @@ namespace TransformationTypes {
    */
   template<typename SourceFloatType, typename SinkFloatType>
   class BaseT: public boost::noncopyable {
-    template <typename T>
-    friend class Initializer;
+    template <typename T,typename SourceFloatType1, typename SinkFloatType1>
+    friend class InitializerT;
     friend class TransformationDescriptor;
-    friend class Accessor;
+    template <typename SourceFloatType1, typename SinkFloatType1>
+    friend class AccessorT;
   public:
-    using BaseType  = BaseT<SourceFloatType,SinkFloatType>;
-    using EntryType = EntryT<SourceFloatType,SinkFloatType>;
+    using BaseType       = BaseT<SourceFloatType,SinkFloatType>;
+    using AccessorType   = AccessorT<SourceFloatType,SinkFloatType>;
+    using EntryType      = EntryT<SourceFloatType,SinkFloatType>;
+    using EntryContainerType = boost::ptr_vector<EntryType>;
 
     BaseT(const BaseType &other);                                         ///< Clone constructor.
     BaseT &operator=(const BaseType &other);                              ///< Clone assignment.
@@ -69,14 +70,12 @@ namespace TransformationTypes {
     }
     EntryType &getEntry(const std::string &name);                        ///< Get an Entry by name.
 
-    Accessor t_;                                                         ///< An Accessor to Base's Entry instances via Handle.
+    AccessorType t_;                                                     ///< An Accessor to Base's Entry instances via Handle.
 
     size_t addEntry(EntryType *e);                                       ///< Add new Entry.
-    boost::ptr_vector<EntryType> m_entries;                              ///< Vector of Entry pointers. Calls destructors when deleted.
+    EntryContainerType m_entries;                                        ///< Vector of Entry pointers. Calls destructors when deleted.
     boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.
     void copyEntries(const BaseType &other);                             ///< Clone entries from the other Base.
   }; /* class Base */
-
-  using Base = BaseT<double,double>;
 } /* namespace TransformationTypes */
 

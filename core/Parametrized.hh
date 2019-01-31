@@ -16,7 +16,8 @@
 #include "callback.hh"
 
 class ParametersGroup;
-class GNAObject;
+template <typename SourceFloatType,typename SinkFloatType>
+class GNAObjectT;
 namespace ParametrizedTypes {
   class Base;
   class Entry: public boost::noncopyable {
@@ -160,7 +161,8 @@ namespace ParametrizedTypes {
 
   class Base {
     friend class ::ParametersGroup;
-    friend class ::GNAObject;
+    template<typename SourceFloatType, typename SinkFloatType>
+    friend class ::GNAObjectT;
   public:
     Base(const Base &other);
     Base &operator=(const Base &other);
