@@ -188,39 +188,41 @@ def setup(ROOT):
         "IndexError": IndexError,
     })
 
-    simpledicts = [
-        ROOT.GNAObject.Variables,
-        ROOT.GNAObject.Evaluables,
-        ROOT.GNAObject.Transformations,
-        ROOT.TransformationDescriptor.Inputs,
-        ROOT.TransformationDescriptor.Outputs,
-        ROOT.EvaluableDescriptor.Sources,
-    ]
+    simpledicts=[]
+    for ft in ('double', 'float'):
+        simpledicts += [
+            ROOT.GNAObjectT(ft,ft).Variables,
+            ROOT.GNAObjectT(ft,ft).Evaluables,
+            ROOT.GNAObjectT(ft,ft).Transformations,
+            ROOT.TransformationDescriptorT(ft,ft).Inputs,
+            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+        ]
+    simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
         patchSimpleDict(cls)
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
-    patchTransformationDescriptor(ROOT.TransformationDescriptor)
+    for ft in ('double', 'float'):
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+
+        dataproviders = [
+            ROOT.OutputDescriptorT(ft,ft),
+            ROOT.SingleOutputT(ft),
+        ]
+        for cls in dataproviders:
+            patchDataProvider(cls)
 
     patchStatistic(ROOT.Statistic)
 
-    patchDescriptor(ROOT.InputDescriptor)
-    patchDescriptor(ROOT.OutputDescriptor)
-
-    dataproviders = [
-        ROOT.OutputDescriptor,
-        ROOT.SingleOutput,
-    ]
-    for cls in dataproviders:
-        patchDataProvider(cls)
-
-    GNAObject = ROOT.GNAObject
+    GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
         if not isinstance(cls, ROOT.PyRootType):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
-        if issubclass(cls, GNAObject):
+        if issubclass(cls, GNAObjectBase):
             wrapped = patchGNAclass(cls)
             return wrapped
         if 'Class' not in cls.__dict__:

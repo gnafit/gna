@@ -6,8 +6,17 @@
 #include "TransformationBind.hh"
 #include "GPUFunctionArgs.hh"
 
+template <typename SourceFloatType,typename SinkFloatType> class GNAObjectT;
+
+template <>
+class GNAObjectT<void,void> {
+protected:
+  GNAObjectT() = default;
+};
+
 template <typename SourceFloatType,typename SinkFloatType>
-class GNAObjectT: public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType>,
+class GNAObjectT: public GNAObjectT<void,void>,
+                  public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType>,
                   public virtual ParametrizedTypes::Base {
 public:
   using VariablesContainer = ParametrizedTypes::VariablesContainer;
