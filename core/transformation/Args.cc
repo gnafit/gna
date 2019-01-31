@@ -10,7 +10,7 @@ using TransformationTypes::Args;
 using TransformationTypes::CalculationError;
 
 /**
- * @brief Get i-th Source Data. If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
+ * @brief Get i-th Source Data. If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it.
  * @param i -- index of a Source.
  * @return i-th Sources's Data as input (const).
  *
@@ -40,14 +40,6 @@ const Data<double> &Args::operator[](int i) const {
  * @brief Touch all the sources
  */
 void Args::touch() const {
-#ifdef GNA_CUDA_SUPPORT
-  for (size_t i = 0; i < m_entry->sources.size(); i++) { 
-    const Source &src = m_entry->sources[i];
-    if (src.sink->data->gpuArr) {
-      src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
-    }
-  }
-#endif
 
   for(auto& source: m_entry->sources){
     if (!source.materialized()) {
@@ -55,6 +47,12 @@ void Args::touch() const {
       throw CalculationError(m_entry, msg);
     }
     source.sink->entry->touch();
+#ifdef GNA_CUDA_SUPPORT
+    auto& gpuarr=source.sink->data->gpuArr;
+    if (gpuarr) {
+      gpuarr->sync(this->m_entry->getEntryLocation());
+    }
+#endif
   }
 }
 

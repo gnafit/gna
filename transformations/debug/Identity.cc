@@ -11,7 +11,7 @@ Identity::Identity(){
 	transformation_("identity")
 		.input("source")
 		.output("target")
-		.types(TypesFunctions::pass<0,0>)
+		.types(TypesFunctions::ifSame,TypesFunctions::pass<0,0>)
 		.func([](FunctionArgs& fargs){ fargs.rets[0].x = fargs.args[0].x; })
 		.func("identity_gpuargs_h", identity_gpu_h, DataLocation::Host)
 #ifdef GNA_CUDA_SUPPORT     //
