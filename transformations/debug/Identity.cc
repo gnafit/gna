@@ -2,6 +2,11 @@
 
 #include <iostream>
 
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#endif
+
 using TransformationTypes::FunctionArgs;
 
 void identity_gpu_h(FunctionArgs& fargs);
@@ -54,7 +59,5 @@ void identity_gpu_d(FunctionArgs& fargs){
 
 	auto** source=gpuargs->args;
 	auto** dest  =gpuargs->rets;
-	auto** shape =gpuargs->argshapes;
-	auto** rshape =gpuargs->retshapes;
-	printf("%p %p %p %p\n", (void*)source, (void*)dest, (void*)shape, (void*)rshape);
+	identity_gpu(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
 }
