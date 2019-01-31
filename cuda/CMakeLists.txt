@@ -20,6 +20,7 @@ set(CUSOURCES
   core/GpuArray.cu
   extra/cuInterpExpo.cu
   operations/sum.cu
+  operations/product.cu
   operations/identity.cu
   )
 

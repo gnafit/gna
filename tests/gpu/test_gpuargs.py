@@ -101,5 +101,4 @@ if __name__ == "__main__":
                                     choices=['host', 'device'])
 
     test_io(parser.parse_args())
-    test_vars(parser.parse_args())
-
+    #test_vars(parser.parse_args())

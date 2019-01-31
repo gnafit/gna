@@ -1,6 +1,15 @@
 #include "Product.hh"
 #include "TypesFunctions.hh"
 
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"                             
+#include "DataLocation.hh"
+#endif
+
+using TransformationTypes::FunctionArgs;
+void product_ongpu(FunctionArgs& fargs);
+
 Product::Product() {
   transformation_("product")
     .output("product")
@@ -30,7 +39,9 @@ Product::Product() {
         else if(factor!=1){
           ret*=factor;
         }
-      });
+      })
+    .func("gpu", product_ongpu, DataLocation::Device)
+	;
 }
 
 /**
@@ -61,4 +72,15 @@ InputDescriptor Product::multiply(SingleOutput &out) {
  */
 InputDescriptor Product::add_input(const char* name) {
   return InputDescriptor(t_[0].input(name));
+}
+
+
+void product_ongpu(FunctionArgs& fargs) {
+	fargs.args.touch();
+	auto& gpuargs=fargs.gpu;
+	gpuargs->provideSignatureDevice();
+	auto** source=gpuargs->args;
+        auto** dest  =gpuargs->rets;
+        auto** ash  =gpuargs->argshapes;
+	cuproduct(source, dest, gpuargs->nargs, fargs.args[0].arr.size(), ash);
 }
