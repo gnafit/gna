@@ -69,6 +69,5 @@ void sum_ongpu(FunctionArgs& fargs) {
 	gpuargs->provideSignatureDevice();
 	auto** source=gpuargs->args;
         auto** dest  =gpuargs->rets;
-//        auto** shape =gpuargs->argshapes;
-	cusum(source, dest, 2,2);
+	cusum(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
 }

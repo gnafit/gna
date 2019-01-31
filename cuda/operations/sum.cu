@@ -15,7 +15,6 @@
 template <typename T>
 __global__ void sum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
-	if (x >= m) return;
 	ans_array[0][x] = array[0][x];
 	for (int i = 1; i < n; i++){
 		ans_array[0][x] += array[i][x];
@@ -24,7 +23,7 @@ __global__ void sum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 
 template <typename T>
 void cusum(T** array, T** ans_array, unsigned int n, unsigned int m) {
-	sum<<<n/CU_BLOCK_SIZE+1, m/CU_BLOCK_SIZE+1>>>(array, ans_array, n, m);
+	sum<<<m/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, m);
 }
 
 template void cusum<double>(double** array, double** ans_array, unsigned int n, unsigned int m);

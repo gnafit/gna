@@ -10,7 +10,7 @@ from constructors import Points, stdvector
 from gna.env import env
 
 """Initialize inpnuts"""
-arr1 = N.arange(0, 5)
+arr1 = N.arange(1, 1000000)
 arr2 = arr1
 print( 'Data1:', arr1 )
 print( 'Data2:', arr2 )

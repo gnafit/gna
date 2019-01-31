@@ -225,7 +225,7 @@ DataLocation GpuArray<T>::getContent(T* dst) {
 template <typename T> 
 void GpuArray<T>::sync_H2D() {
 #ifdef CU_DEBUG_3
-    	printf("Sync to H2D\n");
+    	printf("Sync H2D\n");
 #endif
 	cudaError_t err;
 	if (dataLoc == DataLocation::NotInitialized) {

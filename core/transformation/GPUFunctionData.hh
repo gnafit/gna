@@ -121,7 +121,6 @@ namespace TransformationTypes{
 	    h_shape_pointers_dev.push_back(std::next(d_shapes, h_offsets[i]));
 	}
         copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
-	std::cout << "DEBUG The end of allocate device" << std::endl;
 	printf("allocated %p %p %p %zu\n", (void*)d_pointers_dev, (void*)d_shapes, (void*)d_shape_pointers_dev, h_shape_pointers_dev.size());
     }
 
