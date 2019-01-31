@@ -1,5 +1,7 @@
 #include "Identity.hh"
 
+using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+
 void identity_gpu_h(FunctionArgs& fargs);
 
 Identity::Identity(){

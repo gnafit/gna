@@ -154,7 +154,7 @@ namespace TransformationTypes {
         throw std::runtime_error("too much transformations");
       }
       if (m_entry->typefuns.empty()) {
-        m_entry->typefuns.push_back(TypesFunctions::passAll);
+        m_entry->typefuns.push_back(TypesFunctions::passAllT<SinkFloatType>);
       }
       m_entry->initializing = 0;
       if (!m_nosubscribe) {

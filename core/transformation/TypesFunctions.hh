@@ -5,9 +5,14 @@
 
 #include "TransformationFunctionArgs.hh"
 
+using TransformationTypes::TypesFunctionArgsT;
+
 struct TypesFunctions
 {
   using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<double,double>;
+
+  template<typename FloatType>
+  static void passAllT(TypesFunctionArgsT<FloatType,FloatType>& fargs);       ///< Assigns shape of each input to corresponding output.
 
   static void passAll(TypesFunctionArgs& fargs);       ///< Assigns shape of each input to corresponding output.
 
