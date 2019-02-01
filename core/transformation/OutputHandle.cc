@@ -11,7 +11,7 @@ template<typename FloatType>
 inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() const {
   m_sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
-  if (m_sink->data->gpuArr != nullptr) {
+  if (m_sink->data->gpuArr!=nullptr) {
      m_sink->data->gpuArr->sync( DataLocation::Host );
   }
 #endif

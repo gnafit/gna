@@ -32,9 +32,9 @@ const Data<SourceFloatType> &ArgsT<SourceFloatType,SinkFloatType>::operator[](in
   }
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
-  if (src.sink->data->gpuArr) {
-    src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
-  }
+//  if (src.sink->data->gpuArr) {
+//    src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
+//  }
 #endif
   return *src.sink->data;
 }

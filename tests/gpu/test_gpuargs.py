@@ -39,8 +39,6 @@ def test_io(opts):
     res = identity.identity.target.data()
     dt  = identity.identity.target.datatype()
 
-    assert N.allclose(mat, res), "C++ and Python results doesn't match"
-
     #
     # Dump
     #
@@ -53,6 +51,8 @@ def test_io(opts):
     print()
 
     print( 'Datatype:', str(dt) )
+
+    assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
 def test_vars(opts):
     print('Test inputs/outputs/variables (Dummy)')
@@ -81,9 +81,6 @@ def test_vars(opts):
     dt1  = dummy.dummy.out1.datatype()
     dt2  = dummy.dummy.out2.datatype()
 
-    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
-    assert N.allclose(res2, 1.0), "C++ and Python results doesn't match"
-
     print( 'Result (C++ Data to numpy)' )
     print( res1 )
     print( res2 )
@@ -91,6 +88,9 @@ def test_vars(opts):
 
     print( 'Datatype:', str(dt1) )
     print( 'Datatype:', str(dt2) )
+
+    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
+    assert N.allclose(res2, 1.0), "C++ and Python results doesn't match"
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@
 #include "DataLocation.hh"
 #endif
 
-using TransformationTypes::FunctionArgs;
+using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
 void product_ongpu(FunctionArgs& fargs);
 
 Product::Product() {

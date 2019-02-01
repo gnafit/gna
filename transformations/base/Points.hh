@@ -96,7 +96,7 @@ namespace GNA{
        * The transformation function is empty.
        */
       void init() {
-        this->transformation_("points")                                      /// Initialize the transformation points.
+        this->transformation_("points")                                /// Initialize the transformation points.
           .output("points")                                            /// Add an output points.
           .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
               fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).

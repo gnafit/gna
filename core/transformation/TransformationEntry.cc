@@ -359,16 +359,18 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
 /**
  *    @brief Sets the target (Host or Device) for execution of current transformation
  */
-    void Entry::setEntryLocation(DataLocation loc) {
-                m_entryLoc = loc;
-    }
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
+	m_entryLoc = loc;
+}
 
 /** 
  * @brief Returns the target (Host or Device) for execution of current transformation
  */
-    DataLocation Entry::getEntryLocation() const {   
-                return m_entryLoc;
-    }
+template<typename SourceFloatType, typename SinkFloatType>
+DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {   
+	return m_entryLoc;
+}
 #endif
 
 

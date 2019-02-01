@@ -40,6 +40,9 @@ def test_points():
     identity.dump()
     print()
 
+    print( 'Points output' )
+    print(points.points.points.data())
+
     print( 'Result (C++ Data to numpy)' )
     print( res, res.dtype )
     print()

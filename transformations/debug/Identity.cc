@@ -60,4 +60,6 @@ void identity_gpu_d(FunctionArgs& fargs){
 	auto** source=gpuargs->args;
 	auto** dest  =gpuargs->rets;
 	identity_gpu(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
+	fargs.args[0].gpuArr->dump();
+	fargs.rets[0].gpuArr->dump();
 }
