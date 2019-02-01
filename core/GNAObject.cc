@@ -33,3 +33,12 @@ template class GNASingleObjectT<double,double>;
   template class GNAObjectT<float,float>;
   template class GNASingleObjectT<float,float>;
 #endif
+
+std::vector<std::string> GNA::provided_precisions(){
+  return {
+    "double"
+#ifdef PROVIDE_SINGLE_PRECISION
+  , "float"
+#endif
+  };
+}

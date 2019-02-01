@@ -116,3 +116,6 @@ public:
 using GNAObject = GNAObjectT<double,double>;
 using GNASingleObject = GNASingleObjectT<double,double>;
 
+namespace GNA{
+  std::vector<std::string> provided_precisions();
+}

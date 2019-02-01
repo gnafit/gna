@@ -188,8 +188,11 @@ def setup(ROOT):
         "IndexError": IndexError,
     })
 
+    ROOT.GNAObjectT
+    provided_precisions = ROOT.GNA.provided_precisions()
+
     simpledicts=[]
-    for ft in ('double', 'float'):
+    for ft in provided_precisions:
         simpledicts += [
             ROOT.GNAObjectT(ft,ft).Variables,
             ROOT.GNAObjectT(ft,ft).Evaluables,
@@ -202,7 +205,7 @@ def setup(ROOT):
         patchSimpleDict(cls)
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
-    for ft in ('double', 'float'):
+    for ft in provided_precisions:
         patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
         patchDescriptor(ROOT.InputDescriptorT(ft,ft))
         patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
