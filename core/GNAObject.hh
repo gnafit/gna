@@ -71,20 +71,21 @@ protected:
       transformations(TransformationBaseType::m_entries)
   { }
 
-  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;
-  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
-  using FunctionArgs = TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>;
   using Args = TransformationTypes::ArgsT<SourceFloatType,SinkFloatType>;
   using Rets = TransformationTypes::RetsT<SourceFloatType,SinkFloatType>;
   using Atypes = TransformationTypes::AtypesT<SourceFloatType,SinkFloatType>;
   using Rtypes = TransformationTypes::RtypesT<SourceFloatType,SinkFloatType>;
-  using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
-  using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
   using Entry = TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
   using Accessor = TransformationTypes::AccessorT<SourceFloatType,SinkFloatType>;
   using Handle = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
   using TransformationBaseType::t_;
+
+  using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
+  using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
+  using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+  using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+  using FunctionArgs = TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>;
 };
 
 template<typename SourceFloatType, typename SinkFloatType>
@@ -95,6 +96,7 @@ public:
   using GNASingleObjectType = GNASingleObjectT<SourceFloatType,SinkFloatType>;
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
   using SingleTransformation = typename GNAObjectType::SingleTransformation;
+
   GNASingleObjectT()
     : GNAObjectT<SourceFloatType,SinkFloatType>(SingleTransformation())
   { }

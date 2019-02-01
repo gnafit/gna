@@ -16,7 +16,7 @@ template<typename FloatType>
 class PointsT: public GNASingleObjectT<FloatType,FloatType>,
                public TransformationBind<PointsT<FloatType>,FloatType,FloatType> {
 private:
-  using BaseClass = GNAObjectT<FloatType,FloatType>;
+  using BaseClass = GNASingleObjectT<FloatType,FloatType>;
 public:
   using typename BaseClass::FunctionArgs;
   using typename BaseClass::TypesFunctionArgs;

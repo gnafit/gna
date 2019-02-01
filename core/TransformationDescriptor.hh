@@ -13,10 +13,6 @@ template<typename SourceFloatType, typename SinkFloatType> class InputDescriptor
 template<typename SourceFloatType, typename SinkFloatType>
 class GNASingleObjectT;
 
-//using FunctionArgs             = TransformationTypes::FunctionArgsT<double,double>;
-//using TypesFunctionArgs        = TransformationTypes::TypesFunctionArgsT<double,double>;
-//using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<double,double>;
-
 template<typename SourceFloatType, typename SinkFloatType>
 class TransformationDescriptorT: public TransformationTypes::HandleT<SourceFloatType,SinkFloatType>,
                                  public SingleOutputT<SinkFloatType> {
@@ -51,8 +47,6 @@ public:
   class Outputs: public OutputsBase,
                  public SingleOutputT<SinkFloatType> {
   public:
-    using OutputsBase::size;
-    using OutputsBase::at;
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }
 

@@ -26,12 +26,12 @@ void connect(const InputDescriptorT<SourceFloatType,SinkFloatType> &input,
 
 template<typename SourceFloatType, typename SinkFloatType>
 OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs::single() const {
-  if (size() > 1) {
+  if (this->size() > 1) {
     throw std::runtime_error("too much outputs for one input");
-  } else if (size() < 1) {
+  } else if (this->size() < 1) {
     throw std::runtime_error("no outputs");
   }
-  return at(0);
+  return this->at(0);
 }
 
 template<typename SourceFloatType, typename SinkFloatType>
