@@ -55,7 +55,7 @@ void identity_gpu_h(FunctionArgs& fargs){
 void identity_gpu_d(FunctionArgs& fargs){
 	fargs.args.touch();
 	auto& gpuargs=fargs.gpu;
-	gpuargs->provideSignatureDevice();
+//	gpuargs->provideSignatureDevice();
 
 	auto** source=gpuargs->args;
 	auto** dest  =gpuargs->rets;

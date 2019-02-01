@@ -66,7 +66,7 @@ InputDescriptor Sum::add_input(const char* name) {
 void sum_ongpu(FunctionArgs& fargs) {
 	fargs.args.touch();
 	auto& gpuargs=fargs.gpu;
-	gpuargs->provideSignatureDevice();
+//	gpuargs->provideSignatureDevice();
 	auto** source=gpuargs->args;
         auto** dest  =gpuargs->rets;
 	cusum(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
