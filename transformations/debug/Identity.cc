@@ -7,7 +7,7 @@
 #include "cuElementary.hh"
 #endif
 
-using TransformationTypes::FunctionArgs;
+using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
 
 void identity_gpu_h(FunctionArgs& fargs);
 void identity_gpu_d(FunctionArgs& fargs);

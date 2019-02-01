@@ -2,8 +2,9 @@
 
 #include <string>
 
+#include "changeable.hh"
+#include "Sink.hh"
 #include "Data.hh"
-#include "TransformationEntry.hh"
 
 namespace TransformationTypes
 {
@@ -17,7 +18,8 @@ namespace TransformationTypes
    */
   template<typename FloatType>
   class OutputHandleT {
-    friend class InputHandle;
+    template<typename FloatType1>
+    friend class InputHandleT;
   public:
     /**
      * @brief Constructor.
@@ -49,50 +51,4 @@ namespace TransformationTypes
     const FloatType *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
     SinkT<FloatType> *m_sink;                                                   ///< Pointer to the Sink.
   }; /* class OutputHandleT */
-
-  /**
-   * @brief Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
-   * @return pointer to the Sink's data buffer.
-   */
-  template<typename FloatType>
-  inline const FloatType *OutputHandleT<FloatType>::data() const {
-    m_sink->entry->touch();
-#ifdef GNA_CUDA_SUPPORT
-    if (m_sink->data->gpuArr != nullptr) {
-       m_sink->data->gpuArr->sync( DataLocation::Host );
-    }
-#endif
-    return this->view();
-  }
-
-  /**
-   * @brief Check that Sink depends on a changeable.
-   * Simply checks that Entry depends on a changeable.
-   * @param x -- changeable to test.
-   * @return true if depends.
-   */
-  template<typename FloatType>
-  inline bool OutputHandleT<FloatType>::depends(changeable x) const {
-    return m_sink->entry->tainted.depends(x);
-  }
-
-  /**
-   * @brief Check the Entry.
-   * @copydoc Entry::check()
-   */
-  template<typename FloatType>
-  bool OutputHandleT<FloatType>::check() const {
-    return m_sink->entry->check() && m_sink->data;
-  }
-
-  /**
-   * @brief Dump the Entry.
-   * @copydoc Entry::dump()
-   */
-  template<typename FloatType>
-  void OutputHandleT<FloatType>::dump() const {
-    m_sink->entry->dump(0);
-  }
-
-  using OutputHandle = OutputHandleT<double>;
 } /* TransformationTypes */

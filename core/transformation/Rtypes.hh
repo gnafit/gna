@@ -22,8 +22,12 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Rtypes {
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct RtypesT {
   public:
+    using EntryImpl = EntryT<SourceFloatType,SinkFloatType>;
+    using DataImpl  = Data<SourceFloatType>;
+    using SinkImpl  = SinkT<SourceFloatType>;
     /**
      * @brief Rtypes constructor.
      *
@@ -31,7 +35,7 @@ namespace TransformationTypes
      *
      * @param e -- Entry instance.
      */
-    Rtypes(const Entry *e)
+    RtypesT(const EntryImpl *e)
       : m_entry(e), m_types(new std::vector<DataType>(e->sinks.size()))
       { }
 
@@ -61,7 +65,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SinkTypeError error(const DataType &dt, const std::string &message = "");
+    SinkTypeError<SinkImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name
@@ -70,7 +74,8 @@ namespace TransformationTypes
     const std::string &name() const { return m_entry->name; }
 
   protected:
-    const Entry *m_entry; ///< Entry instance.
+    const EntryImpl *m_entry; ///< Entry instance.
+
     std::shared_ptr<std::vector<DataType> > m_types; ///< Storage for the output DataType types.
   }; /* struct Rtypes */
 } /* TransformationTypes */

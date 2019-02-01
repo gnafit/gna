@@ -17,7 +17,8 @@ def InputDescriptor____str__(self):
 def InputDescriptor__print(self):
     printl(str(self))
 
-del R.TransformationTypes.InputHandle.__lshift__
+InputHandle = R.TransformationTypes.InputHandleT('double')
+del InputHandle.__lshift__
 
 @patchROOTClass(R.InputDescriptor, '__gt__')
 @patchROOTClass(R.InputDescriptor, '__lt__')

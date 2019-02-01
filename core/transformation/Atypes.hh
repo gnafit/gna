@@ -4,7 +4,6 @@
 
 #include "TransformationEntry.hh"
 #include "TransformationErrors.hh"
-#include "Rtypes.hh"
 
 namespace TransformationTypes
 {
@@ -20,35 +19,25 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  struct Atypes {
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct AtypesT {
+    using EntryImpl  = EntryT<SourceFloatType,SinkFloatType>;
+    using SourceImpl = SourceT<SourceFloatType>;
+    using SinkImpl   = SinkT<SourceFloatType>;
+
     /**
      * @brief An exception for uninitialized Source instance
      */
     class Undefined {
     public:
-      Undefined(const Source *s = nullptr) : source(s) { }
-      const Source *source;
+      Undefined(const SourceImpl *s = nullptr) : source(s) { }
+      const SourceImpl *source;
     };
     /**
      * @brief Atypes constructor.
      * @param e -- Entry instance. Atypes will get access to Entry's source types.
      */
-    Atypes(const Entry *e): m_entry(e) { }
-
-    /**
-     * @brief Direct access to Sink instance, which is used as Source for the transformation.
-     *
-     * @param i -- Source number to return its Sink.
-     * @return i-th Source's Sink instance.
-     *
-     * @exception Undefined in case input data is not initialized.
-     */
-    const Sink *sink(int i) const {
-      if (!m_entry->sources[i].materialized()) {
-        throw Undefined(&m_entry->sources[i]);
-      }
-      return m_entry->sources[i].sink;
-    }
+    AtypesT(const EntryImpl *e): m_entry(e) { }
 
     /**
      * @brief Get i-th Source DataType (const).
@@ -71,7 +60,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SourceTypeError error(const DataType &dt, const std::string &message = "");
+    SourceTypeError<SourceImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name
@@ -84,7 +73,24 @@ namespace TransformationTypes
      * @return Empty Undefined exception.
      */
     Undefined undefined() { return Undefined(); }
+
+  protected:
+    /**
+     * @brief Direct access to Sink instance, which is used as Source for the transformation.
+     *
+     * @param i -- Source number to return its Sink.
+     * @return i-th Source's Sink instance.
+     *
+     * @exception Undefined in case input data is not initialized.
+     */
+    const SinkImpl *sink(int i) const {
+      if (!m_entry->sources[i].materialized()) {
+        throw Undefined(&m_entry->sources[i]);
+      }
+      return m_entry->sources[i].sink;
+    }
+
   private:
-    const Entry *m_entry; ///< Entry instance to access Source DataType.
+    const EntryImpl *m_entry; ///< Entry instance to access Source DataType.
   };
 } /* TransformationBase */

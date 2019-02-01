@@ -1,4 +1,9 @@
 set(CORE_SOURCES
+  # Parameters
+  core/parameters/variable.cc
+  core/parameters/parameter.cc
+  core/parameters/evaluable.cc
+  core/parameters/dependant.cc
   # GPU staff
   core/transformation/GPUFunctionArgs.cc
   core/transformation/GPUVariablesLocal.cc
@@ -12,6 +17,7 @@ set(CORE_SOURCES
   core/transformation/EntryHandle.cc
   core/transformation/OutputHandle.cc
   core/transformation/InputHandle.cc
+  core/transformation/OpenHandle.cc
   core/transformation/Initializer.hh
   core/transformation/Rets.cc
   core/transformation/Ints.cc

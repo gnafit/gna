@@ -23,9 +23,13 @@
  * @author Dmitry Taychenachev
  * @date 2015
  */
-template <typename Derived>
-class TransformationBind: public virtual TransformationTypes::Base {
+template <typename Derived,typename SourceFloatType=double,typename SinkFloatType=double>
+class TransformationBind: public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType> {
 public:
+  using TransformationBaseType = TransformationTypes::BaseT<SourceFloatType,SinkFloatType>;
+  using InitializerType        = TransformationTypes::InitializerT<Derived,SourceFloatType,SinkFloatType>;
+  using TransformationBindType = TransformationBind<Derived,SourceFloatType,SinkFloatType>;
+
   TransformationBind() = default;                                                   ///< Default constructor.
   /**
    * @brief Clone constructor.
@@ -34,7 +38,7 @@ public:
    *
    * @param other -- TransformationBind to copy MemFunction and MemTypesFunction objects from.
    */
-  TransformationBind(const TransformationBind<Derived> &other)
+  TransformationBind(const TransformationBindType &other)
     : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
   {
     rebindMemFunctions();
@@ -44,7 +48,7 @@ public:
    * @brief Clone assignment. Works the same was as clone constructor.
    * @copydoc TransformationBind::TransformationBind(const TransformationBind<Derived>&)
    */
-  TransformationBind<Derived> &operator=(const TransformationBind<Derived> &other) {
+  TransformationBindType &operator=(const TransformationBindType &other) {
     m_memFuncs = other.m_memFuncs;
     m_memTypesFuncs = other.m_memTypeFuncs;
     rebindMemFunctions();
@@ -56,19 +60,21 @@ public:
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
-  TransformationTypes::Initializer<Derived> transformation_(const std::string &name) {
-    return TransformationTypes::Initializer<Derived>(this, name);
+  InitializerType transformation_(const std::string &name) {
+    return InitializerType(this, name);
   }
 protected:
-  friend class TransformationTypes::Initializer<Derived>;
-  using Initializer = typename TransformationTypes::Initializer<Derived>;
-  using MemFunction = typename Initializer::MemFunction;
-  using MemTypesFunction = typename Initializer::MemTypesFunction;
-  using MemStorageTypesFunction = typename Initializer::MemStorageTypesFunction;
+  template<typename T,typename FloatType1,typename FloatType2>
+  friend class TransformationTypes::InitializerT;
+  using MemFunction = typename InitializerType::MemFunction;
+  using MemTypesFunction = typename InitializerType::MemTypesFunction;
+  using MemStorageTypesFunction = typename InitializerType::MemStorageTypesFunction;
 
 private:
   using MemTypesFunctionGMap = std::list<std::tuple<size_t, size_t, MemTypesFunction>>;
   using MemStorageTypesFunctionGMap = std::list<std::tuple<size_t, std::string, size_t, MemStorageTypesFunction>>;
+
+  using TransformationBaseType::m_entries;
 
   /**
    * @brief Return `this` casted to the Derived type (CRTP).

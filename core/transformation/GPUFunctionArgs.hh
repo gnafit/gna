@@ -8,6 +8,8 @@
 #include "GPUVariablesLocal.hh"
 #include "GPUFunctionData.hh"
 
+#include "config_vars.h"
+
 #ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
 #endif
@@ -16,8 +18,14 @@ namespace TransformationTypes{
     template<typename FloatType, typename SizeType=unsigned int>
     class GPUFunctionArgsT {
     public:
-        GPUFunctionArgsT(Entry* entry) : m_entry(entry){ }
-        ~GPUFunctionArgsT(){ }
+        using EntryType = EntryT<FloatType,FloatType>;
+        GPUFunctionArgsT(EntryType* entry) : m_entry(entry){
+
+        }
+
+        ~GPUFunctionArgsT(){
+
+        }
 
         template<typename Container>
         void readVariables(Container& vars){m_vars.readVariables(vars);}
@@ -47,7 +55,7 @@ namespace TransformationTypes{
         SizeType  **intshapes{0u};   ///< list of pointers to shapes of ints
 
     private:
-        Entry* m_entry;
+        EntryType* m_entry;
 
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs
@@ -67,9 +75,9 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
 #ifdef GNA_CUDA_SUPPORT
-        m_args.fillContainersDevice(m_entry->sources);
-        m_rets.fillContainersDevice(m_entry->sinks);
-        m_ints.fillContainersDevice(m_entry->storages);
+        m_args.fillContainers(m_entry->sources);
+        m_rets.fillContainers(m_entry->sinks);
+        m_ints.fillContainers(m_entry->storages);
 #else
 	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
 #endif
@@ -110,6 +118,4 @@ namespace TransformationTypes{
         m_ints.dump("storages");
         printf("\n");
     }
-
-    using GPUFunctionArgs = GPUFunctionArgsT<double>;
 }

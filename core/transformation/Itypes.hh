@@ -15,14 +15,18 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 17.07.2018
    */
-  struct Itypes {
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct ItypesT {
   public:
+    using EntryImpl   = EntryT<SourceFloatType,SinkFloatType>;
+    using StorageImpl = StorageT<SourceFloatType>;
+
     /**
      * @brief Itypes constructor.
      *
      * @param e -- Entry instance.
      */
-    Itypes(const Entry *e)
+    ItypesT(const EntryImpl *e)
       : m_entry(e), m_types(new std::vector<DataType>())
       { }
 
@@ -45,7 +49,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    StorageTypeError error(const DataType &dt, const std::string &message = "");
+    StorageTypeError<StorageImpl> error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name
@@ -54,7 +58,8 @@ namespace TransformationTypes
     const std::string &name() const { return m_entry->name; }
 
   protected:
-    const Entry *m_entry; ///< Entry instance.
+    const EntryImpl *m_entry; ///< Entry instance.
     std::shared_ptr<std::vector<DataType> > m_types; ///< the Storage data types.
   }; /* struct Itypes */
 } /* TransformationTypes */
+

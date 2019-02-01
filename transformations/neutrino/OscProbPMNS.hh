@@ -69,5 +69,5 @@ public:
 protected:
   variable<double> m_Lavg;
 
-  variable<std::array<double, 3>> m_weights;
+  variable<double> m_weights;
 };
