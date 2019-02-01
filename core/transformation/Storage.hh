@@ -8,7 +8,7 @@
 
 namespace TransformationTypes
 {
-  struct Entry;
+  template<typename SourceType,typename SinkType> struct EntryT;
 
   /**
    * @brief Definition of a transformation internal data Storage.
@@ -19,17 +19,18 @@ namespace TransformationTypes
   template<typename FloatType>
   struct StorageT: public boost::noncopyable {
     using DataType = Data<FloatType>;
+    using EntryType = EntryT<FloatType,FloatType>;
     /**
      * @brief Constructor.
      * @param entry -- Entry pointer Storage belongs to.
      * @exception std::runtime_error in case entry==nullptr
      */
-    StorageT(Entry *entry=nullptr) : entry(entry) { if(!entry) throw std::runtime_error("Storage initialized without entry"); }
+    StorageT(EntryType *entry=nullptr) : entry(entry) { if(!entry) throw std::runtime_error("Storage initialized without entry"); }
     /**
      * @brief Clone constructor.
      * @param entry -- Entry pointer Storage belongs to.
      */
-    StorageT(const StorageT<FloatType> &other, Entry *entry)
+    StorageT(const StorageT<FloatType> &other, EntryType *entry)
       : entry(entry) { }
 
     DataType*       getData()       {return data.get();}
@@ -40,8 +41,6 @@ namespace TransformationTypes
     std::string name;                    ///< Storage's name.
     std::string label;                   ///< Storage's label.
     std::unique_ptr<DataType> data;      ///< Storage's Data.
-    Entry *entry;                        ///< Pointer to the transformation Entry this Storage belongs to.
+    EntryType *entry;                    ///< Pointer to the transformation Entry this Storage belongs to.
   };
-
-  using Storage = StorageT<double>;
 } /* TransformationTypes */

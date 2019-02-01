@@ -1,8 +1,39 @@
 #include "TypesFunctions.hh"
 
-using TransformationTypes::TypesFunctionArgs;
-using TransformationTypes::Atypes;
-using TransformationTypes::Rtypes;
+using TypesFunctionArgs = TypesFunctions::TypesFunctionArgs;
+using TransformationTypes::TypesFunctionArgsT;
+
+/**
+ * @brief Assigns shape of each input to corresponding output.
+ *
+ * In case of single input and multiple outputs assign its size to each output.
+ *
+ * @param args -- source types.
+ * @param rets -- output types.
+ *
+ * @exception std::runtime_error in case the number of inputs and outputs is >1 and not the same.
+ */
+template<typename FloatType>
+void TypesFunctions::passAllT(TypesFunctionArgsT<FloatType,FloatType>& fargs) {
+  auto& args=fargs.args;
+  auto& rets=fargs.rets;
+  if (args.size() == 1) {
+    for (size_t i = 0; i < rets.size(); ++i) {
+      rets[i] = args[0];
+    }
+  } else if (args.size() != rets.size()) {
+    auto msg = fmt::format("Transformation {0}: nargs != nrets", args.name());
+    throw std::runtime_error(msg);
+  } else {
+    for (size_t i = 0; i < args.size(); ++i) {
+      rets[i] = args[i];
+    }
+  }
+}
+template void TypesFunctions::passAllT<double>(TypesFunctionArgsT<double,double>& fargs);
+#ifdef PROVIDE_SINGLE_PRECISION
+  template void TypesFunctions::passAllT<float>(TypesFunctionArgsT<float,float>& fargs);
+#endif
 
 /**
  * @brief Assigns shape of each input to corresponding output.

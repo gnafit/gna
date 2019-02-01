@@ -114,7 +114,7 @@ def patchDataProvider(cls):
     def data(self):
         buf = origdata(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
+        return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
     cls.data = data
     cls.__data_raw__ = origdata
     # cls.__view_raw__ = origview
@@ -175,6 +175,10 @@ def patchDescriptor(cls):
 def importcommon():
     from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
+def legacytypes():
+    ROOT.TransformationTypes.OutputHandle=ROOT.TransformationTypes.OutputHandleT('double')
+    ROOT.TransformationTypes.InputHandle=ROOT.TransformationTypes.InputHandleT('double')
+
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
@@ -184,39 +188,41 @@ def setup(ROOT):
         "IndexError": IndexError,
     })
 
-    simpledicts = [
-        ROOT.GNAObject.Variables,
-        ROOT.GNAObject.Evaluables,
-        ROOT.GNAObject.Transformations,
-        ROOT.TransformationDescriptor.Inputs,
-        ROOT.TransformationDescriptor.Outputs,
-        ROOT.EvaluableDescriptor.Sources,
-    ]
+    simpledicts=[]
+    for ft in ('double', 'float'):
+        simpledicts += [
+            ROOT.GNAObjectT(ft,ft).Variables,
+            ROOT.GNAObjectT(ft,ft).Evaluables,
+            ROOT.GNAObjectT(ft,ft).Transformations,
+            ROOT.TransformationDescriptorT(ft,ft).Inputs,
+            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+        ]
+    simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
         patchSimpleDict(cls)
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
-    patchTransformationDescriptor(ROOT.TransformationDescriptor)
+    for ft in ('double', 'float'):
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+
+        dataproviders = [
+            ROOT.OutputDescriptorT(ft,ft),
+            ROOT.SingleOutputT(ft),
+        ]
+        for cls in dataproviders:
+            patchDataProvider(cls)
 
     patchStatistic(ROOT.Statistic)
 
-    patchDescriptor(ROOT.InputDescriptor)
-    patchDescriptor(ROOT.OutputDescriptor)
-
-    dataproviders = [
-        ROOT.OutputDescriptor,
-        ROOT.SingleOutput,
-    ]
-    for cls in dataproviders:
-        patchDataProvider(cls)
-
-    GNAObject = ROOT.GNAObject
+    GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
         if not isinstance(cls, ROOT.PyRootType):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
-        if issubclass(cls, GNAObject):
+        if issubclass(cls, GNAObjectBase):
             wrapped = patchGNAclass(cls)
             return wrapped
         if 'Class' not in cls.__dict__:
@@ -235,6 +241,7 @@ def setup(ROOT):
     t.__getattr__ = patchclass
 
     importcommon()
+    legacytypes()
 
 def patchROOTClass( object=None, method=None ):
     """Decorator to override ROOT class methods. Usage

@@ -5,13 +5,11 @@
 #include "GNAObject.hh"
 
 using std::string;
+using TransformationTypes::OutputHandleT;
 
-using Input = InputDescriptor;
-using Inputs = TransformationDescriptor::Inputs;
-using Output = OutputDescriptor;
-using Outputs = TransformationDescriptor::Outputs;
-
-void connect(const Inputs &inputs, const Outputs &outputs) {
+template<typename SourceFloatType, typename SinkFloatType>
+void connect(const typename TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs &inputs,
+             const typename TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outputs) {
   if (inputs.size() != outputs.size()) {
     throw std::runtime_error("inconsistent sizes");
   }
@@ -20,7 +18,14 @@ void connect(const Inputs &inputs, const Outputs &outputs) {
   }
 }
 
-TransformationTypes::OutputHandle Outputs::single() const {
+template<typename SourceFloatType, typename SinkFloatType>
+void connect(const InputDescriptorT<SourceFloatType,SinkFloatType> &input,
+             const typename TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outputs) {
+  input.connect(outputs.single());
+}
+
+template<typename SourceFloatType, typename SinkFloatType>
+OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs::single() const {
   if (size() > 1) {
     throw std::runtime_error("too much outputs for one input");
   } else if (size() < 1) {
@@ -29,71 +34,93 @@ TransformationTypes::OutputHandle Outputs::single() const {
   return at(0);
 }
 
-TransformationTypes::OutputHandle Outputs::single() {
+template<typename SourceFloatType, typename SinkFloatType>
+OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs::single() {
+  using Outputs = typename TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs;
   return static_cast<const Outputs*>(this)->single();
 }
 
-TransformationTypes::OutputHandle TransformationDescriptor::single() {
+template<typename SourceFloatType, typename SinkFloatType>
+OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::single() {
   return outputs.single();
 }
 
-void connect(const Input &input, const Outputs &outputs) {
-  input.connect(outputs.single());
+template<typename SourceFloatType, typename SinkFloatType>
+void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outputs) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, outputs);
 }
 
-void Inputs::operator()(const Outputs &outputs) const {
-  connect(*this, outputs);
+template<typename SourceFloatType, typename SinkFloatType>
+void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType> &other) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, other.outputs);
 }
 
-void Inputs::operator()(const TransformationDescriptor &other) const {
-  connect(*this, other.outputs);
+template<typename SourceFloatType, typename SinkFloatType>
+void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(GNASingleObjectT<SourceFloatType,SinkFloatType> &obj) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, obj[0].outputs);
 }
 
-void Inputs::operator()(GNASingleObject &obj) const {
-  connect(*this, obj[0].outputs);
+template<typename SourceFloatType, typename SinkFloatType>
+void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(GNASingleObjectT<SourceFloatType,SinkFloatType> &obj) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, obj[0].outputs);
 }
 
-void InputDescriptor::connect(GNASingleObject &obj) const {
-  ::connect(*this, obj[0].outputs);
+template<typename SourceFloatType, typename SinkFloatType>
+void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(const TransformationDescriptorT<SourceFloatType,SinkFloatType> &obj) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, obj.outputs);
 }
 
-void InputDescriptor::connect(const TransformationDescriptor &obj) const {
-  ::connect(*this, obj.outputs);
+template<typename SourceFloatType, typename SinkFloatType>
+void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(const typename TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outs) const {
+  ::connect<SourceFloatType,SinkFloatType>(*this, outs);
 }
 
-void InputDescriptor::connect(const Outputs &outs) const {
-  ::connect(*this, outs);
-}
-
-void InputDescriptor::connect(const OutputDescriptor &out) const {
+template<typename SourceFloatType, typename SinkFloatType>
+void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(const OutputDescriptorT<SourceFloatType,SinkFloatType> &out) const {
   return BaseClass::connect(out);
 }
 
-void InputDescriptor::connect(const TransformationTypes::OutputHandle &out) const {
+template<typename SourceFloatType, typename SinkFloatType>
+void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(const OutputHandleT<SinkFloatType> &out) const {
   return BaseClass::connect(out);
 }
 
-TransformationDescriptor TransformationDescriptor::invalid(int index) {
+template<typename SourceFloatType, typename SinkFloatType>
+TransformationDescriptorT<SourceFloatType,SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::invalid(int index) {
   throw IndexError(index, "input");
 }
 
-TransformationDescriptor TransformationDescriptor::invalid(const std::string name) {
+template<typename SourceFloatType, typename SinkFloatType>
+TransformationDescriptorT<SourceFloatType,SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloatType>::invalid(const std::string name) {
   throw KeyError(name, "input");
 }
 
-Input InputDescriptor::invalid(int index) {
+template<typename SourceFloatType, typename SinkFloatType>
+InputDescriptorT<SourceFloatType,SinkFloatType> InputDescriptorT<SourceFloatType,SinkFloatType>::invalid(int index) {
   throw IndexError(index, "input");
 }
 
-Input InputDescriptor::invalid(const std::string name) {
+template<typename SourceFloatType, typename SinkFloatType>
+InputDescriptorT<SourceFloatType,SinkFloatType> InputDescriptorT<SourceFloatType,SinkFloatType>::invalid(const std::string name) {
   throw KeyError(name, "input");
 }
 
-Output OutputDescriptor::invalid(int index) {
+template<typename SourceFloatType, typename SinkFloatType>
+OutputDescriptorT<SourceFloatType,SinkFloatType> OutputDescriptorT<SourceFloatType,SinkFloatType>::invalid(int index) {
   throw IndexError(index, "output");
 }
 
-Output OutputDescriptor::invalid(const std::string name) {
+template<typename SourceFloatType, typename SinkFloatType>
+OutputDescriptorT<SourceFloatType,SinkFloatType> OutputDescriptorT<SourceFloatType,SinkFloatType>::invalid(const std::string name) {
   throw KeyError(name, "output");
 }
 
+
+template class TransformationDescriptorT<double,double>;
+template class InputDescriptorT<double,double>;
+template class OutputDescriptorT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationDescriptorT<float,float>;
+  template class InputDescriptorT<float,float>;
+  template class OutputDescriptorT<float,float>;
+#endif

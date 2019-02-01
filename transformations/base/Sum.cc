@@ -8,7 +8,8 @@
 #include "DataLocation.hh"
 #endif
 
-using TransformationTypes::FunctionArgs;
+using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+
 void sum_ongpu(FunctionArgs& fargs);
 
 /**

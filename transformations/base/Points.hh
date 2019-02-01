@@ -12,51 +12,59 @@
  * @author Dmitry Taychenachev
  * @date 2015
  */
-class Points: public GNASingleObject,
-              public TransformationBind<Points> {
+template<typename FloatType>
+class PointsT: public GNASingleObjectT<FloatType,FloatType>,
+               public TransformationBind<PointsT<FloatType>,FloatType,FloatType> {
 public:
+  using BaseClass = GNAObjectT<FloatType,FloatType>;
+  using typename BaseClass::FunctionArgs;
+  using typename BaseClass::TypesFunctionArgs;
+  using ArrayType = Eigen::Array<FloatType,Eigen::Dynamic,1>;
+  using PointsType = PointsT<FloatType>;
+  using TBind = TransformationBind<PointsT<FloatType>,FloatType,FloatType>;
+  using TBind::transformation_;
   /**
-   * @brief Construct 1d array from a vector of doubles.
+   * @brief Construct 1d array from a vector of floats.
    *
    * The size is determined by the size of the vector.
    *
-   * @param points - vector of doubles.
+   * @param points - vector of floats.
    */
-  Points(const std::vector<double> &points) : Points(&points[0], points.size()) {  }
+  PointsT(const std::vector<FloatType> &points) : PointsType(&points[0], points.size()) {  }
 
   /**
-   * @brief Construct 1d array from C++ array of doubles.
-   * @param points - pointer to an array of doubles.
+   * @brief Construct 1d array from C++ array of floats.
+   * @param points - pointer to an array of floats.
    * @param cnt - the array size.
    */
-  Points(const double *points, size_t cnt)
-    : m_points(Eigen::Map<const Eigen::ArrayXd>(points, cnt)), m_shape{cnt}
+  PointsT(const FloatType *points, size_t cnt)
+    : m_points(Eigen::Map<const ArrayType>(points, cnt)), m_shape{cnt}
   {
     init();
   }
 
   /**
-   * @brief Construct Nd array from C++ array of doubles.
-   * @param points - pointer to an array of doubles.
+   * @brief Construct Nd array from C++ array of floats.
+   * @param points - pointer to an array of floats.
    * @param shape - vector with dimensions of an array.
    */
-  Points(const double *points, std::vector<size_t> shape)
+  PointsT(const FloatType *points, std::vector<size_t> shape)
     : m_shape(shape)
   {
     size_t cnt = 1;
     for (auto x: shape) {
       cnt *= x;
     }
-    m_points=Eigen::Map<const Eigen::ArrayXd>(points, cnt);
+    m_points=Eigen::Map<const ArrayType>(points, cnt);
 
     init();
   }
 
   /**
    * @brief Construct from just a single point.
-   * @param single_point - just one double.
+   * @param single_point - just one FloatType.
    */
-  Points(const double single_point) : Points(&single_point, 1) {}
+  PointsT(const FloatType single_point) : PointsType(&single_point, 1) {}
 
   /**
    * @brief Return the size of an array.
@@ -71,7 +79,7 @@ public:
    * @brief Return the pointer to C++ array.
    * @return array pointer.
    */
-  const double *data() const {
+  const FloatType *data() const {
     return m_points.data();
   }
 
@@ -88,13 +96,15 @@ protected:
   void init() {
     transformation_("points")                                      /// Initialize the transformation points.
       .output("points")                                            /// Add an output points.
-      .types([](Points *obj, TypesFunctionArgs& fargs) {           /// Define the TypesFunction:
+      .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
           fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
           fargs.rets[0].preallocated(obj->m_points.data());        ///   - tell the DataType that the buffer is preallocated (m_points).
         })
       .func([](FunctionArgs& fargs){})                             /// Assign empty Function.
       .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
-  Eigen::ArrayXd m_points;                                         ///< The array holding the raw 1d data buffer.
+  ArrayType m_points;                                              ///< The array holding the raw 1d data buffer.
   std::vector<size_t> m_shape;                                     ///< Vector with data dimensions.
 };
+
+using Points = PointsT<double>;

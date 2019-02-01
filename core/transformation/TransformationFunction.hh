@@ -5,9 +5,14 @@
 
 namespace TransformationTypes
 {
-  struct FunctionArgs;
-  struct TypesFunctionArgs;
-  struct StorageTypesFunctionArgs;
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct FunctionArgsT;
+
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct TypesFunctionArgsT;
+
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct StorageTypesFunctionArgsT;
 
   /**
    * @brief Function, that does the actual calculation.
@@ -17,7 +22,8 @@ namespace TransformationTypes
    *
    * @param FunctionArgs -- container with transformation inputs (Args), outputs (Rets) and storages (Ints).
    */
-  using Function = std::function<void (FunctionArgs &)>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using FunctionT = std::function<void (FunctionArgsT<SourceFloatType,SinkFloatType>&)>;
 
   /**
    * @brief TypesFunction, that does the input types checking and output types derivation.
@@ -26,9 +32,11 @@ namespace TransformationTypes
    *
    * @param TypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).
    */
-  using TypesFunction = std::function<void (TypesFunctionArgs &)>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using TypesFunctionT = std::function<void (TypesFunctionArgsT<SourceFloatType,SinkFloatType> &)>;
 
-  using TypesFunctionsContainer = std::vector<TypesFunction>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using TypesFunctionsContainerT = std::vector<TypesFunctionT<SourceFloatType,SinkFloatType>>;
 
   /**
    * @brief StorageTypesFunction, that does the storage types derivation
@@ -38,7 +46,9 @@ namespace TransformationTypes
    *
    * @param StorageTypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).
    */
-  using StorageTypesFunction = std::function<void (StorageTypesFunctionArgs &)>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using StorageTypesFunctionT = std::function<void (StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType> &)>;
 
-  using StorageTypesFunctionsContainer = std::vector<StorageTypesFunction>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using StorageTypesFunctionsContainerT = std::vector<StorageTypesFunctionT<SourceFloatType,SinkFloatType>>;
 }

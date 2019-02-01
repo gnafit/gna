@@ -11,14 +11,25 @@
  * @author Maxim Gonchar
  * @date 12.2017
  */
-class OpenHandle : public TransformationTypes::Handle {
+template<typename SourceFloatType, typename SinkFloatType>
+class OpenHandleT : public TransformationTypes::HandleT<SourceFloatType,SinkFloatType> {
 public:
-    OpenHandle(const TransformationTypes::Handle& other) : TransformationTypes::Handle(other){}; ///< Constructor. @param other -- Handle instance.
-    TransformationTypes::Entry* getEntry() { return m_entry; }                                   ///< Get the Entry pointer.
+    using Entry =TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
+    using Handle=TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
+    using Handle::m_entry;
+    OpenHandleT(const Handle& other) : Handle(other){};                         ///< Constructor. @param other -- Handle instance.
+    Entry* getEntry() { return m_entry; }                                       ///< Get the Entry pointer.
 };
 
-class OpenOutputHandle : public TransformationTypes::OutputHandle {
+template<typename SourceFloatType, typename SinkFloatType>
+class OpenOutputHandleT : public TransformationTypes::OutputHandleT<SinkFloatType> {
 public:
-    OpenOutputHandle(const TransformationTypes::OutputHandle& other) : TransformationTypes::OutputHandle(other){}; ///< Constructor. @param other -- OutputHandle instance.
-    TransformationTypes::Entry* getEntry() { return m_sink->entry; }                                               ///< Get thy Entry pointer.
+    using Entry= TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
+    using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
+    using OutputHandle::m_sink;
+    OpenOutputHandleT(const OutputHandle& other) : OutputHandle(other){}; ///< Constructor. @param other -- OutputHandle instance.
+    Entry* getEntry() { return m_sink->entry; }                                           ///< Get thy Entry pointer.
 };
+
+using OpenHandle = OpenHandleT<double,double>;
+using OpenOutputHandle = OpenOutputHandleT<double,double>;

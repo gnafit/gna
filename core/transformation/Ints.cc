@@ -1,6 +1,8 @@
 #include "Ints.hh"
+#include "TransformationEntry.hh"
 
-using TransformationTypes::Ints;
+using TransformationTypes::EntryT;
+using TransformationTypes::IntsT;
 using TransformationTypes::CalculationError;
 
 /**
@@ -11,7 +13,8 @@ using TransformationTypes::CalculationError;
  * @exception CalculationError in case invalid index is queried.
  * @exception CalculationError in case output data is not initialized.
  */
-Data<double> &Ints::operator[](int i) const {
+template<typename SourceFloatType, typename SinkFloatType>
+Data<SourceFloatType> &IntsT<SourceFloatType,SinkFloatType>::operator[](int i) const {
   if (i < 0 or static_cast<size_t>(i) > m_entry->storages.size()) {
     auto msg = fmt::format("invalid ret idx {0}, have {1} ints", i, m_entry->storages.size());
     throw this->error(msg);
@@ -30,6 +33,21 @@ Data<double> &Ints::operator[](int i) const {
  * @param message -- exception message.
  * @return exception.
  */
-CalculationError Ints::error(const std::string &message) const {
-  return CalculationError(this->m_entry, message);
+template<typename SourceFloatType, typename SinkFloatType>
+CalculationError<EntryT<SourceFloatType,SinkFloatType>> IntsT<SourceFloatType,SinkFloatType>::error(const std::string &message) const {
+  return CalculationError<EntryType>(this->m_entry, message);
 }
+
+/**
+ * @brief Get number of transformation storages.
+ * @return Number of transformation storage instances.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+size_t IntsT<SourceFloatType,SinkFloatType>::size() const {
+  return m_entry->storages.size();
+}
+
+template class TransformationTypes::IntsT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::IntsT<float,float>;
+#endif

@@ -3,22 +3,29 @@
 #include <typeinfo>
 #include <functional>
 #include <deque>
+#include <initializer_list>
 #include <set>
 #include <cstring>
 #include <string>
+#include <vector>
+#include <memory>
 
 class changeable;
 
 struct references {
-  bool has(changeable obj) const;
-  void add(changeable obj);
-  void resize(size_t newsize);
-  void replace(changeable o, changeable n);
-  void remove(changeable obj);
+  using Container = std::vector<changeable>;
 
-  changeable *objs = nullptr;
-  size_t cnt = 0;
-  size_t bufsize = 0;
+  bool   has(changeable obj) const;
+  size_t index(changeable obj) const;
+  void   add(changeable obj);
+  void   replace(changeable o, changeable n);
+  void   remove(changeable obj);
+  size_t size() { return objs.size(); }
+
+  Container::iterator begin() { return objs.begin(); }
+  Container::iterator end()   { return objs.end(); }
+
+  Container objs;
 };
 
 enum class TaintStatus {
@@ -37,6 +44,7 @@ struct inconstant_header {
       ++ih_counter;
     }
   }
+  virtual ~inconstant_header()=default;
   std::string name = "";
   references observers;
   references emitters;
@@ -48,11 +56,12 @@ struct inconstant_header {
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data(const char* name="", bool autoname=false) : inconstant_header(name, autoname) {
+  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname), value(size) {
     type = &typeid(ValueType);
   }
-  ValueType value;
-  std::function<ValueType()> func;
+  std::vector<ValueType> value;
+  std::function<ValueType()> func{nullptr};
+  std::function<void(std::vector<ValueType>&)> vfunc{nullptr};
 };
 
 #include "parameters_debug.hh"
@@ -60,74 +69,79 @@ struct inconstant_data: public inconstant_header {
 class changeable {
 public:
   void subscribe(changeable d) {
-    inconstant_header *hdr = m_data.hdr;
-    if (hdr->observers.has(d)) {
-      DPRINTF("%p/%s is already observer", d.m_data.raw, d.name());
+    if (m_hdr->observers.has(d)) {
+      DPRINTF("%p/%s is already observer", static_cast<void*>(d.m_hdr), d.name());
       return;
     }
-    DPRINTF("%p/%s becomes observer", d.m_data.raw, d.name());
-    hdr->observers.add(d);
-    d.m_data.hdr->emitters.add(*this);
-    if(m_data.hdr->tainted){
-      DPRINTF("taint %p/%s", d.m_data.raw, d.name());
+    DPRINTF("%p/%s becomes observer", static_cast<void*>(d.m_hdr), d.name());
+    m_hdr->observers.add(d);
+    d.m_hdr->emitters.add(*this);
+    if(m_hdr->tainted){
+      DPRINTF("taint %p/%s", static_cast<void*>(d.m_hdr), d.name());
       d.taint();
     }
   }
+  void subscirbeto(changeable d){
+    d.subscribe(*this);
+  }
   void unsubscribe(changeable d) {
-    m_data.hdr->observers.remove(d);
-    d.m_data.hdr->emitters.remove(*this);
+    m_hdr->observers.remove(d);
+    d.m_hdr->emitters.remove(*this);
+  }
+  void unsubscribefrom(changeable d) {
+    d.unsubscribe(*this);
   }
   void *rawdata() const {
-    return m_data.raw;
+    return static_cast<void*>(m_hdr.get());
   }
   size_t hash() const {
     return reinterpret_cast<size_t>(rawdata());
   }
   const char *name() const {
-    return m_data.hdr->name.c_str();
+    return m_hdr->name.c_str();
   }
-  bool operator==(changeable const &other) {
-    return m_data.raw == other.m_data.raw;
+  bool operator==(changeable const &other) const {
+    return m_hdr == other.m_hdr;
   }
   bool is(changeable const &other) {
     return *this == other;
   }
   bool isnull() const {
-    return !m_data.raw;
+    return !m_hdr;
   }
   bool tainted() const {
-    return m_data.hdr->tainted;
+    return m_hdr->tainted;
   }
   bool frozen() const {
-    return m_data.hdr->status==TaintStatus::Frozen || m_data.hdr->status==TaintStatus::FrozenTainted;
+    return m_hdr->status==TaintStatus::Frozen || m_hdr->status==TaintStatus::FrozenTainted;
   }
   TaintStatus taintstatus() const {
-    return m_data.hdr->status;
+    return m_hdr->status;
   }
   void taint() const {
     if(frozen()){
-      m_data.hdr->status=TaintStatus::FrozenTainted;
+      m_hdr->status=TaintStatus::FrozenTainted;
       return;
     }
     else{
-      if(m_data.hdr->tainted && m_data.hdr->status!=TaintStatus::PassThrough){
+      if(m_hdr->tainted && m_hdr->status!=TaintStatus::PassThrough){
         DPRINTF("already tainted (do not propagate)");
         return;
       }
     }
     DPRINTF("got tainted");
     notify();
-    m_data.hdr->tainted = true;
-    if (m_data.hdr->on_taint) {
+    m_hdr->tainted = true;
+    if (m_hdr->on_taint) {
       DPRINTF("calling on_taint callback");
-      m_data.hdr->on_taint();
+      m_hdr->on_taint();
     }
   }
   void freeze(){
-    switch(m_data.hdr->status){
+    switch(m_hdr->status){
       case TaintStatus::Normal:
-        if(!m_data.hdr->tainted){
-          m_data.hdr->status=TaintStatus::Frozen;
+        if(!m_hdr->tainted){
+          m_hdr->status=TaintStatus::Frozen;
         }else{
           throw std::runtime_error("can not freeze tainted changeable");
         }
@@ -141,8 +155,8 @@ public:
   }
   void unfreeze(){
     if(!frozen()) return;
-    auto wastainted = m_data.hdr->status==TaintStatus::FrozenTainted;
-    m_data.hdr->status=TaintStatus::Normal;
+    auto wastainted = m_hdr->status==TaintStatus::FrozenTainted;
+    m_hdr->status=TaintStatus::Normal;
     if(wastainted){
       taint();
     }
@@ -154,14 +168,12 @@ public:
     while (!queue.empty()) {
       changeable x = queue.front();
       queue.pop_front();
-      references &ems = x.m_data.hdr->emitters;
+      references &ems = x.m_hdr->emitters;
       if (ems.has(other)) {
         return true;
       }
       if (visited.insert(x.rawdata()).second) {
-        for (size_t i = 0; i < ems.cnt; ++i) {
-          queue.push_back(ems.objs[i]);
-        }
+        queue.insert(queue.end(), ems.begin(), ems.end());
       }
     }
     return false;
@@ -170,42 +182,36 @@ public:
     if (this->is(other)) {
       return;
     }
-    references &obs = m_data.hdr->observers;
-    for (size_t i = 0; i < obs.cnt; ++i) {
-      if (!obs.objs[i].isnull()) {
-        other.m_data.hdr->observers.add(obs.objs[i]);
-        obs.objs[i].m_data.hdr->emitters.replace(*this, other);
+    references &obs = m_hdr->observers;
+    for (auto& obj: obs) {
+      if (!obj.isnull()) {
+        other.m_hdr->observers.add(obj);
+        obj.m_hdr->emitters.replace(*this, other);
       }
     }
-    references &ems = m_data.hdr->emitters;
-    for (size_t i = 0; i < ems.cnt; ++i) {
-      if (!ems.objs[i].isnull()) {
-        other.m_data.hdr->emitters.add(ems.objs[i]);
-        ems.objs[i].m_data.hdr->observers.replace(*this, other);
+    references &ems = m_hdr->emitters;
+    for (auto& obj: ems) {
+      if (!obj.isnull()) {
+        other.m_hdr->emitters.add(obj);
+        obj.m_hdr->observers.replace(*this, other);
       }
     }
     assign(other);
-    if(m_data.hdr->tainted){
+    if(m_hdr->tainted){
       notify();
     }
   }
   void assign(changeable other) {
-    m_data.raw = other.m_data.raw;
+    m_hdr = other.m_hdr;
   }
 protected:
   changeable() = default;
   void notify() const {
-    size_t nsubs = m_data.hdr->observers.cnt;
-    changeable *observers = m_data.hdr->observers.objs;
-    if (nsubs == 0) {
-      return;
-    }
-
-    for (size_t i = 0; i < nsubs; ++i) {
-      if (observers[i].isnull()) {
+    for (auto& observer: m_hdr->observers) {
+      if (observer.isnull()) {
         continue;
       }
-      observers[i].taint();
+      observer.taint();
     }
   }
   template <typename T>
@@ -215,8 +221,14 @@ protected:
       dep.subscribe(*this);
     }
   }
+  void alloc(inconstant_header* hdr){
+    if(m_hdr){
+      throw std::runtime_error("double initialization of changeable");
+    }
+    m_hdr.reset(hdr);
+  }
   void init(const char* name="", bool autoname=false) {
-    m_data.raw = new inconstant_header(name, autoname);
+    alloc(new inconstant_header(name, autoname));
     DPRINTF("constructed header");
   }
   template <typename T>
@@ -226,61 +238,48 @@ protected:
       dep.subscribe(*this);
     }
   }
-  union {
-    void *raw;
-    inconstant_header *hdr;
-  } m_data;
+  std::shared_ptr<inconstant_header> m_hdr;
 };
 
 inline bool references::has(changeable obj) const {
-  for (size_t i = 0; i < cnt; ++i) {
-    if (objs[i] == obj) {
+  for (auto& o: objs) {
+    if (o == obj) {
       return true;
     }
   }
   return false;
 }
 
+inline size_t references::index(changeable obj) const {
+  for (size_t i(0); i<objs.size(); ++i) {
+    if (objs[i] == obj) {
+      return i;
+    }
+  }
+  return -1u;
+}
+
 inline void references::add(changeable obj) {
   if(has(obj)){
     return;
   }
-  if (bufsize <= cnt) {
-    size_t newsize = cnt + 8 + bufsize/2;
-    resize(newsize);
-  }
-  objs[cnt++] = obj;
+  objs.push_back(obj);
 }
 
-inline void references::resize(size_t newsize) {
-  objs = static_cast<changeable*>(realloc(objs, newsize*sizeof(changeable)));
-  if (!objs) {
-    throw std::runtime_error("out of memory");
-  }
-  bufsize = newsize;
-}
-
-inline void references::replace(changeable o, changeable n) {
-  for (size_t i = 0; i < cnt; ++i) {
-    if (objs[i] == o) {
-      objs[i] = n;
+inline void references::replace(changeable old, changeable newobj) {
+  for (size_t i = 0; i < objs.size(); ++i) {
+    if (objs[i] == old) {
+      objs[i] = newobj;
     }
   }
 }
 
 inline void references::remove(changeable d) {
-  if (cnt == 0) {
-    return;
-  }
-  size_t i = 0;
-  for (i = 0; i < cnt; ++i) {
+  for (size_t i = 0; i < objs.size(); ++i) {
     if (objs[i] == d) {
+      objs.erase(objs.begin()+i);
       break;
     }
   }
-  if (cnt > i+1) {
-    std::memmove(objs+i, objs+i+1, cnt-(i+1));
-  }
-  cnt--;
 }
 

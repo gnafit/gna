@@ -114,7 +114,10 @@ struct DataType {
    *
    * @todo Preallocated buffer is explicitly double, while the Data<> is a template with arbitrary datatype. Make DataType<T> a template?
    */
-  void preallocated(double *buf) { buffer = buf; }
+  void preallocated(double *buf) { buffer = static_cast<void*>(buf); }
+  void preallocated(float *buf)  { buffer = static_cast<void*>(buf); }
+  void preallocated(int *buf)    { buffer = static_cast<void*>(buf); }
+  void preallocated(size_t *buf) { buffer = static_cast<void*>(buf); }
 
   DataKind kind = DataKind::Undefined;                         ///< DataKind: points (array) or histogram?
   std::vector<size_t> shape;                                   ///< Data dimensions.
@@ -126,7 +129,7 @@ struct DataType {
      //std::numeric_limits<double>::infinity()
   //};
 
-  double *buffer = nullptr;                                    ///< Preallocated data buffer (double).
+  void *buffer = nullptr;                                      ///< Preallocated data buffer (double).
 };
 
 /**
@@ -645,10 +648,10 @@ public:
       throw std::runtime_error("Using undefined DataType to initialize data");
     }
     if (dt.preallocated()) {
-      if(!std::is_same<T*, decltype(dt.buffer)>::value) {
-        throw std::bad_typeid();
-      }
-      this->buffer = dt.buffer;
+      //if(!std::is_same<T*, decltype(dt.buffer)>::value) {
+        //throw std::bad_typeid();
+      //}
+      this->buffer = static_cast<T*>(dt.buffer);
     }
     else {
       allocated.reset(new T[dt.size()]);
