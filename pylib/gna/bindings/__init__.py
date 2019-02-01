@@ -11,7 +11,7 @@ ROOT.GNAObjectT
 provided_precisions = list(ROOT.GNA.provided_precisions())
 
 def patchGNAclass(cls):
-    if hasattr(cls, '__original_init__'):
+    if '__original_init__' in cls.__dict__:
         return cls
     def newinit(self, *args, **kwargs):
         self.__original_init__(*args)
@@ -54,18 +54,11 @@ class GNAObjectTemplates(object):
     def __init__(self, parent, name):
         self.namespace=getattr(parent, name)
         setattr(parent, name, self)
-        self.storage={}
 
     def __getattr__(self, name):
-        ret = self.storage.get(name, None)
-        if not ret is None:
-            return ret
-
         ret = getattr(self.namespace, name)
-        self.storage[name]=ret
-
         self.patchGNATemplate(ret)
-
+        setattr(self, name, ret)
         return ret
 
     @staticmethod
