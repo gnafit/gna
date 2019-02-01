@@ -8,6 +8,7 @@
 #endif
 
 using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+
 void product_ongpu(FunctionArgs& fargs);
 
 Product::Product() {

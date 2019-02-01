@@ -4,7 +4,6 @@
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
-
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "DataLocation.hh"
@@ -222,7 +221,7 @@ namespace TransformationTypes {
     /**
      * @brief Set the named function and its target device.
      * 
-     * See Initializer::func(const std::string& name, Function afunc) for more details. 
+     * See InitializerT::func(const std::string& name, Function afunc) for more details. 
      * Additionally set the location (DataLocation::Host or DataLocation::Device).
      *
      * @return `*this`.	
@@ -495,10 +494,6 @@ namespace TransformationTypes {
      * @return `*this`
      */
     InitializerType setEntryLocation(DataLocation loc) {
-std::cout << __func__ << std::endl
-              << __FUNCTION__ << std::endl
-              << __PRETTY_FUNCTION__ << std::endl;
-
       m_entry->setEntryLocation(loc);
       return *this;
     }

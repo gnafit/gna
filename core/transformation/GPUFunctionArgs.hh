@@ -118,4 +118,6 @@ namespace TransformationTypes{
         m_ints.dump("storages");
         printf("\n");
     }
+
+    using GPUFunctionArgs = GPUFunctionArgsT<double>;
 }

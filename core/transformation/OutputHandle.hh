@@ -5,6 +5,7 @@
 #include "changeable.hh"
 #include "Sink.hh"
 #include "Data.hh"
+#include "TransformationEntry.hh"
 
 namespace TransformationTypes
 {

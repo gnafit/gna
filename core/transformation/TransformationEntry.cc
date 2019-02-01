@@ -271,15 +271,12 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 	
       for (auto &source : sources) {
           source.sink->data->require_gpu();
-//	   source.sink->data->gpuArr->setLocation( this->getEntryLocation() );
       }
       for (auto &sink : sinks) {
         sink.data->require_gpu();
         sink.data->gpuArr->setLocation( this->getEntryLocation() );
       }
-      //gpustorage = new GPUStorage(this); 
-      //std::cerr << "afret gpu storage new" << std::endl;
-      //gpustorage->initGPUStorage();
+      // init gpu storage
     }
 #endif
 
@@ -359,18 +356,18 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
 /**
  *    @brief Sets the target (Host or Device) for execution of current transformation
  */
-template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
-	m_entryLoc = loc;
-}
+    template<typename SourceFloatType, typename SinkFloatType>
+    void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
+                m_entryLoc = loc;
+    }
 
 /** 
  * @brief Returns the target (Host or Device) for execution of current transformation
  */
-template<typename SourceFloatType, typename SinkFloatType>
-DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {   
-	return m_entryLoc;
-}
+    template<typename SourceFloatType, typename SinkFloatType>
+    DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {   
+                return m_entryLoc;
+    }
 #endif
 
 

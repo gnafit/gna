@@ -9,6 +9,7 @@
 #endif
 
 using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+
 void sum_ongpu(FunctionArgs& fargs);
 
 /**
