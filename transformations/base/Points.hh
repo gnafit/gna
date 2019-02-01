@@ -15,14 +15,14 @@
 template<typename FloatType>
 class PointsT: public GNASingleObjectT<FloatType,FloatType>,
                public TransformationBind<PointsT<FloatType>,FloatType,FloatType> {
-public:
+private:
   using BaseClass = GNAObjectT<FloatType,FloatType>;
+public:
   using typename BaseClass::FunctionArgs;
   using typename BaseClass::TypesFunctionArgs;
   using ArrayType = Eigen::Array<FloatType,Eigen::Dynamic,1>;
   using PointsType = PointsT<FloatType>;
-  using TBind = TransformationBind<PointsT<FloatType>,FloatType,FloatType>;
-  using TBind::transformation_;
+
   /**
    * @brief Construct 1d array from a vector of floats.
    *
@@ -94,7 +94,7 @@ protected:
    * The transformation function is empty.
    */
   void init() {
-    transformation_("points")                                      /// Initialize the transformation points.
+    this->transformation_("points")                                      /// Initialize the transformation points.
       .output("points")                                            /// Add an output points.
       .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
           fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
