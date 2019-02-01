@@ -5,22 +5,14 @@ from gna.env import env
 import numpy as np
 import ROOT
 import itertools as it
+import types
 
-# Protect the following classes/namespaces from being wrapped
-ignored_classes = [
-        'Eigen',
-        'EigenHelpers',
-        'DataType',
-        'GNA',
-        'GNAUnitTest',
-        'NeutrinoUnits',
-        'TransformationTypes',
-        'ParametrizedTypes',
-        'TypesFunctions',
-        'TMath',
-        ]
+ROOT.GNAObjectT
+provided_precisions = list(ROOT.GNA.provided_precisions())
 
 def patchGNAclass(cls):
+    if hasattr(cls, '__original_init__'):
+        return cls
     def newinit(self, *args, **kwargs):
         self.__original_init__(*args)
         if not self:
@@ -56,6 +48,36 @@ def patchGNAclass(cls):
         cls.__original_getattr__, cls.__getattr__ = None, newgetattr
 
     return cls
+
+class GNAObjectTemplates(object):
+    """Patch GNA object templates"""
+    def __init__(self, parent, name):
+        self.namespace=getattr(parent, name)
+        setattr(parent, name, self)
+        self.storage={}
+
+    def __getattr__(self, name):
+        ret = self.storage.get(name, None)
+        if not ret is None:
+            return ret
+
+        ret = getattr(self.namespace, name)
+        self.storage[name]=ret
+
+        self.patchGNATemplate(ret)
+
+        return ret
+
+    @staticmethod
+    def patchGNATemplate(template):
+        if not isinstance(template, types.InstanceType):
+            return
+
+        for pp in provided_precisions:
+            cls = template(pp)
+            patchGNAclass(cls)
+
+GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
     def itervalues(self):
@@ -219,8 +241,23 @@ def setup(ROOT):
 
     patchStatistic(ROOT.Statistic)
 
+    # Protect the following classes/namespaces from being wrapped
+    ignored_classes = [
+            'Eigen',
+            'EigenHelpers',
+            'DataType',
+            'GNA',
+            'GNAUnitTest',
+            'NeutrinoUnits',
+            'TransformationTypes',
+            'ParametrizedTypes',
+            'TypesFunctions',
+            'TMath',
+            ]
+
     GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
+        # If the object is template, try to patch its instance
         if not isinstance(cls, ROOT.PyRootType):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:

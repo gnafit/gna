@@ -11,6 +11,27 @@ from gna.converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from gna.converters import list_to_stdvector as stdvector
 
+Templates = R.GNA.GNAObjectTemplates
+
+current_precision = 'double'
+current_precision_short = 'double'
+def set_current_precision(precision):
+    global current_precision, current_precision_short
+    assert precision in R.GNA.provided_precisions(), 'Unsupported precision '+precision
+    current_precision=precision
+    current_precision_short=precision[0]
+
+class precision(object):
+    def __init__(self, precision):
+        self.precision=precision
+
+    def __enter__(self):
+        self.old_precision = current_precision
+        set_current_precision(self.precision)
+
+    def __exit__(self, *args):
+        set_current_precision(self.old_precision)
+
 def OutputDescriptors(outputs):
     descriptors=[]
     for output in outputs:
@@ -44,20 +65,11 @@ def Dummy(shape, name, varnames, *args, **kwargs):
 """Construct Points object from numpy array"""
 def Points(array, *args, **kwargs):
     """Convert array to Points"""
-    a = N.ascontiguousarray(array, dtype='d')
+    a = N.ascontiguousarray(array, dtype=current_precision_short)
     if len(a.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( a.shape )
-    return R.Points( a.ravel( order='F' ), s, *args, **kwargs )
-
-"""Construct Points object from numpy array"""
-def PointsF(array, *args, **kwargs):
-    """Convert array to Points"""
-    a = N.ascontiguousarray(array, dtype='f')
-    if len(a.shape)>2:
-        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
-    s = array_to_stdvector_size_t( a.shape )
-    return R.PointsT('float')( a.ravel( order='F' ), s, *args, **kwargs )
+    return Templates.PointsT(current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):

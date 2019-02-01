@@ -59,9 +59,9 @@ def test_pointsf():
     #
     # Create transformations
     #
-    points = C.PointsF(mat)
-    from gna.bindings import patchGNAclass
-    patchGNAclass(type(points))
+    with C.precision('float'):
+        points = C.Points(mat)
+
     out = points.points.points
     res = out.data()
     dt  = out.datatype()

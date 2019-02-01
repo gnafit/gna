@@ -1,6 +1,6 @@
 #include "Points.hh"
 
-template class PointsT<double>;
+template class GNA::GNAObjectTemplates::PointsT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class PointsT<float>;
+  template class GNA::GNAObjectTemplates::PointsT<float>;
 #endif
