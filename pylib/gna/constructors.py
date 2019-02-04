@@ -74,9 +74,9 @@ def Points(array, *args, **kwargs):
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
     if outputs is None:
-        return R.Sum(*args, **kwargs)
+        return Templates.SumT(*args, **kwargs)
 
-    return R.Sum(OutputDescriptors(outputs), *args, **kwargs)
+    return Templates.SumT(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
