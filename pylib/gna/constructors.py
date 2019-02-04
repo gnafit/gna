@@ -11,6 +11,9 @@ from gna.converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from gna.converters import list_to_stdvector as stdvector
 
+Templates = R.GNA.GNAObjectTemplates
+print('templates', Templates)
+
 current_precision = 'double'
 current_precision_short = 'double'
 def set_current_precision(precision):

@@ -30,11 +30,14 @@ set(CORE_SOURCES
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
   core/parameters/fillers.cc
+  # GNAObject and bindings
+  core/TransformationDescriptor.cc
   core/GNAObject.cc
   core/GNAObjectBind1N.cc
+  core/GNAObjectBindMN.cc
+  # Parameter representation
   core/ParametersGroup.cc
   core/Parametrized.cc
-  core/TransformationDescriptor.cc
   core/UncertainParameter.cc
   PARENT_SCOPE
  )
@@ -66,7 +69,6 @@ set(CORE_HEADERS
   FunctionDescriptor.hh
   TransformationEntry.hh
   TransformationErrors.hh
-  TransformationDescriptor.hh
   TransformationBind.hh
   SingleOutput.hh
   Initializer.hh
@@ -84,9 +86,12 @@ set(CORE_HEADERS
   GPUVariablesLocal.hh
   GPUFunctionData.hh
   GPUFunctionArgs.hh
+  # Parameter representation
+  UncertainParameter.hh
   # core/
+  TransformationDescriptor.hh
   GNAObject.hh
   GNAObjectBind1N.hh
-  UncertainParameter.hh
+  GNAObjectBindMN.hh
   PARENT_SCOPE
  )
