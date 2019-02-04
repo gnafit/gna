@@ -52,21 +52,6 @@ def test_02():
 def test_02b():
     check_product([m34, m34*0])
 
-def test_03():
-    check_product([2.0*m11, 3.0*m34])
-
-def test_04():
-    check_product([3.0*m34, 2.0*m11])
-
-def test_03():
-    check_product([2.0*m11, 3.0*m34, 4.0*m34])
-
-def test_04():
-    check_product([3.0*m34, 2.0*m11, 4.0*m34])
-
-def test_05():
-    check_product([3.0*m34, 4.0*m34, 2.0*m11])
-
 def test_06():
     check_product([3.0*m34, 4.0*m34, 2.0*m34])
 

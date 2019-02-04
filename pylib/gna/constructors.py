@@ -74,9 +74,9 @@ def Points(array, *args, **kwargs):
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
     if outputs is None:
-        return Templates.SumT(*args, **kwargs)
+        return Templates.SumT(current_precision)(*args, **kwargs)
 
-    return Templates.SumT(OutputDescriptors(outputs), *args, **kwargs)
+    return Templates.SumT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
@@ -102,9 +102,9 @@ def EnergyResolution(weights, *args, **kwargs):
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
     if outputs is None:
-        return R.Product(*args, **kwargs)
+        return Templates.ProductT(current_precision)(*args, **kwargs)
 
-    return R.Product(OutputDescriptors(outputs), *args, **kwargs)
+    return Templates.ProductT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):

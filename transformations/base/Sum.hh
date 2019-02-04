@@ -22,7 +22,6 @@ namespace GNA {
     public:
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;
-      using SumType = SumT<FloatType>;
 
       SumT();                                                   ///< Constructor.
       SumT(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Sum from vector of outputs
