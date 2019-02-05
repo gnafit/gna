@@ -2,21 +2,9 @@
 
 #include "GNAObject.hh"
 
-/**
- * @brief Helper methods for GNAObject containing 1+N transformations
- *
- * Implements methods for transformations, contatining 1 common input and N other inputs.
- * For example matrix multiplication of form of:
- * R_i = M I_i
- *
- * where M is common matrix, passed as first input and applied to all the other inputs.
- *
- * @author Maxim Gonchar
- * @date 12.2018
- */
-class GNAObjectBind1N: public GNAObject {
+class GNAObjectBindMN: public GNAObject {
 public:
-    GNAObjectBind1N(const std::string& transformation, const std::string& input, const std::string& output,
+    GNAObjectBindMN(const std::string& transformation, const std::string& input, const std::string& output,
                     size_t transformation_offsset, size_t input_offset, size_t output_offset);
 
     virtual TransformationDescriptor add_transformation(const std::string& name="");

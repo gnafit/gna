@@ -6,9 +6,9 @@
 and test the matrix memory ordering"""
 
 from __future__ import print_function
+from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as N
-from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
 from gna.bindings import DataType

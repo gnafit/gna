@@ -12,6 +12,7 @@ from gna.converters import array_to_stdvector_size_t
 from gna.converters import list_to_stdvector as stdvector
 
 Templates = R.GNA.GNAObjectTemplates
+print('templates', Templates)
 
 current_precision = 'double'
 current_precision_short = 'double'
@@ -69,7 +70,7 @@ def Points(array, *args, **kwargs):
     if len(a.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( a.shape )
-    return Templates.PointsT(current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
+    return R.GNA.GNAObjectTemplates.PointsT(current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Identity object from list of SingleOutputs"""
 def Identity(outputs=None, *args, **kwargs):
