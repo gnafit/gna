@@ -40,6 +40,7 @@ namespace TransformationTypes
 #ifdef GNA_CUDA_SUPPORT
     FunctionDescriptorT(FunctionT<SourceFloatType,SinkFloatType> infun, StorageTypesFunctionsContainerT<SourceFloatType,SinkFloatType> intypefuns, DataLocation inloc) 
 														: fun(infun), typefuns(intypefuns), funcLoc(inloc) {  }
+    FunctionDescriptorT(const FunctionDescriptorT& other) : fun(other.fun), typefuns(other.typefuns), funcLoc(other.funcLoc) { }
 #endif
 
     FunctionT<SourceFloatType,SinkFloatType>                       fun;      ///< The pointer to the transformation Function

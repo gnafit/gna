@@ -227,7 +227,7 @@ namespace TransformationTypes {
      * @return `*this`.	
      */
     InitializerType func(const std::string &name, Function afunc, DataLocation loc) {
-      setEntryLocation(loc);
+      //setEntryLocation(loc);
       this->func(name, afunc);
       return *this;
     }
@@ -311,7 +311,7 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     InitializerType func(const std::string& name, MemFunction mfunc, DataLocation loc) {
-      setEntryLocation(loc);
+      //setEntryLocation(loc);
       this->func(name, mfunc);
       return *this;
     }
