@@ -71,6 +71,13 @@ def Points(array, *args, **kwargs):
     s = array_to_stdvector_size_t( a.shape )
     return Templates.PointsT(current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
 
+"""Construct Identity object from list of SingleOutputs"""
+def Identity(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return Templates.IdentityT(current_precision)(*args, **kwargs)
+
+    return Templates.IdentityT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
+
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
     if outputs is None:

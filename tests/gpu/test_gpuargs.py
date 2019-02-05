@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from gna.constructors import stdvector, Points, Dummy
+from gna.constructors import stdvector, Points, Dummy, Identity
 from gna.bindings import DataType
 
 #
@@ -26,7 +26,7 @@ def test_io(opts):
     # Create transformations
     #
     points = Points(mat)
-    identity = R.Identity()
+    identity = Identity()
     if opts.function=='host':
         identity.identity.switchFunction('identity_gpuargs_h')
     else:
