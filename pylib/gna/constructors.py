@@ -11,8 +11,8 @@ from gna.converters import array_to_stdvector_size_t
 """Construct std::vector object from an array"""
 from gna.converters import list_to_stdvector as stdvector
 
-Templates = R.GNA.GNAObjectTemplates
-print('templates', Templates)
+# Templates = R.GNA.GNAObjectTemplates
+# print('templates', Templates)
 
 current_precision = 'double'
 current_precision_short = 'double'
@@ -78,6 +78,13 @@ def Sum(outputs=None, *args, **kwargs):
         return R.Sum(*args, **kwargs)
 
     return R.Sum(OutputDescriptors(outputs), *args, **kwargs)
+
+"""Construct Sum object from list of SingleOutputs"""
+def MultiSum(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.MultiSum(*args, **kwargs)
+
+    return R.MultiSum(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):

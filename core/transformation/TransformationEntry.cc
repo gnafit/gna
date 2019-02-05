@@ -44,6 +44,7 @@ template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
+    mapping(other.mapping),
     fun(), typefuns(), tainted(other.name.c_str()), initializing(0),
     functionargs(new FunctionArgsType(this))
 {
@@ -90,6 +91,7 @@ template<typename SourceFloatType, typename SinkFloatType>
 InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(const std::string &name, bool inactive) {
   auto *s = new SourceType(name, this, inactive);
   sources.push_back(s);
+  mapping.resize(mapping.size()+1);
   return InputHandleType(*s);
 }
 

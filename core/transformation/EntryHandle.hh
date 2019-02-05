@@ -42,17 +42,14 @@ namespace TransformationTypes
     std::vector<InputHandleType> inputs() const;                              ///< Get vector of inputs.
     std::vector<OutputHandleType> outputs() const;                            ///< Get vector of outputs.
 
-    /**
-     * @brief Add named input.
-     * @param name -- Source name.
-     * @return InputHandle for the newly created Source.
-     */
-    InputHandleType input(const std::string &name) {
-      return m_entry->addSource(name);
-    }
+    InputHandleType input(const std::string &name);                           ///< Add named input.
+    InputHandleType input(const std::string &name, int mapto);                ///< Add named input.
 
     InputHandleType input(SingleOutputType &output);                          ///< Create a new input and connect to the SingleOutput transformation.
     InputHandleType input(const std::string &name, SingleOutputType &output); ///< Create a new input and connect to the SingleOutput transformation.
+
+    InputHandleType input(SingleOutputType &output, int mapto);                          ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(const std::string &name, SingleOutputType &output, int mapto); ///< Create a new input and connect to the SingleOutput transformation.
 
     /**
      * @brief Add new named output.

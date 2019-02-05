@@ -118,6 +118,7 @@ namespace TransformationTypes
     SourcesContainerType sources;                        ///< Transformation inputs (sources).
     SinksContainerType sinks;                            ///< Transformation outputs (sinks).
     StoragesContainerType storages;                      ///< Transformation internal Storage instances.
+    std::vector<size_t> mapping;                         ///< Inputs to outputs mapping (for multi-transformations).
 
     // Functions
     FunctionType fun=nullptr;                            ///< The function that does actual calculation.

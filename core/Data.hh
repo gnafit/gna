@@ -616,12 +616,16 @@ inline void DataType::dump() const {
  */
 template <typename T>
 class Data {
-  using ArrayXT = Eigen::Array<T, Eigen::Dynamic, 1> ;
-  using VectorXT = Eigen::Matrix<T, Eigen::Dynamic, 1>;
-
-  using ArrayXXT = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
-  using MatrixXT = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 public:
+  using ArrayType      = Eigen::Array<T, Eigen::Dynamic, 1> ;
+  using VectorType     = Eigen::Matrix<T, Eigen::Dynamic, 1>;
+  using Array2Type     = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
+  using MatrixType     = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+  using ArrayViewType  = Eigen::Map<ArrayType>;
+  using VectorViewType = Eigen::Map<VectorType>;
+  using Array2ViewType = Eigen::Map<Array2Type>;
+  using MatrixViewType = Eigen::Map<MatrixType>;
+
   /**
    * @brief Constructor.
    * @param dt -- DataType specification.
@@ -651,14 +655,14 @@ public:
       this->buffer = allocated.get();
     }
     if (dt.shape.size() == 1) {
-      new (&this->arr)   Eigen::Map<ArrayXT>(  this->buffer, dt.shape[0] );
-      new (&this->vec)   Eigen::Map<VectorXT>( this->buffer, dt.shape[0] );
+      new (&this->arr)   ArrayViewType(  this->buffer, dt.shape[0] );
+      new (&this->vec)   VectorViewType( this->buffer, dt.shape[0] );
     } else if (dt.shape.size() == 2) {
-      new (&this->arr)   Eigen::Map<ArrayXT>(  this->buffer, dt.shape[0]*dt.shape[1] );
-      new (&this->vec)   Eigen::Map<VectorXT>( this->buffer, dt.shape[0]*dt.shape[1] );
+      new (&this->arr)   ArrayViewType(  this->buffer, dt.shape[0]*dt.shape[1] );
+      new (&this->vec)   VectorViewType( this->buffer, dt.shape[0]*dt.shape[1] );
 
-      new (&this->arr2d) Eigen::Map<ArrayXXT>( this->buffer, dt.shape[0], dt.shape[1] );
-      new (&this->mat)   Eigen::Map<MatrixXT>( this->buffer, dt.shape[0], dt.shape[1] );
+      new (&this->arr2d) Array2ViewType( this->buffer, dt.shape[0], dt.shape[1] );
+      new (&this->mat)   MatrixViewType( this->buffer, dt.shape[0], dt.shape[1] );
     }
   }
 
@@ -668,13 +672,13 @@ public:
   T *buffer{nullptr};                              ///< the buffer. Data ownership is undefined.
   std::unique_ptr<T> allocated{nullptr};           ///< the buffer initialized within Data. Deallocates the data when destructed.
 
-  Eigen::Map<ArrayXT> arr{nullptr, 0};             ///< 1D array view.
-  Eigen::Map<VectorXT> vec{nullptr, 0};            ///< 1D vector view.
+  ArrayViewType  arr{nullptr,   0}; ///< 1D array   view.
+  VectorViewType vec{nullptr,   0}; ///< 1D vector  view.
 
-  Eigen::Map<ArrayXXT> arr2d{nullptr, 0, 0};       ///< 2D array view.
-  Eigen::Map<MatrixXT> mat{nullptr, 0, 0};         ///< 2D matrix view.
+  Array2ViewType arr2d{nullptr, 0,  0}; ///< 2D array  view.
+  MatrixViewType mat{nullptr,   0,  0}; ///< 2D matrix view.
 
-  Eigen::Map<ArrayXT> &x = arr;                    ///< 1D array view shorthand.
+  ArrayViewType  &x = arr;    ///< 1D array  view shorthand.
 };
 
 template class Data<double>;

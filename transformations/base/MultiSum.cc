@@ -1,52 +1,51 @@
 #include "MultiSum.hh"
 #include "TypesFunctions.hh"
 
+using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
+void multisum(FunctionArgs& fargs);
+
 /**
  * @brief Constructor.
  */
-MultiSum::MultiSum() {
-  transformation_("sum")                               ///< Define the transformation `sum`:
-    .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
-    .types(                                            ///<   - provide type checking functions:
-           TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
-           TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
-           )                                           ///<
-    .func([](FunctionArgs& fargs) {                    ///<   - provide the calculation function:
-        auto& args=fargs.args;                         ///<     * extract transformation inputs
-        auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
-        ret = args[0].x;                               ///<     * assign (copy) the first input to output
-        for (size_t j = 1; j < args.size(); ++j) {     ///<     * iteratively add all the other inputs
-          ret += args[j].x;                            ///<
-        }                                              ///<
-      });                                              ///<
+MultiSum::MultiSum() :
+GNAObjectBindMN("sum", "item", "sum")
+{
+    add_transformation();
 }
 
 /**
  * @brief Construct MultiSum from vector of SingleOutput instances
  */
-MultiSum::MultiSum(const OutputDescriptor::OutputDescriptors& outputs) : MultiSum(){
-  for(auto& output : outputs){
-    this->add(*output);
-  }
+MultiSum::MultiSum(const OutputDescriptor::OutputDescriptors& outputs) : MultiSum() {
+    add_inputs(outputs);
 }
 
-/**
- * @brief Add an input and connect it to the output.
- *
- * The input name is derived from the output name.
- *
- * @param out -- a SingleOutput instance.
- * @return InputDescriptor instance for the newly created input.
- */
-InputDescriptor MultiSum::add(SingleOutput &out) {
-  return InputDescriptor(t_[0].input(out));
+TransformationDescriptor MultiSum::add_transformation(const std::string& name){
+    transformation_(new_transformation_name(name))
+        .types(TypesFunctions::ifSame, TypesFunctions::passToRange<0,0,-1>)
+        .func(multisum);
+    add_output();
+    add_input();
+    set_open_input();
+    return transformations.back();
 }
 
-/**
- * @brief Add an input by name and leave unconnected.
- * @param name -- a name for the new input.
- * @return InputDescriptor instance for the newly created input.
- */
-InputDescriptor MultiSum::add_input(const char* name) {
-  return InputDescriptor(t_[0].input(name));
+void multisum(FunctionArgs& fargs){
+    auto& args=fargs.args;
+    auto& rets=fargs.rets;
+
+    int iret=-1;
+    using ArrayViewType = typename FunctionArgs::RetsType::DataType::ArrayViewType;
+    ArrayViewType* data=nullptr;
+    for (size_t jarg = 0; jarg < args.size(); ++jarg) {
+        auto jmap=fargs.getMapping(jarg);
+        if(jmap-iret == 1){
+            iret=jmap;
+            data=&(rets[iret].x);
+            *data = args[jarg].x;
+        }
+        else{
+            *data += args[jarg].x;
+        }
+    }
 }
