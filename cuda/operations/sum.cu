@@ -24,6 +24,7 @@ __global__ void sum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 template <typename T>
 void cusum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 	sum<<<m/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, m);
+	cudaDeviceSynchronize();
 }
 
 template void cusum<double>(double** array, double** ans_array, unsigned int n, unsigned int m);

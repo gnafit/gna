@@ -25,6 +25,7 @@ __global__ void d_product(T** array, T** ans_array, unsigned int n, unsigned int
 template <typename T>
 void cuproduct(T** array, T** ans_array, unsigned int n, unsigned int m) {
 	d_product<<<m/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, m);
+	cudaDeviceSynchronize();
 }
 
 template void cuproduct<double>(double** array, double** ans_array, unsigned int n, unsigned int m); 
