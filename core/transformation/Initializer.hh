@@ -227,8 +227,8 @@ namespace TransformationTypes {
      * @return `*this`.	
      */
     InitializerType func(const std::string &name, Function afunc, DataLocation loc) {
-      //setEntryLocation(loc);
       this->func(name, afunc);
+      setFuncLocation(name, loc);
       return *this;
     }
 #endif
@@ -311,9 +311,14 @@ namespace TransformationTypes {
 
 #ifdef GNA_CUDA_SUPPORT
     InitializerType func(const std::string& name, MemFunction mfunc, DataLocation loc) {
-      //setEntryLocation(loc);
       this->func(name, mfunc);
+      setFuncLocation(name, loc);
       return *this;
+    }
+
+    InitializerType setFuncLocation(const std::string& name, DataLocation loc) {
+      this->m_entry->functions[name].funcLoc = loc;
+      return *this; 
     }
 #endif
 
@@ -483,22 +488,6 @@ namespace TransformationTypes {
       m_nosubscribe = true;
       return *this;
     }
-
-#ifdef GNA_CUDA_SUPPORT
-    /**
-     * @brief Sets the location for transformation
-     *
-     * Sets the location flag in Entry:m_entry.
-     * \warning{Deprecated}
-     *
-     * @return `*this`
-     */
-    InitializerType setEntryLocation(DataLocation loc) {
-      m_entry->setEntryLocation(loc);
-      return *this;
-    }
-#endif
-
 
   protected:
     EntryType *m_entry;                    ///< New Entry pointer.
