@@ -346,7 +346,14 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
     throw std::runtime_error(msg);
   }
   fun = it->second.fun;
-
+#ifdef GNA_CUDA_SUPPORT
+  if (name == "gpu") {
+    it->second.funcLoc = DataLocation::Device; 
+    setEntryLocation(DataLocation::Device);
+  }
+// DEBUGOUT
+std::cout << "FUNC LOCATION " <<  it->second.funcLoc <<std::endl;
+#endif
   funcname=name;
   evaluateTypes();
 }

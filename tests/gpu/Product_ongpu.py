@@ -31,7 +31,7 @@ def check_product(arrays):
     points = [C.Points(array) for array in arrays]
     prod = C.Product([p.points.points for p in points])
 
-    prod.product.switchFunction("gpu")
+#    prod.product.switchFunction("gpu")
     calc =  prod.single().data()
     print('Result', calc, end='\n\n')
 
