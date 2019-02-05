@@ -134,6 +134,7 @@ namespace TransformationTypes
     FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
+    void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.

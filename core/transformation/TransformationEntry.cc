@@ -315,15 +315,28 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name){
+  initFunction(name);
+  evaluateTypes();
+}
+
+/**
+ * @brief Use Function `name` as Entry::fun.
+ *
+ * The method replaces the transformation function Entry::fun with another function from the
+ * Entry::functions map.
+ *
+ * @param name -- function name.
+ * @exception std::runtime_error in case the function `name` does not exist.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name){
   auto it = functions.find(name);
   if(it==functions.end()){
     auto msg = fmt::format("invalid function name {0}", name.data());
     throw std::runtime_error(msg);
   }
   fun = it->second.fun;
-
   funcname=name;
-  evaluateTypes();
 }
 
 /**

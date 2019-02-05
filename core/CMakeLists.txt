@@ -18,7 +18,7 @@ set(CORE_SOURCES
   core/transformation/OutputHandle.cc
   core/transformation/InputHandle.cc
   core/transformation/OpenHandle.cc
-  core/transformation/Initializer.hh
+  core/transformation/Initializer.cc
   core/transformation/Rets.cc
   core/transformation/Ints.cc
   core/transformation/Rtypes.cc

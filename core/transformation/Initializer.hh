@@ -8,6 +8,24 @@ template <typename Derived,typename SourceFloatType,typename SinkFloatType>
 class TransformationBind;
 
 namespace TransformationTypes {
+  template <typename T,typename SourceFloatType,typename SinkFloatType>
+  class InitializerT;
+
+  template <>
+  class InitializerT<void,void,void> {
+  public:
+    static void setMainFunction(const std::string& fcn) { context_main_function=fcn=="main"?"":fcn; }
+
+  protected:
+    InitializerT() = default;
+
+    static bool hasMainFunction() { return context_main_function.size()>0; }
+    static const std::string& getMainFunction() { return context_main_function; }
+
+  private:
+    static std::string context_main_function;
+  };
+
   /**
    * @brief TransformationBind Entry initializer (CRTP).
    *
@@ -39,7 +57,7 @@ namespace TransformationTypes {
    * @date 2015
    */
   template <typename T,typename SourceFloatType,typename SinkFloatType>
-  class InitializerT {
+  class InitializerT : public InitializerT<void,void,void> {
   public:
     using InitializerType          = InitializerT<T,SourceFloatType,SinkFloatType>;
     using TransformationBindType   = TransformationBind<T,SourceFloatType,SinkFloatType>;
@@ -160,6 +178,11 @@ namespace TransformationTypes {
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
+      if(hasMainFunction()){
+        auto& fcn = getMainFunction();
+        m_entry->initFunction(fcn);
+      }
+
       size_t idx = m_obj->addEntry(m_entry);
       m_entry = nullptr;
       for (const auto& kv: m_mfuncs) {
@@ -242,7 +265,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType switchFunc(const std::string& name) {
-      m_entry->switchFunction(name);
+      m_entry->initFunction(name);
       return *this;
     }
 
