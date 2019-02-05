@@ -81,10 +81,11 @@ def Sum(outputs=None, *args, **kwargs):
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, *args, **kwargs):
+    cls = R.GNA.GNAObjectTemplates.MultiSumT(current_precision)
     if outputs is None:
-        return R.MultiSum(*args, **kwargs)
+        return cls(*args, **kwargs)
 
-    return R.MultiSum(OutputDescriptors(outputs), *args, **kwargs)
+    return cls(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):

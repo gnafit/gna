@@ -81,6 +81,10 @@ protected:
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
   using TransformationBaseType::t_;
 
+  using OutputDescriptor = OutputDescriptorT<SourceFloatType,SinkFloatType>;
+  using InputDescriptor = InputDescriptorT<SourceFloatType,SinkFloatType>;
+  using SingleOutput = SingleOutputT<SinkFloatType>;
+
   using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
   using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
   using StorageTypesFunctionArgs = TransformationTypes::StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;

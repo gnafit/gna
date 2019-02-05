@@ -2,8 +2,17 @@
 
 #include "GNAObject.hh"
 
-class GNAObjectBindMN: public GNAObject {
+template<typename FloatType>
+class GNAObjectBindMN: public GNAObjectT<FloatType,FloatType> {
+protected:
+    using GNAObject = GNAObjectT<FloatType,FloatType>;
+    using GNAObject::transformations;
 public:
+    using typename GNAObject::SingleOutput;
+    using typename GNAObject::OutputDescriptor;
+    using typename GNAObject::InputDescriptor;
+    using OutputDescriptors = typename OutputDescriptor::OutputDescriptors;
+
     GNAObjectBindMN(const std::string& transformation, const std::string& input, const std::string& output);
 
     virtual TransformationDescriptor add_transformation(const std::string& name="");
@@ -11,7 +20,7 @@ public:
     OutputDescriptor add_input(SingleOutput& output, const std::string& iname="");
     OutputDescriptor add_output(const std::string& oname="");
 
-    void add_inputs(const OutputDescriptor::OutputDescriptors& outputs);
+    void add_inputs(const OutputDescriptors& outputs);
 
 protected:
     std::string new_transformation_name(const std::string& name);

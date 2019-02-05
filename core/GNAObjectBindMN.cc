@@ -1,12 +1,14 @@
 #include "GNAObjectBindMN.hh"
 
-GNAObjectBindMN::GNAObjectBindMN(const std::string& transformation, const std::string& input, const std::string& output) :
+template<typename FloatType>
+GNAObjectBindMN<FloatType>::GNAObjectBindMN(const std::string& transformation, const std::string& input, const std::string& output) :
 m_transformation_name(transformation), m_input_name(input), m_output_name(output)
 {
     /* code */
 }
 
-std::string GNAObjectBindMN::new_transformation_name(const std::string& name){
+template<typename FloatType>
+std::string GNAObjectBindMN<FloatType>::new_transformation_name(const std::string& name){
     auto newname=new_name(m_transformation_name, transformations.size(), name);
     if(transformations.contains(newname)){
         throw std::runtime_error(fmt::format("Unable to add transformation {}. Already in the list.", newname));
@@ -14,11 +16,13 @@ std::string GNAObjectBindMN::new_transformation_name(const std::string& name){
     return newname;
 }
 
-TransformationDescriptor GNAObjectBindMN::add_transformation(const std::string& name){
+template<typename FloatType>
+TransformationDescriptor GNAObjectBindMN<FloatType>::add_transformation(const std::string& name){
     throw std::runtime_error(fmt::format("Unimplemented method add_transformation ({0}, {1})", m_transformation_name, name));
 }
 
-std::string GNAObjectBindMN::new_name(const std::string& base, size_t num, const std::string& altname){
+template<typename FloatType>
+std::string GNAObjectBindMN<FloatType>::new_name(const std::string& base, size_t num, const std::string& altname){
     //printf("%s %zu %zu %s\n", base.c_str(), num, altname.c_str());
     if(altname.size()>0u){
         return altname;
@@ -30,7 +34,8 @@ std::string GNAObjectBindMN::new_name(const std::string& base, size_t num, const
     return base;
 }
 
-OutputDescriptor GNAObjectBindMN::add_output(const std::string& oname){
+template<typename FloatType>
+typename GNAObjectBindMN<FloatType>::OutputDescriptor GNAObjectBindMN<FloatType>::add_output(const std::string& oname){
     auto trans=transformations.back();
     auto newname=new_name(m_output_name, trans.outputs.size(), oname);
     if(trans.outputs.contains(newname)){
@@ -39,7 +44,8 @@ OutputDescriptor GNAObjectBindMN::add_output(const std::string& oname){
     return trans.output(newname);
 }
 
-InputDescriptor GNAObjectBindMN::add_input(const std::string& iname){
+template<typename FloatType>
+typename GNAObjectBindMN<FloatType>::InputDescriptor GNAObjectBindMN<FloatType>::add_input(const std::string& iname){
     auto trans=transformations.back();
 
     if(m_open_input){
@@ -59,14 +65,21 @@ InputDescriptor GNAObjectBindMN::add_input(const std::string& iname){
     return input;
 }
 
-OutputDescriptor GNAObjectBindMN::add_input(SingleOutput& output, const std::string& iname){
+template<typename FloatType>
+typename GNAObjectBindMN<FloatType>::OutputDescriptor GNAObjectBindMN<FloatType>::add_input(typename GNAObjectBindMN<FloatType>::SingleOutput& output, const std::string& iname){
     auto input=add_input(iname);
     output.single() >> input;
     return OutputDescriptor(transformations.back().outputs.back());
 }
 
-void GNAObjectBindMN::add_inputs(const OutputDescriptor::OutputDescriptors& outputs){
+template<typename FloatType>
+void GNAObjectBindMN<FloatType>::add_inputs(const typename GNAObjectBindMN<FloatType>::OutputDescriptors& outputs){
     for(const auto& output: outputs){
         add_input(*output);
     }
 }
+
+template class GNAObjectBindMN<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class GNAObjectBindMN<float>;
+#endif

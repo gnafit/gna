@@ -1,41 +1,46 @@
 #include "MultiSum.hh"
 #include "TypesFunctions.hh"
 
-using FunctionArgs = TransformationTypes::FunctionArgsT<double,double>;
-void multisum(FunctionArgs& fargs);
+using GNA::GNAObjectTemplates::MultiSumT;
+
+template<typename FunctionArgsType> void multisum(FunctionArgsType& fargs);
 
 /**
  * @brief Constructor.
  */
-MultiSum::MultiSum() :
-GNAObjectBindMN("sum", "item", "sum")
+template<typename FloatType>
+MultiSumT<FloatType>::MultiSumT() :
+BindClass("sum", "item", "sum")
 {
     add_transformation();
 }
 
 /**
- * @brief Construct MultiSum from vector of SingleOutput instances
+ * @brief Construct MultiSumT from vector of SingleOutput instances
  */
-MultiSum::MultiSum(const OutputDescriptor::OutputDescriptors& outputs) : MultiSum() {
-    add_inputs(outputs);
+template<typename FloatType>
+MultiSumT<FloatType>::MultiSumT(const OutputDescriptor::OutputDescriptors& outputs) : MultiSumT() {
+    this->add_inputs(outputs);
 }
 
-TransformationDescriptor MultiSum::add_transformation(const std::string& name){
-    transformation_(new_transformation_name(name))
+template<typename FloatType>
+TransformationDescriptor MultiSumT<FloatType>::add_transformation(const std::string& name){
+    this->transformation_(new_transformation_name(name))
         .types(TypesFunctions::ifSame, TypesFunctions::passToRange<0,0,-1>)
-        .func(multisum);
+        .func(&multisum<FunctionArgs>);
     add_output();
     add_input();
     set_open_input();
     return transformations.back();
 }
 
-void multisum(FunctionArgs& fargs){
+template<typename FunctionArgsType>
+void multisum(FunctionArgsType& fargs){
     auto& args=fargs.args;
     auto& rets=fargs.rets;
 
     int iret=-1;
-    using ArrayViewType = typename FunctionArgs::RetsType::DataType::ArrayViewType;
+    using ArrayViewType = typename FunctionArgsType::RetsType::DataType::ArrayViewType;
     ArrayViewType* data=nullptr;
     for (size_t jarg = 0; jarg < args.size(); ++jarg) {
         auto jmap=fargs.getMapping(jarg);
@@ -49,3 +54,8 @@ void multisum(FunctionArgs& fargs){
         }
     }
 }
+
+template class GNA::GNAObjectTemplates::MultiSumT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  //template class GNA::GNAObjectTemplates::MultiSumT<float>;
+#endif
