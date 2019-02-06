@@ -114,13 +114,13 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType,SizeType>::allocateDevice(){
         deAllocateDevice();
 
-        copyH2D<FloatType*>(d_pointers_dev, h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
-        copyH2D<SizeType>(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
+        copyH2D_ALL<FloatType*>(d_pointers_dev, h_pointers_dev.data(), (unsigned int)h_pointers_dev.size());
+        copyH2D_ALL<SizeType>(d_shapes, h_shapes.data(), (unsigned int)h_shapes.size());
 
 	for (size_t i = 0; i<h_shape_pointers_host.size(); i++) {
 	    h_shape_pointers_dev.push_back(std::next(d_shapes, h_offsets[i]));
 	}
-        copyH2D<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
+        copyH2D_ALL<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
 	printf("allocated %p %p %p %zu\n", (void*)d_pointers_dev, (void*)d_shapes, (void*)d_shape_pointers_dev, h_shape_pointers_dev.size());
     }
 
