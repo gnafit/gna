@@ -176,7 +176,7 @@ namespace TransformationTypes {
       }
       if(hasDefaultFunction()){
         auto& fcn = getDefaultFunction();
-        m_entry->initFunction(fcn);
+        m_entry->switchFunction(fcn);
       }
 
       size_t idx = m_obj->addEntry(m_entry);
