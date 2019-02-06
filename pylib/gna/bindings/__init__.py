@@ -245,6 +245,7 @@ def setup(ROOT):
             'TransformationTypes',
             'ParametrizedTypes',
             'TypesFunctions',
+            'TypeClasses',
             'TMath',
             ]
 

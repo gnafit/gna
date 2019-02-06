@@ -29,6 +29,7 @@ set(CORE_SOURCES
   core/transformation/TransformationBase.cc
   core/transformation/TransformationErrors.cc
   core/transformation/TypesFunctions.cc
+  core/transformation/TypeClasses.cc
   core/parameters/fillers.cc
   # GNAObject and bindings
   core/TransformationDescriptor.cc
@@ -58,6 +59,7 @@ set(CORE_HEADERS
   Itypes.hh
   Atypes.hh
   TypesFunctions.hh
+  TypeClasses.hh
   EntryHandle.hh
   OutputHandle.hh
   OpenHandle.hh

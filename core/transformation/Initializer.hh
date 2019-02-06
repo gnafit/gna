@@ -7,6 +7,10 @@
 template <typename Derived,typename SourceFloatType,typename SinkFloatType>
 class TransformationBind;
 
+namespace TypeClasses{
+  template<typename FloatType> class TypeClassT;
+}
+
 namespace TransformationTypes {
   class InitializerBase {
   public:
@@ -64,6 +68,7 @@ namespace TransformationTypes {
     using FunctionArgs             = FunctionArgsT<SourceFloatType,SinkFloatType>;
     using TypesFunctionArgs        = TypesFunctionArgsT<SourceFloatType,SinkFloatType>;
     using StorageTypesFunctionArgs = StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>;
+    using TypeClass                = TypeClasses::TypeClassT<SourceFloatType>;
     /**
      * @brief Function, that does the actual calculation (reference to a member function).
      *
@@ -312,6 +317,16 @@ namespace TransformationTypes {
      */
     InitializerType types(TypesFunction func) {
       m_entry->typefuns.push_back(func);
+      return *this;
+    }
+
+    /**
+     * @brief Add new TypesFunction to the Entry.
+     * @param func -- the TypesFunction to be added.
+     * @return `*this`.
+     */
+    InitializerType types(TypeClass* cls) {
+      m_entry->typeclasses.push_back(cls);
       return *this;
     }
 

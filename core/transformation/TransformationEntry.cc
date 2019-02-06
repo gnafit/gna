@@ -11,6 +11,7 @@
 #include "OutputHandle.hh"
 #include "Atypes.hh"
 #include "TransformationErrors.hh"
+#include "TypeClasses.hh"
 #include "GPUFunctionArgs.hh"
 
 using TransformationTypes::BaseT;
@@ -18,8 +19,10 @@ using TransformationTypes::EntryT;
 using TransformationTypes::AtypesT;
 using TransformationTypes::OutputHandleT;
 using TransformationTypes::InputHandleT;
-
 using TransformationTypes::TypeError;
+
+template<typename FloatType>
+using TypeClassT = TypeClasses::TypeClassT<FloatType>;
 
 /**
  * @brief Constructor.
@@ -45,7 +48,7 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkF
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
     mapping(other.mapping),
-    fun(), typefuns(), tainted(other.name.c_str()), initializing(0),
+    fun(), typefuns(), typeclasses(), tainted(other.name.c_str()), initializing(0),
     functionargs(new FunctionArgsType(this))
 {
   initSourcesSinks(other.sources, other.sinks);
@@ -219,6 +222,9 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
   try {
     for (auto &typefun: typefuns) {
       typefun(fargs);
+    }
+    for (auto &typeclass: typeclasses) {
+      typeclass.check(fargs);
     }
     auto& itypefuns=functions[funcname].typefuns;
     for (auto &typefun: itypefuns) {

@@ -15,6 +15,10 @@
 #include "Sink.hh"
 #include "Storage.hh"
 
+namespace TypeClasses{
+  template<typename FloatType> class TypeClassT;
+}
+
 namespace TransformationTypes
 {
   template<typename SourceFloatType, typename SinkFloatType> class BaseT;
@@ -29,6 +33,9 @@ namespace TransformationTypes
 
   template<typename FloatType>
   using StoragesContainerT = boost::ptr_vector<StorageT<FloatType>>;  ///< Container for Storage pointers.
+
+  template<typename FloatType>
+  using TypeClassContainerT = boost::ptr_vector<TypeClasses::TypeClassT<FloatType>>;  ///< Container for TypeClass pointers.
 
   /**
    * @brief Definition of a single transformation.
@@ -91,6 +98,8 @@ namespace TransformationTypes
     using FunctionDescriptorType             = FunctionDescriptorT<SourceFloatType,SinkFloatType>;
     using FunctionDescriptorsContainerType   = FunctionDescriptorsContainerT<SourceFloatType,SinkFloatType>;
 
+    using TypeClassContainerType             = TypeClassContainerT<SourceFloatType>;
+
     EntryT(const std::string &name, const BaseType *parent); ///< Constructor.
     EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
     ~EntryT();                                           ///< Destructor.
@@ -123,6 +132,7 @@ namespace TransformationTypes
     // Functions
     FunctionType fun=nullptr;                            ///< The function that does actual calculation.
     TypesFunctionsContainerType typefuns;                ///< Vector of TypeFunction objects.
+    TypeClassContainerType typeclasses;                  ///< Vector of TypeClass instances
     FunctionDescriptorsContainerType functions;          ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.
 
