@@ -8,22 +8,18 @@ template <typename Derived,typename SourceFloatType,typename SinkFloatType>
 class TransformationBind;
 
 namespace TransformationTypes {
-  template <typename T,typename SourceFloatType,typename SinkFloatType>
-  class InitializerT;
-
-  template <>
-  class InitializerT<void,void,void> {
+  class InitializerBase {
   public:
-    static void setMainFunction(const std::string& fcn) { context_main_function=fcn=="main"?"":fcn; }
+    static bool hasDefaultFunction() { return context_default_function.size()>0; }
+    static void setDefaultFunction(const std::string& fcn) { context_default_function=fcn=="main"?"":fcn; }
+    static const std::string& getDefaultFunction() { return context_default_function; }
 
   protected:
-    InitializerT() = default;
+    InitializerBase() = default;
 
-    static bool hasMainFunction() { return context_main_function.size()>0; }
-    static const std::string& getMainFunction() { return context_main_function; }
 
   private:
-    static std::string context_main_function;
+    static std::string context_default_function;
   };
 
   /**
@@ -57,7 +53,7 @@ namespace TransformationTypes {
    * @date 2015
    */
   template <typename T,typename SourceFloatType,typename SinkFloatType>
-  class InitializerT : public InitializerT<void,void,void> {
+  class InitializerT : public InitializerBase {
   public:
     using InitializerType          = InitializerT<T,SourceFloatType,SinkFloatType>;
     using TransformationBindType   = TransformationBind<T,SourceFloatType,SinkFloatType>;
@@ -178,8 +174,8 @@ namespace TransformationTypes {
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
-      if(hasMainFunction()){
-        auto& fcn = getMainFunction();
+      if(hasDefaultFunction()){
+        auto& fcn = getDefaultFunction();
         m_entry->initFunction(fcn);
       }
 

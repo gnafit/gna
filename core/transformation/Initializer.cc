@@ -1,4 +1,4 @@
 #include "Initializer.hh"
 
-std::string TransformationTypes::InitializerT<void,void,void>::context_main_function="";
+std::string TransformationTypes::InitializerBase::context_default_function="";
 

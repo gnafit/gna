@@ -14,24 +14,40 @@ from gna.converters import list_to_stdvector as stdvector
 # Templates = R.GNA.GNAObjectTemplates
 # print('templates', Templates)
 
-current_precision = 'double'
-current_precision_short = 'double'
-def set_current_precision(precision):
-    global current_precision, current_precision_short
+_current_precision = 'double'
+_current_precision_short = 'double'
+def _set_current_precision(precision):
+    global _current_precision, _current_precision_short
     assert precision in R.GNA.provided_precisions(), 'Unsupported precision '+precision
-    current_precision=precision
-    current_precision_short=precision[0]
+    _current_precision=precision
+    _current_precision_short=precision[0]
 
 class precision(object):
+    """Context manager for the floating precision"""
+    old_precision=''
     def __init__(self, precision):
         self.precision=precision
 
     def __enter__(self):
-        self.old_precision = current_precision
-        set_current_precision(self.precision)
+        self.old_precision = _current_precision
+        _set_current_precision(self.precision)
 
     def __exit__(self, *args):
-        set_current_precision(self.old_precision)
+        __set_current_precision(self.old_precision)
+
+class cuda(object):
+    """Context manager for GPU
+    Makes Initializer to switch transformations to "gpu" function after initialization"""
+    backup_function=''
+    def __init__(self):
+        self.handle=R.TransformationTypes.InitializerBase
+
+    def __enter__(self):
+        self.backup_function = self.handle.getDefaultFunction()
+        self.handle.setDefaultFunction('gpu')
+
+    def __exit__(self, *args):
+        self.handle.setDefaultFunction(self.backup_function)
 
 def OutputDescriptors(outputs):
     descriptors=[]
@@ -66,11 +82,11 @@ def Dummy(shape, name, varnames, *args, **kwargs):
 """Construct Points object from numpy array"""
 def Points(array, *args, **kwargs):
     """Convert array to Points"""
-    a = N.ascontiguousarray(array, dtype=current_precision_short)
+    a = N.ascontiguousarray(array, dtype=_current_precision_short)
     if len(a.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( a.shape )
-    return R.GNA.GNAObjectTemplates.PointsT(current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
+    return R.GNA.GNAObjectTemplates.PointsT(_current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
@@ -81,7 +97,7 @@ def Sum(outputs=None, *args, **kwargs):
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, *args, **kwargs):
-    cls = R.GNA.GNAObjectTemplates.MultiSumT(current_precision)
+    cls = R.GNA.GNAObjectTemplates.MultiSumT(_current_precision)
     if outputs is None:
         return cls(*args, **kwargs)
 
