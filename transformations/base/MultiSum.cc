@@ -44,7 +44,7 @@ void multisum(FunctionArgsType& fargs){
     ArrayViewType* data=nullptr;
     for (size_t jarg = 0; jarg < args.size(); ++jarg) {
         auto jmap=fargs.getMapping(jarg);
-        if(jmap-iret == 1){
+        if(jmap-iret > 0){
             iret=jmap;
             data=&(rets[iret].x);
             *data = args[jarg].x;

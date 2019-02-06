@@ -91,7 +91,6 @@ template<typename SourceFloatType, typename SinkFloatType>
 InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(const std::string &name, bool inactive) {
   auto *s = new SourceType(name, this, inactive);
   sources.push_back(s);
-  mapping.resize(mapping.size()+1);
   return InputHandleType(*s);
 }
 

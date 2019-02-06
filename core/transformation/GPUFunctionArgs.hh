@@ -9,7 +9,7 @@
 #include "GPUFunctionData.hh"
 
 namespace TransformationTypes{
-    template<typename FloatType, typename SizeType=unsigned int>
+    template<typename FloatType, typename SizeType=size_t>
     class GPUFunctionArgsT {
     public:
         using EntryType = EntryT<FloatType,FloatType>;
@@ -18,7 +18,7 @@ namespace TransformationTypes{
         }
 
         ~GPUFunctionArgsT(){
-
+            ///TODO: deallocate m_argsmapping_dev
         }
 
         template<typename Container>
@@ -31,25 +31,29 @@ namespace TransformationTypes{
         void provideSignatureDevice();
         void dump();
 
-        SizeType    nvars{0u};       ///< number of variables
-        FloatType **vars{nullptr};   ///< list of pointers to variable values
-        SizeType    nargs{0u};       ///< number of args
-        FloatType **args{nullptr};   ///< list of pointers to args
-        SizeType  **argshapes{0u};   ///< list of pointers to shapes of args
-        SizeType    nrets{0u};       ///< number of rets
-        FloatType **rets{nullptr};   ///< list of pointers to rets
-        SizeType  **retshapes{0u};   ///< list of pointers to shapes of rets
-        SizeType    nints{0u};       ///< number of ints
-        FloatType **ints{nullptr};   ///< list of pointers to ints
-        SizeType  **intshapes{0u};   ///< list of pointers to shapes of ints
+        SizeType    nvars{0u};            ///< number of variables
+        FloatType **vars{nullptr};        ///< list of pointers to variable values
+        SizeType    nargs{0u};            ///< number of args
+        FloatType **args{nullptr};        ///< list of pointers to args
+        SizeType  **argshapes{nullptr};   ///< list of pointers to shapes of args
+        SizeType   *argsmapping{nullptr}; ///< array mapping each of the args to specific ret
+        SizeType    nrets{0u};            ///< number of rets
+        FloatType **rets{nullptr};        ///< list of pointers to rets
+        SizeType  **retshapes{nullptr};   ///< list of pointers to shapes of rets
+        SizeType    nints{0u};            ///< number of ints
+        FloatType **ints{nullptr};        ///< list of pointers to ints
+        SizeType  **intshapes{nullptr};   ///< list of pointers to shapes of ints
+
+
+    private:
+        EntryType* m_entry;
 
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs
         GPUFunctionData<FloatType,SizeType>   m_rets; ///< Handler for outputs
         GPUFunctionData<FloatType,SizeType>   m_ints; ///< Handler for storages
 
-    private:
-        EntryType* m_entry;
+        SizeType* m_argsmapping_dev{nullptr};
     };
 
 
@@ -64,9 +68,14 @@ namespace TransformationTypes{
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
+        ///TODO: deallocate m_argsmapping_dev
+        //
         m_args.fillContainers(m_entry->sources);
         m_rets.fillContainers(m_entry->sinks);
         m_ints.fillContainers(m_entry->storages);
+
+        ///TODO: allocate m_argsmapping_dev
+        ///TODO: sync m_entry->mapping to m_argsmapping_dev
 
         provideSignatureDevice();
     }
@@ -77,6 +86,8 @@ namespace TransformationTypes{
         m_args.provideSignatureHost(nargs, args, argshapes);
         m_rets.provideSignatureHost(nrets, rets, retshapes);
         m_ints.provideSignatureHost(nints, ints, intshapes);
+
+        argsmapping = m_entry->mapping.size() ? m_entry->mapping.data() : nullptr;
     }
 
     template<typename FloatType,typename SizeType>
@@ -85,6 +96,8 @@ namespace TransformationTypes{
         m_args.provideSignatureDevice(nargs, args, argshapes);
         m_rets.provideSignatureDevice(nrets, rets, retshapes);
         m_ints.provideSignatureDevice(nints, ints, intshapes);
+
+        argsmapping = m_argsmapping_dev;
     }
 
 

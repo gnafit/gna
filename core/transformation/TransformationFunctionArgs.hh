@@ -31,7 +31,7 @@ namespace TransformationTypes
   public:
     using EntryType              = EntryT<SourceFloatType,SinkFloatType>;
     using FunctionArgsType       = FunctionArgsT<SourceFloatType,SinkFloatType>;
-    using GPUFunctionArgsType    = GPUFunctionArgsT<SourceFloatType, unsigned int>;
+    using GPUFunctionArgsType    = GPUFunctionArgsT<SourceFloatType, size_t>;
     using GPUFunctionArgsPtr     = std::unique_ptr<GPUFunctionArgsType>;
     using ArgsType               = ArgsT<SourceFloatType,SinkFloatType>;
     using RetsType               = RetsT<SourceFloatType,SinkFloatType>;
