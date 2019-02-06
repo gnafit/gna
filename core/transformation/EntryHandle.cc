@@ -69,7 +69,7 @@ void maplastinput(EntryT<SourceFloatType,SinkFloatType>* entry, int mapto){
   if(mapping.size() < entry->sources.size()){
     mapping.resize(entry->sources.size());
   }
-  printf("map %zu -> %i\n", mapping.size(), mapto);
+  //printf("map %zu -> %i\n", mapping.size(), mapto);
   mapping.back() = static_cast<size_t>(mapto);
 }
 
