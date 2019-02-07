@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include "TransformationEntry.hh"
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
@@ -135,6 +136,19 @@ namespace TransformationTypes {
     }
 
     InitializerT(const InitializerType& other) = delete;
+
+    InitializerT(const InitializerType&& other) noexcept
+      : m_entry(other.m_entry),
+        m_obj(other.m_obj),
+        m_mfuncs((std::move(other.m_mfuncs))),
+        m_mtfuncs(std::move(other.m_mtfuncs)),
+        m_mstfuncs(std::move(other.m_mstfuncs)),
+        m_nosubscribe(other.m_nosubscribe),
+        m_noautotype(other.m_noautotype)
+    {
+      other.m_entry=nullptr;
+      other.m_obj=nullptr;
+    }
 
     /**
      * @brief Destructor.
