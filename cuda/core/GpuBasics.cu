@@ -5,8 +5,22 @@
 
 
 template<typename T>
+void debug_drop(T* in, unsigned int n) {
+	T* tmp;
+	cudaMalloc(&tmp, N);
+	cudaMemcpy(dst, src, N * sizeof(T), cudaMemcpyHostToDevice);
+	std::cout << "Debug drop:" << std::endl;
+	for (unsigned int i = 0; i < N; ++i) {
+		std::cout << tmp[i] << " ";
+	}
+}
+
+template<typename T>
 void device_malloc(T* &dst, unsigned int N) {
-	cudaMalloc(&dst, N*sizeof(T));
+	cudaError_t err = cudaMalloc(&dst, N*sizeof(T));
+	if (err != cudaSuccess) {
+		std::cerr << "Allocation err is " << cudaGetErrorString(err) << std::endl;
+	}
 }
 
 template<typename T>
@@ -66,3 +80,5 @@ template void copyH2D_NA<double>(double* dst, double* src, unsigned int N);
 
 template void device_malloc<double>(double* &dst, unsigned int N);
 template void device_malloc<double*>(double** &dst, unsigned int N);
+
+template void debug_drop<double>(double* dst, unsigned int N);

@@ -11,3 +11,7 @@ void cuwr_free(T* &ptr);
 
 template<typename T>
 void device_malloc(T* &dst, unsigned int N);
+
+template<typename T> 
+void debug_drop(T* dst, unsigned int N);
+
