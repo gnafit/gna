@@ -76,5 +76,8 @@ def test_range_07():
     check(r, 5, [2])
     check(r, 6, [])
 
+def test_typeclass_same():
+    pass
+
 if __name__ == "__main__":
     run_unittests(globals())

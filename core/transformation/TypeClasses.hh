@@ -57,6 +57,16 @@ namespace TypeClasses{
             }
             printf("\n");
         }
+
+        void dump(size_t size){
+            printf("Range %i->%i", m_begin, m_end);
+            if(singular()){
+                printf(" (singular)");
+            }
+            size_t begin, end;
+            getRangeAbs(size, begin, end, false);
+            printf(" for size %zu: %zu->%zu\n", size, begin, end);
+        }
     private:
         void getRangeAbs(int size, size_t &begin, size_t &end, bool strict=true) const {
             int absbegin = m_begin>=0 ? m_begin : size+m_begin;
@@ -93,7 +103,7 @@ namespace TypeClasses{
     class TypeClassT {
     public:
         using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<FloatType,FloatType>;
-        virtual void check(TypesFunctionArgs& fargs) = 0;
+        virtual void processTypes(TypesFunctionArgs& fargs) = 0;
     };
 
     template<typename FloatType>
@@ -112,13 +122,16 @@ namespace TypeClasses{
             else if (what=="shape"){
                 m_comparison = ComparisonType::Shape;
             }
+            else if (what=="kind"){
+                m_comparison = ComparisonType::Kind;
+            }
             else{
                 throw std::runtime_error(fmt::format("Unknown comparison type: {}", what));
             }
         }
         CheckSameTypesT(const SelfClass& other) = default;
 
-        void check(TypesFunctionArgs& fargs){
+        void processTypes(TypesFunctionArgs& fargs){
             auto& args = fargs.args;
             const DataType* compare_to=nullptr;
             size_t first;
@@ -146,6 +159,10 @@ namespace TypeClasses{
                 return dt1.shape == dt2.shape;
                 break;
 
+                case ComparisonType::Kind:
+                return dt1.kind == dt2.kind;
+                break;
+
                 default:
                 assert(false);
                 return false;
@@ -158,6 +175,7 @@ namespace TypeClasses{
         enum class ComparisonType {
             All = 0,
             Shape = 1,
+            Kind = 2,
         };
 
         ComparisonType m_comparison;
@@ -179,7 +197,7 @@ namespace TypeClasses{
         }
         PassTypeT(const SelfClass& other) = default;
 
-        void check(TypesFunctionArgs& fargs){
+        void processTypes(TypesFunctionArgs& fargs){
             auto& args = fargs.args;
             auto& rets = fargs.rets;
             auto& typeToPass=args[m_argsrange.getBeginAbs(args.size())];
@@ -189,6 +207,50 @@ namespace TypeClasses{
         }
 
     private:
+        Range m_argsrange;
+        Range m_retsrange;
+    };
+
+    template<typename FloatType>
+    class PassEachTypeT : TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = PassEachTypeT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        PassEachTypeT(Range argsrange, Range retsrange) : m_argsrange(argsrange), m_retsrange(retsrange) { }
+        PassEachTypeT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            auto& args = fargs.args;
+            auto& rets = fargs.rets;
+
+            auto arange = m_argsrange.iterateSafe(args.size());
+            auto rrange = m_retsrange.iterateSafe(rets.size());
+
+            auto rit = rrange.begin();
+            for(auto aidx: arange){
+                if(rit==rrange.end()){
+                    error(args.size(), rets.size());
+                }
+                rets[*rit]=args[aidx];
+                std::advance(rit, 1);
+            }
+            if(rit!=rrange.end()){
+                error(args.size(), rets.size());
+            }
+        }
+
+    private:
+        void error(size_t nargs, size_t nrets){
+            printf("Args: ");
+            m_argsrange.dump(nargs);
+            printf("Rets: ");
+            m_retsrange.dump(nrets);
+            throw std::runtime_error("Inconsistent ranges\n");
+        }
         Range m_argsrange;
         Range m_retsrange;
     };

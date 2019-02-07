@@ -89,6 +89,7 @@ set(TRANSFORMATION_SOURCES
   transformations/debug/Identity.cc
   transformations/debug/DebugTransformation.cc
   transformations/debug/Dummy.cc
+  transformations/debug/DummyType.cc
   transformations/debug/TrialMultiFunc.cc
   # Legacy transformations
   transformations/legacy/EnergyResolutionC.cc
@@ -180,6 +181,7 @@ set(TRANSFORMATION_HEADERS
   # Debug
   DebugTransformation.hh
   Dummy.hh
+  DummyType.hh
   Identity.hh
   TrialMultiFunc.hh
   # Legacy

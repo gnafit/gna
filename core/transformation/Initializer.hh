@@ -172,7 +172,7 @@ namespace TransformationTypes {
           m_obj->m_entries.size()+1 > m_obj->m_maxEntries) {
         throw std::runtime_error("too much transformations");
       }
-      if (m_entry->typefuns.empty()) {
+      if (m_entry->typefuns.empty() && m_entry->typeclasses.empty() && !m_noatotype) {
         m_entry->typefuns.push_back(TypesFunctions::passAllT<SinkFloatType>);
       }
       m_entry->initializing = 0;
@@ -487,6 +487,15 @@ namespace TransformationTypes {
       return *this;
     }
 
+    /**
+     * @brief Disable automatic passAll usage in case no type functions passed.
+     *
+     * @return `*this`
+     */
+    InitializerType no_autotype() {
+      m_noatotype = true;
+      return *this;
+    }
   protected:
     EntryType *m_entry;                    ///< New Entry pointer.
     TransformationBindType *m_obj;         ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
@@ -495,6 +504,7 @@ namespace TransformationTypes {
     MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
     MemStorageTypesFunctionMap m_mstfuncs; ///< MemStorageTypesFunction objects.
 
-    bool m_nosubscribe;                    ///< Flag forbidding automatic subscription to Base taintflag emissions.
+    bool m_nosubscribe{false};             ///< Flag forbidding automatic subscription to Base taintflag emissions.
+    bool m_noatotype{false};               ///< Do not add automatic passAll type function.
   }; /* class Initializer */
 }

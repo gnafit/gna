@@ -224,7 +224,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       typefun(fargs);
     }
     for (auto &typeclass: typeclasses) {
-      typeclass.check(fargs);
+      typeclass.processTypes(fargs);
     }
     auto& itypefuns=functions[funcname].typefuns;
     for (auto &typefun: itypefuns) {
