@@ -57,6 +57,8 @@ class GNAObjectTemplates(object):
 
     def __getattr__(self, name):
         ret = getattr(self.namespace, name)
+        if name.startswith('__'):
+            return ret
         self.patchGNATemplate(ret)
         setattr(self, name, ret)
         return ret
@@ -70,7 +72,7 @@ class GNAObjectTemplates(object):
             cls = template(pp)
             patchGNAclass(cls)
 
-GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
+GNAObjectTemplates=GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
     def itervalues(self):

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include "fmt/format.h"
 #include "GNAObject.hh"
 #include "OpenHandle.hh"
 #include "TypeClasses.hh"
@@ -38,23 +39,21 @@ namespace GNA{
             }
 
           /** @brief Add an input by name and leave unconnected. */
-          InputDescriptor add_input(const std::string& name){
+          InputDescriptor add_input(const std::string& name=""){
             auto trans = transformations.back();
-            auto input = trans.input(name);
-            return InputDescriptor(input);
+            return trans.input(name.size() ? name : fmt::format( "input_{:02d}", trans.inputs.size()));
           }
 
           /** @brief Add an input. */
-          void add_input(SingleOutput& output, const std::string& name){
-            auto out=output.single();
-            auto input=add_input(name.size() ? name : out.name());
+          void add_input(SingleOutput& output, const std::string& name=""){
+            auto input=add_input(name);
             output.single() >> input;
           }
 
           /** @brief Add an output by name */
-          OutputDescriptor add_output(const std::string& name){
+          OutputDescriptor add_output(const std::string& name=""){
             auto trans = transformations.back();
-            auto output = trans.output(name);
+            auto output = trans.output(name.size() ? name : fmt::format( "output_{:02d}", trans.inputs.size()));
             trans.updateTypes();
             return OutputDescriptor(output);
           }

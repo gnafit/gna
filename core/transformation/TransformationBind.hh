@@ -60,7 +60,7 @@ public:
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
-  InitializerType transformation_(const std::string &name) {
+  InitializerType& transformation_(const std::string &name) {
     return InitializerType(this, name);
   }
 protected:

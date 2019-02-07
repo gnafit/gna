@@ -10,8 +10,7 @@ class ConstructorsWrapper(object):
     def __init__(self):
         from gna import constructors
         self.__constructors = constructors
-        self.__templates = R.GNA.GNAObjectTemplates
-        self.__chain = ( self.__findwrapper, self.__findtemplate, self.__findclass )
+        self.__chain = [self.__findwrapper, self.__findtemplate, self.__findclass]
         self.__notfound=['notfound']
 
     def __getattr__(self, name):
@@ -20,8 +19,8 @@ class ConstructorsWrapper(object):
             try:
                 # print('try', finder, name)
                 ret, save = finder(name)
-            except AttributeError:
-                # print('  fail')
+            except AttributeError as e:
+                # print('  fail', e)
                 pass
             else:
                 # print('  found')
@@ -39,8 +38,8 @@ class ConstructorsWrapper(object):
         return getattr(self.__constructors, name), True
 
     def __findtemplate(self, name):
-        template = self.__templates.__getattr__(name+'T')
-        cls = template(self.__constructors.current_precision)
+        template = getattr(R.GNA.GNAObjectTemplates, name+'T')
+        cls = template(self.__constructors._current_precision)
         return cls, False
 
     def __findclass(self, name):
