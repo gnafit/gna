@@ -1,5 +1,11 @@
 #include "WeightedSum.hh"
 #include "TypesFunctions.hh"
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"                             
+#include "DataLocation.hh"
+#endif
+
 
 WeightedSum::WeightedSum(const std::vector<std::string> &weights)
   : WeightedSum(false, weights, weights){ }
@@ -37,7 +43,11 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &wei
   auto sum = transformation_("sum")
     .output("sum")
     .label("wsum")
-    .types(TypesFunctions::ifSame, TypesFunctions::pass<0>);
+    .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
+#ifdef GNA_CUDA_SUPPORT
+    .func("gpu", &WeightedSum::sum_ongpu, DataLocation::Device)
+#endif
+    ;
 
   if( use_fillvalue ){
     sum.func(&WeightedSum::sumFill);
@@ -79,4 +89,14 @@ void WeightedSum::sumFill(FunctionArgs& fargs){
     for (; i < args.size(); ++i) {
       ret += args[i].x;
     }
+}
+
+void WeightedSum::sum_ongpu(FunctionArgs& fargs) {
+    fargs.args.touch();
+    auto& gpuargs=fargs.gpu;
+    gpuargs->readVariables(m_vars);
+    gpuargs->provideSignatureDevice();
+
+std::cout << "DEBUGOUT I am in gpu funck " << std::endl;
+    cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nvars);
 }
