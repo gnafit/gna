@@ -51,18 +51,21 @@ class cuda(object):
 
 def OutputDescriptors(outputs):
     descriptors=[]
+    odescr = R.OutputDescriptorT(_current_precision, _current_precision)
+    ohandle = R.TransformationTypes.OutputHandleT(_current_precision)
+    singleoutput = R.SingleOutputT(_current_precision)
     for output in outputs:
-        if isinstance(output, R.OutputDescriptor):
+        if isinstance(output, odescr):
             output = output
-        elif isinstance(output, R.TransformationTypes.OutputHandle):
-            output = R.OutputDescriptor(output)
-        elif isinstance(output, R.SingleOutput):
-            output=R.OutputDescriptor(output.single())
+        elif isinstance(output, ohandle):
+            output = odescr(output)
+        elif isinstance(output, singleoutput):
+            output=odescr(output.single())
         else:
             raise Exception('Expect OutputHandle or SingleOutput object')
         descriptors.append(output)
 
-    return stdvector(descriptors, 'OutputDescriptor*')
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>*'%(_current_precision,_current_precision))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
