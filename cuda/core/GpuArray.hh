@@ -70,7 +70,10 @@ public:
         GpuArray<T> operator=(GpuArray<T> rhs);
 	void dump(); 						///< Shows data from GPU
 
-	inline void setLocation( DataLocation loc ) { dataLoc = loc; syncFlag =  SyncFlag::Unsynchronized; }
+	inline void setLocation( DataLocation loc ) { 
+		dataLoc = loc; 
+		syncFlag =  SyncFlag::Unsynchronized; 
+	}
 
 //        DataLocation arrState;
 //	DataType type;

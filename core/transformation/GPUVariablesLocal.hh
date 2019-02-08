@@ -73,7 +73,6 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::deAllocateDevice(){
         if(d_values){
-            /// TODO
             cuwr_free<FloatType>(d_values);
             d_values=nullptr;
         }
@@ -87,20 +86,13 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::allocateDevice(){
         /// allocate d_values (same as h_values, no sync is needed here)
-        device_malloc(d_values, h_values.size()); // TODO?????
+        device_malloc(d_values, h_values.size()); 
         auto* ptr=d_values;
-	debug_drop(ptr, h_values.size());
-        //auto* ptr=h_values.data();
         for (size_t i = 0; i < h_value_pointers_dev.size(); ++i) {
             h_value_pointers_dev[i]=ptr;
-            //std::advance(ptr, 1);
             ptr = ptr + 1;
-	    debug_drop(ptr, 1);
         }
- 	std::cout<< "allocated" << std::endl; 
-        /// h_value_pointers_dev -> d_value_pointers_dev
         copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size()); 
-
     }
 
     template<typename FloatType,typename SizeType>
@@ -153,13 +145,6 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::syncHost2Device(){
         /// h_values -> d_values
-	std::cout << h_values.size() << " h_values: " << std::endl;
-	for (size_t i = 0; i < h_values.size();++i) {
-		std::cout << h_values[i] << " ";
-	}
-	std::cout << std::endl;
         copyH2D_NA(d_values, h_values.data(), h_values.size());
-	debug_drop(d_values+1, h_values.size()-1);
-	std::cout << std::endl;
     }
 }

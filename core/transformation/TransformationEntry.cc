@@ -13,6 +13,8 @@
 #include "TransformationErrors.hh"
 #include "GPUFunctionArgs.hh"
 
+#include "config_vars.h"
+
 using TransformationTypes::BaseT;
 using TransformationTypes::EntryT;
 using TransformationTypes::AtypesT;
@@ -360,8 +362,19 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
  */
     template<typename SourceFloatType, typename SinkFloatType>
     void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
-                m_entryLoc = loc;
+        m_entryLoc = loc;
     }
+
+/**
+ *    @brief Sets the target (Host or Device) for transformation sinks
+ *    \warning Be careful! It changes sink location values directly without synchronization invoke!
+ */
+    template<typename SourceFloatType, typename SinkFloatType>
+    void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
+        for (const SinkType &s: sinks) {
+            s.data->gpuArr->setLocation(loc);
+        }
+    } 
 
 /** 
  * @brief Returns the target (Host or Device) for execution of current transformation

@@ -136,6 +136,7 @@ namespace TransformationTypes
 
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
+    void setEntryDataLocation(DataLocation loc);
     DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
 #endif
 

@@ -96,7 +96,5 @@ void WeightedSum::sum_ongpu(FunctionArgs& fargs) {
     auto& gpuargs=fargs.gpu;
     gpuargs->readVariables(m_vars);
     gpuargs->provideSignatureDevice();
-
-std::cout << "DEBUGOUT I am in gpu funck " << std::endl;
     cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nvars);
 }
