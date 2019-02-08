@@ -4,7 +4,10 @@ template<typename T>
 void cusum(T** in, T** out, unsigned int N, unsigned int M);
 
 template<typename T>
-void cuweightedsum(T** in, T** out, T** weights, unsigned int N, unsigned int M);
+void cuweightedsum(T** in, T** out, T** weights, unsigned int N, unsigned int M, unsigned int nvars);
+
+template<typename T>
+void cuweightedsumfill(T** in, T** out, T** weights, T k,  unsigned int N, unsigned int M, unsigned int nvars);
 
 template<typename T>
 void cuproduct(T** in, T** out, unsigned int N, unsigned int M);

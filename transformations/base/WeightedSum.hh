@@ -19,6 +19,7 @@ protected:
   void sum(FunctionArgs& fargs);
   void sum_ongpu(FunctionArgs& fargs);
   void sumFill(FunctionArgs& fargs);
+  void sumFill_ongpu(FunctionArgs& fargs);
 
   std::vector<variable<double>> m_vars;
 

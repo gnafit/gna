@@ -44,16 +44,19 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &wei
     .output("sum")
     .label("wsum")
     .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
-#ifdef GNA_CUDA_SUPPORT
-    .func("gpu", &WeightedSum::sum_ongpu, DataLocation::Device)
-#endif
     ;
 
   if( use_fillvalue ){
-    sum.func(&WeightedSum::sumFill);
+    sum.func(&WeightedSum::sumFill)
+#ifdef GNA_CUDA_SUPPORT
+       .func("gpu", &WeightedSum::sumFill_ongpu, DataLocation::Device);
+#endif
   }
   else{
-    sum.func(&WeightedSum::sum);
+    sum.func(&WeightedSum::sum)
+#ifdef GNA_CUDA_SUPPORT
+       .func("gpu", &WeightedSum::sum_ongpu, DataLocation::Device);
+#endif
   }
 
   m_vars.resize(weights.size());
@@ -96,5 +99,13 @@ void WeightedSum::sum_ongpu(FunctionArgs& fargs) {
     auto& gpuargs=fargs.gpu;
     gpuargs->readVariables(m_vars);
     gpuargs->provideSignatureDevice();
-    cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nvars);
+    cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
+}
+
+void WeightedSum::sumFill_ongpu(FunctionArgs& fargs) {
+    fargs.args.touch();
+    auto& gpuargs=fargs.gpu;
+    gpuargs->readVariables(m_vars);
+    gpuargs->provideSignatureDevice();
+    cuweightedsumfill(gpuargs->args, gpuargs->rets, gpuargs->vars, m_fillvalue, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
 }
