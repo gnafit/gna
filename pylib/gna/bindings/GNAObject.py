@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.bindings import patchROOTClass
+from gna.bindings import patchROOTClass, DataType, provided_precisions
 from gna.bindings import DataType
 import ROOT as R
 from printing import printl, nextlevel
 
-@patchROOTClass(R.GNAObject, '__str__')
+classes = [R.GNAObjectT(ft,ft) for ft in provided_precisions]
+
+@patchROOTClass(classes, '__str__')
 def GNAObject____str__(self):
     return '[obj] {}: {:d} transformation(s), {:d} variables'.format(self.__class__.__name__, self.transformations.size(), self.variables.size())
 
-@patchROOTClass
+@patchROOTClass(classes, 'print')
 def GNAObject__print(self):
     self.printtransformations()
     if not self.variables:
@@ -20,7 +22,7 @@ def GNAObject__print(self):
         print()
         self.printvariables()
 
-@patchROOTClass
+@patchROOTClass(classes, 'printtransformations')
 def GNAObject__printtransformations(self):
     printl(str(self))
     if self.transformations.size():
@@ -30,7 +32,7 @@ def GNAObject__printtransformations(self):
                 printl('{:2d}'.format(i), end=' ')
                 t.print()
 
-@patchROOTClass
+@patchROOTClass(classes, 'printvariables')
 def GNAObject__printvariables(self):
     from gna.parameters import printer
     ns = self.currentns
@@ -48,17 +50,17 @@ def GNAObject__printvariables(self):
         else:
             printl('[none]')
 
-@patchROOTClass
+@patchROOTClass(classes, 'variablevalues')
 def GNAObject__variablevalues(self):
     ns = self.currentns
     return dict([(ns[k].name(), ns[k].value()) for k in self.variables.iterkeys()])
 
 R.SingleOutput.__single_orig = R.SingleOutput.single
-@patchROOTClass
+@patchROOTClass(classes, 'single')
 def SingleOutput__single(self):
     R.OutputDescriptor(self.__single_orig())
 
-@patchROOTClass([R.GNAObject, R.GNASingleObject, R.SingleOutput], 'single')
+@patchROOTClass(classes+[R.GNASingleObject, R.SingleOutput], 'single')
 def GNAObject__single(self):
     transf = self.transformations
     if transf.size()!=1:
@@ -66,7 +68,7 @@ def GNAObject__single(self):
 
     return transf.front().single()
 
-@patchROOTClass
+@patchROOTClass(classes, 'single_input')
 def GNAObject__single_input(self):
     transf = self.transformations
     if transf.size()!=1:
@@ -74,23 +76,22 @@ def GNAObject__single_input(self):
 
     return transf.front().single_input()
 
-@patchROOTClass(R.GNAObject, '__rshift__')
+@patchROOTClass(classes, '__rshift__')
 def GNAObject______rshift__(obj, inputs):
     '''output(self)>>inputs(arg)'''
     obj.single()>>inputs
 
 
-@patchROOTClass(R.GNAObject, '__rlshift__')
+@patchROOTClass(classes, '__rlshift__')
 def GNAObject______rlshift__(obj, inputs):
     '''inputs(argument)<<outputs(self)'''
     obj.single()>>inputs
 
-@patchROOTClass(R.GNAObject, '__lshift__')
+@patchROOTClass(classes, '__lshift__')
 def GNAObject______lshift__(obj, output):
     '''inputs(obj)<<output(arg)'''
     output>>obj.single_input()
 
-@patchROOTClass(R.GNAObject, '__gt__')
-@patchROOTClass(R.GNAObject, '__lt__')
+@patchROOTClass(classes, ('__gt__', '__lt__'))
 def GNAObject______cmp__(a,b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

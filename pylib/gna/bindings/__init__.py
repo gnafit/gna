@@ -279,7 +279,7 @@ def setup(ROOT):
     importcommon()
     legacytypes()
 
-def patchROOTClass( object=None, method=None ):
+def patchROOTClass(objects=None, methods=None):
     """Decorator to override ROOT class methods. Usage
     @patchclass
     def CLASSNAME__METHODNAME(self,...)
@@ -293,24 +293,26 @@ def patchROOTClass( object=None, method=None ):
     @patchclass( [ROOT.CLASS1, ROOT.CLASS2,...], METHODNAME )
     def function(self,...)
     """
-    cfcn = None
-    if not method:
-        cfcn = object
-        spl = cfcn.__name__.split( '__' )
-        object=spl[0]
-        method = '__'.join( spl[1:] )
+    function=None
+    if isinstance(objects, types.FunctionType):
+        function = objects
+        objects, methods = function.__name__.split( '__', 1 )
 
-    if not type( object ) is list:
-        object = [ object ]
+    if not isinstance(objects, (list,tuple)):
+        objects = (objects,)
+
+    if methods and not isinstance(methods, (list,tuple)):
+        methods = (methods,)
 
     def converter( fcn ):
-        for o in object:
+        for o in objects:
             if type(o)==str:
                 o = getattr( ROOT, o )
-            setattr( o, method, fcn )
+            for method in methods:
+                setattr(o, method, fcn)
         return fcn
 
-    if cfcn:
-        return converter( cfcn )
+    if function:
+        return converter( function )
 
     return converter

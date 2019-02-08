@@ -53,6 +53,7 @@ def test_test():
                 print(it, io)
                 print('Result', data, sep='\n')
                 print('Check', check, sep='\n')
+                print('Datatype', out.datatype(), data.dtype)
 
                 assert np.allclose(check, data)
 
