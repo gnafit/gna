@@ -80,6 +80,9 @@ class NestedDict(object):
     def __len__(self):
         return len(self.__storage__)
 
+    def __dir__(self):
+        return  dir(type(self)) + list(self.keys())
+
     def _set_parent(self, parent):
         super(NestedDict, self).__setattr__('__parent__', parent)
 
