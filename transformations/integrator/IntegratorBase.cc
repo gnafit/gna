@@ -98,7 +98,7 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
 }
 
 void IntegratorBase::init_sampler() {
-    auto trans=transformation_("points")
+    auto& trans=transformation_("points")
         .output("x")
         .output("xedges")
         .types(&IntegratorBase::check_sampler)

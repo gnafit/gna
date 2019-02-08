@@ -102,7 +102,7 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
 }
 
 void Integrator2Base::init_sampler() {
-  auto trans=transformation_("points")
+  auto& trans=transformation_("points")
       .output("x")
       .output("y")
       .output("xedges")

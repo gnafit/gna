@@ -87,7 +87,7 @@ void Integrator21Base::integrate(FunctionArgs& fargs){
 }
 
 void Integrator21Base::init_sampler() {
-  auto trans=transformation_("points")
+  auto& trans=transformation_("points")
       .output("x")
       .output("y")
       .output("xedges")

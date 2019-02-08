@@ -61,8 +61,8 @@ public:
    * @param name -- the transformation name.
    * @return transformation Initializer.
    */
-  InitializerType&& transformation_(const std::string &name) {
-    return std::move(InitializerType(this, name));
+  InitializerType transformation_(const std::string &name) {
+    return InitializerType(this, name);
   }
 protected:
   template<typename T,typename FloatType1,typename FloatType2>

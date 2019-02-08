@@ -3,6 +3,8 @@
 
 namespace GNAUnitTest {
 	//static bool typefunction(void (&func) (TransformationTypes::TypesFunctionArgs&), TransformationTypes::TypesFunctionArgs& fargs);
+	void testMove();
+	void testMove1();
 }
 
 //static bool GNAUnitTest::typefunction(void (&func) (TransformationTypes::TypesFunctionArgs&), TransformationTypes::TypesFunctionArgs& fargs){

@@ -128,16 +128,14 @@ namespace TransformationTypes {
      * @param name -- new Entry name.
      */
     InitializerT(TransformationBindType *obj, const std::string &name)
-      : m_entry(new EntryType(name, obj)), m_obj(obj),
-        m_nosubscribe(false)
+      : m_entry(new EntryType(name, obj)), m_obj(obj)
     {
-      m_entry->initializing++;
-      printf("Initializing + %i, %p, flag %i\n", (int)m_entry->initializing, (void*)this, (int)m_noautotype);
+      printf("Initializing + %i, %p, entry %p\n", (int)m_entry->initializing, (void*)this, (void*)m_entry);
     }
 
     InitializerT(const InitializerType& other) = delete;
 
-    InitializerT(const InitializerType&& other) noexcept
+    InitializerT(InitializerType&& other) noexcept
       : m_entry(other.m_entry),
         m_obj(other.m_obj),
         m_mfuncs((std::move(other.m_mfuncs))),
@@ -147,7 +145,7 @@ namespace TransformationTypes {
         m_noautotype(other.m_noautotype)
     {
       other.m_entry=nullptr;
-      other.m_obj=nullptr;
+      other.m_entry=nullptr;
     }
 
     /**
@@ -161,15 +159,12 @@ namespace TransformationTypes {
       if (!m_entry) {
         return;
       }
-      m_entry->initializing--;
-      printf("Destructor + %i, %p, flag %i\n", (int)m_entry->initializing, (void*)this, (int)m_noautotype);
+      printf("Destructor - %i, %p, entry %p\n", (int)m_entry->initializing, (void*)this, (void*)m_entry);
       if (std::uncaught_exception()) {
         delete m_entry;
         return;
       }
-      if (m_entry->initializing==0) {
-        this->add();
-      }
+      this->add();
     }
     /**
      * @brief Add the Entry to the Base.
@@ -193,10 +188,8 @@ namespace TransformationTypes {
         throw std::runtime_error("too much transformations");
       }
       if (m_entry->typefuns.empty() && m_entry->typeclasses.empty() && !m_noautotype) {
-        printf("here %i\n", (int)m_noautotype);
         m_entry->typefuns.push_back(TypesFunctions::passAllT<SinkFloatType>);
       }
-      m_entry->initializing = 0;
       if (!m_nosubscribe) {
         m_obj->obj()->subscribe(m_entry->tainted);
       }
@@ -310,6 +303,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& func(MemFunction mfunc) {
+      printf("memfunc %p entry %p\n", (void*)this, (void*)m_entry);
       this->func("main", mfunc);
       return *this;
     }
@@ -519,8 +513,8 @@ namespace TransformationTypes {
       return *this;
     }
   protected:
-    EntryType *m_entry;                    ///< New Entry pointer.
-    TransformationBindType *m_obj;         ///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
+    EntryType *m_entry{nullptr};           ///< New Entry pointer.
+    TransformationBindType *m_obj{nullptr};///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
 
     MemFunctionMap m_mfuncs;               ///< MemFunction objects.
     MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
