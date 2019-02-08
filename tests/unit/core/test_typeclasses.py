@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-from gna.unittest import run_unittests
+from gna.unittest import run_unittests, makefloat
 from gna import constructors as C
 import numpy as np
 
@@ -231,17 +231,8 @@ def test_typeclass_passeach():
     assert doutputs[3].datatype()==dtb
     assert doutputs[4].datatype()==dtc
 
-def makefloat(name):
-    dct = globals()
-    fcn=dct[name]
-    def ffcn():
-        with C.precision('float'):
-            fcn()
-    dct[name+'_float']=ffcn
-
-if 'float' in R.GNA.provided_precisions():
-    makefloat('test_typeclass_same_v01')
-    makefloat('test_typeclass_same_v02')
+makefloat('test_typeclass_same_v01', globals())
+makefloat('test_typeclass_same_v02', globals())
 
 if __name__ == "__main__":
     run_unittests(globals())

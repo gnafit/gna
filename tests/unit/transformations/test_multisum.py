@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.unittest import run_unittests
+from gna.unittest import run_unittests, makefloat
 import numpy as np
 from gna import constructors as C
 
@@ -59,6 +59,8 @@ def test_test():
         print()
         print()
         print()
+
+makefloat('test_test', globals())
 
 if __name__ == "__main__":
     run_unittests(globals())
