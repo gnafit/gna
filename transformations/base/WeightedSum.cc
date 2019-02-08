@@ -35,7 +35,7 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &wei
   }
 
   printf("init\n");
-  auto&& sum = transformation_("sum")
+  auto sum = transformation_("sum")
     .output("sum")
     .label("wsum")
     .types(TypesFunctions::ifSame, TypesFunctions::pass<0>);

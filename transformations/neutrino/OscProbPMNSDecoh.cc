@@ -33,7 +33,7 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
     .output("compCP23")
     .depends(m_L, m_sigma,m_param->DeltaMSq23)
     .func(&OscProbPMNSDecoh::calcComponent<2,3>);
-   auto& probsum = transformation_("probsum")
+   auto probsum = transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")

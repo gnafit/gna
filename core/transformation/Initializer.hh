@@ -1,6 +1,7 @@
 #pragma once
 
 #include <utility>
+#include <memory>
 #include "TransformationEntry.hh"
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
@@ -18,11 +19,6 @@ namespace TransformationTypes {
     static bool hasDefaultFunction() { return context_default_function.size()>0; }
     static void setDefaultFunction(const std::string& fcn) { context_default_function=fcn=="main"?"":fcn; }
     static const std::string& getDefaultFunction() { return context_default_function; }
-
-  protected:
-    InitializerBase() = default;
-    InitializerBase(const InitializerBase&) = delete;
-
 
   private:
     static std::string context_default_function;
@@ -128,25 +124,8 @@ namespace TransformationTypes {
      * @param name -- new Entry name.
      */
     InitializerT(TransformationBindType *obj, const std::string &name)
-      : m_entry(new EntryType(name, obj)), m_obj(obj)
-    {
-      printf("Initializing + %i, %p, entry %p\n", (int)m_entry->initializing, (void*)this, (void*)m_entry);
-    }
-
-    InitializerT(const InitializerType& other) = delete;
-
-    InitializerT(InitializerType&& other) noexcept
-      : m_entry(other.m_entry),
-        m_obj(other.m_obj),
-        m_mfuncs((std::move(other.m_mfuncs))),
-        m_mtfuncs(std::move(other.m_mtfuncs)),
-        m_mstfuncs(std::move(other.m_mstfuncs)),
-        m_nosubscribe(other.m_nosubscribe),
-        m_noautotype(other.m_noautotype)
-    {
-      other.m_entry=nullptr;
-      other.m_entry=nullptr;
-    }
+      : m_data(new InitializerData(new EntryType(name, obj), obj))
+    { }
 
     /**
      * @brief Destructor.
@@ -156,15 +135,16 @@ namespace TransformationTypes {
      * which adds Entry instance to the Base.
      */
     ~InitializerT() {
-      if (!m_entry) {
+      if (!m_data->entry) {
         return;
       }
-      printf("Destructor - %i, %p, entry %p\n", (int)m_entry->initializing, (void*)this, (void*)m_entry);
       if (std::uncaught_exception()) {
-        delete m_entry;
+        delete m_data->entry;
         return;
       }
-      this->add();
+      if(m_data.use_count()==1) {
+        this->add();
+      }
     }
     /**
      * @brief Add the Entry to the Base.
@@ -173,42 +153,44 @@ namespace TransformationTypes {
      *   - checks that the number of Entry instances in the Base does not
      *     exceed the maximal number of allowed entries.
      *   - passes TypesFunctions::passAll() as TypeFunction if no TypeFunction objects are provided.
-     *   - subscribes the Entry to the Base's taint flag unless Initializer::m_nosubscribe is set.
+     *   - subscribes the Entry to the Base's taint flag unless Initializer::m_data->nosubscribe is set.
      *   - adds the Entry to the Base.
      *   - adds MemFunction, MemTypesFunction and StorageMemTypesFunction
-     *     objects to the TransformationBind instance Initializer::m_obj.
+     *     objects to the TransformationBind instance Initializer::m_data->obj.
      *
      * @note while Function, TypeFunction and StorageTypesFunction objects are kept within Entry
      * instance, MemFunction, MemTypesFunction and MemStorageTypesFunction instances are managed via
-     * TransformationBind instance (Initializer::m_obj).
+     * TransformationBind instance (Initializer::m_data->obj).
      */
     void add() {
-      if (m_obj->m_maxEntries &&
-          m_obj->m_entries.size()+1 > m_obj->m_maxEntries) {
+      auto* obj = m_data->obj;
+      auto* entry = m_data->entry;
+      if (obj->m_maxEntries &&
+          obj->m_entries.size()+1 > obj->m_maxEntries) {
         throw std::runtime_error("too much transformations");
       }
-      if (m_entry->typefuns.empty() && m_entry->typeclasses.empty() && !m_noautotype) {
-        m_entry->typefuns.push_back(TypesFunctions::passAllT<SinkFloatType>);
+      if (entry->typefuns.empty() && entry->typeclasses.empty() && !m_data->noautotype) {
+        entry->typefuns.push_back(TypesFunctions::passAllT<SinkFloatType>);
       }
-      if (!m_nosubscribe) {
-        m_obj->obj()->subscribe(m_entry->tainted);
+      if (!m_data->nosubscribe) {
+        obj->obj()->subscribe(entry->tainted);
       }
       if(hasDefaultFunction()){
         auto& fcn = getDefaultFunction();
-        m_entry->switchFunction(fcn);
+        entry->switchFunction(fcn);
       }
 
-      size_t idx = m_obj->addEntry(m_entry);
-      m_entry = nullptr;
-      for (const auto& kv: m_mfuncs) {
-        m_obj->addMemFunction(idx, kv.first, kv.second);
+      size_t idx = obj->addEntry(entry);
+      m_data->entry = nullptr;
+      for (const auto& kv: m_data->mfuncs) {
+        obj->addMemFunction(idx, kv.first, kv.second);
       }
-      for (const auto &f: m_mtfuncs) {
-        m_obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
+      for (const auto &f: m_data->mtfuncs) {
+        obj->addMemTypesFunction(idx, std::get<0>(f), std::get<1>(f));
       }
-      for (const auto &kv: m_mstfuncs) {
+      for (const auto &kv: m_data->mstfuncs) {
         for (const auto &f: kv.second){
-          m_obj->addMemStorageTypesFunction(idx, kv.first, std::get<0>(f), std::get<1>(f));
+          obj->addMemStorageTypesFunction(idx, kv.first, std::get<0>(f), std::get<1>(f));
         }
       }
     }
@@ -222,7 +204,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& input(const std::string &name, bool inactive=false) {
-      m_entry->addSource(name, inactive);
+      m_data->entry->addSource(name, inactive);
       return *this;
     }
 
@@ -235,7 +217,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& output(const std::string &name) {
-      m_entry->addSink(name);
+      m_data->entry->addSink(name);
       return *this;
     }
 
@@ -261,15 +243,15 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& func(const std::string& name, Function afunc) {
-      if( m_entry->functions.find(name)!=m_entry->functions.end() ){
+      if( m_data->entry->functions.find(name)!=m_data->entry->functions.end() ){
         auto msg = fmt::format("mem function {0} already exists", name.data());
         throw std::runtime_error(msg);
       }
-      m_entry->functions[name]={afunc, {}};
+      m_data->entry->functions[name]={afunc, {}};
 
       if(name=="main"){
-        m_entry->fun=afunc;
-        m_entry->funcname="main";
+        m_data->entry->fun=afunc;
+        m_data->entry->funcname="main";
       }
       return *this;
     }
@@ -280,7 +262,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& switchFunc(const std::string& name) {
-      m_entry->initFunction(name);
+      m_data->entry->initFunction(name);
       return *this;
     }
 
@@ -290,7 +272,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& label(const std::string &label) {
-      m_entry->label=label;
+      m_data->entry->label=label;
       return *this;
     }
 
@@ -303,7 +285,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& func(MemFunction mfunc) {
-      printf("memfunc %p entry %p\n", (void*)this, (void*)m_entry);
+      printf("memfunc %p entry %p\n", (void*)this, (void*)m_data->entry);
       this->func("main", mfunc);
       return *this;
     }
@@ -320,8 +302,8 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& func(const std::string& name, MemFunction mfunc) {
-      m_mfuncs[name]=mfunc;
-      this->func(name, m_obj->template bind<>(mfunc));
+      m_data->mfuncs[name]=mfunc;
+      this->func(name, m_data->obj->template bind<>(mfunc));
       return *this;
     }
 
@@ -331,7 +313,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& types(TypesFunction func) {
-      m_entry->typefuns.push_back(func);
+      m_data->entry->typefuns.push_back(func);
       return *this;
     }
 
@@ -341,7 +323,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& types(TypeClass* cls) {
-      m_entry->typeclasses.push_back(cls);
+      m_data->entry->typeclasses.push_back(cls);
       return *this;
     }
 
@@ -355,8 +337,8 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& types(MemTypesFunction func) {
-      m_mtfuncs.emplace_back(m_entry->typefuns.size(), func);
-      m_entry->typefuns.push_back(m_obj->template bind<>(func));
+      m_data->mtfuncs.emplace_back(m_data->entry->typefuns.size(), func);
+      m_data->entry->typefuns.push_back(m_data->obj->template bind<>(func));
       return *this;
     }
 
@@ -388,7 +370,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& storage(const std::string& name, StorageTypesFunction func) {
-      auto& fd = m_entry->functions.at(name);
+      auto& fd = m_data->entry->functions.at(name);
       fd.typefuns.emplace_back(func);
       return *this;
     }
@@ -401,9 +383,9 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& storage(const std::string& name, MemStorageTypesFunction func) {
-      auto& fd = m_entry->functions.at(name);
-      m_mstfuncs[name].emplace_back(fd.typefuns.size(), func);
-      fd.typefuns.push_back(m_obj->template bind<>(func));
+      auto& fd = m_data->entry->functions.at(name);
+      m_data->mstfuncs[name].emplace_back(fd.typefuns.size(), func);
+      fd.typefuns.push_back(m_data->obj->template bind<>(func));
       return *this;
     }
 
@@ -415,7 +397,7 @@ namespace TransformationTypes {
      * that transformation has no inputs and its DataType may be derived immediately.
      */
     InitializerType& finalize() {
-      m_entry->evaluateTypes();
+      m_data->entry->evaluateTypes();
       return *this;
     }
 
@@ -459,7 +441,7 @@ namespace TransformationTypes {
      * to any taintflag. The user has to call Initializer::depends() explicitly for each
      * taintflag emitter.
      *
-     * I.e. the Initializer::m_nosubscribe flag is set.
+     * I.e. the Initializer::m_data->nosubscribe flag is set.
      *
      * @tparam Changeable -- the changeable type.
      * @param v -- changeable with ::subscribe() method.
@@ -467,8 +449,8 @@ namespace TransformationTypes {
      */
     template <typename Changeable>
     InitializerType& depends(Changeable v) {
-      v.subscribe(m_entry->tainted);
-      m_nosubscribe = true;
+      v.subscribe(m_data->entry->tainted);
+      m_data->nosubscribe = true;
       return *this;
     }
 
@@ -492,13 +474,13 @@ namespace TransformationTypes {
     /**
      * @brief Disable automatic Entry subscription to the taintflag emissions.
      *
-     * Sets the Initializer::m_nosubscribe flag and disables subscription to
+     * Sets the Initializer::m_data->nosubscribe flag and disables subscription to
      * the Base taintflag emission.
      *
      * @return `*this`
      */
     InitializerType& dont_subscribe() {
-      m_nosubscribe = true;
+      m_data->nosubscribe = true;
       return *this;
     }
 
@@ -508,19 +490,26 @@ namespace TransformationTypes {
      * @return `*this`
      */
     InitializerType& no_autotype() {
-      m_noautotype = true;
-      printf("set %i\n", (int)m_noautotype);
+      m_data->noautotype = true;
+      printf("set %i\n", (int)m_data->noautotype);
       return *this;
     }
   protected:
-    EntryType *m_entry{nullptr};           ///< New Entry pointer.
-    TransformationBindType *m_obj{nullptr};///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
+    class InitializerData{
+    public:
+      InitializerData(EntryType* aentry, TransformationBindType* aobj) :
+        entry(aentry), obj(aobj) {}
+      EntryType *entry{nullptr};           ///< New Entry pointer.
+      TransformationBindType *obj{nullptr};///< The TransformationBind object managing MemFunction and MemTypesFunction objects.
 
-    MemFunctionMap m_mfuncs;               ///< MemFunction objects.
-    MemTypesFunctionMap m_mtfuncs;         ///< MemTypesFunction objects.
-    MemStorageTypesFunctionMap m_mstfuncs; ///< MemStorageTypesFunction objects.
+      MemFunctionMap mfuncs;               ///< MemFunction objects.
+      MemTypesFunctionMap mtfuncs;         ///< MemTypesFunction objects.
+      MemStorageTypesFunctionMap mstfuncs; ///< MemStorageTypesFunction objects.
 
-    bool m_nosubscribe{false};             ///< Flag forbidding automatic subscription to Base taintflag emissions.
-    bool m_noautotype{false};              ///< Do not add automatic passAll type function.
+      bool nosubscribe{false};             ///< Flag forbidding automatic subscription to Base taintflag emissions.
+      bool noautotype{false};              ///< Do not add automatic passAll type function.
+    };
+
+    std::shared_ptr<InitializerData> m_data; ///<
   }; /* class Initializer */
 }

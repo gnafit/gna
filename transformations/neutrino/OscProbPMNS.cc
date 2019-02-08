@@ -128,7 +128,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP);
   }
-  auto& probsum = transformation_("probsum")
+  auto probsum = transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
