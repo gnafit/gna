@@ -13,7 +13,8 @@ using TransformationTypes::SourceTypeError;
  * @return exception.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-SourceTypeError<SourceT<SourceFloatType>> AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
+typename AtypesT<SourceFloatType,SinkFloatType>::ErrorType
+AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::string &message) {
   const SourceImpl *source = nullptr;
   for (size_t i = 0; i < m_entry->sources.size(); ++i) {
     auto& lsource=m_entry->sources[i];
@@ -22,7 +23,7 @@ SourceTypeError<SourceT<SourceFloatType>> AtypesT<SourceFloatType,SinkFloatType>
       break;
     }
   }
-  return SourceTypeError<SourceImpl>(source, message);
+  return ErrorType(source, message);
 }
 
 template class TransformationTypes::AtypesT<double,double>;

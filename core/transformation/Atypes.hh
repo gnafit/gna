@@ -24,6 +24,7 @@ namespace TransformationTypes
     using EntryImpl  = EntryT<SourceFloatType,SinkFloatType>;
     using SourceImpl = SourceT<SourceFloatType>;
     using SinkImpl   = SinkT<SourceFloatType>;
+    using ErrorType  = SourceTypeError<SourceImpl>;
 
     /**
      * @brief An exception for uninitialized Source instance
@@ -60,7 +61,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SourceTypeError<SourceImpl> error(const DataType &dt, const std::string &message = "");
+    ErrorType error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name

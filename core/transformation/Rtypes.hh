@@ -28,6 +28,7 @@ namespace TransformationTypes
     using EntryImpl = EntryT<SourceFloatType,SinkFloatType>;
     using DataImpl  = Data<SourceFloatType>;
     using SinkImpl  = SinkT<SourceFloatType>;
+    using ErrorType = SinkTypeError<SinkImpl>;
     /**
      * @brief Rtypes constructor.
      *
@@ -65,7 +66,7 @@ namespace TransformationTypes
      * @param message -- exception message.
      * @return exception.
      */
-    SinkTypeError<SinkImpl> error(const DataType &dt, const std::string &message = "");
+    ErrorType error(const DataType &dt, const std::string &message = "");
 
     /**
      * @brief Get Entry's name

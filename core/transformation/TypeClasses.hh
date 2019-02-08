@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <fmt/format.h>
+#include <fmt/printf.h>
 
 #include "TransformationFunctionArgs.hh"
 
@@ -55,7 +56,6 @@ namespace TypeClasses{
             if(singular()){
                 printf(" (singular)");
             }
-            printf("\n");
         }
 
         void dump(size_t size){
@@ -65,7 +65,7 @@ namespace TypeClasses{
             }
             size_t begin, end;
             getRangeAbs(size, begin, end, false);
-            printf(" for size %zu: %zu->%zu\n", size, begin, end);
+            printf(" for size %zu: %zu->%zu", size, begin, end);
         }
     private:
         void getRangeAbs(int size, size_t &begin, size_t &end, bool strict=true) const {
@@ -169,6 +169,11 @@ namespace TypeClasses{
             }
         }
 
+        void dump(){
+            const char* names[] = {"types", "shapes", "kinds"};
+            printf("TypeClass check same %s: args ", names[static_cast<size_t>(m_comparison)]);
+            m_argsrange.dump();
+        }
     private:
         Range m_argsrange;
 
@@ -206,6 +211,12 @@ namespace TypeClasses{
             }
         }
 
+        void dump(){
+            printf("TypeClass pass type: args ");
+            m_argsrange.dump();
+            printf("rets ");
+            m_retsrange.dump();
+        }
     private:
         Range m_argsrange;
         Range m_retsrange;
@@ -243,12 +254,20 @@ namespace TypeClasses{
             }
         }
 
+        void dump(){
+            printf("TypeClass pass each type: args ");
+            m_argsrange.dump();
+            printf("rets ");
+            m_retsrange.dump();
+        }
     private:
         void error(size_t nargs, size_t nrets){
             printf("Args: ");
             m_argsrange.dump(nargs);
+            printf("\n");
             printf("Rets: ");
             m_retsrange.dump(nrets);
+            printf("\n");
             throw std::runtime_error("Inconsistent ranges\n");
         }
         Range m_argsrange;

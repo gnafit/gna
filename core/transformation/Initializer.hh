@@ -285,7 +285,6 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& func(MemFunction mfunc) {
-      printf("memfunc %p entry %p\n", (void*)this, (void*)m_data->entry);
       this->func("main", mfunc);
       return *this;
     }
@@ -491,7 +490,6 @@ namespace TransformationTypes {
      */
     InitializerType& no_autotype() {
       m_data->noautotype = true;
-      printf("set %i\n", (int)m_data->noautotype);
       return *this;
     }
   protected:
@@ -510,6 +508,6 @@ namespace TransformationTypes {
       bool noautotype{false};              ///< Do not add automatic passAll type function.
     };
 
-    std::shared_ptr<InitializerData> m_data; ///<
+    std::shared_ptr<InitializerData> m_data; ///< Shared pointer to data, ensures that there is only one copy and initialization done before the last reference is destroyed.
   }; /* class Initializer */
 }

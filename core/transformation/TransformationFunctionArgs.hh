@@ -71,11 +71,14 @@ namespace TransformationTypes
   template<typename SourceFloatType, typename SinkFloatType>
   struct TypesFunctionArgsT {
     using EntryType = EntryT<SourceFloatType,SinkFloatType>;
+    using Atypes = AtypesT<SourceFloatType,SinkFloatType>;
+    using Rtypes = RtypesT<SourceFloatType,SinkFloatType>;
+    using Itypes = ItypesT<SourceFloatType,SinkFloatType>;
     TypesFunctionArgsT(EntryType* e) : args(e), rets(e), ints(e) {  } ///< Constructor.
 
-    AtypesT<SourceFloatType,SinkFloatType> args; ///< arguments'/inputs' data types (read-only)
-    RtypesT<SourceFloatType,SinkFloatType> rets; ///< return values'/outputs' data  types (writable)
-    ItypesT<SourceFloatType,SinkFloatType> ints; ///< preallocated storage's data types (writable)
+    Atypes args; ///< arguments'/inputs' data types (read-only)
+    Rtypes rets; ///< return values'/outputs' data  types (writable)
+    Itypes ints; ///< preallocated storage's data types (writable)
   };
 
   /**

@@ -2,10 +2,12 @@
 
 #include <stdio.h>
 #include <vector>
+#include <iostream>
 #include "fmt/format.h"
 #include "GNAObject.hh"
 #include "OpenHandle.hh"
 #include "TypeClasses.hh"
+#include "TransformationErrors.hh"
 
 namespace GNA{
     namespace GNAObjectTemplates{
@@ -61,6 +63,17 @@ namespace GNA{
           void add_typeclass(TypeClass* tcls){
             auto* entry = OpenHandleT<FloatType,FloatType>(transformations.back()).getEntry();
             entry->typeclasses.push_back(tcls);
+          }
+
+          bool process_types(){
+              try {
+                  OpenHandleT<FloatType,FloatType>(transformations.back()).getEntry()->evaluateTypes();
+              }
+              catch(const std::runtime_error& ex) {
+                  std::cout<<ex.what()<<std::endl;
+                  return false;
+              }
+              return true;
           }
 
           void dummytype_fcn(FunctionArgs& fargs){
