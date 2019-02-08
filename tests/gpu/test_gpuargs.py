@@ -100,5 +100,5 @@ if __name__ == "__main__":
     parser.add_argument('function', default='host', nargs='?',
                                     choices=['host', 'device'])
 
-    test_io(parser.parse_args())
-    #test_vars(parser.parse_args())
+#    test_io(parser.parse_args())
+    test_vars(parser.parse_args())

@@ -121,7 +121,6 @@ namespace TransformationTypes{
 	    h_shape_pointers_dev.push_back(std::next(d_shapes, h_offsets[i]));
 	}
         copyH2D_ALL<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
-	printf("allocated %p %p %p %zu\n", (void*)d_pointers_dev, (void*)d_shapes, (void*)d_shape_pointers_dev, h_shape_pointers_dev.size());
     }
 
     /**

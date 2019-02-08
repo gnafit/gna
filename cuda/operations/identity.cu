@@ -1,5 +1,4 @@
 #include "cuElementary.hh"
-
 #include "cuda_config_vars.h"
 
 template<typename T>

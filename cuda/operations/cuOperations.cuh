@@ -25,7 +25,13 @@ __device__ void inverse <float> (float* in, float* out) {
 template <>
 __device__ void inverse <double> (double* in, double* out) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        __drcp_rn(in[idx]); // TODO check if out == 0 by default
+        out[idx] = __drcp_rn(in[idx]); // TODO check if out == 0 by default
+}
+
+template <>
+__device__ void inverse <size_t> (size_t* in, size_t* out) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        out[idx] =in[idx]; // TODO check if out == 0 by default
 }
 
 

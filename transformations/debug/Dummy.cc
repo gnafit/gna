@@ -1,4 +1,5 @@
 #include "Dummy.hh"
+#include "cuElementary.hh"
 
 using TransformationTypes::GPUShape;
 
@@ -50,3 +51,4 @@ void Dummy::dummy_gpuargs_h(FunctionArgs& fargs){
 
     gpuargs->dump();
 }
+
