@@ -55,7 +55,7 @@ namespace GNA{
           /** @brief Add an output by name */
           OutputDescriptor add_output(const std::string& name=""){
             auto trans = transformations.back();
-            auto output = trans.output(name.size() ? name : fmt::format( "output_{:02d}", trans.inputs.size()));
+            auto output = trans.output(name.size() ? name : fmt::format( "output_{:02d}", trans.outputs.size()));
             trans.updateTypes();
             return OutputDescriptor(output);
           }

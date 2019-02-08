@@ -1,7 +1,8 @@
 #include "MultiSum.hh"
-#include "TypesFunctions.hh"
+#include "TypeClasses.hh"
 
 using GNA::GNAObjectTemplates::MultiSumT;
+using namespace TypeClasses;
 
 template<typename FunctionArgsType> void multisum(FunctionArgsType& fargs);
 
@@ -19,14 +20,14 @@ BindClass("sum", "item", "sum")
  * @brief Construct MultiSumT from vector of SingleOutput instances
  */
 template<typename FloatType>
-MultiSumT<FloatType>::MultiSumT(const OutputDescriptor::OutputDescriptors& outputs) : MultiSumT() {
+MultiSumT<FloatType>::MultiSumT(const typename MultiSumT<FloatType>::OutputDescriptors& outputs) : MultiSumT() {
     this->add_inputs(outputs);
 }
 
 template<typename FloatType>
-TransformationDescriptor MultiSumT<FloatType>::add_transformation(const std::string& name){
+typename MultiSumT<FloatType>::TransformationDescriptor MultiSumT<FloatType>::add_transformation(const std::string& name){
     this->transformation_(new_transformation_name(name))
-        .types(TypesFunctions::ifSame, TypesFunctions::passToRange<0,0,-1>)
+        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0,{0,-1}))
         .func(&multisum<FunctionArgs>);
     add_output();
     add_input();
@@ -57,5 +58,5 @@ void multisum(FunctionArgsType& fargs){
 
 template class GNA::GNAObjectTemplates::MultiSumT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  //template class GNA::GNAObjectTemplates::MultiSumT<float>;
+  template class GNA::GNAObjectTemplates::MultiSumT<float>;
 #endif

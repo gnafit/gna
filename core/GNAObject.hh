@@ -82,6 +82,7 @@ protected:
   using TransformationBaseType::t_;
 
   using OutputDescriptor = OutputDescriptorT<SourceFloatType,SinkFloatType>;
+  using OutputDescriptors = typename OutputDescriptor::OutputDescriptors;
   using InputDescriptor = InputDescriptorT<SourceFloatType,SinkFloatType>;
   using SingleOutput = SingleOutputT<SinkFloatType>;
 

@@ -33,7 +33,7 @@ class precision(object):
         _set_current_precision(self.precision)
 
     def __exit__(self, *args):
-        __set_current_precision(self.old_precision)
+        _set_current_precision(self.old_precision)
 
 class cuda(object):
     """Context manager for GPU

@@ -22,6 +22,8 @@ namespace GNA{
             using BaseClass = GNAObjectT<FloatType,FloatType>;
             using BindClass = GNAObjectBindMN<FloatType>;
 
+            using typename BaseClass::OutputDescriptors;
+            using TransformationDescriptor = typename BaseClass::TransformationDescriptorType;
             using BaseClass::transformations;
 
             using BindClass::new_transformation_name;
@@ -33,8 +35,8 @@ namespace GNA{
             using typename BaseClass::FunctionArgs;
             using typename BaseClass::TypesFunctionArgs;
 
-            MultiSumT();                                                   ///< Constructor.
-            MultiSumT(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct MultiSum from vector of outputs
+            MultiSumT();                                 ///< Constructor.
+            MultiSumT(const OutputDescriptors& outputs); ///< Construct MultiSum from vector of outputs
 
             TransformationDescriptor add_transformation(const std::string& name=""); ///< Add new transformation
         };

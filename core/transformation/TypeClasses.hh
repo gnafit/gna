@@ -107,7 +107,7 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
-    class CheckSameTypesT : TypeClassT<FloatType> {
+    class CheckSameTypesT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;
         using SelfClass = CheckSameTypesT<FloatType>;
@@ -187,7 +187,7 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
-    class PassTypeT : TypeClassT<FloatType> {
+    class PassTypeT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;
         using SelfClass = PassTypeT<FloatType>;
@@ -223,7 +223,7 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
-    class PassEachTypeT : TypeClassT<FloatType> {
+    class PassEachTypeT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;
         using SelfClass = PassEachTypeT<FloatType>;

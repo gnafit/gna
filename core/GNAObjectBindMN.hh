@@ -11,6 +11,7 @@ public:
     using typename GNAObject::SingleOutput;
     using typename GNAObject::OutputDescriptor;
     using typename GNAObject::InputDescriptor;
+    using TransformationDescriptor = typename GNAObject::TransformationDescriptorType;
     using OutputDescriptors = typename OutputDescriptor::OutputDescriptors;
 
     GNAObjectBindMN(const std::string& transformation, const std::string& input, const std::string& output);

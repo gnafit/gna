@@ -17,7 +17,7 @@ std::string GNAObjectBindMN<FloatType>::new_transformation_name(const std::strin
 }
 
 template<typename FloatType>
-TransformationDescriptor GNAObjectBindMN<FloatType>::add_transformation(const std::string& name){
+typename GNAObjectBindMN<FloatType>::TransformationDescriptor GNAObjectBindMN<FloatType>::add_transformation(const std::string& name){
     throw std::runtime_error(fmt::format("Unimplemented method add_transformation ({0}, {1})", m_transformation_name, name));
 }
 
