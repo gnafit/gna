@@ -83,12 +83,12 @@ def GNAObject______rshift__(obj, inputs):
 
 
 @patchROOTClass(classes, '__rlshift__')
-def GNAObject______rlshift__(obj, inputs):
+def GNAObject____rlshift__(obj, inputs):
     '''inputs(argument)<<outputs(self)'''
     obj.single()>>inputs
 
 @patchROOTClass(classes, '__lshift__')
-def GNAObject______lshift__(obj, output):
+def GNAObject____lshift__(obj, output):
     '''inputs(obj)<<output(arg)'''
     output>>obj.single_input()
 

@@ -279,40 +279,45 @@ def setup(ROOT):
     importcommon()
     legacytypes()
 
-def patchROOTClass(objects=None, methods=None):
+def patchROOTClass(classes=None, methods=None):
     """Decorator to override ROOT class methods. Usage
     @patchclass
     def CLASSNAME__METHODNAME(self,...)
 
-    @patchclass( CLASSNAME, METHODNAME )
+    @patchclass(CLASSNAME, METHODNAME)
     def function(self,...)
 
-    @patchclass( ROOT.CLASS, METHODNAME )
+    @patchclass(ROOT.CLASS, METHODNAME)
     def function(self,...)
 
     @patchclass( [ROOT.CLASS1, ROOT.CLASS2,...], METHODNAME )
     def function(self,...)
     """
     function=None
-    if isinstance(objects, types.FunctionType):
-        function = objects
-        objects, methods = function.__name__.split( '__', 1 )
 
-    if not isinstance(objects, (list,tuple)):
-        objects = (objects,)
+    # Used as decorator
+    if isinstance(classes, types.FunctionType):
+        function = classes
+        classname, method = function.__name__.split( '__', 1 )
+        setattr(getattr(ROOT, classname), method, function)
+        return
 
-    if methods and not isinstance(methods, (list,tuple)):
+    # Used as function returning decorator
+    if not isinstance(classes, (list,tuple)):
+        classes = (classes,)
+
+    classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
+
+    if methods is not None and not isinstance(methods, (list,tuple)):
         methods = (methods,)
 
-    def converter( fcn ):
-        for o in objects:
-            if type(o)==str:
-                o = getattr( ROOT, o )
-            for method in methods:
-                setattr(o, method, fcn)
-        return fcn
+    def decorator(function):
+        lmethods = methods
+        if lmethods is None:
+            lmethods = function.__name__.split( '__', 1 )[1],
+        for cls in classes:
+            for method in lmethods:
+                setattr(cls, method, function)
+        return function
 
-    if function:
-        return converter( function )
-
-    return converter
+    return decorator
