@@ -409,7 +409,6 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
-
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
             ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
@@ -436,10 +435,10 @@ class exp(baseexp):
         'enu| ee(evis()), ctheta()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        'ff_nom = fission_fraction_nom[i,r]',
-        'ff = fission_fractions_add[i,r]()*ff_nom',
+        'ff_corr = fission_fraction_corr[i,r]',
+        'ff = fission_fractions_add[i,r]()*ff_corr',
         'denom = sum[i] | eper_fission[i]*ff',
-        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()*ff_nom / denom',
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()*ff_corr / denom',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
         'eres_matrix| evis_hist()',

@@ -29,9 +29,9 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
     @staticmethod
     def _provides(cfg):
         if not cfg.add_ff:
-            return ('fission_fraction_nom',), ('thermal_power', 'fission_fractions',)
+            return ('fission_fraction_corr',), ('thermal_power', 'fission_fractions',)
         else:
-            return ('fission_fraction_nom',), ('thermal_power', 'fission_fractions', 'fission_fractions_add')
+            return ('fission_fraction_corr',), ('thermal_power', 'fission_fractions', 'fission_fractions_add')
 
     def init_data(self):
         try:
@@ -64,7 +64,7 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
 
                 iso_idx = isotopes.index(iso_name)
                 relsigma = relsigmas[iso_idx]
-                ff_name = it.current_format(name='fission_fraction_nom')
+                ff_name = it.current_format(name='fission_fraction_corr')
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
                 isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
