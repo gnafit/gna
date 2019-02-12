@@ -39,7 +39,6 @@ class reactor_anu_spectra_v03(TransformationBundle):
         sampler = interp_expo.transformations.front()
         model_edges_t >> sampler.inputs.edges
         sampler_input = sampler.inputs.points
-        interp_expo.bind_transformations(False)
 
         interp_expo_t = interp_expo.transformations.back()
         for i, it in enumerate(self.nidx_major):
@@ -59,8 +58,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
                 spectrum_t = spectrum_raw_t
 
             if i>0:
-                interp_expo_t = interp_expo.add_transformation(False)
-                interp_expo.bind_transformations(False)
+                interp_expo_t = interp_expo.add_transformation()
 
             model_edges_t >> interp_expo_t.inputs.x
             interp_output = interp_expo.add_input(spectrum_t)
