@@ -5,8 +5,10 @@
 
 namespace TransformationTypes
 {
-  struct Storage;
-  using StoragesContainer = boost::ptr_vector<Storage>;  ///< Container for Storage pointers.
+  template<typename FloatType> struct StorageT;
+
+  template<typename FloatType>
+  using StoragesContainerT = boost::ptr_vector<StorageT<FloatType>>;  ///< Container for Storage pointers.
 
   /**
    * @brief A class to keep transformation function information
@@ -22,10 +24,12 @@ namespace TransformationTypes
    * @author Maxim Gonchar
    * @date 18.07.2018
    */
-  struct FunctionDescriptor {
-    Function fun;                            ///< The pointer to the transformation Function
-    StorageTypesFunctionsContainer typefuns; ///< Container with TypesFunction specifying the storage requirements for this particular function
+  template<typename SourceFloatType, typename SinkFloatType>
+  struct FunctionDescriptorT {
+    FunctionT<SourceFloatType,SinkFloatType>                       fun;      ///< The pointer to the transformation Function
+    StorageTypesFunctionsContainerT<SourceFloatType,SinkFloatType> typefuns; ///< Container with TypesFunction specifying the storage requirements for this particular function
   };
 
-  using FunctionDescriptorsContainer = std::map<std::string, FunctionDescriptor>;
+  template<typename SourceFloatType, typename SinkFloatType>
+  using FunctionDescriptorsContainerT = std::map<std::string, FunctionDescriptorT<SourceFloatType,SinkFloatType>>;
 }

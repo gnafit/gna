@@ -10,21 +10,19 @@
 #include "InputHandle.hh"
 #include "OutputHandle.hh"
 #include "Atypes.hh"
-#include "Rtypes.hh"
 #include "TransformationErrors.hh"
+#include "TypeClasses.hh"
+#include "GPUFunctionArgs.hh"
 
-using TransformationTypes::Base;
-using TransformationTypes::Entry;
-
-using TransformationTypes::Atypes;
-using TransformationTypes::Rtypes;
-
-using TransformationTypes::Source;
-using TransformationTypes::Sink;
-using TransformationTypes::OutputHandle;
-using TransformationTypes::InputHandle;
-
+using TransformationTypes::BaseT;
+using TransformationTypes::EntryT;
+using TransformationTypes::AtypesT;
+using TransformationTypes::OutputHandleT;
+using TransformationTypes::InputHandleT;
 using TransformationTypes::TypeError;
+
+template<typename FloatType>
+using TypeClassT = TypeClasses::TypeClassT<FloatType>;
 
 /**
  * @brief Constructor.
@@ -32,8 +30,10 @@ using TransformationTypes::TypeError;
  * @param name -- Entry's name.
  * @param parent -- Base class instance to hold the Entry.
  */
-Entry::Entry(const std::string &name, const Base *parent)
-  : name(name), label(name), parent(parent), tainted(name.c_str()), initializing(0)
+template<typename SourceFloatType, typename SinkFloatType>
+EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
+  : name(name), label(name), parent(parent), tainted(name.c_str()),
+    functionargs(new FunctionArgsType(this))
 { }
 
 /**
@@ -43,13 +43,25 @@ Entry::Entry(const std::string &name, const Base *parent)
  * @param other -- Entry to copy name, inputs and outputs from.
  * @param parent -- Base class instance to hold the Entry.
  */
-Entry::Entry(const Entry &other, const Base *parent)
+template<typename SourceFloatType, typename SinkFloatType>
+EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(other.name), label(other.label), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
-    fun(), typefuns(), tainted(other.name.c_str()), initializing(0)
+    mapping(other.mapping),
+    fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
+    functionargs(new FunctionArgsType(this))
 {
   initSourcesSinks(other.sources, other.sinks);
 }
+
+
+/**
+ * @brief Destructor.
+ *
+ * The destructor is defined explicitly in order to enable unique_ptr members to delete their objects.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+EntryT<SourceFloatType,SinkFloatType>::~EntryT<SourceFloatType,SinkFloatType>(){}
 
 /**
  * @brief Initialize the clones for inputs and outputs.
@@ -61,12 +73,14 @@ Entry::Entry(const Entry &other, const Base *parent)
  * @param inputs -- container for Source instances.
  * @param outputs -- container for Sink instances.
  */
+template<typename SourceFloatType, typename SinkFloatType>
 template <typename InsT, typename OutsT>
-void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
+void EntryT<SourceFloatType,SinkFloatType>::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
   std::transform(inputs.begin(), inputs.end(), std::back_inserter(sources),
-                 [this](const Source &s) { return new Source{s, this}; });
+                 [this](const SourceType &s) { return new SourceType{s, this}; });
   std::transform(outputs.begin(), outputs.end(), std::back_inserter(sinks),
-                 [this](const Sink &s) { return new Sink{s, this}; });
+                 [this](const SinkType &s) { return new SinkType{s, this}; });
+  functionargs->updateTypes();
 }
 
 /**
@@ -76,10 +90,11 @@ void Entry::initSourcesSinks(const InsT &inputs, const OutsT &outputs) {
  * @param inactive -- set source inactive (do not subscribe taintflag)
  * @return InputHandle for the new Source.
  */
-InputHandle Entry::addSource(const std::string &name, bool inactive) {
-  auto *s = new Source(name, this, inactive);
+template<typename SourceFloatType, typename SinkFloatType>
+InputHandleT<SourceFloatType> EntryT<SourceFloatType,SinkFloatType>::addSource(const std::string &name, bool inactive) {
+  auto *s = new SourceType(name, this, inactive);
   sources.push_back(s);
-  return InputHandle(*s);
+  return InputHandleType(*s);
 }
 
 /**
@@ -88,10 +103,11 @@ InputHandle Entry::addSource(const std::string &name, bool inactive) {
  * @param name -- new Sink's name.
  * @return Source for the new Sink.
  */
-OutputHandle Entry::addSink(const std::string &name) {
-  auto *s = new Sink(name, this);
+template<typename SourceFloatType, typename SinkFloatType>
+OutputHandleT<SinkFloatType> EntryT<SourceFloatType,SinkFloatType>::addSink(const std::string &name) {
+  auto *s = new SinkType(name, this);
   sinks.push_back(s);
-  return OutputHandle(*s);
+  return OutputHandleType(*s);
 }
 
 /**
@@ -102,13 +118,14 @@ OutputHandle Entry::addSink(const std::string &name) {
  *
  * @return true if everything is OK.
  */
-bool Entry::check() const {
-  for (const Source &s: sources) {
+template<typename SourceFloatType, typename SinkFloatType>
+bool EntryT<SourceFloatType,SinkFloatType>::check() const {
+  for (const SourceType &s: sources) {
     if (!s.materialized()) {
       return false;
     }
   }
-  for (const Source &s: sources) {
+  for (const SourceType &s: sources) {
     if (!s.sink->entry->check()) {
       return false;
     }
@@ -121,9 +138,9 @@ bool Entry::check() const {
  *
  * Does not reset the taintflag.
  */
-void Entry::evaluate() {
-  auto fargs = FunctionArgs(this);
-  return fun(fargs);
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::evaluate() {
+  return fun(*functionargs);
 }
 
 /**
@@ -131,12 +148,13 @@ void Entry::evaluate() {
  *
  * Handles exception and resets the taintflag.
  */
-void Entry::update() {
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::update() {
   Status status = Status::Success;
   try {
     evaluate();
     tainted = false;
-  } catch (const SinkTypeError&) {
+  } catch (const SinkTypeError<SinkType>&) {
     status = Status::Failed;
   }
   for (auto &sink: sinks) {
@@ -150,13 +168,14 @@ void Entry::update() {
  *
  * @param level -- indentation level.
  */
-void Entry::dump(size_t level) const {
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
   std::string spacing = std::string(level*2, ' ');
   std::cerr << spacing << "Transformation " << name << std::endl;
   if (sources.empty()) {
     std::cerr << spacing << "no inputs" << std::endl;
   }
-  for (const Source &s: sources) {
+  for (const SourceType &s: sources) {
     std::cerr << spacing << "Input " << s.name;
     if (!s.sink) {
       std::cerr << " NOT CONNECTED" << std::endl;
@@ -194,14 +213,18 @@ void Entry::dump(size_t level) const {
  *
  * @exception std::runtime_error in case any of type functions fails.
  */
-void Entry::evaluateTypes() {
-  TypesFunctionArgs fargs(this);
-  StorageTypesFunctionArgs sargs(fargs);
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
+  TypesFunctionArgsType fargs(this);
+  StorageTypesFunctionArgsType sargs(fargs);
   bool success = false;
   TR_DPRINTF("evaluating types for %s: \n", name.c_str());
   try {
     for (auto &typefun: typefuns) {
       typefun(fargs);
+    }
+    for (auto &typeclass: typeclasses) {
+      typeclass.processTypes(fargs);
     }
     auto& itypefuns=functions[funcname].typefuns;
     for (auto &typefun: itypefuns) {
@@ -212,11 +235,11 @@ void Entry::evaluateTypes() {
     TR_DPRINTF("types[%s]: failed\n", name.c_str());
     throw std::runtime_error(
       (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
-  } catch (const Atypes::Undefined&) {
+  } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
     TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
   if (success) {
-    std::set<Entry*> deps;
+    std::set<EntryType*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
     auto& rets=fargs.rets;
     for (size_t i = 0; i < sinks.size(); ++i) {
@@ -226,7 +249,7 @@ void Entry::evaluateTypes() {
         continue;
       }
       if (ret.defined()) {
-        sink.data.reset(new Data<double>(ret));
+        sink.data.reset(new SinkDataType(ret));
       }
       else{
         sink.data.reset();
@@ -235,24 +258,29 @@ void Entry::evaluateTypes() {
 #ifdef TRANSFORMATION_DEBUG
       sink.data->type.dump();
 #endif // TRANSFORMATION_DEBUG
-      for (Source *depsrc: sink.sources) {
+      for (auto *depsrc: sink.sources) {
         deps.insert(depsrc->entry);
       }
     }
-    for (Entry *dep: deps) {
+    for (auto *dep: deps) {
       dep->evaluateTypes();
     }
     initInternals(sargs);
   }
+
+  functionargs->requireGPU();
+  functionargs->updateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */
-void Entry::updateTypes() {
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::updateTypes() {
   evaluateTypes();
 }
 
 /** @brief Update the transformation if it is not frozen and tainted. */
-void Entry::touch() {
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::touch() {
   if (tainted) {
     update();
   }
@@ -266,15 +294,16 @@ void Entry::touch() {
  * @exception CalculationError in case invalid index is queried.
  * @exception CalculationError in case input data is undefined.
  */
-const Data<double> &Entry::data(int i) {
+template<typename SourceFloatType, typename SinkFloatType>
+const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
   if (i < 0 or static_cast<size_t>(i) > sinks.size()) {
     auto msg = fmt::format("invalid sink idx {0}, have {1} sinks", i, sinks.size());
-    throw CalculationError(this, msg);
+    throw CalculationError<EntryType>(this, msg);
   }
-  const Sink &sink = sinks[i];
+  const SinkType &sink = sinks[i];
   if (!sink.data) {
     auto msg = fmt::format("sink {0} ({1}) have no type", i, sink.name);
-    throw CalculationError(this, msg);
+    throw CalculationError<EntryType>(this, msg);
   }
   touch();
   return *sink.data;
@@ -289,16 +318,30 @@ const Data<double> &Entry::data(int i) {
  * @param name -- function name.
  * @exception std::runtime_error in case the function `name` does not exist.
  */
-void Entry::switchFunction(const std::string& name){
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name){
+  initFunction(name);
+  evaluateTypes();
+}
+
+/**
+ * @brief Use Function `name` as Entry::fun.
+ *
+ * The method replaces the transformation function Entry::fun with another function from the
+ * Entry::functions map.
+ *
+ * @param name -- function name.
+ * @exception std::runtime_error in case the function `name` does not exist.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name){
   auto it = functions.find(name);
   if(it==functions.end()){
     auto msg = fmt::format("invalid function name {0}", name.data());
     throw std::runtime_error(msg);
   }
   fun = it->second.fun;
-
   funcname=name;
-  evaluateTypes();
 }
 
 /**
@@ -308,7 +351,8 @@ void Entry::switchFunction(const std::string& name){
  *
  * @param fargs -- Storage TypesFunction arguments.
  */
-void Entry::initInternals(StorageTypesFunctionArgs& fargs){
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::initInternals(StorageTypesFunctionArgsT<SourceFloatType,SinkFloatType>& fargs){
   auto& itypes=fargs.ints;
 
   // Truncate storages in case less storages is required
@@ -328,8 +372,8 @@ void Entry::initInternals(StorageTypesFunctionArgs& fargs){
     }
 
     // create new storage and allocate memory (if needed)
-    auto* newstorage = new Storage(this);
-    newstorage->data.reset(new Data<double>(int_dtype));
+    auto* newstorage = new StorageType(this);
+    newstorage->data.reset(new Data<SourceFloatType>(int_dtype));
 
     // debug
     TR_DPRINTF("stypes[%s, %i %s]: ", name.c_str(), static_cast<int>(i), newstorage->name.c_str());
@@ -347,3 +391,7 @@ void Entry::initInternals(StorageTypesFunctionArgs& fargs){
   }
 }
 
+template class TransformationTypes::EntryT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::EntryT<float>;
+#endif

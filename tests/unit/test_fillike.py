@@ -18,10 +18,12 @@ def test_filllike():
     size = 5
     arr1 = N.arange(0, size)
     """Initialize environment"""
-    p1 = env.globalns.defparameter( 'w1', central=1.0, sigma=0.1 )
+    ns=env.globalns('test_filllike')
+    p1 = ns.defparameter( 'w1', central=1.0, sigma=0.1 )
     points1 = Points( arr1 )
 
-    ws = WeightedSum(['w1'], [points1.points.points])
+    with ns:
+        ws = WeightedSum(['w1'], [points1.points.points])
     ws.print()
     print()
 

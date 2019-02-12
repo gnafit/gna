@@ -3,12 +3,10 @@
 #include "GNAObject.hh"
 #include "Statistic.hh"
 
-
 class Poisson: public GNASingleObject,
-	       public TransformationBind<Poisson>,
-	       public Statistic	 {
+               public TransformationBind<Poisson>,
+               public Statistic  {
 public:
-
  Poisson(bool ln_approx = false) {
     transformation_("poisson")
         .output("poisson")
@@ -17,8 +15,6 @@ public:
       ;
     m_transform = t_["poisson"];
   }
-
-
 
   void add(SingleOutput &theory, SingleOutput &data);
 

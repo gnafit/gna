@@ -16,7 +16,8 @@
 #include "callback.hh"
 
 class ParametersGroup;
-class GNAObject;
+template <typename SourceFloatType,typename SinkFloatType>
+class GNAObjectT;
 namespace ParametrizedTypes {
   class Base;
   class Entry: public boost::noncopyable {
@@ -58,6 +59,7 @@ namespace ParametrizedTypes {
       m_entry->required = req;
       return *this;
     }
+    size_t hash() const {return m_entry->par.hash();}
     void dump() const;
   protected:
     void bind(variable<void> var) { m_entry->bind(var); }
@@ -142,6 +144,7 @@ namespace ParametrizedTypes {
 
     const std::string &name() const { return m_entry->name; }
 
+    size_t hash() const {return m_entry->dep.hash();}
     void dump() const;
   protected:
     EvaluableEntry *m_entry;
@@ -158,7 +161,8 @@ namespace ParametrizedTypes {
 
   class Base {
     friend class ::ParametersGroup;
-    friend class ::GNAObject;
+    template<typename SourceFloatType, typename SinkFloatType>
+    friend class ::GNAObjectT;
   public:
     Base(const Base &other);
     Base &operator=(const Base &other);
@@ -189,13 +193,17 @@ namespace ParametrizedTypes {
       m_callbacks.emplace_back(func, std::vector<changeable>{m_taintflag});
       return m_callbacks.back();
     }
+    //template <typename T>
+    //dependant<T> evaluable_(const std::string &name,
+                            //std::function<T()> func,
+                            //const std::vector<int> &sources);
     template <typename T>
     dependant<T> evaluable_(const std::string &name,
                             std::function<T()> func,
-                            const std::vector<int> &sources);
+                            const std::vector<changeable> &sources);
     template <typename T>
     dependant<T> evaluable_(const std::string &name,
-                            std::function<T()> func,
+                            size_t size, std::function<void(std::vector<T>&)> vfunc,
                             const std::vector<changeable> &sources);
 
     taintflag m_taintflag;
@@ -227,6 +235,26 @@ namespace ParametrizedTypes {
     }
     DPRINTFS("make evaluable: %i deps", int(sources.size()));
     dependant<T> dep = dependant<T>(func, sources, name.c_str());
+    m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
+    return dep;
+  }
+  template <typename T>
+  inline dependant<T>
+  Base::evaluable_(const std::string &name,
+                   size_t size, std::function<void(std::vector<T>&)> vfunc,
+                   const std::vector<changeable> &sources)
+  {
+    SourcesContainer depentries;
+    for (changeable chdep: sources) {
+      size_t i;
+      for (i = 0; i < m_entries.size(); ++i) {
+        if (m_entries[i].var.is(chdep)) {
+          depentries.push_back(&m_entries[i]);
+        }
+      }
+    }
+    DPRINTFS("make evaluable: %i deps", int(sources.size()));
+    dependant<T> dep = dependant<T>(vfunc, sources, name.c_str(), size);
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
     return dep;
   }

@@ -2,17 +2,16 @@
 
 #include <algorithm>
 
-using TransformationTypes::Entry;
-using TransformationTypes::Base;
-using TransformationTypes::Accessor;
-using TransformationTypes::Initializer;
+using TransformationTypes::EntryT;
+using TransformationTypes::BaseT;
 
 /**
  * @brief Clone constructor.
  * @copydetails Base::copyEntries
  * @param other -- the other Base.
  */
-Base::Base(const Base &other)
+template<typename SourceFloatType, typename SinkFloatType>
+BaseT<SourceFloatType,SinkFloatType>::BaseT(const BaseT<SourceFloatType,SinkFloatType> &other)
   : t_(*this), m_entries(other.m_entries.size())
 {
   this->copyEntries(other);
@@ -23,8 +22,9 @@ Base::Base(const Base &other)
  * @copydetails Base::copyEntries
  * @param other -- the other Base.
  */
-Base &Base::operator=(const Base &other) {
-  t_ = Accessor(*this);
+template<typename SourceFloatType, typename SinkFloatType>
+BaseT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::operator=(const BaseT<SourceFloatType,SinkFloatType> &other) {
+  t_ = AccessorType(*this);
   m_entries.reserve(other.m_entries.size());
   this->copyEntries(other);
   return *this;
@@ -37,10 +37,11 @@ Base &Base::operator=(const Base &other) {
  *
  * @param other -- the other Base to copy Entry instances from.
  */
-void Base::copyEntries(const Base &other) {
+template<typename SourceFloatType, typename SinkFloatType>
+void BaseT<SourceFloatType,SinkFloatType>::copyEntries(const BaseT<SourceFloatType,SinkFloatType> &other) {
   std::transform(other.m_entries.begin(), other.m_entries.end(),
                  std::back_inserter(m_entries),
-                 [this](const Entry &e) { return new Entry{e, this}; });
+                 [this](const EntryType &e) { return new EntryType{e, this}; });
 }
 
 /**
@@ -48,7 +49,8 @@ void Base::copyEntries(const Base &other) {
  * @param e -- new Entry.
  * @return the current number of Entry instances in the Base.
  */
-size_t Base::addEntry(Entry *e) {
+template<typename SourceFloatType, typename SinkFloatType>
+size_t BaseT<SourceFloatType,SinkFloatType>::addEntry(EntryT<SourceFloatType,SinkFloatType> *e) {
   size_t idx = m_entries.size();
   m_entries.push_back(e);
   return idx;
@@ -60,8 +62,9 @@ size_t Base::addEntry(Entry *e) {
  * @return Entry.
  * @exception KeyError in case there is no Entry with such a name.
  */
-Entry &Base::getEntry(const std::string &name) {
-  for (Entry &e: m_entries) {
+template<typename SourceFloatType, typename SinkFloatType>
+EntryT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::getEntry(const std::string &name) {
+  for (auto &e: m_entries) {
     if (e.name == name) {
       return e;
     }
@@ -69,3 +72,7 @@ Entry &Base::getEntry(const std::string &name) {
   throw KeyError(name, "transformation");
 }
 
+template class TransformationTypes::BaseT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class TransformationTypes::BaseT<float,float>;
+#endif

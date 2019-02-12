@@ -7,127 +7,154 @@
 #include "SingleOutput.hh"
 #include "SimpleDict.hh"
 
-class GNASingleObject;
+template<typename SourceFloatType, typename SinkFloatType> class OutputDescriptorT;
+template<typename SourceFloatType, typename SinkFloatType> class InputDescriptorT;
 
-class InputDescriptor;
-class OutputDescriptor;
+template<typename SourceFloatType, typename SinkFloatType>
+class GNASingleObjectT;
 
-class TransformationDescriptor: public TransformationTypes::Handle,
-                                public SingleOutput {
+template<typename SourceFloatType, typename SinkFloatType>
+class TransformationDescriptorT: public TransformationTypes::HandleT<SourceFloatType,SinkFloatType>,
+                                 public SingleOutputT<SinkFloatType> {
 public:
-  using BaseClass = TransformationTypes::Handle;
+  using TransformationDescriptorType = TransformationDescriptorT<SourceFloatType,SinkFloatType>;
+  using BaseClass = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
+  using EntryType = TransformationTypes::EntryT<SourceFloatType,SinkFloatType>;
 
-  using SourcesContainer = TransformationTypes::SourcesContainer;
-  using InputsBase = SimpleDict<InputDescriptor, SourcesContainer>;
+  using SourcesContainer = TransformationTypes::SourcesContainerT<SourceFloatType>;
+  using InputsBase = SimpleDict<InputDescriptorT<SourceFloatType,SinkFloatType>, SourcesContainer>;
   class Inputs;
 
-  using SinksContainer = TransformationTypes::SinksContainer;
-  using OutputsBase = SimpleDict<OutputDescriptor, SinksContainer>;
+  using SinksContainer = TransformationTypes::SinksContainerT<SinkFloatType>;
+  using OutputsBase = SimpleDict<OutputDescriptorT<SourceFloatType,SinkFloatType>, SinksContainer>;
   class Outputs;
+
+  using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
+
+  using GNASingleObjectType = GNASingleObjectT<SourceFloatType,SinkFloatType>;
+
+  using BaseClass::m_entry;
 
   class Inputs: public InputsBase {
   public:
     Inputs(SourcesContainer &container)
       : InputsBase(container) { }
     void operator()(const Outputs &other) const;
-    void operator()(const TransformationDescriptor &other) const;
-    void operator()(GNASingleObject &obj) const;
+    void operator()(const TransformationDescriptorType &other) const;
+    void operator()(GNASingleObjectType &obj) const;
   };
 
   class Outputs: public OutputsBase,
-                 public SingleOutput {
+                 public SingleOutputT<SinkFloatType> {
   public:
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }
 
-    TransformationTypes::OutputHandle single() override;
-    TransformationTypes::OutputHandle single() const;
+    OutputHandle single() override;
+    OutputHandle single() const;
   };
 
-  TransformationDescriptor(const BaseClass &other)
-    : Handle(other),
+  TransformationDescriptorT(const BaseClass &other)
+    : TransformationTypes::HandleT<SourceFloatType,SinkFloatType>(other),
       inputs(m_entry->sources),
       outputs(m_entry->sinks)
     { }
-  TransformationDescriptor(const TransformationDescriptor &other)
-    : TransformationDescriptor(BaseClass(other))
+  TransformationDescriptorT(const TransformationDescriptorType &other)
+    : TransformationDescriptorT(BaseClass(other))
     { }
-  TransformationDescriptor(TransformationTypes::Entry &entry)
-    : TransformationDescriptor(BaseClass(entry))
+  TransformationDescriptorT(EntryType &entry)
+    : TransformationDescriptorT(BaseClass(entry))
     { }
-  static TransformationDescriptor invalid(int index);
-  static TransformationDescriptor invalid(const std::string name);
+  static TransformationDescriptorType invalid(int index);
+  static TransformationDescriptorType invalid(const std::string name);
 
   const Inputs inputs;
   const Outputs outputs;
 
-  TransformationTypes::OutputHandle single() override;
+  OutputHandle single() override;
 };
 
-class InputDescriptor: public TransformationTypes::InputHandle {
+template<typename SourceFloatType, typename SinkFloatType>
+class InputDescriptorT: public TransformationTypes::InputHandleT<SourceFloatType> {
 public:
-  using BaseClass = TransformationTypes::InputHandle;
+  using InputDescriptorType          = InputDescriptorT<SourceFloatType,SinkFloatType>;
+  using OutputDescriptorType         = OutputDescriptorT<SourceFloatType,SinkFloatType>;
+  using BaseClass                    = TransformationTypes::InputHandleT<SourceFloatType>;
+  using OutputHandleType             = TransformationTypes::OutputHandleT<SinkFloatType>;
+  using GNASingleObjectType          = GNASingleObjectT<SourceFloatType,SinkFloatType>;
+  using TransformationDescriptorType = TransformationDescriptorT<SourceFloatType,SinkFloatType>;
+  using OutputsType                  = typename TransformationDescriptorType::Outputs;
 
-  InputDescriptor(const BaseClass &other)
+  InputDescriptorT(const BaseClass &other)
     : BaseClass(other)
     { }
-  InputDescriptor(const InputDescriptor &other)
-    : InputDescriptor(BaseClass(other))
+  InputDescriptorT(const InputDescriptorType &other)
+    : InputDescriptorType(BaseClass(other))
     { }
-  InputDescriptor(TransformationTypes::Source &source)
-    : InputDescriptor(BaseClass(source))
+  InputDescriptorT(TransformationTypes::SourceT<SourceFloatType> &source)
+    : InputDescriptorType(BaseClass(source))
     { }
-  static InputDescriptor invalid(int index);
-  static InputDescriptor invalid(const std::string name);
+  static InputDescriptorType invalid(int index);
+  static InputDescriptorType invalid(const std::string name);
 
-  void operator()(GNASingleObject &obj) const {
+  void operator()(GNASingleObjectType &obj) const {
     connect(obj);
   }
-  void operator()(const TransformationDescriptor &obj) const {
+  void operator()(const TransformationDescriptorType &obj) const {
     connect(obj);
   }
-  void operator()(const TransformationDescriptor::Outputs &outs) const {
+  void operator()(const OutputsType &outs) const {
     connect(outs);
   }
-  void operator()(const OutputDescriptor &out) const {
+  void operator()(const OutputDescriptorType &out) const {
     connect(out);
   }
-  void operator()(const TransformationTypes::OutputHandle &out) const {
+  void operator()(const OutputHandleType &out) const {
     connect(out);
   }
 
-  void connect(GNASingleObject &obj) const;
-  void connect(const TransformationDescriptor &obj) const;
-  void connect(const TransformationDescriptor::Outputs &outs) const;
-  void connect(const OutputDescriptor &out) const;
-  void connect(const TransformationTypes::OutputHandle &out) const;
+  void connect(GNASingleObjectType &obj) const;
+  void connect(const TransformationDescriptorType &obj) const;
+  void connect(const OutputsType &outs) const;
+  void connect(const OutputDescriptorType &out) const;
+  void connect(const OutputHandleType &out) const;
 
-  inline const OutputDescriptor output() const;
+  inline const OutputDescriptorType output() const;
 };
 
-class OutputDescriptor: public TransformationTypes::OutputHandle,
-                        public SingleOutput {
+template<typename SourceFloatType, typename SinkFloatType>
+class OutputDescriptorT: public TransformationTypes::OutputHandleT<SinkFloatType>,
+                         public SingleOutputT<SinkFloatType> {
 public:
-  using BaseClass = TransformationTypes::OutputHandle;
-  using OutputHandle::data;
+  using InputDescriptorType  = InputDescriptorT<SourceFloatType,SinkFloatType>;
+  using OutputDescriptorType = OutputDescriptorT<SourceFloatType,SinkFloatType>;
+  using BaseClass            = TransformationTypes::OutputHandleT<SinkFloatType>;
+  using GNASingleObjectType  = GNASingleObjectT<SourceFloatType,SinkFloatType>;
+  using BaseClass::data;
 
-  OutputDescriptor(const BaseClass &other)
+  OutputDescriptorT(const BaseClass &other)
     : BaseClass(other)
     { }
-  OutputDescriptor(const OutputDescriptor &other)
-    : OutputDescriptor(BaseClass(other))
+  OutputDescriptorT(const OutputDescriptorType &other)
+    : OutputDescriptorType(BaseClass(other))
     { }
-  OutputDescriptor(TransformationTypes::Sink &sink)
-    : OutputDescriptor(BaseClass(sink))
+  OutputDescriptorT(TransformationTypes::SinkT<SinkFloatType> &sink)
+    : OutputDescriptorType(BaseClass(sink))
     { }
-  static OutputDescriptor invalid(int index);
-  static OutputDescriptor invalid(const std::string name);
+  static OutputDescriptorType invalid(int index);
+  static OutputDescriptorType invalid(const std::string name);
 
-  TransformationTypes::OutputHandle single() override { return *this; }
+  BaseClass single() override { return *this; }
 
-  typedef std::vector<OutputDescriptor*> OutputDescriptors;
+  typedef std::vector<OutputDescriptorType*> OutputDescriptors;
 };
 
-const OutputDescriptor InputDescriptor::output() const {
-  return OutputDescriptor(BaseClass::output());
+template<typename SourceFloatType, typename SinkFloatType>
+const OutputDescriptorT<SourceFloatType,SinkFloatType> InputDescriptorT<SourceFloatType,SinkFloatType>::output() const {
+  return OutputDescriptorT<SourceFloatType,SinkFloatType>(BaseClass::output());
 }
+
+using TransformationDescriptor = TransformationDescriptorT<double,double>;
+using OutputDescriptor = OutputDescriptorT<double,double>;
+using InputDescriptor = InputDescriptorT<double,double>;
+

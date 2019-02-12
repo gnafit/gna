@@ -13,22 +13,25 @@ namespace TransformationTypes
    * @author Dmitry Taychenachev
    * @date 2015
    */
-  class InputHandle {
-    friend class OutputHandle;
+  template<typename FloatType>
+  class InputHandleT {
+    template<typename FloatType1>
+    friend class OutputHandleT;
   public:
+    using SourceType = SourceT<FloatType>;
     /**
      * @brief Constructor.
      * @param s -- Source to access.
      */
-    InputHandle(Source &source): m_source(&source) { }
+    InputHandleT(SourceType &source): m_source(&source) { }
     /**
      * @brief Clone constructor.
-     * @param other -- other InputHandle instance to access its Source.
+     * @param other -- other InputHandleT instance to access its Source.
      */
-    InputHandle(const InputHandle &other): InputHandle(*other.m_source) { }
+    InputHandleT(const InputHandleT &other): InputHandleT(*other.m_source) { }
 
-    void connect(const OutputHandle &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
-    void operator<<(const OutputHandle& out) const { connect(out); }
+    void connect(const OutputHandleT<FloatType> &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
+    void operator<<(const OutputHandleT<FloatType>& out) const { connect(out); }
 
     const std::string &name() const { return m_source->name; }                 ///< Get Source's name.
     const std::string &label() const { return m_source->label; }               ///< Get Source's label.
@@ -40,11 +43,17 @@ namespace TransformationTypes
     bool materialized() const { return m_source->materialized(); }            ///< Call Source::materialized(). @copydoc Source::materialized()
     bool bound() const { return m_source->sink!=nullptr; }                    ///< Return true if the source is bound to the sink.
 
-    const OutputHandle output() const { return OutputHandle(*const_cast<Sink*>(m_source->sink)); }
+    const OutputHandleT<FloatType> output() const { return OutputHandleT<FloatType>(*const_cast<SinkT<FloatType>*>(m_source->sink)); }
   protected:
-    Source *m_source; ///< Pointer to the Source.
-  }; /* class InputHandle */
+    SourceType *m_source; ///< Pointer to the Source.
+  }; /* class InputHandleT */
 
-  inline void operator>>(const OutputHandle& output, const InputHandle& input) { input.connect(output); }
+  template<typename FloatType>
+  inline void operator>>(const OutputHandleT<FloatType>& output, const InputHandleT<FloatType>& input) { input.connect(output); }
+
+  template void operator>><double>(const OutputHandleT<double>& output, const InputHandleT<double>& input);
+#ifdef PROVIDE_SINGLE_PRECISION
+  template void operator>><float>(const OutputHandleT<float>& output, const InputHandleT<float>& input);
+#endif
 } /* TransformationTypes */
 

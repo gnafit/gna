@@ -15,7 +15,7 @@ using std::fabs;
 /**
  * @brief Constructor.
  */
-InSegment::InSegment() {
+InSegment::InSegment() : GNAObjectBind1N("interp", "y", "interp", 1, 4, 0) {
   transformation_("insegment")                                    /// Define transformation `segments`:
                                                                   ///   - with two inputs:
     .input("points")                                              ///     + `points` - fine x.
@@ -58,8 +58,12 @@ void InSegment::determineSegments(FunctionArgs& fargs){
     if (*point<*edge_first-m_tolerance){                 /// Check if the point below the lower limit
       *insegment = -1;
     }
-    else if (*point>=*edge_last){                        /// Check if the point is above the upper limit
-      *insegment = static_cast<double>(nedges-1);
+    else if (*point>*edge_last-m_tolerance){             /// Check if the point is above the upper limit
+      if(*point<*edge_last+m_tolerance)                  /// If the point on the last edge, assign it to the last bin
+        *insegment = static_cast<double>(nedges-2);
+      else{
+        *insegment = static_cast<double>(nedges-1);      /// Otherwise assign it to the overflow
+      }
     }
     else{
       auto seg_next = lower_bound(edge_first, edge_end, *point); /// Find edge, that is greater or equal the current point.

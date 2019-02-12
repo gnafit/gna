@@ -5,22 +5,14 @@ from gna.env import env
 import numpy as np
 import ROOT
 import itertools as it
+import types
 
-# Protect the following classes/namespaces from being wrapped
-ignored_classes = [
-        'Eigen',
-        'EigenHelpers',
-        'DataType',
-        'GNA',
-        'GNAUnitTest',
-        'NeutrinoUnits',
-        'TransformationTypes',
-        'ParametrizedTypes',
-        'TypesFunctions',
-        'TMath',
-        ]
+ROOT.GNAObjectT
+provided_precisions = list(ROOT.GNA.provided_precisions())
 
 def patchGNAclass(cls):
+    if '__original_init__' in cls.__dict__:
+        return cls
     def newinit(self, *args, **kwargs):
         self.__original_init__(*args)
         if not self:
@@ -56,6 +48,31 @@ def patchGNAclass(cls):
         cls.__original_getattr__, cls.__getattr__ = None, newgetattr
 
     return cls
+
+class GNAObjectTemplates(object):
+    """Patch GNA object templates"""
+    def __init__(self, parent, name):
+        self.namespace=getattr(parent, name)
+        setattr(parent, name, self)
+
+    def __getattr__(self, name):
+        ret = getattr(self.namespace, name)
+        if name.startswith('__'):
+            return ret
+        self.patchGNATemplate(ret)
+        setattr(self, name, ret)
+        return ret
+
+    @staticmethod
+    def patchGNATemplate(template):
+        if not isinstance(template, types.InstanceType):
+            return
+
+        for pp in provided_precisions:
+            cls = template(pp)
+            patchGNAclass(cls)
+
+GNAObjectTemplates=GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
     def itervalues(self):
@@ -118,7 +135,7 @@ def patchDataProvider(cls):
     def data(self):
         buf = origdata(self)
         datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
+        return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
     cls.data = data
     cls.__data_raw__ = origdata
     # cls.__view_raw__ = origview
@@ -179,6 +196,10 @@ def patchDescriptor(cls):
 def importcommon():
     from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
 
+def legacytypes():
+    ROOT.TransformationTypes.OutputHandle=ROOT.TransformationTypes.OutputHandleT('double')
+    ROOT.TransformationTypes.InputHandle=ROOT.TransformationTypes.InputHandleT('double')
+
 def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
@@ -188,39 +209,60 @@ def setup(ROOT):
         "IndexError": IndexError,
     })
 
-    simpledicts = [
-        ROOT.GNAObject.Variables,
-        ROOT.GNAObject.Evaluables,
-        ROOT.GNAObject.Transformations,
-        ROOT.TransformationDescriptor.Inputs,
-        ROOT.TransformationDescriptor.Outputs,
-        ROOT.EvaluableDescriptor.Sources,
-    ]
+    ROOT.GNAObjectT
+    provided_precisions = ROOT.GNA.provided_precisions()
+
+    simpledicts=[]
+    for ft in provided_precisions:
+        simpledicts += [
+            ROOT.GNAObjectT(ft,ft).Variables,
+            ROOT.GNAObjectT(ft,ft).Evaluables,
+            ROOT.GNAObjectT(ft,ft).Transformations,
+            ROOT.TransformationDescriptorT(ft,ft).Inputs,
+            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+        ]
+    simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
         patchSimpleDict(cls)
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
-    patchTransformationDescriptor(ROOT.TransformationDescriptor)
+    for ft in provided_precisions:
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+
+        dataproviders = [
+            ROOT.OutputDescriptorT(ft,ft),
+            ROOT.SingleOutputT(ft),
+        ]
+        for cls in dataproviders:
+            patchDataProvider(cls)
 
     patchStatistic(ROOT.Statistic)
 
-    patchDescriptor(ROOT.InputDescriptor)
-    patchDescriptor(ROOT.OutputDescriptor)
+    # Protect the following classes/namespaces from being wrapped
+    ignored_classes = [
+            'Eigen',
+            'EigenHelpers',
+            'DataType',
+            'GNA',
+            'GNAUnitTest',
+            'NeutrinoUnits',
+            'TransformationTypes',
+            'ParametrizedTypes',
+            'TypesFunctions',
+            'TypeClasses',
+            'TMath',
+            ]
 
-    dataproviders = [
-        ROOT.OutputDescriptor,
-        ROOT.SingleOutput,
-    ]
-    for cls in dataproviders:
-        patchDataProvider(cls)
-
-    GNAObject = ROOT.GNAObject
+    GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
+        # If the object is template, try to patch its instance
         if not isinstance(cls, ROOT.PyRootType):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
-        if issubclass(cls, GNAObject):
+        if issubclass(cls, GNAObjectBase):
             wrapped = patchGNAclass(cls)
             return wrapped
         if 'Class' not in cls.__dict__:
@@ -239,39 +281,47 @@ def setup(ROOT):
     t.__getattr__ = patchclass
 
     importcommon()
+    legacytypes()
 
-def patchROOTClass( object=None, method=None ):
+def patchROOTClass(classes=None, methods=None):
     """Decorator to override ROOT class methods. Usage
     @patchclass
     def CLASSNAME__METHODNAME(self,...)
 
-    @patchclass( CLASSNAME, METHODNAME )
+    @patchclass(CLASSNAME, METHODNAME)
     def function(self,...)
 
-    @patchclass( ROOT.CLASS, METHODNAME )
+    @patchclass(ROOT.CLASS, METHODNAME)
     def function(self,...)
 
     @patchclass( [ROOT.CLASS1, ROOT.CLASS2,...], METHODNAME )
     def function(self,...)
     """
-    cfcn = None
-    if not method:
-        cfcn = object
-        spl = cfcn.__name__.split( '__' )
-        object=spl[0]
-        method = '__'.join( spl[1:] )
+    function=None
 
-    if not type( object ) is list:
-        object = [ object ]
+    # Used as decorator
+    if isinstance(classes, types.FunctionType):
+        function = classes
+        classname, method = function.__name__.split( '__', 1 )
+        setattr(getattr(ROOT, classname), method, function)
+        return
 
-    def converter( fcn ):
-        for o in object:
-            if type(o)==str:
-                o = getattr( ROOT, o )
-            setattr( o, method, fcn )
-        return fcn
+    # Used as function returning decorator
+    if not isinstance(classes, (list,tuple)):
+        classes = (classes,)
 
-    if cfcn:
-        return converter( cfcn )
+    classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
 
-    return converter
+    if methods is not None and not isinstance(methods, (list,tuple)):
+        methods = (methods,)
+
+    def decorator(function):
+        lmethods = methods
+        if lmethods is None:
+            lmethods = function.__name__.split( '__', 1 )[1],
+        for cls in classes:
+            for method in lmethods:
+                setattr(cls, method, function)
+        return function
+
+    return decorator

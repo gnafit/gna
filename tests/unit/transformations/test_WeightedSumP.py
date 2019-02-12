@@ -20,13 +20,15 @@ labels = [ 'arr1', 'arr2' ]
 weights = [ 'w1', 'w2' ]
 
 """Initialize environment"""
-p1 = env.globalns.defparameter( weights[0], central=1.0, sigma=0.1 )
-p2 = env.globalns.defparameter( weights[1], central=1.0, sigma=0.1 )
+ns=env.globalns('test_WeightedSumP')
+p1 = ns.defparameter( weights[0], central=1.0, sigma=0.1 )
+p2 = ns.defparameter( weights[1], central=1.0, sigma=0.1 )
 
-env.globalns.printparameters()
+ns.printparameters()
 
-pp1 = VarArray([weights[0]])
-pp2 = VarArray([weights[1]])
+with ns:
+    pp1 = VarArray([weights[0]])
+    pp2 = VarArray([weights[1]])
 
 """Initialize transformations"""
 points1 = Points( arr1 )

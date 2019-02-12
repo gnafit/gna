@@ -14,7 +14,7 @@ public:
     return variable<void>();
   }
   const std::type_info *type() const {
-    return m_data.hdr->type;
+    return m_hdr->type;
   }
   std::string typeName() const {
     return boost::core::demangle(type()->name());
@@ -34,9 +34,7 @@ public:
   operator const ValueType&() const {
     return value();
   }
-  variable() {
-    m_data.raw = nullptr;
-  }
+  variable(){};
   variable(const variable<ValueType> &other)
     : variable<void>(other) { }
   explicit variable(const variable<void> &other)
@@ -50,21 +48,42 @@ public:
   }
   const ValueType &value() const {
     update();
+    return data().value[0];
+  }
+  const ValueType &value(size_t i) const {
+    update();
+    return data().value[i];
+  }
+  const std::vector<ValueType> &values() const {
+    update();
     return data().value;
+  }
+  void values(std::vector<ValueType>& dest) const {
+    update();
+    dest=data().value;
+  }
+  ValueType* values(ValueType* dest) const {
+    update();
+    auto& val=data().value;
+    std::copy(val.begin(), val.end(), dest);
+    return std::next(dest, val.size());
   }
 protected:
   inline inconstant_data<ValueType> &data() const {
-    return *static_cast<inconstant_data<ValueType>*>(m_data.raw);
+    return *static_cast<inconstant_data<ValueType>*>(m_hdr.get());
   }
   void update() const {
     auto &d = data();
     if (!d.tainted) {
       return;
     }
-    if (!d.func) {
-      return;
-    }
-    d.value = d.func();
     d.tainted = false;
+    if (d.func) {
+      d.value[0] = d.func();
+    }
+    else if (d.vfunc) {
+      d.vfunc(d.value);
+    }
   }
 };
+

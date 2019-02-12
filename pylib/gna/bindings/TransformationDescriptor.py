@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.bindings import patchROOTClass
-from gna.bindings import DataType
+from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
 
-@patchROOTClass(R.TransformationDescriptor, '__str__')
+classes = [R.TransformationDescriptorT(ft,ft) for ft in provided_precisions]
+
+@patchROOTClass(classes, '__str__')
 def TransformationDescriptor____str__(self):
     return '[trans] {}: {:d} input(s), {:d} output(s)'.format(self.name(), self.inputs.size(), self.outputs.size())
 
-@patchROOTClass
+@patchROOTClass(classes, 'print')
 def TransformationDescriptor__print(self):
     printl(str(self))
     with nextlevel():
@@ -21,7 +22,7 @@ def TransformationDescriptor__print(self):
             printl('{:2d}'.format(i), end=' ')
             o.print()
 
-@patchROOTClass
+@patchROOTClass(classes, 'single')
 def TransformationDescriptor__single(self):
     outputs = self.outputs
     if outputs.size()!=1:
@@ -29,7 +30,7 @@ def TransformationDescriptor__single(self):
 
     return outputs.front()
 
-@patchROOTClass
+@patchROOTClass(classes, 'single_input')
 def TransformationDescriptor__single_input(self):
     inputs = self.inputs
     if inputs.size()!=1:
@@ -37,22 +38,22 @@ def TransformationDescriptor__single_input(self):
 
     return inputs.front()
 
-@patchROOTClass(R.TransformationDescriptor, '__rshift__')
+@patchROOTClass(classes, '__rshift__')
 def TransformationDescriptor______rshift__(transf, inputs):
     '''output(transf)>>inputs(arg)'''
     transf.single()>>inputs
 
-@patchROOTClass(R.TransformationDescriptor, '__rlshift__')
+@patchROOTClass(classes, '__rlshift__')
 def TransformationDescriptor______rlshift__(transf, inputs):
     '''inputs(arg)<<output(transf)'''
     transf.single()>>inputs
 
-@patchROOTClass(R.TransformationDescriptor, '__lshift__')
+@patchROOTClass(classes, '__lshift__')
 def TransformationDescriptor______lshift__(self, output):
     '''inputs(self)<<output(arg)'''
     output>>self.single_input()
 
-@patchROOTClass(R.TransformationDescriptor, '__gt__')
-@patchROOTClass(R.TransformationDescriptor, '__lt__')
+@patchROOTClass(classes, '__gt__')
+@patchROOTClass(classes, '__lt__')
 def TransformationDescriptor______cmp__(a,b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

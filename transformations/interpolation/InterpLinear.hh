@@ -28,7 +28,7 @@
  * @date 02.2017
  */
 class InterpLinear: public InSegment,
-                  public TransformationBind<InterpLinear> {
+                    public TransformationBind<InterpLinear> {
 public:
   //enum Strategy { ///< Extrapolation strategy.
     //Constant = 0, ///< Fill with constant value.
@@ -41,11 +41,10 @@ public:
   InterpLinear(SingleOutput& x, SingleOutput& newx);                                                             ///< Constructor.
   InterpLinear(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                            ///< Constructor.
 
-  TransformationDescriptor add_transformation(bool bind=true);
+  TransformationDescriptor add_transformation(const std::string& name="");
   void bind_transformations();
+  void bind_inputs();
   void set(SingleOutput& x, SingleOutput& newx);
-  InputDescriptor  add_input();
-  OutputDescriptor add_input(SingleOutput& y);
 
   OutputDescriptor interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                        ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 

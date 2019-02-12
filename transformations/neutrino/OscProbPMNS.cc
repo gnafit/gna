@@ -140,7 +140,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     probsum.input("compCP");
   }
 
-  auto full_formula = transformation_("full_osc_prob")
+  transformation_("full_osc_prob")
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
@@ -248,9 +248,10 @@ OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)
 
 template <int I, int J>
 void OscProbPMNSMult::calcComponent(FunctionArgs fargs) {
-  double s2 = m_weights.value()[0];
-  double s3 = m_weights.value()[1];
-  double s4 = m_weights.value()[2];
+  auto& svalues=m_weights.values();
+  double s2 = svalues[0];
+  double s3 = svalues[1];
+  double s4 = svalues[2];
   auto &Enu = fargs.args[0].x;
   ArrayXd phi = (DeltaMSq<I,J>()*oscprobArgumentFactor*m_Lavg*0.25)*Enu.inverse();
   ArrayXd phi2 = phi.square();

@@ -11,7 +11,9 @@ using std::advance;
 using TMath::Exp;
 
 InterpLinear::InterpLinear() : InSegment() {
-  add_transformation(false);
+  add_transformation();
+  add_input();
+  set_open_input();
 
   //if(underflow_strategy.length()){
     //this->setUnderflowStrategy(underflow_strategy);
@@ -24,7 +26,7 @@ InterpLinear::InterpLinear() : InSegment() {
 InterpLinear::InterpLinear(SingleOutput& x, SingleOutput& newx) : InterpLinear()
 {
   set(x, newx);
-  bind_transformations();
+  bind_inputs();
 }
 
 InterpLinear::InterpLinear(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpLinear()
@@ -32,32 +34,23 @@ InterpLinear::InterpLinear(SingleOutput& x, SingleOutput& y, SingleOutput& newx)
   interpolate(x, y, newx);
 }
 
-TransformationDescriptor InterpLinear::add_transformation(bool bind){
-  int num=transformations.size();
-  std::string name="interp";
-  if(num>1){
-      name = fmt::format("{0}_{1:02d}", name, num);
-  }
-  transformation_(name)
+TransformationDescriptor InterpLinear::add_transformation(const std::string& name){
+  transformation_(new_transformation_name(name))
     .input("newx")             /// 0
     .input("x")                /// 1
     .input("insegment")        /// 2
     .input("widths")           /// 3
-    .input("y")                /// 4
-    .output("interp")          /// 0
     .types(TypesFunctions::ifPoints<0>)                                     /// newx is an array of any shape
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)            /// x is an 1d array
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::ifSameShape2<0,2>)  /// segment index is of shape of newx
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
     .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
-    .types(TypesFunctions::ifSameInRange<4,-1>, TypesFunctions::passToRange<0,0,-1>)
+    .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpLinear::do_interpolate)
     ;
 
-  if(bind){
-    bind_transformations();
-  }
+  bind_transformations();
   return transformations.back();
 }
 
@@ -68,42 +61,32 @@ void InterpLinear::set(SingleOutput& x, SingleOutput& newx){
   sinputs[1].connect(x.single());
 }
 
-InputDescriptor InterpLinear::add_input(){
-    auto interp=transformations.back();
-    auto input=interp.inputs.back();
-    if(input.bound()){
-        auto ninputs=interp.inputs.size()-3;
-        input=interp.input(fmt::format("{0}_{1:02d}", "y", ninputs));
-        interp.output(fmt::format("{0}_{1:02d}", "interp", ninputs));
-    }
-
-    return input;
-}
-
-OutputDescriptor InterpLinear::add_input(SingleOutput& y){
-  auto input=add_input();
-  input.connect(y.single());
-  return OutputDescriptor(transformations.back().outputs.back());
-}
-
 void InterpLinear::bind_transformations(){
   auto segments=transformations.front();
   auto interp=transformations.back();
 
-  auto& seg_inputs=segments.inputs;
   auto& outputs=segments.outputs;
+  auto& inputs=interp.inputs;
+
+  outputs[0]>>inputs[2];
+  outputs[1]>>inputs[3];
+}
+
+void InterpLinear::bind_inputs(){
+  auto segments=transformations.front();
+  auto interp=transformations.back();
+
+  auto& seg_inputs=segments.inputs;
   auto& inputs=interp.inputs;
 
   seg_inputs[0].output()>>inputs[0];
   seg_inputs[1].output()>>inputs[1];
-  outputs[0]>>inputs[2];
-  outputs[1]>>inputs[3];
 }
 
 OutputDescriptor InterpLinear::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   set(x, newx);
   auto output=add_input(y);
-  bind_transformations();
+  bind_inputs();
   return output;
 }
 
@@ -141,7 +124,7 @@ void InterpLinear::do_interpolate(FunctionArgs& fargs){
       else if( *insegment>=nseg ){ /// overflow, extrapolate
         idx=nseg-1u;
       }
-      *result = *next(k_buffer, idx) * (*point - *next(x_buffer, idx)) + *next(y_buffer, idx);
+      *result = k_buffer[idx] * (*point - x_buffer[idx]) + y_buffer[idx];
 
       advance(point, 1);
       advance(result, 1);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GNAObject.hh"
+#include "GNAObjectBind1N.hh"
 
 /**
  * @brief Determines the bins edges indices for an unsorted array.
@@ -41,7 +42,7 @@
  * @author Maxim Gonchar
  * @date 02.2018
  */
-class InSegment: public GNAObject,
+class InSegment: public GNAObjectBind1N,
                  public TransformationBind<InSegment> {
 public:
   InSegment();                                               ///< Constructor.

@@ -10,7 +10,7 @@ WeightedSumP::WeightedSumP(const OutputDescriptor::OutputDescriptors& outputs) :
 }
 
 WeightedSumP::WeightedSumP() {
-  auto sum = transformation_("sum")
+  transformation_("sum")
     .output("sum")
     .label("wsum")
     .types(&WeightedSumP::check)
