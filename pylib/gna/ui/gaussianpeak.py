@@ -12,20 +12,21 @@ class cmd(basecmd):
         parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
         parser.add_argument('--nbins',  default=100, type=int, help='Number of bins')
         parser.add_argument('--order',  default=8, help='Order of integrator for each bin (Gauss-Legendre)')
-        parser.add_argument('--no-eres', action='store_false', dest='with_eres', help='Disable energy resoulution')
+        parser.add_argument('--with-eres', '--eres', action='store_true', help='Enable energy resoulution')
 
     def init(self):
         if self.opts.npeaks == 1:
             names = [self.opts.name]
         else:
             names = [self.opts.name + str(i) for i in range(self.opts.npeaks)]
-        ns = env.ns(self.opts.name)
-        ns.reqparameter("Eres_a", central=0.0, sigma=0)
-        ns.reqparameter("Eres_b", central=0.03, sigma=0)
-        ns.reqparameter("Eres_c", central=0.0, sigma=0)
+        common_ns = env.ns(self.opts.name)
+
+        if self.opts.with_eres:
+            ns.reqparameter("Eres_a", central=0.0, sigma=0)
+            ns.reqparameter("Eres_b", central=0.03, sigma=0)
+            ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
         peak_sum = ROOT.Sum(labels='Sum of\nsignals')
-        common_ns = env.ns(self.opts.name)
         edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1)
         orders = np.array([self.opts.order]*(len(edges)-1), dtype=int)
 
@@ -46,9 +47,11 @@ class cmd(basecmd):
             locns.addobservable('spectrum', hist.hist)
 
         common_ns.addobservable('spectrum', peak_sum)
-        with ns:
-             eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
-        eres.smear.inputs(peak_sum)
-        ns.addobservable("spectrum_with_eres", eres.smear)
+
+        if self.opts.with_eres:
+            with ns:
+                 eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
+            eres.smear.inputs(peak_sum)
+            ns.addobservable("spectrum_with_eres", eres.smear)
 
         ns.printparameters(labels='True')
