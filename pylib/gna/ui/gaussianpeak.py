@@ -23,29 +23,29 @@ class cmd(basecmd):
         ns.reqparameter("Eres_b", central=0.03, sigma=0)
         ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
-        peak_sum = ROOT.Sum()
+        peak_sum = ROOT.Sum(labels='Sum of\nsignals')
         common_ns = env.ns(self.opts.name)
         edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1)
         orders = np.array([self.opts.order]*(len(edges)-1), dtype=int)
 
-        integrator = ROOT.GaussLegendre(edges, orders, len(orders))
-        for name in names:
+        integrator = ROOT.GaussLegendre(edges, orders, len(orders), labels='GL sampler')
+        for i, name in enumerate(names):
             locns = env.ns(name)
             locns.reqparameter('BackgroundRate', central=50, relsigma=0.1)
             locns.reqparameter('Mu', central=100, relsigma=0.1)
             locns.reqparameter('E0', central=2, sigma=0.05)
             locns.reqparameter('Width', central=0.2, sigma=0.005)
             with locns:
-                model = ROOT.GaussianPeakWithBackground()
+                model = ROOT.GaussianPeakWithBackground(labels='Peak %i'%i)
 
             model.rate.E(integrator.points.x)
-            hist = ROOT.GaussLegendreHist(integrator)
+            hist = ROOT.GaussLegendreHist(integrator, labels='Integrator')
             hist.hist.f(model.rate.rate)
             peak_sum.add(hist.hist)
             locns.addobservable('spectrum', hist.hist)
 
         common_ns.addobservable('spectrum', peak_sum)
         with ns:
-             eres = ROOT.EnergyResolutionC()
+             eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
         eres.smear.inputs(peak_sum)
         ns.addobservable("spectrum_with_eres", eres.smear)
