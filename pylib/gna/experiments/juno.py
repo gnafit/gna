@@ -144,7 +144,7 @@ class exp(baseexp):
                                       version = "v01",
                                       nidx = [self.nidx[1]]),
                         parameter = "thermal_power",
-                        label = 'Thermal power of {reactor} in MWt',
+                        label = 'Thermal power of {reactor} in GWt',
                         pars = uncertaindict([
                             ('TS1',  4.6),
                             ('TS2',  4.6),

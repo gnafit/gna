@@ -5,10 +5,11 @@ from matplotlib.ticker import AutoMinorLocator
 import numpy as np
 import yaml
 from gna.bindings import common
-from gna.env import PartNotFoundError
+from gna.env import PartNotFoundError, env
 
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.unicode'] = True
+
 
 class cmd(basecmd):
     @classmethod
@@ -29,6 +30,7 @@ class cmd(basecmd):
         parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar'],
                             default='bin_center', metavar='PLOT_TYPE',
                             help='Select plot type')
+        parser.add_argument('--ratio', nargs=2, action="append", default=[], help="Plot ratio of 2 observables")
         parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')
         parser.add_argument('-l', '--legend', action='append', default=[],
                             metavar=('Legend',),
@@ -93,6 +95,16 @@ class cmd(basecmd):
             output1, output2 = self.opts.difference_plot
             label = legends[0] if legends else ''
             output1.plot_hist(diff=output2, label=label, **plot_kwargs)
+
+        if self.opts.ratio:
+            for pair in self.opts.ratio:
+                descs = map(env.get, pair)
+                datas = [_.data() for _ in descs]
+                #  import IPython
+                #  IPython.embed()
+                edges, ratio, _ = edges_to_barpoints(np.array(descs[0].datatype().hist().edges()), datas[0]/datas[1])
+                plt.plot(edges, ratio)
+
 
         if show_legend:
             ax.legend(loc='best')
