@@ -394,9 +394,12 @@ namespace TransformationTypes {
      * Entry::evaluateTypes() is usually called when outputs are connected to the inputs of other
      * transformations. This function should be used in case when it's known
      * that transformation has no inputs and its DataType may be derived immediately.
+     *
+     * This methods adds the Entry to the Base, no further actions are possible.
      */
     InitializerType& finalize() {
       m_data->entry->evaluateTypes();
+      this->add();
       return *this;
     }
 

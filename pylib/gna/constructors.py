@@ -169,6 +169,26 @@ def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
 
     return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
 
+def _wrap_integrator_1d(classname):
+    def newfcn(edges, orders, *args, **kwargs):
+        size = None
+        if edges is not None:
+            edges = N.ascontiguousarray(edges, dtype='d')
+            size = edges.size-1
+        if not isinstance(orders, int):
+            orders = N.ascontiguousarray(orders, dtype='i')
+            size = orders.size
+        if size is None:
+            raise Exception('Insufficient parameters to determine the number of bins')
+        cls = getattr(R, classname)
+        return cls(size, orders, edges, *args, **kwargs)
+    return newfcn
+
+IntegratorGL   = _wrap_integrator_1d('IntegratorGL')
+IntegratorTrap = _wrap_integrator_1d('IntegratorTrap')
+IntegratorRect = _wrap_integrator_1d('IntegratorRect')
+
+
 """Construct the GaussLegendre transformation based on bin edges and order(s)"""
 def GaussLegendre(edges, orders, *args, **kwargs):
     edges = N.ascontiguousarray(edges, dtype='d')

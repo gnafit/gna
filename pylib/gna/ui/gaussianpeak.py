@@ -1,7 +1,9 @@
+from __future__ import print_function
 from gna.ui import basecmd
 from gna.env import env
 import ROOT
 import numpy as np
+from gna import constructors as C
 
 class cmd(basecmd):
     @classmethod
@@ -11,7 +13,7 @@ class cmd(basecmd):
         parser.add_argument('--Emin',   default=0,   type=float, help='Minimal energy')
         parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
         parser.add_argument('--nbins',  default=100, type=int, help='Number of bins')
-        parser.add_argument('--order',  default=8, help='Order of integrator for each bin (Gauss-Legendre)')
+        parser.add_argument('--order',  default=8, type=int, help='Order of integrator for each bin (Gauss-Legendre)')
         parser.add_argument('--with-eres', '--eres', action='store_true', help='Enable energy resoulution')
 
     def init(self):
@@ -27,10 +29,9 @@ class cmd(basecmd):
             common_ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
         peak_sum = ROOT.Sum(labels='Sum of\nsignals')
-        edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1)
-        orders = np.array([self.opts.order]*(len(edges)-1), dtype=int)
+        edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1, dtype='d')
 
-        integrator = ROOT.GaussLegendre(edges, orders, len(orders), labels='GL sampler')
+        integrator = C.IntegratorGL(edges, self.opts.order, labels=('GL sampler', 'GL integrator'))
         for i, name in enumerate(names):
             locns = env.ns(name)
             locns.reqparameter('BackgroundRate', central=50, relsigma=0.1)
@@ -41,17 +42,21 @@ class cmd(basecmd):
                 model = ROOT.GaussianPeakWithBackground(labels='Peak %i'%i)
 
             model.rate.E(integrator.points.x)
-            hist = ROOT.GaussLegendreHist(integrator, labels='Integrator')
-            hist.hist.f(model.rate.rate)
-            peak_sum.add(hist.hist)
-            locns.addobservable('spectrum', hist.hist)
+            if i:
+                integrator.add_transformation()
+            print(i)
+            integrator.print()
+            out = integrator.add_input(model.rate.rate)
+            peak_sum.add(out)
+            locns.addobservable('spectrum', out)
 
         common_ns.addobservable('spectrum', peak_sum)
 
         if self.opts.with_eres:
             with common_ns:
-                 eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
-            eres.smear.inputs(peak_sum)
-            common_ns.addobservable("spectrum_with_eres", eres.smear)
+                 eres = ROOT.EnergyResolution(True, labels='Energy\nresolution')
+            peak_sum.sum >> eres.matrix.Edges
+            peak_sum.sum >> eres.smear.Ntrue
+            common_ns.addobservable("spectrum_with_eres", eres.smear.Nrec)
 
         env.globalns.printparameters(labels='True')
