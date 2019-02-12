@@ -190,7 +190,7 @@ class exp(baseexp):
                         mode='percent',
                         uncertainty=30
                         ),
-                    expose_matrix = True 
+                    expose_matrix = True
                     ),
             lsnl = NestedDict( #TODO: evis_edges
                     bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
