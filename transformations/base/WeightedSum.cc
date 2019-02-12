@@ -34,20 +34,17 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &wei
     throw std::runtime_error("WeightedSum should have at least as much inputs as the number of weights");
   }
 
-  printf("init\n");
   auto sum = transformation_("sum")
     .output("sum")
     .label("wsum")
     .types(TypesFunctions::ifSame, TypesFunctions::pass<0>);
 
-  printf("init more\n");
   if( use_fillvalue ){
     sum.func(&WeightedSum::sumFill);
   }
   else{
     sum.func(&WeightedSum::sum);
   }
-  printf("init done\n");
 
   m_vars.resize(weights.size());
   for (size_t i = 0; i < m_vars.size(); ++i) {
@@ -56,8 +53,6 @@ WeightedSum::WeightedSum(bool use_fillvalue, const std::vector<std::string> &wei
   for (auto& label: inputs) {
     sum.input(label);
   }
-
-  printf("end of scope\n");
 }
 
 void WeightedSum::sum(FunctionArgs& fargs){
