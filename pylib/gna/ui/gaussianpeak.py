@@ -44,8 +44,6 @@ class cmd(basecmd):
             model.rate.E(integrator.points.x)
             if i:
                 integrator.add_transformation()
-            print(i)
-            integrator.print()
             out = integrator.add_input(model.rate.rate)
             peak_sum.add(out)
             locns.addobservable('spectrum', out)

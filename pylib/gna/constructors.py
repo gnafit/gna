@@ -188,14 +188,6 @@ IntegratorGL   = _wrap_integrator_1d('IntegratorGL')
 IntegratorTrap = _wrap_integrator_1d('IntegratorTrap')
 IntegratorRect = _wrap_integrator_1d('IntegratorRect')
 
-
-"""Construct the GaussLegendre transformation based on bin edges and order(s)"""
-def GaussLegendre(edges, orders, *args, **kwargs):
-    edges = N.ascontiguousarray(edges, dtype='d')
-    if not isinstance(orders, int):
-        orders = N.ascontiguousarray(orders, dtype='i')
-    return R.GaussLegendre(edges, orders, edges.size-1, *args, **kwargs)
-
 """Construct Rebin object from array with edges"""
 def Rebin( edges, rounding, *args, **kwargs ):
     if not isinstance( rounding, int ):
