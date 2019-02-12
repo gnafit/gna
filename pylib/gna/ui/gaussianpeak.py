@@ -6,12 +6,13 @@ import numpy as np
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('--name', required=True)
-        parser.add_argument('--npeaks', default=1, type=int)
-        parser.add_argument('--Emin', default=0, type=float)
-        parser.add_argument('--Emax', default=5, type=float)
-        parser.add_argument('--nbins', default=100, type=int)
-        parser.add_argument('--order', default=8)
+        parser.add_argument('--name',   required=True, halp='observation name')
+        parser.add_argument('--npeaks', default=1,   type=int, help='number of peaks')
+        parser.add_argument('--Emin',   default=0,   type=float, help='Minimal energy')
+        parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
+        parser.add_argument('--nbins',  default=100, type=int, help='Number of bins')
+        parser.add_argument('--order',  default=8, help='Order of integrator for each bin (Gauss-Legendre)')
+        parser.add_argument('--no-eres', action='store_false', dest='with_eres', help='Disable energy resoulution')
 
     def init(self):
         if self.opts.npeaks == 1:
@@ -49,3 +50,5 @@ class cmd(basecmd):
              eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
         eres.smear.inputs(peak_sum)
         ns.addobservable("spectrum_with_eres", eres.smear)
+
+        ns.printparameters(labels='True')
