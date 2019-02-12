@@ -6,7 +6,7 @@ import numpy as np
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('--name',   required=True, halp='observation name')
+        parser.add_argument('--name',   required=True, help='observation name')
         parser.add_argument('--npeaks', default=1,   type=int, help='number of peaks')
         parser.add_argument('--Emin',   default=0,   type=float, help='Minimal energy')
         parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
@@ -22,9 +22,9 @@ class cmd(basecmd):
         common_ns = env.ns(self.opts.name)
 
         if self.opts.with_eres:
-            ns.reqparameter("Eres_a", central=0.0, sigma=0)
-            ns.reqparameter("Eres_b", central=0.03, sigma=0)
-            ns.reqparameter("Eres_c", central=0.0, sigma=0)
+            common_ns.reqparameter("Eres_a", central=0.0, sigma=0)
+            common_ns.reqparameter("Eres_b", central=0.03, sigma=0)
+            common_ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
         peak_sum = ROOT.Sum(labels='Sum of\nsignals')
         edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1)
@@ -49,9 +49,9 @@ class cmd(basecmd):
         common_ns.addobservable('spectrum', peak_sum)
 
         if self.opts.with_eres:
-            with ns:
+            with common_ns:
                  eres = ROOT.EnergyResolutionC(labels='Energy\nresolution')
             eres.smear.inputs(peak_sum)
-            ns.addobservable("spectrum_with_eres", eres.smear)
+            common_ns.addobservable("spectrum_with_eres", eres.smear)
 
-        ns.printparameters(labels='True')
+        env.globalns.printparameters(labels='True')
