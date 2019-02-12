@@ -5,6 +5,10 @@ from __future__ import print_function, division
 import ROOT as R
 import numpy as N
 
+def get_bin_edges_hist1(h):
+    edges = N.array([h.GetBinLowEdge(i)+h.GetBinWidth(i) for i in range(h.GetNbinsX()+1)])
+    return edges
+
 def get_buffer_hist1( h, flows=False ):
     """Return TH1* histogram data buffer
     if flows=False, exclude underflow and overflow
@@ -158,11 +162,11 @@ def bind():
     """Bind functions to ROOT classes"""
     setattr( R.TH1, 'get_buffer',     get_buffer_hist1 )
     setattr( R.TH1, 'get_err_buffer', get_err_buffer_hist1 )
+    setattr( R.TH1, 'get_edges', get_bin_edges_hist1 )
 
     setattr( R.TH2, 'get_buffer',     get_buffer_hist2 )
     setattr( R.TH2, 'get_err_buffer', get_err_buffer_hist2 )
 
-    setattr( R.TAxis, 'get_bin_edges',  get_bin_edges_axis )
     setattr( R.TAxis, 'get_bin_edges',  get_bin_edges_axis )
     setattr( R.TAxis, 'get_bin_widths', get_bin_widths_axis )
 
@@ -172,3 +176,10 @@ def bind():
 
     setattr( R.TMatrixD, 'get_buffer', get_buffer_matrix )
     setattr( R.TMatrixF, 'get_buffer', get_buffer_matrix )
+
+data_handlers = {R.TH1: get_buffer_hist1,
+                 R.TH2: get_buffer_hist2,
+                 R.TAxis: get_bin_edges_axis,
+                 R.TGraph: get_buffers_graph,
+                 }
+err_handlers = {}

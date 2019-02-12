@@ -46,15 +46,15 @@ class exp(baseexp):
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
         if self.opts.composition=='minimal':
-            self.nidx[0][2] = self.nidx[0][2][:1]
-            self.nidx[1][2] = self.nidx[1][2][:1]
-            self.nidx[2][2] = self.nidx[2][2][:1]
-            self.nidx[3][2] = self.nidx[3][2][:1]
+            self.nidx[0][2][:] = self.nidx[0][2][:1]
+            self.nidx[1][2][:] = self.nidx[1][2][:1]
+            self.nidx[2][2][:] = self.nidx[2][2][:1]
+            self.nidx[3][2][:] = self.nidx[3][2][:1]
         elif self.opts.composition=='small':
-            self.nidx[0][2] = self.nidx[0][2][:2]
-            self.nidx[1][2] = self.nidx[1][2][:3]
-            self.nidx[2][2] = self.nidx[2][2][:2]
-            self.nidx[3][2] = self.nidx[3][2][:1]
+            self.nidx[0][2][:] = self.nidx[0][2][:2]
+            self.nidx[1][2][:] = self.nidx[1][2][:3]
+            self.nidx[2][2][:] = self.nidx[2][2][:2]
+            self.nidx[3][2][:] = self.nidx[3][2][:1]
 
         self.nidx = NIndex.fromlist(self.nidx)
 
@@ -144,6 +144,7 @@ class exp(baseexp):
                     bundle = dict(name='dayabay_reactor_burning_info_v02', major='ri'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
+                    add_ff = True,
                     ),
             eper_fission =  NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
@@ -155,14 +156,6 @@ class exp(baseexp):
                          ('U235',  (201.92, 0.46)),
                          ('U238', (205.52, 0.96))],
                         mode='absolute'
-                        ),
-                    ),
-            target_protons = NestedDict(
-                    bundle = dict(name="parameters", version = "v01"),
-                    parameter = "target_protons",
-                    label = 'Number of protons in {detector}',
-                    pars = uncertaindict(
-                        [('AD1', (1.42e33, 'fixed'))],
                         ),
                     ),
             conversion_factor =  NestedDict(
@@ -197,7 +190,7 @@ class exp(baseexp):
                         mode='percent',
                         uncertainty=30
                         ),
-                    expose_matrix = False
+                    expose_matrix = True 
                     ),
             lsnl = NestedDict( #TODO: evis_edges
                     bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
@@ -416,12 +409,18 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
-        #
+
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
             ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            ns.addobservable("{0}_bkg".format(ad),         outputs.bkg[ad], export=False)
+            ns.addobservable("{0}.bkg.acc".format(ad),         outputs.bkg_acc[ad], export=False)
+            ns.addobservable("{0}.bkg.fastn".format(ad), outputs.bkg_fastn[ad], export=False)
+            ns.addobservable("{0}.bkg.amc".format(ad), outputs.bkg_amc[ad], export=False)
+            ns.addobservable("{0}.bkg.alphan".format(ad), outputs.bkg_alphan[ad], export=False)
+            ns.addobservable("{0}.bkg.lihe".format(ad), outputs.bkg_lihe[ad], export=False)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -437,7 +436,10 @@ class exp(baseexp):
         'enu| ee(evis()), ctheta()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
+        'ff_nom = fission_fraction_nom[i,r]',
+        'ff = fission_fractions_add[i,r]()*ff_nom',
+        'denom = sum[i] | eper_fission[i]*ff',
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()*ff_nom / denom',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
         'eres_matrix| evis_hist()',

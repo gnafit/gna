@@ -28,7 +28,10 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('fission_fraction',), ('thermal_power', 'fission_fractions',)
+        if not cfg.add_ff:
+            return ('fission_fraction_nom',), ('thermal_power', 'fission_fractions',)
+        else:
+            return ('fission_fraction_nom',), ('thermal_power', 'fission_fractions', 'fission_fractions_add')
 
     def init_data(self):
         try:
@@ -61,7 +64,7 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
 
                 iso_idx = isotopes.index(iso_name)
                 relsigma = relsigmas[iso_idx]
-                ff_name = it.current_format(name='fission_fraction')
+                ff_name = it.current_format(name='fission_fraction_nom')
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
                 isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
@@ -100,4 +103,10 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
                 fission_per_iso = C.Points(fission_fractions_daily[iso_name], labels=label)
                 self.context.objects[it.current_values(name='fission_fractions')] = fission_per_iso
                 self.set_output('fission_fractions', it, fission_per_iso.single())
+                if self.cfg.add_ff:
+                    label_add=it.current_format('Additional set of fission fractions for norm calc\n{autoindex}')
+                    fission_per_iso_add = C.Points(fission_fractions_daily[iso_name], labels=label_add)
+                    self.context.objects[it.current_values(name='fission_fractions_add')] = fission_per_iso_add
+                    self.set_output('fission_fractions_add', it, fission_per_iso_add.single())
+
 

@@ -114,6 +114,9 @@ def patchSimpleDict(cls):
         else:
             return default
 
+    def __dir__(self):
+        return dir(cls) + self.keys()
+
     cls.itervalues = itervalues
     cls.values = values
     cls.iterkeys = iterkeys
@@ -124,6 +127,7 @@ def patchSimpleDict(cls):
     cls.__iter__ = __iter__
     cls.__getattr__ = __getattr__
     cls.get = get
+    cls.__dir__ = __dir__
 
 def patchDataProvider(cls):
     origdata = cls.data
