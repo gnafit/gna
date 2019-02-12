@@ -14,6 +14,7 @@ from gna.converters import convert
 from argparse import ArgumentParser
 import gna.constructors as C
 from gna.parameters.printer import print_parameters
+from gna.bindings import common
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -30,12 +31,6 @@ def axes( title, ylabel='' ):
     ax.set_title( title )
     return ax
 
-def singularities( values, edges ):
-    indices = N.digitize( values, edges )-1
-    phist = N.zeros( edges.size-1 )
-    phist[indices] = 1.0
-    return phist
-
 #
 # Define the parameters in the current namespace
 #
@@ -45,53 +40,39 @@ par = env.defparameter( 'Eres_b',  central=0.03, fixed=True )
 env.defparameter( 'Eres_c',  central=0.0, fixed=True )
 print_parameters( env.globalns )
 
-values = []
-def pop_value():
-    global values, par
-    par.set(values.pop())
-
-def push_value(v):
-    global values, par
-    values.append(par.value())
-    par.set(v)
-
 #
 # Define bin edges
 #
-binwidth=0.02
-edges = N.arange( 0.0, 2, binwidth )
+nbins=40
+edges = N.linspace(0.0, 2.0, nbins+1)
+binwidth=edges[1]-edges[0]
+centers = (edges[1:]+edges[:-1])*0.5
 efine = N.arange( edges[0], edges[-1]+1.e-5, 0.005 )
 
 ax = axes( 'Energy resolution impact' )
-phist = singularities( [0.4, 0.8, 1.0], edges )
+phist = N.ones(edges.size-1)
 
 hist = C.Histogram(edges, phist)
 edges_o = R.HistEdges(hist)
 eres = R.EnergyResolution(True)
 eres.matrix.Edges( hist )
 eres.smear.Ntrue( hist )
-
 smeared = eres.smear.Nrec.data()
-print( 'Sum check for {} (diff): {}'.format( e, phist.sum()-smeared.sum() ) )
 
-lines = plot_hist( edges, smeared, label='default' )
+eres.smear.plot_hist(label='default')
 
-color = lines[0].get_color()
-ax.vlines( e, 0.0, smeared.max(), linestyle='--', color=color )
+arrays = N.eye(20, edges.size-1, dtype='d')
+objects = [C.Histogram(edges, a) for a in arrays]
+outputs = [o.single() for o in objects]
 
-if len(e)>1:
-    color='green'
-for e in e:
-    ax.plot( efine, binwidth*norm.pdf( efine, loc=e, scale=eres.relativeSigma(e)*e ), linestyle='--', color=color )
+for i, out in enumerate(outputs):
+    out = eres.add_input(out)
 
-push_value(0.162)
-smeared = eres.smear.Nrec.data()
-plot_hist( edges, smeared, label='modified', color=color, alpha=0.5)
-pop_value()
+    out.plot_hist(label='Bin %i'%i, alpha=0.5)
 
 ax.legend()
 
-savefig( opts.output, suffix='_test_%i'%i )
+savefig(opts.output)
 
 smeared = eres.smear.Nrec.data()
 
