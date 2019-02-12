@@ -40,6 +40,10 @@ class GNADot(object):
         kwargs.setdefault('labelfontsize', 10)
         self.joints = kwargs.pop('joints', False)
 
+        OutputHandle = R.TransformationTypes.OutputHandleT('double')
+        Handle = R.TransformationTypes.HandleT('double', 'double')
+        SingleOutput = R.SingleOutputT('double')
+
         self.graph=G.AGraph( directed=True, strict=False, **kwargs )
         self.register = set()
         if isinstance(transformation, (types.GeneratorType)):
@@ -47,12 +51,12 @@ class GNADot(object):
         if not isinstance(transformation, (list, tuple)):
             transformation = [transformation]
         for t in transformation:
-            if isinstance(t, R.TransformationTypes.OutputHandle):
-                entry = R.OpenOutputHandle(t).getEntry()
-            elif isinstance(t, R.TransformationTypes.Handle):
-                entry = R.OpenHandle(t).getEntry()
-            elif isinstance(t, R.SingleOutput):
-                entry = R.OpenOutputHandle(t.single()).getEntry()
+            if isinstance(t, OutputHandle):
+                entry = R.OpenOutputHandleT('double','double')(t).getEntry()
+            elif isinstance(t, Handle):
+                entry = R.OpenHandleT('double','double')(t).getEntry()
+            elif isinstance(t, SingleOutput):
+                entry = R.OpenOutputHandleT('double','double')(t.single()).getEntry()
             else:
                 raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
 
