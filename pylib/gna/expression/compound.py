@@ -288,7 +288,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, TProduct) and o.expandable:
+            if self.expandable and isinstance(o, TProduct) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -337,7 +337,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, TSum) and o.expandable:
+            if self.expandable and isinstance(o, TSum) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -360,7 +360,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             elif isinstance(other, Variable):
                 self.weight = self.weight*other if self.weight is not None else other
             elif isinstance(other, Transformation):
-                self.object = self.object*other if self.object is not None else other
+                self.object = Transformation.__mul__(self.object, other, False) if self.object is not None else other
             else:
                 raise Exception( 'Unsupported type' )
 

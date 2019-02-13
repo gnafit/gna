@@ -14,7 +14,7 @@ def uid( obj1, obj2=None ):
 def savegraph(obj, fname, *args, **kwargs):
     verbose = kwargs.pop('verbose', True)
 
-    gdot = GNADot(obj)
+    gdot = GNADot(obj, *args, **kwargs)
 
     if verbose:
         print('Write output file:', fname)
