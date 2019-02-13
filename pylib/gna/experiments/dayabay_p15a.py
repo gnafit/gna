@@ -435,10 +435,9 @@ class exp(baseexp):
         'enu| ee(evis()), ctheta()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        'ff_corr = fission_fraction_corr[i,r]',
-        'ff = fission_fractions_add[i,r]()*ff_corr',
+        'ff = fission_fraction_corr[i,r] * fission_fractions[i,r]()',
         'denom = sum[i] | eper_fission[i]*ff',
-        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()*ff_corr / denom',
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*ff / denom',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
         'eres_matrix| evis_hist()',
