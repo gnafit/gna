@@ -373,9 +373,6 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
         import ROOT as R
         self.set_tinit( R.WeightedSum )
 
-    def __mul__(self, other):
-        return WeightedTransformation(undefinedname, self, other)
-
     @methodname
     def require(self, context):
         self.object.require(context)

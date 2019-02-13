@@ -36,11 +36,12 @@ class exp(baseexp):
 
     def init_nidx(self):
         self.detectors = ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']
+        self.reactors  = ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']
         self.nidx = [
             ('s', 'site',        ['EH1', 'EH2', 'EH3']),
             ('d', 'detector',    self.detectors,
                                  dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
-            ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
+            ('r', 'reactor',     self.reactors),
             ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
