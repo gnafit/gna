@@ -48,13 +48,15 @@ def loadcmdclass(modules, name, args):
 def listmodules(modules, printdoc=False):
     print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
     from textwrap import TextWrapper
-    from os.path import relpath
+    from os.path import relpath, isfile
     offsetlen, namelen = 4, 20
     offset  = ' '*offsetlen
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
     wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
-    for modname, module in modules.iteritems():
+    modnames = sorted(modules.
+            keys())
+    for modname in modnames:
         try:
             module=loadmodule(modules, modname)
         except Exception as e:
@@ -64,6 +66,13 @@ def listmodules(modules, printdoc=False):
             if printdoc and module.__doc__:
                 print(wrp.fill(module.__doc__))
                 print()
+
+            if module.__file__.endswith('.pyc'):
+                pyname = module.__file__[:-1]
+                if not isfile(pyname):
+                    print('')
+                    print('\033[31mWarning!\033[0m\nThe file {} does not exist. Consider removing all the \'*.pyc\' files from the project'.format(pyname))
+                    print('')
 
 def run():
     modules = getmodules()

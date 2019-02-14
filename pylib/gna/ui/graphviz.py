@@ -30,6 +30,7 @@ class cmd(basecmd):
         head = self.opts.plot[0]
 
         kwargs = dict(self.opts.options, joints=self.opts.joints)
+        kwargs.setdefault('rankdir', 'LR')
         if self.opts.splines:
             kwargs['splines']=self.opts.splines
         graph = GNADot( head, **kwargs )

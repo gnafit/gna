@@ -1,3 +1,5 @@
+.. _bundles_configuration:
+
 Bundles configuration and seach path
 ''''''''''''''''''''''''''''''''''''
 
