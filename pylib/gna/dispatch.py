@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import sys
 import os.path
@@ -29,9 +30,12 @@ def getmodules():
         modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
     return modules
 
-def loadcmdclass(modules, name, args):
+def loadmodule(modules, name):
     loader = modules[name]
-    module = loader.find_module(name).load_module(name)
+    return loader.find_module(name).load_module(name)
+
+def loadcmdclass(modules, name, args):
+    module=loadmodule(modules, name)
     cls = getattr(module, 'cmd')
 
     parser = argparse.ArgumentParser()
@@ -41,11 +45,38 @@ def loadcmdclass(modules, name, args):
 
     return cls, opts
 
+def listmodules(modules, printdoc=False):
+    print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
+    from textwrap import TextWrapper
+    from os.path import relpath
+    offsetlen, namelen = 4, 20
+    offset  = ' '*offsetlen
+    eoffset = '!'+offset[1:]
+    docoffset = ' '*(offsetlen+namelen+6)
+    wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
+    for modname, module in modules.iteritems():
+        try:
+            module=loadmodule(modules, modname)
+        except Exception as e:
+            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname, e.message, namelen=namelen))
+        else:
+            print('{}{:<{namelen}s} from {}'.format(offset, modname, './'+relpath(module.__file__), namelen=namelen))
+            if printdoc and module.__doc__:
+                print(wrp.fill(module.__doc__))
+                print()
+
 def run():
     modules = getmodules()
     for group in arggroups(sys.argv):
         if not group:
             continue
+        if group==['--list']:
+            listmodules(modules)
+            sys.exit(0)
+        elif group==['--list-long']:
+            listmodules(modules, True)
+            sys.exit(0)
+
         name = group[0] = group[0].replace('-', '_')
         if name not in modules:
             msg = 'unknown module %s' % name

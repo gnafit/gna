@@ -15,6 +15,7 @@ Tutorial (Under construction)
    tutorial/variables
    tutorial/complex_transformations
    tutorial/bundles
+   tutorial/ui
    tutorial/tbd
 
 

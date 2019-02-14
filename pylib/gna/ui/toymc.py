@@ -11,10 +11,10 @@ class cmd(basecmd):
 
     def init(self):
         toymc = ROOT.CovarianceToyMC()
-b
+
         for block in self.opts.analysis:
             toymc.add(block.theory, block.cov)
-b
+
         self.env.parts.statistic[self.opts.name] = chi2
 
     @classmethod
