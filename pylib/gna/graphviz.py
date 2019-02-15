@@ -50,14 +50,8 @@ class GNADot(object):
         self.walker.entry_do(self._action_entry)
         self.walker.source_open_do(self._action_source_open)
 
-    def _get_graph(self, *args):
-        return self.graph
-
     def _action_entry(self, entry):
-        name = self.entryfmt.format(name=entry.name, label=entry.label)
-        graph = self._get_graph(name)
-
-        node = graph.add_node( uid(entry), label=name )
+        node = self.graph.add_node( uid(entry), **self._node_attrs(entry) )
         for i, sink in enumerate(entry.sinks):
             self._action_sink(sink, i)
 
@@ -80,6 +74,24 @@ class GNADot(object):
             self.graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
             for j, source in enumerate(sink.sources):
                 self.graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, None, None, source))
+
+    def _node_attrs(self, entry):
+        ret=dict()
+
+        styles=()
+        if entry.name in ('sum',):
+            ret['shape']='record'
+            styles+='rounded',
+            prefix = '+|'
+        else:
+            prefix=''
+
+        if entry.name in ('hist','points'):
+            styles+='dashed',
+
+        ret['label'] = prefix+self.entryfmt.format(name=entry.name, label=entry.label)
+        ret['style'] = ','.join(styles)
+        return ret
 
     def get_head_label(self, i, obj):
         if not self.markhead:
