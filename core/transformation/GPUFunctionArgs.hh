@@ -30,7 +30,15 @@ namespace TransformationTypes{
         template<typename Container>
         void readVariables(Container& vars){ 
 		m_vars.readVariables(vars);
+		setAsDevice();
+	}
+
+	void setAsDevice() {
 		m_entry->setEntryDataLocation(DataLocation::Device);
+	}
+
+	void setAsHost() {
+		m_entry->setEntryDataLocation(DataLocation::Host);
 	}
 
         void updateTypesHost();

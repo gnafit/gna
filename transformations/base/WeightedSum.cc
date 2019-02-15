@@ -108,4 +108,5 @@ void WeightedSum::sumFill_ongpu(FunctionArgs& fargs) {
     gpuargs->readVariables(m_vars);
     gpuargs->provideSignatureDevice();
     cuweightedsumfill(gpuargs->args, gpuargs->rets, gpuargs->vars, m_fillvalue, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
+    gpuargs->setAsDevice();
 }

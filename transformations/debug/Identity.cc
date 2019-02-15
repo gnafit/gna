@@ -62,12 +62,13 @@ void identity_gpu_d(FunctionArgs& fargs){
 	fargs.args.touch();
 	auto& gpuargs=fargs.gpu;
 //	gpuargs->provideSignatureDevice();
-
+//        gpuargs->setAsDevice();
 	auto** source=gpuargs->args;
 	auto** dest  =gpuargs->rets;
 	identity_gpu(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
 	fargs.args[0].gpuArr->dump();
 	fargs.rets[0].gpuArr->dump();
+	gpuargs->setAsDevice();
 }
 template class GNA::GNAObjectTemplates::IdentityT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
