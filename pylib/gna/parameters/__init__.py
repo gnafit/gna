@@ -85,7 +85,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         if not 'relsigma' in kwargs and not 'sigma' in kwargs:
             kwargs['sigma']=float('inf')
             if not 'step' in kwargs:
-                central = kwargs['central']
+                central = float(kwargs['central'])
                 if central:
                     kwargs.setdefault('step', 0.1*central)
                 else:

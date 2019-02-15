@@ -62,17 +62,20 @@ def listmodules(modules, printdoc=False):
         except Exception as e:
             print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname, e.message, namelen=namelen))
         else:
-            print('{}{:<{namelen}s} from {}'.format(offset, modname, './'+relpath(module.__file__), namelen=namelen))
+            if module.__file__.endswith('.pyc'):
+                pyname = module.__file__[:-1]
+                if isfile(pyname):
+                    modfile = './'+relpath(pyname)+' (pyc)'
+                    warning=''
+                else:
+                    modfile = './'+relpath(module.__file__)
+                    warning='  \033[31mWarning!\033[0m The file {} does not exist. Consider removing all the \'*.pyc\' files from the project'.format(relpath(pyname))
+
+            print('{}{:<{namelen}s} from {}{}'.format(offset, modname, modfile, warning, namelen=namelen))
             if printdoc and module.__doc__:
                 print(wrp.fill(module.__doc__))
                 print()
 
-            if module.__file__.endswith('.pyc'):
-                pyname = module.__file__[:-1]
-                if not isfile(pyname):
-                    print('')
-                    print('\033[31mWarning!\033[0m\nThe file {} does not exist. Consider removing all the \'*.pyc\' files from the project'.format(pyname))
-                    print('')
 
 def run():
     modules = getmodules()

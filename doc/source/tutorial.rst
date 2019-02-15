@@ -16,7 +16,6 @@ Tutorial (Under construction)
    tutorial/complex_transformations
    tutorial/bundles
    tutorial/ui
-   tutorial/tbd
 
 
 
