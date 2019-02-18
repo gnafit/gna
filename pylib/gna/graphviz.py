@@ -7,6 +7,9 @@ import ROOT as R
 from collections import OrderedDict
 from configurator import NestedDict
 
+import re
+pattern = re.compile('^.*::([^:<]+)(T<[^>]*>)*$')
+
 def uid( obj1, obj2=None ):
     if obj2:
         res = '%s -> %s'%( uid( obj1), uid( obj2 ) )
@@ -88,9 +91,12 @@ class GNADot(object):
             """In case there is more than one connections, merge them"""
             jointuid = self.entry_uid(sink, 'joint')
             joint = self.graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.style.tail_label(None, sink) )
-            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, arrowhead='none', weight=0.5 )
+
+            sstyle=self.style.edge_attrs(i, sink, None, None)
+            sstyle['arrowhead']='none'
+            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
             for j, source in enumerate(sink.sources):
-                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, None, None, source))
+                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, sink, None, source))
 
 class TreeStyle(object):
     markhead, marktail = True, True
@@ -115,6 +121,9 @@ class TreeStyle(object):
         objectname = attrs['_object']
         entryname = entry.name
         funcname = entry.funcname
+
+        if '::' in objectname:
+            objectname = pattern.match(objectname).groups()[0]
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
@@ -142,6 +151,17 @@ class TreeStyle(object):
         elif objectname in ('Histogram2d',):
             features.static=True
             mark='h²'
+        elif objectname in ('Rebin',):
+            mark='r'
+        elif objectname in ('Concat',):
+            mark='..'
+        elif objectname in ('FillLike',):
+            features.static=True
+            mark='c'
+        elif objectname in ('HistSmearSparse', 'HistSmear'):
+            mark='@'
+        # else:
+            # print(objectname, entryname, features.label)
 
         if entry.funcname=='gpu':
             features.gpu=True
@@ -218,8 +238,6 @@ class TreeStyle(object):
             sinkfeatures = self.get_features(sink.entry)
             if sinkfeatures.static:
                 style+='dashed',
-            if sinkfeatures.frozen:
-                style+='dotted',
 
             gpu1 = sinkfeatures.gpu
         else:
@@ -229,6 +247,9 @@ class TreeStyle(object):
             attrs['headlabel']=self.head_label(isource, source)
             sourcefeatures = self.get_features(source.entry)
             gpu2 = sourcefeatures.gpu
+            if sourcefeatures.frozen:
+                attrs['arrowhead']='tee'
+                style+='dotted',
         else:
             attrs['arrowhead']='empty'
             gpu2 = False
