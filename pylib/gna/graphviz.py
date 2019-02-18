@@ -109,6 +109,7 @@ class TreeStyle(object):
     entryfmt = '{label}'
 
     gpucolor = 'limegreen'
+    staticcolor = 'azure3'
     gpupenwidth = 4
 
     def __init__(self, walker):
@@ -127,45 +128,77 @@ class TreeStyle(object):
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
+        def getdim(sink):
+            if not sink.materialized():
+                return None
+
+            return tuple('%i'%d for d in sink.data.type.shape)
+
         mark=None
-        if objectname in ('Sum', 'MultiSum', 'WeightedSum'):
+        dim=None
+        npars=0
+        if objectname in ('Sum', 'MultiSum'):
             mark='+'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('WeightedSum'):
+            mark='+w'
+            npars=entry.sinks.size()
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Product',):
             mark='*'
+            dim = getdim(entry.sinks[0])
         elif objectname.startswith('Integrator'):
             if entry.name == 'points':
-                mark='.'
+                mark='x'
                 features.static=True
+                if objectname.startswith('Integrator21'):
+                    dim = getdim(entry.sinks[3])
+                elif objectname.startswith('Integrator2'):
+                    dim = getdim(entry.sinks[4])
+                else:
+                    dim = getdim(entry.sinks[0])
             else:
                 mark='i'
+                dim = getdim(entry.sinks[0])
         elif objectname.startswith('Interp'):
             mark='~'
+            dim = getdim(entry.sinks.back())
         elif objectname in ('InSegment',):
             mark='[]'
         elif objectname in ('Points',):
             features.static=True
-            mark='.'
+            mark='a'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram',):
             features.static=True
             mark='h'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram2d',):
             features.static=True
             mark='h²'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Rebin',):
             mark='r'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Concat',):
             mark='..'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('FillLike',):
             features.static=True
             mark='c'
+            dim = getdim(entry.sinks[0])
+            npars=1
         elif objectname in ('HistSmearSparse', 'HistSmear'):
             mark='@'
+            dim = getdim(entry.sinks[0])
         # else:
             # print(objectname, entryname, features.label)
 
         if entry.funcname=='gpu':
             features.gpu=True
 
+        features.dim=dim
+        features.npars=npars
         features.mark=mark
         self.entry_features[entry.hash()]=features
         return features
@@ -183,25 +216,39 @@ class TreeStyle(object):
 
         styles=()
         label=()
+        color=None
 
         if features.frozen:
-            styles+='dotted',
-        elif features.static:
             styles+='dashed',
 
-        mark=features.mark
-        if mark is not None:
-            ret['shape']='Mrecord'
-
         if features.gpu:
-            ret['color']='limegreen'
+            ret['color']=self.gpucolor
             styles+='bold',
+        if features.static:
+            ret['color']=self.staticcolor
 
         label=self.entryfmt.format(name=entry.name, label=features['label'])
-        if mark is not None:
-            ret['label'] =  '{%s|%s}'%(mark, label)
+
+        mark=features.mark
+        dim=features.dim
+        npars=features.npars
+        marks = ()
+        if mark:
+            marks+=mark,
+        if npars:
+            marks+='(%i)'%npars,
+            marks='{%s}'%('|'.join(marks)),
+        if dim:
+            marks+='[%s]'%('x'.join(dim)),
+            marks='{%s}'%('|'.join(marks)),
+        if marks:
+            ret['shape']='Mrecord'
+            marks+=label,
+            marks='{%s}'%('|'.join(marks)),
         else:
-            ret['label'] =  label
+            marks=label,
+
+        ret['label'] = marks[0]
         ret['style'] = ','.join(styles)
         return ret
 
@@ -237,7 +284,7 @@ class TreeStyle(object):
 
             sinkfeatures = self.get_features(sink.entry)
             if sinkfeatures.static:
-                style+='dashed',
+                attrs['color']=self.staticcolor
 
             gpu1 = sinkfeatures.gpu
         else:
@@ -249,7 +296,7 @@ class TreeStyle(object):
             gpu2 = sourcefeatures.gpu
             if sourcefeatures.frozen:
                 attrs['arrowhead']='tee'
-                style+='dotted',
+                style+='dashed',
         else:
             attrs['arrowhead']='empty'
             gpu2 = False
