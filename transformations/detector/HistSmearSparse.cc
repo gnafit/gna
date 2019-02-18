@@ -26,6 +26,7 @@ TransformationDescriptor HistSmearSparse::add_transformation(const std::string& 
            })
     .func(&HistSmearSparse::calcSmear);
 
+  reset_open_input();
   bind_tfirst_tlast(0, 0);
 
   return transformations.back();

@@ -41,7 +41,7 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Source belongs to.
      */
     SourceT(const SourceType &other, EntryType *entry)
-      : name(other.name), label(other.label), entry(entry), inactive(other.inactive) { }
+      : name(other.name), entry(entry), inactive(other.inactive), attrs(other.attrs) { }
 
     void connect(SinkType *newsink);      ///< Connect the Source to the Sink.
 
@@ -55,11 +55,13 @@ namespace TransformationTypes
 
     const DataType* getData() const {return sink ? sink->getData() : nullptr;}
 
+    size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return source address as size_t
+
     std::string name;                             ///< Source's name.
-    std::string label;                            ///< Source's label.
     const SinkType *sink = nullptr;               ///< Pointer to the Sink the Source is connected to.
     EntryType *entry;                             ///< Entry pointer the Source belongs to.
     bool inactive=false;                          ///< Source is inactive (taintflag will not be subscribed)
+    Attrs attrs;                                  ///< Map with source attributes
   };
 } /* namespace TransformationTypes */
 

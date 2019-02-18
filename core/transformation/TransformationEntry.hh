@@ -102,7 +102,7 @@ namespace TransformationTypes
 
     EntryT(const std::string &name, const BaseType *parent); ///< Constructor.
     EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
-    ~EntryT();                                           ///< Destructor.
+    ~EntryT();                                               ///< Destructor.
 
     InputHandleType addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
     OutputHandleType addSink(const std::string &name);                            ///< Initialize and return new Sink.
@@ -120,7 +120,7 @@ namespace TransformationTypes
 
     // Names, labels and meta
     std::string name;                                    ///< Transformation name.
-    std::string label;                                   ///< Transformation label.
+    Attrs attrs;                                         ///< Map with entry attributes
     const BaseType *parent;                              ///< Base class, containing the transformation Entry.
 
     // Data
@@ -144,6 +144,8 @@ namespace TransformationTypes
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
     void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
+
+    size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.

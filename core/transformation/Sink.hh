@@ -2,6 +2,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <string>
+#include <map>
 #include <memory>
 #include <utility>
 
@@ -9,6 +10,7 @@
 
 namespace TransformationTypes
 {
+  using Attrs = std::map<std::string,std::string>;
   template<typename SourceFloatType,typename SinkFloatType> struct EntryT;
 
   template<typename FloatType> struct SourceT;
@@ -44,17 +46,19 @@ namespace TransformationTypes
      * @param entry -- Entry pointer Sink belongs to.
      */
     SinkT(const SinkType &other, EntryType *entry)
-      : name(other.name), label(other.label), entry(entry) { }
+      : name(other.name), entry(entry), attrs(other.attrs) {  }
 
     bool materialized() const { return (bool)data; } ///< Check if data is initialized
 
     DataType* getData() {return data.get();}
     const DataType* getData() const {return const_cast<const DataType*>(data.get());}
 
+    size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return sink address as size_t
+
     std::string name;                    ///< Sink's name.
-    std::string label;                   ///< Sink's label.
     DataPtr data;                        ///< Sink's Data.
     std::vector<SourceType*> sources;    ///< Container with Source pointers which use this Sink as their input.
     EntryType *entry;                    ///< Pointer to the transformation Entry this Sink belongs to.
+    Attrs attrs;                         ///< Map with sink attributes
   };
 } /* TransformationTypes */
