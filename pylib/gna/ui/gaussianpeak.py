@@ -1,3 +1,4 @@
+"""Example model: gaussian peak with flat background"""
 from __future__ import print_function
 from gna.ui import basecmd
 from gna.env import env
@@ -19,8 +20,10 @@ class cmd(basecmd):
     def init(self):
         if self.opts.npeaks == 1:
             names = [self.opts.name]
+            peak_sum = None
         else:
             names = [self.opts.name + str(i) for i in range(self.opts.npeaks)]
+            peak_sum = ROOT.Sum(labels='Sum of\nsignals')
         common_ns = env.ns(self.opts.name)
 
         if self.opts.with_eres:
@@ -28,16 +31,15 @@ class cmd(basecmd):
             common_ns.reqparameter("Eres_b", central=0.03, sigma=0)
             common_ns.reqparameter("Eres_c", central=0.0, sigma=0)
 
-        peak_sum = ROOT.Sum(labels='Sum of\nsignals')
         edges = np.linspace(self.opts.Emin, self.opts.Emax, self.opts.nbins+1, dtype='d')
 
         integrator = C.IntegratorGL(edges, self.opts.order, labels=('GL sampler', 'GL integrator'))
         for i, name in enumerate(names):
             locns = env.ns(name)
-            locns.reqparameter('BackgroundRate', central=50, relsigma=0.1)
-            locns.reqparameter('Mu', central=100, relsigma=0.1)
-            locns.reqparameter('E0', central=2, sigma=0.05)
-            locns.reqparameter('Width', central=0.2, sigma=0.005)
+            locns.reqparameter('BackgroundRate', central=50, relsigma=0.1, label='Flat background rate %i'%i)
+            locns.reqparameter('Mu', central=100, relsigma=0.1, label='Peak %i amplitude'%i)
+            locns.reqparameter('E0', central=2, sigma=0.05, label='Peak %i position'%i)
+            locns.reqparameter('Width', central=0.2, sigma=0.005, label='Peak %i width'%i)
             with locns:
                 model = ROOT.GaussianPeakWithBackground(labels='Peak %i'%i)
 
@@ -45,8 +47,11 @@ class cmd(basecmd):
             if i:
                 integrator.add_transformation()
             out = integrator.add_input(model.rate.rate)
-            peak_sum.add(out)
-            locns.addobservable('spectrum', out)
+            if peak_sum:
+                peak_sum.add(out)
+                locns.addobservable('spectrum', out)
+            else:
+                peak_sum=out
 
         common_ns.addobservable('spectrum', peak_sum)
 
@@ -57,4 +62,4 @@ class cmd(basecmd):
             peak_sum.sum >> eres.smear.Ntrue
             common_ns.addobservable("spectrum_with_eres", eres.smear.Nrec)
 
-        env.globalns.printparameters(labels='True')
+        common_ns.printparameters(labels='True')

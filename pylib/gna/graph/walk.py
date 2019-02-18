@@ -4,6 +4,7 @@ from __future__ import print_function
 import ROOT as R
 from collections import deque
 import numpy as N
+import types
 
 class GraphWalker(object):
     def __init__(self, *args):
@@ -14,12 +15,25 @@ class GraphWalker(object):
         self.build_cache()
 
     def _add_entry_point(self, arg):
-        if isinstance(arg, R.TransformationTypes.OutputHandle):
-            entry = R.OpenOutputHandle(arg).getEntry()
-        elif isinstance(arg, R.TransformationTypes.Handle):
-            entry = R.OpenHandle(arg).getEntry()
-        else:
-            raise TypeError('Unsupported argument type '+type(arg).__name__)
+        OutputHandle = R.TransformationTypes.OutputHandleT('double')
+        Handle = R.TransformationTypes.HandleT('double', 'double')
+        SingleOutput = R.SingleOutputT('double')
+
+        if isinstance(arg, (types.GeneratorType)):
+            arg = list(arg)
+        if not isinstance(arg, (list, tuple)):
+            arg = [arg]
+
+        for t in arg:
+            if isinstance(t, OutputHandle):
+                entry = R.OpenOutputHandleT('double','double')(t).getEntry()
+            elif isinstance(t, Handle):
+                entry = R.OpenHandleT('double','double')(t).getEntry()
+            elif isinstance(t, SingleOutput):
+                entry = R.OpenOutputHandleT('double','double')(t.single()).getEntry()
+            else:
+                # raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
+                raise TypeError('Unsupported argument type '+type(arg).__name__)
 
         self._entry_points.append(entry)
 
@@ -32,18 +46,29 @@ class GraphWalker(object):
 
                 queue.append(other)
 
+            if sink.sources.size()==0:
+                self.cache_sinks_open.append(sink)
+
     def _propagate_backward(self, entry, queue):
         for source in entry.sources:
-            other=source.sink.entry
-            if other in queue or other in self.cache_entries:
-                continue
+            sink = source.sink
 
-            queue.append(other)
+            if sink:
+                other=sink.entry
+                if other in queue or other in self.cache_entries:
+                    continue
+
+                queue.append(other)
+            else:
+                self.cache_sources_open.append(source)
 
     def build_cache(self):
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
+
+        self.cache_sources_open=[]
+        self.cache_sinks_open=[]
 
         queue=deque(self._entry_points)
         while queue:
@@ -66,6 +91,12 @@ class GraphWalker(object):
 
     def sink_do(self, *args):
         return self._list_do(self.cache_sinks, *args)
+
+    def source_do(self, *args):
+        return self._list_do(self.cache_sources, *args)
+
+    def source_open_do(self, *args):
+        return self._list_do(self.cache_sources_open, *args)
 
     def get_edges(self):
         edges=0

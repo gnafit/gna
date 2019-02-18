@@ -17,7 +17,7 @@ class cmd(basecmd):
         if self.opts.latex:
             matplotlib.rcParams['text.usetex'] = True
             matplotlib.rcParams['text.latex.unicode'] = True
-            matplotlib.rcParams['font.size'] = 14
+            matplotlib.rcParams['font.size'] = 13
 
     @classmethod
     def initparser(cls, parser, env):
@@ -44,7 +44,7 @@ class cmd(basecmd):
                             help='Add legend to the plot, note that number of legends must match the number of plots')
         parser.add_argument('--plot-kwargs', type=yaml.load,
                             help='All additional plotting options go here. They are applied for all plots')
-        parser.add_argument('--drawgrid', action='store_true')
+        parser.add_argument('--drawgrid', '--grid', action='store_true')
         parser.add_argument('-s', '--show', action='store_true')
         parser.add_argument('--savefig', '-o', '--output', default='', help='Path to save figure')
         parser.add_argument('-t', '--title', nargs='+', help='Title to the figure')
@@ -52,6 +52,7 @@ class cmd(basecmd):
                             help='Create new figure')
         parser.add_argument('--xlabel', nargs='+', required=False)
         parser.add_argument('--ylabel', nargs='+', required=False)
+        parser.add_argument('--ylim', nargs='+', type=float, help='Y limits')
         parser.add_argument('--latex', action='store_true', help='Enable latex mode')
 
     def run(self):
@@ -111,6 +112,8 @@ class cmd(basecmd):
                 edges, ratio, _ = edges_to_barpoints(np.array(descs[0].datatype().hist().edges()), datas[0]/datas[1])
                 plt.plot(edges, ratio)
 
+        if self.opts.ylim:
+            ax.set_ylim(*self.opts.ylim)
 
         if show_legend:
             ax.legend(loc='best')

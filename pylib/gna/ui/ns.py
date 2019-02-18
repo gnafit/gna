@@ -1,7 +1,10 @@
+from __future__ import print_function
 from gna.ui import basecmd
 from importlib import import_module
 from gna.config import cfg
 from gna.parameters.covariance_helpers import CovarianceHandler
+
+undefined = ['undefined']
 
 class cmd(basecmd):
     @classmethod
@@ -41,6 +44,8 @@ class cmd(basecmd):
         #  parser.add_argument('--correlation', action='append', nargs='*',
                             #  metavar=('CORRELATION_SET', 'PARS'))
 
+        parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
+
     def init(self):
         self.env.nsview.add([self.env.ns(x) for x in self.opts.push])
         self.env.nsview.remove([self.env.ns(x) for x in self.opts.pop])
@@ -79,3 +84,9 @@ class cmd(basecmd):
         for entry in self.opts.covariance:
             cov, pars = entry[0], entry[1:]
             CovarianceHandler(cov, pars).covariate_pars()
+
+        try:
+            if self.opts.print is not undefined:
+                self.env.globalns(self.opts.print or '').printparameters(labels=True)
+        except Exception as e:
+            print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))
