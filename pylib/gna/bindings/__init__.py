@@ -265,11 +265,6 @@ def setup(ROOT):
         if issubclass(cls, GNAObjectBase):
             wrapped = patchGNAclass(cls)
             return wrapped
-        if 'Class' not in cls.__dict__:
-            t = cls.__class__
-            origgetattr = cls.__getattribute__
-            t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))
-            return cls
         return cls
 
     t = type(ROOT)
