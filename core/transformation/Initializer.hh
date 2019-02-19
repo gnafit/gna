@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <memory>
+#include "demangle.hpp"
 #include "TransformationEntry.hh"
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
@@ -123,9 +124,11 @@ namespace TransformationTypes {
      * @param obj -- TransformationBind pointer to manage. Used to get Base pointer for Entry.
      * @param name -- new Entry name.
      */
-    InitializerT(TransformationBindType *obj, const std::string &name)
-      : m_data(new InitializerData(new EntryType(name, obj), obj))
-    { }
+    InitializerT(TransformationBindType *obj, const std::string &name) :
+      m_data(new InitializerData(new EntryType(name, obj), obj))
+    {
+      m_data->entry->attrs["_object"]=boost::core::demangle(typeid(T).name());
+    }
 
     /**
      * @brief Destructor.
@@ -272,7 +275,7 @@ namespace TransformationTypes {
      * @return `*this`.
      */
     InitializerType& label(const std::string &label) {
-      m_data->entry->label=label;
+      m_data->entry->attrs["_label"]=label;
       return *this;
     }
 

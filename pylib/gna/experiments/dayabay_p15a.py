@@ -98,7 +98,7 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
             kinint2 = NestedDict(
-                bundle   = dict(name='integral_2d1d', version='v02', names=dict(integral='kinint2')),
+                bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
                 xorders   = 2,

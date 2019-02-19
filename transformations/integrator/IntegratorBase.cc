@@ -43,6 +43,7 @@ TransformationDescriptor IntegratorBase::add_transformation(const std::string& n
         .types(TypesFunctions::ifSame)
         .func(&IntegratorBase::integrate)
         ;
+    reset_open_input();
     return transformations.back();
 }
 
@@ -96,6 +97,7 @@ void IntegratorBase::init_sampler() {
     auto trans=transformation_("points")
         .output("x")
         .output("xedges")
+        .output("xhist")
         .types(&IntegratorBase::check_sampler)
         .func(&IntegratorBase::sample)
         ;
@@ -121,6 +123,7 @@ void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
         m_edges=Map<const ArrayXd>(edges.data(), edges.size());
     }
     rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
+    rets[2]=DataType().hist().edges(m_edges.size(), m_edges.data());;
 }
 
 void IntegratorBase::dump(){

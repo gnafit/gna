@@ -27,6 +27,7 @@ protected:
     std::string new_transformation_name(const std::string& name);
 
     void set_open_input() { m_open_input=true; }
+    void reset_open_input() { m_open_input=false; }
 
 private:
     std::string new_name(const std::string& base, size_t num, const std::string& altname="");

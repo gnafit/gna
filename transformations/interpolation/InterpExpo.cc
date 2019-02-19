@@ -50,6 +50,7 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .func(&InterpExpo::do_interpolate)
     ;
 
+  reset_open_input();
   bind_transformations();
   return transformations.back();
 }

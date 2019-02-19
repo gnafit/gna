@@ -36,17 +36,17 @@ namespace TransformationTypes
     HandleT(EntryType &entry) : m_entry(&entry) { }                 ///< Constructor. @param entry -- an Entry instance to wrap.
     HandleT(const HandleType &other): HandleT(*other.m_entry) { }   ///< Constructor. @param other -- Handle instance to get Entry to wrap.
 
-    const std::string &name() const { return m_entry->name; }                 ///< Get entry name.
-    const std::string &label() const { return m_entry->label; }               ///< Get entry label.
-    void  setLabel(const std::string& label) const { m_entry->label=label; }  ///< Set entry label.
-    std::vector<InputHandleType> inputs() const;                              ///< Get vector of inputs.
-    std::vector<OutputHandleType> outputs() const;                            ///< Get vector of outputs.
+    const std::string &name() const { return m_entry->name; }                            ///< Get entry name.
+    const std::string &label() const { return m_entry->attrs["_label"]; }                ///< Get entry label.
+    void  setLabel(const std::string& label) const { m_entry->attrs["_label"]=label; }   ///< Set entry label.
+    std::vector<InputHandleType> inputs() const;                                         ///< Get vector of inputs.
+    std::vector<OutputHandleType> outputs() const;                                       ///< Get vector of outputs.
 
-    InputHandleType input(const std::string &name);                           ///< Add named input.
-    InputHandleType input(const std::string &name, int mapto);                ///< Add named input.
+    InputHandleType input(const std::string &name);                                      ///< Add named input.
+    InputHandleType input(const std::string &name, int mapto);                           ///< Add named input.
 
-    InputHandleType input(SingleOutputType &output);                          ///< Create a new input and connect to the SingleOutput transformation.
-    InputHandleType input(const std::string &name, SingleOutputType &output); ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(SingleOutputType &output);                                     ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(const std::string &name, SingleOutputType &output);            ///< Create a new input and connect to the SingleOutput transformation.
 
     InputHandleType input(SingleOutputType &output, int mapto);                          ///< Create a new input and connect to the SingleOutput transformation.
     InputHandleType input(const std::string &name, SingleOutputType &output, int mapto); ///< Create a new input and connect to the SingleOutput transformation.

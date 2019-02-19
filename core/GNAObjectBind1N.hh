@@ -31,7 +31,8 @@ protected:
     std::string new_transformation_name(const std::string& name);
 
     void bind_tfirst_tlast(size_t noutput, size_t ninput);
-    void set_open_input() { m_open_input=true; }
+    void set_open_input()   { m_open_input=true; }
+    void reset_open_input() { m_open_input=false; }
 
 private:
     std::string new_name(const std::string& base, size_t num, size_t offset, const std::string& altname="");

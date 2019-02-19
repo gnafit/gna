@@ -47,6 +47,7 @@ TransformationDescriptor Integrator2Base::add_transformation(const std::string& 
         .types(TypesFunctions::ifSame)
         .func(&Integrator2Base::integrate)
         ;
+    reset_open_input();
     return transformations.back();
 }
 
@@ -104,6 +105,8 @@ void Integrator2Base::init_sampler() {
       .output("yedges")
       .output("xmesh")
       .output("ymesh")
+      .output("xhist")
+      .output("yhist")
       .types(&Integrator2Base::check_sampler)
       .func(&Integrator2Base::sample)
       ;
@@ -137,6 +140,9 @@ void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
   }
   rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
   rets[3]=DataType().points().shape(m_yedges.size()).preallocated(m_yedges.data());
+
+  rets[6]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+  rets[7]=DataType().hist().edges(m_yedges.size(), m_yedges.data());
 }
 
 void Integrator2Base::dump(){
@@ -156,4 +162,3 @@ void Integrator2Base::set_edges(OutputDescriptor& hist2_output){
     }
     inputs.front()(hist2_output);
 }
-

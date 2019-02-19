@@ -32,7 +32,7 @@ using TypeClassT = TypeClasses::TypeClassT<FloatType>;
  */
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
-  : name(name), label(name), parent(parent), tainted(name.c_str()),
+  : name(name), attrs({{"_label", name}}), parent(parent), tainted(name.c_str()),
     functionargs(new FunctionArgsType(this))
 { }
 
@@ -45,7 +45,7 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Bas
  */
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
-  : name(other.name), label(other.label), parent(parent),
+  : name(other.name), attrs(other.attrs), parent(parent),
     sources(other.sources.size()), sinks(other.sinks.size()),
     mapping(other.mapping),
     fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),

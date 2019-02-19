@@ -14,6 +14,8 @@ MultiSumT<FloatType>::MultiSumT() :
 BindClass("sum", "item", "sum")
 {
     add_transformation();
+    add_input();
+    set_open_input();
 }
 
 /**
@@ -29,9 +31,8 @@ typename MultiSumT<FloatType>::TransformationDescriptor MultiSumT<FloatType>::ad
     this->transformation_(new_transformation_name(name))
         .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0,{0,-1}))
         .func(&multisum<FunctionArgs>);
+    this->reset_open_input();
     add_output();
-    add_input();
-    set_open_input();
     return transformations.back();
 }
 

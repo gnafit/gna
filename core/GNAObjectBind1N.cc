@@ -21,7 +21,7 @@ TransformationDescriptor GNAObjectBind1N::add_transformation(const std::string& 
 }
 
 std::string GNAObjectBind1N::new_name(const std::string& base, size_t num, size_t offset, const std::string& altname){
-    //printf("%s %zu %zu %s\n", base.c_str(), num, offset, altname.c_str());
+    //printf("%s %zu %zu %s\n", base.c_st(), num, offset, altname.c_str());
     if(altname.size()>0u){
         return altname;
     }

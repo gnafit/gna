@@ -50,6 +50,7 @@ TransformationDescriptor InterpLinear::add_transformation(const std::string& nam
     .func(&InterpLinear::do_interpolate)
     ;
 
+  reset_open_input();
   bind_transformations();
   return transformations.back();
 }
