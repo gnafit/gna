@@ -346,6 +346,14 @@ class namespace(Mapping):
             for ns in self.namespaces.values():
                 ns.materializeexpressions(True)
 
+    def get_obs(self, *names):
+        import fnmatch as fn
+        obses = []
+        for name in names:
+            matched = fn.filter(self.observables.keys(), name)
+            obses.extend(matched)
+        return obses
+
 class nsview(object):
     def __init__(self):
         self.nses = deque()
