@@ -78,3 +78,20 @@ explanatory. Within three lines 3-5 we define:
 
 The option `range` defines the energy range, `points` defines the number of points over X axis and `name` defines the
 observable name.
+
+As soon as proper `help` lines are specified, one may get the documented help with the :code:`./gna -- exp --help exampleexp`
+command:
+
+.. code-block:: text
+
+    usage: gna -- exp exampleexp [-h] [-r RANGE RANGE] [-N POINTS] [-n NAME]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -r RANGE RANGE, --range RANGE RANGE
+                            Energy range
+      -N POINTS, --points POINTS
+                            Number of points
+      -n NAME, --name NAME  observable name
+
+

@@ -38,9 +38,10 @@ def loadcmdclass(modules, name, args):
     module=loadmodule(modules, name)
     cls = getattr(module, 'cmd')
 
+    parserkwargs = getattr(cls, 'parserkwargs', {})
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    cls.initparser(subparsers.add_parser(name), env)
+    cls.initparser(subparsers.add_parser(name, **parserkwargs), env)
     opts = parser.parse_args(args, namespace=LazyNamespace())
 
     return cls, opts
