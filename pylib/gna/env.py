@@ -13,6 +13,8 @@ class namespacedict(OrderedDict):
         self.ns = ns
 
     def __missing__(self, key):
+        if key in self.ns.storage:
+            return self.ns
         value = namespace(self.ns, key)
         self[key] = value
         return value
@@ -148,6 +150,7 @@ class namespace(Mapping):
             parts = nsname
         if not parts:
             return self
+        print(parts)
         return self.namespaces[parts[0]](parts[1:])
 
     def link(self, nsname, newns):
