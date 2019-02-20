@@ -14,6 +14,10 @@ class cmd(basecmd):
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
 
+        if self.opts.vs and self.opts.plot_type!='plot':
+            print('\033[35mWarning! plot-type option was reset to "plot"')
+            self.opts.plot_type='plot'
+
         if self.opts.latex:
             matplotlib.rcParams['text.usetex'] = True
             matplotlib.rcParams['text.latex.unicode'] = True
@@ -22,7 +26,11 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
-            nspath, name = path.split('/')
+            if not '/' in path:
+                nspath=''
+                name=path
+            else:
+                nspath, name = path.split('/')
             try:
                 return env.ns(nspath).observables[name]
             except KeyError:
@@ -34,7 +42,8 @@ class cmd(basecmd):
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar'],
+        parser.add_argument('--vs', metavar='X points', type=observable, help='Points over X axis to plot vs')
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot'],
                             default='bin_center', metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('--ratio', nargs=2, action="append", default=[], help="Plot ratio of 2 observables")
@@ -94,6 +103,8 @@ class cmd(basecmd):
                 output.plot_hist(label=legend, **plot_kwargs)
             elif self.opts.plot_type=='errorbar':
                 output.plot_errorbar(yerr='stat', label=legend, **plot_kwargs)
+            elif self.opts.plot_type=='plot':
+                output.plot_vs(self.opts.vs, label=legend, **plot_kwargs)
             else:
                 output.plot_hist_centers(label=legend, **plot_kwargs)
 

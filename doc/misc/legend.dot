@@ -10,33 +10,33 @@ digraph "" {
     subgraph cluster4{
         fontsize=14;
         label="Edge features";
-        node4_1l [shape=Mrecord,label="open output"];
+        node4_1l [shape=Mrecord,label="node"];
         node4_1r [shape=Mrecord,style="invis"];
-        node4_1l -> node4_1r [arrowhead=empty];
+        node4_1l -> node4_1r [arrowhead=empty,label="open output"];
 
         node4_2l [shape=Mrecord,style="invis"];
-        node4_2r [shape=Mrecord,label="open input"];
-        node4_2l -> node4_2r [];
+        node4_2r [shape=Mrecord,label="node"];
+        node4_2l -> node4_2r [label="open input"];
 
         node4_7l [shape=Mrecord,label="static node",color=azure4];
         node4_7r [shape=Mrecord,label="node"];
         node4_7l -> node4_7r [color=azure4,label="static node output"];
 
-        node4_6l [shape=Mrecord,label="CPU node"];
+        node4_6l [shape=Mrecord,label="node"];
         node4_6r [shape=Mrecord,label="frozen node",color=azure4,style=dashed];
         node4_6l -> node4_6r [arrowhead="tee",style=dashed,label="taintflag is ignored"];
 
         node4_3l [shape=Mrecord,label="CPU node"];
         node4_3r [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
-        node4_3l -> node4_3r [style=tapered,penwidth=4,dir=back,color="limegreen",arrowtail=none,label="H2D transfer"];
+        node4_3l -> node4_3r [style=tapered,penwidth=4,dir=back,color="limegreen",arrowtail=none,label="host to device transfer"];
 
         node4_4l [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
         node4_4r [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
-        node4_4l -> node4_4r [penwidth=2,color="limegreen"];
+        node4_4l -> node4_4r [penwidth=2,color="limegreen",label="device to device access"];
 
         node4_5l [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
         node4_5r [shape=Mrecord,label="CPU node"];
-        node4_5l -> node4_5r [style=tapered,penwidth=4,color="limegreen",arrowhead=none,label="D2H transfer"];
+        node4_5l -> node4_5r [style=tapered,penwidth=4,color="limegreen",arrowhead=none,label="device to host transfer"];
     }
 
     subgraph cluster3{
