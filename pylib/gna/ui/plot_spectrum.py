@@ -14,9 +14,14 @@ class cmd(basecmd):
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
 
-        if self.opts.vs and self.opts.plot_type!='plot':
-            print('\033[35mWarning! plot-type option was reset to "plot"')
+        if self.opts.plot_type:
+            if self.opts.vs and self.opts.plot_type!='plot':
+                print('\033[35mWarning! plot-type option was reset to "plot"')
+                self.opts.plot_type='plot'
+        elif self.opts.vs:
             self.opts.plot_type='plot'
+        else:
+            self.opts.plot_type='bin_center'
 
         if self.opts.latex:
             matplotlib.rcParams['text.usetex'] = True
@@ -43,8 +48,7 @@ class cmd(basecmd):
                             metavar=('DATA',),
                             action=append_typed(observable))
         parser.add_argument('--vs', metavar='X points', type=observable, help='Points over X axis to plot vs')
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot'],
-                            default='bin_center', metavar='PLOT_TYPE',
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot'], metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('--ratio', nargs=2, action="append", default=[], help="Plot ratio of 2 observables")
         parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')

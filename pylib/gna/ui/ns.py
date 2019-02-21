@@ -9,6 +9,7 @@ undefined = ['undefined']
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
+        parser.add_argument('-n', '--name', help='the namespace to work with')
         parser.add_argument('--push', nargs='+', default=[],
                             metavar='NS',
                             help='push namespaces NS to current view')
@@ -47,20 +48,24 @@ class cmd(basecmd):
         parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
 
     def init(self):
-        self.env.nsview.add([self.env.ns(x) for x in self.opts.push])
-        self.env.nsview.remove([self.env.ns(x) for x in self.opts.pop])
+        if self.opts.name:
+            namespace = self.env.globalns(self.opts.name)
+        else:
+            namespace = self.env.globalns
+        self.env.nsview.add([namespace(x) for x in self.opts.push])
+        self.env.nsview.remove([namespace(x) for x in self.opts.pop])
 
         for ns1, ns2 in self.opts.route:
-            self.env.ns(ns1).rules.append((None, ns2))
+            namespace(ns1).rules.append((None, ns2))
 
         for nsname, parsetname in self.opts.loadset:
             mod = import_module("gna.parameters.{0}".format(parsetname))
-            mod.defparameters(self.env.ns(nsname))
+            mod.defparameters(namespace(nsname))
 
         for define in self.opts.define:
             name, kwargs = define[0], define[1:]
             kwargs = dict(kw.split('=', 1) for kw in kwargs)
-            self.env.defparameter(name, **kwargs)
+            namespace.defparameter(name, **kwargs)
 
         for name, sigma in self.opts.sigma:
             p = self.env.parameters[name]
@@ -87,6 +92,6 @@ class cmd(basecmd):
 
         try:
             if self.opts.print is not undefined:
-                self.env.globalns(self.opts.print or '').printparameters(labels=True)
+                namespace(self.opts.print or '').printparameters(labels=True)
         except Exception as e:
             print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))

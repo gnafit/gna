@@ -94,4 +94,77 @@ command:
                             Number of points
       -n NAME, --name NAME  observable name
 
+The actual computational chain is defined in the `build()` method.
 
+.. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
+    :linenos:
+    :lines: 22-31
+    :emphasize-lines: 8-10
+
+First half checks that all the necessary variables are present in the namespace. Than we define energy axis as instance
+of `Points`. The energy array is then bound to the input of the `GaussianPeakWithBackground` instance. When module `exp`
+loads the experiment definition it ensures that `exp.namespace` is set as default namespace to search for parameters.
+
+And the last method adds the outputs as observables to the current namespace: `x` and `peak`:
+
+.. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
+    :linenos:
+    :lines: 33-35
+
+As the namespace is shared across the modules, the observables are accessible for other commands, including
+`plot-spectrum`, `minimizer` or `fit`.
+
+Let us now define the parameters and execute the module.
+
+.. code-block:: bash
+
+    ./gna -- ns \
+                --define BackgroundRate central=5 fixed=True label='Background rate' \
+                --define E0             central=6 fixed=True label='Peak position' \
+                --define Width          central=1 fixed=True label='Peak width' \
+                --define Mu             central=5 fixed=True label='Signal rate' \
+            -- exp exampleexp --range 0 10 -N 100
+
+The command output reflects the fact, that the outputs were registered:
+
+.. code-block:: text
+
+    Add observable: /x
+    Add observable: /peak
+
+We now may plot the provided model with `plot-spectrum` module. The only change we do is that we place the variables and
+the outputs to the nested namespace `peak`. In order to achieve this we are using :code:`ns --name` and :code:`exp --ns`
+options.
+
+Unlike in case of histograms, the output does not contain the information about the X axis, therefore a special option
+:code:`--vs`
+
+.. code-block:: bash
+
+    ./gna -- ns --name peak -p \
+                    --define BackgroundRate central=5 fixed=True label='Background rate' \
+                    --define E0             central=6 fixed=True label='Peak position' \
+                    --define Width          central=1 fixed=True label='Peak width' \
+                    --define Mu             central=5 fixed=True label='Signal rate' \
+              -- exp --ns peak exampleexp --range 0 10 -N 100 \
+              -- plot-spectrum -p peak/peak --vs peak/x \
+                               -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
+                               --grid -s
+
+..
+    ./gna -- ns --name peak -p \
+                    --define BackgroundRate central=5 fixed=True label='Background rate' \
+                    --define E0             central=6 fixed=True label='Peak position' \
+                    --define Width          central=1 fixed=True label='Peak width' \
+                    --define Mu             central=5 fixed=True label='Signal rate' \
+              -- exp --ns peak exampleexp --range 0 10 -N 100 \
+              -- plot-spectrum -p peak/peak --vs peak/x \
+                               -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
+                               --grid -o doc/img/tutorial/ui/02_gna_exp_plot.png
+
+The output of the command is:
+
+.. figure:: ../../img/tutorial/ui/02_gna_exp_plot.png
+    :align: center
+
+    The model, defined by the `exampleexp` exp module.

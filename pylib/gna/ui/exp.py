@@ -51,4 +51,5 @@ class cmd(basecmd):
             sys.exit(0)
 
         expopts = parser.parse_args(self.opts.expargs)
-        self.exp_instance = expcls(ns, expopts)
+        with ns:
+            self.exp_instance = expcls(ns, expopts)
