@@ -168,3 +168,8 @@ The output of the command is:
     :align: center
 
     The model, defined by the `exampleexp` exp module.
+
+.. important::
+
+    Good practise is to work on your own models and experiments in a restricted environment, i.e. in a separate folder
+    added to the `experimentpaths` configuration variable.
