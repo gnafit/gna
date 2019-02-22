@@ -73,8 +73,14 @@
 #pragma link C++ class GaussLegendre2dHist-;
 
 #pragma link C++ class EnergyResolution-;
+#pragma link C++ class EtoNpe-;
+#pragma link C++ class Npesmear-;
+#pragma link C++ class EnergyResolution-;
 #pragma link C++ class Quadratic-;
 #pragma link C++ class Worst-;
+#pragma link C++ class ExpNonlinearity-;
+#pragma link C++ class HistNonlinearity-;
+#pragma link C++ class Mine-;
 
 #pragma link C++ class ReactorNormAbsolute-;
 #pragma link C++ class ReactorNorm-;

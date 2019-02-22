@@ -2,6 +2,7 @@
 
 import ROOT
 from scipy import integrate as integrate
+import constructors as C
 from ROOT import TFile, TProfile, TGraphAsymmErrors
 from ROOT import gROOT
 import numpy as np
@@ -98,7 +99,7 @@ class ReactorGroup(object):
 
 class Detector(object):
     def __init__(self, name, edges, location,
-                 orders=None, protons=None, livetime=None, slicing=None):
+                 orders=None, protons=None, livetime=None, slicing=None, rtheta=None, npe=None):
         self.name = name
         self.edges = edges
         self.orders = orders
@@ -109,6 +110,8 @@ class Detector(object):
 
         self.livetime = livetime
         self.slicing = slicing
+        self.rtheta = rtheta
+        self.npe = npe
 
         self.unoscillated = None
         self.sumedspectra = None
@@ -154,7 +157,8 @@ class Detector(object):
                 return r
 
             def cal_layer_res(mean_nn):
-                return  1/np.sqrt(0.935828*mean_nn)
+                return  1/np.sqrt(1/1.022*mean_nn)
+                #return  1/np.sqrt(0.935828*mean_nn)
             #normalized center 1.42465
             #normalized medium 1.217484
             #normalized highest 1.168
@@ -164,7 +168,9 @@ class Detector(object):
             tmpp1 =  np.array([integrate.quad(cal_layer_res1,xx0,xx1) for xx0, xx1 in zip(lista[:-1], lista[1:])])
             #centers = (lista[1:]+lista[:-1])*0.5
             tmpp =  tmpp0/tmpp1
-            tmpp2 = tmpp[:,0]
+            #tmpp2 = tmpp[:,0]
+            #tmpp2 = [1189,1261,1295,1324,1349,1375,1400,1427,1458,1502]
+            tmpp2 = [751,1154,1207,1229,1243,1255,1266,1275,1283,1291,1299,1306,1313,1320,1327,1333,1340,1346,1352,1358,1365,1371,1378,1384,1390,1397,1403,1410,1416,1423,1430,1438,1445,1453,1462,1472,1482,1494,1511,1537]
             eresbs = np.array([cal_layer_res(x) for x in tmpp2])
             for idx, eresb in enumerate(eresbs):
                 ns_res = self.ns("res_{0}".format(idx))
@@ -172,6 +178,23 @@ class Detector(object):
                 self.res_nses.append(ns_res)
                 print('layer {0} Eres_b is {1}'.format(idx,eresb))
 
+        elif self.rtheta:
+            lightyeild = self.rtheta[:]
+
+            def cal_layer_res(mean_nn):
+                return  1/np.sqrt(mean_nn)
+
+            eresbs = np.array([cal_layer_res(x) for x in lightyeild])
+            weight_rtheta = 1.0/len(lightyeild)
+            weight_rtheta_error = 1.0/np.sqrt(510000/len(lightyeild))
+
+            for idx, eresb in enumerate(eresbs):
+                ns_res = self.ns("res_{0}".format(idx))
+                ns_res.defparameter("Eres_b", central=eresb, sigma=0.)
+                self.res_nses.append(ns_res)
+                print('layer {0} Eres_b is {1}'.format(idx,eresb))
+                self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=weight_rtheta, sigma=weight_rtheta_error)
+                print('ratio {0} is {1}'.format(idx,weight_rtheta))
         else:
             self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
@@ -224,6 +247,9 @@ class ReactorExperimentModel(baseexp):
         parser.add_argument('--integration-order', type=int, default=4)
         parser.add_argument('--slicing', metavar='N', type=float, nargs='+',
                  help='radius of sliced detector layers')
+        parser.add_argument('--rtheta', metavar='N', type=float, nargs='+',
+                 help='mean Npe of each subdetector')
+        parser.add_argument('--npe', action='store_true')
         #parser.add_argument('--eresb', metavar='N', type=float, nargs='+',
         #         help='eresb of sliced detector layers')
         parser.add_argument('--no-reactor-groups', action='store_true')
@@ -580,8 +606,47 @@ class ReactorExperimentModel(baseexp):
                                           finalsum, export=True)
             else:
                 finalsum = inter_sum
+                self.ns.addobservable("{0}_noc14".format(detector.name),finalsum, export=True)
 
-            if detector.slicing:
+            if detector.npe:
+                with detector.ns:
+                    npeq = ROOT.Npesmear()
+                npeq.Npesmear.inputs(finalsum)
+                self.ns.addobservable("weightedspectra", npeq.Npesmear)
+                #with detector.ns:
+                #    npeq = ROOT.EtoNpe()
+                #try1points = C.Points(detector.edges)
+                #npeq.etonpe.input(try1points)
+                #try2points = npeq.etonpe
+                #nlqua = ROOT.HistNonlinearity()
+                #nlqua.set( try1points, try2points, finalsum )
+                ##mat24 = nlqua.matrix.FakeMatrix.data()
+                ##print(mat24)
+                ##print(mat24.sum(axis=0))
+                ##finalsum = nlqua.smear.Nvis
+                #finalsumtmp = ROOT.Sum()
+                #finalsumtmp.add(nlqua.smear.Nvis)
+                #finalsum = finalsumtmp
+                #self.ns.addobservable("{0}_qua".format(detector.name),
+                #                     finalsum, export=True)
+                #self.ns.addobservable("weightedspectra", npeq.Npesmear)
+
+            elif detector.rtheta:
+                with detector.ns_weight:
+                    detector.sumedspectra = ROOT.WeightedSum(vec(range(len(detector.rtheta))))
+                smeared_spectras = []
+                for res_ns in detector.res_nses:
+                    with res_ns, detector.ns:
+                        eres = ROOT.EnergyResolution()
+                        eres.smear.inputs(finalsum)
+                        smeared_spectras.append(eres.smear)
+
+                for idx, eres in enumerate(smeared_spectras):
+                    detector.sumedspectra.sum[str(idx)](eres)
+                    self.ns.addobservable("subdetector{}".format(idx), eres)
+                self.ns.addobservable("weightedspectra", detector.sumedspectra)
+
+            elif detector.slicing:
                 with detector.ns_weight:
                     detector.sumedspectra = ROOT.WeightedSum(vec(range(len(detector.slicing))))
                 smeared_spectras = []

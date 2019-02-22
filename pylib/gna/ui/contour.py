@@ -366,6 +366,7 @@ class cmd(basecmd):
             plt.yticks(list(plt.yticks()[0]) + list(levels))
             labels = ['%g' % loc for loc in plt.yticks()[0]]
             ticks, labels = plt.yticks(plt.yticks()[0], labels)
+            #plt.yticks(np.arange(self.opts.ylim[0], self.opts.ylim[1], (self.opts.ylim[1]-self.opts.ylim[0])/10.0))
             for level in levels:
                 plt.axhline(level, linestyle='-.')
             xlabel = r'{}'.format(self.opts.xlabel)
@@ -397,15 +398,17 @@ class cmd(basecmd):
         if self.opts.xlim is not None:
             ax.set_xlim(self.opts.xlim)
         if self.opts.drawgrid:
+    	    ax.yaxis.label.set_size(26)
+            ax.xaxis.label.set_size(26)
             ax.xaxis.set_minor_locator(minorLocatorx)
             ax.yaxis.set_minor_locator(minorLocatory)
-            plt.tick_params(which='both', width=1)
+            plt.tick_params(which='both', width=1,labelsize=24)
             plt.tick_params(which='major', length=7)
             plt.tick_params(which='minor', length=4, color='k')
             ax.grid(which = 'minor', alpha = 0.3)
             ax.grid(which = 'major', alpha = 0.7)
         if self.opts.legend:
-            plt.legend(loc=' '.join(self.opts.legend))
+            plt.legend(loc=' '.join(self.opts.legend), prop={'size': 20})
         if self.opts.show:
             plt.show()
         if self.opts.output:

@@ -1,0 +1,21 @@
+python gna  -- ns \
+    --define w.Qp0 central=0.035 sigma=0 \
+    --define w.Qp2 central=1691 sigma=0 \
+    --define w.Qp3 central=1.3 sigma=0 \
+    -- worst --name w -- ns \
+    --define w2.Qp0 central=0.035 sigma=0 \
+    --define w2.Qp2 central=1791 sigma=0 \
+    --define w2.Qp3 central=1.3 sigma=0 \
+    -- worst --name w2  -- ns \
+    --define w3.Qp0 central=0.035 sigma=0 \
+    --define w3.Qp2 central=1291 sigma=0 \
+    --define w3.Qp3 central=1.3 sigma=0 \
+    -- worst --name w3 \
+    -- spectrum --plot w/spectrum3  \
+    -l 'kb=0.035 NS=1691 NC=1.3 ' \
+    --plot w2/spectrum3  \
+    -l 'kb=0.035 NS=1791 NC=1.3  ' \
+    --plot w3/spectrum3  \
+    -l 'kb=0.035 NS=1291 NC=1.3 ' \
+    --plot w3/dyb -l dyb
+

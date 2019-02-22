@@ -40,7 +40,9 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
+  detector/Npesmear.cc
   detector/HistNonlinearity.cc
+  detector/Mine.cc
   detector/HistSmear.cc
   detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
@@ -92,8 +94,13 @@ set (HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  Npesmear.hh
+  EtoNpe.hh
   HistNonlinearity.hh
+  Mine.hh
+  tt.hh
   Quadratic.hh
+  ExpNonlinearity.hh
   Worst.hh
   HistSmear.hh
   RenormalizeDiag.hh

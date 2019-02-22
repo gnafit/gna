@@ -9,7 +9,7 @@
 class HistNonlinearity: public GNAObject,
                         public Transformation<HistNonlinearity> {
 public:
-  HistNonlinearity( bool propagate_matrix=false );
+  HistNonlinearity( bool propagate_matrix=true );
 
   Eigen::SparseMatrix<double> getMatrix()      { return m_sparse_cache; }
   Eigen::MatrixXd             getDenseMatrix() { return m_sparse_cache; }

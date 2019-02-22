@@ -29,7 +29,7 @@ class Quadratic: public GNAObject,
                 // Apply the conversion formula and get new bin edges. unaryExpr method applies given function to each element of Eigen array and modifies it inplace.
                 // Here we took substituded each bin edges with its' square times weight.
                 //new_bin_edges.unaryExpr( [&m_p0, m_p1, m_p2](auto& orig_bin_edges) {return m_p0+m_p1*orig_bin_edges+m_p2*orig_bin_edges*orig_bin_edges} );
-                rets[0].arr = (m_p0+m_p1*orig_bin_edges+m_p2*orig_bin_edges*orig_bin_edges)*orig_bin_edges;
+                rets[0].arr = (m_p0+(1.0+m_p1)*orig_bin_edges+m_p2*orig_bin_edges*orig_bin_edges);
 
             }
         protected:

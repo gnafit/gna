@@ -146,10 +146,15 @@ class Detector(object):
 
         self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
+        self.ns.reqparameter("Qp0", central=0.0065, sigma=2)
+        self.ns.reqparameter("Qp1", central=0, sigma=0)
+        self.ns.reqparameter("Qp2", central=1391, sigma=0)
+        self.ns.reqparameter("Qp3", central=1.0, sigma=0)
+        #self.ns.reqparameter("Qp2", central=1414, sigma=0)
+        #self.ns.reqparameter("Qp3", central=1.191, sigma=0)
 
-        self.ns.reqparameter("Qp0", central=19968.9*500./10000000/1.04852, sigma=1)
-        self.ns.reqparameter("Qp1", central=251.168*500./10000000/1.04852, sigma=1)
-        self.ns.reqparameter("Qp2", central=-15.5711*500./10000000/1.04852, sigma=1)
+        self.ns.reqparameter("Exp_p0", central=0.01, sigma=1)
+        self.ns.reqparameter("Exp_p1", central=0.02, sigma=1)
 
         if self.slicing:
             radius = self.slicing[-1]
@@ -255,6 +260,8 @@ class ReactorExperimentModel(baseexp):
         parser.add_argument('--with-nl', action='store_true')
         parser.add_argument('--with-worst', action='store_true')
         parser.add_argument('--with-qua', action='store_true')
+        parser.add_argument('--with-mine', action='store_true')
+        parser.add_argument('--with-exp', action='store_true')
 
     def __init__(self, opts, ns=None, reactors=None, detectors=None):
 
@@ -630,6 +637,9 @@ class ReactorExperimentModel(baseexp):
                     #print(b.common_namespace['weight_pull3'].sigma())
 
                     (nonlin,) = b.output_transformations
+                    mat23 = nonlin.matrix.FakeMatrix.data()
+                    print(mat23)
+                    print(mat23.sum(axis=0))
                     corr_lsnl = b.storage['lsnl_factor']
                     corr = b.storage('escale')['factor']
 
@@ -709,9 +719,33 @@ class ReactorExperimentModel(baseexp):
                     try1points = C.Points(detector.edges)
                     worst.WorstNL.old_bins(try1points)
                     worstedges = worst.WorstNL.bins_after_nl
-                    nlworst = ROOT.HistNonlinearity()
+                    nlworst = ROOT.HistNonlinearity(True)
                     nlworst.set( try1points, worstedges, finalsum )
-                    finalsum = nlworst.smear.Nvis
+                    #mat = convert(nlworst.getDenseMatrix(), 'matrix')
+                    #mat = np.ma.array( mat, mask= mat==0.0 )
+                    #print( 'yp nl check Col sum 252', mat.sum(axis=0) )
+                    #mat = nlworst.matrix.FakeMatrix.data()
+                    #print( 'C++' )
+                    #print( mat )
+                    #print( mat.sum( axis=0 ) )
+                    #mat = convert(nlworst.getDenseMatrix(), 'matrix')
+                    #mat = np.ma.array( mat, mask= mat==0.0 )
+                    mat = nlworst.matrix.FakeMatrix.data()
+                    print( 'yp nl check Col sum', mat.sum(axis=0) )
+
+                    fig = P.figure()
+                    ax_mat = P.subplot( 111 )
+                    c = ax_mat.matshow( mat, cmap="viridis")
+                    add_colorbar( c )
+                    P.show()
+                    #for xx in np.nditer(detector.edges.shape[0]):
+                    #    print xx
+                    #for yy in np.nditer(np.array(worstedges)):
+                    #    print yy
+                    #finalsum = nlworst.smear.Nvis
+                    finalsumtmp = ROOT.Sum()
+                    finalsumtmp.add(nlworst.smear.Nvis)
+                    finalsum = finalsumtmp
                     self.ns.addobservable("{0}_worst".format(detector.name),
                                      finalsum, export=True)
 
@@ -723,16 +757,80 @@ class ReactorExperimentModel(baseexp):
                     quaedges = qua.QuaNL.bins_after_nl
                     nlqua = ROOT.HistNonlinearity()
                     nlqua.set( try1points, quaedges, finalsum )
-                    finalsum = nlqua.smear.Nvis
+                    mat24 = nlqua.matrix.FakeMatrix.data()
+                    print(mat24)
+                    print(mat24.sum(axis=0))
+                    #finalsum = nlqua.smear.Nvis
+                    finalsumtmp = ROOT.Sum()
+                    finalsumtmp.add(nlqua.smear.Nvis)
+                    finalsum = finalsumtmp
                     self.ns.addobservable("{0}_qua".format(detector.name),
                                      finalsum, export=True)
 
-            edges_m = np.linspace(1., 10., 300+1)
-            rebin = ROOT.Rebin( edges_m.size, edges_m, 5 )
-            rebin.rebin.histin(finalsum)
-            finalsumtmp2 = ROOT.Sum()
-            finalsumtmp2.add(rebin.rebin.histout)
-            finalsum = finalsumtmp2
+            if self.opts.with_mine:
+                with self.ns('ibd'), detector.ns:
+                    model3 = ROOT.Mine()
+                    try1points = C.Points(detector.edges)
+                    model3.MineNL.old_bins(try1points)
+                    mineedges = model3.MineNL.bins_after_nl
+                    nlmine = ROOT.HistNonlinearity(True)
+                    #print('norm_test')
+                    itemindex = np.where(detector.edges<4.7) #2.28766)
+                    thisindex=len(itemindex[0])
+                    #print(mineedges.data()[thisindex-1])
+                    normfactor=detector.edges[thisindex-1]/mineedges.data()[thisindex-1]
+                    #normfactor=1.0/model3.MineNL.bins_after_nl.data()[thisindex-1]
+                    model3.setnorm(normfactor)
+                    model3.normMineNL.new_bins(mineedges)
+                    mineedges_2=model3.normMineNL.norm_new_bins
+                    #print(mineedges_2.data()[thisindex-1])
+                    print('fake mine nl')
+                    print(detector.edges)
+                    print('fake mine nl 2')
+                    print(mineedges_2.data())
+                    print('fake mine nl')
+                    print(mineedges_2.data()[thisindex-1])
+                    print(detector.edges[thisindex-1])
+                    nlmine.set( try1points, mineedges_2, finalsum )
+                    #mat24 = nlmine.matrix.FakeMatrix.data()
+                    ##print(mat24)
+                    #print('check col sum', mat24.sum(axis=0))
+
+
+                    #fig = P.figure()
+                    #ax_mat = P.subplot( 111 )
+                    #c = ax_mat.matshow( mat24, cmap="viridis")
+                    #add_colorbar( c )
+                    #P.show()
+
+                    #finalsum = nlmine.smear.Nvis
+                    finalsumtmp = ROOT.Sum()
+                    finalsumtmp.add(nlmine.smear.Nvis)
+                    finalsum = finalsumtmp
+                    self.ns.addobservable("{0}_mine".format(detector.name),
+                                     finalsum, export=True)
+
+            if self.opts.with_exp:
+                with self.ns('ibd'), detector.ns:
+                    expnl = ROOT.ExpNonlinearity()
+                    try1points = C.Points(detector.edges)
+                    expnl.ExpNL.old_bins(try1points)
+                    expnledges = expnl.ExpNL.bins_after_nl
+                    nlexpnl = ROOT.HistNonlinearity()
+                    nlexpnl.set( try1points, expnledges, finalsum )
+                    #finalsum = nlexpnl.smear.Nvis
+                    finalsumtmp = ROOT.Sum()
+                    finalsumtmp.add(nlexpnl.smear.Nvis)
+                    finalsum = finalsumtmp
+                    self.ns.addobservable("{0}_expnl".format(detector.name),
+                                     finalsum, export=True)
+
+            #edges_m = np.linspace(1., 10., 300+1)
+            #rebin = ROOT.Rebin( edges_m.size, edges_m, 5 )
+            #rebin.rebin.histin(finalsum)
+            #finalsumtmp2 = ROOT.Sum()
+            #finalsumtmp2.add(rebin.rebin.histout)
+            #finalsum = finalsumtmp2
             with detector.ns:
                 self.ns.addobservable("{0}_beforeEres".format(detector.name), finalsum)
             #mat = convert(rebin.getDenseMatrix(), 'matrix')

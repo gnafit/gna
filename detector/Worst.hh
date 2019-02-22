@@ -40,6 +40,8 @@ class Worst: public GNAObject,
                 Eigen::ArrayXd msphi=phi*xx/1.27/L;
                 double in1=4*c2th12*ms21;
                 rets[0].arr = xx*(2*ms32+in1-msphi)/(2*ms32+msphi)-0.8;
+    //std::cout <<" args "<<args[0].arr<< std::endl << std::endl;
+    //std::cout <<" rets "<<rets[0].arr<< std::endl << std::endl;
             }
 
     };

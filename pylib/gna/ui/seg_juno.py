@@ -48,11 +48,13 @@ class cmd(basecmd):
         #for cnt in range(0,len(self.opts.slicing)):
         detector = Detector(
                 name='AD1',
-                edges=np.linspace(1., 10., 200+1),
+                edges=np.linspace(1., 10., 300+1),
                 location=0,
                 protons=0.8*1.42e33, #TODO: is this detection efficiency of 80% ?
                 livetime=[6*365*24*60*60.0],
-                slicing=self.opts.slicing
+                slicing=self.opts.slicing,
+                rtheta=self.opts.rtheta,
+                npe=self.opts.npe
                 #eres_b=self.opts.eresb[cnt],
                 )
         detectors.append(detector)

@@ -1,6 +1,6 @@
 from gna.ui import basecmd, append_typed, qualified
 from matplotlib import pyplot as plt
-params = {'legend.fontsize': 18,
+params = {'legend.fontsize': 24,
           'legend.handlelength': 2}
 plt.rcParams.update(params)
 from matplotlib.ticker import AutoMinorLocator
@@ -68,7 +68,7 @@ class cmd(basecmd):
         if self.opts.drawgrid:
             ax.xaxis.set_minor_locator(minorLocatorx)
             ax.yaxis.set_minor_locator(minorLocatory)
-            plt.tick_params(which='both', width=1)
+            plt.tick_params(which='both', width=1,labelsize=28)
             plt.tick_params(which='major', length=7)
             plt.tick_params(which='minor', length=4, color='k')
             ax.grid(which = 'minor', alpha = 0.3)
@@ -89,8 +89,17 @@ class cmd(basecmd):
             ax.legend(loc='best')
 
         if self.opts.savefig:
-            plt.savefig(self.opts.savefig)
+            plt.savefig(self.opts.savefig,dpi = 100)
         else:
+    	    ax.yaxis.label.set_size(26)
+            ax.xaxis.label.set_size(26)
+            #plt.yscale('log')
+            #plt.xscale('log')
+            plt.xlabel('Visible Energy [MeV]')
+            plt.ylabel(r"arbitrary")
+            xx = [1, 2, 3, 4,5,6,7,8,9,10]
+            abels = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+            plt.xticks(xx, abels)
             plt.show()
 
     def make_diff(self):
