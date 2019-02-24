@@ -33,14 +33,16 @@ E = Points(E_arr)
 with ns:
     #Vacuum neutrino (same antineutrino)
     oscprob = ROOT.OscProbPMNS(from_nu, to_nu)
-    oscprob.full_osc_prob.inputs.Enu(E)
-    data_osc = oscprob.full_osc_prob.oscprob
+    oscprob.comp12.inputs.Enu(E)
+    oscprob.comp12.switchFunction("gpu")
+    data_osc = oscprob.comp12.comp12
 
 
 
 
+#print(data_osc)
 plt.plot(E_arr*1e-3, data_osc.data())
-plt.xlabel('$E, GeV $')
+plt.xlabel('$comp12$')
 plt.ylabel(r'$P_{\nu_{\mu} \to \nu_{e}}$')
 plt.grid()
 plt.show()
