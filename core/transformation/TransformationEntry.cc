@@ -278,6 +278,10 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
         sink.data->require_gpu();
         sink.data->gpuArr->setLocation( this->getEntryLocation() );
       }
+      for (auto &intern : storages) {
+        intern.data->require_gpu();
+        intern.data->gpuArr->setLocation( this->getEntryLocation() );
+      }
       // init gpu storage
     }
 #endif
