@@ -13,6 +13,7 @@
 #ifdef GNA_CUDA_SUPPORT 
 //#include "extra/GNAcuOscProbFull.h"
 //#include "extra/GNAcuOscProbMem.hh"
+#include "cuOscProbPMNS.hh"
 #endif
 
 #include <chrono>
@@ -118,7 +119,13 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     .input("Enu")
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
-    .func(&OscProbPMNS::calcComponent<1,2>);
+    .func(&OscProbPMNS::calcComponent<1,2>)
+    .func("gpu", &OscProbPMNS::testgpu, DataLocation::Device)
+    .storage("gpu", [](StorageTypesFunctionArgs& fargs){
+      std::cout << "INTS!" << std::endl;
+      fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
+      std::cout << fargs.ints[0].size() << std::endl;
+	});
   transformation_("comp13")
     .input("Enu")
     .output("comp13")
@@ -155,17 +162,13 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
-/*
-#ifdef GNA_CUDA_SUPPORT
-  auto full_formula_gpu = transformation_( "full_osc_prob_gpu")
-      .input("Enu")
-      .output("oscprob")
-      .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .types(TypesFunctions::pass<0>)
-      .func(&OscProbPMNS::calcFullProbGpu);
-#endif
-*/
+}
 
+void OscProbPMNS::testgpu(FunctionArgs& fargs) {
+  fargs.args.touch();
+  auto& gpuargs=fargs.gpu;
+ // gpuargs->provideSignatureDevice();
+  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, fargs.args[0].arr.size(), gpuargs->nargs);
 }
 
 void OscProbPMNS::calcFullProb(FunctionArgs fargs) {

@@ -4,6 +4,7 @@
 
 #include "GNAObject.hh"
 #include "Neutrino.hh"
+#include "config_vars.h"
 
 class OscillationVariables;
 class PMNSVariables;
@@ -40,6 +41,7 @@ public:
   void calcFullProb(FunctionArgs fargs);
 #ifdef GNA_CUDA_SUPPORT
   void calcFullProbGpu(FunctionArgs fargs);
+  void testgpu(FunctionArgs& fargs);
 #endif
 
 protected:

@@ -13,27 +13,29 @@
  * @return 1/x
  */
 template <typename T> 
-__device__ void inverse(T* in, T* out);
+__device__ void inverse(T* in, T* out, unsigned int m);
 
 
 template<>
-__device__ void inverse <float> (float* in, float* out) {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	out[idx] =  __frcp_rn(in[idx]); // TODO check if out == 0 by default
+__device__ void inverse <float> (float* in, float* out, unsigned int m) {
+	unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	if (idx < m)
+	  out[idx] =  __frcp_rn(in[idx]); // TODO check if out == 0 by default
 }
 
 template <>
-__device__ void inverse <double> (double* in, double* out) {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        out[idx] = __drcp_rn(in[idx]); // TODO check if out == 0 by default
+__device__ void inverse <double> (double* in, double* out, unsigned int m) {
+        unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	if (idx < m)
+          out[idx] = __drcp_rn(in[idx]); // TODO check if out == 0 by default
 }
-
+/*
 template <>
 __device__ void inverse <size_t> (size_t* in, size_t* out) {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         out[idx] =in[idx]; // TODO check if out == 0 by default
 }
-
+*/
 
 /* Multiply number k to vector x. 
  * @return k * x
