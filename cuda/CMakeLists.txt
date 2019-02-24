@@ -23,6 +23,7 @@ set(CUSOURCES
   operations/weightedsum.cu
   operations/product.cu
   operations/identity.cu
+  extra/cuOscProbPMNS.cu
   )
 
 set(CUHEADERS 
@@ -33,6 +34,7 @@ set(CUHEADERS
   extra/cuRootMath.h
   extra/cuInterpExpo.hh
   core/cuElementary.hh
+  extra/cuOscProbPMNS.hh
 #  extra/GNAcuMath.h
 #  extra/GNAcuOscProbFull.h
 #  extra/GNAcuOscProbMem.hh

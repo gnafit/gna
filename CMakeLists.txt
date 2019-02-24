@@ -30,6 +30,7 @@ if(CUDA_SUPPORT)
   	cuInterpExpo.hh
 	GpuBasics.hh
 	cuElementary.hh
+	cuOscProbPMNS.hh
         )
 else()
     set(CUDA_SUPPORT 0)

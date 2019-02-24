@@ -10,7 +10,7 @@
 * @brief Weighted sum of N vectors of length M into one
 * @return \f$\sum w * x\f$ 
 *
-* @author Ilya Lebedev
+* @author Ilya Lebedev and Anna Fatkina
 * @date 2018
 */
 
@@ -33,7 +33,7 @@ __global__ void weightedsum(T** array, T** ans_array, T** weights, unsigned int 
 * @brief Weighted sum of N vectors of length M into one
 * @return \f$\sum w * x + k\f$ 
 *
-* @author Ilya Lebedev
+* @author Ilya Lebedev and Anna Fatkina
 * @date 2018
 */
 template<typename T>
