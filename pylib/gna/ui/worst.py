@@ -32,14 +32,14 @@ class cmd(basecmd):
 
         model1.QuaNL.old_bins(integrator.points.x)
         model2.WorstNL.old_bins(integrator.points.x)
-        model3.MineNL.old_bins(integrator.points.x)
+        model3.DisplayNL.old_bins2(integrator.points.x)
         itemindex = np.where(integrator.points.x.data()<2.28766)
         thisindex=len(itemindex[0])
         #print(mineedges.data()[thisindex-1])
-        normfactor=1000.0/model3.MineNL.bins_after_nl.data()[thisindex-1]
+        normfactor=1000.0/model3.DisplayNL.bins2_after_nl.data()[thisindex-1]
         #print('thisindex: {1} normfactor: {0}'.format(normfactor,thisindex))
         model3.setnorm(normfactor)
-        model3.normMineNL.new_bins(model3.MineNL.bins_after_nl)
+        model3.normMineNL.new_bins(model3.DisplayNL.bins2_after_nl)
         hist1 = ROOT.GaussLegendreHist(integrator)
         hist1.hist.f(model1.QuaNL.bins_after_nl)
         hist2 = ROOT.GaussLegendreHist(integrator)

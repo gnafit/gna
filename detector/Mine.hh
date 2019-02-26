@@ -25,6 +25,7 @@ class Mine: public GNAObject,
             Mine();
 
             void getNewBins(Args args, Rets rets); 
+            void fordisplay(Args args, Rets rets); 
             void normNewBins(Args args, Rets rets); 
             void setnorm(double normF){_normF =  normF;}
         protected:

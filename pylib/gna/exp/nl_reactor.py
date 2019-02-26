@@ -775,7 +775,7 @@ class ReactorExperimentModel(baseexp):
                     mineedges = model3.MineNL.bins_after_nl
                     nlmine = ROOT.HistNonlinearity(True)
                     #print('norm_test')
-                    itemindex = np.where(detector.edges<4.7) #2.28766)
+                    itemindex = np.where(detector.edges<2.28766)#4.7 )
                     thisindex=len(itemindex[0])
                     #print(mineedges.data()[thisindex-1])
                     normfactor=detector.edges[thisindex-1]/mineedges.data()[thisindex-1]
