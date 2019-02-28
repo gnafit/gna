@@ -8,16 +8,28 @@ def __is_independent(par):
     return isinstance(par, ParameterDouble)
 
 def get_parameters(params, drop_fixed=True, drop_free=True):
+    special_chars = list('*?[]!')
     pars = []
     for candidate in params:
         if __is_independent(candidate):
             pars.append(candidate)
             continue
+        if any(char in candidate for char in special_chars):
+            import fnmatch as fn
+            import IPython 
+            matched_names = fn.filter((_[0] for _ in env.globalns.walknames()), candidate)
+            matched_pars = map(env.get, matched_names)
+            pars.extend(matched_pars)
+            continue
         try:
             par_namespace = env.ns(candidate)
             par_namespace.walknames().next()
-            independent_pars  = [par for _, par in par_namespace.walknames()
-                                 if __is_independent(par)]
+            print("From ns attempted: ", list(par_namespace.walknames()))
+            if par_namespace != env.globalns:
+                independent_pars  = [par for _, par in par_namespace.walknames()
+                                     if __is_independent(par)]
+            else:
+                independent_pars = [env.globalns.get(candidate)]
             pars.extend(independent_pars)
         except StopIteration:
             if cfg.debug_par_fetching:

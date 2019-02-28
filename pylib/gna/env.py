@@ -150,7 +150,6 @@ class namespace(Mapping):
             parts = nsname
         if not parts:
             return self
-        print(parts)
         return self.namespaces[parts[0]](parts[1:])
 
     def link(self, nsname, newns):
