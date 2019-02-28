@@ -17,7 +17,7 @@ class cmd(basecmd):
         action_group.add_argument('--dump', help='File to dump covariance matrix')
         parser.add_argument('--mask', action='store_true',
                              help="Mask zeros from covariance matrix")
-        
+
 
     def init(self):
         chol_blocks = (np.tril(block.cov.data()) for block in self.opts.analysis)
@@ -27,7 +27,7 @@ class cmd(basecmd):
 
 
         if self.opts.mask:
-            covmat = np.ma.array(covmat, mask=(covmat == 0.)) 
+            covmat = np.ma.array(covmat, mask=(covmat == 0.))
 
         fig, ax = plt.subplots()
         im = ax.matshow(covmat)

@@ -1,7 +1,6 @@
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
-from gna.env import PartNotFoundError
 from itertools import chain
 from gna.dataset import Dataset
 from gna.parameters.parameter_loader import get_parameters

@@ -53,8 +53,3 @@ class cmd(basecmd):
             obs = C.Histogram(edges, data)
             self.opts.ns.addobservable(name, obs.hist)
 
-        
-        
-
-   
-

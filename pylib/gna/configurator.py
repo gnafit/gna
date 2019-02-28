@@ -14,6 +14,14 @@ import numpy
 meta = WeakKeyDictionary()
 init_globals = dict( percent=0.01, numpy=numpy )
 
+def set_option(nd, option, value):
+    """Set NesteDict oprion:
+        verbose
+        createmissing
+        split           # TODO: make splitting by dot optional
+    """
+    meta[nd][option]=value
+
 def process_key(key):
     listkey = None
     if isinstance( key, basestring ):
@@ -142,7 +150,13 @@ class NestedDict(object):
         if key is ():
             return self
 
-        return self.__storage__.__getitem__(key)
+        try:
+            return self.__storage__.__getitem__(key)
+        except KeyError as e:
+            if meta[self].get('createmissing', False):
+                return self(key)
+
+            raise
 
     __getattr__ = __getitem__
 
@@ -241,12 +255,17 @@ class NestedDict(object):
             if '.' in key:
                 return self.__call__(key.split('.'))
 
-        if self.__storage__.__contains__( key ):
-            raise KeyError( "Can not create nested configuration as the key '%s' already exists"%key )
+        other = self.__storage__.get(key, None)
+        if other is None:
+            value = self.__storage__[key] = NestedDict()
+            value._set_parent( self )
+            return value
 
-        value = self.__storage__[key] = NestedDict()
-        value._set_parent( self )
-        return value
+        if isinstance(other, NestedDict):
+            return other
+
+        raise KeyError( "Can not create nested configuration as soon as soon as the key '%s' already exists"%key )
+
 
     def __load__(self, filename, subst=[]):
         if subst:
