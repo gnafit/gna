@@ -1,7 +1,6 @@
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
-from gna.env import PartNotFoundError
 from itertools import chain
 from gna.dataset import Dataset
 
@@ -28,7 +27,7 @@ class cmd(basecmd):
         for path in self.opts.observables:
             nspath, name = path.split('/')
             observables.append(self.env.ns(nspath).observables[name])
-        
+
         blocks = dataset.makeblocks(observables, parameters)
         self.env.parts.prediction[name] = blocks
         print blocks

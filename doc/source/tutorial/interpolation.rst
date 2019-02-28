@@ -137,7 +137,7 @@ even parameter down.
 
 .. note::
 
-    There is ``InterLinear`` object implementing linear interpolation. The syntax and transformations are similar to
+    There is ``InterpLinear`` object implementing linear interpolation. The syntax and transformations are similar to
     ones from the ``InterpExpo``.
 
 

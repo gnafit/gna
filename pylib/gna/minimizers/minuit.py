@@ -120,6 +120,7 @@ class Minuit(ROOT.TMinuitMinimizer):
             'cpu': clock,
         }
         self.result = Namespace(**resultdict)
+        self._patchresult()
         return self.result
 
     def fit(self):
@@ -151,7 +152,15 @@ class Minuit(ROOT.TMinuitMinimizer):
             'cpu': clock,
         }
         self.result = Namespace(**resultdict)
+        self._patchresult()
         return self.result
+
+    def _patchresult(self):
+        names = [self.VariableName(i) for i in range(self.NDim())]
+        self.result.xdict      = dict(zip(names, self.result.x))
+        self.result.errorsdict = dict(zip(names, self.result.errors))
+        self.result.names = names
+        self.result.npars = self.NDim()
 
     def __call__(self):
         res = self.fit()

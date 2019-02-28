@@ -16,7 +16,7 @@ override it by providing a local configuration file ``config_local/gna/gnacfg.py
 .. code-block:: sh
 
     mkdir -p config_local/gna
-    echo "bundlepaths = [ './pylib/gna/bundles', './pylib/gna/bundles_legacy', '../macro/tutorial/bundles' ]" > config_local/gna/gnacfg.py
+    echo "bundlepaths = [ './pylib/gna/bundles', './pylib/gna/bundles_legacy', './macro/tutorial/bundles' ]" > config_local/gna/gnacfg.py
 
 The configuration from the `local` version is loaded after the global one and overrides its settings. After creating the
 local configuration file run `gna` without arguments:

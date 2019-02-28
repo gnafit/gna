@@ -85,7 +85,7 @@ follows:
 
    [out] points: array 2d, shape 3x4, size  12
 
-There exist a longer but in come cases more readable way of accessing the same data:
+There exist a longer but in some cases more readable way of accessing the same data:
 
 .. code-block:: python
 

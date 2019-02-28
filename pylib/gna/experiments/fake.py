@@ -52,8 +52,3 @@ class exp(baseexp):
             obs = C.Histogram(edges, data)
             self.opts.ns.addobservable(name, obs.hist)
 
-        
-        
-
-   
-

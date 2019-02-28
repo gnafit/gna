@@ -16,3 +16,4 @@ The functionality includes:
 
     ui_syntax
     ui_example_gaussianpeak
+    ui_introduce_experiment
