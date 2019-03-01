@@ -14,7 +14,7 @@ class cmd(basecmd):
         parser.add_argument('--npeaks', default=1,   type=int, help='number of peaks')
         parser.add_argument('--Emin',   default=0,   type=float, help='Minimal energy')
         parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
-        parser.add_argument('--nbins',  default=100, type=int, help='Number of bins')
+        parser.add_argument('--nbins',  default=200, type=int, help='Number of bins')
         parser.add_argument('--order',  default=8, type=int, help='Order of integrator for each bin (Gauss-Legendre)')
         parser.add_argument('--with-eres', '--eres', action='store_true', help='Enable energy resoulution')
 

@@ -74,7 +74,7 @@ def listmodules(modules, printdoc=False):
 
             print('{}{:<{namelen}s} from {}{}'.format(offset, modname, modfile, warning, namelen=namelen))
             if printdoc and module.__doc__:
-                print(wrp.fill(module.__doc__))
+                print(wrp.fill(module.__doc__.strip()))
                 print()
 
 

@@ -1,3 +1,7 @@
+"""
+Manage parameters and namespaces
+"""
+
 from __future__ import print_function
 from gna.ui import basecmd
 from importlib import import_module

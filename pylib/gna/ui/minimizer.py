@@ -13,9 +13,11 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('-s', '--spec', default=None, help='Minimization options (YAML)')
         parser.add_argument('name', help='Minimizer name')
-        parser.add_argument('type', choices=minimizers.keys())
-        parser.add_argument('statistic', action=set_typed(env.parts.statistic))
-        parser.add_argument('par', nargs='*')
+        parser.add_argument('type', choices=minimizers.keys(),
+                                    help='Minimizer type {%(choices)s}', metavar='minimizer')
+        parser.add_argument('statistic', action=set_typed(env.parts.statistic), help='Statistic name',
+                                         metavar='statmodule')
+        parser.add_argument('par', nargs='*', help='Parameters to minimize')
 
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)
