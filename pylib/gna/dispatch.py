@@ -50,7 +50,7 @@ def listmodules(modules, printdoc=False):
     print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
     from textwrap import TextWrapper
     from os.path import relpath, isfile
-    offsetlen, namelen = 4, 20
+    offsetlen, namelen = 2, 15
     offset  = ' '*offsetlen
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
@@ -74,7 +74,8 @@ def listmodules(modules, printdoc=False):
 
             print('{}{:<{namelen}s} from {}{}'.format(offset, modname, modfile, warning, namelen=namelen))
             if printdoc and module.__doc__:
-                print(wrp.fill(module.__doc__.strip()))
+                for line in module.__doc__.strip().split('\n'):
+                    print(wrp.fill(line))
                 print()
 
 

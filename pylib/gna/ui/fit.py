@@ -41,7 +41,6 @@ class cmd(basecmd):
             # data = self.result.__dict__
             # import IPython; IPython.embed()
 
-
     def save_yaml(self, filename):
         import yaml
         mode='w'
