@@ -37,11 +37,21 @@ with ns:
     oscprob.comp12.switchFunction("gpu")
     data_osc = oscprob.comp12.comp12
 
+    oscprob.comp13.inputs.Enu(E)
+    oscprob.comp13.switchFunction("gpu")
+    data_osc2 = oscprob.comp13.comp13
+
+    oscprob.comp23.inputs.Enu(E)
+    oscprob.comp23.switchFunction("gpu")
+    data_osc3 = oscprob.comp23.comp23
+
 
 
 
 #print(data_osc)
 plt.plot(E_arr*1e-3, data_osc.data())
+plt.plot(E_arr*1e-3, data_osc2.data())
+plt.plot(E_arr*1e-3, data_osc3.data())
 plt.xlabel('$comp12$')
 plt.ylabel(r'$P_{\nu_{\mu} \to \nu_{e}}$')
 plt.grid()

@@ -41,28 +41,18 @@ __global__ void cuCalcComponent(float** xarg, float** xret, float** intern) {
  * 
  */
 
-//template < int I, int J>
-__global__ void d_cuCalcComponent(double** xarg, double** xret, double** intern, unsigned int m) { 
+__global__ void d_cuCalcComponent(double** xarg, double** xret, double** intern, double** params,
+				unsigned int m, double oscprobArgumentFactor, double DeltaMSq, double m_L) { 
 	inverse(xarg[0], intern[0], m);
-/*	prodNumToVec (cos( DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5), 
-				intern[0],
-				xret[0]);	
-
-*/
-	
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-//	if (idx < m) xret[0][idx] = intern[0][idx];
-//	if (idx < m) {
-//		intern[0][idx] = 10.0;
-		xret[0][idx] = intern[0][idx];
-//		xret[0][idx] = 10.0;
-//	}
+        xret[0][idx] = cos( DeltaMSq * m_L * oscprobArgumentFactor * 0.5 * intern[0][idx]);      
 }
 
 
-void cuCalcComponent(double** xarg, double** xret, double** intern, unsigned int m, unsigned int n) {
-	d_cuCalcComponent<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, m);
-//	d_cuCalcComponent<<<1, n >>>(xarg, xret, intern, );
+void cuCalcComponent(double** xarg, double** xret, double** intern, double** params,
+		 unsigned int m, unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L) {
+	d_cuCalcComponent<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
+								 m, oscprobArgumentFactor, DeltaMSq, m_L);
 	cudaDeviceSynchronize();
 }
 

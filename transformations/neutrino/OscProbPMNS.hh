@@ -41,7 +41,9 @@ public:
   void calcFullProb(FunctionArgs fargs);
 #ifdef GNA_CUDA_SUPPORT
   void calcFullProbGpu(FunctionArgs fargs);
-  void testgpu(FunctionArgs& fargs);
+  void gpuCalcComponent12(FunctionArgs& fargs);
+  void gpuCalcComponent13(FunctionArgs& fargs);
+  void gpuCalcComponent23(FunctionArgs& fargs);
 #endif
 
 protected:

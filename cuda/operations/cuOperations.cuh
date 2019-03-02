@@ -27,7 +27,8 @@ template <>
 __device__ void inverse <double> (double* in, double* out, unsigned int m) {
         unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	if (idx < m)
-          out[idx] = __drcp_rn(in[idx]); // TODO check if out == 0 by default
+          //out[idx] = __drcp_rn(in[idx]); // TODO check if out == 0 by default
+	  out[idx] = 1.0/in[idx];
 }
 /*
 template <>
