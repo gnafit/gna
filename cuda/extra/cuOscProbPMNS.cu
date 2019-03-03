@@ -74,3 +74,21 @@ void cuCalcComponentCP(double** xarg, double** xret, double** intern, double** p
 								oscprobArgumentFactor, m_L);
 	cudaDeviceSynchronize();
 }
+
+__global__ void d_cuCalcSum(double** xarg, double** xret, double w12, double w13, double w23, double wcp, bool isSame) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+/*	xret[0][idx]=2.0*(params[0][0]*xarg[0][idx]+params[0][1]*xarg[1][idx]+params[0][2]*xarg[2][idx])
+			+ (-2.0*(params[0][0]+params[0][1]+params[0][2]) 
+			+ 1.0*isSame) * xarg[3][idx]
+			+ 8.0*(!isSame)*params[0][4]*xarg[4][idx];
+*/
+	xret[0][idx]=2.0*(w12*xarg[0][idx]+w13*xarg[1][idx]+w23*xarg[2][idx])
+			+ (-2.0*(w12+w13+w23) 
+			+ 1.0*isSame) * xarg[3][idx]
+			+ 8.0*(!isSame)*wcp*xarg[4][idx];
+}
+
+void cuCalcSum(double** xarg, double** xret, double w12, double w13, double w23, double wcp, bool isSame, unsigned int m) {
+	d_cuCalcSum<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, w12, w13, w23, wcp, isSame);
+	cudaDeviceSynchronize();
+}

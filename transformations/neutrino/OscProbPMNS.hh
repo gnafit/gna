@@ -44,6 +44,7 @@ public:
   template <int I, int J>
   void gpuCalcComponent(FunctionArgs& fargs);
   void gpuCalcComponentCP(FunctionArgs& fargs);
+  void gpuCalcSum(FunctionArgs& fargs);
 #endif
 
 protected:

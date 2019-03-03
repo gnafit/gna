@@ -170,7 +170,9 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     .input("comp0")
     .output("probsum")
     .types(TypesFunctions::pass<0>)
-    .func(&OscProbPMNS::calcSum);
+    .func(&OscProbPMNS::calcSum)
+    .func("gpu", &OscProbPMNS::gpuCalcSum, DataLocation::Device)
+    ;
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
   }
@@ -264,6 +266,17 @@ void OscProbPMNS::calcSum(FunctionArgs fargs) {
   if (m_alpha != m_beta) {
     ret += 8.0*weightCP()*args[4].x;
   }
+}
+
+void OscProbPMNS::gpuCalcSum(FunctionArgs& fargs) {
+  fargs.args.touch();
+  auto& gpuargs=fargs.gpu;
+ // std::vector<variable<double>> weights = 
+		//{(weight<1,2>()), weight<1,3>(), weight<2,3>() ,weightCP()};
+  //gpuargs->readVariables(weights);
+  //gpuargs->provideSignatureDevice();
+  //TODO add vector<double> to parameters on gpu
+  cuCalcSum(gpuargs->args, gpuargs->rets, weight<1,2>(), weight<1,3>(), weight<2,3>() ,weightCP(), (m_alpha == m_beta), fargs.args[0].arr.size());
 }
 
 OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)
