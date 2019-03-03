@@ -12,15 +12,6 @@
 #include "cuOscProbPMNS.hh"
 
 
-// TODO del debug values
-
-//#define oscprobArgumentFactor 1.0
-//#define m_L 1.0
-
-
-// TODO define inern as array of the same as xarg size from internals
-
-
 /*
  * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (floats)
  * 
@@ -61,18 +52,25 @@ void cuCalcComponent(double** xarg, double** xret, double** intern, double** par
  * 
  */
 
-/*
-template <typename T>
-__global__ void cuCalcComponentCP(T** xarg, T** xret, T** intern) {
-	inverse(xarg, intern);
-	prodNumToVec ((oscprobArgumentFactor * m_L * T(0.5)), intern, intern);
-	arr_sin(DeltaMSq<1,2>(), intern, xret);
-	mult_by_arr_sin(DeltaMSq<1,3>(), intern, xret);
-	mult_by_arr_sin(DeltaMSq<2,3>(), intern, xret);
+
+//template <typename T>
+__global__ void d_cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, unsigned int m,
+					double oscprobArgumentFactor, double m_L) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	inverse(xarg[0], intern[0], m);
+	intern[0][idx] = oscprobArgumentFactor * m_L * 0.25 * intern[0][idx];
+	arr_sin(params[0][0], intern[0], xret[0]);
+	mult_by_arr_sin(params[0][1], intern[0], xret[0]);
+	mult_by_arr_sin(params[0][2], intern[0], xret[0]);
 // for debug
 //	arr_sin(1.0, intern, xret);
 //	mult_by_arr_sin(1.0, intern, xret);
 //	mult_by_arr_sin(1.0, intern, xret);
 }
-*/
 
+void cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, 
+			unsigned int m, unsigned int n, double oscprobArgumentFactor, double m_L) {
+	d_cuCalcComponentCP<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params, m, 
+								oscprobArgumentFactor, m_L);
+	cudaDeviceSynchronize();
+}

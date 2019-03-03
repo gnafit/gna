@@ -120,7 +120,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNS::calcComponent<1,2>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent12, DataLocation::Device)
+    .func("gpu", &OscProbPMNS::gpuCalcComponent<1,2>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
@@ -131,7 +131,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNS::calcComponent<1,3>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent13, DataLocation::Device)
+    .func("gpu", &OscProbPMNS::gpuCalcComponent<1,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
@@ -142,7 +142,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNS::calcComponent<2,3>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent23, DataLocation::Device)
+    .func("gpu", &OscProbPMNS::gpuCalcComponent<2,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
@@ -155,12 +155,12 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNS::calcComponentCP)
-      /*.func("gpu", &OscProbPMNS::gpuCalcComponentCP, DataLocation::Device)
+      .func("gpu", &OscProbPMNS::gpuCalcComponentCP, DataLocation::Device)
       .storage("gpu", [](StorageTypesFunctionArgs& fargs){
         std::cout << "INTS!" << std::endl;
         fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
         std::cout << fargs.ints[0].size() << std::endl;
-      })*/
+      })
       ;
   }
   auto probsum = transformation_("probsum")
@@ -181,24 +181,6 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(TypesFunctions::pass<0>)
       .func(&OscProbPMNS::calcFullProb);
-}
-
-void OscProbPMNS::gpuCalcComponent12(FunctionArgs& fargs) {
-  fargs.args.touch();
-  auto& gpuargs=fargs.gpu;
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<1,2>(), m_L);
-}
-
-void OscProbPMNS::gpuCalcComponent13(FunctionArgs& fargs) {
-  fargs.args.touch();
-  auto& gpuargs=fargs.gpu;
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<1,3>(), m_L);
-}
-
-void OscProbPMNS::gpuCalcComponent23(FunctionArgs& fargs) {
-  fargs.args.touch();
-  auto& gpuargs=fargs.gpu;
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<2,3>(), m_L);
 }
 
 void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
@@ -237,6 +219,14 @@ void OscProbPMNS::calcComponent(FunctionArgs fargs) {
   fargs.rets[0].x = cos((DeltaMSq<I,J>()*oscprobArgumentFactor*m_L*0.5)*Enu.inverse());
 }
 
+template <int I, int J>
+void OscProbPMNS::gpuCalcComponent(FunctionArgs& fargs) {
+  fargs.args.touch();
+  auto& gpuargs=fargs.gpu;
+  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
+		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
+}
+
 void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
   auto& ret=fargs.rets[0].x;
   auto &Enu = fargs.args[0].x;
@@ -244,6 +234,17 @@ void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
   ret = sin(DeltaMSq<1,2>()*tmp);
   ret*= sin(DeltaMSq<1,3>()*tmp);
   ret*= sin(DeltaMSq<2,3>()*tmp);
+}
+
+void OscProbPMNS::gpuCalcComponentCP(FunctionArgs& fargs) {
+  fargs.args.touch();
+  auto& gpuargs=fargs.gpu;
+  std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
+  gpuargs->readVariables(dmsq);
+  gpuargs->provideSignatureDevice();
+  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
+			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);  
+  gpuargs->setAsDevice();
 }
 
 void OscProbPMNS::calcSum(FunctionArgs fargs) {
