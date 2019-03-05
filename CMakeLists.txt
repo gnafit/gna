@@ -46,6 +46,7 @@ set (SOURCES
   detector/HistSmear.cc
   detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
+  detector/Quadratic.cc
   extra/GridFilter.cc
   )
 

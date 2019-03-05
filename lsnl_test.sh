@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # plot multi lsnl curve
 ./draw_lsnl.sh \
 
