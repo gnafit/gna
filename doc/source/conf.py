@@ -28,16 +28,9 @@ import os
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinxcontrib.plantuml',
+extensions = ['sphinx.ext.mathjax',
               'IPython.sphinxext.ipython_console_highlighting',
               'IPython.sphinxext.ipython_directive']
-
-if 'plantuml' in os.listdir('/usr/bin'):
-    plantuml = '/usr/bin/plantuml'
-else:
-    plantuml = 'java -Djava.awt.headless=true -jar /plantuml.jar'
-
-plantuml_output_format = 'svg'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
