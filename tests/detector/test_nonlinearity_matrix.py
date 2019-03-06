@@ -38,8 +38,8 @@ def rescale_to_matrix( edges_from, edges_to, **kwargs ):
 
     return mat
 
-edges   = N.array( [ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
-edges_m = N.array( [ 0.5, 1.2, 1.8, 4.1, 5.1, 6.2, 7.5 ] )
+edges   = N.array( [   -1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
+edges_m = N.array( [ -2e100, -0.9, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
 matp = rescale_to_matrix( edges, edges_m, roundto=3 )
 
 pedges_m = C.Points( edges_m )
