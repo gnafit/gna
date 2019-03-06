@@ -1,17 +1,26 @@
 set(TRANSFORMATION_SOURCES
-  thirdparty/chengyp/Npesmear.cc
+  thirdparty/chengyp/EtoNpe.cc
+  thirdparty/chengyp/ExpNonlinearity.cc
   thirdparty/chengyp/Mine.cc
+  thirdparty/chengyp/MixedNonlinearity.cc
+  thirdparty/chengyp/Npesmear.cc
+  thirdparty/chengyp/PolynomialNonlinearity.cc
   thirdparty/chengyp/Quadratic.cc
+  #thirdparty/chengyp/Segment.cc
+  thirdparty/chengyp/Worst.cc
   PARENT_SCOPE
 )
 
 set(TRANSFORMATION_HEADERS
-  Npesmear.hh
   EtoNpe.hh
-  Mine.hh
-  tt.hh
-  Quadratic.hh
   ExpNonlinearity.hh
+  Mine.hh
+  MixedNonlinearity.hh
+  Npesmear.hh
+  PolynomialNonlinearity.hh
+  Quadratic.hh
+  #Segment.hh
+  tt.hh
   Worst.hh
   PARENT_SCOPE
 )

@@ -1,7 +1,6 @@
 #include "Mine.hh"
 #include "tt.hh"
-
-
+#include "TypesFunctions.hh"
 
 Mine::Mine(){
 	variable_(&m_p0, "Qp0");
@@ -9,40 +8,40 @@ Mine::Mine(){
 	variable_(&m_p2, "Qp2");
 	variable_(&m_p3, "Qp3");
 
-	transformation_(this, "MineNL")
+	this->transformation_("MineNL")
 		.input("old_bins")
 		.output("bins_after_nl")
-		.types(Atypes::pass<0,0>)
+		.types(TypesFunctions::pass<0,0>)
 		.func(&Mine::getNewBins)
 		;
-	 transformation_(this, "DisplayNL")
-	     .input("old_bins2")
-	     .output("bins2_after_nl")
-	     .types(Atypes::pass<0,0>)
-	     .func(&Mine::fordisplay)
-	     ;
-	transformation_(this, "normMineNL")
+	this->transformation_("DisplayNL")
+	    .input("old_bins2")
+	    .output("bins2_after_nl")
+	    .types(TypesFunctions::pass<0,0>)
+	    .func(&Mine::fordisplay)
+	    ;
+	this->transformation_("normMineNL")
 		.input("new_bins")
 		.output("norm_new_bins")
-		.types(Atypes::pass<0,0>)
+		.types(TypesFunctions::pass<0,0>)
 		.func(&Mine::normNewBins)
 		;
 
 }
 
-void Mine::normNewBins( Args args, Rets rets){
-	const auto& orig_bin_edges = args[0].arr;
-	rets[0].arr = _normF*orig_bin_edges;
+void Mine::normNewBins(FunctionArgs& fargs){
+	const auto& orig_bin_edges = fargs.args[0].arr;
+	fargs.rets[0].arr = _normF*orig_bin_edges;
 }
 // /*
-   void Mine::fordisplay(Args args, Rets rets){
+void Mine::fordisplay(FunctionArgs& fargs){
    double OrigEnergy[1200],DEDX[1200];
    std::ifstream in2("stoppingpower.txt");
    for(int i=0;i<1200;i++){
    std::string temp2;
    double temp3;
    in2>>OrigEnergy[i]>>temp2>>temp3>>DEDX[i];
-   }
+}
 
 
 
@@ -74,18 +73,18 @@ Eigen::VectorXd quch_Yvals = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(quch_
 std::vector<double> quch_Xv(&xx[0],&xx[0]+m_totalpoints);
 Eigen::VectorXd quch_Xvals = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(quch_Xv.data(), quch_Xv.size());
 
-const auto& orig_bin_edges = args[0].arr-2*0.511;
+const auto& orig_bin_edges = fargs.args[0].arr-2*0.511;
 SplineFunction quch_s(quch_Xvals, quch_Yvals);
 std::cout<<" m_p0: "<<m_p0<<" m_p1: "<<m_p1;
 std::cout<<" m_p2: "<<m_p2<<" m_p3: "<<m_p3<< std::endl;
-//rets[0].arr = (m_p2*quch_s.eval(2*0.511)+ m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234./(orig_bin_edges+2*0.511);
+//fargs.rets[0].arr = (m_p2*quch_s.eval(2*0.511)+ m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234./(orig_bin_edges+2*0.511);
 	double E0=0.165;
 	double par[5]={ -7.26624e+00, 1.72463e+01, -2.18044e+01,1.44731e+01,3.22121e-02};
-rets[0].arr = (m_p2*quch_s.eval(2*0.511) + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/(orig_bin_edges+2*0.511);
-//rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/(orig_bin_edges+2*0.511);
+fargs.rets[0].arr = (m_p2*quch_s.eval(2*0.511) + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/(orig_bin_edges+2*0.511);
+//fargs.rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/(orig_bin_edges+2*0.511);
 }
 // */
-void Mine::getNewBins(Args args, Rets rets){
+void Mine::getNewBins(FunctionArgs& fargs){
 	double OrigEnergy[1200],DEDX[1200];
 	TH1F *m_Cheren;
 	std::ifstream in2("stoppingpower.txt");
@@ -145,25 +144,25 @@ void Mine::getNewBins(Args args, Rets rets){
 	std::vector<double> quch_Xv(&xx[0],&xx[0]+m_totalpoints);
 	Eigen::VectorXd quch_Xvals = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(quch_Xv.data(), quch_Xv.size());
 
-	const auto& orig_bin_edges = args[0].arr;
-	//const auto& orig_bin_edges = args[0].arr-2*0.511;
+	const auto& orig_bin_edges = fargs.args[0].arr;
+	//const auto& orig_bin_edges = fargs.args[0].arr-2*0.511;
 	SplineFunction cheren_s(cheren_xvals, cheren_yvals);
 	SplineFunction quch_s(quch_Xvals, quch_Yvals);
 	std::cout<<" m_p0: "<<m_p0<<" m_p1: "<<m_p1;
 	std::cout<<" m_p2: "<<m_p2<<" m_p3: "<<m_p3<< std::endl;
-	//         rets[0].arr = (m_p2*quch_s.eval(2*0.511)+ m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234./(orig_bin_edges+2*0.511);
-	//rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234.0;
+	//         fargs.rets[0].arr = (m_p2*quch_s.eval(2*0.511)+ m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234./(orig_bin_edges+2*0.511);
+	//fargs.rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*cheren_s.eval(orig_bin_edges))/1234.0;
 	// use fit cheren response
 	double E0=0.165;
 	double par[5]={ -7.26624e+00, 1.72463e+01, -2.18044e+01,1.44731e+01,3.22121e-02};
 	//if(orig_bin_edges>E0) To Be Done, there is a cut off for Cherenkov response below E0
-		rets[0].arr = (m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/1.12722853;
-		//rets[0].arr = (m_p2*quch_s.eval(2*0.511) + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0;
-		//rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0;
-	//else 
-	//	rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges))/1234.0;
-	//std::cout <<" args "<<args[0].arr<< std::endl << std::endl;
-	//std::cout <<" rets "<<rets[0].arr<< std::endl << std::endl;
+		fargs.rets[0].arr = (m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0/1.12722853;
+		//fargs.rets[0].arr = (m_p2*quch_s.eval(2*0.511) + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0;
+		//fargs.rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges)+m_p3*(par[0]+par[1]*log(1+orig_bin_edges/E0)+par[2]*pow(log(1+orig_bin_edges/E0),2)+par[3]*pow(log(1+orig_bin_edges/E0),3))*(1+par[4]*orig_bin_edges))/1234.0;
+	//else
+	//	fargs.rets[0].arr = (1261 + m_p2*quch_s.eval(orig_bin_edges))/1234.0;
+	//std::cout <<" args "<<fargs.args[0].arr<< std::endl << std::endl;
+	//std::cout <<" rets "<<fargs.rets[0].arr<< std::endl << std::endl;
 
 	//    std::cout<<"single "<< (1261 + m_p2*quch_s.eval(0)+m_p3*cheren_s.eval(0))/1234./1.022<<std::endl;
 	//    std::cout<<"single "<< (1261 + m_p2*quch_s.eval(4)+m_p3*cheren_s.eval(4))/1234./(4+1.022)<<std::endl;

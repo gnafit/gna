@@ -1,13 +1,12 @@
-#ifndef SEGMENT_H
-#define SEGMENT_H
+#pragma once
 
 #include <vector>
 
 #include "GNAObject.hh"
-#include "Eigen/Sparse"
+#include <Eigen/Sparse>
 
 class Segment: public GNASingleObject,
-                        public Transformation<Segment> {
+               public TransformationBind<Segment> {
 public:
   Segment();
 
@@ -19,5 +18,3 @@ private:
 
 
 };
-
-#endif // SEGMENT_H

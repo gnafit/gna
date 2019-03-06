@@ -2,7 +2,6 @@
 #include "Npesmear.hh"
 #include <boost/format.hpp>
 #include <string.h>
-using boost::format;
 
 constexpr double pi = boost::math::constants::pi<double>();
 
@@ -17,25 +16,25 @@ void Npesmear::add(){
     std::cout<<" index "<<index<<std::endl;
     std::string label="Npesmear";
     if(!m_single){
-        label=(format("Npesmear_%1%")%index).str();
+        label=(boost::format("Npesmear_%1%")%index).str();
     }
-    transformation_(this, label)
+    this->transformation_(label)
         .input("Nvis")
         .output("Nrec")
-        .types(Atypes::pass<0>,
-                [index](Npesmear *obj, Atypes args, Rtypes /*rets*/) {
+        .types(TypesFunctions::pass<0>)
+        .types([index](Npesmear *obj, TypesFunctionArgs& fargs) {
                 std::cout<<" ypp0 "<<std::endl;
-                if( args[0].kind!=DataKind::Hist ){
+                if( fargs.args[0].kind!=DataKind::Hist ){
                 throw std::runtime_error("Npesmear input should be a histogram");
                 }
                 if(index==0){
-                obj->m_datatype = args[0];
+                obj->m_datatype = fargs.args[0];
                 std::cout<<" yp0 "<<std::endl;
                 obj->fillCache();
                 std::cout<<" yp1 "<<std::endl;
                 }
                 else{
-                if( args[0]!=obj->m_datatype ) {
+                if( fargs.args[0]!=obj->m_datatype ) {
                 throw std::runtime_error("Inconsistent histogram in Npesmear");
                 }
                 }
@@ -100,10 +99,11 @@ void Npesmear::fillCache() {
 }
 
 /* Apply precalculated cache and actually smear */
-void Npesmear::calcSmear(Args args, Rets rets) {
+void Npesmear::calcSmear(FunctionArgs& fargs) {
     // rets[0].x = args[0].vec ;
-    rets[0].x = m_sparse_cache * args[0].vec ;
-    rets[0].x = 1348.55 + 30.71*rets[0].x;//-4.49097*E*E+0.216868*E*E*E;
+    auto& ret = fargs.rets[0].x;
+    ret = m_sparse_cache * fargs.args[0].vec ;
+    ret = 1348.55 + 30.71*ret;//-4.49097*E*E+0.216868*E*E*E;
 }
 
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Eigen/Core>
 #include <unsupported/Eigen/Splines>
 
@@ -43,7 +45,3 @@ private:
   // Spline of one-dimensional "points."
   Eigen::Spline<double, 1> spline_;
 };
-
-//int main(int argc, char const* argv[])
-//{
-//}

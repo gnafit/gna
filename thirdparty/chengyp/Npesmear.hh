@@ -1,13 +1,12 @@
-#ifndef NPESMEAR_H
-#define NPESMEAR_H
+#pragma once
 
 #include <vector>
 
 #include "GNAObject.hh"
-#include "Eigen/Sparse"
+#include <Eigen/Sparse>
 
 class Npesmear: public GNAObject,
-                        public Transformation<Npesmear> {
+                       public TransformationBind<Npesmear> {
 public:
   Npesmear( bool single=true );
 
@@ -20,7 +19,7 @@ public:
   void add(SingleOutput& hist);
 private:
   void fillCache();
-  void calcSmear(Args args, Rets rets);
+  void calcSmear(FunctionArgs& fargs);
 
 
   DataType m_datatype;
@@ -30,5 +29,3 @@ private:
 
   bool m_single; /// restricts Npesmear to contain only one transformation
 };
-
-#endif // NPESMEAR_H

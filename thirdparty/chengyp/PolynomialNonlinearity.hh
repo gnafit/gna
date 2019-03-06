@@ -3,14 +3,13 @@
 #include "GNAObject.hh"
 #include <vector>
 
-
 class PolynomialNonlinearity: public GNASingleObject,
-                              public Transformation<PolynomialNonlinearity> {
+                              public TransformationBind<PolynomialNonlinearity> {
     public:
         explicit PolynomialNonlinearity(int poly_order);
 
     protected:
-        void computeNewBins(Args args, Rets rets) noexcept;
+        void computeNewBins(FunctionArgs& fargs) noexcept;
         int m_poly_order;
         std::vector<variable<double>> m_coeffs;
 };

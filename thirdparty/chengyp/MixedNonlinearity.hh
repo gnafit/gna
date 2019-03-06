@@ -3,13 +3,12 @@
 #include "GNAObject.hh"
 #include <vector>
 
-
 class MixedNonlinearity: public GNASingleObject,
-                              public Transformation<MixedNonlinearity> {
+                         public TransformationBind<MixedNonlinearity> {
     public:
         explicit MixedNonlinearity();
 
     protected:
-        void computeNewBins(Args args, Rets rets) noexcept;
+        void computeNewBins(FunctionArgs& fargs) noexcept;
         variable<double> m_alpha, m_beta;
 };

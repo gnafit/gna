@@ -8,25 +8,25 @@
 #include <sstream>
 #include <string>
 #include <math.h>
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TH1F.h"
-#include "TMath.h"
-#include "TString.h"
-#include "TGraph.h"
-#include "TRandom.h"
-#include "TProfile.h"
-#include "TTree.h"
-#include "TFile.h"
-#include "TGraphErrors.h"
-#include "Minuit2/FCNBase.h"
+#include <TFile.h>
+#include <TCanvas.h>
+#include <TH1F.h>
+#include <TMath.h>
+#include <TString.h>
+#include <TGraph.h>
+#include <TRandom.h>
+#include <TProfile.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TGraphErrors.h>
+#include <Minuit2/FCNBase.h>
 //#include "dybData.h"
 
 using namespace std;
 
 //class dybParameters;
 
-class dybGammaPeak 
+class dybGammaPeak
 {
 	public:
 		dybGammaPeak();
@@ -35,12 +35,12 @@ class dybGammaPeak
 		void  Init();
 		void   SetEScale     (double gamScale);
 		void   SetERec       (double val);
-		void   SetERecError  (double val){m_eRecError = val;}    
-		void   SetBiasOS     (double val){m_biasOS    = val;}  
-		void   GetsimDataNL  ();  
+		void   SetERecError  (double val){m_eRecError = val;}
+		void   SetBiasOS     (double val){m_biasOS    = val;}
+		void   GetsimDataNL  ();
 		double* ScintillatorNL(double inE);
 		void UpdateVis511();
-		double GetChi2       ();        
+		double GetChi2       ();
 		bool Execute();
 		double CalLh(double,double,double,double);
 		void updatefQ();
@@ -71,24 +71,24 @@ class dybGammaPeak
 		private:
 			dybGammaPeak *m_seek;
 
-	};	
+	};
 
 	private:
 		TGraph* m_fQ_gr;
 		static int s_count;
 		string m_name;
-		double m_eTru_single; 
-		double m_eTru_total; 
-		double m_eVis; 
-		double m_gVis; 
-		double m_cal_Vis511[50000]; 
-		double m_data_ekin[50000]; 
+		double m_eTru_single;
+		double m_eTru_total;
+		double m_eVis;
+		double m_gVis;
+		double m_cal_Vis511[50000];
+		double m_data_ekin[50000];
 
 
-		float  m_predict1_NL[50000]; 
-		float  m_predict2_NL[50000]; 
-		float  m_data1_NL[50000]; 
-		float  m_data2_NL[50000]; 
+		float  m_predict1_NL[50000];
+		float  m_predict2_NL[50000];
+		float  m_data1_NL[50000];
+		float  m_data2_NL[50000];
 
 		float  sm_predict1_NL;
 		float  sm_predict2_NL;
@@ -96,16 +96,16 @@ class dybGammaPeak
 		float  sm_data2_NL;
 
 
-		int m_Ne_511[50000]; 
-		double m_e_from511[50000][50]; 
+		int m_Ne_511[50000];
+		double m_e_from511[50000][50];
 
 
-		double m_eVisError; 
-		double m_eRec; 
-		double m_eRecError; 
-		double m_eRecRaw; 
-		double m_error; 
-		double m_biasOS; 
+		double m_eVisError;
+		double m_eRec;
+		double m_eRecError;
+		double m_eRecRaw;
+		double m_error;
+		double m_biasOS;
 		double m_theoScintNL;
 		double m_dataScintNL;
 		double m_theoFullNL;
@@ -113,8 +113,8 @@ class dybGammaPeak
 		bool   m_includeInFit;
 
 		/// PDF of primary e+/e- to fold with electron NL
-		static const unsigned int m_nMaxPdf = 100;  
-		unsigned int m_nPdf;  
+		static const unsigned int m_nMaxPdf = 100;
+		unsigned int m_nPdf;
 		double        m_pdf_eTru [m_nMaxPdf];
 		double        m_pdf_prob [m_nMaxPdf];
 		double        m_pdf_prob2[m_nMaxPdf];
