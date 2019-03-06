@@ -619,7 +619,7 @@ class ReactorExperimentModel(baseexp):
                 #npeq.etonpe.input(try1points)
                 #try2points = npeq.etonpe
                 #nlqua = ROOT.HistNonlinearity(True)
-                #nlqua.set( try1points, try2points, finalsum )
+                #nlqua.set(self.integrator.points.xhist, try2points, finalsum )
                 ##mat24 = nlqua.matrix.FakeMatrix.data()
                 ##print(mat24)
                 ##print(mat24.sum(axis=0))
@@ -637,7 +637,8 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolutionC()
+                        eres = ROOT.EnergyResolution()
+                        eres.matrix.Edges(self.integrator.points.xhist)
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -652,7 +653,8 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolutionC()
+                        eres = ROOT.EnergyResolution()
+                        eres.matrix.Edges(self.integrator.points.xhist)
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -663,7 +665,8 @@ class ReactorExperimentModel(baseexp):
 
             else:
                 with detector.ns:
-                    orgeres = ROOT.EnergyResolutionC()
+                    orgeres = ROOT.EnergyResolution()
+                orgeres.matrix.Edges(self.integrator.points.xhist)
                 orgeres.smear.inputs(finalsum)
                 self.ns.addobservable("weightedspectra", orgeres.smear)
 

@@ -701,7 +701,8 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolutionC()
+                        eres = ROOT.EnergyResolution()
+                        eres.matrix.Edges(self.integrator.points.xhist)
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -721,7 +722,8 @@ class ReactorExperimentModel(baseexp):
 
             else:
                 with detector.ns:
-                    orgeres = ROOT.EnergyResolutionC()
+                    orgeres = ROOT.EnergyResolution()
+                orgeres.matrix.Edges(self.integrator.points.xhist)
                 orgeres.smear.inputs(finalsum)
                 self.ns.addobservable("weightedspectra", orgeres.smear)
                 #edges   = np.array( [ 0.0, 0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )

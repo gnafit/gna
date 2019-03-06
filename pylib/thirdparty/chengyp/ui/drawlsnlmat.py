@@ -36,7 +36,7 @@ class cmd(basecmd):
         model3.MineNL.old_bins(trypoints)
         worstedges2 = model2.MineNL.bins_after_nl
         lsnl_model_2 = ROOT.HistNonlinearity(True)
-        lsnl_model_2.set( trypoints, worstedges2)
+        lsnl_model_2.set(integrator.points.xhist, worstedges2)
 
 
         #mat2 = convert(lsnl_model_2.getDenseMatrix(), 'matrix')
@@ -57,7 +57,7 @@ class cmd(basecmd):
         model3.normMineNL.new_bins(model3.MineNL.bins_after_nl)
         worstedges3 = model3.normMineNL.norm_new_bins
         lsnl_model_3 = ROOT.HistNonlinearity(True)
-        lsnl_model_3.set( trypoints, worstedges3)
+        lsnl_model_3.set(integrator.points.xhist, worstedges3)
 
 
         mat3 = lsnl_model_3.matrix.FakeMatrix.data()

@@ -617,7 +617,8 @@ class ReactorExperimentModel(baseexp):
                 finalsum = inter_sum
 
             #with detector.ns:
-            #    orgeres = ROOT.EnergyResolutionC()
+            #    orgeres = ROOT.EnergyResolution()
+            #orgeres.matrix.Edges(self.integrator.points.xhist)
             #orgeres.smear.inputs(finalsum)
             #self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear)
             #finalsum = orgeres.smear
@@ -720,7 +721,7 @@ class ReactorExperimentModel(baseexp):
                     worst.WorstNL.old_bins(try1points)
                     worstedges = worst.WorstNL.bins_after_nl
                     nlworst = ROOT.HistNonlinearity(True)
-                    nlworst.set( try1points, worstedges, finalsum )
+                    nlworst.set(self.integrator.points.xhist, worstedges, finalsum )
                     #mat = convert(nlworst.getDenseMatrix(), 'matrix')
                     #mat = np.ma.array( mat, mask= mat==0.0 )
                     #print( 'yp nl check Col sum 252', mat.sum(axis=0) )
@@ -756,7 +757,7 @@ class ReactorExperimentModel(baseexp):
                     qua.QuaNL.old_bins(try1points)
                     quaedges = qua.QuaNL.bins_after_nl
                     nlqua = ROOT.HistNonlinearity(True)
-                    nlqua.set( try1points, quaedges, finalsum )
+                    nlqua.set(self.integrator.points.xhist, quaedges, finalsum )
                     mat24 = nlqua.matrix.FakeMatrix.data()
                     print(mat24)
                     print(mat24.sum(axis=0))
@@ -817,7 +818,7 @@ class ReactorExperimentModel(baseexp):
                     expnl.ExpNL.old_bins(try1points)
                     expnledges = expnl.ExpNL.bins_after_nl
                     nlexpnl = ROOT.HistNonlinearity(True)
-                    nlexpnl.set( try1points, expnledges, finalsum )
+                    nlexpnl.set(self.integrator.points.xhist, expnledges, finalsum )
                     #finalsum = nlexpnl.smear.Nvis
                     finalsumtmp = ROOT.Sum()
                     finalsumtmp.add(nlexpnl.smear.Nvis)
@@ -844,7 +845,8 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolutionC()
+                        eres = ROOT.EnergyResolution()
+                        eres.matrix.Edges(self.integrator.points.xhist)
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -856,7 +858,8 @@ class ReactorExperimentModel(baseexp):
 
             else:
                 with detector.ns:
-                    orgeres = ROOT.EnergyResolutionC()
+                    orgeres = ROOT.EnergyResolution()
+                orgeres.matrix.Edges(self.integrator.points.xhist)
                 orgeres.smear.inputs(finalsum)
                 self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear)
                 finalsum = orgeres.smear
