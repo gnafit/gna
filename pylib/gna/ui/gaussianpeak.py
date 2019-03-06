@@ -21,7 +21,7 @@ class cmd(basecmd):
         ns = env.ns(self.opts.name)
         ns.reqparameter("Eres_a", central=0.0, sigma=0)
         ns.reqparameter("Eres_b", central=0.03, sigma=0)
-        ns.reqparameter("Eres_c", central=0.0, sigma=0)
+        ns.reqparameter("Eres_c", central=0.0, sigma=0)        
 
         peak_sum = ROOT.Sum()
         common_ns = env.ns(self.opts.name)
@@ -43,7 +43,7 @@ class cmd(basecmd):
             hist.hist.f(model.rate.rate)
             peak_sum.add(hist.hist)
             locns.addobservable('spectrum', hist.hist)
-
+        
         common_ns.addobservable('spectrum', peak_sum)
         with ns:
              eres = ROOT.EnergyResolution()
