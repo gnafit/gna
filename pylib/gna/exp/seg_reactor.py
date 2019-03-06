@@ -618,7 +618,7 @@ class ReactorExperimentModel(baseexp):
                 #try1points = C.Points(detector.edges)
                 #npeq.etonpe.input(try1points)
                 #try2points = npeq.etonpe
-                #nlqua = ROOT.HistNonlinearity()
+                #nlqua = ROOT.HistNonlinearity(True)
                 #nlqua.set( try1points, try2points, finalsum )
                 ##mat24 = nlqua.matrix.FakeMatrix.data()
                 ##print(mat24)

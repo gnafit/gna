@@ -755,7 +755,7 @@ class ReactorExperimentModel(baseexp):
                     try1points = C.Points(detector.edges)
                     qua.QuaNL.old_bins(try1points)
                     quaedges = qua.QuaNL.bins_after_nl
-                    nlqua = ROOT.HistNonlinearity()
+                    nlqua = ROOT.HistNonlinearity(True)
                     nlqua.set( try1points, quaedges, finalsum )
                     mat24 = nlqua.matrix.FakeMatrix.data()
                     print(mat24)
@@ -816,7 +816,7 @@ class ReactorExperimentModel(baseexp):
                     try1points = C.Points(detector.edges)
                     expnl.ExpNL.old_bins(try1points)
                     expnledges = expnl.ExpNL.bins_after_nl
-                    nlexpnl = ROOT.HistNonlinearity()
+                    nlexpnl = ROOT.HistNonlinearity(True)
                     nlexpnl.set( try1points, expnledges, finalsum )
                     #finalsum = nlexpnl.smear.Nvis
                     finalsumtmp = ROOT.Sum()
