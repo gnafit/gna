@@ -1,5 +1,4 @@
-#ifndef MINIMIZABLE_H
-#define MINIMIZABLE_H
+#pragma once
 
 #include "Math/IFunction.h"
 
@@ -41,5 +40,3 @@ protected:
   Statistic *m_statistic;
   std::vector<Parameter<double>*> m_pars;
 };
-
-#endif // MINIMIZABLE_H

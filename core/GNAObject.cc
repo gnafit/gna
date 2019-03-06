@@ -3,7 +3,8 @@
 #include <boost/type_index.hpp>
 #include "GNAObject.hh"
 
-void GNAObject::dumpObj() {
+template<typename SourceFloatType, typename SinkFloatType>
+void GNAObjectT<SourceFloatType,SinkFloatType>::dumpObj() {
   std::cerr << "GNAObject " << (void*)this << ", ";
   std::cerr << "type: " << boost::typeindex::type_id<decltype(*this)>().pretty_name() << std::endl;
   /* std::cerr << "type: " << typeid(*this).name() << std::endl; */
@@ -24,4 +25,20 @@ void GNAObject::dumpObj() {
     std::cerr << "  " << i << ": ";
     t_[i].dump();
   }
+}
+
+template class GNAObjectT<double,double>;
+template class GNASingleObjectT<double,double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class GNAObjectT<float,float>;
+  template class GNASingleObjectT<float,float>;
+#endif
+
+std::vector<std::string> GNA::provided_precisions(){
+  return {
+    "double"
+#ifdef PROVIDE_SINGLE_PRECISION
+  , "float"
+#endif
+  };
 }

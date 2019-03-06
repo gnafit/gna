@@ -1,7 +1,7 @@
 .. _detector_nonlinearity_db_root_v01:
 
-EnergyNonlinearity effect parametrization (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_nonlinearity_db_root_v01 -- energyNonlinearity effect parametrization (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""
@@ -27,6 +27,11 @@ Function :math:`f_0(E)` is the nominal LSNL. The functions :math:`f_i(E)` repres
 in order to parametrize LSNL uncertainty with parameters :math:`a_i=0\pm1`. Parameters' :math:`a_i` uncertainties are
 uncorrelated between parameters and fully correlated between detectors.
 
+.. note::
+
+    The current implementation of the bundle requireds input edges ``shared.edges`` to be provided within ``shared``
+    constructor argument.
+
 Scheme
 """"""
 
@@ -34,7 +39,9 @@ Scheme
    histogram bin edges :math:`E` and summed together within  :ref:`WeightedSum` transformation. The :ref:`WeightedSums
    <WeightedSum>` weights representing parameters :math:`a_i` are created in a common namespace.
 
-   NOTE: the values of :math:`f_0(E)` and :math:`f_i(E)` are extrapolated for the whole range of :math:`E` if needed.
+.. attention::
+
+   The values of :math:`f_0(E)` and :math:`f_i(E)` are extrapolated for the whole range of :math:`E` if needed.
 
 2. For each supplied namespace:
 
@@ -55,8 +62,29 @@ Parameters
 
 2. Uncorrelated energy scale parameters :math:`\delta_d` for each supplied namespace.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`HistNonlinearity` by namespace name. The observable
+``'nonlinearity'`` is also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]  = nonlin.smear.Ntrue
+    self.outputs[ns.name] = nonlin.smear.Nrec
+    ns.addobservable('nonlinearity', nonlin.smear.Nrec, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
+
 Configuration
 """""""""""""
+
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'nonlinearity' will be used.
 
 .. code-block:: python
 
@@ -67,11 +95,15 @@ Configuration
             filename = 'output/detector_nl_consModel_450itr.root',
             # TGraph names. First curve will be used as nominal
             names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-            # The uncorrelated energy scale uncertainty
-            uncertainty = 0.2*percent,
-            # The uncorrelated energy scale uncertainty type (absolute/relative)
-            uncertainty_type = 'relative'
+            # The uncorrelated energy scale uncertainty type (absolute/relative/percent)
+            par = uncertain(1.0, 0.2, 'percent'),
+            # The parameter name to use for storage
+            parname = 'escale',
             )
+
+``parname`` may optionally contain a formatting directive ('escale.{}'). '{}' will be replaced with namespace
+(detector) name. Period '.' is interpreted as nesting, i.e. bundle will created new namespace ``'escale'`` and
+collect all the parameters within.
 
 Testing scripts
 """""""""""""""

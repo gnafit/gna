@@ -1,0 +1,13 @@
+@startuml
+ while(For each point in matrix)
+     if (Cross-section contains current point) then (yes)
+         if (Interesting points array contains this point) then (no)
+             :Add point to interesting points array;
+             :Set the corresponding extended cross-section matrix point 1;
+         endif
+         :makeCorridor(current_x, current_y, deviation);
+         
+     endif
+ endwhile
+     stop
+@enduml

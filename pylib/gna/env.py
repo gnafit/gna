@@ -1,3 +1,4 @@
+from __future__ import print_function
 from collections import defaultdict, deque, Mapping, OrderedDict
 import parameters
 from contextlib import contextmanager
@@ -16,14 +17,6 @@ class namespacedict(OrderedDict):
         self[key] = value
         return value
 
-def findname(name, curns):
-    if '.' in name:
-        nsname, name = name.rsplit('.', 1)
-        ns = env.ns(nsname)
-    else:
-        ns = curns
-    return ns[name]
-
 class ExpressionWithBindings(object):
     def __init__(self, ns, obj, expr, bindings):
         self.ns = ns
@@ -40,7 +33,7 @@ class ExpressionWithBindings(object):
                 if dep in known:
                     continue
                 try:
-                    dep = findname(dep, env.nsview)
+                    dep = env.nsview[dep]
                 except KeyError:
                     return None
             if isinstance(dep, ExpressionsEntry):
@@ -49,7 +42,7 @@ class ExpressionWithBindings(object):
                 path = dep.resolvepath(seen | {dep}, known)
                 if path is None:
                     return None
-                known.append(dep)
+                known.add(dep)
                 allpath.extend(path)
         return allpath
 
@@ -61,14 +54,21 @@ class ExpressionWithBindings(object):
                 continue
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
             if isinstance(dep, basestring):
-                dep = findname(dep, env.nsview)
+                dep = env.nsview[dep]
             v.bind(dep.getVariable())
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
 
 class ExpressionsEntry(object):
+    _label = None
     def __init__(self, ns):
         self.ns = ns
         self.exprs = []
+
+    def setLabel(self, label):
+        self._label = label
+
+    def label(self):
+        return self._label
 
     def add(self, obj, expr, bindings):
         self.exprs.append(ExpressionWithBindings(self.ns, obj, expr, bindings))
@@ -79,13 +79,15 @@ class ExpressionsEntry(object):
             raise KeyError()
         for expr in path:
             v = expr.get()
+            if self._label is not None:
+                v.setLabel(self._label)
         return v
 
     def resolvepath(self, seen, known):
         minexpr, minpaths = None, None
         for expr in self.exprs:
             if cfg.debug_bindings:
-                print expr.expr.name(), seen
+                print(expr.expr.name(), seen)
             paths = expr.resolvepath(seen, set(known))
             if paths is None:
                 continue
@@ -99,10 +101,14 @@ class ExpressionsEntry(object):
         return minpaths+[minexpr]
 
 class namespace(Mapping):
+    groups = None
     def __init__(self, parent, name):
+        self.groups=[]
         self.name = name
-        if parent is not None and parent.path:
-            self.path = '.'.join([parent.path, name])
+        if parent and name=='':
+            raise Exception( 'Only root namespace may have no name' )
+        if parent:
+            self.path = parent.pathto(name)
         else:
             self.path = name
 
@@ -114,6 +120,9 @@ class namespace(Mapping):
         self.namespaces = namespacedict(self)
 
         self.objs = []
+
+    def pathto(self, name):
+        return '.'.join((self.path, name)) if self.path else name
 
     def __nonzero__(self):
         return True
@@ -128,9 +137,14 @@ class namespace(Mapping):
         env.nsview.remove([self])
 
     def __call__(self, nsname):
+        if not nsname:
+            return self
+
         if isinstance(nsname, basestring):
+            if nsname=='':
+                return self
             parts = nsname.split('.')
-        else:
+        elif isinstance(nsname, (list,tuple)):
             parts = nsname
         if not parts:
             return self
@@ -144,14 +158,42 @@ class namespace(Mapping):
             if nsname not in self.namespaces:
                 self.namespaces[nsname] = otherns.namespaces[nsname]
 
+    def get_proper_ns(self, name):
+        if isinstance(name, (tuple, list)):
+            path, head = name[:-1], name[-1]
+        else:
+            path, head = (), name
+
+        if '.' in head:
+            newpath = tuple(head.split('.'))
+            path+=newpath[:-1]
+            head = newpath[-1]
+
+        if path:
+            return self(path), head
+        else:
+            return None, head
+
     def __getitem__(self, name):
-        v = self.storage[name]
+        if not name:
+            return self
+
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage[head]
         if isinstance(v, basestring):
-            return findname(v, env.nsview)
+            return env.nsview[v]
         return v
 
     def __setitem__(self, name, value):
-        self.storage[name] = value
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            ns.__setitem__(head, value)
+
+        self.storage[head] = value
 
     def __iter__(self):
         return self.storage.iterkeys()
@@ -159,36 +201,86 @@ class namespace(Mapping):
     def __len__(self):
         return len(self.storage)
 
-    def defparameter(self, name, **kwargs):
-        if name in self.storage:
-            raise Exception("{} is already defined".format(name))
-        target = self.matchrule(name)
+    def defparameter_group(self, *args, **kwargs):
+        import gna.parameters.covariance_helpers as ch
+        pars = [self.defparameter(name, **ctor_args) for name, ctor_args in args]
+
+        covmat_passed =  kwargs.get('covmat')
+        if covmat_passed is not None:
+            ch.covariate_pars(pars, covmat_passed)
+
+        cov_from_cfg = kwargs.get('covmat_cfg')
+        if cov_from_cfg is not None:
+            ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
+
+        return pars
+
+    def defparameter(self, name, *args, **kwargs):
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.defparameter(head, *args, **kwargs)
+
+        if head in self.storage:
+            raise Exception("{} is already defined in {}".format(head, self.path))
+        target = self.matchrule(head)
         if not target:
             target = kwargs.pop('target', None)
         if target:
             p = target
         else:
-            p = parameters.makeparameter(self, name, **kwargs)
-        self[name] = p
+            p = parameters.makeparameter(self, head, *args, **kwargs)
+        self[head] = p
         return p
 
-    def reqparameter(self, name, **kwargs):
-        try:
-            return self[name]
-        except KeyError:
-            pass
-        try:
-            return env.nsview[name]
-        except KeyError:
-            pass
-        return self.defparameter(name, **kwargs)
+    def reqparameter(self, name, *args, **kwargs):
+        ns, head = self.get_proper_ns(name)
+        if ns:
+            return ns.reqparameter(head, *args, **kwargs)
 
-    def addobservable(self, name, output, export=True):
-        if output.check():
+        par = None
+        try:
+            par = self[head]
+        except KeyError:
+            pass
+
+        if not par:
+            try:
+                par = env.nsview[head]
+            except KeyError:
+                pass
+
+        found=bool(par)
+        if not par:
+            par = self.defparameter(head, *args, **kwargs)
+
+        if kwargs.get('with_status'):
+            return par, found
+
+        return par
+
+    def reqparameter_group(self, *args, **kwargs):
+        import gna.parameters.covariance_helpers as ch
+        args_patched = [(name, dict(ctor_args, with_status=True))
+                        for name, ctor_args in args]
+        pars_with_status = [self.reqparameter(name, **ctor_args)
+                            for name, ctor_args in args_patched]
+        statuses = [status for _, status in pars_with_status]
+        pars = [par for par, _ in pars_with_status]
+        if not any(statuses):
+            covmat_passed =  kwargs.get('covmat')
+            if covmat_passed is not None:
+                ch.covariate_pars(pars, covmat_passed)
+            cov_from_cfg = kwargs.get('covmat_cfg')
+            if cov_from_cfg is not None:
+                ch.CovarianceHandler(cov_from_cfg, pars).covariate_pars()
+        return pars
+
+    def addobservable(self, name, output, export=True, ignorecheck=False):
+        if ignorecheck or output.check():
             self.observables[name] = output
-            print 'Add observable:', '%s/%s'%(self.path, name)
+            print('Add observable:', '%s/%s'%(self.path, name))
         else:
-            print "observation", name, "is invalid"
+            print("observation", name, "is invalid")
             output.dump()
         if not export:
             self.observables_tags[name].add('internal')
@@ -196,7 +288,7 @@ class namespace(Mapping):
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
             if cfg.debug_bindings:
-                print self.path, obj, expr.name()
+                print(self.path, obj, expr.name())
             name = expr.name()
             if name not in self.storage:
                 self.storage[name] = ExpressionsEntry(self)
@@ -204,7 +296,7 @@ class namespace(Mapping):
                 self.storage[name].add(obj, expr, bindings)
 
     def addevaluable(self, name, var):
-        evaluable = ROOT.Uncertain(var.typeName())(name, var)
+        evaluable = ROOT.Variable(var.typeName())(name, var)
         evaluable.ns = self
         self[name] = evaluable
         return evaluable
@@ -235,6 +327,33 @@ class namespace(Mapping):
             if not pattern or pattern(name):
                 return target
 
+    def printobservables(self, internal=False):
+        import gna.bindings.DataType
+        for path, out in self.walkobservables(internal):
+            print('%-30s'%(path+':'), str(out.datatype()))
+
+    def printparameters(self, **kwargs):
+        from gna.parameters.printer import print_parameters
+        print_parameters(self, **kwargs)
+
+    def materializeexpressions(self, recursive=False):
+        for v in self.itervalues():
+            if not isinstance(v, ExpressionsEntry):
+                continue
+            v.get()
+
+        if recursive:
+            for ns in self.namespaces.values():
+                ns.materializeexpressions(True)
+
+    def get_obs(self, *names):
+        import fnmatch as fn
+        obses = []
+        for name in names:
+            matched = fn.filter(self.observables.keys(), name)
+            obses.extend(matched)
+        return obses
+
 class nsview(object):
     def __init__(self):
         self.nses = deque()
@@ -252,19 +371,23 @@ class nsview(object):
                 return ns[name]
             except KeyError:
                 pass
+
         if cfg.debug_bindings:
-            print "can't find name {}. Names in view: ".format(name),
+            print("can't find name {}. Names in view: ".format(name), end='')
             if self.nses:
                 for ns in self.nses:
-                    print '"{}": "{}"'.format(ns.path, ', '.join(ns.storage)), ' ',
-                print ''
+                    print('"{}": "{}"'.format(ns.path, ', '.join(ns.storage)), ' ', end='')
+                print('')
             else:
-                'none'
+                print('none')
         raise KeyError('%s (namespaces: %s)'%(name, str([ns.name for ns in self.nses])))
+
+    def currentns(self):
+        return self.nses[0]
 
 class parametersview(object):
     def __getitem__(self, name):
-        res = findname(name, env.nsview)
+        res = env.nsview[name]
         return res
 
     @contextmanager
@@ -290,10 +413,13 @@ class parametersview(object):
         for p, v in oldvalues.iteritems():
             p.set(v)
 
-class PartNotFoundError(BaseException):
+class PartNotFoundError(Exception):
     def __init__(self, parttype, partname):
         self.parttype = parttype
         self.partname = partname
+        msg = "Failed to find {} in the env".format(self.partname)
+        super(PartNotFoundError, self).__init__(msg)
+
 
 class envpart(dict):
     def __init__(self, parttype):
@@ -342,6 +468,7 @@ class _environment(object):
             self.globalns.objs.append(obj)
         else:
             ns.objs.append(obj)
+        obj.currentns = self.nsview.currentns()
         bindings = self._bindings+[kwargs.pop("bindings", OrderedDict())]
         if ns:
             ns.addexpressions(obj, bindings=bindings)
@@ -359,18 +486,18 @@ class _environment(object):
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
             if isinstance(param, basestring):
-                param = findname(param, self.nsview)
+                param = self.nsview[param]
             if isinstance(param, ExpressionsEntry):
                 param = param.get()
             if param is not None:
                 if cfg.debug_bindings:
-                    print "binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()])
+                    print("binding", v.name(), 'of', type(obj).__name__, 'to', type(param).__name__, '.'.join([param.ns.path, param.name()]))
                 v.bind(param.getVariable())
             else:
                 msg = "unable to bind variable %s of %r" % (v.name(), obj)
                 if not v.required():
                     msg += ", optional"
-                    print msg
+                    print(msg)
                 else:
                     raise Exception(msg)
         return obj
@@ -390,8 +517,8 @@ class _environment(object):
         else:
             return self.globalns.defparameter(name, **kwargs)
 
-    def iternstree(self):
-        return self.globalns.iternstree()
+    # def iternstree(self):
+        # return self.globalns.iternstree()
 
     def bind(self, **bindings):
         self._bindings.append(bindings)
@@ -418,6 +545,6 @@ class _environment(object):
             nspath, obsname = objspec.rsplit("/", 1)
             return self.ns(nspath).observables[obsname]
         else:
-            return findname(objspec, self.globalns)
+            return self.globalns[objspec]
 
 env = _environment()

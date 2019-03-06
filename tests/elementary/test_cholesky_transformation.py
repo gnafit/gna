@@ -8,50 +8,63 @@ from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
-from converters import convert
+from gna.constructors import Points
 
 #
-# Create the matrix
+# Create the matrix in numpy
 #
-size = 4
-v = N.matrix(N.arange(size, dtype='d'))
-v.A1[size//2:] = N.arange(size//2, 0, -1)
+def test_chol():
+    size = 4
+    v = N.matrix(N.arange(size, dtype='d'))
+    v.A1[size//2:] = N.arange(size//2, 0, -1)
 
-mat = v.T*v + N.eye( size, size )*size*2
+    mat = v.T*v + N.eye( size, size )*size*2
 
-chol = N.linalg.cholesky( mat )
+    chol = N.linalg.cholesky( mat )
 
-print( 'Matrix (numpy)' )
-print( mat )
-print()
+    print( 'Matrix (numpy)' )
+    print( mat )
+    print()
 
-print( 'L (numpy)' )
-print( chol )
-print()
+    print( 'L (numpy)' )
+    print( chol )
+    print()
 
-points = convert( mat, R.Points )
-cholesky = R.Cholesky()
+    #
+    # Create the transformations
+    #
+    points = Points( mat )
+    cholesky = R.Cholesky()
 
-cholesky.cholesky.mat( points.points.points )
+    cholesky.cholesky.mat( points.points.points )
 
-res = cholesky.cholesky.L.data()
-res = N.matrix(N.tril( res ))
+    #
+    # Retrieve data
+    #
+    res = cholesky.cholesky.L.data()
+    res = N.matrix(N.tril( res ))
 
-print( 'L' )
-print( res )
+    #
+    # Print data
+    #
+    print( 'L' )
+    print( res )
 
-mat_back = res*res.T
+    mat_back = res*res.T
 
-print( 'Matrix (rec)' )
-print( mat_back )
+    print( 'Matrix (rec)' )
+    print( mat_back )
+    assert N.allclose(mat, mat_back), "C++ result and Python origin doesn't match"
 
-diff = chol - res
-print( 'Diff L' )
-print( diff )
+    diff = chol - res
+    print( 'Diff L' )
+    print( diff )
 
-diff1 = mat_back - mat
-print( 'Diff mat' )
-print( diff1 )
+    diff1 = mat_back - mat
+    print( 'Diff mat' )
+    print( diff1 )
 
-print( (((N.fabs(diff)+N.fabs(diff1))>1.e-12).sum() and '\033[31mFail!' or '\033[32mOK!' ), '\033[0m' )
+    print( (((N.fabs(diff)+N.fabs(diff1))>1.e-12).sum() and '\033[31mFail!' or '\033[32mOK!' ), '\033[0m' )
 
+if __name__ == "__main__":
+    test_chol()

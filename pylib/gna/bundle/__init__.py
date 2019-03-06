@@ -1,3 +1,2 @@
-from gna.bundle.bundle import execute_bundle, TransformationBundle
-from gna.bundle.connections import *
+from gna.bundle.bundle import execute_bundle, execute_bundles, TransformationBundleLegacy, TransformationBundle
 

@@ -5,7 +5,7 @@ from itertools import chain
 import glob
 from collections import defaultdict
 
-from pointtree import PointTree
+from gna.pointtree import PointTree
 
 class cmd(basecmd):
     @classmethod
@@ -117,7 +117,7 @@ class cmd(basecmd):
     def run(self):
         parnames = None
         fcmerged = PointTree(self.opts.output, "w")
-        
+
         attrs = {}
         dsattrs = defaultdict(dict)
         paths = set()

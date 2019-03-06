@@ -1,5 +1,6 @@
 from gna.ui import basecmd
 import ROOT
+import gna.constructors as C
 import gna.parameters.oscillation
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
@@ -23,24 +24,24 @@ class cmd(basecmd):
     self.make_simple_prediction(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(), Enu_arr[0], L_arr[0])
 
   def make_simple_prediction(self, from_nu, to_nu, Enu_arr, L):
-    Enu_p = ROOT.Points(Enu_arr)
+    Enu_p = C.Points(Enu_arr)
     self.ns['L'].set(2.)
     with self.ns:
         oscprob_full = ROOT.OscProbPMNS(from_nu, to_nu)
         oscprob_full.full_osc_prob.inputs.Enu(Enu_p)
         data_osc = oscprob_full.full_osc_prob.oscprob
         data_osc.data()
-        print data_osc.data() 
+        print data_osc.data()
         plt.figure()
         plt.plot(Enu_arr, data_osc.data())
         plt.savefig('test.pdf')
 
-    
-    
+
+
   def make_prediction(self,from_neutrino, to_neutrino, Enu_arr, L):
     with self.ns:
-      Enu = ROOT.Points(Enu_arr)
-      
+      Enu = C.Points(Enu_arr)
+
       oscprob_classes = {
         'standard': ROOT.OscProbPMNS,
         'decoh': ROOT.OscProbPMNSDecoh,
@@ -56,7 +57,7 @@ class cmd(basecmd):
                   oscprob.probsum[compname](tf[compname])
                   break
             else:
-              oscprob.probsum[compname](ROOT.Points(np.ones_like(Enu_arr)))
+              oscprob.probsum[compname](C.Points(np.ones_like(Enu_arr)))
           for tf in oscprob.transformations.itervalues():
             if 'Enu' in tf.inputs:
               tf.inputs.Enu(Enu)
@@ -64,7 +65,7 @@ class cmd(basecmd):
           oscprobs[name] = oscprob
           data[name] = oscprob.probsum
 
-    
+
 
       data_stand, data_decoh = data['standard'], data['decoh']
 
@@ -81,20 +82,20 @@ class cmd(basecmd):
       #plt.show()
       nu_tex = [r"$\nu_e$",r"$\nu_\mu$",r"$\nu_\tau$"]
       self.close_pdf('E, [MeV]',r'$P($'+nu_tex[from_neutrino.flavor]+r'$\to$'+nu_tex[to_neutrino.flavor]+r'$)$')
-  
+
   def open_pdf(self,name,title):
     self.pp = PdfPages(name)
     plt.figure()
     plt.title(title)
     self.ax = subplot(111)
-    
+
   def close_pdf(self,x_title,y_title):
     self.ax.set_xlabel(x_title, size='x-large')
     self.ax.set_ylabel(y_title, size='x-large')
     self.ax.set_xscale('log')
     plt.legend(loc=4).get_frame().set_alpha(0.6)
-    
-    
+
+
     plt.savefig(self.pp,format='pdf')
     self.pp.close()
 

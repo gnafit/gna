@@ -11,5 +11,43 @@ Commits to the `master` branch are commonly prohibited. Please, contribute your 
 # Code style
 
 * Two space indentation, no tabs.
-* Class members shold start with 'm_'.
+* Class members should start with 'm_'.
+* Class methods are called with explicit `this->method()` to distinguish them from static functions.
+* Composite names follow camelCaseAgreement.
 * TBD :)
+* Use `constexpr` and `noexcept` annotations when appropriate:
+  - Make sure that functions marked with `noexcept` do NOT throw any exceptions: 
+    no dynamic allocations inside of functions, functions called don't throw also and etc.
+  - `constexpr` everything you can
+
+# RST documentation style
+
+## RST sections structure
+
+```rst
+#########
+Part name
+#########
+
+************
+Chapter name
+************
+
+Section name
+============
+
+Subsection name
+---------------
+
+Subsubsection name
+^^^^^^^^^^^^^^^^^^
+
+Paragraph name
+""""""""""""""
+
+Subparagraph name
+'''''''''''''''''
+
+Subsubparagraph name
+++++++++++++++++++++
+```

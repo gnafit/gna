@@ -1,3 +1,4 @@
+from __future__ import print_function
 import argparse
 import sys
 import os.path
@@ -29,23 +30,67 @@ def getmodules():
         modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
     return modules
 
-def loadcmdclass(modules, name, args):
+def loadmodule(modules, name):
     loader = modules[name]
-    module = loader.find_module(name).load_module(name)
+    return loader.find_module(name).load_module(name)
+
+def loadcmdclass(modules, name, args):
+    module=loadmodule(modules, name)
     cls = getattr(module, 'cmd')
 
+    parserkwargs = getattr(cls, 'parserkwargs', {})
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    cls.initparser(subparsers.add_parser(name), env)
+    cls.initparser(subparsers.add_parser(name, **parserkwargs), env)
     opts = parser.parse_args(args, namespace=LazyNamespace())
 
     return cls, opts
+
+def listmodules(modules, printdoc=False):
+    print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
+    from textwrap import TextWrapper
+    from os.path import relpath, isfile
+    offsetlen, namelen = 2, 15
+    offset  = ' '*offsetlen
+    eoffset = '!'+offset[1:]
+    docoffset = ' '*(offsetlen+namelen+6)
+    wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
+    modnames = sorted(modules.
+            keys())
+    for modname in modnames:
+        try:
+            module=loadmodule(modules, modname)
+        except Exception as e:
+            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname, e.message, namelen=namelen))
+        else:
+            if module.__file__.endswith('.pyc'):
+                pyname = module.__file__[:-1]
+                if isfile(pyname):
+                    modfile = './'+relpath(pyname)+' (pyc)'
+                    warning=''
+                else:
+                    modfile = './'+relpath(module.__file__)
+                    warning='  \033[31mWarning!\033[0m The file {} does not exist. Consider removing all the \'*.pyc\' files from the project'.format(relpath(pyname))
+
+            print('{}{:<{namelen}s} from {}{}'.format(offset, modname, modfile, warning, namelen=namelen))
+            if printdoc and module.__doc__:
+                for line in module.__doc__.strip().split('\n'):
+                    print(wrp.fill(line))
+                print()
+
 
 def run():
     modules = getmodules()
     for group in arggroups(sys.argv):
         if not group:
             continue
+        if group==['--list']:
+            listmodules(modules)
+            sys.exit(0)
+        elif group==['--list-long']:
+            listmodules(modules, True)
+            sys.exit(0)
+
         name = group[0] = group[0].replace('-', '_')
         if name not in modules:
             msg = 'unknown module %s' % name

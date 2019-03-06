@@ -1,3 +1,5 @@
+.. _reference_guide:
+
 Reference guide
 ===============
 
@@ -9,6 +11,8 @@ Overview
    :maxdepth: 1
 
    making_sense
+
+.. equation_concept
 
 Cheat sheet
 -----------
@@ -36,21 +40,35 @@ Helper classes
    :maxdepth: 1
    :glob:
 
-   helperclasses/*
+   cppclasses/*
 
-Transformation bundles
-----------------------
+..  Transformation bundles
+    ----------------------
+
+    .. toctree::
+       :maxdepth: 1
+       :glob:
+
+       python_modules/TransformationBundle.rst
+       python_modules/NestedDict.rst
+       bundles/*
+
+Transformations
+---------------
+
+Evaluables
+^^^^^^^^^^
+
+The following transformations do not provide the inputs and outputs. They rather define the new parameters via evaluable
+mechanism.
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
-   python_modules/TransformationBundle.rst
-   python_modules/NestedDict.rst
-   bundles/*
-
-Transformations
----------------
+   transformations/VarDiff.rst
+   transformations/VarProduct.rst
+   transformations/VarSum.rst
 
 Basic types and actions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -62,10 +80,11 @@ Basic types and actions
    transformations/HistEdges.rst
    transformations/Histogram.rst
    transformations/Points.rst
+   transformations/Concat.rst
    transformations/Rebin.rst
 
-Linear algebra
-^^^^^^^^^^^^^^
+Linear algebra and simple operations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -74,13 +93,38 @@ Linear algebra
    transformations/Cholesky.rst
    transformations/FillLike.rst
    transformations/Identity.rst
+   transformations/Normalize.rst
    transformations/Product.rst
+   transformations/Ratio.rst
    transformations/RenormalizeDiag.rst
    transformations/Sum.rst
    transformations/WeightedSum.rst
 
-Stats and calculus
-^^^^^^^^^^^^^^^^^^
+Interpolation
+^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/InSegment.rst
+   transformations/InterpExpo.rst
+
+Calculus
+^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/Derivative.rst
+   transformations/GaussLegendre.rst
+   transformations/GaussLegendreHist.rst
+   transformations/GaussLegendre2d.rst
+   transformations/GaussLegendre2dHist.rst
+
+Stats
+^^^^^
 
 .. toctree::
    :maxdepth: 1
@@ -90,9 +134,17 @@ Stats and calculus
    transformations/CovarianceToyMC.rst
    transformations/CovariatedPrediction.rst
    transformations/Covmat.rst
-   transformations/Derivative.rst
    transformations/NormalToyMC.rst
    transformations/Poisson.rst
+
+Math functions
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transformations/SelfPower.rst
 
 Neutrino oscillations
 ^^^^^^^^^^^^^^^^^^^^^
@@ -114,6 +166,7 @@ Detector related
    :glob:
 
    transformations/EnergyResolution.rst
+   transformations/EnergyResolutionC.rst
    transformations/HistNonlinearity.rst
    transformations/HistSmear.rst
 

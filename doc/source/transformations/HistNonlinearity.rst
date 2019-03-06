@@ -13,8 +13,10 @@ HistNonlinearity_ contains two transformations:
 1) Matrix_ transformation, that calculates 'smearing' matrix for given distortion.
 2) Smear_ transformation, that actually applies the smearing matrix.
 
-NOTE! Use HistNonlinearity_ for cases when Matrix form is desirable. In other cases consider using smooth integration
-scaling.
+.. note::
+
+    Use HistNonlinearity_ for cases when Matrix form is desirable. In other cases consider using smooth integration
+    scaling.
 
 Inputs
 ^^^^^^
@@ -141,5 +143,5 @@ Inputs
 Outputs
 """""""
 
-1. ``'smear.Nvis'`` one-dimensional smeared histo of number of events :math:`N_{\text{vis}}`
+1. ``'smear.Nrec'`` one-dimensional smeared histo of number of events :math:`N_{\text{vis}}`
 

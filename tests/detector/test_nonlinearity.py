@@ -9,9 +9,9 @@ from gna.env import env
 from gna.labelfmt import formatter as L
 from mpl_tools.helpers import savefig, plot_hist, add_colorbar
 from scipy.stats import norm
-from converters import convert
+from gna.converters import convert
 from argparse import ArgumentParser
-import constructors as C
+import gna.constructors as C
 
 parser = ArgumentParser()
 parser.add_argument( '-o', '--output' )
@@ -79,20 +79,21 @@ ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
 phist = singularities( ev, edges )
 hist = C.Histogram( edges, phist )
 
-histedges = R.HistEdges()
-histedges.histedges.hist( hist.hist )
-
 nl = R.HistNonlinearity()
-nl.set( histedges.histedges, pedges_m, hist )
+nl.print()
 
-smeared = nl.smear.Nvis.data()
+nl.set(hist.hist, pedges_m.points)
+
+nl.add_input(hist)
+
+smeared = nl.smear.Nrec.data()
 print( 'Sum check (diff): {}'.format( phist.sum()-smeared.sum() ) )
 
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
-ax.set_xlabel( L.u('Evis') )
+ax.set_xlabel( L.u('evis') )
 ax.set_ylabel( 'Entries' )
 ax.set_title( 'Non-linearity correction' )
 

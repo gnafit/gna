@@ -1,10 +1,7 @@
-#ifndef STATISTIC_H
-#define STATISTIC_H
+#pragma once
 
 class Statistic {
 public:
-  virtual ~Statistic() { }
+  virtual ~Statistic() = default;
   virtual double value() = 0;
 };
-
-#endif // STATISTIC_H

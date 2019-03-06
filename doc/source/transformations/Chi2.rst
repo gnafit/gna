@@ -1,3 +1,5 @@
+.. _chi2_transformation:
+
 Chi2
 ~~~~
 

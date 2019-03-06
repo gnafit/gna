@@ -19,18 +19,30 @@ class cmd(basecmd):
         parser.add_argument('plot', default=[],
                             metavar=('DATA',),
                             action=append_typed(observable))
-        parser.add_argument('-o', '--output', help='output .dot file')
+        parser.add_argument('-J', '--no-joints', action='store_false', dest='joints', help='disable joints')
+        parser.add_argument('-s', '--splines', help='splines option [dot]')
+        parser.add_argument('-o', '--output', nargs='+', default=[], dest='outputs', help='output dot/pdf/png file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
         parser.add_argument('-E', '--stderr', action='store_true', help='output to stderr')
+        parser.add_argument('--option', nargs=2, action='append', dest='options', default=[], help='AGraph kwargs key value pair')
 
     def init(self):
         head = self.opts.plot[0]
 
-        graph = GNADot( head )
+        kwargs = dict(self.opts.options, joints=self.opts.joints)
+        kwargs.setdefault('rankdir', 'LR')
+        if self.opts.splines:
+            kwargs['splines']=self.opts.splines
+        graph = GNADot( head, **kwargs )
 
-        if self.opts.output:
-            print( 'Write graph to:', self.opts.output )
-            graph.write( self.opts.output )
+        for output in self.opts.outputs:
+            print( 'Write graph to:', output )
+
+            if output.endswith('.dot'):
+                graph.write(output)
+            else:
+                graph.layout(prog='dot')
+                graph.draw(output)
 
         if self.opts.stdout:
             graph.write()

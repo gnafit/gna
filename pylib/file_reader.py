@@ -14,7 +14,7 @@ def read_object_root( filename, name, *args, **kwargs ):
 
     fmt = kwargs.pop( 'convertto', None )
     if fmt:
-        from converters import convert
+        from gna.converters import convert
         return convert(o, fmt)
 
     return o

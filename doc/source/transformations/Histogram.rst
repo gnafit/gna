@@ -1,5 +1,7 @@
-Histogram transformation
-~~~~~~~~~~~~~~~~~~~~~~~~
+.. _Histogram:
+
+Histogram
+~~~~~~~~~
 
 Description
 ^^^^^^^^^^^
@@ -18,7 +20,7 @@ In Python ``Histogram`` instance may be constructed from two numpy arrays:
 
 .. code-block:: ipython
 
-   from constructors import Histogram
+   from gna.constructors import Histogram
    h = Histogram(edges, data)
 
 Outputs

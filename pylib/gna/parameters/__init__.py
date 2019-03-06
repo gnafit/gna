@@ -2,16 +2,19 @@
 from __future__ import print_function
 import ROOT
 # from gna.bindings import patchROOTClass
+from gna.configurator import uncertain
 
 debug=False
 
 class DiscreteParameter(object):
-    def __init__(self, name, variants):
+    def __init__(self, name, variants, **kwargs):
         self.default = None
         self._variable = ROOT.ParameterWrapper("double")(name)
         self._name = name
+        self._namespace = kwargs.get("namespace", "")
         self._variants = variants
         self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
+        self._label = kwargs.pop('label', '')
         if  len(self._inverse) != len(self._variants):
             msg = "DiscreteParameter variants dict is not a bijection"
             raise Exception(msg)
@@ -37,10 +40,56 @@ class DiscreteParameter(object):
     def getVariable(self):
         return self._variable.getVariable()
 
-def makeparameter(ns, name, **kwargs):
+    def setNamespace(self, name):
+        self._namespace = name
+
+    def getVariants(self):
+        return tuple(self._variants)
+
+    def getLabel(self):
+        return self._label
+
+    def setLabel(self, label):
+        self._label=label
+
+def makeparameter(ns, name, cfg=None, **kwargs):
     if 'target' in kwargs:
         return kwargs['target']
-    ptype = kwargs.get('type', 'gaussian')
+    if cfg:
+        ptype = kwargs['ptype'] = 'gaussian'
+        kwargs['central']     = cfg.central
+        if cfg.mode=='fixed':
+            kwargs['uncertainty'] = 0.1
+            kwargs['uncertainty_type'] = 'absolute'
+            kwargs['fixed'] = True
+        elif cfg.mode=='free':
+            kwargs['uncertainty'] = float('inf')
+            kwargs['uncertainty_type'] = 'absolute'
+            kwargs['free'] = True
+        else:
+            kwargs['uncertainty'] = cfg.uncertainty
+            kwargs['uncertainty_type'] = cfg.mode
+        kwargs.setdefault('label', cfg.label)
+    else:
+        ptype = kwargs.get('type', 'gaussian')
+
+    fixed = kwargs.get('fixed', False)
+    free  = kwargs.get('free',  False)
+    if free and fixed:
+        raise Exception('Parameter {} may not be free and fixed in the same time')
+
+    if fixed:
+        if not 'relsigma' in kwargs:
+            kwargs.setdefault('sigma', 1.e-6)
+    elif free:
+        if not 'relsigma' in kwargs and not 'sigma' in kwargs:
+            kwargs['sigma']=float('inf')
+            if not 'step' in kwargs:
+                central = float(kwargs['central'])
+                if central:
+                    kwargs.setdefault('step', 0.1*central)
+                else:
+                    kwargs.setdefault('step', 0.1)
 
     if debug:
         print( 'Defpar {ns}.{name} ({type}):'.format(
@@ -72,6 +121,9 @@ def makeparameter(ns, name, **kwargs):
 
         if 'relsigma' in kwargs:
             rs = float(kwargs['relsigma'])
+            if rs==0.0:
+                fixed = True
+
             sigma = param.central()*rs
             if 'sigma' in kwargs and sigma != kwargs['sigma']:
                 msg = ("parameter `%s': conflicting relative (%g*%g=%g)"
@@ -83,7 +135,11 @@ def makeparameter(ns, name, **kwargs):
             if debug:
                 print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma,relsigma=rs,perc=rs*100.0), end=' ' )
         elif 'sigma' in kwargs:
-            param.setSigma(param.cast(kwargs['sigma']))
+            sigma = param.cast(kwargs['sigma'])
+            if sigma==0.0:
+                fixed=True
+
+            param.setSigma(sigma)
             if debug:
                 print( u'±{sigma}'.format(sigma=param.sigma() ), end=' ' )
                 if param.central():
@@ -110,14 +166,26 @@ def makeparameter(ns, name, **kwargs):
         if debug:
             print( '{central} rad'.format( central=param.central() ), end=' ' )
 
-    if 'fixed' in kwargs:
+    if fixed:
         param.setFixed()
         if debug:
             print( 'fixed!', end='' )
+    elif free:
+        param.setFree()
+        if debug:
+            print( 'free!', end='' )
+    if 'step' in kwargs:
+        param.setStep(kwargs['step'])
+        if debug:
+            print( 'step={}'.format(kwargs['step']), end='' )
+
     param.reset()
     param.ns = ns
 
+    if 'label' in kwargs:
+        param.setLabel(kwargs['label'])
     if debug:
         print()
+    param.setNamespace(ns.path)
     return param
 

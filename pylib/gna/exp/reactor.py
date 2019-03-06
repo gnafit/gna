@@ -9,15 +9,16 @@ import gna.parameters.oscillation
 import itertools
 from gna.exp import baseexp
 from gna.env import env
+import gna.constructors as C
 
 
 year=365*24*60*60.0
 
 spectrumfiles = {
-    'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
-    'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
-    'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
-    'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
+    'Pu239': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
+    'Pu241': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
+    'U235': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
+    'U238': 'reactor_anu_spectra/Mueller/Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
 }
 
 eperfission = {
@@ -112,12 +113,13 @@ class Detector(object):
         self.ns = ns("detectors")(self.name)
 
         if self.protons is not None:
-            self.ns.defparameter("TargetProtons", central=self.protons, sigma=0)
+            self.ns.defparameter("TargetProtons", central=self.protons, relsigma=0.01)
 
         self.ns.reqparameter("Eres_a", central=0.0, sigma=0)
         self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         self.ns.reqparameter("Eres_c", central=0.0, sigma=0)
-        #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
+        self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-19)
+        self.ns.reqparameter("CoincidenceWindow", central=300, sigma=1)
 
 class GeoNeutrinoIsotope(object):
     def __init__(self, name):
@@ -176,7 +178,7 @@ class ReactorExperimentModel(baseexp):
         reactors -- iterable over Reactor objects, self.makereactors() will be called if None
         detectors -- iterable over Detector objects, self.makedetoctrs() will be called if None
         """
-        super(ReactorExperimentModel, self).__init__(opts)
+        super(ReactorExperimentModel, self).__init__(None, opts)
         self._oscprobs = {}
         self._oscprobcls = self.oscprob_classes[self.opts.oscprob]
         self._isotopes = defaultdict(list)
@@ -298,10 +300,17 @@ class ReactorExperimentModel(baseexp):
             for isoname in reactor.fission_fractions:
                 bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
             norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
-            norm.isotopes.livetime(ROOT.Points(detector.livetime))
-            norm.isotopes.power_rate(ROOT.Points(reactor.power_rate))
+            lt=C.Points(detector.livetime)
+            lt.points.setLabel('livetime:\n'+detector.name)
+            norm.isotopes.livetime(lt)
+            pr=C.Points(reactor.power_rate)
+            pr.points.setLabel('power:\n'+reactor.name)
+            norm.isotopes.power_rate(pr)
+            norm.isotopes.setLabel('norm:\n{} to {}'.format(reactor.name, detector.name))
             for isoname, frac in reactor.fission_fractions.iteritems():
-                norm.isotopes['fission_fraction_{0}'.format(isoname)](ROOT.Points(frac))
+                ff=C.Points(frac)
+                ff.points.setLabel('fission frac:\n{} at {}'.format(isoname, reactor.name))
+                norm.isotopes['fission_fraction_{0}'.format(isoname)](ff)
         elif normtype == 'manual':
             norm = ROOT.ReactorNormAbsolute(vec(reactor.fission_fractions.keys()))
             for isoname, frac in reactor.fission_fractions.iteritems():
@@ -318,6 +327,7 @@ class ReactorExperimentModel(baseexp):
 
         for detector in detectors:
             detector.unoscillated = ROOT.Sum()
+            detector.unoscillated.sum.setLabel('unosc flux:\n'+detector.name)
             grouped = self.groupreactors(reactors, detector)
             for rgroup in grouped:
                 pair_ns = detector.ns(rgroup.name)
@@ -329,12 +339,15 @@ class ReactorExperimentModel(baseexp):
                         oscprob = oscprobcls(ROOT.Neutrino.ae(), ROOT.Neutrino.ae())
 
                 normedflux = ROOT.Sum()
+                normedflux.sum.setLabel('normed flux:\n{}'.format(rgroup.name))
 
                 for isoname in rgroup.fission_fractions.keys():
                     isotope = Isotope(self.ns, isoname)
+                    isotope.spectrum.f.setLabel('spectrum:\n{} at {}'.format(isoname, rgroup.name))
                     self._isotopes[(detector, rgroup)].append(isotope)
                     self._Enu_inputs[detector].add(isotope.spectrum.f.inputs.x)
                     subflux = ROOT.Product()
+                    subflux.product.setLabel('flux\n{}'.format(isoname))
                     subflux.multiply(isotope.spectrum)
                     subflux.multiply(norm.isotopes['norm_{0}'.format(isoname)])
                     detector.intermediates['flux_{}'.format(isoname)] = subflux
@@ -346,21 +359,32 @@ class ReactorExperimentModel(baseexp):
 
                 detector.unoscillated.add(normedflux)
                 if 'comp0' in compnames:
-                    detector.components['rate'][(weightscls, 'comp0')].add(normedflux)
+                    csum = detector.components['rate'][(weightscls, 'comp0')]
+                    csum.add(normedflux)
+                    csum.sum.setLabel('normed flux\ncomp0 at '+detector.name)
                     ones = ROOT.FillLike(1.0)
+                    ones.fill.setLabel('1: comp0')
                     ones.fill.inputs(normedflux)
-                    detector.components['oscprob'][(weightscls, 'comp0')].add(ones)
+                    opsum=detector.components['oscprob'][(weightscls, 'comp0')]
+                    opsum.add(ones)
+                    opsum.sum.setLabel('osc flux\n{} at {}'.format('comp0', detector.name))
                     self.oscprobs_comps[(detector, rgroup)][(weightscls, 'comp0')] = ones
                     compnames.remove('comp0')
                 for osccomps in oscprob.transformations.itervalues():
+                    osccomps.setLabel('oscprob {}\n{}->{}'.format(osccomps.label(), rgroup.name, detector.name))
                     for compname, osccomp in osccomps.outputs.iteritems():
                         if compname not in compnames:
                             continue
                         product = ROOT.Product()
+                        product.product.setLabel('osc flux:\n{} from {}'.format(compname, rgroup.name))
                         product.multiply(normedflux)
                         product.multiply(osccomp)
-                        detector.components['rate'][(weightscls, compname)].add(product)
-                        detector.components['oscprob'][(weightscls, compname)].add(osccomp)
+                        csum=detector.components['rate'][(weightscls, compname)]
+                        csum.add(product)
+                        csum.sum.setLabel('normed flux\n{} at {}'.format(compname, detector.name))
+                        opsum=detector.components['oscprob'][(weightscls, compname)]
+                        opsum.add(osccomp)
+                        opsum.sum.setLabel('osc flux\n{} at {}'.format(compname, detector.name))
                         self.oscprobs_comps[(detector, rgroup)][(weightscls, compname)] = osccomp
                         if compname not in compnames:
                             raise Exception("overriden component {}".format(compname))
@@ -386,7 +410,8 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator.points.setLabel('integrator 1d')
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
             ibd.xsec.Ee(econv.Ee.Ee)
@@ -395,7 +420,8 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator.points.setLabel('integrator 2d')
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
             ibd.Enu.Ee(econv.Ee.Ee)
@@ -409,12 +435,12 @@ class ReactorExperimentModel(baseexp):
             eventsparts = [ibd.xsec, ibd.jacobian]
         else:
             raise Exception("unknown ibd type {0!r}".format(ibdtype))
+        ibd.xsec.setLabel('IBD xsec')
 
         detector.intermediates['Enu'] = ibd.Enu
         detector.intermediates['xsec'] = ibd.xsec
         for inp in self._Enu_inputs.get(detector, []):
             inp.connect(ibd.Enu.Enu)
-
 
         for detector in self.detectors:
             for resname, comps in detector.components.iteritems():
@@ -422,24 +448,29 @@ class ReactorExperimentModel(baseexp):
                     res = None
                     if resname == 'rate':
                         res = ROOT.Product()
+                        res.product.setLabel('count rate:\n{} at {}'.format(compid[1], detector.name))
                         res.multiply(comp)
                         for part in eventsparts:
                             res.multiply(part)
                     elif resname == 'oscprob':
                         res = comp
-                    detector.hists[resname][compid] = histcls(integrator)
+                    hist = detector.hists[resname][compid] = histcls(integrator)
+                    hist.hist.setLabel('{} hist:\n{} at {}'.format(resname, compid[1], detector.name))
                     detector.hists[resname][compid].hist.inputs(res)
 
             # Below we construct backgrounds histos
             if self.opts.backgrounds:
                 bkg_summary = ROOT.Sum()
+                bkg_summary.sum.setLabel('bkg:\n'+detector.name)
                 for bkg_name, bkg in detector.intermediates_bkg.iteritems():
                     prod = ROOT.Product()
+                    prod.product.setLabel('bkg:\n'+detector.name)
                     prod.multiply(bkg)
                     unosc_bkg_name = 'unosc_' + bkg_name
                     for part in eventsparts:
                         prod.multiply(part)
-                    detector.back_hists[unosc_bkg_name] = histcls(integrator)
+                    hist = detector.back_hists[unosc_bkg_name] = histcls(integrator)
+                    hist.hist.setLabel('bkg hist:\n'+detector.name)
                     detector.back_hists[unosc_bkg_name].hist.inputs(prod)
 
                     # normalize isotope flux now
@@ -459,6 +490,8 @@ class ReactorExperimentModel(baseexp):
 
             detector.unoscillated_hist = histcls(integrator)
             res = ROOT.Product()
+            res.product.setLabel('unosc IBD:\n'+detector.name)
+            detector.unoscillated_hist.hist.setLabel('unoscillated hist:\n'+detector.name)
             res.multiply(detector.unoscillated)
             for part in eventsparts:
                 res.multiply(part)
@@ -466,11 +499,12 @@ class ReactorExperimentModel(baseexp):
 
             if self.opts.backgrounds:
                 detector.unoscillated_with_bkg = ROOT.Sum()
+                detector.unoscillated_with_bkg.sum.setLabel('noosc+bkg\n'+detector.name)
                 detector.unoscillated_with_bkg.add(bkg_summary)
                 detector.unoscillated_with_bkg.add(detector.unoscillated_hist)
                 detector.back_hists['sum_bkg'] = bkg_summary
 
-    def _sumcomponents(self, components):
+    def _sumcomponents(self, components, name):
         oscprobs = {}
         for oscprobcls, compname in components.iterkeys():
             if oscprobcls in oscprobs:
@@ -481,11 +515,14 @@ class ReactorExperimentModel(baseexp):
             oscprobs[oscprobcls] = oscprob
 
         for compid, comp in components.iteritems():
-            oscprobs[compid[0]].probsum[compid[1]](comp)
+            ps = oscprobs[compid[0]].probsum
+            ps.setLabel('osc prob:\n'+name)
+            ps[compid[1]](comp)
 
         probsums = [oscprob.probsum for oscprob in oscprobs.values()]
         if len(probsums) > 1:
             finalsum = ROOT.Sum()
+            finalsum.sum.setLabel('finalsum\n'+name)
             for probsum in probsums:
                 finalsum.add(probsum)
             return finalsum
@@ -500,13 +537,14 @@ class ReactorExperimentModel(baseexp):
             self.ns.addobservable("{0}_unoscillated_with_bkg".format(detector.name),
                            detector.unoscillated_with_bkg, export=False)
 
-        sums = {resname: self._sumcomponents(detector.hists[resname])
+        sums = {resname: self._sumcomponents(detector.hists[resname], detector.name)
                 for resname in detector.hists}
 
         if 'oscprob' in sums:
             detector.intermediates["oscprob"] = sums['oscprob']
         if 'rate' in sums:
             inter_sum = ROOT.Sum()
+            inter_sum.sum.setLabel('Observed IBD:\n'+detector.name)
             sum_without_bkg = sums['rate']
             inter_sum.add(sum_without_bkg)
             if self.opts.backgrounds:
@@ -527,7 +565,9 @@ class ReactorExperimentModel(baseexp):
 
             with detector.ns:
                 detector.eres = ROOT.EnergyResolution()
-            detector.eres.smear.inputs(finalsum)
+            detector.eres.matrix.Edges(self.integrator.points.xhist)
+            detector.eres.smear.setLabel('Eres')
+            detector.eres.smear.Ntrue(finalsum)
             self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
 
         det_ns = self.ns("detectors")(detector.name)
@@ -540,7 +580,7 @@ class ReactorExperimentModel(baseexp):
 
         for pair, comps in self.oscprobs_comps.iteritems():
             pair_ns = det_ns(pair[1].name)
-            pair_ns.addobservable('oscprob', self._sumcomponents(comps), export=False)
+            pair_ns.addobservable('oscprob', self._sumcomponents(comps, detector.name), export=False)
 
     @classmethod
     def reqparameters(cls, ns):
@@ -554,3 +594,4 @@ class ReactorExperimentModel(baseexp):
         for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
             geo_isons = ns("geo_isotopes")(geo_isoname)
             geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
+

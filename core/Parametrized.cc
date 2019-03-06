@@ -1,8 +1,8 @@
 #include <stdexcept>
 #include <iostream>
+#include <utility>
 
-#include <boost/format.hpp>
-using boost::format;
+#include <fmt/format.h>
 
 #include "Parametrized.hh"
 
@@ -12,8 +12,8 @@ using ParametrizedTypes::EvaluableEntry;
 using ParametrizedTypes::EvaluableHandle;
 using ParametrizedTypes::Base;
 
-Entry::Entry(parameter<void> par, const std::string &name, const Base *parent)
-  : name(name), required(true),
+Entry::Entry(parameter<void> par, std::string name, const Base *parent)
+  : name(std::move(name)), required(true),
     par(par), var(par), state(Free), claimer(nullptr),
     parent(parent)
 {
@@ -27,7 +27,7 @@ Entry::Entry(const Entry &other, const Base *parent)
 void Entry::bind(variable<void> newvar) {
   if (!var.is(par)) {
     throw std::runtime_error(
-      (format("can not rebind parameter `%1%'") % name).str()
+      fmt::format("can not rebind parameter `{0}'", name)
       );
   }
   var.replace(newvar);
@@ -41,7 +41,7 @@ void Entry::bind(variable<void> newvar) {
 parameter<void> Entry::claim(Base *other) {
   if (state != Entry::State::Free) {
     throw std::runtime_error(
-      (format("claiming non-free parameter `%1%'") % name).str()
+      fmt::format("claiming non-free parameter `{0}'", name)
       );
   }
   state = Entry::State::Claimed;
@@ -49,11 +49,11 @@ parameter<void> Entry::claim(Base *other) {
   return par;
 }
 
-EvaluableEntry::EvaluableEntry(const std::string &name,
+EvaluableEntry::EvaluableEntry(std::string name,
                                const SourcesContainer &sources,
                                dependant<void> dependant,
                                const Base *parent)
-  : name(name), sources(sources), dep(dependant), parent(parent)
+  : name(std::move(name)), sources(sources), dep(dependant), parent(parent)
 {
 }
 
@@ -108,7 +108,7 @@ Entry &Base::getEntry(const std::string &name) {
   int i = findEntry(name);
   if (i < 0) {
     throw std::runtime_error(
-      (format("unknown parameter `%1%'") % name).str()
+      fmt::format("unknown parameter `{0}'", name)
       );
   }
   return m_entries[i];

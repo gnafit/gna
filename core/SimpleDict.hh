@@ -1,12 +1,11 @@
-#ifndef SIMPLEDICT_H
-#define SIMPLEDICT_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
 
 class SimpleDictBase {
 public:
-  virtual ~SimpleDictBase() { }
+  virtual ~SimpleDictBase() = default;
 };
 
 template <typename T, typename Container>
@@ -14,7 +13,7 @@ class SimpleDict: public SimpleDictBase {
 public:
   SimpleDict(Container &container): m_container(&container) { }
 
-  size_t size() const {
+  size_t size() const noexcept {
     return m_container->size();
   }
 
@@ -29,7 +28,11 @@ public:
   }
 
   T back() const {
-    return m_container->back();
+    return T(m_container->back());
+  }
+
+  T front() const {
+    return T(m_container->front());
   }
 
   T operator[](const std::string &name) const {
@@ -42,8 +45,21 @@ public:
     }
     return *it;
   }
+
+  bool contains(const std::string &name) const {
+    auto it = std::find_if(m_container->begin(), m_container->end(),
+                           [&](typename Container::const_reference e) {
+                             return e.name == name;
+                           });
+    if (it == m_container->end()) {
+      return false;
+    }
+    return true;
+  }
+
+  bool empty() const noexcept {
+    return m_container->empty();
+  }
 private:
   Container *m_container;
 };
-
-#endif // SIMPLEDICT_H

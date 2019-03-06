@@ -1,3 +1,6 @@
+"""Legacy JUNO experiment model: consider switching to
+gna -- ... -- exp juno"""
+
 from gna.ui import basecmd
 
 from gna.exp.reactor import ReactorExperimentModel, Reactor, Detector

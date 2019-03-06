@@ -1,18 +1,20 @@
-#!/usr/bin/env python
+Broken, use expressions
+
+!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
-from gna.bundle import execute_bundle
+from gna.bundle import execute_bundles
 import numpy as N
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
-import constructors as C
-from converters import convert
-from gna.configurator import NestedDict
+import gna.constructors as C
+from gna.converters import convert
+from gna.configurator import NestedDict, uncertaindict, uncertain
 import itertools as I
 from physlib import percent
 from gna import parameters
@@ -37,22 +39,22 @@ args = parser.parse_args()
 #
 cfg = NestedDict()
 cfg.detector = NestedDict(
+        # the bundle name
         bundle = 'bundlechain_v01',
         detectors = [ 'AD11', 'AD21', 'AD31' ],
-        chain = [ 'iav', 'nonlinearity', 'eres', 'rebin' ]
+        bundlechain_list = [ 'iav', 'nonlinearity', 'eres', 'rebin' ],
         )
 cfg.detector.nonlinearity = NestedDict(
         bundle = 'detector_nonlinearity_db_root_v01',
         names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
         filename = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
-        uncertainty = 0.2*percent,
-        uncertainty_type = 'relative'
+        parname = 'escale.{}',
+        par = uncertain(1.0, 0.2, 'percent'),
         )
 cfg.detector.iav = NestedDict(
         bundle = 'detector_iav_db_root_v01',
-        parname = 'OffdiagScale',
-        uncertainty = 4*percent,
-        uncertainty_type = 'relative',
+        parname = 'OffdiagScale.{}',
+        scale   = uncertain(1.0, 4, 'percent'),
         ndiag = 1,
         filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
         matrixname = 'iav_matrix'
@@ -60,9 +62,13 @@ cfg.detector.iav = NestedDict(
 cfg.detector.eres = NestedDict(
         bundle = 'detector_eres_common3',
         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
-        values  = [ 0.014764, 0.0869, 0.0271 ],
-        uncertainties = [30.0*percent]*3,
-        uncertainty_type = 'relative'
+        pars = uncertaindict(
+            [('Eres_a', 0.014764) ,
+             ('Eres_b', 0.0869) ,
+             ('Eres_c', 0.0271)],
+            mode='percent',
+            uncertainty=30
+            )
         )
 cfg.detector.rebin = NestedDict(
         bundle = 'rebin',
@@ -74,7 +80,6 @@ cfg.detector.rebin = NestedDict(
 # Define namespaces
 #
 namespaces = cfg.detector.detectors
-storage = env.globalns('storage')
 
 #
 # Bin edges, required by energy nonlinearity
@@ -93,16 +98,20 @@ for eset in ( (1.025, 6.025), (2.025, 7.025), (3.025, 8.025) ):
 #
 # Define the chain
 #
-b = execute_bundle( edges=points.single(), cfg=cfg.detector, namespaces=namespaces, storage=storage )
+shared = NestedDict( edges=points.single() )
+b, = execute_bundles(cfg=cfg.detector, namespaces=namespaces, shared=shared)
 
-from gna.parameters.printer import print_parameters
-print_parameters( env.globalns )
+print('Parameters:')
+env.globalns.printparameters(labels=True)
 
 #
 # Connect inputs
 #
-for inp, hist in zip(b.inputs, hists_list):
+for inp, hist in zip(b.inputs.values(), hists_list):
     inp( hist.hist )
+
+print('\nObservables:')
+env.globalns.printobservables()
 
 #
 # Dump graph
@@ -111,7 +120,7 @@ if args.dot:
     try:
         from gna.graphviz import GNADot
 
-        graph = GNADot( b.output_transformations[0][0] )
+        graph = GNADot( b.transformations_out[0][0] )
         graph.write(args.dot)
         print( 'Write output to:', args.dot )
     except Exception as e:
@@ -138,13 +147,13 @@ for i, hist in enumerate(hists_list):
     plot_hist(edges, data, label='original')
 
 for bundle in b.bundles.values():
-    for i, out in enumerate( bundle.outputs ):
+    for i, (oname, out) in enumerate( bundle.outputs.items() ):
         P.sca(axes[i])
 
         data = out.data()
-        print( 'Sum data %s %i=%f'%( bundle.name, i, data.sum() ) )
+        print( 'Sum data %s (%s) %i=%f'%( type(bundle).__name__, oname, i, data.sum() ) )
 
-        plot_hist(out.datatype().edges, data, label=bundle.name)
+        plot_hist(out.datatype().edges, data, label=type(bundle).__name__)
 
 for i, hist in enumerate(hists_list):
     ax=axes[i]

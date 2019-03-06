@@ -1,7 +1,7 @@
 .. _detector_iav_db_root_v01:
 
-Daya Bay IAV effect (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_iav_db_root_v01 -- Daya Bay IAV effect (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""
@@ -32,6 +32,23 @@ All the transformations are configured to tread IAV matrix as upper triangular.
 
    IAV bundle scheme.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`HistSmear` by namespace name. The observable ``'iav'`` is
+also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]  = esmear.smear.Ntrue
+    self.outputs[ns.name] = esmear.smear.Nrec
+    ns.addobservable('iav', esmear.smear.Nrec, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
+
 Parameters
 """"""""""
 
@@ -40,23 +57,30 @@ Parameters
 Configuration
 """""""""""""
 
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'iav' will be used.
+
 .. code-block:: python
 
     cfg = NestedDict(
-             # Bundle name
-             bundle = 'detector_iav_db_root_v01',
-             # Parameter name
-             parname = 'OffdiagScale',
-             # Parameter uncertainty and its type (absolute or relative)
-             uncertainty = 4*percent,
-             uncertainty_type = 'relative',
-             # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
-             ndiag = 1,
-             # File name to read
-             filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-             # Matrix name
-             matrixname = 'iav_matrix'
+            # Bundle name
+            bundle = 'detector_iav_db_root_v01',
+            # Parameter name to use for storage
+            parname = 'OffdiagScale',
+            # Parameter uncertainty and its type (absolute or relative)
+            scale   = uncertain(1.0, 4, 'percent'),
+            # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
+            ndiag = 1,
+            # File name to read
+            filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+            # Matrix name
+            matrixname = 'iav_matrix'
          )
+
+``parname`` may optionally contain a formatting directive ('OffdiagScale.{}'). '{}' will be replaced with namespace
+(detector) name. Period '.' is interpreted as nesting, i.e. bundle will created new namespace ``'OffdiagScale'`` and
+collect all the parameters within.
 
 Testing scripts
 """""""""""""""

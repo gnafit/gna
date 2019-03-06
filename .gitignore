@@ -32,3 +32,10 @@ compile_commands.json
 *.vim
 .ycm_extra_conf.py
 data/dayabay/
+config_local
+.gitignore
+.viminfo
+tags
+.cache
+data/*
+makerst

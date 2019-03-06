@@ -1,7 +1,7 @@
 .. _detector_eres_common3:
 
-Energy resolution (version 1)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+detector_eres_common3 -- common energy resolution with 3 parameters (version 1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Overview
 """"""""
@@ -27,9 +27,29 @@ Parameters
 
 :ref:`EnergyResolution` parameters :math:`a`, :math:`b` and :math:`c`.
 
+Inputs, outputs and observables
+"""""""""""""""""""""""""""""""
+
+The bundle provides the input and output of the :ref:`EnergyResolution` by namespace name. The observable ``'eres'`` is
+also defined for the corresponding namespace:
+
+.. code-block:: python
+
+    self.inputs[ns.name]              = eres.smear.Ntrue
+    self.outputs[ns.name]             = eres.smear.Nrec
+    ns.addobservable('eres', eres.smear.Nrec, ignorecheck=True)
+
+.. attention::
+
+    When observable is added no check is perfomed whether the input is connected. The DataType and Data are not
+    initialized.
 
 Configuration
 """""""""""""
+
+Optional options:
+  - ``observable`` (bool or string). If provided, the observable is added for each output to th relevant namespace. If
+    true the name 'eres' will be used.
 
 .. code-block:: python
 
@@ -37,17 +57,22 @@ Configuration
             # bundle name
             bundle = 'detector_eres_common3',
             # parameters a, b and c respectively for sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 )
-            values  = [ 0.014764, 0.0869, 0.0271 ],
-            # uncertainty on each parameter
-            uncertainties = [30.0*percent]*3,
-            # uncertainty type (absolute/relative)
-            uncertainty_type = 'relative'
+            pars = uncertaindict(
+                # parameter values
+                [('Eres_a', 0.014764) ,
+                 ('Eres_b', 0.0869) ,
+                 ('Eres_c', 0.0271)],
+                # parameters uncertainty mode (absolute, relative or percent)
+                mode='percent',
+                # parameters uncertainty
+                uncertainty=30
+                )
             )
 
 Testing scripts
 """""""""""""""
 
-There is now individual testing script for  :ref:`detector_eres_common3`. Nevertheless it is included in the
+There is no individual testing script for  :ref:`detector_eres_common3`. Nevertheless it is included in the
 :ref:`bundlechain_v01` testing script:
 
 .. code-block:: sh
