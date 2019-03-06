@@ -464,7 +464,7 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
             ibd.xsec.Ee(econv.Ee.Ee)
@@ -473,7 +473,7 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
             ibd.Enu.Ee(econv.Ee.Ee)
@@ -658,7 +658,7 @@ class ReactorExperimentModel(baseexp):
                     ax.set_xlabel( '' )
                     ax.set_ylabel( '' )
                     ax.set_title( 'Non-linearity effect' )
-                    smeared = nonlin.smear.Nvis.data().copy()
+                    smeared = nonlin.smear.Nrec.data().copy()
                     #print( 'Sum check for {} (diff): {}'.format( 1.0, phist2.sum()-smeared.sum() ) )
 
                     #plot_hist( detector.edges, phist2, label='original' )
@@ -685,7 +685,7 @@ class ReactorExperimentModel(baseexp):
                     #nonlin.smear.Ntrue(hist.hist)
                     #detector.nl.set( pedges, pedges_m, hist )
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nonlin.smear.Nvis)
+                    finalsumtmp.add(nonlin.smear.Nrec)
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_nl_beforerebin".format(detector.name),
                                      finalsum, export=True)
@@ -704,7 +704,7 @@ class ReactorExperimentModel(baseexp):
                         eres = ROOT.EnergyResolution()
                         eres.matrix.Edges(self.integrator.points.xhist)
                         eres.smear.inputs(finalsum)
-                        smeared_spectras.append(eres.smear)
+                        smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
                     detector.sumedspectra.sum[str(idx)](eres)
@@ -725,7 +725,7 @@ class ReactorExperimentModel(baseexp):
                     orgeres = ROOT.EnergyResolution()
                 orgeres.matrix.Edges(self.integrator.points.xhist)
                 orgeres.smear.inputs(finalsum)
-                self.ns.addobservable("weightedspectra", orgeres.smear)
+                self.ns.addobservable("weightedspectra", orgeres.smear.Nrec)
                 #edges   = np.array( [ 0.0, 0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
                 #edges_m = np.array( [      0.1, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
 
@@ -750,7 +750,7 @@ class ReactorExperimentModel(baseexp):
                 #print(edges.size)
                 #print(orgeres.smear.data().size)
                 #ntrue = C.Histogram(edges, np.ones( edges.size-1))
-                ntrue = C.Histogram(edges, orgeres.smear.data())
+                ntrue = C.Histogram(edges, orgeres.smear.Nrec.data())
                 rebin = ROOT.Rebin( edges_m.size, edges_m, 5 )
                 rebin.rebin.histin( ntrue )
                 olddata = ntrue.data()

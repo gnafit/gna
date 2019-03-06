@@ -468,7 +468,7 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
             ibd.xsec.Ee(econv.Ee.Ee)
@@ -477,7 +477,7 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
             ibd.Enu.Ee(econv.Ee.Ee)
@@ -619,13 +619,14 @@ class ReactorExperimentModel(baseexp):
                 #npeq.etonpe.input(try1points)
                 #try2points = npeq.etonpe
                 #nlqua = ROOT.HistNonlinearity(True)
-                #nlqua.set(self.integrator.points.xhist, try2points, finalsum )
+                #nlqua.set(self.integrator.points.xhist, try2points)
+                #nlqua.add_input(finalsum)
                 ##mat24 = nlqua.matrix.FakeMatrix.data()
                 ##print(mat24)
                 ##print(mat24.sum(axis=0))
-                ##finalsum = nlqua.smear.Nvis
+                ##finalsum = nlqua.smear.Nrec
                 #finalsumtmp = ROOT.Sum()
-                #finalsumtmp.add(nlqua.smear.Nvis)
+                #finalsumtmp.add(nlqua.smear.Nrec)
                 #finalsum = finalsumtmp
                 #self.ns.addobservable("{0}_qua".format(detector.name),
                 #                     finalsum, export=True)
@@ -639,8 +640,8 @@ class ReactorExperimentModel(baseexp):
                     with res_ns, detector.ns:
                         eres = ROOT.EnergyResolution()
                         eres.matrix.Edges(self.integrator.points.xhist)
-                        eres.smear.inputs(finalsum)
-                        smeared_spectras.append(eres.smear)
+                        eres.smear.Ntrue(finalsum)
+                        smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
                     detector.sumedspectra.sum[str(idx)](eres)
@@ -655,8 +656,8 @@ class ReactorExperimentModel(baseexp):
                     with res_ns, detector.ns:
                         eres = ROOT.EnergyResolution()
                         eres.matrix.Edges(self.integrator.points.xhist)
-                        eres.smear.inputs(finalsum)
-                        smeared_spectras.append(eres.smear)
+                        eres.smear.Ntrue(finalsum)
+                        smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
                     detector.sumedspectra.sum[str(idx)](eres)
@@ -667,8 +668,8 @@ class ReactorExperimentModel(baseexp):
                 with detector.ns:
                     orgeres = ROOT.EnergyResolution()
                 orgeres.matrix.Edges(self.integrator.points.xhist)
-                orgeres.smear.inputs(finalsum)
-                self.ns.addobservable("weightedspectra", orgeres.smear)
+                orgeres.smear.Ntrue(finalsum)
+                self.ns.addobservable("weightedspectra", orgeres.smear.Nrec)
 
         det_ns = self.ns("detectors")(detector.name)
 

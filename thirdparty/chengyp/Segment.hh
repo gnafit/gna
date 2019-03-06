@@ -10,7 +10,7 @@ class Segment: public GNASingleObject,
 public:
   Segment();
 
-  std::vector<std::double> calweights() const noexcept;
+  std::vector<double> calweights(FunctionArgs& args) const noexcept;
 
 private:
 

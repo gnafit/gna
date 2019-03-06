@@ -1,6 +1,6 @@
 from gna.ui import basecmd
 
-from gna.exp.nl_reactor import ReactorExperimentModel, Reactor, Detector
+from thirdparty.chengyp.exp.nl_reactor import ReactorExperimentModel, Reactor, Detector
 import numpy as np
 import ROOT
 

@@ -477,7 +477,7 @@ class ReactorExperimentModel(baseexp):
         if ibdtype == 'zero':
             with self.ns("ibd"):
                 ibd = ROOT.IbdZeroOrder()
-            integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
+            integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             histcls = ROOT.GaussLegendreHist
             econv.Ee.Evis(integrator.points.x)
             ibd.xsec.Ee(econv.Ee.Ee)
@@ -486,7 +486,7 @@ class ReactorExperimentModel(baseexp):
         elif ibdtype == 'first':
             with self.ns("ibd"):
                 ibd = ROOT.IbdFirstOrder()
-            integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
+            integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             histcls = ROOT.GaussLegendre2dHist
             econv.Ee.Evis(integrator.points.x)
             ibd.Enu.Ee(econv.Ee.Ee)
@@ -619,9 +619,9 @@ class ReactorExperimentModel(baseexp):
             #with detector.ns:
             #    orgeres = ROOT.EnergyResolution()
             #orgeres.matrix.Edges(self.integrator.points.xhist)
-            #orgeres.smear.inputs(finalsum)
-            #self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear)
-            #finalsum = orgeres.smear
+            #orgeres.smear.Ntrue(finalsum)
+            #self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear.Nrec)
+            #finalsum = orgeres.smear.Nrec
 
             if self.opts.with_nl:
                 with self.ns('ibd'), detector.ns:
@@ -689,7 +689,7 @@ class ReactorExperimentModel(baseexp):
                     ax1.set_xlabel( '' )
                     ax1.set_ylabel( '' )
                     ax1.set_title( 'Non-linearity effect' )
-                    smeared = nonlin.smear.Nvis.data().copy()
+                    smeared = nonlin.smear.Nrec.data().copy()
                     #plot_hist( detector.edges, phist2, label='original' )
                     #lines = plot_hist( detector.edges, smeared, label='smeared: nominal' )
 
@@ -706,9 +706,9 @@ class ReactorExperimentModel(baseexp):
                     #P.show()
 
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nonlin.smear.Nvis)
+                    finalsumtmp.add(nonlin.smear.Nrec)
                     finalsum = finalsumtmp
-                    #finalsum = nonlin.smear.Nvis
+                    #finalsum = nonlin.smear.Nrec
 
                     self.ns.addobservable("{0}_nl".format(detector.name),
                                      finalsum, export=True)
@@ -721,7 +721,8 @@ class ReactorExperimentModel(baseexp):
                     worst.WorstNL.old_bins(try1points)
                     worstedges = worst.WorstNL.bins_after_nl
                     nlworst = ROOT.HistNonlinearity(True)
-                    nlworst.set(self.integrator.points.xhist, worstedges, finalsum )
+                    nlworst.set(self.integrator.points.xhist, worstedges)
+                    nlworst.add_input(finalsum)
                     #mat = convert(nlworst.getDenseMatrix(), 'matrix')
                     #mat = np.ma.array( mat, mask= mat==0.0 )
                     #print( 'yp nl check Col sum 252', mat.sum(axis=0) )
@@ -743,9 +744,9 @@ class ReactorExperimentModel(baseexp):
                     #    print xx
                     #for yy in np.nditer(np.array(worstedges)):
                     #    print yy
-                    #finalsum = nlworst.smear.Nvis
+                    #finalsum = nlworst.smear.Nrec
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nlworst.smear.Nvis)
+                    finalsumtmp.add(nlworst.smear.Nrec)
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_worst".format(detector.name),
                                      finalsum, export=True)
@@ -757,13 +758,14 @@ class ReactorExperimentModel(baseexp):
                     qua.QuaNL.old_bins(try1points)
                     quaedges = qua.QuaNL.bins_after_nl
                     nlqua = ROOT.HistNonlinearity(True)
-                    nlqua.set(self.integrator.points.xhist, quaedges, finalsum )
+                    nlqua.set(self.integrator.points.xhist, quaedges)
+                    nlqua.add_input(finalsum )
                     mat24 = nlqua.matrix.FakeMatrix.data()
                     print(mat24)
                     print(mat24.sum(axis=0))
-                    #finalsum = nlqua.smear.Nvis
+                    #finalsum = nlqua.smear.Nrec
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nlqua.smear.Nvis)
+                    finalsumtmp.add(nlqua.smear.Nrec)
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_qua".format(detector.name),
                                      finalsum, export=True)
@@ -792,7 +794,8 @@ class ReactorExperimentModel(baseexp):
                     print('fake mine nl')
                     print(mineedges_2.data()[thisindex-1])
                     print(detector.edges[thisindex-1])
-                    nlmine.set( try1points, mineedges_2, finalsum )
+                    nlmine.set(self.integrator.points.xhist, mineedges_2)
+                    nlmine.add_input(finalsum)
                     #mat24 = nlmine.matrix.FakeMatrix.data()
                     ##print(mat24)
                     #print('check col sum', mat24.sum(axis=0))
@@ -804,9 +807,9 @@ class ReactorExperimentModel(baseexp):
                     #add_colorbar( c )
                     #P.show()
 
-                    #finalsum = nlmine.smear.Nvis
+                    #finalsum = nlmine.smear.Nrec
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nlmine.smear.Nvis)
+                    finalsumtmp.add(nlmine.smear.Nrec)
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_mine".format(detector.name),
                                      finalsum, export=True)
@@ -818,10 +821,11 @@ class ReactorExperimentModel(baseexp):
                     expnl.ExpNL.old_bins(try1points)
                     expnledges = expnl.ExpNL.bins_after_nl
                     nlexpnl = ROOT.HistNonlinearity(True)
-                    nlexpnl.set(self.integrator.points.xhist, expnledges, finalsum )
-                    #finalsum = nlexpnl.smear.Nvis
+                    nlexpnl.set(self.integrator.points.xhist, expnledges)
+                    nlexpnl.add_input(finalsum)
+                    #finalsum = nlexpnl.smear.Nrec
                     finalsumtmp = ROOT.Sum()
-                    finalsumtmp.add(nlexpnl.smear.Nvis)
+                    finalsumtmp.add(nlexpnl.smear.Nrec)
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_expnl".format(detector.name),
                                      finalsum, export=True)
@@ -847,8 +851,8 @@ class ReactorExperimentModel(baseexp):
                     with res_ns, detector.ns:
                         eres = ROOT.EnergyResolution()
                         eres.matrix.Edges(self.integrator.points.xhist)
-                        eres.smear.inputs(finalsum)
-                        smeared_spectras.append(eres.smear)
+                        eres.smear.Ntrue(finalsum)
+                        smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
                     detector.sumedspectra.sum[str(idx)](eres)
@@ -860,9 +864,9 @@ class ReactorExperimentModel(baseexp):
                 with detector.ns:
                     orgeres = ROOT.EnergyResolution()
                 orgeres.matrix.Edges(self.integrator.points.xhist)
-                orgeres.smear.inputs(finalsum)
-                self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear)
-                finalsum = orgeres.smear
+                orgeres.smear.Ntrue(finalsum)
+                self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear.Nrec)
+                finalsum = orgeres.smear.Nrec
 
             #edges_m = np.linspace(1., 10., 300+1)
             #rebin = ROOT.Rebin( edges_m.size, edges_m, 5 )

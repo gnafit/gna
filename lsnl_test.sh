@@ -13,8 +13,5 @@ python gna lsnl_norm --name test -- spectrum --plot test/spectrum2 -l orginal --
 
 python gna drawlsnlmat --name j \
 
-
-
 # check the lsnl in juno experiment
-
 python gna nl_juno --name ju --with-mine -- spectrum --plot ju/AD1_noeffects -l  no_effect_spectrum --plot ju/AD1_mine -l add_lsnl --plot ju/AD1_Eres -l add_Eres \
