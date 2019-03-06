@@ -3,7 +3,7 @@ from gna.env import env
 import ROOT
 import numpy as np
 import array
-import constructors as C
+from gna import constructors as C
 
 class cmd(basecmd):
     @classmethod

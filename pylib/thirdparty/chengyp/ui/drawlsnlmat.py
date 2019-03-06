@@ -4,8 +4,8 @@ from gna.env import env
 import ROOT
 import numpy as np
 import array
-import constructors as C
-from converters import convert
+from gna import constructors as C
+from gna.converters import convert
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 
 class cmd(basecmd):

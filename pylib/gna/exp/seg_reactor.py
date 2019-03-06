@@ -2,7 +2,7 @@
 
 import ROOT
 from scipy import integrate as integrate
-import constructors as C
+from gna import constructors as C
 from ROOT import TFile, TProfile, TGraphAsymmErrors
 from ROOT import gROOT
 import numpy as np
@@ -24,10 +24,10 @@ def vec(lst):
 year=365*24*60*60.0
 
 spectrumfiles = {
-    'Pu239': 'Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
-    'Pu241': 'Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
-    'U235': 'Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
-    'U238': 'Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
+    'Pu239': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu239_13MeV0.01MeVbin.dat',
+    'Pu241': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_Pu241_13MeV0.01MeVbin.dat',
+    'U235': 'reactor_anu_spectra/Huber/Huber_smooth_extrap_U235_13MeV0.01MeVbin.dat',
+    'U238': 'reactor_anu_spectra/Mueller/Mueller_smooth_extrap_U238_13MeV0.01MeVbin.dat',
 }
 
 eperfission = {
@@ -205,7 +205,7 @@ class GeoNeutrinoIsotope(object):
 
         try:
             Es_keV, self.ys = np.loadtxt(datapath(geo_flux_files[name]), unpack=True, skiprows=5)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} geo isotope from {1}".format(name, geo_flux_files[name]))
         self.Es = Es_keV*1e-3
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
@@ -217,7 +217,7 @@ class Isotope(object):
 
         try:
             self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} reactor isotope from {1}".format(name, datapath(spectrumfiles[name])))
 
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
@@ -263,7 +263,7 @@ class ReactorExperimentModel(baseexp):
         reactors -- iterable over Reactor objects, self.makereactors() will be called if None
         detectors -- iterable over Detector objects, self.makedetoctrs() will be called if None
         """
-        super(ReactorExperimentModel, self).__init__(opts)
+        super(ReactorExperimentModel, self).__init__(ns, opts)
         self._oscprobs = {}
         self._oscprobcls = self.oscprob_classes[self.opts.oscprob]
         self._isotopes = defaultdict(list)
@@ -380,10 +380,10 @@ class ReactorExperimentModel(baseexp):
             for isoname in reactor.fission_fractions:
                 bindings["EnergyPerFission_{0}".format(isoname)] = self.ns("isotopes")(isoname)["EnergyPerFission"]
             norm = ROOT.ReactorNorm(vec(reactor.fission_fractions.keys()), bindings=bindings)
-            norm.isotopes.livetime(ROOT.Points(detector.livetime))
-            norm.isotopes.power_rate(ROOT.Points(reactor.power_rate))
+            norm.isotopes.livetime(C.Points(detector.livetime))
+            norm.isotopes.power_rate(C.Points(reactor.power_rate))
             for isoname, frac in reactor.fission_fractions.iteritems():
-                norm.isotopes['fission_fraction_{0}'.format(isoname)](ROOT.Points(frac))
+                norm.isotopes['fission_fraction_{0}'.format(isoname)](C.Points(frac))
         elif normtype == 'manual':
             norm = ROOT.ReactorNormAbsolute(vec(reactor.fission_fractions.keys()))
             for isoname, frac in reactor.fission_fractions.iteritems():
@@ -637,7 +637,7 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolution()
+                        eres = ROOT.EnergyResolutionC()
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -652,7 +652,7 @@ class ReactorExperimentModel(baseexp):
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
-                        eres = ROOT.EnergyResolution()
+                        eres = ROOT.EnergyResolutionC()
                         eres.smear.inputs(finalsum)
                         smeared_spectras.append(eres.smear)
 
@@ -663,7 +663,7 @@ class ReactorExperimentModel(baseexp):
 
             else:
                 with detector.ns:
-                    orgeres = ROOT.EnergyResolution()
+                    orgeres = ROOT.EnergyResolutionC()
                 orgeres.smear.inputs(finalsum)
                 self.ns.addobservable("weightedspectra", orgeres.smear)
 

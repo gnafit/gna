@@ -1,4 +1,4 @@
-set(TRANSFORMATION_SOURCES
+set(CHENGYP_SOURCES
   thirdparty/chengyp/EtoNpe.cc
   thirdparty/chengyp/ExpNonlinearity.cc
   thirdparty/chengyp/Mine.cc
@@ -11,7 +11,7 @@ set(TRANSFORMATION_SOURCES
   PARENT_SCOPE
 )
 
-set(TRANSFORMATION_HEADERS
+set(CHENGYP_HEADERS
   EtoNpe.hh
   ExpNonlinearity.hh
   Mine.hh

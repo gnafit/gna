@@ -127,7 +127,7 @@ class GeoNeutrinoIsotope(object):
 
         try:
             Es_keV, self.ys = np.loadtxt(datapath(geo_flux_files[name]), unpack=True, skiprows=5)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} geo isotope from {1}".format(name, geo_flux_files[name]))
         self.Es = Es_keV*1e-3
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
@@ -139,7 +139,7 @@ class Isotope(object):
 
         try:
             self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} reactor isotope from {1}".format(name, datapath(spectrumfiles[name])))
 
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")

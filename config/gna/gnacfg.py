@@ -1,5 +1,5 @@
 # Paths to look for UI modules
-pkgpaths        = [ './pylib/gna/ui' ]
+pkgpaths        = [ './pylib/gna/ui', './pylib/thirdparty/chengyp/ui' ]
 bundlepaths     = [ './pylib/gna/bundles', './pylib/gna/bundles_legacy' ]
 experimentpaths  = [ './pylib/gna/experiments' ]
 covariance_path = [ './tests/covariances' ]
