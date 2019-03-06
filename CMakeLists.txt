@@ -40,14 +40,14 @@ set (SOURCES
   integrator/GaussLegendre.cc
   integrator/GaussLegendre2d.cc
   detector/EnergyResolution.cc
-  detector/Npesmear.cc
   detector/HistNonlinearity.cc
-  detector/Mine.cc
   detector/HistSmear.cc
   detector/RenormalizeDiag.cc
   detector/C14Spectrum.cc
-  detector/Quadratic.cc
   extra/GridFilter.cc
+  thirdparty/chengyp/Npesmear.cc
+  thirdparty/chengyp/Mine.cc
+  thirdparty/chengyp/Quadratic.cc
   )
 
 set (HEADERS
@@ -111,7 +111,7 @@ set (HEADERS
   EigenHelpers.hh
   )
 
-include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/)
+include_directories(core/ extra/ neutrino/ integrator/ detector/ examples/ backgrounds/ thirdparty/chengyp/)
 set(DICT    Dict.cc)
 
 if(NOT CMAKE_BUILD_TYPE)
