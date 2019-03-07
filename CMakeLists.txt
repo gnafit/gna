@@ -42,6 +42,11 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
+add_custom_target(cleanpyc ALL
+                  COMMAND find . -name '*.pyc' -delete
+                  COMMENT "Cleaning temporary python files"
+                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
 option(GENERATE_PROFILE OFF)
 option(USE_PROFILE OFF)
 option(UB_SANITIZE OFF)
