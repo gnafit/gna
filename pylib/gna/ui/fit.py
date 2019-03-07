@@ -9,11 +9,17 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('minimizer', action=set_typed(env.parts.minimizer), help='Minimizer to use', metavar='name')
         parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
+        parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
         parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
         # parser.add_argument('-o', '--output', help='Output file (yaml/hdf5)', metavar='filename')
 
     def init(self):
-        result = self.result = self.opts.minimizer.fit()
+        minimizer = self.opts.minimizer
+        result = self.result = minimizer.fit()
+
+        if self.opts.set and result.success:
+            for par, value in zip(minimizer.pars, result.x):
+                par.set(value)
 
         if self.opts.print:
             self.print()
