@@ -160,7 +160,7 @@ class NestedDict(object):
 
     __getattr__ = __getitem__
 
-    def set(self, key, value, loading_from_file=False ):
+    def set(self, key, value):
         if isinstance(value, dict):
             value = NestedDict(value)
         if isinstance(value, NestedDict):

@@ -1,3 +1,10 @@
+"""Dataset initialization. Configures the dataset for a single experiment.
+Dataset defines:
+    - Observable (model) to be used as fitted function
+    - Observable (data) to be fitted to
+    - Statistical uncertainty (Person/Neyman) [theory/observation]
+    - Nuisance parameters
+    """
 from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
@@ -10,16 +17,16 @@ from gna.parameters.parameter_loader import get_parameters
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('--name', required=True)
-        parser.add_argument('--pull', action='append')
+        parser.add_argument('--name', required=True, help='Dataset name', metavar='dataset')
+        parser.add_argument('--pull', action='append', help='Parameters to be added as pull terms')
         parser.add_argument('--asimov-data', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
                             default=[])
-        parser.add_argument('--asimov-poisson', nargs=2, action='append',
-                            metavar=('THEORY', 'DATA'),
-                            default=[])
+        # parser.add_argument('--asimov-poisson', nargs=2, action='append',
+                            # metavar=('THEORY', 'DATA'),
+                            # default=[])
         parser.add_argument('--error-type', choices=['pearson', 'neyman'],
-                default='pearson', help='The type of statistical errors to be used')
+                            default='pearson', help='The type of statistical errors to be used')
         parser.add_argument('--random-seed', type=int, help='Set random seed of numpy random generator to given value')
 
     def run(self):
@@ -45,16 +52,16 @@ class cmd(basecmd):
                                    env.get(data_path),
                                    env.get(theory_path))
 
-        if self.opts.asimov_poisson:
-            for theory_path, data_path in self.opts.asimov_poisson:
-                data_poisson = np.random.poisson(env.get(data_path).data())
-                if self.opts.error_type == 'neyman':
-                    dataset.assign(env.get(theory_path),
-                                   data_poisson,
-                                   env.get(data_path))
-                elif self.opts.error_type == 'pearson':
-                    dataset.assign(env.get(theory_path),
-                                   data_poisson,
-                                   env.get(theory_path))
+        # if self.opts.asimov_poisson:
+            # for theory_path, data_path in self.opts.asimov_poisson:
+                # data_poisson = np.random.poisson(env.get(data_path).data())
+                # if self.opts.error_type == 'neyman':
+                    # dataset.assign(env.get(theory_path),
+                                   # data_poisson,
+                                   # env.get(data_path))
+                # elif self.opts.error_type == 'pearson':
+                    # dataset.assign(env.get(theory_path),
+                                   # data_poisson,
+                                   # env.get(theory_path))
 
         self.env.parts.dataset[self.opts.name] = dataset

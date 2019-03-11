@@ -3,6 +3,7 @@ from argparse import Namespace
 import numpy as np
 import time
 import spec
+from collections import OrderedDict
 
 class Minuit(ROOT.TMinuitMinimizer):
     def __init__(self, statistic, pars=[]):
@@ -157,10 +158,12 @@ class Minuit(ROOT.TMinuitMinimizer):
 
     def _patchresult(self):
         names = [self.VariableName(i) for i in range(self.NDim())]
-        self.result.xdict      = dict(zip(names, self.result.x))
-        self.result.errorsdict = dict(zip(names, self.result.errors))
+        self.result.xdict      = OrderedDict(zip(names, (float(x) for x in self.result.x)))
+        self.result.errorsdict = OrderedDict(zip(names, (float(e) for e in self.result.errors)))
         self.result.names = names
-        self.result.npars = self.NDim()
+        self.result.npars = int(self.NDim())
+        self.result.nfev = int(self.result.nfev)
+        self.result.npars = int(self.result.npars)
 
     def __call__(self):
         res = self.fit()

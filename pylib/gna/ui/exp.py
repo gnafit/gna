@@ -1,3 +1,4 @@
+"""Load experement definition, that provides observables and parameters"""
 from __future__ import print_function
 from gna.ui import basecmd
 import argparse

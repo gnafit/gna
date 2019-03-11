@@ -65,7 +65,12 @@ class Dataset(object):
     def sortobservables(self, observables, covparameters):
         """Splits observables into such a groups that observables that are
         all covariated with respect to a covparameters or pull terms
+
+        If observables are not provided: use ones stored in data
         """
+        if observables is None:
+            observables = self.data.keys()
+
         to_process = list(observables)
         groups = [[]]
         while to_process:
@@ -127,9 +132,6 @@ class Dataset(object):
             product.multiply(jac_T.transpose.T)
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
-
-
-
 
     def makedata(self, obsblock):
         """ Returns either observable itself or a concantenation of

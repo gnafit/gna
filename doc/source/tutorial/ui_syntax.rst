@@ -40,7 +40,7 @@ Each module defines its own arguments parser with :code:`--help` command defined
     ./gna -- plot-spectrum --help
 
 will print the help for the arguments of the module `plot-spectrum`. The module itself may be found in
-:download:`pylib/gna/ui/plot-spectrum.py <../../../pylib/gna/ui/plot-spectrum.py>`.
+:download:`pylib/gna/ui/plot_spectrum.py <../../../pylib/gna/ui/plot_spectrum.py>`.
 
 .. code-block:: text
 

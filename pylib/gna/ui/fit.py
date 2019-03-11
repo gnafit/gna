@@ -1,3 +1,5 @@
+"""Simple fit module. Makes the minimizer fit the model."""
+
 from __future__ import print_function
 from gna.ui import basecmd, set_typed
 from gna.configurator import NestedDict
@@ -5,12 +7,50 @@ from gna.configurator import NestedDict
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('minimizer', action=set_typed(env.parts.minimizer), help='Minimizer to use', metavar='NAME')
-        parser.add_argument('-o', '--output', help='Output file (hdf5)', metavar='FILENAME')
+        parser.add_argument('minimizer', action=set_typed(env.parts.minimizer), help='Minimizer to use', metavar='name')
+        parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
+        parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
+        parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
+        # parser.add_argument('-o', '--output', help='Output file (yaml/hdf5)', metavar='filename')
 
     def init(self):
-        res=self.opts.minimizer.fit()
+        minimizer = self.opts.minimizer
+        result = self.result = minimizer.fit()
 
+        if self.opts.set and result.success:
+            for par, value in zip(minimizer.pars, result.x):
+                par.set(value)
+
+        if self.opts.print:
+            self.print()
+
+        ofile = self.opts.output
+        if ofile:
+            if ofile.endswith('.yaml'):
+                self.save_yaml(ofile)
+            # elif ofile.endswith('.hdf5'):
+                # self.save_hdf5(ofile)
+            else:
+                raise Exception('Unsupported output format or '+ofile)
+            print('Save output file:', ofile)
+
+    def print(self):
         print('Fit result:', end='')
-        print(NestedDict(res.__dict__))
+        print(NestedDict(self.result.__dict__))
 
+    # def save_hdf5(self, filename):
+        # from h5py import File
+
+        # mode = 'w'
+
+        # with File(filename, mode) as ofile:
+            # data = self.result.__dict__
+            # import IPython; IPython.embed()
+
+    def save_yaml(self, filename):
+        import yaml
+        mode='w'
+
+        with open(filename, mode) as ofile:
+            data = self.result.__dict__
+            ofile.write(yaml.dump(data))

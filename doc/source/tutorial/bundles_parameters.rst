@@ -22,7 +22,7 @@ a parameter.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex01.py
     :linenos:
-    :lines: 12-15
+    :lines: 12-
 
 Again `parameters_ex01` in a sense a function, which reads its argument from configuration dictionary.
 

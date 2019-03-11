@@ -1,4 +1,5 @@
 """Example model: gaussian peak with flat background"""
+
 from __future__ import print_function
 from gna.ui import basecmd
 from gna.env import env
@@ -13,9 +14,10 @@ class cmd(basecmd):
         parser.add_argument('--npeaks', default=1,   type=int, help='number of peaks')
         parser.add_argument('--Emin',   default=0,   type=float, help='Minimal energy')
         parser.add_argument('--Emax',   default=5,   type=float, help='Maximal Energy')
-        parser.add_argument('--nbins',  default=100, type=int, help='Number of bins')
+        parser.add_argument('--nbins',  default=200, type=int, help='Number of bins')
         parser.add_argument('--order',  default=8, type=int, help='Order of integrator for each bin (Gauss-Legendre)')
         parser.add_argument('--with-eres', '--eres', action='store_true', help='Enable energy resoulution')
+        parser.add_argument('--print', action='store_true', help='Print parameters')
 
     def init(self):
         if self.opts.npeaks == 1:
@@ -62,4 +64,5 @@ class cmd(basecmd):
             peak_sum.sum >> eres.smear.Ntrue
             common_ns.addobservable("spectrum_with_eres", eres.smear.Nrec)
 
-        common_ns.printparameters(labels='True')
+        if self.opts.print:
+            common_ns.printparameters(labels='True')

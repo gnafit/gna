@@ -9,14 +9,6 @@ class cmd(basecmd):
         parser.add_argument('name')
         parser.add_argument('analysis', type=env.parts.analysis)
 
-    def init(self):
-        toymc = ROOT.CovarianceToyMC()
-
-        for block in self.opts.analysis:
-            toymc.add(block.theory, block.cov)
-
-        self.env.parts.statistic[self.opts.name] = chi2
-
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('-a', '--add', nargs=2, default=[],

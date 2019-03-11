@@ -1,10 +1,18 @@
+"""
+Manage parameters and namespaces
+"""
+
 from __future__ import print_function
 from gna.ui import basecmd
 from importlib import import_module
 from gna.config import cfg
 from gna.parameters.covariance_helpers import CovarianceHandler
+from collections import OrderedDict
 
 undefined = ['undefined']
+
+def list_to_dict(lst):
+    return OrderedDict(item.split('=', 1) if '=' in item else (item, True) for item in lst)
 
 class cmd(basecmd):
     @classmethod
@@ -24,7 +32,9 @@ class cmd(basecmd):
         parser.add_argument('--define', action='append', nargs='+',
                             metavar=('PAR ARG', 'ARG'),
                             default=[])
-
+        parser.add_argument('--set', action='append', nargs='+',
+                            metavar=('PAR', 'opts'),
+                            default=[])
         parser.add_argument('--sigma', action='append', nargs=2,
                             metavar=('PAR', 'SIGMA'),
                             default=[])
@@ -64,23 +74,43 @@ class cmd(basecmd):
 
         for define in self.opts.define:
             name, kwargs = define[0], define[1:]
-            kwargs = dict(kw.split('=', 1) for kw in kwargs)
-            namespace.defparameter(name, **kwargs)
+            namespace.defparameter(name, **list_to_dict(kwargs))
+
+        for parset in self.opts.set:
+            name, opts = parset[0], list_to_dict(parset[1:])
+            par = namespace[name]
+            for k, v in opts.iteritems():
+                if k=='value':
+                    par.set(par.cast(v))
+                elif k=='values':
+                    v=par.cast(v)
+                    par.set(v)
+                    par.setCentral(v)
+                elif k=='central':
+                    par.setCentral(par.cast(v))
+                elif k=='sigma':
+                    par.setSigma(par.cast(v))
+                elif k=='relsigma':
+                    par.setRelSigma(par.cast(v))
+                elif k=='fixed' and v in ['true', 'True', True, 1]:
+                    par.setFixed()
+                else:
+                    raise Exception('Unknown parameter option: {}={}'.format(k,v))
 
         for name, sigma in self.opts.sigma:
-            p = self.env.parameters[name]
+            p = namespace[name]
             p.setSigma(p.cast(sigma))
 
         for name, central in self.opts.central:
-            p = self.env.parameters[name]
+            p = namespace[name]
             p.setCentral(p.cast(central))
 
         for name, value in self.opts.value:
-            p = self.env.parameters[name]
+            p = namespace[name]
             p.set(p.cast(value))
 
         for name in self.opts.fix:
-            p = self.env.parameters[name[0]]
+            p = namespace[name[0]]
             p.setFixed()
 
         #  for name1, name2, corr in self.opts.correlation:

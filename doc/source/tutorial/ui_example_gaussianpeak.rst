@@ -63,7 +63,7 @@ Also let us save the graph of the example model. The `graphviz` module reads the
 .. code-block:: bash
 
   ./gna -- \
-        -- gaussianpeak --name peak --Emin 0 --Emax 5 --nbins 200 \
+        -- gaussianpeak --name peak --Emin 0 --Emax 5 --nbins 200 --print \
         -- graphviz peak/spectrum -o output/gna_ui_graph.pdf \
         -- plot_spectrum -p peak/spectrum -l 'Peak 1' --ylim 0.0\
                          -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
@@ -95,7 +95,7 @@ Remember, that parameters are not owned neither by transformations, nor by the m
 in. The parameters are usually initialized with `reqparameter()` command which only creates anything when no parameters
 with the same name was defined before.
 
-The module `gaussianpeak` also prints a list of the variables it creates:
+The module `gaussianpeak` also prints a list of the variables it creates, when argument :code:`--print` is passed:
 
 .. code-block:: text
 
@@ -147,7 +147,7 @@ The following command line lower the background rate twice, moves the peak posit
               --define peak.BackgroundRate central=25  fixed=True label='Background rate' \
               --define peak.E0             central=6   fixed=True label='Peak position' \
               --define peak.Width          central=2   fixed=True label='Peak width' \
-        -- gaussianpeak --name peak --Emin 0 --Emax 12 --nbins 480 \
+        -- gaussianpeak --name peak --Emin 0 --Emax 12 --nbins 480 --print \
         -- plot_spectrum -p peak/spectrum -l 'Peak 1' --ylim 0.0\
                          -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
                          -s
