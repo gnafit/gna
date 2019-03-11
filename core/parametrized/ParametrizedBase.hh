@@ -1,16 +1,19 @@
 #pragma once
 
 #include <string>
+#include <type_traits>
 #include "EvaluableEntry.hh"
 #include "VariableHandle.hh"
+#include "EvaluableHandle.hh"
 #include "variable.hh"
+#include "parameter.hh"
 #include "evaluable.hh"
 #include "callback.hh"
 #include "taintflag.hh"
 
 namespace ParametrizedTypes {
   using VariablesContainer = boost::ptr_vector<ParametrizedEntry>;
-  using EvaluablesContainer = boost::ptr_vector<ParametrizedTypes::EvaluableEntry>;
+  using EvaluablesContainer = boost::ptr_vector<EvaluableEntry>;
 
   class ParametrizedBase {
     friend class ::ParametersGroup;
@@ -20,6 +23,7 @@ namespace ParametrizedTypes {
     ParametrizedBase(const ParametrizedBase &other);
     ParametrizedBase &operator=(const ParametrizedBase &other);
 
+    std::vector<variable<double>> getFloatVariables(){ return m_ft_variables; }
   protected:
     ParametrizedBase() : m_taintflag("base", true) { m_taintflag.set_pass_through(); }
     void copyEntries(const ParametrizedBase &other);
@@ -27,8 +31,14 @@ namespace ParametrizedTypes {
 
     template <typename T>
     VariableHandle<T> variable_(const std::string &name) {
-      auto *e = new ParametrizedEntry(parameter<T>(name.c_str()), name, this);
+      parameter<T> par(name.c_str());
+      auto *e = new ParametrizedEntry(par, name, this);
       m_entries.push_back(e);
+
+      if(std::is_same<T,double>::value){
+          m_ft_variables.push_back(variable<double>(par));
+      }
+
       e->par.subscribe(m_taintflag);
       e->field = &e->var;
       return VariableHandle<T>(*e);
@@ -69,6 +79,9 @@ namespace ParametrizedTypes {
     boost::ptr_vector<ParametrizedEntry> m_entries;
     std::vector<callback> m_callbacks;
     boost::ptr_vector<EvaluableEntry> m_eventries;
+
+    std::vector<variable<double>> m_ft_variables;
+    //std::vector<dependant<double>> m_ft_evaluables;
   };
 
   template <typename T>
@@ -89,6 +102,9 @@ namespace ParametrizedTypes {
     DPRINTFS("make evaluable: %i deps", int(sources.size()));
     dependant<T> dep = dependant<T>(func, sources, name.c_str());
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
+    //if(std::is_same<T,double>::value){
+        //m_ft_evaluables.push_back(dep);
+    //}
     return dep;
   }
   template <typename T>
@@ -109,6 +125,9 @@ namespace ParametrizedTypes {
     DPRINTFS("make evaluable: %i deps", int(sources.size()));
     dependant<T> dep = dependant<T>(vfunc, sources, name.c_str(), size);
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
+    //if(std::is_same<T,double>::value){
+        //m_ft_evaluables.push_back(dep);
+    //}
     return dep;
   }
 }
