@@ -1,4 +1,6 @@
 set(CORE_SOURCES
+  # Common classes
+  core/TreeManager.cc
   # Parameters
   core/parameters/variable.cc
   core/parameters/parameter.cc
@@ -36,14 +38,23 @@ set(CORE_SOURCES
   core/GNAObject.cc
   core/GNAObjectBind1N.cc
   core/GNAObjectBindMN.cc
+  # core/parametrized
+  core/parametrized/ParametrizedEntry.cc
+  core/parametrized/ParametrizedBase.cc
+  core/parametrized/VariableHandle.cc
+  core/parametrized/EvaluableEntry.cc
+  core/parametrized/EvaluableHandle.cc
+  core/parametrized/VariableDescriptor.cc
+  core/parametrized/EvaluableDescriptor.cc
   # Parameter representation
   core/ParametersGroup.cc
-  core/Parametrized.cc
   core/UncertainParameter.cc
   PARENT_SCOPE
  )
 
 set(CORE_HEADERS
+  # core/ Common classes
+  TreeManager.hh
   # core/
   Data.hh
   Random.hh
@@ -88,6 +99,14 @@ set(CORE_HEADERS
   GPUVariablesLocal.hh
   GPUFunctionData.hh
   GPUFunctionArgs.hh
+  # core/parametrized
+  ParametrizedEntry.hh
+  ParametrizedBase.hh
+  VariableHandle.hh
+  EvaluableEntry.hh
+  EvaluableHandle.hh
+  VariableDescriptor.hh
+  EvaluableDescriptor.hh
   # Parameter representation
   UncertainParameter.hh
   # core/

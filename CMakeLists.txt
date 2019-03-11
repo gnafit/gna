@@ -14,7 +14,9 @@ add_subdirectory(unittest)
 set(SOURCES ${CORE_SOURCES} ${TRANSFORMATION_SOURCES} ${EXTRA_SOURCES} ${EXAMPLES_SOURCES} ${UNITTEST_SOURCES})
 set(HEADERS ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
 
-include_directories(core/parameters/
+include_directories(
+                    core/parameters/
+                    core/parametrized/
                     core/transformation/
                     core/
                     transformations/trial/

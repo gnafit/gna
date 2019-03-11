@@ -67,7 +67,7 @@ protected:
   const std::string &fieldName(Field field) const;
   virtual void setExpressions(ExpressionsProvider &/*provider*/) { }
 
-  ParametrizedTypes::Base* m_parent;
+  ParametrizedTypes::ParametrizedBase* m_parent;
   Fields m_fields;
 };
 

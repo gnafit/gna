@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Parametrized.hh"
+#include "ParametrizedBase.hh"
+#include "VariableDescriptor.hh"
+#include "EvaluableDescriptor.hh"
 #include "TransformationDescriptor.hh"
 #include "TransformationBase.hh"
 #include "TransformationBind.hh"
@@ -17,7 +19,7 @@ protected:
 template <typename SourceFloatType,typename SinkFloatType>
 class GNAObjectT: public GNAObjectT<void,void>,
                   public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType>,
-                  public virtual ParametrizedTypes::Base {
+                  public virtual ParametrizedTypes::ParametrizedBase {
 public:
   using VariablesContainer = ParametrizedTypes::VariablesContainer;
   using EvaluablesContainer = ParametrizedTypes::EvaluablesContainer;
@@ -31,21 +33,21 @@ public:
 
   GNAObjectT()
     : TransformationBaseType(),
-      ParametrizedTypes::Base(),
-      variables(ParametrizedTypes::Base::m_entries),
+      ParametrizedTypes::ParametrizedBase(),
+      variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
     { }
   GNAObjectT(const GNAObjectType &other)
     : TransformationBaseType(other),
-      ParametrizedTypes::Base(other),
-      variables(ParametrizedTypes::Base::m_entries),
+      ParametrizedTypes::ParametrizedBase(other),
+      variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
     { }
 
   void subscribe(taintflag flag) {
-    ParametrizedTypes::Base::subscribe_(flag);
+    ParametrizedTypes::ParametrizedBase::subscribe_(flag);
   }
 
   TransformationDescriptorType operator[](size_t idx) {
@@ -65,8 +67,8 @@ protected:
   class SingleTransformation { };
   GNAObjectT(SingleTransformation)
     : TransformationBaseType(1),
-      ParametrizedTypes::Base(),
-      variables(ParametrizedTypes::Base::m_entries),
+      ParametrizedTypes::ParametrizedBase(),
+      variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
   { }
