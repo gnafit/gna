@@ -16,7 +16,7 @@ from itertools import chain
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
-        parser.add_argument('datapath', nargs='+', dest='sources', help="Path to file with data to serve as fake observables")
+        parser.add_argument('sources', nargs='+', help="Pathes to file with data to serve as fake observables")
         parser.add_argument('--ns', default='fake_data', type=env.ns, help="Name of the namespace in which fake data will be loaded")
         parser.add_argument('--filter', dest='filters', action='append', default=[],
                            help="Filters to select specific entries from ROOT files")

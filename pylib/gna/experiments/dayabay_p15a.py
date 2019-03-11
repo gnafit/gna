@@ -101,7 +101,7 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 2,
+                xorders   = 5,
                 yorder   = 2,
                 ),
             ibd_xsec = NestedDict(
@@ -173,12 +173,12 @@ class exp(baseexp):
                     pars = uncertain(20.0*7.163e28, 'fixed'),
                     ),
             iav = NestedDict(
-                    bundle     = dict(name='detector_iav_db_root_v03'),
+                    bundle     = dict(name='detector_iav_db_root_v03', major='d'),
                     parname    = 'OffdiagScale',
                     scale      = uncertain(1.0, 4, 'percent'),
                     ndiag      = 1,
                     filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-                    matrixname = 'iav_matrix'
+                    matrixname = 'iav_matrix',
                     ),
             eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
@@ -410,9 +410,16 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
+        #  import IPython
+        #  IPython.embed()
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-            ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
+            if  self.opts.mode == 'dyboscar':
+                for comp in self.nidx.indices['c'].variants:
+                    ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
+                            outputs.observation_noeffects[ad][comp], export=False)
+            else:
+                ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
             ns.addobservable("{0}_bkg".format(ad),         outputs.bkg[ad], export=False)
