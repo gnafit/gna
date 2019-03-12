@@ -8,8 +8,8 @@ from gna.env import env
 import gna.constructors as C
 import numpy as N
 
-def test_varlist():
-    ns = env.globalns('test_varlist')
+def test_vararray():
+    ns = env.globalns('test_vararray')
 
     names  = [ 'zero', 'one', 'two', 'three', 'four', 'five' ]
     values = N.arange(len(names), dtype='d')
@@ -26,7 +26,7 @@ def test_varlist():
 
     assert N.allclose(values, res)
 
-    for i, (val, name) in enumerate(enumerate( names, 2 )):
+    for i, (val, name) in enumerate(enumerate(names, 2)):
         ns[name].set(val)
         values[i]=val
         res=va.vararray.points.data()

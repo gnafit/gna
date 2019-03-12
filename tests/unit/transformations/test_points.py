@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
-from gna.bindings import DataType
+from gna.bindings import DataType, provided_precisions
 
 #
 # Create the matrix
@@ -49,30 +49,31 @@ def test_points():
     assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
 
-def test_pointsf():
-    mat = N.arange(12, dtype='f').reshape(3, 4)
+if 'float' in provided_precisions:
+    def test_pointsf():
+        mat = N.arange(12, dtype='f').reshape(3, 4)
 
-    print( 'Input matrix (numpy)' )
-    print( mat )
-    print()
+        print( 'Input matrix (numpy)' )
+        print( mat )
+        print()
 
-    #
-    # Create transformations
-    #
-    with C.precision('float'):
-        points = C.Points(mat)
+        #
+        # Create transformations
+        #
+        with C.precision('float'):
+            points = C.Points(mat)
 
-    out = points.points.points
-    res = out.data()
-    dt  = out.datatype()
+        out = points.points.points
+        res = out.data()
+        dt  = out.datatype()
 
-    print( 'Result (C++ Data to numpy)' )
-    print( res, res.dtype )
-    print()
+        print( 'Result (C++ Data to numpy)' )
+        print( res, res.dtype )
+        print()
 
-    print( 'Datatype:', str(dt) )
+        print( 'Datatype:', str(dt) )
 
-    assert N.allclose(mat, res), "C++ and Python results doesn't match"
+        assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
 if __name__ == "__main__":
     glb = globals()
