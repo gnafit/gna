@@ -10,6 +10,36 @@
 #include <vector>
 #include <memory>
 
+template<typename T>
+class arrayview {
+private:
+  using arrayviewType = arrayview<T>;
+public:
+  arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
+  arrayview(size_t size) : m_allocated(new T[size]), m_buffer(m_allocated.get()), m_size(size) { }
+
+  T& operator[](size_t i) noexcept { return m_buffer[i]; }
+  const T& operator[](size_t i) const noexcept { return m_buffer[i]; }
+
+  T* data() const noexcept {return m_buffer;}
+  T* begin() const noexcept {return m_buffer;}
+  T* end() const noexcept {return m_buffer+m_size;}
+
+  size_t size() const noexcept {return m_size;}
+
+  template<class Other>
+  bool operator==(const Other& other) const noexcept {
+    if(m_size!=other.size()){
+      return false;
+    }
+    return 0==std::memcmp(m_buffer, other.data(), m_size);
+  }
+private:
+  std::unique_ptr<T> m_allocated{nullptr};
+  T*                 m_buffer;
+  size_t             m_size;
+};
+
 class changeable;
 
 struct references {
@@ -59,9 +89,11 @@ struct inconstant_data: public inconstant_header {
   inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname), value(size) {
     type = &typeid(ValueType);
   }
-  std::vector<ValueType> value;
+  arrayview<ValueType> value;
   std::function<ValueType()> func{nullptr};
-  std::function<void(std::vector<ValueType>&)> vfunc{nullptr};
+  std::function<void(arrayview<ValueType>&)> vfunc{nullptr};
+  ValueType* root{nullptr};   ///< Memory pool root address
+  size_t     root_offset{0u}; ///< An offset from the root address
 };
 
 #include "parameters_debug.hh"

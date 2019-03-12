@@ -55,13 +55,15 @@ public:
     update();
     return data().value[i];
   }
-  const std::vector<ValueType> &values() const {
+  const arrayview<ValueType> &values() const {
     update();
     return data().value;
   }
   void values(std::vector<ValueType>& dest) const {
     update();
-    dest=data().value;
+    auto& value = data().value;
+    dest.resize(value.size());
+    std::copy(value.begin(), value.end(), dest.begin());
   }
   ValueType* values(ValueType* dest) const {
     update();
