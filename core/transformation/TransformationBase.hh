@@ -49,6 +49,7 @@ namespace TransformationTypes {
 
     BaseT(const BaseType &other);                                         ///< Clone constructor.
     BaseT &operator=(const BaseType &other);                              ///< Clone assignment.
+    virtual ~BaseT(){}
 
   protected:
     BaseT(): t_(*this) { }                                                ///< Default constructor.

@@ -7,8 +7,9 @@ from gna.unittest import run_unittests
 from gna.env import env
 import gna.constructors as C
 import numpy as N
+from gna.bindings import parameters
 
-def test_varlist():
+def test_object_variables():
     ns = env.globalns('test_varlist')
 
     names  = [ 'zero', 'one', 'two', 'three', 'four', 'five' ]
@@ -19,13 +20,18 @@ def test_varlist():
     with ns:
         va = R.VarArray(C.stdvector(names))
 
-    res=va.vararray.points.data()
+    for i, (name, val_true) in enumerate(zip(names, values)):
+        var = va.variables[i].getVariable()
+        assert name==var.name()
 
-    print('Python array:', values)
-    print('Array:', res)
+        val = var.cast().value()
+        assert val==val_true
 
-    # vlist = va.getFloatVariables()
-    import IPython; IPython.embed()
+    for i, (name, val_true) in enumerate(zip(names, values)):
+        ns[name].set(val_true)
+        var=va.variables[i].getVariable()
+        val=var.cast().value()
+        assert val==val_true
 
 if __name__ == '__main__':
     run_unittests(globals())

@@ -36,7 +36,8 @@ public:
   }
   variable(){};
   variable(const variable<ValueType> &other)
-    : variable<void>(other) { }
+    : variable<void>(other) {
+    }
   explicit variable(const variable<void> &other)
     : variable<void>(other) {
     if (!this->sametype(other)) {

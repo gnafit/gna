@@ -23,6 +23,8 @@ namespace ParametrizedTypes {
     }
     size_t hash() const {return m_entry->par.hash();}
     void dump() const;
+
+	variable<void> getVariable() { return m_entry->var; }
   protected:
     void bind(variable<void> var) { m_entry->bind(var); }
     parameter<void> claim() { return m_entry->claim(nullptr); }
@@ -68,5 +70,7 @@ namespace ParametrizedTypes {
     parameter<T> claim() {
       return parameter<T>(m_entry->claim(nullptr));
     }
+
+	variable<T> getVariable() { return variable<T>(m_entry->var); }
   };
 }

@@ -14,6 +14,7 @@ template <>
 class GNAObjectT<void,void> {
 protected:
   GNAObjectT() = default;
+  virtual ~GNAObjectT(){}
 };
 
 template <typename SourceFloatType,typename SinkFloatType>
@@ -45,6 +46,7 @@ public:
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
     { }
+  virtual ~GNAObjectT(){}
 
   void subscribe(taintflag flag) {
     ParametrizedTypes::ParametrizedBase::subscribe_(flag);
