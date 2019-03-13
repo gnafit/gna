@@ -2,6 +2,8 @@ set(CORE_SOURCES
   # Common classes
   core/TreeManager.cc
   # Parameters
+  core/parameters/arrayview.cc
+  core/parameters/changeable.cc
   core/parameters/variable.cc
   core/parameters/parameter.cc
   core/parameters/evaluable.cc
@@ -87,6 +89,7 @@ set(CORE_HEADERS
   Initializer.hh
   Accessor.hh
   # variables
+  arrayview.hh
   changeable.hh
   variable.hh
   parameter.hh

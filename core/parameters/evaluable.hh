@@ -32,7 +32,7 @@ protected:
     this->initdeps(deps);
   }
   template <typename T>
-  void init(std::function<void(std::vector<ValueType>&)> vf, T deps) {
+  void init(std::function<void(arrayview<ValueType>&)> vf, T deps) {
     auto &d = base_type::data();
     d.vfunc = vf;
     this->initdeps(deps);

@@ -61,7 +61,7 @@ namespace ParametrizedTypes {
                             const std::vector<changeable> &sources);
     template <typename T>
     dependant<T> evaluable_(const std::string &name,
-                            size_t size, std::function<void(std::vector<T>&)> vfunc,
+                            size_t size, std::function<void(arrayview<T>&)> vfunc,
                             const std::vector<changeable> &sources);
 
     taintflag m_taintflag;
@@ -99,7 +99,7 @@ namespace ParametrizedTypes {
   template <typename T>
   inline dependant<T>
   ParametrizedBase::evaluable_(const std::string &name,
-                   size_t size, std::function<void(std::vector<T>&)> vfunc,
+                   size_t size, std::function<void(arrayview<T>&)> vfunc,
                    const std::vector<changeable> &sources)
   {
     SourcesContainer depentries;

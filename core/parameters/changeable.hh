@@ -7,38 +7,8 @@
 #include <set>
 #include <cstring>
 #include <string>
-#include <vector>
-#include <memory>
 
-template<typename T>
-class arrayview {
-private:
-  using arrayviewType = arrayview<T>;
-public:
-  arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
-  arrayview(size_t size) : m_allocated(new T[size]), m_buffer(m_allocated.get()), m_size(size) { }
-
-  T& operator[](size_t i) noexcept { return m_buffer[i]; }
-  const T& operator[](size_t i) const noexcept { return m_buffer[i]; }
-
-  T* data() const noexcept {return m_buffer;}
-  T* begin() const noexcept {return m_buffer;}
-  T* end() const noexcept {return m_buffer+m_size;}
-
-  size_t size() const noexcept {return m_size;}
-
-  template<class Other>
-  bool operator==(const Other& other) const noexcept {
-    if(m_size!=other.size()){
-      return false;
-    }
-    return 0==std::memcmp(m_buffer, other.data(), m_size);
-  }
-private:
-  std::unique_ptr<T> m_allocated{nullptr};
-  T*                 m_buffer;
-  size_t             m_size;
-};
+#include "arrayview.hh"
 
 class changeable;
 
