@@ -11,6 +11,8 @@ def arrayview_d_view(self):
 
 arrayview_d = R.arrayview('double')
 arrayview_d.view = arrayview_d_view
+allocator_d = R.arrayviewAllocatorSimple('double')
+allocator_d.view = arrayview_d_view
 
 def test_arrayview_constructor_view():
     a = N.arange(5, dtype='d')
@@ -77,6 +79,30 @@ def test_arrayview_vector():
 
     assert     view1==v1
     assert not view1!=v1
+
+def test_arrayview_complex():
+    a1 = arrayview_d(2)
+    a1[0]=2
+    a1[1]=3
+    c1 = a1.complex()
+    assert c1.real()==2.0
+    assert c1.imag()==3.0
+
+# def test_arrayview_allocation():
+    # nitems, ndata = 5, 15
+    # allocator = allocator_d(ndata)
+
+    # arrays = []
+    # for i in range(1, nitems):
+        # array = arrayview_d(i, allocator)
+        # for j in range(i):
+            # array[j]=j
+        # print(i, array.view())
+        # arrays.append(array)
+
+    # data = allocator.view()
+    # print('Arrays:', [array.view() for array in arrays])
+    # print('Data:', data)
 
 if __name__ == "__main__":
     run_unittests(globals())
