@@ -16,7 +16,9 @@ namespace ParametrizedTypes {
     friend class ParametrizedBase;
   public:
     enum State {
-      Free = 0, Claimed, Bound,
+      Free = 0,   ///< Default state
+      Claimed,    ///< The parameter access is claimed
+      Bound,      ///< The Entry is a view to another Entry
     };
 
     ParametrizedEntry(parameter<void> par, std::string name, const ParametrizedBase *parent);
@@ -27,11 +29,11 @@ namespace ParametrizedTypes {
 
     std::string name;
     bool required;
-    parameter<void> par;
-    variable<void> var;
+    parameter<void> par;               ///< Parameter view (able to set the value)
+    variable<void> var;                ///< Varaible view (unable to set the value)
     State state;
-    void *claimer;
-    variable<void> *field;
+    void *claimer;                     ///< An object (ParametrizedBase), that claimed the parameter. FIXME: not used
+    variable<void> *field;             ///< Reference to the transformation member variable (GNAObject)
     const ParametrizedBase *parent;
   };
 }

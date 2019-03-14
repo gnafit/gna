@@ -195,3 +195,13 @@ def Rebin( edges, rounding, *args, **kwargs ):
     edges = N.ascontiguousarray(edges, dtype='d')
     return R.Rebin(edges.size, edges, int( rounding), *args, **kwargs )
 
+def _wrap_parameter(classname):
+    def newfcn(*args, **kwargs):
+        template = getattr(R, classname)
+        return template(_current_precision)(*args, **kwargs)
+    return newfcn
+
+GaussianParameter     = _wrap_parameter('GaussianParameter')
+UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
+ParameterWrapper      = _wrap_parameter('ParameterWrapper')
+

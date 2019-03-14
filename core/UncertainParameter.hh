@@ -63,8 +63,6 @@ public:
 
   size_t hash() const {return reinterpret_cast<size_t>(this);}
 
-  
-
 protected:
   variable<T> m_var{};
   ParametrizedTypes::VariableHandle<T> m_varhandle;
@@ -98,12 +96,13 @@ public:
   virtual void set(T value)
     { m_par = value; }
 
-  void push(T value) {
+  T push(T value) {
     m_stack.push(this->value());
     this->set(value);
+    return value;
   }
 
-  void pop() {
+  T pop() {
     this->set(m_stack.top());
     m_stack.pop();
     return this->value();
@@ -265,7 +264,7 @@ public:
   void set(T value) override;
 
   T cast(const std::string &v) const override;
-  T cast(const T &v) const override { return Parameter<T>::cast(v); }
+  T cast(const T &v) const noexcept override { return Parameter<T>::cast(v); }
 };
 
 template <typename T>
@@ -297,3 +296,4 @@ inline T UniformAngleParameter<T>::cast(const std::string &v) const {
   T b = boost::lexical_cast<T>(v.substr(pipos+2));
   return a*pi/b;
 }
+

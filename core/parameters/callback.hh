@@ -4,7 +4,7 @@
 
 class callback: public changeable {
 public:
-  callback() { init(); }
+  callback() { init("callback", true); }
   callback(std::function<void()> f, std::initializer_list<changeable> deps) {
     init(deps);
     m_hdr->on_taint = f;

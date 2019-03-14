@@ -32,6 +32,11 @@ void ParametrizedEntry::bind(variable<void> newvar) {
       fmt::format("can not rebind parameter `{0}'", name)
       );
   }
+  if (state != ParametrizedEntry::State::Free) {
+    throw std::runtime_error(
+      fmt::format("unable to bind non-free parameter `{0}'", name)
+      );
+  }
   var.replace(newvar);
   par.replace(newvar);
   if (field != &var) {

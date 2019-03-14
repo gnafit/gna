@@ -13,18 +13,21 @@ public:
   static variable<void> null() {
     return variable<void>();
   }
-  const std::type_info *type() const {
+  const std::type_info *type() const noexcept {
     return m_hdr->type;
   }
   std::string typeName() const {
     return boost::core::demangle(type()->name());
   }
   template <typename T>
-  bool istype() {
+  bool istype() const {
     return (type()->hash_code() == typeid(T).hash_code());
   }
-  bool sametype(const variable<void> &other) {
-    return (type()->hash_code() == other.type()->hash_code());
+  bool sametype(const variable<void> &other) const {
+    return (type()->hash_code() == other.type()->hash_code()) && ( size()==other.size() );
+  }
+  size_t size() const noexcept {
+    return m_hdr->size;
   }
 };
 
