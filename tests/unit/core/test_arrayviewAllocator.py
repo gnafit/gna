@@ -113,6 +113,15 @@ def test_variable_allocation_complex():
         avview = av.view()
         assert (allocdata[offset:offset+size]==avview).all()
 
+def test_variables_precision():
+    from gna.env import env
+    gns = env.globalns('test_variable_precision')
+
+    ns = gns('namespace1')
+    ns.defparameter('double',   central=1, fixed=True, label='Double precision variable')
+    with context.precision('float'):
+        ns.defparameter('float',   central=2, fixed=True, label='Float variable')
+
 if __name__ == "__main__":
     run_unittests(globals())
 
