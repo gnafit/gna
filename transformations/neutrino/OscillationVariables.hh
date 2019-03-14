@@ -7,6 +7,8 @@
 #include "ParametersGroup.hh"
 
 class OscillationVariables: public ParametersGroup {
+private:
+  using FloatType = double;
 public:
   OscillationVariables(GNAObject *parent)
     : ParametersGroup(parent, fields())
@@ -15,30 +17,30 @@ public:
     : OscillationVariables(parent)
     { initFields(params); }
 
-  variable<double> DeltaMSq12;
-  variable<double> DeltaMSq13;
-  variable<double> DeltaMSq23;
-  variable<double> DeltaMSqEE;
-  variable<double> DeltaMSqMM;
-  variable<double> Alpha;
-  variable<double> SinSq12;
-  variable<double> SinSq13;
-  variable<double> SinSq23;
-  variable<double> CosSq12;
-  variable<double> CosSq13;
-  variable<double> CosSq23;
-  variable<double> Sin12;
-  variable<double> Sin13;
-  variable<double> Sin23;
-  variable<double> Cos12;
-  variable<double> Cos13;
-  variable<double> Cos23;
-  variable<double> Theta12;
-  variable<double> Theta13;
-  variable<double> Theta23;
-  variable<double> Delta;
-  variable<std::complex<double>> Phase;
-  variable<std::complex<double>> PhaseC;
+  variable<FloatType> DeltaMSq12;
+  variable<FloatType> DeltaMSq13;
+  variable<FloatType> DeltaMSq23;
+  variable<FloatType> DeltaMSqEE;
+  variable<FloatType> DeltaMSqMM;
+  variable<FloatType> Alpha;
+  variable<FloatType> SinSq12;
+  variable<FloatType> SinSq13;
+  variable<FloatType> SinSq23;
+  variable<FloatType> CosSq12;
+  variable<FloatType> CosSq13;
+  variable<FloatType> CosSq23;
+  variable<FloatType> Sin12;
+  variable<FloatType> Sin13;
+  variable<FloatType> Sin23;
+  variable<FloatType> Cos12;
+  variable<FloatType> Cos13;
+  variable<FloatType> Cos23;
+  variable<FloatType> Theta12;
+  variable<FloatType> Theta13;
+  variable<FloatType> Theta23;
+  variable<FloatType> Delta;
+  variable<FloatType> Phase;
+  variable<FloatType> PhaseC;
 
 protected:
   Fields fields() {
@@ -120,12 +122,12 @@ protected:
       .add(&Theta13, {&Sin13}, [&]() { return asin(Sin13.value()); })
       .add(&Theta23, {&Sin23}, [&]() { return asin(Sin23.value()); })
       // CP
-      .add(&Phase, {&Delta}, [&]() {
-          return exp(-std::complex<double>(0, Delta.value()));
-        })
-      .add(&PhaseC, {&Delta}, [&]() { //conjugate
-          return exp(+std::complex<double>(0, Delta.value()));
-        })
+      .add(&Phase, {&Delta}, [&](arrayview<FloatType>& ret) {
+          ret.complex() = exp(-std::complex<FloatType>(0, Delta.value()));
+        }, 2)
+      .add(&PhaseC, {&Delta}, [&](arrayview<FloatType>& ret) { //conjugate
+          ret.complex() = exp(+std::complex<FloatType>(0, Delta.value()));
+        }, 2)
       ;
   }
 };

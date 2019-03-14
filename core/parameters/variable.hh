@@ -54,6 +54,10 @@ public:
     update();
     return data().value[0];
   }
+  const std::complex<ValueType> &complex() const {
+    update();
+    return data().value.complex();
+  }
   const ValueType &value(size_t i) const {
     update();
     return data().value[i];

@@ -20,7 +20,7 @@ public:
     : OscProbPMNSVariables(parent, from, to, names)
     { initFields(params); }
 
-  variable<std::complex<double>> V[Nnu][Nnu];
+  variable<double> V[Nnu][Nnu];
 
   variable<double> weight0;
   variable<double> weight12;
@@ -74,26 +74,26 @@ protected:
            })
       .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
           return 2.0*std::real(
-            V[m_alpha][0].value()*
-            V[m_beta][1].value()*
-            std::conj(V[m_alpha][1].value())*
-            std::conj(V[m_beta][0].value())
+            V[m_alpha][0].complex()*
+            V[m_beta][1].complex()*
+            std::conj(V[m_alpha][1].complex())*
+            std::conj(V[m_beta][0].complex())
             );
         })
       .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
           return 2.0*std::real(
-            V[m_alpha][0].value()*
-            V[m_beta][2].value()*
-            std::conj(V[m_alpha][2].value())*
-            std::conj(V[m_beta][0].value())
+            V[m_alpha][0].complex()*
+            V[m_beta][2].complex()*
+            std::conj(V[m_alpha][2].complex())*
+            std::conj(V[m_beta][0].complex())
             );
         })
       .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
           return 2.0*std::real(
-            V[m_alpha][1].value()*
-            V[m_beta][2].value()*
-            std::conj(V[m_alpha][2].value())*
-            std::conj(V[m_beta][1].value())
+            V[m_alpha][1].complex()*
+            V[m_beta][2].complex()*
+            std::conj(V[m_alpha][2].complex())*
+            std::conj(V[m_beta][1].complex())
             );
         })
       ;

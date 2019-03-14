@@ -54,6 +54,29 @@ def test_variable_allocation():
     print('Data (filled):', allocator.view())
     print('Data (all):', allocator.viewall())
 
+def test_variable_allocation1():
+    from gna.env import env
+    gns = env.globalns('test_variable_allocation1')
+    ndata = 10
+    allocator = allocator_d(ndata)
+
+    with context.allocator(allocator):
+        ns = gns('namespace1')
+        ns.defparameter('float1',   central=1, fixed=True, label='Float variable 1')
+        ns.defparameter('float2',   central=2, fixed=True, label='Float variable 2')
+        ns = gns('namespace2')
+        ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+
+    ns = gns('namespace3')
+    ns.defparameter('float3',   central=100, fixed=True, label='Float variable 3 (independent)')
+    ns.defparameter('float4',   central=200, fixed=True, label='Float variable 4 (independent)')
+
+    gns.printparameters(labels=True)
+
+    print('Data (filled):', allocator.view())
+    print('Data (all):', allocator.viewall())
+
 if __name__ == "__main__":
     run_unittests(globals())
 
