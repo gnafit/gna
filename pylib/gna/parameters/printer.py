@@ -170,8 +170,17 @@ def varstats(var, stats):
 
 @patchROOTClass( ROOT.Variable('double'), '__str__' )
 def Variable__str( self, labels=False ):
+    var = self.getVariable()
+    size = var.size()
+    if size==2:
+        return Variable_complex__str(self, labels, value=var.values().complex())
+
+    name = self.name()
+    if size>2:
+        name += ' [%i]'%size
+
     fmt = dict(
-            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+            name    = colorize(name, Fore.CYAN) if colorama_present else name,
             val     = self.value(),
             color = Fore.BLUE if colorama_present else ""
             )
@@ -191,11 +200,13 @@ def Variable__str( self, labels=False ):
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
-def Variablec__str( self, labels=False  ):
+def Variable_complex__str(self, labels=False, value=None):
+    if value is None:
+        value = self.value()
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
-            rval  = self.value().real(),
-            ival  = self.value().imag(),
+            rval  = value.real(),
+            ival  = value.imag(),
             color = Fore.BLUE if colorama_present else ""
             )
     label = self.label()
@@ -204,6 +215,10 @@ def Variablec__str( self, labels=False  ):
 
     s= namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
+
+    # cnum = value.real() + value.imag()*1j
+    # angle = N.angle(cnum, deg=True)
+    # mag = N.absolute(cnum)
 
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
