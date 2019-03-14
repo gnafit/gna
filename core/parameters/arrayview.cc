@@ -2,9 +2,7 @@
 
 template class std::complex<double>;
 template class arrayview<double>;
-template class arrayviewAllocatorSimple<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
 	template class std::complex<float>;
 	template class arrayview<float>;
-	template class arrayviewAllocatorSimple<float>;
 #endif

@@ -1,43 +1,11 @@
 #pragma once
 
 #include <stdexcept>
-#include <vector>
 #include <new>
 #include <memory>
 #include <algorithm>
 #include <complex>
-
-template<typename T>
-class arrayviewAllocator {
-public:
-    virtual ~arrayviewAllocator(){};
-    virtual T* allocate(size_t n) = 0;
-};
-
-template<typename T>
-class arrayviewAllocatorSimple : public arrayviewAllocator<T> {
-public:
-    arrayviewAllocatorSimple(size_t nmax) : m_buffer(nmax), m_current_ptr(m_buffer.data()) { }
-    virtual ~arrayviewAllocatorSimple(){};
-
-    T* allocate(size_t n) {
-        m_size+=n;
-        if( m_size>m_buffer.size() ){
-            throw std::bad_alloc();
-        }
-        T* ret = m_current_ptr;
-        m_current_ptr += n;
-        return ret;
-    }
-
-    const T* data() const noexcept { return m_buffer.data(); }
-    size_t size() const noexcept { return m_size; }
-    size_t maxSize() const noexcept { return m_buffer.size(); }
-private:
-    size_t m_size=0u;
-    std::vector<T> m_buffer;
-    T* m_current_ptr;
-};
+#include "arrayviewAllocator.hh"
 
 template<typename T>
 class arrayview {
@@ -47,7 +15,16 @@ private:
 public:
   arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
 
-  arrayview(size_t size) : m_allocated(new T[size]), m_buffer(m_allocated.get()), m_size(size) { }
+  arrayview(size_t size) : m_size(size) {
+      auto* allocator = allocatorType::current();
+      if(allocator){
+          m_buffer = allocator->allocate(size);
+      }
+      else{
+          m_buffer = new T[size];
+          m_allocated.reset(m_buffer);
+      }
+  }
   arrayview(const arrayviewType& other) : arrayview(other.size()) { *this = other; }
   arrayview(const std::initializer_list<T>& other) : arrayview(other.size()) { *this = other; }
 
