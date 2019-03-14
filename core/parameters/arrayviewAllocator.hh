@@ -9,6 +9,7 @@ private:
 public:
     virtual ~arrayviewAllocator(){};
     virtual T* allocate(size_t n) = 0;
+    virtual const T* data() const noexcept = 0;
 
     static allocatorType* current() noexcept { return allocatorType::s_current; }
     static void setCurrent(allocatorType* current) noexcept { allocatorType::s_current=current; }

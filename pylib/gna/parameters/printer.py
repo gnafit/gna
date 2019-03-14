@@ -4,6 +4,7 @@ from __future__ import print_function
 from load import ROOT
 import numpy as N
 from gna.parameters import DiscreteParameter
+from gna.bindings import provided_precisions
 
 from itertools import chain, tee, cycle
 import itertools
@@ -168,7 +169,7 @@ def varstats(var, stats):
         else:
             increment('unknown')
 
-@patchROOTClass( ROOT.Variable('double'), '__str__' )
+@patchROOTClass( [ROOT.Variable(prec) for prec in provided_precisions], '__str__' )
 def Variable__str( self, labels=False ):
     var = self.getVariable()
     size = var.size()
@@ -199,7 +200,7 @@ def Variable__str( self, labels=False ):
     s += Style.RESET_ALL if colorama_present else ""
     return s
 
-@patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
+@patchROOTClass( [ROOT.Variable('complex<%s>'%prec) for prec in provided_precisions], '__str__' )
 def Variable_complex__str(self, labels=False, value=None):
     if value is None:
         value = self.value()
@@ -228,7 +229,7 @@ def Variable_complex__str(self, labels=False, value=None):
     s += Style.RESET_ALL if colorama_present else ""
     return s
 
-@patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
+@patchROOTClass( [ROOT.UniformAngleParameter(prec) for prec in provided_precisions], '__str__' )
 def UniformAngleParameter__str( self, labels=False  ):
     fmt = dict(
             name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
@@ -261,7 +262,7 @@ def UniformAngleParameter__str( self, labels=False  ):
     s += Style.RESET_ALL if colorama_present else ""
     return s
 
-@patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
+@patchROOTClass( [ROOT.GaussianParameter(prec) for prec in provided_precisions], '__str__' )
 def GaussianParameter__str( self, labels=False  ):
     fmt = dict(
             name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
