@@ -88,22 +88,6 @@ def test_arrayview_complex():
     assert c1.real()==2.0
     assert c1.imag()==3.0
 
-# def test_arrayview_allocation():
-    # nitems, ndata = 5, 15
-    # allocator = allocator_d(ndata)
-
-    # arrays = []
-    # for i in range(1, nitems):
-        # array = arrayview_d(i, allocator)
-        # for j in range(i):
-            # array[j]=j
-        # print(i, array.view())
-        # arrays.append(array)
-
-    # data = allocator.view()
-    # print('Arrays:', [array.view() for array in arrays])
-    # print('Data:', data)
-
 if __name__ == "__main__":
     run_unittests(globals())
 

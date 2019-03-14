@@ -23,10 +23,17 @@ template<typename T> arrayviewAllocator<T>* arrayviewAllocator<T>::s_current=nul
 template<typename T>
 class arrayviewAllocatorSimple : public arrayviewAllocator<T> {
 public:
-    arrayviewAllocatorSimple(size_t nmax) : m_buffer(nmax), m_current_ptr(m_buffer.data()) { }
+    arrayviewAllocatorSimple(size_t nmax) : m_buffer(nmax), m_current_ptr(m_buffer.data()) {
+        m_sizes.reserve(nmax);
+    }
     virtual ~arrayviewAllocatorSimple(){};
 
     T* allocate(size_t n) {
+        if(!n){
+            return static_cast<T*>(nullptr);
+        }
+        m_sizes.push_back(n);
+
         m_size+=n;
         if( m_size>m_buffer.size() ){
             throw std::bad_alloc();
@@ -42,5 +49,6 @@ public:
 private:
     size_t m_size=0u;
     std::vector<T> m_buffer;
+    std::vector<size_t> m_sizes;
     T* m_current_ptr;
 };

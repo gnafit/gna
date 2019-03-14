@@ -17,6 +17,9 @@ def current_precision():
 def current_precision_short():
     return _current_precision_short
 
+def current_allocator():
+    return R.arrayviewAllocator(_current_precision)
+
 class precision(object):
     """Context manager for the floating precision"""
     old_precision=''
@@ -24,6 +27,10 @@ class precision(object):
         self.precision=precision
 
     def __enter__(self):
+        if self.precision!=_current_precision:
+            if not current_allocator():
+                raise Exception('may not change precision while allocator is set')
+
         self.old_precision = _current_precision
         _set_current_precision(self.precision)
 
@@ -51,7 +58,7 @@ class allocator(object):
         self.allocator = allocator
 
     def __enter__(self):
-        self.cls = R.arrayviewAllocator(_current_precision)
+        self.cls = current_allocator()
         self.backup_allocator = self.cls.current()
         self.cls.setCurrent(self.allocator)
 

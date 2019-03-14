@@ -16,6 +16,9 @@ public:
   arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
 
   arrayview(size_t size) : m_size(size) {
+      if(!size){
+          return;
+      }
       auto* allocator = allocatorType::current();
       if(allocator){
           m_buffer = allocator->allocate(size);
@@ -28,7 +31,7 @@ public:
   arrayview(const arrayviewType& other) : arrayview(other.size()) { *this = other; }
   arrayview(const std::initializer_list<T>& other) : arrayview(other.size()) { *this = other; }
 
-  arrayview(size_t size, allocatorType* allocator) : m_allocated(allocator->allocate(size)), m_size(size) { }
+  arrayview(size_t size, allocatorType* allocator) : m_buffer(allocator->allocate(size)), m_size(size) { }
   arrayview(const arrayviewType& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
   arrayview(const std::initializer_list<T>& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
 
@@ -41,9 +44,9 @@ public:
 
   size_t size() const noexcept {return m_size;}
 
-  arrayview<T>& operator=(const arrayview<T>& other){ assign(other); return *this; }
-  arrayview<T>& operator=(const std::vector<T>& other){ assign(other); return *this; }
-  arrayview<T>& operator=(const std::initializer_list<T>& other){ assign(other); return *this; }
+  arrayview<T>& operator=(const arrayview<T>& other){ copyfrom(other); return *this; }
+  arrayview<T>& operator=(const std::vector<T>& other){ copyfrom(other); return *this; }
+  arrayview<T>& operator=(const std::initializer_list<T>& other){ copyfrom(other); return *this; }
 
   bool operator==(const arrayview<T>& other) const noexcept { return equal(other); }
   bool operator==(const std::vector<T>& other) const noexcept { return equal(other); }
@@ -70,7 +73,7 @@ public:
   }
 
   template<class Other>
-  void assign(const Other& other) {
+  void copyfrom(const Other& other) {
     if(m_size!=other.size()){
       throw std::runtime_error("may assign only same size arrays");
     }
@@ -83,7 +86,7 @@ public:
   const std::complex<T>& complex() const noexcept { return *reinterpret_cast<std::complex<T>*>(m_buffer); }
 private:
   std::unique_ptr<T> m_allocated{nullptr};
-  T*                 m_buffer;
-  size_t             m_size;
+  T*                 m_buffer{nullptr};
+  size_t             m_size{0u};
 };
 
