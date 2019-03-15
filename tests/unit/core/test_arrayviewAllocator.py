@@ -113,14 +113,37 @@ def test_variable_allocation_complex():
         avview = av.view()
         assert (allocdata[offset:offset+size]==avview).all()
 
-def test_variables_precision():
-    from gna.env import env
-    gns = env.globalns('test_variable_precision')
+from gna.bindings import provided_precisions
+if 'float' in provided_precisions:
+    def test_variables_precision():
+        from gna.env import env
+        gns = env.globalns('test_variable_precision')
 
-    ns = gns('namespace1')
-    ns.defparameter('double',   central=1, fixed=True, label='Double precision variable')
-    with context.precision('float'):
-        ns.defparameter('float',   central=2, fixed=True, label='Float variable')
+        ns = gns('namespace1')
+        ns.defparameter('double',   central=1, fixed=True, label='Double precision variable')
+        with context.precision('float'):
+            ns.defparameter('float',   central=2, fixed=True, label='Float variable')
+
+        var_dbl = ns['double'].getVariable()
+        var_flt = ns['float'].getVariable()
+
+        assert var_dbl.value()==1.0
+        assert var_dbl.typeName()=='double'
+
+        assert var_flt.value()==2.0
+        assert var_flt.typeName()=='float'
+
+        par_flt = ns['float'].getParameter()
+        par_dbl = ns['double'].getParameter()
+        par_flt.set(1.e-46)
+        par_dbl.set(1.e-46)
+        assert par_flt.value()==0.0
+        assert par_dbl.value()!=0.0
+
+        par_flt.set(1.e39)
+        par_dbl.set(1.e39)
+        assert par_flt.value()==float('inf')
+        assert par_dbl.value()!=float('inf')
 
 if __name__ == "__main__":
     run_unittests(globals())
