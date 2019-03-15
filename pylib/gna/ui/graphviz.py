@@ -34,6 +34,7 @@ class cmd(basecmd):
         if self.opts.splines:
             kwargs['splines']=self.opts.splines
         graph = GNADot( head, **kwargs )
+        graph.walker.set_parameters(env.globalns)
 
         for output in self.opts.outputs:
             print( 'Write graph to:', output )

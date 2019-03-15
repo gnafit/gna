@@ -81,12 +81,24 @@ class GraphWalker(object):
             self._propagate_forward(entry, queue)
             self._propagate_backward(entry, queue)
 
-    def set_parameters(iterable):
-        for par in iterable:
+    def set_parameters(self, ns):
+        self.variables_cache=[]
+        for (name, par) in ns.walknames():
             var = par.getVariable()
-            for entry in self.cash_entries:
-                dist = entry.tainted.distance(var)
-                print(entry.name, entry.label, var.name())
+            self.variables_cache.append(var)
+
+        for var in self.variables_cache:
+            for entry in self.cache_entries:
+                dist = entry.tainted.distance(var, True)
+                if dist!=1:
+                    continue
+                print(entry.name, var.name(), dist)
+
+            for var1 in self.variables_cache:
+                dist = var1.distance(var, True)
+                if dist!=1:
+                    continue
+                print(var1.name(), var.name(), dist)
 
 
     def _list_do(self, lst, *args):
