@@ -162,6 +162,9 @@ public:
     }
   }
   bool depends(changeable other) const {
+    if(*this==other){
+      return true;
+    }
     std::deque<changeable> queue;
     std::set<const void*> visited;
     queue.push_back(*this);
@@ -178,6 +181,23 @@ public:
     }
     return false;
   }
+  //int distance(changeable other) const {
+    //std::deque<changeable> queue;
+    //std::set<const void*> visited;
+    //queue.push_back(*this);
+    //while (!queue.empty()) {
+      //changeable x = queue.front();
+      //queue.pop_front();
+      //references &ems = x.m_hdr->emitters;
+      //if (ems.has(other)) {
+        //return true;
+      //}
+      //if (visited.insert(x.rawdata()).second) {
+        //queue.insert(queue.end(), ems.begin(), ems.end());
+      //}
+    //}
+    //return false;
+  //}
   void replace(changeable other) {
     if (this->is(other)) {
       return;

@@ -12,7 +12,7 @@ class GraphWalker(object):
         for arg in args:
             self._add_entry_point(arg)
 
-        self.build_cache()
+        self._build_cache()
 
     def _add_entry_point(self, arg):
         OutputHandle = R.TransformationTypes.OutputHandleT('double')
@@ -62,7 +62,7 @@ class GraphWalker(object):
             else:
                 self.cache_sources_open.append(source)
 
-    def build_cache(self):
+    def _build_cache(self):
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
@@ -80,6 +80,8 @@ class GraphWalker(object):
 
             self._propagate_forward(entry, queue)
             self._propagate_backward(entry, queue)
+
+        self._build_cache_variables(self)
 
     def _list_do(self, lst, *args):
         for obj in lst:

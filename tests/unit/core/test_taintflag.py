@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 import numpy as N
-from load import ROOT as R
+from loadfast import ROOT as R
 
 t1a = R.taintflag()
 t1b = R.taintflag()
@@ -159,6 +159,25 @@ def test_taintflag_14():
     print(res and 'OK' or 'FAIL!')
     if __name__!="__main__" and  not res:
         raise Exception('freeze failed')
+
+def test_taintflag_dependance_01():
+    reset()
+
+    assert t3a.depends(t3a)
+    assert t3a.depends(t1a)
+    assert t3a.depends(t1b)
+    assert t3a.depends(t2a)
+    assert not t3a.depends(t1c)
+    assert not t3a.depends(t2b)
+    assert not t3a.depends(t3b)
+
+    assert t2a.depends(t1a)
+    assert t2a.depends(t1b)
+    assert t2a.depends(t2a)
+    assert not t2a.depends(t1c)
+    assert not t2a.depends(t2b)
+    assert not t2a.depends(t3a)
+    assert not t2a.depends(t3b)
 
 if __name__ == "__main__":
     glb = globals()
