@@ -179,6 +179,80 @@ def test_taintflag_dependance_01():
     assert not t2a.depends(t3a)
     assert not t2a.depends(t3b)
 
+def test_taintflag_distance_01():
+    reset()
+
+    inf = N.uintp(-1)
+    assert t3a.distance(t1a)==2
+    assert t3a.distance(t1b)==2
+    assert t3a.distance(t1c)==inf
+    assert t3a.distance(t2a)==1
+    assert t3a.distance(t2b)==inf
+    assert t3a.distance(t3a)==0
+    assert t3a.distance(t3b)==inf
+
+    assert t3b.distance(t1a)==inf
+    assert t3b.distance(t1b)==2
+    assert t3b.distance(t1c)==2
+    assert t3b.distance(t2a)==inf
+    assert t3b.distance(t2b)==1
+    assert t3b.distance(t3a)==inf
+    assert t3b.distance(t3b)==0
+
+    assert t2a.distance(t1a)==1
+    assert t2a.distance(t1b)==1
+    assert t2a.distance(t1c)==inf
+    assert t2a.distance(t2a)==0
+    assert t2a.distance(t2b)==inf
+    assert t2a.distance(t3a)==inf
+    assert t2a.distance(t3b)==inf
+
+    assert t2b.distance(t1a)==inf
+    assert t2b.distance(t1b)==1
+    assert t2b.distance(t1c)==1
+    assert t2b.distance(t2a)==inf
+    assert t2b.distance(t2b)==0
+    assert t2b.distance(t3a)==inf
+    assert t2b.distance(t3b)==inf
+
+def test_taintflag_distance_02():
+    reset()
+
+    printboth(*flags)
+
+    inf = N.uintp(-1)
+    assert t3a.distance(t1a, True)==2
+    assert t3a.distance(t1b, True)==2
+    assert t3a.distance(t1c, True)==inf
+    assert t3a.distance(t2a, True)==1
+    assert t3a.distance(t2b, True)==inf
+    assert t3a.distance(t3a, True)==0
+    assert t3a.distance(t3b, True)==inf
+
+    assert t3b.distance(t1a, True)==inf
+    assert t3b.distance(t1b, True)==1   # distance throught passthrough flag
+    assert t3b.distance(t1c, True)==1   # distance throught passthrough flag
+    assert t3b.distance(t2a, True)==inf
+    assert t3b.distance(t2b, True)==1   # distance to passthrough flag (not through)
+    assert t3b.distance(t3a, True)==inf
+    assert t3b.distance(t3b, True)==0
+
+    assert t2a.distance(t1a, True)==1
+    assert t2a.distance(t1b, True)==1
+    assert t2a.distance(t1c, True)==inf
+    assert t2a.distance(t2a, True)==0
+    assert t2a.distance(t2b, True)==inf
+    assert t2a.distance(t3a, True)==inf
+    assert t2a.distance(t3b, True)==inf
+
+    assert t2b.distance(t1a, True)==inf
+    assert t2b.distance(t1b, True)==1   # distance from passthrough flag (not through)
+    assert t2b.distance(t1c, True)==1   # distance from passthrough flag (not through)
+    assert t2b.distance(t2a, True)==inf
+    assert t2b.distance(t2b, True)==0
+    assert t2b.distance(t3a, True)==inf
+    assert t2b.distance(t3b, True)==inf
+
 if __name__ == "__main__":
     glb = globals()
     for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):

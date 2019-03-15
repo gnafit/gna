@@ -115,6 +115,9 @@ public:
   bool frozen() const {
     return m_hdr->status==TaintStatus::Frozen || m_hdr->status==TaintStatus::FrozenTainted;
   }
+  bool passthrough() const {
+    return m_hdr->status==TaintStatus::PassThrough;
+  }
   TaintStatus taintstatus() const {
     return m_hdr->status;
   }
@@ -169,35 +172,43 @@ public:
     std::set<const void*> visited;
     queue.push_back(*this);
     while (!queue.empty()) {
-      changeable x = queue.front();
+      changeable current = queue.front();
       queue.pop_front();
-      references &ems = x.m_hdr->emitters;
-      if (ems.has(other)) {
+      references &emitters = current.m_hdr->emitters;
+      if (emitters.has(other)) {
         return true;
       }
-      if (visited.insert(x.rawdata()).second) {
-        queue.insert(queue.end(), ems.begin(), ems.end());
+      if (visited.insert(current.rawdata()).second) {
+        queue.insert(queue.end(), emitters.begin(), emitters.end());
       }
     }
     return false;
   }
-  //int distance(changeable other) const {
-    //std::deque<changeable> queue;
-    //std::set<const void*> visited;
-    //queue.push_back(*this);
-    //while (!queue.empty()) {
-      //changeable x = queue.front();
-      //queue.pop_front();
-      //references &ems = x.m_hdr->emitters;
-      //if (ems.has(other)) {
-        //return true;
-      //}
-      //if (visited.insert(x.rawdata()).second) {
-        //queue.insert(queue.end(), ems.begin(), ems.end());
-      //}
-    //}
-    //return false;
-  //}
+  size_t distance(changeable other, bool ignore_passthrough=false) const {
+    if(*this==other){
+      return 0u;
+    }
+    std::deque<std::pair<changeable*,size_t>> queue;
+    std::set<const void*> visited;
+    queue.push_back({const_cast<changeable*>(this), 1lu});
+    changeable* current;
+    size_t depth;
+    while (!queue.empty()) {
+      std::tie(current, depth) = queue.front();
+      queue.pop_front();
+      references &emitters = current->m_hdr->emitters;
+      if (emitters.has(other)) {
+        return depth;
+      }
+      if (visited.insert(current->rawdata()).second) {
+        for(auto& emitter: emitters){
+          size_t newdepth = ignore_passthrough ? depth+static_cast<size_t>(!emitter.passthrough()) : depth+1;
+          queue.push_back({&emitter, newdepth});
+        }
+      }
+    }
+    return -1lu;
+  }
   void replace(changeable other) {
     if (this->is(other)) {
       return;
