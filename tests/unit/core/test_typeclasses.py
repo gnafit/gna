@@ -5,6 +5,7 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.unittest import run_unittests, makefloat
 from gna import constructors as C
+from gna import context
 import numpy as np
 
 def check(r, size, expect):
@@ -87,7 +88,7 @@ def test_typeclass_same_v01():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1))
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1))
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
@@ -104,13 +105,13 @@ def test_typeclass_same_v02():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-2))
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-2))
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((-2,-1))
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((-2,-1))
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -127,13 +128,13 @@ def test_typeclass_same_v03():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'shape')
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'kind')
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'kind')
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -149,13 +150,13 @@ def test_typeclass_same_v04():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'shape')
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1),)
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1),)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -176,8 +177,8 @@ def test_typeclass_passtype():
     for i in range(5):
         obj.add_output()
 
-    dt1 = R.TypeClasses.PassTypeT(C._current_precision)((0,), (0,1))
-    dt2 = R.TypeClasses.PassTypeT(C._current_precision)((1,), (2,-1))
+    dt1 = R.TypeClasses.PassTypeT(context.current_precision())((0,), (0,1))
+    dt2 = R.TypeClasses.PassTypeT(context.current_precision())((1,), (2,-1))
     dt1.dump(); print()
     dt2.dump(); print()
     obj.add_typeclass(dt1)
@@ -210,8 +211,8 @@ def test_typeclass_passeach():
     for i in range(5):
         obj.add_output()
 
-    dt1 = R.TypeClasses.PassTypeT(C._current_precision)((2,), (0,1))
-    dt2 = R.TypeClasses.PassEachTypeT(C._current_precision)((0,-1), (2,-1))
+    dt1 = R.TypeClasses.PassTypeT(context.current_precision())((2,), (0,1))
+    dt2 = R.TypeClasses.PassEachTypeT(context.current_precision())((0,-1), (2,-1))
     dt1.dump(); print()
     dt2.dump(); print()
     obj.add_typeclass(dt1)

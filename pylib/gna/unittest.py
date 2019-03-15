@@ -14,10 +14,10 @@ def run_unittests(glb, message='All tests are OK!'):
 
 if 'float' in R.GNA.provided_precisions():
     def makefloat(name, globals):
-        import constructors as C
+        from gna import context
         fcn=globals[name]
         def ffcn():
-            with C.precision('float'):
+            with context.precision('float'):
                 fcn()
         globals[name+'_float']=ffcn
 else:

@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 import numpy as N
 from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
+from gna import context
 from gna.bindings import DataType, provided_precisions
 
 #
@@ -60,7 +61,7 @@ if 'float' in provided_precisions:
         #
         # Create transformations
         #
-        with C.precision('float'):
+        with context.precision('float'):
             points = C.Points(mat)
 
         out = points.points.points
