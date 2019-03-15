@@ -30,8 +30,8 @@ namespace ParametrizedTypes {
     void subscribe_(taintflag flag);
 
     template <typename T>
-    VariableHandle<T> variable_(const std::string &name) {
-      auto *e = new ParametrizedEntry(parameter<T>(name.c_str()), name, this);
+    VariableHandle<T> variable_(const std::string &name, size_t size=0u) {
+      auto *e = new ParametrizedEntry(parameter<T>(name.c_str(), size), name, this);
       m_entries.push_back(e);
 
       e->par.subscribe(m_taintflag);
@@ -39,8 +39,8 @@ namespace ParametrizedTypes {
       return VariableHandle<T>(*e);
     }
     template <typename T>
-    VariableHandle<T> variable_(variable<T> *field, const std::string &name) {
-      auto handle = variable_<T>(name);
+    VariableHandle<T> variable_(variable<T> *field, const std::string &name, size_t size=0u) {
+      auto handle = variable_<T>(name, size);
       field->assign(handle.m_entry->par);
       handle.m_entry->field = field;
       return handle;

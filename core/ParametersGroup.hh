@@ -41,7 +41,7 @@ public:
 
   template <typename T>
   Handle factory(Field field, const std::string &name) {
-    return m_parent->variable_(static_cast<variable<T>*>(field), name);
+    return m_parent->variable_(static_cast<variable<T>*>(field), name, 0u);
   }
 
   template <typename T=void>

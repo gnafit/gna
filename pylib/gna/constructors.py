@@ -167,6 +167,8 @@ def _wrap_parameter(classname):
         return template(context.current_precision())(*args, **kwargs)
     return newfcn
 
+Variable              = _wrap_parameter('Variable')
+Parameter             = _wrap_parameter('Parameter')
 GaussianParameter     = _wrap_parameter('GaussianParameter')
 UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
 ParameterWrapper      = _wrap_parameter('ParameterWrapper')

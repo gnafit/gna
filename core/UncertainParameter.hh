@@ -39,9 +39,10 @@ class Variable: public GNASingleObject,
                 public TransformationBind<Variable<T>>
 {
 public:
-  Variable(const std::string &name)
-    : m_varhandle(variable_(&m_var, name)), m_name(name)
+  Variable(const std::string &name, bool allocate=false)
+    : m_varhandle(variable_(&m_var, name, static_cast<size_t>(allocate))), m_name(name)
   { }
+
   Variable(const std::string &name, variable<void> var)
     : Variable(name)
   { m_varhandle.bind(variable<T>(var)); }
@@ -72,8 +73,8 @@ protected:
 };
 
 template <>
-inline Variable<double>::Variable(const std::string &name)
-  : m_varhandle(variable_(&m_var, name)), m_name(name)
+inline Variable<double>::Variable(const std::string &name, bool allocate)
+  : m_varhandle(variable_(&m_var, name, static_cast<size_t>(allocate))), m_name(name)
 {
   transformation_("value")
     .output(name)
@@ -86,11 +87,28 @@ inline Variable<double>::Variable(const std::string &name)
     .finalize();
 }
 
+#ifdef PROVIDE_SINGLE_PRECISION
+template <>
+inline Variable<float>::Variable(const std::string &name, bool allocate)
+  : m_varhandle(variable_(&m_var, name, static_cast<size_t>(allocate))), m_name(name)
+{
+  transformation_("value")
+    .output(name)
+    .types([](TypesFunctionArgs& fargs) {
+        fargs.rets[0] = DataType().points().shape(1);
+      })
+    .func([](Variable<float> *obj, FunctionArgs& fargs) {
+        fargs.rets[0].arr(0) = obj->m_var.value();
+      })
+    .finalize();
+}
+#endif
+
 template <typename T>
 class Parameter: public Variable<T> {
 public:
   Parameter(const std::string &name)
-    : Variable<T>(name), m_par(this->m_varhandle.claim())
+    : Variable<T>(name, true/*allocate*/), m_par(this->m_varhandle.claim())
     {}
 
   virtual void set(T value)

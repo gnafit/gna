@@ -58,6 +58,7 @@ struct inconstant_header {
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
   inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname, size), value(size) {
+    //printf("make %s of size %zu\n", this->name.c_str(), size);
     type = &typeid(ValueType);
   }
   arrayview<ValueType> value;
