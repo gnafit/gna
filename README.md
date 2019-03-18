@@ -1,19 +1,25 @@
-# Global Neutrino Analysis Toolkit
+# Global Neutrino Analysis Project
 
 [![Docs status](https://git.jinr.ru/gna/gna/badges/master/pipeline.svg)](https://git.jinr.ru/gna/gna/commits/master)
 
-For installation guidelines and documentation look at `doc/`: 
-> `cd doc/`
+Global Neutrino Analysis (GNA) project aims at providing the following tools for 
+the needs of the data analysis related to the neutrino physics:
 
-> `make latexpdf` to get the PDF file.
+*  Buill complex physical models with large number of parameters using dataflow 
+   principles. 
+*  Implicit caching and lazy evaluation.
+*  High performance fitting using CPU/CPU (multithreading)/GPU. 
+   Swithcing between modes at a runtime, not at a compile time.
+*  Statistical analysis of data of neutrino experiments.
+*  Combined analysis.
 
-> `make html` to get static HTML pages, it looks better and easier to navigate.
+The project is on the alpha stage.
 
-> You can install ReadTheDocs Sphinx theme to get nicer HTML. Do the `pip install sphinx_rtd_theme` get it. Then Sphinx will automatically switch to it.
+# Links
 
-> Also you need PlantUML package to build the docs correctly `sudo -H pip install sphinxcontrib-plantuml`
-
-> Access the docs with `firefox -new-window doc/build/html/index.html`
-
-
-You will need TeX distribution and [`Sphinx`](http://www.sphinx-doc.org/en/stable/) installed for that.
+| header                    | header                                     |
+| ------                    | ------                                     |
+| Homepage                  | https://astronu.jinr.ru/wiki/index.php/GNA |
+| Documentation             | http://gna.pages.jinr.ru/gna/              |
+| Public mirror (master)    | https://github.com/gnafit/gna              |
+| Main repository (private) | https://git.jinr.ru/gna/gna                |

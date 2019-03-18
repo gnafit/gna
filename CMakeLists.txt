@@ -11,8 +11,21 @@ add_subdirectory(extra)
 add_subdirectory(examples)
 add_subdirectory(unittest)
 
-set(SOURCES ${CORE_SOURCES} ${TRANSFORMATION_SOURCES} ${EXTRA_SOURCES} ${EXAMPLES_SOURCES} ${UNITTEST_SOURCES})
-set(HEADERS ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
+set(SOURCES
+    ${CORE_SOURCES}
+    ${TRANSFORMATION_SOURCES}
+    ${EXTRA_SOURCES}
+    ${EXAMPLES_SOURCES}
+    ${UNITTEST_SOURCES}
+    )
+
+set(HEADERS
+    ${CORE_HEADERS}
+    ${TRANSFORMATION_HEADERS}
+    ${EXTRA_HEADERS}
+    ${EXAMPLES_HEADERS}
+    ${UNITTEST_HEADERS}
+    )
 
 include_directories(
                     core/parameters/
@@ -43,6 +56,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
+
+add_custom_target(cleanpyc ALL
+                  COMMAND find . -name '*.pyc' -delete
+                  COMMENT "Cleaning temporary python files"
+                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 option(GENERATE_PROFILE OFF)
 option(USE_PROFILE OFF)

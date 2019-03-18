@@ -191,6 +191,14 @@ public:
     }
   }
 
+   void setRelSigma(T relsigma) {
+     auto central = this->central();
+     if(central==static_cast<T>(0)){
+       throw std::runtime_error("May not set relative uncertainty to the parameter with central=0");
+     }
+     this->setSigma(central*relsigma);
+   }
+
   bool isCovariated(const GaussianParameter<T>& other) const noexcept {
     auto it = this->m_covariances.find(&other);
     if (it == this->m_covariances.end() and (&other != this)) {
@@ -314,4 +322,3 @@ inline T UniformAngleParameter<T>::cast(const std::string &v) const {
   T b = boost::lexical_cast<T>(v.substr(pipos+2));
   return a*pi/b;
 }
-
