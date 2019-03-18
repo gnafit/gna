@@ -2,17 +2,23 @@
 
 from __future__ import print_function
 import ROOT as R
-from collections import deque
+from collections import deque, namedtuple, OrderedDict
 import numpy as N
 import types
 
+VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_entry', 'taints_entry', 'depends_var', 'taints_var'])
+
 class GraphWalker(object):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._entry_points = []
         for arg in args:
             self._add_entry_point(arg)
 
         self._build_cache()
+
+        ns = kwargs.get('namespace', None)
+        if ns:
+            self.set_parameters(ns)
 
     def _add_entry_point(self, arg):
         OutputHandle = R.TransformationTypes.OutputHandleT('double')
@@ -66,6 +72,7 @@ class GraphWalker(object):
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
+        self.cache_variables=OrderedDict()
 
         self.cache_sources_open=[]
         self.cache_sinks_open=[]
@@ -81,13 +88,54 @@ class GraphWalker(object):
             self._propagate_forward(entry, queue)
             self._propagate_backward(entry, queue)
 
-    def set_parameters(iterable):
-        for par in iterable:
+    def set_parameters(self, ns):
+        self.cache_variables=OrderedDict()
+        for (name, par) in ns.walknames():
             var = par.getVariable()
-            for entry in self.cash_entries:
-                dist = entry.tainted.distance(var)
-                print(entry.name, entry.label, var.name())
+            # print('walk', name, var.hash())
+            self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [])
 
+        for varentry in self.cache_variables.values():
+            for transentry in self.cache_entries:
+                dist = transentry.tainted.distance(varentry.variable, True, 1)
+                if dist!=1:
+                    continue
+                varentry.taints_entry.append(transentry)
+
+                # print(varentry.variable.name(), '->', transentry.name)
+
+            for varentry1 in self.cache_variables.values():
+                dist = varentry1.variable.distance(varentry.variable, True, 1)
+                if dist!=1:
+                    continue
+                varentry.taints_var.append(varentry1)
+                varentry1.depends_var.append(varentry)
+
+                # print(varentry.variable.name(), '->', varentry1.variable.name())
+
+        for varhash in list(self.cache_variables.keys()):
+            varentry = self.cache_variables.get(varhash, None)
+            if varentry is None:
+                continue
+
+            self._remove_deadend_variable(varhash, varentry)
+
+    def _remove_deadend_variable(self, varhash, varentry):
+        # print('check', varentry.variable.name())
+        if varentry.taints_var or varentry.taints_entry:
+            return
+
+        # print('  remove', varentry.variable.name())
+
+        del self.cache_variables[varhash]
+        upstream = varentry.depends_var
+
+        for varentry1 in varentry.taints_var:
+            varentry1.depends_var.remove(varentry)
+
+        for varentry1 in upstream:
+            varentry1.taints_var.remove(varentry)
+            self._remove_deadend_variable(varentry1.variable.hash(), varentry1)
 
     def _list_do(self, lst, *args):
         for obj in lst:
@@ -102,6 +150,9 @@ class GraphWalker(object):
 
     def source_do(self, *args):
         return self._list_do(self.cache_sources, *args)
+
+    def variable_do(self, *args):
+        return self._list_do(self.cache_variables.values(), *args)
 
     def source_open_do(self, *args):
         return self._list_do(self.cache_sources_open, *args)
