@@ -184,9 +184,12 @@ public:
     }
     return false;
   }
-  size_t distance(changeable other, bool ignore_passthrough=false) const {
+  size_t distance(changeable other, bool skip_passthrough=false, size_t max_depth=-1lu) const {
     if(*this==other){
       return 0u;
+    }
+    if(!max_depth){
+      return -1lu;
     }
     std::deque<std::pair<changeable*,size_t>> queue;
     std::set<const void*> visited;
@@ -202,7 +205,10 @@ public:
       }
       if (visited.insert(current->rawdata()).second) {
         for(auto& emitter: emitters){
-          size_t newdepth = ignore_passthrough ? depth+static_cast<size_t>(!emitter.passthrough()) : depth+1;
+          size_t newdepth = skip_passthrough ? depth+static_cast<size_t>(!emitter.passthrough()) : depth+1;
+          if(newdepth>max_depth){
+            continue;
+          }
           queue.push_back({&emitter, newdepth});
         }
       }
