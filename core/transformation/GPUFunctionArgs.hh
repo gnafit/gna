@@ -69,7 +69,7 @@ namespace TransformationTypes{
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
         ///TODO: deallocate m_argsmapping_dev
-        //
+
         m_args.fillContainers(m_entry->sources);
         m_rets.fillContainers(m_entry->sinks);
         m_ints.fillContainers(m_entry->storages);
@@ -99,7 +99,6 @@ namespace TransformationTypes{
 
         argsmapping = m_argsmapping_dev;
     }
-
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::dump(){

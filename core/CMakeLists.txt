@@ -12,6 +12,7 @@ set(CORE_SOURCES
   # GPU staff
   core/transformation/GPUFunctionArgs.cc
   core/transformation/GPUVariablesLocal.cc
+  core/transformation/GPUVariables.cc
   core/transformation/GPUFunctionData.cc
   # Transformation
   core/transformation/TransformationEntry.cc
@@ -101,6 +102,7 @@ set(CORE_HEADERS
   evaluable.hh
   callback.hh
   # GPU related stuff
+  GPUVariables.hh
   GPUVariablesLocal.hh
   GPUFunctionData.hh
   GPUFunctionArgs.hh

@@ -165,7 +165,7 @@ class TreeStyle(object):
             dim = getdim(entry.sinks[0])
         elif objectname in ('WeightedSum'):
             mark='+w'
-            npars=entry.sinks.size()
+            npars=entry.sources.size()
             dim = getdim(entry.sinks[0])
         elif objectname in ('Product',):
             mark='*'
@@ -210,7 +210,7 @@ class TreeStyle(object):
             features.static=True
             mark='c'
             dim = getdim(entry.sinks[0])
-            npars=1
+            npars=0
         elif objectname in ('HistSmearSparse', 'HistSmear'):
             mark='@'
             dim = getdim(entry.sinks[0])
