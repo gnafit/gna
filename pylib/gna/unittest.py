@@ -12,15 +12,30 @@ def run_unittests(glb, message='All tests are OK!'):
 
     print(message)
 
-if 'float' in R.GNA.provided_precisions():
-    def makefloat(name, globals):
-        from gna import context
-        fcn=globals[name]
-        def ffcn():
-            with context.precision('float'):
-                fcn()
-        globals[name+'_float']=ffcn
-else:
-    def makefloat(name, globals):
-        pass
+def passname(fcn):
+    name = fcn.__name__
+    def newfcn(*args, **kwargs):
+        return fcn(*args, function_name=name, **kwargs)
+    return newfcn
 
+if 'float' in R.GNA.provided_precisions():
+    def floatcopy(glb, addname=False):
+        def decorator(fcn):
+            newname = fcn.__name__+'_float'
+            def newfcn(*args, **kwargs):
+                from gna import context
+                if addname:
+                    kwargs.setdefault('function_name', newname)
+                with context.precision('float'):
+                    fcn(*args, **kwargs)
+            newfcn.__name__=newname
+            glb[newname]=newfcn
+
+            if addname:
+                return passname(fcn)
+            else:
+                return fcn
+        return decorator
+else:
+    def floatcopy(*args, **kwargs):
+        return lambda fcn: fcn

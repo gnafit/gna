@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.unittest import run_unittests, makefloat
+from gna.unittest import *
 from load import ROOT as R
 import numpy as N
 from gna import constructors as C
@@ -22,13 +22,14 @@ for precision in bindings.provided_precisions:
     R.arrayviewAllocatorSimple(precision).view = arrayview_view
     R.arrayviewAllocatorSimple(precision).viewall = allocator_viewall
 
+@floatcopy(globals())
 def test_arrayview_allocation():
     nitems, ndata = 6, 15
-    allocator = R.arrayviewAllocatorSimple('double')(ndata)
+    allocator = R.arrayviewAllocatorSimple(context.current_precision())(ndata)
 
     arrays = []
     for i in range(1, nitems):
-        array = R.arrayview('double')(i, allocator)
+        array = R.arrayview(context.current_precision())(i, allocator)
         for j in range(i):
             array[j]=j
         print(i, array.view())
@@ -38,11 +39,12 @@ def test_arrayview_allocation():
     print('Data (filled):', allocator.view())
     print('Data (all):', allocator.viewall())
 
-def test_variable_allocation():
+@floatcopy(globals(), addname=True)
+def test_variable_allocation(function_name):
     from gna.env import env
-    ns = env.globalns('test_variable_allocation')
+    ns = env.globalns(function_name)
     ndata = 10
-    allocator = R.arrayviewAllocatorSimple('double')(ndata)
+    allocator = R.arrayviewAllocatorSimple(context.current_precision())(ndata)
 
     with context.allocator(allocator):
         ns.defparameter('float1',   central=1, fixed=True, label='Float variable 1')
@@ -55,11 +57,12 @@ def test_variable_allocation():
     print('Data (filled):', allocator.view())
     print('Data (all):', allocator.viewall())
 
-def test_variable_allocation1():
+@floatcopy(globals(), addname=True)
+def test_variable_allocation1(function_name):
     from gna.env import env
-    gns = env.globalns('test_variable_allocation1')
+    gns = env.globalns(function_name)
     ndata = 10
-    allocator = R.arrayviewAllocatorSimple('double')(ndata)
+    allocator = R.arrayviewAllocatorSimple(context.current_precision())(ndata)
 
     with context.allocator(allocator):
         ns = gns('namespace1')
@@ -78,9 +81,10 @@ def test_variable_allocation1():
     print('Data (filled):', allocator.view())
     print('Data (all):', allocator.viewall())
 
-def test_variable_allocation2(nsname='test_variable_allocation2'):
+@floatcopy(globals(), addname=True)
+def test_variable_allocation2(function_name):
     from gna.env import env
-    gns = env.globalns(nsname)
+    gns = env.globalns(function_name)
     ndata = 10
 
     with context.allocator(ndata) as allocator:
@@ -99,10 +103,6 @@ def test_variable_allocation2(nsname='test_variable_allocation2'):
 
     print('Data (filled):', allocator.view())
     print('Data (all):', allocator.viewall())
-
-def test_variable_allocation2_float():
-    with context.precision('float'):
-        test_variable_allocation2('test_variable_allocation2_float')
 
 def test_variable_allocation_complex():
     from gna.env import env
@@ -142,9 +142,10 @@ def test_variable_allocation_complex():
 
 from gna.bindings import provided_precisions
 if 'float' in provided_precisions:
-    def test_variables_precision():
+    @passname
+    def test_variables_precision(function_name):
         from gna.env import env
-        gns = env.globalns('test_variable_precision')
+        gns = env.globalns(function_name)
 
         ns = gns('namespace1')
         ns.defparameter('double',   central=1, fixed=True, label='Double precision variable')

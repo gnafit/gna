@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
-from gna.unittest import run_unittests, makefloat
+from gna.unittest import *
 from gna import constructors as C
 from gna import context
 import numpy as np
@@ -79,6 +79,7 @@ def test_range_07():
     check(r, 5, [2])
     check(r, 6, [])
 
+@floatcopy(globals())
 def test_typeclass_same_v01():
     """All inputs have same types"""
     arrays = [np.arange(12, dtype='d').reshape(3,4) for i in range(5)]
@@ -94,6 +95,7 @@ def test_typeclass_same_v01():
     res = obj.process_types();
     assert res
 
+@floatcopy(globals())
 def test_typeclass_same_v02():
     """Last input has another shape"""
     arrays = [np.arange(12, dtype='d').reshape(3,4) for i in range(5)]
@@ -231,9 +233,6 @@ def test_typeclass_passeach():
     assert doutputs[2].datatype()==dta
     assert doutputs[3].datatype()==dtb
     assert doutputs[4].datatype()==dtc
-
-makefloat('test_typeclass_same_v01', globals())
-makefloat('test_typeclass_same_v02', globals())
 
 if __name__ == "__main__":
     run_unittests(globals())
