@@ -32,7 +32,7 @@ def savegraph(obj, fname, *args, **kwargs):
         gdot.draw(fname)
 
 class GNADot(object):
-    layers = 'variable,transformation'
+    layers = 'variable:transformation'
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)

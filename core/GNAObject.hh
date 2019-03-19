@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include "ParametrizedBase.hh"
 #include "VariableDescriptor.hh"
 #include "EvaluableDescriptor.hh"
@@ -11,7 +12,7 @@
 template <typename SourceFloatType,typename SinkFloatType> class GNAObjectT;
 
 template <>
-class GNAObjectT<void,void> {
+class GNAObjectT<void,void>: public boost::noncopyable {
 protected:
   GNAObjectT() = default;
   virtual ~GNAObjectT(){}
@@ -39,13 +40,13 @@ public:
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
     { }
-  GNAObjectT(const GNAObjectType &other)
-    : TransformationBaseType(other),
-      ParametrizedTypes::ParametrizedBase(other),
-      variables(ParametrizedTypes::ParametrizedBase::m_entries),
-      evaluables(m_eventries),
-      transformations(TransformationBaseType::m_entries)
-    { }
+  //GNAObjectT(const GNAObjectType &other)
+    //: TransformationBaseType(other),
+      //ParametrizedTypes::ParametrizedBase(other),
+      //variables(ParametrizedTypes::ParametrizedBase::m_entries),
+      //evaluables(m_eventries),
+      //transformations(TransformationBaseType::m_entries)
+    //{ }
   virtual ~GNAObjectT(){}
 
   void subscribe(taintflag flag) {
@@ -109,9 +110,9 @@ public:
   GNASingleObjectT()
     : GNAObjectT<SourceFloatType,SinkFloatType>(SingleTransformation())
   { }
-  GNASingleObjectT(const GNASingleObjectType &other)
-    : GNAObjectT<SourceFloatType,SinkFloatType>(other)
-  { }
+  //GNASingleObjectT(const GNASingleObjectType &other)
+    //: GNAObjectT<SourceFloatType,SinkFloatType>(other)
+  //{ }
 
   OutputHandle single() override {
     return (*this)[0].outputs.single();

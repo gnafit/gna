@@ -39,22 +39,22 @@ public:
    *
    * @param other -- TransformationBind to copy MemFunction and MemTypesFunction objects from.
    */
-  TransformationBind(const TransformationBindType &other)
-    : m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
-  {
-    rebindMemFunctions();
-  }
+  //TransformationBind(const TransformationBindType &other)
+    //: m_memFuncs(other.m_memFuncs), m_memTypesFuncs(other.m_memTypesFuncs)
+  //{
+    //rebindMemFunctions();
+  //}
 
   /**
    * @brief Clone assignment. Works the same was as clone constructor.
    * @copydoc TransformationBind::TransformationBind(const TransformationBind<Derived>&)
    */
-  TransformationBindType &operator=(const TransformationBindType &other) {
-    m_memFuncs = other.m_memFuncs;
-    m_memTypesFuncs = other.m_memTypeFuncs;
-    rebindMemFunctions();
-    return *this;
-  }
+  //TransformationBindType &operator=(const TransformationBindType &other) {
+    //m_memFuncs = other.m_memFuncs;
+    //m_memTypesFuncs = other.m_memTypeFuncs;
+    //rebindMemFunctions();
+    //return *this;
+  //}
 
   /**
    * @brief Initialize the new transformation Entry.
@@ -142,31 +142,31 @@ private:
    *
    * @todo Should be tested.
    */
-  void rebindMemFunctions() {
-    for (const auto &f: m_memFuncs) {
-      auto  idx   = std::get<0>(f);
-      auto& name  = std::get<1>(f);
-      auto& mfunc = std::get<2>(f);
-      auto& entry = m_entries[idx];
-      auto& func  = this->template bind<>(mfunc);
-      entry.functions.at(name).fun = func;
-      if(entry.funcname==name) {
-        entry.fun = func;
-      }
-    }
-    for (const auto &f: m_memTypesFuncs) {
-      auto  idx = std::get<0>(f);
-      auto  fidx = std::get<1>(f);
-      auto& func = std::get<2>(f);
-      m_entries[idx].typefuns[fidx] = this->template bind<>(func);
-    }
-    for (const auto &f: m_memStorageFuncs) {
-      auto  idx  = std::get<0>(f);
-      auto& name = std::get<1>(f);
-      auto  fidx = std::get<2>(f);
-      auto& func = std::get<3>(f);
-      m_entries[idx].functions[name].typefuns[fidx] = this->template bind<>(func);
-    }
-  }
+  //void rebindMemFunctions() {
+    //for (const auto &f: m_memFuncs) {
+      //auto  idx   = std::get<0>(f);
+      //auto& name  = std::get<1>(f);
+      //auto& mfunc = std::get<2>(f);
+      //auto& entry = m_entries[idx];
+      //auto& func  = this->template bind<>(mfunc);
+      //entry.functions.at(name).fun = func;
+      //if(entry.funcname==name) {
+        //entry.fun = func;
+      //}
+    //}
+    //for (const auto &f: m_memTypesFuncs) {
+      //auto  idx = std::get<0>(f);
+      //auto  fidx = std::get<1>(f);
+      //auto& func = std::get<2>(f);
+      //m_entries[idx].typefuns[fidx] = this->template bind<>(func);
+    //}
+    //for (const auto &f: m_memStorageFuncs) {
+      //auto  idx  = std::get<0>(f);
+      //auto& name = std::get<1>(f);
+      //auto  fidx = std::get<2>(f);
+      //auto& func = std::get<3>(f);
+      //m_entries[idx].functions[name].typefuns[fidx] = this->template bind<>(func);
+    //}
+  //}
 }; /* class TransformationBind */
 

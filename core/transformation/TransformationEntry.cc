@@ -13,6 +13,7 @@
 #include "TransformationErrors.hh"
 #include "TypeClasses.hh"
 #include "GPUFunctionArgs.hh"
+#include "TreeManager.hh"
 
 using TransformationTypes::BaseT;
 using TransformationTypes::EntryT;
@@ -33,7 +34,7 @@ using TypeClassT = TypeClasses::TypeClassT<FloatType>;
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(name), attrs({{"_label", name}}), parent(parent), tainted(name.c_str()),
-    functionargs(new FunctionArgsType(this))
+    functionargs(new FunctionArgsType(this)), m_tmanager(GNA::TreeManager<SourceFloatType>::current())
 { }
 
 /**
@@ -43,16 +44,17 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Bas
  * @param other -- Entry to copy name, inputs and outputs from.
  * @param parent -- Base class instance to hold the Entry.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
-  : name(other.name), attrs(other.attrs), parent(parent),
-    sources(other.sources.size()), sinks(other.sinks.size()),
-    mapping(other.mapping),
-    fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
-    functionargs(new FunctionArgsType(this))
-{
-  initSourcesSinks(other.sources, other.sinks);
-}
+//template<typename SourceFloatType, typename SinkFloatType>
+//EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
+  //: name(other.name), attrs(other.attrs), parent(parent),
+    //sources(other.sources.size()), sinks(other.sinks.size()),
+    //mapping(other.mapping),
+    //fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
+    //functionargs(new FunctionArgsType(this)),
+    //m_tmanager(other.m_tmanager)
+//{
+  //initSourcesSinks(other.sources, other.sinks);
+//}
 
 
 /**
@@ -282,6 +284,17 @@ void EntryT<SourceFloatType,SinkFloatType>::updateTypes() {
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::touch() {
   if (tainted) {
+    update();
+  }
+}
+
+/** @brief Update the transformation if it is not frozen and tainted. */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::touch_global() {
+  if (tainted) {
+    if(m_tmanager){
+      m_tmanager->update();
+    }
     update();
   }
 }

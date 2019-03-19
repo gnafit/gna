@@ -99,7 +99,7 @@ namespace TransformationTypes
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
-    EntryType *m_entry;                                         ///< Wrapped Entry pointer.
+    EntryType *m_entry;                                     ///< Wrapped Entry pointer.
   }; /* class Handle */
 
 } /* TransformationTypes */

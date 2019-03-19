@@ -8,7 +8,7 @@
 
 namespace TransformationTypes
 {
-  template<typename SourceType,typename SinkType> struct EntryT;
+  template<typename SourceType,typename SinkType> class EntryT;
 
   /**
    * @brief Definition of a transformation internal data Storage.

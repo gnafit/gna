@@ -1,9 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <boost/noncopyable.hpp>
 
 template<typename T>
-class arrayviewAllocator {
+class arrayviewAllocator : public boost::noncopyable {
 private:
     using allocatorType = arrayviewAllocator<T>;
 public:
