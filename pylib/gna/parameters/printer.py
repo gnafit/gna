@@ -19,7 +19,10 @@ except ImportError:
 def colorize(string, color):
     return color + str(string) + Style.RESET_ALL
 
-unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>'), DiscreteParameter )
+unctypes = ()
+for precision in provided_precisions:
+    unctypes += ( ROOT.Variable(precision), ROOT.Variable('complex<%s>'%precision) )
+unctypes+=(DiscreteParameter,)
 
 namefmt='{name:30}'
 

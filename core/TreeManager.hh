@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/noncopyable.hpp>
+#include <memory>
 
 template<typename FloatType>
 class arrayviewAllocator;
@@ -11,24 +12,26 @@ namespace GNA{
     {
     protected:
         using TreeManagerType = TreeManager<FloatType>;
-
     public:
         using allocatorType = arrayviewAllocator<FloatType>;
+        using allocatorPtr = std::unique_ptr<allocatorType>;
 
-        TreeManager()  { }
-        virtual ~TreeManager(){ }
+        TreeManager(size_t allocatepars=0u);
+        virtual ~TreeManager();
 
-        void update(){}
+        void update();
 
         static TreeManagerType* current() noexcept { return TreeManagerType::s_current_manager; }
-        static void setCurrent(TreeManagerType* tmanager) noexcept { TreeManagerType::s_current_manager=tmanager; }
+        void makeCurrent();
 
     protected:
+        static void setCurrent(TreeManagerType* tmanager) noexcept { TreeManagerType::s_current_manager=tmanager; }
+
         void resetAllocator() const;
         void setAllocator() const;
 
         static TreeManagerType* s_current_manager;
-        allocatorType* m_allocator=nullptr;
+        allocatorPtr m_allocator=nullptr;
     };
 
     template<typename T> TreeManager<T>* TreeManager<T>::s_current_manager=nullptr;

@@ -53,14 +53,20 @@ class cuda(object):
 
 class allocator(object):
     """Set allocator for arrayview"""
-    backup_function=''
+    backup_allocator=None
     def __init__(self, allocator):
-        self.allocator = allocator
+        if isinstance(allocator, int):
+            self.allocator = R.arrayviewAllocatorSimple(_current_precision)(allocator)
+        else:
+            self.allocator = allocator
 
     def __enter__(self):
         self.cls = current_allocator()
         self.backup_allocator = self.cls.current()
         self.cls.setCurrent(self.allocator)
 
+        return self.allocator
+
     def __exit__(self, *args):
         self.cls.setCurrent(self.backup_allocator)
+

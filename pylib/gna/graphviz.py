@@ -38,6 +38,7 @@ class GNADot(object):
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
         self.joints = kwargs.pop('joints', False)
+        ns = kwargs.pop('namespace', None)
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
         self.layout = self.graph.layout
@@ -47,7 +48,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=kwargs.pop('namespace', None))
+        self.walker = GraphWalker(transformation, namespace=ns)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
