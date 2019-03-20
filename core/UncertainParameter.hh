@@ -35,17 +35,20 @@ protected:
 };
 
 template <typename T>
-class Variable: public GNASingleObject,
-                public TransformationBind<Variable<T>>
+class Variable: public GNASingleObjectT<T,T>,
+                public TransformationBind<Variable<T>,T,T>
 {
 public:
   Variable(const std::string &name, bool allocate=false)
     : m_varhandle(variable_(&m_var, name, static_cast<size_t>(allocate))), m_name(name)
-  { }
+  {}
 
   Variable(const std::string &name, variable<void> var)
     : Variable(name)
-  { m_varhandle.bind(variable<T>(var)); }
+  {
+    m_varhandle.bind(variable<T>(var));
+    this->transformations.front().updateTypes();
+  }
 
   ~Variable() override = default;
 
@@ -78,11 +81,11 @@ inline Variable<double>::Variable(const std::string &name, bool allocate)
 {
   transformation_("value")
     .output(name)
-    .types([](TypesFunctionArgs& fargs) {
-        fargs.rets[0] = DataType().points().shape(1);
+    .types([](Variable<double> *obj, TypesFunctionArgs& fargs) {
+        fargs.rets[0] = DataType().points().shape(obj->m_var.size());
       })
     .func([](Variable<double> *obj, FunctionArgs& fargs) {
-        fargs.rets[0].arr(0) = obj->m_var.value();
+        obj->m_var.values(fargs.rets[0].buffer);
       })
     .finalize();
 }
@@ -94,11 +97,11 @@ inline Variable<float>::Variable(const std::string &name, bool allocate)
 {
   transformation_("value")
     .output(name)
-    .types([](TypesFunctionArgs& fargs) {
-        fargs.rets[0] = DataType().points().shape(1);
+    .types([](Variable<float> *obj, TypesFunctionArgs& fargs) {
+        fargs.rets[0] = DataType().points().shape(obj->m_var.size());
       })
     .func([](Variable<float> *obj, FunctionArgs& fargs) {
-        fargs.rets[0].arr(0) = obj->m_var.value();
+        obj->m_var.values(fargs.rets[0].buffer);
       })
     .finalize();
 }
@@ -109,7 +112,9 @@ class Parameter: public Variable<T> {
 public:
   Parameter(const std::string &name)
     : Variable<T>(name, true/*allocate*/), m_par(this->m_varhandle.claim())
-    {}
+    {
+      this->transformations.front().updateTypes();
+    }
 
   virtual void set(T value)
     { m_par = value; }

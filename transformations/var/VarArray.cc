@@ -19,15 +19,19 @@ m_vars(varnames.size())
 
 template<typename FloatType>
 void GNA::GNAObjectTemplates::VarArrayT<FloatType>::typesFunction(VarArrayT<FloatType>::TypesFunctionArgs& fargs){
-    fargs.rets[0] = DataType().points().shape(m_vars.size());
+    size_t size=0u;
+    for(auto& var: m_vars){
+        size+=var.size();
+    }
+    fargs.rets[0] = DataType().points().shape(size);
 }
 
 template<typename FloatType>
 void GNA::GNAObjectTemplates::VarArrayT<FloatType>::function(VarArrayT<FloatType>::FunctionArgs& fargs){
     auto* buffer = fargs.rets[0].buffer;
     for( auto& var : m_vars ){
-        *buffer = var.value();
-        buffer=next(buffer);
+        var.values(buffer);
+        buffer=next(buffer, var.size());
     }
 }
 

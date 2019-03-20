@@ -10,6 +10,7 @@ from gna import context, bindings
 from collections import OrderedDict
 import gna.bindings.arrayview
 
+#@floatcopy(globals(), True)
 @passname
 def test_tree_manager(function_name):
     from gna.env import env
@@ -32,12 +33,32 @@ def test_tree_manager(function_name):
             ns.materializeexpressions()
         ns['Delta'].set(N.pi*0.25)
 
+        with gns:
+            names=[]
+            names_all=[]
+            indices=[]
+            for name, par in gns.walknames():
+                names.append(name)
+                val=par.getVariable().values()
+                offset = val.offset()
+                # if val.size()>1:
+                    # import IPython; IPython.embed()
+                for i in range(val.size()):
+                    indices.append(offset+i)
+                    names_all.append(name)
+            varray = C.VarArray(names)
+
     gns.printparameters(labels=True)
 
     allocator = manager.getAllocator()
-    allocdata = allocator.view()
-    print('Data (filled):', allocdata)
-    print('Data (all):', allocator.viewall())
+    data_v = varray.vararray.points.data()
+    data_a = allocator.view()
+    data_s = data_a[indices].copy()
+    print('Data (filled):', data_a.size, data_a.dtype, data_a)
+    print('Data (vararray):', data_v.size, data_v.dtype, data_v)
+    print('Data (selected):', data_s.size, data_s.dtype, data_s)
+    mask = data_v==data_s
+    assert mask is not False and mask.all()
 
 if __name__ == "__main__":
     run_unittests(globals())
