@@ -82,7 +82,6 @@ class manager(object):
         else:
             self.manager = manager or cls()
 
-
     def __enter__(self):
         self.manager.makeCurrent()
         return self.manager
