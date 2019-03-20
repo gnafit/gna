@@ -78,9 +78,9 @@ public:
     std::copy(val.begin(), val.end(), dest);
     return std::next(dest, val.size());
   }
-protected:
-  inline inconstant_data<ValueType> &data() const {
-    return *static_cast<inconstant_data<ValueType>*>(m_hdr.get());
+  bool hasFunc() const {
+    auto& d = data();
+    return d.func || d.vfunc;
   }
   void update() const {
     auto &d = data();
@@ -94,6 +94,10 @@ protected:
     else if (d.vfunc) {
       d.vfunc(d.value);
     }
+  }
+protected:
+  inline inconstant_data<ValueType> &data() const {
+    return *static_cast<inconstant_data<ValueType>*>(m_hdr.get());
   }
 };
 

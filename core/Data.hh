@@ -253,6 +253,16 @@ public:
   }
 
   /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Points<T> &preallocated(float* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
+
+  /**
    * @brief Set the DataType to be the view on the preallocated 1d Array
    * @param array - 1d Eigen array.
    * @return `*this`.

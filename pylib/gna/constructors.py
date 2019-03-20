@@ -47,6 +47,18 @@ def VarArray(vars, *args, **kwargs):
     ret.transformations.front().updateTypes()
     return ret
 
+"""Construct VarArrayPreallocated object from vector of strings"""
+def VarArrayPreallocated(vars, *args, **kwargs):
+    cls = R.GNA.GNAObjectTemplates.VarArrayPreallocatedT(context.current_precision())
+    ret = cls(stdvector(vars), *args, **kwargs)
+    return ret
+
+def VarSum(varnames, *args, **kwargs):
+    return R.VarSum(stdvector(varnames), *args, **kwargs)
+
+def VarProduct(varnames, *args, **kwargs):
+    return R.VarProduct(stdvector(varnames), *args, **kwargs)
+
 """Construct Dummy object from vector of strings"""
 def Dummy(shape, name, varnames, *args, **kwargs):
     return R.Dummy(shape, name, stdvector(varnames), *args, **kwargs)

@@ -11,6 +11,8 @@ public:
     virtual ~arrayviewAllocator(){};
     virtual T* allocate(size_t n) = 0;
     virtual const T* data() const noexcept = 0;
+    virtual T* data() noexcept = 0;
+    virtual size_t size() const noexcept = 0;
 
     static allocatorType* current() noexcept { return allocatorType::s_current; }
     static void setCurrent(allocatorType* current) noexcept { allocatorType::s_current=current; }
@@ -46,6 +48,7 @@ public:
     }
 
     const T* data() const noexcept { return m_buffer.data(); }
+    T* data() noexcept { return m_buffer.data(); }
     size_t size() const noexcept { return m_size; }
     size_t maxSize() const noexcept { return m_buffer.size(); }
 private:

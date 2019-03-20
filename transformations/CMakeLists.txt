@@ -78,10 +78,11 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
   # Variables manipulation
+  transformations/var/VarArray.cc
+  transformations/var/VarArrayPreallocated.cc
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
-  transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   #
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
@@ -139,6 +140,7 @@ set(TRANSFORMATION_HEADERS
   PoissonToyMC.hh
   Rebin.hh
   VarArray.hh
+  VarArrayPreallocated.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
