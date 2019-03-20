@@ -85,8 +85,8 @@ class manager(object):
 
     def __enter__(self):
         self.manager.makeCurrent()
-
         return self.manager
 
     def __exit__(self, *args):
-        pass
+        self.manager.resetCurrent()
+

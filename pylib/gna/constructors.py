@@ -41,8 +41,9 @@ def wrap_constructor1(obj, dtype='d'):
     return method
 
 """Construct VarArray object from vector of strings"""
-def VarArray(varnames, *args, **kwargs):
-    ret = R.GNA.GNAObjectTemplates.VarArrayT(context.current_precision())(stdvector(varnames), *args, **kwargs)
+def VarArray(vars, *args, **kwargs):
+    cls = R.GNA.GNAObjectTemplates.VarArrayT(context.current_precision())
+    ret = cls(stdvector(vars), *args, **kwargs)
     ret.transformations.front().updateTypes()
     return ret
 

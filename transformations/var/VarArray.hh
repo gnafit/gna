@@ -15,9 +15,13 @@ namespace GNA{
             using VarArrayType = VarArrayT<FloatType>;
 
         public:
-            VarArrayT(const std::vector<std::string>& varnames); ///< Constructor.
+            VarArrayT(const std::vector<std::string>& varnames);     ///< Constructor.
+            VarArrayT(const std::vector<variable<FloatType>>& vars); ///< Constructor.
+            //VarArrayT(const std::vector<variable<void>>& vars); ///< Constructor.
 
         protected:
+            void initTransformation();
+
             void typesFunction(TypesFunctionArgs& fargs);
             void function(FunctionArgs& fargs);
 

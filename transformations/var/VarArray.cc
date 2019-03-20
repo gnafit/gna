@@ -9,7 +9,22 @@ m_vars(varnames.size())
     for (size_t i = 0; i < varnames.size(); ++i) {
         this->variable_(&m_vars[i], varnames[i]);
     }
+    initTransformation();
+}
 
+template<typename FloatType>
+GNA::GNAObjectTemplates::VarArrayT<FloatType>::VarArrayT(const std::vector<variable<FloatType>>& vars) :
+m_vars(vars.size())
+{
+    for (size_t i = 0; i < vars.size(); ++i) {
+        auto& var = vars[i];
+        this->variable_(&m_vars[i], var.name()).bind(var);
+    }
+    initTransformation();
+}
+
+template<typename FloatType>
+void GNA::GNAObjectTemplates::VarArrayT<FloatType>::initTransformation(){
     this->transformation_("vararray")                           /// Initialize the transformation points.
          .output("points")
          .types(&VarArrayType::typesFunction)

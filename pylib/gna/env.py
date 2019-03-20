@@ -482,6 +482,8 @@ class _environment(object):
             if v.name() in freevars:
                 continue
             if not v.isFree():
+                if cfg.debug_bindings:
+                    print('binding skipped', v.name())
                 continue
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
