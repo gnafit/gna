@@ -24,6 +24,7 @@ namespace GNA{
         static TreeManagerType* current() noexcept { return TreeManagerType::s_current_manager; }
         void makeCurrent();
 
+        allocatorType* getAllocator() { return m_allocator.get(); }
     protected:
         static void setCurrent(TreeManagerType* tmanager) noexcept { TreeManagerType::s_current_manager=tmanager; }
 

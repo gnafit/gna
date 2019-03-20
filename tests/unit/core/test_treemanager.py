@@ -8,6 +8,7 @@ import numpy as N
 from gna import constructors as C
 from gna import context, bindings
 from collections import OrderedDict
+import gna.bindings.arrayview
 
 @passname
 def test_tree_manager(function_name):
@@ -15,7 +16,7 @@ def test_tree_manager(function_name):
     gns = env.globalns(function_name)
     ndata = 200
 
-    with context.allocator(ndata) as allocator:
+    with context.manager(ndata) as manager:
         ns = gns('namespace1')
         ns.defparameter('float1',   central=1, fixed=True, label='Float variable 1')
         ns.defparameter('float2',   central=2, fixed=True, label='Float variable 2')
@@ -29,21 +30,14 @@ def test_tree_manager(function_name):
         reqparameters(ns)
         with ns:
             ns.materializeexpressions()
-        ns['Delta'].set(N.pi*1.5)
+        ns['Delta'].set(N.pi*0.25)
 
     gns.printparameters(labels=True)
 
+    allocator = manager.getAllocator()
     allocdata = allocator.view()
     print('Data (filled):', allocdata)
     print('Data (all):', allocator.viewall())
-
-    for name, par in gns.walknames():
-        av = par.getVariable().values()
-        offset = av.offset()
-        size = av.size()
-
-        avview = av.view()
-        assert (allocdata[offset:offset+size]==avview).all()
 
 if __name__ == "__main__":
     run_unittests(globals())

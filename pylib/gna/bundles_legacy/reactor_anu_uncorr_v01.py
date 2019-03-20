@@ -22,7 +22,7 @@ class reactor_anu_uncorr_v01(TransformationBundleLegacy):
         uncpars = OrderedDict()
         for name, vars in self.uncorr_vars.items():
             with self.common_namespace:
-                uncpar_t = R.VarArray(C.stdvector(vars), ns=self.common_namespace)
+                uncpar_t = C.VarArray(vars, ns=self.common_namespace)
             uncpar_t.vararray.setLabel('Uncorr correction:\n'+name)
             uncpars[name]=uncpar_t
 

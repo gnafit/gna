@@ -17,8 +17,11 @@ def current_precision():
 def current_precision_short():
     return _current_precision_short
 
-def current_allocator():
+def current_precision_allocator():
     return R.arrayviewAllocator(_current_precision)
+
+def current_precision_manager():
+    return R.GNA.TreeManager(_current_precision)
 
 class precision(object):
     """Context manager for the floating precision"""
@@ -28,7 +31,7 @@ class precision(object):
 
     def __enter__(self):
         if self.precision!=_current_precision:
-            if not current_allocator():
+            if not current_precision_allocator():
                 raise Exception('may not change precision while allocator is set')
 
         self.old_precision = _current_precision
@@ -61,7 +64,7 @@ class allocator(object):
             self.allocator = allocator
 
     def __enter__(self):
-        self.cls = current_allocator()
+        self.cls = current_precision_allocator()
         self.backup_allocator = self.cls.current()
         self.cls.setCurrent(self.allocator)
 
@@ -70,3 +73,20 @@ class allocator(object):
     def __exit__(self, *args):
         self.cls.setCurrent(self.backup_allocator)
 
+class manager(object):
+    """Set TreeManager"""
+    def __init__(self, manager=None):
+        cls = current_precision_manager()
+        if isinstance(manager, (int, None)):
+            self.manager = cls(manager)
+        else:
+            self.manager = manager or cls()
+
+
+    def __enter__(self):
+        self.manager.makeCurrent()
+
+        return self.manager
+
+    def __exit__(self, *args):
+        pass

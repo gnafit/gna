@@ -3,21 +3,23 @@
 
 from __future__ import print_function
 from load import ROOT as R
-from gna.unittest import run_unittests
+from gna.unittest import *
 from gna.env import env
 import gna.constructors as C
 import numpy as N
+from gna import context
 
-def test_vararray():
-    ns = env.globalns('test_vararray')
+@floatcopy(globals(), True)
+def test_vararray(function_name):
+    ns = env.globalns(function_name)
 
     names  = [ 'zero', 'one', 'two', 'three', 'four', 'five' ]
-    values = N.arange(len(names), dtype='d')
+    values = N.arange(len(names), dtype=context.current_precision_short())
     for name, value in zip(names, values):
         ns.defparameter(name, central=value, relsigma=0.1)
 
     with ns:
-        va = R.VarArray(C.stdvector(names))
+        va = C.VarArray(names)
 
     res=va.vararray.points.data()
 

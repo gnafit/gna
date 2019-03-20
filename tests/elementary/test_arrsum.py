@@ -7,6 +7,7 @@ from load import ROOT as R
 from gna.env import env
 from gna.parameters.printer import print_parameters
 from gna.converters import convert
+import gna.constructors as C
 
 def test_arrsum():
     varname = 'out'
@@ -15,8 +16,7 @@ def test_arrsum():
     variables = [ns.reqparameter(name, central=float(i), relsigma=0.1)
                 for i, name in enumerate(names)]
 
-    cpp_names = convert(names, 'stdvector')
-    var_arr = R.VarArray(cpp_names)
+    var_arr = C.VarArray(names)
     print("Input var array ", var_arr.vararray.points.data())
 
     sum_arr = R.ArraySum(varname, var_arr, ns=ns)

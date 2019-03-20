@@ -3,22 +3,24 @@
 
 from __future__ import print_function
 from load import ROOT as R
-from gna.unittest import run_unittests
+from gna.unittest import *
 from gna.env import env
 import gna.constructors as C
 import numpy as N
 from gna.bindings import parameters
+from gna import context
 
-def test_object_variables():
-    ns = env.globalns('test_varlist')
+@floatcopy(globals(), True)
+def test_object_variables(function_name):
+    ns = env.globalns(function_name)
 
     names  = [ 'zero', 'one', 'two', 'three', 'four', 'five' ]
-    values = N.arange(len(names), dtype='d')
+    values = N.arange(len(names), dtype=context.current_precision_short())
     for name, value in zip(names, values):
         ns.defparameter(name, central=value, relsigma=0.1)
 
     with ns:
-        va = R.VarArray(C.stdvector(names))
+        va = C.VarArray(names)
 
     for i, (name, val_true) in enumerate(zip(names, values)):
         var = va.variables[i].getVariable()

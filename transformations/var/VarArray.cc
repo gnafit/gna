@@ -2,28 +2,36 @@
 
 using std::next;
 
-VarArray::VarArray(const std::vector<std::string>& varnames)
-  : m_vars(varnames.size())
+template<typename FloatType>
+GNA::GNAObjectTemplates::VarArrayT<FloatType>::VarArrayT(const std::vector<std::string>& varnames) :
+m_vars(varnames.size())
 {
-  for (size_t i = 0; i < varnames.size(); ++i) {
-    variable_(&m_vars[i], varnames[i]);
-  }
+    for (size_t i = 0; i < varnames.size(); ++i) {
+        this->variable_(&m_vars[i], varnames[i]);
+    }
 
-  transformation_("vararray")                               /// Initialize the transformation points.
-    .output("points")
-    .types(&VarArray::typesFunction)
-    .func(&VarArray::function)
-    .finalize();                                            /// Tell the initializer that there are no more configuration and it may initialize the types.
+    this->transformation_("vararray")                           /// Initialize the transformation points.
+         .output("points")
+         .types(&VarArrayType::typesFunction)
+         .func(&VarArrayType::function)
+         .finalize();                                            /// Tell the initializer that there are no more configuration and it may initialize the types.
 }
 
-void VarArray::typesFunction(TypesFunctionArgs& fargs){
-  fargs.rets[0] = DataType().points().shape(m_vars.size());
+template<typename FloatType>
+void GNA::GNAObjectTemplates::VarArrayT<FloatType>::typesFunction(VarArrayT<FloatType>::TypesFunctionArgs& fargs){
+    fargs.rets[0] = DataType().points().shape(m_vars.size());
 }
 
-void VarArray::function(FunctionArgs& fargs){
-  auto* buffer = fargs.rets[0].buffer;
-  for( auto& var : m_vars ){
-      *buffer = var.value();
-      buffer=next(buffer);
-  }
+template<typename FloatType>
+void GNA::GNAObjectTemplates::VarArrayT<FloatType>::function(VarArrayT<FloatType>::FunctionArgs& fargs){
+    auto* buffer = fargs.rets[0].buffer;
+    for( auto& var : m_vars ){
+        *buffer = var.value();
+        buffer=next(buffer);
+    }
 }
+
+template class GNA::GNAObjectTemplates::VarArrayT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+template class GNA::GNAObjectTemplates::VarArrayT<float>;
+#endif

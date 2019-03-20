@@ -20,12 +20,12 @@ void GNA::TreeManager<FloatType>::update() {
 
 template<typename FloatType>
 void GNA::TreeManager<FloatType>::makeCurrent() {
-    setAllocator();
-
     if(GNA::TreeManager<FloatType>::current()){
         throw std::runtime_error("Unable to set treemanager. Another instance is already set.");
     }
     GNA::TreeManager<FloatType>::setCurrent(this);
+
+    setAllocator();
 }
 
 template<typename FloatType>

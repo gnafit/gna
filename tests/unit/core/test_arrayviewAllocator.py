@@ -8,19 +8,7 @@ import numpy as N
 from gna import constructors as C
 from gna import context, bindings
 from collections import OrderedDict
-
-def arrayview_view(self):
-    buf = self.data()
-    return N.frombuffer(buf, count=self.size(), dtype=buf.typecode)
-
-def allocator_viewall(self):
-    buf = self.data()
-    return N.frombuffer(buf, count=self.maxSize(), dtype=buf.typecode)
-
-for precision in bindings.provided_precisions:
-    R.arrayview(precision).view = arrayview_view
-    R.arrayviewAllocatorSimple(precision).view = arrayview_view
-    R.arrayviewAllocatorSimple(precision).viewall = allocator_viewall
+import gna.bindings.arrayview
 
 @floatcopy(globals())
 def test_arrayview_allocation():

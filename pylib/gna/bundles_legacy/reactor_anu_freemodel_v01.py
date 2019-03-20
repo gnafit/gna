@@ -19,7 +19,7 @@ class reactor_anu_freemodel_v01(TransformationBundleLegacy):
 
     def build(self):
         with self.common_namespace:
-            npar_raw_t = R.VarArray(C.stdvector(self.variables), ns=self.common_namespace)
+            npar_raw_t = C.VarArray(self.variables, ns=self.common_namespace)
 
         nsname = self.common_namespace.name
         if self.cfg.varmode=='log':
