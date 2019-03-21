@@ -82,6 +82,7 @@ namespace ParametrizedTypes {
                    std::function<T()> func,
                    const std::vector<changeable> &sources)
   {
+    //return evaluable_(name, 1, [](arrayview<T>& ret){ ret[0]=func(); }, sources);
     SourcesContainer depentries;
     for (changeable chdep: sources) {
       size_t i;

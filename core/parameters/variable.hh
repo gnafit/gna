@@ -82,6 +82,9 @@ public:
     auto& d = data();
     return d.func || d.vfunc;
   }
+  const ValueType* root() const {
+    return data().value.root();
+  }
   void update() const {
     auto &d = data();
     if (!d.tainted) {

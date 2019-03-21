@@ -1,5 +1,6 @@
 #include "TreeManager.hh"
 #include "arrayviewAllocator.hh"
+#include "VarArrayPreallocated.hh"
 
 #include <stdexcept>
 
@@ -12,6 +13,11 @@ GNA::TreeManager<FloatType>::TreeManager(size_t allocatepars) {
 
 template<typename FloatType>
 GNA::TreeManager<FloatType>::~TreeManager() { }
+
+template<typename FloatType>
+void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatType>>& variables) {
+    m_vararray.reset(new VarArrayType(variables));
+}
 
 template<typename FloatType>
 void GNA::TreeManager<FloatType>::update() {
