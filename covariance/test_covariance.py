@@ -20,8 +20,6 @@ def main(args):
     buf1 = N.ma.array(buf, mask=buf==0.0)
     plt.matshow(buf1)
 
-    import IPython; IPython.embed()
-
     plt.show()
 
 if __name__ == '__main__':

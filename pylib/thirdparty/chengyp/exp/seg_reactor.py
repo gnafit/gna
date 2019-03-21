@@ -123,7 +123,38 @@ class Detector(object):
         self.hists = defaultdict(dict)
         self.back_hists = defaultdict(dict)
 
-    def assign(self, ns):
+    def load_correlation_matrix(self, weightns, weight_correlation):
+        filename, histname = weight_correlation
+        try:
+            tfile = ROOT.TFile(filename, 'read')
+            hist = tfile.Get(histname)
+        except:
+            tfile, hist = None, None
+
+        if not hist:
+            if tfile:
+                tfile.ls()
+            raise Exception('Unable to read histogram "%s" from file %s'%(histname, filename))
+
+        from mpl_tools.root2numpy import get_buffer_hist2
+        mat = get_buffer_hist2(hist)
+
+        if mat.shape[0]!=mat.shape[1]:
+            raise Exception('Non square matrix provided:', mat.shape[0], mat.shape[1])
+
+        mmin, mmax = mat.min(), mat.max()
+        if mmin<-1-1.e-12 or mmax>1.0+1.e-12:
+            raise Exception('Invalid min/max correlation values:', mmin, mmax)
+
+        pars = [par for (name,par) in weightns.walknames()]
+
+        if len(pars)!=mat.shape[0]:
+            raise Exception('Unable to set correlation to %i parameters with %ix%i matrix'%(len(pars, mat.shape[0], mat.shape[1])))
+
+        from gna.parameters import covariance_helpers as ch
+        ch.covariate_pars(pars, mat)
+
+    def assign(self, ns, weight_correlation=None):
         self.ns = ns("detectors")(self.name)
         self.ns_weight = self.ns('weights')
         self.res_nses = []
@@ -148,6 +179,8 @@ class Detector(object):
             for idx, ratio in enumerate(ratios):
                 self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=ratio, sigma=0.)
                 print('ratio {0} is {1}'.format(idx,ratio))
+            if weight_correlation:
+                self.load_correlation_matrix(self.ns_weight, weight_correlation)
 
             fin = TFile('input/npe-r-1mev.root')
             curve = fin.Get("curve")
@@ -193,8 +226,10 @@ class Detector(object):
                 ns_res.defparameter("Eres_b", central=eresb, sigma=0.)
                 self.res_nses.append(ns_res)
                 print('layer {0} Eres_b is {1}'.format(idx,eresb))
-                self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=weight_rtheta, sigma=weight_rtheta_error)
+                self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=weight_rtheta, relsigma=weight_rtheta_error)
                 print('ratio {0} is {1}'.format(idx,weight_rtheta))
+            if weight_correlation:
+                self.load_correlation_matrix(self.ns_weight, weight_correlation)
         else:
             self.ns.reqparameter("Eres_b", central=0.03, sigma=0)
         #  self.ns.reqparameter("rho_C14", central=1e-16, sigma=1e-16)
@@ -249,6 +284,7 @@ class ReactorExperimentModel(baseexp):
                  help='radius of sliced detector layers')
         parser.add_argument('--rtheta', metavar='N', type=float, nargs='+',
                  help='mean Npe of each subdetector')
+        parser.add_argument('--weight-correlation', nargs=2, metavar=("file.root", "name"), help='add correlation matrix for segment weights')
         parser.add_argument('--npe', action='store_true')
         #parser.add_argument('--eresb', metavar='N', type=float, nargs='+',
         #         help='eresb of sliced detector layers')
@@ -283,7 +319,7 @@ class ReactorExperimentModel(baseexp):
                 raise Exception("can't find detector {}".format(binopt[0]))
             det.edges = np.linspace(float(binopt[1]), float(binopt[2]), int(binopt[3]))
         for det in self.detectors:
-            det.assign(self.ns)
+            det.assign(self.ns, weight_correlation=self.opts.weight_correlation)
             if det.orders is None:
                 det.orders = np.full(len(det.edges)-1, self.opts.integration_order, int)
 

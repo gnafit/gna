@@ -9,14 +9,22 @@ from itertools import chain, tee, cycle
 import itertools
 
 from gna.bindings import patchROOTClass
+
 try:
     from colorama import Fore, Style
-    colorama_present = True
-except ImportError:
-    colorama_present = False
 
-def colorize(string, color):
-    return color + str(string) + Style.RESET_ALL
+    def colorize(string, color):
+        return color + str(string) + Style.RESET_ALL
+
+except ImportError:
+    def colorize(string, color):
+        return string
+
+    class DummyAttr(object):
+        def __getattr__(self, attr):
+            return ''
+    Style = DummyAttr()
+    Fore = DummyAttr()
 
 unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>'), DiscreteParameter )
 
@@ -47,10 +55,7 @@ centralrel_empty =(central_reg_len)*' '
 sigmarel_empty =(sigma_len+relsigma_len-1)*' '
 sigma_empty =(sigma_len-1)*' '
 
-if colorama_present:
-    sepstr='{} │ '.format(Style.RESET_ALL)
-else:
-    sepstr=' │ '
+sepstr='{} │ '.format(Style.RESET_ALL)
 
 fixedstr='[fixed]'
 fixedstr_len = (centralsigma_len+relsigma_len-1-len(fixedstr))
@@ -81,17 +86,17 @@ class CovarianceStore():
             for item in par_set:
                 yield par == item
 
-def print_covariated(cov_store):
-    if len(cov_store) == 0:
+def print_correlated(cor_store):
+    if len(cor_store) == 0:
         return
     raw = "\nCorrelations between parameters:"
-    title = colorize(raw, Fore.RED) if colorama_present else raw
+    title = colorize(raw, Fore.RED)
     print(title)
-    for par_set in cov_store.storage:
+    for par_set in cor_store.storage:
         max_offset = max((len(x.qualifiedName()) for x in par_set))
         for pivot in par_set:
             full_name = pivot.qualifiedName()
-            s = colorize(full_name, Fore.CYAN) if colorama_present else full_name
+            s = colorize(full_name, Fore.CYAN)
             current_offset = len(full_name)
             if max_offset != current_offset:
                 initial_sep = " "*(max_offset-current_offset +1)
@@ -104,12 +109,11 @@ def print_covariated(cov_store):
             print(s)
         print("")
 
-
-def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=None):
+def print_parameters( ns, recursive=True, labels=False, cor_storage=None, stats=None):
     '''Pretty prints parameters in a given namespace. Prints parameters
     and then outputs covariance matrices for covariated pars. '''
-    if cov_storage is None:
-        cov_storage = CovarianceStore()
+    if cor_storage is None:
+        cor_storage = CovarianceStore()
         top_level = True
     else:
         top_level = False
@@ -122,15 +126,12 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=
         if not isinstance( var, unctypes ):
             continue
         if not header:
-            if colorama_present:
-                print("Variables in namespace '{}':".format(colorize(ns.path, color=Fore.GREEN)))
-            else:
-                print("Variables in namespace '%s'"%ns.path)
+            print("Variables in namespace '{}':".format(colorize(ns.path, color=Fore.GREEN)))
             header=True
 
         try:
             if var.isCovariated():
-                cov_storage.add_to_store(var)
+                cor_storage.add_to_store(var)
         except (AttributeError, TypeError):
             pass
 
@@ -139,10 +140,10 @@ def print_parameters( ns, recursive=True, labels=False, cov_storage=None, stats=
         varstats(var, stats)
     if recursive:
         for sns in ns.namespaces.itervalues():
-            print_parameters(sns, recursive=recursive, labels=labels, cov_storage=cov_storage, stats=stats)
+            print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats)
 
     if top_level:
-        print_covariated(cov_storage)
+        print_correlated(cor_storage)
 
 def varstats(var, stats):
     if stats is None:
@@ -171,9 +172,9 @@ def varstats(var, stats):
 @patchROOTClass( ROOT.Variable('double'), '__str__' )
 def Variable__str( self, labels=False ):
     fmt = dict(
-            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+            name    = colorize(self.name(), Fore.CYAN),
             val     = self.value(),
-            color = Fore.BLUE if colorama_present else ""
+            color = Fore.BLUE
             )
     label = self.label()
     if not labels or label=='value':
@@ -185,18 +186,18 @@ def Variable__str( self, labels=False ):
     if labels:
         s+=sepstr+centralrel_empty+sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
-    s += Style.RESET_ALL if colorama_present else ""
+    s += Style.RESET_ALL
     return s
 
 @patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
 def Variablec__str( self, labels=False  ):
     fmt = dict(
-            name  = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+            name  = colorize(self.name(), Fore.CYAN),
             rval  = self.value().real(),
             ival  = self.value().imag(),
-            color = Fore.BLUE if colorama_present else ""
+            color = Fore.BLUE
             )
     label = self.label()
     if not labels or label=='value':
@@ -208,19 +209,19 @@ def Variablec__str( self, labels=False  ):
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
-    s += Style.RESET_ALL if colorama_present else ""
+    s += Style.RESET_ALL
     return s
 
 @patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
 def UniformAngleParameter__str( self, labels=False  ):
     fmt = dict(
-            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+            name    = colorize(self.name(), Fore.CYAN),
             val     = self.value(),
             central = self.central(),
             npi     = self.value()/N.pi,
-            color   = Fore.BLUE if colorama_present else ""
+            color   = Fore.BLUE
             )
     label = self.label()
     if not labels or label=='value':
@@ -241,19 +242,19 @@ def UniformAngleParameter__str( self, labels=False  ):
     if labels:
         s+=sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
-    s += Style.RESET_ALL if colorama_present else ""
+    s += Style.RESET_ALL
     return s
 
 @patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
 def GaussianParameter__str( self, labels=False  ):
     fmt = dict(
-            name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+            name    = colorize(self.name(), Fore.CYAN),
             val     = self.value(),
             central = self.central(),
             sigma   = self.sigma(),
-            color   = Fore.BLUE if colorama_present else ""
+            color   = Fore.BLUE
             )
     covariated = self.isCovariated()
     limits  = self.limits()
@@ -266,11 +267,11 @@ def GaussianParameter__str( self, labels=False  ):
 
     if self.isFixed():
         s += sepstr
-        s += Fore.LIGHTYELLOW_EX + fixedstr if colorama_present else fixedstr
+        s += Fore.LIGHTYELLOW_EX + fixedstr
     else:
         s+=sepstr + centralsigmafmt.format(**fmt)
         if self.isFree():
-            s += Fore.LIGHTYELLOW_EX + freestr if colorama_present else freestr
+            s += Fore.LIGHTYELLOW_EX + freestr
         else:
             if fmt['central']:
                 s+=relsigmafmt.format(relsigma=fmt['sigma']/fmt['central']*100.0)
@@ -279,7 +280,7 @@ def GaussianParameter__str( self, labels=False  ):
 
         if covariated:
             s += sepstr
-            s += Fore.LIGHTGREEN_EX if colorama_present else ""
+            s += Fore.LIGHTGREEN_EX
             s += "[C]"
 
         if limits.size():
@@ -291,18 +292,18 @@ def GaussianParameter__str( self, labels=False  ):
         s+=sepstr
 
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
-    s += Style.RESET_ALL if colorama_present else ""
+    s += Style.RESET_ALL
 
     return s
 
 def DiscreteParameter____str__(self, labels=False):
     fmt = dict(
-        name    = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
+        name    = colorize(self.name(), Fore.CYAN),
         val     = self.value(),
         variants = str(self.getVariants()),
-        color   = Fore.BLUE if colorama_present else ""
+        color   = Fore.BLUE
         )
     label = self.getLabel()
 
@@ -314,7 +315,7 @@ def DiscreteParameter____str__(self, labels=False):
         s+=sepstr
 
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL if colorama_present else label
+        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
     return s
 DiscreteParameter.__str__ = DiscreteParameter____str__
