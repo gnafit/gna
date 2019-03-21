@@ -17,11 +17,16 @@ GNA::TreeManager<FloatType>::~TreeManager() { }
 template<typename FloatType>
 void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatType>>& variables) {
     m_vararray.reset(new VarArrayType(variables));
+    m_transformation.reset(new TransformationDescriptorType(m_vararray->transformations.front()));
+    m_output.reset(new OutputDescriptorType(m_transformation->outputs.front()));
 }
 
 template<typename FloatType>
 void GNA::TreeManager<FloatType>::update() {
-    printf("update");
+    // Caution: triggering touch_global() may cause infinite loop.
+    if(m_transformation){
+        m_transformation->touch();
+    }
 }
 
 template<typename FloatType>

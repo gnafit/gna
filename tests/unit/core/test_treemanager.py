@@ -33,32 +33,18 @@ def test_tree_manager(function_name):
             ns.materializeexpressions()
         ns['Delta'].set(N.pi*0.25)
 
-        with gns:
-            names=[]
-            names_all=[]
-            indices=[]
-            for name, par in gns.walknames():
-                names.append(name)
-                val=par.getVariable().values()
-                offset = val.offset()
-                print(name, val.size(), offset)
-                # if val.size()>1:
-                    # import IPython; IPython.embed()
-                for i in range(val.size()):
-                    indices.append(offset+i)
-                    names_all.append(name)
-            varray = C.VarArray(names)
+        pars = tuple(par.getVariable() for (name,par) in ns.walknames())
+        manager.setVariables(C.stdvector(pars))
 
     gns.printparameters(labels=True)
 
     allocator = manager.getAllocator()
+    varray = manager.getVarArray()
     data_v = varray.vararray.points.data()
     data_a = allocator.view()
-    data_s = data_a[indices].copy()
     print('Data (filled):', data_a.size, data_a.dtype, data_a)
     print('Data (vararray):', data_v.size, data_v.dtype, data_v)
-    print('Data (selected):', data_s.size, data_s.dtype, data_s)
-    mask = data_v==data_s
+    mask = data_v==data_a
     assert mask is not False and mask.all()
 
 if __name__ == "__main__":

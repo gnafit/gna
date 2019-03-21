@@ -78,6 +78,7 @@ namespace TransformationTypes
      * @param i -- Entry's Sink's index.
      */
     void update(int i) const { (void)m_entry->data(i); }
+    void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
