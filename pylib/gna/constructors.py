@@ -54,10 +54,10 @@ def VarArrayPreallocated(vars, *args, **kwargs):
     return ret
 
 def VarSum(varnames, *args, **kwargs):
-    return R.VarSum(stdvector(varnames), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.VarSumT(context.current_precision())(stdvector(varnames), *args, **kwargs)
 
 def VarProduct(varnames, *args, **kwargs):
-    return R.VarProduct(stdvector(varnames), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.VarProductT(context.current_precision())(stdvector(varnames), *args, **kwargs)
 
 """Construct Dummy object from vector of strings"""
 def Dummy(shape, name, varnames, *args, **kwargs):

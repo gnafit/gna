@@ -10,8 +10,7 @@ from gna import context, bindings
 from collections import OrderedDict
 import gna.bindings.arrayview
 
-#@floatcopy(globals(), True)
-@passname
+@floatcopy(globals(), True)
 def test_tree_manager(function_name):
     from gna.env import env
     gns = env.globalns(function_name)
