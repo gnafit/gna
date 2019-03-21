@@ -219,7 +219,7 @@ class Detector(object):
 
             eresbs = np.array([cal_layer_res(x) for x in lightyeild])
             weight_rtheta = 1.0/len(lightyeild)
-            weight_rtheta_error = 1.0/np.sqrt(510000/len(lightyeild))/200
+            weight_rtheta_error = 1.0/np.sqrt(131400/len(lightyeild))/200
 
             for idx, eresb in enumerate(eresbs):
                 ns_res = self.ns("res_{0}".format(idx))
