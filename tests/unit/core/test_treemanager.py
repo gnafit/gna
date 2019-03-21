@@ -10,7 +10,8 @@ from gna import context, bindings
 from collections import OrderedDict
 import gna.bindings.arrayview
 
-@floatcopy(globals(), True)
+# @floatcopy(globals(), True)
+@passname
 def test_tree_manager(function_name):
     from gna.env import env
     gns = env.globalns(function_name)
@@ -40,6 +41,7 @@ def test_tree_manager(function_name):
                 names.append(name)
                 val=par.getVariable().values()
                 offset = val.offset()
+                print(name, val.size(), offset)
                 # if val.size()>1:
                     # import IPython; IPython.embed()
                 for i in range(val.size()):
