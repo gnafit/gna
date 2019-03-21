@@ -634,7 +634,8 @@ class ReactorExperimentModel(baseexp):
 
             elif detector.rtheta:
                 with detector.ns_weight:
-                    detector.sumedspectra = ROOT.WeightedSum(vec(range(len(detector.rtheta))))
+                    vnames=vec('weight_%i'%i for i in range(len(detector.rtheta)))
+                    detector.sumedspectra = ROOT.WeightedSum(vnames, vnames)
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
@@ -644,13 +645,14 @@ class ReactorExperimentModel(baseexp):
                         smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
-                    detector.sumedspectra.sum[str(idx)](eres)
+                    detector.sumedspectra.sum['weight_%i'%(idx)](eres)
                     self.ns.addobservable("subdetector{}".format(idx), eres)
                 self.ns.addobservable("weightedspectra", detector.sumedspectra)
 
             elif detector.slicing:
                 with detector.ns_weight:
-                    detector.sumedspectra = ROOT.WeightedSum(vec(range(len(detector.slicing))))
+                    vnames=vec('weight_%i'%i for i in range(len(detector.slicing)))
+                    detector.sumedspectra = ROOT.WeightedSum(vnames, vnames)
                 smeared_spectras = []
                 for res_ns in detector.res_nses:
                     with res_ns, detector.ns:
@@ -660,7 +662,7 @@ class ReactorExperimentModel(baseexp):
                         smeared_spectras.append(eres.smear.Nrec)
 
                 for idx, eres in enumerate(smeared_spectras):
-                    detector.sumedspectra.sum[str(idx)](eres)
+                    detector.sumedspectra.sum['weight_%i'%(idx)](eres)
                     self.ns.addobservable("layer{}".format(idx), eres)
                 self.ns.addobservable("weightedspectra", detector.sumedspectra)
 
