@@ -219,14 +219,14 @@ class Detector(object):
 
             eresbs = np.array([cal_layer_res(x) for x in lightyeild])
             weight_rtheta = 1.0/len(lightyeild)
-            weight_rtheta_error = 1.0/np.sqrt(510000/len(lightyeild))
+            weight_rtheta_error = 1.0/np.sqrt(131400/len(lightyeild))/200
 
             for idx, eresb in enumerate(eresbs):
                 ns_res = self.ns("res_{0}".format(idx))
                 ns_res.defparameter("Eres_b", central=eresb, sigma=0.)
                 self.res_nses.append(ns_res)
                 print('layer {0} Eres_b is {1}'.format(idx,eresb))
-                self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=weight_rtheta, relsigma=weight_rtheta_error)
+                self.ns_weight.defparameter("weight_{0}".format(str(idx)), central=weight_rtheta, sigma=weight_rtheta_error)
                 print('ratio {0} is {1}'.format(idx,weight_rtheta))
             if weight_correlation:
                 self.load_correlation_matrix(self.ns_weight, weight_correlation)
