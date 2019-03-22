@@ -16,6 +16,7 @@ Cherenkov::Cherenkov() {
 
 void Cherenkov::calc_Cherenkov(FunctionArgs fargs) {
     auto energy = fargs.args[0].x;
-    auto cherenkov_contrib = (p0 + p1*log(1+energy/E_0)+p2*pow(log(1+energy/E_0),2)+p3*pow(log(1+energy/E_0),3));
+    auto x = log(1+energy/E_0);
+    auto cherenkov_contrib = (p0 + p1*x + p2*x.square() + p3*x.cube())*(1+p4*energy);
     fargs.rets[0].x = cherenkov_contrib;
 }
