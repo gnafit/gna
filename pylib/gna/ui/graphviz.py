@@ -6,7 +6,10 @@ import ROOT as R
 
 from gna.graphviz import GNADot
 
+
 class cmd(basecmd):
+    undefined = dict()
+
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
@@ -24,6 +27,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', nargs='+', default=[], dest='outputs', help='output dot/pdf/png file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
         parser.add_argument('-E', '--stderr', action='store_true', help='output to stderr')
+        parser.add_argument('-n', '--namespace', default=cls.undefined, nargs='?', help='use <namespace> to read parameters', metavar='namespace')
         parser.add_argument('--option', nargs=2, action='append', dest='options', default=[], help='AGraph kwargs key value pair')
 
     def init(self):
@@ -33,7 +37,12 @@ class cmd(basecmd):
         kwargs.setdefault('rankdir', 'LR')
         if self.opts.splines:
             kwargs['splines']=self.opts.splines
+
+        if self.opts.namespace is not self.undefined:
+            kwargs['namespace']=env.globalns(self.opts.namespace)
+
         graph = GNADot( head, **kwargs )
+
 
         for output in self.opts.outputs:
             print( 'Write graph to:', output )

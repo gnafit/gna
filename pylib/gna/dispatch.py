@@ -50,7 +50,7 @@ def listmodules(modules, printdoc=False):
     print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
     from textwrap import TextWrapper
     from os.path import relpath, isfile
-    offsetlen, namelen = 2, 15
+    offsetlen, namelen = 2, 16
     offset  = ' '*offsetlen
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
@@ -58,10 +58,11 @@ def listmodules(modules, printdoc=False):
     modnames = sorted(modules.
             keys())
     for modname in modnames:
+        modname_print = modname.replace('_', '-')
         try:
             module=loadmodule(modules, modname)
         except Exception as e:
-            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname, e.message, namelen=namelen))
+            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.message, namelen=namelen))
         else:
             if module.__file__.endswith('.pyc'):
                 pyname = module.__file__[:-1]
@@ -72,7 +73,7 @@ def listmodules(modules, printdoc=False):
                     modfile = './'+relpath(module.__file__)
                     warning='  \033[31mWarning!\033[0m The file {} does not exist. Consider removing all the \'*.pyc\' files from the project'.format(relpath(pyname))
 
-            print('{}{:<{namelen}s} from {}{}'.format(offset, modname, modfile, warning, namelen=namelen))
+            print('{}{:<{namelen}s} from {}{}'.format(offset, modname_print, modfile, warning, namelen=namelen))
             if printdoc and module.__doc__:
                 for line in module.__doc__.strip().split('\n'):
                     print(wrp.fill(line))

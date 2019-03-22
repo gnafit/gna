@@ -63,7 +63,7 @@ public:
 
   size_t hash() const {return reinterpret_cast<size_t>(this);}
 
-  
+
 
 protected:
   variable<T> m_var{};
@@ -172,6 +172,14 @@ public:
        this->setFree(false);
        this->setStep(sigma*0.1);
      }
+   }
+
+   void setRelSigma(T relsigma) {
+     auto central = this->central();
+     if(central==static_cast<T>(0)){
+       throw std::runtime_error("May not set relative uncertainty to the parameter with central=0");
+     }
+     this->setSigma(central*relsigma);
    }
 
    bool isCovariated(const GaussianParameter<T>& other) const noexcept {

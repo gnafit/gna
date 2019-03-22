@@ -17,6 +17,7 @@ class cmd(basecmd):
         parser.add_argument('--nbins',  default=200, type=int, help='Number of bins')
         parser.add_argument('--order',  default=8, type=int, help='Order of integrator for each bin (Gauss-Legendre)')
         parser.add_argument('--with-eres', '--eres', action='store_true', help='Enable energy resoulution')
+        parser.add_argument('--print', action='store_true', help='Print parameters')
 
     def init(self):
         if self.opts.npeaks == 1:
@@ -63,4 +64,5 @@ class cmd(basecmd):
             peak_sum.sum >> eres.smear.Ntrue
             common_ns.addobservable("spectrum_with_eres", eres.smear.Nrec)
 
-        common_ns.printparameters(labels='True')
+        if self.opts.print:
+            common_ns.printparameters(labels='True')

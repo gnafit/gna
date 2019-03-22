@@ -35,13 +35,14 @@ def savegraph(obj, fname, *args, **kwargs):
         gdot.draw(fname)
 
 class GNADot(object):
+    layers = 'variable,transformation'
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
         self.joints = kwargs.pop('joints', False)
 
-        self.graph=G.AGraph( directed=True, strict=False, **kwargs )
+        self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
         self.layout = self.graph.layout
         self.write = self.graph.write
         self.draw = self.graph.draw
@@ -49,11 +50,18 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation)
+        self.walker = GraphWalker(transformation, namespace=kwargs.pop('namespace', None))
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
         self.walker.source_open_do(self._action_source_open)
+
+        self._process_variables()
+
+    def _process_variables(self):
+        # self.vargraph = self.graph.subgraph(name='cluster_var')
+        self.vargraph=self.graph
+        self.walker.variable_do(self._action_variable)
 
     def entry_uid(self, entry, suffix=None):
         hash=entry.hash()
@@ -73,6 +81,20 @@ class GNADot(object):
         node = self.graph.add_node( self.entry_uid(entry), **self.style.node_attrs(entry) )
         for i, sink in enumerate(entry.sinks):
             self._action_sink(sink, i)
+
+    def _action_variable(self, varentry):
+        var=varentry.variable
+        varid = self.entry_uid(var)
+        node = self.vargraph.add_node(varid, **self.style.node_attrs_var(varentry))
+
+        for entry in varentry.taints_entry:
+            # print('plot entry', varentry.variable.name(), '->', entry.name, self.entry_uid(entry))
+            self.vargraph.add_edge(varid, self.entry_uid(entry), **self.style.edge_attrs_var(var, False))
+
+        for varentry1 in varentry.taints_var:
+            varid1 = self.entry_uid(varentry1.variable)
+            # print('plot var', varentry.variable.name(), '->', varentry1.variable.name(), varid1)
+            self.vargraph.add_edge(varid, varid1, **self.style.edge_attrs_var(var, True))
 
     def _action_source_open(self, source, i=0):
         sourceuid = self.entry_uid(source, 'source')
@@ -112,6 +134,7 @@ class TreeStyle(object):
     entryfmt = '{label}'
 
     gpucolor = 'limegreen'
+    varcolor = 'cornflowerblue'
     staticcolor = 'azure3'
     gpupenwidth = 4
 
@@ -213,8 +236,23 @@ class TreeStyle(object):
 
         return features
 
+    def node_attrs_var(self, varentry):
+        ret=dict(shape='octagon', style='rounded', fontsize=10, color=self.varcolor, layer='variable')
+        variable=varentry.variable
+
+        label=variable.name()
+
+        size=variable.values().size()
+        if size>1:
+            label='%s [%i]'%(label, size)
+
+        label='%s\n%s'%(label, varentry.fullname)
+
+        ret['label']=label
+        return ret
+
     def node_attrs(self, entry):
-        ret=dict()
+        ret=dict(layer='transformation')
         features=self.get_features(entry)
 
         styles=()
@@ -280,7 +318,7 @@ class TreeStyle(object):
         return self.tailfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
 
     def edge_attrs(self, isink, sink, isource=None, source=None):
-        attrs = dict()
+        attrs = dict(layer='transformation')
         style=()
         if sink:
             attrs['taillabel']=self.tail_label(isink, sink)
@@ -322,3 +360,13 @@ class TreeStyle(object):
 
         attrs['style']=','.join(style)
         return {k:v for k, v in attrs.items() if v}
+
+    def edge_attrs_var(self, var, tovar=False):
+        ret=dict(color=self.varcolor, layer='variable')
+        if tovar:
+            ret['weight']=0.5
+        else:
+            ret['weight']=1.0
+
+        return ret
+
