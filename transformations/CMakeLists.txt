@@ -23,6 +23,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
+  transformations/detector/Cherenkov.cc
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/functions/Sin.cc
@@ -172,6 +173,7 @@ set(TRANSFORMATION_HEADERS
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
+  Cherenkov.hh
   HistSmear.hh
   HistSmearSparse.hh
   RenormalizeDiag.hh
