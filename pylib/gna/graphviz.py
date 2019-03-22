@@ -18,6 +18,9 @@ def uid( obj1, obj2=None ):
     return res
 
 def savegraph(obj, fname, *args, **kwargs):
+    if not fname:
+        return
+
     verbose = kwargs.pop('verbose', True)
 
     gdot = GNADot(obj, *args, **kwargs)
