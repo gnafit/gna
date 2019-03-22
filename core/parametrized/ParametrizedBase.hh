@@ -11,6 +11,13 @@
 #include "callback.hh"
 #include "taintflag.hh"
 
+namespace TransformationTypes{
+  template<typename FloatType,typename SizeType>
+  class GPUVariablesLocal;
+  template<typename FloatType,typename SizeType>
+  class GPUVariables;
+}
+
 namespace ParametrizedTypes {
   using VariablesContainer = boost::ptr_vector<ParametrizedEntry>;
   using EvaluablesContainer = boost::ptr_vector<EvaluableEntry>;
@@ -19,6 +26,11 @@ namespace ParametrizedTypes {
     friend class ::ParametersGroup;
     template<typename SourceFloatType, typename SinkFloatType>
     friend class ::GNAObjectT;
+
+    template<typename F1,typename S1>
+    friend class TransformationTypes::GPUVariablesLocal;
+    template<typename F1,typename S1>
+    friend class TransformationTypes::GPUVariables;
   public:
     ParametrizedBase(const ParametrizedBase &other);
     ParametrizedBase &operator=(const ParametrizedBase &other);

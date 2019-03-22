@@ -63,6 +63,8 @@ public:
 
   void dumpObj();
 
+  void variablesBound();
+
   Variables variables;
   Evaluables evaluables;
   Transformations transformations;

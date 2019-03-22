@@ -6,6 +6,7 @@
 #include <iostream>
 #include "TransformationEntry.hh"
 #include "GPUVariablesLocal.hh"
+#include "GPUVariables.hh"
 #include "GPUFunctionData.hh"
 
 namespace TransformationTypes{
@@ -13,7 +14,7 @@ namespace TransformationTypes{
     class GPUFunctionArgsT {
     public:
         using EntryType = EntryT<FloatType,FloatType>;
-        GPUFunctionArgsT(EntryType* entry) : m_entry(entry){
+        GPUFunctionArgsT(EntryType* entry) : m_entry(entry) {
 
         }
 
@@ -23,6 +24,11 @@ namespace TransformationTypes{
 
         template<typename Container>
         void readVariables(Container& vars){m_vars.readVariables(vars);}
+
+        void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
+            m_vars.readVariables(parbase);
+            m_vars_global.readVariables(parbase);
+        }
 
         void updateTypesHost();
         void updateTypesDevice();
@@ -49,6 +55,7 @@ namespace TransformationTypes{
         EntryType* m_entry;
 
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
+        GPUVariables<FloatType,SizeType>      m_vars_global; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs
         GPUFunctionData<FloatType,SizeType>   m_rets; ///< Handler for outputs
         GPUFunctionData<FloatType,SizeType>   m_ints; ///< Handler for storages

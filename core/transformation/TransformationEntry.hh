@@ -23,6 +23,10 @@ namespace TypeClasses{
   template<typename FloatType> class TypeClassT;
 }
 
+namespace ParametrizedTypes{
+  class ParametrizedBase;
+}
+
 namespace TransformationTypes
 {
   template<typename SourceFloatType, typename SinkFloatType> class BaseT;

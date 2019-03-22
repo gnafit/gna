@@ -8,6 +8,10 @@
 template<typename SourceFloatType,typename SinkFloatType>
 class GNAObjectT;
 
+namespace ParametrizedTypes{
+  class ParametrizedBase;
+}
+
 namespace TransformationTypes{
     template<typename FloatType,typename SizeType=unsigned int>
     class GPUVariables {
@@ -30,10 +34,11 @@ namespace TransformationTypes{
 
         void dump(const std::string& type);
 
-        void readVariables(GNAObjectT<FloatType,FloatType>* object);
+        void readVariables(ParametrizedTypes::ParametrizedBase* parbase);
 
         void syncHost2Device();
     private:
+        std::vector<variable<FloatType>> m_variables;
 
         std::vector<std::string> names;
         std::vector<FloatType>   h_values;

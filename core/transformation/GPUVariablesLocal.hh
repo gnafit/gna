@@ -5,6 +5,10 @@
 #include <initializer_list>
 #include "variable.hh"
 
+namespace ParametrizedTypes{
+  class ParametrizedBase;
+}
+
 namespace TransformationTypes{
     template<typename FloatType,typename SizeType=unsigned int>
     class GPUVariablesLocal {
@@ -27,12 +31,15 @@ namespace TransformationTypes{
 
         void dump(const std::string& type);
 
-        template<typename Container>
-        void readVariables(Container& list);
+        void readVariables();
+        void readVariables(ParametrizedTypes::ParametrizedBase* parbase);
 
         void syncHost2Device();
+
     private:
         void readVariable(size_t i, const variable<FloatType>& var);
+
+        std::vector<variable<FloatType>> m_variables;
 
         std::vector<std::string> names;
         std::vector<FloatType>   h_values;
@@ -117,11 +124,10 @@ namespace TransformationTypes{
     }
 
     template<typename FloatType,typename SizeType>
-    template<typename Container>
-    void GPUVariablesLocal<FloatType,SizeType>::readVariables(Container& vars){
-        setSize(vars.size());
+    void GPUVariablesLocal<FloatType,SizeType>::readVariables(){
+        setSize(m_variables.size());
         size_t i(0);
-        for (auto& var: vars) {
+        for (auto& var: m_variables) {
             readVariable(i, var);
             ++i;
         }

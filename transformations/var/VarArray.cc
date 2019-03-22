@@ -21,6 +21,7 @@ m_vars(vars.size())
         this->variable_(&m_vars[i], var.name()).bind(var);
     }
     initTransformation();
+    variablesBound();
 }
 
 template<typename FloatType>

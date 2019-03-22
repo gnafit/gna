@@ -34,6 +34,7 @@ m_vars(vars.size())
     }
 
     initTransformation();
+    variablesBound();
 }
 
 template<typename FloatType>

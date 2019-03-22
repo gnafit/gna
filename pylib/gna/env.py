@@ -502,6 +502,7 @@ class _environment(object):
                     print(msg)
                 else:
                     raise Exception(msg)
+        obj.variablesBound()
         return obj
 
     def ns(self, ns):
