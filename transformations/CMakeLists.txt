@@ -14,6 +14,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/PolyRatio.cc
   transformations/base/WeightedSumP.cc
   transformations/base/Inverse.cc
+  transformations/base/PartialSum.cc
   # Calculus
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -112,6 +113,7 @@ set(TRANSFORMATION_HEADERS
   Inverse.hh
   Points.hh
   Product.hh
+  PartialSum.hh
   Ratio.hh
   MultiSum.hh
   Sum.hh
