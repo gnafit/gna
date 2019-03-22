@@ -24,7 +24,7 @@ def main(args):
     xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power')
 
     with ns:
-        pratio = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'])
+        pratio = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels='Integrand')
     dedx_p >> pratio.polyratio.points
 
     integrator = C.IntegratorGL(bins, 4, labels=('GL sampler', 'GL integrator'))
