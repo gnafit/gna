@@ -106,6 +106,11 @@ def MultiSum(outputs=None, *args, **kwargs):
 
     return cls(OutputDescriptors(outputs), *args, **kwargs)
 
+def PolyRatio(nominator=[], denominator=[], *args, **kwargs):
+    nominator = stdvector(nominator, 'string')
+    denominator = stdvector(denominator, 'string')
+    return R.GNA.GNAObjectTemplates.PolyRatioT(_current_precision)(nominator, denominator, *args, **kwargs)
+
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
     weights = stdvector(weights)
