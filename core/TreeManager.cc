@@ -19,6 +19,9 @@ void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatT
     m_vararray.reset(new VarArrayType(variables));
     m_transformation.reset(new TransformationDescriptorType(m_vararray->transformations.front()));
     m_output.reset(new OutputDescriptorType(m_transformation->outputs.front()));
+#ifdef GNA_CUDA_SUPPORT
+    m_transformation->setLocation(DataLocation::Device);
+#endif
 }
 
 template<typename FloatType>
@@ -43,9 +46,13 @@ template<typename FloatType>
 void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){
-        m_transformation->touch();
 #ifdef GNA_CUDA_SUPPORT
-        /// TODO: add sync
+        auto& data=m_transformation->data(0);
+        if (data.gpuArr){
+            data.gpuArr->sync(DataLocation::Device);
+        }
+#else
+        m_transformation->touch();
 #endif
     }
 }

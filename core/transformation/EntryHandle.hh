@@ -81,6 +81,10 @@ namespace TransformationTypes
     void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
+#endif
+
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
@@ -104,5 +108,4 @@ namespace TransformationTypes
   protected:
     EntryType *m_entry;                                     ///< Wrapped Entry pointer.
   }; /* class Handle */
-
 } /* TransformationTypes */

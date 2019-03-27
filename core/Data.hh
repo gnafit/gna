@@ -12,6 +12,13 @@
 #include <type_traits>
 
 #include <Eigen/Dense>
+#include "config_vars.h"
+
+#ifdef GNA_CUDA_SUPPORT
+#include "GpuArray.hh"
+#include "DataLocation.hh"
+#include "cuda_config_vars.h"
+#endif // GNA_CUDA_SUPPORT
 
 /**
  * @brief Data status flag.
@@ -675,6 +682,9 @@ public:
       new (&this->mat)   MatrixViewType( this->buffer, dt.shape[0], dt.shape[1] );
     }
   }
+#ifdef GNA_CUDA_SUPPORT
+  DataLocation require_gpu();
+#endif // GNA_CUDA_SUPPORT
 
   const DataType type;                             ///< data type.
   Status state{Status::Undefined};                 ///< data status.
@@ -682,14 +692,43 @@ public:
   T *buffer{nullptr};                              ///< the buffer. Data ownership is undefined.
   std::unique_ptr<T> allocated{nullptr};           ///< the buffer initialized within Data. Deallocates the data when destructed.
 
-  ArrayViewType  arr{nullptr,   0}; ///< 1D array   view.
-  VectorViewType vec{nullptr,   0}; ///< 1D vector  view.
+  ArrayViewType  arr{nullptr,   0}; ///< 1D array view.
+  VectorViewType vec{nullptr,   0}; ///< 1D vector view.
 
   Array2ViewType arr2d{nullptr, 0,  0}; ///< 2D array  view.
   MatrixViewType mat{nullptr,   0,  0}; ///< 2D matrix view.
 
   ArrayViewType  &x = arr;    ///< 1D array  view shorthand.
 };
+
+#ifdef GNA_CUDA_SUPPORT
+
+template <typename T>
+DataLocation Data<T>::require_gpu() {
+/**
+Allocate GPU memory in case of GPU array is not inited yet
+*/
+
+  if (gpuArr == nullptr) {
+    gpuArr.reset(new GpuArray<T>());
+  }
+  if (gpuArr->deviceMemAllocated) {
+#ifdef CU_DEBUG_2
+    std::cerr << "INITED! Nothing to do! Reqire_gpu exit!" << std::endl;
+#endif
+    return gpuArr->dataLoc;
+  }
+  DataLocation tmp = DataLocation::NoData;
+  if (type.shape.size() == 1) {
+	std::cout << "shape 1" << std::endl;
+    tmp = gpuArr->Init(type.shape[0], buffer);
+  } else if (type.shape.size() == 2) {
+	std::cout << "shape 2" << std::endl;
+    tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
+  }
+  return tmp;
+}
+#endif
 
 template class Data<double>;
 #ifdef PROVIDE_SINGLE_PRECISION

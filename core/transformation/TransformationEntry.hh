@@ -161,7 +161,11 @@ namespace TransformationTypes
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
 
-    TreeManagerType* m_tmanager=nullptr;                             ///< Tree manager
+    TreeManagerType* m_tmanager=nullptr;                 ///< Tree manager
+
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entryLoc=loc; } ///< Change Entry location
+#endif
   private:
 #ifdef GNA_CUDA_SUPPORT
     DataLocation m_entryLoc = DataLocation::Host;       ///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
