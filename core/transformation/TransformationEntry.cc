@@ -15,6 +15,8 @@
 #include "GPUFunctionArgs.hh"
 #include "TreeManager.hh"
 
+#include "config_vars.h"
+
 using TransformationTypes::BaseT;
 using TransformationTypes::EntryT;
 using TransformationTypes::AtypesT;
@@ -214,6 +216,8 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
  *
+ * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
+ *
  * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
  * in any case. Should be fixed.
  *
@@ -272,6 +276,26 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       dep->evaluateTypes();
     }
     initInternals(sargs);
+
+#ifdef GNA_CUDA_SUPPORT
+    // GPU: require GPU memory for previous transformation's sink
+    if (this->getEntryLocation() == DataLocation::Device) {
+	
+      for (auto &source : sources) {
+          source.sink->data->require_gpu();
+      }
+      for (auto &sink : sinks) {
+        sink.data->require_gpu();
+        sink.data->gpuArr->setLocation( this->getEntryLocation() );
+      }
+      for (auto &intern : storages) {
+        intern.data->require_gpu();
+        intern.data->gpuArr->setLocation( this->getEntryLocation() );
+      }
+      // init gpu storage
+    }
+#endif
+
   }
 
   functionargs->requireGPU();
@@ -305,6 +329,7 @@ void EntryT<SourceFloatType,SinkFloatType>::touch_global() {
 
 /**
  * Returns i-th data. Does the calculation if needed.
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
  * @param i -- index of a Sink to read the data.
  * @return i-th Sink's Data.
  *
@@ -323,6 +348,11 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
     throw CalculationError<EntryType>(this, msg);
   }
   touch();
+#ifdef GNA_CUDA_SUPPORT
+  if (sink.data->gpuArr != nullptr) {
+    sink.data->gpuArr->sync( DataLocation::Host );
+  }
+#endif
   return *sink.data;
 }
 
@@ -358,8 +388,43 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
     throw std::runtime_error(msg);
   }
   fun = it->second.fun;
+#ifdef GNA_CUDA_SUPPORT
+  setEntryLocation(it->second.funcLoc);
+#endif
   funcname=name;
 }
+
+
+#ifdef GNA_CUDA_SUPPORT
+/**
+ *    @brief Sets the target (Host or Device) for execution of current transformation
+ */
+    template<typename SourceFloatType, typename SinkFloatType>
+    void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
+        m_entryLoc = loc;
+    }
+
+/**
+ *    @brief Sets the target (Host or Device) for transformation sinks
+ *    \warning Be careful! It changes sink location values directly without synchronization invoke!
+ */
+    template<typename SourceFloatType, typename SinkFloatType>
+    void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
+        for (const SinkType &s: sinks) {
+            s.data->gpuArr->setLocation(loc);
+        }
+    } 
+
+/** 
+ * @brief Returns the target (Host or Device) for execution of current transformation
+ */
+    template<typename SourceFloatType, typename SinkFloatType>
+    DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {   
+                return m_entryLoc;
+    }
+#endif
+
+
 
 /**
  * @brief Initialize the Data for the internal storage.

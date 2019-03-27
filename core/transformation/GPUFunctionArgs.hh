@@ -9,6 +9,12 @@
 #include "GPUVariables.hh"
 #include "GPUFunctionData.hh"
 
+#include "config_vars.h"
+
+#ifdef GNA_CUDA_SUPPORT
+#include "GpuBasics.hh"
+#endif
+
 namespace TransformationTypes{
     template<typename FloatType, typename SizeType=size_t>
     class GPUFunctionArgsT {
@@ -19,21 +25,36 @@ namespace TransformationTypes{
         }
 
         ~GPUFunctionArgsT(){
-            ///TODO: deallocate m_argsmapping_dev
-        }
+		/// deallocate m_argsmapping_dev
+	}
 
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
             m_vars_global.readVariables(parbase);
+            setAsDevice();
         }
 
         void readVariablesLocal(){
             m_vars.readVariables();
+            setAsDevice();
         }
+
+	void setAsDevice() {
+		m_entry->setEntryDataLocation(DataLocation::Device);
+	}
+
+	void setAsHost() {
+		m_entry->setEntryDataLocation(DataLocation::Host);
+	}
 
         void updateTypesHost();
         void updateTypesDevice();
-        void updateTypes() { updateTypesHost(); }
+        void updateTypes() {
+		updateTypesHost();
+		if (m_entry->getEntryLocation() == DataLocation::Device){
+		    updateTypesDevice();
+		}
+	}
         void provideSignatureHost();
         void provideSignatureDevice();
         void dump();
@@ -76,14 +97,13 @@ namespace TransformationTypes{
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
-        ///TODO: deallocate m_argsmapping_dev
-
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
-
-        ///TODO: allocate m_argsmapping_dev
-        ///TODO: sync m_entry->mapping to m_argsmapping_dev
+#ifdef GNA_CUDA_SUPPORT
+        m_args.fillContainersDevice(m_entry->sources);
+        m_rets.fillContainersDevice(m_entry->sinks);
+        m_ints.fillContainersDevice(m_entry->storages);
+#else
+	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
+#endif
 
         provideSignatureDevice();
     }
@@ -123,6 +143,5 @@ namespace TransformationTypes{
 
         m_ints.dump("storages");
         printf("\n");
-
     }
 }

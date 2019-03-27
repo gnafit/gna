@@ -15,6 +15,8 @@
 #include "Sink.hh"
 #include "Storage.hh"
 
+#include "config_vars.h"
+
 namespace GNA{
   template<typename FloatType> class TreeManager;
 }
@@ -161,6 +163,10 @@ namespace TransformationTypes
 
     TreeManagerType* m_tmanager=nullptr;                             ///< Tree manager
   private:
+#ifdef GNA_CUDA_SUPPORT
+    DataLocation m_entryLoc = DataLocation::Host;       ///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
+#endif
+
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
 
