@@ -61,7 +61,7 @@ def VarProduct(varnames, *args, **kwargs):
 
 """Construct Dummy object from vector of strings"""
 def Dummy(shape, name, varnames, *args, **kwargs):
-    return R.Dummy(shape, name, stdvector(varnames), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
 
 """Construct Points object from numpy array"""
 def Points(array, *args, **kwargs):

@@ -25,8 +25,8 @@ namespace TransformationTypes{
         }
 
         ~GPUFunctionArgsT(){
-		/// deallocate m_argsmapping_dev
-	}
+                /// deallocate m_argsmapping_dev
+        }
 
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
@@ -39,28 +39,29 @@ namespace TransformationTypes{
             setAsDevice();
         }
 
-	void setAsDevice() {
+        void setAsDevice() {
 #ifdef GNA_CUDA_SUPPORT
-		m_entry->setEntryDataLocation(DataLocation::Device);
+            m_entry->setEntryDataLocation(DataLocation::Device);
 #endif
-	}
+        }
 
-	void setAsHost() {
+        void setAsHost() {
 #ifdef GNA_CUDA_SUPPORT
-		m_entry->setEntryDataLocation(DataLocation::Host);
+            m_entry->setEntryDataLocation(DataLocation::Host);
 #endif
-	}
+        }
 
         void updateTypesHost();
         void updateTypesDevice();
+
         void updateTypes() {
-		updateTypesHost();
+            updateTypesHost();
 #ifdef GNA_CUDA_SUPPORT
-		if (m_entry->getEntryLocation() == DataLocation::Device){
-		    updateTypesDevice();
-		}
+            if (m_entry->getEntryLocation() == DataLocation::Device){
+                updateTypesDevice();
+            }
 #endif
-	}
+        }
         void provideSignatureHost();
         void provideSignatureDevice();
         void dump();
@@ -108,7 +109,7 @@ namespace TransformationTypes{
         m_rets.fillContainersDevice(m_entry->sinks);
         m_ints.fillContainersDevice(m_entry->storages);
 #else
-	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
+        std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
 #endif
 
         provideSignatureDevice();

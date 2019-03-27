@@ -22,7 +22,7 @@ namespace GNA{
 }
 
 namespace TransformationTypes{
-    template<typename FloatType,typename SizeType=unsigned int>
+    template<typename FloatType,typename SizeType>
     class GPUVariables {
     protected:
         using TreeManagerType = GNA::TreeManager<FloatType>;

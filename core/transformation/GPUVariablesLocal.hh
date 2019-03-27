@@ -16,7 +16,7 @@ namespace ParametrizedTypes{
 }
 
 namespace TransformationTypes{
-    template<typename FloatType,typename SizeType=unsigned int>
+    template<typename FloatType,typename SizeType>
     class GPUVariablesLocal {
     public:
         GPUVariablesLocal() {

@@ -48,8 +48,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
 	allocateDevice();
 }
 
-template class TransformationTypes::GPUVariables<double>;
-
+template class TransformationTypes::GPUVariables<double,size_t>;
 #ifdef PROVIDE_SINGLE_PRECISION
-	template class TransformationTypes::GPUVariables<float>;
+template class TransformationTypes::GPUVariables<float,size_t>;
 #endif
