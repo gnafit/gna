@@ -4,10 +4,11 @@
 from __future__ import print_function
 from load import ROOT as R
 
-def run_unittests(glb, message='All tests are OK!'):
+def run_unittests(glb, *args, **kwargs):
+    message=kwargs.pop('message', 'All tests are OK!')
     for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
         print('call ', fcn)
-        glb[fcn]()
+        glb[fcn](*args, **kwargs)
         print()
 
     print(message)

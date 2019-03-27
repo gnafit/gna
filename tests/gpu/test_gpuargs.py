@@ -10,6 +10,7 @@ from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
 from gna.constructors import stdvector, Points, Dummy
 from gna.bindings import DataType
+from gna.unittest import *
 
 #
 # Create the matrix
@@ -51,21 +52,24 @@ def test_io(opts):
 
     print( 'Datatype:', str(dt) )
 
-def test_vars(opts):
+@floatcopy(globals(), addname=True)
+def test_vars_local(opts, function_name):
     print('Test inputs/outputs/variables (Dummy)')
     mat1 = N.arange(12, dtype='d').reshape(3, 4)
     mat2 = N.arange(15, dtype='d').reshape(5, 3)
 
     from gna.env import env
-    ns = env.globalns
+    ns = env.globalns(function_name)
     ns.reqparameter('par1', central=1.0,    fixed=True, label='Dummy parameter 1')
     ns.reqparameter('par2', central=1.5,    fixed=True, label='Dummy parameter 2')
     ns.reqparameter('par3', central=1.01e5, fixed=True, label='Dummy parameter 3')
     ns.printparameters(labels=True)
 
     points1, points2 = Points(mat1), Points(mat2)
-    dummy = Dummy(4, "dummy", ['par1', 'par2', 'par3'])
-    dummy.dummy.switchFunction('dummy_gpuargs_h')
+    with ns:
+        dummy = Dummy(4, "dummy", ['par1', 'par2', 'par3'])
+
+    dummy.dummy.switchFunction('dummy_gpuargs_h_local')
     dummy.add_input(points1, 'input1')
     dummy.add_input(points2, 'input2')
     dummy.add_output('out1')
@@ -95,6 +99,5 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     # parser.add_argument('-g', '--gpuargs', action='store_true')
 
-    test_io(parser.parse_args())
-    test_vars(parser.parse_args())
+    run_unittests(globals(), parser.parse_args())
 
