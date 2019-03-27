@@ -62,8 +62,8 @@ namespace TransformationTypes{
             }
 #endif
         }
-        void provideSignatureHost();
-        void provideSignatureDevice();
+        void provideSignatureHost(bool local=false);
+        void provideSignatureDevice(bool local=false);
         void dump();
 
         SizeType    nvars{0u};            ///< number of variables
@@ -91,64 +91,4 @@ namespace TransformationTypes{
 
         SizeType* m_argsmapping_dev{nullptr};
     };
-
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::updateTypesHost(){
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
-
-        provideSignatureHost();
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
-#ifdef GNA_CUDA_SUPPORT
-        m_args.fillContainersDevice(m_entry->sources);
-        m_rets.fillContainersDevice(m_entry->sinks);
-        m_ints.fillContainersDevice(m_entry->storages);
-#else
-        std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
-#endif
-
-        provideSignatureDevice();
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::provideSignatureHost(){
-        m_vars.provideSignatureHost(nvars, vars);
-        m_args.provideSignatureHost(nargs, args, argshapes);
-        m_rets.provideSignatureHost(nrets, rets, retshapes);
-        m_ints.provideSignatureHost(nints, ints, intshapes);
-
-        argsmapping = m_entry->mapping.size() ? m_entry->mapping.data() : nullptr;
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::provideSignatureDevice(){
-        m_vars.provideSignatureDevice(nvars, vars);
-        m_args.provideSignatureDevice(nargs, args, argshapes);
-        m_rets.provideSignatureDevice(nrets, rets, retshapes);
-        m_ints.provideSignatureDevice(nints, ints, intshapes);
-
-        argsmapping = m_argsmapping_dev;
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::dump(){
-        printf("Dumping GPU args state\n");
-
-        m_vars.dump("variables");
-        printf("\n");
-
-        m_args.dump("sources");
-        printf("\n");
-
-        m_rets.dump("sinks");
-        printf("\n");
-
-        m_ints.dump("storages");
-        printf("\n");
-    }
 }

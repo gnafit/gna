@@ -24,7 +24,8 @@ GNA::GNAObjectTemplates::DummyT<FloatType>::DummyT(size_t shape, const char* lab
   .func(&DummyType::dummy_fcn)
   .func("dummy_gpuargs_h_local", &DummyType::dummy_gpuargs_h_local/*, DataLocation::Host*/)
   .func("dummy_gpuargs_h",       &DummyType::dummy_gpuargs_h/*,       DataLocation::Host*/)
-  .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d/*,       DataLocation::Device*/);
+  .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d/*,       DataLocation::Device*/)
+  .finalize();
 
   m_vars.resize(labels.size());
   for (size_t i = 0; i < m_vars.size(); ++i) {
@@ -45,7 +46,7 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(typename 
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->readVariablesLocal();
-    gpuargs->provideSignatureHost();
+    gpuargs->provideSignatureHost(true /*local*/);
 
     for (size_t i = 0; i < gpuargs->nrets; ++i) {
         auto* shape =gpuargs->retshapes[i];
@@ -63,7 +64,7 @@ template<typename FloatType>
 void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
-    gpuargs->provideSignatureHost();
+    gpuargs->provideSignatureHost(); /*global*/
 
     for (size_t i = 0; i < gpuargs->nrets; ++i) {
         auto* shape =gpuargs->retshapes[i];

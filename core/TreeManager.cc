@@ -31,10 +31,22 @@ bool GNA::TreeManager<FloatType>::hasVariable(const variable<void>& variable) {
 }
 
 template<typename FloatType>
+bool GNA::TreeManager<FloatType>::consistentVariable(const variable<FloatType>& variable) {
+    if(!m_allocator){
+        return false;
+    }
+
+    return variable.values().root() == m_allocator->data();
+}
+
+template<typename FloatType>
 void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){
         m_transformation->touch();
+#ifdef GNA_CUDA_SUPPORT
+        /// TODO: add sync
+#endif
     }
 }
 

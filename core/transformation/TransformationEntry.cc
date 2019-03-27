@@ -280,7 +280,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 #ifdef GNA_CUDA_SUPPORT
     // GPU: require GPU memory for previous transformation's sink
     if (this->getEntryLocation() == DataLocation::Device) {
-	
+
       for (auto &source : sources) {
           source.sink->data->require_gpu();
       }
@@ -295,7 +295,6 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       // init gpu storage
     }
 #endif
-
   }
 
   functionargs->requireGPU();
@@ -329,7 +328,7 @@ void EntryT<SourceFloatType,SinkFloatType>::touch_global() {
 
 /**
  * Returns i-th data. Does the calculation if needed.
- * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it. 
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it.
  * @param i -- index of a Sink to read the data.
  * @return i-th Sink's Data.
  *
@@ -413,13 +412,13 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
         for (const SinkType &s: sinks) {
             s.data->gpuArr->setLocation(loc);
         }
-    } 
+    }
 
-/** 
+/**
  * @brief Returns the target (Host or Device) for execution of current transformation
  */
     template<typename SourceFloatType, typename SinkFloatType>
-    DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {   
+    DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {
                 return m_entryLoc;
     }
 #endif

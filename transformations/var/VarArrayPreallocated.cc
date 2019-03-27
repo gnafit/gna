@@ -48,11 +48,14 @@ void GNA::GNAObjectTemplates::VarArrayPreallocatedT<FloatType>::initTransformati
 
 template<typename FloatType>
 bool GNA::GNAObjectTemplates::VarArrayPreallocatedT<FloatType>::hasVariable(const variable<void>& variable){
+    printf("Find var %s (%zu)\n", variable.name(), m_vars.size());
     for(auto& var: m_vars){
+        printf("  check %s\n", var.name());
         if(var==variable){
             return true;
         }
     }
+    printf("not found\n");
     return false;
 }
 

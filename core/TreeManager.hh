@@ -47,6 +47,7 @@ namespace GNA{
 
         void setVariables(const std::vector<variableType>& vars);
         bool hasVariable(const variable<void>& variable);
+        bool consistentVariable(const variable<FloatType>& variable);
 
         void registerTransformation(TransformationType* entry){ m_transformations.insert(entry); }
         bool hasTransformation(TransformationType* entry) { return m_transformations.find(entry)!=m_transformations.end(); }
