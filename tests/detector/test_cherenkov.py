@@ -25,7 +25,7 @@ env.defparameter("p2",  central=-2.18044e+01, fixed=True)
 env.defparameter("p3",  central=1.44731e+01,  fixed=True)
 env.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
-energy = N.linspace(0.166, 10, num=1000)
+energy = N.linspace(0.1, 10, num=1000)
 gna_energy = C.Points(energy)
 cherenkov = R.Cherenkov()
 cherenkov.cherenkov.energy(gna_energy)
