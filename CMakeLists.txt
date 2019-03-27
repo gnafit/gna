@@ -5,6 +5,46 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+
+if(CUDA_SUPPORT)
+    find_package( CUDA REQUIRED)
+    include_directories(cuda/operations/ cuda/extra/ cuda/core/)
+    include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+    if(NOT CUDA_MAT_SIZE_THRESHOLD)
+        set(CUDA_MAT_SIZE_THRESHOLD 100)
+    endif()
+#    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
+    set(CUDA_ADD_LIBS)
+    IF (CUDA_FOUND)
+        add_subdirectory(cuda/)
+        #set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
+        set (CUDA_ADD_LIBS cuGNA)
+        link_directories(cuda/)
+    ENDIF()
+    set (CUSOURCES
+        )
+    set (CUHEADERS
+  	GpuArray.hh
+  	GpuArrayTypes.hh
+  	cuInterpExpo.hh
+	GpuBasics.hh
+	cuElementary.hh
+	cuOscProbPMNS.hh
+        )
+else()
+    set(CUDA_SUPPORT 0)
+    set(CUSOURCES "")
+    set(CUHEADERS "")
+endif()
+
+if (NOT CUDA_DEBUG_INFO )
+    set(CUDA_DEBUG_INFO 0)
+endif()
+
+
+
+
 add_subdirectory(core)
 add_subdirectory(transformations)
 add_subdirectory(extra)
@@ -121,7 +161,7 @@ endif()
 
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS}  -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt)
 
