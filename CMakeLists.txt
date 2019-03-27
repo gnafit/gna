@@ -5,12 +5,9 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
-
 if(CUDA_SUPPORT)
-    find_package( CUDA REQUIRED)
+    find_package(CUDA REQUIRED)
     include_directories(cuda/operations/ cuda/extra/ cuda/core/)
-    include_directories( ${CMAKE_BINARY_DIR}/generated/ )
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
         set(CUDA_MAT_SIZE_THRESHOLD 100)
     endif()
@@ -38,12 +35,11 @@ else()
     set(CUHEADERS "")
 endif()
 
-if (NOT CUDA_DEBUG_INFO )
+if (NOT CUDA_DEBUG_INFO)
     set(CUDA_DEBUG_INFO 0)
 endif()
 
-
-
+configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 
 add_subdirectory(core)
 add_subdirectory(transformations)
@@ -60,6 +56,7 @@ set(SOURCES
     )
 
 set(HEADERS
+    ${CUHEADERS}
     ${CORE_HEADERS}
     ${TRANSFORMATION_HEADERS}
     ${EXTRA_HEADERS}
@@ -68,6 +65,7 @@ set(HEADERS
     )
 
 include_directories(
+                    ${CMAKE_BINARY_DIR}/generated/
                     core/parameters/
                     core/parametrized/
                     core/transformation/

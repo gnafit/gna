@@ -40,20 +40,26 @@ namespace TransformationTypes{
         }
 
 	void setAsDevice() {
+#ifdef GNA_CUDA_SUPPORT
 		m_entry->setEntryDataLocation(DataLocation::Device);
+#endif
 	}
 
 	void setAsHost() {
+#ifdef GNA_CUDA_SUPPORT
 		m_entry->setEntryDataLocation(DataLocation::Host);
+#endif
 	}
 
         void updateTypesHost();
         void updateTypesDevice();
         void updateTypes() {
 		updateTypesHost();
+#ifdef GNA_CUDA_SUPPORT
 		if (m_entry->getEntryLocation() == DataLocation::Device){
 		    updateTypesDevice();
 		}
+#endif
 	}
         void provideSignatureHost();
         void provideSignatureDevice();

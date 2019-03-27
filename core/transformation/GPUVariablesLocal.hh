@@ -78,6 +78,7 @@ namespace TransformationTypes{
 
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::deAllocateDevice(){
+#ifdef GNA_CUDA_SUPPORT
         if(d_values){
             cuwr_free<FloatType>(d_values);
             d_values=nullptr;
@@ -87,18 +88,21 @@ namespace TransformationTypes{
             cuwr_free<FloatType*>(d_value_pointers_dev);
             d_value_pointers_dev=nullptr;
         }
+#endif
     }
 
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::allocateDevice(){
+#ifdef GNA_CUDA_SUPPORT
         /// allocate d_values (same as h_values, no sync is needed here)
-        device_malloc(d_values, h_values.size()); 
+        device_malloc(d_values, h_values.size());
         auto* ptr=d_values;
         for (size_t i = 0; i < h_value_pointers_dev.size(); ++i) {
             h_value_pointers_dev[i]=ptr;
             ptr = ptr + 1;
         }
-        copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size()); 
+        copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size());
+#endif
     }
 
     template<typename FloatType,typename SizeType>
@@ -149,7 +153,9 @@ namespace TransformationTypes{
 
     template<typename FloatType,typename SizeType>
     void GPUVariablesLocal<FloatType,SizeType>::syncHost2Device(){
+#ifdef GNA_CUDA_SUPPORT
         /// h_values -> d_values
         copyH2D_NA(d_values, h_values.data(), h_values.size());
+#endif
     }
 }
