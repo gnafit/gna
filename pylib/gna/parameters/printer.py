@@ -4,6 +4,7 @@ from __future__ import print_function
 from load import ROOT
 import numpy as N
 from gna.parameters import DiscreteParameter
+from gna.bindings import provided_precisions
 
 from itertools import chain, tee, cycle
 import itertools
@@ -26,7 +27,10 @@ except ImportError:
     Style = DummyAttr()
     Fore = DummyAttr()
 
-unctypes = ( ROOT.Variable('double'), ROOT.Variable('complex<double>'), DiscreteParameter )
+unctypes = ()
+for precision in provided_precisions:
+    unctypes += ( ROOT.Variable(precision), ROOT.Variable('complex<%s>'%precision) )
+unctypes+=(DiscreteParameter,)
 
 namefmt='{name:30}'
 
@@ -169,8 +173,17 @@ def varstats(var, stats):
         else:
             increment('unknown')
 
-@patchROOTClass( ROOT.Variable('double'), '__str__' )
+@patchROOTClass( [ROOT.Variable(prec) for prec in provided_precisions], '__str__' )
 def Variable__str( self, labels=False ):
+    var = self.getVariable()
+    size = var.size()
+    if size==2:
+        return Variable_complex__str(self, labels, value=var.values().complex())
+
+    name = self.name()
+    if size>2:
+        name += ' [%i]'%size
+
     fmt = dict(
             name    = colorize(self.name(), Fore.CYAN),
             val     = self.value(),
@@ -191,8 +204,10 @@ def Variable__str( self, labels=False ):
     s += Style.RESET_ALL
     return s
 
-@patchROOTClass( ROOT.Variable('complex<double>'), '__str__' )
-def Variablec__str( self, labels=False  ):
+@patchROOTClass( [ROOT.Variable('complex<%s>'%prec) for prec in provided_precisions], '__str__' )
+def Variable_complex__str(self, labels=False, value=None):
+    if value is None:
+        value = self.value()
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN),
             rval  = self.value().real(),
@@ -206,6 +221,10 @@ def Variablec__str( self, labels=False  ):
     s= namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
 
+    # cnum = value.real() + value.imag()*1j
+    # angle = N.angle(cnum, deg=True)
+    # mag = N.absolute(cnum)
+
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
     if label:
@@ -214,7 +233,7 @@ def Variablec__str( self, labels=False  ):
     s += Style.RESET_ALL
     return s
 
-@patchROOTClass( ROOT.UniformAngleParameter('double'), '__str__' )
+@patchROOTClass( [ROOT.UniformAngleParameter(prec) for prec in provided_precisions], '__str__' )
 def UniformAngleParameter__str( self, labels=False  ):
     fmt = dict(
             name    = colorize(self.name(), Fore.CYAN),
@@ -247,7 +266,7 @@ def UniformAngleParameter__str( self, labels=False  ):
     s += Style.RESET_ALL
     return s
 
-@patchROOTClass( ROOT.GaussianParameter('double'), '__str__' )
+@patchROOTClass( [ROOT.GaussianParameter(prec) for prec in provided_precisions], '__str__' )
 def GaussianParameter__str( self, labels=False  ):
     fmt = dict(
             name    = colorize(self.name(), Fore.CYAN),
