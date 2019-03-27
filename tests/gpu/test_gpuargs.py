@@ -99,6 +99,10 @@ def test_vars_01_local(opts, function_name):
     print( 'Datatype:', str(dt1) )
     print( 'Datatype:', str(dt2) )
 
+    print('Change 3d variable')
+    ns['par3'].set(-1.0)
+    res1 = dummy.dummy.out1.data()
+
 @floatcopy(globals(), addname=True)
 def test_vars_02(opts, function_name):
     print('Test inputs/outputs/variables (Dummy)')
@@ -132,6 +136,10 @@ def test_vars_02(opts, function_name):
 
     print( 'Datatype:', str(dt1) )
     print( 'Datatype:', str(dt2) )
+
+    print('Change 3d variable')
+    ns['par3'].set(-1.0)
+    res1 = dummy.dummy.out1.data()
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
