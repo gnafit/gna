@@ -17,10 +17,13 @@ namespace GNA{
             using typename BaseClass::FunctionArgs;
             using typename BaseClass::TypesFunctionArgs;
             using VarArrayPreallocatedType = VarArrayPreallocatedT<FloatType>;
+            using variableType = variable<FloatType>;
 
         public:
             //VarArrayPreallocatedT(const std::vector<std::string>& varnames);     ///< Constructor.
-            VarArrayPreallocatedT(const std::vector<variable<FloatType>>& vars); ///< Constructor.
+            VarArrayPreallocatedT(const std::vector<variableType>& vars); ///< Constructor.
+
+            bool hasVariable(const variable<void>& variable);
 
         protected:
             void initTransformation();

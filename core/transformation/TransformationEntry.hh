@@ -159,12 +159,12 @@ namespace TransformationTypes
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
 
+    TreeManagerType* m_tmanager=nullptr;                             ///< Tree manager
   private:
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
 
     void initInternals(StorageTypesFunctionArgsType& fargs);         ///< Initialize the Data for the internal storage.
 
-    TreeManagerType* m_tmanager=nullptr;                             ///< Tree manager
   }; /* class Entry */
 } /* TransformationTypes */

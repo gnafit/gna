@@ -2,6 +2,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <memory>
+#include <set>
 #include "variable.hh"
 
 template<typename FloatType>
@@ -12,6 +13,11 @@ class OutputDescriptorT;
 
 template<typename SourceFloatType, typename SinkFloatType>
 class TransformationDescriptorT;
+
+namespace TransformationTypes{
+  template<typename SourceFloatType, typename SinkFloatType>
+  class EntryT;
+}
 
 namespace GNA{
     namespace GNAObjectTemplates{
@@ -34,11 +40,16 @@ namespace GNA{
         using allocatorType = arrayviewAllocator<FloatType>;
         using allocatorPtr = std::unique_ptr<allocatorType>;
         using variableType = variable<FloatType>;
+        using TransformationType = TransformationTypes::EntryT<FloatType,FloatType>;
 
         TreeManager(size_t allocatepars=0u);
         virtual ~TreeManager();
 
         void setVariables(const std::vector<variableType>& vars);
+        bool hasVariable(const variable<void>& variable);
+
+        void registerTransformation(TransformationType* entry){ m_transformations.insert(entry); }
+        bool hasTransformation(TransformationType* entry) { return m_transformations.find(entry)!=m_transformations.end(); }
 
         void update();
 
@@ -65,6 +76,8 @@ namespace GNA{
         VarArrayPtr m_vararray=nullptr;
         OutputDescriptorPtr m_output=nullptr;
         TransformationDescriptorPtr m_transformation=nullptr;
+
+        std::set<TransformationType*> m_transformations;
     };
 
     template<typename T> TreeManager<T>* TreeManager<T>::s_current_manager=nullptr;

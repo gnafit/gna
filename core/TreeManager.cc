@@ -22,6 +22,15 @@ void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatT
 }
 
 template<typename FloatType>
+bool GNA::TreeManager<FloatType>::hasVariable(const variable<void>& variable) {
+    if(!m_vararray){
+        return false;
+    }
+
+    return m_vararray->hasVariable(variable);
+}
+
+template<typename FloatType>
 void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){

@@ -13,7 +13,7 @@ private:
     using arrayviewType = arrayview<T>;
     using allocatorType = arrayviewAllocator<T>;
 public:
-    arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size), m_root(ptr), m_offset(0u) { }
+    arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
 
     arrayview(size_t size) : m_size(size) {
         if(!size){
@@ -28,7 +28,6 @@ public:
         else{
             m_buffer = new T[size];
             m_allocated.reset(m_buffer);
-            m_root = m_buffer;
         }
     }
     arrayview(const arrayviewType& other) : arrayview(other.size()) { *this = other; }

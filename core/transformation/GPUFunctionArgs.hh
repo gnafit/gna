@@ -14,7 +14,7 @@ namespace TransformationTypes{
     class GPUFunctionArgsT {
     public:
         using EntryType = EntryT<FloatType,FloatType>;
-        GPUFunctionArgsT(EntryType* entry) : m_entry(entry) {
+        GPUFunctionArgsT(EntryType* entry) : m_entry(entry), m_vars_global(entry) {
 
         }
 
@@ -22,12 +22,13 @@ namespace TransformationTypes{
             ///TODO: deallocate m_argsmapping_dev
         }
 
-        template<typename Container>
-        void readVariables(Container& vars){m_vars.readVariables(vars);}
-
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
             m_vars_global.readVariables(parbase);
+        }
+
+        void readVariablesLocal(){
+            m_vars.readVariables();
         }
 
         void updateTypesHost();

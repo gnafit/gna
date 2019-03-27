@@ -36,7 +36,7 @@ void Dummy::dummy_fcn(FunctionArgs& fargs){
 void Dummy::dummy_gpuargs_h(FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
-    gpuargs->readVariables(m_vars);
+    gpuargs->readVariablesLocal();
     gpuargs->provideSignatureHost();
 
     for (size_t i = 0; i < gpuargs->nrets; ++i) {

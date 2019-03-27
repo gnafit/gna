@@ -34,7 +34,7 @@ m_vars(vars.size())
     }
 
     initTransformation();
-    variablesBound();
+    this->GNAObjectT<FloatType,FloatType>::variablesBound();
 }
 
 template<typename FloatType>
@@ -44,6 +44,16 @@ void GNA::GNAObjectTemplates::VarArrayPreallocatedT<FloatType>::initTransformati
          .types(&VarArrayPreallocatedType::typesFunction)
          .func(&VarArrayPreallocatedType::function)
          .finalize();
+}
+
+template<typename FloatType>
+bool GNA::GNAObjectTemplates::VarArrayPreallocatedT<FloatType>::hasVariable(const variable<void>& variable){
+    for(auto& var: m_vars){
+        if(var==variable){
+            return true;
+        }
+    }
+    return false;
 }
 
 template<typename FloatType>
@@ -62,3 +72,4 @@ template class GNA::GNAObjectTemplates::VarArrayPreallocatedT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
 template class GNA::GNAObjectTemplates::VarArrayPreallocatedT<float>;
 #endif
+

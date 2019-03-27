@@ -35,7 +35,11 @@ template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(name), attrs({{"_label", name}}), parent(parent), tainted(name.c_str()),
     functionargs(new FunctionArgsType(this)), m_tmanager(GNA::TreeManager<SourceFloatType>::current())
-{ }
+{
+  if(m_tmanager){
+    m_tmanager->registerTransformation(this);
+  }
+}
 
 /**
  * @brief Clone constructor.

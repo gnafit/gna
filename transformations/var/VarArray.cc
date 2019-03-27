@@ -21,7 +21,7 @@ m_vars(vars.size())
         this->variable_(&m_vars[i], var.name()).bind(var);
     }
     initTransformation();
-    variablesBound();
+    this->GNAObjectT<FloatType,FloatType>::variablesBound();
 }
 
 template<typename FloatType>
