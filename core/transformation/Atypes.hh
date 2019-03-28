@@ -50,6 +50,15 @@ namespace TransformationTypes
     }
 
     /**
+     * @brief Get i-th Source Data(const).
+     * @param i -- Source index.
+     * @return i-th Source DataType.
+     */
+    const Data<SourceFloatType> &data(int i) const {
+      return *sink(i)->data;
+    }
+
+    /**
      * @brief Get number of Source instances.
      * @return number of sources.
      */
