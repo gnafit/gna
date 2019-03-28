@@ -40,6 +40,9 @@ void IntegratorRect::init(const std::string& mode) {
 void IntegratorRect::sample(FunctionArgs& fargs){
   auto& rets=fargs.rets;
   rets[1].x = m_edges.cast<double>();
+  auto npoints=m_edges.size()-1;
+  rets[3].x = 0.5*(m_edges.tail(npoints)+m_edges.head(npoints));
+
   auto& abscissa=rets[0].x;
 
   auto nbins=m_edges.size()-1;
