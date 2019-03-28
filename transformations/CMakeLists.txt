@@ -15,6 +15,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/WeightedSumP.cc
   transformations/base/Inverse.cc
   transformations/base/PartialSum.cc
+  transformations/base/PointsToHist.cc
   # Calculus
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -113,6 +114,7 @@ set(TRANSFORMATION_HEADERS
   Histogram2d.hh
   Inverse.hh
   Points.hh
+  PointsToHist.hh
   Product.hh
   PartialSum.hh
   Ratio.hh
