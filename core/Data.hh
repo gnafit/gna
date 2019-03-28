@@ -253,6 +253,16 @@ public:
   }
 
   /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Points<T> &preallocated(float* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
+
+  /**
    * @brief Set the DataType to be the view on the preallocated 1d Array
    * @param array - 1d Eigen array.
    * @return `*this`.
@@ -500,6 +510,18 @@ public:
    * @return `*this`.
    */
   DataType::Hist<T> &edges(size_t n, double* edges) {
+    m_type.edges.assign(edges, edges+n);
+    m_type.edgesNd[0]=m_type.edges;
+    return bins(n-1);
+  }
+
+  /**
+   * @brief Set the bin edges via double buffer.
+   * @param n -- number of bin edges.
+   * @param edges -- buffer with bin edges.
+   * @return `*this`.
+   */
+  DataType::Hist<T> &edges(size_t n, const double* edges) {
     m_type.edges.assign(edges, edges+n);
     m_type.edgesNd[0]=m_type.edges;
     return bins(n-1);

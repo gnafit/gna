@@ -15,7 +15,7 @@ dtype_spower = [ ('e', 'd'), ('temp1', 'd'), ('temp2', 'd'), ('dedx', 'd') ]
 
 def main(args):
     ns = env.globalns('birks')
-    ns.defparameter('Kb0', central=1.0, fixed=True)
+    ns.defparameter('Kb0', central=1.0, fixed=True, label='Kb0=1')
     ns.defparameter('Kb1', central=0.0062, fixed=True)
     ns.defparameter('Kb2', central=1.5e-6, fixed=True)
     ns.defparameter("E_0", central=0.165, fixed=True)

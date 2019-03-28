@@ -4,6 +4,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Histogram.cc
   transformations/base/Histogram2d.cc
   transformations/base/Points.cc
+  transformations/base/View.cc
   transformations/base/Bins.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
@@ -115,6 +116,7 @@ set(TRANSFORMATION_HEADERS
   Inverse.hh
   Points.hh
   PointsToHist.hh
+  View.hh
   Product.hh
   PartialSum.hh
   Ratio.hh
