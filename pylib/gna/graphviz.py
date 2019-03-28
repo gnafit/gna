@@ -196,6 +196,9 @@ class TreeStyle(object):
             features.static=True
             mark='a'
             dim = getdim(entry.sinks[0])
+        elif objectname in ('View',):
+            mark='v'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram',):
             features.static=True
             mark='h'
