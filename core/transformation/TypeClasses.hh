@@ -254,6 +254,35 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
+    class SetPointsT : public TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = SetPointsT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        SetPointsT(size_t size, Range retsrange={0,-1}) : m_shape({size}), m_retsrange(retsrange) { }
+        SetPointsT(size_t sizex, size_t sizey, Range retsrange={0,-1}) : m_shape({sizex, sizey}), m_retsrange(retsrange) { }
+        SetPointsT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            auto& rets = fargs.rets;
+            for(auto ridx: m_retsrange.iterateSafe(rets.size())){
+                rets[ridx].points().shape(m_shape);
+            }
+        }
+
+        void dump(){
+            printf("TypeClass set points: rets ");
+            m_retsrange.dump();
+        }
+    private:
+        std::vector<size_t> m_shape;
+        Range m_retsrange;
+    };
+
+    template<typename FloatType>
     class PassEachTypeT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;
