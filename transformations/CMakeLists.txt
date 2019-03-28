@@ -37,6 +37,7 @@ set(TRANSFORMATION_SOURCES
   # Histograms
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
+  transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
   # Integration
@@ -157,6 +158,7 @@ set(TRANSFORMATION_HEADERS
   # Histogram
   Rebin.hh
   RebinN.hh
+  PointsToHist.hh
   VarArray.hh
   VarArrayPreallocated.hh
   VarProduct.hh
@@ -190,6 +192,7 @@ set(TRANSFORMATION_HEADERS
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
+  Cherenkov.hh
   HistSmear.hh
   HistSmearSparse.hh
   RenormalizeDiag.hh
