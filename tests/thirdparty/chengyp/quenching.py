@@ -18,6 +18,12 @@ def main(args):
     ns.defparameter('Kb0', central=1.0, fixed=True)
     ns.defparameter('Kb1', central=0.0062, fixed=True)
     ns.defparameter('Kb2', central=1.5e-6, fixed=True)
+    ns.defparameter("E_0", central=0.165, fixed=True)
+    ns.defparameter("p0",  central=-7.26624e+00, fixed=True)
+    ns.defparameter("p1",  central=1.72463e+01,  fixed=True)
+    ns.defparameter("p2",  central=-2.18044e+01, fixed=True)
+    ns.defparameter("p3",  central=1.44731e+01,  fixed=True)
+    ns.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
     bins = N.arange(0.0, 12.0+1.e-6, 0.025)
     xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
@@ -31,6 +37,12 @@ def main(args):
     interpolator = C.InterpLinear(xp, integrator.points.x, labels=('InSegment', 'Interpolator'))
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
     integrated = integrator.add_input(interpolated)
+
+    accumulator = C.PartialSum(labels='reduction')
+    accumulator.reduction << integrated
+
+    #  import IPython
+    #  IPython.embed()
 
     savegraph(xp, args.graph, namespace=ns)
 
@@ -69,6 +81,16 @@ def main(args):
 
     integrated.plot_hist()
     savefig(args.output, suffix='_spower_int')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Partial sum' )
+    ax.set_title( 'Partial sum integrated' )
+    #  accumulator.reduction.out.plot_vs(integrator.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
+    accumulator.reduction.plot_hist()
 
     P.show()
 
