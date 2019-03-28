@@ -25,6 +25,9 @@ def main(args):
     ns.defparameter("p3",  central=1.44731e+01,  fixed=True)
     ns.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
+    Nsc = ns.defparameter("Nsc", central=1341.38, fixed=True)
+    Nch = ns.defparameter("Nch", central=1., fixed=True)
+
     bins = N.arange(0.0, 12.0+1.e-6, 0.025)
     xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
     xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power')
@@ -38,11 +41,15 @@ def main(args):
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
     integrated = integrator.add_input(interpolated)
 
-    accumulator = C.PartialSum(labels='reduction')
+    accumulator = C.PartialSum(labels='Integral with floating upper limit')
     accumulator.reduction << integrated
 
-    #  import IPython
-    #  IPython.embed()
+    with ns:
+        cherenkov = C.Cherenkov(labels='Cherenkov contribution')
+    cherenkov.cherenkov << integrator.points.xcenters
+
+    with ns:
+        npe_electron = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='Evis nonlinearity')
 
     savegraph(xp, args.graph, namespace=ns)
 

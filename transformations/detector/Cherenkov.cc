@@ -1,6 +1,5 @@
 #include "Cherenkov.hh"
 #include <algorithm>
-#include "fmt/ostream.h"
 
 Cherenkov::Cherenkov() {
     variable_(&p0, "p0");
