@@ -39,6 +39,7 @@ set(TRANSFORMATION_SOURCES
   transformations/hist/HistEdges.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
+  transformations/base/PointsToHist.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
@@ -117,7 +118,7 @@ set(TRANSFORMATION_HEADERS
   FillLike.hh
   Histogram.hh
   Histogram2d.hh
-  Points.hh
+  PointsToHist.hh
   View.hh
   Product.hh
   # Sums
