@@ -47,9 +47,11 @@ void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){
 #ifdef GNA_CUDA_SUPPORT
-        auto& data=m_transformation->data(0);
-        if (data.gpuArr){
-            data.gpuArr->sync(DataLocation::Device);
+        if(m_transformation->tainted()){
+            auto& data=m_transformation->data(0);
+            if (data.gpuArr){
+                data.gpuArr->sync(DataLocation::Device);
+            }
         }
 #else
         m_transformation->touch();

@@ -298,7 +298,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
   }
 
   functionargs->requireGPU();
-  functionargs->updateTypes();
+  //functionargs->updateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */
