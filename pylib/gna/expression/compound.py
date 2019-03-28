@@ -158,8 +158,7 @@ class VProduct(IndexedContainer, Variable):
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
-            from gna.constructors import stdvector
-            import ROOT as R
+            from gna.constructors import VarProduct
             with context.ns:
                 for idx in self.nindex.iterate():
                     names = [obj.current_format(idx) for obj in self.objects]
@@ -171,7 +170,7 @@ class VProduct(IndexedContainer, Variable):
                     else:
                         path, head = '', name
                         ns = context.ns
-                    vp = R.VarProduct( stdvector( names ), head, ns=ns )
+                    vp = VarProduct(names, head, ns=ns)
                     v=ns[head]
                     if isinstance(v, (ExpressionsEntry, ExpressionWithBindings)):
                         v=v.get()

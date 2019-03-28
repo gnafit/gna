@@ -207,11 +207,11 @@ def Variable__str( self, labels=False ):
 @patchROOTClass( [ROOT.Variable('complex<%s>'%prec) for prec in provided_precisions], '__str__' )
 def Variable_complex__str(self, labels=False, value=None):
     if value is None:
-        value = self.value()
+        value = self.values()
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN),
-            rval  = self.value().real(),
-            ival  = self.value().imag(),
+            rval  = value.real(),
+            ival  = value.imag(),
             color = Fore.BLUE
             )
     label = self.label()
