@@ -18,9 +18,6 @@ def uid( obj1, obj2=None ):
     return res
 
 def savegraph(obj, fname, *args, **kwargs):
-    if not fname:
-        return
-
     verbose = kwargs.pop('verbose', True)
 
     gdot = GNADot(obj, *args, **kwargs)
@@ -35,12 +32,13 @@ def savegraph(obj, fname, *args, **kwargs):
         gdot.draw(fname)
 
 class GNADot(object):
-    layers = 'variable,transformation'
+    layers = 'variable:transformation'
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
         self.joints = kwargs.pop('joints', False)
+        ns = kwargs.pop('namespace', None)
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
         self.layout = self.graph.layout
@@ -50,7 +48,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=kwargs.pop('namespace', None))
+        self.walker = GraphWalker(transformation, namespace=ns)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
@@ -168,7 +166,7 @@ class TreeStyle(object):
             dim = getdim(entry.sinks[0])
         elif objectname in ('WeightedSum'):
             mark='+w'
-            npars=entry.sinks.size()
+            npars=entry.sources.size()
             dim = getdim(entry.sinks[0])
         elif objectname in ('Product',):
             mark='*'
@@ -195,6 +193,9 @@ class TreeStyle(object):
             features.static=True
             mark='a'
             dim = getdim(entry.sinks[0])
+        elif objectname in ('View',):
+            mark='v'
+            dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram',):
             features.static=True
             mark='h'
@@ -213,7 +214,7 @@ class TreeStyle(object):
             features.static=True
             mark='c'
             dim = getdim(entry.sinks[0])
-            npars=1
+            npars=0
         elif objectname in ('HistSmearSparse', 'HistSmear'):
             mark='@'
             dim = getdim(entry.sinks[0])
