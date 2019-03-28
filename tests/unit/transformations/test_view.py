@@ -32,7 +32,7 @@ def test_view_01():
         print()
         assert (res==pview).all()
 
-@floatcopy(globals())
+# @floatcopy(globals())
 def test_view_02():
     arr = N.arange(13, dtype='d')
     points = C.Histogram(arr, arr[:-1])
