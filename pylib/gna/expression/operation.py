@@ -192,7 +192,7 @@ class Accumulate(IndexedContainer, Variable):
         obj, = self.objects
         ns = context.namespace()
         from gna.env import ExpressionsEntry
-        from gna import converters as C
+        from gna import constructors as C
         for it in self.nindex.iterate():
             out = obj.get_output(it, context)
             varname = self.current_format(it)
