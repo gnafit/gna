@@ -523,6 +523,18 @@ public:
   }
 
   /**
+   * @brief Set the bin edges via double buffer.
+   * @param n -- number of bin edges.
+   * @param edges -- buffer with bin edges.
+   * @return `*this`.
+   */
+  DataType::Hist<T> &edges(size_t n, const double* edges) {
+    m_type.edges.assign(edges, edges+n);
+    m_type.edgesNd[0]=m_type.edges;
+    return bins(n-1);
+  }
+
+  /**
    * @brief Get the vector with bin edges.
    * @return edges.
    */
