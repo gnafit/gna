@@ -1,5 +1,6 @@
 #include "PolyRatio.hh"
-#include "TypesFunctions.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
 
 template<typename FloatType>
 GNA::GNAObjectTemplates::PolyRatioT<FloatType>::PolyRatioT(const std::vector<std::string> &nominator, const std::vector<std::string> &denominator) :
@@ -9,7 +10,7 @@ m_weights_denominator(denominator.size())
     this->transformation_("polyratio")
         .input("points")
         .output("ratio")
-        .types(TypesFunctions::pass<0>)
+        .types(new PassTypeT<FloatType>(0,{0,-1}))
         .func(&PolyRatioType::polyratio);
 
     for (size_t i = 0; i < nominator.size(); ++i) {
