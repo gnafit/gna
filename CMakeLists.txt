@@ -36,6 +36,8 @@ include_directories(core/parameters/
                     transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
+                    transformations/sum/
+                    transformations/ratio/
                     transformations/calculus/
                     transformations/detector/
                     transformations/functions/
