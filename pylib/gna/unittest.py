@@ -38,5 +38,10 @@ if 'float' in R.GNA.provided_precisions():
                 return fcn
         return decorator
 else:
-    def floatcopy(*args, **kwargs):
-        return lambda fcn: fcn
+    def floatcopy(glb, addname=False):
+        def decorator(fcn):
+            if addname:
+                return passname(fcn)
+            else:
+                return fcn
+        return decorator
