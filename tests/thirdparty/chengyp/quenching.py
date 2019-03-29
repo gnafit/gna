@@ -71,7 +71,6 @@ def main(args):
     ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
     ekin_integrator.points.edges(ekin_edges.adapter.hist)
 
-
     interpolator = C.InterpLinear(xp, ekin_integrator.points.x, labels=('InSegment', 'Interpolator'))
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
     integrated = ekin_integrator.add_input(interpolated)
@@ -106,7 +105,7 @@ def main(args):
     electron_model_lowe_interpolated = interpolator_2g.add_input(electron_model_lowe.view.view)
 
     with ns:
-        npe_positron_offset = C.NormalizedConvolution('ngamma', labels='Positron energy offset')
+        npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation E')
         electron_model_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
         egamma_hp >> npe_positron_offset.normconvolution.weights
 
@@ -114,14 +113,11 @@ def main(args):
     # Total positron model
     #
     positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
-                                    labels='{Positron energy model|(absolute)}')
+                                    labels='Nph: positron responce')
 
     #
     # Plots and tests
     #
-
-    savegraph(xp, args.graph, namespace=ns)
-
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
@@ -142,10 +138,10 @@ def main(args):
     ax.set_ylabel( '' )
     ax.set_title( 'Integrand' )
 
-    pratio.polyratio.ratio.plot_vs(xp.points.points, '-', markerfacecolor='none', markersize=2.0, label='raw')
-    interpolated.plot_vs(ekin_integrator.points.x, '-', markerfacecolor='none', markersize=2.0, label='interpolated')
-    ax.legend(loc='upper right')
-    savefig(args.output, suffix='_spower')
+    pratio.polyratio.ratio.plot_vs(xp.points.points, '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
+    interpolated.plot_vs(ekin_integrator.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
+    ax.legend(loc='lower right')
+    savefig(args.output, suffix='_spower_int')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -156,7 +152,7 @@ def main(args):
     ax.set_title( 'Integrated' )
 
     integrated.plot_hist()
-    savefig(args.output, suffix='_spower_int')
+    savefig(args.output, suffix='_spower_intc')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -176,6 +172,8 @@ def main(args):
     ax.set_ylabel( 'Nph' )
     ax.set_title( 'Cherenkov photons' )
     cherenkov.cherenkov.ch_npe.plot_vs(electron_model_e)
+
+    savegraph(xp, args.graph, namespace=ns)
 
     P.show()
 

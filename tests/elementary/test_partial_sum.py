@@ -4,7 +4,7 @@
 from __future__ import print_function
 from __future__ import division
 from matplotlib import pyplot as plt
-import numpy as np 
+import numpy as np
 from load import ROOT as R
 from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
@@ -37,7 +37,6 @@ def test_partial_sum():
     print("Results from C++")
     print(res)
     assert np.allclose(arithmetic_progression, res)
-
 
 if __name__ == "__main__":
     test_partial_sum()
