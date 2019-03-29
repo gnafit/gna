@@ -42,7 +42,7 @@ def main(args):
     Nch = ns.defparameter("kC", central=1., fixed=True, label='Cerenkov contribution normalization')
 
     from physlib import pdg
-    ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
+    emass=ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
@@ -61,7 +61,7 @@ def main(args):
     dedx_p >> pratio.polyratio.points
 
     integrator = C.IntegratorGL(bins, 4, labels=('GL sampler', 'GL integrator'))
-   
+
     emass_point = C.Points([-2*emass.value()])
     inputs = [emass_point.points.points, integrator.points.x]
 

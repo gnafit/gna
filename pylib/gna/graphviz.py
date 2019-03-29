@@ -99,8 +99,8 @@ class GNADot(object):
 
     def _action_source_open(self, source, i=0):
         sourceuid = self.entry_uid(source, 'source')
-        graph.add_node( sourceuid, shape='point', label='in' )
-        graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
+        self.graph.add_node( sourceuid, shape='point', label='in' )
+        self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
     def _action_sink(self, sink, i=0):
         if sink.sources.size()==0:
@@ -157,7 +157,7 @@ class TreeStyle(object):
 
         def getdim(sink, offset=0):
             if not sink.materialized():
-                return None
+                return '?',
 
             return tuple('%i'%(d+offset) for d in sink.data.type.shape)
 
