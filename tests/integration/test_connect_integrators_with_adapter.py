@@ -31,7 +31,7 @@ def test_connect_integrators_with_adapter():
     print(second_integrator.points.xedges.data())
     assert np.allclose(converted, second_integrator.points.xedges.data())
 
-def test_shifting_edges():
+def test_shifting_edges_1():
     par = env.defparameter("par", central=0.1, fixed=True)
     dummy = env.defparameter("dummy", central=1, fixed=True)
     
@@ -48,6 +48,24 @@ def test_shifting_edges():
     print("After shift by -2*{}".format(par.value()))
     print(shifted.sum.sum.data())
     expected = initial_binning - 2*par.value()
+    assert np.allclose(expected, shifted.sum.sum.data())
+
+def test_shifting_edges_2():
+    param = env.defparameter("param", central=0.1, fixed=True)
+    placeholder = env.defparameter("placeholder", central=1, fixed=True)
+    
+    initial_binning = np.arange(1, 10, 0.5)
+
+    initial_integrator = C.IntegratorGL(initial_binning, 4, labels = (('First Sampler', 'First Integrator')))
+    print("Integration edges from first integral")
+    print(initial_integrator.points.xedges.data())
+
+    from gna.constructors import stdvector
+    shifted = R.WeightedSum(-2*param.value(), stdvector(['placeholder']), stdvector(['inp']))
+    shifted.sum.inp(initial_integrator.points.xedges)
+    print("After shift by -2*{}".format(param.value()))
+    print(shifted.sum.sum.data())
+    expected = initial_binning - 2*param.value()
     assert np.allclose(expected, shifted.sum.sum.data())
     
 
