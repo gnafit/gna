@@ -60,16 +60,15 @@ def main(args):
         pratio = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
     dedx_p >> pratio.polyratio.points
 
-    integrator = C.IntegratorGL(bins, 4, labels=('GL sampler', 'GL integrator'))
-   
-    emass_point = C.Points([-2*emass.value()])
+    integrator = C.IntegratorGL(bins, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
+
+    emass_point = C.Points([-2*emass.value()], labels='2me offset')
     inputs = [emass_point.points.points, integrator.points.x]
 
-    ekin_points = C.SumBroadcast(inputs, labels=('Shift energy'))
+    ekin_points = C.SumBroadcast(inputs, labels='Evis to Te')
+    ekin_edges = C.PointsToHist(ekin_points, labels='Te bin edges')
 
-    ekin_edges = C.PointsToHist(ekin_points)
-
-    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 4, labels=(('Finer Sampler', 'Finer Integrator')))
+    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
     ekin_integrator.points.edges(ekin_edges.adapter.hist)
 
 
@@ -77,7 +76,7 @@ def main(args):
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
     integrated = ekin_integrator.add_input(interpolated)
 
-    accumulator = C.PartialSum(labels="Birk's contribution\n(absolute)")
+    accumulator = C.PartialSum(labels="Evis (Birks)\n[MeV]")
     accumulator.reduction << integrated
 
     #
@@ -86,14 +85,14 @@ def main(args):
     electron_model_e = ekin_integrator.points.xcenters
 
     with nsc:
-        cherenkov = C.Cherenkov_Borexino(labels='Cherenkov contribution\n(absolute)')
+        cherenkov = C.Cherenkov_Borexino(labels='Nph Cherenkov')
     cherenkov.cherenkov << electron_model_e
 
     #
     # Electron energy model
     #
     with ns:
-        electron_model = C.WeightedSum(['kC', 'Nphsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
+        electron_model = C.WeightedSum(['kC', 'Nphsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='Nph: electron responce')
 
     #
     # 2 511 keV gamma model
@@ -101,7 +100,7 @@ def main(args):
     egamma_edges, egamma_x, egamma_xp, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
     elow_npoints = int(egamma_edges[-1]*0.99999999//binwidth)
     electron_model_elow = C.View(electron_model_e, 0, elow_npoints, labels='Low E view')
-    electron_model_lowe = C.View(electron_model, 0, elow_npoints, labels='Electron energy model\n(low E view)')
+    electron_model_lowe = C.View(electron_model, 0, elow_npoints, labels='Nph: electron responce\n(low E view)')
 
     interpolator_2g = C.InterpLinear(electron_model_elow.view.view, egamma_xp, labels=('InSegment', 'e-gamma interpolator'))
     electron_model_lowe_interpolated = interpolator_2g.add_input(electron_model_lowe.view.view)
