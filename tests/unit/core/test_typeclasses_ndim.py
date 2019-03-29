@@ -5,6 +5,7 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
+from gna import context
 import numpy as np
 
 def test_typeclass_ndim_v01():
@@ -14,13 +15,13 @@ def test_typeclass_ndim_v01():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckNdimT(C._current_precision)(1)
+    dt = R.TypeClasses.CheckNdimT(context.current_precision())(1)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckNdimT(C._current_precision)(2)
+    dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(2)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -34,13 +35,13 @@ def test_typeclass_ndim_v02():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckNdimT(C._current_precision)(2)
+    dt = R.TypeClasses.CheckNdimT(context.current_precision())(2)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckNdimT(C._current_precision)(1)
+    dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(1)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -54,13 +55,13 @@ def test_typeclass_ndim_v03():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckNdimT(C._current_precision)(1, (0,1))
+    dt = R.TypeClasses.CheckNdimT(context.current_precision())(1, (0,1))
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckNdimT(C._current_precision)(2, (-2,-1))
+    dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(2, (-2,-1))
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     res = obj.process_types();

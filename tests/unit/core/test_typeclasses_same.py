@@ -5,9 +5,10 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
+from gna import context
 import numpy as np
 
-@floatcopy(globals)
+@floatcopy(globals())
 def test_typeclass_same_v01():
     """All inputs have same types"""
     arrays = [np.arange(12, dtype='d').reshape(3,4) for i in range(5)]
@@ -17,13 +18,13 @@ def test_typeclass_same_v01():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((0,-1))
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((0,-1))
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-@floatcopy(globals)
+@floatcopy(globals())
 def test_typeclass_same_v02():
     """Last input has another shape"""
     arrays = [np.arange(12, dtype='d').reshape(3,4) for i in range(5)]
@@ -35,13 +36,13 @@ def test_typeclass_same_v02():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-2))
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-2))
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((-2,-1))
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((-2,-1))
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -58,13 +59,13 @@ def test_typeclass_same_v03():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'shape')
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'kind')
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'kind')
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -80,13 +81,13 @@ def test_typeclass_same_v04():
     obj = C.DummyType()
     map(obj.add_input, outputs)
 
-    dt = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1), 'shape')
+    dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
-    dt1 = R.TypeClasses.CheckSameTypesT(C._current_precision)((1,-1),)
+    dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1),)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')

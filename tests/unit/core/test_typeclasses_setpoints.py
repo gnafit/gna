@@ -5,6 +5,7 @@ from __future__ import print_function
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
+from gna import context
 import numpy as np
 
 def test_typeclass_setpoints_v01():
@@ -14,7 +15,7 @@ def test_typeclass_setpoints_v01():
         obj = C.DummyType()
         obj.add_output('out')
 
-        dt = R.TypeClasses.SetPointsT(C._current_precision)(size)
+        dt = R.TypeClasses.SetPointsT(context.current_precision())(size)
         dt.dump(); print()
         obj.add_typeclass(dt)
         res = obj.process_types();
@@ -32,7 +33,7 @@ def test_typeclass_setpoints_v01():
         obj = C.DummyType()
         obj.add_output('out')
 
-        dt = R.TypeClasses.SetPointsT(C._current_precision)(*size)
+        dt = R.TypeClasses.SetPointsT(context.current_precision())(*size)
         dt.dump(); print()
         obj.add_typeclass(dt)
         res = obj.process_types();

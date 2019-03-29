@@ -42,7 +42,7 @@ def test_arrsum(function_name):
     assert (output.data().sum()==ns[varname].value()).all()
     print()
 
-    env.globalns.printparameters()
+    ns.printparameters()
 
 if __name__ == "__main__":
     run_unittests(globals())

@@ -11,7 +11,7 @@ from gna import context
 import gna.bindings.arrayview
 
 @floatcopy(globals(), True)
-def test_vararray_v01(function_name):
+def test_vararray_preallocated_v01(function_name):
     ns = env.globalns(function_name)
 
     names  = [ 'zero', 'one', 'two', 'three', 'four', 'five' ]
