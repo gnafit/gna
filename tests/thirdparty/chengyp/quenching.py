@@ -38,11 +38,11 @@ def main(args):
     nsc.defparameter("p3",  central=1.44731e+01,  fixed=True)
     nsc.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
-    Nsc = ns.defparameter("Nsc", central=1341.38, fixed=True, label='')
-    Nch = ns.defparameter("Nch", central=1., fixed=True)
+    Nsc = ns.defparameter("Nphsc", central=1341.38, fixed=True, label='Scintillation responce, Nph/MeV')
+    Nch = ns.defparameter("kC", central=1., fixed=True, label='Cerenkov contribution normalization')
 
     from physlib import pdg
-    emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass')
+    ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
@@ -61,16 +61,15 @@ def main(args):
     dedx_p >> pratio.polyratio.points
 
     integrator = C.IntegratorGL(bins, 4, labels=('GL sampler', 'GL integrator'))
-
+   
     emass_point = C.Points([-2*emass.value()])
     inputs = [emass_point.points.points, integrator.points.x]
-               
+
     ekin_points = C.SumBroadcast(inputs, labels=('Shift energy'))
 
     ekin_edges = C.PointsToHist(ekin_points)
 
     ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 4, labels=(('Finer Sampler', 'Finer Integrator')))
-
 
     interpolator = C.InterpLinear(xp, ekin_integrator.points.x, labels=('InSegment', 'Interpolator'))
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
@@ -92,7 +91,7 @@ def main(args):
     # Electron energy model
     #
     with ns:
-        electron_model = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
+        electron_model = C.WeightedSum(['kC', 'Nphsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
 
     #
     # 2 511 keV gamma model
@@ -126,7 +125,7 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
+    ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'dE/dx' )
     ax.set_title( 'Stopping power' )
 
@@ -138,7 +137,7 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
+    ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( '' )
     ax.set_title( 'Integrand' )
 
@@ -151,7 +150,7 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
+    ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( '' )
     ax.set_title( 'Integrated' )
 
@@ -162,8 +161,8 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
-    ax.set_ylabel( 'Partial sum' )
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Electron energy (Birks)' )
     #  accumulator.reduction.out.plot_vs(integrator.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     accumulator.reduction.plot_hist()
