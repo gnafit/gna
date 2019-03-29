@@ -11,6 +11,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
 from gna.bindings import DataType
+from gna.env import env
 
 def test_connect_integrators_with_adapter():
     initial_binning = np.arange(1, 10, 0.5)
@@ -29,6 +30,26 @@ def test_connect_integrators_with_adapter():
     print("Integration points from second integrator")
     print(second_integrator.points.xedges.data())
     assert np.allclose(converted, second_integrator.points.xedges.data())
+
+def test_shifting_edges():
+    par = env.defparameter("par", central=0.1, fixed=True)
+    dummy = env.defparameter("dummy", central=1, fixed=True)
+    
+    initial_binning = np.arange(1, 10, 0.5)
+
+    initial_integrator = C.IntegratorGL(initial_binning, 4, labels = (('First Sampler', 'First Integrator')))
+    print("Integration edges from first integral")
+    print(initial_integrator.points.xedges.data())
+
+    filled = C.FillLike(-2)
+    initial_integrator.points.xedges >> filled.fill
+    outputs = [par.single(), filled.single(), dummy.single(), initial_integrator.points.xedges]
+    shifted = C.WeightedSumP(outputs)
+    print("After shift by -2*{}".format(par.value()))
+    print(shifted.sum.sum.data())
+    expected = initial_binning - 2*par.value()
+    assert np.allclose(expected, shifted.sum.sum.data())
+    
 
 
 if __name__ == "__main__":
