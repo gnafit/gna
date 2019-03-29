@@ -109,8 +109,6 @@ def main(args):
         electron_model_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
         egamma_hp >> npe_positron_offset.normconvolution.weights
 
-    import IPython; IPython.embed()
-
     #
     # Total positron model
     #
