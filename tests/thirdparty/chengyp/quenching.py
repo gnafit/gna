@@ -8,10 +8,17 @@ from gna import constructors as C
 from gna.bindings import common
 from matplotlib import pyplot as P
 from mpl_tools.helpers import savefig
+from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from gna.graphviz import savegraph
 from gna.env import env
 
 dtype_spower = [ ('e', 'd'), ('temp1', 'd'), ('temp2', 'd'), ('dedx', 'd') ]
+
+def load_electron_distribution(filename, objname):
+    file = R.TFile(filename, 'read')
+    hist = file.Get(objname)
+    buf = hist.get_buffer_hist1(hist)
+    edges = hist.get_bin_edges_axis(hist.GetXaxis())
 
 def main(args):
     ns = env.globalns('energy')
@@ -36,7 +43,7 @@ def main(args):
     binwidth=0.025
     bins = N.arange(0.0, 12.0+1.e-6, binwidth)
     xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
-    xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power')
+    xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power (dE/dx)')
 
     earg_view = C.View(xp, 0, int(0.600001//binwidth), labels='Low E view')
 
@@ -49,15 +56,15 @@ def main(args):
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
     integrated = integrator.add_input(interpolated)
 
-    accumulator = C.PartialSum(labels='Cumulative integral')
+    accumulator = C.PartialSum(labels="Birk's contribution\n(absolute)")
     accumulator.reduction << integrated
 
     with nsc:
-        cherenkov = C.Cherenkov(labels='Cherenkov contribution')
+        cherenkov = C.Cherenkov(labels='Cherenkov contribution\n(absolute)')
     cherenkov.cherenkov << integrator.points.xcenters
 
     with ns:
-        npe_electron = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='Evis nonlinearity')
+        npe_electron = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
 
     savegraph(xp, args.graph, namespace=ns)
 
@@ -115,5 +122,6 @@ if __name__ == '__main__':
     parser.add_argument('stoppingpower', type=lambda fname: N.loadtxt(fname, dtype=dtype_spower))
     parser.add_argument('-o', '--output', help='Output file for images')
     parser.add_argument('-g', '--graph', help='Output file for graph')
+    parser.add_argument('--annihilation-electrons', nargs=2, default=('input/hgamma2e.root', 'hgamma2e_1KeV'), help='Input electron distribution from 2 511 keV gammas')
 
     main( parser.parse_args() )
