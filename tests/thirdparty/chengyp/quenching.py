@@ -39,7 +39,7 @@ def main(args):
     nsc.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
     Nsc = ns.defparameter("Nphsc", central=1341.38, fixed=True, label='Scintillation responce, Nph/MeV')
-    Nch = ns.defparameter("kC", central=1., fixed=True, label='Cerenkov contribution normalization')
+    kC = ns.defparameter("kC", central=1., fixed=True, label='Cerenkov contribution normalization')
 
     from physlib import pdg
     emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
@@ -108,6 +108,8 @@ def main(args):
         npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation E')
         electron_model_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
         egamma_hp >> npe_positron_offset.normconvolution.weights
+
+    import IPython; IPython.embed()
 
     #
     # Total positron model
@@ -198,11 +200,22 @@ def main(args):
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
-    ax.set_ylabel( 'Evis/Etrue' )
+    ax.set_ylabel( '???' )
     ax.set_title( 'Positron energy nonlineairty' )
     positron_model_relative_out.plot_vs(integrator.points.x)
 
     savefig(args.output, suffix='_total')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Evis/Etrue' )
+    ax.set_title( 'Positron energy nonlineairty' )
+    integrator.points.x.vs_plot( 4.0*positron_model_relative_out.data()/integrator.points.x.data() )
+
+    savefig(args.output, suffix='_total_relative')
 
     P.show()
 
