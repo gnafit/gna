@@ -2,8 +2,8 @@
 #include "TypesFunctions.hh"
 
 SumBroadcast::SumBroadcast() {
-  transformation_("product")
-    .output("product")
+  transformation_("sum")
+    .output("sum")
     .types(TypesFunctions::ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0>)
     .func([](FunctionArgs& fargs) {
         auto& args=fargs.args;

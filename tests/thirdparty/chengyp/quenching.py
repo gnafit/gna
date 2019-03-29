@@ -115,6 +115,11 @@ def main(args):
     positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
                                     labels='Nph: positron responce')
 
+    # fixed_point = C.Points([2.0*emass.value()], labels='{Energy scale normalization|(2me)}')
+    fixed_point = C.Points([4.0], labels='{Energy scale normalization|(4 MeV)}')
+    positron_model_relative = C.FixedPointScale(integrator.points.x, fixed_point.points.points, labels=('Fixed point index', 'Positron energy nonlinearity'))
+    positron_model_relative_out = positron_model_relative.add_input(positron_model.sum.outputs[0])
+
     #
     # Plots and tests
     #
@@ -164,6 +169,8 @@ def main(args):
     #  accumulator.reduction.out.plot_vs(integrator.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     accumulator.reduction.plot_hist()
 
+    savefig(args.output, suffix='_birks_evis')
+
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
@@ -173,7 +180,29 @@ def main(args):
     ax.set_title( 'Cherenkov photons' )
     cherenkov.cherenkov.ch_npe.plot_vs(electron_model_e)
 
-    savegraph(xp, args.graph, namespace=ns)
+    savefig(args.output, suffix='_cherenkov_nph')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Nph' )
+    ax.set_title( 'Total Nph' )
+    positron_model.sum.outputs[0].plot_vs(integrator.points.x)
+
+    savefig(args.output, suffix='_total_nph')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Evis/Etrue' )
+    ax.set_title( 'Positron energy nonlineairty' )
+    positron_model_relative_out.plot_vs(integrator.points.x)
+
+    savefig(args.output, suffix='_total')
 
     P.show()
 
