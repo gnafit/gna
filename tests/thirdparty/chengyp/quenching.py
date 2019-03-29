@@ -68,7 +68,7 @@ def main(args):
     ekin_points = C.SumBroadcast(inputs, labels='Evis to Te')
     ekin_edges = C.PointsToHist(ekin_points, -2., labels='Te bin edges')
 
-    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
+    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data()), 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
     ekin_integrator.points.edges(ekin_edges.adapter.hist)
 
 
