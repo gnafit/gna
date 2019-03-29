@@ -42,7 +42,7 @@ def main(args):
     Nch = ns.defparameter("Nch", central=1., fixed=True)
 
     from physlib import pdg
-    ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass')
+    emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass')
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
@@ -52,6 +52,7 @@ def main(args):
     #
     binwidth=0.025
     bins = N.arange(0.0, 12.0+1.e-6, binwidth)
+
     xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
     xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power (dE/dx)')
 
@@ -60,9 +61,20 @@ def main(args):
     dedx_p >> pratio.polyratio.points
 
     integrator = C.IntegratorGL(bins, 4, labels=('GL sampler', 'GL integrator'))
-    interpolator = C.InterpLinear(xp, integrator.points.x, labels=('InSegment', 'Interpolator'))
+
+    emass_point = C.Points([-2*emass.value()])
+    inputs = [emass_point.points.points, integrator.points.x]
+               
+    ekin_points = C.SumBroadcast(inputs, labels=('Shift energy'))
+
+    ekin_edges = C.PointsToHist(ekin_points)
+
+    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 4, labels=(('Finer Sampler', 'Finer Integrator')))
+
+
+    interpolator = C.InterpLinear(xp, ekin_integrator.points.x, labels=('InSegment', 'Interpolator'))
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
-    integrated = integrator.add_input(interpolated)
+    integrated = ekin_integrator.add_input(interpolated)
 
     accumulator = C.PartialSum(labels="Birk's contribution\n(absolute)")
     accumulator.reduction << integrated
@@ -70,7 +82,7 @@ def main(args):
     #
     # Cherenkov model
     #
-    electron_model_e = integrator.points.xcenters
+    electron_model_e = ekin_integrator.points.xcenters
 
     with nsc:
         cherenkov = C.Cherenkov_Borexino(labels='Cherenkov contribution\n(absolute)')
