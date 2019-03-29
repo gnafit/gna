@@ -7,8 +7,8 @@ ipython --pdb -- \
   gna \
     -- seg_juno --name juno_nh   \
                 --rtheta $rtheta --weight-correlation $correlation \
-    -- graphviz juno_nh/subdetector0 --ns juno_nh -o output/juno_nh_subdetector0.dot \
     -- ns --print \
+    -- graphviz juno_nh/subdetector0 -o output/juno_nh_subdetector0.dot \
     -- seg_juno --name juno_ih \
                 --rtheta $rtheta --weight-correlation $correlation \
     -- ns --value juno_ih.oscillation.Alpha inverted     \

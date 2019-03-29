@@ -28,8 +28,8 @@ def main(args):
     ns = env.globalns('energy')
     nsb = ns('birks')
     nsb.defparameter('Kb0', central=1.0, fixed=True, label='Kb0=1')
-    nsb.defparameter('Kb1', central=0.0062, fixed=True, label="Birk's constant")
-    nsb.defparameter('Kb2', central=1.5e-6, fixed=True, label="Birk's constant (second derivative)")
+    nsb.defparameter('Kb1', central=0.0062, fixed=True, label="Birk's 1st constant (E')")
+    nsb.defparameter('Kb2', central=1.5e-6, fixed=True, label="Birk's 2nd constant (E'')")
     nsc = ns('cherenkov')
     nsc.defparameter("E_0", central=0.165, fixed=True)
     nsc.defparameter("p0",  central=-7.26624e+00, fixed=True)
@@ -38,7 +38,7 @@ def main(args):
     nsc.defparameter("p3",  central=1.44731e+01,  fixed=True)
     nsc.defparameter("p4",  central=3.22121e-02,  fixed=True)
 
-    Nsc = ns.defparameter("Nsc", central=1341.38, fixed=True)
+    Nsc = ns.defparameter("Nsc", central=1341.38, fixed=True, label='')
     Nch = ns.defparameter("Nch", central=1., fixed=True)
 
     from physlib import pdg
@@ -152,9 +152,18 @@ def main(args):
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Partial sum' )
-    ax.set_title( 'Partial sum integrated' )
+    ax.set_title( 'Electron energy (Birks)' )
     #  accumulator.reduction.out.plot_vs(integrator.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     accumulator.reduction.plot_hist()
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Nph' )
+    ax.set_title( 'Cherenkov photons' )
+    cherenkov.cherenkov.ch_npe.plot_vs(electron_model_e)
 
     P.show()
 

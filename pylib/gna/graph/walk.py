@@ -91,7 +91,11 @@ class GraphWalker(object):
     def set_parameters(self, ns):
         self.cache_variables=OrderedDict()
         for (name, par) in ns.walknames():
-            var = par.getVariable()
+            if hasattr(par, 'getVariable'):
+                var = par.getVariable()
+            elif hasattr(par, 'get'):
+                par = par.get()
+                var=par.getVariable()
             # print('walk', name, var.hash())
             self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [])
 
