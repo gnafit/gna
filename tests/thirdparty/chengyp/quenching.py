@@ -80,7 +80,7 @@ def main(args):
     # Electron energy model
     #
     with ns:
-        npe_electron = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
+        electron_model = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
 
     #
     # 2 511 keV gamma model
@@ -88,15 +88,21 @@ def main(args):
     egamma_edges, egamma_x, egamma_xp, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
     elow_npoints = int(egamma_edges[-1]*0.99999999//binwidth)
     electron_model_elow = C.View(electron_model_e, 0, elow_npoints, labels='Low E view')
-    npe_electron_lowe = C.View(npe_electron, 0, elow_npoints, labels='Electron energy model\n(low E view)')
+    electron_model_lowe = C.View(electron_model, 0, elow_npoints, labels='Electron energy model\n(low E view)')
 
     interpolator_2g = C.InterpLinear(electron_model_elow.view.view, egamma_xp, labels=('InSegment', 'e-gamma interpolator'))
-    npe_electron_lowe_interpolated = interpolator_2g.add_input(npe_electron_lowe.view.view)
+    electron_model_lowe_interpolated = interpolator_2g.add_input(electron_model_lowe.view.view)
 
     with ns:
         npe_positron_offset = C.NormalizedConvolution('ngamma', labels='Positron energy offset')
-        npe_electron_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
+        electron_model_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
         egamma_hp >> npe_positron_offset.normconvolution.weights
+
+    #
+    # Total positron model
+    #
+    positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
+                                    labels='{Positron energy model|(absolute)}')
 
     #
     # Plots and tests

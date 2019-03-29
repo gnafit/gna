@@ -155,16 +155,16 @@ class TreeStyle(object):
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
-        def getdim(sink):
+        def getdim(sink, offset=0):
             if not sink.materialized():
                 return None
 
-            return tuple('%i'%d for d in sink.data.type.shape)
+            return tuple('%i'%(d+offset) for d in sink.data.type.shape)
 
         mark=None
         dim=None
         npars=0
-        if objectname in ('Sum', 'MultiSum'):
+        if objectname in ('Sum', 'MultiSum', 'SumBroadcast'):
             mark='+'
             dim = getdim(entry.sinks[0])
         elif objectname in ('WeightedSum'):
@@ -193,7 +193,7 @@ class TreeStyle(object):
         elif objectname in ('InSegment',):
             mark=u'∈'
             dim1 = 'x'.join(getdim(entry.sinks[0]))
-            dim2 = 'x'.join(getdim(entry.sinks[1]))
+            dim2 = 'x'.join(getdim(entry.sinks[1], 1))
             dim = u']∈['.join((dim1, dim2)),
         elif objectname in ('Points',):
             features.static=True
