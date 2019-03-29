@@ -25,7 +25,7 @@ def test_partial_sum():
     # Create transformations
     #
     points = C.Points(arr)
-    partial_sum = R.PartialSum()
+    partial_sum = R.PartialSum(0.)
     partial_sum.reduction << points
 
 
