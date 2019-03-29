@@ -11,6 +11,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/MultiSum.cc
   transformations/sum/PartialSum.cc
   transformations/sum/Sum.cc
+  transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
   transformations/sum/WeightedSumP.cc
   # Ratios
@@ -125,6 +126,7 @@ set(TRANSFORMATION_HEADERS
   PartialSum.hh
   MultiSum.hh
   Sum.hh
+  SumBroadcast.hh
   WeightedSum.hh
   WeightedSumP.hh
   # Ratios

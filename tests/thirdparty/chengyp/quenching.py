@@ -17,8 +17,12 @@ dtype_spower = [ ('e', 'd'), ('temp1', 'd'), ('temp2', 'd'), ('dedx', 'd') ]
 def load_electron_distribution(filename, objname):
     file = R.TFile(filename, 'read')
     hist = file.Get(objname)
-    buf = hist.get_buffer_hist1(hist)
-    edges = hist.get_bin_edges_axis(hist.GetXaxis())
+    buf = get_buffer_hist1(hist).copy()
+    buf/=buf.sum()
+    edges = get_bin_edges_axis(hist.GetXaxis())
+    centers = (edges[:-1] + edges[1:])*0.5
+
+    return edges, centers, C.Points(centers, labels='gamma-e centers'), buf, C.Points(buf, labels='gamma-e weights')
 
 def main(args):
     ns = env.globalns('energy')
@@ -36,16 +40,20 @@ def main(args):
 
     Nsc = ns.defparameter("Nsc", central=1341.38, fixed=True)
     Nch = ns.defparameter("Nch", central=1., fixed=True)
-    Eannihil = ns.defparameter("Eannihil", central=2.0*0.511, fixed=True, label='Electron-positron annihilation energy')
+
+    from physlib import pdg
+    ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass')
+    ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
 
+    #
+    # Birk's model integration
+    #
     binwidth=0.025
     bins = N.arange(0.0, 12.0+1.e-6, binwidth)
     xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
     xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power (dE/dx)')
-
-    earg_view = C.View(xp, 0, int(0.600001//binwidth), labels='Low E view')
 
     with nsb:
         pratio = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
@@ -59,12 +67,40 @@ def main(args):
     accumulator = C.PartialSum(labels="Birk's contribution\n(absolute)")
     accumulator.reduction << integrated
 
+    #
+    # Cherenkov model
+    #
+    electron_model_e = integrator.points.xcenters
+
     with nsc:
         cherenkov = C.Cherenkov(labels='Cherenkov contribution\n(absolute)')
-    cherenkov.cherenkov << integrator.points.xcenters
+    cherenkov.cherenkov << electron_model_e
 
+    #
+    # Electron energy model
+    #
     with ns:
         npe_electron = C.WeightedSum(['Nch', 'Nsc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='{Electron energy model|(absolute)}')
+
+    #
+    # 2 511 keV gamma model
+    #
+    egamma_edges, egamma_x, egamma_xp, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
+    elow_npoints = int(egamma_edges[-1]*0.99999999//binwidth)
+    electron_model_elow = C.View(electron_model_e, 0, elow_npoints, labels='Low E view')
+    npe_electron_lowe = C.View(npe_electron, 0, elow_npoints, labels='Electron energy model\n(low E view)')
+
+    interpolator_2g = C.InterpLinear(electron_model_elow.view.view, egamma_xp, labels=('InSegment', 'e-gamma interpolator'))
+    npe_electron_lowe_interpolated = interpolator_2g.add_input(npe_electron_lowe.view.view)
+
+    with ns:
+        npe_positron_offset = C.NormalizedConvolution('ngamma', labels='Positron energy offset')
+        npe_electron_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
+        egamma_hp >> npe_positron_offset.normconvolution.weights
+
+    #
+    # Plots and tests
+    #
 
     savegraph(xp, args.graph, namespace=ns)
 
