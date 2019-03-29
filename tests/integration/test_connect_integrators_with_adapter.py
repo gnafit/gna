@@ -67,8 +67,27 @@ def test_shifting_edges_2():
     print(shifted.sum.sum.data())
     expected = initial_binning - 2*param.value()
     assert np.allclose(expected, shifted.sum.sum.data())
-    
 
+def test_shifting_edges_3():
+    param = env.defparameter("param1", central=0.1, fixed=True)
+    placeholder = env.defparameter("placeholder1", central=1, fixed=True)
+    
+    initial_binning = np.arange(1, 10, 0.5)
+
+    initial_integrator = C.IntegratorGL(initial_binning, 4, labels = (('First Sampler', 'First Integrator')))
+    print("Integration edges from first integral")
+    print(initial_integrator.points.xedges.data())
+
+    param_point = C.Points([-2*param.value()])
+    inputs = [param_point.points.points, initial_integrator.points.xedges]
+               
+    shifted = C.SumBroadcast(inputs)
+
+    print("After shift by -2*{}".format(param.value()))
+    print(shifted.single().data())
+    expected = initial_binning - 2*param.value()
+    assert np.allclose(expected, shifted.single().data())
+    
 
 if __name__ == "__main__":
     glb = globals()
