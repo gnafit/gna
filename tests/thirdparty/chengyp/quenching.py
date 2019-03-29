@@ -42,7 +42,7 @@ def main(args):
     Nch = ns.defparameter("kC", central=1., fixed=True, label='Cerenkov contribution normalization')
 
     from physlib import pdg
-    ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
+    emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
@@ -70,6 +70,8 @@ def main(args):
     ekin_edges = C.PointsToHist(ekin_points)
 
     ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data())-1, 4, labels=(('Finer Sampler', 'Finer Integrator')))
+    ekin_integrator.points.edges(ekin_edges.adapter.hist)
+
 
     interpolator = C.InterpLinear(xp, ekin_integrator.points.x, labels=('InSegment', 'Interpolator'))
     interpolated = interpolator.add_input(pratio.polyratio.ratio)
@@ -142,7 +144,7 @@ def main(args):
     ax.set_title( 'Integrand' )
 
     pratio.polyratio.ratio.plot_vs(xp.points.points, '-', markerfacecolor='none', markersize=2.0, label='raw')
-    interpolated.plot_vs(integrator.points.x, '-', markerfacecolor='none', markersize=2.0, label='interpolated')
+    interpolated.plot_vs(ekin_integrator.points.x, '-', markerfacecolor='none', markersize=2.0, label='interpolated')
     ax.legend(loc='upper right')
     savefig(args.output, suffix='_spower')
 
