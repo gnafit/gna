@@ -209,10 +209,10 @@ def Variable_complex__str(self, labels=False, value=None):
     if value is None:
         value = self.values()
     fmt = dict(
-            name  = colorize(self.name(), Fore.CYAN) if colorama_present else self.name(),
-            rval  = self.value().real(),
-            ival  = self.value().imag(),
-            color = Fore.BLUE if colorama_present else ""
+            name  = colorize(self.name(), Fore.CYAN),
+            rval  = value.real(),
+            ival  = value.imag(),
+            color = Fore.BLUE
             )
     label = self.label()
     if not labels or label=='value':
