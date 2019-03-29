@@ -191,7 +191,10 @@ class TreeStyle(object):
             mark='~'
             dim = getdim(entry.sinks.back())
         elif objectname in ('InSegment',):
-            mark='[]'
+            mark=u'∈'
+            dim1 = 'x'.join(getdim(entry.sinks[0]))
+            dim2 = 'x'.join(getdim(entry.sinks[1]))
+            dim = u']∈['.join((dim1, dim2)),
         elif objectname in ('Points',):
             features.static=True
             mark='a'
@@ -245,6 +248,8 @@ class TreeStyle(object):
         variable=varentry.variable
 
         label=variable.name()
+        value = str(variable.value())
+        label+='='+value
 
         size=variable.values().size()
         if size>1:

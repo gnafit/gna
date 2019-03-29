@@ -113,6 +113,13 @@ def WeightedSumP(inputs, *args, **kwargs):
 def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 
+"""Construct SumBroadcast object from list of SingleOutputs"""
+def SumBroadcast(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.SumBroadcast(*args, **kwargs)
+
+    return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
     if outputs is None:
