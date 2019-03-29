@@ -12,61 +12,35 @@ from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
 from gna.bindings import DataType
 
-#
-# Create the matrix
-#
-def test_points_to_hist():
-    mat = N.arange(1, 13)
+# #
+# # Create the matrix
+# #
+# def test_points_to_hist():
+    # mat = N.arange(1, 13)
 
-    print( mat )
+    # print( mat )
 
-    #
-    # Create transformations
-    #
-    points = C.Points(mat)
-    adapter = C.PointsToHist(points.points)
-    adapter.adapter.hist.data()
-    import IPython
-    IPython.embed()
+    # #
+    # # Create transformations
+    # #
+    # points = C.Points(mat)
+    # adapter = C.PointsToHist(points.points)
+    # adapter.adapter.hist.data()
+    # import IPython
+    # IPython.embed()
 
-    #
-    # Dump
-    #
+    # #
+    # # Dump
+    # #
 
-    #  assert N.allclose(mat, res), "C++ and Python results doesn't match"
+    # #  assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
+# if __name__ == "__main__":
+    # glb = globals()
+    # for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
+        # print('call ', fcn)
+        # glb[fcn]()
+        # print()
 
-#  def test_pointsf():
-    #  mat = N.arange(12, dtype='f').reshape(3, 4)
-
-    #  print( 'Input matrix (numpy)' )
-    #  print( mat )
-    #  print()
-
-    #  #
-    #  # Create transformations
-    #  #
-    #  with C.precision('float'):
-        #  points = C.Points(mat)
-
-    #  out = points.points.points
-    #  res = out.data()
-    #  dt  = out.datatype()
-
-    #  print( 'Result (C++ Data to numpy)' )
-    #  print( res, res.dtype )
-    #  print()
-
-    #  print( 'Datatype:', str(dt) )
-
-    #  assert N.allclose(mat, res), "C++ and Python results doesn't match"
-
-if __name__ == "__main__":
-    glb = globals()
-    for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
-        print('call ', fcn)
-        glb[fcn]()
-        print()
-
-    print('All tests are OK!')
+    # print('All tests are OK!')
 
