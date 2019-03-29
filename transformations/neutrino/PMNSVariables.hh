@@ -23,7 +23,7 @@ public:
   variable<double> Theta13;
   variable<double> Theta23;
   variable<double> Delta;
-  variable<std::complex<double>> V[Nnu][Nnu];
+  variable<double> V[Nnu][Nnu];
 protected:
   Fields fields() {
     Fields allvars;
@@ -45,46 +45,46 @@ protected:
     using std::cos;
     using std::exp;
     provider
-      .add(&V[0][0], {&Theta12, &Theta13}, [&]() {
-          return cos(Theta12.value())*cos(Theta13.value());
-        })
-      .add(&V[0][1], {&Theta12, &Theta13}, [&]() {
-          return sin(Theta12.value())*cos(Theta13.value());
-        })
-      .add(&V[0][2], {&Theta13, &Delta}, [&]() {
+      .add(&V[0][0], {&Theta12, &Theta13}, [&](arrayview<double>& ret) {
+          ret.complex() = cos(Theta12.value())*cos(Theta13.value());
+        }, 2)
+      .add(&V[0][1], {&Theta12, &Theta13}, [&](arrayview<double>& ret) {
+          ret.complex() = sin(Theta12.value())*cos(Theta13.value());
+        }, 2)
+      .add(&V[0][2], {&Theta13, &Delta}, [&](arrayview<double>& ret) {
           auto phase = exp(-std::complex<double>(0, Delta.value()));
-          return sin(Theta13.value())*phase;
-        })
-      .add(&V[1][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
+          ret.complex() = sin(Theta13.value())*phase;
+        }, 2)
+      .add(&V[1][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<double>& ret) {
           auto phase = exp(std::complex<double>(0, Delta.value()));
-          return
+          ret.complex() =
             -sin(Theta12.value())*cos(Theta23.value())
             -cos(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
-        })
-      .add(&V[1][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
+        }, 2)
+      .add(&V[1][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<double>& ret) {
           auto phase = exp(std::complex<double>(0, Delta.value()));
-          return
+          ret.complex() =
              cos(Theta12.value())*cos(Theta23.value())
             -sin(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
-        })
-      .add(&V[1][2], {&Theta13, &Theta23}, [&]() {
-          return sin(Theta23.value())*cos(Theta13.value());
-        })
-      .add(&V[2][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
+        }, 2)
+      .add(&V[1][2], {&Theta13, &Theta23}, [&](arrayview<double>& ret) {
+          ret.complex() = sin(Theta23.value())*cos(Theta13.value());
+        }, 2)
+      .add(&V[2][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<double>& ret) {
           auto phase = exp(std::complex<double>(0, Delta.value()));
-          return
+          ret.complex() =
             sin(Theta12.value())*sin(Theta23.value())
             -cos(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
-        })
-      .add(&V[2][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
+        }, 2)
+      .add(&V[2][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<double>& ret) {
           auto phase = exp(std::complex<double>(0, Delta.value()));
-          return
+          ret.complex() =
             -cos(Theta12.value())*sin(Theta23.value())
             -sin(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
-        })
-      .add(&V[2][2], {&Theta13, &Theta23}, [&]() {
-          return cos(Theta23.value())*cos(Theta13.value());
-        })
+        }, 2)
+      .add(&V[2][2], {&Theta13, &Theta23}, [&](arrayview<double>& ret) {
+          ret.complex() = cos(Theta23.value())*cos(Theta13.value());
+        }, 2)
     ;
   }
 };
@@ -106,9 +106,9 @@ public:
   variable<double> Cos12;
   variable<double> Cos13;
   variable<double> Cos23;
-  variable<std::complex<double>> Phase;
-  variable<std::complex<double>> PhaseC;
-  variable<std::complex<double>> V[Nnu][Nnu];
+  variable<double> Phase;
+  variable<double> PhaseC;
+  variable<double> V[Nnu][Nnu];
 protected:
   Fields fields() {
     Fields allvars;
@@ -128,41 +128,41 @@ protected:
   void setExpressions(ExpressionsProvider &provider) override {
     using std::exp;
     provider
-      .add(&V[0][0], {&Cos12, &Cos13}, [&]() {
-          return Cos12.value()*Cos13.value();
-        })
-      .add(&V[0][1], {&Sin12, &Cos13}, [&]() {
-          return Sin12.value()*Cos13.value();
-        })
-      .add(&V[0][2], {&Sin13, &Phase}, [&]() {
-          return Sin13.value()*Phase.value();
-        })
-      .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
-          return
+      .add(&V[0][0], {&Cos12, &Cos13}, [&](arrayview<double>& ret) {
+          ret.complex() = Cos12.value()*Cos13.value();
+        }, 2)
+      .add(&V[0][1], {&Sin12, &Cos13}, [&](arrayview<double>& ret) {
+          ret.complex() = Sin12.value()*Cos13.value();
+        }, 2)
+      .add(&V[0][2], {&Sin13, &Phase}, [&](arrayview<double>& ret) {
+          ret.complex() = Sin13.value()*Phase.complex();
+        }, 2)
+      .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<double>& ret) {
+          ret.complex() =
             -Sin12.value()*Cos23.value()
-            -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
-        })
-      .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
-          return
+            -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
+        }, 2)
+      .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<double>& ret) {
+          ret.complex() =
              Cos12.value()*Cos23.value()
-            -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
-        })
-      .add(&V[1][2], {&Cos13, &Sin23}, [&]() {
-          return Sin23.value()*Cos13.value();
-        })
-      .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
-          return
+            -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
+        }, 2)
+      .add(&V[1][2], {&Cos13, &Sin23}, [&](arrayview<double>& ret) {
+          ret.complex() = Sin23.value()*Cos13.value();
+        }, 2)
+      .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<double>& ret) {
+          ret.complex() =
             Sin12.value()*Sin23.value()
-            -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
-        })
-      .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
-          return
+            -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
+        }, 2)
+      .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<double>& ret) {
+          ret.complex() =
             -Cos12.value()*Sin23.value()
-            -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
-        })
-      .add(&V[2][2], {&Cos13, &Cos23}, [&]() {
-          return Cos23.value()*Cos13.value();
-        })
+            -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
+        }, 2)
+      .add(&V[2][2], {&Cos13, &Cos23}, [&](arrayview<double>& ret) {
+          ret.complex() = Cos23.value()*Cos13.value();
+        }, 2)
     ;
   }
 };

@@ -320,3 +320,9 @@ def patchROOTClass(classes=None, methods=None):
         return function
 
     return decorator
+
+def patchROOTTemplate(templates=None, methods=None):
+    if not isinstance(templates, tuple):
+        templates = (templates,)
+    classes = tuple(template(precision) for template in templates for precision in provided_precisions)
+    return patchROOTClass(classes, methods)

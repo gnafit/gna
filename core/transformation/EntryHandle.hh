@@ -78,13 +78,20 @@ namespace TransformationTypes
      * @param i -- Entry's Sink's index.
      */
     void update(int i) const { (void)m_entry->data(i); }
+    void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
+
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
+#endif
 
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
     bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
     taintflag& expose_taintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
+
+    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Read the variables
 
     /**
      * @brief Switch the active Function.
@@ -99,7 +106,6 @@ namespace TransformationTypes
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
-    EntryType *m_entry;                                         ///< Wrapped Entry pointer.
+    EntryType *m_entry;                                     ///< Wrapped Entry pointer.
   }; /* class Handle */
-
 } /* TransformationTypes */

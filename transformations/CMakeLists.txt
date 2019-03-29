@@ -37,9 +37,9 @@ set(TRANSFORMATION_SOURCES
   # Histograms
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
+  transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
-  transformations/base/PointsToHist.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
@@ -55,7 +55,6 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
-  transformations/interpolation/InterpSpline.cc
   # Linear algebra
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
@@ -89,10 +88,11 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
   # Variables manipulation
+  transformations/var/VarArray.cc
+  transformations/var/VarArrayPreallocated.cc
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
-  transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   #
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
@@ -118,7 +118,7 @@ set(TRANSFORMATION_HEADERS
   FillLike.hh
   Histogram.hh
   Histogram2d.hh
-  PointsToHist.hh
+  Points.hh
   View.hh
   Product.hh
   # Sums
@@ -140,7 +140,6 @@ set(TRANSFORMATION_HEADERS
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
-  InterpSpline.hh
   InterpLinear.hh
   Covmat.hh
   Cholesky.hh
@@ -159,7 +158,9 @@ set(TRANSFORMATION_HEADERS
   # Histogram
   Rebin.hh
   RebinN.hh
+  PointsToHist.hh
   VarArray.hh
+  VarArrayPreallocated.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
