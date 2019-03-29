@@ -20,7 +20,7 @@ void GNA::GNAObjectTemplates::ViewT<FloatType>::init(){
          .output("view")
          .types(new TypeClasses::CheckNdimT<FloatType>(1))
          .types(&ViewType::types)
-         .func([](FunctionArgs& fargs){});
+         .func([](FunctionArgs& fargs){fargs.args.touch();});
 
     //TODO: Add GPU option for preallocated buffer
 }
@@ -33,21 +33,20 @@ void GNA::GNAObjectTemplates::ViewT<FloatType>::types(typename GNAObjectT<FloatT
         auto& arg = args[i];
         FloatType* buf = const_cast<FloatType*>(args.data(i).buffer)+m_start;
         auto required_length=m_start+m_len;
+        switch(arg.kind){
+            case DataKind::Hist:
+                rets[i].hist().edges(m_len+1, arg.edges.data()+m_start);
+            case DataKind::Points:
+                rets[i].points().shape(m_len).preallocated(buf);
+                break;
+            default:
+                continue;
+                break;
+        }
         if(arg.shape[0]<required_length)
         {
             throw args.error(arg, fmt::format("Transformation {0}: input {1} length should be at least {2}, got {3}",
                                                   args.name(), i, required_length, arg.shape[0]));
-        }
-        auto& ret=rets[i];
-        switch(arg.kind){
-            case DataKind::Hist:
-                ret.hist().edges(m_len+1, arg.edges.data()+m_start);
-            case DataKind::Points:
-                ret.points().shape(m_len).preallocated(buf);
-                break;
-            default:
-                throw args.error(arg, fmt::format("Transformation {0}: input {1} kind is undefined", args.name(), i));
-                break;
         }
     }
 }

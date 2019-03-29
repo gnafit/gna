@@ -97,9 +97,10 @@ def main(args):
     # 2 511 keV gamma model
     #
     egamma_edges, egamma_x, egamma_xp, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
-    elow_npoints = int(egamma_edges[-1]*0.99999999//binwidth)
-    electron_model_elow = C.View(electron_model_e, 0, elow_npoints, labels='Low E view')
-    electron_model_lowe = C.View(electron_model, 0, elow_npoints, labels='Nph: electron responce\n(low E view)')
+    offset = N.where(electron_model_e.data()>=0)[0][0]-1 #FIXME
+    elow_npoints = int(egamma_edges[-1]*0.99999999//binwidth)+1
+    electron_model_elow = C.View(electron_model_e, offset, offset+elow_npoints, labels='Low E view')
+    electron_model_lowe = C.View(electron_model.single(), offset, offset+elow_npoints, labels='Nph: electron responce\n(low E view)')
 
     interpolator_2g = C.InterpLinear(electron_model_elow.view.view, egamma_xp, labels=('InSegment', 'e-gamma interpolator'))
     electron_model_lowe_interpolated = interpolator_2g.add_input(electron_model_lowe.view.view)
@@ -115,8 +116,8 @@ def main(args):
     positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
                                     labels='Nph: positron responce')
 
-    # fixed_point = C.Points([2.0*emass.value()], labels='{Energy scale normalization|(2me)}')
-    fixed_point = C.Points([4.0], labels='{Energy scale normalization|(4 MeV)}')
+    normv=2.0 #FIXME
+    fixed_point = C.Points([normv], labels='{Energy scale normalization|(2)}')
     positron_model_relative = C.FixedPointScale(integrator.points.x, fixed_point.points.points, labels=('Fixed point index', 'Positron energy nonlinearity'))
     positron_model_relative_out = positron_model_relative.add_input(positron_model.sum.outputs[0])
 
@@ -211,7 +212,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Evis/Etrue' )
     ax.set_title( 'Positron energy nonlineairty' )
-    integrator.points.x.vs_plot( 4.0*positron_model_relative_out.data()/integrator.points.x.data() )
+    integrator.points.x.vs_plot( normv*positron_model_relative_out.data()/integrator.points.x.data() )
 
     savefig(args.output, suffix='_total_relative')
 
