@@ -73,7 +73,7 @@ def main(args):
     electron_model_e = integrator.points.xcenters
 
     with nsc:
-        cherenkov = C.Cherenkov(labels='Cherenkov contribution\n(absolute)')
+        cherenkov = C.Cherenkov_Borexino(labels='Cherenkov contribution\n(absolute)')
     cherenkov.cherenkov << electron_model_e
 
     #

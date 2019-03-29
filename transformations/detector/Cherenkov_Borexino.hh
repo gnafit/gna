@@ -2,11 +2,11 @@
 #include "GNAObject.hh"
 #include "TransformationBind.hh"
 
-class Cherenkov: public GNAObject,
-                 public TransformationBind<Cherenkov> {
+class Cherenkov_Borexino: public GNAObject,
+                 public TransformationBind<Cherenkov_Borexino> {
     public:
-        using TransformationBind<Cherenkov>::transformation_;
-        Cherenkov();
+        using TransformationBind<Cherenkov_Borexino>::transformation_;
+        Cherenkov_Borexino();
         
     private:
         void calc_Cherenkov(FunctionArgs fargs);

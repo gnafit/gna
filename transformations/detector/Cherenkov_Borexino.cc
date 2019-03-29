@@ -1,7 +1,7 @@
-#include "Cherenkov.hh"
+#include "Cherenkov_Borexino.hh"
 #include <algorithm>
 
-Cherenkov::Cherenkov() {
+Cherenkov_Borexino::Cherenkov_Borexino() {
     variable_(&p0, "p0");
     variable_(&p1, "p1");
     variable_(&p2, "p2");
@@ -12,10 +12,10 @@ Cherenkov::Cherenkov() {
         .input("energy")
         .output("ch_npe")
         .types(TypesFunctions::passAll)
-        .func(&Cherenkov::calc_Cherenkov);
+        .func(&Cherenkov_Borexino::calc_Cherenkov);
 }
 
-void Cherenkov::calc_Cherenkov(FunctionArgs fargs) {
+void Cherenkov_Borexino::calc_Cherenkov(FunctionArgs fargs) {
     auto* energy_buf = fargs.args[0].buffer;
     auto size = fargs.args[0].x.size();
     auto* end_of_buf = energy_buf + size;
