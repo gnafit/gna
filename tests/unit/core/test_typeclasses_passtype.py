@@ -47,7 +47,7 @@ def test_typeclass_passeach():
     objects = [
             C.Histogram2d(np.arange(4), np.arange(5)),
             C.Histogram(np.arange(4)),
-            C.Points(np.arange(12).reshape(3,4))
+            C.Points(np.arange(20).reshape(4,5))
             ]
     outputs = [p.single() for p in objects]
 

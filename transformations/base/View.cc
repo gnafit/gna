@@ -35,7 +35,8 @@ void GNA::GNAObjectTemplates::ViewT<FloatType>::types(typename GNAObjectT<FloatT
         auto required_length=m_start+m_len;
         switch(arg.kind){
             case DataKind::Hist:
-                rets[i].hist().edges(m_len+1, arg.edges.data()+m_start);
+                rets[i].hist().edges(m_len+1, arg.edges.data()+m_start).preallocated(buf);
+                break;
             case DataKind::Points:
                 rets[i].points().shape(m_len).preallocated(buf);
                 break;
