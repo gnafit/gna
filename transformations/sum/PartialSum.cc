@@ -20,7 +20,6 @@ void PartialSum::calc(FunctionArgs fargs) {
 
     if (__builtin_expect(m_idx<0, 0)) {
         findStartingPoint(input, input + size);
-        fmt::print("in expected branch");
     }
 
     std::fill(output, output+m_idx, 0.);
