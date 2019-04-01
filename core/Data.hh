@@ -70,16 +70,32 @@ struct DataType {
   /**
    * @brief Copy constructor.
    *
-   * Copy constructor copies all members except preallocated buffer.
+   * Copy constructor copies all members INCLUDING preallocated buffer.
    *
    * @param other instance of DataType.
    */
   DataType(const DataType& other) :
-  kind{other.kind}, shape(other.shape), edges(other.edges), edgesNd(other.edgesNd)
+  kind{other.kind}, shape(other.shape), edges(other.edges), edgesNd(other.edgesNd), buffer(other.buffer)
   { }
+
+  /**
+   * @brief Copy assignment.
+   *
+   * Copy assignment copies all members EXCEPT preallocated buffer.
+   *
+   * @param other instance of DataType.
+   */
+  DataType& operator=(const DataType& other) {
+    kind=other.kind;
+    shape=other.shape;
+    edges=other.edges;
+    edgesNd=other.edgesNd;
+    return *this;
+  }
 
   bool operator==(const DataType &other) const;                 ///< Check if data types are identical.
   bool operator!=(const DataType &other) const;                 ///< Check if data types are not identical.
+  bool requiresReallocation(const DataType &other) const;       ///< Check if data types are identical.
 
   void dump() const;
 
@@ -546,6 +562,26 @@ public:
   const std::vector<double> &edges() const {
     return m_type.edges;
   }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Hist<T> &preallocated(double* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
+
+  /**
+   * @brief Set the DataType to be the view on the preallocated buffer
+   * @param buf -- double buffer
+   * @return `*this`.
+   */
+  DataType::Hist<T> &preallocated(float* buf) {
+    m_type.preallocated(buf);
+    return setKind();
+  }
 protected:
   /**
    * @brief Set the DataKind to DataKind::Hist.
@@ -576,7 +612,7 @@ inline DataType::Hist<const DataType> DataType::hist() const {
  * @brief Check if data types are identical.
  *
  * Compares that DataKind values. If needed uses DataType::Hist::operator==() or DataType::Points::operator==()
- * for further comparison.
+ * for further comparison. Does not check the buffer pointer;
  */
 inline bool DataType::operator==(const DataType &other) const {
   if (kind != other.kind) {
@@ -591,6 +627,19 @@ inline bool DataType::operator==(const DataType &other) const {
     return false;
   }
   return true;
+}
+
+/**
+ * @brief Check if data requires reallocation.
+ *
+ * Similar to operator==(), but also checks the buffer pointer.
+ */
+inline bool DataType::requiresReallocation(const DataType &other) const {
+  if( *this != other ){
+    return true;
+  }
+
+  return buffer!=other.buffer;
 }
 
 /**
@@ -628,6 +677,13 @@ inline void DataType::dump() const {
   }
 }
 
+namespace GNA{
+  namespace GNAObjectTemplates{
+    template<typename FloatType>
+    class ViewRearT;
+  }
+}
+
 /**
  * @brief Generic data class.
  *
@@ -645,6 +701,10 @@ inline void DataType::dump() const {
  */
 template <typename T>
 class Data {
+private:
+  /// fixme: this is an ugly implementation of viewrear.
+  /// the mechanism should be provided on the lavel of framework.
+  friend class GNA::GNAObjectTemplates::ViewRearT<T>;
 public:
   using ArrayType      = Eigen::Array<T, Eigen::Dynamic, 1> ;
   using VectorType     = Eigen::Matrix<T, Eigen::Dynamic, 1>;
@@ -674,24 +734,11 @@ public:
       throw std::runtime_error("Using undefined DataType to initialize data");
     }
     if (dt.preallocated()) {
-      //if(!std::is_same<T*, decltype(dt.buffer)>::value) {
-        //throw std::bad_typeid();
-      //}
-      this->buffer = static_cast<T*>(dt.buffer);
+      this->init(static_cast<T*>(dt.buffer));
     }
     else {
       allocated.reset(new T[dt.size()]);
-      this->buffer = allocated.get();
-    }
-    if (dt.shape.size() == 1) {
-      new (&this->arr)   ArrayViewType(  this->buffer, dt.shape[0] );
-      new (&this->vec)   VectorViewType( this->buffer, dt.shape[0] );
-    } else if (dt.shape.size() == 2) {
-      new (&this->arr)   ArrayViewType(  this->buffer, dt.shape[0]*dt.shape[1] );
-      new (&this->vec)   VectorViewType( this->buffer, dt.shape[0]*dt.shape[1] );
-
-      new (&this->arr2d) Array2ViewType( this->buffer, dt.shape[0], dt.shape[1] );
-      new (&this->mat)   MatrixViewType( this->buffer, dt.shape[0], dt.shape[1] );
+      this->init(allocated.get());
     }
   }
 #ifdef GNA_CUDA_SUPPORT
@@ -711,6 +758,21 @@ public:
   MatrixViewType mat{nullptr,   0,  0}; ///< 2D matrix view.
 
   ArrayViewType  &x = arr;    ///< 1D array  view shorthand.
+
+protected:
+  void init(T* buffer){
+    this->buffer = buffer;
+    if (type.shape.size() == 1) {
+      new (&this->arr)   ArrayViewType(  this->buffer, type.shape[0] );
+      new (&this->vec)   VectorViewType( this->buffer, type.shape[0] );
+    } else if (type.shape.size() == 2) {
+      new (&this->arr)   ArrayViewType(  this->buffer, type.shape[0]*type.shape[1] );
+      new (&this->vec)   VectorViewType( this->buffer, type.shape[0]*type.shape[1] );
+
+      new (&this->arr2d) Array2ViewType( this->buffer, type.shape[0], type.shape[1] );
+      new (&this->mat)   MatrixViewType( this->buffer, type.shape[0], type.shape[1] );
+    }
+  }
 };
 
 #ifdef GNA_CUDA_SUPPORT
@@ -732,10 +794,10 @@ Allocate GPU memory in case of GPU array is not inited yet
   }
   DataLocation tmp = DataLocation::NoData;
   if (type.shape.size() == 1) {
-	std::cout << "shape 1" << std::endl;
+        std::cout << "shape 1" << std::endl;
     tmp = gpuArr->Init(type.shape[0], buffer);
   } else if (type.shape.size() == 2) {
-	std::cout << "shape 2" << std::endl;
+        std::cout << "shape 2" << std::endl;
     tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
   }
   return tmp;

@@ -126,8 +126,8 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
     auto& edges=fargs.args[0].edges;
     m_xedges=Map<const ArrayXd>(edges.data(), edges.size());
   }
-  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
-  rets[5]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+  rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[5].hist().edges(m_xedges.size(), m_xedges.data());
 }
 
 void Integrator21Base::dump(){

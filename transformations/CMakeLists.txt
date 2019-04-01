@@ -5,6 +5,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Histogram2d.cc
   transformations/base/Points.cc
   transformations/base/View.cc
+  transformations/base/ViewRear.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
   # Sums
@@ -119,6 +120,7 @@ set(TRANSFORMATION_HEADERS
   Histogram2d.hh
   Points.hh
   View.hh
+  ViewRear.hh
   Product.hh
   # Sums
   PartialSum.hh

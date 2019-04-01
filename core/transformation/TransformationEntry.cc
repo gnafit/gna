@@ -258,7 +258,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     for (size_t i = 0; i < sinks.size(); ++i) {
       auto& ret  = rets[i];
       auto& sink = sinks[i];
-      if (!ret.buffer && sink.data && sink.data->type==ret) {
+      if (!ret.buffer && sink.data && !ret.requiresReallocation(sink.data->type)) {
         continue;
       }
       if (ret.defined()) {

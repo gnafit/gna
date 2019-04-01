@@ -28,7 +28,7 @@ inline bool TransformationTypes::OutputHandleT<FloatType>::depends(changeable x)
  */
 template<typename FloatType>
 bool TransformationTypes::OutputHandleT<FloatType>::check() const {
-  return m_sink->entry->check() && m_sink->data;
+  return bool(m_sink->data);
 }
 
 /**

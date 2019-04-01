@@ -21,10 +21,15 @@ public:
    * @param edegs - pointer to an array with nbins+1 edges.
    * @param edegs - pointer to an array with nbins data points.
    */
-  Histogram(size_t nbins, const double *edges, const double *data)
+  Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false)
     : m_edges(edges, edges+nbins+1), m_data(Eigen::Map<const Eigen::ArrayXd>(data, nbins))
   {
-    init();
+    if( fcn_copy ){
+      init_copy();
+    }
+    else {
+      init();
+    }
   }
 
   /**
@@ -67,6 +72,17 @@ protected:
           fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
         })
       .func([](FunctionArgs& fargs) {})                          /// Assign empty Function.
+      .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
+  }
+  void init_copy() {
+    transformation_("hist")                                      /// Initialize the transformation hist.
+      .output("hist")                                            /// Add an output hist.
+      .types([](Histogram *obj, TypesFunctionArgs& fargs) {      /// Define the TypesFunction:
+          fargs.rets[0] = DataType().hist().edges(obj->edges()); ///   - assign the data shape and bin edges for the first output (hist).
+        })
+      .func([](Histogram* obj, FunctionArgs& fargs) {            /// Define the function.
+              fargs.rets[0].x=obj->m_data;                       /// Copy data.
+            })
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_edges;                                   ///< Vector with bin edges.
