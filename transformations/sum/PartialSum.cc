@@ -18,15 +18,29 @@ void PartialSum::calc(FunctionArgs fargs) {
     auto  size = inputs.x.size();
     auto* output = fargs.rets[0].buffer;
 
+    if (__builtin_expect(m_idx<0, 0)) {
+        findStartingPoint(input, input + size);
+        fmt::print("in expected branch");
+    }
+
     std::fill(output, output+m_idx, 0.);
     std::partial_sum(input+m_idx, input+size, output+m_idx);
 }
 
 void PartialSum::findIdx(TypesFunctionArgs targs) {
-    auto& edges = targs.args[0].edges;
-    auto above_starting = std::lower_bound(std::begin(edges), std::end(edges), m_starting_value);
-    if (above_starting == edges.end()) {
-        throw std::runtime_error("Starting value is larger then any bin in histogram");
+    if (targs.args[0].kind == DataKind::Points) {
+        this->m_idx = -1;
+        return;
     }
-    this->m_idx = std::distance(std::begin(edges), above_starting);
+    auto& edges = targs.args[0].edges;
+    findStartingPoint(std::begin(edges), std::end(edges));
+}
+
+template <typename InputIterator>  
+void PartialSum::findStartingPoint(InputIterator start, InputIterator end) {
+    auto above_starting = std::lower_bound(start, end, m_starting_value);
+    if (above_starting == end) {
+        throw std::runtime_error("Starting value is larger then any bin in container");
+    }
+        this->m_idx = std::distance(start, above_starting);
 }
