@@ -11,7 +11,9 @@ class PartialSum: public GNAObject,
     private:
         void calc(FunctionArgs fargs);
         void findIdx(TypesFunctionArgs targs);
+        template<typename InputIterator>
+           void findStartingPoint(InputIterator start, InputIterator end);
 
     double m_starting_value;
-    size_t m_idx = 0;
+    int m_idx = 0;
 };
