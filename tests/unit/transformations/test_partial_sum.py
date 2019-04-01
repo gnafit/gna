@@ -14,7 +14,9 @@ from gna.bindings import DataType
 # Create the matrix
 #
 def test_partial_sum():
-    arr = np.arange(12, dtype='d')
+    arr = np.arange(1, 13, dtype='d')
+    edges = np.arange(0, 13, dtype='d')
+
 
     print( 'Input matrix (numpy)' )
     print(arr)
@@ -24,7 +26,7 @@ def test_partial_sum():
     #
     # Create transformations
     #
-    points = C.Points(arr)
+    points = C.Histogram(edges, arr)
     partial_sum = R.PartialSum(0.)
     partial_sum.reduction << points
 
