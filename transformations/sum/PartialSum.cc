@@ -36,11 +36,11 @@ void PartialSum::findIdx(TypesFunctionArgs targs) {
     findStartingPoint(std::begin(edges), std::end(edges));
 }
 
-template <typename InputIterator>  
+template <typename InputIterator>
 void PartialSum::findStartingPoint(InputIterator start, InputIterator end) {
     auto above_starting = std::lower_bound(start, end, m_starting_value);
     if (above_starting == end) {
         throw std::runtime_error("Starting value is larger then any bin in container");
     }
-        this->m_idx = std::distance(start, above_starting);
+    this->m_idx = std::distance(start, above_starting);
 }

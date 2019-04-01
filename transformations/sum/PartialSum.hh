@@ -7,7 +7,7 @@ class PartialSum: public GNAObject,
     public:
         using TransformationBind<PartialSum>::transformation_;
         PartialSum(double starting_value);
-        
+
     private:
         void calc(FunctionArgs fargs);
         void findIdx(TypesFunctionArgs targs);

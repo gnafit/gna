@@ -123,7 +123,7 @@ void FixedPointScale::do_scale(FunctionArgs& fargs){
     auto  k=((y2-y1)/width);                                              /// k coefficient
 
     auto scale = k*(fixed_point - x1) + y1;
-    rets[ret].x = y_a/scale;                                              /// scale
+    rets[ret].x = fixed_point*y_a/scale;                                  /// scale
   }
 }
 
