@@ -18,7 +18,7 @@ def test_points_to_hist():
 
     # Create transformations
     points = C.Points(mat)
-    adapter = C.PointsToHist(points.points)
+    adapter = C.PointsToHist(points.points, 0.)
     hist_edges = N.array(adapter.adapter.hist.datatype().hist().edges())
 
     # Add zero as initial bin edge
