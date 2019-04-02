@@ -45,6 +45,7 @@ def main(args):
 
     from physlib import pdg
     emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
+    doubleme = 2*emass.value()
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
     ns.printparameters(labels=True)
@@ -53,53 +54,53 @@ def main(args):
     # Birk's model integration
     #
     binwidth=0.025
-    bins = N.arange(0.0, 12.0+1.e-6, binwidth)
+    epos_edges_input = N.arange(0.0, 12.0+1.e-6, binwidth)
+    epos_firstbin = N.where(epos_edges_input>doubleme)[0][0]-1
+    epos_edges_input=epos_edges_input[epos_firstbin:]
+    epos_edges_input[0]=doubleme
 
-    xa, dedx = args.stoppingpower['e'], args.stoppingpower['dedx']
-    xp, dedx_p = C.Points(xa, labels='Energy'), C.Points(dedx, labels='Stopping power (dE/dx)')
+    integrator_epos = C.IntegratorGL(epos_edges_input, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
+    epos_edges = integrator_epos.points.xedges
+
+    birks_e_input, birks_quenching_input = args.stoppingpower['e'], args.stoppingpower['dedx']
+    birks_e_p, birks_quenching_p = C.Points(birks_e_input, labels='Energy'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
 
     with nsb:
-        pratio = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
-    dedx_p >> pratio.polyratio.points
+        birks_integrand_raw = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
+    birks_quenching_p >> birks_integrand_raw.polyratio.points
 
-    integrator = C.IntegratorGL(bins, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
-    bin_edges = integrator.points.xedges
+    doubleemass_point = C.Points([-doubleme], labels='2me offset')
 
-    emass_point = C.Points([-2*emass.value()], labels='2me offset')
+    ekin_edges_p = C.SumBroadcast([epos_edges, doubleemass_point.points.points], labels='Evis to Te')
+    ekin_edges_h = C.PointsToHist(ekin_edges_p, labels='Te bin edges')
 
-    ekin_points = C.SumBroadcast([bin_edges, emass_point.points.points], labels='Evis to Te')
-    pointsx=ekin_points.sum.sum.data()
-    ekin_edges = C.PointsToHist(ekin_points, 2.0*pointsx[0]-pointsx[1], labels='Te bin edges')
+    integrator_ekin = C.IntegratorGL(ekin_edges_h.adapter.hist, 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
 
-    ekin_integrator = R.IntegratorGL(len(ekin_edges.adapter.hist.data()), 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
-    ekin_edges.adapter.hist >> ekin_integrator.points.edges
+    birks_integrand_interpolator = C.InterpLinear(birks_e_p, integrator_ekin.points.x, labels=('InSegment', 'Interpolator'))
+    birks_integrand_interpolated = birks_integrand_interpolator.add_input(birks_integrand_raw.polyratio.ratio)
+    birks_integral = integrator_ekin.add_input(birks_integrand_interpolated)
 
-    interpolator = C.InterpLinear(xp, ekin_integrator.points.x, labels=('InSegment', 'Interpolator'))
-    interpolated = interpolator.add_input(pratio.polyratio.ratio)
-    integrated = ekin_integrator.add_input(interpolated)
-
-    accumulator = C.PartialSum(0., labels="Evis (Birks)\n[MeV]")
-    accumulator.reduction << integrated
+    birks_accumulator = C.PartialSum(0., labels="Evis (Birks)\n[MeV]")
+    birks_integral >> birks_accumulator.reduction
 
     #
     # Cherenkov model
     #
-    electron_model_e = ekin_integrator.points.xcenters
-
     with nsc:
         cherenkov = C.Cherenkov_Borexino(labels='Npe Cherenkov')
-    cherenkov.cherenkov << electron_model_e
+    ekin_edges_p >> cherenkov.cherenkov
 
+    import IPython, sys; IPython.embed(); sys.exit()
     #
     # Electron energy model
     #
     with ns:
-        electron_model = C.WeightedSum(['kC', 'Npesc'], [cherenkov.cherenkov.ch_npe, accumulator.reduction.out], labels='Npe: electron responce')
+        electron_model = C.WeightedSum(['kC', 'Npesc'], [cherenkov.cherenkov.ch_npe, birks_accumulator.reduction.out], labels='Npe: electron responce')
 
     #
     # 2 511 keV gamma model
     #
-    egamma_edges, egamma_x, egamma_xp, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
+    egamma_edges, egamma_x, egamma_birks_e_p, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
     offset = N.where(electron_model_e.data()>=0)[0][0]-1
     lastpoint = N.where(electron_model_e.data()>egamma_edges[-1])[0][0]+1
     electron_model_elow = C.View(electron_model_e, offset, lastpoint-offset, labels='Low E view')
@@ -121,7 +122,7 @@ def main(args):
 
     normv=2.505
     fixed_point = C.Points([normv], labels='{Energy scale normalization|2.505 MeV (60Co)}')
-    positron_model_relative = C.FixedPointScale(bin_edges, fixed_point.points.points, labels=('Fixed point index', 'Positron energy nonlinearity'))
+    positron_model_relative = C.FixedPointScale(epos_edges, fixed_point.points.points, labels=('Fixed point index', 'Positron energy nonlinearity'))
     positron_model_relative_out = positron_model_relative.add_input(positron_model.sum.outputs[0])
 
     if args.output and args.output.endswith('.pdf'):
@@ -146,7 +147,7 @@ def main(args):
     ax.set_ylabel( 'dE/dx' )
     ax.set_title( 'Stopping power' )
 
-    dedx_p.points.points.plot_vs(xp.points.points, '-', markerfacecolor='none', markersize=2.0, label='input')
+    birks_quenching_p.points.points.plot_vs(birks_e_p.points.points, '-', markerfacecolor='none', markersize=2.0, label='input')
     ax.legend(loc='upper right')
     savefig(args.output, suffix='_spower')
 
@@ -158,10 +159,10 @@ def main(args):
     ax.set_ylabel( '' )
     ax.set_title( 'Integrand' )
 
-    pratio.polyratio.ratio.plot_vs(xp.points.points, '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
-    # interpolated.plot_vs(ekin_integrator.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
-    lines=interpolated.plot_vs(ekin_integrator.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
-    interpolated.plot_vs(ekin_integrator.points.x, 'o', alpha=0.5, color='black', markersize=0.6)
+    birks_integrand_raw.polyratio.ratio.plot_vs(birks_e_p.points.points, '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
+    # birks_integrand_interpolated.plot_vs(integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
+    lines=birks_integrand_interpolated.plot_vs(integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
+    birks_integrand_interpolated.plot_vs(integrator_ekin.points.x, 'o', alpha=0.5, color='black', markersize=0.6)
     ax.legend(loc='lower right')
 
     savefig()
@@ -180,7 +181,7 @@ def main(args):
     ax.set_ylabel( '' )
     ax.set_title( 'Integrated' )
 
-    integrated.plot_hist()
+    birks_integral.plot_hist()
 
     savefig()
 
@@ -198,8 +199,8 @@ def main(args):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Electron energy (Birks)' )
-    #  accumulator.reduction.out.plot_vs(integrator.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
-    accumulator.reduction.plot_hist()
+    #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
+    birks_accumulator.reduction.plot_hist()
 
     savefig(args.output, suffix='_birks_evis')
 
@@ -245,7 +246,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Total Npe' )
-    positron_model.sum.outputs[0].plot_vs(bin_edges)
+    positron_model.sum.outputs[0].plot_vs(epos_edges)
 
     savefig(args.output, suffix='_total_npe')
 
@@ -256,7 +257,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( '???' )
     ax.set_title( 'Positron energy nonlineairty' )
-    positron_model_relative_out.plot_vs(bin_edges)
+    positron_model_relative_out.plot_vs(epos_edges)
 
     savefig(args.output, suffix='_total')
 
@@ -267,7 +268,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Evis/Etrue' )
     ax.set_title( 'Positron energy nonlineairty' )
-    bin_edges.vs_plot( positron_model_relative_out.data()/bin_edges.data() )
+    epos_edges.vs_plot( positron_model_relative_out.data()/epos_edges.data() )
 
     savefig(args.output, suffix='_total_relative')
 

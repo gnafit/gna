@@ -165,16 +165,27 @@ def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):
         size = None
-        if edges is not None:
+        if isinstance(edges, R.SingleOutput):
+            edges_input, edges = edges, R.nullptr
+            size = edges_input.single().data().size
+        elif edges is not None:
             edges = N.ascontiguousarray(edges, dtype='d')
             size = edges.size-1
+            edges_input = None
+
         if not isinstance(orders, int):
             orders = N.ascontiguousarray(orders, dtype='i')
             size = orders.size
         if size is None:
             raise Exception('Insufficient parameters to determine the number of bins')
+
         cls = getattr(R, classname)
-        return cls(size, orders, edges, *args, **kwargs)
+        ret=cls(size, orders, edges, *args, **kwargs)
+
+        if edges_input:
+            edges_input >> ret.points.edges
+
+        return ret
     return newfcn
 
 IntegratorGL   = _wrap_integrator_1d('IntegratorGL')
