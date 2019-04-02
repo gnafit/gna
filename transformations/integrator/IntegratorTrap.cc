@@ -50,4 +50,6 @@ void IntegratorTrap::sample(FunctionArgs& fargs) {
     advance(edge_b, 1);
   }
   m_weights.tail(1)=samplewidths.tail(1)*0.5;
+  rets.untaint();
+  rets.freeze();
 }

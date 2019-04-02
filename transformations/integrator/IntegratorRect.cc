@@ -84,4 +84,6 @@ void IntegratorRect::sample(FunctionArgs& fargs){
     }
     offset+=n;
   }
+  rets.untaint();
+  rets.freeze();
 }

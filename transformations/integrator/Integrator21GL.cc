@@ -37,5 +37,8 @@ void Integrator21GL::sample(FunctionArgs& fargs){
   rets[3].mat = x.vec.replicate(1, m_yweights.size());
   rets[4].mat = y.vec.transpose().replicate(m_xweights.size(), 1);
   rets[5].x = 0.0;
+
+  rets.untaint();
+  rets.freeze();
 }
 

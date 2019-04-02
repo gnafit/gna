@@ -30,6 +30,7 @@ void PointsToHist::init(SingleOutput& points) {
                 fargs.args[0];
                 auto& rets=fargs.rets;
                 rets[0].x=0.0;
+                rets.untaint();
                 rets.freeze();
                 })
         .finalize();
