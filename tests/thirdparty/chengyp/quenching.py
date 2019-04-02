@@ -90,8 +90,6 @@ def main(args):
         cherenkov = C.Cherenkov_Borexino(labels='Npe Cherenkov')
     ekin_edges_p >> cherenkov.cherenkov
 
-    import IPython, sys; IPython.embed(); sys.exit()
-
     #
     # Electron energy model
     #
@@ -102,13 +100,13 @@ def main(args):
     # 2 511 keV gamma model
     #
     egamma_edges, egamma_x, egamma_birks_e_p, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
-    offset = N.where(electron_model_e.data()>=0)[0][0]-1
-    lastpoint = N.where(electron_model_e.data()>egamma_edges[-1])[0][0]+1
-    electron_model_elow = C.View(electron_model_e, offset, lastpoint-offset, labels='Low E view')
-    electron_model_lowe = C.View(electron_model.single(), offset, lastpoint-offset, labels='Npe: electron responce\n(low E view)')
+    egamma_offset = 0
+    lastpoint = N.where(ekin_edges_p.data()>egamma_edges[-1])[0][0]+1
+    ekin_edges_lowe = C.View(ekin_edges_p, egamma_offset, lastpoint-egamma_offset, labels='Low E view')
+    electron_model_lowe = C.View(electron_model.single(), egamma_offset, lastpoint-egamma_offset, labels='Npe: electron responce\n(low E view)')
 
-    interpolator_2g = C.InterpLinear(electron_model_elow.view.view, egamma_xp, labels=('InSegment', 'e-gamma interpolator'))
-    electron_model_lowe_interpolated = interpolator_2g.add_input(electron_model_lowe.view.view)
+    electron_model_lowe_interpolator = C.InterpLinear(ekin_edges_lowe.view.view, egamma_birks_e_p, labels=('InSegment', 'e-gamma interpolator'))
+    electron_model_lowe_interpolated = electron_model_lowe_interpolator.add_input(electron_model_lowe.view.view)
 
     with ns:
         npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation E')
@@ -201,7 +199,7 @@ def main(args):
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Electron energy (Birks)' )
     #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
-    birks_accumulator.reduction.plot_hist()
+    birks_accumulator.reduction.plot_vs(ekin_edges_p)
 
     savefig(args.output, suffix='_birks_evis')
 
@@ -212,7 +210,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Cherenkov photons' )
-    cherenkov.cherenkov.ch_npe.plot_vs(electron_model_e)
+    cherenkov.cherenkov.ch_npe.plot_vs(ekin_edges_p)
 
     savefig(args.output, suffix='_cherenkov_npe')
 
@@ -223,7 +221,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Electron model' )
-    electron_model.single().plot_vs(electron_model_e)
+    electron_model.single().plot_vs(ekin_edges_p)
 
     savefig(args.output, suffix='_electron')
 
@@ -234,8 +232,8 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Electron model (low energy view)' )
-    electron_model_lowe.single().plot_vs(electron_model_elow.view.view, 'o', label='data')
-    electron_model_lowe_interpolated.single().plot_vs(egamma_xp.single(), '-', label='interpolation')
+    electron_model_lowe.single().plot_vs(ekin_edges_lowe.view.view, 'o', label='data')
+    electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='interpolation')
     ax.legend(loc='upper left')
 
     savefig(args.output, suffix='_electron_lowe')
