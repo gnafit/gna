@@ -101,6 +101,7 @@ set(CORE_HEADERS
   dependant.hh
   evaluable.hh
   callback.hh
+  fragile.hh
   # GPU related stuff
   GPUVariables.hh
   GPUVariablesLocal.hh

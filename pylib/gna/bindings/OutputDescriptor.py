@@ -9,12 +9,17 @@ import types
 classes = [R.OutputDescriptorT(ft,ft) for ft in provided_precisions]
 
 @patchROOTClass(classes, '__str__')
-def OutputDescriptor____str__(self):
-    return '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+def OutputDescriptor____str__(self, **kwargs):
+    ret = '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+    data, sl = kwargs.pop('data', False), kwargs.pop('slice', slice(None))
+    if data and self.check() and self.datatype():
+        values = str(self.data()[sl])
+        ret = ret+': '+values+'\n'
+    return ret
 
 @patchROOTClass(classes, 'print')
-def OutputDescriptor__print(self):
-    printl(str(self))
+def OutputDescriptor__print(self, **kwargs):
+    printl(OutputDescriptor____str__(self, **kwargs))
 
 @patchROOTClass(classes, 'single')
 def OutputDescriptor__single(self):

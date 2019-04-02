@@ -1,5 +1,6 @@
 #pragma once
 #include "GNAObject.hh"
+#include "fragile.hh"
 #include <boost/optional.hpp>
 
 class PointsToHist: public GNAObject,
@@ -13,4 +14,5 @@ class PointsToHist: public GNAObject,
         void init(SingleOutput& points);
         boost::optional<double> m_left_edge;
         std::vector<double> m_edges;
+        fragile m_fragile;
 };

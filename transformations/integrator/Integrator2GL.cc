@@ -45,5 +45,7 @@ void Integrator2GL::sample(FunctionArgs& fargs){
 
   rets[4].mat = x.vec.replicate(1, m_yweights.size());
   rets[5].mat = y.vec.transpose().replicate(m_xweights.size(), 1);
+  rets[6].x = 0.0;
+  rets[7].x = 0.0;
 }
 

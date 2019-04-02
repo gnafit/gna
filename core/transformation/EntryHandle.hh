@@ -89,7 +89,7 @@ namespace TransformationTypes
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
     bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
-    taintflag& expose_taintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
+    taintflag& getTaintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
 
     void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Read the variables
 
