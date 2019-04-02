@@ -502,7 +502,6 @@ class exp(baseexp):
 
     formula_ibd_simple = '''ibd =
                       norm_bf*
-                      conversion_factor*nprotons_nominal*
                       eres[d]|
                         lsnl[d]|
                           iav[d]|
@@ -512,6 +511,7 @@ class exp(baseexp):
                                   ibd_xsec(enu(), ctheta())*
                                   jacobian(enu(), ee(), ctheta())*
                                   (sum[i]| power_livetime_factor*anuspec[i](enu()))*
+                                      conversion_factor*nprotons_nominal*
                                   sum[c]|
                                     pmns[c]*oscprob[c,d,r](enu())
         '''
@@ -523,6 +523,14 @@ class exp(baseexp):
             ]
 
     lib = OrderedDict(
+            anue_produced_iso = dict(expr='power_livetime_factor*anuspec',
+                label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
+            anue_produced_total = dict(expr='sum:i|anue_produced_iso',
+                                       label='Total number of anue in {reactor}@{detector}'),
+            xsec_weighted = dict(expr='baselineweight*ibd_xsec', label="Cross section weighted by distance {reactor}@{detector}"),
+            count_rate = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                              label='Countrate from {reactor} in {detector}'),
+
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                            label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
             # cspec_diff_reac         = dict(expr='sum:i'),
@@ -535,12 +543,13 @@ class exp(baseexp):
             prediction_scale        = dict(expr='conversion_factor*norm_bf*nprotons_nominal'),
             ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n{detector}'),
 
+
             lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
             lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
             evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
             evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
 
-            oscprob_weighted        = dict(expr='oscprob*pmns'),
+            oscprob_weighted        = dict(expr='pmns*oscprob'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
 
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
