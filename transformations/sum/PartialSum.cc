@@ -6,10 +6,19 @@ PartialSum::PartialSum(double starting_value): m_starting_value{starting_value} 
     transformation_("reduction")
         .input("inp")
         .output("out")
-        .types(TypesFunctions::passAll,
+        .types( &PartialSum::make_Points,
                 &PartialSum::findIdx
             )
         .func(&PartialSum::calc);
+}
+
+void PartialSum::make_Points(TypesFunctionArgs targs) {
+    if (targs.args[0].kind == DataKind::Points) {
+        targs.rets[0] = targs.args[0];
+    } else {
+        auto size = targs.args[0].hist().bins();
+        targs.rets[0] = DataType().points().shape(size);
+    };
 }
 
 void PartialSum::calc(FunctionArgs fargs) {
@@ -31,9 +40,9 @@ void PartialSum::findIdx(TypesFunctionArgs targs) {
         this->m_idx = -1;
         return;
     }
-    auto& edges = targs.args[0].edges;
+    const auto& edges = targs.args[0].edges;
     findStartingPoint(std::begin(edges), std::end(edges));
-}
+} 
 
 template <typename InputIterator>
 void PartialSum::findStartingPoint(InputIterator start, InputIterator end) {
