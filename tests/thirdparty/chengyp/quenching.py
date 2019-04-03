@@ -56,13 +56,14 @@ def main(args):
     # Birk's model integration
     #
     binwidth=0.025
-    epos_edges_input = N.arange(0.0, 12.0+1.e-6, binwidth)
-    epos_firstbin = N.where(epos_edges_input>doubleme)[0][0]-1
-    epos_edges_input=epos_edges_input[epos_firstbin:]
+    epos_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
+    epos_firstbin = N.where(epos_edges_full_input>doubleme)[0][0]-1
+    epos_edges_input=epos_edges_full_input[epos_firstbin:]
     epos_edges_input[0]=doubleme
 
     integrator_epos = C.IntegratorGL(epos_edges_input, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
     epos_edges = integrator_epos.points.xedges
+    epos_edges_full = C.Points(epos_edges_full_input)
 
     birks_e_input, birks_quenching_input = args.stoppingpower['e'], args.stoppingpower['dedx']
     birks_e_p, birks_quenching_p = C.Points(birks_e_input, labels='Te (input)'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
@@ -128,6 +129,8 @@ def main(args):
     # Relative positron model
     #
     positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
+    positron_model_relative_full = C.ViewRear(positron_model_relative, epos_firstbin, epos_edges_input.size, labels='Positron Energy nonlinearity')
+
 
     #
     # Plots and tests
@@ -287,7 +290,8 @@ def main(args):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
-    epos_edges.vs_plot( positron_model_relative.data() )
+    positron_model_relative.plot_vs(epos_edges, label='nonlinearity')
+    positron_model_relative_full.plot_vs(epos_edges_full, '--', label='nonlinearity (full range)')
 
     savefig(args.output, suffix='_total_relative')
 
