@@ -129,10 +129,8 @@ def main(args):
     # Relative positron model
     #
     positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
-    import IPython; IPython.embed()
     positron_model_relative_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, 0.0, labels='Positron Energy nonlinearity')
     positron_model_relative >> positron_model_relative_full.view.rear
-    import IPython; IPython.embed()
 
     #
     # Plots and tests
@@ -255,7 +253,7 @@ def main(args):
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Electron model (low energy view)' )
     annihilation_gamma_evis = npe_positron_offset.normconvolution.result.data()[0]
-    label = 'Annihilation Evis=%.2f MeV'%annihilation_gamma_evis
+    label = 'Annihilation contribution=%.2f Npe'%annihilation_gamma_evis
     electron_model_lowe.single().plot_vs(ekin_edges_lowe.view.view, 'o', markerfacecolor='none', label='data')
     electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='interpolation\n'+label)
 
