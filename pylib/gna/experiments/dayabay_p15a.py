@@ -205,7 +205,7 @@ class exp(baseexp):
                     rounding = 3,
                     edges = N.concatenate(( [0.7], N.arange(1.2, 8.1, 0.2), [12.0] )),
                     name = 'rebin',
-                    label = 'Final histogram\n{detector}'
+                    label = 'Final histogram\n {detector}'
                     ),
             #
             # Spectra
@@ -215,7 +215,7 @@ class exp(baseexp):
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
                 format    = '{site}_AD{adnum_local}_singleTrigEnergy',
                 name      = 'bkg_spectrum_acc',
-                label     = 'Accidentals {detector}\n(norm spectrum)',
+                label     = 'Accidentals {detector}\n (norm spectrum)',
                 groups    = self.groups,
                 normalize = True,
                 ),
@@ -224,7 +224,7 @@ class exp(baseexp):
                 filename  = 'data/dayabay/bkg/lihe/toyli9spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_li',
-                label     = '9Li spectrum\n(norm)',
+                label     = '9Li spectrum\n (norm)',
                 normalize = True,
                 ),
             bkg_spectrum_he= NestedDict(
@@ -232,7 +232,7 @@ class exp(baseexp):
                 filename  = 'data/dayabay/bkg/lihe/toyhe8spec_BCWmodel_v1.root',
                 format    = 'h_eVisAllSmeared',
                 name      = 'bkg_spectrum_he',
-                label     = '8He spectrum\n(norm)',
+                label     = '8He spectrum\n (norm)',
                 normalize = True,
                 ),
             bkg_spectrum_amc = NestedDict(
@@ -240,7 +240,7 @@ class exp(baseexp):
                 filename  = 'data/dayabay/bkg/P12B_amc_expofit.root',
                 format    = 'hCorrAmCPromptSpec',
                 name      = 'bkg_spectrum_amc',
-                label     = 'AmC spectrum\n(norm)',
+                label     = 'AmC spectrum\n (norm)',
                 normalize = True,
                 ),
             bkg_spectrum_alphan = NestedDict(
@@ -249,7 +249,7 @@ class exp(baseexp):
                 format    = 'AD{adnum_global_alphan_subst}',
                 groups    = self.groups,
                 name      = 'bkg_spectrum_alphan',
-                label     = 'C(alpha,n) spectrum\n{detector} (norm)',
+                label     = 'C(alpha,n) spectrum\n {detector} (norm)',
                 normalize = True,
                 ),
             lihe_fractions=NestedDict(
@@ -380,7 +380,8 @@ class exp(baseexp):
         # Parse the expression
         self.expression.parse()
         # The next step is needed to name all the intermediate variables.
-        self.expression.guessname(self.lib, save=True)
+        lib = self.libs[self.opts.mode]
+        self.expression.guessname(lib, save=True)
 
         if self.opts.verbose>1:
             print('Expression tree:')
@@ -501,7 +502,8 @@ class exp(baseexp):
         '''
 
     formula_ibd_simple = '''ibd =
-                      norm_bf*
+                      norm_bf* 
+                      conversion_factor*nprotons_nominal*
                       eres[d]|
                         lsnl[d]|
                           iav[d]|
@@ -511,7 +513,6 @@ class exp(baseexp):
                                   ibd_xsec(enu(), ctheta())*
                                   jacobian(enu(), ee(), ctheta())*
                                   (sum[i]| power_livetime_factor*anuspec[i](enu()))*
-                                      conversion_factor*nprotons_nominal*
                                   sum[c]|
                                     pmns[c]*oscprob[c,d,r](enu())
         '''
@@ -522,80 +523,171 @@ class exp(baseexp):
             'total=concat[d]| observation'
             ]
 
-    lib = OrderedDict(
-            anue_produced_iso = dict(expr='power_livetime_factor*anuspec',
-                label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
-            anue_produced_total = dict(expr='sum:i|anue_produced_iso',
-                                       label='Total number of anue in {reactor}@{detector}'),
-            xsec_weighted = dict(expr='baselineweight*ibd_xsec', label="Cross section weighted by distance {reactor}@{detector}"),
-            count_rate = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
-                              label='Countrate from {reactor} in {detector}'),
+    libs = {
+            'dyboscar': OrderedDict(
+                    anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
+                                                   label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
+                    anue_produced_total     = dict(expr='sum:i|anue_produced_iso',
+                                                   label='Total number of anue in {reactor}@{detector}'),
+                    xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
+                                                   label="Cross section weighted by distance {reactor}@{detector}"),
+                    count_rate              = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                                                    label='Countrate from {reactor} in {detector}'),
 
-            cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
-                                           label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
-            # cspec_diff_reac         = dict(expr='sum:i'),
-            cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
-            # cspec_diff_det          = dict(expr='sum:r'),
-            # spec_diff_det           = dict(expr='sum:c'),
-            cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
+                    cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
+                                                   label='anu count rate\n {isotope}@{reactor}->{detector} ({component})'),
+                    # cspec_diff_reac         = dict(expr='sum:i'),
+                    cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
+                    # cspec_diff_det          = dict(expr='sum:r'),
+                    # spec_diff_det           = dict(expr='sum:c'),
+                    cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
-            prediction_scale        = dict(expr='conversion_factor*norm_bf*nprotons_nominal'),
-            ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n{detector}'),
+                    norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
+                    prediction_scale        = dict(expr='conversion_factor*norm_bf*nprotons_nominal'),
+                    ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum\n {detector}'),
 
 
-            lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
-            lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
-            evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
-            evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
+                    lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight'),
+                    lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted'),
+                    evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
+                    evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
 
-            oscprob_weighted        = dict(expr='pmns*oscprob'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
+                    oscprob_weighted        = dict(expr='pmns*oscprob', label='PMNS weight * component {component}'),
+                    oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\n {reactor}@{detector}'),
 
-            anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
+                    anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
+                    anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\n weight: {weight_label}'),
 
-            countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
-            countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-            countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\nweight: {weight_label}'),
+                    countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
+                    countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
+                    countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\n weight: {weight_label}'),
 
-            observation_fine        = dict(expr='bkg+ibd', label='Observed spectrum\n{detector}'),
+                    observation_fine        = dict(expr='bkg+ibd', label='Observed spectrum\n {detector}'),
 
-            iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
-            reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
-            reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
-            ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
-            ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
-            ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
+                    iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
+                    reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
+                    reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
+                    ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
+                    ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
+                    ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
 
-            # Accidentals
-            acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n(best fit)}'),
-            bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),
+                    # Accidentals
+                    acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n (best fit)}'),
+                    bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n (w: {weight_label})'),
 
-            # Li/He
-            bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n(frac)'),
-            bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n(frac)'),
-            bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n(norm)'),
-            lihe_num_bf       = dict(expr='bkg_rate_lihe*days_in_second*efflivetime'),
-            bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n(w: {weight_label})'),
+                    # Li/He
+                    bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n (frac)'),
+                    bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n (frac)'),
+                    bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n (norm)'),
+                    lihe_num_bf       = dict(expr='bkg_rate_lihe*days_in_second*efflivetime'),
+                    bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n (w: {weight_label})'),
 
-            # Fast neutrons
-            fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
-            bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n(w: {weight_label})'),
+                    # Fast neutrons
+                    fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
+                    bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
 
-            # AmC
-            amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
-            bkg_amc           = dict(expr='bkg_spectrum_amc*amc_num_bf',                   label='AmC {detector}\n(w: {weight_label})'),
+                    # AmC
+                    amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
+                    bkg_amc           = dict(expr='bkg_spectrum_amc*amc_num_bf',                   label='AmC {detector}\n (w: {weight_label})'),
 
-            # AlphaN
-            alphan_num_bf     = dict(expr='bkg_rate_alphan*days_in_second*efflivetime'),
-            bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n(w: {weight_label})'),
+                    # AlphaN
+                    alphan_num_bf     = dict(expr='bkg_rate_alphan*days_in_second*efflivetime'),
+                    bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n (w: {weight_label})'),
 
-            # Total background
-            bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n{detector}'),
+                    # Total background
+                    bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n {detector}'),
 
-            # dybOscar mode
-            eres_cw           = dict(expr='eres*pmns'),
-            # eres_w            = dict(expr='sum:c|eres_cw'),
-            )
+                    # dybOscar mode
+                    eres_cw           = dict(expr='eres*pmns'),
+                    ),
 
+            'simple': OrderedDict(
+                    denom                   = dict(expr='denom',
+                                                   label='Denominator of reactor norm for {reactor}'),
+                    anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
+                                                   label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
+                    anue_produced_total     = dict(expr='sum:i|anue_produced_iso',
+                                                   label='Total number of anue in {reactor}@{detector}'),
+                    xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
+                                                   label="Cross section weighted by distance {reactor}@{detector}"),
+                    count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                                                   label='Countrate from {reactor} in {detector}'),
+                    count_rate_d            = dict(expr='sum:r|countrate_rd',
+                                                   label='Countrate in {detector}'),
+
+                    cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
+                                                   label='anu count rate\n {isotope}@{reactor}->{detector} ({component})'),
+                    # cspec_diff_reac         = dict(expr='sum:i'),
+                    cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
+                    # cspec_diff_det          = dict(expr='sum:r'),
+                    # spec_diff_det           = dict(expr='sum:c'),
+                    cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
+
+                    norm_bf                 = dict(expr='eff*effunc_uncorr*global_norm'),
+                    prediction_scale        = dict(expr='conversion_factor*norm_bf*nprotons_nominal'),
+                    ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum \n {detector}'),
+
+
+                    lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight', 
+                                                   label='Weighted LSNL curve {lsnl_component}'),
+                    lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted', 
+                                                   label='Sum of LSNL curves'),
+                    evis_after_escale       = dict(expr='escale*evis_edges',
+                                                   label='Evis edges after escale, {detector}'),
+                    evis_nonlinear_correlated = dict(expr='evis_after_escale*lsnl_correlated',
+                                                     label='Edges after LSNL, {detector}'),
+                    evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
+
+                    oscprob_weighted        = dict(expr='oscprob*pmns'),
+                    oscprob_full            = dict(expr='sum:c|oscprob_weighted',
+                                                   label='anue survival probability\n {reactor}@{detector}'),
+                    #  oscillation_probability = dict(expr='sum:d|oscprob_full',
+                                                   #  label='anue survival probability\n {reactor}@{detector}'),
+
+                    anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
+                    anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\n weight: {weight_label}'),
+
+                    countrate_rd            = dict(expr='anue_produced_total*jacobian*oscprob_full*xsec_weighted',
+                                                   label='Countrate {reactor}@{detector}'),
+                    countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
+                    countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\n weight: {weight_label}'),
+
+                    observation_fine        = dict(expr='bkg+ibd', label='Observed spectrum \n {detector}'),
+
+                    #  iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
+                    #  reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
+                    #  reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
+                    #  ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
+                    #  ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
+                    #  ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
+
+                    # Accidentals
+                    acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n (best fit)}'),
+                    bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n (w: {weight_label})'),
+
+                    # Li/He
+                    bkg_spectrum_li_w = dict(expr='bkg_spectrum_li*frac_li',                       label='9Li spectrum\n (frac)'),
+                    bkg_spectrum_he_w = dict(expr='bkg_spectrum_he*frac_he',                       label='8He spectrum\n (frac)'),
+                    bkg_spectrum_lihe = dict(expr='bkg_spectrum_he_w+bkg_spectrum_li_w',           label='8He/9Li spectrum\n (norm)'),
+                    lihe_num_bf       = dict(expr='bkg_rate_lihe*days_in_second*efflivetime'),
+                    bkg_lihe          = dict(expr='bkg_spectrum_lihe*lihe_num_bf',                 label='8He/9Li {detector}\n (w: {weight_label})'),
+
+                    # Fast neutrons
+                    fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
+                    bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
+
+                    # AmC
+                    amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
+                    bkg_amc           = dict(expr='bkg_spectrum_amc*amc_num_bf',                   label='AmC {detector}\n (w: {weight_label})'),
+
+                    # AlphaN
+                    alphan_num_bf     = dict(expr='bkg_rate_alphan*days_in_second*efflivetime'),
+                    bkg_alphan        = dict(expr='bkg_spectrum_alphan*alphan_num_bf',             label='C(alpha,n) {detector}\n (w: {weight_label})'),
+
+                    # Total background
+                    bkg               = dict(expr='bkg_acc+bkg_alphan+bkg_amc+bkg_fastn+bkg_lihe', label='Background spectrum\n {detector}'),
+
+                    # dybOscar mode
+                    eres_cw           = dict(expr='eres*pmns'),
+                    )
+            }
