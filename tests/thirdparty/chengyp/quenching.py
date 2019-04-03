@@ -129,7 +129,7 @@ def main(args):
     # Relative positron model
     #
     positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
-    positron_model_relative_full = C.ViewRear(positron_model_relative, epos_firstbin, epos_edges_input.size, labels='Positron Energy nonlinearity')
+    positron_model_relative_full = C.ViewRear(positron_model_relative.single(), epos_firstbin, epos_edges_input.size, labels='Positron Energy nonlinearity')
 
 
     #
