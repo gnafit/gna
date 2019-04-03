@@ -535,7 +535,8 @@ class exp(baseexp):
                                                     label='Countrate from {reactor} in {detector}'),
 
                     cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
-                                                   label='anu count rate\n {isotope}@{reactor}->{detector} ({component})'),
+                                                   label='anue count rate\n {isotope}@{reactor} to {detector} ({component})'),
+                                                   #  label='anu count rate\n {isotope}@{reactor}->{detector} ({component})'),
                     # cspec_diff_reac         = dict(expr='sum:i'),
                     cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
                     # cspec_diff_det          = dict(expr='sum:r'),
@@ -565,9 +566,12 @@ class exp(baseexp):
                     observation_fine        = dict(expr='bkg+ibd', label='Observed spectrum\n {detector}'),
 
                     iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
-                    reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
-                    reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
-                    ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
+                    reac_spectrum           = dict(expr='sum:i|iso_spectrum_w',
+                                                   label='Sum of isotope spectra from {reactor} in {detector}\n ({component})'),
+                    reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum',
+                                                   label='Reactor spectrum from {reactor} in {detector} weighted by distance\n ({component})'),
+                    ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w',
+                                                   label='Reactor spectrum in {detector} ({component})'),
                     ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
                     ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
 
