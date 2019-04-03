@@ -2,7 +2,10 @@
 #include "TypeClasses.hh"
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start, size_t len) : m_start(start), m_len(len) {
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start, size_t len) :
+m_start(start),
+m_len(len)
+{
     init();
 }
 
@@ -14,25 +17,57 @@ ViewRearT(start, len)
 }
 
 template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start, size_t len, FloatType fill_value) :
+m_start(start),
+m_len(len),
+m_fill_value(fill_value)
+{
+    init();
+}
+
+template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(typename GNAObjectT<FloatType,FloatType>::SingleOutput* output, size_t start, size_t len, FloatType fill_value) :
+ViewRearT(start, len, fill_value)
+{
+    output->single() >> this->transformations.back().inputs.front();
+}
+
+template<typename FloatType>
 void GNA::GNAObjectTemplates::ViewRearT<FloatType>::init(){
-    this->transformation_("view")
-         .input("original")
-         .input("rear")
-         .output("result")
-         .types(new TypeClasses::CheckNdimT<FloatType>(1))
-         .types(&ViewRearType::types)
-         .func([](FunctionArgs& fargs){
-                   static bool subsequent=false;
-                   if(subsequent){
-                       fargs.args[1];
-                   }
-                   else {
-                       auto &args = fargs.args;
-                       fargs.rets[0].x = args[0].x;
-                       args[1];
-                       subsequent=true;
-                   }
-               });
+    auto trans = this->transformation_("view")
+                 .input("original")
+                 .input("rear")
+                 .output("result")
+                 .types(new TypeClasses::CheckNdimT<FloatType>(1))
+                 .types(&ViewRearType::types);
+    if(m_fill_value){
+        trans.func([](ViewRearType* obj, FunctionArgs& fargs){
+                    fargs.args[1];
+                });
+    }
+    else{
+        trans.func([](ViewRearType* obj, FunctionArgs& fargs){
+                    if(obj->m_fill_value){
+                        fargs.args[1];
+                    }
+                    else {
+                        auto& args=fargs.args;
+                        auto& ret=fargs.rets[0].x;
+                        auto& arg0=args[0].x;
+                        size_t head = obj->m_start;
+                        if(head){
+                            ret.head(head) = arg0.head(head);
+                        }
+                        size_t tail=ret.size()-obj->m_start-obj->m_len;
+                        if(tail){
+                            ret.tail(tail) = arg0.tail(tail);
+                        }
+                        args[1];
+                        obj->m_fill_value=-1;
+                    }
+                });
+
+    }
 
     //TODO: Add GPU option for preallocated buffer
 }
@@ -42,7 +77,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
     auto& args = fargs.args;
 
     /// Store the output datatype and check it has enough elements
-    DataType dt_main = args[0];
+    const DataType& dt_main = args[0];
     if(dt_main.kind==DataKind::Undefined){
         return;
     }
@@ -55,23 +90,22 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
     }
 
     /// Allocate data if required
-    if( !m_data || m_data->type.requiresReallocation(dt_main) ){
-        m_data.reset(new Data<FloatType>(dt_main));
+    auto& dt_ret = (fargs.rets[0] = dt_main);
+    if( !m_data || m_data->type.requiresReallocation(dt_ret) ){
+        m_data.reset(new Data<FloatType>(dt_ret));
+        if(m_fill_value){
+            m_data->x = m_fill_value.value();
+        }
     }
     FloatType* buffer_main=m_data->buffer;
-
-    auto& ret = (fargs.rets[0] = dt_main);
-    ret.points().preallocated(buffer_main);
-
-    m_datatype_sub=ret;
-    m_datatype_sub.buffer=ret.buffer;
+    dt_ret.buffer=static_cast<void*>(buffer_main);
 
     /// Derive the proper datatype for inputs
-    DataType dt_sub=dt_main;
+    DataType dt_sub=dt_ret;
     FloatType* buffer_sub=buffer_main+m_start;
-    switch(dt_main.kind){
+    switch(dt_ret.kind){
         case DataKind::Hist:
-            dt_sub.hist().edges(m_len+1, dt_main.edges.data()+m_start).preallocated(buffer_sub);
+            dt_sub.hist().edges(m_len+1, dt_ret.edges.data()+m_start).preallocated(buffer_sub);
             break;
         case DataKind::Points:
             dt_sub.points().shape(m_len).preallocated(buffer_sub);
@@ -89,7 +123,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
     /// Check that input datatype is consistent
     if(dtypeInconsistent(dt_input, dt_sub)){
         fprintf(stderr, "Main datatype:");
-        dt_main.dump();
+        dt_ret.dump();
 
         fprintf(stderr, "Sub datatype: ");
         dt_sub.dump();

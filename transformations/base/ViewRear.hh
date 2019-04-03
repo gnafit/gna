@@ -2,18 +2,10 @@
 
 #include <vector>
 #include "GNAObject.hh"
+#include <boost/optional.hpp>
 
 namespace GNA{
     namespace GNAObjectTemplates{
-        /**
-         * @brief Transformation object holding a static 1- or 2-dimensional array.
-         *
-         * Outputs:
-         *   - `points.points` - 1- or 2- dimensional array with fixed data.
-         *
-         * @author Dmitry Taychenachev
-         * @date 2015
-         */
         template<typename FloatType>
         class ViewRearT: public GNAObjectT<FloatType,FloatType>,
                          public TransformationBind<ViewRearT<FloatType>,FloatType,FloatType> {
@@ -28,10 +20,10 @@ namespace GNA{
 
             ViewRearT(size_t start, size_t len);
             ViewRearT(SingleOutput* output, size_t start, size_t len);
+            ViewRearT(size_t start, size_t len, FloatType fill_value);
+            ViewRearT(SingleOutput* output, size_t start, size_t len, FloatType fill_value);
 
             void allowThreshold() { m_threshold_forbidden=false; }
-
-            const DataType& getDataType() { return m_datatype_sub; }
         protected:
             void types(TypesFunctionArgs& fargs);
             void init();
@@ -41,7 +33,8 @@ namespace GNA{
             size_t m_start=0lu;
             size_t m_len;
 
-            DataType m_datatype_sub;
+            boost::optional<FloatType> m_fill_value;
+
             DataPtr m_data;
         };
     }

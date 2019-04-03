@@ -129,8 +129,10 @@ def main(args):
     # Relative positron model
     #
     positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
-    positron_model_relative_full = C.ViewRear(positron_model_relative.single(), epos_firstbin, epos_edges_input.size, labels='Positron Energy nonlinearity')
-
+    import IPython; IPython.embed()
+    positron_model_relative_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, 0.0, labels='Positron Energy nonlinearity')
+    positron_model_relative >> positron_model_relative_full.view.rear
+    import IPython; IPython.embed()
 
     #
     # Plots and tests
@@ -290,8 +292,8 @@ def main(args):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
-    positron_model_relative.plot_vs(epos_edges, label='nonlinearity')
-    positron_model_relative_full.plot_vs(epos_edges_full, '--', label='nonlinearity (full range)')
+    positron_model_relative.single().plot_vs(epos_edges, label='nonlinearity')
+    positron_model_relative_full.single().plot_vs(epos_edges_full.single(), '--', label='nonlinearity (full range)')
 
     savefig(args.output, suffix='_total_relative')
 
