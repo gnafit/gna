@@ -29,12 +29,16 @@ namespace GNA{
             ViewRearT(size_t start, size_t len);
             ViewRearT(SingleOutput* output, size_t start, size_t len);
 
+            void allowThreshold() { m_threshold_forbidden=false; }
+
             const DataType& getDataType() { return m_datatype_sub; }
         protected:
             void types(TypesFunctionArgs& fargs);
             void init();
+            bool dtypeInconsistent(const DataType& input, const DataType& required);
 
-            size_t m_start;
+            size_t m_threshold_forbidden=true;
+            size_t m_start=0lu;
             size_t m_len;
 
             DataType m_datatype_sub;

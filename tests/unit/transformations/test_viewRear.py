@@ -92,6 +92,42 @@ def test_viewrear_02():
         assert (res==expect).all()
         assert (edges==expect_edges).all()
 
+# @floatcopy(globals()) # uncomment after porting the histogram
+def test_viewrear_03():
+    edges = N.arange(13, dtype='d')
+    arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
+
+    ranges = [ (0, 3), (0, 12), (1, 3), (6, 6), (6, 1)]
+    for rng in ranges:
+        hist_main = C.Histogram(edges, arr)
+        start, len = rng
+
+        view = C.ViewRear(hist_main, start, len);
+        view.allowThreshold()
+
+        pedges = edges[start:start+len+1].copy()
+        print('Original edges', pedges)
+        pedges[0]  = 0.5*(pedges[:2].sum())
+        pedges[-1] = 0.5*(pedges[-2:].sum())
+        print('Modified edges', pedges)
+        arr_sub = N.arange(start, start+len, dtype=arr.dtype)
+        hist_sub=C.Histogram(pedges, arr_sub, True)
+        hist_sub >> view.view.rear
+
+        res = view.view.result.data()
+        expect_edges = N.array(view.view.result.datatype().edges)
+        expect = arr.copy()
+        expect[start:start+len]=arr_sub
+        print('Range', rng)
+        print('Result', res)
+        print('Expect', expect)
+        print('Result (edges)', edges)
+        print('Expect (edges)', expect_edges)
+        print()
+        assert (res==expect).all()
+        assert (edges==expect_edges).all()
+
+
 if __name__ == "__main__":
     run_unittests(globals())
 

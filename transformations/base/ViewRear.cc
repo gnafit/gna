@@ -81,12 +81,13 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
             break;
     }
 
-    if(args[1].kind==DataKind::Undefined){
+    auto& dt_input = args[1];
+    if(dt_input.kind==DataKind::Undefined){
         return;
     }
 
     /// Check that input datatype is consistent
-    if( args[1]!=dt_sub ){
+    if(dtypeInconsistent(dt_input, dt_sub)){
         fprintf(stderr, "Main datatype:");
         dt_main.dump();
 
@@ -94,15 +95,15 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
         dt_sub.dump();
 
         fprintf(stderr, "Input datatype: ");
-        args[1].dump();
+        dt_input.dump();
 
-        throw args.error(args[1], fmt::format("Transformation {0}: input {1} type is inconsistent with expectations", args.name(), 1));
+        throw args.error(dt_input, fmt::format("Transformation {0}: input {1} type is inconsistent with expectations", args.name(), 1));
     }
 
     /// Check that input data is not preallocatad
     auto& data_in=const_cast<Data<FloatType>&>(args.data(1));
     if(!data_in.allocated && data_in.buffer!=buffer_sub){
-        throw args.error(args[1], fmt::format("Transformation {0}: input {1} may not be preallocated", args.name(), 1));
+        throw args.error(dt_input, fmt::format("Transformation {0}: input {1} may not be preallocated", args.name(), 1));
     }
 
     /// Reallocate input data
@@ -116,6 +117,51 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
         data_in.allocated.reset(nullptr);
         data_in.init(buffer_sub);
     }
+}
+
+template<typename FloatType>
+bool GNA::GNAObjectTemplates::ViewRearT<FloatType>::dtypeInconsistent(const DataType& input, const DataType& required){
+    // Check if data types are same (strict)
+    if(input==required){
+        return false;
+    }else if(m_threshold_forbidden){
+        return true;
+    }
+
+    // If threshold is enabled check if
+    // - type is a histogram
+    // - types are consisttent
+    // - shapes are consistent
+    if(input.kind!=DataKind::Hist || input.kind!=required.kind || input.shape!=required.shape){
+        return true;
+    }
+
+    // Get edges definition
+    auto& edges_in = input.edges;
+    auto& edges_req= required.edges;
+
+    // Check all, but first and last edges
+    if( !equal( edges_in.begin()+1, edges_in.end()-1, edges_req.begin()+1 ) ){
+        return true;
+    }
+
+    // Check first and last edges
+    double check=edges_in[0];
+    double left =edges_req[0];
+    double right=edges_req[1];
+    if(check<left || check>=right){
+        return true;
+    }
+
+    size_t i=edges_in.size();
+    check=edges_in[i-1];
+    left =edges_req[i-2];
+    right=edges_req[i-1];
+    if(check<=left || check>right){
+        return true;
+    }
+
+    return false;
 }
 
 template class GNA::GNAObjectTemplates::ViewRearT<double>;

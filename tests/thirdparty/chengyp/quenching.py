@@ -7,7 +7,7 @@ import numpy as N
 from gna import constructors as C
 from gna.bindings import common
 from matplotlib import pyplot as P
-from mpl_tools.helpers import savefig
+from mpl_tools.helpers import savefig, add_to_labeled_items
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from gna.graphviz import savegraph
 from gna.env import env
@@ -23,7 +23,7 @@ def load_electron_distribution(filename, objname):
     edges = get_bin_edges_axis(hist.GetXaxis())
     centers = (edges[:-1] + edges[1:])*0.5
 
-    return edges, centers, C.Points(centers, labels='gamma-e centers'), buf, C.Points(buf, labels='gamma-e weights')
+    return edges, centers, C.Points(centers, labels='Annihilation gamma E centers'), buf, C.Points(buf, labels='Annihilation gamma weights')
 
 def main(args):
     global savefig
@@ -47,6 +47,8 @@ def main(args):
     emass = ns.defparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
     doubleme = 2*emass.value()
     ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
+    energy_scale_normalization_point = ns.defparameter('Co60gamma', central=2.505, fixed=True, label='60Co total gamma energy, MeV')
+    energy_scale_normalization_point.transformations.front().setLabel('Energy scale normalization point')
 
     ns.printparameters(labels=True)
 
@@ -63,7 +65,7 @@ def main(args):
     epos_edges = integrator_epos.points.xedges
 
     birks_e_input, birks_quenching_input = args.stoppingpower['e'], args.stoppingpower['dedx']
-    birks_e_p, birks_quenching_p = C.Points(birks_e_input, labels='Energy'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
+    birks_e_p, birks_quenching_p = C.Points(birks_e_input, labels='Te (input)'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
 
     with nsb:
         birks_integrand_raw = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
@@ -74,13 +76,13 @@ def main(args):
     ekin_edges_p = C.SumBroadcast([epos_edges, doubleemass_point.points.points], labels='Evis to Te')
     ekin_edges_h = C.PointsToHist(ekin_edges_p, labels='Te bin edges')
 
-    integrator_ekin = C.IntegratorGL(ekin_edges_h.adapter.hist, 2, labels=(('Te sampler (GL)', 'Te integrator (GL)')))
+    integrator_ekin = C.IntegratorGL(ekin_edges_h.adapter.hist, 2, labels=(('Te sampler (GL)', "Birk's integrator (GL)")))
 
-    birks_integrand_interpolator = C.InterpLinear(birks_e_p, integrator_ekin.points.x, labels=('InSegment', 'Interpolator'))
+    birks_integrand_interpolator = C.InterpLinear(birks_e_p, integrator_ekin.points.x, labels=("Birk's InSegment", "Birk's interpolator"))
     birks_integrand_interpolated = birks_integrand_interpolator.add_input(birks_integrand_raw.polyratio.ratio)
     birks_integral = integrator_ekin.add_input(birks_integrand_interpolated)
 
-    birks_accumulator = C.PartialSum(0., labels="Evis (Birks)\n[MeV]")
+    birks_accumulator = C.PartialSum(0., labels="Birk's Evis\n[MeV]")
     birks_integral >> birks_accumulator.reduction
 
     #
@@ -102,14 +104,14 @@ def main(args):
     egamma_edges, egamma_x, egamma_birks_e_p, egamma_h, egamma_hp = load_electron_distribution(*args.annihilation_electrons)
     egamma_offset = 0
     lastpoint = N.where(ekin_edges_p.data()>egamma_edges[-1])[0][0]+1
-    ekin_edges_lowe = C.View(ekin_edges_p, egamma_offset, lastpoint-egamma_offset, labels='Low E view')
+    ekin_edges_lowe = C.View(ekin_edges_p, egamma_offset, lastpoint-egamma_offset, labels='Te Low E view')
     electron_model_lowe = C.View(electron_model.single(), egamma_offset, lastpoint-egamma_offset, labels='Npe: electron responce\n(low E view)')
 
-    electron_model_lowe_interpolator = C.InterpLinear(ekin_edges_lowe.view.view, egamma_birks_e_p, labels=('InSegment', 'e-gamma interpolator'))
+    electron_model_lowe_interpolator = C.InterpLinear(ekin_edges_lowe.view.view, egamma_birks_e_p, labels=('Annihilation E InSegment', 'Annihilation gamma interpolator'))
     electron_model_lowe_interpolated = electron_model_lowe_interpolator.add_input(electron_model_lowe.view.view)
 
     with ns:
-        npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation E')
+        npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation Evis [MeV]')
         electron_model_lowe_interpolated >> npe_positron_offset.normconvolution.fcn
         egamma_hp >> npe_positron_offset.normconvolution.weights
 
@@ -119,11 +121,17 @@ def main(args):
     positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
                                     labels='Npe: positron responce')
 
-    normv=2.505
-    fixed_point = C.Points([normv], labels='{Energy scale normalization|2.505 MeV (60Co)}')
-    positron_model_relative = C.FixedPointScale(epos_edges, fixed_point.points.points, labels=('Fixed point index', 'Positron energy nonlinearity'))
-    positron_model_relative_out = positron_model_relative.add_input(positron_model.sum.outputs[0])
+    positron_model_scaled = C.FixedPointScale(epos_edges, energy_scale_normalization_point, labels=('Fixed point index', 'Positron energy model\nEvis, MeV'))
+    positron_model_scaled = positron_model_scaled.add_input(positron_model.sum.outputs[0])
 
+    #
+    # Relative positron model
+    #
+    positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
+
+    #
+    # Plots and tests
+    #
     if args.output and args.output.endswith('.pdf'):
         pdfpages = PdfPages(args.output)
         savefig_old=savefig
@@ -156,7 +164,7 @@ def main(args):
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( '' )
-    ax.set_title( 'Integrand' )
+    ax.set_title( "Birk's integrand" )
 
     birks_integrand_raw.polyratio.ratio.plot_vs(birks_e_p.points.points, '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
     # birks_integrand_interpolated.plot_vs(integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
@@ -166,7 +174,7 @@ def main(args):
 
     savefig()
 
-    ax.set_xlim(left=0.01)
+    ax.set_xlim(left=0.0001)
     ax.set_ylim(bottom=0.5)
     # ax.set_yscale('log')
     ax.set_xscale('log')
@@ -178,13 +186,13 @@ def main(args):
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( '' )
-    ax.set_title( 'Integrated' )
+    ax.set_title( "Birk's integral (bin by bin)" )
 
     birks_integral.plot_hist()
 
     savefig()
 
-    ax.set_xlim(left=0.01)
+    ax.set_xlim(left=0.0001)
     ax.set_ylim(bottom=0.0)
     # ax.set_yscale('log')
     ax.set_xscale('log')
@@ -200,8 +208,13 @@ def main(args):
     ax.set_title( 'Electron energy (Birks)' )
     #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     birks_accumulator.reduction.plot_vs(ekin_edges_p)
+    ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5)
 
     savefig(args.output, suffix='_birks_evis')
+
+    ax.set_xlim(0.0, 2.0)
+    ax.set_ylim(0.0, 2.0)
+    savefig()
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -213,6 +226,10 @@ def main(args):
     cherenkov.cherenkov.ch_npe.plot_vs(ekin_edges_p)
 
     savefig(args.output, suffix='_cherenkov_npe')
+
+    ax.set_xlim(0.0, 2.0)
+    ax.set_ylim(0.0, 200.0)
+    savefig()
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -232,8 +249,11 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Electron model (low energy view)' )
-    electron_model_lowe.single().plot_vs(ekin_edges_lowe.view.view, 'o', label='data')
-    electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='interpolation')
+    annihilation_gamma_evis = npe_positron_offset.normconvolution.result.data()[0]
+    label = 'Annihilation Evis=%.2f MeV'%annihilation_gamma_evis
+    electron_model_lowe.single().plot_vs(ekin_edges_lowe.view.view, 'o', markerfacecolor='none', label='data')
+    electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='interpolation\n'+label)
+
     ax.legend(loc='upper left')
 
     savefig(args.output, suffix='_electron_lowe')
@@ -253,10 +273,10 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
-    ax.set_ylabel( '???' )
-    ax.set_title( 'Positron energy nonlineairty' )
-    positron_model_relative_out.plot_vs(epos_edges)
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Evis, MeV' )
+    ax.set_title( 'Positron energy model' )
+    positron_model_scaled.plot_vs(epos_edges)
 
     savefig(args.output, suffix='_total')
 
@@ -264,10 +284,10 @@ def main(args):
     ax = P.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel( 'E, MeV' )
-    ax.set_ylabel( 'Evis/Etrue' )
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
-    epos_edges.vs_plot( positron_model_relative_out.data()/epos_edges.data() )
+    epos_edges.vs_plot( positron_model_relative.data() )
 
     savefig(args.output, suffix='_total_relative')
 
@@ -277,6 +297,9 @@ def main(args):
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
+
+    savegraph(epos_edges, args.graph, namespace=ns)
+
     if args.show:
         P.show()
 
