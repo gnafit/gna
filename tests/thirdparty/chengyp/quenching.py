@@ -124,9 +124,9 @@ def main(args):
     positron_model = C.SumBroadcast([electron_model.sum.sum, npe_positron_offset.normconvolution.result],
                                     labels='Npe: positron responce')
 
-    positron_model_scaled = C.FixedPointScale(epos_edges, energy_scale_normalization_point, labels=('Fixed point index', 'Positron energy model\nEvis, MeV'))
+    positron_model_scaled = C.FixedPointScale(epos_edges, energy_scale_normalization_point, labels=('Fixed point index', 'Positron energy model|Evis, MeV'))
     positron_model_scaled = positron_model_scaled.add_input(positron_model.sum.outputs[0])
-    positron_model_scaled_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, -1.0, labels='Positron Energy nonlinearity\nfull range')
+    positron_model_scaled_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, -1.0, labels='Positron Energy nonlinearity|full range')
     positron_model_scaled >> positron_model_scaled_full.view.rear
 
     #
@@ -367,7 +367,24 @@ def main(args):
 
     ax.legend(loc='upper right')
 
-    savefig(args.output, suffix='_refsmear1')
+    savefig(args.output, suffix='_matrix_projections')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( '' )
+    ax.set_title( 'Mapping' )
+
+    positron_model_scaled_data = positron_model_scaled.single().data()
+    for e1, e2 in zip(epos_edges_input, positron_model_scaled_data):
+        ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=0.5 )
+    ax.axvline(12.0, linestyle='--')
+
+    # ax.legend(loc='upper right')
+
+    savefig(args.output, suffix='_mapping')
 
     fig = P.figure()
     ax = P.subplot( 111 )
