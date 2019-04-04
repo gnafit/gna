@@ -261,7 +261,7 @@ class TreeStyle(object):
         return ret
 
     def node_attrs(self, entry):
-        ret=dict(layer='transformation')
+        ret=dict(shape='Mrecord', layer='transformation')
         features=self.get_features(entry)
 
         styles=()
@@ -292,7 +292,6 @@ class TreeStyle(object):
             marks+='[%s]'%('x'.join(dim)),
             marks='{%s}'%('|'.join(marks)),
         if marks:
-            ret['shape']='Mrecord'
             marks+=label,
             marks='{%s}'%('|'.join(marks)),
         else:

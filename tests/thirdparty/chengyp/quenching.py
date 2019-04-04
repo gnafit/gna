@@ -7,7 +7,7 @@ import numpy as N
 from gna import constructors as C
 from gna.bindings import common
 from matplotlib import pyplot as P
-from mpl_tools.helpers import savefig, add_to_labeled_items
+from mpl_tools.helpers import savefig, add_to_labeled_items, plot_hist
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from gna.graphviz import savegraph
 from gna.env import env
@@ -59,11 +59,13 @@ def main(args):
     epos_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
     epos_firstbin = N.where(epos_edges_full_input>doubleme)[0][0]-1
     epos_edges_input=epos_edges_full_input[epos_firstbin:]
-    epos_edges_input[0]=doubleme
+    epos_edges_threshold_input = epos_edges_input.copy()
+    epos_edges_threshold_input[0]=doubleme
 
-    integrator_epos = C.IntegratorGL(epos_edges_input, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
-    epos_edges = integrator_epos.points.xedges
-    epos_edges_full = C.Points(epos_edges_full_input)
+    integrator_epos = C.IntegratorGL(epos_edges_threshold_input, 3, labels=('Evis sampler (GL)', 'Evis integrator (GL)'))
+    epos_edges_threshold = integrator_epos.points.xedges
+    epos_edges = C.Points(epos_edges_input, labels='Epos edges (no threshold)')
+    epos_edges_full = C.Points(epos_edges_full_input, labels='Epos edges (full range)')
 
     birks_e_input, birks_quenching_input = args.stoppingpower['e'], args.stoppingpower['dedx']
     birks_e_p, birks_quenching_p = C.Points(birks_e_input, labels='Te (input)'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
@@ -74,7 +76,7 @@ def main(args):
 
     doubleemass_point = C.Points([-doubleme], labels='2me offset')
 
-    ekin_edges_p = C.SumBroadcast([epos_edges, doubleemass_point.points.points], labels='Evis to Te')
+    ekin_edges_p = C.SumBroadcast([epos_edges_threshold, doubleemass_point.points.points], labels='Evis to Te')
     ekin_edges_h = C.PointsToHist(ekin_edges_p, labels='Te bin edges')
 
     integrator_ekin = C.IntegratorGL(ekin_edges_h.adapter.hist, 2, labels=(('Te sampler (GL)', "Birk's integrator (GL)")))
@@ -83,7 +85,7 @@ def main(args):
     birks_integrand_interpolated = birks_integrand_interpolator.add_input(birks_integrand_raw.polyratio.ratio)
     birks_integral = integrator_ekin.add_input(birks_integrand_interpolated)
 
-    birks_accumulator = C.PartialSum(0., labels="Birk's Evis\n[MeV]")
+    birks_accumulator = C.PartialSum(0., labels="Birk's Evis|[MeV]")
     birks_integral >> birks_accumulator.reduction
 
     #
@@ -106,7 +108,7 @@ def main(args):
     egamma_offset = 0
     lastpoint = N.where(ekin_edges_p.data()>egamma_edges[-1])[0][0]+1
     ekin_edges_lowe = C.View(ekin_edges_p, egamma_offset, lastpoint-egamma_offset, labels='Te Low E view')
-    electron_model_lowe = C.View(electron_model.single(), egamma_offset, lastpoint-egamma_offset, labels='Npe: electron responce\n(low E view)')
+    electron_model_lowe = C.View(electron_model.single(), egamma_offset, lastpoint-egamma_offset, labels='{Npe: electron responce|(low E view)}')
 
     electron_model_lowe_interpolator = C.InterpLinear(ekin_edges_lowe.view.view, egamma_birks_e_p, labels=('Annihilation E InSegment', 'Annihilation gamma interpolator'))
     electron_model_lowe_interpolated = electron_model_lowe_interpolator.add_input(electron_model_lowe.view.view)
@@ -124,13 +126,30 @@ def main(args):
 
     positron_model_scaled = C.FixedPointScale(epos_edges, energy_scale_normalization_point, labels=('Fixed point index', 'Positron energy model\nEvis, MeV'))
     positron_model_scaled = positron_model_scaled.add_input(positron_model.sum.outputs[0])
+    positron_model_scaled_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, -1.0, labels='Positron Energy nonlinearity\nfull range')
+    positron_model_scaled >> positron_model_scaled_full.view.rear
 
     #
     # Relative positron model
     #
     positron_model_relative = C.Ratio(positron_model_scaled, epos_edges, labels='Positron energy nonlinearity')
-    positron_model_relative_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, 0.0, labels='Positron Energy nonlinearity')
+    positron_model_relative_full = C.ViewRear(epos_edges_full, epos_firstbin, epos_edges_input.size, 0.0, labels='Positron Energy nonlinearity\nfull range')
     positron_model_relative >> positron_model_relative_full.view.rear
+
+    #
+    # HistNonLinearity transformation
+    #
+    reference_histogram1_input = N.zeros(epos_edges_full_input.size-1)
+    reference_histogram2_input = reference_histogram1_input.copy()
+    reference_histogram1_input+=1.0
+    reference_histogram2_input[[10, 20, 50, 100, 200, 300, 400]]=1.0
+    reference_histogram1 = C.Histogram(epos_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
+    reference_histogram2 = C.Histogram(epos_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
+    pm_histsmear = C.HistNonlinearity(True, labels=('Nonlinearity matrix', 'Nonlinearity smearing'))
+    pm_histsmear.set_range(-0.5, 20.0)
+    pm_histsmear.set(reference_histogram1, positron_model_scaled_full.single())
+    reference_smeared1 = pm_histsmear.add_input(reference_histogram1)
+    reference_smeared2 = pm_histsmear.add_input(reference_histogram2)
 
     #
     # Plots and tests
@@ -255,7 +274,7 @@ def main(args):
     annihilation_gamma_evis = npe_positron_offset.normconvolution.result.data()[0]
     label = 'Annihilation contribution=%.2f Npe'%annihilation_gamma_evis
     electron_model_lowe.single().plot_vs(ekin_edges_lowe.view.view, 'o', markerfacecolor='none', label='data')
-    electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='interpolation\n'+label)
+    electron_model_lowe_interpolated.single().plot_vs(egamma_birks_e_p.single(), '-', label='{interpolation|%s}'%label)
 
     ax.legend(loc='upper left')
 
@@ -268,7 +287,7 @@ def main(args):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Total Npe' )
-    positron_model.sum.outputs[0].plot_vs(epos_edges)
+    positron_model.sum.outputs[0].plot_vs(epos_edges.single())
 
     savefig(args.output, suffix='_total_npe')
 
@@ -279,7 +298,9 @@ def main(args):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Positron energy model' )
-    positron_model_scaled.plot_vs(epos_edges)
+    positron_model_scaled.plot_vs(epos_edges.single(), label='definition range')
+    positron_model_scaled_full.single().plot_vs(epos_edges_full.single(), '--', label='full range')
+    ax.legend(loc='upper left')
 
     savefig(args.output, suffix='_total')
 
@@ -290,8 +311,10 @@ def main(args):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
-    positron_model_relative.single().plot_vs(epos_edges, label='nonlinearity')
-    positron_model_relative_full.single().plot_vs(epos_edges_full.single(), '--', label='nonlinearity (full range)')
+    positron_model_relative.single().plot_vs(epos_edges.single(), label='definition range')
+    positron_model_relative_full.single().plot_vs(epos_edges_full.single(), '--', label='full range')
+
+    ax.legend(loc='lower right')
 
     savefig(args.output, suffix='_total_relative')
 
@@ -299,10 +322,72 @@ def main(args):
     ax.set_ylim(0.5, 1.7)
     savefig(args.output, suffix='_total_relative1')
 
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel('Etrue, MeV')
+    ax.set_ylabel('Edep, MeV')
+    ax.set_title( 'Smearing matrix' )
+
+    pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[0.0, epos_edges_full_input.max(), epos_edges_full_input.max(), 0.0], colorbar=True)
+    ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5, linewidth=1.0)
+
+    savefig(args.output, suffix='_matrix')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( '' )
+    ax.set_title( 'Reference histogram 1' )
+
+    reference_histogram1.single().plot_hist(linewidth=0.5, alpha=1.0, label='original')
+    reference_smeared1.single().plot_hist(  linewidth=0.5, alpha=1.0, label='smeared')
+
+    ax.legend(loc='upper right')
+
+    savefig(args.output, suffix='_refsmear1')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( '' )
+    ax.set_title( 'Matrix projections' )
+
+    mat = pm_histsmear.matrix.FakeMatrix.data()
+    proj0 = mat.sum(axis=0)
+    proj1 = mat.sum(axis=1)
+
+    plot_hist(epos_edges_full_input, proj0, alpha=0.7, linewidth=1.0, label='Projection 0: Edep view')
+    plot_hist(epos_edges_full_input, proj1, alpha=0.7, linewidth=1.0, label='Projection 1: Evis')
+
+    ax.legend(loc='upper right')
+
+    savefig(args.output, suffix='_refsmear1')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( '' )
+    ax.set_title( 'Reference histogram 2' )
+
+    reference_histogram2.single().plot_hist(linewidth=0.5, alpha=1.0, label='original')
+    reference_smeared2.single().plot_hist(  linewidth=0.5, alpha=1.0, label='smeared')
+
+    ax.legend(loc='upper right')
+
+    savefig(args.output, suffix='_refsmear2')
+
     if pdfpages:
         pdfpages.__exit__(None,None,None)
 
-    savegraph(epos_edges, args.graph, namespace=ns)
+    savegraph(epos_edges.single(), args.graph, namespace=ns)
 
     if args.show:
         P.show()
