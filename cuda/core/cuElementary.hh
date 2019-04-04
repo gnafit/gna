@@ -17,3 +17,12 @@ void identity_gpu(T** in, T** out, unsigned int N, unsigned int M);
 
 template<typename T>
 void dummy_params_ongpu(T** in, T** out, T* pars, unsigned int inSize, unsigned int npars);
+
+void cuexp(float** array, float** ans_array, int n, int m);
+void cuexp(double** array, double** ans_array, int n, int m);
+
+void cupoisson(double** array, double** ans_array, int* n, int amount, int maxn);
+void cupoissonapprox(double** array, double** ans_array, int* n, int amount, int maxn);
+
+void cuselfpower(double** array, double** ans_array, int n, int m, double scale);
+void cuselfpower(float** array, float** ans_array, int n, int m, float scale);
