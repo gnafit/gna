@@ -177,7 +177,7 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
     probsum.input("compCP");
   }
 
-  auto full_formula = transformation_("full_osc_prob")
+  transformation_("full_osc_prob")
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)

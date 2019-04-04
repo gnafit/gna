@@ -57,6 +57,8 @@ class GNAObjectTemplates(object):
 
     def __getattr__(self, name):
         ret = getattr(self.namespace, name)
+        if name.startswith('__'):
+            return ret
         self.patchGNATemplate(ret)
         setattr(self, name, ret)
         return ret
@@ -70,7 +72,7 @@ class GNAObjectTemplates(object):
             cls = template(pp)
             patchGNAclass(cls)
 
-GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
+GNAObjectTemplates=GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
     def itervalues(self):
@@ -112,6 +114,9 @@ def patchSimpleDict(cls):
         else:
             return default
 
+    def __dir__(self):
+        return dir(cls) + self.keys()
+
     cls.itervalues = itervalues
     cls.values = values
     cls.iterkeys = iterkeys
@@ -122,6 +127,7 @@ def patchSimpleDict(cls):
     cls.__iter__ = __iter__
     cls.__getattr__ = __getattr__
     cls.get = get
+    cls.__dir__ = __dir__
 
 def patchDataProvider(cls):
     origdata = cls.data
@@ -245,6 +251,7 @@ def setup(ROOT):
             'TransformationTypes',
             'ParametrizedTypes',
             'TypesFunctions',
+            'TypeClasses',
             'TMath',
             ]
 
@@ -258,11 +265,6 @@ def setup(ROOT):
         if issubclass(cls, GNAObjectBase):
             wrapped = patchGNAclass(cls)
             return wrapped
-        if 'Class' not in cls.__dict__:
-            t = cls.__class__
-            origgetattr = cls.__getattribute__
-            t.__getattribute__ = lambda s, n: patchcls(origgetattr(s, n))
-            return cls
         return cls
 
     t = type(ROOT)
@@ -276,38 +278,51 @@ def setup(ROOT):
     importcommon()
     legacytypes()
 
-def patchROOTClass( object=None, method=None ):
+def patchROOTClass(classes=None, methods=None):
     """Decorator to override ROOT class methods. Usage
     @patchclass
     def CLASSNAME__METHODNAME(self,...)
 
-    @patchclass( CLASSNAME, METHODNAME )
+    @patchclass(CLASSNAME, METHODNAME)
     def function(self,...)
 
-    @patchclass( ROOT.CLASS, METHODNAME )
+    @patchclass(ROOT.CLASS, METHODNAME)
     def function(self,...)
 
     @patchclass( [ROOT.CLASS1, ROOT.CLASS2,...], METHODNAME )
     def function(self,...)
     """
-    cfcn = None
-    if not method:
-        cfcn = object
-        spl = cfcn.__name__.split( '__' )
-        object=spl[0]
-        method = '__'.join( spl[1:] )
+    function=None
 
-    if not type( object ) is list:
-        object = [ object ]
+    # Used as decorator
+    if isinstance(classes, types.FunctionType):
+        function = classes
+        classname, method = function.__name__.split( '__', 1 )
+        setattr(getattr(ROOT, classname), method, function)
+        return
 
-    def converter( fcn ):
-        for o in object:
-            if type(o)==str:
-                o = getattr( ROOT, o )
-            setattr( o, method, fcn )
-        return fcn
+    # Used as function returning decorator
+    if not isinstance(classes, (list,tuple)):
+        classes = (classes,)
 
-    if cfcn:
-        return converter( cfcn )
+    classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
 
-    return converter
+    if methods is not None and not isinstance(methods, (list,tuple)):
+        methods = (methods,)
+
+    def decorator(function):
+        lmethods = methods
+        if lmethods is None:
+            lmethods = function.__name__.split( '__', 1 )[1],
+        for cls in classes:
+            for method in lmethods:
+                setattr(cls, method, function)
+        return function
+
+    return decorator
+
+def patchROOTTemplate(templates=None, methods=None):
+    if not isinstance(templates, tuple):
+        templates = (templates,)
+    classes = tuple(template(precision) for template in templates for precision in provided_precisions)
+    return patchROOTClass(classes, methods)

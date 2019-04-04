@@ -33,8 +33,6 @@ ws = R.WeightedSum( stdvector(weights), stdvector(labels) )
 ws.sum.arr1(points1.points)
 ws.sum.arr2(points2.points)
 
-import IPython; IPython.embed()
-
 print( 'Mode1: a1*w1+a2*w2' )
 print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
 p1.set(2)

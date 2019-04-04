@@ -30,18 +30,18 @@ namespace TransformationTypes
      */
     InputHandleT(const InputHandleT &other): InputHandleT(*other.m_source) { }
 
-    void connect(const OutputHandleT<FloatType> &out) const; ///< Connect the Source to the other transformation's Sink via its OutputHandle
+    void connect(const OutputHandleT<FloatType> &out) const;                            ///< Connect the Source to the other transformation's Sink via its OutputHandle
     void operator<<(const OutputHandleT<FloatType>& out) const { connect(out); }
 
-    const std::string &name() const { return m_source->name; }                 ///< Get Source's name.
-    const std::string &label() const { return m_source->label; }               ///< Get Source's label.
-    void  setLabel(const std::string& label) const { m_source->label=label; }  ///< Set Source's label.
+    const std::string &name() const { return m_source->name; }                          ///< Get Source's name.
+    const std::string &label() const { return m_source->attrs["_label"]; }              ///< Get Source's label.
+    void  setLabel(const std::string& label) const { m_source->attrs["_label"]=label; } ///< Set Source's label.
 
-    const void *rawptr() const { return static_cast<const void*>(m_source); } ///< Return Source's pointer as void pointer.
-    size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }  ///< Return a Source's hash value based on it's pointer address.
+    const void *rawptr() const { return static_cast<const void*>(m_source); }           ///< Return Source's pointer as void pointer.
+    size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }                  ///< Return a Source's hash value based on it's pointer address.
 
-    bool materialized() const { return m_source->materialized(); }            ///< Call Source::materialized(). @copydoc Source::materialized()
-    bool bound() const { return m_source->sink!=nullptr; }                    ///< Return true if the source is bound to the sink.
+    bool materialized() const { return m_source->materialized(); }                      ///< Call Source::materialized(). @copydoc Source::materialized()
+    bool bound() const { return m_source->sink!=nullptr; }                              ///< Return true if the source is bound to the sink.
 
     const OutputHandleT<FloatType> output() const { return OutputHandleT<FloatType>(*const_cast<SinkT<FloatType>*>(m_source->sink)); }
   protected:

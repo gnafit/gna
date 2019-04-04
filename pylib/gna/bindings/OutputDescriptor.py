@@ -1,25 +1,31 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.bindings import patchROOTClass
-from gna.bindings import DataType
+from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
 import types
 
-@patchROOTClass(R.OutputDescriptor, '__str__')
-def OutputDescriptor____str__(self):
-    return '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+classes = [R.OutputDescriptorT(ft,ft) for ft in provided_precisions]
 
-@patchROOTClass
-def OutputDescriptor__print(self):
-    printl(str(self))
+@patchROOTClass(classes, '__str__')
+def OutputDescriptor____str__(self, **kwargs):
+    ret = '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+    data, sl = kwargs.pop('data', False), kwargs.pop('slice', slice(None))
+    if data and self.check() and self.datatype():
+        values = str(self.data()[sl])
+        ret = ret+': '+values+'\n'
+    return ret
 
-@patchROOTClass
+@patchROOTClass(classes, 'print')
+def OutputDescriptor__print(self, **kwargs):
+    printl(OutputDescriptor____str__(self, **kwargs))
+
+@patchROOTClass(classes, 'single')
 def OutputDescriptor__single(self):
     return self
 
-@patchROOTClass(R.OutputDescriptor, '__rshift__')
+@patchROOTClass(classes, '__rshift__')
 def OutputDescriptor______rshift__(output, inputs):
     if isinstance(inputs, R.InputDescriptor):
         inputs.connect(output)
@@ -31,11 +37,11 @@ def OutputDescriptor______rshift__(output, inputs):
     else:
         raise Exception('Failed to connect {} to {}'.format(output.name(), inputs))
 
-@patchROOTClass(R.OutputDescriptor, '__rlshift__')
+@patchROOTClass(classes, '__rlshift__')
 def OutputDescriptor______rlshift__(output, inputs):
     OutputDescriptor______rshift__(output, inputs)
 
-@patchROOTClass(R.OutputDescriptor, '__gt__')
-@patchROOTClass(R.OutputDescriptor, '__lt__')
+@patchROOTClass(classes, '__gt__')
+@patchROOTClass(classes, '__lt__')
 def OutputDescriptor______cmp__(a,b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

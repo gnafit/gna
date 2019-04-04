@@ -15,7 +15,7 @@ using std::fabs;
 /**
  * @brief Constructor.
  */
-InSegment::InSegment() {
+InSegment::InSegment() : GNAObjectBind1N("interp", "y", "interp", 1, 4, 0) {
   transformation_("insegment")                                    /// Define transformation `segments`:
                                                                   ///   - with two inputs:
     .input("points")                                              ///     + `points` - fine x.

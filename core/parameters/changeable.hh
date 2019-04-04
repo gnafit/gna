@@ -7,8 +7,8 @@
 #include <set>
 #include <cstring>
 #include <string>
-#include <vector>
-#include <memory>
+
+#include "arrayview.hh"
 
 class changeable;
 
@@ -36,7 +36,7 @@ enum class TaintStatus {
 };
 
 struct inconstant_header {
-  inconstant_header(const char* aname="", bool autoname=false) : name(aname){
+  inconstant_header(const char* aname="", bool autoname=false, size_t size=1u) : name(aname), size(size) {
     static size_t ih_counter=0;
     autoname = autoname || !name.size();
     if(autoname){
@@ -52,16 +52,18 @@ struct inconstant_header {
   TaintStatus status=TaintStatus::Normal;
   std::function<void()> on_taint;
   const std::type_info *type = nullptr;
+  size_t size=1u;
 };
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname), value(size) {
+  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname, size), value(size) {
+    //printf("make %s of size %zu\n", this->name.c_str(), size);
     type = &typeid(ValueType);
   }
-  std::vector<ValueType> value;
+  arrayview<ValueType> value;
   std::function<ValueType()> func{nullptr};
-  std::function<void(std::vector<ValueType>&)> vfunc{nullptr};
+  std::function<void(arrayview<ValueType>&)> vfunc{nullptr};
 };
 
 #include "parameters_debug.hh"
@@ -115,6 +117,9 @@ public:
   bool frozen() const {
     return m_hdr->status==TaintStatus::Frozen || m_hdr->status==TaintStatus::FrozenTainted;
   }
+  bool passthrough() const {
+    return m_hdr->status==TaintStatus::PassThrough;
+  }
   TaintStatus taintstatus() const {
     return m_hdr->status;
   }
@@ -162,21 +167,55 @@ public:
     }
   }
   bool depends(changeable other) const {
+    if(*this==other){
+      return true;
+    }
     std::deque<changeable> queue;
     std::set<const void*> visited;
     queue.push_back(*this);
     while (!queue.empty()) {
-      changeable x = queue.front();
+      changeable current = queue.front();
       queue.pop_front();
-      references &ems = x.m_hdr->emitters;
-      if (ems.has(other)) {
+      references &emitters = current.m_hdr->emitters;
+      if (emitters.has(other)) {
         return true;
       }
-      if (visited.insert(x.rawdata()).second) {
-        queue.insert(queue.end(), ems.begin(), ems.end());
+      if (visited.insert(current.rawdata()).second) {
+        queue.insert(queue.end(), emitters.begin(), emitters.end());
       }
     }
     return false;
+  }
+  size_t distance(changeable other, bool skip_passthrough=false, size_t max_depth=-1lu) const {
+    if(*this==other){
+      return 0u;
+    }
+    if(!max_depth){
+      return -1lu;
+    }
+    std::deque<std::pair<changeable*,size_t>> queue;
+    std::set<const void*> visited;
+    queue.push_back({const_cast<changeable*>(this), 1lu});
+    changeable* current;
+    size_t depth;
+    while (!queue.empty()) {
+      std::tie(current, depth) = queue.front();
+      queue.pop_front();
+      references &emitters = current->m_hdr->emitters;
+      if (emitters.has(other)) {
+        return depth;
+      }
+      if (visited.insert(current->rawdata()).second) {
+        for(auto& emitter: emitters){
+          size_t newdepth = skip_passthrough ? depth+static_cast<size_t>(!emitter.passthrough()) : depth+1;
+          if(newdepth>max_depth){
+            continue;
+          }
+          queue.push_back({&emitter, newdepth});
+        }
+      }
+    }
+    return -1lu;
   }
   void replace(changeable other) {
     if (this->is(other)) {
@@ -227,8 +266,8 @@ protected:
     }
     m_hdr.reset(hdr);
   }
-  void init(const char* name="", bool autoname=false) {
-    alloc(new inconstant_header(name, autoname));
+  void init(const char* name="", bool autoname=false, size_t size=0u) {
+    alloc(new inconstant_header(name, autoname, size));
     DPRINTF("constructed header");
   }
   template <typename T>

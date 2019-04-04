@@ -17,6 +17,18 @@
 
 #include "config_vars.h"
 
+namespace GNA{
+  template<typename FloatType> class TreeManager;
+}
+
+namespace TypeClasses{
+  template<typename FloatType> class TypeClassT;
+}
+
+namespace ParametrizedTypes{
+  class ParametrizedBase;
+}
+
 namespace TransformationTypes
 {
   template<typename SourceFloatType, typename SinkFloatType> class BaseT;
@@ -31,6 +43,9 @@ namespace TransformationTypes
 
   template<typename FloatType>
   using StoragesContainerT = boost::ptr_vector<StorageT<FloatType>>;  ///< Container for Storage pointers.
+
+  template<typename FloatType>
+  using TypeClassContainerT = boost::ptr_vector<TypeClasses::TypeClassT<FloatType>>;  ///< Container for TypeClass pointers.
 
   /**
    * @brief Definition of a single transformation.
@@ -57,7 +72,8 @@ namespace TransformationTypes
    * @date 2015
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
-  struct EntryT: public boost::noncopyable {
+  class EntryT: public boost::noncopyable {
+  public:
     using BaseType                           = BaseT<SourceFloatType,SinkFloatType>;
     using EntryType                          = EntryT<SourceFloatType,SinkFloatType>;
     using StorageFloatType                   = SourceFloatType;
@@ -93,9 +109,13 @@ namespace TransformationTypes
     using FunctionDescriptorType             = FunctionDescriptorT<SourceFloatType,SinkFloatType>;
     using FunctionDescriptorsContainerType   = FunctionDescriptorsContainerT<SourceFloatType,SinkFloatType>;
 
+    using TypeClassContainerType             = TypeClassContainerT<SourceFloatType>;
+
+    using TreeManagerType                    = GNA::TreeManager<SourceFloatType>;
+
     EntryT(const std::string &name, const BaseType *parent); ///< Constructor.
-    EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
-    ~EntryT();                                           ///< Destructor.
+    //EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
+    ~EntryT();                                               ///< Destructor.
 
     InputHandleType addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
     OutputHandleType addSink(const std::string &name);                            ///< Initialize and return new Sink.
@@ -106,6 +126,7 @@ namespace TransformationTypes
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
+    void touch_global();                                 ///< Update the transformation if it is not frozen and tainted.
     const SinkDataType &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
     bool check() const;                                  ///< Checks that Data are initialized.
@@ -113,17 +134,19 @@ namespace TransformationTypes
 
     // Names, labels and meta
     std::string name;                                    ///< Transformation name.
-    std::string label;                                   ///< Transformation label.
+    Attrs attrs;                                         ///< Map with entry attributes
     const BaseType *parent;                              ///< Base class, containing the transformation Entry.
 
     // Data
     SourcesContainerType sources;                        ///< Transformation inputs (sources).
     SinksContainerType sinks;                            ///< Transformation outputs (sinks).
     StoragesContainerType storages;                      ///< Transformation internal Storage instances.
+    std::vector<size_t> mapping;                         ///< Inputs to outputs mapping (for multi-transformations).
 
     // Functions
     FunctionType fun=nullptr;                            ///< The function that does actual calculation.
     TypesFunctionsContainerType typefuns;                ///< Vector of TypeFunction objects.
+    TypeClassContainerType typeclasses;                  ///< Vector of TypeClass instances
     FunctionDescriptorsContainerType functions;          ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.
 
@@ -134,13 +157,16 @@ namespace TransformationTypes
     // Function args
     FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
-#ifdef GNA_CUDA_SUPPORT
-    void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
-    void setEntryDataLocation(DataLocation loc);
-    DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
-#endif
-
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
+    void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
+
+    size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
+
+    TreeManagerType* m_tmanager=nullptr;                 ///< Tree manager
+
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entryLoc=loc; } ///< Change Entry location
+#endif
   private:
 #ifdef GNA_CUDA_SUPPORT
     DataLocation m_entryLoc = DataLocation::Host;       ///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
@@ -150,5 +176,6 @@ namespace TransformationTypes
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
 
     void initInternals(StorageTypesFunctionArgsType& fargs);         ///< Initialize the Data for the internal storage.
-  }; /* struct Entry */
+
+  }; /* class Entry */
 } /* TransformationTypes */

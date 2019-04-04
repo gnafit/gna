@@ -9,6 +9,7 @@ using namespace Eigen;
 using namespace std;
 
 IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges, bool shared_edge) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_orders(bins),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
@@ -17,6 +18,7 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 }
 
 IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges, bool shared_edge) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_orders(Map<const ArrayXi>(orders, bins)),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
@@ -35,19 +37,13 @@ void IntegratorBase::init_base(double* edges) {
     }
 }
 
-TransformationDescriptor IntegratorBase::add_transformation(){
-    int num=transformations.size()-1;
-    std::string name="hist";
-    if(num>0){
-        name = fmt::format("{0}_{1:02d}", name, num+1);
-    }
-    transformation_(name)
-        .input("f")
-        .output("hist")
+TransformationDescriptor IntegratorBase::add_transformation(const std::string& name){
+    this->transformation_(this->new_transformation_name(name))
         .types(TypesFunctions::if1d<0>, TypesFunctions::ifPoints<0>, &IntegratorBase::check_base)
         .types(TypesFunctions::ifSame)
         .func(&IntegratorBase::integrate)
         ;
+    reset_open_input();
     return transformations.back();
 }
 
@@ -99,21 +95,23 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
 
 void IntegratorBase::init_sampler() {
     auto trans=transformation_("points")
-        .output("x")
-        .output("xedges")
+        .output("x")        // 0
+        .output("xedges")   // 1
+        .output("xhist")    // 2
+        .output("xcenters") // 3
         .types(&IntegratorBase::check_sampler)
         .func(&IntegratorBase::sample)
         ;
 
-    if(m_edges.size()){
-        trans.finalize();
-    }
-    else{
+    if(!m_edges.size()){
         trans.input("edges", /*inactive*/true) //hist with edges
-          .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+            .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
     }
+    trans.finalize();
 
     add_transformation();
+    add_input();
+    set_open_input();
 }
 
 void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
@@ -125,44 +123,15 @@ void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
         auto& edges=fargs.args[0].edges;
         m_edges=Map<const ArrayXd>(edges.data(), edges.size());
     }
-    rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
+    /*xedges*/   rets[1].points().shape(m_edges.size()).preallocated(m_edges.data());
+    /*xhist*/    rets[2].hist().edges(m_edges.size(), m_edges.data());;
+    /*xcenters*/ rets[3].points().shape(m_edges.size()-1);
 }
 
 void IntegratorBase::dump(){
     std::cout<<"Edges: "<<m_edges.transpose()<<std::endl;
     std::cout<<"Orders: "<<m_orders.transpose()<<std::endl;
     std::cout<<"Weights: "<<m_weights.transpose()<<std::endl;
-}
-
-InputDescriptor IntegratorBase::add_input(){
-    auto hist=transformations.back();
-    auto input=hist.inputs.back();
-    if(input.bound()){
-        auto ninputs=hist.inputs.size()+1;
-        input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
-        hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
-    }
-
-    return input;
-}
-
-OutputDescriptor IntegratorBase::add_input(OutputDescriptor& fcn_output){
-    auto input=add_input();
-    input(fcn_output);
-    return OutputDescriptor(transformations.back().outputs.back());
-}
-
-OutputDescriptor IntegratorBase::add_input(InputDescriptor& fcn_input, OutputDescriptor& fcn_output){
-    auto x=transformations.front().outputs.front();
-    fcn_input(x);
-
-    return add_input(fcn_output);
-}
-
-
-OutputDescriptor IntegratorBase::add_input(OutputDescriptor& hist_output, InputDescriptor& fcn_input, OutputDescriptor& fcn_output){
-    set_edges(hist_output);
-    return add_input(fcn_input, fcn_output);
 }
 
 void IntegratorBase::set_edges(OutputDescriptor& hist_output){

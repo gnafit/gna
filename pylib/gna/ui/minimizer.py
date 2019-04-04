@@ -1,3 +1,5 @@
+"""Minimizer module: initializes minimizer for a given statistic and set of parameters"""
+
 import ROOT
 from gna.ui import basecmd, set_typed
 from gna.minimizers import minimizers
@@ -9,11 +11,13 @@ import warnings
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-s', '--spec', default=None)
-        parser.add_argument('name')
-        parser.add_argument('type', choices=minimizers.keys())
-        parser.add_argument('statistic', action=set_typed(env.parts.statistic))
-        parser.add_argument('par', nargs='*')
+        parser.add_argument('-s', '--spec', default=None, help='Minimization options (YAML)')
+        parser.add_argument('name', help='Minimizer name')
+        parser.add_argument('type', choices=minimizers.keys(),
+                                    help='Minimizer type {%(choices)s}', metavar='minimizer')
+        parser.add_argument('statistic', action=set_typed(env.parts.statistic), help='Statistic name',
+                                         metavar='statmodule')
+        parser.add_argument('par', nargs='*', help='Parameters to minimize')
 
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)

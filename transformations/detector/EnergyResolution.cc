@@ -38,7 +38,7 @@ void EnergyResolution::getEdges(TypesFunctionArgs& fargs) {
   m_edges = fargs.args[0].edges.data();
 }
 
-double EnergyResolution::relativeSigma(double Etrue) const noexcept{
+double EnergyResolution::relativeSigma(double Etrue) const noexcept {
   return sqrt(pow(m_a, 2)+ pow(m_b, 2)/Etrue + pow(m_c/Etrue, 2));
 }
 

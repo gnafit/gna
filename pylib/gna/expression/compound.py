@@ -158,8 +158,7 @@ class VProduct(IndexedContainer, Variable):
         with nextlevel():
             IndexedContainer.bind(self, context, connect=False)
 
-            from gna.constructors import stdvector
-            import ROOT as R
+            from gna.constructors import VarProduct
             with context.ns:
                 for idx in self.nindex.iterate():
                     names = [obj.current_format(idx) for obj in self.objects]
@@ -171,7 +170,7 @@ class VProduct(IndexedContainer, Variable):
                     else:
                         path, head = '', name
                         ns = context.ns
-                    vp = R.VarProduct( stdvector( names ), head, ns=ns )
+                    vp = VarProduct(names, head, ns=ns)
                     v=ns[head]
                     if isinstance(v, (ExpressionsEntry, ExpressionWithBindings)):
                         v=v.get()
@@ -288,7 +287,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, TProduct) and o.expandable:
+            if self.expandable and isinstance(o, TProduct) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -337,7 +336,7 @@ class TSum(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, TSum) and o.expandable:
+            if self.expandable and isinstance(o, TSum) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -360,7 +359,7 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             elif isinstance(other, Variable):
                 self.weight = self.weight*other if self.weight is not None else other
             elif isinstance(other, Transformation):
-                self.object = self.object*other if self.object is not None else other
+                self.object = Transformation.__mul__(self.object, other, False) if self.object is not None else other
             else:
                 raise Exception( 'Unsupported type' )
 
@@ -372,9 +371,6 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
 
         import ROOT as R
         self.set_tinit( R.WeightedSum )
-
-    def __mul__(self, other):
-        return WeightedTransformation(undefinedname, self, other)
 
     @methodname
     def require(self, context):

@@ -11,7 +11,7 @@
 namespace TransformationTypes
 {
   template<typename FloatType,typename SizeType> struct GPUFunctionArgsT;
-  template<typename SourceType,typename SinkType> struct EntryT;
+  template<typename SourceType,typename SinkType> class EntryT;
 
   /**
    * @brief Transformation Function arguments.
@@ -27,27 +27,32 @@ namespace TransformationTypes
    * @date 07.2018
    */
   template<typename SourceFloatType, typename SinkFloatType>
-  struct FunctionArgsT {
+  class FunctionArgsT {
+  public:
     using EntryType              = EntryT<SourceFloatType,SinkFloatType>;
     using FunctionArgsType       = FunctionArgsT<SourceFloatType,SinkFloatType>;
-    using GPUFunctionArgsType    = GPUFunctionArgsT<SourceFloatType, unsigned int>;
+    using GPUFunctionArgsType    = GPUFunctionArgsT<SourceFloatType, size_t>;
     using GPUFunctionArgsPtr     = std::unique_ptr<GPUFunctionArgsType>;
+    using ArgsType               = ArgsT<SourceFloatType,SinkFloatType>;
+    using RetsType               = RetsT<SourceFloatType,SinkFloatType>;
+    using IntsType               = IntsT<SourceFloatType,SinkFloatType>;
 
     FunctionArgsT(EntryType* e) : args(e), rets(e), ints(e), m_entry(e) {  }         ///< Constructor.
     FunctionArgsT(const FunctionArgsType& other) : FunctionArgsT(other.m_entry) {  } ///< Copy constructor.
     ~FunctionArgsT();
 
-    ArgsT<SourceFloatType,SinkFloatType> args; ///< arguments, or transformation inputs (read-only)
-    RetsT<SourceFloatType,SinkFloatType> rets; ///< return values, or transformation outputs (writable)
-    IntsT<SourceFloatType,SinkFloatType> ints; ///< preallocated data arrays for the transformation's internal usage (writable)
+    ArgsType args; ///< arguments, or transformation inputs (read-only)
+    RetsType rets; ///< return values, or transformation outputs (writable)
+    IntsType ints; ///< preallocated data arrays for the transformation's internal usage (writable)
 
     GPUFunctionArgsPtr gpu; ///< GPU function arguments
 
     void requireGPU();                    ///< Initialize GPU function arguments
     void updateTypes();                   ///< Update arguments and types
 
-    private:
-      EntryType *m_entry; ///< Entry instance to access Sinks.
+    size_t getMapping(size_t input){ return m_entry->mapping[input]; }
+  private:
+    EntryType *m_entry; ///< Entry instance to access Sinks.
   };
 
   /**
@@ -66,11 +71,14 @@ namespace TransformationTypes
   template<typename SourceFloatType, typename SinkFloatType>
   struct TypesFunctionArgsT {
     using EntryType = EntryT<SourceFloatType,SinkFloatType>;
+    using Atypes = AtypesT<SourceFloatType,SinkFloatType>;
+    using Rtypes = RtypesT<SourceFloatType,SinkFloatType>;
+    using Itypes = ItypesT<SourceFloatType,SinkFloatType>;
     TypesFunctionArgsT(EntryType* e) : args(e), rets(e), ints(e) {  } ///< Constructor.
 
-    AtypesT<SourceFloatType,SinkFloatType> args; ///< arguments'/inputs' data types (read-only)
-    RtypesT<SourceFloatType,SinkFloatType> rets; ///< return values'/outputs' data  types (writable)
-    ItypesT<SourceFloatType,SinkFloatType> ints; ///< preallocated storage's data types (writable)
+    Atypes args; ///< arguments'/inputs' data types (read-only)
+    Rtypes rets; ///< return values'/outputs' data  types (writable)
+    Itypes ints; ///< preallocated storage's data types (writable)
   };
 
   /**

@@ -61,10 +61,13 @@ class Transformation(Indexed):
         from gna.expression.compound import TRatio
         return TRatio(undefinedname, self, other)
 
-    def __mul__(self, other):
+    def __mul__(self, other, may_weight=True):
         from gna.expression.compound import WeightedTransformation
-        if isinstance(other, (Variable, WeightedTransformation)):
-            return WeightedTransformation(undefinedname, self, other)
+        if may_weight:
+            if isinstance(other, Variable):
+                return WeightedTransformation(undefinedname, self, other)
+            elif isinstance(other, WeightedTransformation) and self.expandable and other.expandable:
+                return WeightedTransformation(undefinedname, self, other)
 
         from gna.expression.compound import TProduct
         return TProduct(undefinedname, self, other)

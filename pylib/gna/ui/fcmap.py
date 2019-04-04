@@ -2,7 +2,7 @@ from gna.ui import basecmd
 import numpy as np
 import h5py
 
-from pointtree import PointTree
+from gna.pointtree import PointTree
 
 class cmd(basecmd):
     @classmethod

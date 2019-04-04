@@ -10,25 +10,25 @@ using TransformationTypes::BaseT;
  * @copydetails Base::copyEntries
  * @param other -- the other Base.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-BaseT<SourceFloatType,SinkFloatType>::BaseT(const BaseT<SourceFloatType,SinkFloatType> &other)
-  : t_(*this), m_entries(other.m_entries.size())
-{
-  this->copyEntries(other);
-}
+//template<typename SourceFloatType, typename SinkFloatType>
+//BaseT<SourceFloatType,SinkFloatType>::BaseT(const BaseT<SourceFloatType,SinkFloatType> &other)
+  //: t_(*this), m_entries(other.m_entries.size())
+//{
+  //this->copyEntries(other);
+//}
 
 /**
  * @brief Clone assignment.
  * @copydetails Base::copyEntries
  * @param other -- the other Base.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-BaseT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::operator=(const BaseT<SourceFloatType,SinkFloatType> &other) {
-  t_ = AccessorType(*this);
-  m_entries.reserve(other.m_entries.size());
-  this->copyEntries(other);
-  return *this;
-}
+//template<typename SourceFloatType, typename SinkFloatType>
+//BaseT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::operator=(const BaseT<SourceFloatType,SinkFloatType> &other) {
+  //t_ = AccessorType(*this);
+  //m_entries.reserve(other.m_entries.size());
+  //this->copyEntries(other);
+  //return *this;
+//}
 
 /**
  * @brief Clone entries from the other Base.
@@ -37,12 +37,12 @@ BaseT<SourceFloatType,SinkFloatType> &BaseT<SourceFloatType,SinkFloatType>::oper
  *
  * @param other -- the other Base to copy Entry instances from.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-void BaseT<SourceFloatType,SinkFloatType>::copyEntries(const BaseT<SourceFloatType,SinkFloatType> &other) {
-  std::transform(other.m_entries.begin(), other.m_entries.end(),
-                 std::back_inserter(m_entries),
-                 [this](const EntryType &e) { return new EntryType{e, this}; });
-}
+//template<typename SourceFloatType, typename SinkFloatType>
+//void BaseT<SourceFloatType,SinkFloatType>::copyEntries(const BaseT<SourceFloatType,SinkFloatType> &other) {
+  //std::transform(other.m_entries.begin(), other.m_entries.end(),
+                 //std::back_inserter(m_entries),
+                 //[this](const EntryType &e) { return new EntryType{e, this}; });
+//}
 
 /**
  * @brief Add new Entry.

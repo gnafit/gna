@@ -8,6 +8,7 @@ using namespace Eigen;
 using namespace std;
 
 Integrator2Base::Integrator2Base(size_t xbins, int xorders, double* xedges, size_t ybins, int yorders, double* yedges) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_xorders(xbins),
 m_yorders(ybins)
 {
@@ -17,6 +18,7 @@ m_yorders(ybins)
 }
 
 Integrator2Base::Integrator2Base(size_t xbins, int* xorders, double* xedges, size_t ybins, int* yorders, double* yedges) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
 m_yorders(Map<const ArrayXi>(yorders, ybins))
 {
@@ -39,19 +41,13 @@ void Integrator2Base::init_base(double* xedges, double* yedges) {
     }
 }
 
-TransformationDescriptor Integrator2Base::add_transformation(){
-    int num=transformations.size()-1;
-    std::string name="hist";
-    if(num>0){
-      name = fmt::format("{0}_{1:02d}", name, num+1);
-    }
-    transformation_(name)
-        .input("f")
-        .output("hist")
+TransformationDescriptor Integrator2Base::add_transformation(const std::string& name){
+    transformation_(new_transformation_name(name))
         .types(TypesFunctions::ifPoints<0>, TypesFunctions::if2d<0>, &Integrator2Base::check_base)
         .types(TypesFunctions::ifSame)
         .func(&Integrator2Base::integrate)
         ;
+    reset_open_input();
     return transformations.back();
 }
 
@@ -109,6 +105,8 @@ void Integrator2Base::init_sampler() {
       .output("yedges")
       .output("xmesh")
       .output("ymesh")
+      .output("xhist")
+      .output("yhist")
       .types(&Integrator2Base::check_sampler)
       .func(&Integrator2Base::sample)
       ;
@@ -117,11 +115,11 @@ void Integrator2Base::init_sampler() {
     trans.input("edges", /*inactive*/true) //hist with edges
          .types(TypesFunctions::if2d<0>, TypesFunctions::ifHist<0>);
   }
-  else {
-    trans.finalize();
-  }
+  trans.finalize();
 
   add_transformation();
+  add_input();
+  set_open_input();
 }
 
 void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
@@ -140,8 +138,11 @@ void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
     auto& yedges=arg.edgesNd[1];
     m_yedges=Map<const ArrayXd>(yedges.data(), yedges.size());
   }
-  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
-  rets[3]=DataType().points().shape(m_yedges.size()).preallocated(m_yedges.data());
+  rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[3].points().shape(m_yedges.size()).preallocated(m_yedges.data());
+
+  rets[6].hist().edges(m_xedges.size(), m_xedges.data());
+  rets[7].hist().edges(m_yedges.size(), m_yedges.data());
 }
 
 void Integrator2Base::dump(){
@@ -160,22 +161,4 @@ void Integrator2Base::set_edges(OutputDescriptor& hist2_output){
         throw std::runtime_error("Can not bind bin edges since bin edges were provided in the constructor.");
     }
     inputs.front()(hist2_output);
-}
-
-InputDescriptor Integrator2Base::add_input(){
-    auto hist=transformations.back();
-    auto input=hist.inputs.back();
-    if(input.bound()){
-        auto ninputs=hist.inputs.size()+1;
-        input=hist.input(fmt::format("{0}_{1:02d}", "f", ninputs));
-        hist.output(fmt::format("{0}_{1:02d}", "hist", ninputs));
-    }
-
-    return input;
-}
-
-OutputDescriptor Integrator2Base::add_input(OutputDescriptor& fcn_output){
-    auto input=add_input();
-    input(fcn_output);
-    return OutputDescriptor(transformations.back().outputs.back());
 }

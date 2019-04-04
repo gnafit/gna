@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.bindings import patchROOTClass
-from gna.bindings import DataType
+from gna.bindings import patchROOTClass, DataType, provided_precisions, OutputDescriptor
 import ROOT as R
 from printing import printl, nextlevel
 
-@patchROOTClass(R.InputDescriptor, '__str__')
-def InputDescriptor____str__(self):
+classes = [R.InputDescriptorT(ft,ft) for ft in provided_precisions]
+
+@patchROOTClass(classes, '__str__')
+def InputDescriptor____str__(self, **kwargs):
     if self.bound():
-        return '[in]  {} <- {!s}'.format(self.name(), self.output())
+        return '[in]  {} <- {!s}'.format(self.name(), OutputDescriptor.OutputDescriptor____str__(self.output(), **kwargs))
     else:
         return '[in]  {} <- ...'.format(self.name())
 
-@patchROOTClass
-def InputDescriptor__print(self):
-    printl(str(self))
+@patchROOTClass(classes, 'print')
+def InputDescriptor__print(self, **kwargs):
+    printl(InputDescriptor____str__(self, **kwargs))
 
-InputHandle = R.TransformationTypes.InputHandleT('double')
-del InputHandle.__lshift__
+for ft in provided_precisions:
+    InputHandle = R.TransformationTypes.InputHandleT(ft)
+    del InputHandle.__lshift__
 
-@patchROOTClass(R.InputDescriptor, '__gt__')
-@patchROOTClass(R.InputDescriptor, '__lt__')
+@patchROOTClass(classes, '__gt__')
+@patchROOTClass(classes, '__lt__')
 def InputDescriptor______cmp__(a,b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

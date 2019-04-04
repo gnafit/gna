@@ -48,7 +48,7 @@ public:
       base_type::init(f, deps);
       DPRINTF("constructed dependant");
     }
-  dependant(std::function<void(std::vector<ValueType>&)> vf,
+  dependant(std::function<void(arrayview<ValueType>&)> vf,
             std::initializer_list<changeable> deps,
             const char *name = "", size_t size=1u)
     : base_type(name, size)
@@ -57,7 +57,7 @@ public:
       DPRINTF("constructed dependant");
     }
   template <typename T>
-  dependant(std::function<void(std::vector<ValueType>&)> vf,
+  dependant(std::function<void(arrayview<ValueType>&)> vf,
             std::vector<T> deps,
             const char *name = "", size_t size=1u)
     : base_type(name, size)

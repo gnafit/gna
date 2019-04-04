@@ -1,0 +1,88 @@
+digraph "" {
+    graph [
+        fontsize=10,
+        labelfontsize=10,
+        rankdir=LR,
+        ranksep=0.01,
+    ];
+    node [label="\N"];
+
+    subgraph cluster4{
+        fontsize=14;
+        label="Edge features";
+        node4_1l [shape=Mrecord,label="node"];
+        node4_1r [shape=Mrecord,style="invis"];
+        node4_1l -> node4_1r [arrowhead=empty,label="open output"];
+
+        node4_2l [shape=Mrecord,style="invis"];
+        node4_2r [shape=Mrecord,label="node"];
+        node4_2l -> node4_2r [label="open input"];
+
+        node4_7l [shape=Mrecord,label="static node",color=azure4];
+        node4_7r [shape=Mrecord,label="node"];
+        node4_7l -> node4_7r [color=azure4,label="static node output"];
+
+        node4_6l [shape=Mrecord,label="node"];
+        node4_6r [shape=Mrecord,label="frozen node",color=azure4,style=dashed];
+        node4_6l -> node4_6r [arrowhead="tee",style=dashed,label="taintflag is ignored"];
+
+        node4_3l [shape=Mrecord,label="CPU node"];
+        node4_3r [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
+        node4_3l -> node4_3r [style=tapered,penwidth=4,dir=back,color="limegreen",arrowtail=none,label="host to device transfer"];
+
+        node4_4l [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
+        node4_4r [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
+        node4_4l -> node4_4r [penwidth=2,color="limegreen",label="device to device access"];
+
+        node4_5l [shape=Mrecord,label="GPU node", color="limegreen", style=bold];
+        node4_5r [shape=Mrecord,label="CPU node"];
+        node4_5l -> node4_5r [style=tapered,penwidth=4,color="limegreen",arrowhead=none,label="device to host transfer"];
+    }
+
+    subgraph cluster3{
+        fontsize=14;
+        label="Node features";
+        node3_1 [label="{|regular node}", shape=Mrecord];
+        node3_2 [label="{|constant node}", shape=Mrecord, color="azure3"];
+        node3_3 [label="{|frozen node}", shape=Mrecord, color="azure3", style="dashed"];
+        node3_4 [label="{|GPU based node}", shape=Mrecord, color="limegreen", style=bold];
+    }
+
+    subgraph cluster2{
+        fontsize=14;
+        label="Function node types";
+        node2_1 [label="{c|constant of the same shape}", shape=Mrecord];
+        node2_2 [label="{r|rebinning}",                  shape=Mrecord];
+        node2_3 [label="{..|concatenation}",             shape=Mrecord];
+        node2_4 [label="{+|sum}", shape=Mrecord];
+        node2_5 [label="{+w|weighted sum}", shape=Mrecord];
+        node2_6 [label="{*|product}", shape=Mrecord];
+        node2_7 [label="{@|matrix product}", shape=Mrecord];
+        node2_8 [label="{i|integration}", shape=Mrecord];
+        node2_9 [label="{~|interpolation}", shape=Mrecord];
+        node2_10 [label="{[]|bin index definition}", shape=Mrecord];
+        node2_11 [label="other node"];
+    }
+
+    subgraph cluster0{
+        fontsize=14;
+        label="Source node types";
+        node [color="azure3"];
+        node0_1 [label="{a|array}",                     shape=Mrecord];
+        node0_2 [label="{h|1d histogram}",              shape=Mrecord];
+        node0_3 [label="{h²|2d histogram}",             shape=Mrecord];
+        node0_4 [label="{x|integration sample points}", shape=Mrecord];
+    }
+
+    subgraph cluster1{
+        fontsize=14;
+        label="Node attributes";
+        node1_1 [label="{{|(N)}|number of parameters}", shape=Mrecord];
+        node1_2 [label="{{{|(N)}|}|number of parameters}", shape=Mrecord];
+        node1_3 [label="{{|[N]}|dimensions}", shape=Mrecord];
+        node1_4 [label="{{|[NxM]}|dimensions}", shape=Mrecord];
+    }
+
+    node0_1 -> node2_1 [style="invis"];
+    node2_1 -> node1_1 [style="invis"];
+}

@@ -4,17 +4,31 @@
 #include <vector>
 #include <string>
 
-class ArraySum: public GNAObject,
-                public TransformationBind<ArraySum> {
-public:
-      ArraySum()= default;
-      ArraySum(const std::string& name, SingleOutput& out);
+namespace GNA{
+      namespace GNAObjectTemplates{
+            template<typename FloatType>
+            class ArraySumT: public GNASingleObjectT<FloatType,FloatType>,
+                             public TransformationBind<ArraySumT<FloatType>,FloatType,FloatType> {
+            private:
+                  using GNAObjectType = GNAObjectT<FloatType,FloatType>;
+                  using typename GNAObjectType::FunctionArgs;
+                  using typename GNAObjectType::TypesFunctionArgs;
 
-private:
-      void initialize(const std::string& name);
-      void sum(FunctionArgs& fargs);
-      void check(TypesFunctionArgs& fargs);
+            public:
+                  using ArraySumType = ArraySumT<FloatType>;
+                  using typename GNAObjectType::SingleOutput;
 
-      std::string m_output_name;
-      dependant<double> m_accumulated;
-};
+                  ArraySumT();
+                  ArraySumT(SingleOutput& out);
+                  ArraySumT(const std::string& name, SingleOutput& out);
+
+            private:
+                  void initialize(const std::string& name);
+                  void sum(FunctionArgs& fargs);
+                  void check(TypesFunctionArgs& fargs);
+
+                  std::string          m_output_name;
+                  dependant<FloatType> m_accumulated;
+            };
+      }
+}

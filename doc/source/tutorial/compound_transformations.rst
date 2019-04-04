@@ -86,8 +86,8 @@ The outputs should be of the same type and shape. The code produces the followin
     [30. 35. 40. 45.]
     [50. 55. 60. 65.]]
 
-Ways to costruct Sum and add inputs
-"""""""""""""""""""""""""""""""""""
+Ways to construct Sum and add inputs
+""""""""""""""""""""""""""""""""""""
 
 There several ways to add inputs to the ``Sum`` instance:
 

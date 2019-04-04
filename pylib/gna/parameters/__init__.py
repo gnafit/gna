@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
-import ROOT
-# from gna.bindings import patchROOTClass
 from gna.configurator import uncertain
 
 debug=False
 
 class DiscreteParameter(object):
     def __init__(self, name, variants, **kwargs):
+        from gna import constructors as C
         self.default = None
-        self._variable = ROOT.ParameterWrapper("double")(name)
+        self._variable = C.ParameterWrapper(name)
         self._name = name
         self._namespace = kwargs.get("namespace", "")
         self._variants = variants
@@ -53,6 +52,7 @@ class DiscreteParameter(object):
         self._label=label
 
 def makeparameter(ns, name, cfg=None, **kwargs):
+    from gna import constructors as C
     if 'target' in kwargs:
         return kwargs['target']
     if cfg:
@@ -85,7 +85,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         if not 'relsigma' in kwargs and not 'sigma' in kwargs:
             kwargs['sigma']=float('inf')
             if not 'step' in kwargs:
-                central = kwargs['central']
+                central = float(kwargs['central'])
                 if central:
                     kwargs.setdefault('step', 0.1*central)
                 else:
@@ -96,7 +96,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
             ns=ns.name, name=name, type=ptype
             ), end=' ' )
     if ptype == 'gaussian':
-        param = ROOT.GaussianParameter("double")(name)
+        param = C.GaussianParameter(name)
         if 'limits' in kwargs:
             upper, lower = kwargs['limits']
             param.addLimits(param.cast(upper), param.cast(lower))
@@ -157,7 +157,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         if debug:
             print( '{default} {variants}'.format( default=kwargs['variants'][kwargs['default']], variants=kwargs['variants'] ), end=' ' )
     elif ptype == 'uniformangle':
-        param = ROOT.UniformAngleParameter("double")(name)
+        param = C.UniformAngleParameter(name)
         if 'central' in kwargs:
             param.setCentral(param.cast(kwargs['central']))
         else:

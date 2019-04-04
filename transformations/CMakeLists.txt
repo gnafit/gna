@@ -4,15 +4,20 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Histogram.cc
   transformations/base/Histogram2d.cc
   transformations/base/Points.cc
-  transformations/base/Bins.cc
+  transformations/base/View.cc
+  transformations/base/ViewRear.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
-  transformations/base/MultiSum.cc
-  transformations/base/Sum.cc
-  transformations/base/Ratio.cc
-  transformations/base/WeightedSum.cc
-  transformations/base/WeightedSumP.cc
-  transformations/base/Inverse.cc
+  # Sums
+  transformations/sum/MultiSum.cc
+  transformations/sum/PartialSum.cc
+  transformations/sum/Sum.cc
+  transformations/sum/WeightedSum.cc
+  transformations/sum/WeightedSumP.cc
+  # Ratios
+  transformations/ratio/NormalizedConvolution.cc
+  transformations/ratio/PolyRatio.cc
+  transformations/ratio/Ratio.cc
   # Calculus
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -23,13 +28,18 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
+  # Functions
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
   transformations/functions/Sin.cc
   transformations/functions/Cos.cc
+  transformations/functions/Inverse.cc
   # Histograms
+  transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
+  transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
+  transformations/hist/RebinN.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
   transformations/integrator/IntegratorBase.cc
@@ -78,10 +88,11 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
   # Variables manipulation
+  transformations/var/VarArray.cc
+  transformations/var/VarArrayPreallocated.cc
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
-  transformations/var/VarArray.cc
   transformations/var/ArraySum.cc
   #
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
@@ -89,6 +100,7 @@ set(TRANSFORMATION_SOURCES
   transformations/debug/Identity.cc
   transformations/debug/DebugTransformation.cc
   transformations/debug/Dummy.cc
+  transformations/debug/DummyType.cc
   transformations/debug/TrialMultiFunc.cc
   # Legacy transformations
   transformations/legacy/EnergyResolutionC.cc
@@ -106,14 +118,20 @@ set(TRANSFORMATION_HEADERS
   FillLike.hh
   Histogram.hh
   Histogram2d.hh
-  Inverse.hh
   Points.hh
+  View.hh
+  ViewRear.hh
   Product.hh
-  Ratio.hh
+  # Sums
+  PartialSum.hh
   MultiSum.hh
   Sum.hh
   WeightedSum.hh
   WeightedSumP.hh
+  # Ratios
+  NormalizedConvolution.hh
+  PolyRatio.hh
+  Ratio.hh
   # Calculus
   Derivative.hh
   Jacobian.hh
@@ -128,16 +146,22 @@ set(TRANSFORMATION_HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
-  Exp.hh
-  Sin.hh
-  Cos.hh
-  SelfPower.hh
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
   PoissonToyMC.hh
+  # Functions
+  Inverse.hh
+  Exp.hh
+  Sin.hh
+  Cos.hh
+  SelfPower.hh
+  # Histogram
   Rebin.hh
+  RebinN.hh
+  PointsToHist.hh
   VarArray.hh
+  VarArrayPreallocated.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
@@ -180,6 +204,7 @@ set(TRANSFORMATION_HEADERS
   # Debug
   DebugTransformation.hh
   Dummy.hh
+  DummyType.hh
   Identity.hh
   TrialMultiFunc.hh
   # Legacy

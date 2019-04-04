@@ -1,3 +1,5 @@
+"""Embed IPython repl on module execution"""
+
 from gna.ui import basecmd
 import numpy as np
 import ROOT

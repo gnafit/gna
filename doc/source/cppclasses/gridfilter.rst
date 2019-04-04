@@ -22,7 +22,7 @@ Constructors
 
 ``GridFilter(int rows, int columns, double* mat, double xStep, double yStep, int initDeviation, double gradInfl, double allowErr)``
 
-where 
+where
 
 * :math:`mat` is matrix contains float values;
 
@@ -63,7 +63,7 @@ Protected:
 .. math::
   \frac {f(x_i,y_i) - f(x_{i-1}, y_i)} {x_{i} - x_{i-1}},  \frac {f(x_i,y_i) - f(x_i, y_{i-1})} {y_{i} - y_{i-1}}
 
-.. math:: 
+.. math::
   xStep = x_{i} - x_{i-1}
 
 .. math::
@@ -71,21 +71,8 @@ Protected:
 
 ``addPoints(int deviation)`` finds points of extended cross-section with the given deviation.
 
-.. uml:: 
-   
-   @startuml
-	while(For each point in matrix)
-		if (Cross-section contains current point) then (yes)
-			if (Interesting points array contains this point) then (no)
-				:Add point to interesting points array;
-				:Set the corresponding extended cross-section matrix point 1;
-			endif
-			:makeCorridor(current_x, current_y, deviation);
-			
-		endif
-	endwhile
-        stop
-   @enduml
+.. figure:: ../../img/uml/gridfilter1.png
+   :align: center
 
 ``ComputeCrossSectionOriginal(double value)`` computes cross-section :math:`z = value ± allowErr`
 
@@ -103,7 +90,7 @@ Algorithm:
 
 * Divide it by the number of non-zero values to find the avarage value of contour's gradient;
 
-* Multiply it with the gradient multiplier (can be set at constructor, default is 1); 
+* Multiply it with the gradient multiplier (can be set at constructor, default is 1);
 
 * Product with multiplier InitialDeviation (can be set at constructor, default is 1).
 
@@ -111,18 +98,8 @@ Returns the value of deviation.
 
 ``ComputeAbsGradMatrix()`` computes matrix contains gradient vector length at every point.
 
-``makeCorridor(int curr_x, int curr_y, int deviation)`` is auxiliary function for ``addPoints(int deviation)``. It fills the nearest points to the current points in extended cross-section matrix. As inputs there are coordinates of current point: :math:`curr\_x` and :math:`curr\_y` and deviation value that means that the square with side :math:`2 \times\text{deviation} + 1` will be considered. 
+``makeCorridor(int curr_x, int curr_y, int deviation)`` is auxiliary function for ``addPoints(int deviation)``. It fills the nearest points to the current points in extended cross-section matrix. As inputs there are coordinates of current point: :math:`curr\_x` and :math:`curr\_y` and deviation value that means that the square with side :math:`2 \times\text{deviation} + 1` will be considered.
 
-.. uml::
+.. figure:: ../../img/uml/gridfilter2.png
+   :align: center
 
-   @startuml
-   while (For each the nearest point)
-   if (Cross-section contains current point) then (yes)
-   	if (Interesting points array contains this point) then (no)
-   		:Add point to interesting points array;
-   		:Set the corresponding extended cross-section matrix point 1;
-   	endif
-   endif
-   endwhile
-   stop
-   @enduml

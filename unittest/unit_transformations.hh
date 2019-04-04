@@ -1,10 +1,6 @@
 #pragma once
 #include "TransformationFunctionArgs.hh"
 
-namespace GNAUnitTest {
-	//static bool typefunction(void (&func) (TransformationTypes::TypesFunctionArgs&), TransformationTypes::TypesFunctionArgs& fargs);
-}
-
 //static bool GNAUnitTest::typefunction(void (&func) (TransformationTypes::TypesFunctionArgs&), TransformationTypes::TypesFunctionArgs& fargs){
 	//try {
 		//func(fargs);

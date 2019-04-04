@@ -346,6 +346,14 @@ class namespace(Mapping):
             for ns in self.namespaces.values():
                 ns.materializeexpressions(True)
 
+    def get_obs(self, *names):
+        import fnmatch as fn
+        obses = []
+        for name in names:
+            matched = fn.filter(self.observables.keys(), name)
+            obses.extend(matched)
+        return obses
+
 class nsview(object):
     def __init__(self):
         self.nses = deque()
@@ -474,6 +482,8 @@ class _environment(object):
             if v.name() in freevars:
                 continue
             if not v.isFree():
+                if cfg.debug_bindings:
+                    print('binding skipped', v.name())
                 continue
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
@@ -492,6 +502,7 @@ class _environment(object):
                     print(msg)
                 else:
                     raise Exception(msg)
+        obj.variablesBound()
         return obj
 
     def ns(self, ns):

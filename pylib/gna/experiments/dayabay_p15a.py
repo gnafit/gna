@@ -36,25 +36,26 @@ class exp(baseexp):
 
     def init_nidx(self):
         self.detectors = ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']
+        self.reactors  = ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']
         self.nidx = [
             ('s', 'site',        ['EH1', 'EH2', 'EH3']),
             ('d', 'detector',    self.detectors,
                                  dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
-            ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
+            ('r', 'reactor',     self.reactors),
             ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
         ]
         if self.opts.composition=='minimal':
-            self.nidx[0][2] = self.nidx[0][2][:1]
-            self.nidx[1][2] = self.nidx[1][2][:1]
-            self.nidx[2][2] = self.nidx[2][2][:1]
-            self.nidx[3][2] = self.nidx[3][2][:1]
+            self.nidx[0][2][:] = self.nidx[0][2][:1]
+            self.nidx[1][2][:] = self.nidx[1][2][:1]
+            self.nidx[2][2][:] = self.nidx[2][2][:1]
+            self.nidx[3][2][:] = self.nidx[3][2][:1]
         elif self.opts.composition=='small':
-            self.nidx[0][2] = self.nidx[0][2][:2]
-            self.nidx[1][2] = self.nidx[1][2][:3]
-            self.nidx[2][2] = self.nidx[2][2][:2]
-            self.nidx[3][2] = self.nidx[3][2][:1]
+            self.nidx[0][2][:] = self.nidx[0][2][:2]
+            self.nidx[1][2][:] = self.nidx[1][2][:3]
+            self.nidx[2][2][:] = self.nidx[2][2][:2]
+            self.nidx[3][2][:] = self.nidx[3][2][:1]
 
         self.nidx = NIndex.fromlist(self.nidx)
 
@@ -97,7 +98,7 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
             kinint2 = NestedDict(
-                bundle   = dict(name='integral_2d1d', version='v02', names=dict(integral='kinint2')),
+                bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
                 xorders   = 2,
@@ -144,6 +145,7 @@ class exp(baseexp):
                     bundle = dict(name='dayabay_reactor_burning_info_v02', major='ri'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
+                    add_ff = True,
                     ),
             eper_fission =  NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
@@ -155,14 +157,6 @@ class exp(baseexp):
                          ('U235',  (201.92, 0.46)),
                          ('U238', (205.52, 0.96))],
                         mode='absolute'
-                        ),
-                    ),
-            target_protons = NestedDict(
-                    bundle = dict(name="parameters", version = "v01"),
-                    parameter = "target_protons",
-                    label = 'Number of protons in {detector}',
-                    pars = uncertaindict(
-                        [('AD1', (1.42e33, 'fixed'))],
                         ),
                     ),
             conversion_factor =  NestedDict(
@@ -197,7 +191,7 @@ class exp(baseexp):
                         mode='percent',
                         uncertainty=30
                         ),
-                    expose_matrix = False
+                    expose_matrix = True
                     ),
             lsnl = NestedDict( #TODO: evis_edges
                     bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
@@ -416,12 +410,17 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
-        #
         for ad in self.detectors:
             # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
             ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            ns.addobservable("{0}_bkg".format(ad),         outputs.bkg[ad], export=False)
+            ns.addobservable("{0}.bkg.acc".format(ad),         outputs.bkg_acc[ad], export=False)
+            ns.addobservable("{0}.bkg.fastn".format(ad), outputs.bkg_fastn[ad], export=False)
+            ns.addobservable("{0}.bkg.amc".format(ad), outputs.bkg_amc[ad], export=False)
+            ns.addobservable("{0}.bkg.alphan".format(ad), outputs.bkg_alphan[ad], export=False)
+            ns.addobservable("{0}.bkg.lihe".format(ad), outputs.bkg_lihe[ad], export=False)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -437,7 +436,9 @@ class exp(baseexp):
         'enu| ee(evis()), ctheta()',
         'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
         'livetime=accumulate("livetime", livetime_daily[d]())',
-        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*fission_fractions[i,r]()',
+        'ff = fission_fraction_corr[i,r] * fission_fractions[i,r]()',
+        'denom = sum[i] | eper_fission[i]*ff',
+        'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*ff / denom',
         'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
         # Detector effects
         'eres_matrix| evis_hist()',

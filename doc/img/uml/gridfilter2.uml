@@ -1,0 +1,12 @@
+@startuml
+while (For each the nearest point)
+if (Cross-section contains current point) then (yes)
+ if (Interesting points array contains this point) then (no)
+     :Add point to interesting points array;
+     :Set the corresponding extended cross-section matrix point 1;
+ endif
+endif
+endwhile
+stop
+@enduml
+

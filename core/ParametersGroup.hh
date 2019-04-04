@@ -41,7 +41,7 @@ public:
 
   template <typename T>
   Handle factory(Field field, const std::string &name) {
-    return m_parent->variable_(static_cast<variable<T>*>(field), name);
+    return m_parent->variable_(static_cast<variable<T>*>(field), name, 0u);
   }
 
   template <typename T=void>
@@ -67,7 +67,7 @@ protected:
   const std::string &fieldName(Field field) const;
   virtual void setExpressions(ExpressionsProvider &/*provider*/) { }
 
-  ParametrizedTypes::Base* m_parent;
+  ParametrizedTypes::ParametrizedBase* m_parent;
   Fields m_fields;
 };
 
@@ -86,6 +86,20 @@ public:
       deps.push_back(*f);
     }
     evaluable_(name, std::function<T()>(func), deps);
+    return *this;
+  }
+
+  template <typename T, typename FuncType>
+  ExpressionsProvider &add(variable<T> *field,
+                           const ParametersGroup::FieldsVector &sources,
+                           FuncType func, size_t size) {
+    std::string name = m_pgroup->fieldName(field);
+    std::vector<changeable> deps;
+    for (ParametersGroup::Field f: sources) {
+      m_pgroup->variable_(m_pgroup->fieldName(f)).required(false);
+      deps.push_back(*f);
+    }
+    evaluable_(name, size, std::function<void(arrayview<T>&)>(func), deps);
     return *this;
   }
 protected:

@@ -75,14 +75,14 @@ else:
 
 if opts.input_edges:
     edges_in = Histogram(edges, edges[:-1])
-    integrator = Integrator(edges.size-1, opts.order, None, *iopts)
+    integrator = Integrator(edges.size-1, opts.order, R.nullptr, *iopts)
     integrator.points.edges(edges_in)
 else:
     integrator = Integrator(edges.size-1, opts.order, edges, *iopts)
 
 integrator.points.setLabel('Integrator inputs')
-integrator.points.x.setLabel('E (points)')
-integrator.points.xedges.setLabel('E (bin edges)')
+# integrator.points.x.setLabel('E (points)')
+# integrator.points.xedges.setLabel('E (bin edges)')
 if mode21:
     integrator.points.y.setLabel('Y')
 integrator.hist.setLabel('Integrator (histogram)')
@@ -93,20 +93,22 @@ widths = edges[1:]-edges[:-1]
 """Make fake gaussian data"""
 # pass sample points as input to the function 'energy'
 if mode21:
-    fcn_input(integrator.points.xmesh)
+   integrator.points.xmesh >> fcn_input
 else:
-    fcn_input(integrator.points.x)
+   integrator.points.x >> fcn_input
 # pass the function output to the histogram builder (integrator)
-integrator.hist.f( fcn_output )
+fcn_output >> integrator.hist.f
+
 # read the histogram contents
 hist_output = integrator.hist.hist
-hist_output.setLabel('output histogram')
+# hist_output.setLabel('output histogram')
 hist = hist_output.data()
 
 if opts.dump:
     integrator.dump()
     print('Abscissas:', integrator.points.x.data())
     print('Widths:', widths)
+    print('Centers:', integrator.points.xcenters.data())
 
 """Plot data"""
 # init figure
@@ -143,10 +145,8 @@ print( N.fabs(diff)<1.e-8 and adiff<1.e-8 and '\033[32mIntegration is OK!' or '\
 
 if opts.dot:
     try:
-        from gna.graphviz import GNADot
-        graph = GNADot(integrator.hist)
-        graph.write(opts.dot)
-        print( 'Write output to:', opts.dot )
+        from gna.graphviz import savegraph
+        savegraph(integrator.hist, opts.dot)
     except Exception as e:
         print( '\033[31mFailed to plot dot\033[0m' )
         raise

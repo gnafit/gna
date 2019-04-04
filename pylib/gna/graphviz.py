@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from gna.env import env
 import pygraphviz as G
 import ROOT as R
-import types
+from collections import OrderedDict
+from configurator import NestedDict
+
+import re
+pattern = re.compile('^.*::([^:<]+)(T<[^>]*>)*$')
 
 def uid( obj1, obj2=None ):
     if obj2:
@@ -12,9 +18,12 @@ def uid( obj1, obj2=None ):
     return res
 
 def savegraph(obj, fname, *args, **kwargs):
+    if not fname:
+        return
+
     verbose = kwargs.pop('verbose', True)
 
-    gdot = GNADot(obj)
+    gdot = GNADot(obj, *args, **kwargs)
 
     if verbose:
         print('Write output file:', fname)
@@ -26,6 +35,96 @@ def savegraph(obj, fname, *args, **kwargs):
         gdot.draw(fname)
 
 class GNADot(object):
+    layers = 'variable:transformation'
+    def __init__(self, transformation, **kwargs):
+        kwargs.setdefault('fontsize', 10)
+        kwargs.setdefault('labelfontsize', 10)
+        kwargs.setdefault('rankdir', 'LR')
+        self.joints = kwargs.pop('joints', False)
+        ns = kwargs.pop('namespace', None)
+
+        self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
+        self.layout = self.graph.layout
+        self.write = self.graph.write
+        self.draw = self.graph.draw
+
+        self._entry_uids = OrderedDict()
+
+        from gna.graph.walk import GraphWalker
+        self.walker = GraphWalker(transformation, namespace=ns)
+        self.style=TreeStyle(self.walker)
+
+        self.walker.entry_do(self._action_entry)
+        self.walker.source_open_do(self._action_source_open)
+
+        self._process_variables()
+
+    def _process_variables(self):
+        # self.vargraph = self.graph.subgraph(name='cluster_var')
+        self.vargraph=self.graph
+        self.walker.variable_do(self._action_variable)
+
+    def entry_uid(self, entry, suffix=None):
+        hash=entry.hash()
+        uid = self._entry_uids.get(hash, None)
+        if uid:
+            return uid
+
+        uid = ('entry', '%04i'%(len(self._entry_uids)))
+        if suffix:
+            uid+=suffix,
+        uid='_'.join(uid)
+        self._entry_uids[hash]=uid
+
+        return uid
+
+    def _action_entry(self, entry):
+        node = self.graph.add_node( self.entry_uid(entry), **self.style.node_attrs(entry) )
+        for i, sink in enumerate(entry.sinks):
+            self._action_sink(sink, i)
+
+    def _action_variable(self, varentry):
+        var=varentry.variable
+        varid = self.entry_uid(var)
+        node = self.vargraph.add_node(varid, **self.style.node_attrs_var(varentry))
+
+        for entry in varentry.taints_entry:
+            # print('plot entry', varentry.variable.name(), '->', entry.name, self.entry_uid(entry))
+            self.vargraph.add_edge(varid, self.entry_uid(entry), **self.style.edge_attrs_var(var, False))
+
+        for varentry1 in varentry.taints_var:
+            varid1 = self.entry_uid(varentry1.variable)
+            # print('plot var', varentry.variable.name(), '->', varentry1.variable.name(), varid1)
+            self.vargraph.add_edge(varid, varid1, **self.style.edge_attrs_var(var, True))
+
+    def _action_source_open(self, source, i=0):
+        sourceuid = self.entry_uid(source, 'source')
+        graph.add_node( sourceuid, shape='point', label='in' )
+        graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
+
+    def _action_sink(self, sink, i=0):
+        if sink.sources.size()==0:
+            """In case sink is not connected, draw empty output"""
+            sinkuid=self.entry_uid(sink, 'sink')
+            self.graph.add_node( sinkuid, shape='point', label='out' )
+            self.graph.add_edge( self.entry_uid(sink.entry), sinkuid, **self.style.edge_attrs(i, sink) )
+        elif sink.sources.size()==1 or not self.joints:
+            """In case there is only one connection draw it as is"""
+            sinkuid = self.entry_uid(sink.entry)
+            for j, source in enumerate(sink.sources):
+                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=str(i), **self.style.edge_attrs(i, sink, None, source))
+        else:
+            """In case there is more than one connections, merge them"""
+            jointuid = self.entry_uid(sink, 'joint')
+            joint = self.graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.style.tail_label(None, sink) )
+
+            sstyle=self.style.edge_attrs(i, sink, None, None)
+            sstyle['arrowhead']='none'
+            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
+            for j, source in enumerate(sink.sources):
+                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, sink, None, source))
+
+class TreeStyle(object):
     markhead, marktail = True, True
     # headfmt = '{index:d}: {label}'
     headfmt = '{label}'
@@ -35,159 +134,243 @@ class GNADot(object):
     tailfmt_noi = '{label}'
     entryfmt = '{label}'
 
-    def __init__(self, transformation, **kwargs):
-        kwargs.setdefault('fontsize', 10)
-        kwargs.setdefault('labelfontsize', 10)
-        self.joints = kwargs.pop('joints', False)
+    gpucolor = 'limegreen'
+    varcolor = 'cornflowerblue'
+    staticcolor = 'azure3'
+    gpupenwidth = 4
 
-        self.graph=G.AGraph( directed=True, strict=False, **kwargs )
-        self.register = set()
-        if isinstance(transformation, (types.GeneratorType)):
-            transformation = list(transformation)
-        if not isinstance(transformation, (list, tuple)):
-            transformation = [transformation]
-        for t in transformation:
-            if isinstance(t, R.TransformationTypes.OutputHandle):
-                entry = R.OpenOutputHandle(t).getEntry()
-            elif isinstance(t, R.TransformationTypes.Handle):
-                entry = R.OpenHandle(t).getEntry()
-            elif isinstance(t, R.SingleOutput):
-                entry = R.OpenOutputHandle(t.single()).getEntry()
+    def __init__(self, walker):
+        self.walker=walker
+
+        self.entry_features=dict()
+
+    def build_features(self, entry):
+        attrs=dict(entry.attrs)
+        objectname = attrs['_object']
+        entryname = entry.name
+        funcname = entry.funcname
+
+        if '::' in objectname:
+            objectname = pattern.match(objectname).groups()[0]
+
+        features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
+
+        def getdim(sink):
+            if not sink.materialized():
+                return None
+
+            return tuple('%i'%d for d in sink.data.type.shape)
+
+        mark=None
+        dim=None
+        npars=0
+        if objectname in ('Sum', 'MultiSum'):
+            mark='+'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('WeightedSum'):
+            mark='+w'
+            npars=entry.sources.size()
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('Product',):
+            mark='*'
+            dim = getdim(entry.sinks[0])
+        elif objectname.startswith('Integrator'):
+            if entry.name == 'points':
+                mark='x'
+                features.static=True
+                if objectname.startswith('Integrator21'):
+                    dim = getdim(entry.sinks[3])
+                elif objectname.startswith('Integrator2'):
+                    dim = getdim(entry.sinks[4])
+                else:
+                    dim = getdim(entry.sinks[0])
             else:
-                raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
+                mark='i'
+                dim = getdim(entry.sinks[0])
+        elif objectname.startswith('Interp'):
+            mark='~'
+            dim = getdim(entry.sinks.back())
+        elif objectname in ('InSegment',):
+            mark='[]'
+        elif objectname in ('Points',):
+            features.static=True
+            mark='a'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('View',):
+            mark='v'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('Histogram',):
+            features.static=True
+            mark='h'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('Histogram2d',):
+            features.static=True
+            mark='h²'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('Rebin',):
+            mark='r'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('Concat',):
+            mark='..'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('FillLike',):
+            features.static=True
+            mark='c'
+            dim = getdim(entry.sinks[0])
+            npars=0
+        elif objectname in ('HistSmearSparse', 'HistSmear'):
+            mark='@'
+            dim = getdim(entry.sinks[0])
+        # else:
+            # print(objectname, entryname, features.label)
 
-            self.walk_back( entry )
+        if entry.funcname=='gpu':
+            features.gpu=True
 
-        self.layout = self.graph.layout
-        self.write = self.graph.write
-        self.draw = self.graph.draw
+        features.dim=dim
+        features.npars=npars
+        features.mark=mark
+        self.entry_features[entry.hash()]=features
+        return features
 
-    def registered( self, *args, **kwargs ):
-        id = uid( *args )
-        if id in self.register:
-            return True
+    def get_features(self, entry):
+        features = self.entry_features.get(entry.hash(), None)
+        if features is None:
+            return self.build_features(entry)
 
-        if kwargs.pop('register', True):
-            self.register.add( id )
-        return False
+        return features
 
-    def get_head_label(self, i, obj):
+    def node_attrs_var(self, varentry):
+        ret=dict(shape='octagon', style='rounded', fontsize=10, color=self.varcolor, layer='variable')
+        variable=varentry.variable
+
+        label=variable.name()
+
+        size=variable.values().size()
+        if size>1:
+            label='%s [%i]'%(label, size)
+
+        label='%s\n%s'%(label, varentry.fullname)
+
+        ret['label']=label
+        return ret
+
+    def node_attrs(self, entry):
+        ret=dict(layer='transformation')
+        features=self.get_features(entry)
+
+        styles=()
+        label=()
+        color=None
+
+        if features.frozen:
+            styles+='dashed',
+
+        if features.gpu:
+            ret['color']=self.gpucolor
+            styles+='bold',
+        if features.static:
+            ret['color']=self.staticcolor
+
+        label=self.entryfmt.format(name=entry.name, label=features['label'])
+
+        mark=features.mark
+        dim=features.dim
+        npars=features.npars
+        marks = ()
+        if mark:
+            marks+=mark,
+        if npars:
+            marks+='(%i)'%npars,
+            marks='{%s}'%('|'.join(marks)),
+        if dim:
+            marks+='[%s]'%('x'.join(dim)),
+            marks='{%s}'%('|'.join(marks)),
+        if marks:
+            ret['shape']='Mrecord'
+            marks+=label,
+            marks='{%s}'%('|'.join(marks)),
+        else:
+            marks=label,
+
+        ret['label'] = marks[0]
+        ret['style'] = ','.join(styles)
+        return ret
+
+    def head_label(self, i, obj):
+        attrs=dict(obj.attrs)
         if not self.markhead:
             return None
         if isinstance(obj, basestring):
             return obj
 
         if i is None:
-            return self.headfmt_noi.format(name=obj.name, label=obj.label)
+            return self.headfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
 
-        return self.headfmt.format(index=i, name=obj.name, label=obj.label)
+        return self.headfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
 
-    def get_tail_label(self, i, obj):
+    def tail_label(self, i, obj):
+        attrs=dict(obj.attrs)
         if not self.marktail:
             return None
         if isinstance(obj, basestring):
             return obj
 
         if i is None:
-            return self.tailfmt_noi.format(name=obj.name, label=obj.label)
+            return self.tailfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
 
-        return self.tailfmt.format(index=i, name=obj.name, label=obj.label)
+        return self.tailfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
 
-    def get_labels(self, isink, sink, isource=None, source=None):
-        labels = {}
+    def edge_attrs(self, isink, sink, isource=None, source=None):
+        attrs = dict(layer='transformation')
+        style=()
         if sink:
-            labels['taillabel']=self.get_tail_label(isink, sink)
-        if source:
-            labels['headlabel']=self.get_head_label(isource, source)
+            attrs['taillabel']=self.tail_label(isink, sink)
+
+            sinkfeatures = self.get_features(sink.entry)
+            if sinkfeatures.static:
+                attrs['color']=self.staticcolor
+
+            gpu1 = sinkfeatures.gpu
         else:
-            labels['arrowhead']='empty'
-        return {k:v for k, v in labels.items() if v}
+            gpu1 = False
 
-    def get_subgraph(self, subname, label, graph=None):
-        if graph is None:
-            graph = self.graph
+        if source:
+            attrs['headlabel']=self.head_label(isource, source)
+            sourcefeatures = self.get_features(source.entry)
+            gpu2 = sourcefeatures.gpu
+            if sourcefeatures.frozen:
+                attrs['arrowhead']='tee'
+                style+='dashed',
+        else:
+            attrs['arrowhead']='empty'
+            gpu2 = False
 
-        if not subname:
-            return graph
+        if gpu1 or gpu2:
+            attrs['color']    =self.gpucolor
 
-        subname = 'cluster_'+subname
-        subgraph = graph.get_subgraph(subname)
-        if subgraph is None:
-            subgraph=graph.add_subgraph(name=subname, label=label)
+        if gpu1^gpu2:
+            style+='tapered',
+            attrs['penwidth'] =self.gpupenwidth
+            attrs['arrowhead']='none'
 
-        return subgraph
+        if gpu1 and gpu2:
+            attrs['dir']      ='forward'
+        elif gpu1:
+            attrs['dir']      ='forward'
+        elif gpu2:
+            attrs['dir']      ='back'
+            attrs['arrowtail']='none'
 
-    def get_graph(self, name):
-        return self.graph
-        subname = None
-        label = None
-        graph = self.graph
+        attrs['style']=','.join(style)
+        return {k:v for k, v in attrs.items() if v}
 
-        if 'AD' in name:
-            idx = name.find('AD')
-            ad = name[idx:idx+4]
-            subname=ad
-            label=ad
+    def edge_attrs_var(self, var, tovar=False):
+        ret=dict(color=self.varcolor, layer='variable')
+        if tovar:
+            ret['weight']=0.5
+        else:
+            ret['weight']=1.0
 
-            eh = 'EH'+ad[2]
-            graph = self.get_subgraph(eh, eh, graph)
-        elif 'EH' in name:
-            idx = name.find('EH')
-            eh = name[idx:idx+3]
-            subname = eh
-            label=eh
-            print(eh )
-        elif 'NL' in name:
-            subname = 'NL'
-            label='NL'
-
-        return self.get_subgraph(subname, label, graph)
-
-    def walk_back( self, entry ):
-        if self.registered( entry ):
-            return
-
-        name = self.entryfmt.format(name=entry.name, label=entry.label)
-        graph = self.get_graph(name)
-
-        """Add a node for current Entry"""
-        node = graph.add_node( uid(entry), label=name )
-
-        """For each sink of the Entry walk forward and build tree"""
-        self.walk_forward( entry )
-
-        """For each source of the Entry walk backward and build the tree"""
-        for i, source in enumerate(entry.sources):
-            if not source.sink:
-                graph.add_node( uid(source)+' in', shape='point', label='in' )
-                graph.add_edge( uid(source)+' in', uid(entry), **self.get_labels(i, source) )
-                continue
-
-            self.walk_back( source.sink.entry )
-
-    def walk_forward( self, entry, graph=None ):
-        if graph is None:
-            graph = self.graph
-
-        for i, sink in enumerate( entry.sinks ):
-            if self.registered( sink ):
-                continue
-
-            if sink.sources.size()==0:
-                """In case sink is not connected, draw empty output"""
-                graph.add_node( uid(sink)+' out', shape='point', label='out' )
-                graph.add_edge( uid(sink.entry), uid(sink)+' out', **self.get_labels(i, sink) )
-                continue
-            elif sink.sources.size()==1 or not self.joints:
-                """In case there is only one connection draw it as is"""
-                for j, source in enumerate(sink.sources):
-                    graph.add_edge( uid(sink.entry), uid(source.entry), sametail=str(i), **self.get_labels(i, sink, None, source))
-                    self.walk_back( source.entry )
-            else:
-                """In case there is more than one connections, merge them"""
-                joint = graph.add_node( uid(sink), shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.get_tail_label(None, sink) )
-                graph.add_edge( uid(sink.entry), uid(sink), arrowhead='none', weight=0.5 )
-                for j, source in enumerate(sink.sources):
-                    graph.add_edge( uid(sink), uid(source.entry), **self.get_labels(i, None, None, source))
-                    self.walk_back( source.entry )
+        return ret
 

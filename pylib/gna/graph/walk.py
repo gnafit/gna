@@ -2,24 +2,44 @@
 
 from __future__ import print_function
 import ROOT as R
-from collections import deque
+from collections import deque, namedtuple, OrderedDict
 import numpy as N
+import types
+
+VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_entry', 'taints_entry', 'depends_var', 'taints_var'])
 
 class GraphWalker(object):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._entry_points = []
         for arg in args:
             self._add_entry_point(arg)
 
-        self.build_cache()
+        self._build_cache()
+
+        ns = kwargs.get('namespace', None)
+        if ns:
+            self.set_parameters(ns)
 
     def _add_entry_point(self, arg):
-        if isinstance(arg, R.TransformationTypes.OutputHandle):
-            entry = R.OpenOutputHandle(arg).getEntry()
-        elif isinstance(arg, R.TransformationTypes.Handle):
-            entry = R.OpenHandle(arg).getEntry()
-        else:
-            raise TypeError('Unsupported argument type '+type(arg).__name__)
+        OutputHandle = R.TransformationTypes.OutputHandleT('double')
+        Handle = R.TransformationTypes.HandleT('double', 'double')
+        SingleOutput = R.SingleOutputT('double')
+
+        if isinstance(arg, (types.GeneratorType)):
+            arg = list(arg)
+        if not isinstance(arg, (list, tuple)):
+            arg = [arg]
+
+        for t in arg:
+            if isinstance(t, OutputHandle):
+                entry = R.OpenOutputHandleT('double','double')(t).getEntry()
+            elif isinstance(t, Handle):
+                entry = R.OpenHandleT('double','double')(t).getEntry()
+            elif isinstance(t, SingleOutput):
+                entry = R.OpenOutputHandleT('double','double')(t.single()).getEntry()
+            else:
+                # raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
+                raise TypeError('Unsupported argument type '+type(arg).__name__)
 
         self._entry_points.append(entry)
 
@@ -32,18 +52,30 @@ class GraphWalker(object):
 
                 queue.append(other)
 
+            if sink.sources.size()==0:
+                self.cache_sinks_open.append(sink)
+
     def _propagate_backward(self, entry, queue):
         for source in entry.sources:
-            other=source.sink.entry
-            if other in queue or other in self.cache_entries:
-                continue
+            sink = source.sink
 
-            queue.append(other)
+            if sink:
+                other=sink.entry
+                if other in queue or other in self.cache_entries:
+                    continue
 
-    def build_cache(self):
+                queue.append(other)
+            else:
+                self.cache_sources_open.append(source)
+
+    def _build_cache(self):
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
+        self.cache_variables=OrderedDict()
+
+        self.cache_sources_open=[]
+        self.cache_sinks_open=[]
 
         queue=deque(self._entry_points)
         while queue:
@@ -56,6 +88,55 @@ class GraphWalker(object):
             self._propagate_forward(entry, queue)
             self._propagate_backward(entry, queue)
 
+    def set_parameters(self, ns):
+        self.cache_variables=OrderedDict()
+        for (name, par) in ns.walknames():
+            var = par.getVariable()
+            # print('walk', name, var.hash())
+            self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [])
+
+        for varentry in self.cache_variables.values():
+            for transentry in self.cache_entries:
+                dist = transentry.tainted.distance(varentry.variable, True, 1)
+                if dist!=1:
+                    continue
+                varentry.taints_entry.append(transentry)
+
+                # print(varentry.variable.name(), '->', transentry.name)
+
+            for varentry1 in self.cache_variables.values():
+                dist = varentry1.variable.distance(varentry.variable, True, 1)
+                if dist!=1:
+                    continue
+                varentry.taints_var.append(varentry1)
+                varentry1.depends_var.append(varentry)
+
+                # print(varentry.variable.name(), '->', varentry1.variable.name())
+
+        for varhash in list(self.cache_variables.keys()):
+            varentry = self.cache_variables.get(varhash, None)
+            if varentry is None:
+                continue
+
+            self._remove_deadend_variable(varhash, varentry)
+
+    def _remove_deadend_variable(self, varhash, varentry):
+        # print('check', varentry.variable.name())
+        if varentry.taints_var or varentry.taints_entry:
+            return
+
+        # print('  remove', varentry.variable.name())
+
+        del self.cache_variables[varhash]
+        upstream = varentry.depends_var
+
+        for varentry1 in varentry.taints_var:
+            varentry1.depends_var.remove(varentry)
+
+        for varentry1 in upstream:
+            varentry1.taints_var.remove(varentry)
+            self._remove_deadend_variable(varentry1.variable.hash(), varentry1)
+
     def _list_do(self, lst, *args):
         for obj in lst:
             for fcn in args:
@@ -66,6 +147,15 @@ class GraphWalker(object):
 
     def sink_do(self, *args):
         return self._list_do(self.cache_sinks, *args)
+
+    def source_do(self, *args):
+        return self._list_do(self.cache_sources, *args)
+
+    def variable_do(self, *args):
+        return self._list_do(self.cache_variables.values(), *args)
+
+    def source_open_do(self, *args):
+        return self._list_do(self.cache_sources_open, *args)
 
     def get_edges(self):
         edges=0

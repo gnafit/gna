@@ -8,6 +8,7 @@ using namespace Eigen;
 using namespace std;
 
 Integrator21Base::Integrator21Base(size_t xbins, int xorders, double* xedges, int yorder, double ymin, double ymax) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_xorders(xbins),
 m_yorder(yorder),
 m_ymin(ymin),
@@ -19,6 +20,7 @@ m_yweights(yorder)
 }
 
 Integrator21Base::Integrator21Base(size_t xbins, int* xorders, double* xedges, int yorder, double ymin, double ymax) :
+GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
 m_yorder(yorder),
 m_ymin(ymin),
@@ -34,26 +36,23 @@ void Integrator21Base::init_base(double* xedges) {
         m_xedges=Map<const ArrayXd>(xedges, m_xorders.size()+1);
     }
 
-    add();
 }
 
-TransformationDescriptor Integrator21Base::add(){
-    int num=transformations.size()-1;
-    std::string name="hist";
-    if(num>0){
-      name = fmt::format("{0}_{1:02d}", name, num);
-    }
-    transformation_(name)
-        .input("f")
-        .output("hist")
+TransformationDescriptor Integrator21Base::add_transformation(const std::string& name){
+    transformation_(new_transformation_name(name))
         .types(TypesFunctions::ifPoints<0>, &Integrator21Base::check_base)
+        .types(TypesFunctions::ifSame)
         .func(&Integrator21Base::integrate)
         ;
+    reset_open_input();
     return transformations.back();
 }
 
 void Integrator21Base::check_base(TypesFunctionArgs& fargs){
-    fargs.rets[0]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+    auto& rets=fargs.rets;
+    for(size_t i(0); i<rets.size(); ++i){
+      rets[i]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+    }
 
     auto& shape=fargs.args[0].shape;
     if (shape[0]!=static_cast<size_t>(m_xweights.size()) || shape[1]!=static_cast<size_t>(m_yweights.size())){
@@ -73,16 +72,21 @@ void Integrator21Base::check_base(TypesFunctionArgs& fargs){
 }
 
 void Integrator21Base::integrate(FunctionArgs& fargs){
-    auto& arg=fargs.args[0];
-    auto& ret=fargs.rets[0];
+    auto& args=fargs.args;
+    auto& rets=fargs.rets;
 
-    ArrayXd prod = (arg.arr2d*m_weights).rowwise().sum();
-    auto* data_start = prod.data();
-    for (size_t i = 0; i < static_cast<size_t>(m_xorders.size()); ++i) {
-        size_t n = m_xorders[i];
-        auto* data_end=std::next(data_start, n);
-        ret.x(i) = std::accumulate(data_start, data_end, 0.0);
-        data_start=data_end;
+    for (size_t i = 0; i < args.size(); ++i) {
+      auto& arg=args[i].arr2d;
+      auto& ret=rets[i].x;
+
+      ArrayXd prod = (arg*m_weights).rowwise().sum();
+      auto* data_start = prod.data();
+      for (size_t i = 0; i < static_cast<size_t>(m_xorders.size()); ++i) {
+          size_t n = m_xorders[i];
+          auto* data_end=std::next(data_start, n);
+          ret(i) = std::accumulate(data_start, data_end, 0.0);
+          data_start=data_end;
+      }
     }
 }
 
@@ -93,17 +97,20 @@ void Integrator21Base::init_sampler() {
       .output("xedges")
       .output("xmesh")
       .output("ymesh")
+      .output("xhist")
       .types(&Integrator21Base::check_sampler)
       .func(&Integrator21Base::sample)
       ;
 
-  if(m_xedges.size()){
-    trans.finalize();
+  if(!m_xedges.size()){
+    trans.input("edges", /*inactive*/true) //hist with edges
+         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>);
   }
-  else{
-    trans.input("edges") //hist with edges
-      .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>);
-  }
+  trans.finalize();
+
+  add_transformation();
+  add_input();
+  set_open_input();
 }
 
 void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
@@ -119,7 +126,8 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
     auto& edges=fargs.args[0].edges;
     m_xedges=Map<const ArrayXd>(edges.data(), edges.size());
   }
-  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[5].hist().edges(m_xedges.size(), m_xedges.data());
 }
 
 void Integrator21Base::dump(){
@@ -130,4 +138,12 @@ void Integrator21Base::dump(){
     std::cout<<"Y order: "<<m_yorder<<std::endl;
     std::cout<<"Y weights: "<<m_yweights.transpose()<<std::endl;
 
+}
+
+void Integrator21Base::set_edges(OutputDescriptor& hist_output){
+    auto& inputs=transformations.front().inputs;
+    if(!inputs.size()){
+        throw std::runtime_error("Can not bind bin edges since bin edges were provided in the constructor.");
+    }
+    inputs.front()(hist_output);
 }

@@ -1,6 +1,9 @@
 #pragma once
 
-#include "Parametrized.hh"
+#include <boost/noncopyable.hpp>
+#include "ParametrizedBase.hh"
+#include "VariableDescriptor.hh"
+#include "EvaluableDescriptor.hh"
 #include "TransformationDescriptor.hh"
 #include "TransformationBase.hh"
 #include "TransformationBind.hh"
@@ -9,15 +12,16 @@
 template <typename SourceFloatType,typename SinkFloatType> class GNAObjectT;
 
 template <>
-class GNAObjectT<void,void> {
+class GNAObjectT<void,void>: public boost::noncopyable {
 protected:
   GNAObjectT() = default;
+  virtual ~GNAObjectT(){}
 };
 
 template <typename SourceFloatType,typename SinkFloatType>
 class GNAObjectT: public GNAObjectT<void,void>,
                   public virtual TransformationTypes::BaseT<SourceFloatType,SinkFloatType>,
-                  public virtual ParametrizedTypes::Base {
+                  public virtual ParametrizedTypes::ParametrizedBase {
 public:
   using VariablesContainer = ParametrizedTypes::VariablesContainer;
   using EvaluablesContainer = ParametrizedTypes::EvaluablesContainer;
@@ -31,21 +35,22 @@ public:
 
   GNAObjectT()
     : TransformationBaseType(),
-      ParametrizedTypes::Base(),
-      variables(ParametrizedTypes::Base::m_entries),
+      ParametrizedTypes::ParametrizedBase(),
+      variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
     { }
-  GNAObjectT(const GNAObjectType &other)
-    : TransformationBaseType(other),
-      ParametrizedTypes::Base(other),
-      variables(ParametrizedTypes::Base::m_entries),
-      evaluables(m_eventries),
-      transformations(TransformationBaseType::m_entries)
-    { }
+  //GNAObjectT(const GNAObjectType &other)
+    //: TransformationBaseType(other),
+      //ParametrizedTypes::ParametrizedBase(other),
+      //variables(ParametrizedTypes::ParametrizedBase::m_entries),
+      //evaluables(m_eventries),
+      //transformations(TransformationBaseType::m_entries)
+    //{ }
+  virtual ~GNAObjectT(){}
 
   void subscribe(taintflag flag) {
-    ParametrizedTypes::Base::subscribe_(flag);
+    ParametrizedTypes::ParametrizedBase::subscribe_(flag);
   }
 
   TransformationDescriptorType operator[](size_t idx) {
@@ -58,6 +63,8 @@ public:
 
   void dumpObj();
 
+  void variablesBound();
+
   Variables variables;
   Evaluables evaluables;
   Transformations transformations;
@@ -65,8 +72,8 @@ protected:
   class SingleTransformation { };
   GNAObjectT(SingleTransformation)
     : TransformationBaseType(1),
-      ParametrizedTypes::Base(),
-      variables(ParametrizedTypes::Base::m_entries),
+      ParametrizedTypes::ParametrizedBase(),
+      variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
   { }
@@ -80,6 +87,11 @@ protected:
   using Handle = TransformationTypes::HandleT<SourceFloatType,SinkFloatType>;
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
   using TransformationBaseType::t_;
+
+  using OutputDescriptor = OutputDescriptorT<SourceFloatType,SinkFloatType>;
+  using OutputDescriptors = typename OutputDescriptor::OutputDescriptors;
+  using InputDescriptor = InputDescriptorT<SourceFloatType,SinkFloatType>;
+  using SingleOutput = SingleOutputT<SinkFloatType>;
 
   using Function = TransformationTypes::FunctionT<SourceFloatType,SinkFloatType>;
   using TypesFunction = TransformationTypes::TypesFunctionT<SourceFloatType,SinkFloatType>;
@@ -100,9 +112,9 @@ public:
   GNASingleObjectT()
     : GNAObjectT<SourceFloatType,SinkFloatType>(SingleTransformation())
   { }
-  GNASingleObjectT(const GNASingleObjectType &other)
-    : GNAObjectT<SourceFloatType,SinkFloatType>(other)
-  { }
+  //GNASingleObjectT(const GNASingleObjectType &other)
+    //: GNAObjectT<SourceFloatType,SinkFloatType>(other)
+  //{ }
 
   OutputHandle single() override {
     return (*this)[0].outputs.single();

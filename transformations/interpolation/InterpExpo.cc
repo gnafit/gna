@@ -5,24 +5,17 @@
 #include <TMath.h>
 #include <stdexcept>
 
-#include "config_vars.h"
-#ifdef GNA_CUDA_SUPPORT
-#include "cuInterpExpo.hh"
-#include "DataLocation.hh"
-
-#endif
-
 using std::next;
 using std::prev;
 using std::advance;
 using TMath::Exp;
 
-
-
 //InterpExpo::InterpExpo(const std::string& underflow_strategy, const std::string& overflow_strategy) : InSegment() {
 
 InterpExpo::InterpExpo() : InSegment() {
-  add_transformation(false);
+  add_transformation();
+  add_input();
+  set_open_input();
 
   //if(underflow_strategy.length()){
     //this->setUnderflowStrategy(underflow_strategy);
@@ -35,7 +28,7 @@ InterpExpo::InterpExpo() : InSegment() {
 InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& newx) : InterpExpo()
 {
   set(x, newx);
-  bind_transformations();
+  bind_inputs();
 }
 
 InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpExpo()
@@ -43,13 +36,8 @@ InterpExpo::InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : I
   interpolate(x, y, newx);
 }
 
-TransformationDescriptor InterpExpo::add_transformation(bool bind){
-  int num=transformations.size();
-  std::string name="interp";
-  if(num>1){
-      name = fmt::format("{0}_{1:02d}", name, num);
-  }
-  transformation_(name)
+TransformationDescriptor InterpExpo::add_transformation(const std::string& name){
+  transformation_(new_transformation_name(name))
     .input("newx")             /// 0
     .input("x")                /// 1
     .input("insegment")        /// 2
@@ -69,9 +57,8 @@ TransformationDescriptor InterpExpo::add_transformation(bool bind){
 #endif
     ;
 
-  if(bind){
-    bind_transformations(false);
-  }
+  reset_open_input();
+  bind_transformations();
   return transformations.back();
 }
 
@@ -82,32 +69,18 @@ void InterpExpo::set(SingleOutput& x, SingleOutput& newx){
   sinputs[1].connect(x.single());
 }
 
-InputDescriptor InterpExpo::add_input(){
-std::cerr << "Input wrong 1" << std::endl;
-    auto interp=transformations.back();
-std::cerr << "Input wrong 2" << std::endl;
-    auto input=interp.inputs.back();
-std::cerr << "Input wrong 3" << std::endl;
-    if(input.bound()){
-std::cerr << "Input wrong 4" << std::endl;
-        auto ninputs=interp.inputs.size()-3;
-std::cerr << "Input wrong 5" << std::endl;
-        input=interp.input(fmt::format("{0}_{1:02d}", "y", ninputs));
-std::cerr << "Input wrong 6" << std::endl;
-        interp.output(fmt::format("{0}_{1:02d}", "interp", ninputs));
-    }
+void InterpExpo::bind_transformations(){
+  auto segments=transformations.front();
+  auto interp=transformations.back();
 
-std::cerr << "Input wrong 7" << std::endl;
-    return input;
+  auto& outputs=segments.outputs;
+  auto& inputs=interp.inputs;
+
+  outputs[0]>>inputs[2];
+  outputs[1]>>inputs[3];
 }
 
-OutputDescriptor InterpExpo::add_input(SingleOutput& y){
-  auto input=add_input();
-  input.connect(y.single());
-  return OutputDescriptor(transformations.back().outputs.back());
-}
-
-void InterpExpo::bind_transformations(bool bind_inputs){
+void InterpExpo::bind_inputs(){
   auto segments=transformations.front();
   auto interp=transformations.back();
 
@@ -115,27 +88,18 @@ void InterpExpo::bind_transformations(bool bind_inputs){
   auto& outputs=segments.outputs;
   auto& inputs=interp.inputs;
 
-  if(bind_inputs) {
-    seg_inputs[0].output()>>inputs[0];
-    seg_inputs[1].output()>>inputs[1];
-  }
-  outputs[0]>>inputs[2];
-  outputs[1]>>inputs[3];
+  seg_inputs[0].output()>>inputs[0];
+  seg_inputs[1].output()>>inputs[1];
 }
 
 OutputDescriptor InterpExpo::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
-std::cerr << "Whats wrong 1" << std::endl;
   set(x, newx);
-std::cerr << "Whats wrong 2" << std::endl;
   auto output=add_input(y);
-std::cerr << "Whats wrong 3" << std::endl;
-  bind_transformations();
-std::cerr << "Whats wrong 4" << std::endl;
+  bind_inputs();
   return output;
 }
 
 void InterpExpo::do_interpolate(FunctionArgs& fargs){
-	std::cout << "Interp ON HOST" << std::endl;
   auto& args=fargs.args;                                                  /// name inputs
   auto& rets=fargs.rets;                                                  /// name outputs
 
@@ -169,7 +133,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
       else if( *insegment>=nseg ){ /// overflow, extrapolate
         idx=nseg-1u;
       }
-      *result = *next(y_buffer, idx) * Exp((*next(x_buffer, idx) - *point)*(*next(b_buffer, idx)));
+      *result = y_buffer[idx] * Exp((x_buffer[idx] - *point)*(b_buffer[idx]));
 
       advance(point, 1);
       advance(result, 1);

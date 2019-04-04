@@ -11,7 +11,7 @@ m_propagate_matrix(propagate_matrix)
 }
 
 TransformationDescriptor HistSmearSparse::add_transformation(const std::string& name){
-  auto init=transformation_(new_transformation_name(name))
+  transformation_(new_transformation_name(name))
     .input("FakeMatrix")
     .dont_subscribe()
     .types(TypesFunctions::if2d<0>, TypesFunctions::ifSquare<0>)
@@ -26,6 +26,7 @@ TransformationDescriptor HistSmearSparse::add_transformation(const std::string& 
            })
     .func(&HistSmearSparse::calcSmear);
 
+  reset_open_input();
   bind_tfirst_tlast(0, 0);
 
   return transformations.back();

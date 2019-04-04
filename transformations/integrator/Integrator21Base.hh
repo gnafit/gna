@@ -1,13 +1,15 @@
 #pragma once
 
 #include "GNAObject.hh"
+#include "GNAObjectBind1N.hh"
 #include <Eigen/Dense>
 
-class Integrator21Base : public GNAObject,
-                       public TransformationBind<Integrator21Base>
+class Integrator21Base : public GNAObjectBind1N,
+                         public TransformationBind<Integrator21Base>
 {
 public:
-  TransformationDescriptor add();
+  TransformationDescriptor add_transformation(const std::string& name="");
+  void set_edges(OutputDescriptor& hist2_output);
 
   void dump();
 

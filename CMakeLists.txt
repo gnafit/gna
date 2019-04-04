@@ -8,9 +8,8 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 
 if(CUDA_SUPPORT)
-    find_package( CUDA REQUIRED)
+    find_package(CUDA REQUIRED)
     include_directories(cuda/operations/ cuda/extra/ cuda/core/)
-    include_directories( ${CMAKE_BINARY_DIR}/generated/ )
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
         set(CUDA_MAT_SIZE_THRESHOLD 100)
     endif()
@@ -38,12 +37,11 @@ else()
     set(CUHEADERS "")
 endif()
 
-if (NOT CUDA_DEBUG_INFO )
+if (NOT CUDA_DEBUG_INFO)
     set(CUDA_DEBUG_INFO 0)
 endif()
 
-
-
+configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 
 add_subdirectory(core)
 add_subdirectory(transformations)
@@ -51,15 +49,34 @@ add_subdirectory(extra)
 add_subdirectory(examples)
 add_subdirectory(unittest)
 
-set(SOURCES ${CORE_SOURCES} ${TRANSFORMATION_SOURCES} ${EXTRA_SOURCES} ${EXAMPLES_SOURCES} ${UNITTEST_SOURCES})
-set(HEADERS ${CUHEADERS} ${CORE_HEADERS} ${TRANSFORMATION_HEADERS} ${EXTRA_HEADERS} ${EXAMPLES_HEADERS} ${UNITTEST_HEADERS})
+set(SOURCES
+    ${CORE_SOURCES}
+    ${TRANSFORMATION_SOURCES}
+    ${EXTRA_SOURCES}
+    ${EXAMPLES_SOURCES}
+    ${UNITTEST_SOURCES}
+    )
 
-include_directories(core/parameters/
+set(HEADERS
+    ${CUHEADERS}
+    ${CORE_HEADERS}
+    ${TRANSFORMATION_HEADERS}
+    ${EXTRA_HEADERS}
+    ${EXAMPLES_HEADERS}
+    ${UNITTEST_HEADERS}
+    )
+
+include_directories(
+                    ${CMAKE_BINARY_DIR}/generated/
+                    core/parameters/
+                    core/parametrized/
                     core/transformation/
                     core/
                     transformations/trial/
                     transformations/backgrounds/
                     transformations/base/
+                    transformations/sum/
+                    transformations/ratio/
                     transformations/calculus/
                     transformations/detector/
                     transformations/functions/
@@ -82,6 +99,11 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
+add_custom_target(cleanpyc ALL
+                  COMMAND find . -name '*.pyc' -delete
+                  COMMENT "Cleaning temporary python files"
+                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
 option(GENERATE_PROFILE OFF)
 option(USE_PROFILE OFF)
 option(UB_SANITIZE OFF)
@@ -101,7 +123,7 @@ set(BUILD_SHARED_LIBS ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD 14)
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
 include(compilation_opts)
 include(debug_opts)

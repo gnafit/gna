@@ -36,23 +36,20 @@ namespace TransformationTypes
     HandleT(EntryType &entry) : m_entry(&entry) { }                 ///< Constructor. @param entry -- an Entry instance to wrap.
     HandleT(const HandleType &other): HandleT(*other.m_entry) { }   ///< Constructor. @param other -- Handle instance to get Entry to wrap.
 
-    const std::string &name() const { return m_entry->name; }                 ///< Get entry name.
-    const std::string &label() const { return m_entry->label; }               ///< Get entry label.
-    void  setLabel(const std::string& label) const { m_entry->label=label; }  ///< Set entry label.
-    std::vector<InputHandleType> inputs() const;                              ///< Get vector of inputs.
-    std::vector<OutputHandleType> outputs() const;                            ///< Get vector of outputs.
+    const std::string &name() const { return m_entry->name; }                            ///< Get entry name.
+    const std::string &label() const { return m_entry->attrs["_label"]; }                ///< Get entry label.
+    void  setLabel(const std::string& label) const { m_entry->attrs["_label"]=label; }   ///< Set entry label.
+    std::vector<InputHandleType> inputs() const;                                         ///< Get vector of inputs.
+    std::vector<OutputHandleType> outputs() const;                                       ///< Get vector of outputs.
 
-    /**
-     * @brief Add named input.
-     * @param name -- Source name.
-     * @return InputHandle for the newly created Source.
-     */
-    InputHandleType input(const std::string &name) {
-      return m_entry->addSource(name);
-    }
+    InputHandleType input(const std::string &name);                                      ///< Add named input.
+    InputHandleType input(const std::string &name, int mapto);                           ///< Add named input.
 
-    InputHandleType input(SingleOutputType &output);                          ///< Create a new input and connect to the SingleOutput transformation.
-    InputHandleType input(const std::string &name, SingleOutputType &output); ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(SingleOutputType &output);                                     ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(const std::string &name, SingleOutputType &output);            ///< Create a new input and connect to the SingleOutput transformation.
+
+    InputHandleType input(SingleOutputType &output, int mapto);                          ///< Create a new input and connect to the SingleOutput transformation.
+    InputHandleType input(const std::string &name, SingleOutputType &output, int mapto); ///< Create a new input and connect to the SingleOutput transformation.
 
     /**
      * @brief Add new named output.
@@ -81,13 +78,20 @@ namespace TransformationTypes
      * @param i -- Entry's Sink's index.
      */
     void update(int i) const { (void)m_entry->data(i); }
+    void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
+
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
+#endif
 
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
 
     void taint() { m_entry->tainted.taint(); }              ///< Taint the Entry's taintflag. The outputs will be evaluated upon request.
     bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
     taintflag& expose_taintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
+
+    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Read the variables
 
     /**
      * @brief Switch the active Function.
@@ -102,7 +106,6 @@ namespace TransformationTypes
     void dump() const { m_entry->dump(0); }                 ///< Call Entry::dump(). @copydoc Entry::dump()
     void dumpObj() const;                                   ///< Print Entry's Sink and Source instances and their connection status.
   protected:
-    EntryType *m_entry;                                         ///< Wrapped Entry pointer.
+    EntryType *m_entry;                                     ///< Wrapped Entry pointer.
   }; /* class Handle */
-
 } /* TransformationTypes */

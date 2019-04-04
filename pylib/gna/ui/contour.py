@@ -224,7 +224,7 @@ class cmd(basecmd):
         parser.add_argument('--xlim', type=float, nargs=2)
         parser.add_argument('--labels', nargs='+')
         parser.add_argument('--legend', nargs=2)
-        parser.add_argument('--title', default='', required=False, 
+        parser.add_argument('--title', default='', required=False,
                             help='Set a title to the plot')
         parser.add_argument('--no-bestfit', action='store_false',
         help='Do not show best fit point with contour')

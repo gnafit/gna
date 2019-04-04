@@ -44,12 +44,10 @@ public:
   InterpExpo(SingleOutput& x, SingleOutput& newx);                                                             ///< Constructor.
   InterpExpo(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                            ///< Constructor.
 
-  TransformationDescriptor add_transformation(bool bind=true);
-  void bind_transformations(bool bind_inputs=true);
+  TransformationDescriptor add_transformation(const std::string& name="");
+  void bind_transformations();
+  void bind_inputs();
   void set(SingleOutput& x, SingleOutput& newx);
-  InputDescriptor  add_input();
-  OutputDescriptor add_input(SingleOutput& y);
-
   OutputDescriptor interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                        ///< Initialize transformations by connecting `x`, `y` and `newy` outputs.
 
   //void setUnderflow(double value) { m_underflow = value; }                                                 ///< Set value to write into underflow points when strategy=Constant.
