@@ -23,6 +23,9 @@ set(CUSOURCES
   operations/weightedsum.cu
   operations/product.cu
   operations/identity.cu
+  operations/exp.cu
+  operations/selfpower.cu
+  operations/poisson.cu
   extra/cuOscProbPMNS.cu
   )
 
@@ -35,9 +38,6 @@ set(CUHEADERS
   extra/cuInterpExpo.hh
   core/cuElementary.hh
   extra/cuOscProbPMNS.hh
-#  extra/GNAcuMath.h
-#  extra/GNAcuOscProbFull.h
-#  extra/GNAcuOscProbMem.hh
   )
 
 configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
