@@ -13,9 +13,14 @@ def GNAObject____str__(self):
     return '[obj] {}: {:d} transformation(s), {:d} variables'.format(self.__class__.__name__, self.transformations.size(), self.variables.size())
 
 @patchROOTClass(classes, 'print')
-def GNAObject__print(self):
-    self.printtransformations()
-    if not self.variables:
+def GNAObject__print(self, **kwargs):
+    print_trans = kwargs.pop('transformations', True)
+    print_vars = kwargs.pop('variables', True)
+
+    if print_vars:
+        self.printtransformations(**kwargs)
+
+    if not self.variables or not print_vars:
         return
 
     if self.variables.size()>0:
@@ -23,14 +28,14 @@ def GNAObject__print(self):
         self.printvariables()
 
 @patchROOTClass(classes, 'printtransformations')
-def GNAObject__printtransformations(self):
+def GNAObject__printtransformations(self, **kwargs):
     printl(str(self))
     if self.transformations.size():
         with nextlevel():
             # printl('Transformations:')
             for i, t in enumerate(self.transformations.itervalues()):
                 printl('{:2d}'.format(i), end=' ')
-                t.print()
+                t.print(**kwargs)
 
 @patchROOTClass(classes, 'printvariables')
 def GNAObject__printvariables(self):

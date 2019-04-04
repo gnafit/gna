@@ -12,15 +12,15 @@ def TransformationDescriptor____str__(self):
     return '[trans] {}: {:d} input(s), {:d} output(s)'.format(self.name(), self.inputs.size(), self.outputs.size())
 
 @patchROOTClass(classes, 'print')
-def TransformationDescriptor__print(self):
+def TransformationDescriptor__print(self, **kwargs):
     printl(str(self))
     with nextlevel():
         for i, inp in enumerate(self.inputs.itervalues()):
             printl('{:2d}'.format(i), end=' ')
-            inp.print()
+            inp.print(**kwargs)
         for i, o in enumerate(self.outputs.itervalues()):
             printl('{:2d}'.format(i), end=' ')
-            o.print()
+            o.print(**kwargs)
 
 @patchROOTClass(classes, 'single')
 def TransformationDescriptor__single(self):
