@@ -69,7 +69,7 @@ op_sum.plot_vs(enu.single(), '--', label='oscprob (sum)')
 ax.legend(loc='lower right')
 
 savefig('output/test_oscprob.pdf')
-savegraph(enu, 'output/test_oscprob_graph.dot')
-savegraph(enu, 'output/test_oscprob_graph.pdf')
+savegraph(enu, 'output/test_oscprob_graph.dot', namespace=ns)
+savegraph(enu, 'output/test_oscprob_graph.pdf', namespace=ns)
 
 plt.show()
