@@ -99,8 +99,8 @@ class GNADot(object):
 
     def _action_source_open(self, source, i=0):
         sourceuid = self.entry_uid(source, 'source')
-        graph.add_node( sourceuid, shape='point', label='in' )
-        graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
+        self.graph.add_node( sourceuid, shape='point', label='in' )
+        self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
     def _action_sink(self, sink, i=0):
         if sink.sources.size()==0:
@@ -155,16 +155,16 @@ class TreeStyle(object):
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
-        def getdim(sink):
+        def getdim(sink, offset=0):
             if not sink.materialized():
-                return None
+                return '?',
 
-            return tuple('%i'%d for d in sink.data.type.shape)
+            return tuple('%i'%(d+offset) for d in sink.data.type.shape)
 
         mark=None
         dim=None
         npars=0
-        if objectname in ('Sum', 'MultiSum'):
+        if objectname in ('Sum', 'MultiSum', 'SumBroadcast'):
             mark='+'
             dim = getdim(entry.sinks[0])
         elif objectname in ('WeightedSum'):
@@ -191,7 +191,10 @@ class TreeStyle(object):
             mark='~'
             dim = getdim(entry.sinks.back())
         elif objectname in ('InSegment',):
-            mark='[]'
+            mark=u'∈'
+            dim1 = 'x'.join(getdim(entry.sinks[0]))
+            dim2 = 'x'.join(getdim(entry.sinks[1], 1))
+            dim = u']∈['.join((dim1, dim2)),
         elif objectname in ('Points',):
             features.static=True
             mark='a'
@@ -245,6 +248,8 @@ class TreeStyle(object):
         variable=varentry.variable
 
         label=variable.name()
+        value = str(variable.value())
+        label+='='+value
 
         size=variable.values().size()
         if size>1:
@@ -256,7 +261,7 @@ class TreeStyle(object):
         return ret
 
     def node_attrs(self, entry):
-        ret=dict(layer='transformation')
+        ret=dict(shape='Mrecord', layer='transformation')
         features=self.get_features(entry)
 
         styles=()
@@ -287,7 +292,6 @@ class TreeStyle(object):
             marks+='[%s]'%('x'.join(dim)),
             marks='{%s}'%('|'.join(marks)),
         if marks:
-            ret['shape']='Mrecord'
             marks+=label,
             marks='{%s}'%('|'.join(marks)),
         else:
