@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna.unittest import run_unittests, makefloat
+from gna.unittest import *
 import numpy as np
 from gna import constructors as C
 
@@ -20,6 +20,7 @@ def sum_arrays(arrays, lens):
 
     return ret
 
+@floatcopy(globals())
 def test_test():
     arrays = [np.arange(6).reshape(3,2)*i for i in range(12)]
     points = [C.Points(a) for a in arrays]
@@ -60,8 +61,6 @@ def test_test():
         print()
         print()
         print()
-
-makefloat('test_test', globals())
 
 if __name__ == "__main__":
     run_unittests(globals())

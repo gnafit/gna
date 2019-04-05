@@ -17,7 +17,7 @@ namespace GNAUnitTest{
     FloatType debug_fcn_adder();
 
     template<typename FloatType>
-    void debug_vfcn_adder(std::vector<FloatType>& dest);
+    void debug_vfcn_adder(arrayview<FloatType>& dest);
 }
 
 template<typename FloatType>
@@ -28,7 +28,7 @@ FloatType GNAUnitTest::debug_fcn_adder(){
 }
 
 template<typename FloatType>
-void GNAUnitTest::debug_vfcn_adder(std::vector<FloatType>& dest){
+void GNAUnitTest::debug_vfcn_adder(arrayview<FloatType>& dest){
   static FloatType ret=0.0;
   for (size_t i = 0; i < dest.size(); ++i) {
     dest[i] = ++ret;

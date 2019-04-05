@@ -95,16 +95,17 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
 
 void IntegratorBase::init_sampler() {
     auto trans=transformation_("points")
-        .output("x")
-        .output("xedges")
-        .output("xhist")
+        .output("x")        // 0
+        .output("xedges")   // 1
+        .output("xhist")    // 2
+        .output("xcenters") // 3
         .types(&IntegratorBase::check_sampler)
         .func(&IntegratorBase::sample)
         ;
 
     if(!m_edges.size()){
         trans.input("edges", /*inactive*/true) //hist with edges
-            .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+            .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>);
     }
     trans.finalize();
 
@@ -122,8 +123,9 @@ void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
         auto& edges=fargs.args[0].edges;
         m_edges=Map<const ArrayXd>(edges.data(), edges.size());
     }
-    rets[1]=DataType().points().shape(m_edges.size()).preallocated(m_edges.data());
-    rets[2]=DataType().hist().edges(m_edges.size(), m_edges.data());;
+    /*xedges*/   rets[1].points().shape(m_edges.size()).preallocated(m_edges.data());
+    /*xhist*/    rets[2].hist().edges(m_edges.size(), m_edges.data());;
+    /*xcenters*/ rets[3].points().shape(m_edges.size()-1);
 }
 
 void IntegratorBase::dump(){

@@ -77,3 +77,4 @@ void WeightedSumP::add(SingleOutput &out) {
   auto ninputs=trans.inputs.size();
   trans.input(fmt::format("input_{0:02d}", ninputs), out);
 }
+

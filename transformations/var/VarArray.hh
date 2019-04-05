@@ -2,13 +2,30 @@
 
 #include "GNAObject.hh"
 
-class VarArray: public GNASingleObject,
-                public TransformationBind<VarArray> {
-public:
-  VarArray(const std::vector<std::string>& varnames); ///< Constructor.
+namespace GNA{
+    namespace GNAObjectTemplates{
+        template<typename FloatType>
+        class VarArrayT: public GNASingleObjectT<FloatType,FloatType>,
+                         public TransformationBind<VarArrayT<FloatType>,FloatType,FloatType> {
+        private:
+            using BaseClass = GNASingleObjectT<FloatType,FloatType>;
+        public:
+            using typename BaseClass::FunctionArgs;
+            using typename BaseClass::TypesFunctionArgs;
+            using VarArrayType = VarArrayT<FloatType>;
 
-protected:
-  void typesFunction(TypesFunctionArgs& fargs);
-  void function(FunctionArgs& fargs);
-  std::vector<variable<double>> m_vars;              ///< List of variables.
-};
+        public:
+            VarArrayT(const std::vector<std::string>& varnames);     ///< Constructor.
+            VarArrayT(const std::vector<variable<FloatType>>& vars); ///< Constructor.
+            //VarArrayT(const std::vector<variable<void>>& vars); ///< Constructor.
+
+        protected:
+            void initTransformation();
+
+            void typesFunction(TypesFunctionArgs& fargs);
+            void function(FunctionArgs& fargs);
+
+            std::vector<variable<FloatType>> m_vars;            ///< List of variables.
+        };
+    }
+}

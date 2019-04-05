@@ -10,50 +10,16 @@ from gna.converters import array_to_stdvector_size_t
 
 """Construct std::vector object from an array"""
 from gna.converters import list_to_stdvector as stdvector
+from gna import context
 
 # Templates = R.GNA.GNAObjectTemplates
 # print('templates', Templates)
 
-_current_precision = 'double'
-_current_precision_short = 'double'
-def _set_current_precision(precision):
-    global _current_precision, _current_precision_short
-    assert precision in R.GNA.provided_precisions(), 'Unsupported precision '+precision
-    _current_precision=precision
-    _current_precision_short=precision[0]
-
-class precision(object):
-    """Context manager for the floating precision"""
-    old_precision=''
-    def __init__(self, precision):
-        self.precision=precision
-
-    def __enter__(self):
-        self.old_precision = _current_precision
-        _set_current_precision(self.precision)
-
-    def __exit__(self, *args):
-        _set_current_precision(self.old_precision)
-
-class cuda(object):
-    """Context manager for GPU
-    Makes Initializer to switch transformations to "gpu" function after initialization"""
-    backup_function=''
-    def __init__(self):
-        self.handle=R.TransformationTypes.InitializerBase
-
-    def __enter__(self):
-        self.backup_function = self.handle.getDefaultFunction()
-        self.handle.setDefaultFunction('gpu')
-
-    def __exit__(self, *args):
-        self.handle.setDefaultFunction(self.backup_function)
-
 def OutputDescriptors(outputs):
     descriptors=[]
-    odescr = R.OutputDescriptorT(_current_precision, _current_precision)
-    ohandle = R.TransformationTypes.OutputHandleT(_current_precision)
-    singleoutput = R.SingleOutputT(_current_precision)
+    odescr = R.OutputDescriptorT(context.current_precision(), context.current_precision())
+    ohandle = R.TransformationTypes.OutputHandleT(context.current_precision())
+    singleoutput = R.SingleOutputT(context.current_precision())
     for output in outputs:
         if isinstance(output, odescr):
             output = output
@@ -65,7 +31,7 @@ def OutputDescriptors(outputs):
             raise Exception('Expect OutputHandle or SingleOutput object')
         descriptors.append(output)
 
-    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>*'%(_current_precision,_current_precision))
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>*'%(context.current_precision(),context.current_precision()))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -75,21 +41,36 @@ def wrap_constructor1(obj, dtype='d'):
     return method
 
 """Construct VarArray object from vector of strings"""
-def VarArray(varnames, *args, **kwargs):
-    return R.VarArray(stdvector(varnames), *args, **kwargs)
+def VarArray(vars, *args, **kwargs):
+    cls = R.GNA.GNAObjectTemplates.VarArrayT(context.current_precision())
+    ret = cls(stdvector(vars), *args, **kwargs)
+    ret.transformations.front().updateTypes()
+    return ret
+
+"""Construct VarArrayPreallocated object from vector of strings"""
+def VarArrayPreallocated(vars, *args, **kwargs):
+    cls = R.GNA.GNAObjectTemplates.VarArrayPreallocatedT(context.current_precision())
+    ret = cls(stdvector(vars), *args, **kwargs)
+    return ret
+
+def VarSum(varnames, *args, **kwargs):
+    return R.GNA.GNAObjectTemplates.VarSumT(context.current_precision())(stdvector(varnames), *args, **kwargs)
+
+def VarProduct(varnames, *args, **kwargs):
+    return R.GNA.GNAObjectTemplates.VarProductT(context.current_precision())(stdvector(varnames), *args, **kwargs)
 
 """Construct Dummy object from vector of strings"""
 def Dummy(shape, name, varnames, *args, **kwargs):
-    return R.Dummy(shape, name, stdvector(varnames), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
 
 """Construct Points object from numpy array"""
 def Points(array, *args, **kwargs):
     """Convert array to Points"""
-    a = N.ascontiguousarray(array, dtype=_current_precision_short)
+    a = N.ascontiguousarray(array, dtype=context.current_precision_short())
     if len(a.shape)>2:
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( a.shape )
-    return R.GNA.GNAObjectTemplates.PointsT(_current_precision)( a.ravel( order='F' ), s, *args, **kwargs )
+    return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
@@ -100,11 +81,16 @@ def Sum(outputs=None, *args, **kwargs):
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, *args, **kwargs):
-    cls = R.GNA.GNAObjectTemplates.MultiSumT(_current_precision)
+    cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
     if outputs is None:
         return cls(*args, **kwargs)
 
     return cls(OutputDescriptors(outputs), *args, **kwargs)
+
+def PolyRatio(nominator=[], denominator=[], *args, **kwargs):
+    nominator = stdvector(nominator, 'string')
+    denominator = stdvector(denominator, 'string')
+    return R.GNA.GNAObjectTemplates.PolyRatioT(context.current_precision())(nominator, denominator, *args, **kwargs)
 
 """Construct WeightedSum object from lists of weights and input names/outputs"""
 def WeightedSum(weights, inputs=None, *args, **kwargs):
@@ -126,6 +112,13 @@ def WeightedSumP(inputs, *args, **kwargs):
 """Construct EnergyResolution object from lists of weights"""
 def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
+
+"""Construct SumBroadcast object from list of SingleOutputs"""
+def SumBroadcast(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.SumBroadcast(*args, **kwargs)
+
+    return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
@@ -172,16 +165,27 @@ def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):
         size = None
-        if edges is not None:
+        if isinstance(edges, R.SingleOutput):
+            edges_input, edges = edges, R.nullptr
+            size = edges_input.single().data().size
+        elif edges is not None:
             edges = N.ascontiguousarray(edges, dtype='d')
             size = edges.size-1
+            edges_input = None
+
         if not isinstance(orders, int):
             orders = N.ascontiguousarray(orders, dtype='i')
             size = orders.size
         if size is None:
             raise Exception('Insufficient parameters to determine the number of bins')
+
         cls = getattr(R, classname)
-        return cls(size, orders, edges, *args, **kwargs)
+        ret=cls(size, orders, edges, *args, **kwargs)
+
+        if edges_input:
+            edges_input >> ret.points.edges
+
+        return ret
     return newfcn
 
 IntegratorGL   = _wrap_integrator_1d('IntegratorGL')
@@ -194,4 +198,16 @@ def Rebin( edges, rounding, *args, **kwargs ):
         raise Exception('Rebin rounding should be an integer')
     edges = N.ascontiguousarray(edges, dtype='d')
     return R.Rebin(edges.size, edges, int( rounding), *args, **kwargs )
+
+def _wrap_parameter(classname):
+    def newfcn(*args, **kwargs):
+        template = getattr(R, classname)
+        return template(context.current_precision())(*args, **kwargs)
+    return newfcn
+
+Variable              = _wrap_parameter('Variable')
+Parameter             = _wrap_parameter('Parameter')
+GaussianParameter     = _wrap_parameter('GaussianParameter')
+UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
+ParameterWrapper      = _wrap_parameter('ParameterWrapper')
 

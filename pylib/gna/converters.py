@@ -9,6 +9,7 @@ from load import ROOT as R
 import numpy as N
 from collections import defaultdict
 from inspect import getmro
+from gna import context
 
 # List all converters in dict: converters['from']['to']
 converters = defaultdict( dict )
@@ -107,13 +108,18 @@ def get_cpp_type( array ):
     else:
         typemap = {
                 int: 'int',
-                float: 'double',
-                str: 'std::string'
+                float: context.current_precision(),
+                str: 'std::string',
+                'int': 'int',
+                'float': context.current_precision(),
+                'str': 'std::string',
+                'variable<double>': 'variable<double>',
+                'variable<float>': 'variable<float>',
                 }
-        atype = type( array[0] )
+        atype = type( array[0] ).__name__
     ret = typemap.get( atype )
     if not ret:
-        raise Exception( 'Do not know how to convert type '+atype )
+        raise Exception( 'Do not know how to convert type '+str(atype) )
     return ret
 
 @save_converter( list, R.vector )

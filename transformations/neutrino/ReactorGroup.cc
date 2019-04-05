@@ -36,7 +36,7 @@ ReactorGroup::ReactorGroup(size_t count)
       return s1*s1/s2;
     }, deps);
   deps.push_back(m_Lavg);
-  evaluable_<double>("weights", 3, [this](std::vector<double>& ret) {
+  evaluable_<double>("weights", 3, [this](arrayview<double>& ret) {
       ret={0.0, 0.0, 0.0};
       double sum = 0.0;
       for (size_t i = 0; i < m_Ls.size(); ++i) {

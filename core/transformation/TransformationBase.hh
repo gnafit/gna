@@ -48,7 +48,8 @@ namespace TransformationTypes {
     using EntryContainerType = boost::ptr_vector<EntryType>;
 
     BaseT(const BaseType &other);                                         ///< Clone constructor.
-    BaseT &operator=(const BaseType &other);                              ///< Clone assignment.
+    //BaseT &operator=(const BaseType &other);                              ///< Clone assignment.
+    virtual ~BaseT(){}
 
   protected:
     BaseT(): t_(*this) { }                                                ///< Default constructor.
@@ -75,7 +76,7 @@ namespace TransformationTypes {
     size_t addEntry(EntryType *e);                                       ///< Add new Entry.
     EntryContainerType m_entries;                                        ///< Vector of Entry pointers. Calls destructors when deleted.
     boost::optional<size_t> m_maxEntries;                                ///< Maximum number of allowed entries.
-    void copyEntries(const BaseType &other);                             ///< Clone entries from the other Base.
+    //void copyEntries(const BaseType &other);                             ///< Clone entries from the other Base.
   }; /* class Base */
 } /* namespace TransformationTypes */
 

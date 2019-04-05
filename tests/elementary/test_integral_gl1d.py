@@ -108,6 +108,7 @@ if opts.dump:
     integrator.dump()
     print('Abscissas:', integrator.points.x.data())
     print('Widths:', widths)
+    print('Centers:', integrator.points.xcenters.data())
 
 """Plot data"""
 # init figure

@@ -138,11 +138,11 @@ void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
     auto& yedges=arg.edgesNd[1];
     m_yedges=Map<const ArrayXd>(yedges.data(), yedges.size());
   }
-  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
-  rets[3]=DataType().points().shape(m_yedges.size()).preallocated(m_yedges.data());
+  rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[3].points().shape(m_yedges.size()).preallocated(m_yedges.data());
 
-  rets[6]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
-  rets[7]=DataType().hist().edges(m_yedges.size(), m_yedges.data());
+  rets[6].hist().edges(m_xedges.size(), m_xedges.data());
+  rets[7].hist().edges(m_yedges.size(), m_yedges.data());
 }
 
 void Integrator2Base::dump(){

@@ -1,5 +1,10 @@
 set(CORE_SOURCES
+  # Common classes
+  core/TreeManager.cc
   # Parameters
+  core/parameters/arrayviewAllocator.cc
+  core/parameters/arrayview.cc
+  core/parameters/changeable.cc
   core/parameters/variable.cc
   core/parameters/parameter.cc
   core/parameters/evaluable.cc
@@ -7,6 +12,7 @@ set(CORE_SOURCES
   # GPU staff
   core/transformation/GPUFunctionArgs.cc
   core/transformation/GPUVariablesLocal.cc
+  core/transformation/GPUVariables.cc
   core/transformation/GPUFunctionData.cc
   # Transformation
   core/transformation/TransformationEntry.cc
@@ -36,14 +42,23 @@ set(CORE_SOURCES
   core/GNAObject.cc
   core/GNAObjectBind1N.cc
   core/GNAObjectBindMN.cc
+  # core/parametrized
+  core/parametrized/ParametrizedEntry.cc
+  core/parametrized/ParametrizedBase.cc
+  core/parametrized/VariableHandle.cc
+  core/parametrized/EvaluableEntry.cc
+  core/parametrized/EvaluableHandle.cc
+  core/parametrized/VariableDescriptor.cc
+  core/parametrized/EvaluableDescriptor.cc
   # Parameter representation
   core/ParametersGroup.cc
-  core/Parametrized.cc
   core/UncertainParameter.cc
   PARENT_SCOPE
  )
 
 set(CORE_HEADERS
+  # core/ Common classes
+  TreeManager.hh
   # core/
   Data.hh
   Random.hh
@@ -76,6 +91,8 @@ set(CORE_HEADERS
   Initializer.hh
   Accessor.hh
   # variables
+  arrayviewAllocator.hh
+  arrayview.hh
   changeable.hh
   variable.hh
   parameter.hh
@@ -84,10 +101,20 @@ set(CORE_HEADERS
   dependant.hh
   evaluable.hh
   callback.hh
+  fragile.hh
   # GPU related stuff
+  GPUVariables.hh
   GPUVariablesLocal.hh
   GPUFunctionData.hh
   GPUFunctionArgs.hh
+  # core/parametrized
+  ParametrizedEntry.hh
+  ParametrizedBase.hh
+  VariableHandle.hh
+  EvaluableEntry.hh
+  EvaluableHandle.hh
+  VariableDescriptor.hh
+  EvaluableDescriptor.hh
   # Parameter representation
   UncertainParameter.hh
   # core/

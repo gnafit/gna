@@ -205,13 +205,14 @@ class Accumulate(IndexedContainer, Variable):
         obj, = self.objects
         ns = context.namespace()
         from gna.env import ExpressionsEntry
+        from gna import constructors as C
         for it in self.nindex.iterate():
             out = obj.get_output(it, context)
             varname = self.current_format(it)
 
             head, tail = varname.rsplit('.', 1)
             cns = ns(head)
-            arrsum = R.ArraySum(tail, out, ns=cns)
+            arrsum = C.ArraySum(tail, out, ns=cns)
             var = cns[tail].get()
             var.setLabel('sum of {}'.format(obj.current_format(it)))
             self.arrsums.append(arrsum)

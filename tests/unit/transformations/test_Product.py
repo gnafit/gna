@@ -5,13 +5,14 @@ from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
+from gna.unittest import *
 
-m11 = np.ones((1,), dtype='d')
-m34 = np.ones((3,4), dtype='d')
-m33 = np.ones((3,3), dtype='d')
+product_mat_m11 = np.ones((1,), dtype='d')
+product_mat_m34 = np.ones((3,4), dtype='d')
+product_mat_m33 = np.ones((3,3), dtype='d')
 
-rup   = np.arange(12.0, dtype='d').reshape(3,4)
-rdown = np.arange(12.0, dtype='d')[::-1].reshape(3,4)
+product_rup   = np.arange(12.0, dtype='d').reshape(3,4)
+product_rdown = np.arange(12.0, dtype='d')[::-1].reshape(3,4)
 
 def check_product(arrays):
     print('Test ', len(arrays), ':', sep='')
@@ -36,44 +37,41 @@ def check_product(arrays):
 
     assert (calc==truth).all()
 
-def test_01():
-    check_product([m11])
+def test_product_01():
+    check_product([product_mat_m11])
 
-def test_01a():
-    check_product([m11*2, m11*3, m11*4])
+def test_product_01a():
+    check_product([product_mat_m11*2, product_mat_m11*3, product_mat_m11*4])
 
-def test_01b():
-    check_product([m11*2, m11*0])
+def test_product_01b():
+    check_product([product_mat_m11*2, product_mat_m11*0])
 
-def test_02():
-    check_product([m34])
+def test_product_02():
+    check_product([product_mat_m34])
 
-def test_02b():
-    check_product([m34, m34*0])
+def test_product_02b():
+    check_product([product_mat_m34, product_mat_m34*0])
 
-def test_03():
-    check_product([2.0*m11, 3.0*m34])
+def test_product_03():
+    check_product([2.0*product_mat_m11, 3.0*product_mat_m34])
 
-def test_04():
-    check_product([3.0*m34, 2.0*m11])
+def test_product_04():
+    check_product([3.0*product_mat_m34, 2.0*product_mat_m11])
 
-def test_03():
-    check_product([2.0*m11, 3.0*m34, 4.0*m34])
+def test_product_03():
+    check_product([2.0*product_mat_m11, 3.0*product_mat_m34, 4.0*product_mat_m34])
 
-def test_04():
-    check_product([3.0*m34, 2.0*m11, 4.0*m34])
+def test_product_04():
+    check_product([3.0*product_mat_m34, 2.0*product_mat_m11, 4.0*product_mat_m34])
 
-def test_05():
-    check_product([3.0*m34, 4.0*m34, 2.0*m11])
+def test_product_05():
+    check_product([3.0*product_mat_m34, 4.0*product_mat_m34, 2.0*product_mat_m11])
 
-def test_06():
-    check_product([3.0*m34, 4.0*m34, 2.0*m34])
+def test_product_06():
+    check_product([3.0*product_mat_m34, 4.0*product_mat_m34, 2.0*product_mat_m34])
 
-def test_07():
-    check_product([rup, rdown])
+def test_product_07():
+    check_product([product_rup, product_rdown])
 
 if __name__ == "__main__":
-    glb = globals()
-    for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
-        print('Run ', fcn)
-        glb[fcn]()
+    run_unittests(globals())

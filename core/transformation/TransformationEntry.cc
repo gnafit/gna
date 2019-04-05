@@ -13,6 +13,9 @@
 #include "TransformationErrors.hh"
 #include "TypeClasses.hh"
 #include "GPUFunctionArgs.hh"
+#include "TreeManager.hh"
+
+#include "config_vars.h"
 
 using TransformationTypes::BaseT;
 using TransformationTypes::EntryT;
@@ -33,8 +36,12 @@ using TypeClassT = TypeClasses::TypeClassT<FloatType>;
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
   : name(name), attrs({{"_label", name}}), parent(parent), tainted(name.c_str()),
-    functionargs(new FunctionArgsType(this))
-{ }
+    functionargs(new FunctionArgsType(this)), m_tmanager(GNA::TreeManager<SourceFloatType>::current())
+{
+  if(m_tmanager){
+    m_tmanager->registerTransformation(this);
+  }
+}
 
 /**
  * @brief Clone constructor.
@@ -43,16 +50,17 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Bas
  * @param other -- Entry to copy name, inputs and outputs from.
  * @param parent -- Base class instance to hold the Entry.
  */
-template<typename SourceFloatType, typename SinkFloatType>
-EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
-  : name(other.name), attrs(other.attrs), parent(parent),
-    sources(other.sources.size()), sinks(other.sinks.size()),
-    mapping(other.mapping),
-    fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
-    functionargs(new FunctionArgsType(this))
-{
-  initSourcesSinks(other.sources, other.sinks);
-}
+//template<typename SourceFloatType, typename SinkFloatType>
+//EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
+  //: name(other.name), attrs(other.attrs), parent(parent),
+    //sources(other.sources.size()), sinks(other.sinks.size()),
+    //mapping(other.mapping),
+    //fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
+    //functionargs(new FunctionArgsType(this)),
+    //m_tmanager(other.m_tmanager)
+//{
+  //initSourcesSinks(other.sources, other.sinks);
+//}
 
 
 /**
@@ -153,6 +161,9 @@ void EntryT<SourceFloatType,SinkFloatType>::update() {
   Status status = Status::Success;
   try {
     evaluate();
+#ifdef GNA_CUDA_SUPPORT
+    setEntryDataLocation(m_entryLoc);
+#endif
     tainted = false;
   } catch (const SinkTypeError<SinkType>&) {
     status = Status::Failed;
@@ -208,6 +219,8 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
  *   also executed.
  *
+ * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
+ *
  * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
  * in any case. Should be fixed.
  *
@@ -245,7 +258,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     for (size_t i = 0; i < sinks.size(); ++i) {
       auto& ret  = rets[i];
       auto& sink = sinks[i];
-      if (!ret.buffer && sink.data && sink.data->type==ret) {
+      if (!ret.buffer && sink.data && !ret.requiresReallocation(sink.data->type)) {
         continue;
       }
       if (ret.defined()) {
@@ -266,8 +279,28 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       dep->evaluateTypes();
     }
     initInternals(sargs);
+
+#ifdef GNA_CUDA_SUPPORT
+    // GPU: require GPU memory for previous transformation's sink
+    if (this->getEntryLocation() == DataLocation::Device) {
+
+      for (auto &source : sources) {
+          source.sink->data->require_gpu();
+      }
+      for (auto &sink : sinks) {
+        sink.data->require_gpu();
+        sink.data->gpuArr->setLocation( this->getEntryLocation() );
+      }
+      for (auto &intern : storages) {
+        intern.data->require_gpu();
+        intern.data->gpuArr->setLocation( this->getEntryLocation() );
+      }
+      // init gpu storage
+    }
+#endif
   }
 
+  /// TODO: do it optionally
   functionargs->requireGPU();
   functionargs->updateTypes();
 }
@@ -286,8 +319,20 @@ void EntryT<SourceFloatType,SinkFloatType>::touch() {
   }
 }
 
+/** @brief Update the transformation if it is not frozen and tainted. */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::touch_global() {
+  if (tainted) {
+    if(m_tmanager){
+      m_tmanager->update();
+    }
+    update();
+  }
+}
+
 /**
  * Returns i-th data. Does the calculation if needed.
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it.
  * @param i -- index of a Sink to read the data.
  * @return i-th Sink's Data.
  *
@@ -306,6 +351,11 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
     throw CalculationError<EntryType>(this, msg);
   }
   touch();
+#ifdef GNA_CUDA_SUPPORT
+  if (sink.data->gpuArr != nullptr) {
+    sink.data->gpuArr->sync( DataLocation::Host );
+  }
+#endif
   return *sink.data;
 }
 
@@ -341,8 +391,43 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
     throw std::runtime_error(msg);
   }
   fun = it->second.fun;
+#ifdef GNA_CUDA_SUPPORT
+  setEntryLocation(it->second.funcLoc);
+#endif
   funcname=name;
 }
+
+
+#ifdef GNA_CUDA_SUPPORT
+/**
+ *    @brief Sets the target (Host or Device) for execution of current transformation
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
+    m_entryLoc = loc;
+}
+
+/**
+ *    @brief Sets the target (Host or Device) for transformation sinks
+ *    \warning Be careful! It changes sink location values directly without synchronization invoke!
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
+    for (const SinkType &s: sinks) {
+        s.data->gpuArr->setLocation(loc);
+    }
+}
+
+/**
+ * @brief Returns the target (Host or Device) for execution of current transformation
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+DataLocation EntryT<SourceFloatType,SinkFloatType>::getEntryLocation() const {
+            return m_entryLoc;
+}
+#endif
+
+
 
 /**
  * @brief Initialize the Data for the internal storage.

@@ -34,18 +34,7 @@ def patchGNAclass(cls):
         for trans, label in zip(self.transformations.values(), labels):
             trans.setLabel(label)
 
-    def newgetattr(self, attr):
-        try:
-            return self[attr]
-        except KeyError:
-            raise AttributeError(attr)
-
     cls.__original_init__, cls.__init__ = cls.__init__, newinit
-
-    if hasattr(cls, '__getattr__'):
-        cls.__original_getattr__, cls.__getattr__ = cls.__getattr__, newgetattr
-    else:
-        cls.__original_getattr__, cls.__getattr__ = None, newgetattr
 
     return cls
 
@@ -128,25 +117,6 @@ def patchSimpleDict(cls):
     cls.__getattr__ = __getattr__
     cls.get = get
     cls.__dir__ = __dir__
-
-def patchDataProvider(cls):
-    origdata = cls.data
-    # origview = cls.view
-    def data(self):
-        buf = origdata(self)
-        datatype = self.datatype()
-        return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
-    cls.data = data
-    cls.__data_raw__ = origdata
-    # cls.__view_raw__ = origview
-
-    # origview = cls.view
-    # def view(self):
-        # buf = origview(self)
-        # datatype = self.datatype()
-        # return np.frombuffer(buf, count=datatype.size()).reshape(datatype.shape, order='F')
-    # cls.view = view
-    # cls.__view_raw__ = origview
 
 def patchVariableDescriptor(cls):
     origclaim = cls.claim
@@ -231,13 +201,6 @@ def setup(ROOT):
         patchDescriptor(ROOT.InputDescriptorT(ft,ft))
         patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
 
-        dataproviders = [
-            ROOT.OutputDescriptorT(ft,ft),
-            ROOT.SingleOutputT(ft),
-        ]
-        for cls in dataproviders:
-            patchDataProvider(cls)
-
     patchStatistic(ROOT.Statistic)
 
     # Protect the following classes/namespaces from being wrapped
@@ -316,6 +279,10 @@ def patchROOTClass(classes=None, methods=None):
             lmethods = function.__name__.split( '__', 1 )[1],
         for cls in classes:
             for method in lmethods:
+                origname = '__%s_orig'%method
+                origmethod = getattr(cls, method, None)
+                if origmethod:
+                    setattr(cls, origname, origmethod)
                 setattr(cls, method, function)
         return function
 

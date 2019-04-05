@@ -22,7 +22,7 @@ class dummy(TransformationBundleLegacy):
     def make_trans(self, i, key):
         tkey = key.current_format(name=self.cfg.name)
 
-        obj = R.Dummy(self.cfg.size, tkey)
+        obj = C.Dummy(self.cfg.size, tkey)
         trans = obj.dummy
 
         if 'label' in self.cfg:

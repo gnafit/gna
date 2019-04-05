@@ -7,8 +7,8 @@
 #include <set>
 #include <cstring>
 #include <string>
-#include <vector>
-#include <memory>
+
+#include "arrayview.hh"
 
 class changeable;
 
@@ -36,7 +36,7 @@ enum class TaintStatus {
 };
 
 struct inconstant_header {
-  inconstant_header(const char* aname="", bool autoname=false) : name(aname){
+  inconstant_header(const char* aname="", bool autoname=false, size_t size=1u) : name(aname), size(size) {
     static size_t ih_counter=0;
     autoname = autoname || !name.size();
     if(autoname){
@@ -52,16 +52,18 @@ struct inconstant_header {
   TaintStatus status=TaintStatus::Normal;
   std::function<void()> on_taint;
   const std::type_info *type = nullptr;
+  size_t size=1u;
 };
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname), value(size) {
+  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname, size), value(size) {
+    //printf("make %s of size %zu\n", this->name.c_str(), size);
     type = &typeid(ValueType);
   }
-  std::vector<ValueType> value;
+  arrayview<ValueType> value;
   std::function<ValueType()> func{nullptr};
-  std::function<void(std::vector<ValueType>&)> vfunc{nullptr};
+  std::function<void(arrayview<ValueType>&)> vfunc{nullptr};
 };
 
 #include "parameters_debug.hh"
@@ -264,8 +266,8 @@ protected:
     }
     m_hdr.reset(hdr);
   }
-  void init(const char* name="", bool autoname=false) {
-    alloc(new inconstant_header(name, autoname));
+  void init(const char* name="", bool autoname=false, size_t size=0u) {
+    alloc(new inconstant_header(name, autoname, size));
     DPRINTF("constructed header");
   }
   template <typename T>

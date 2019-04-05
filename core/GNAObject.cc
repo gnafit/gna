@@ -27,6 +27,13 @@ void GNAObjectT<SourceFloatType,SinkFloatType>::dumpObj() {
   }
 }
 
+template<typename SourceFloatType, typename SinkFloatType>
+void GNAObjectT<SourceFloatType,SinkFloatType>::variablesBound() {
+  for (size_t i = 0; i < transformations.size(); ++i) {
+    transformations[i].readVariables(this);
+  }
+}
+
 template class GNAObjectT<double,double>;
 template class GNASingleObjectT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION

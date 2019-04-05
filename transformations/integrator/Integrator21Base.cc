@@ -104,7 +104,7 @@ void Integrator21Base::init_sampler() {
 
   if(!m_xedges.size()){
     trans.input("edges", /*inactive*/true) //hist with edges
-         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>);
+         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>);
   }
   trans.finalize();
 
@@ -126,8 +126,8 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
     auto& edges=fargs.args[0].edges;
     m_xedges=Map<const ArrayXd>(edges.data(), edges.size());
   }
-  rets[2]=DataType().points().shape(m_xedges.size()).preallocated(m_xedges.data());
-  rets[5]=DataType().hist().edges(m_xedges.size(), m_xedges.data());
+  rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
+  rets[5].hist().edges(m_xedges.size(), m_xedges.data());
 }
 
 void Integrator21Base::dump(){

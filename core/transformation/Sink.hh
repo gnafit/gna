@@ -11,7 +11,7 @@
 namespace TransformationTypes
 {
   using Attrs = std::map<std::string,std::string>;
-  template<typename SourceFloatType,typename SinkFloatType> struct EntryT;
+  template<typename SourceFloatType,typename SinkFloatType> class EntryT;
 
   template<typename FloatType> struct SourceT;
 
