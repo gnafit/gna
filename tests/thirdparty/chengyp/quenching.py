@@ -20,25 +20,27 @@ def main(args):
         bundle = dict(
             name='energy_nonlinearity_birks_cherenkov',
             version='v01',
+            nidx=[ ('r', 'reference', ['R1', 'R2']) ],
+            major=[],
             ),
         stopping_power='stoppingpower.txt',
         annihilation_electrons=('input/hgamma2e.root', 'hgamma2e_1KeV'),
         pars = uncertaindict(
             [
-                ('birks.Kb0',              (1.0, 'fixed')),
-                ('birks.Kb1',           (0.0062, 'fixed')),
-                ('birks.Kb2',           (1.5e-6, 'fixed')),
+                ('birks.Kb0',               (1.0, 'fixed')),
+                ('birks.Kb1',           (15.2e-3, 0.1776)),
+                # ('birks.Kb2',           (0.0, 'fixed')),
                 ("cherenkov.E_0",         (0.165, 'fixed')),
                 ("cherenkov.p0",  ( -7.26624e+00, 'fixed')),
                 ("cherenkov.p1",   ( 1.72463e+01, 'fixed')),
                 ("cherenkov.p2",  ( -2.18044e+01, 'fixed')),
                 ("cherenkov.p3",   ( 1.44731e+01, 'fixed')),
                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
-                ("Npesc",              (1341.38, 'fixed')),
-                ("kC",                      (1., 'fixed')),
-                ("normalizationEnergy", (2.505, 'fixed'))
-
-             ]
+                ("Npesc",               (1341.38, 'fixed')),
+                ("kC",                      (0.5, 'fixed')),
+                ("normalizationEnergy",   (2.505, 'fixed'))
+             ],
+            mode='relative'
             ),
         fill_matrix=True,
         labels = dict(
@@ -61,9 +63,11 @@ def main(args):
     reference_histogram1 = C.Histogram(quench.epos_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
     reference_histogram2 = C.Histogram(quench.epos_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
 
-    reference_histogram1 >> quench.pm_histsmear.matrix.Edges
-    reference_smeared1 = quench.pm_histsmear.add_input(reference_histogram1)
-    reference_smeared2 = quench.pm_histsmear.add_input(reference_histogram2)
+    reference_histogram1 >> quench.context.inputs.lsnl_edges.values()
+    reference_histogram1 >> quench.context.inputs.lsnl.R1.values()
+    reference_histogram2 >> quench.context.inputs.lsnl.R2.values()
+    reference_smeared1 = quench.context.outputs.lsnl.R1
+    reference_smeared2 = quench.context.outputs.lsnl.R2
 
     #
     # Plots and tests
@@ -148,8 +152,21 @@ def main(args):
 
     savefig(args.output, suffix='_birks_evis')
 
-    ax.set_xlim(0.0, 2.0)
-    ax.set_ylim(0.0, 2.0)
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Evis/Edep' )
+    ax.set_title( 'Electron energy (Birks)' )
+    #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
+    quench.ekin_edges_p.vs_plot(quench.birks_accumulator.reduction.data()/quench.ekin_edges_p.data())
+    ax.set_ylim(0.65, 1.0)
+
+    savefig(args.output, suffix='_birks_evis_rel')
+
+    ax.set_xlim(1.e-3, 2.0)
+    ax.set_xscale('log')
     savefig()
 
     fig = P.figure()
@@ -163,8 +180,12 @@ def main(args):
 
     savefig(args.output, suffix='_cherenkov_npe')
 
+    ax.set_ylim(bottom=0.1)
+    ax.set_yscale('log')
+    savefig()
+
     ax.set_xlim(0.0, 2.0)
-    ax.set_ylim(0.0, 200.0)
+    # ax.set_ylim(0.0, 200.0)
     savefig()
 
     fig = P.figure()

@@ -17,13 +17,13 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
     debug = False
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(0, 0, 'both')
+        self.check_nidx_dim(0, 0, 'major')
 
         self.storage=NestedDict()
 
     @staticmethod
     def _provides(cfg):
-        return (), ()
+        return (), ('lsnl_edges', 'lsnl')
 
     def init_data(self):
         dtype_spower = [ ('e', 'd'), ('temp1', 'd'), ('temp2', 'd'), ('dedx', 'd') ]
@@ -62,8 +62,9 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         birks_e_input, birks_quenching_input = self.stopping_power['e'], self.stopping_power['dedx']
         self.birks_e_p, self.birks_quenching_p = C.Points(birks_e_input, labels='Te (input)'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
 
-        with self.namespace('birks'):
-            self.birks_integrand_raw = C.PolyRatio([], ['Kb0', 'Kb1', 'Kb2'], labels="Birk's integrand")
+        birksns = self.namespace('birks')
+        with birksns:
+            self.birks_integrand_raw = C.PolyRatio([], list(birksns.storage.keys()), labels="Birk's integrand")
         self.birks_quenching_p >> self.birks_integrand_raw.polyratio.points
 
         self.doubleemass_point = C.Points([-self.doubleme], labels='2me offset')
@@ -136,26 +137,18 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.pm_histsmear.set_range(-0.5, 20.0)
         self.positron_model_scaled_full >> self.pm_histsmear.matrix.EdgesModified
 
-        # with self.namespace:
-            # for i, itd in enumerate(self.detector_idx.iterate()):
-                # """Finally, original bin edges multiplied by the correction factor"""
-                # """Construct the nonlinearity calss"""
-                # nonlin = R.HistNonlinearity(self.debug, labels=itd.current_format('NL matrix\n{autoindex}'))
-                # self.context.objects[('nonlinearity',)+itd.current_values()] = nonlin
+        self.set_input('lsnl_edges', None, self.pm_histsmear.matrix.Edges, argument_number=0)
 
-                # self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,         argument_number=0)
-                # self.set_input('lsnl_edges', itd, nonlin.matrix.EdgesModified, argument_number=1)
+        trans = self.pm_histsmear.transformations.back()
+        for i, it in enumerate(self.nidx.iterate()):
+            # if i:
+                # trans = self.pm_histsmear.add_transformation()
+            inp = self.pm_histsmear.add_input()
 
-                # trans = nonlin.smear
-                # for j, itother in enumerate(self.nidx_minor.iterate()):
-                    # it = itd+itother
-                    # if j:
-                        # trans = nonlin.add_transformation()
-                        # nonlin.add_input()
-                    # trans.setLabel(it.current_format('NL\n{autoindex}'))
+            trans.setLabel(it.current_format('Nonlinearity smearing\n{autoindex}'))
 
-                    # self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
-                    # self.set_output('lsnl', it, trans.Nrec)
+            self.set_input('lsnl', it, inp, argument_number=0)
+            self.set_output('lsnl', it, trans.outputs.back())
 
     def define_variables(self):
         from physlib import pdg
@@ -164,7 +157,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.doubleme = 2*emass.value()
         ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
-        labels=dict([
+        labels=OrderedDict([
             ( 'birks.Kb0', 'Kb0=1' ),
             ( 'birks.Kb1', "Birk's 1st constant (E')" ),
             ( 'birks.Kb2', "Birk's 2nd constant (E'')" ),
@@ -182,6 +175,8 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         for name, label in labels.items():
             parcfg = self.cfg.pars.get(name, None)
             if parcfg is None:
+                if 'Kb2' in name:
+                    continue
                 raise self.exception('Parameter {} configuration is not provided'.format(name))
             self.reqparameter(name, None, cfg=parcfg, label=label)
 
