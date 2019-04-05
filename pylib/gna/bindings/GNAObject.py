@@ -81,7 +81,7 @@ R.SingleOutput.__single_orig = R.SingleOutput.single
 def SingleOutput__single(self):
     R.OutputDescriptor(self.__single_orig())
 
-@patchROOTClass(classes+classes_single, 'data')
+@patchROOTClass(classes_single, 'data')
 def GNAObject__data(self):
     buf = self.__data_orig()
     datatype = self.datatype()

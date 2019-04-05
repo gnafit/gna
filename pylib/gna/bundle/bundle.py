@@ -249,7 +249,7 @@ class TransformationBundle(object):
 
         self._debug = self.bundlecfg.get('debug', self._debug)
 
-        assert not kwargs
+        assert not kwargs, 'Unparsed kwargs: '+str(kwargs)
 
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
