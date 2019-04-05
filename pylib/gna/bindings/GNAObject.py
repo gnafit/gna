@@ -41,19 +41,22 @@ def GNAObject__printvariables(self):
     with nextlevel():
         if self.variables.size()>0:
             for name in self.variables:
-                printl(ns[name].__str__(labels=True), end='')
+                if name in ns:
+                    printl(ns[name].__str__(labels=True), end='')
 
-                if '.' in name:
-                    printl(' [{}]'.format(name))
+                    if '.' in name:
+                        printl(' [{}]'.format(name))
+                    else:
+                        printl()
                 else:
-                    printl()
+                    printl('unknown', name)
         else:
             printl('[none]')
 
 @patchROOTClass(classes, 'variablevalues')
 def GNAObject__variablevalues(self):
     ns = self.currentns
-    return dict([(ns[k].name(), ns[k].value()) for k in self.variables.iterkeys()])
+    return dict([(ns[k].name(), ns[k].value()) if k in ns else (k+'_unknown', 0) for k in self.variables.iterkeys()])
 
 R.SingleOutput.__single_orig = R.SingleOutput.single
 @patchROOTClass(classes, 'single')
