@@ -101,8 +101,8 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 5,
-                yorder   = 2,
+                xorders   = 7,
+                yorder   = 3,
                 ),
             ibd_xsec = NestedDict(
                 bundle = dict(name='xsec_ibd', version='v02'),
@@ -117,7 +117,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
+                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) ),
                 ),
             eff = NestedDict(
                 bundle = dict(name='efficiencies', version='v02',
@@ -411,10 +411,15 @@ class exp(baseexp):
     def register(self):
         ns = self.namespace
         outputs = self.context.outputs
-        #  import IPython
-        #  IPython.embed()
+        reactors  = self.nidx.indices['r'].variants
+        isotopes  = self.nidx.indices['i'].variants
+        detectors = self.nidx.indices['d'].variants
+        if self.opts.embed:
+            import IPython
+            IPython.embed()
+
+        ns.addobservable("ibd_xsec", outputs.ibd_xsec, export=False)
         for ad in self.detectors:
-            # ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
             if  self.opts.mode == 'dyboscar':
                 for comp in self.nidx.indices['c'].variants:
                     ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
@@ -429,6 +434,22 @@ class exp(baseexp):
             ns.addobservable("{0}.bkg.amc".format(ad), outputs.bkg_amc[ad], export=False)
             ns.addobservable("{0}.bkg.alphan".format(ad), outputs.bkg_alphan[ad], export=False)
             ns.addobservable("{0}.bkg.lihe".format(ad), outputs.bkg_lihe[ad], export=False)
+            ns.addobservable("{0}.efflivetime".format(ad), outputs.efflivetime_daily[ad], export=False)
+            ns.addobservable("{0}.livetime".format(ad), outputs.livetime_daily[ad], export=False)
+            ns.addobservable("{0}.eff".format(ad), outputs.eff_daily[ad], export=False)
+            ns.addobservable("{0}.evis_nonlinear_correlated".format(ad),
+                             outputs.evis_nonlinear_correlated[ad], export=False )
+            ns.addobservable("{0}.iav".format(ad), outputs.iav[ad], export=False)
+            for reac in reactors:
+                for iso in isotopes:
+                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
+                                     outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
+
+        for iso in isotopes:
+            ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
+
+        for reac in reactors:
+            ns.addobservable("{0}.thermal_power".format(reac), outputs.thermal_power[reac], export=False)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -478,8 +499,8 @@ class exp(baseexp):
                              kinint2|
                                anuspec[i](enu())*
                                oscprob[c,d,r](enu())*
-                               ibd_xsec(enu(), ctheta())*
-                               jacobian(enu(), ee(), ctheta())
+                                 ibd_xsec(enu(), ctheta())*
+                                 jacobian(enu(), ee(), ctheta())
         '''
 
     formula_ibd_mid = '''ibd =
@@ -512,9 +533,9 @@ class exp(baseexp):
                                   baselineweight[r,d]*
                                   ibd_xsec(enu(), ctheta())*
                                   jacobian(enu(), ee(), ctheta())*
-                                  (sum[i]| power_livetime_factor*anuspec[i](enu()))*
-                                  sum[c]|
-                                    pmns[c]*oscprob[c,d,r](enu())
+                                  (sum[i]| power_livetime_factor*anuspec[i](enu())) *
+                                    sum[c]|
+                                      pmns[c]*oscprob[c,d,r](enu())
         '''
 
     formula_back = [
@@ -618,6 +639,8 @@ class exp(baseexp):
                                                    label='Countrate from {reactor} in {detector}'),
                     count_rate_d            = dict(expr='sum:r|countrate_rd',
                                                    label='Countrate in {detector}'),
+                    numenator               = dict(expr='efflivetime_daily*thermal_power*ff',
+                                                   label='Numenator of normalization  for {reactor}@{detector} ({isotope})'),
 
                     cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                                    label='anu count rate\n {isotope}@{reactor}->{detector} ({component})'),
