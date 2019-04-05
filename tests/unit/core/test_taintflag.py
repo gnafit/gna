@@ -362,13 +362,13 @@ def test_taintflag_distance_05():
     assert t2b.distance(t3a, True, 0)==inf
     assert t2b.distance(t3b, True, 0)==inf
 
-def test_taintflag_fragile():
-    t1 = R.taintflag()
-    t1.set(False)
-    fragile = R.fragile(t1)
+# def test_taintflag_fragile():
+    # t1 = R.taintflag()
+    # t1.set(False)
+    # fragile = R.fragile(t1)
 
-    print('C++ exception expected now')
-    t1.taint()
+    # print('C++ exception expected now')
+    # t1.taint()
 
 if __name__ == "__main__":
     glb = globals()
