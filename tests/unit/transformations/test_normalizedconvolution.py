@@ -10,10 +10,11 @@ from gna import constructors as C
 from gna.env import env
 from gna.unittest import *
 import numpy as N
+from gna import context
 
 def normalizedconvolution_prepare(fcn, weights, scale=1.0, nsname=None):
-    fcn = N.ascontiguousarray(fcn, dtype='d')
-    weights = N.ascontiguousarray(weights, dtype='d')
+    fcn = N.ascontiguousarray(fcn, dtype=context.current_precision_short())
+    weights = N.ascontiguousarray(weights, dtype=context.current_precision_short())
 
     fcn_p, weights_p = C.Points(fcn), C.Points(weights)
 
