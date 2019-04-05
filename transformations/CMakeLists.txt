@@ -12,6 +12,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/MultiSum.cc
   transformations/sum/PartialSum.cc
   transformations/sum/Sum.cc
+  transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
   transformations/sum/WeightedSumP.cc
   # Ratios
@@ -28,6 +29,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
+  transformations/detector/Cherenkov_Borexino.cc
   # Functions
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
@@ -55,6 +57,7 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/interpolation/FixedPointScale.cc
   # Linear algebra
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
@@ -126,6 +129,7 @@ set(TRANSFORMATION_HEADERS
   PartialSum.hh
   MultiSum.hh
   Sum.hh
+  SumBroadcast.hh
   WeightedSum.hh
   WeightedSumP.hh
   # Ratios
@@ -142,6 +146,7 @@ set(TRANSFORMATION_HEADERS
   SegmentWise.hh
   InterpExpo.hh
   InterpLinear.hh
+  FixedPointScale.hh
   Covmat.hh
   Cholesky.hh
   Chi2.hh
@@ -193,6 +198,7 @@ set(TRANSFORMATION_HEADERS
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
+  Cherenkov_Borexino.hh
   HistSmear.hh
   HistSmearSparse.hh
   RenormalizeDiag.hh

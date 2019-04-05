@@ -94,3 +94,8 @@ def savefig( name, *args, **kwargs ):
             print( 'Save figure', name )
             P.savefig( name, *args, **kwargs )
 
+def add_to_labeled_items(o, l, ax=None):
+    ax = ax or P.gca()
+    ocurrent, lcurrent = ax.get_legend_handles_labels()
+    ocurrent.append( o )
+    lcurrent.append( l )

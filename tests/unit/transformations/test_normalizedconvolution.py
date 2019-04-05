@@ -11,13 +11,20 @@ from gna.env import env
 from gna.unittest import *
 import numpy as N
 
-@floatcopy(globals())
-def normalizedconvolution_prepare(fcn, weights):
+def normalizedconvolution_prepare(fcn, weights, scale=1.0, nsname=None):
     fcn = N.ascontiguousarray(fcn, dtype='d')
     weights = N.ascontiguousarray(weights, dtype='d')
 
     fcn_p, weights_p = C.Points(fcn), C.Points(weights)
-    nc = C.NormalizedConvolution()
+
+    if nsname is not None:
+        ns = env.globalns(nsname)
+        ns.defparameter('scale', central=scale, fixed=True)
+        with ns:
+            nc = C.NormalizedConvolution('scale')
+    else:
+        scale=1.0
+        nc = C.NormalizedConvolution()
 
     fcn_p >> nc.normconvolution.fcn
     weights_p >> nc.normconvolution.weights
@@ -26,8 +33,9 @@ def normalizedconvolution_prepare(fcn, weights):
     prod = nc.normconvolution.product.data()
 
     product_e = fcn*weights
-    res_e = product_e.sum()/weights.sum()
+    res_e = scale*product_e.sum()/weights.sum()
 
+    print('Scale', scale)
     print('Function', fcn)
     print('Weights', weights)
     print('Product', prod)
@@ -39,11 +47,14 @@ def normalizedconvolution_prepare(fcn, weights):
     assert (res==res_e).all()
     print()
 
-def test_normalizedconvolution_v01():
+@floatcopy(globals(), addname=True)
+def test_normalizedconvolution_v01(function_name):
     normalizedconvolution_prepare([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
     normalizedconvolution_prepare([1.0, 1.0, 1.0], [2.0, 2.0, 2.0])
     normalizedconvolution_prepare([2.0, 2.0, 2.0], [1.0, 1.0, 1.0])
     normalizedconvolution_prepare([3.0, 4.0, 5.0], [3.0, 2.0, 1.0])
+
+    normalizedconvolution_prepare([2.0, 2.0, 2.0], [1.0, 1.0, 1.0], scale=3.0, nsname=function_name)
 
 if __name__ == "__main__":
     run_unittests(globals())

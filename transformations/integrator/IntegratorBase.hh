@@ -13,6 +13,8 @@ public:
 
   void dump();
 
+  const Eigen::ArrayXd& getWeights() { return m_weights; }
+  const Eigen::ArrayXi& getOrders() { return m_orders; }
 protected:
   IntegratorBase(size_t bins, int orders, double* edges=nullptr, bool shared_edge=false);
   IntegratorBase(size_t bins, int* orders, double* edges=nullptr, bool shared_edge=false);

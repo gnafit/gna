@@ -27,7 +27,7 @@ void GNA::GNAObjectTemplates::ArraySumT<FloatType>::initialize(const std::string
     m_output_name = name;
 
     auto handle = this->t_[0];
-    std::vector<changeable> deps{handle.expose_taintflag()};
+    std::vector<changeable> deps{handle.getTaintflag()};
     m_accumulated = this->template evaluable_<FloatType>(m_output_name, [handle]() -> decltype(auto) {
                                        return handle[0].x(0);
                                        }, deps);

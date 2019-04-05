@@ -46,7 +46,7 @@ void HistNonlinearity::getEdges(TypesFunctionArgs& fargs) {
 
 void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   auto& args=fargs.args;
-  auto bins = args[1].arr.size()-1;
+  size_t bins = args[1].arr.size()-1;
   auto* edges_orig = m_edges;
   auto* edges_mod  = args[1].arr.data();
   auto* end_orig = std::next(edges_orig, bins);
@@ -55,7 +55,7 @@ void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   m_sparse_cache.resize(bins, bins);
   m_sparse_cache.setZero();
 
-  DEBUG("n=%li, matrix n=%i\n", n, int(n-1));
+  DEBUG("n=%zu, matrix n=%zu\n", bins+1, bins);
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
   auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );
