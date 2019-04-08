@@ -57,6 +57,7 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/interpolation/InterpLog.cc
   transformations/interpolation/FixedPointScale.cc
   # Linear algebra
   transformations/linalg/Cholesky.cc
@@ -146,6 +147,7 @@ set(TRANSFORMATION_HEADERS
   SegmentWise.hh
   InterpExpo.hh
   InterpLinear.hh
+  InterpLog.hh
   FixedPointScale.hh
   Covmat.hh
   Cholesky.hh
