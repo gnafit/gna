@@ -74,7 +74,7 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 
     return P.plot(pointsx, pointsy, *args, **kwargs)
 
-def vs_plot_points(outputx, outputy, *arsg, **kwargs):
+def vs_plot_points(outputx, outputy, *args, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
 
 def get_1d_buffer(output, scale=None):

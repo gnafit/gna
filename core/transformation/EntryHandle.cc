@@ -1,5 +1,7 @@
 #include "EntryHandle.hh"
 #include "SingleOutput.hh"
+#include "TransformationFunctionArgs.hh"
+#include "GPUFunctionArgs.hh"
 
 #include <algorithm>
 
@@ -154,6 +156,20 @@ InputHandleT<SourceFloatType> HandleT<SourceFloatType,SinkFloatType>::input(cons
 template<typename SourceFloatType, typename SinkFloatType>
 OutputHandleT<SinkFloatType> HandleT<SourceFloatType,SinkFloatType>::output(SingleOutputT<SourceFloatType> &out) {
   return output(out.single().name());
+}
+
+/**
+ * @brief Assign variables to the transformation.
+ *
+ * @param out -- SingleOutput transformation.
+ * @return OutputHandle for the new output.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void HandleT<SourceFloatType,SinkFloatType>::readVariables(ParametrizedTypes::ParametrizedBase* parbase){
+  auto& gpu=m_entry->functionargs->gpu;
+  if(gpu){
+    gpu->readVariables(parbase);
+  }
 }
 
 /**

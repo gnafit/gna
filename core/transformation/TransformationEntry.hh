@@ -15,8 +15,18 @@
 #include "Sink.hh"
 #include "Storage.hh"
 
+#include "config_vars.h"
+
+namespace GNA{
+  template<typename FloatType> class TreeManager;
+}
+
 namespace TypeClasses{
   template<typename FloatType> class TypeClassT;
+}
+
+namespace ParametrizedTypes{
+  class ParametrizedBase;
 }
 
 namespace TransformationTypes
@@ -62,7 +72,8 @@ namespace TransformationTypes
    * @date 2015
    */
   template<typename SourceFloatType, typename SinkFloatType=SourceFloatType>
-  struct EntryT: public boost::noncopyable {
+  class EntryT: public boost::noncopyable {
+  public:
     using BaseType                           = BaseT<SourceFloatType,SinkFloatType>;
     using EntryType                          = EntryT<SourceFloatType,SinkFloatType>;
     using StorageFloatType                   = SourceFloatType;
@@ -100,8 +111,10 @@ namespace TransformationTypes
 
     using TypeClassContainerType             = TypeClassContainerT<SourceFloatType>;
 
+    using TreeManagerType                    = GNA::TreeManager<SourceFloatType>;
+
     EntryT(const std::string &name, const BaseType *parent); ///< Constructor.
-    EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
+    //EntryT(const EntryType &other, const BaseType *parent);  ///< Clone constructor.
     ~EntryT();                                               ///< Destructor.
 
     InputHandleType addSource(const std::string &name, bool inactive=false);      ///< Initialize and return new Source.
@@ -113,6 +126,7 @@ namespace TransformationTypes
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
 
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
+    void touch_global();                                 ///< Update the transformation if it is not frozen and tainted.
     const SinkDataType &data(int i);                     ///< Evaluates the function if needed and returns i-th data.
 
     bool check() const;                                  ///< Checks that Data are initialized.
@@ -146,10 +160,21 @@ namespace TransformationTypes
     void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
+
+    TreeManagerType* m_tmanager=nullptr;                 ///< Tree manager
+
+#ifdef GNA_CUDA_SUPPORT
+    void setLocation(DataLocation::Host loc) { m_entryLoc=loc; } ///< Change Entry location
+#endif
   private:
+#ifdef GNA_CUDA_SUPPORT
+    DataLocation m_entryLoc = DataLocation::Host;       ///< In case of GPU support is swiched on, the target for execution(Host or Device). Host by default.
+#endif
+
     template <typename InsT, typename OutsT>
     void initSourcesSinks(const InsT &inputs, const OutsT &outputs); ///< Initialize the Data for inputs and outputs.
 
     void initInternals(StorageTypesFunctionArgsType& fargs);         ///< Initialize the Data for the internal storage.
-  }; /* struct Entry */
+
+  }; /* class Entry */
 } /* TransformationTypes */

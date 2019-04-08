@@ -1,4 +1,7 @@
 #include "Dummy.hh"
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#endif
 
 using TransformationTypes::GPUShape;
 
@@ -8,36 +11,42 @@ using TransformationTypes::GPUShape;
  * @param label - transformation label.
  * @param labels - variables to bind.
  */
-Dummy::Dummy(size_t shape, const char* label, const std::vector<std::string> &labels){
-  transformation_("dummy")
+template<typename FloatType>
+GNA::GNAObjectTemplates::DummyT<FloatType>::DummyT(size_t shape, const char* label, const std::vector<std::string> &labels){
+  this->transformation_("dummy")
     .label(label)
-    .types([shape](TypesFunctionArgs fargs) {
+    .types([shape](typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs fargs) {
               for (size_t i = 0; i < fargs.rets.size(); ++i) {
                 fargs.rets[i] = DataType().points().shape(shape);
               }
             }
           )
-  .func(&Dummy::dummy_fcn)
-  .func("dummy_gpuargs_h", &Dummy::dummy_gpuargs_h/*, DataLocation::Device*/);
+  .func(&DummyType::dummy_fcn)
+  .func("dummy_gpuargs_h_local", &DummyType::dummy_gpuargs_h_local/*, DataLocation::Host*/)
+  .func("dummy_gpuargs_h",       &DummyType::dummy_gpuargs_h/*,       DataLocation::Host*/)
+  .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d/*,       DataLocation::Device*/)
+  .finalize();
 
   m_vars.resize(labels.size());
   for (size_t i = 0; i < m_vars.size(); ++i) {
-    variable_(&m_vars[i], labels[i].data());
+    this->variable_(&m_vars[i], labels[i].data());
   }
 }
 
-void Dummy::dummy_fcn(FunctionArgs& fargs){
+template<typename FloatType>
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_fcn(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
     auto& rets = fargs.rets;
     for (size_t i = 0; i < rets.size(); ++i) {
-        rets[i].x=static_cast<double>(i);
+        rets[i].x=static_cast<FloatType>(i);
     }
 }
 
-void Dummy::dummy_gpuargs_h(FunctionArgs& fargs){
+template<typename FloatType>
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
-    gpuargs->readVariables(m_vars);
-    gpuargs->provideSignatureHost();
+    gpuargs->readVariablesLocal();
+    gpuargs->provideSignatureHost(true /*local*/);
 
     for (size_t i = 0; i < gpuargs->nrets; ++i) {
         auto* shape =gpuargs->retshapes[i];
@@ -45,8 +54,40 @@ void Dummy::dummy_gpuargs_h(FunctionArgs& fargs){
 
         auto* start=*std::next(gpuargs->rets, i);
         auto* stop = std::next(start, size);
-        std::fill(start, stop, static_cast<double>(i));
+        std::fill(start, stop, static_cast<FloatType>(i));
     }
 
     gpuargs->dump();
 }
+
+template<typename FloatType>
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+    fargs.args.touch();
+    auto& gpuargs=fargs.gpu;
+    gpuargs->provideSignatureHost(); /*global*/
+
+    for (size_t i = 0; i < gpuargs->nrets; ++i) {
+        auto* shape =gpuargs->retshapes[i];
+        auto size=shape[(int)GPUShape::Size];
+
+        auto* start=*std::next(gpuargs->rets, i);
+        auto* stop = std::next(start, size);
+        std::fill(start, stop, static_cast<FloatType>(i));
+    }
+
+    gpuargs->dump();
+}
+
+template<typename FloatType>
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+#ifdef GNA_CUDA_SUPPORT
+  /// put some code here
+#else
+  throw std::runtime_error("CUDA support not implemented");
+#endif
+}
+
+template class GNA::GNAObjectTemplates::DummyT<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class GNA::GNAObjectTemplates::DummyT<float>;
+#endif

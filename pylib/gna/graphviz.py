@@ -18,6 +18,9 @@ def uid( obj1, obj2=None ):
     return res
 
 def savegraph(obj, fname, *args, **kwargs):
+    if not fname:
+        return
+
     verbose = kwargs.pop('verbose', True)
 
     gdot = GNADot(obj, *args, **kwargs)
@@ -32,12 +35,13 @@ def savegraph(obj, fname, *args, **kwargs):
         gdot.draw(fname)
 
 class GNADot(object):
-    layers = 'variable,transformation'
+    layers = 'variable:transformation'
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
         self.joints = kwargs.pop('joints', False)
+        ns = kwargs.pop('namespace', None)
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
         self.layout = self.graph.layout
@@ -47,7 +51,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=kwargs.pop('namespace', None))
+        self.walker = GraphWalker(transformation, namespace=ns)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
@@ -95,8 +99,8 @@ class GNADot(object):
 
     def _action_source_open(self, source, i=0):
         sourceuid = self.entry_uid(source, 'source')
-        graph.add_node( sourceuid, shape='point', label='in' )
-        graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
+        self.graph.add_node( sourceuid, shape='point', label='in' )
+        self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
     def _action_sink(self, sink, i=0):
         if sink.sources.size()==0:
@@ -151,21 +155,21 @@ class TreeStyle(object):
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
-        def getdim(sink):
+        def getdim(sink, offset=0):
             if not sink.materialized():
-                return None
+                return '?',
 
-            return tuple('%i'%d for d in sink.data.type.shape)
+            return tuple('%i'%(d+offset) for d in sink.data.type.shape)
 
         mark=None
         dim=None
         npars=0
-        if objectname in ('Sum', 'MultiSum'):
+        if objectname in ('Sum', 'MultiSum', 'SumBroadcast'):
             mark='+'
             dim = getdim(entry.sinks[0])
         elif objectname in ('WeightedSum'):
             mark='+w'
-            npars=entry.sinks.size()
+            npars=entry.sources.size()
             dim = getdim(entry.sinks[0])
         elif objectname in ('Product',):
             mark='*'
@@ -187,10 +191,16 @@ class TreeStyle(object):
             mark='~'
             dim = getdim(entry.sinks.back())
         elif objectname in ('InSegment',):
-            mark='[]'
+            mark=u'∈'
+            dim1 = 'x'.join(getdim(entry.sinks[0]))
+            dim2 = 'x'.join(getdim(entry.sinks[1], 1))
+            dim = u']∈['.join((dim1, dim2)),
         elif objectname in ('Points',):
             features.static=True
             mark='a'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('View',):
+            mark='v'
             dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram',):
             features.static=True
@@ -210,7 +220,7 @@ class TreeStyle(object):
             features.static=True
             mark='c'
             dim = getdim(entry.sinks[0])
-            npars=1
+            npars=0
         elif objectname in ('HistSmearSparse', 'HistSmear'):
             mark='@'
             dim = getdim(entry.sinks[0])
@@ -238,6 +248,8 @@ class TreeStyle(object):
         variable=varentry.variable
 
         label=variable.name()
+        value = str(variable.value())
+        label+='='+value
 
         size=variable.values().size()
         if size>1:
@@ -249,7 +261,7 @@ class TreeStyle(object):
         return ret
 
     def node_attrs(self, entry):
-        ret=dict(layer='transformation')
+        ret=dict(shape='Mrecord', layer='transformation')
         features=self.get_features(entry)
 
         styles=()
@@ -280,7 +292,6 @@ class TreeStyle(object):
             marks+='[%s]'%('x'.join(dim)),
             marks='{%s}'%('|'.join(marks)),
         if marks:
-            ret['shape']='Mrecord'
             marks+=label,
             marks='{%s}'%('|'.join(marks)),
         else:

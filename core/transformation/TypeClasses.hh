@@ -38,7 +38,7 @@ namespace TypeClasses{
         RangeIterator iterate(size_t size, bool strict=true) const {
             size_t begin, end;
             getRangeAbs(size, begin, end, strict);
-            if(begin==-1u){
+            if(begin==-1lu){
                 return boost::counting_range(begin, end);
             }
             return boost::counting_range(begin, end+1);
@@ -74,7 +74,7 @@ namespace TypeClasses{
 
             bool error=absend<absbegin && !((m_begin>=0) ^ (m_end>=0));
             if (absend<0 || absbegin>=size || absend<absbegin){
-                begin=end=-1u;
+                begin=end=-1lu;
                 error|=strict;
             }
             else{
@@ -187,6 +187,37 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
+    class CheckNdimT : public TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = CheckNdimT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        CheckNdimT(size_t ndim, Range argsrange={0,-1}) : m_argsrange(argsrange), m_ndim(ndim) { }
+        CheckNdimT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            auto& args = fargs.args;
+            for(auto aidx: m_argsrange.iterate(args.size())){
+                if(args[aidx].shape.size()!=m_ndim){
+                    auto msg = fmt::format("Transformation {0}: input {1} should have dimension {2}, got {3}", args.name(), aidx, m_ndim, args[aidx].shape.size());
+                    throw args.error(args[aidx], msg);
+                }
+            }
+        }
+
+        void dump(){
+            printf("TypeClass to check ndim is %zu ", m_ndim);
+            m_argsrange.dump();
+        }
+    private:
+        Range m_argsrange;
+        size_t m_ndim;
+    };
+
+    template<typename FloatType>
     class PassTypeT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;
@@ -219,6 +250,35 @@ namespace TypeClasses{
         }
     private:
         Range m_argsrange;
+        Range m_retsrange;
+    };
+
+    template<typename FloatType>
+    class SetPointsT : public TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = SetPointsT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        SetPointsT(size_t size, Range retsrange={0,-1}) : m_shape({size}), m_retsrange(retsrange) { }
+        SetPointsT(size_t sizex, size_t sizey, Range retsrange={0,-1}) : m_shape({sizex, sizey}), m_retsrange(retsrange) { }
+        SetPointsT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            auto& rets = fargs.rets;
+            for(auto ridx: m_retsrange.iterateSafe(rets.size())){
+                rets[ridx].points().shape(m_shape);
+            }
+        }
+
+        void dump(){
+            printf("TypeClass set points: rets ");
+            m_retsrange.dump();
+        }
+    private:
+        std::vector<size_t> m_shape;
         Range m_retsrange;
     };
 

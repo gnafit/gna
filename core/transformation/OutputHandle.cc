@@ -7,7 +7,7 @@
  */
 template<typename FloatType>
 inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() const {
-  m_sink->entry->touch();
+  m_sink->entry->touch_global();
   return this->view();
 }
 
@@ -28,7 +28,7 @@ inline bool TransformationTypes::OutputHandleT<FloatType>::depends(changeable x)
  */
 template<typename FloatType>
 bool TransformationTypes::OutputHandleT<FloatType>::check() const {
-  return m_sink->entry->check() && m_sink->data;
+  return bool(m_sink->data);
 }
 
 /**

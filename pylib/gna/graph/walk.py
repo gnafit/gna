@@ -89,8 +89,11 @@ class GraphWalker(object):
             self._propagate_backward(entry, queue)
 
     def set_parameters(self, ns):
+        from gna import env
         self.cache_variables=OrderedDict()
         for (name, par) in ns.walknames():
+            if isinstance(par, env.ExpressionsEntry):
+                continue
             var = par.getVariable()
             # print('walk', name, var.hash())
             self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [])

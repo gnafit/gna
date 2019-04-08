@@ -6,29 +6,64 @@
 #include <iostream>
 #include "TransformationEntry.hh"
 #include "GPUVariablesLocal.hh"
+#include "GPUVariables.hh"
 #include "GPUFunctionData.hh"
+
+#include "config_vars.h"
+
+#ifdef GNA_CUDA_SUPPORT
+#include "GpuBasics.hh"
+#endif
 
 namespace TransformationTypes{
     template<typename FloatType, typename SizeType=size_t>
     class GPUFunctionArgsT {
     public:
         using EntryType = EntryT<FloatType,FloatType>;
-        GPUFunctionArgsT(EntryType* entry) : m_entry(entry){
+        GPUFunctionArgsT(EntryType* entry) : m_entry(entry), m_vars_global(entry) {
 
         }
 
         ~GPUFunctionArgsT(){
-            ///TODO: deallocate m_argsmapping_dev
+                /// deallocate m_argsmapping_dev
         }
 
-        template<typename Container>
-        void readVariables(Container& vars){m_vars.readVariables(vars);}
+        void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
+            m_vars.readVariables(parbase);
+            m_vars_global.readVariables(parbase);
+            setAsDevice();
+        }
+
+        void readVariablesLocal(){
+            m_vars.readVariables();
+            setAsDevice();
+        }
+
+        void setAsDevice() {
+#ifdef GNA_CUDA_SUPPORT
+            m_entry->setEntryDataLocation(DataLocation::Device);
+#endif
+        }
+
+        void setAsHost() {
+#ifdef GNA_CUDA_SUPPORT
+            m_entry->setEntryDataLocation(DataLocation::Host);
+#endif
+        }
 
         void updateTypesHost();
         void updateTypesDevice();
-        void updateTypes() { updateTypesHost(); }
-        void provideSignatureHost();
-        void provideSignatureDevice();
+
+        void updateTypes() {
+            updateTypesHost();
+#ifdef GNA_CUDA_SUPPORT
+            if (m_entry->getEntryLocation() == DataLocation::Device){
+                updateTypesDevice();
+            }
+#endif
+        }
+        void provideSignatureHost(bool local=false);
+        void provideSignatureDevice(bool local=false);
         void dump();
 
         SizeType    nvars{0u};            ///< number of variables
@@ -49,73 +84,11 @@ namespace TransformationTypes{
         EntryType* m_entry;
 
         GPUVariablesLocal<FloatType,SizeType> m_vars; ///< Handler for variables (local)
+        GPUVariables<FloatType,SizeType>      m_vars_global; ///< Handler for variables (local)
         GPUFunctionData<FloatType,SizeType>   m_args; ///< Handler for inputs
         GPUFunctionData<FloatType,SizeType>   m_rets; ///< Handler for outputs
         GPUFunctionData<FloatType,SizeType>   m_ints; ///< Handler for storages
 
         SizeType* m_argsmapping_dev{nullptr};
     };
-
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::updateTypesHost(){
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
-
-        provideSignatureHost();
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
-        ///TODO: deallocate m_argsmapping_dev
-        //
-        m_args.fillContainers(m_entry->sources);
-        m_rets.fillContainers(m_entry->sinks);
-        m_ints.fillContainers(m_entry->storages);
-
-        ///TODO: allocate m_argsmapping_dev
-        ///TODO: sync m_entry->mapping to m_argsmapping_dev
-
-        provideSignatureDevice();
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::provideSignatureHost(){
-        m_vars.provideSignatureHost(nvars, vars);
-        m_args.provideSignatureHost(nargs, args, argshapes);
-        m_rets.provideSignatureHost(nrets, rets, retshapes);
-        m_ints.provideSignatureHost(nints, ints, intshapes);
-
-        argsmapping = m_entry->mapping.size() ? m_entry->mapping.data() : nullptr;
-    }
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::provideSignatureDevice(){
-        m_vars.provideSignatureDevice(nvars, vars);
-        m_args.provideSignatureDevice(nargs, args, argshapes);
-        m_rets.provideSignatureDevice(nrets, rets, retshapes);
-        m_ints.provideSignatureDevice(nints, ints, intshapes);
-
-        argsmapping = m_argsmapping_dev;
-    }
-
-
-    template<typename FloatType,typename SizeType>
-    void GPUFunctionArgsT<FloatType,SizeType>::dump(){
-        printf("Dumping GPU args state\n");
-
-        m_vars.dump("variables");
-        printf("\n");
-
-        m_args.dump("sources");
-        printf("\n");
-
-        m_rets.dump("sinks");
-        printf("\n");
-
-        m_ints.dump("storages");
-        printf("\n");
-
-    }
 }

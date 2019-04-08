@@ -22,8 +22,8 @@ dependant<float> GNAUnitTest::make_test_dependant_float(const std::string& name,
 #endif
 
 template double GNAUnitTest::debug_fcn_adder<double>();
-template void   GNAUnitTest::debug_vfcn_adder<double>(std::vector<double>&);
+template void   GNAUnitTest::debug_vfcn_adder<double>(arrayview<double>&);
 #ifdef PROVIDE_SINGLE_PRECISION
   template float GNAUnitTest::debug_fcn_adder<float>();
-  template void  GNAUnitTest::debug_vfcn_adder<float>(std::vector<float>&);
+  template void  GNAUnitTest::debug_vfcn_adder<float>(arrayview<float>&);
 #endif

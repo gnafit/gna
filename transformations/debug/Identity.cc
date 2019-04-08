@@ -32,7 +32,7 @@ using TransformationTypes::GPUShape;
 void identity_gpu_h(FunctionArgs& fargs){
 	fargs.args.touch();
 	auto& gpuargs=fargs.gpu;
-	gpuargs->provideSignatureHost();
+	gpuargs->provideSignatureHost(/*local*/true);
 
 	auto* source=*gpuargs->args;
 	auto* dest  =*gpuargs->rets;

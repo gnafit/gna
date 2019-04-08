@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os.path
 
 from load import ROOT as R
@@ -8,8 +9,9 @@ def datapath(fname):
 
 class ConstructorsWrapper(object):
     def __init__(self):
-        from gna import constructors
+        from gna import constructors, context
         self.__constructors = constructors
+        self.__context = context
         self.__chain = [self.__findwrapper, self.__findtemplate, self.__findclass]
         self.__notfound=['notfound']
 
@@ -19,6 +21,7 @@ class ConstructorsWrapper(object):
             try:
                 # print('try', finder, name)
                 ret, save = finder(name)
+                # print('found', ret, save)
             except AttributeError as e:
                 # print('  fail', e)
                 pass
@@ -39,7 +42,7 @@ class ConstructorsWrapper(object):
 
     def __findtemplate(self, name):
         template = getattr(R.GNA.GNAObjectTemplates, name+'T')
-        cls = template(self.__constructors._current_precision)
+        cls = template(self.__context.current_precision())
         return cls, False
 
     def __findclass(self, name):

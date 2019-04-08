@@ -4,7 +4,7 @@
 
 namespace TransformationTypes
 {
-  template<typename SourceFloatType, typename SinkFloatType> struct EntryT;
+  template<typename SourceFloatType, typename SinkFloatType> class EntryT;
   /**
    * @brief Access the transformation inputs.
    *
