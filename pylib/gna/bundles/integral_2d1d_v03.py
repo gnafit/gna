@@ -52,8 +52,8 @@ class integral_2d1d_v03(TransformationBundle):
         self.integrator.points.y.setLabel(self.cfg.variables[1])
 
         self.set_output(self.cfg.variables[0],            None, self.integrator.points.x)
-        self.set_output('%s_edges'%self.cfg.variables[0], None, self.integrator.points.xedges)
-        self.set_output('%s_hist'%self.cfg.variables[0],  None, self.integrator.points.xhist)
+        self.set_output('{}_edges'.format(self.cfg.variables[0]), None, self.integrator.points.xedges)
+        self.set_output('{}_hist'.format(self.cfg.variables[0]),  None, self.integrator.points.xhist)
         self.set_output(self.cfg.variables[1],            None, self.integrator.points.y)
 
         hist = self.integrator.hist
