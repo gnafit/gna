@@ -30,11 +30,11 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.stopping_power=N.loadtxt(self.cfg.stopping_power, dtype=dtype_spower)
 
         from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
-        filename, objname = self.cfg.annihilation_electrons
-        file = R.TFile(filename, 'read')
-        hist = file.Get(objname)
-        buf = get_buffer_hist1(hist).copy()
-        buf/=buf.sum()
+        cfg = self.cfg.annihilation_electrons
+        file = R.TFile(cfg.file, 'read')
+        hist = file.Get(cfg.histogram)
+        buf=get_buffer_hist1(hist).copy()
+        buf*=cfg.scale
         edges = get_bin_edges_axis(hist.GetXaxis())
 
         self.annihilation_electrons_p_input = buf
@@ -108,7 +108,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.electron_model_lowe_interpolated = self.electron_model_lowe_interpolator.add_input(self.electron_model_lowe.view.view)
 
         with self.namespace:
-            self.npe_positron_offset = C.NormalizedConvolution('ngamma', labels='e+e- annihilation Evis [MeV]')
+            self.npe_positron_offset = C.Convolution('ngamma', labels='e+e- annihilation Evis [MeV]')
             self.electron_model_lowe_interpolated >> self.npe_positron_offset.normconvolution.fcn
             self.annihilation_electrons_p >> self.npe_positron_offset.normconvolution.weights
 

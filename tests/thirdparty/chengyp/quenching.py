@@ -14,7 +14,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from gna.bundle import execute_bundle
 from gna.configurator import NestedDict, uncertaindict
 
-def main(args):
+def main(opts):
     global savefig
     cfg = NestedDict(
         bundle = dict(
@@ -24,7 +24,11 @@ def main(args):
             major=[],
             ),
         stopping_power='stoppingpower.txt',
-        annihilation_electrons=('input/hgamma2e.root', 'hgamma2e_1KeV'),
+        annihilation_electrons=dict(
+            file='input/hgamma2e.root',
+            histogram='hgamma2e_1KeV',
+            scale=1.0/50000 # event simulated
+            ),
         pars = uncertaindict(
             [
                 ('birks.Kb0',               (1.0, 'fixed')),
@@ -52,6 +56,7 @@ def main(args):
     quench = execute_bundle(cfg, namespace=ns)
     ns.printparameters(labels=True)
     print()
+    normE = ns['normalizationEnergy'].value()
 
     #
     # HistNonLinearity transformation
@@ -72,12 +77,12 @@ def main(args):
     #
     # Plots and tests
     #
-    if args.output and args.output.endswith('.pdf'):
-        pdfpages = PdfPages(args.output)
+    if opts.output and opts.output.endswith('.pdf'):
+        pdfpages = PdfPages(opts.output)
         savefig_old=savefig
         pdf=pdfpages.__enter__()
         def savefig(*args, **kwargs):
-            if args and args[0]:
+            if opts.individual and args and args[0]:
                 savefig_old(*args, **kwargs)
             pdf.savefig()
     else:
@@ -96,7 +101,11 @@ def main(args):
 
     quench.birks_quenching_p.points.points.plot_vs(quench.birks_e_p.points.points, '-', markerfacecolor='none', markersize=2.0, label='input')
     ax.legend(loc='upper right')
-    savefig(args.output, suffix='_spower')
+    savefig(opts.output, suffix='_spower')
+
+    ax.set_xlim(left=0.001)
+    ax.set_xscale('log')
+    savefig(opts.output, suffix='_spower_log')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -115,10 +124,10 @@ def main(args):
     savefig()
 
     ax.set_xlim(left=0.0001)
-    ax.set_ylim(bottom=0.5)
+    ax.set_ylim(bottom=0.3)
     # ax.set_yscale('log')
     ax.set_xscale('log')
-    savefig(args.output, suffix='_spower_int')
+    savefig(opts.output, suffix='_spower_int')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -137,7 +146,7 @@ def main(args):
     # ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim(auto=True)
-    savefig(args.output, suffix='_spower_intc')
+    savefig(opts.output, suffix='_spower_intc')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -150,7 +159,7 @@ def main(args):
     quench.birks_accumulator.reduction.plot_vs(quench.ekin_edges_p)
     ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5)
 
-    savefig(args.output, suffix='_birks_evis')
+    savefig(opts.output, suffix='_birks_evis')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -161,9 +170,9 @@ def main(args):
     ax.set_title( 'Electron energy (Birks)' )
     #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     quench.ekin_edges_p.vs_plot(quench.birks_accumulator.reduction.data()/quench.ekin_edges_p.data())
-    ax.set_ylim(0.65, 1.0)
+    ax.set_ylim(0.40, 1.0)
 
-    savefig(args.output, suffix='_birks_evis_rel')
+    savefig(opts.output, suffix='_birks_evis_rel')
 
     ax.set_xlim(1.e-3, 2.0)
     ax.set_xscale('log')
@@ -178,7 +187,7 @@ def main(args):
     ax.set_title( 'Cherenkov photons' )
     quench.cherenkov.cherenkov.ch_npe.plot_vs(quench.ekin_edges_p)
 
-    savefig(args.output, suffix='_cherenkov_npe')
+    savefig(opts.output, suffix='_cherenkov_npe')
 
     ax.set_ylim(bottom=0.1)
     ax.set_yscale('log')
@@ -197,7 +206,7 @@ def main(args):
     ax.set_title( 'Electron model' )
     quench.electron_model.single().plot_vs(quench.ekin_edges_p)
 
-    savefig(args.output, suffix='_electron')
+    savefig(opts.output, suffix='_electron')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -209,11 +218,11 @@ def main(args):
     annihilation_gamma_evis = quench.npe_positron_offset.normconvolution.result.data()[0]
     label = 'Annihilation contribution=%.2f Npe'%annihilation_gamma_evis
     quench.electron_model_lowe.single().plot_vs(quench.ekin_edges_lowe.view.view, 'o', markerfacecolor='none', label='data')
-    quench.electron_model_lowe_interpolated.single().plot_vs(quench.annihilation_electrons_centers.single(), '-', label='{interpolation|%s}'%label)
+    quench.electron_model_lowe_interpolated.single().plot_vs(quench.annihilation_electrons_centers.single(), '-', label='interpolation\n%s'%label)
 
     ax.legend(loc='upper left')
 
-    savefig(args.output, suffix='_electron_lowe')
+    savefig(opts.output, suffix='_electron_lowe')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -224,7 +233,7 @@ def main(args):
     ax.set_title( 'Total Npe' )
     quench.positron_model.sum.outputs[0].plot_vs(quench.epos_edges.single())
 
-    savefig(args.output, suffix='_total_npe')
+    savefig(opts.output, suffix='_total_npe')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -234,10 +243,12 @@ def main(args):
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Positron energy model' )
     quench.positron_model_scaled.plot_vs(quench.epos_edges.single(), label='definition range')
-    quench.positron_model_scaled_full.single().plot_vs(quench.epos_edges_full.single(), '--', label='full range')
+    quench.positron_model_scaled_full.single().plot_vs(quench.epos_edges_full.single(), '--', linewidth=1., label='full range', zorder=0.5)
+    ax.vlines(normE, 0.0, normE, linestyle=':')
+    ax.hlines(normE, 0.0, normE, linestyle=':')
     ax.legend(loc='upper left')
 
-    savefig(args.output, suffix='_total')
+    savefig(opts.output, suffix='_total')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -247,15 +258,16 @@ def main(args):
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
     quench.positron_model_relative.single().plot_vs(quench.epos_edges.single(), label='definition range')
-    quench.positron_model_relative_full.single().plot_vs(quench.epos_edges_full.single(), '--', label='full range')
+    quench.positron_model_relative_full.single().plot_vs(quench.epos_edges_full.single(), '--', linewidth=1., label='full range', zorder=0.5)
+    ax.vlines(normE, 0.0, 1.0, linestyle=':')
 
     ax.legend(loc='lower right')
+    ax.set_ylim(0.85, 1.1)
 
-    savefig(args.output, suffix='_total_relative')
+    savefig(opts.output, suffix='_total_relative')
 
-    ax.set_xlim(left=1.0)
-    ax.set_ylim(0.5, 1.7)
-    savefig(args.output, suffix='_total_relative1')
+    ax.set_xlim(0.75, 3)
+    savefig(opts.output, suffix='_total_relative1')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -266,9 +278,15 @@ def main(args):
     ax.set_title( 'Smearing matrix' )
 
     quench.pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[0.0, quench.epos_edges_full_input.max(), quench.epos_edges_full_input.max(), 0.0], colorbar=True)
-    ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5, linewidth=1.0)
+    ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5, linewidth=1.0, color='magenta')
+    ax.vlines(normE, 0.0, normE, linestyle=':')
+    ax.hlines(normE, 0.0, normE, linestyle=':')
 
-    savefig(args.output, suffix='_matrix')
+    savefig(opts.output, suffix='_matrix')
+
+    ax.set_xlim(0.8, 3.0)
+    ax.set_ylim(3.0, 0.8)
+    savefig(opts.output, suffix='_matrix_zoom')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -283,7 +301,7 @@ def main(args):
 
     ax.legend(loc='upper right')
 
-    savefig(args.output, suffix='_refsmear1')
+    savefig(opts.output, suffix='_refsmear1')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -302,7 +320,7 @@ def main(args):
 
     ax.legend(loc='upper right')
 
-    savefig(args.output, suffix='_matrix_projections')
+    savefig(opts.output, suffix='_matrix_projections')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -319,7 +337,7 @@ def main(args):
 
     # ax.legend(loc='upper right')
 
-    savefig(args.output, suffix='_mapping')
+    savefig(opts.output, suffix='_mapping')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -331,23 +349,25 @@ def main(args):
 
     reference_histogram2.single().plot_hist(linewidth=0.5, alpha=1.0, label='original')
     reference_smeared2.single().plot_hist(  linewidth=0.5, alpha=1.0, label='smeared')
+    ax.vlines(normE, 0.0, 1.0, linestyle=':')
 
     ax.legend(loc='upper right')
 
-    savefig(args.output, suffix='_refsmear2')
+    savefig(opts.output, suffix='_refsmear2')
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
 
-    savegraph(quench.epos_edges.single(), args.graph, namespace=ns)
+    savegraph(quench.epos_edges.single(), opts.graph, namespace=ns)
 
-    if args.show:
+    if opts.show:
         P.show()
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('-o', '--output', help='Output file for images')
+    parser.add_argument('-i', '--individual', help='Save individual output files', action='store_true')
     parser.add_argument('-g', '--graph', help='Output file for graph')
     parser.add_argument('-s', '--show', action='store_true', help='Show the plots')
 
