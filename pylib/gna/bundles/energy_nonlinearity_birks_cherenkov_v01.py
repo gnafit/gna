@@ -74,7 +74,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
         self.integrator_ekin = C.IntegratorGL(self.ekin_edges_h.adapter.hist, 2, labels=(('Te sampler (GL)', "Birk's integrator (GL)")))
 
-        self.birks_integrand_interpolator = C.InterpLog(self.birks_e_p, self.integrator_ekin.points.x, labels=("Birk's InSegment", "Birk's interpolator"))
+        self.birks_integrand_interpolator = C.InterpLogx(self.birks_e_p, self.integrator_ekin.points.x, labels=("Birk's InSegment", "Birk's interpolator"))
         self.birks_integrand_interpolated = self.birks_integrand_interpolator.add_input(self.birks_integrand_raw.polyratio.ratio)
         self.birks_integral = self.integrator_ekin.add_input(self.birks_integrand_interpolated)
 
