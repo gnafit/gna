@@ -1,4 +1,4 @@
-#include "InterpLog.hh"
+#include "InterpLogx.hh"
 #include "TypesFunctions.hh"
 #include "fmt/format.h"
 
@@ -10,7 +10,7 @@ using std::next;
 using std::prev;
 using std::advance;
 
-InterpLog::InterpLog() : InSegment() {
+InterpLogx::InterpLogx() : InSegment() {
   add_transformation();
   add_input();
   set_open_input();
@@ -23,18 +23,18 @@ InterpLog::InterpLog() : InSegment() {
   //}
 }
 
-InterpLog::InterpLog(SingleOutput& x, SingleOutput& newx) : InterpLog()
+InterpLogx::InterpLogx(SingleOutput& x, SingleOutput& newx) : InterpLogx()
 {
   set(x, newx);
   bind_inputs();
 }
 
-InterpLog::InterpLog(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpLog()
+InterpLogx::InterpLogx(SingleOutput& x, SingleOutput& y, SingleOutput& newx) : InterpLogx()
 {
   interpolate(x, y, newx);
 }
 
-TransformationDescriptor InterpLog::add_transformation(const std::string& name){
+TransformationDescriptor InterpLogx::add_transformation(const std::string& name){
   transformation_(new_transformation_name(name))
     .input("newx")             /// 0
     .input("x")                /// 1
@@ -47,7 +47,7 @@ TransformationDescriptor InterpLog::add_transformation(const std::string& name){
     .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
-    .func(&InterpLog::do_interpolate)
+    .func(&InterpLogx::do_interpolate)
     ;
 
   reset_open_input();
@@ -55,14 +55,14 @@ TransformationDescriptor InterpLog::add_transformation(const std::string& name){
   return transformations.back();
 }
 
-void InterpLog::set(SingleOutput& x, SingleOutput& newx){
+void InterpLogx::set(SingleOutput& x, SingleOutput& newx){
   auto segments = transformations.front();
   auto sinputs  = segments.inputs;
   sinputs[0].connect(newx.single());
   sinputs[1].connect(x.single());
 }
 
-void InterpLog::bind_transformations(){
+void InterpLogx::bind_transformations(){
   auto segments=transformations.front();
   auto interp=transformations.back();
 
@@ -73,7 +73,7 @@ void InterpLog::bind_transformations(){
   outputs[1]>>inputs[3];
 }
 
-void InterpLog::bind_inputs(){
+void InterpLogx::bind_inputs(){
   auto segments=transformations.front();
   auto interp=transformations.back();
 
@@ -84,23 +84,23 @@ void InterpLog::bind_inputs(){
   seg_inputs[1].output()>>inputs[1];
 }
 
-OutputDescriptor InterpLog::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
+OutputDescriptor InterpLogx::interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx){
   set(x, newx);
   auto output=add_input(y);
   bind_inputs();
   return output;
 }
 
-void InterpLog::do_interpolate(FunctionArgs& fargs){
+void InterpLogx::do_interpolate(FunctionArgs& fargs){
   auto& args=fargs.args;                                                  /// name inputs
   auto& rets=fargs.rets;                                                  /// name outputs
 
   auto& points_a=args[0].x;                                               /// new x points
   auto  npoints=points_a.size();                                          /// number of points
   auto& x_a=args[1].x;                                                    /// x of segments
-  auto& widths_a=args[3].x;                                               /// segment widths
-
   auto nseg=x_a.size()-1;                                                 /// number of segments
+
+  auto logratios=(x_a.tail(nseg)/x_a.head(nseg)).log().eval();
 
   auto insegment_start=args[2].buffer;                                    /// insegment buffer
 
@@ -111,9 +111,8 @@ void InterpLog::do_interpolate(FunctionArgs& fargs){
 
     auto& y_a=args[4+ret].x;                                              /// y of segments, the offset
 
-    auto  b_a = y_a.exp().eval();
-    auto  b_buffer = b_a.data();
-    auto  k_a=((b_a.tail(nseg)-b_a.head(nseg))/widths_a).eval();          /// k coefficient
+    auto  b_buffer = y_a.data();
+    auto  k_a=((y_a.tail(nseg)-y_a.head(nseg))/logratios).eval();         /// k coefficient
     auto  k_buffer=k_a.data();                                            /// k buffer
 
     auto result=rets[ret].buffer;                                         /// interpolation write buffer
@@ -126,7 +125,7 @@ void InterpLog::do_interpolate(FunctionArgs& fargs){
       else if( *insegment>=nseg ){ /// overflow, extrapolate
         idx=nseg-1u;
       }
-      *result = std::log(k_buffer[idx] * (*point - x_buffer[idx]) + b_buffer[idx]);
+      *result = k_buffer[idx] * std::log(*point/x_buffer[idx]) + b_buffer[idx];
 
       advance(point, 1);
       advance(result, 1);
@@ -135,7 +134,7 @@ void InterpLog::do_interpolate(FunctionArgs& fargs){
   }
 }
 
-//InterpLog::Strategy InterpLog::getStrategy(const std::string& strategy){
+//InterpLogx::Strategy InterpLogx::getStrategy(const std::string& strategy){
   //if(strategy=="constant"){
     //return Constant;
   //}

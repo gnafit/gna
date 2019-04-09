@@ -11,6 +11,7 @@ from mpl_tools.helpers import savefig
 interpolators = dict(
         linear = R.InterpLinear,
         log = R.InterpLog,
+        logx = R.InterpLogx,
         expo = R.InterpExpo
         )
 

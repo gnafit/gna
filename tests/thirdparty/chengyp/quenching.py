@@ -106,7 +106,7 @@ def main(args):
     ax.set_ylabel( '' )
     ax.set_title( "Birk's integrand" )
 
-    quench.birks_integrand_raw.polyratio.ratio.plot_vs(quench.birks_e_p.points.points, '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
+    quench.birks_integrand_raw.polyratio.ratio.plot_vs(quench.birks_e_p.points.points, '-o', alpha=0.5, markerfacecolor='none', markersize=2.0, label='raw')
     # birks_integrand_interpolated.plot_vs(integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
     lines=quench.birks_integrand_interpolated.plot_vs(quench.integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
     quench.birks_integrand_interpolated.plot_vs(quench.integrator_ekin.points.x, 'o', alpha=0.5, color='black', markersize=0.6)
