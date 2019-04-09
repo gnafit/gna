@@ -58,6 +58,7 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
   transformations/interpolation/InterpLog.cc
+  transformations/interpolation/InterpLogx.cc
   transformations/interpolation/FixedPointScale.cc
   # Linear algebra
   transformations/linalg/Cholesky.cc
@@ -148,6 +149,7 @@ set(TRANSFORMATION_HEADERS
   InterpExpo.hh
   InterpLinear.hh
   InterpLog.hh
+  InterpLogx.hh
   FixedPointScale.hh
   Covmat.hh
   Cholesky.hh
