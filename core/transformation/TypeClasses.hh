@@ -218,6 +218,39 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
+    class CheckKindT : public TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = CheckKindT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        CheckKindT(DataKind kind, Range argsrange={0,-1}) : m_kind(kind), m_argsrange(argsrange) { }
+        CheckKindT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            static const char* names[] = {"Undefined", "Points", "Hist"};
+
+            auto& args = fargs.args;
+            for(auto aidx: m_argsrange.iterate(args.size())){
+                if(args[aidx].kind!=m_kind){
+                    auto msg = fmt::format("Transformation {0}: input {1} should have kind {2}, got {3}", args.name(), aidx, names[int(m_kind)], names[int(args[aidx].kind)]);
+                    throw args.error(args[aidx], msg);
+                }
+            }
+        }
+
+        void dump(){
+            printf("TypeClass to check kind is %zu ", size_t(m_kind));
+            m_argsrange.dump();
+        }
+    private:
+        DataKind m_kind;
+        Range m_argsrange;
+    };
+
+    template<typename FloatType>
     class PassTypeT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;

@@ -40,6 +40,7 @@ set(TRANSFORMATION_SOURCES
   # Histograms
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
+  transformations/hist/HistEdgesOffset.cc
   transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
@@ -146,6 +147,7 @@ set(TRANSFORMATION_HEADERS
   # Detector effects
   CovariatedPrediction.hh
   HistEdges.hh
+  HistEdgesOffset.hh
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
