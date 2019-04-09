@@ -17,6 +17,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/WeightedSumP.cc
   # Ratios
   transformations/ratio/NormalizedConvolution.cc
+  transformations/ratio/Convolution.cc
   transformations/ratio/PolyRatio.cc
   transformations/ratio/Ratio.cc
   # Calculus
@@ -135,6 +136,7 @@ set(TRANSFORMATION_HEADERS
   WeightedSum.hh
   WeightedSumP.hh
   # Ratios
+  Convolution.hh
   NormalizedConvolution.hh
   PolyRatio.hh
   Ratio.hh
