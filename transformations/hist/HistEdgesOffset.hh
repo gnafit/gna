@@ -20,8 +20,14 @@ public:
     //void add_transformation(double fill_value);
     //void add_input();
 
-    bool floatThreshold() { return bool(m_threshold); }
-    size_t getOffset() { return m_offset.value(); }
+    bool floatThreshold() const noexcept { return bool(m_threshold); }
+    size_t getOffset() const { return m_offset.value(); }
+
+    const DataType& getDataTypePoints() const noexcept { return m_dt_points; }
+    const DataType& getDataTypePointsTruncated() const noexcept { return m_dt_points_truncated; }
+    const DataType& getDataTypeHistTruncated() const noexcept { return m_dt_hist_truncated; }
+    const DataType& getDataTypeHistThreshold() const noexcept { return m_dt_hist_threshold; }
+    const DataType& getDataTypeHistOffset() const noexcept { return m_dt_hist_offset; }
 private:
     void init();
     void types(TypesFunctionArgs& fargs);
@@ -35,9 +41,10 @@ private:
 
     //boost::optional<double> m_fillvalue;
 
-    //DataType m_dt_hist_input;
-    //DataType m_dt_points;
-    //DataType m_dt_points_truncated;
-    //DataType m_dt_hist_truncated;
-    //DataType m_dt_hist_threshold;
+    DataType m_dt_hist_input;
+    DataType m_dt_points;
+    DataType m_dt_points_truncated;
+    DataType m_dt_hist_truncated;
+    DataType m_dt_hist_threshold;
+    DataType m_dt_hist_offset;
 };

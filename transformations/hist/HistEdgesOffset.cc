@@ -31,12 +31,16 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     auto& edges_input = hist_input.edges;
 
     if(!m_offset){
-        auto it = std::upper_bound(edges_input.begin(), edges_input.end(), m_threshold.value());
-        if( it==edges_input.end() || it==edges_input.begin() ){
-            throw fargs.args.error(hist_input, "Unable to find proper offset");
+        if(m_threshold.value() <= edges_input[0]){
+            m_offset = 0lu;
         }
-
-        m_offset = std::distance(edges_input.begin(), it-1);
+        else{
+            auto it = std::upper_bound(edges_input.begin(), edges_input.end(), m_threshold.value());
+            if( it==edges_input.end() ){
+                throw fargs.args.error(hist_input, "Unable to find proper offset");
+            }
+            m_offset = std::distance(edges_input.begin(), it-1);
+        }
     }
 
     size_t size_in = hist_input.shape[0];
@@ -56,10 +60,10 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     points_truncated.points().shape(newsize+1);
     hist_truncated.hist().edges(newsize+1, edges_input.data()+m_offset.value());
 
-    //m_dt_hist_input       = hist_input;
-    //m_dt_hist_truncated   = hist_truncated;
-    //m_dt_points           = points;
-    //m_dt_points_truncated = points_truncated;
+    m_dt_hist_input       = hist_input;
+    m_dt_hist_truncated   = hist_truncated;
+    m_dt_points           = points;
+    m_dt_points_truncated = points_truncated;
 
     if(!m_threshold){
         return;
@@ -89,7 +93,8 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     hist_threshold.hist().edges(edges_threshold);
     hist_offset.hist().edges(edges_offset);
 
-    //m_dt_hist_threshold = hist_threshold;
+    m_dt_hist_threshold = hist_threshold;
+    m_dt_hist_offset = hist_offset;
 }
 
 void HistEdgesOffset::func(FunctionArgs& fargs){

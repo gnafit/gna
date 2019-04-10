@@ -10,6 +10,11 @@
 using namespace Eigen;
 using namespace std;
 
+IntegratorGL::IntegratorGL(int orders) : IntegratorBase(orders)
+{
+  init_sampler();
+}
+
 IntegratorGL::IntegratorGL(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges)
 {
   init_sampler();

@@ -329,7 +329,9 @@ class TreeStyle(object):
         attrs = dict(layer='transformation')
         style=()
         if sink:
-            attrs['taillabel']=self.tail_label(isink, sink)
+            taillabel=self.tail_label(isink, sink)
+            if taillabel and source:
+                attrs['xlabel']=taillabel
 
             sinkfeatures = self.get_features(sink.entry)
             if sinkfeatures.static:

@@ -66,8 +66,60 @@ def test_viewrear_01(function_name):
             assert (points.single().data()==arr).all()
             print()
 
+@floatcopy(globals(), addname=True)
+def test_viewrear_02(function_name):
+    arr = N.zeros(12, dtype=context.current_precision_short())
+    ns = env.env.globalns(function_name)
+    names=[]
+    for i in range(arr.size):
+        name='val_%02i'%i
+        names.append(name)
+        ns.defparameter( name, central=i, fixed=True, label='Value %i'%i )
+
+    for start in range(arr.size):
+        pview = arr[start:]
+        points = C.Points(arr)
+        view = C.ViewRear(points, start);
+
+        cnames = names[start:]
+        with ns:
+            vararray = C.VarArray(cnames)
+
+        vararray >> view.view.rear
+
+        print('Start', start)
+        for ichange, iname in enumerate(['']+cnames, -1):
+            if iname:
+                print('  Change', ichange, iname)
+                par=ns[iname]
+                par.set(par.value()+1.0)
+
+            res0 = vararray.single().data()
+            res = view.view.result.data()
+            expect = arr.copy()
+            for i, name in enumerate(cnames, start):
+                expect[i] = ns[name].value()
+
+            expect0 = []
+            for i, name in enumerate(cnames, start):
+                expect0.append(ns[name].value())
+
+            print('    Result 0', res0)
+            print('    Expect 0', expect0)
+            print('    Result', res)
+            print('    Expect', expect)
+            print('    Original data', points.single().data())
+            print('    Original data (expect)', arr)
+
+            assert (res==expect).all()
+            assert (res0==expect0).all()
+            assert (res[start:]==res0).all()
+            assert (points.single().data()==arr).all()
+            print()
+
+
 # @floatcopy(globals()) # uncomment after porting the histogram
-def test_viewrear_02():
+def test_viewrear_03():
     edges = N.arange(13, dtype='d')
     arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
 
@@ -98,7 +150,7 @@ def test_viewrear_02():
         assert (hist_main.single().data()==arr).all()
 
 # @floatcopy(globals()) # uncomment after porting the histogram
-def test_viewrear_03():
+def test_viewrear_04():
     edges = N.arange(13, dtype='d')
     arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
 
@@ -134,7 +186,7 @@ def test_viewrear_03():
         assert (hist_main.single().data()==arr).all()
 
 @floatcopy(globals(), addname=True)
-def test_viewrear_04(function_name):
+def test_viewrear_05(function_name):
     arr = N.arange(12, dtype=context.current_precision_short())
     ns = env.env.globalns(function_name)
     names=[]

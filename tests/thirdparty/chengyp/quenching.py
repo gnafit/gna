@@ -59,14 +59,21 @@ def main(opts):
     normE = ns['normalizationEnergy'].value()
 
     #
+    # Input bins
+    #
+    binwidth=0.025
+    evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
+    evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
+
+    #
     # HistNonLinearity transformation
     #
-    reference_histogram1_input = N.zeros(quench.epos_edges_full_input.size-1)
+    reference_histogram1_input = N.zeros(evis_edges_full_input.size-1)
     reference_histogram2_input = reference_histogram1_input.copy()
     reference_histogram1_input+=1.0
     reference_histogram2_input[[10, 20, 50, 100, 200, 300, 400]]=1.0
-    reference_histogram1 = C.Histogram(quench.epos_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
-    reference_histogram2 = C.Histogram(quench.epos_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
+    reference_histogram1 = C.Histogram(evis_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
+    reference_histogram2 = C.Histogram(evis_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
 
     reference_histogram1 >> quench.context.inputs.lsnl_edges.values()
     reference_histogram1 >> quench.context.inputs.lsnl.R1.values()
@@ -79,6 +86,7 @@ def main(opts):
     #
     if opts.output and opts.output.endswith('.pdf'):
         pdfpages = PdfPages(opts.output)
+        pdfpagesfilename=opts.output
         savefig_old=savefig
         pdf=pdfpages.__enter__()
         def savefig(*args, **kwargs):
@@ -87,6 +95,7 @@ def main(opts):
             pdf.savefig()
     else:
         pdf = None
+        pdfpagesfilename = ''
 
     #
     # Plots and tests
@@ -155,8 +164,8 @@ def main(opts):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Electron energy (Birks)' )
-    #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
-    quench.birks_accumulator.reduction.plot_vs(quench.ekin_edges_p)
+    #  birks_accumulator.reduction.out.plot_vs(integrator_evis.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
+    quench.birks_accumulator.reduction.plot_vs(quench.histoffset.histedges.points_offset)
     ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5)
 
     savefig(opts.output, suffix='_birks_evis')
@@ -168,8 +177,8 @@ def main(opts):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Electron energy (Birks)' )
-    #  birks_accumulator.reduction.out.plot_vs(integrator_epos.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
-    quench.ekin_edges_p.vs_plot(quench.birks_accumulator.reduction.data()/quench.ekin_edges_p.data())
+    #  birks_accumulator.reduction.out.plot_vs(integrator_evis.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
+    quench.histoffset.histedges.points_offset.vs_plot(quench.birks_accumulator.reduction.data()/quench.histoffset.histedges.points_offset.data())
     ax.set_ylim(0.40, 1.0)
 
     savefig(opts.output, suffix='_birks_evis_rel')
@@ -185,7 +194,7 @@ def main(opts):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Cherenkov photons' )
-    quench.cherenkov.cherenkov.ch_npe.plot_vs(quench.ekin_edges_p)
+    quench.cherenkov.cherenkov.ch_npe.plot_vs(quench.histoffset.histedges.points_offset)
 
     savefig(opts.output, suffix='_cherenkov_npe')
 
@@ -204,7 +213,7 @@ def main(opts):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Electron model' )
-    quench.electron_model.single().plot_vs(quench.ekin_edges_p)
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_offset)
 
     savefig(opts.output, suffix='_electron')
 
@@ -231,7 +240,7 @@ def main(opts):
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Total Npe' )
-    quench.positron_model.sum.outputs[0].plot_vs(quench.epos_edges.single())
+    quench.positron_model.sum.outputs[0].plot_vs(quench.histoffset.histedges.points_truncated)
 
     savefig(opts.output, suffix='_total_npe')
 
@@ -242,8 +251,8 @@ def main(opts):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Positron energy model' )
-    quench.positron_model_scaled.plot_vs(quench.epos_edges.single(), label='definition range')
-    quench.positron_model_scaled_full.single().plot_vs(quench.epos_edges_full.single(), '--', linewidth=1., label='full range', zorder=0.5)
+    quench.positron_model_scaled.plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
+    quench.positron_model_scaled_full.single().plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
     ax.vlines(normE, 0.0, normE, linestyle=':')
     ax.hlines(normE, 0.0, normE, linestyle=':')
     ax.legend(loc='upper left')
@@ -257,8 +266,8 @@ def main(opts):
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
-    quench.positron_model_relative.single().plot_vs(quench.epos_edges.single(), label='definition range')
-    quench.positron_model_relative_full.single().plot_vs(quench.epos_edges_full.single(), '--', linewidth=1., label='full range', zorder=0.5)
+    quench.positron_model_relative.single().plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
+    quench.positron_model_relative_full.single().plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
 
     ax.legend(loc='lower right')
@@ -277,7 +286,7 @@ def main(opts):
     ax.set_ylabel('Edep, MeV')
     ax.set_title( 'Smearing matrix' )
 
-    quench.pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[0.0, quench.epos_edges_full_input.max(), quench.epos_edges_full_input.max(), 0.0], colorbar=True)
+    quench.pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[0.0, evis_edges_full_input.max(), evis_edges_full_input.max(), 0.0], colorbar=True)
     ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5, linewidth=1.0, color='magenta')
     ax.vlines(normE, 0.0, normE, linestyle=':')
     ax.hlines(normE, 0.0, normE, linestyle=':')
@@ -315,8 +324,8 @@ def main(opts):
     proj0 = mat.sum(axis=0)
     proj1 = mat.sum(axis=1)
 
-    plot_hist(quench.epos_edges_full_input, proj0, alpha=0.7, linewidth=1.0, label='Projection 0: Edep view')
-    plot_hist(quench.epos_edges_full_input, proj1, alpha=0.7, linewidth=1.0, label='Projection 1: Evis')
+    plot_hist(evis_edges_full_input, proj0, alpha=0.7, linewidth=1.0, label='Projection 0: Edep view')
+    plot_hist(evis_edges_full_input, proj1, alpha=0.7, linewidth=1.0, label='Projection 1: Evis')
 
     ax.legend(loc='upper right')
 
@@ -331,7 +340,7 @@ def main(opts):
     ax.set_title( 'Mapping' )
 
     positron_model_scaled_data = quench.positron_model_scaled.single().data()
-    for e1, e2 in zip(quench.epos_edges_input, positron_model_scaled_data):
+    for e1, e2 in zip(quench.histoffset.histedges.points_truncated.data(), positron_model_scaled_data):
         ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=0.5 )
     ax.axvline(12.0, linestyle='--')
 
@@ -357,8 +366,9 @@ def main(opts):
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
+        print('Write output figure to', pdfpagesfilename)
 
-    savegraph(quench.epos_edges.single(), opts.graph, namespace=ns)
+    savegraph(quench.histoffset.histedges.points_truncated, opts.graph, namespace=ns)
 
     if opts.show:
         P.show()
