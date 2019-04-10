@@ -163,14 +163,15 @@ ax.set_title("Jacobian of transition")
 enu_first = context.outputs.enu_first_order.data().T
 ctheta = context.outputs.ctheta.data()
 jacobians = context.outputs.jacobian.data().T
+ee_first = context.outputs.ee_first_order.data()
 
 for enu, cos, jac in zip(enu_first, ctheta, jacobians):
     if cos in dyboscar_ctheta:
-        ax.plot(enu, jac, label=r'GNA $\cos\,\theta = {}$'.format(cos))
+        ax.plot(ee_first, jac, label=r'GNA $\cos\,\theta = {}$'.format(cos))
 if input_dyboscar is not None:
     ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0') 
     ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 0') 
-ax.set_xlim(1.8, 12.)
+#  ax.set_xlim(1.8, 12.)
 ax.set_ylim(0.97, 1.03)
 
 ax.legend(loc='best')
