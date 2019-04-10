@@ -6,6 +6,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Points.cc
   transformations/base/View.cc
   transformations/base/ViewRear.cc
+  transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
   # Sums
@@ -128,6 +129,7 @@ set(TRANSFORMATION_HEADERS
   Points.hh
   View.hh
   ViewRear.hh
+  ViewHistBased.hh
   Product.hh
   # Sums
   PartialSum.hh

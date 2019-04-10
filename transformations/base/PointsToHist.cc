@@ -24,7 +24,7 @@ void PointsToHist::init(SingleOutput& points) {
         .input("points")
         .output("hist")
         .types([](PointsToHist* obj, TypesFunctionArgs targs){
-                    targs.rets[0] = DataType().hist().edges(obj->m_edges);
+                    targs.rets[0].hist().edges(obj->m_edges);
                 })
         .func([](PointsToHist* obj, FunctionArgs fargs) {
                 fargs.args[0];

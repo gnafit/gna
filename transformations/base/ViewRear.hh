@@ -18,6 +18,10 @@ namespace GNA{
             using typename BaseClass::SingleOutput;
             using DataPtr = std::unique_ptr<Data<FloatType>>;
 
+            ViewRearT(size_t start);
+            ViewRearT(SingleOutput* output, size_t start);
+            ViewRearT(size_t start, FloatType fill_value);
+            ViewRearT(SingleOutput* output, size_t start, FloatType fill_value);
             ViewRearT(size_t start, size_t len);
             ViewRearT(SingleOutput* output, size_t start, size_t len);
             ViewRearT(size_t start, size_t len, FloatType fill_value);
@@ -31,7 +35,7 @@ namespace GNA{
 
             size_t m_threshold_forbidden=true;
             size_t m_start=0lu;
-            size_t m_len;
+            boost::optional<size_t> m_len;
 
             boost::optional<FloatType> m_fill_value;
 

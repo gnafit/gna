@@ -2,6 +2,30 @@
 #include "TypeClasses.hh"
 
 template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start) : m_start(start) {
+    init();
+}
+
+template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(typename GNAObjectT<FloatType,FloatType>::SingleOutput* output, size_t start) :
+ViewRearT(start)
+{
+    output->single() >> this->transformations.back().inputs.front();
+}
+
+template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start, FloatType fill_value) : m_start(start), m_fill_value(fill_value) {
+    init();
+}
+
+template<typename FloatType>
+GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(typename GNAObjectT<FloatType,FloatType>::SingleOutput* output, size_t start, FloatType fill_value) :
+ViewRearT(start, fill_value)
+{
+    output->single() >> this->transformations.back().inputs.front();
+}
+
+template<typename FloatType>
 GNA::GNAObjectTemplates::ViewRearT<FloatType>::ViewRearT(size_t start, size_t len) :
 m_start(start),
 m_len(len)
@@ -58,7 +82,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::init(){
                         if(head){
                             ret.head(head) = arg0.head(head);
                         }
-                        size_t tail=ret.size()-obj->m_start-obj->m_len;
+                        size_t tail=ret.size()-obj->m_start-obj->m_len.value();
                         if(tail){
                             ret.tail(tail) = arg0.tail(tail);
                         }
@@ -82,12 +106,22 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
         return;
     }
 
-    auto required_length=m_start+m_len;
-    if(dt_main.shape[0]<required_length)
-    {
-        throw args.error(dt_main, fmt::format("Transformation {0}: input {1} length should be at least {2}, got {3}",
-                                              args.name(), 0, required_length, dt_main.shape[0]));
+    if(m_len){
+        auto required_length=m_start+m_len.value();
+        if(dt_main.shape[0]<required_length)
+        {
+            throw args.error(dt_main, fmt::format("Transformation {0}: input {1} length should be at least {2}, got {3}",
+                                                  args.name(), 0, required_length, dt_main.shape[0]));
+        }
+    } else {
+        if(dt_main.shape[0]<=m_start)
+        {
+            throw args.error(dt_main, fmt::format("Transformation {0}: input {1} length should be at least {2}, got {3}",
+                                                  args.name(), 0, m_start+1, dt_main.shape[0]));
+        }
+        m_len = dt_main.shape[0]-m_start;
     }
+
 
     /// Allocate data if required
     auto& dt_ret = (fargs.rets[0] = dt_main);
@@ -105,10 +139,10 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
     FloatType* buffer_sub=buffer_main+m_start;
     switch(dt_ret.kind){
         case DataKind::Hist:
-            dt_sub.hist().edges(m_len+1, dt_ret.edges.data()+m_start).preallocated(buffer_sub);
+            dt_sub.hist().edges(m_len.value()+1, dt_ret.edges.data()+m_start).preallocated(buffer_sub);
             break;
         case DataKind::Points:
-            dt_sub.points().shape(m_len).preallocated(buffer_sub);
+            dt_sub.points().shape(m_len.value()).preallocated(buffer_sub);
             break;
         default:
             throw std::runtime_error("something is wrong (ViewRear)");

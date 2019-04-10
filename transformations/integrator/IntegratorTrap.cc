@@ -8,6 +8,11 @@
 using namespace Eigen;
 using namespace std;
 
+IntegratorTrap::IntegratorTrap(int orders) : IntegratorBase(orders, true)
+{
+  init_sampler();
+}
+
 IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges, true)
 {
   init_sampler();
