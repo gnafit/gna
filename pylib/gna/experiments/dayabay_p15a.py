@@ -416,6 +416,7 @@ class exp(baseexp):
         reactors  = self.nidx.indices['r'].variants
         isotopes  = self.nidx.indices['i'].variants
         detectors = self.nidx.indices['d'].variants
+        components = self.nidx.indices['c'].variants
         if self.opts.embed:
             import IPython
             IPython.embed()
@@ -425,9 +426,10 @@ class exp(baseexp):
         ns.addobservable("Evis", outputs.evis, export=False)
         ns.addobservable("ctheta", outputs.ctheta, export=False)
         ns.addobservable("ee", outputs.ee, export=False)
+        ns.addobservable("jacobian", outputs.jacobian, export=False)
         for ad in self.detectors:
             if  self.opts.mode == 'dyboscar':
-                for comp in self.nidx.indices['c'].variants:
+                for comp in components:
                     ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
                             outputs.observation_noeffects[ad][comp], export=False)
             else:
@@ -552,7 +554,7 @@ class exp(baseexp):
                 ]
 
     def define_labels(self):
-        libs = {
+        self.libs = {
                 'dyboscar': OrderedDict(
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
                                                        label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
