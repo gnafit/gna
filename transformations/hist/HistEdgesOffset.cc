@@ -1,7 +1,9 @@
 #include "HistEdgesOffset.hh"
 #include "TypeClasses.hh"
+#include "fmt/format.h"
 
 #include <algorithm>
+#include <iterator>
 
 void HistEdgesOffset::init(){
     auto trans = this->transformation_("histedges");
@@ -34,7 +36,7 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
             throw fargs.args.error(hist_input, "Unable to find proper offset");
         }
 
-        m_offset = *(it-1);
+        m_offset = std::distance(edges_input.begin(), it-1);
     }
 
     size_t size_in = hist_input.shape[0];
@@ -74,7 +76,10 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
 
     auto edges_threshold=hist_truncated.edges;
     if( m_threshold.value()<=edges_threshold[0] || m_threshold.value()>=edges_threshold[1] ){
-        throw fargs.args.error(hist_input, "Threshold is not located in a first bin of the truncated histogram (excluding edges)");
+        auto message = fmt::format("Threshold {} is not located "
+                                   "in a first bin ({}) of the truncated histogram (excluding edges): ({}, {})",
+                                   m_threshold.value(), m_offset.value(), edges_threshold[0], edges_threshold[1]);
+        throw fargs.args.error(hist_input, message);
     }
     auto threshold = edges_threshold[0] = m_threshold.value();
 
