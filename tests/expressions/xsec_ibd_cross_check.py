@@ -36,7 +36,6 @@ dyboscar_ctheta = [0., 1.]
 Evis_edges = C.Points(np.linspace(0.0, 12.0, 241, dtype='d'))
 ctheta = C.Points(np.array([-1., -0.5, 0.0, 0.5, 1.0]))
 
-
 indices = []
 lib = dict()
 expr =[
