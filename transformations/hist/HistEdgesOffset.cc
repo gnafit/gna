@@ -29,7 +29,7 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     auto& edges_input = hist_input.edges;
 
     if(!m_offset){
-        auto it = std::upper_bound(edges_input.begin(), edges_input.end(), m_offset.value());
+        auto it = std::upper_bound(edges_input.begin(), edges_input.end(), m_threshold.value());
         if( it==edges_input.end() || it==edges_input.begin() ){
             throw fargs.args.error(hist_input, "Unable to find proper offset");
         }
@@ -53,6 +53,11 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     points.points().shape(size_in+1);
     points_truncated.points().shape(newsize+1);
     hist_truncated.hist().edges(newsize+1, edges_input.data()+m_offset.value());
+
+    //m_dt_hist_input       = hist_input;
+    //m_dt_hist_truncated   = hist_truncated;
+    //m_dt_points           = points;
+    //m_dt_points_truncated = points_truncated;
 
     if(!m_threshold){
         return;
@@ -78,6 +83,8 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
 
     hist_threshold.hist().edges(edges_threshold);
     hist_offset.hist().edges(edges_offset);
+
+    //m_dt_hist_threshold = hist_threshold;
 }
 
 void HistEdgesOffset::func(FunctionArgs& fargs){
@@ -117,3 +124,56 @@ void HistEdgesOffset::func(FunctionArgs& fargs){
     rets.untaint();
     rets.freeze();
 }
+
+//void HistEdgesOffset::add_transformation(double fillvalue){
+    //auto trans = this->transformation_("view")
+                 //.input("original")
+                 //.input("rear")
+                 //.output("result")
+                 //.types(new TypeClasses::CheckNdimT<double>(1))
+                 //.types(&HistEdgesOffset::viewTypes)
+                 //.func(&HistEdgesOffset::viewFunc);
+
+    //if(m_fillvalue){
+        //if(m_fillvalue!=fillvalue){
+            //throw std::runtime_error("Inconsistent fill value.");
+        //}
+    //}
+    //else{
+        //m_fillvalue = fillvalue;
+    //}
+//}
+
+//void HistEdgesOffset::viewTypes(TypesFunctionArgs& fargs){
+    //auto& args = fargs.args;
+    //auto& rets = fargs.rets;
+    //for (size_t i = 0; i < args.size(); ++i) {
+        //auto& dt=args[dt];
+
+        //switch(dt.kind){
+            //case DataKind::Points:
+                //if(dt!=m_dt_points_truncated){
+                    //throw args.error(dt, "Inconsistent input datatype (Points)");
+                //}
+                //rets[i]=m_dt_points;
+                //break;
+
+            //case DataKind::Points:
+                //if(dt!=m_dt_hist_truncated && (!m_threshold в
+                                               //dt!=m_dt_hist_threshold)){
+                    //throw args.error(dt, "Inconsistent input datatype (Hist)");
+                //}
+                //rets[i]=m_dt_hist_input;
+                //break;
+
+            //default:
+                //continue;
+        //}
+
+    //}
+//}
+
+//void HistEdgesOffset::viewFunc(FunctionArgs& fargs){
+    //fargs.args.touch();
+//}
+
