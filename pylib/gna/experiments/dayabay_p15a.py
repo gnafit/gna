@@ -436,18 +436,18 @@ class exp(baseexp):
                 ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-            ns.addobservable("{0}_bkg".format(ad),         outputs.bkg[ad], export=False)
-            ns.addobservable("{0}.bkg.acc".format(ad),         outputs.bkg_acc[ad], export=False)
-            ns.addobservable("{0}.bkg.fastn".format(ad), outputs.bkg_fastn[ad], export=False)
-            ns.addobservable("{0}.bkg.amc".format(ad), outputs.bkg_amc[ad], export=False)
-            ns.addobservable("{0}.bkg.alphan".format(ad), outputs.bkg_alphan[ad], export=False)
-            ns.addobservable("{0}.bkg.lihe".format(ad), outputs.bkg_lihe[ad], export=False)
-            ns.addobservable("{0}.efflivetime".format(ad), outputs.efflivetime_daily[ad], export=False)
-            ns.addobservable("{0}.livetime".format(ad), outputs.livetime_daily[ad], export=False)
-            ns.addobservable("{0}.eff".format(ad), outputs.eff_daily[ad], export=False)
-            ns.addobservable("{0}.evis_nonlinear_correlated".format(ad),
+            ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
+            ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
+            ns.addobservable("bkg.fastn.{0}".format(ad), outputs.bkg_fastn[ad], export=False)
+            ns.addobservable("bkg.amc.{0}".format(ad), outputs.bkg_amc[ad], export=False)
+            ns.addobservable("bkg.alphan.{0}".format(ad), outputs.bkg_alphan[ad], export=False)
+            ns.addobservable("bkg.lihe.{0}".format(ad), outputs.bkg_lihe[ad], export=False)
+            ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
+            ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
+            ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
+            ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              outputs.evis_nonlinear_correlated[ad], export=False )
-            ns.addobservable("{0}.iav".format(ad), outputs.iav[ad], export=False)
+            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             for reac in reactors:
                 for iso in isotopes:
                     ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
@@ -457,7 +457,7 @@ class exp(baseexp):
             ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
 
         for reac in reactors:
-            ns.addobservable("{0}.thermal_power".format(reac), outputs.thermal_power[reac], export=False)
+            ns.addobservable("thermal_power.{0}".format(reac), outputs.thermal_power[reac], export=False)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy

@@ -38,4 +38,5 @@ config_local
 tags
 .cache
 data/*
+UltiSnips/*
 makerst
