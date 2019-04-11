@@ -83,6 +83,10 @@ void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::histTypes(typename GNAO
     }
 
     fargs.rets[0].hist().edges(m_len.value()+1, edges.data()+m_start.value());
+
+    for (size_t i = 1; i < this->transformations.size(); ++i) {
+        this->transformations[i].updateTypes();
+    }
 }
 
 template<typename FloatType>

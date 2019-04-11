@@ -73,6 +73,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::offsetTypes(typename GNAObje
         return;
     }
     determineStartLen(dt_main, dt_sub, fargs);
+    this->transformations[0].updateTypes();
 }
 
 template<typename FloatType>
