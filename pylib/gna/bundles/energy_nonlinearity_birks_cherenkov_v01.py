@@ -88,7 +88,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         # Electron energy model
         #
         with self.namespace:
-            self.electron_model = C.WeightedSum(['kC', 'Npesc'], [self.cherenkov.cherenkov.ch_npe, self.birks_accumulator.reduction.out], labels='Npe: electron responce')
+            self.electron_model = C.WeightedSum(['kC', 'Npescint'], [self.cherenkov.cherenkov.ch_npe, self.birks_accumulator.reduction.out], labels='Npe: electron responce')
 
         #
         # 2 511 keV gamma model
@@ -173,7 +173,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             ( 'cherenkov.p2', '' ),
             ( 'cherenkov.p3', '' ),
             ( 'cherenkov.p4', '' ),
-            ( 'Npesc', '' ),
+            ( 'Npescint', '' ),
             ( 'kC', '' ),
             ( 'normalizationEnergy', '' )
             ])
@@ -185,4 +185,26 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
                     continue
                 raise self.exception('Parameter {} configuration is not provided'.format(name))
             self.reqparameter(name, None, cfg=parcfg, label=label)
+
+        correlations_pars = self.cfg.correlations_pars
+        correlations = self.cfg.correlations
+
+        if not correlations_pars and not correlations:
+            return
+        if not correlations_pars or not correlations:
+            raise self.exception("Both 'correlations' and 'correlations_pars' should be defined")
+
+        npars = len(correlations_pars)
+        corrmatrix = N.array(correlations, dtype='d').reshape(npars, npars)
+        if (corrmatrix.diagonal()!=1.0).any():
+            raise self.exception('There should be no non-unitary elements on the correlation matrix')
+        if (N.fabs(corrmatrix)>1.0).any():
+            raise self.exception('Correlation matrix values should be within -1.0 and 1.0')
+        if (corrmatrix!=corrmatrix.T).all():
+            raise self.exception('Correlation matrix is expected to be diagonal')
+
+        pars=[ns[par] for par in correlations_pars]
+
+        from gna.parameters import covariance_helpers as ch
+        ch.covariate_pars(pars, corrmatrix)
 

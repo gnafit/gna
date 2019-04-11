@@ -40,12 +40,16 @@ def main(opts):
                 ("cherenkov.p2",  ( -2.18044e+01, 'fixed')),
                 ("cherenkov.p3",   ( 1.44731e+01, 'fixed')),
                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
-                ("Npesc",               (1341.38, 'fixed')),
-                ("kC",                      (0.5, 'fixed')),
+                ("Npescint",            (1341.38, 0.0059)),
+                ("kC",                      (0.5, 0.4737)),
                 ("normalizationEnergy",   (2.505, 'fixed'))
              ],
             mode='relative'
             ),
+        correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
+        correlations = [ 1.0,   0.94, -0.97,
+                         0.94,  1.0,  -0.985,
+                        -0.97, -0.985, 1.0   ],
         fill_matrix=True,
         labels = dict(
             normalizationEnergy = '60Co total gamma energy, MeV'
@@ -342,8 +346,13 @@ def main(opts):
 
     positron_model_scaled_data = quench.positron_model_scaled.single().data()
     for e1, e2 in zip(quench.histoffset.histedges.points_truncated.data(), positron_model_scaled_data):
-        ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=0.5 )
-    ax.axvline(12.0, linestyle='--')
+        if e2>12.0 or e2<1.022:
+            alpha = 0.1
+        else:
+            alpha = 0.5
+        ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=alpha )
+    ax.axvline(1.022, linestyle='--', linewidth=1.0)
+    ax.axvline(12.0, linestyle='--', linewidth=1.0)
 
     # ax.legend(loc='upper right')
 
