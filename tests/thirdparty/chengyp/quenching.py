@@ -64,6 +64,7 @@ def main(opts):
     binwidth=0.025
     evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
+    evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
 
     #
     # HistNonLinearity transformation
@@ -226,7 +227,7 @@ def main(opts):
     ax.set_title( 'Electron model (low energy view)' )
     annihilation_gamma_evis = quench.npe_positron_offset.normconvolution.result.data()[0]
     label = 'Annihilation contribution=%.2f Npe'%annihilation_gamma_evis
-    quench.electron_model_lowe.single().plot_vs(quench.ekin_edges_lowe.view.view, 'o', markerfacecolor='none', label='data')
+    quench.electron_model_lowe.plot_vs(quench.ekin_edges_lowe, 'o', markerfacecolor='none', label='data')
     quench.electron_model_lowe_interpolated.single().plot_vs(quench.annihilation_electrons_centers.single(), '-', label='interpolation\n%s'%label)
 
     ax.legend(loc='upper left')
@@ -252,7 +253,7 @@ def main(opts):
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Positron energy model' )
     quench.positron_model_scaled.plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
-    quench.positron_model_scaled_full.single().plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
+    quench.positron_model_scaled_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
     ax.vlines(normE, 0.0, normE, linestyle=':')
     ax.hlines(normE, 0.0, normE, linestyle=':')
     ax.legend(loc='upper left')
@@ -267,7 +268,7 @@ def main(opts):
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
     quench.positron_model_relative.single().plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
-    quench.positron_model_relative_full.single().plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
+    quench.positron_model_relative_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
 
     ax.legend(loc='lower right')

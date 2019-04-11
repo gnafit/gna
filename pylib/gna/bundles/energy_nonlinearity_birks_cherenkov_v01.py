@@ -46,13 +46,10 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         #
         # Birk's model integration
         #
-        binwidth=0.025
-
-        self.evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
-        self.evis_edges_full_hist = C.Histogram(self.evis_edges_full_input, labels='Evis bin edges')
-
-        self.histoffset = C.HistEdgesOffset(self.evis_edges_full_hist, self.doubleme, labels='Offset/threshold bin edges (Evis, Te+)')
+        self.histoffset = C.HistEdgesOffset(self.doubleme, labels='Offset/threshold bin edges (Evis, Te+)')
         histedges = self.histoffset.histedges
+        self.set_input('evis_edges_hist', None, histedges.hist_in, argument_number=0)
+
         histedges.points.setLabel('Evis (full range)')
         histedges.points_truncated.setLabel('Evis (truncated)')
         histedges.points_threshold.setLabel('Evis (threshold)')
@@ -100,13 +97,15 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.annihilation_electrons_p = C.Points(self.annihilation_electrons_p_input, labels='Annihilation gamma weights')
         egamma_offset = 0
 
-        lastpoint = N.where(self.histoffset.histedges.points_offset.data()>self.annihilation_electrons_edges_input[-1])[0][0]+1
-        self.ekin_edges_lowe = C.View(self.histoffset.histedges.points_offset, egamma_offset, lastpoint-egamma_offset, labels='Te Low E view')
-        self.electron_model_lowe = C.View(self.electron_model.single(), egamma_offset, lastpoint-egamma_offset, labels='{Npe: electron responce|(low E view)}')
-        import IPython; IPython.embed()
+        self.view_lowe = C.ViewHistBased(self.histoffset.histedges.hist_offset, 0.0, self.annihilation_electrons_edges_input[-1], labels=('Low E indices', 'Low E view'))
+        self.ekin_edges_lowe = self.view_lowe.add_input(self.histoffset.histedges.points_offset)
+        self.electron_model_lowe = self.view_lowe.add_input(self.electron_model.single())
 
-        self.electron_model_lowe_interpolator = C.InterpLinear(self.ekin_edges_lowe.view.view, self.annihilation_electrons_centers, labels=('Annihilation E InSegment', 'Annihilation gamma interpolator'))
-        self.electron_model_lowe_interpolated = self.electron_model_lowe_interpolator.add_input(self.electron_model_lowe.view.view)
+        self.ekin_edges_lowe.setLabel('Te+ edges (low Te view)')
+        self.electron_model_lowe.setLabel('Npe: electron responce (low Te view)')
+
+        self.electron_model_lowe_interpolator = C.InterpLinear(self.ekin_edges_lowe, self.annihilation_electrons_centers, labels=('Annihilation E InSegment', 'Annihilation gamma interpolator'))
+        self.electron_model_lowe_interpolated = self.electron_model_lowe_interpolator.add_input(self.electron_model_lowe)
 
         with self.namespace:
             self.npe_positron_offset = C.Convolution('ngamma', labels='e+e- annihilation Evis [MeV]')
@@ -121,15 +120,21 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
         self.positron_model_scaled = C.FixedPointScale(self.histoffset.histedges.points_truncated, self.namespace['normalizationEnergy'], labels=('Fixed point index', 'Positron energy model|Evis, MeV'))
         self.positron_model_scaled = self.positron_model_scaled.add_input(self.positron_model.sum.outputs[0])
-        self.positron_model_scaled_full = C.ViewRear(self.histoffset.histedges.points, self.histoffset.getOffset(), -1.0, labels='Positron Energy nonlinearity|full range')
-        self.positron_model_scaled >> self.positron_model_scaled_full.view.rear
+        self.positron_model_scaled_full_view = C.ViewRear(-1.0, labels='Positron Energy nonlinearity|full range')
+        self.positron_model_scaled_full_view.determineOffset(self.histoffset.histedges.hist, self.histoffset.histedges.hist_truncated, True)
+        self.histoffset.histedges.points >> self.positron_model_scaled_full_view.view.original
+        self.positron_model_scaled >> self.positron_model_scaled_full_view.view.rear
+        self.positron_model_scaled_full = self.positron_model_scaled_full_view.view.result
 
         #
         # Relative positron model
         #
         self.positron_model_relative = C.Ratio(self.positron_model_scaled, self.histoffset.histedges.points_truncated, labels='Positron energy nonlinearity')
-        self.positron_model_relative_full = C.ViewRear(self.histoffset.histedges.points, self.histoffset.getOffset(), 0.0, labels='Positron Energy nonlinearity\nfull range')
-        self.positron_model_relative >> self.positron_model_relative_full.view.rear
+        self.positron_model_relative_full_view = C.ViewRear(0.0, labels='Positron Energy nonlinearity\nfull range')
+        self.positron_model_relative_full_view.determineOffset(self.histoffset.histedges.hist, self.histoffset.histedges.hist_truncated, True)
+        self.histoffset.histedges.points >> self.positron_model_relative_full_view.view.original
+        self.positron_model_relative >> self.positron_model_relative_full_view.view.rear
+        self.positron_model_relative_full = self.positron_model_relative_full_view.view.result
 
         #
         # Hist Smear
