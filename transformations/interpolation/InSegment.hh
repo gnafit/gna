@@ -42,7 +42,7 @@
  * @author Maxim Gonchar
  * @date 02.2018
  */
-class InSegment: public GNAObjectBind1N,
+class InSegment: public GNAObjectBind1N<double>,
                  public TransformationBind<InSegment> {
 public:
   InSegment();                                               ///< Constructor.

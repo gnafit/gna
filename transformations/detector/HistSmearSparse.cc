@@ -5,7 +5,7 @@
 
 
 HistSmearSparse::HistSmearSparse(bool propagate_matrix) :
-GNAObjectBind1N("smear", "Ntrue", "Nrec", 1, 1, 0),
+GNAObjectBind1N<double>("smear", "Ntrue", "Nrec", 1, 1, 0),
 m_propagate_matrix(propagate_matrix)
 {
 }

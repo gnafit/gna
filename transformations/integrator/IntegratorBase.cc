@@ -9,14 +9,14 @@ using namespace Eigen;
 using namespace std;
 
 IntegratorBase::IntegratorBase(int order, bool shared_edge) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_order(static_cast<size_t>(order)),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
 }
 
 IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges, bool shared_edge) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_orders(bins),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
@@ -25,7 +25,7 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 }
 
 IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges, bool shared_edge) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_orders(Map<const ArrayXi>(orders, bins)),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
