@@ -2,13 +2,14 @@
 
 #include <vector>
 #include "GNAObject.hh"
+#include "GNAObjectBind1N.hh"
 #include <boost/optional.hpp>
 
 namespace GNA{
     namespace GNAObjectTemplates{
         template<typename FloatType>
-        class ViewHistBasedT: public GNAObjectT<FloatType,FloatType>,
-                     public TransformationBind<ViewHistBasedT<FloatType>,FloatType,FloatType> {
+        class ViewHistBasedT: public GNAObjectBind1N<FloatType>,
+                              public TransformationBind<ViewHistBasedT<FloatType>,FloatType,FloatType> {
         private:
             using BaseClass = GNAObjectT<FloatType,FloatType>;
             using typename BaseClass::TypesFunctionArgs;
@@ -22,10 +23,12 @@ namespace GNA{
             ViewHistBasedT(FloatType threshold, FloatType ceiling);
             ViewHistBasedT(SingleOutput& output, FloatType threshold, FloatType ceiling);
 
-            TransformationDescriptor add_transformation(const std::string& name="");
             void set(SingleOutput& hist){
                 hist.single() >> this->transformations.front().inputs.front();
             }
+
+            TransformationDescriptor add_transformation(const std::string& name="");
+
         protected:
             void histTypes(TypesFunctionArgs& fargs);
             void types(TypesFunctionArgs& fargs);
@@ -36,6 +39,7 @@ namespace GNA{
 
             boost::optional<size_t> m_start;
             boost::optional<size_t> m_len;
+            size_t m_full_length;
         };
     }
 }

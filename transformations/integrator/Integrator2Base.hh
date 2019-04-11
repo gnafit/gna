@@ -4,7 +4,7 @@
 #include "GNAObjectBind1N.hh"
 #include <Eigen/Dense>
 
-class Integrator2Base : public GNAObjectBind1N,
+class Integrator2Base : public GNAObjectBind1N<double>,
                         public TransformationBind<Integrator2Base>
 {
 public:

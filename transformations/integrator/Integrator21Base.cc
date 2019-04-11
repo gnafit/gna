@@ -8,7 +8,7 @@ using namespace Eigen;
 using namespace std;
 
 Integrator21Base::Integrator21Base(size_t xbins, int xorders, double* xedges, int yorder, double ymin, double ymax) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(xbins),
 m_yorder(yorder),
 m_ymin(ymin),
@@ -20,7 +20,7 @@ m_yweights(yorder)
 }
 
 Integrator21Base::Integrator21Base(size_t xbins, int* xorders, double* xedges, int yorder, double ymin, double ymax) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
 m_yorder(yorder),
 m_ymin(ymin),

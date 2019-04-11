@@ -5,7 +5,7 @@
 #include <Eigen/Dense>
 #include <boost/optional.hpp>
 
-class IntegratorBase : public GNAObjectBind1N,
+class IntegratorBase : public GNAObjectBind1N<double>,
                        public TransformationBind<IntegratorBase>
 {
 public:
