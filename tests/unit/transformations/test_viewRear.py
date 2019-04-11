@@ -13,7 +13,8 @@ from gna import env
 from gna import context
 
 @floatcopy(globals(), addname=True)
-def test_viewrear_01(function_name):
+def test_viewrear_points_01_start_len(function_name):
+    """Test ViewRear on Points (start, len)"""
     arr = N.zeros(12, dtype=context.current_precision_short())
     ns = env.env.globalns(function_name)
     names=[]
@@ -67,7 +68,8 @@ def test_viewrear_01(function_name):
             print()
 
 @floatcopy(globals(), addname=True)
-def test_viewrear_02(function_name):
+def test_viewrear_points_02_start(function_name):
+    """Test ViewRear on Points (start) [no len]"""
     arr = N.zeros(12, dtype=context.current_precision_short())
     ns = env.env.globalns(function_name)
     names=[]
@@ -117,9 +119,71 @@ def test_viewrear_02(function_name):
             assert (points.single().data()==arr).all()
             print()
 
+# @floatcopy(globals()) # uncomment after porting the histogram
+def test_viewrear_points_03_auto_fromhist():
+    """Test ViewRear on Histogram (determine start and length)"""
+    edges = N.arange(13, dtype='d')
+    arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
+    points_main = C.Points(arr)
+
+    ranges = [ (0, 3), (0, 12), (1, 3), (6, 6), (6, 1)]
+    for rng in ranges:
+        print('Range', rng)
+        hist_main = C.Histogram(edges, arr)
+        start, len = rng
+        pedges = edges[start:start+len+1]
+        arr_sub = N.arange(start, start+len, dtype=arr.dtype)
+        hist_sub=C.Histogram(pedges, arr_sub, True)
+
+        points_sub=C.Points(arr_sub, True)
+
+        view = C.ViewRear();
+        view.determineOffset(hist_main, hist_sub)
+        points_main >> view.view.original
+        points_sub >> view.view.rear
+
+        res = view.view.result.data()
+        expect = arr.copy()
+        expect[start:start+len]=arr_sub
+        print('Result', res)
+        print('Expect', expect)
+        print()
+        assert (res==expect).all()
 
 # @floatcopy(globals()) # uncomment after porting the histogram
-def test_viewrear_03():
+def test_viewrear_points_04_auto_fromhist_edges():
+    """Test ViewRear on Histogram (determine start and length)"""
+    edges = N.arange(13, dtype='d')
+    arr = N.zeros(edges.size, dtype=context.current_precision_short())
+    points_main = C.Points(arr)
+
+    ranges = [ (0, 3), (0, 12), (1, 3), (6, 6), (6, 1)]
+    for rng in ranges:
+        print('Range', rng)
+        hist_main = C.Histogram(edges, arr[:-1])
+        start, len = rng
+        pedges = edges[start:start+len+1]
+        arr_sub = N.arange(start, start+len+1, dtype=arr.dtype)
+        hist_sub=C.Histogram(pedges, arr_sub[:-1], True)
+
+        points_sub=C.Points(arr_sub, True)
+
+        view = C.ViewRear()
+        view.determineOffset(hist_main, hist_sub, True)
+        points_main >> view.view.original
+        points_sub >> view.view.rear
+
+        res = view.view.result.data()
+        expect = arr.copy()
+        expect[start:start+len+1]=arr_sub
+        print('Result', res)
+        print('Expect', expect)
+        print()
+        assert (res==expect).all()
+
+# @floatcopy(globals()) # uncomment after porting the histogram
+def test_viewrear_hist_01_start_len():
+    """Test ViewRear on Histogram (start, len)"""
     edges = N.arange(13, dtype='d')
     arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
 
@@ -150,7 +214,39 @@ def test_viewrear_03():
         assert (hist_main.single().data()==arr).all()
 
 # @floatcopy(globals()) # uncomment after porting the histogram
-def test_viewrear_04():
+def test_viewrear_hist_02_auto():
+    """Test ViewRear on Histogram (determine start and length)"""
+    edges = N.arange(13, dtype='d')
+    arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
+
+    ranges = [ (0, 3), (0, 12), (1, 3), (6, 6), (6, 1)]
+    for rng in ranges:
+        print('Range', rng)
+        hist_main = C.Histogram(edges, arr)
+        start, len = rng
+        pedges = edges[start:start+len+1]
+        arr_sub = N.arange(start, start+len, dtype=arr.dtype)
+        hist_sub=C.Histogram(pedges, arr_sub, True)
+
+        view = C.ViewRear(hist_main);
+        hist_sub >> view.view.rear
+
+        res = view.view.result.data()
+        expect_edges = N.array(view.view.result.datatype().edges)
+        expect = arr.copy()
+        expect[start:start+len]=arr_sub
+        print('Result', res)
+        print('Expect', expect)
+        print('Result (edges)', edges)
+        print('Expect (edges)', expect_edges)
+        print()
+        assert (res==expect).all()
+        assert (edges==expect_edges).all()
+        assert (hist_main.single().data()==arr).all()
+
+# @floatcopy(globals()) # uncomment after porting the histogram
+def test_viewrear_hist_03_start_len_threshold():
+    """Test ViewRear on Histogram (start, len), enable threshold"""
     edges = N.arange(13, dtype='d')
     arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
 
@@ -185,8 +281,46 @@ def test_viewrear_04():
         assert (edges==expect_edges).all()
         assert (hist_main.single().data()==arr).all()
 
+# @floatcopy(globals()) # uncomment after porting the histogram
+def test_viewrear_hist_04_auto_threshold():
+    """Test ViewRear on Histogram (auto start and len), enable threshold"""
+    edges = N.arange(13, dtype='d')
+    arr = N.zeros(edges.size-1, dtype=context.current_precision_short())
+
+    ranges = [ (0, 3), (0, 12), (1, 3), (6, 6)]
+    for rng in ranges:
+        hist_main = C.Histogram(edges, arr)
+        start, len = rng
+
+        pedges = edges[start:start+len+1].copy()
+        print('Original edges', pedges)
+        pedges[0]  = 0.5*(pedges[:2].sum())
+        pedges[-1] = 0.5*(pedges[-2:].sum())
+        print('Modified edges', pedges)
+        arr_sub = N.arange(start, start+len, dtype=arr.dtype)
+        hist_sub=C.Histogram(pedges, arr_sub, True)
+
+        view = C.ViewRear(hist_main);
+        view.allowThreshold()
+        hist_sub >> view.view.rear
+
+        res = view.view.result.data()
+        expect_edges = N.array(view.view.result.datatype().edges)
+        expect = arr.copy()
+        expect[start:start+len]=arr_sub
+        print('Range', rng)
+        print('Result', res)
+        print('Expect', expect)
+        print('Result (edges)', edges)
+        print('Expect (edges)', expect_edges)
+        print()
+        assert (res==expect).all()
+        assert (edges==expect_edges).all()
+        assert (hist_main.single().data()==arr).all()
+
 @floatcopy(globals(), addname=True)
-def test_viewrear_05(function_name):
+def test_viewrear_points_vars_01(function_name):
+    """Test ViewRear on Points (start, len), check taintflag propagation"""
     arr = N.arange(12, dtype=context.current_precision_short())
     ns = env.env.globalns(function_name)
     names=[]

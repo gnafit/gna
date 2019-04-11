@@ -7,20 +7,21 @@
 
 void HistEdgesOffset::init(){
     auto trans = this->transformation_("histedges");
-    trans.input("hist", /*inactive*/true)
+    trans.input("hist_in", /*inactive*/true)
          .output("points")                 // 0
          .output("points_truncated")       // 1
-         .output("hist_truncated")         // 2
+         .output("hist")                   // 2
+         .output("hist_truncated")         // 3
          .types(new TypeClasses::CheckKindT<double>(DataKind::Hist), new TypeClasses::CheckNdimT<double>(1))
          .types(&HistEdgesOffset::types)
          .func(&HistEdgesOffset::func);
          ;
 
     if(m_threshold){
-        trans.output("hist_threshold")     // 3
-             .output("hist_offset")        // 4
-             .output("points_threshold")   // 5
-             .output("points_offset")      // 6
+        trans.output("hist_threshold")     // 4
+             .output("hist_offset")        // 5
+             .output("points_threshold")   // 6
+             .output("points_offset")      // 7
              ;
     }
 
@@ -54,10 +55,12 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     /// Fill the regular outputs
     auto& points           = rets[0];
     auto& points_truncated = rets[1];
-    auto& hist_truncated   = rets[2];
+    auto& hist             = rets[2];
+    auto& hist_truncated   = rets[3];
 
     points.points().shape(size_in+1);
     points_truncated.points().shape(newsize+1);
+    hist.hist().edges(edges_input);
     hist_truncated.hist().edges(newsize+1, edges_input.data()+m_offset.value());
 
     m_dt_hist_input       = hist_input;
@@ -70,10 +73,10 @@ void HistEdgesOffset::types(TypesFunctionArgs& fargs){
     }
 
     /// Fill the offset/threshold outputs
-    auto& hist_threshold   = rets[3];
-    auto& hist_offset      = rets[4];
-    auto& points_threshold = rets[5];
-    auto& points_offset    = rets[6];
+    auto& hist_threshold   = rets[4];
+    auto& hist_offset      = rets[5];
+    auto& points_threshold = rets[6];
+    auto& points_offset    = rets[7];
 
     points_threshold.points().shape(newsize+1);
     points_offset.points().shape(newsize+1);
@@ -105,12 +108,14 @@ void HistEdgesOffset::func(FunctionArgs& fargs){
     /// Fill the regular outputs
     auto& points           = rets[0];
     auto& points_truncated = rets[1];
-    auto& hist_truncated   = rets[2];
+    auto& hist             = rets[2];
+    auto& hist_truncated   = rets[3];
 
     auto& edges_truncated = hist_truncated.type.edges;
 
     points.x           = Eigen::Map<const Eigen::ArrayXd>(edges_input.data(), edges_input.size());
     points_truncated.x = Eigen::Map<const Eigen::ArrayXd>(edges_truncated.data(), edges_truncated.size());
+    hist.x             = 0.0;
     hist_truncated.x   = 0.0;
 
     if(!m_threshold){
@@ -118,10 +123,10 @@ void HistEdgesOffset::func(FunctionArgs& fargs){
     }
 
     /// Fill the offset/threshold outputs
-    auto& hist_threshold   = rets[3];
-    auto& hist_offset      = rets[4];
-    auto& points_threshold = rets[5];
-    auto& points_offset    = rets[6];
+    auto& hist_threshold   = rets[4];
+    auto& hist_offset      = rets[5];
+    auto& points_threshold = rets[6];
+    auto& points_offset    = rets[7];
 
     auto& edges_threshold = hist_threshold.type.edges;
     auto& edges_offset    = hist_offset.type.edges;
