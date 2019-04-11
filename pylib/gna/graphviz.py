@@ -80,8 +80,9 @@ class GNADot(object):
 
     def _action_entry(self, entry):
         node = self.graph.add_node( self.entry_uid(entry), **self.style.node_attrs(entry) )
+        nsinks = entry.sinks.size()
         for i, sink in enumerate(entry.sinks):
-            self._action_sink(sink, i)
+            self._action_sink(sink, i, nsinks)
 
     def _action_variable(self, varentry):
         var=varentry.variable
@@ -102,7 +103,7 @@ class GNADot(object):
         self.graph.add_node( sourceuid, shape='point', label='in' )
         self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
-    def _action_sink(self, sink, i=0):
+    def _action_sink(self, sink, i=0, nsinks=0):
         if sink.sources.size()==0:
             """In case sink is not connected, draw empty output"""
             sinkuid=self.entry_uid(sink, 'sink')
@@ -111,8 +112,9 @@ class GNADot(object):
         elif sink.sources.size()==1 or not self.joints:
             """In case there is only one connection draw it as is"""
             sinkuid = self.entry_uid(sink.entry)
+            sametail=str(i) if nsinks<5 else None
             for j, source in enumerate(sink.sources):
-                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=str(i), **self.style.edge_attrs(i, sink, None, source))
+                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=sametail, **self.style.edge_attrs(i, sink, None, source))
         else:
             """In case there is more than one connections, merge them"""
             jointuid = self.entry_uid(sink, 'joint')
