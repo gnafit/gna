@@ -424,6 +424,8 @@ class exp(baseexp):
         ns.addobservable("ibd_xsec", outputs.ibd_xsec, export=False)
         ns.addobservable("Enu", outputs.enu, export=False)
         ns.addobservable("Evis", outputs.evis, export=False)
+        ns.addobservable("Evis_edges", outputs.evis_edges, export=False)
+        ns.addobservable("Evis_centres", outputs.evis_centers, export=False)
         ns.addobservable("ctheta", outputs.ctheta, export=False)
         ns.addobservable("ee", outputs.ee, export=False)
         ns.addobservable("jacobian", outputs.jacobian, export=False)
