@@ -32,17 +32,17 @@ namespace GNA{
        *
        * @param points - vector of floats.
        */
-      PointsT(const std::vector<FloatType> &points) : PointsType(&points[0], points.size()) {  }
+      PointsT(const std::vector<FloatType> &points, bool fcn_copy=false) : PointsType(&points[0], points.size(), fcn_copy) {  }
 
       /**
        * @brief Construct 1d array from C++ array of floats.
        * @param points - pointer to an array of floats.
        * @param cnt - the array size.
        */
-      PointsT(const FloatType *points, size_t cnt)
+      PointsT(const FloatType *points, size_t cnt, bool fcn_copy=false)
         : m_points(Eigen::Map<const ArrayType>(points, cnt)), m_shape{cnt}
       {
-        init();
+        init(fcn_copy);
       }
 
       /**
@@ -50,7 +50,7 @@ namespace GNA{
        * @param points - pointer to an array of floats.
        * @param shape - vector with dimensions of an array.
        */
-      PointsT(const FloatType *points, std::vector<size_t> shape)
+      PointsT(const FloatType *points, std::vector<size_t> shape, bool fcn_copy=false)
         : m_shape(shape)
       {
         size_t cnt = 1;
@@ -59,14 +59,14 @@ namespace GNA{
         }
         m_points=Eigen::Map<const ArrayType>(points, cnt);
 
-        init();
+        init(fcn_copy);
       }
 
       /**
        * @brief Construct from just a single point.
        * @param single_point - just one FloatType.
        */
-      PointsT(const FloatType single_point) : PointsType(&single_point, 1) {}
+      PointsT(const FloatType single_point, bool fcn_copy=false) : PointsType(&single_point, 1, fcn_copy) {}
 
       /**
        * @brief Return the size of an array.
@@ -95,18 +95,31 @@ namespace GNA{
        *
        * The transformation function is empty.
        */
-      void init() {
-        this->transformation_("points")                                      /// Initialize the transformation points.
-          .output("points")                                            /// Add an output points.
-          .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
-              fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
-              fargs.rets[0].preallocated(obj->m_points.data());        ///   - tell the DataType that the buffer is preallocated (m_points).
-            })
-          .func([](FunctionArgs& fargs){})                             /// Assign empty Function.
-          .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
+      void init(bool fcn_copy) {
+        if(fcn_copy){
+          this->transformation_("points")                                /// Initialize the transformation points.
+            .output("points")                                            /// Add an output points.
+            .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
+                fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
+              })
+            .func([](PointsType* obj, FunctionArgs& fargs){              /// Assign Transformation function that
+                fargs.rets[0].x = obj->m_points;                         /// copies the data to the output
+                })
+            .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
+        }
+        else{
+          this->transformation_("points")                                /// Initialize the transformation points.
+            .output("points")                                            /// Add an output points.
+            .types([](PointsType *obj, TypesFunctionArgs& fargs) {       /// Define the TypesFunction:
+                fargs.rets[0] = DataType().points().shape(obj->m_shape); ///   - assign the data shape for the first output (points).
+                fargs.rets[0].preallocated(obj->m_points.data());        ///   - tell the DataType that the buffer is preallocated (m_points).
+              })
+            .func([](FunctionArgs& fargs){})                             /// Assign empty Function.
+            .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
+        }
       }
-      ArrayType m_points;                                              ///< The array holding the raw 1d data buffer.
-      std::vector<size_t> m_shape;                                     ///< Vector with data dimensions.
+      ArrayType m_points;                                                ///< The array holding the raw 1d data buffer.
+      std::vector<size_t> m_shape;                                       ///< Vector with data dimensions.
     };
   }
 }
