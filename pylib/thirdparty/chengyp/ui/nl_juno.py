@@ -48,7 +48,7 @@ class cmd(basecmd):
         #for cnt in range(0,len(self.opts.slicing)):
         detector = Detector(
                 name='AD1',
-                edges=np.linspace(1.0, 10., 3000+1,dtype='d'),
+                edges=np.linspace(1.0, 10., 3000+1, dtype='d'),
                 location=0,
                 protons=0.8*1.42e33, #TODO: is this detection efficiency of 80% ?
                 livetime=[6*365*24*60*60.0],

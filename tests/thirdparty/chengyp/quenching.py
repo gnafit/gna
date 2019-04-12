@@ -66,8 +66,8 @@ def main(opts):
     #
     # Input bins
     #
-    binwidth=0.025
-    evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
+    evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, 0.025)
+    evis_edges_full_input=N.arange(1.0, 3.0000001, 0.003, dtype='d')
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
 
@@ -77,7 +77,8 @@ def main(opts):
     reference_histogram1_input = N.zeros(evis_edges_full_input.size-1)
     reference_histogram2_input = reference_histogram1_input.copy()
     reference_histogram1_input+=1.0
-    reference_histogram2_input[[10, 20, 50, 100, 200, 300, 400]]=1.0
+    # reference_histogram2_input[[10, 20, 50, 100, 200, 300, 400]]=1.0
+    reference_histogram2_input[[10, 20]]=1.0
     reference_histogram1 = C.Histogram(evis_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
     reference_histogram2 = C.Histogram(evis_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
 
@@ -291,7 +292,7 @@ def main(opts):
     ax.set_ylabel('Edep, MeV')
     ax.set_title( 'Smearing matrix' )
 
-    quench.pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[0.0, evis_edges_full_input.max(), evis_edges_full_input.max(), 0.0], colorbar=True)
+    quench.pm_histsmear.matrix.FakeMatrix.plot_matshow(mask=0.0, extent=[evis_edges_full_input.min(), evis_edges_full_input.max(), evis_edges_full_input.max(), evis_edges_full_input.min()], colorbar=True)
     ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5, linewidth=1.0, color='magenta')
     ax.vlines(normE, 0.0, normE, linestyle=':')
     ax.hlines(normE, 0.0, normE, linestyle=':')

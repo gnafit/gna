@@ -58,74 +58,85 @@ void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   DEBUG("n=%zu, matrix n=%zu\n", bins+1, bins);
 
   // Find first bin in modified edge higher than lowest original value: set it as current bin
-  auto* cur_bin = std::upper_bound( edges_mod, end_mod, m_range_min );
-  DEBUG("found curbin: %li -> %g\n", std::distance(edges_mod, cur_bin), *cur_bin);
-  if( *cur_bin<edges_orig[0] && cur_bin!=edges_mod ){
-      cur_bin = std::prev(std::lower_bound( std::next(cur_bin), end_mod, edges_orig[0] ));
+  auto* cur_bin_mod = std::upper_bound( edges_mod, end_mod, m_range_min );
+  DEBUG("found curbin mod %li: %g -> %g\n", std::distance(edges_mod, cur_bin_mod), *cur_bin_mod, *(cur_bin_mod+1));
+  if( *cur_bin_mod<edges_orig[0] && cur_bin_mod!=edges_mod ){
+    cur_bin_mod = std::prev(std::lower_bound( std::next(cur_bin_mod), end_mod, edges_orig[0] ));
+    DEBUG("update curbin mod %li: %g -> %g\n", std::distance(edges_mod, cur_bin_mod), *cur_bin_mod, *(cur_bin_mod+1));
   }
-  auto i_bin = cur_bin - edges_mod;
-  if( cur_bin<end_mod ){
+  auto i_bin_mod = cur_bin_mod - edges_mod;
+  if( cur_bin_mod<end_mod ){
     // Find current bin's projection to the original range
-    auto* cur_proj = std::lower_bound( edges_orig, end_orig, *cur_bin );
-    if (cur_proj!=edges_orig) cur_proj = std::prev(cur_proj);
-    auto i_proj = cur_proj - edges_orig;
-    if ( cur_proj<end_orig && cur_bin<end_mod ){
-      auto* next_bin = std::next(cur_bin);
+    auto* cur_proj_to_orig = std::lower_bound( edges_orig, end_orig, *cur_bin_mod );
+    DEBUG("found cur_proj %li: %g -> %g\n", std::distance(edges_orig, cur_proj_to_orig), *cur_proj_to_orig, *(cur_proj_to_orig+1));
+    if (cur_proj_to_orig!=edges_orig) {
+      cur_proj_to_orig = std::prev(cur_proj_to_orig);
+      DEBUG("update cur_proj %li %g -> %g\n", std::distance(edges_orig, cur_proj_to_orig), *cur_proj_to_orig, *(cur_proj_to_orig+1));
+    }
+    auto i_proj = cur_proj_to_orig - edges_orig;
+    if ( cur_proj_to_orig<end_orig && cur_bin_mod<end_mod ){
+      auto* next_bin_mod = std::next(cur_bin_mod);
       // Iterate bins
       #ifdef DEBUG_ENL
       size_t iteration=0;
       #endif
-      while( cur_bin<end_mod && *cur_bin<*end_orig && *next_bin<m_range_max ){
-        auto full_width = *next_bin - *cur_bin;
+      while( cur_bin_mod<end_mod && *cur_bin_mod<*end_orig && *next_bin_mod<m_range_max ){
+        auto full_width = *next_bin_mod - *cur_bin_mod;
 
-        auto* cur_edge{cur_bin};
+        auto* cur_edge{cur_bin_mod};
         #ifdef DEBUG_ENL
         bool cur_mod{true};
         #endif
+        if(*cur_edge < *edges_orig){
+          cur_edge = edges_orig;
+          #ifdef DEBUG_ENL
+          cur_mod=false;
+          #endif
+        }
         // Iterate inner bin edges
-        while ( (cur_edge!=next_bin) && (cur_proj!=end_orig) ){
-          auto* next_edge = std::min( next_bin, std::next(cur_proj), [](auto a, auto b){ return *a<*b; } );
+        while ( (cur_edge!=next_bin_mod) && (cur_proj_to_orig!=end_orig) ){
+          auto* next_edge = std::min( next_bin_mod, std::next(cur_proj_to_orig), [](auto a, auto b){ return *a<*b; } );
 
           #ifdef DEBUG_ENL
-          bool next_mod = next_edge==next_bin;
+          bool next_mod = next_edge==next_bin_mod;
           #endif
 
-          double f = ( *next_edge - *cur_edge )/full_width;
+          double weight = ( *next_edge - *cur_edge )/full_width;
 
           #ifdef DEBUG_ENL
           if ( ((iteration++)%20)==0 ) {
-          printf("\n%6s%13s%13s%14s%14s%8s %8s%8s%8s\n",
+          printf("\n%6s%14s%13s%15s%14s%8s %8s%8s%8s\n",
                 "it",
                 "curbin", "curproj", "curedge",
                 "nextedge", "nextbin", "nextproj",
                 "weight", "width");
           }
           printf("%6li"
-                 "%7li%6.2g""%7li%6.2g"
-                 "%7li%s%6.2g""%7li%s%6.2g"
-                 "%8.2g%1s%8.2g""%8.3f%8.3g %s\n",
+                 "%7lij%6.3g""%7lii%6.3g"
+                 "%7li%s%6.3g""%7li%s%6.3g"
+                 "%8.3g%1s%8.3g""%8.3f%8.3g %s\n",
                  iteration,
-                 i_bin, *cur_bin, i_proj, *cur_proj,
+                 i_bin_mod, *cur_bin_mod, i_proj, *cur_proj_to_orig,
                  std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
                  std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
-                 *next_bin, *next_bin==*std::next(cur_proj) ? "=":" ", *std::next(cur_proj),
-                 f, full_width, f==0.0 ? "*" : "" );
+                 *next_bin_mod, *next_bin_mod==*std::next(cur_proj_to_orig) ? "=":" ", *std::next(cur_proj_to_orig),
+                 weight, full_width, weight==0.0 ? "*" : "" );
           #endif
-          m_sparse_cache.insert(i_proj, i_bin) = f;
+          m_sparse_cache.insert(i_proj, i_bin_mod) = weight;
 
           cur_edge = next_edge;
-          std::advance(cur_proj, 1); i_proj++;
+          std::advance(cur_proj_to_orig, 1); i_proj++;
           #ifdef DEBUG_ENL
           cur_mod = next_mod;
           #endif
         }
         DEBUG("\n");
 
-        if(*next_bin!=*cur_proj) {
-          std::advance(cur_proj, -1); i_proj--;
+        if(*next_bin_mod!=*cur_proj_to_orig) {
+          std::advance(cur_proj_to_orig, -1); i_proj--;
         }
-        std::advance(cur_bin, 1); i_bin++;
-        std::advance(next_bin, 1);
+        std::advance(cur_bin_mod, 1); i_bin_mod++;
+        std::advance(next_bin_mod, 1);
       }
     }
   }
