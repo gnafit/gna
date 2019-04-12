@@ -67,7 +67,6 @@ def main(opts):
     # Input bins
     #
     evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, 0.025)
-    evis_edges_full_input=N.arange(1.0, 3.0000001, 0.003, dtype='d')
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
 
