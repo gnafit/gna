@@ -92,7 +92,7 @@ class GraphWalker(object):
         from gna import env
         self.cache_variables=OrderedDict()
         for (name, par) in ns.walknames():
-            if isinstance(par, env.ExpressionsEntry):
+            if isinstance(par, (str, env.ExpressionsEntry)):
                 continue
             var = par.getVariable()
             # print('walk', name, var.hash())
