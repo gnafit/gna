@@ -66,7 +66,7 @@ def main(opts):
     #
     # Input bins
     #
-    binwidth=0.003
+    binwidth=0.025
     evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
@@ -336,27 +336,50 @@ def main(opts):
 
     savefig(opts.output, suffix='_matrix_projections')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( 'E, MeV' )
-    ax.set_ylabel( '' )
-    ax.set_title( 'Mapping' )
+    if opts.mapping:
+        fig = P.figure()
+        ax = P.subplot( 111 )
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlabel( 'E, MeV' )
+        ax.set_ylabel( '' )
+        ax.set_title( 'Mapping' )
 
-    positron_model_scaled_data = quench.positron_model_scaled.single().data()
-    for e1, e2 in zip(quench.histoffset.histedges.points_truncated.data(), positron_model_scaled_data):
-        if e2>12.0 or e2<1.022:
-            alpha = 0.1
-        else:
-            alpha = 0.5
-        ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=alpha )
-    ax.axvline(1.022, linestyle='--', linewidth=1.0)
-    ax.axvline(12.0, linestyle='--', linewidth=1.0)
+        positron_model_scaled_data = quench.positron_model_scaled.single().data()
+        for e1, e2 in zip(quench.histoffset.histedges.points_truncated.data(), positron_model_scaled_data):
+            if e2>12.0 or e2<1.022:
+                alpha = 0.05
+            else:
+                alpha = 0.7
+            ax.plot( [e1, e2], [1.0, 0.0], '-', linewidth=2.0, alpha=alpha )
+        ax.axvline(1.022, linestyle='--', linewidth=1.0)
+        ax.axvline(12.0, linestyle='--', linewidth=1.0)
 
-    # ax.legend(loc='upper right')
+        fig = P.figure()
+        ax = P.subplot( 111 )
+        ax.minorticks_on()
+        # ax.grid()
+        ax.set_xlabel( 'E, MeV' )
+        ax.set_ylabel( '' )
+        ax.set_title( 'Mapping' )
 
-    savefig(opts.output, suffix='_mapping')
+        positron_model_scaled_data = quench.positron_model_scaled.single().data()
+        for e1, e2 in zip(quench.histoffset.histedges.points_truncated.data(), positron_model_scaled_data):
+            if e2>12.0 or e2<1.022:
+                alpha = 0.05
+            else:
+                alpha = 0.7
+            ax.plot( [e1, e2], [1.1, 0.9], '-', linewidth=2.0, alpha=alpha )
+
+        for e1 in quench.histoffset.histedges.points.data():
+            ax.axvline(e1, linestyle=':', linewidth=1.0, color='black')
+
+        ax.axvline(1.022, linestyle='--', linewidth=1.0)
+        ax.axvline(12.0, linestyle='--', linewidth=1.0)
+
+        # ax.legend(loc='upper right')
+
+        savefig(opts.output, suffix='_mapping_bins')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -390,5 +413,6 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--individual', help='Save individual output files', action='store_true')
     parser.add_argument('-g', '--graph', help='Output file for graph')
     parser.add_argument('-s', '--show', action='store_true', help='Show the plots')
+    parser.add_argument('-m', '--mapping', action='store_true', help='Do mapping plot')
 
     main( parser.parse_args() )
