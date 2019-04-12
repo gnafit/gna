@@ -49,6 +49,7 @@ class integral_2d1d_v03(TransformationBundle):
 
         self.integrator.points.x.setLabel(self.cfg.variables[0])
         self.integrator.points.xedges.setLabel('%s edges'%self.cfg.variables[0])
+        self.integrator.points.xcenters.setLabel('{} bin centers'.format(self.cfg.variables[0]))
         self.integrator.points.y.setLabel(self.cfg.variables[1])
 
         self.set_output(self.cfg.variables[0],            None, self.integrator.points.x)
@@ -68,4 +69,3 @@ class integral_2d1d_v03(TransformationBundle):
 
     def define_variables(self):
         pass
-
