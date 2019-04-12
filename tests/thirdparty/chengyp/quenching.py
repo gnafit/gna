@@ -46,6 +46,7 @@ def main(opts):
              ],
             mode='relative'
             ),
+        integration_order = 2,
         correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
         correlations = [ 1.0,   0.94, -0.97,
                          0.94,  1.0,  -0.985,
@@ -65,7 +66,7 @@ def main(opts):
     #
     # Input bins
     #
-    binwidth=0.025
+    binwidth=0.003
     evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, binwidth)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']

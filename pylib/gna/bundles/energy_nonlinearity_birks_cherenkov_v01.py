@@ -74,7 +74,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
         self.doubleemass_point = C.Points([-self.doubleme], labels='2me offset')
 
-        self.integrator_ekin = C.IntegratorGL(self.histoffset.histedges.hist_offset, 2, labels=('Te sampler (GL)', "Birk's integrator (GL)"))
+        self.integrator_ekin = C.IntegratorGL(self.histoffset.histedges.hist_offset, self.cfg.integration_order, labels=('Te sampler (GL)', "Birk's integrator (GL)"))
 
         self.birks_integrand_interpolator = C.InterpLogx(self.birks_e_p, self.integrator_ekin.points.x, labels=("Birk's InSegment", "Birk's interpolator"))
         self.birks_integrand_interpolated = self.birks_integrand_interpolator.add_input(self.birks_integrand_raw.polyratio.ratio)
@@ -121,8 +121,11 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         #
         # Total positron model
         #
-        self.positron_model = C.SumBroadcast([self.electron_model.sum.sum, self.npe_positron_offset.normconvolution.result],
-                                             labels='Npe: positron responce')
+        self.positron_model = C.SumBroadcast([
+            self.electron_model.sum.sum,
+            self.npe_positron_offset.normconvolution.result
+            ],
+            labels='Npe: positron responce')
 
         self.positron_model_scaled = C.FixedPointScale(self.histoffset.histedges.points_truncated, self.namespace['normalizationEnergy'], labels=('Fixed point index', 'Positron energy model|Evis, MeV'))
         self.positron_model_scaled = self.positron_model_scaled.add_input(self.positron_model.sum.outputs[0])

@@ -858,6 +858,7 @@ class ReactorExperimentModel(baseexp):
                          ],
                         mode='relative'
                         ),
+                    integration_order = 2,
                     correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
                     correlations = [ 1.0,   0.94, -0.97,
                                      0.94,  1.0,  -0.985,
