@@ -80,7 +80,6 @@ def main(opts):
     reference_histogram1 = C.Histogram(evis_edges_full_input, reference_histogram1_input, labels='Reference hist 1')
     reference_histogram2 = C.Histogram(evis_edges_full_input, reference_histogram2_input, labels='Reference hist 2')
 
-    reference_histogram1 >> quench.context.inputs.lsnl_edges.values()
     reference_histogram1 >> quench.context.inputs.lsnl.R1.values()
     reference_histogram2 >> quench.context.inputs.lsnl.R2.values()
     reference_smeared1 = quench.context.outputs.lsnl.R1

@@ -23,7 +23,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return (), ('lsnl_edges', 'lsnl')
+        return (), ('evis_edges_hist', 'lsnl')
 
     def init_data(self):
         dtype_spower = [ ('e', 'd'), ('temp1', 'd'), ('temp2', 'd'), ('dedx', 'd') ]
@@ -43,11 +43,14 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
     def build(self):
         self.init_data()
+
         #
-        # Birk's model integration
+        # Initialize bin edges
         #
         self.histoffset = C.HistEdgesOffset(self.doubleme, labels='Offset/threshold bin edges (Evis, Te+)')
         histedges = self.histoffset.histedges
+
+        # Declare open input
         self.set_input('evis_edges_hist', None, histedges.hist_in, argument_number=0)
 
         histedges.points.setLabel('Evis (full range)')
@@ -58,6 +61,9 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         histedges.hist_threshold.setLabel('Hist Evis (threshold)')
         histedges.hist_offset.setLabel('Hist Te+')
 
+        #
+        # Birk's model integration
+        #
         birks_e_input, birks_quenching_input = self.stopping_power['e'], self.stopping_power['dedx']
         self.birks_e_p, self.birks_quenching_p = C.Points(birks_e_input, labels='Te (input)'), C.Points(birks_quenching_input, labels='Stopping power (dE/dx)')
 
@@ -143,7 +149,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.pm_histsmear.set_range(-0.5, 20.0)
         self.positron_model_scaled_full >> self.pm_histsmear.matrix.EdgesModified
 
-        self.set_input('lsnl_edges', None, self.pm_histsmear.matrix.Edges, argument_number=0)
+        self.histoffset.histedges.hist >> self.pm_histsmear.matrix.Edges
 
         trans = self.pm_histsmear.transformations.back()
         for i, it in enumerate(self.nidx.iterate()):
@@ -159,6 +165,10 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
     def define_variables(self):
         from physlib import pdg
         ns = self.namespace
+
+        #
+        # Some constants
+        #
         emass = ns.reqparameter("emass", central=pdg['live']['ElectronMass'], fixed=True, label='Electron mass, MeV')
         self.doubleme = 2*emass.value()
         ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
@@ -178,6 +188,9 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             ( 'normalizationEnergy', '' )
             ])
 
+        #
+        # Define parameters according to predefined list and input configuration
+        #
         for name, label in labels.items():
             parcfg = self.cfg.pars.get(name, None)
             if parcfg is None:
@@ -186,6 +199,9 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
                 raise self.exception('Parameter {} configuration is not provided'.format(name))
             self.reqparameter(name, None, cfg=parcfg, label=label)
 
+        #
+        # Set the correlation matrix if provided by configuration
+        #
         correlations_pars = self.cfg.correlations_pars
         correlations = self.cfg.correlations
 
@@ -196,6 +212,8 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
         npars = len(correlations_pars)
         corrmatrix = N.array(correlations, dtype='d').reshape(npars, npars)
+
+        # Check matrix sanity
         if (corrmatrix.diagonal()!=1.0).any():
             raise self.exception('There should be no non-unitary elements on the correlation matrix')
         if (N.fabs(corrmatrix)>1.0).any():
@@ -203,8 +221,8 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         if (corrmatrix!=corrmatrix.T).all():
             raise self.exception('Correlation matrix is expected to be diagonal')
 
-        pars=[ns[par] for par in correlations_pars]
-
+        # Take parameters and set correlations
         from gna.parameters import covariance_helpers as ch
+        pars=[ns[par] for par in correlations_pars]
         ch.covariate_pars(pars, corrmatrix)
 

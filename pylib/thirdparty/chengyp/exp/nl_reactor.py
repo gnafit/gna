@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from __future__ import print_function
-from gna.configurator import NestedDict
+from gna.configurator import NestedDict, uncertaindict
 from gna.bundle import execute_bundle
 from physlib import percent
 from matplotlib import pyplot as P
@@ -257,11 +257,14 @@ class ReactorExperimentModel(baseexp):
         #         help='eresb of sliced detector layers')
         parser.add_argument('--no-reactor-groups', action='store_true')
         parser.add_argument('--with-C14', action='store_true')
-        parser.add_argument('--with-nl', action='store_true')
-        parser.add_argument('--with-worst', action='store_true')
-        parser.add_argument('--with-qua', action='store_true')
-        parser.add_argument('--with-mine', action='store_true')
-        parser.add_argument('--with-exp', action='store_true')
+
+        nlgroup = parser.add_mutually_exclusive_group()
+        nlgroup.add_argument('--with-nl', action='store_true', help='Enable energy-nonlinearity')
+        nlgroup.add_argument('--with-worst', action='store_true', help='Enable energy-nonlinearity')
+        nlgroup.add_argument('--with-qua', action='store_true', help='Enable energy-nonlinearity')
+        nlgroup.add_argument('--with-mine', action='store_true', help='Enable energy-nonlinearity')
+        nlgroup.add_argument('--with-exp', action='store_true', help='Enable energy-nonlinearity')
+        nlgroup.add_argument('--with-birks', action='store_true', help='Enable energy-nonlinearity: Birks-Cherenkov')
 
     def __init__(self, opts, ns=None, reactors=None, detectors=None):
 
@@ -627,8 +630,6 @@ class ReactorExperimentModel(baseexp):
                 with self.ns('ibd'), detector.ns:
                     points = C.Points(detector.edges)
                     b = execute_bundle( edges=points.single(), cfg=cfg )
-                    pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
-                    escale = b.common_namespace['escale']
                     escale.set(1.0)
                     print("aaa")
                     #print(b.common_namespace['weight_nominal'].sigma())
@@ -712,8 +713,7 @@ class ReactorExperimentModel(baseexp):
 
                     self.ns.addobservable("{0}_nl".format(detector.name),
                                      finalsum, export=True)
-
-            if self.opts.with_worst:
+            elif self.opts.with_worst:
                 with self.ns('ibd'), detector.ns:
                     worst = ROOT.Worst()
                     print(type(detector.edges))
@@ -750,8 +750,7 @@ class ReactorExperimentModel(baseexp):
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_worst".format(detector.name),
                                      finalsum, export=True)
-
-            if self.opts.with_qua:
+            elif self.opts.with_qua:
                 with self.ns('ibd'), detector.ns:
                     qua = ROOT.Quadratic()
                     try1points = C.Points(detector.edges)
@@ -769,8 +768,7 @@ class ReactorExperimentModel(baseexp):
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_qua".format(detector.name),
                                      finalsum, export=True)
-
-            if self.opts.with_mine:
+            elif self.opts.with_mine:
                 with self.ns('ibd'), detector.ns:
                     model3 = ROOT.Mine()
                     try1points = C.Points(detector.edges)
@@ -813,8 +811,7 @@ class ReactorExperimentModel(baseexp):
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_mine".format(detector.name),
                                      finalsum, export=True)
-
-            if self.opts.with_exp:
+            elif self.opts.with_exp:
                 with self.ns('ibd'), detector.ns:
                     expnl = ROOT.ExpNonlinearity()
                     try1points = C.Points(detector.edges)
@@ -829,6 +826,65 @@ class ReactorExperimentModel(baseexp):
                     finalsum = finalsumtmp
                     self.ns.addobservable("{0}_expnl".format(detector.name),
                                      finalsum, export=True)
+
+            elif self.opts.with_birks:
+                #
+                # Birks-Cherenkov energy nonlinearity model
+                #
+
+                # Configuration
+                birks_cfg = NestedDict(
+                    bundle = dict(name='energy_nonlinearity_birks_cherenkov', version='v01'),
+                    stopping_power='stoppingpower.txt',
+                    annihilation_electrons=dict(
+                        file='input/hgamma2e.root',
+                        histogram='hgamma2e_1KeV',
+                        scale=1.0/50000 # event simulated
+                        ),
+                    pars = uncertaindict(
+                        [
+                            ('birks.Kb0',               (1.0, 'fixed')),
+                            ('birks.Kb1',           (15.2e-3, 0.1776)),
+                            # ('birks.Kb2',           (0.0, 'fixed')),
+                            ("cherenkov.E_0",         (0.165, 'fixed')),
+                            ("cherenkov.p0",  ( -7.26624e+00, 'fixed')),
+                            ("cherenkov.p1",   ( 1.72463e+01, 'fixed')),
+                            ("cherenkov.p2",  ( -2.18044e+01, 'fixed')),
+                            ("cherenkov.p3",   ( 1.44731e+01, 'fixed')),
+                            ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
+                            ("Npescint",            (1341.38, 0.0059)),
+                            ("kC",                      (0.5, 0.4737)),
+                            ("normalizationEnergy",   (2.505, 'fixed'))
+                         ],
+                        mode='relative'
+                        ),
+                    correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
+                    correlations = [ 1.0,   0.94, -0.97,
+                                     0.94,  1.0,  -0.985,
+                                    -0.97, -0.985, 1.0   ],
+                    fill_matrix=True,
+                    labels = dict(
+                        normalizationEnergy = '60Co total gamma energy, MeV'
+                        ),
+                    )
+
+                #
+                # Build the model based on configuration, store the variables with 'energy' sub-namespace
+                #
+                self.lsnl_birks_cherenkov = execute_bundle(birks_cfg, namespace=detector.ns('energy'))
+
+                #
+                # Feed the inputs
+                # 1. bin edges
+                self.integrator.points.xhist >> self.lsnl_birks_cherenkov.context.inputs.evis_edges_hist.values()
+                # 2. histogram to smear
+                finalsum >> self.lsnl_birks_cherenkov.context.inputs.lsnl.values()
+
+                #
+                # Get the output
+                #
+                finalsum = self.lsnl_birks_cherenkov.context.outputs.lsnl
+                self.ns.addobservable('{}_lsnl_bc'.format(detector.name), finalsum)
 
             #edges_m = np.linspace(1., 10., 300+1)
             #rebin = ROOT.Rebin( edges_m.size, edges_m, 5 )
@@ -863,8 +919,8 @@ class ReactorExperimentModel(baseexp):
             else:
                 with detector.ns:
                     orgeres = ROOT.EnergyResolution()
-                orgeres.matrix.Edges(self.integrator.points.xhist)
-                orgeres.smear.Ntrue(finalsum)
+                self.integrator.points.xhist >> orgeres.matrix.Edges
+                finalsum >> orgeres.smear.Ntrue
                 self.ns.addobservable("{0}_Eres".format(detector.name), orgeres.smear.Nrec)
                 finalsum = orgeres.smear.Nrec
 
