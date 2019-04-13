@@ -101,7 +101,6 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         #
         self.annihilation_electrons_centers = C.Points(self.annihilation_electrons_centers_input, labels='Annihilation gamma E centers')
         self.annihilation_electrons_p = C.Points(self.annihilation_electrons_p_input, labels='Annihilation gamma weights')
-        egamma_offset = 0
 
         self.view_lowe = C.ViewHistBased(self.histoffset.histedges.hist_offset, 0.0, self.annihilation_electrons_edges_input[-1], labels=('Low E indices', 'Low E view'))
         self.ekin_edges_lowe = self.view_lowe.add_input(self.histoffset.histedges.points_offset)
