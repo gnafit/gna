@@ -21,18 +21,16 @@ def get_parameters(params, drop_fixed=True, drop_free=True):
             pars.extend(matched_pars)
             continue
         try:
+            par = env.pars[candidate]
+            pars.append(par)
+        except KeyError:
             par_namespace = env.ns(candidate)
-            par_namespace.walknames().next()
             if par_namespace != env.globalns:
                 independent_pars  = [par for _, par in par_namespace.walknames()
                                      if __is_independent(par)]
             else:
                 independent_pars = [env.globalns.get(candidate)]
             pars.extend(independent_pars)
-        except StopIteration:
-            if cfg.debug_par_fetching:
-                print("{0} is not a namespace, trying to use it as a parameter".format(candidate))
-            pars.append(env.pars[candidate])
 
     if drop_fixed:
         pars = [par for par in pars if not par.isFixed()]
