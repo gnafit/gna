@@ -8,6 +8,11 @@
 using namespace Eigen;
 using namespace std;
 
+IntegratorRect::IntegratorRect(int order, const std::string& mode) : IntegratorBase(order)
+{
+  init(mode);
+}
+
 IntegratorRect::IntegratorRect(size_t bins, int orders, double* edges, const std::string& mode) : IntegratorBase(bins, orders, edges)
 {
   init(mode);

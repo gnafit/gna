@@ -6,6 +6,7 @@
 class IntegratorRect: public TransformationBind<IntegratorRect>,
                       public IntegratorBase {
 public:
+  IntegratorRect(int order, const std::string& mode="center");
   IntegratorRect(size_t bins, int orders, double* edges=nullptr, const std::string& mode="center");
   IntegratorRect(size_t bins, int* orders, double* edges=nullptr, const std::string& mode="center");
 

@@ -6,7 +6,7 @@
 #include "GNAObjectBind1N.hh"
 #include "Eigen/Sparse"
 
-class HistSmearSparse: public GNAObjectBind1N,
+class HistSmearSparse: public GNAObjectBind1N<double>,
                        public TransformationBind<HistSmearSparse> {
 public:
   HistSmearSparse(bool propagate_matrix=false);
