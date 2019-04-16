@@ -40,7 +40,7 @@ poisson    = R.PoissonToyMC( False )
 
 normal_cov.add( mu_p, chol.cholesky.L )
 normal.add( mu_p, sigma_p )
-poisson.add( mu_p, chol.cholesky.L )
+poisson.add( mu_p)
 
 distrs = [ normal_cov, normal, poisson ]
 labels = [ 'Normal (cov)', 'Normal (sigma)', 'Poisson' ]

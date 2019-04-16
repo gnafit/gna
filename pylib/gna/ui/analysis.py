@@ -5,6 +5,7 @@ import numpy as np
 from itertools import chain
 from gna.dataset import Dataset
 from gna.parameters.parameter_loader import get_parameters
+from gna import constructors as C
 
 class cmd(basecmd):
     def __init__(self, *args, **kwargs):
@@ -25,7 +26,7 @@ class cmd(basecmd):
         parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
-        parser.add_argument('--toymc', choices=['covariance', 'poisson'], help='use random sampling to variate the data')
+        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'asimov'], help='use random sampling to variate the data')
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
@@ -40,11 +41,19 @@ class cmd(basecmd):
         if self.opts.toymc:
             if self.opts.toymc == 'covariance':
                 toymc = ROOT.CovarianceToyMC()
+                add = toymc.add
             elif self.opts.toymc == 'poisson':
                 toymc = ROOT.PoissonToyMC()
+                add = lambda t, c: toymc.add(t)
+            elif self.opts.toymc == 'asimov':
+                toymc = C.Snapshot()
+                add = lambda t, c: toymc.add_input(t)
+
             for block in blocks:
-                toymc.add(block.theory, block.cov)
-            blocks = [block._replace(data=toymc_out)
-                      for (block, toymc_out) in zip(blocks, toymc.toymc.outputs.itervalues())]
+                add(block.theory, block.cov)
+
+            blocks = [ block._replace(data=toymc_out)
+                      for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.itervalues()) ]
+
             self.env.parts.toymc[self.opts.name] = toymc
         self.env.parts.analysis[self.opts.name] = blocks
