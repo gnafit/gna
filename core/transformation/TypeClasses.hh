@@ -324,7 +324,7 @@ namespace TypeClasses{
     public:
         using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
 
-        PassEachTypeT(Range argsrange, Range retsrange) : m_argsrange(argsrange), m_retsrange(retsrange) { }
+        PassEachTypeT(Range argsrange={0,-1}, Range retsrange={0,-1}) : m_argsrange(argsrange), m_retsrange(retsrange) { }
         PassEachTypeT(const SelfClass& other) = default;
 
         void processTypes(TypesFunctionArgs& fargs){
