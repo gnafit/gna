@@ -25,7 +25,12 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument('-e', '--energy_choice', choices=['enu', 'ee', 'evis'], default='evis', 
+                    help='Choice against what energy xsec will be ploted')
+parser.add_argument('-d', '--differential_xsec', action='store_true', 
+                    help='Plot differential cross section')
 args = parser.parse_args()
+energy_use = args.energy_choice
 
 #
 # Import libraries
@@ -153,14 +158,22 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'Visible energy, MeV' )
 ax.set_ylabel( r'$\sigma$' )
-ax.set_title( 'IBD cross section' )
+ax.set_title("IBD cross section vs {} in zero order".format(energy_use))
 
 # Get evis and cross section
 evis = context.outputs.evis.data()
+enu = context.outputs.enu.data()
 xsec = context.outputs.ibd_xsec.data()
+integrated = context.outputs.kinint.data()
 
 # Plot
-ax.plot( evis, xsec, label='Differential IBD cross section' )
+if args.differential_xsec:
+    if energy_use == 'evis':
+        ax.plot( evis, xsec, label='Differential IBD cross section' )
+    elif energy_use == 'enu':
+        ax.plot(enu, xsec, label='Differential IBD cross section')
+
+
 context.outputs.kinint.plot_hist( label='Integrated cross section' )
 
 ax.legend(loc='upper left')

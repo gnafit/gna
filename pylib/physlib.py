@@ -86,6 +86,27 @@ pdg[2016]  = dict( pdg[2013]
     , dmSqEE_e = 0.8485e-3
 )
 
+pdg['dyboscar']  = dict( pdg[2013]
+    , NeutronMass = 939.565346
+    , ProtonMass  = 938.272013
+    , ElectronMass = 0.51099891
+    , neutron_lifetime = 880.3
+    , neutron_lifetimee = 1.1
+    , dmSq21 = 7.53e-5
+    , dmSq21e = 0.18e-5
+    #
+    , dmSq32 = 2.44e-3
+    , dmSq32e = 0.06
+    #
+    , sinSq2theta12 = 0.846
+    , sinSq2theta12e = 0.021
+    #
+    , sinSq2theta13 = 0.093
+    , sinSq2theta13e = 0.008
+
+
+)
+
 class PhysicsConstants:
     def __init__(self, pdgver = use_pdg_version):
         self.__dict__.update( pdg[pdgver] )
