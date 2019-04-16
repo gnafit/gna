@@ -16,7 +16,6 @@ def get_parameters(params, drop_fixed=True, drop_free=True):
             continue
         if any(char in candidate for char in special_chars):
             import fnmatch as fn
-            import IPython 
             matched_names = fn.filter((_[0] for _ in env.globalns.walknames()), candidate)
             matched_pars = map(env.get, matched_names)
             pars.extend(matched_pars)
@@ -24,7 +23,6 @@ def get_parameters(params, drop_fixed=True, drop_free=True):
         try:
             par_namespace = env.ns(candidate)
             par_namespace.walknames().next()
-            print("From ns attempted: ", list(par_namespace.walknames()))
             if par_namespace != env.globalns:
                 independent_pars  = [par for _, par in par_namespace.walknames()
                                      if __is_independent(par)]
