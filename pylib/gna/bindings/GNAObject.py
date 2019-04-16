@@ -83,7 +83,7 @@ def SingleOutput__single(self):
 
 @patchROOTClass(classes_single, 'data')
 def GNAObject__data(self):
-    buf = self.__data_orig()
+    buf = self.single().__data_orig()
     datatype = self.datatype()
     return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
 
