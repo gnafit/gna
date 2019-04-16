@@ -18,7 +18,7 @@ class exp(baseexp):
     def initparser(cls, parser, namespace):
         parser.add_argument('sources', nargs='+', help="Pathes to file with data to serve as fake observables")
         parser.add_argument('--ns', default='fake_data', type=env.ns, help="Name of the namespace in which fake data will be loaded")
-        parser.add_argument('--filter', dest='filters', action='append', default=[],
+        parser.add_argument('--take', dest='extracted', action='append', default=[],
                            help="Filters to select specific entries from ROOT files")
 
     def __init__(self, namespace, opts):
@@ -37,7 +37,9 @@ class exp(baseexp):
 
     def _handler_root(self, source):
         def _apply_filters(names):
-            for filt in self.opts.filters:
+            if not self.opts.extracted:
+                yield names
+            for filt in self.opts.extracted:
                     yield fn.filter(names, filt)
 
         roo_file = ROOT.TFile(source)

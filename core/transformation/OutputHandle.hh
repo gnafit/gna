@@ -40,6 +40,7 @@ namespace TransformationTypes
     bool check() const; ///< Check the Entry.
     void dump() const;  ///< Dump the Entry.
     taintflag& getTaintflag() const noexcept { return m_sink->entry->tainted; }
+    void unfreeze() { m_sink->entry->tainted.unfreeze(); }
 
     const FloatType *data() const;                                              ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
     const DataType &datatype() const { return m_sink->data->type; }             ///< Return Sink's DataType.

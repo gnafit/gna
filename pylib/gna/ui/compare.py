@@ -47,7 +47,7 @@ class cmd(basecmd):
                     ax.plot(obs, label=label)
 
             ax.set_title(title)
-            ax.set_xlabel(self.opts.xaxis.label)
+            ax.set_xlabel(self.opts.xaxis.label())
             ax.legend(loc='best')
 
             first_exp, second_exp = self.exps
