@@ -114,10 +114,11 @@ class ReactorGroup(object):
 
 class Detector(object):
     def __init__(self, name, edges, location,
-                 orders=None, protons=None, livetime=None, slicing=None):
+                 orders=None, protons=None, livetime=None, slicing=None, **cfg):
         self.name = name
         self.edges = edges
         self.orders = orders
+        self.cfg = cfg
 
         self.location = location
 
@@ -934,7 +935,16 @@ class ReactorExperimentModel(baseexp):
             ##prj = mat.sum(axis=0)
             ##print( ((prj==1.0) + (prj==0.0)).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
 
-            self.ns.addobservable("{0}".format(detector.name), finalsum)
+            if 'edges_final' in detector.cfg:
+                self.ns.addobservable("{0}_fine".format(detector.name), finalsum)
+
+                rebin = C.Rebin(detector.cfg['edges_final'], 6)
+                finalsum >> rebin
+
+                finalsum = rebin
+                self.ns.addobservable("{0}".format(detector.name), finalsum.single())
+            else:
+                self.ns.addobservable("{0}".format(detector.name), finalsum)
             #print(type(finalsum))
             #print(np.array(finalsum.datatype().hist().edges()))
             #print(np.array(finalsum.data()))
