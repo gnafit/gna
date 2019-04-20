@@ -6,16 +6,20 @@ set(TRANSFORMATION_SOURCES
   transformations/base/Points.cc
   transformations/base/View.cc
   transformations/base/ViewRear.cc
+  transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
+  transformations/base/Snapshot.cc
   # Sums
   transformations/sum/MultiSum.cc
   transformations/sum/PartialSum.cc
   transformations/sum/Sum.cc
+  transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
   transformations/sum/WeightedSumP.cc
   # Ratios
   transformations/ratio/NormalizedConvolution.cc
+  transformations/ratio/Convolution.cc
   transformations/ratio/PolyRatio.cc
   transformations/ratio/Ratio.cc
   # Calculus
@@ -28,6 +32,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
+  transformations/detector/Cherenkov_Borexino.cc
   # Functions
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
@@ -37,6 +42,7 @@ set(TRANSFORMATION_SOURCES
   # Histograms
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
+  transformations/hist/HistEdgesOffset.cc
   transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
@@ -55,6 +61,9 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
+  transformations/interpolation/InterpLog.cc
+  transformations/interpolation/InterpLogx.cc
+  transformations/interpolation/FixedPointScale.cc
   # Linear algebra
   transformations/linalg/Cholesky.cc
   transformations/linalg/Normalize.cc
@@ -121,14 +130,18 @@ set(TRANSFORMATION_HEADERS
   Points.hh
   View.hh
   ViewRear.hh
+  ViewHistBased.hh
   Product.hh
+  Snapshot.hh
   # Sums
   PartialSum.hh
   MultiSum.hh
   Sum.hh
+  SumBroadcast.hh
   WeightedSum.hh
   WeightedSumP.hh
   # Ratios
+  Convolution.hh
   NormalizedConvolution.hh
   PolyRatio.hh
   Ratio.hh
@@ -138,10 +151,14 @@ set(TRANSFORMATION_HEADERS
   # Detector effects
   CovariatedPrediction.hh
   HistEdges.hh
+  HistEdgesOffset.hh
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
   InterpLinear.hh
+  InterpLog.hh
+  InterpLogx.hh
+  FixedPointScale.hh
   Covmat.hh
   Cholesky.hh
   Chi2.hh
@@ -193,6 +210,7 @@ set(TRANSFORMATION_HEADERS
   EnergyResolution.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
+  Cherenkov_Borexino.hh
   HistSmear.hh
   HistSmearSparse.hh
   RenormalizeDiag.hh

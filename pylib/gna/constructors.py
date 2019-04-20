@@ -120,6 +120,13 @@ def WeightedSumP(inputs, *args, **kwargs):
 def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 
+"""Construct SumBroadcast object from list of SingleOutputs"""
+def SumBroadcast(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return R.SumBroadcast(*args, **kwargs)
+
+    return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
     if outputs is None:
@@ -165,16 +172,37 @@ def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):
         size = None
-        if edges is not None:
+        if isinstance(edges, R.SingleOutput):
+            edges_input, edges = edges, R.nullptr
+            size = None
+        elif edges is not None:
             edges = N.ascontiguousarray(edges, dtype='d')
             size = edges.size-1
+            edges_input = None
+
         if not isinstance(orders, int):
             orders = N.ascontiguousarray(orders, dtype='i')
             size = orders.size
+
+        cls = getattr(R, classname)
+
+        if edges_input and isinstance(orders, int):
+            ret = cls(orders, *args, **kwargs)
+            edges_input >> ret.points.edges
+            return ret
+
+        if edges_input:
+            size = edges_input.data().size
+
         if size is None:
             raise Exception('Insufficient parameters to determine the number of bins')
-        cls = getattr(R, classname)
-        return cls(size, orders, edges, *args, **kwargs)
+
+        ret=cls(size, orders, edges, *args, **kwargs)
+
+        if edges_input:
+            edges_input >> ret.points.edges
+
+        return ret
     return newfcn
 
 IntegratorGL   = _wrap_integrator_1d('IntegratorGL')

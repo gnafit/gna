@@ -5,8 +5,21 @@ from gna.bindings import patchROOTClass, DataType, provided_precisions
 from gna.bindings import DataType
 import ROOT as R
 from printing import printl, nextlevel
+import numpy as np
 
-classes = [R.GNAObjectT(ft,ft) for ft in provided_precisions]
+classes = []
+classes_single=[]
+for ft in provided_precisions:
+    classes.append(R.GNAObjectT(ft,ft))
+    classes_single.append(R.GNASingleObjectT(ft,ft))
+    classes_single.append(R.SingleOutputT(ft))
+
+@patchROOTClass(classes+classes_single, '__getattr__')
+def GNAObject____getattr__(self, attr):
+    try:
+        return self[attr]
+    except KeyError:
+        raise AttributeError(attr)
 
 @patchROOTClass(classes, '__str__')
 def GNAObject____str__(self):
@@ -68,7 +81,13 @@ R.SingleOutput.__single_orig = R.SingleOutput.single
 def SingleOutput__single(self):
     R.OutputDescriptor(self.__single_orig())
 
-@patchROOTClass(classes+[R.GNASingleObject, R.SingleOutput], 'single')
+@patchROOTClass(classes_single, 'data')
+def GNAObject__data(self):
+    buf = self.single().__data_orig()
+    datatype = self.datatype()
+    return np.frombuffer(buf, count=datatype.size(), dtype=buf.typecode).reshape(datatype.shape, order='F')
+
+@patchROOTClass(classes+classes_single, 'single')
 def GNAObject__single(self):
     transf = self.transformations
     if transf.size()!=1:

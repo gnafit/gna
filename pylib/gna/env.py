@@ -13,6 +13,8 @@ class namespacedict(OrderedDict):
         self.ns = ns
 
     def __missing__(self, key):
+        if key in self.ns.storage:
+            return self.ns
         value = namespace(self.ns, key)
         self[key] = value
         return value

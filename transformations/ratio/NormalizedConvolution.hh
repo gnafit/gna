@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/optional.hpp>
 
 #include "GNAObject.hh"
 
@@ -17,9 +18,12 @@ namespace GNA{
             using typename GNAObjectType::FunctionArgs;
 
             NormalizedConvolutionT();
+            NormalizedConvolutionT(const std::string& scale);
 
         protected:
             void convolute(FunctionArgs& fargs);
+
+            boost::optional<variable<FloatType>> m_scale;
         };
     }
 }

@@ -85,7 +85,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
                     if j:
                         trans = nonlin.add_transformation()
                         nonlin.add_input()
-                    trans.setLabel(it.current_format('NL\n{autoindex}'))
+                    trans.setLabel(it.current_format('NL\n {autoindex}'))
 
                     self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
                     self.set_output('lsnl', it, trans.Nrec)

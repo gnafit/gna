@@ -6,7 +6,6 @@
 #include "DataLocation.hh"
 #endif
 
-
 namespace GNA {
   namespace GNAObjectTemplates {
     template<typename FloatType>

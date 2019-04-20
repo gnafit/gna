@@ -8,8 +8,15 @@
 using namespace Eigen;
 using namespace std;
 
+IntegratorBase::IntegratorBase(int order, bool shared_edge) :
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
+m_order(static_cast<size_t>(order)),
+m_shared_edge(static_cast<size_t>(shared_edge))
+{
+}
+
 IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges, bool shared_edge) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_orders(bins),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
@@ -18,7 +25,7 @@ m_shared_edge(static_cast<size_t>(shared_edge))
 }
 
 IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges, bool shared_edge) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_orders(Map<const ArrayXi>(orders, bins)),
 m_shared_edge(static_cast<size_t>(shared_edge))
 {
@@ -105,7 +112,7 @@ void IntegratorBase::init_sampler() {
 
     if(!m_edges.size()){
         trans.input("edges", /*inactive*/true) //hist with edges
-            .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,1>);
+            .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>);
     }
     trans.finalize();
 
@@ -116,13 +123,26 @@ void IntegratorBase::init_sampler() {
 
 void IntegratorBase::check_sampler(TypesFunctionArgs& fargs){
     auto& rets=fargs.rets;
-    rets[0] = DataType().points().shape(m_weights.size());
-
     auto& args=fargs.args;
+
     if(args.size() && !m_edges.size()){
-        auto& edges=fargs.args[0].edges;
+        auto& arg=fargs.args[0];
+        if(arg.kind==DataKind::Undefined){
+            return;
+        }
+
+        auto& edges=arg.edges;
         m_edges=Map<const ArrayXd>(edges.data(), edges.size());
+
+        if(m_order){
+            m_orders.resize(arg.size());
+            m_orders.setConstant(m_order.value());
+            m_order.reset();
+            init_base(nullptr);
+        }
     }
+
+    /*x*/        rets[0].points().shape(m_weights.size());
     /*xedges*/   rets[1].points().shape(m_edges.size()).preallocated(m_edges.data());
     /*xhist*/    rets[2].hist().edges(m_edges.size(), m_edges.data());;
     /*xcenters*/ rets[3].points().shape(m_edges.size()-1);

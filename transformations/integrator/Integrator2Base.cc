@@ -8,7 +8,7 @@ using namespace Eigen;
 using namespace std;
 
 Integrator2Base::Integrator2Base(size_t xbins, int xorders, double* xedges, size_t ybins, int yorders, double* yedges) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(xbins),
 m_yorders(ybins)
 {
@@ -18,7 +18,7 @@ m_yorders(ybins)
 }
 
 Integrator2Base::Integrator2Base(size_t xbins, int* xorders, double* xedges, size_t ybins, int* yorders, double* yedges) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
 m_yorders(Map<const ArrayXi>(yorders, ybins))
 {

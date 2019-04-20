@@ -17,7 +17,7 @@ protected:
 
   double m_cmfactor;
 
-  const double PhaseFactor = 1.7152;
+  const double PhaseFactor = 1.7152; // Wilkinson Nucl. Phys. A377, 474(1982)
 
   const double g = 1.2601; // g_A/g_V: axial-vector and vector coupling constants ratio
   const double f = 1.;     // g_V/g_V

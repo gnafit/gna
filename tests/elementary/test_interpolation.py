@@ -8,10 +8,17 @@ from gna.constructors import Points
 from matplotlib import pyplot as P
 from mpl_tools.helpers import savefig
 
+interpolators = dict(
+        linear = R.InterpLinear,
+        log = R.InterpLog,
+        logx = R.InterpLogx,
+        expo = R.InterpExpo
+        )
+
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-parser.add_argument( '-m', '--mode', default='expo', choices=['expo', 'linear'], help='Interpolation mode' )
+parser.add_argument( '-m', '--mode', default='expo', choices=interpolators.keys(), help='Interpolation mode' )
 # parser.add_argument( '-U', '--underflow', default="", choices=['constant', 'extrapolate'] )
 # parser.add_argument( '-O', '--overflow', default="", choices=['constant', 'extrapolate'] )
 parser.add_argument( '-o', '--output' )
@@ -31,11 +38,7 @@ print( 'Edges', segments )
 print( 'Points', points )
 print( 'Fcn', fcn )
 
-# ie = R.InterpExpo(opts.underflow, opts.overflow)
-if opts.mode=='expo':
-    ie = R.InterpExpo()
-else:
-    ie = R.InterpLinear()
+ie=interpolators[opts.mode]()
 ie.interpolate(segments_t, fcn_t, points_t)
 seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )

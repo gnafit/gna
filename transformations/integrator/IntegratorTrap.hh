@@ -6,6 +6,7 @@
 class IntegratorTrap: public TransformationBind<IntegratorTrap>,
                       public IntegratorBase {
 public:
+  IntegratorTrap(int orders);
   IntegratorTrap(size_t bins, int orders, double* edges=nullptr);
   IntegratorTrap(size_t bins, int* orders, double* edges=nullptr);
 

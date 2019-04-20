@@ -8,7 +8,7 @@ using namespace Eigen;
 using namespace std;
 
 Integrator21Base::Integrator21Base(size_t xbins, int xorders, double* xedges, int yorder, double ymin, double ymax) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(xbins),
 m_yorder(yorder),
 m_ymin(ymin),
@@ -20,7 +20,7 @@ m_yweights(yorder)
 }
 
 Integrator21Base::Integrator21Base(size_t xbins, int* xorders, double* xedges, int yorder, double ymin, double ymax) :
-GNAObjectBind1N("hist", "f", "hist", 1, 0, 0),
+GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
 m_xorders(Map<const ArrayXi>(xorders, xbins)),
 m_yorder(yorder),
 m_ymin(ymin),
@@ -92,19 +92,20 @@ void Integrator21Base::integrate(FunctionArgs& fargs){
 
 void Integrator21Base::init_sampler() {
   auto trans=transformation_("points")
-      .output("x")
-      .output("y")
-      .output("xedges")
-      .output("xmesh")
-      .output("ymesh")
-      .output("xhist")
+      .output("x")        // 0
+      .output("y")        // 1
+      .output("xedges")   // 2
+      .output("xcenters") // 3
+      .output("xmesh")    // 4
+      .output("ymesh")    // 5
+      .output("xhist")    // 6
       .types(&Integrator21Base::check_sampler)
       .func(&Integrator21Base::sample)
       ;
 
   if(!m_xedges.size()){
     trans.input("edges", /*inactive*/true) //hist with edges
-         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>, TypesFunctions::binsToEdges<0,2>);
+         .types(TypesFunctions::if1d<0>, TypesFunctions::ifHist<0>);
   }
   trans.finalize();
 
@@ -118,8 +119,8 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
   rets[0] = DataType().points().shape(m_xweights.size());
   rets[1] = DataType().points().shape(m_yweights.size());
 
-  rets[3] = DataType().points().shape(m_xweights.size(), m_yweights.size());
   rets[4] = DataType().points().shape(m_xweights.size(), m_yweights.size());
+  rets[5] = DataType().points().shape(m_xweights.size(), m_yweights.size());
 
   auto& args=fargs.args;
   if(args.size() && !m_xedges.size()){
@@ -127,7 +128,8 @@ void Integrator21Base::check_sampler(TypesFunctionArgs& fargs){
     m_xedges=Map<const ArrayXd>(edges.data(), edges.size());
   }
   rets[2].points().shape(m_xedges.size()).preallocated(m_xedges.data());
-  rets[5].hist().edges(m_xedges.size(), m_xedges.data());
+  rets[3] = DataType().points().shape(m_xedges.size()-1);
+  rets[6].hist().edges(m_xedges.size(), m_xedges.data());
 }
 
 void Integrator21Base::dump(){

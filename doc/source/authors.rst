@@ -9,3 +9,6 @@ GNA is developed by the Laboratory of Nuclear Problems group:
     + Jilberto Zamora Saa (2016): compilation, documentation.
     + Konstantin Treskov (since 2016): transformations, tutorial, documentation, JUNO implementation, Daya Bay implementation.
     + Anna Fatkina (since 2017): GPU support.
+    + Liudmila Kolupaeva (since 2018): work on implementation of NOvA experiment oscillation 
+    + Anastasia Kalitkina (since 2018): work on implementation of NOvA experiment oscillation 
+
