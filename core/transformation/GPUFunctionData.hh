@@ -6,9 +6,10 @@
 
 
 #include "config_vars.h"
-#ifdef GNA_CUDA_SUPPORT
+#include "cuda_config_vars.h"
+//#ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
-#endif
+//#endif
 
 namespace TransformationTypes{
     enum class GPUShape {

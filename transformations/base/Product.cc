@@ -1,11 +1,12 @@
 #include "Product.hh"
 #include "TypesFunctions.hh"
+#include "GNAObject.hh" 
 
 #include "config_vars.h"
-#ifdef GNA_CUDA_SUPPORT
+//#ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"                             
 #include "DataLocation.hh"
-#endif
+//#endif
 
 namespace GNA {
   namespace GNAObjectTemplates {
