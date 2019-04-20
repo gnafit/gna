@@ -157,6 +157,12 @@ namespace TransformationTypes
     // Function args
     FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
+#ifdef GNA_CUDA_SUPPORT
+    void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
+    void setEntryDataLocation(DataLocation loc);
+    DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
+#endif
+
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
     void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
 
@@ -165,7 +171,7 @@ namespace TransformationTypes
     TreeManagerType* m_tmanager=nullptr;                 ///< Tree manager
 
 #ifdef GNA_CUDA_SUPPORT
-    void setLocation(DataLocation::Host loc) { m_entryLoc=loc; } ///< Change Entry location
+    void setLocation(DataLocation loc) { m_entryLoc=loc; } ///< Change Entry location
 #endif
   private:
 #ifdef GNA_CUDA_SUPPORT

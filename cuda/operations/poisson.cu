@@ -62,11 +62,11 @@ void poissonapprox(double** array, double** ans_array, int* n, int amount, int m
 }
 
 void cupoisson(double** array, double** ans_array, int* n, int amount, int maxn) {
-	poisson<<<< amount/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, amount, maxn);
+	poisson<<< amount/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, amount, maxn);
 	cudaDeviceSynchronize();
 }
 
 void cupoissonapprox(double** array, double** ans_array, int* n, int amount, int maxn) {
-	poissonapprox<<<< amount/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, amount, maxn);
+	poissonapprox<<< amount/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, n, amount, maxn);
 	cudaDeviceSynchronize();
 }

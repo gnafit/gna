@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include "TypesFunctions.hh"
 
 #include "GNAObject.hh"
 #include "Neutrino.hh"
@@ -31,12 +32,13 @@ protected:
 
 namespace GNA {
   namespace GNAObjectTemplates {
+    template<typename FloatType>
     class OscProbPMNST: public OscProbPMNSBase,
                         public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
     public:
-      using TransformationBind<OscProbPMNS>::transformation_;
+      using TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType>::transformation_;
     
-      OscProbPMNS(Neutrino from, Neutrino to, std::string l_name="L");
+      OscProbPMNST<FloatType>(Neutrino from, Neutrino to, std::string l_name="L");
     
       template <int I, int J>
       void calcComponent(FunctionArgs fargs);
@@ -52,7 +54,7 @@ namespace GNA {
     #endif
    
     protected:
-      variable<double> m_L;
+      variable<FloatType> m_L;
     };
   }
 }

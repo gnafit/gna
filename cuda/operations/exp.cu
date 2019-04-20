@@ -20,6 +20,7 @@ void exp(float** array, float** ans_array, int n, int m) {
 	if (x >= m) return;
 	for (int i = 0; i < n; i++){
 		ans_array[0][x] = expf(array[i][x]);
+	}
 }
 
 void cuexp(float** array, float** ans_array, int n, int m) {

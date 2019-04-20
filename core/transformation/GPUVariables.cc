@@ -3,6 +3,10 @@
 #include "TreeManager.hh"
 #include "TransformationEntry.hh"
 
+#ifdef GNA_CUDA_SUPPORT
+#include "GpuBasics.hh"
+#endif
+
 using GNA::TreeManager;
 
 template<typename FloatType,typename SizeType>

@@ -82,7 +82,7 @@ namespace TransformationTypes
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
 #ifdef GNA_CUDA_SUPPORT
-    void setLocation(DataLocation::Host loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
+    void setLocation(DataLocation loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
 #endif
 
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
