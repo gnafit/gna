@@ -106,7 +106,7 @@ namespace GNA {
     void WeightedSumT<FloatType>::sum_ongpu(FunctionArgs& fargs) {
         fargs.args.touch();
         auto& gpuargs=fargs.gpu;
-        gpuargs->readVariables(m_vars);
+        //gpuargs->readVariables(m_vars);
         gpuargs->provideSignatureDevice();
         cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
         gpuargs->setAsDevice();
@@ -116,7 +116,7 @@ namespace GNA {
     void WeightedSumT<FloatType>::sumFill_ongpu(FunctionArgs& fargs) {
         fargs.args.touch();
         auto& gpuargs=fargs.gpu;
-        gpuargs->readVariables(m_vars);
+       // gpuargs->readVariables(m_vars);
         gpuargs->provideSignatureDevice();
         cuweightedsumfill(gpuargs->args, gpuargs->rets, gpuargs->vars, m_fillvalue, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
         gpuargs->setAsDevice();
