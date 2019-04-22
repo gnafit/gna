@@ -1,4 +1,3 @@
-#include "config_vars.h"
 #include "TreeManager.hh"
 #include "arrayviewAllocator.hh"
 #include "VarArrayPreallocated.hh"

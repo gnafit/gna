@@ -3,6 +3,7 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <set>
+#include "config_vars.h"
 #include "variable.hh"
 
 template<typename FloatType>
