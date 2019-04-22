@@ -341,7 +341,7 @@ namespace TransformationTypes {
     }
 
     InitializerType setFuncLocation(const std::string& name, DataLocation loc) {
-      this->m_entry->functions[name].funcLoc = loc;
+      m_data->entry->functions[name].funcLoc = loc;
       return *this; 
     }
 #endif

@@ -5,6 +5,11 @@
 #include <TMath.h>
 #include <stdexcept>
 
+#ifdef GNA_CUDA_SUPPORT
+#include "cuInterpExpo.hh"
+#endif
+
+
 using std::next;
 using std::prev;
 using std::advance;
@@ -85,7 +90,7 @@ void InterpExpo::bind_inputs(){
   auto interp=transformations.back();
 
   auto& seg_inputs=segments.inputs;
-  auto& outputs=segments.outputs;
+  //auto& outputs=segments.outputs;
   auto& inputs=interp.inputs;
 
   seg_inputs[0].output()>>inputs[0];
