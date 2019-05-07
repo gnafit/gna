@@ -1,10 +1,12 @@
 from __future__ import print_function
 from gna.ui import basecmd
+import numpy as np
 import argparse
 import os
 from os.path import join, abspath
 from pkgutil import iter_modules
 from gna.config import cfg
+from itertools import product
 import runpy
 import sys
 from gna.env import env
@@ -40,7 +42,7 @@ class cmd(basecmd):
     def make_plots(self):
         for title, obses in self.observables.items():
             if self.opts.output:
-                pp = PdfPages(abspath( join(self.opts.output,title) ) + '.pdf')
+                pp = PdfPages(str(abspath( join(self.opts.output,title) ) + '.pdf'))
 
             #  import IPython; IPython.embed()
             for obs_name, obs_pair in obses.items():
@@ -59,20 +61,27 @@ class cmd(basecmd):
                 ax.legend(loc='best')
 
                 first_exp, second_exp = self.exps
+                #  print(obs_pair.keys())
                 ratio = obs_pair[first_exp] / obs_pair[second_exp]
                 if self.opts.xaxis:
                     ax_for_ratio.plot(self.opts.xaxis.data(), ratio, label='/'.join(self.exps))
                 else:
                     ax_for_ratio.plot(ratio, label='/'.join(self.exps))
                 ax_for_ratio.legend(loc='best')
-                ax_for_ratio.set_ylim(-1, 2)
                 ax_for_ratio.set_title('Ratio', fontsize=16)
+                sanitized = ratio[np.isfinite(ratio)]
+                #  high = np.percentile(sanitized, 95, interpolation='linear')
+                #  low  = np.percentile(sanitized, 5, interpolation='linear')
+                #  interval = high - low
+                #  ax_for_ratio.set_ylim((low - interval*5, high + 5*interval))
+                ax_for_ratio.axhline(y=1.0, linestyle='--', color='grey', alpha=0.5)
 
                 if self.opts.show:
                     plt.show()
 
                 if self.opts.output:
                     pp.savefig(fig)
+                    plt.close('all')
 
             if self.opts.output:
                 pp.close()
@@ -80,11 +89,16 @@ class cmd(basecmd):
 
     def extract_observables(self):
         for obs_pair, label in zip(self.mapping['observables'], self.mapping['labels']):
-            for idx_pair in self.mapping['indices']:
-                for obs_template, idx, exp in zip(obs_pair, idx_pair, self.exps):
-                    obs = obs_template.format(idx)
-                    self.observables[label][obs][exp] = env.get('{0}/{1}'.format(exp, obs)).data()
-                    print(label, obs, exp)
+                for idx_pair in self.mapping['indices']:
+                    obs_common_name = obs_pair[0].format(idx_pair[0])
+                    try:
+                        label_formated = label.format(idx_pair[0])
+                    except:
+                        label_formated = label
+                    for obs_template, idx, exp in zip(obs_pair, idx_pair, self.exps):
+                        obs = obs_template.format(idx)
+                        self.observables[label_formated][obs_common_name][exp] = env.get('{0}/{1}'.format(exp, obs)).data()
+                        print(label_formated, obs, exp)
 
     def load_mapping(self):
         map_path = os.path.abspath(self.opts.mapping)
