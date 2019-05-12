@@ -111,51 +111,52 @@ void OscProbAveraged::CalcAverage(FunctionArgs fargs) {
 }
 
 
-OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
+template<typename FloatType>
+GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)
 {
   variable_(&m_L, l_name);
-  transformation_("comp12")
+  this->transformation_("comp12")
     .input("Enu")
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
-    .func(&OscProbPMNS::calcComponent<1,2>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent<1,2>, DataLocation::Device)
+    .func(&OscProbPMNST<FloatType>::calcComponent<1,2>)
+    .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,2>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       std::cout << fargs.ints[0].size() << std::endl;
     });
-  transformation_("comp13")
+  this->transformation_("comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
-    .func(&OscProbPMNS::calcComponent<1,3>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent<1,3>, DataLocation::Device)
+    .func(&OscProbPMNST<FloatType>::calcComponent<1,3>)
+    .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       std::cout << fargs.ints[0].size() << std::endl;
     });
-  transformation_("comp23")
+  this->transformation_("comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
-    .func(&OscProbPMNS::calcComponent<2,3>)
-    .func("gpu", &OscProbPMNS::gpuCalcComponent<2,3>, DataLocation::Device)
+    .func(&OscProbPMNST<FloatType>::calcComponent<2,3>)
+    .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<2,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       std::cout << fargs.ints[0].size() << std::endl;
     });
   if (m_alpha != m_beta) {
-    transformation_("compCP")
+    this->transformation_("compCP")
       .input("Enu")
       .output("compCP")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .func(&OscProbPMNS::calcComponentCP)
-      .func("gpu", &OscProbPMNS::gpuCalcComponentCP, DataLocation::Device)
+      .func(&OscProbPMNST<FloatType>::calcComponentCP)
+      .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponentCP, DataLocation::Device)
       .storage("gpu", [](StorageTypesFunctionArgs& fargs){
         std::cout << "INTS!" << std::endl;
         fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
@@ -163,29 +164,30 @@ OscProbPMNS::OscProbPMNS(Neutrino from, Neutrino to, std::string l_name)
       })
       ;
   }
-  auto probsum = transformation_("probsum")
+  auto probsum = this->transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
     .input("comp0")
     .output("probsum")
     .types(TypesFunctions::pass<0>)
-    .func(&OscProbPMNS::calcSum)
-    .func("gpu", &OscProbPMNS::gpuCalcSum, DataLocation::Device)
+    .func(&OscProbPMNST<FloatType>::calcSum)
+    .func("gpu", &OscProbPMNST<FloatType>::gpuCalcSum, DataLocation::Device)
     ;
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
   }
 
-  transformation_("full_osc_prob")
+  this->transformation_("full_osc_prob")
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .types(TypesFunctions::pass<0>)
-      .func(&OscProbPMNS::calcFullProb);
+      .func(&OscProbPMNST<FloatType>::calcFullProb);
 }
 
-void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(FunctionArgs fargs) {
   auto& ret=fargs.rets[0].x;
   auto& Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.5)*Enu.inverse();
@@ -215,21 +217,25 @@ void OscProbPMNS::calcFullProb(FunctionArgs fargs) {
 }
 
 
+template<typename FloatType>
 template <int I, int J>
-void OscProbPMNS::calcComponent(FunctionArgs fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArgs fargs) {
   auto &Enu = fargs.args[0].x;
   fargs.rets[0].x = cos((DeltaMSq<I,J>()*oscprobArgumentFactor*m_L*0.5)*Enu.inverse());
 }
 
-template <int I, int J>
-void OscProbPMNS::gpuCalcComponent(FunctionArgs& fargs) {
+
+template<typename FloatType>
+template < int I, int J>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
 		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
 }
 
-void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionArgs fargs) {
   auto& ret=fargs.rets[0].x;
   auto &Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.25)*Enu.inverse();
@@ -238,18 +244,20 @@ void OscProbPMNS::calcComponentCP(FunctionArgs fargs) {
   ret*= sin(DeltaMSq<2,3>()*tmp);
 }
 
-void OscProbPMNS::gpuCalcComponentCP(FunctionArgs& fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
-  std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
-  gpuargs->readVariables(dmsq);
+  //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
+  //gpuargs->readVariables(dmsq);
   gpuargs->provideSignatureDevice();
   cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
 			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);  
   gpuargs->setAsDevice();
 }
 
-void OscProbPMNS::calcSum(FunctionArgs fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0].x;
   auto weight12=weight<1,2>();
@@ -268,7 +276,8 @@ void OscProbPMNS::calcSum(FunctionArgs fargs) {
   }
 }
 
-void OscProbPMNS::gpuCalcSum(FunctionArgs& fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
  // std::vector<variable<double>> weights = 
@@ -335,3 +344,9 @@ void OscProbPMNSMult::calcSum(FunctionArgs fargs) {
   ret+= weight<2,3>()*args[2].x;
   ret+= (1.0-weight<1,2>()-weight<1,3>()-weight<2,3>())*args[3].x;
 }
+
+template class GNA::GNAObjectTemplates::OscProbPMNST<double>;
+#ifdef PROVIDE_SINGLE_PRECISION
+  template class GNA::GNAObjectTemplates::OscProbPMNST<float>;
+#endif
+
