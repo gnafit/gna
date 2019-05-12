@@ -150,18 +150,18 @@ namespace TransformationTypes
     FunctionDescriptorsContainerType functions;          ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.
 
-    // Status
-    taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
-    int initializing;                                    ///< Initialization status. initializing>0 when Entry is being configured via Initializer.
-
-    // Function args
-    FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
-
 #ifdef GNA_CUDA_SUPPORT
     void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
     void setEntryDataLocation(DataLocation loc);
     DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
 #endif
+
+
+    // Status
+    taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
+
+    // Function args
+    FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
     void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
     void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.

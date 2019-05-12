@@ -118,8 +118,8 @@ namespace GNA{
             .finalize();                                                 /// Tell the initializer that there are no more configuration and it may initialize the types.
         }
       }
-      ArrayType m_points;                                              ///< The array holding the raw 1d data buffer.
-      std::vector<size_t> m_shape;                                     ///< Vector with data dimensions.
+      ArrayType m_points;                                                ///< The array holding the raw 1d data buffer.
+      std::vector<size_t> m_shape;                                       ///< Vector with data dimensions.
     };
   }
 }

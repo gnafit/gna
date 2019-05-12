@@ -283,6 +283,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 #ifdef GNA_CUDA_SUPPORT
     // GPU: require GPU memory for previous transformation's sink
     if (this->getEntryLocation() == DataLocation::Device) {
+
       for (auto &source : sources) {
           source.sink->data->require_gpu();
       }
@@ -394,7 +395,7 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
   setEntryLocation(it->second.funcLoc);
 #endif
   funcname=name;
-  evaluateTypes();
+//  evaluateTypes();
 }
 
 
