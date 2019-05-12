@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "config_vars.h"
 #include "taintflag.hh"
 #include "Data.hh"
 #include "TransformationEntry.hh"

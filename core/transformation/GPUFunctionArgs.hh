@@ -53,6 +53,7 @@ namespace TransformationTypes{
 
         void updateTypesHost();
         void updateTypesDevice();
+
         void updateTypes() {
             updateTypesHost();
 #ifdef GNA_CUDA_SUPPORT
