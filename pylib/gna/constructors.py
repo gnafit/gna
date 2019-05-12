@@ -75,9 +75,9 @@ def Points(array, *args, **kwargs):
 """Construct Identity object from list of SingleOutputs"""
 def Identity(outputs=None, *args, **kwargs):
     if outputs is None:
-        return Templates.IdentityT(current_precision)(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(*args, **kwargs)
 
-    return Templates.IdentityT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):

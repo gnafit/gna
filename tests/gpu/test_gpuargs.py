@@ -28,7 +28,7 @@ def test_io(opts):
     # Create transformations
     #
     points = C.Points(mat)
-    identity = R.Identity()
+    identity = C.Identity()
     identity.identity.switchFunction('identity_gpuargs_h')
 
     points.points.points >> identity.identity.source
@@ -144,7 +144,7 @@ def test_vars_02(opts, function_name):
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    # parser.add_argument('-g', '--gpuargs', action='store_true')
+    #parser.add_argument('-g', '--gpuargs', action='store_true')
 
     run_unittests(globals(), parser.parse_args())
 

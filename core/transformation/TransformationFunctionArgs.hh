@@ -45,7 +45,7 @@ namespace TransformationTypes
     RetsType rets; ///< return values, or transformation outputs (writable)
     IntsType ints; ///< preallocated data arrays for the transformation's internal usage (writable)
 
-    GPUFunctionArgsPtr gpu; ///< GPU function arguments
+    GPUFunctionArgsPtr gpu=nullptr; ///< GPU function arguments
 
     void requireGPU();                    ///< Initialize GPU function arguments
     void updateTypes();                   ///< Update arguments and types
