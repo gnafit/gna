@@ -46,7 +46,7 @@ StorageTypeError<StorageT<SourceFloatType>> ItypesT<SourceFloatType,SinkFloatTyp
   return StorageTypeError<StorageT<SourceFloatType>>(storage, message);
 }
 
-template class TransformationTypes::ItypesT<double,double>;
+template struct TransformationTypes::ItypesT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::ItypesT<float,float>;
+  template struct TransformationTypes::ItypesT<float,float>;
 #endif

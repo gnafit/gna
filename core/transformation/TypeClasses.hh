@@ -104,6 +104,7 @@ namespace TypeClasses{
     public:
         using TypesFunctionArgs = TransformationTypes::TypesFunctionArgsT<FloatType,FloatType>;
         virtual void processTypes(TypesFunctionArgs& fargs) = 0;
+        virtual ~TypeClassT() = default;
     };
 
     template<typename FloatType>

@@ -6,7 +6,7 @@
 namespace TransformationTypes
 {
   template<typename SourceFloatType, typename SinkFloatType>
-  struct FunctionArgsT;
+  class FunctionArgsT;
 
   template<typename SourceFloatType, typename SinkFloatType>
   struct TypesFunctionArgsT;

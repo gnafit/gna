@@ -53,7 +53,7 @@ size_t ArgsT<SourceFloatType,SinkFloatType>::size() const {
   return m_entry->sources.size();
 }
 
-template class TransformationTypes::ArgsT<double,double>;
+template struct TransformationTypes::ArgsT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::ArgsT<float,float>;
+  template struct TransformationTypes::ArgsT<float,float>;
 #endif

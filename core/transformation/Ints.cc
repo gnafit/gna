@@ -47,7 +47,7 @@ size_t IntsT<SourceFloatType,SinkFloatType>::size() const {
   return m_entry->storages.size();
 }
 
-template class TransformationTypes::IntsT<double,double>;
+template struct TransformationTypes::IntsT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::IntsT<float,float>;
+  template struct TransformationTypes::IntsT<float,float>;
 #endif

@@ -45,7 +45,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::init(){
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewRearT<FloatType>::determineOffset(typename GNAObjectT<FloatType,FloatType>::SingleOutput& main, typename GNAObjectT<FloatType,FloatType>::SingleOutput& sub, bool points_for_edges){
+void GNA::GNAObjectTemplates::ViewRearT<FloatType>::determineOffset(SingleOutput& main, SingleOutput& sub, bool points_for_edges){
     this->transformation_("offset")
          .input("original", /*inactive*/true)
          .input("sub", /*inactive*/true)
@@ -61,7 +61,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::determineOffset(typename GNA
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewRearT<FloatType>::offsetTypes(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewRearT<FloatType>::offsetTypes(TypesFunctionArgs& fargs){
     if(m_start){
         return;
     }
@@ -77,7 +77,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::offsetTypes(typename GNAObje
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(TypesFunctionArgs& fargs){
     auto& args = fargs.args;
 
     /// Store the main input datatype
@@ -193,7 +193,7 @@ void GNA::GNAObjectTemplates::ViewRearT<FloatType>::types(typename GNAObjectT<Fl
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewRearT<FloatType>::determineStartLen(const DataType& main, const DataType& sub, typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewRearT<FloatType>::determineStartLen(const DataType& main, const DataType& sub, TypesFunctionArgs& fargs){
     auto& edges_all = main.edges;
     auto& edges_sub = sub.edges;
 
