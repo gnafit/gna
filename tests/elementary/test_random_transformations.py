@@ -12,6 +12,7 @@ import itertools as I
 from mpl_tools.helpers import savefig, add_colorbar
 import gna.constructors as C
 
+
 mu    = N.array( [ 1.0, 10.0, 100.0 ] )
 sigma = N.matrix( [ 1.0,  1.0, 10.0 ] )
 cor   = N.array( [ [ 1.0, 0.5, 0.7 ],
@@ -50,7 +51,7 @@ def run(opts):
         data = N.zeros( shape=opts.n, dtype=[ ('x', 'd'), ('y', 'd'), ('z', 'd') ] )
 
         for i in xrange( opts.n ):
-            data[i] = distr.toymc.data()
+            data[i] = tuple(distr.toymc.data())
             distr.nextSample()
 
         plot( label, data, opts )
