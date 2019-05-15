@@ -134,7 +134,7 @@ def print_parameters( ns, recursive=True, labels=False, cor_storage=None, stats=
             header=True
 
         try:
-            if var.isCovariated():
+            if var.isCorrelated():
                 cor_storage.add_to_store(var)
         except (AttributeError, TypeError):
             pass
@@ -275,7 +275,7 @@ def GaussianParameter__str( self, labels=False  ):
             sigma   = self.sigma(),
             color   = Fore.BLUE
             )
-    covariated = self.isCovariated()
+    covariated = self.isCorrelated()
     limits  = self.limits()
     label = self.label()
     if not labels or label=='value':

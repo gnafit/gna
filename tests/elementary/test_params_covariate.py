@@ -39,7 +39,7 @@ def test_par_cov():
     probe_1.setCovariance(probe_2, cov1)
     print("Check that they are mutually covariated now.")
 
-    assert probe_1.isCovariated(probe_2) and probe_2.isCovariated(probe_1)
+    assert probe_1.isCorrelated(probe_2) and probe_2.isCorrelated(probe_1)
     print("Success")
     print("Get covariance from both -- {0} and {1}\n".format(probe_1.getCovariance(probe_2), probe_2.getCovariance(probe_1)))
 

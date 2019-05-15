@@ -90,7 +90,7 @@ class Dataset(object):
         groups = [[]]
         while to_process:
             for par in to_process:
-                if not groups[-1] or any(par.isCovariated(x) for x in groups[-1]):
+                if not groups[-1] or any(par.isCorrelated(x) for x in groups[-1]):
                     groups[-1].append(par)
                     break
             else:

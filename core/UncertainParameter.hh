@@ -204,7 +204,7 @@ public:
      this->setSigma(central*relsigma);
    }
 
-  bool isCovariated(const GaussianParameter<T>& other) const noexcept {
+  bool isCorrelated(const GaussianParameter<T>& other) const noexcept {
     auto it = this->m_covariances.find(&other);
     if (it == this->m_covariances.end() and (&other != this)) {
       return false;
@@ -213,7 +213,7 @@ public:
     }
   }
 
-  bool isCovariated() const noexcept {
+  bool isCorrelated() const noexcept {
     return !m_covariances.empty();
   }
 

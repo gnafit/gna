@@ -39,7 +39,7 @@ def test_req_group():
                                       **{'covmat': covmat, })
     for first, second in itertools.combinations_with_replacement(range(len(new_pars)), 2):
         if first != second:
-            assert not new_pars[first].isCovariated(new_pars[second]), "Covariance should not be assigned to pars!"
+            assert not new_pars[first].isCorrelated(new_pars[second]), "Covariance should not be assigned to pars!"
 
 if __name__ == "__main__":
     test_req_group()
