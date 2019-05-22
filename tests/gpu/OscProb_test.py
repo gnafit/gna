@@ -5,11 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import load
 import ROOT
-from gna.constructors import Points, stdvector 
+from gna.constructors import Points, stdvector, OscProbPMNS 
 from gna.ui import basecmd
 import gna.parameters.oscillation
 from gna.env import env
 import gna.parameters
+from gna import context, bindings
 
 ROOT.GNAObject
 
@@ -30,9 +31,12 @@ comp0 = np.array(np.ones(110))
 E = Points(E_arr)
 com = Points(comp0)
 
-with ns:
+ndata = 110
+
+with context.manager(ndata) as manager:
+  with ns:
     #Vacuum neutrino (same antineutrino)
-    oscprob = ROOT.OscProbPMNS(from_nu, to_nu)
+    oscprob = OscProbPMNS(from_nu, to_nu)
     oscprob.comp12.inputs.Enu(E)
     oscprob.comp12.switchFunction("gpu")
     data_osc = oscprob.comp12.comp12

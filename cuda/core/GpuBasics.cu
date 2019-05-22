@@ -64,13 +64,17 @@ void cuwr_free(T* &ptr) {
 }
 
 template void copyH2D_ALL<unsigned int>(unsigned int* &dst, unsigned int* src, unsigned int N);
+template void copyH2D_ALL<size_t>(size_t* &dst, size_t* src, unsigned int N);
 template void copyH2D_ALL<double>(double* &dst, double* src, unsigned int N);
 template void cuwr_free<unsigned int>(unsigned int* &ptr);
+template void cuwr_free<size_t>(size_t* &ptr);
 template void cuwr_free<double>(double* &ptr);
 
 template void copyH2D_ALL<unsigned int*>(unsigned int** &dst, unsigned int** src, unsigned int N);
+template void copyH2D_ALL<size_t*>(size_t** &dst, size_t** src, unsigned int N);
 template void copyH2D_ALL<double*>(double** &dst, double** src, unsigned int N);
 template void cuwr_free<unsigned int*>(unsigned int** &ptr);
+template void cuwr_free<size_t*>(size_t** &ptr);
 template void cuwr_free<double*>(double** &ptr);
 
 

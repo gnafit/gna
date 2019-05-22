@@ -8,13 +8,13 @@
 template<typename FloatType>
 inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() const {
   m_sink->entry->touch_global();
-/*
+
 #ifdef GNA_CUDA_SUPPORT
   if (m_sink->data->gpuArr!=nullptr) {
      m_sink->data->gpuArr->sync( DataLocation::Host );
   }
 #endif
-*/  
+  
   return this->view();
 }
 

@@ -82,9 +82,9 @@ def Identity(outputs=None, *args, **kwargs):
 """Construct Sum object from list of SingleOutputs"""
 def Sum(outputs=None, *args, **kwargs):
     if outputs is None:
-        return Templates.SumT(current_precision)(*args, **kwargs)
+        return Templates.SumT(context.current_precision())(*args, **kwargs)
 
-    return Templates.SumT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
+    return Templates.SumT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, *args, **kwargs):
@@ -121,7 +121,7 @@ def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 
 def OscProbPMNS(*args, **kwargs):
-    return R.OscProbPMNST(current_precision)(*args, **kwargs)
+    return R.GNA.GNAObjectTemplates.OscProbPMNST(context.current_precision())(*args, **kwargs)
 
 """Construct SumBroadcast object from list of SingleOutputs"""
 def SumBroadcast(outputs=None, *args, **kwargs):

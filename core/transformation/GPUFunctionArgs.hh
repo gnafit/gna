@@ -13,6 +13,7 @@
 
 #ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
+#include "DataLocation.hh"
 #endif
 
 namespace TransformationTypes{
@@ -31,7 +32,7 @@ namespace TransformationTypes{
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
             m_vars_global.readVariables(parbase);
-            //setAsDevice();
+            setAsDevice();
         }
 
         void readVariablesLocal(){

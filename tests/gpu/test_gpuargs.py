@@ -144,7 +144,7 @@ def test_vars_02(opts, function_name):
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    #parser.add_argument('-g', '--gpuargs', action='store_true')
+    parser.add_argument('-g', '--gpuargs', action='store_true')
 
     run_unittests(globals(), parser.parse_args())
 

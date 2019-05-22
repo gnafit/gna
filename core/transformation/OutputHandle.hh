@@ -7,6 +7,11 @@
 #include "Data.hh"
 #include "taintflag.hh"
 
+#include "config_vars.h"
+#ifdef CUDA_SUPPORT
+#include "cuda_config_vars.h"
+#endif
+
 namespace TransformationTypes
 {
   /**
