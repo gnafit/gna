@@ -162,7 +162,6 @@ void EntryT<SourceFloatType,SinkFloatType>::update() {
   try {
     evaluate();
 #ifdef GNA_CUDA_SUPPORT
-    std::cout << "TMPLOG " << m_entryLoc << std::endl;
     setEntryDataLocation(m_entryLoc);
 #endif
     tainted = false;
@@ -393,8 +392,6 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
   }
   fun = it->second.fun;
 #ifdef GNA_CUDA_SUPPORT
-  std::cout << "TMPLOG ";
-  std::cout << it->second.funcLoc << std::endl;
   setEntryLocation(it->second.funcLoc);
 #endif
   funcname=name;
@@ -408,7 +405,6 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
-    std::cout << "TMPLOG LOG"<< std::endl;
     m_entryLoc = loc;
 }
 

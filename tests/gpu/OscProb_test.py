@@ -49,14 +49,14 @@ with context.manager(ndata) as manager:
     oscprob.comp23.switchFunction("gpu")
     data_osc3 = oscprob.comp23.comp23
 
-#    oscprob.compCP.inputs.Enu(E)
-#    oscprob.compCP.switchFunction("gpu")
-#    data_osc4 = oscprob.compCP.compCP
+    oscprob.compCP.inputs.Enu(E)
+    oscprob.compCP.switchFunction("gpu")
+    data_osc4 = oscprob.compCP.compCP
 
 #    oscprob.probsum.inputs.comp12(oscprob.comp12.comp12)
 #    oscprob.probsum.inputs.comp13(oscprob.comp13.comp13)
 #    oscprob.probsum.inputs.comp23(oscprob.comp23.comp23)
-#    oscprob.probsum.inputs.comp0(com.points.points)
+#    oscprob.probsum.inputs.comp0(oscprob.compCP.compCP)
 #    datafin = oscprob.probsum.probsum
     
     
@@ -68,7 +68,7 @@ with context.manager(ndata) as manager:
 plt.plot(E_arr*1e-3, data_osc.data())
 plt.plot(E_arr*1e-3, data_osc2.data())
 plt.plot(E_arr*1e-3, data_osc3.data())
-#plt.plot(E_arr*1e-3, data_osc4.data())
+plt.plot(E_arr*1e-3, data_osc4.data())
 #plt.plot(E_arr*1e-3, datafin.data())
 plt.xlabel('$comp12$')
 plt.ylabel(r'$P_{\nu_{\mu} \to \nu_{e}}$')

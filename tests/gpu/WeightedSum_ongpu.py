@@ -6,8 +6,11 @@
 from __future__ import print_function
 import numpy as N
 from load import ROOT as R
+from gna import constructors as C # construct objects
 from gna.constructors import Points, stdvector
 from gna.env import env
+import gna.parameters
+from gna import context, bindings
 
 """Initialize inpnuts"""
 arr1 = N.arange(0, 5)
@@ -28,11 +31,13 @@ env.globalns.printparameters()
 points1 = Points( arr1 )
 points2 = Points( arr2 )
 
+ndata=5
 """Mode1: a1*w1+a2*w2"""
-ws = R.WeightedSum( stdvector(weights), stdvector(labels) )
-ws.sum.arr1(points1.points)
-ws.sum.arr2(points2.points)
-ws.sum.switchFunction("gpu")
+with context.manager(ndata) as manager:
+    ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
+    ws.sum.arr1(points1.points)
+    ws.sum.arr2(points2.points)
+    ws.sum.switchFunction("gpu")
 
 #import IPython; IPython.embed()
 
@@ -47,10 +52,11 @@ p2.set(1)
 print()
 
 """Mode2: a1*w1+a2"""
-ws = R.WeightedSum( stdvector(weights[:1]), stdvector(labels) )
-ws.sum.arr1(points1.points)
-ws.sum.arr2(points2.points)
-ws.sum.switchFunction("gpu")
+with context.manager(ndata) as manager:
+    ws = C.WeightedSum( stdvector(weights[:1]), stdvector(labels) )
+    ws.sum.arr1(points1.points)
+    ws.sum.arr2(points2.points)
+    ws.sum.switchFunction("gpu")
 
 print( 'Mode2: a1*w1+a2' )
 print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
@@ -63,10 +69,11 @@ p2.set(1)
 print()
 
 """Mode4: c+a1*w1+a1*w2"""
-ws = R.WeightedSum( -10, stdvector(weights), stdvector(labels) )
-ws.sum.arr1(points1.points)
-ws.sum.arr2(points2.points)
-ws.sum.switchFunction("gpu")
+with context.manager(ndata) as manager:
+    ws = C.WeightedSum( -10, stdvector(weights), stdvector(labels) )
+    ws.sum.arr1(points1.points)
+    ws.sum.arr2(points2.points)
+    ws.sum.switchFunction("gpu")
 
 print( 'Mode4: -10+a1*w1+a2*w2' )
 print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )

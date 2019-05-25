@@ -798,10 +798,8 @@ Allocate GPU memory in case of GPU array is not inited yet
   }
   DataLocation tmp = DataLocation::NoData;
   if (type.shape.size() == 1) {
-        std::cout << "shape 1" << std::endl;
     tmp = gpuArr->Init(type.shape[0], buffer);
   } else if (type.shape.size() == 2) {
-        std::cout << "shape 2" << std::endl;
     tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
   }
   return tmp;

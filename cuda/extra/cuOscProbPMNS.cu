@@ -54,23 +54,27 @@ void cuCalcComponent(double** xarg, double** xret, double** intern, double** par
 
 
 //template <typename T>
-__global__ void d_cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, unsigned int m,
+__global__ void d_cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, double m12, double m13, double m23, unsigned int m,
 					double oscprobArgumentFactor, double m_L) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+//	xret[0][idx] = 1.0;
 	inverse(xarg[0], intern[0], m);
 	intern[0][idx] = oscprobArgumentFactor * m_L * 0.25 * intern[0][idx];
-	arr_sin(params[0][0], intern[0], xret[0]);
-	mult_by_arr_sin(params[0][1], intern[0], xret[0]);
-	mult_by_arr_sin(params[0][2], intern[0], xret[0]);
+	arr_sin(m12, intern[0], xret[0]);
+//	arr_sin(1.0, intern[0], xret[0]);
+	
+	mult_by_arr_sin(m13, intern[0], xret[0]);
+	mult_by_arr_sin(m23, intern[0], xret[0]);
+
 // for debug
 //	arr_sin(1.0, intern, xret);
 //	mult_by_arr_sin(1.0, intern, xret);
 //	mult_by_arr_sin(1.0, intern, xret);
 }
 
-void cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, 
+void cuCalcComponentCP(double** xarg, double** xret, double** intern, double** params, double m12, double m13, double m23, 
 			unsigned int m, unsigned int n, double oscprobArgumentFactor, double m_L) {
-	d_cuCalcComponentCP<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params, m, 
+	d_cuCalcComponentCP<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params, m12, m13, m23, m, 
 								oscprobArgumentFactor, m_L);
 	cudaDeviceSynchronize();
 }

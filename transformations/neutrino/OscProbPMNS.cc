@@ -123,9 +123,8 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func(&OscProbPMNST<FloatType>::calcComponent<1,2>)
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,2>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
-      std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      std::cout << fargs.ints[0].size() << std::endl;
+      //std::cout << fargs.ints[0].size() << std::endl;
     });
   this->transformation_("comp13")
     .input("Enu")
@@ -134,9 +133,8 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func(&OscProbPMNST<FloatType>::calcComponent<1,3>)
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
-      std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      std::cout << fargs.ints[0].size() << std::endl;
+      //std::cout << fargs.ints[0].size() << std::endl;
     });
   this->transformation_("comp23")
     .input("Enu")
@@ -145,9 +143,8 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func(&OscProbPMNST<FloatType>::calcComponent<2,3>)
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<2,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
-      std::cout << "INTS!" << std::endl;
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      std::cout << fargs.ints[0].size() << std::endl;
+      //std::cout << fargs.ints[0].size() << std::endl;
     });
   if (m_alpha != m_beta) {
     this->transformation_("compCP")
@@ -158,9 +155,8 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
       .func(&OscProbPMNST<FloatType>::calcComponentCP)
       .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponentCP, DataLocation::Device)
       .storage("gpu", [](StorageTypesFunctionArgs& fargs){
-        std::cout << "INTS!" << std::endl;
         fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-        std::cout << fargs.ints[0].size() << std::endl;
+        //std::cout << fargs.ints[0].size() << std::endl;
       })
       ;
   }
@@ -250,11 +246,11 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(Functi
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
-  //gpuargs->readVariables(dmsq);
+//  gpuargs->readVariables(m_param);
   gpuargs->provideSignatureDevice();
-  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
+  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23, 
 			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);  
-  gpuargs->setAsDevice();
+//  gpuargs->setAsDevice();
 }
 
 template<typename FloatType>

@@ -1,5 +1,6 @@
 #include "GPUFunctionArgs.hh"
 
+
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::updateTypesHost(){
 	m_args.fillContainers(m_entry->sources);
@@ -15,11 +16,11 @@ void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevic
 	m_args.fillContainersDevice(m_entry->sources);
 	m_rets.fillContainersDevice(m_entry->sinks);
 	m_ints.fillContainersDevice(m_entry->storages);
+//	provideSignatureDevice();
 #else
 	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
 #endif
 
-	//provideSignatureDevice();
 }
 
 template<typename FloatType,typename SizeType>

@@ -11,7 +11,8 @@ from gna.bindings import common   # plot outputs
 from gna.graphviz import savegraph
 from mpl_tools.helpers import savefig
 from gna.env import env
-
+from gna import context, bindings
+import time
 #
 # Define the parameters
 #
@@ -29,22 +30,34 @@ component_names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
 with ns:
     R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), component_names, ns=ns)
 
+ndata = 900
 # Initialize neutrino oscillations
+#with context.manager(ndata) as manager:
 with ns:
-    labels=['Oscillation probability|%s'%s for s in ('component 12', 'component 13', 'component 23', 'full', 'probsum')]
-    oscprob = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
+    with ns:
+        labels=['Oscillation probability|%s'%s for s in ('component 12', 'component 13', 'component 23', 'full', 'probsum')]
+        oscprob = C.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
+        #oscprob.comp12.switchFunction("gpu")
+        #oscprob.comp13.switchFunction("gpu")
+        #oscprob.comp23.switchFunction("gpu")
+    
+    
+        enu >> oscprob.full_osc_prob.Enu
+        enu >> (oscprob.comp12.Enu, oscprob.comp13.Enu, oscprob.comp23.Enu)
 
-enu >> oscprob.full_osc_prob.Enu
-enu >> (oscprob.comp12.Enu, oscprob.comp13.Enu, oscprob.comp23.Enu)
 
-# Oscillation probability as single transformation
-op_full = oscprob.full_osc_prob.oscprob
+        # Oscillation probability as single transformation
+        op_full = oscprob.full_osc_prob.oscprob
 
-# Oscillation probability as weighted sum
-unity = C.FillLike(1, labels='Unity')
-enu >> unity.fill.inputs[0]
-with ns:
-    op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
+        # Oscillation probability as weighted sum
+        unity = C.FillLike(1, labels='Unity')
+        enu >> unity.fill.inputs[0]
+
+#with manager:
+with context.manager(ndata) as manager:
+    with ns:
+        op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
+        op_sum.sum.switchFunction("gpu")
 
 # Print some information
 oscprob.print()
@@ -62,6 +75,11 @@ ax.grid()
 ax.set_xlabel( 'E nu, MeV' )
 ax.set_ylabel( 'P' )
 ax.set_title( 'Oscillation probability' )
+
+time1 = time.time()
+op_sum.sum.data()
+time2 = time.time()
+print (time2-time1)
 
 op_full.plot_vs(enu.single(), '-', label='full oscprob')
 op_sum.plot_vs(enu.single(), '--', label='oscprob (sum)')
