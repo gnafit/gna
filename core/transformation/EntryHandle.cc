@@ -167,9 +167,7 @@ OutputHandleT<SinkFloatType> HandleT<SourceFloatType,SinkFloatType>::output(Sing
 template<typename SourceFloatType, typename SinkFloatType>
 void HandleT<SourceFloatType,SinkFloatType>::readVariables(ParametrizedTypes::ParametrizedBase* parbase){
   auto& gpu=m_entry->functionargs->gpu;
-  std::cout << "TMPLOG READ VAR gpu" << std::endl;
   if(gpu){
-  std::cout << "TMPLOG READ VAR gpu2" << std::endl;
     gpu->readVariables(parbase);
   }
 }

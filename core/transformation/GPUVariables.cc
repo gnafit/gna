@@ -28,7 +28,6 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
 		return;
 	}
 	for(auto& entry: parbase->m_entries){
-		std::cout << std::endl << "Entry!!!!" << std::endl;
 		auto& var=entry.var;
 		if(!var.istype<FloatType>()){
 			throw std::runtime_error("GPUVariables: Invalid variable type");
@@ -44,8 +43,8 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
 	h_value_pointers_host.resize(size);
 	h_value_pointers_dev.resize(size);
 
-	std::cout << "VARSIZE h_value_pointers_host sixe = " << h_value_pointers_host.size() <<
-			 "h_value_pointers_dev = " << h_value_pointers_dev.size() << std::endl;
+	std::cout << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+			 "h_value_pointers_dev size = " << h_value_pointers_dev.size() << std::endl;
 	deAllocateDevice();
 	FloatType* m_dev_root=nullptr;
 	for (size_t i = 0; i < size; ++i) {
@@ -70,7 +69,8 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::provideSignatureDevi
 	if(!m_tmanager){
 		throw std::runtime_error("Unable to provide global GPU variables without TreeManager set");
 	}
-	std::cout << "TMPLOG provide Sign Dev h_devsize= " <<  h_value_pointers_dev.size() << ", hh size = " << h_value_pointers_host.size() <<std::endl <<std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size() <<std::endl <<std::endl;
+
 	nvars=h_value_pointers_host.size();
 	values=d_value_pointers_dev;
 }
@@ -87,13 +87,11 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::deAllocateDevice(){
 
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUVariables<FloatType,SizeType>::allocateDevice(){
-	std::cout << "TMPLOG alloc dev size " << h_value_pointers_dev.size() ; 
+	std::cout << __PRETTY_FUNCTION__ << " alloc size " << h_value_pointers_dev.size() << std::endl ; 
 #ifdef GNA_CUDA_SUPPORT
 	//device_malloc(d_value_pointers_dev, h_value_pointers_dev.size());
 	copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size());
-	std::cout << "allocated " ;
 #endif
-	std::cout << "finished" << std::endl << std::endl;
 }
 
 template<typename FloatType,typename SizeType>

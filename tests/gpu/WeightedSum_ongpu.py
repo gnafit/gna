@@ -55,7 +55,8 @@ print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
 #p2.set(1)
 print()
 
-"""Mode2: a1*w1+a2"""
+"""
+""" """Mode2: a1*w1+a2""" """
 with context.manager(ndata) as manager:
     ws = C.WeightedSum( stdvector(weights[:1]), stdvector(labels) )
     ws.sum.arr1(points1.points)
@@ -72,7 +73,7 @@ p1.set(1)
 p2.set(1)
 print()
 
-"""Mode4: c+a1*w1+a1*w2"""
+""" """Mode4: c+a1*w1+a1*w2""" """
 with context.manager(ndata) as manager:
     ws = C.WeightedSum( -10, stdvector(weights), stdvector(labels) )
     ws.sum.arr1(points1.points)
@@ -88,3 +89,4 @@ print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
 p1.set(1)
 p2.set(1)
 print()
+"""
