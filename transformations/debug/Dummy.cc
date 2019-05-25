@@ -81,7 +81,18 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObj
 template<typename FloatType>
 void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
 #ifdef GNA_CUDA_SUPPORT
-  /// put some code here
+  
+    fargs.args.touch();
+    auto& gpuargs=fargs.gpu;
+    gpuargs->provideSignatureDevice(); /*global*/
+
+ //   for (size_t i = 0; i < gpuargs->nrets; ++i) {
+//        auto* shape =gpuargs->retshapes[i];
+//        auto size=shape[0];
+//        identity_gpu(gpuargs->args, gpuargs->rets, size, size); 
+//    }
+     gpuargs->dump();
+
 #else
   throw std::runtime_error("CUDA support not implemented");
 #endif

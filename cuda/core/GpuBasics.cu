@@ -87,3 +87,4 @@ template void device_malloc<double>(double* &dst, unsigned int N);
 template void device_malloc<double*>(double** &dst, unsigned int N);
 
 template void debug_drop<double>(double* dst, unsigned int N);
+template void debug_drop<double*>(double** dst, unsigned int N);

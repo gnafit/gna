@@ -5,7 +5,7 @@
 
 from __future__ import print_function
 import numpy as N
-from load import ROOT as R
+from load import ROOT 
 from gna import constructors as C # construct objects
 from gna.constructors import Points, stdvector
 from gna.env import env
@@ -21,34 +21,38 @@ print( 'Data2:', arr2 )
 labels = [ 'arr1', 'arr2' ]
 weights = [ 'w1', 'w2' ]
 
-"""Initialize environment"""
-p1 = env.globalns.defparameter( weights[0], central=1.0, sigma=0.1 )
-p2 = env.globalns.defparameter( weights[1], central=1.0, sigma=0.1 )
 
-env.globalns.printparameters()
-
-"""Initialize transformations"""
-points1 = Points( arr1 )
-points2 = Points( arr2 )
-
-ndata=5
-"""Mode1: a1*w1+a2*w2"""
+ndata=7
 with context.manager(ndata) as manager:
+    """Initialize environment"""
+    p1 = env.globalns.defparameter( weights[0], central=1.0, sigma=0.1 )
+    p2 = env.globalns.defparameter( weights[1], central=1.0, sigma=0.1 )
+
+    env.globalns.printparameters()
+#    reqparameters(env.globalns)
+    """Initialize transformations"""
+    points1 = Points( arr1 )
+    points2 = Points( arr2 )
+
+    """Mode1: a1*w1+a2*w2"""
     ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
     ws.sum.arr1(points1.points)
     ws.sum.arr2(points2.points)
     ws.sum.switchFunction("gpu")
+    pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
+#    manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
+    manager.setVariables(C.stdvector(pars))
 
 #import IPython; IPython.embed()
 
 print( 'Mode1: a1*w1+a2*w2' )
 print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p1.set(2)
-print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p2.set(2)
-print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-p1.set(1)
-p2.set(1)
+#p1.set(2)
+#print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
+#p2.set(2)
+#print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
+#p1.set(1)
+#p2.set(1)
 print()
 
 """Mode2: a1*w1+a2"""
