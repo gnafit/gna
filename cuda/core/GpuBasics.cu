@@ -17,6 +17,22 @@ void debug_drop(T* in, unsigned int N) {
 }
 
 template<typename T>
+void debug_drop(T** in, size_t M /*how many arrs*/ , size_t N /*length of single arr*/ ) {
+	std::cout << "Debug multidim drop:" << std::endl;
+	T** bigtmp = new T*[M];
+	cudaMemcpy(bigtmp, in, M*sizeof(T*), cudaMemcpyDeviceToHost);
+	for(int j = 0; j < M ; j++) {
+		T* tmp = new T[N];
+		cudaMemcpy(tmp, bigtmp[j], N * sizeof(T), cudaMemcpyDeviceToHost);
+		for (unsigned int i = 0; i < N; ++i) {
+			std::cout << tmp[i] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout <<  std::endl;
+}
+
+template<typename T>
 void device_malloc(T* &dst, unsigned int N) {
 	cudaError_t err = cudaMalloc(&dst, N*sizeof(T));
 	if (err != cudaSuccess) {
@@ -88,3 +104,4 @@ template void device_malloc<double*>(double** &dst, unsigned int N);
 
 template void debug_drop<double>(double* dst, unsigned int N);
 template void debug_drop<double*>(double** dst, unsigned int N);
+template void debug_drop<double>(double** in, size_t M /*how many arrs*/ , size_t N /*length of single arr*/ ) ;
