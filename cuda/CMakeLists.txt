@@ -26,6 +26,7 @@ set(CUSOURCES
   operations/exp.cu
   operations/selfpower.cu
   operations/poisson.cu
+  operations/fillike.cu
   extra/cuOscProbPMNS.cu
   )
 

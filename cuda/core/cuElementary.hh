@@ -15,6 +15,10 @@ void cuproduct(T** in, T** out, unsigned int N, unsigned int M);
 template<typename T>
 void identity_gpu(T** in, T** out, unsigned int N, unsigned int M);
 
+
+void cufilllike(size_t val, double** out, int N);
+void cufilllike(size_t val, float** out, int N);
+
 template<typename T>
 void dummy_params_ongpu(T** in, T** out, T* pars, unsigned int inSize, unsigned int npars);
 

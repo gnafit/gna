@@ -1,4 +1,5 @@
 #include "Dummy.hh"
+#include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
 #endif
@@ -24,7 +25,7 @@ GNA::GNAObjectTemplates::DummyT<FloatType>::DummyT(size_t shape, const char* lab
   .func(&DummyType::dummy_fcn)
   .func("dummy_gpuargs_h_local", &DummyType::dummy_gpuargs_h_local/*, DataLocation::Host*/)
   .func("dummy_gpuargs_h",       &DummyType::dummy_gpuargs_h/*,       DataLocation::Host*/)
-  .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d/*,       DataLocation::Device*/)
+  .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d,       DataLocation::Device)
   .finalize();
 
   m_vars.resize(labels.size());
@@ -85,13 +86,13 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObj
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->provideSignatureDevice(); /*global*/
-
- //   for (size_t i = 0; i < gpuargs->nrets; ++i) {
-//        auto* shape =gpuargs->retshapes[i];
-//        auto size=shape[0];
-//        identity_gpu(gpuargs->args, gpuargs->rets, size, size); 
-//    }
-     gpuargs->dump();
+    for (size_t i = 0; i < gpuargs->nrets; ++i) {
+        auto size = fargs.rets[i].arr.size();
+        
+	std::cout << "TMP " << size <<std::endl;
+	cufilllike(i, gpuargs->rets, static_cast<int> (size) );
+    }
+     //gpuargs->dump();
 
 #else
   throw std::runtime_error("CUDA support not implemented");
