@@ -9,7 +9,7 @@ __global__
 void fillike(size_t val, double** ans_array, int n) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
 	if (x >= n) return;
-	ans_array[0][x] = val*1.0;
+	ans_array[val][x] = val*1.0;
 	printf("%lf ", ans_array[0][x]);
 }
 
@@ -17,7 +17,7 @@ __global__
 void fillike(size_t val, float** ans_array, int n) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
 	if (x >= n) return;
-	ans_array[0][x] = val*1.0;
+	ans_array[val][x] = val*1.0;
 	
 }
 

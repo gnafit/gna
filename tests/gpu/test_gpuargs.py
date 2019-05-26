@@ -113,7 +113,7 @@ def test_vars_02(opts, function_name):
         dummy, points1, points2, ns = gpuargs_make(function_name, mat1, mat2)
         manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
 
-	dummy.dummy.switchFunction('dummy_gpuargs_d')
+    dummy.dummy.switchFunction('dummy_gpuargs_d')
     dummy.add_input(points1, 'input1')
     dummy.add_input(points2, 'input2')
     dummy.add_output('out1')
@@ -126,8 +126,8 @@ def test_vars_02(opts, function_name):
     dt1  = dummy.dummy.out1.datatype()
     dt2  = dummy.dummy.out2.datatype()
 
-#    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
-#    assert N.allclose(res2, 1.0), "C++ and Python results doesn't match"
+    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
+    assert N.allclose(res2, 1.0), "C++ and Python results doesn't match"
 
     print( 'Result (C++ Data to numpy)' )
     print( res1 )
