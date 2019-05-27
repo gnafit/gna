@@ -37,6 +37,10 @@ else()
     set(CUHEADERS "")
 endif()
 
+if(NOT TIME_COUNT)
+    set(TIME_COUNT FALSE)
+endif()
+
 if (NOT CUDA_DEBUG_INFO)
     set(CUDA_DEBUG_INFO 0)
 endif()
