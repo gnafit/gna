@@ -16,19 +16,20 @@
 
 template <typename T>
 __global__ void weightedsum(T** array, T** ans_array, T** weights, unsigned int n, unsigned int m, unsigned int nvars) {
-	int x = blockDim.x * blockIdx.x + threadIdx.x;
-//	if (x >= n) return;
-  	      
-//	ans_array[0][x] = weights[0][0];
+	int x = blockDim.x * blockIdx.x + threadIdx.x; /* num of element in array */
+	if (x >= n) return;
+//	ans_array[0][x] = array[0][x];
 	ans_array[0][x] = array[0][x] * weights[0][0];
 	unsigned int i = 1;
 	for (; i < nvars; ++i){
-		ans_array[0][x] += array[i][x] * weights[0][i];
-	}
-	for (; i < m; ++i) {
-		ans_array[0][x] += array[i][x] ;
+		ans_array[0][x] += array[i][x] * weights[i][0];
 	}
 
+/*	printf("BAD FUNC");
+	for (int i = 0; i < nvars; i++) {
+		printf("%lf %lf \n", array[0][i], array[i][0]);
+	}
+*/
 }
 
 

@@ -70,7 +70,7 @@ print('  result', ws.sum.sum.data() )
 
 print()
 p1.set(1)
-p2.set(1)
+p2.set(-1)
 print('  parameters', p1.value(), p2.value())
 print('  parameters memory block', vaout.data())
 print('  result', ws.sum.sum.data() )
