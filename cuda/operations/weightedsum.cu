@@ -19,8 +19,8 @@ __global__ void weightedsum(T** array, T** ans_array, T** weights, unsigned int 
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
 //	if (x >= n) return;
   	      
-	ans_array[0][x] = weights[0][0];
-/*	ans_array[0][x] = array[0][x] * weights[0][0];
+//	ans_array[0][x] = weights[0][0];
+	ans_array[0][x] = array[0][x] * weights[0][0];
 	unsigned int i = 1;
 	for (; i < nvars; ++i){
 		ans_array[0][x] += array[i][x] * weights[0][i];
@@ -28,7 +28,7 @@ __global__ void weightedsum(T** array, T** ans_array, T** weights, unsigned int 
 	for (; i < m; ++i) {
 		ans_array[0][x] += array[i][x] ;
 	}
-*/
+
 }
 
 

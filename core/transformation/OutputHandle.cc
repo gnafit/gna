@@ -10,8 +10,9 @@ inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() co
   m_sink->entry->touch_global();
 
 #ifdef GNA_CUDA_SUPPORT
-  if (m_sink->data->gpuArr!=nullptr) {
-     m_sink->data->gpuArr->sync( DataLocation::Host );
+  auto* gpu=m_sink->data->gpuArr.get();
+  if (gpu) {
+    gpu->sync(DataLocation::Host);
   }
 #endif
 

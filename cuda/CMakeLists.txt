@@ -11,7 +11,7 @@ set(CMAKE_MODULE_PATH cmake)
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_50,code=sm_50 -std=c++11 -Xcompiler -fPIC )
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -std=c++11 -Xcompiler -fPIC )
 
 include_directories(extra/ core/)
 

@@ -28,8 +28,6 @@ void cufilllike(size_t val, float** ans_array, int n) {
 
 
 void cufilllike(size_t val, double** ans_array, int n) {
-	std::cout << "IMHERE!" <<std::endl <<std::endl;
 	fillike<<<n/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>> (val, ans_array, n);
-	std::cout << "IMHERE!" <<std::endl <<std::endl;
 	cudaDeviceSynchronize();
 }

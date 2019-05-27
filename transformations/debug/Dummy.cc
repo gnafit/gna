@@ -88,14 +88,14 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObj
     gpuargs->provideSignatureDevice(); /*global*/
     for (size_t i = 0; i < gpuargs->nrets; i++) {
         auto size = fargs.rets[i].arr.size();
-        
-	std::cout  << "TMP i=" << i <<std::endl;
 	cufilllike(i, gpuargs->rets, static_cast<int> (size) );
     }
     std::cout << std::endl << "GPU dump:" <<std::endl;
     for (size_t i = 0; i < gpuargs->nrets; i++) {
 	fargs.rets[i].gpuArr->dump();
     }
+    std::cout << __PRETTY_FUNCTION__ << std::endl <<  "nvars = " << gpuargs->nvars << std::endl <<std::endl;
+    debug_drop(gpuargs->vars, 3, 1);
      //gpuargs->dump();
 
 #else

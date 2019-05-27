@@ -15,3 +15,5 @@ void device_malloc(T* &dst, unsigned int N);
 template<typename T> 
 void debug_drop(T* dst, unsigned int N);
 
+template<typename T> 
+void debug_drop(T** in, size_t M /*how many arrs*/ , size_t N /*length of single arr*/ );
