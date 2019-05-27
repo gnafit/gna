@@ -2,6 +2,7 @@
 #include "ParametrizedBase.hh"
 #include "TreeManager.hh"
 #include "TransformationEntry.hh"
+#include "TransformationDescriptor.hh"
 
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
@@ -20,6 +21,8 @@ TransformationTypes::GPUVariables<FloatType,SizeType>::GPUVariables(Transformati
 	if(m_tmanager!=transformation->m_tmanager){
 		throw std::runtime_error("Transformation is not managed by the current TreeManager");
 	}
+	std::cout << "constructor " << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+			 " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
 }
 
 template<typename FloatType,typename SizeType>
@@ -43,15 +46,36 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
 	h_value_pointers_host.resize(size);
 	h_value_pointers_dev.resize(size);
 
-	std::cout << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
-			 "h_value_pointers_dev size = " << h_value_pointers_dev.size() << std::endl;
+	std::cout << "readVars "<< __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+			 " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
 	deAllocateDevice();
-	FloatType* m_dev_root=nullptr;
+	#ifdef GNA_CUDA_SUPPORT
+	OutputHandleT<FloatType>* output = m_tmanager->getOutput();
+	if(!output){
+		return;
+		//throw std::runtime_error("Unable to get the output with variable values");
+	}
+	auto* data = output->m_sink->data.get();
+	if(!data){
+		return; /// The data is not allocated yet
+	}
+	auto* gpuArr = data->gpuArr.get();
+	if(!gpuArr){
+		throw std::runtime_error("GPU data is not allocated");
+	}
+	FloatType* m_dev_root=gpuArr->devicePtr;
 	for (size_t i = 0; i < size; ++i) {
 		auto& val=m_variables[i].values();
 		h_value_pointers_host[i]=val.data();
 		h_value_pointers_dev[i]= m_dev_root+val.offset();
 	}
+	#else
+	for (size_t i = 0; i < size; ++i) {
+		auto& val=m_variables[i].values();
+		h_value_pointers_host[i]=val.data();
+		h_value_pointers_dev[i]=nullptr;
+	}
+	#endif
 	allocateDevice();
 }
 
@@ -69,7 +93,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::provideSignatureDevi
 	if(!m_tmanager){
 		throw std::runtime_error("Unable to provide global GPU variables without TreeManager set");
 	}
-	std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size() <<std::endl <<std::endl;
+	std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size()  << " " << (void*)this <<std::endl <<std::endl;
 
 	nvars=h_value_pointers_host.size();
 	values=d_value_pointers_dev;
@@ -87,7 +111,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::deAllocateDevice(){
 
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUVariables<FloatType,SizeType>::allocateDevice(){
-	std::cout << __PRETTY_FUNCTION__ << " alloc size " << h_value_pointers_dev.size() << std::endl ; 
+	std::cout << "allocate dev " << __PRETTY_FUNCTION__ << " alloc size " << h_value_pointers_dev.size()  << " " << (void*)this << std::endl ;
 #ifdef GNA_CUDA_SUPPORT
 	//device_malloc(d_value_pointers_dev, h_value_pointers_dev.size());
 	copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size());

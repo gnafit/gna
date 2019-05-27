@@ -159,17 +159,25 @@ OutputHandleT<SinkFloatType> HandleT<SourceFloatType,SinkFloatType>::output(Sing
 }
 
 /**
- * @brief Assign variables to the transformation.
+ * @brief Set ParametrizedBase and assign variables to the transformation.
  *
  * @param out -- SingleOutput transformation.
  * @return OutputHandle for the new output.
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void HandleT<SourceFloatType,SinkFloatType>::readVariables(ParametrizedTypes::ParametrizedBase* parbase){
-  auto& gpu=m_entry->functionargs->gpu;
-  if(gpu){
-    gpu->readVariables(parbase);
-  }
+  m_entry->functionargs->readVariables(parbase);
+}
+
+/**
+ * @brief Assign variables to the transformation from previously set ParametrizedBase.
+ *
+ * @param out -- SingleOutput transformation.
+ * @return OutputHandle for the new output.
+ */
+template<typename SourceFloatType, typename SinkFloatType>
+void HandleT<SourceFloatType,SinkFloatType>::readVariables(){
+  m_entry->functionargs->readVariables();
 }
 
 /**

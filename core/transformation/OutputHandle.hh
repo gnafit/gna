@@ -14,6 +14,9 @@
 
 namespace TransformationTypes
 {
+  template<typename FloatType,typename SizeType>
+  class GPUVariables;
+
   /**
    * @brief Sink wrapper to make it user accessible from the Python.
    * InputHandle and OutputHandle classes give indirect access to Source and Sink instances
@@ -26,6 +29,9 @@ namespace TransformationTypes
   class OutputHandleT {
     template<typename FloatType1>
     friend class InputHandleT;
+
+    template<typename FloatType1,typename SizeType1>
+    friend class GPUVariables;
   public:
     /**
      * @brief Constructor.

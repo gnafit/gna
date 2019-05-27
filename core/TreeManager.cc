@@ -22,6 +22,10 @@ void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatT
 #ifdef GNA_CUDA_SUPPORT
     m_transformation->setLocation(DataLocation::Device);
 #endif
+
+    for(auto& trans: m_transformations){
+        trans->functionargs->readVariables();
+    }
 }
 
 template<typename FloatType>

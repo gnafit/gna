@@ -91,7 +91,8 @@ namespace TransformationTypes
     bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
     taintflag& getTaintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
 
-    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Read the variables
+    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Set parbase and read the variables
+    void readVariables();                                              ///< Read the variables from previously set ParametrizedBase
 
     /**
      * @brief Switch the active Function.
