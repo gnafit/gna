@@ -743,6 +743,7 @@ public:
   }
 #ifdef GNA_CUDA_SUPPORT
   DataLocation require_gpu();
+  DataLocation require_gpu(DataLocation location);
 #endif // GNA_CUDA_SUPPORT
 
   const DataType type;                             ///< data type.
@@ -803,6 +804,13 @@ Allocate GPU memory in case of GPU array is not inited yet
     tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
   }
   return tmp;
+}
+
+template <typename T>
+DataLocation Data<T>::require_gpu(DataLocation location) {
+  require_gpu();
+  gpuArr->setLocation(location);
+  return location;
 }
 #endif
 

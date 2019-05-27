@@ -17,9 +17,9 @@
  */
 template <typename T>
 class GpuArray {
-public: 
-	GpuArray(T* inHostPtr = nullptr);				///< constructor without initialization, sets SyncFlag to Unsynchronized 
-	GpuArray(GpuArray<T> &gpuarray);				///< copy constructor 
+public:
+	GpuArray(T* inHostPtr = nullptr);				///< constructor without initialization, sets SyncFlag to Unsynchronized
+	GpuArray(GpuArray<T> &gpuarray);				///< copy constructor
         GpuArray(size_t inSize, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
         GpuArray(size_t mat_rows, size_t mat_cols, T* inHostPtr = nullptr); 		///< constructor with initializing, sets SyncFlag to InitializedOnly if there are no errors
 	~GpuArray() {/* free();*/ }
@@ -47,7 +47,7 @@ public:
 	* Copies data from internal device pointer to dst.
 	*/
 	DataLocation getContent(T* dst);
-	void sync_H2D(); 
+	void sync_H2D();
 	void sync_D2H();
 	/**
 	* Makes data at location loc relevant.
@@ -57,7 +57,7 @@ public:
 	/**
 	* Make data relevant both on GPU and CPU
 	*/
-	void synchronize(); 
+	void synchronize();
 	T* getArrayPtr() { return devicePtr; }
         inline void setArrayPtr(T* inDevPtr) {devicePtr = inDevPtr; }
 	size_t getArraySize() { return arrSize; }
@@ -70,9 +70,9 @@ public:
         GpuArray<T> operator=(GpuArray<T> rhs);
 	void dump(); 						///< Shows data from GPU
 
-	inline void setLocation( DataLocation loc ) { 
-		dataLoc = loc; 
-		syncFlag =  SyncFlag::Unsynchronized; 
+	inline void setLocation( DataLocation loc ) {
+		dataLoc = loc;
+		syncFlag =  SyncFlag::Unsynchronized;
 	}
 
 //        DataLocation arrState;
@@ -85,7 +85,7 @@ public:
 	StorageOrder order;
 	ArrayType type;
 	bool deviceMemAllocated{false};
-	DataLocation dataLoc;         ///< Shows where actual data is placed or whether it inited or crashed.	
+	DataLocation dataLoc;         ///< Shows where actual data is placed or whether it inited or crashed.
 	SyncFlag syncFlag;            ///< May be Synchronized (the same data on CPU and GPU), Unsynchronized (not the same data) or SyncFailed (copied with error)
 
 private:

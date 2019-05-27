@@ -32,25 +32,25 @@ namespace TransformationTypes{
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
             m_vars_global.readVariables(parbase);
-            setAsDevice();
+            //setAsDevice();
         }
 
         void readVariablesLocal(){
             m_vars.readVariables();
-            setAsDevice();
+            //setAsDevice();
         }
 
-        void setAsDevice() {
-#ifdef GNA_CUDA_SUPPORT
-            m_entry->setEntryDataLocation(DataLocation::Device);
-#endif
-        }
+        //void setAsDevice() {
+//#ifdef GNA_CUDA_SUPPORT
+            //m_entry->setEntryDataLocation(DataLocation::Device);
+//#endif
+        //}
 
-        void setAsHost() {
-#ifdef GNA_CUDA_SUPPORT
-            m_entry->setEntryDataLocation(DataLocation::Host);
-#endif
-        }
+        //void setAsHost() {
+//#ifdef GNA_CUDA_SUPPORT
+            //m_entry->setEntryDataLocation(DataLocation::Host);
+//#endif
+        //}
 
         void updateTypesHost();
         void updateTypesDevice();

@@ -14,7 +14,7 @@ inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() co
      m_sink->data->gpuArr->sync( DataLocation::Host );
   }
 #endif
-  
+
   return this->view();
 }
 

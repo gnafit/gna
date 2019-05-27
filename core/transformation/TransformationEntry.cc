@@ -284,15 +284,13 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     // GPU: require GPU memory for previous transformation's sink
     if (this->getEntryLocation() == DataLocation::Device){
       for (auto &source : sources) {
-          source.sink->data->require_gpu();
+          source.requireGPU();
       }
       for (auto &sink : sinks) {
-        sink.data->require_gpu();
-        sink.data->gpuArr->setLocation( this->getEntryLocation() );
+        sink.requireGPU(this->getEntryLocation());
       }
       for (auto &intern : storages) {
-        intern.data->require_gpu();
-        intern.data->gpuArr->setLocation( this->getEntryLocation() );
+        intern.requireGPU(this->getEntryLocation());
       }
       // init gpu storage
     }
@@ -351,7 +349,7 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
   }
   touch();
 #ifdef GNA_CUDA_SUPPORT
-  if (sink.data->gpuArr != nullptr) {
+  if (m_entryLoc==DataLocation::Device && sink.data->gpuArr) {
     sink.data->gpuArr->sync( DataLocation::Host );
   }
 #endif
@@ -413,7 +411,6 @@ void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
-    if (getEntryLocation() != DataLocation::Device) return;
     for (const SinkType &s: sinks) {
         s.data->gpuArr->setLocation(loc);
     }

@@ -19,9 +19,15 @@ void GNA::TreeManager<FloatType>::setVariables(const std::vector<variable<FloatT
     m_vararray.reset(new VarArrayType(variables));
     m_transformation.reset(new TransformationDescriptorType(m_vararray->transformations.front()));
     m_output.reset(new OutputDescriptorType(m_transformation->outputs.front()));
-#ifdef GNA_CUDA_SUPPORT
-    m_transformation->setLocation(DataLocation::Device);
-#endif
+
+    #ifdef GNA_CUDA_SUPPORT
+    for(auto& trans: m_transformations){
+        if(trans->getEntryLocation()==DataLocation::Device){
+            m_output->requireGPU();
+            break;
+        }
+    }
+    #endif
 
     for(auto& trans: m_transformations){
         trans->functionargs->readVariables();
@@ -51,8 +57,10 @@ void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){
 #ifdef GNA_CUDA_SUPPORT
+        printf("vararray tainted %i, touch\n", m_transformation->tainted());
         auto& data=(*m_transformation)[0];
         if (data.gpuArr){
+            printf("sync host->device?\n");
             data.gpuArr->sync(DataLocation::Device);
         }
 #else

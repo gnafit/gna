@@ -61,6 +61,10 @@ namespace TransformationTypes
 
     bool depends(changeable x) const;                                           ///< Check that Sink depends on a changeable.
 
+#ifdef GNA_CUDA_SUPPORT
+    void requireGPU() { m_sink->requireGPU(); }                                 ///< Require output to be allocated on GPU.
+#endif
+
   protected:
     const FloatType *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.
     SinkT<FloatType> *m_sink;                                                   ///< Pointer to the Sink.
