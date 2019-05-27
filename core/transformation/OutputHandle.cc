@@ -4,15 +4,20 @@
 /**
  * @brief Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
  * @return pointer to the Sink's data buffer.
+ *
+ * The output is expected to be triggered by the user, therefore EntryT::touch_global method
+ * is used to trigger TreeManager (if applicable) to update the variables.
  */
 template<typename FloatType>
 inline const FloatType* TransformationTypes::OutputHandleT<FloatType>::data() const {
   m_sink->entry->touch_global();
 
 #ifdef GNA_CUDA_SUPPORT
-  auto* gpu=m_sink->data->gpuArr.get();
-  if (gpu) {
-    gpu->sync(DataLocation::Host);
+  if(m_sink->entry->getEntryLocation() != DataLocation::Host){
+    auto* gpu=m_sink->data->gpuArr.get();
+    if (gpu) {
+      gpu->sync(DataLocation::Host);
+    }
   }
 #endif
 
