@@ -32,14 +32,13 @@ with ns:
 
 ndata = 900
 # Initialize neutrino oscillations
-#with context.manager(ndata) as manager:
-with ns:
+with context.manager(ndata) as manager:
     with ns:
         labels=['Oscillation probability|%s'%s for s in ('component 12', 'component 13', 'component 23', 'full', 'probsum')]
         oscprob = C.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
-        #oscprob.comp12.switchFunction("gpu")
-        #oscprob.comp13.switchFunction("gpu")
-        #oscprob.comp23.switchFunction("gpu")
+        oscprob.comp12.switchFunction("gpu")
+        oscprob.comp13.switchFunction("gpu")
+        oscprob.comp23.switchFunction("gpu")
     
     
         enu >> oscprob.full_osc_prob.Enu
@@ -53,20 +52,20 @@ with ns:
         unity = C.FillLike(1, labels='Unity')
         enu >> unity.fill.inputs[0]
 
-#with manager:
-with context.manager(ndata) as manager:
-    with ns:
+        #with manager:
+        #with context.manager(ndata) as manager:
+        #    with ns:
         op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
         op_sum.sum.switchFunction("gpu")
 
-# Print some information
-oscprob.print()
-print()
+        # Print some information
+        #oscprob.print()
+        print()
 
-ns.printparameters(labels=True)
+        ns.printparameters(labels=True)
 
-# Print extended information
-oscprob.print(data=True, slice=slice(None, 5))
+        # Print extended information
+        #oscprob.print(data=True, slice=slice(None, 5))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )

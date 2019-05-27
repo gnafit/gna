@@ -43,15 +43,16 @@ __global__ void weightedsum(T** array, T** ans_array, T** weights, unsigned int 
 template<typename T>
 __global__ void weightedsumfill(T** array, T** ans_array, T** weights, T k, unsigned int n, unsigned int m, unsigned int nvars) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
-//	if (x >= m) return;
+	if (x >= n) return;
 	ans_array[0][x] = array[0][x] * weights[0][0] + k;
         unsigned int i = 1;
 	for (; i < nvars; i++){
-		ans_array[0][x] += array[i][x] * weights[0][i];
+		ans_array[0][x] += array[i][x] * weights[i][0];
 	}
-	for (; i < m; ++i) {
+/*	for (; i < m; ++i) {
 		ans_array[0][x] += array[i][x] ;
 	}
+*/
 }
 
 template<typename T>
