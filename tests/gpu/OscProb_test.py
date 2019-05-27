@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import load
 import ROOT
-from gna.constructors import Points, stdvector, OscProbPMNS 
+from gna.constructors import Points, stdvector, OscProbPMNS
 from gna.ui import basecmd
 import gna.parameters.oscillation
 from gna.env import env
@@ -15,10 +15,6 @@ from gna import context, bindings
 ROOT.GNAObject
 
 ns = env.ns("004")
-gna.parameters.oscillation.reqparameters(ns)
-
-env.defparameter("L", central=810,sigma=0) #kilometre
-env.defparameter("rho",central=2.7,sigma=0) #g/cm3
 
 from_nu_a = ROOT.Neutrino.amu()
 to_nu_a = ROOT.Neutrino.ae()
@@ -34,6 +30,11 @@ com = Points(comp0)
 ndata = 2000
 
 with context.manager(ndata) as manager:
+  gna.parameters.oscillation.reqparameters(ns)
+
+  env.defparameter("L", central=810,sigma=0) #kilometre
+  env.defparameter("rho",central=2.7,sigma=0) #g/cm3
+
   with ns:
     #Vacuum neutrino (same antineutrino)
     oscprob = OscProbPMNS(from_nu, to_nu)
@@ -58,8 +59,8 @@ with context.manager(ndata) as manager:
 #    oscprob.probsum.inputs.comp23(oscprob.comp23.comp23)
 #    oscprob.probsum.inputs.comp0(oscprob.compCP.compCP)
 #    datafin = oscprob.probsum.probsum
-    
-    
+
+
 #    oscprob = NestedDict(
 #              bundle = dict(name='oscprob', version='v02', major='rdc'),
 #              ),
