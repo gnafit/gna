@@ -104,7 +104,7 @@ def test_vars_01_local(opts, function_name):
     res1 = dummy.dummy.out1.data()
 
 @floatcopy(globals(), addname=True)
-def test_vars_02(opts, function_name):
+def test_vars_02_host(opts, function_name):
     print('Test inputs/outputs/variables (Dummy)')
     mat1 = N.arange(12, dtype='d').reshape(3, 4)
     mat2 = N.arange(15, dtype='d').reshape(5, 3)
@@ -113,7 +113,45 @@ def test_vars_02(opts, function_name):
         dummy, points1, points2, ns = gpuargs_make(function_name, mat1, mat2)
         manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
 
-    dummy.dummy.switchFunction('dummy_gpuargs_d')
+    dummy.dummy.switchFunction('dummy_gpuargs_h')
+    dummy.add_input(points1, 'input1')
+    dummy.add_input(points2, 'input2')
+    dummy.add_output('out1')
+    dummy.add_output('out2')
+
+    dummy.print()
+
+    res1 = dummy.dummy.out1.data()
+    res2 = dummy.dummy.out2.data()
+    dt1  = dummy.dummy.out1.datatype()
+    dt2  = dummy.dummy.out2.datatype()
+
+    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
+    assert N.allclose(res2, 1.0), "C++ and Python results doesn't match"
+
+    print( 'Result (C++ Data to numpy)' )
+    print( res1 )
+    print( res2 )
+    print()
+
+    print( 'Datatype:', str(dt1) )
+    print( 'Datatype:', str(dt2) )
+
+    print('Change 3d variable')
+    ns['par3'].set(-1.0)
+    res1 = dummy.dummy.out1.data()
+
+@floatcopy(globals(), addname=True)
+def test_vars_02_dev(opts, function_name):
+    print('Test inputs/outputs/variables (Dummy)')
+    mat1 = N.arange(12, dtype='d').reshape(3, 4)
+    mat2 = N.arange(15, dtype='d').reshape(5, 3)
+
+    with context.manager(100) as manager:
+        dummy, points1, points2, ns = gpuargs_make(function_name, mat1, mat2)
+        manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
+
+    dummy.dummy.switchFunction('dummy_gpuargs_h')
     dummy.add_input(points1, 'input1')
     dummy.add_input(points2, 'input2')
     dummy.add_output('out1')

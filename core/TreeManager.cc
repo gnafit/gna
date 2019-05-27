@@ -57,10 +57,8 @@ void GNA::TreeManager<FloatType>::update() {
     // Caution: triggering touch_global() may cause infinite loop.
     if(m_transformation){
 #ifdef GNA_CUDA_SUPPORT
-        printf("vararray tainted %i, touch\n", m_transformation->tainted());
         auto& data=(*m_transformation)[0];
         if (data.gpuArr){
-            printf("sync host->device?\n");
             data.gpuArr->sync(DataLocation::Device);
         }
 #else

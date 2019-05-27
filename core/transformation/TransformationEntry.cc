@@ -412,7 +412,10 @@ void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
     for (const SinkType &s: sinks) {
-        s.data->gpuArr->setLocation(loc);
+      auto* gpuarr = s.data->gpuArr.get();
+      if(gpuarr) {
+        gpuarr->setLocation(loc);
+      }
     }
 }
 

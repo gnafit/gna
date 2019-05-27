@@ -44,7 +44,7 @@ with context.manager(ndata) as manager:
     pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
 #    manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
 
-    print('Set variables')
+    print('Set variables', pars)
     manager.setVariables(C.stdvector(pars))
     print('Variables set')
 
