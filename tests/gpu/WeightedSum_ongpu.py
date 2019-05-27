@@ -5,7 +5,7 @@
 
 from __future__ import print_function
 import numpy as N
-from load import ROOT 
+from load import ROOT
 from gna import constructors as C # construct objects
 from gna.constructors import Points, stdvector
 from gna.env import env
@@ -35,24 +35,31 @@ with context.manager(ndata) as manager:
     points2 = Points( arr2 )
 
     """Mode1: a1*w1+a2*w2"""
+    print('Create weighted sum')
     ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
+    print('Created weighted sum')
     ws.sum.arr1(points1.points)
     ws.sum.arr2(points2.points)
+    print('Switch function')
     ws.sum.switchFunction("gpu")
+    print('Switched function')
     pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
 #    manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
+
+    print('Set variables')
     manager.setVariables(C.stdvector(pars))
+    print('Variables set')
 
 #import IPython; IPython.embed()
 
 print( 'Mode1: a1*w1+a2*w2' )
 print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-#p1.set(2)
-#print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-#p2.set(2)
-#print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
-#p1.set(1)
-#p2.set(1)
+p1.set(2)
+print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
+p2.set(2)
+print( '  ', p1.value(), p2.value(), ws.sum.sum.data() )
+p1.set(1)
+p2.set(1)
 print()
 
 """
