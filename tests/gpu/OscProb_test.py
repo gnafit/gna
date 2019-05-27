@@ -26,12 +26,12 @@ to_nu_a = ROOT.Neutrino.ae()
 from_nu = ROOT.Neutrino.mu()
 to_nu = ROOT.Neutrino.e()
 
-E_arr = np.array(range(500, 6000, 50))  #array energy (МеV)
+E_arr = np.array(range(500, 2500, 1))  #array energy (МеV)
 comp0 = np.array(np.ones(110))
 E = Points(E_arr)
 com = Points(comp0)
 
-ndata = 110
+ndata = 2000
 
 with context.manager(ndata) as manager:
   with ns:
@@ -64,13 +64,58 @@ with context.manager(ndata) as manager:
 #              bundle = dict(name='oscprob', version='v02', major='rdc'),
 #              ),
 
-#print(data_osc)
-plt.plot(E_arr*1e-3, data_osc.data())
-plt.plot(E_arr*1e-3, data_osc2.data())
+print(data_osc)
 plt.plot(E_arr*1e-3, data_osc3.data())
+plt.plot(E_arr*1e-3, data_osc2.data())
+plt.plot(E_arr*1e-3, data_osc.data())
 plt.plot(E_arr*1e-3, data_osc4.data())
+
+oscprob.comp12.taint()
+oscprob.comp13.taint()
+oscprob.comp23.taint()
+
+data_osc3.data()
+data_osc2.data()
+data_osc.data()
+
+oscprob.comp12.taint()
+oscprob.comp13.taint()
+oscprob.comp23.taint()
+
+data_osc3.data()
+data_osc2.data()
+data_osc.data()
+
+oscprob.comp12.taint()
+oscprob.comp13.taint()
+oscprob.comp23.taint()
+
+data_osc3.data()
+data_osc2.data()
+data_osc.data()
+
+oscprob.comp12.taint()
+oscprob.comp13.taint()
+oscprob.comp23.taint()
+
+data_osc3.data()
+data_osc2.data()
+data_osc.data()
+
+oscprob.comp12.taint()
+oscprob.comp13.taint()
+oscprob.comp23.taint()
+
+data_osc3.data()
+data_osc2.data()
+data_osc.data()
+
+
 #plt.plot(E_arr*1e-3, datafin.data())
 plt.xlabel('$comp12$')
 plt.ylabel(r'$P_{\nu_{\mu} \to \nu_{e}}$')
 plt.grid()
 plt.show()
+
+
+

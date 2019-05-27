@@ -43,8 +43,8 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
 	h_value_pointers_host.resize(size);
 	h_value_pointers_dev.resize(size);
 
-	std::cout << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
-			 "h_value_pointers_dev size = " << h_value_pointers_dev.size() << std::endl;
+//	std::cout << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+//			 "h_value_pointers_dev size = " << h_value_pointers_dev.size() << std::endl;
 	deAllocateDevice();
 	FloatType* m_dev_root=nullptr;
 	for (size_t i = 0; i < size; ++i) {
@@ -69,7 +69,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::provideSignatureDevi
 	if(!m_tmanager){
 		throw std::runtime_error("Unable to provide global GPU variables without TreeManager set");
 	}
-	std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size() <<std::endl <<std::endl;
+//	std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size() <<std::endl <<std::endl;
 
 	nvars=h_value_pointers_host.size();
 	values=d_value_pointers_dev;

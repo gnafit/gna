@@ -110,8 +110,8 @@ namespace GNA {
         fargs.args.touch();
         auto& gpuargs=fargs.gpu;
         gpuargs->provideSignatureDevice();
-	std::cout << "NVARS = " << gpuargs->nvars << std::endl;
-	debug_drop(gpuargs->vars, gpuargs->nvars);
+	//std::cout << "NVARS = " << gpuargs->nvars << std::endl;
+	//debug_drop(gpuargs->vars, gpuargs->nvars);
 //	gpuargs->provideSignatureHost();
         cuweightedsum(gpuargs->args, gpuargs->rets, gpuargs->vars, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
         gpuargs->setAsDevice();
