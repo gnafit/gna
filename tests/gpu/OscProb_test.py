@@ -30,10 +30,9 @@ com = Points(comp0)
 ndata = 2000
 
 with context.manager(ndata) as manager:
-  gna.parameters.oscillation.reqparameters(ns)
-
   env.defparameter("L", central=810,sigma=0) #kilometre
-  env.defparameter("rho",central=2.7,sigma=0) #g/cm3
+  gna.parameters.oscillation.reqparameters(ns)
+  pmnsexpr = ROOT.OscProbPMNSExpressions(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(), ns=ns)
 
   with ns:
     #Vacuum neutrino (same antineutrino)
@@ -60,6 +59,8 @@ with context.manager(ndata) as manager:
 #    oscprob.probsum.inputs.comp0(oscprob.compCP.compCP)
 #    datafin = oscprob.probsum.probsum
 
+    ns.materializeexpressions()
+ns.printparameters()
 
 #    oscprob = NestedDict(
 #              bundle = dict(name='oscprob', version='v02', major='rdc'),
