@@ -47,8 +47,6 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .input("x")                /// 1
     .input("insegment")        /// 2
     .input("widths")           /// 3
-    .input("y")                /// 4
-    .output("interp")          /// 0
     .types(TypesFunctions::ifPoints<0>)                                     /// newx is an array of any shape
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)            /// x is an 1d array
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::ifSameShape2<0,2>)  /// segment index is of shape of newx
@@ -57,7 +55,7 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
-#ifdef GNA_CUDA_SUPPORT 
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &InterpExpo::do_interpolate_ongpu, DataLocation::Device)
 #endif
     ;
