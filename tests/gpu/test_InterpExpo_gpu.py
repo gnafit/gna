@@ -12,8 +12,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '-m', '--mode', default='expo', choices=['expo', 'linear'], help='Interpolation mode' )
-# parser.add_argument( '-U', '--underflow', default="", choices=['constant', 'extrapolate'] )
-# parser.add_argument( '-O', '--overflow', default="", choices=['constant', 'extrapolate'] )
+parser.add_argument( '-U', '--underflow', default="", choices=['constant', 'extrapolate'] )
+parser.add_argument( '-O', '--overflow', default="", choices=['constant', 'extrapolate'] )
 parser.add_argument( '-o', '--output' )
 opts = parser.parse_args()
 
@@ -31,13 +31,16 @@ print( 'Edges', segments )
 print( 'Points', points )
 print( 'Fcn', fcn )
 
-# ie = R.InterpExpo(opts.underflow, opts.overflow)
+#ie = R.InterpExpo(opts.underflow, opts.overflow)
 if opts.mode=='expo':
-    ie = R.InterpExpo()
+     ie = R.InterpExpo()
 else:
     ie = R.InterpLinear()
-ie.interp.switchFunction("gpu")
+
+#ie.interp.switchFunction("gpu")
 ie.interpolate(segments_t, fcn_t, points_t)
+ie.printtransformations()
+#ie.y(fcn_t)
 seg_idx = ie.insegment.insegment.data()
 print( 'Segments', seg_idx )
 

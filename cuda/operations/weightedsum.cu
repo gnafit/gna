@@ -57,13 +57,13 @@ __global__ void weightedsumfill(T** array, T** ans_array, T** weights, T k, unsi
 
 template<typename T>
 void cuweightedsum(T** array, T** ans_array, T** weights, unsigned int n, unsigned int m, unsigned int nvars) {
-	weightedsum<<<m/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, weights, n, m, nvars);
+	weightedsum<<<n/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, weights, n, m, nvars);
 	cudaDeviceSynchronize();
 }
 
 template<typename T>
 void cuweightedsumfill(T** array, T** ans_array, T** weights, T k, unsigned int n, unsigned int m, unsigned int nvars) {
-	weightedsumfill<<<m/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, weights, k, n, m, nvars);
+	weightedsumfill<<<n/CU_BLOCK_SIZE+1, CU_BLOCK_SIZE>>>(array, ans_array, weights, k, n, m, nvars);
 	cudaDeviceSynchronize();
 }
 

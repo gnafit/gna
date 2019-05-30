@@ -36,43 +36,41 @@ with context.manager(ndata) as manager:
 
     """Mode1: a1*w1+a2*w2"""
     print('Create weighted sum')
-    # with context.cuda():
     ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
     ws.sum.arr1(points1.points)
     ws.sum.arr2(points2.points)
     ws.sum.switchFunction("gpu")
-    pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
+#    pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
 #    manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
+#    print('Set variables', pars)
+#    manager.setVariables(C.stdvector(pars))
+#    print('Variables set')
 
-    print('Set variables', pars)
-    manager.setVariables(C.stdvector(pars))
-    print('Variables set')
-
-va = manager.getVarArray()
-vaout = va.vararray.points
-
-print( 'Mode1: a1*w1+a2*w2' )
-print('  parameters', p1.value(), p2.value())
-print('  parameters memory block', vaout.data())
-print('  result', ws.sum.sum.data() )
+#va = manager.getVarArray()
+#vaout = va.vararray.points
+    ws.sum.taint()
+    print( 'Mode1: a1*w1+a2*w2' )
+    print('  parameters', p1.value(), p2.value())
+    #print('  parameters memory block', vaout.data())
+    print('  result', ws.sum.sum.data() )
 
 print()
 p1.set(2)
 print('  parameters', p1.value(), p2.value())
-print('  parameters memory block', vaout.data())
+#print('  parameters memory block', vaout.data())
 print('  result', ws.sum.sum.data() )
 
 print()
 p2.set(2)
 print('  parameters', p1.value(), p2.value())
-print('  parameters memory block', vaout.data())
+#print('  parameters memory block', vaout.data())
 print('  result', ws.sum.sum.data() )
 
 print()
 p1.set(1)
 p2.set(-1)
 print('  parameters', p1.value(), p2.value())
-print('  parameters memory block', vaout.data())
+#print('  parameters memory block', vaout.data())
 print('  result', ws.sum.sum.data() )
 
 """
