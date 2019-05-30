@@ -23,9 +23,8 @@ arr2 = -arr1
 #print( 'Data1:', arr1 )
 #print( 'Data2:', arr2 )
 
-labels = [ 'arr1', 'arr2','arr3' ]
-weights = [ 'w1', 'w2', 'w3' ]
-
+labels = [ 'item12', 'item13','item23' ]
+weights = [ 'weight12neg', 'weight13neg', 'weight23neg' ]
 
 ns = env.ns("")
 
@@ -44,15 +43,13 @@ points1 = Points( arr1 )
 points2 = Points( arr2 )
 ndata=260
 with context.manager(ndata) as manager:
+    ns.defparameter("L", central=810,sigma=0) #kilometre
+
     gna.parameters.oscillation.reqparameters(ns)
 
-    ns.defparameter("L", central=810,sigma=0) #kilometre
-    ns.defparameter("rho",central=2.7,sigma=0) #g/cm3
-
-    """Initialize environment"""
-    p1 = ns.defparameter( weights[0], central= 1.0, sigma=0.1 )
-    p2 = ns.defparameter( weights[1], central= 1.0, sigma=0.1 )
-    p3 = ns.defparameter( weights[2], central= 1.0, sigma=0.1 )
+    pmnsexpr = ROOT.OscProbPMNSExpressions(ROOT.Neutrino.ae(), ROOT.Neutrino.ae(), ns=ns)
+    ns.materializeexpressions()
+    ns.printparameters()
 
     with ns:
         #Vacuum neutrino (same antineutrino)
@@ -77,10 +74,11 @@ with context.manager(ndata) as manager:
         #    reqparameters(env.globalns)
         print('Create weighted sum')
         ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
-        ws.sum.arr1(oscprob.comp12)
-        ws.sum.arr2(oscprob.comp13)
-        ws.sum.arr3(oscprob.comp23)
+        ws.sum.item12(oscprob.comp12)
+        ws.sum.item13(oscprob.comp13)
+        ws.sum.item23(oscprob.comp23)
         ws.sum.switchFunction("gpu")
+        ws.sum.setLabel('label example')
         ns.materializeexpressions()
         pars = tuple(par.getVariable() for (name,par) in ns.walknames())
         manager.setVariables(C.stdvector(pars))
