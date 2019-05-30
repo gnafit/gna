@@ -21,8 +21,8 @@ TransformationTypes::GPUVariables<FloatType,SizeType>::GPUVariables(Transformati
     if(m_tmanager!=transformation->m_tmanager){
         throw std::runtime_error("Transformation is not managed by the current TreeManager");
     }
-    std::cout << "constructor " << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
-             " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
+//    std::cout << "constructor " << __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+//             " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
 }
 
 template<typename FloatType,typename SizeType>
@@ -47,8 +47,8 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::readVariables(Parame
     h_value_pointers_host.resize(size);
     h_value_pointers_dev.resize(size);
 
-    std::cout << "readVars "<< __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
-             " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
+//    std::cout << "readVars "<< __PRETTY_FUNCTION__ << " h_value_pointers_host size = " << h_value_pointers_host.size() <<
+//             " h_value_pointers_dev size = " << h_value_pointers_dev.size() << " " << (void*)this << std::endl;
     deAllocateDevice();
     #ifdef GNA_CUDA_SUPPORT
     OutputHandleT<FloatType>* output = m_tmanager->getOutput();
@@ -95,7 +95,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::provideSignatureDevi
     if(!m_tmanager){
         throw std::runtime_error("Unable to provide global GPU variables without TreeManager set");
     }
-    std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size()  << " " << (void*)this <<std::endl <<std::endl;
+//    std::cout << __PRETTY_FUNCTION__ << "h_value_pointers_dev size= " <<  h_value_pointers_dev.size() << ", h_value_pointers_host size = " << h_value_pointers_host.size()  << " " << (void*)this <<std::endl <<std::endl;
 
     nvars=h_value_pointers_host.size();
     values=d_value_pointers_dev;
@@ -113,7 +113,7 @@ void TransformationTypes::GPUVariables<FloatType,SizeType>::deAllocateDevice(){
 
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUVariables<FloatType,SizeType>::allocateDevice(){
-    std::cout << "allocate dev " << __PRETTY_FUNCTION__ << " alloc size " << h_value_pointers_dev.size()  << " " << (void*)this << std::endl ;
+//    std::cout << "allocate dev " << __PRETTY_FUNCTION__ << " alloc size " << h_value_pointers_dev.size()  << " " << (void*)this << std::endl ;
 #ifdef GNA_CUDA_SUPPORT
     //device_malloc(d_value_pointers_dev, h_value_pointers_dev.size());
     copyH2D_ALL(d_value_pointers_dev, h_value_pointers_dev.data(), h_value_pointers_dev.size());

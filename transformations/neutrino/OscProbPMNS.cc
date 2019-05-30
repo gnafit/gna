@@ -216,18 +216,20 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(FunctionArgs
 template<typename FloatType>
 template <int I, int J>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArgs fargs) {
-#ifdef TIME_COUNT
+/*#ifdef TIME_COUNT_ON
    std::chrono::time_point<std::chrono::system_clock> start, end;
    start = std::chrono::system_clock::now();
 #endif
+*/
   auto &Enu = fargs.args[0].x;
   fargs.rets[0].x = cos((DeltaMSq<I,J>()*oscprobArgumentFactor*m_L*0.5)*Enu.inverse());
-#ifdef TIME_COUNT
+/*#ifdef TIME_COUNT_ON
    end = std::chrono::system_clock::now();
    int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
                              (end-start).count();
    std::cout << __PRETTY_FUNCTION__ << std::endl << "elapsed time " << elapsed_seconds << "mcs\n";
 #endif
+*/
 }
 
 
@@ -235,21 +237,23 @@ template<typename FloatType>
 template < int I, int J>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(FunctionArgs& fargs) {
 
-#ifdef TIME_COUNT
+/*#ifdef TIME_COUNT_ON
    std::chrono::time_point<std::chrono::system_clock> start, end;
    start = std::chrono::system_clock::now();
 #endif
+*/
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
   cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
 		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
-#ifdef TIME_COUNT
+/*#ifdef TIME_COUNT_ON
    end = std::chrono::system_clock::now();
    int elapsed_seconds = std::chrono::duration_cast<std::chrono::microseconds>
                              (end-start).count();
    std::cout << __PRETTY_FUNCTION__ << std::endl << "elapsed time " << elapsed_seconds << "mcs\n";
 #endif
+*/
 }
 
 template<typename FloatType>

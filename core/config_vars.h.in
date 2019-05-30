@@ -4,5 +4,5 @@
 #endif
 
 #if @TIME_COUNT@ == TRUE
-	#define TIME_COUNT
+	#define TIME_COUNT_ON
 #endif
