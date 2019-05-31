@@ -19,5 +19,6 @@ public:
     Exp();                               ///< Constructor.
 
     void calculate(FunctionArgs& fargs); ///< Calculate the value of function.
+    void calc_gpu(FunctionArgs& fargs); ///< Calculate the value of function on GPU.
 protected:
 };

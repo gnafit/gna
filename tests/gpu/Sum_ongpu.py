@@ -10,7 +10,7 @@ from load import ROOT as R
 from gna.constructors import Points, stdvector
 from gna.env import env
 from gna import context, bindings
-
+import time
 
 """Initialize inpnuts"""
 ndata = 1000000
@@ -40,8 +40,17 @@ with context.manager(ndata) as manager:
   ws.add(points2.points)
   ws.add(points3.points)
     
-  ws.sum.switchFunction("gpu")
+#  ws.sum.switchFunction("gpu")
 print( 'Mode1: ' )
 print(  ws.sum.sum.data() )
 print()
+
+   
+for x in range(0,20):
+    ws.sum.taint()
+    start_time = time.time()
+    ws.sum.sum.data()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(elapsed_time)
     
