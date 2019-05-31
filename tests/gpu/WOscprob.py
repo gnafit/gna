@@ -32,9 +32,10 @@ ns = env.ns("")
 from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
-gpu = False
+gpu = True
+#gpu = False
 
-E_arr = N.arange(1.0, 10.0, 0.01)  #array energy (МеV)
+E_arr = N.arange(1.0, 10.0, 0.01 )  #array energy (МеV)
 comp0 = N.array(N.ones(900))
 E = Points(E_arr)
 com = Points(comp0)
