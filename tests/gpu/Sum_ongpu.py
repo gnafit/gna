@@ -13,7 +13,7 @@ from gna import context, bindings
 import time
 
 """Initialize inpnuts"""
-ndata = 1000000
+ndata = 3000
 arr1 = N.arange(1, ndata)
 arr2 = arr1
 arr3 = arr1
@@ -31,19 +31,29 @@ weights = [ 'w1', 'w2', 'w3' ]
 with context.manager(ndata) as manager:
   """Initialize transformations"""
   points1 = Points( arr1 )
-  points2 = Points( arr2 )
-  points3 = Points( arr3 )
+  points1.points.setLabel("T1")
+#  points2 = Points( arr2 )
+#  points2.points.setLabel("T2")
+#  points3 = Points( arr3 )
+#  points3.points.setLabel("T3")
     
   """Mode1: a1+a2"""
   ws = R.Sum()
   ws.add(points1.points)
-  ws.add(points2.points)
-  ws.add(points3.points)
+#  ws.add(points2.points)
+#  ws.add(points3.points)
+  ws.sum.setLabel("T4")
     
 #  ws.sum.switchFunction("gpu")
 print( 'Mode1: ' )
 print(  ws.sum.sum.data() )
 print()
+
+
+from gna.graphviz import GNADot
+
+graph = GNADot( ws.sum )
+graph.write("dotfile.dot")
 
    
 for x in range(0,20):

@@ -13,8 +13,8 @@ from gna import context, bindings
 import time
 
 """Initialize inpnuts"""
-ndata = 1000000
-arr1 = N.arange(1, ndata)
+ndata =1300
+arr1 = N.arange(0.001, ndata/100, 0.001)
 arr2 = arr1
 arr3 = arr1
 print( 'Data1:', arr1 )
@@ -38,17 +38,29 @@ with context.manager(ndata) as manager:
   ws = R.Exp()
   ws.exp.points(points1.points)
     
-#  ws.exp.switchFunction("gpu")
+  ws.exp.switchFunction("gpu")
 print( 'Mode1: ' )
 print(  ws.exp.result.data() )
 print()
 
    
-for x in range(0,20):
+N=1000
+start_time = time.time()
+for x in range(N):
     ws.exp.taint()
-    start_time = time.time()
+
+end_time = time.time()
+fake_time = end_time - start_time
+print('Fake time', fake_time)
+
+start_time = time.time()
+for x in range(N):
+    ws.exp.taint()
     ws.exp.result.data()
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(elapsed_time)
-    
+end_time = time.time()
+elapsed_time = end_time - start_time
+print('Total time', elapsed_time)
+
+print('GNA time (%i trials)'%N, elapsed_time-fake_time)
+print('GNA time per event', (elapsed_time-fake_time)/N)
+
