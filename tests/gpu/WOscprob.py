@@ -24,16 +24,15 @@ arr2 = -arr1
 #print( 'Data1:', arr1 )
 #print( 'Data2:', arr2 )
 
-labels = [ 'item12', 'item13','item23', 'comp0' ]
-weights = [ 'weight12neg', 'weight13neg', 'weight23neg', 'comp0w' ]
+labels = [ 'comp0', 'item12', 'item13','item23' ]
+weights = [ 'weight0', 'weight12neg', 'weight13neg', 'weight23neg' ]
 
 ns = env.ns("")
 
-from_nu_a = ROOT.Neutrino.amu()
-to_nu_a = ROOT.Neutrino.ae()
+from_nu = ROOT.Neutrino.ae()
+to_nu = ROOT.Neutrino.ae()
 
-from_nu = ROOT.Neutrino.mu()
-to_nu = ROOT.Neutrino.e()
+gpu = False
 
 E_arr = N.arange(1.0, 10.0, 0.01)  #array energy (МеV)
 comp0 = N.array(N.ones(900))
@@ -45,7 +44,6 @@ points2 = Points( arr2 )
 ndata=950
 with context.manager(ndata) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
-    ns.defparameter("comp0w", central=1.0,sigma=0) #kilometre
 
     gna.parameters.oscillation.reqparameters(ns)
 
@@ -57,16 +55,19 @@ with context.manager(ndata) as manager:
         #Vacuum neutrino (same antineutrino)
         oscprob = C.OscProbPMNS(from_nu, to_nu)
         oscprob.comp12.inputs.Enu(E)
-        oscprob.comp12.switchFunction("gpu")
+        if gpu:
+            oscprob.comp12.switchFunction("gpu")
         data_osc = oscprob.comp12.comp12
         oscprob.comp12.setLabel('P | &#8710;m12')
         oscprob.comp13.inputs.Enu(E)
-        oscprob.comp13.switchFunction("gpu")
+        if gpu:
+            oscprob.comp13.switchFunction("gpu")
         data_osc2 = oscprob.comp13.comp13
         oscprob.comp13.setLabel('P | &#8710;m13')
 
         oscprob.comp23.inputs.Enu(E)
-        oscprob.comp23.switchFunction("gpu")
+        if gpu:
+            oscprob.comp23.switchFunction("gpu")
         data_osc3 = oscprob.comp23.comp23
         oscprob.comp23.setLabel('P | &#8710;m23')
 
@@ -74,7 +75,7 @@ with context.manager(ndata) as manager:
         unity = C.FillLike(1, labels='Unity')
         E >> unity.fill.inputs[0]
         unity.fill.setLabel('comp0')
-	
+
 #        oscprob.compCP.inputs.Enu(E)
 #        oscprob.compCP.switchFunction("gpu")
 #        data_osc4 = oscprob.compCP.compCP
@@ -87,7 +88,8 @@ with context.manager(ndata) as manager:
         ws.sum.item13(oscprob.comp13)
         ws.sum.item23(oscprob.comp23)
         ws.sum.comp0(unity.fill)
-        ws.sum.switchFunction("gpu")
+        if gpu:
+            ws.sum.switchFunction("gpu")
         ws.sum.setLabel('OscProb')
         ns.materializeexpressions()
         pars = tuple(par.getVariable() for (name,par) in ns.walknames())
@@ -103,28 +105,42 @@ print('  parameters', p1.value(), p2.value())
 #print('  parameters memory block', vaout.data())
 print('  result', ws.sum.sum.data() )
 '''
-for x in range(0,20):
+N=1000
+start_time = time.time()
+for x in range(N):
     ws.sum.taint()
     oscprob.comp12.taint()
     oscprob.comp13.taint()
     oscprob.comp23.taint()
-    
-    start_time = time.time()
-    ws.sum.sum.data()
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(elapsed_time)
-    
 
+end_time = time.time()
+fake_time = end_time - start_time
+print('Fake time', fake_time)
+
+start_time = time.time()
+for x in range(N):
+    ws.sum.taint()
+    oscprob.comp12.taint()
+    oscprob.comp13.taint()
+    oscprob.comp23.taint()
+
+    ws.sum.sum.data()
+end_time = time.time()
+elapsed_time = end_time - start_time
+print('Total time', elapsed_time)
+
+print('GNA time (%i trials)'%N, elapsed_time-fake_time)
+print('GNA time per event', (elapsed_time-fake_time)/N)
 
 from gna.graphviz import GNADot
 
 graph = GNADot( ws.sum )
 graph.write("dotfile.dot")
 
-plt.plot(E_arr*1e-3, ws.sum.sum.data())
-plt.xlabel('Energy')
-plt.ylabel(r'$P_{\nu_{\mu} \to \nu_{e}}$')
+plt.plot(E_arr, ws.sum.sum.data())
+plt.title(r'$\overline{\nu}_e$ survival probability at 52 km')
+plt.xlabel(r'$E_{\nu}$, MeV')
+plt.ylabel(r'$P_{ee}$')
 plt.grid()
 plt.show()
 
