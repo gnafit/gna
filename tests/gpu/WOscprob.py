@@ -74,6 +74,7 @@ with context.manager(ndata) as manager:
 
         # Oscillation probability as weighted sum
         unity = C.FillLike(1, labels='Unity')
+        unity.fill.setLabel(u'Unity')
         E >> unity.fill.inputs[0]
         unity.fill.setLabel('comp0')
 
