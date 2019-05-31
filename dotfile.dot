@@ -13,7 +13,7 @@ digraph "" {
 	entry_0000 -> entry_0001_sink	 [arrowhead=empty,
 		layer=transformation];
 	entry_0002	 [color=azure3,
-		label="{{c|[900]}|comp0}",
+		label="{{c|[900]}|Unity}",
 		layer=transformation,
 		shape=Mrecord,
 		style=dashed];

@@ -73,9 +73,8 @@ with context.manager(ndata) as manager:
 
         # Oscillation probability as weighted sum
         unity = C.FillLike(1, labels='Unity')
-        unity.fill.setLabel(u'Unity')
+        unity.fill.setLabel(r'Unity')
         E >> unity.fill.inputs[0]
-        unity.fill.setLabel('comp0')
 
 #        oscprob.compCP.inputs.Enu(E)
 #        oscprob.compCP.switchFunction("gpu")
@@ -141,7 +140,7 @@ graph.write("dotfile.dot")
 plt.plot(E_arr, ws.sum.sum.data())
 plt.title(r'$\overline{\nu}_e$ survival probability at 52 km')
 plt.xlabel(r'$E_{\nu}$, MeV')
-plt.ylabel(r'$P_{ee}$')
+plt.ylabel(u'$P_{ee}$')
 plt.grid()
 plt.show()
 
