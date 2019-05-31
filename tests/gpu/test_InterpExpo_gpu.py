@@ -7,6 +7,7 @@ import numpy as N
 from gna.constructors import Points
 from matplotlib import pyplot as P
 from mpl_tools.helpers import savefig
+from gna import context, bindings
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -23,31 +24,35 @@ segments_t = Points(segments)
 points   = N.stack([N.linspace(0.0+i, 12.+i, 61, dtype='d') for i in [0, -0.1, 0.1, 0.3, 0.5]]).T
 points_t = Points(points)
 
-fcn = N.exp( -(segments-segments[0])*0.5 )
-fcn = N.exp(segments**(-0.5))
-fcn_t = Points(fcn)
-
-print( 'Edges', segments )
-print( 'Points', points )
-print( 'Fcn', fcn )
-
-#ie = R.InterpExpo(opts.underflow, opts.overflow)
-if opts.mode=='expo':
-     ie = R.InterpExpo()
-else:
-    ie = R.InterpLinear()
-
-#ie.interp.switchFunction("gpu")
-ie.interpolate(segments_t, fcn_t, points_t)
-ie.printtransformations()
-#ie.y(fcn_t)
-seg_idx = ie.insegment.insegment.data()
-print( 'Segments', seg_idx )
-
+ndata=70
+with context.manager(ndata) as manager:
+    fcn = N.exp( -(segments-segments[0])*0.5 )
+    fcn = N.exp(segments**(-0.5))
+    fcn_t = Points(fcn)
+    
+    print( 'Edges', segments )
+    print( 'Points', points )
+    print( 'Fcn', fcn )
+    
+    if opts.mode=='expo':
+         ie = R.InterpExpo()
+    else:
+        ie = R.InterpLinear()
+    
+    ie.interp.switchFunction("gpu")
+    ie.interpolate(segments_t, fcn_t, points_t)
+    ie.printtransformations()
+    #ie.y(fcn_t)
+    seg_idx = ie.insegment.insegment.data()
+    print( 'Segments', seg_idx )
+    
+    print( 'Result', res )
+    ns.materializeexpressions()
+    pars = tuple(par.getVariable() for (name,par) in ns.walknames())
+    manager.setVariables(C.stdvector(pars))
+    
 ie.print()
 res = ie.interp.interp.data()
-print( 'Result', res )
-
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
@@ -68,5 +73,4 @@ ax.legend(loc='upper right')
 
 savefig(opts.output)
 
-if opts.show:
-    P.show()
+P.show()

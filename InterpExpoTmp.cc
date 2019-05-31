@@ -47,6 +47,8 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .input("x")                /// 1
     .input("insegment")        /// 2
     .input("widths")           /// 3
+    .input("y")                /// 4
+    .output("interp")          /// 0
     .types(TypesFunctions::ifPoints<0>)                                     /// newx is an array of any shape
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)            /// x is an 1d array
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::ifSameShape2<0,2>)  /// segment index is of shape of newx
@@ -55,7 +57,7 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
-#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT 
     .func("gpu", &InterpExpo::do_interpolate_ongpu, DataLocation::Device)
 #endif
     ;
@@ -88,7 +90,7 @@ void InterpExpo::bind_inputs(){
   auto interp=transformations.back();
 
   auto& seg_inputs=segments.inputs;
-  //auto& outputs=segments.outputs;
+  auto& outputs=segments.outputs;
   auto& inputs=interp.inputs;
 
   seg_inputs[0].output()>>inputs[0];
@@ -146,20 +148,17 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 }
 
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
-	fargs.args.touch();
         auto& gpuargs=fargs.gpu;
-/*	auto** source=gpuargs->args;
+	auto** source=gpuargs->args;
         auto** dest  =gpuargs->rets;
         auto** shape =gpuargs->argshapes;
         auto** rshape =gpuargs->retshapes;
-*/
-//        printf("%p %p %p %p\n", (void*)source, (void*)dest, (void*)shape, (void*)rshape);
+        printf("%p %p %p %p\n", (void*)source, (void*)dest, (void*)shape, (void*)rshape);
 
 /*	fargs.args.touch();
         gpuargs->provideSignatureDevice();
 */
-//	std::cout << "INTERP ON GPU" << std::endl;
-        gpuargs->provideSignatureDevice();
+	std::cout << "INTERP ON GPU" << std::endl;
 	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->argshapes[0][0], gpuargs->argshapes[1][0] );
 }
 

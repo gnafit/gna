@@ -1,0 +1,266 @@
+Loading config file: config/gna/gnacfg.py
+call  test_io
+Test inputs/outputs (Identity)
+Input matrix (numpy)
+[[  0.   1.   2.   3.]
+ [  4.   5.   6.   7.]
+ [  8.   9.  10.  11.]]
+
+[obj] IdentityT<double>: 1 transformation(s), 0 variables
+     0 [trans] identity: 1 input(s), 1 output(s)
+         0 [in]  source <- [out] points: array 2d, shape 3x4, size  12
+         0 [out] target: array 2d, shape 3x4, size  12
+Dumping GPU args state
+Dumping GPUVariablesLocal of size 0 (variables)
+
+Dumping GPUVariables (global) of size 0 (variables)
+
+Dumping GPUFunctionData of size 1 (sources)
+Data 0 of size 12, ndim 2, ptr 0x1a5bf2d0, shape 3x4
+ 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+
+
+Dumping GPUFunctionData of size 1 (sinks)
+Data 0 of size 12, ndim 2, ptr 0x1adf9fc0, shape 3x4
+ 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+
+
+Dumping GPUFunctionData of size 0 (storages)
+
+Eigen dump (C++)
+ 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+
+Result (C++ Data to numpy)
+[[  0.   1.   2.   3.]
+ [  4.   5.   6.   7.]
+ [  8.   9.  10.  11.]]
+
+Datatype: array 2d, shape 3x4, size  12
+
+call  test_vars_01_local
+Test inputs/outputs/variables (Dummy)
+Variables in namespace 'test_vars_01_local':
+  par1                          =          1 │                 [fixed]                 │ Dummy parameter 1
+  par2                          =        1.5 │                 [fixed]                 │ Dummy parameter 2
+  par3                          =     101000 │                 [fixed]                 │ Dummy parameter 3
+[obj] DummyT<double>: 1 transformation(s), 3 variables
+     0 [trans] dummy: 2 input(s), 2 output(s)
+         0 [in]  input1 <- [out] points: array 2d, shape 3x4, size  12
+         1 [in]  input2 <- [out] points: array 2d, shape 5x3, size  15
+         0 [out] out1: array 1d, shape 4, size   4
+         1 [out] out2: array 1d, shape 4, size   4
+
+Variables, relative to namespace "test_vars_01_local":
+    par1                          =          1 │                 [fixed]                 │ Dummy parameter 1
+    par2                          =        1.5 │                 [fixed]                 │ Dummy parameter 2
+    par3                          =     101000 │                 [fixed]                 │ Dummy parameter 3
+Dumping GPU args state
+Dumping GPUVariablesLocal of size 3 (variables)
+  Variable 0:            1    par1
+  Variable 1:          1.5    par2
+  Variable 2:       101000    par3
+
+Dumping GPUVariables (global) of size 0 (variables)
+
+Dumping GPUFunctionData of size 2 (sources)
+Data 0 of size 12, ndim 2, ptr 0x1b08e550, shape 3x4
+ 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+
+Data 1 of size 15, ndim 2, ptr 0x1b6152a0, shape 5x3
+ 0  1  2
+ 3  4  5
+ 6  7  8
+ 9 10 11
+12 13 14
+
+
+Dumping GPUFunctionData of size 2 (sinks)
+Data 0 of size 4, ndim 1, ptr 0x1b135a70, shape 4
+0
+0
+0
+0
+
+Data 1 of size 4, ndim 1, ptr 0x1b1b28d0, shape 4
+1
+1
+1
+1
+
+
+Dumping GPUFunctionData of size 0 (storages)
+
+Result (C++ Data to numpy)
+[ 0.  0.  0.  0.]
+[ 1.  1.  1.  1.]
+
+Datatype: array 1d, shape 4, size   4
+Datatype: array 1d, shape 4, size   4
+Change 3d variable
+Dumping GPU args state
+Dumping GPUVariablesLocal of size 3 (variables)
+  Variable 0:            1    par1
+  Variable 1:          1.5    par2
+  Variable 2:           -1    par3
+
+Dumping GPUVariables (global) of size 0 (variables)
+
+Dumping GPUFunctionData of size 2 (sources)
+Data 0 of size 12, ndim 2, ptr 0x1b08e550, shape 3x4
+ 0  1  2  3
+ 4  5  6  7
+ 8  9 10 11
+
+Data 1 of size 15, ndim 2, ptr 0x1b6152a0, shape 5x3
+ 0  1  2
+ 3  4  5
+ 6  7  8
+ 9 10 11
+12 13 14
+
+
+Dumping GPUFunctionData of size 2 (sinks)
+Data 0 of size 4, ndim 1, ptr 0x1b135a70, shape 4
+0
+0
+0
+0
+
+Data 1 of size 4, ndim 1, ptr 0x1b1b28d0, shape 4
+1
+1
+1
+1
+
+
+Dumping GPUFunctionData of size 0 (storages)
+
+
+call  test_vars_02
+Test inputs/outputs/variables (Dummy)
+Variables in namespace 'test_vars_02':
+  par1                          =          1 │                 [fixed]                 │ Dummy parameter 1
+  par2                          =        1.5 │                 [fixed]                 │ Dummy parameter 2
+  par3                          =     101000 │                 [fixed]                 │ Dummy parameter 3
+void TransformationTypes::GPUVariables<FloatType, SizeType>::readVariables(ParametrizedTypes::ParametrizedBase*) [with FloatType = double; SizeType = long unsigned int] h_value_pointers_host size = 0h_value_pointers_dev size = 0
+void TransformationTypes::GPUVariables<FloatType, SizeType>::allocateDevice() [with FloatType = double; SizeType = long unsigned int] alloc size 0
+void TransformationTypes::GPUVariables<FloatType, SizeType>::readVariables(ParametrizedTypes::ParametrizedBase*) [with FloatType = double; SizeType = long unsigned int] h_value_pointers_host size = 0h_value_pointers_dev size = 0
+void TransformationTypes::GPUVariables<FloatType, SizeType>::allocateDevice() [with FloatType = double; SizeType = long unsigned int] alloc size 0
+void TransformationTypes::GPUVariables<FloatType, SizeType>::readVariables(ParametrizedTypes::ParametrizedBase*) [with FloatType = double; SizeType = long unsigned int] h_value_pointers_host size = 3h_value_pointers_dev size = 3
+void TransformationTypes::GPUVariables<FloatType, SizeType>::allocateDevice() [with FloatType = double; SizeType = long unsigned int] alloc size 3
+void TransformationTypes::GPUVariables<FloatType, SizeType>::readVariables(ParametrizedTypes::ParametrizedBase*) [with FloatType = double; SizeType = long unsigned int] h_value_pointers_host size = 3h_value_pointers_dev size = 3
+void TransformationTypes::GPUVariables<FloatType, SizeType>::allocateDevice() [with FloatType = double; SizeType = long unsigned int] alloc size 3
+GPUArray is created but not inited 
+GPU Array is inited by size (Init)
+Debug drop:
+
+Debug drop:
+0x504b80800 
+Debug drop:
+
+Debug drop:
+
+Debug drop:
+
+Debug drop:
+
+GPUArray is created but not inited 
+GPU Array is inited by size (Init)
+Debug drop:
+0x504b81000 
+Debug drop:
+
+Debug drop:
+
+INITED! Nothing to do! Reqire_gpu exit!
+Debug drop:
+0x504b81000 
+Debug drop:
+
+Debug drop:
+
+INITED! Nothing to do! Reqire_gpu exit!
+GPUArray is created but not inited 
+GPU Array is inited by size (Init)
+Debug drop:
+0x504b81000 0x504b81800 
+Debug drop:
+
+Debug drop:
+
+INITED! Nothing to do! Reqire_gpu exit!
+INITED! Nothing to do! Reqire_gpu exit!
+Debug drop:
+0x504b81000 0x504b81800 
+Debug drop:
+
+Debug drop:
+
+INITED! Nothing to do! Reqire_gpu exit!
+INITED! Nothing to do! Reqire_gpu exit!
+GPUArray is created but not inited 
+GPU Array is inited by size (Init)
+Debug drop:
+0x504b81000 0x504b81800 
+Debug drop:
+0x504b81a00 
+Debug drop:
+
+INITED! Nothing to do! Reqire_gpu exit!
+INITED! Nothing to do! Reqire_gpu exit!
+INITED! Nothing to do! Reqire_gpu exit!
+GPUArray is created but not inited 
+GPU Array is inited by size (Init)
+Debug drop:
+0x504b81000 0x504b81800 
+Debug drop:
+0x504b81a00 0x504b82200 
+Debug drop:
+
+[obj] DummyT<double>: 1 transformation(s), 3 variables
+     0 [trans] dummy: 2 input(s), 2 output(s)
+         0 [in]  input1 <- [out] points: array 2d, shape 3x4, size  12
+         1 [in]  input2 <- [out] points: array 2d, shape 5x3, size  15
+         0 [out] out1: array 1d, shape 4, size   4
+         1 [out] out2: array 1d, shape 4, size   4
+
+Variables, relative to namespace "test_vars_02":
+    par1                          =          1 │                 [fixed]                 │ Dummy parameter 1
+    par2                          =        1.5 │                 [fixed]                 │ Dummy parameter 2
+    par3                          =     101000 │                 [fixed]                 │ Dummy parameter 3
+Sync D2H
+Relevant data on Device  -- no synchronization needed
+Sync H2D
+Sync H2D
+void TransformationTypes::GPUVariables<FloatType, SizeType>::provideSignatureDevice(SizeType&, FloatType**&) [with FloatType = double; SizeType = long unsigned int]h_value_pointers_dev size= 3, h_value_pointers_host size = 3
+
+TMP 4
+IMHERE!
+
+IMHERE!
+
+TMP 4
+IMHERE!
+
+IMHERE!
+
+Sync D2H
+Sync D2H
+Traceback (most recent call last):
+  File "./tests/gpu/test_gpuargs.py", line 149, in <module>
+    run_unittests(globals(), parser.parse_args())
+  File "/home/anna/jinr/forcomaring/gna/pylib/gna/unittest.py", line 11, in run_unittests
+    glb[fcn](*args, **kwargs)
+  File "/home/anna/jinr/forcomaring/gna/pylib/gna/unittest.py", line 19, in newfcn
+    return fcn(*args, function_name=name, **kwargs)
+  File "./tests/gpu/test_gpuargs.py", line 129, in test_vars_02
+    assert N.allclose(res1, 0.0), "C++ and Python results doesn't match"
+AssertionError: C++ and Python results doesn't match
