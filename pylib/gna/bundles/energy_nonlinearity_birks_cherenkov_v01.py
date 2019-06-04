@@ -69,7 +69,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
 
         birksns = self.namespace('birks')
         with birksns:
-            self.birks_integrand_raw = C.PolyRatio([], list(birksns.storage.keys()), labels="Birk's integrand")
+            self.birks_integrand_raw = C.PolyRatio([], list(sorted(birksns.storage.keys())), labels="Birk's integrand")
         self.birks_quenching_p >> self.birks_integrand_raw.polyratio.points
 
         self.doubleemass_point = C.Points([-self.doubleme], labels='2me offset')
