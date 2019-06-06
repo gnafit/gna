@@ -13,7 +13,7 @@ import itertools
 def make_fake_covmat(dimension):
     eigen_decomp = np.eye(dimension)*0.5
     triued_mat = np.triu(np.ones(dimension))
-    transform_mat = np.matrix(triued_mat/np.sum(triued_mat, axis=0))
+    transform_mat = np.array(triued_mat/np.sum(triued_mat, axis=0))
     return np.matmul(transform_mat.T, np.matmul(eigen_decomp, transform_mat))
 
 # Necessary evil, it triggers import of all other symbols from shared library

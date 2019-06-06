@@ -111,7 +111,7 @@ class exp(baseexp):
                 order = 1,
                 ),
             oscprob = NestedDict(
-                bundle = dict(name='oscprob', version='v02', major='rdc'),
+                bundle = dict(name='oscprob', version='v03', major='rdc'),
                 ),
             anuspec = NestedDict(
                 bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -447,9 +447,9 @@ class exp(baseexp):
             ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
-            ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
-                             outputs.evis_nonlinear_correlated[ad], export=False )
-            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
+            #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
+                             #  outputs.evis_nonlinear_correlated[ad], export=False )
+            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             for reac in reactors:
                 for iso in isotopes:
                     ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
