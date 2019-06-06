@@ -18,6 +18,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('-n', '--name', help='the namespace to work with')
+        parser.add_argument('--new', nargs='+', default=[], help='Create one or more namespaces')
         parser.add_argument('--push', nargs='+', default=[],
                             metavar='NS',
                             help='push namespaces NS to current view')
@@ -62,6 +63,10 @@ class cmd(basecmd):
             namespace = self.env.globalns(self.opts.name)
         else:
             namespace = self.env.globalns
+
+        for sub in self.opts.new:
+            namespace(sub)
+
         self.env.nsview.add([namespace(x) for x in self.opts.push])
         self.env.nsview.remove([namespace(x) for x in self.opts.pop])
 
