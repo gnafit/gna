@@ -12,7 +12,7 @@ from gna.converters import array_to_stdvector_size_t
 from gna.converters import list_to_stdvector as stdvector
 from gna import context
 
-# Templates = R.GNA.GNAObjectTemplates
+Templates = R.GNA.GNAObjectTemplates
 # print('templates', Templates)
 
 def OutputDescriptors(outputs):
@@ -133,9 +133,9 @@ def SumBroadcast(outputs=None, *args, **kwargs):
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, *args, **kwargs):
     if outputs is None:
-        return Templates.ProductT(current_precision)(*args, **kwargs)
+        return Templates.ProductT(context.current_precision())(*args, **kwargs)
 
-    return Templates.ProductT(current_precision)(OutputDescriptors(outputs), *args, **kwargs)
+    return Templates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
