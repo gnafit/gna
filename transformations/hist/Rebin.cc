@@ -58,6 +58,6 @@ double Rebin::round(double num){
 
 void Rebin::dump(size_t oldn, double* oldedges, size_t newn, double* newedges) const {
   std::cout<<"Rounding: "<<m_round_scale<<std::endl;
-  std::cout<<"Old edges: " << Eigen::Map<const Eigen::Array<double,Eigen::Dynamic,1>>(oldedges, oldn)<<std::endl;
-  std::cout<<"New edges: " << Eigen::Map<const Eigen::Array<double,Eigen::Dynamic,1>>(newedges, newn)<<std::endl;
+  std::cout<<"Old edges: " << Eigen::Map<const Eigen::Array<double,1,Eigen::Dynamic>>(oldedges, oldn)<<std::endl;
+  std::cout<<"New edges: " << Eigen::Map<const Eigen::Array<double,1,Eigen::Dynamic>>(newedges, newn)<<std::endl;
 }
