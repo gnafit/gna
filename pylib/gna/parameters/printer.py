@@ -12,12 +12,16 @@ import itertools
 from gna.bindings import patchROOTClass
 
 try:
+    import sys
+    if not sys.stdout.isatty():
+        raise RuntimeError()
+
     from colorama import Fore, Style
 
     def colorize(string, color):
         return color + str(string) + Style.RESET_ALL
 
-except ImportError:
+except:
     def colorize(string, color):
         return string
 
