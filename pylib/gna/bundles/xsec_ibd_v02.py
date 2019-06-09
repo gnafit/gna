@@ -119,7 +119,7 @@ class xsec_ibd_v02(TransformationBundle):
             self.set_input('jacobian', None, self.ibd.jacobian.ctheta, argument_number=2)
             self.set_output('jacobian', None, self.ibd.jacobian.jacobian)
             # label jacobian
-            self.ibd.jacobian.setLabel('Ee->Enu jacobian')
+            self.ibd.jacobian.setLabel('Ee-\\>Enu jacobian')
 
         # label neutrino energy caclulator
         self.ibd.Enu.setLabel('Enu')
