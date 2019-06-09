@@ -48,7 +48,7 @@ class oscprob_v02(TransformationBundle):
                             raise Exception( 'No component %s in oscprob transformation'%component )
 
                         trans = oscprob.transformations[component]
-                        trans.setLabel( it.current_format('OP {component}:\n{reactor}->{detector}') )
+                        trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}') )
                         output = trans[component]
                         input  = trans['Enu']
 

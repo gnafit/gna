@@ -54,3 +54,6 @@ class cmd(basecmd):
         expopts = parser.parse_args(self.opts.expargs)
         with ns:
             self.exp_instance = expcls(ns, expopts)
+
+        if self.opts.ns:
+            self.env.parts.exp[self.opts.ns] = self.exp_instance

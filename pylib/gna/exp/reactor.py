@@ -381,7 +381,7 @@ class ReactorExperimentModel(baseexp):
                     self.oscprobs_comps[(detector, rgroup)][(weightscls, 'comp0')] = ones
                     compnames.remove('comp0')
                 for osccomps in oscprob.transformations.itervalues():
-                    osccomps.setLabel('oscprob {}\n{}->{}'.format(osccomps.label(), rgroup.name, detector.name))
+                    osccomps.setLabel('oscprob {}\n{}-\\>{}'.format(osccomps.label(), rgroup.name, detector.name))
                     for compname, osccomp in osccomps.outputs.iteritems():
                         if compname not in compnames:
                             continue
