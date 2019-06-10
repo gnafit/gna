@@ -63,6 +63,9 @@ class oscprob_v02(TransformationBundle):
         names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
         with ns_pmns:
             R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
+            ns_pmns['Delta'].setFixed()
+            ns_pmns['SigmaDecohRel'].setFixed()
+            ns_pmns['SinSq23'].setFixed()
             ns_pmns.materializeexpressions()
 
         for i, vname in enumerate(names):

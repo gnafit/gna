@@ -353,7 +353,7 @@ def configurator(filename=None, dic={}, **kwargs):
     return self
 
 class uncertain(object):
-    def __init__(self, central, uncertainty, mode='', label=''):
+    def __init__(self, central, uncertainty=None, mode='', label=''):
         if isinstance(uncertainty, str):
             uncertainty, mode, label=None, uncertainty, mode
 

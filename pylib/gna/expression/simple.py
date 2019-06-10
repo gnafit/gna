@@ -66,6 +66,8 @@ class Transformation(Indexed):
         if may_weight:
             if isinstance(other, Variable):
                 return WeightedTransformation(undefinedname, self, other)
+            elif isinstance(self, WeightedTransformation) and self.expandable and other.expandable:
+                return WeightedTransformation(undefinedname, self, other)
             elif isinstance(other, WeightedTransformation) and self.expandable and other.expandable:
                 return WeightedTransformation(undefinedname, self, other)
 
