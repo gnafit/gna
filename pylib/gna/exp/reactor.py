@@ -416,10 +416,10 @@ class ReactorExperimentModel(baseexp):
         Evis_edges = detector.edges
         orders = detector.orders
         with self.ns("ibd"):
-            econv = ROOT.EvisToEe()
+            econv = self.econv = ROOT.EvisToEe()
         if ibdtype == 'zero':
             with self.ns("ibd"):
-                ibd = ROOT.IbdZeroOrder()
+                ibd = self.ibd = ROOT.IbdZeroOrder()
             integrator = self.integrator = ROOT.GaussLegendre(Evis_edges, orders, len(orders))
             integrator.points.setLabel('integrator 1d')
             histcls = ROOT.GaussLegendreHist
@@ -429,7 +429,7 @@ class ReactorExperimentModel(baseexp):
             eventsparts = [ibd.xsec]
         elif ibdtype == 'first':
             with self.ns("ibd"):
-                ibd = ROOT.IbdFirstOrder()
+                ibd = self.ibd = ROOT.IbdFirstOrder()
             integrator = self.integrator = ROOT.GaussLegendre2d(Evis_edges, orders, len(orders), -1.0, 1.0, 5)
             integrator.points.setLabel('integrator 2d')
             histcls = ROOT.GaussLegendre2dHist
@@ -440,7 +440,8 @@ class ReactorExperimentModel(baseexp):
             ibd.xsec.Enu(ibd.Enu)
             ibd.xsec.ctheta(integrator.points.y)
             ibd.jacobian.Enu(ibd.Enu)
-            ibd.jacobian.Ee(integrator.points.x)
+            # ibd.jacobian.Ee(integrator.points.x) # legacy: incorrect. X is Evis, not Ee
+            ibd.jacobian.Ee(econv.Ee.Ee)
             ibd.jacobian.ctheta(integrator.points.y)
             eventsparts = [ibd.xsec, ibd.jacobian]
         else:
