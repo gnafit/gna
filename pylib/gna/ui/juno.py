@@ -56,4 +56,5 @@ class cmd(basecmd):
             livetime=[6*365*24*60*60.0],
         )
 
-        ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])
+        model = ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])
+        self.env.parts.juno[model.opts.name] = model

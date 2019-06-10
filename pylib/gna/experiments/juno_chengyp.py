@@ -38,7 +38,7 @@ class exp(baseexp):
     def init_nidx(self):
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
-            ['r', 'reactor',     ['YJ1']], # 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
+            ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ]
@@ -87,7 +87,7 @@ class exp(baseexp):
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
                     ),
                 eff = NestedDict(
                     bundle = dict(
@@ -180,10 +180,12 @@ class exp(baseexp):
                         label = 'Energy per fission for {isotope} in MeV',
                         objectize = True,
                         pars = uncertaindict(
-                            [('Pu239', (209.99, 0.60)),
-                                ('Pu241', (213.60, 0.65)),
-                                ('U235',  (201.92, 0.46)),
-                                ('U238', (205.52, 0.96))],
+                            [
+                              ('U235',  (201.92, 0.46)),
+                              ('U238', (205.52, 0.96)),
+                              ('Pu239', (209.99, 0.60)),
+                              ('Pu241', (213.60, 0.65))
+                              ],
                             mode='absolute'
                             ),
                         ),
@@ -273,11 +275,10 @@ class exp(baseexp):
             'livetime[d]',
             'eper_fiss_transform = eper_fission[i]()',
             'conversion_factor',
-            'numenator = livetime[d] * thermal_power[r] * '
+            'numerator = livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'eper_fission_weight = eper_fiss_transform * fission_fractions[r,i]',
-            'denom = sum[i] | eper_fission_weight',
-            'power_livetime_factor = numenator / denom',
+            'denom = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
+            'power_livetime_factor = numerator / denom',
             # Detector effects
             'eres_matrix| evis_hist()',
             'norm = global_norm * eff'
@@ -323,7 +324,7 @@ class exp(baseexp):
             eper_fission_weight = dict(expr='eper_fission_weight',
                                            label="Weighted eper_fission for {isotope} in reactor {reactor}"),
 
-            numenator = dict(expr='numenator', label='thermal_weight.{isotope}.{reactor}'),
+            numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
             denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
