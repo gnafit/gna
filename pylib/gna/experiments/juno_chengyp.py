@@ -283,8 +283,8 @@ class exp(baseexp):
             'conversion_factor',
             'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'denom = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
-            'power_livetime_factor = numerator / denom',
+            'eper_fission_avg = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
+            'power_livetime_factor = numerator / eper_fission_avg',
             # Detector effects
             'eres_matrix| evis_hist()'
     ]
@@ -328,7 +328,7 @@ class exp(baseexp):
                                            label="Weighted eper_fission for {isotope} in reactor {reactor}"),
 
             numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
-            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
+            eper_fission_avg = dict(expr='eper_fission_avg', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
