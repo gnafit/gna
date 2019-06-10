@@ -95,7 +95,7 @@ class exp(baseexp):
                         version='v01'),
                     parameter="eff",
                     label='Detection efficiency',
-                    pars = uncertain(0.8, uncertainty=5, mode='percent')
+                    pars = uncertain(0.8, 'fixed')
                     ),
                 global_norm = NestedDict(
                     bundle = dict(
@@ -119,8 +119,9 @@ class exp(baseexp):
                         ('U238',  0.07),
                         ('Pu241', 0.06)
                         ],
-                        uncertainty = 30.0,
-                        mode = 'percent',
+                        # uncertainty = 30.0,
+                        # mode = 'percent',
+                        mode = 'fixed',
                         ),
                     ),
                 livetime = NestedDict(
@@ -181,12 +182,17 @@ class exp(baseexp):
                         objectize = True,
                         pars = uncertaindict(
                             [
-                              ('U235',  (201.92, 0.46)),
-                              ('U238', (205.52, 0.96)),
-                              ('Pu239', (209.99, 0.60)),
-                              ('Pu241', (213.60, 0.65))
+                              # ('U235',  (201.92, 0.46)),
+                              # ('U238',  (205.52, 0.96)),
+                              # ('Pu239', (209.99, 0.60)),
+                              # ('Pu241', (213.60, 0.65))
+                              ('U235',  201.92),
+                              ('U238',  205.52),
+                              ('Pu239', 209.99),
+                              ('Pu241', 213.60)
                               ],
-                            mode='absolute'
+                            # mode='absolute'
+                            mode='fixed'
                             ),
                         ),
                 eres = NestedDict(
@@ -195,7 +201,7 @@ class exp(baseexp):
                         parameter = 'eres',
                         pars = uncertaindict([
                             ('a', (0.000, 'fixed')) ,
-                            ('b', (0.03, 30, 'percent')) ,
+                            ('b', (0.03, 'fixed')) ,
                             ('c', (0.000, 'fixed'))
                             ]),
                         expose_matrix = False
@@ -255,9 +261,9 @@ class exp(baseexp):
         ns = self.namespace
         outputs = self.context.outputs
         #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.observation_noeffects.AD1, export=False)
+        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1, export=False)
         ns.addobservable("Enu",    outputs.enu, export=False)
-        ns.addobservable("{0}_fine".format(self.detectorname),         outputs.ibd.AD1)
+        ns.addobservable("{0}_fine".format(self.detectorname),         outputs.eres.AD1)
         ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
 
     def print_stats(self):
@@ -275,46 +281,43 @@ class exp(baseexp):
             'livetime[d]',
             'eper_fiss_transform = eper_fission[i]()',
             'conversion_factor',
-            'numerator = livetime[d] * thermal_power[r] * '
+            'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'denom = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
             'power_livetime_factor = numerator / denom',
             # Detector effects
-            'eres_matrix| evis_hist()',
-            'norm = global_norm * eff'
+            'eres_matrix| evis_hist()'
     ]
 
     formula_ibd_simple = '''ibd =
-                            norm*
                             eres|
-                                   kinint2|
-                                      sum[r]|
-                                        baselineweight[r,d]*
-                                        ibd_xsec(enu(), ctheta())*
-                                        jacobian(enu(), ee(), ctheta())*
-                                        (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
-                                        sum[c]|
-                                          pmns[c]*oscprob[c,d,r](enu())
+                              kinint2|
+                                sum[r]|
+                                  baselineweight[r,d]*
+                                  ibd_xsec(enu(), ctheta())*
+                                  jacobian(enu(), ee(), ctheta())*
+                                  (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                  sum[c]|
+                                    pmns[c]*oscprob[c,d,r](enu())
             '''
 
     formula_back = [
-            'observation_noeffects = norm*kinint2[d]()',
             'observation=rebin| ibd'
             ]
 
     lib = dict(
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
-                                           label='anu count rate\n{isotope}@{reactor}-\\>{detector} ({component})'),
+                                           label='anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'),
             cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            norm                    = dict(expr='eff*effunc_uncorr*global_norm'),
-            ibd                     = dict(expr='eres*norm', label='Observed IBD spectrum\n{detector}'),
+            ibd                     = dict(expr='eres', label='Observed IBD spectrum | {detector}'),
+            ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted',
-                # label='anue survival probability\nweight: {weight_label}'
-                label='anue survival probability\nweight: ???'
+                # label='anue survival probability | weight: {weight_label}'
+                label='anue survival probability | weight: ???'
                 ),
             eper_fiss_transform     = dict(expr='eper_fission_transform',
                                            label='eper_fission for {isotope}' ),
@@ -325,19 +328,19 @@ class exp(baseexp):
                                            label="Weighted eper_fission for {isotope} in reactor {reactor}"),
 
             numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
-            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
+            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
-                # label='anue spectrum {reactor}-\\>{detector}\nweight: {weight_label}'
-                label='anue spectrum {reactor}-\\>{detector}\nweight: ???'
+                # label='anue spectrum {reactor}-\\>{detector} | weight: {weight_label}'
+                label='anue spectrum {reactor}-\\>{detector} | weight: ???'
                 ),
 
             countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
             countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-            countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector}\nweight: {weight_label}'),
+            countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector} | weight: {weight_label}'),
 
-            observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum\n{detector}'),
+            observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
 
             iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
             reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
