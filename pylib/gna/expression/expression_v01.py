@@ -79,7 +79,11 @@ class Expression_v01(object):
         lib = dict()
         for k, v in ilib.items():
             v['name'] = k
-            lib[v['expr']] = v
+            exprs = v['expr']
+            if isinstance(exprs, str):
+                exprs=[exprs]
+            for expr in exprs:
+                lib[expr] = v
         for tree in self.trees:
             tree.guessname(lib, *args, **kwargs)
 

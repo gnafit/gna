@@ -362,5 +362,5 @@ class TransformationBundle(object):
 
         ndim = nidx.ndim();
         if not dmin<=ndim<=dmax:
-            raise self.exception('Ndim %i does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
+            raise self.exception('Ndim {} does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
 

@@ -77,13 +77,15 @@ class detector_eres_normal_v01(TransformationBundle):
             pars = parscfg[major_values]
 
             if self.names is None:
-                self.names = tuple(pars.keys())
+                self.names = tuple(sorted(pars.keys()))
             else:
-                assert self.names == tuple(pars.keys())
+                assert self.names == tuple(sorted(pars.keys()))
 
-            for i, (name, unc) in enumerate(pars.items()):
+            for i, name in enumerate(self.names):
+                unc = pars[name]
                 it=it_major
 
+                # print(i, name, parname, unc)
                 par = self.reqparameter(parname, it, cfg=unc, extra=name)
                 label = it.current_format(labelfmt, description=descriptions[i]) if labelfmt else descriptions[i]
                 self.set_label(par, 'parameter', it_major, '{description} {autoindex}', name=name, description=descriptions[i])
