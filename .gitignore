@@ -44,3 +44,4 @@ makerst
 *Makefile*
 *cmake_install.cmake
 inputs
+.fish_functions
