@@ -37,7 +37,7 @@ class exp(baseexp):
 
     def init_nidx(self):
         self.subdetectors_number = 200
-        self.subdetectors_names = ['subdet%02i'%i for i in range(self.subdetectors_number)]
+        self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
@@ -311,7 +311,7 @@ class exp(baseexp):
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose>2:
             width = 40
             print('Outputs:')
             print(self.context.outputs.__str__(nested=True, width=width))
@@ -371,9 +371,6 @@ class exp(baseexp):
             'power_livetime_factor = numerator / eper_fission_avg',
     ]
 
-    formula_energy_none = ''
-    formula_energy_none = ''
-
     formula_ibd_noeffects = '''
                             kinint2|
                               sum[r]|
@@ -400,13 +397,11 @@ class exp(baseexp):
             ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted',
-                label='anue survival probability | weight: {weight_label}'
-                # label='anue survival probability | weight: ???'
-                ),
+            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
             eper_fiss_transform     = dict(expr='eper_fission_transform',
                                            label='eper_fission for {isotope}' ),
 
+            eper_fission_weighted   = dict(expr='eper_fission*fission_fractions'),
             fission_fractions       = dict(expr='fission_fractions[r,i]()',
                                            label="Fission fraction for {isotope} in reactor {reactor}"),
             eper_fission_weight = dict(expr='eper_fission_weight',
@@ -414,12 +409,10 @@ class exp(baseexp):
 
             numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
             eper_fission_avg = dict(expr='eper_fission_avg', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
-            power_lifetime_factor =   dict(expr='power_lifetime_factor'),
+            power_lifetime_factor   = dict(expr='power_lifetime_factor'),
+            power_lifetime_scale    = dict(expr='eff*livetime*thermal_power*conversion_factor*target_protons'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
-                # label='anue spectrum {reactor}-\\>{detector} | weight: {weight_label}'
-                label='anue spectrum {reactor}-\\>{detector} | weight: ???'
-                ),
+            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}-\\>{detector}'),
 
             countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
             countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
