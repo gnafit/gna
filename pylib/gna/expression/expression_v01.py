@@ -18,7 +18,7 @@ class VTContainer_v01(OrderedDict):
 
     def __missing__(self, key):
         newvar = Variable(key, order=self._order)
-        self[key] = newvar
+        self.__setitem__(key, newvar)
         return newvar
 
     def __setitem__(self, key, value):
@@ -26,7 +26,7 @@ class VTContainer_v01(OrderedDict):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
             value.nindex.arrange(self._order)
-            value.expandable=False
+            # value.expandable=False
         elif inspect.isclass(value) and issubclass(value, Operation):
             value.order=self._order
 
