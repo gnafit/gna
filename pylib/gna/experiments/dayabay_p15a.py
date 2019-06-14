@@ -464,13 +464,13 @@ class exp(baseexp):
             ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
-            
+
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             for reac in reactors:
                 for iso in isotopes:
-                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
+                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
                                      outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
         ns.addobservable("final_concat", outputs.concat_total)
@@ -496,7 +496,7 @@ class exp(baseexp):
             'enu| ee(evis()), ctheta()',
             'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
             'livetime=accumulate("livetime", livetime_daily[d]())',
-            'ff = fission_fraction_corr[i,r] * fission_fractions[i,r]()',
+            'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
             'denom = sum[i] | eper_fission[i]*ff',
             'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
@@ -558,7 +558,7 @@ class exp(baseexp):
             '''
 
         self.formula_ibd_simple = '''ibd =
-                          norm_bf* 
+                          norm_bf*
                           eres[d]|
                             lsnl[d]|
                               iav[d]|
@@ -580,7 +580,7 @@ class exp(baseexp):
                                                        label='Total number of anue in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
-                        count_rate              = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                        count_rate              = dict(expr='anue_produced_total*jacobian*xsec_weighted',
                                                         label='Countrate from {reactor} in {detector}'),
 
                         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
@@ -655,7 +655,7 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
-                        rate_in_detector        = dict(expr='rate_in_detector', 
+                        rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
                         denom                   = dict(expr='denom',
                                                        label='Denominator of reactor norm for {reactor}'),
@@ -665,7 +665,7 @@ class exp(baseexp):
                                                        label='Total number of anue in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
-                        count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                        count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted',
                                                        label='Countrate from {reactor} in {detector}'),
                         count_rate_d            = dict(expr='sum:r|countrate_rd',
                                                        label='Countrate in {detector}'),
@@ -685,9 +685,9 @@ class exp(baseexp):
                         ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum \n {detector}'),
 
 
-                        lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight', 
+                        lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight',
                                                        label='Weighted LSNL curve {lsnl_component}'),
-                        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted', 
+                        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted',
                                                        label='Sum of LSNL curves'),
                         evis_after_escale       = dict(expr='escale*evis_edges',
                                                        label='Evis edges after escale, {detector}'),
@@ -717,6 +717,7 @@ class exp(baseexp):
                         #  ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
                         #  ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
                         #  ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
+                        #
 
                         # Accidentals
                         acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n (best fit)}'),
