@@ -287,8 +287,8 @@ class exp(baseexp):
             self.cfg.lsnl.correlations = None
             self.cfg.lsnl.correlations_pars = None
 
-        if not 'subdetector' in self.opts.correlation:
-            self.cfg.multieres.correlations = None
+        if not 'subdetectors' in self.opts.correlation:
+            self.cfg.subdetector_fraction.correlations = None
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
