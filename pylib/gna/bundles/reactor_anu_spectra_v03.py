@@ -53,7 +53,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
                 spectrum_t.multiply( spectrum_raw_t )
                 for corr in self.corrections.bundles.values():
                     spectrum_t.multiply( corr.outputs[isotope] )
-                spectrum_t.product.setLabel('%s spectrum, corrected'+isotope)
+                spectrum_t.product.setLabel('%s spectrum, corrected'%isotope)
             else:
                 spectrum_t = spectrum_raw_t
 
@@ -69,7 +69,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
             else:
                 self.set_input(self.cfg.name, it, (sampler_input, interp_input), argument_number=0)
 
-            interp_expo_t.setLabel('%s spectrum, interpolated'+isotope)
+            interp_expo_t.setLabel('%s spectrum, interpolated'%isotope)
 
             """Store data"""
             self.set_output(self.cfg.name, it, interp_output)
