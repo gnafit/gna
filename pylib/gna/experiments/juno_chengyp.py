@@ -195,7 +195,6 @@ class exp(baseexp):
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "eper_fission",
                         label = 'Energy per fission for {isotope} in MeV',
-                        objectize = True,
                         pars = uncertaindict(
                             [
                               # ('U235',  (201.92, 0.46)),
@@ -262,7 +261,7 @@ class exp(baseexp):
                         parameter = "subdetector_fraction",
                         label = 'Subdetector fraction weight for {subdetector}',
                         pars = uncertaindict(
-                            [(subdet_name, (1.0/self.subdetectors_number, 'fixed')) for subdet_name in self.subdetectors_names],
+                            [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             )
                         ),
                 multieres = NestedDict(
@@ -363,11 +362,10 @@ class exp(baseexp):
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
             'livetime[d]',
-            'eper_fiss_transform = eper_fission[i]()',
             'conversion_factor',
             'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'eper_fission_avg = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
+            'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
     ]
 
@@ -398,8 +396,6 @@ class exp(baseexp):
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
-            eper_fiss_transform     = dict(expr='eper_fission_transform',
-                                           label='eper_fission for {isotope}' ),
 
             fission_fractions       = dict(expr='fission_fractions[r,i]()', label="Fission fraction for {isotope} at {reactor}"),
             eper_fission_weight     = dict(expr='eper_fission_weight', label="Weighted eper_fission for {isotope} at {reactor}"),
