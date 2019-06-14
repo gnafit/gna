@@ -37,7 +37,7 @@ class exp(baseexp):
 
     def init_nidx(self):
         self.subdetectors_number = 200
-        self.subdetectors_names = ['subdet%02i'%i for i in range(self.subdetectors_number)]
+        self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
@@ -75,7 +75,7 @@ class exp(baseexp):
     def init_configuration(self):
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v02', names=dict(integral='kinint2')),
+                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.6, 12.001, 0.01),
                     #  edges    = np.linspace(0.0, 12.001, 601),
@@ -281,7 +281,7 @@ class exp(baseexp):
                         rounding = 3,
                         edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
                         name = 'rebin',
-                        label = 'Final histogram\n{detector}'
+                        label = 'Final histogram {detector}'
                         ),
                 )
 
@@ -311,7 +311,7 @@ class exp(baseexp):
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose>2:
             width = 40
             print('Outputs:')
             print(self.context.outputs.__str__(nested=True, width=width))
@@ -371,9 +371,6 @@ class exp(baseexp):
             'power_livetime_factor = numerator / eper_fission_avg',
     ]
 
-    formula_energy_none = ''
-    formula_energy_none = ''
-
     formula_ibd_noeffects = '''
                             kinint2|
                               sum[r]|
@@ -395,35 +392,29 @@ class exp(baseexp):
             cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            eres_weighted           = dict(expr='subdetector_fraction*eres', label='Fractional observed spectrum | {subdetector}'),
+            eres_weighted           = dict(expr='subdetector_fraction*eres', label='{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'),
             ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
             ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted',
-                label='anue survival probability | weight: {weight_label}'
-                # label='anue survival probability | weight: ???'
-                ),
+            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
             eper_fiss_transform     = dict(expr='eper_fission_transform',
                                            label='eper_fission for {isotope}' ),
 
-            fission_fractions       = dict(expr='fission_fractions[r,i]()',
-                                           label="Fission fraction for {isotope} in reactor {reactor}"),
-            eper_fission_weight = dict(expr='eper_fission_weight',
-                                           label="Weighted eper_fission for {isotope} in reactor {reactor}"),
+            fission_fractions       = dict(expr='fission_fractions[r,i]()', label="Fission fraction for {isotope} at {reactor}"),
+            eper_fission_weight     = dict(expr='eper_fission_weight', label="Weighted eper_fission for {isotope} at {reactor}"),
+            eper_fission_weighted   = dict(expr='eper_fission*fission_fractions', label="{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"),
 
-            numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
-            eper_fission_avg = dict(expr='eper_fission_avg', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
-            power_lifetime_factor =   dict(expr='power_lifetime_factor'),
-            anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
-                # label='anue spectrum {reactor}-\\>{detector} | weight: {weight_label}'
-                label='anue spectrum {reactor}-\\>{detector} | weight: ???'
-                ),
+            eper_fission_avg        = dict(expr='eper_fission_avg', label='Average energy per fission at {reactor}'),
+            power_livetime_factor   = dict(expr='power_livetime_factor', label='{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'),
+            numerator               = dict(expr='numerator', label='{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'),
+            power_livetime_scale    = dict(expr='eff*livetime*thermal_power*conversion_factor*target_protons', label='{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'),
+            anuspec_weighted        = dict(expr='anuspec*power_livetime_factor', label='{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'),
+            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='{{Antineutrino spectrum|{reactor}-\\>{detector}}}'),
 
-            countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
+            countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full', label='Countrate {reactor}-\\>{detector}'),
             countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-            countrate               = dict(expr='sum:r|countrate_weighted', label='Count rate {detector} | weight: {weight_label}'),
+            countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
 
             observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
 

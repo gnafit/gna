@@ -12,7 +12,7 @@ from gna.env import env, namespace
 from gna.configurator import NestedDict
 from collections import OrderedDict
 from gna.bundle import TransformationBundle
-from gna.context import entryCOntext
+from gna.context import entryContext
 
 class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
     debug = False
@@ -43,7 +43,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.annihilation_electrons_centers_input = 0.5*(edges[1:]+edges[:-1])
 
     def build(self):
-        with entryContext(subgraph="LSNL"):
+        with entryContext(subgraph='LSNL'):
             self.init_data()
 
             #
@@ -140,31 +140,31 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             # Relative positron model
             #
             self.positron_model_relative = C.Ratio(self.positron_model_scaled, self.histoffset.histedges.points_truncated, labels='Positron energy nonlinearity')
-            self.positron_model_relative_full_view = C.ViewRear(0.0, labels='Positron Energy nonlinearity\nfull range')
+            self.positron_model_relative_full_view = C.ViewRear(0.0, labels='Positron Energy nonlinearity|full range')
             self.positron_model_relative_full_view.determineOffset(self.histoffset.histedges.hist, self.histoffset.histedges.hist_truncated, True)
             self.histoffset.histedges.points >> self.positron_model_relative_full_view.view.original
             self.positron_model_relative >> self.positron_model_relative_full_view.view.rear
             self.positron_model_relative_full = self.positron_model_relative_full_view.view.result
 
-            #
-            # Hist Smear
-            #
-            self.pm_histsmear = C.HistNonlinearity(self.cfg.get('fill_matrix', False), labels=('Nonlinearity matrix', 'Nonlinearity smearing'))
-            self.pm_histsmear.set_range(-0.5, 20.0)
-            self.positron_model_scaled_full >> self.pm_histsmear.matrix.EdgesModified
+        #
+        # Hist Smear
+        #
+        self.pm_histsmear = C.HistNonlinearity(self.cfg.get('fill_matrix', False), labels=('Nonlinearity matrix', 'Nonlinearity smearing'))
+        self.pm_histsmear.set_range(-0.5, 20.0)
+        self.positron_model_scaled_full >> self.pm_histsmear.matrix.EdgesModified
 
-            self.histoffset.histedges.hist >> self.pm_histsmear.matrix.Edges
+        self.histoffset.histedges.hist >> self.pm_histsmear.matrix.Edges
 
-            trans = self.pm_histsmear.transformations.back()
-            for i, it in enumerate(self.nidx.iterate()):
-                # if i:
-                    # trans = self.pm_histsmear.add_transformation()
-                inp = self.pm_histsmear.add_input()
+        trans = self.pm_histsmear.transformations.back()
+        for i, it in enumerate(self.nidx.iterate()):
+            # if i:
+                # trans = self.pm_histsmear.add_transformation()
+            inp = self.pm_histsmear.add_input()
 
-                trans.setLabel(it.current_format('Nonlinearity smearing\n{autoindex}'))
+            trans.setLabel(it.current_format('Nonlinearity smearing {autoindex}'))
 
-                self.set_input('lsnl', it, inp, argument_number=0)
-                self.set_output('lsnl', it, trans.outputs.back())
+            self.set_input('lsnl', it, inp, argument_number=0)
+            self.set_output('lsnl', it, trans.outputs.back())
 
     def define_variables(self):
         with entryContext(subgraph="LSNL"):

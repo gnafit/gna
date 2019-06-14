@@ -17,7 +17,7 @@ class rebin_v03(TransformationBundle):
 
     def build(self):
         name = self.cfg.name
-        label = self.cfg.get('label', 'Rebin\n{autoindex}')
+        label = self.cfg.get('label', 'Rebin {autoindex}')
         self.objects = []
         for it in self.nidx_minor.iterate():
             rebin = C.Rebin(self.cfg.edges, self.cfg.rounding, labels=it.current_format(label))

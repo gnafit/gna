@@ -83,7 +83,7 @@ class integral_1d_v02(TransformationBundle):
         for i, it in enumerate(self.nidx):
             # Create a histogram instance, that will convert an integrator output to the histogram
             hist = R.GaussLegendreHist(self.integrator)
-            hist.hist.setLabel(it.current_format(labels.get('integrator', 'integrator\n{autoindex}')))
+            hist.hist.setLabel(it.current_format(labels.get('integrator', 'integrator {autoindex}')))
 
             # register the input and output
             self.set_input( 'integral', it, hist.hist.f, argument_number=0)

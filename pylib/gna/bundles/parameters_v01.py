@@ -46,13 +46,9 @@ class parameters_v01(TransformationBundle):
                 par = self.reqparameter(parname, it, cfg=parcfg, label=label)
 
                 if self.cfg.get("objectize"):
-                    import gna.constructors as C
-                    with self.namespace:
-                        var_array = C.VarArray([par.qualifiedName()],
-                                               labels=par.qualifiedName().split('.',1)[1])
-                    output = var_array.vararray.points
-
-                    self.set_output(parname, it,  output)
+                    trans=par.transformations.value
+                    trans.setLabel(label)
+                    self.set_output(parname, it, trans.single())
 
                 self._par_container.append(par)
 
