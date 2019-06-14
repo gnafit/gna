@@ -19,9 +19,9 @@ class exp(baseexp):
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
-        parser.add_argument('-m', '--mode', default='simple', choices=['simple'], help='Set the topology')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+        parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -36,11 +36,14 @@ class exp(baseexp):
             self.print_stats()
 
     def init_nidx(self):
+        self.subdetectors_number = 200
+        self.subdetectors_names = ['subdet%02i'%i for i in range(self.subdetectors_number)]
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
-            ['r', 'reactor',     ['YJ1']], # 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
+            ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
+            ('s', 'subdetector', self.subdetectors_names)
         ]
         if self.opts.composition=='minimal':
             self.nidx[1][2] = self.nidx[1][2][:1]
@@ -49,11 +52,24 @@ class exp(baseexp):
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
-        self.formula = self.formula_base
-        versions = dict(
-                simple = self.formula_ibd_simple,
-                )
-        self.formula.append(versions[self.opts.mode])
+        if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
+            raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
+
+        self.formula = list(self.formula_base)
+
+        energy_model_formula = ''
+        energy_model = self.opts.energy_model
+        if 'lsnl' in energy_model:
+            energy_model_formula = 'lsnl| '
+            self.formula.append('evis_edges_hist| evis_hist()')
+        if 'eres' in energy_model:
+            energy_model_formula = 'eres| '+energy_model_formula
+            self.formula.append('eres_matrix| evis_hist()')
+        elif 'multieres' in energy_model:
+            energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
+            self.formula.append('eres_matrix[s]| evis_hist()')
+
+        self.formula.append('ibd=' + energy_model_formula + self.formula_ibd_noeffects)
         self.formula+=self.formula_back
 
     def init_configuration(self):
@@ -87,7 +103,7 @@ class exp(baseexp):
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
                     ),
                 eff = NestedDict(
                     bundle = dict(
@@ -181,21 +197,6 @@ class exp(baseexp):
                         label = 'Energy per fission for {isotope} in MeV',
                         objectize = True,
                         pars = uncertaindict(
-<<<<<<< HEAD
-                            [('Pu239', (209.99, 0.60)),
-                                ('Pu241', (213.60, 0.65)),
-                                ('U235',  (201.92, 0.46)),
-                                ('U238', (205.52, 0.96))],
-                            mode='absolute'
-||||||| parent of ea1fe8ad... Clean WeightedSum*Sum product definition
-                            [
-                              ('U235',  (201.92, 0.46)),
-                              ('U238', (205.52, 0.96)),
-                              ('Pu239', (209.99, 0.60)),
-                              ('Pu241', (213.60, 0.65))
-                              ],
-                            mode='absolute'
-=======
                             [
                               # ('U235',  (201.92, 0.46)),
                               # ('U238',  (205.52, 0.96)),
@@ -208,11 +209,45 @@ class exp(baseexp):
                               ],
                             # mode='absolute'
                             mode='fixed'
->>>>>>> ea1fe8ad... Clean WeightedSum*Sum product definition
+                            ),
+                        ),
+                lsnl = NestedDict(
+                        bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
+                        stopping_power='stoppingpower.txt',
+                        annihilation_electrons=dict(
+                            file='input/hgamma2e.root',
+                            histogram='hgamma2e_1KeV',
+                            scale=1.0/50000 # events simulated
+                            ),
+                        pars = uncertaindict(
+                            [
+                                ('birks.Kb0',               (1.0, 'fixed')),
+                                ('birks.Kb1',           (15.2e-3, 0.1776)),
+                                # ('birks.Kb2',           (0.0, 'fixed')),
+                                ("cherenkov.E_0",         (0.165, 'fixed')),
+                                ("cherenkov.p0",  ( -7.26624e+00, 'fixed')),
+                                ("cherenkov.p1",   ( 1.72463e+01, 'fixed')),
+                                ("cherenkov.p2",  ( -2.18044e+01, 'fixed')),
+                                ("cherenkov.p3",   ( 1.44731e+01, 'fixed')),
+                                ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
+                                ("Npescint",            (1341.38, 0.0059)),
+                                ("kC",                      (0.5, 0.4737)),
+                                ("normalizationEnergy",   (12.0, 'fixed'))
+                                ],
+                            mode='relative'
+                            ),
+                        integration_order = 2,
+                        correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
+                        correlations = [ 1.0,   0.94, -0.97,
+                                         0.94,  1.0,  -0.985,
+                                        -0.97, -0.985, 1.0   ],
+                        fill_matrix=True,
+                        labels = dict(
+                            normalizationEnergy = 'Conservative normalization point at 12 MeV'
                             ),
                         ),
                 eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major=''),
+                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive='multieres' in self.opts.energy_model),
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
@@ -220,6 +255,25 @@ class exp(baseexp):
                             ('b', (0.03, 'fixed')) ,
                             ('c', (0.000, 'fixed'))
                             ]),
+                        expose_matrix = False
+                        ),
+                subdetector_fraction = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = "subdetector_fraction",
+                        label = 'Subdetector fraction weight for {subdetector}',
+                        pars = uncertaindict(
+                            [(subdet_name, (1.0/self.subdetectors_number, 'fixed')) for subdet_name in self.subdetectors_names],
+                            )
+                        ),
+                multieres = NestedDict(
+                        bundle = dict(name='detector_eres_normal', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
+                        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                        parameter = 'eres',
+                        pars = uncertaindict(
+                            [ (subdet_name+'.b', (0.03, 'fixed')) for subdet_name in self.subdetectors_names ] +
+                            [ (subdet_name+'.a', (0.00, 'fixed')) for subdet_name in self.subdetectors_names ] +
+                            [ (subdet_name+'.c', (0.00, 'fixed')) for subdet_name in self.subdetectors_names ]
+                            ),
                         expose_matrix = False
                         ),
                 rebin = NestedDict(
@@ -277,9 +331,23 @@ class exp(baseexp):
         ns = self.namespace
         outputs = self.context.outputs
         #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1, export=False)
         ns.addobservable("Enu",    outputs.enu, export=False)
-        ns.addobservable("{0}_fine".format(self.detectorname),         outputs.eres.AD1)
+        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
+        fine = outputs.kinint2.AD1
+
+        if 'lsnl' in self.opts.energy_model:
+            ns.addobservable("{0}_lsnl".format(self.detectorname),     outputs.lsnl.AD1)
+            fine = outputs.lsnl.AD1
+
+        if 'eres' in self.opts.energy_model:
+            ns.addobservable("{0}_eres".format(self.detectorname),     outputs.eres.AD1)
+            fine = outputs.eres.AD1
+
+        if 'multieres' in self.opts.energy_model:
+            ns.addobservable("{0}_eres".format(self.detectorname),     outputs.ibd.AD1)
+            fine = outputs.ibd.AD1
+
+        ns.addobservable("{0}_fine".format(self.detectorname),         fine)
         ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
 
     def print_stats(self):
@@ -297,31 +365,24 @@ class exp(baseexp):
             'livetime[d]',
             'eper_fiss_transform = eper_fission[i]()',
             'conversion_factor',
-<<<<<<< HEAD
-            'numenator = livetime[d] * thermal_power[r] * '
-||||||| parent of ea1fe8ad... Clean WeightedSum*Sum product definition
-            'numerator = livetime[d] * thermal_power[r] * '
-=======
             'numerator = eff * livetime[d] * thermal_power[r] * '
->>>>>>> ea1fe8ad... Clean WeightedSum*Sum product definition
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'eper_fission_weight = eper_fiss_transform * fission_fractions[r,i]',
-            'denom = sum[i] | eper_fission_weight',
-            'power_livetime_factor = numenator / denom',
-            # Detector effects
-            'eres_matrix| evis_hist()'
+            'eper_fission_avg = sum[i] | eper_fiss_transform * fission_fractions[r,i]',
+            'power_livetime_factor = numerator / eper_fission_avg',
     ]
 
-    formula_ibd_simple = '''ibd =
-                            eres|
-                              kinint2|
-                                sum[r]|
-                                  baselineweight[r,d]*
-                                  ibd_xsec(enu(), ctheta())*
-                                  jacobian(enu(), ee(), ctheta())*
-                                  (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
-                                  sum[c]|
-                                    pmns[c]*oscprob[c,d,r](enu())
+    formula_energy_none = ''
+    formula_energy_none = ''
+
+    formula_ibd_noeffects = '''
+                            kinint2|
+                              sum[r]|
+                                baselineweight[r,d]*
+                                ibd_xsec(enu(), ctheta())*
+                                jacobian(enu(), ee(), ctheta())*
+                                (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                sum[c]|
+                                  pmns[c]*oscprob[c,d,r](enu())
             '''
 
     formula_back = [
@@ -334,13 +395,14 @@ class exp(baseexp):
             cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
             cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
 
-            ibd                     = dict(expr='eres', label='Observed IBD spectrum | {detector}'),
+            eres_weighted           = dict(expr='subdetector_fraction*eres', label='Fractional observed spectrum | {subdetector}'),
+            ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
             ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted',
-                # label='anue survival probability | weight: {weight_label}'
-                label='anue survival probability | weight: ???'
+                label='anue survival probability | weight: {weight_label}'
+                # label='anue survival probability | weight: ???'
                 ),
             eper_fiss_transform     = dict(expr='eper_fission_transform',
                                            label='eper_fission for {isotope}' ),
@@ -350,16 +412,8 @@ class exp(baseexp):
             eper_fission_weight = dict(expr='eper_fission_weight',
                                            label="Weighted eper_fission for {isotope} in reactor {reactor}"),
 
-<<<<<<< HEAD
-            numenator = dict(expr='numenator', label='thermal_weight.{isotope}.{reactor}'),
-            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
-||||||| parent of ea1fe8ad... Clean WeightedSum*Sum product definition
             numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
-            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
-=======
-            numerator = dict(expr='numerator', label='thermal_weight.{isotope}.{reactor}'),
-            denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
->>>>>>> ea1fe8ad... Clean WeightedSum*Sum product definition
+            eper_fission_avg = dict(expr='eper_fission_avg', label='Sum over all isotopes weighted eper_fission  | for {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
