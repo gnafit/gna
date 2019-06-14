@@ -265,15 +265,12 @@ class exp(baseexp):
                             )
                         ),
                 multieres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
-                        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                        bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
+                        # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
-                        pars = uncertaindict(
-                            [ (subdet_name+'.b', (0.03, 'fixed')) for subdet_name in self.subdetectors_names ] +
-                            [ (subdet_name+'.a', (0.00, 'fixed')) for subdet_name in self.subdetectors_names ] +
-                            [ (subdet_name+'.c', (0.00, 'fixed')) for subdet_name in self.subdetectors_names ]
-                            ),
-                        expose_matrix = False
+                        nph = 'subdetector200_nph.txt',
+                        expose_matrix = False,
+                        verbose=True
                         ),
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v03', major=''),
