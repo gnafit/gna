@@ -44,7 +44,7 @@ print(  ws.exp.result.data() )
 print()
 
    
-N=1000
+N=1
 start_time = time.time()
 for x in range(N):
     ws.exp.taint()

@@ -3,10 +3,10 @@
 #include "GNAObject.hh" 
 
 #include "config_vars.h"
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"                             
 #include "DataLocation.hh"
-//#endif
+#endif
 
 namespace GNA {
   namespace GNAObjectTemplates {
@@ -41,7 +41,9 @@ namespace GNA {
               ret*=factor;
             }
           })
+#ifdef GNA_CUDA_SUPPORT
         .func("gpu", &ProductT<FloatType>::product_ongpu, DataLocation::Device)
+#endif
     	;
     }
     
@@ -77,7 +79,8 @@ namespace GNA {
     InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::add_input(const char* name) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(name));
     }
-    
+
+#ifdef GNA_CUDA_SUPPORT    
     template<typename FloatType>
     void ProductT<FloatType>::product_ongpu(FunctionArgs& fargs) {
     	fargs.args.touch();
@@ -86,6 +89,7 @@ namespace GNA {
         auto** dest  =gpuargs->rets;
     	cuproduct(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
     }
+#endif
   }
 }
 template class GNA::GNAObjectTemplates::ProductT<double>;

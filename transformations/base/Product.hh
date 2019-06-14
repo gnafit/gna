@@ -79,8 +79,9 @@ namespace GNA {
         multiply(data1); 
         return multiply(data2, data3); 
       }
-
+#ifdef GNA_CUDA_SUPPORT
       void product_ongpu(FunctionArgs& fargs);
+#endif
     };
   }
 }
