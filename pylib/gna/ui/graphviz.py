@@ -23,6 +23,7 @@ class cmd(basecmd):
                             metavar=('DATA',),
                             action=append_typed(observable))
         parser.add_argument('-J', '--no-joints', action='store_false', dest='joints', help='disable joints')
+        parser.add_argument('--subgraph', action='store_true', help='enable subgraphs')
         parser.add_argument('-s', '--splines', help='splines option [dot]')
         parser.add_argument('-o', '--output', nargs='+', default=[], dest='outputs', help='output dot/pdf/png file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
@@ -35,6 +36,7 @@ class cmd(basecmd):
 
         kwargs = dict(self.opts.options, joints=self.opts.joints)
         kwargs.setdefault('rankdir', 'LR')
+        kwargs['subgraph']=self.opts.subgraph
         if self.opts.splines:
             kwargs['splines']=self.opts.splines
 

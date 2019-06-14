@@ -62,7 +62,7 @@ class integral_2d1d_v03(TransformationBundle):
         for i, it in enumerate(self.nidx):
             if i:
                 hist = self.integrator.add_transformation()
-            hist.setLabel(it.current_format(name='hist')+' (GL)')
+            hist.setLabel(it.current_format('{name} {autoindex} (GL)', name='Integral'))
 
             self.set_input('integral', it, self.integrator.add_input(), argument_number=0)
             self.set_output('integral', it, hist.outputs.back())

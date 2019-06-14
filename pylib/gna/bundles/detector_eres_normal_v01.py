@@ -39,12 +39,12 @@ class detector_eres_normal_v01(TransformationBundle):
             eres = C.EnergyResolution(names, expose_matrix, ns=self.namespace)
             self.objects.append(eres)
 
-            self.set_label(eres.matrix, 'matrix', it_major, 'Energy resolution\nmatrix ({autoindex})')
+            self.set_label(eres.matrix, 'matrix', it_major, 'Energy resolution matrix ({autoindex})')
             self.set_input('eres_matrix', it_major, eres.matrix.Edges, argument_number=0)
             self.set_output('eres_matrix', it_major, eres.matrix.FakeMatrix)
 
             if not split_transformations:
-                self.set_label(eres.smear, 'smear', it_major, 'Energy resolution\n({autoindex})')
+                self.set_label(eres.smear, 'smear', it_major, 'Energy resolution ({autoindex})')
 
             trans = eres.smear
             for i, it_minor in enumerate(self.nidx_minor):
@@ -55,7 +55,7 @@ class detector_eres_normal_v01(TransformationBundle):
                 eres.add_input()
 
                 if split_transformations:
-                    self.set_label(trans, 'smear', it, 'Energy resolution\n({autoindex})')
+                    self.set_label(trans, 'smear', it, 'Energy resolution ({autoindex})')
 
                 self.set_input('eres', it, trans.inputs.back(), argument_number=0)
                 self.set_output('eres', it, trans.outputs.back())

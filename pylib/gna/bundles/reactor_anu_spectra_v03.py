@@ -27,7 +27,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
         self.load_data()
 
         model_edges_t = C.Points( self.model_edges, ns=self.namespace )
-        model_edges_t.points.setLabel('E0 (bin edges)')
+        model_edges_t.points.setLabel('Spectra interpolation edges')
         self.context.objects['edges'] = model_edges_t
         self.shared.reactor_anu_edges = model_edges_t.single()
 
@@ -45,7 +45,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
             isotope, = it.current_values()
 
             spectrum_raw_t = C.Points( self.spectra[isotope], ns=self.namespace )
-            spectrum_raw_t.points.setLabel('S0(E0):\n'+isotope)
+            spectrum_raw_t.points.setLabel('%s spectrum, original'%isotope)
             self.context.objects[('spectrum_raw', isotope)] = spectrum_raw_t
 
             if self.corrections:
@@ -53,7 +53,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
                 spectrum_t.multiply( spectrum_raw_t )
                 for corr in self.corrections.bundles.values():
                     spectrum_t.multiply( corr.outputs[isotope] )
-                spectrum_t.product.setLabel('S(E0):\n'+isotope)
+                spectrum_t.product.setLabel('%s spectrum, corrected'+isotope)
             else:
                 spectrum_t = spectrum_raw_t
 
@@ -69,7 +69,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
             else:
                 self.set_input(self.cfg.name, it, (sampler_input, interp_input), argument_number=0)
 
-            interp_expo_t.setLabel('S(E):\n'+isotope)
+            interp_expo_t.setLabel('%s spectrum, interpolated'+isotope)
 
             """Store data"""
             self.set_output(self.cfg.name, it, interp_output)
