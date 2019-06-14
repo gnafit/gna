@@ -106,6 +106,9 @@ class OSum(Operation):
     @call_once
     def bind(self, context):
         # Process sum of weigtedsums
+        print('osum', self.name)
+        if self.name=='ibd':
+            import IPython; IPython.embed()
         if self.expandable and len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation) and self.objects[0].expandable:
             return self.bind_wsum(context)
 
