@@ -265,8 +265,7 @@ class exp(baseexp):
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        correlations = 'covariance/corrmap_xuyu.txt',
-                        verbose=2
+                        correlations = 'covariance/corrmap_xuyu.txt'
                         ),
                 multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
