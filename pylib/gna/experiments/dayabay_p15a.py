@@ -473,6 +473,7 @@ class exp(baseexp):
                     ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
                                      outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
+        ns.addobservable("final_concat", outputs.concat_total)
         for iso in isotopes:
             ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
 
