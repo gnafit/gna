@@ -137,7 +137,7 @@ from gna.graphviz import GNADot
 
 graph = GNADot( ws.sum )
 graph.write("dotfile.dot")
-
+plt.rcParams.update({'font.size': 22})  
 plt.plot(E_arr, ws.sum.sum.data())
 plt.title(r'$\overline{\nu}_e$ survival probability at 52 km')
 plt.xlabel(r'$E_{\nu}$, MeV')

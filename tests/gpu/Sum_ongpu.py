@@ -32,19 +32,19 @@ with context.manager(ndata) as manager:
   """Initialize transformations"""
   points1 = Points( arr1 )
   points1.points.setLabel("T1")
-#  points2 = Points( arr2 )
-#  points2.points.setLabel("T2")
-#  points3 = Points( arr3 )
-#  points3.points.setLabel("T3")
+  points2 = Points( arr2 )
+  points2.points.setLabel("T2")
+  points3 = Points( arr3 )
+  points3.points.setLabel("T3")
     
   """Mode1: a1+a2"""
   ws = R.Sum()
   ws.add(points1.points)
-#  ws.add(points2.points)
-#  ws.add(points3.points)
+  ws.add(points2.points)
+  ws.add(points3.points)
   ws.sum.setLabel("T4")
     
-#  ws.sum.switchFunction("gpu")
+  ws.sum.switchFunction("gpu")
 print( 'Mode1: ' )
 print(  ws.sum.sum.data() )
 print()
