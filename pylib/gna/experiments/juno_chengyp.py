@@ -22,6 +22,8 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        correlations = [ 'lsnl', 'subdetectors' ]
+        parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -257,20 +259,21 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
+                        bundle = dict(name="parameters", version = "v02"),
                         parameter = "subdetector_fraction",
                         label = 'Subdetector fraction weight for {subdetector}',
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            )
+                            ),
+                        correlations = 'covariance/corrmap_xuyu.txt',
+                        verbose=2
                         ),
                 multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         nph = 'subdetector200_nph.txt',
-                        expose_matrix = False,
-                        verbose=True
+                        expose_matrix = False
                         ),
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v03', major=''),
@@ -280,6 +283,12 @@ class exp(baseexp):
                         label = 'Final histogram {detector}'
                         ),
                 )
+        if not 'lsnl' in self.opts.correlation:
+            self.cfg.lsnl.correlations = None
+            self.cfg.lsnl.correlations_pars = None
+
+        if not 'subdetector' in self.opts.correlation:
+            self.cfg.multieres.correlations = None
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
