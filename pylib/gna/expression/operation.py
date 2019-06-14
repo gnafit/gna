@@ -21,7 +21,7 @@ class Operation(TCall,NestedTransformation):
         NestedTransformation.__init__(self)
 
     def __str__(self):
-        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce)
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce.comma_list())
 
     def __call__(self, *args):
         if self.call_lock:
@@ -106,6 +106,9 @@ class OSum(Operation):
     @call_once
     def bind(self, context):
         # Process sum of weigtedsums
+        print('osum', self.name)
+        if self.name=='ibd':
+            import IPython; IPython.embed()
         if self.expandable and len(self.objects)==1 and isinstance(self.objects[0], WeightedTransformation) and self.objects[0].expandable:
             return self.bind_wsum(context)
 

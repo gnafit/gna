@@ -5,6 +5,7 @@ from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
+from gna.context import entryContext
 
 class xsec_ibd_v02(TransformationBundle):
     ## @brief Inverse Beta Decay (IBD) cross section by Vogel&Beacom (arxiv: 9903.554)
@@ -71,62 +72,64 @@ class xsec_ibd_v02(TransformationBundle):
             return (), ('ibd_xsec', 'ee', 'enu')
 
     def build(self):
-        # initalize Evis to Enu converter
-        with self.namespace("ibd"):
-            self.econv = R.EvisToEe()
-
-        # register it's input and output
-        self.set_input('ee', None, self.econv.Ee.Evis, argument_number=0)
-        self.set_output('ee', None, self.econv.Ee.Ee)
-
-        if self.cfg.order==0:
-            # in 0th order and 1d case
-            # create 1d cross section
+        with entryContext(subgraph="IBD"):
+            # initalize Evis to Enu converter
             with self.namespace("ibd"):
-                self.ibd = R.IbdZeroOrder()
+                self.econv = R.EvisToEe()
 
-            # register Enu input and output
-            self.set_input('enu', None, self.ibd.Enu.Ee, argument_number=0)
-            self.set_output('enu', None, self.ibd.Enu.Enu)
+            # register it's input and output
+            self.set_input('ee', None, self.econv.Ee.Evis, argument_number=0)
+            self.set_output('ee', None, self.econv.Ee.Ee)
 
-            # register cross section input and output
-            self.set_input('ibd_xsec', None, self.ibd.xsec.Ee, argument_number=0)
-            self.set_output('ibd_xsec', None, self.ibd.xsec.xsec)
+            if self.cfg.order==0:
+                # in 0th order and 1d case
+                # create 1d cross section
+                with self.namespace("ibd"):
+                    self.ibd = R.IbdZeroOrder()
 
-            #label cross section for the graph
-            self.ibd.xsec.setLabel('IBD xsec (0)')
-        elif self.cfg.order==1:
-            # in 1th order and 2d case
-            # create 2d cross section
-            with self.namespace("ibd"):
-                self.ibd = R.IbdFirstOrder()
+                # register Enu input and output
+                self.set_input('enu', None, self.ibd.Enu.Ee, argument_number=0)
+                self.set_output('enu', None, self.ibd.Enu.Enu)
 
-            # register Enu inputs and output
-            self.set_input('enu', None, self.ibd.Enu.Ee, argument_number=0)
-            self.set_input('enu', None, self.ibd.Enu.ctheta, argument_number=1)
-            self.set_output('enu', None, self.ibd.Enu.Enu)
+                # register cross section input and output
+                self.set_input('ibd_xsec', None, self.ibd.xsec.Ee, argument_number=0)
+                self.set_output('ibd_xsec', None, self.ibd.xsec.xsec)
 
-            # register cross section inputs and output
-            self.set_input('ibd_xsec', None, self.ibd.xsec.Enu, argument_number=0)
-            self.set_input('ibd_xsec', None, self.ibd.xsec.ctheta, argument_number=1)
-            self.set_output('ibd_xsec', None, self.ibd.xsec.xsec)
-            # label cross section
-            self.ibd.xsec.setLabel('IBD xsec (1)')
+                #label cross section for the graph
+                self.ibd.xsec.setLabel('IBD xsec (0)')
+            elif self.cfg.order==1:
+                # in 1th order and 2d case
+                # create 2d cross section
+                with self.namespace("ibd"):
+                    self.ibd = R.IbdFirstOrder()
 
-            # register jacobian inputs and output
-            self.set_input('jacobian', None, self.ibd.jacobian.Enu, argument_number=0)
-            self.set_input('jacobian', None, self.ibd.jacobian.Ee, argument_number=1)
-            self.set_input('jacobian', None, self.ibd.jacobian.ctheta, argument_number=2)
-            self.set_output('jacobian', None, self.ibd.jacobian.jacobian)
-            # label jacobian
-            self.ibd.jacobian.setLabel('Ee-\\>Enu jacobian')
+                # register Enu inputs and output
+                self.set_input('enu', None, self.ibd.Enu.Ee, argument_number=0)
+                self.set_input('enu', None, self.ibd.Enu.ctheta, argument_number=1)
+                self.set_output('enu', None, self.ibd.Enu.Enu)
 
-        # label neutrino energy caclulator
-        self.ibd.Enu.setLabel('Enu')
+                # register cross section inputs and output
+                self.set_input('ibd_xsec', None, self.ibd.xsec.Enu, argument_number=0)
+                self.set_input('ibd_xsec', None, self.ibd.xsec.ctheta, argument_number=1)
+                self.set_output('ibd_xsec', None, self.ibd.xsec.xsec)
+                # label cross section
+                self.ibd.xsec.setLabel('IBD xsec (1)')
+
+                # register jacobian inputs and output
+                self.set_input('jacobian', None, self.ibd.jacobian.Enu, argument_number=0)
+                self.set_input('jacobian', None, self.ibd.jacobian.Ee, argument_number=1)
+                self.set_input('jacobian', None, self.ibd.jacobian.ctheta, argument_number=2)
+                self.set_output('jacobian', None, self.ibd.jacobian.jacobian)
+                # label jacobian
+                self.ibd.jacobian.setLabel('Ee-\\>Enu jacobian')
+
+            # label neutrino energy caclulator
+            self.ibd.Enu.setLabel('Enu')
 
     def define_variables(self):
-        # initialize necessary variables: neutron lifetime and mass (proton, neutron, electron)
-        # in common namespace
-        from gna.parameters import ibd
-        ibd.reqparameters(self.namespace('ibd'))
+        with entryContext(subgraph="IBD"):
+            # initialize necessary variables: neutron lifetime and mass (proton, neutron, electron)
+            # in common namespace
+            from gna.parameters import ibd
+            ibd.reqparameters(self.namespace('ibd'))
 
