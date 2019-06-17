@@ -137,6 +137,12 @@ def Product(outputs=None, *args, **kwargs):
 
     return Templates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
+"""Construct Product object from list of SingleOutputs"""
+def Exp(outputs=None, *args, **kwargs):
+    if outputs is None:
+        return Templates.ExpT(context.current_precision())(*args, **kwargs)
+    return Templates.ExpT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):
     """Convert array to Points"""

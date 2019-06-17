@@ -7,7 +7,7 @@ from __future__ import print_function
 import numpy as N
 import gna.constructors as C
 from load import ROOT as R
-from gna.constructors import Points, stdvector
+from gna.constructors import Points, Exp, stdvector
 from gna.env import env
 from gna import context, bindings
 import time
@@ -35,7 +35,7 @@ with context.manager(ndata) as manager:
   points3 = Points( arr3 )
     
   """Mode1: a1+a2"""
-  ws = R.Exp()
+  ws = Exp()
   ws.exp.points(points1.points)
     
   ws.exp.switchFunction("gpu")
