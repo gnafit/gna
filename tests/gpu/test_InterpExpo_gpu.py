@@ -40,17 +40,19 @@ with context.manager(ndata) as manager:
         ie = R.InterpLinear()
     
     ie.interpolate(segments_t, fcn_t, points_t)
-#    ie.interp.switchFunction("gpu")
+    ie.interp.switchFunction("gpu")
     ie.printtransformations()
     seg_idx = ie.insegment.insegment.data()
     print( 'Segments', seg_idx )
-    
     #ns.materializeexpressions()
     #pars = tuple(par.getVariable() for (name,par) in ns.walknames())
     #manager.setVariables(C.stdvector(pars))
     
 res = ie.interp.interp.data()
+ie.interp.switchFunction("main")
+res2= ie.interp.interp.data()
 print( 'Result', res )
+print( 'Result', res2 )
 #ie.print()
 fig = P.figure()
 ax = P.subplot( 111 )

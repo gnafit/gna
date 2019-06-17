@@ -153,23 +153,12 @@ void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
 	std::cout << "START INTERP ON GPU" << std::endl;
 	fargs.args.touch();
         auto& gpuargs=fargs.gpu;
-/*	auto** source=gpuargs->args;
-        auto** dest  =gpuargs->rets;
-        auto** shape =gpuargs->argshapes;
-        auto** rshape =gpuargs->retshapes;
-*/
-//        printf("%p %p %p %p\n", (void*)source, (void*)dest, (void*)shape, (void*)rshape);
-
-//	fargs.args.touch();
         gpuargs->provideSignatureDevice();
 
-	std::cout << "INTERP ON GPU" << std::endl;
-	std::cout << fargs.args[2].x << std::endl;
-//      gpuargs->provideSignatureDevice();
-//        std::cout << "ARGSHAPES "<< gpuargs->argshapes[0][0] << std::endl;
-	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size() );
+//	std::cout << fargs.args[2].x << std::endl;
+        int nseg=(int)fargs.args[1].x.size()-1;
+	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size(), nseg );
 //	interpExpo_v2(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size() );
- //gpuargs->argshapes[0][0], gpuargs->argshapes[1][0] );
 }
 
 
