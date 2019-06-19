@@ -30,3 +30,6 @@ void cupoissonapprox(double** array, double** ans_array, int* n, int amount, int
 
 void cuselfpower(double** array, double** ans_array, int n, int m, double scale);
 void cuselfpower(float** array, float** ans_array, int n, int m, float scale);
+
+template<typename T> 
+void cunormalize(T** args, T** rets, size_t n );

@@ -20,6 +20,7 @@ public:
     Normalize(size_t start, size_t length);         ///< Subhistogram normalization constructor.
 
     void doNormalize(FunctionArgs& fargs);          ///< Normalize the whole histogram.
+    void doNormalize_gpu(FunctionArgs& fargs);      ///< Normalize the whole histogram on gpu.
     void doNormalize_segment(FunctionArgs& fargs);  ///< Normalize subhistogram.
 
 protected:

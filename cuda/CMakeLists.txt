@@ -14,6 +14,9 @@ set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -std=c++11 -Xcompiler -fPIC )
 
 include_directories(extra/ core/)
+configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
+include_directories( ${CMAKE_BINARY_DIR}/generated/ )
+
 
 set(CUSOURCES
   core/GpuBasics.cu
@@ -27,10 +30,12 @@ set(CUSOURCES
   operations/selfpower.cu
   operations/poisson.cu
   operations/fillike.cu
+  operations/normalize.cu
   extra/cuOscProbPMNS.cu
   )
 
-set(CUHEADERS 
+set(CUHEADERS
+  cuda_config_vars.h 
   operations/cuOperations.cuh
   core/GpuBasics.hh
   core/GpuArray.hh 
@@ -40,9 +45,6 @@ set(CUHEADERS
   core/cuElementary.hh
   extra/cuOscProbPMNS.hh
   )
-
-configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
-include_directories( ${CMAKE_BINARY_DIR}/generated/ )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})
 #cuda_add_cublas_to_target(cuGNA)
