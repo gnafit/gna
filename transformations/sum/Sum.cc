@@ -10,6 +10,7 @@
 
 namespace GNA {
   namespace GNAObjectTemplates {
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType>
     void SumT<FloatType>::sum_ongpu(FunctionArgs& fargs) {
         fargs.args.touch();
@@ -19,6 +20,7 @@ namespace GNA {
         auto** dest  =gpuargs->rets;
         cusum(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
     }
+#endif
     /**
      * @brief Constructor.
      */
