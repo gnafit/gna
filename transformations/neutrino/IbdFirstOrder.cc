@@ -25,7 +25,7 @@ IbdFirstOrder::IbdFirstOrder()
   transformation_("xsec")
     .input("Enu")
     .input("ctheta")
-    .types(TypesFunctions::pass<0>)
+    .types(TypesFunctions::pass<0>,TypesFunctions::ifNd<0,2>)
     .output("xsec")
     .func(&IbdFirstOrder::calc_Xsec);
   transformation_("jacobian")

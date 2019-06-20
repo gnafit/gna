@@ -8,6 +8,7 @@ void HistEdgesLinear::init(){
     auto trans = this->transformation_("histedges");
     trans.input("hist_in", /*inactive*/true)// 0 - histogram with bins defined
          .output("hist")                    // 2 - histogram with new edges
+         .types(new TypeClasses::CheckKindT<double>(DataKind::Hist), new TypeClasses::CheckNdimT<double>(1))
          .types(&HistEdgesLinear::types)
          .func(&HistEdgesLinear::func);
          ;
