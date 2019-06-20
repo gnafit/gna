@@ -22,6 +22,9 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
+        correlations = [ 'lsnl', 'subdetectors' ]
+        parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -56,32 +59,63 @@ class exp(baseexp):
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
         self.formula = list(self.formula_base)
+        if self.opts.mode=='main':
+            enu = self.formula_enu
+            ibd = self.formula_ibd_noeffects
+        elif self.opts.mode=='yb':
+            enu = self.formula_enu_yb
+            ibd = self.formula_ibd_noeffects_yb
+        else:
+            raise Exception('unsupported option')
+        self.formula = self.formula + enu
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
         if 'lsnl' in energy_model:
             energy_model_formula = 'lsnl| '
-            self.formula.append('evis_edges_hist| evis_hist()')
+            self.formula.append('evis_edges_hist| evis_hist')
         if 'eres' in energy_model:
             energy_model_formula = 'eres| '+energy_model_formula
-            self.formula.append('eres_matrix| evis_hist()')
+            self.formula.append('eres_matrix| evis_hist')
         elif 'multieres' in energy_model:
             energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-            self.formula.append('eres_matrix[s]| evis_hist()')
+            self.formula.append('eres_matrix[s]| evis_hist')
 
-        self.formula.append('ibd=' + energy_model_formula + self.formula_ibd_noeffects)
+        self.formula.append('ibd=' + energy_model_formula + ibd)
         self.formula+=self.formula_back
 
     def init_configuration(self):
+        mode_yb = self.opts.mode=='yb'
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
+                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2'), inactive=mode_yb),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.6, 12.001, 0.01),
                     #  edges    = np.linspace(0.0, 12.001, 601),
                     xorders   = 4,
                     yorder   = 5,
                     ),
+                rebin = NestedDict(
+                        bundle = dict(name='rebin', version='v03', major='', inactive=mode_yb),
+                        rounding = 3,
+                        edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
+                        name = 'rebin',
+                        label = 'Final histogram {detector}'
+                        ),
+                kinint2_enu = NestedDict(
+                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2'), inactive=not mode_yb),
+                    variables = ('enu_in', 'ctheta'),
+                    edges     = np.linspace(1.8, 8.0, 601),
+                    xorders   = 4,
+                    yorder   = 5,
+                    ),
+                rebin_yb = NestedDict(
+                        bundle = dict(name='rebin', version='v03', major='', inactive=not mode_yb),
+                        rounding = 3,
+                        edges = np.linspace(1.8, 8.0, 201) ,
+                        name = 'rebin',
+                        label = 'Final histogram {detector}'
+                        ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
                     order = 1,
@@ -257,29 +291,41 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
+                        bundle = dict(name="parameters", version = "v02"),
                         parameter = "subdetector_fraction",
                         label = 'Subdetector fraction weight for {subdetector}',
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            )
+                            ),
+                        correlations = 'covariance/corrmap_xuyu.txt'
                         ),
                 multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         nph = 'subdetector200_nph.txt',
-                        expose_matrix = False,
-                        verbose=True
-                        ),
-                rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v03', major=''),
-                        rounding = 3,
-                        edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
-                        name = 'rebin',
-                        label = 'Final histogram {detector}'
+                        expose_matrix = False
                         ),
                 )
+
+        if mode_yb:
+            from physlib import PhysicsConstants
+            pc = PhysicsConstants(2016)
+            shift = pc.DeltaNP - pc.ElectronMass
+            histshift = R.HistEdgesLinear(1.0, -shift)
+            self.cfg.enuToEvis0 = NestedDict(
+                bundle  = dict(name='predefined', version='v01'),
+                name    = 'enuToEvis0',
+                inputs  = (histshift.histedges.hist_in,),
+                outputs = histshift.histedges.hist,
+                object  = histshift
+                )
+        if not 'lsnl' in self.opts.correlation:
+            self.cfg.lsnl.correlations = None
+            self.cfg.lsnl.correlations_pars = None
+
+        if not 'subdetectors' in self.opts.correlation:
+            self.cfg.subdetector_fraction.correlations = None
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -327,6 +373,9 @@ class exp(baseexp):
         ns = self.namespace
         outputs = self.context.outputs
         #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
+        if self.opts.mode=='yb':
+            ns.addobservable("Enu",    outputs.enu_in, export=False)
+        else:
         ns.addobservable("Enu",    outputs.enu, export=False)
         ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
         fine = outputs.kinint2.AD1
@@ -355,9 +404,10 @@ class exp(baseexp):
         print('Statistics', walker.get_stats())
         print('Parameter statistics', self.stats)
 
+    formula_enu = ['evis_hist=evis_hist()', 'enu| ee(evis()), ctheta()']
+    formula_enu_yb = ['enu_in()', 'evis_hist = enuToEvis0(enu_in_hist())']
     formula_base = [
             'baseline[d,r]',
-            'enu| ee(evis()), ctheta()',
             'livetime[d]',
             'conversion_factor',
             'numerator = eff * livetime[d] * thermal_power[r] * '
@@ -377,6 +427,15 @@ class exp(baseexp):
                                   pmns[c]*oscprob[c,d,r](enu())
             '''
 
+    formula_ibd_noeffects_yb = '''
+                            kinint2|
+                              sum[r]|
+                                baselineweight[r,d]*
+                                ibd_xsec(enu_in_mesh(), ctheta())*
+                                (sum[i]|  power_livetime_factor*anuspec[i](enu_in_mesh()))*
+                                sum[c]|
+                                  pmns[c]*oscprob[c,d,r](enu_in_mesh())
+            '''
     formula_back = [
             'observation=rebin| ibd'
             ]
@@ -405,7 +464,7 @@ class exp(baseexp):
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor', label='{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'),
             anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='{{Antineutrino spectrum|{reactor}-\\>{detector}}}'),
 
-            countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full', label='Countrate {reactor}-\\>{detector}'),
+            countrate_rd            = dict(expr=('anuspec_rd*ibd_xsec*jacobian*oscprob_full', 'anuspec_rd*ibd_xsec*oscprob_full'), label='Countrate {reactor}-\\>{detector}'),
             countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
             countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
 

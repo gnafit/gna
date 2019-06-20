@@ -67,7 +67,7 @@ class xsec_ibd_v02(TransformationBundle):
     @staticmethod
     def _provides(cfg):
         if cfg.order:
-            return (), ('ibd_xsec', 'ee', 'enu', 'jacobian')
+            return (), ('ibd_xsec', 'ee', 'enu', 'jacobian', 'enuToEvis0')
         else:
             return (), ('ibd_xsec', 'ee', 'enu')
 

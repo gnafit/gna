@@ -109,7 +109,6 @@ print( context.outputs )
 #
 # Do some plots
 #
-
 if args.output:
     pp = PdfPages(abspath(args.output))
 #  Initialize figure
@@ -136,7 +135,6 @@ ax.legend(loc='upper left')
 
 if args.output:
     pp.savefig(fig)
-
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
@@ -162,7 +160,6 @@ ax.legend(loc='best')
 if args.output:
     pp.savefig(fig)
 
-
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
@@ -186,7 +183,6 @@ if input_dyboscar is not None:
 ax.set_ylim(0.97, 1.03)
 
 ax.legend(loc='best')
-
 if args.output:
     pp.savefig(fig)
     pp.close()
