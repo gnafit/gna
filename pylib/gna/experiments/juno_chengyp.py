@@ -33,7 +33,9 @@ class exp(baseexp):
         self.init_formula()
         self.init_configuration()
         self.build()
+        self.parameters()
         self.register()
+        self.autodump()
 
         if self.opts.stats:
             self.print_stats()
@@ -85,6 +87,15 @@ class exp(baseexp):
         self.formula.append('ibd=' + energy_model_formula + ibd)
 
         self.formula+=self.formula_back
+
+    def parameters(self):
+        ns = self.namespace
+        fixed_pars = ['pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+        free_pars  = ['pmns.DeltaMSqEE']
+        for par in fixed_pars:
+            ns[par].setFixed()
+        for par in free_pars:
+            ns[par].setFree()
 
     def init_configuration(self):
         mode_yb = self.opts.mode=='yb'
@@ -190,6 +201,12 @@ class exp(baseexp):
                         detectors = 'data/juno_nominal/coordinates_det.py',
                         unit = 'km'
                         ),
+                norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = "norm",
+                        label = 'Reactor power/detection efficiency correlated normalization',
+                        pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
+                        ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "thermal_power",
@@ -208,8 +225,8 @@ class exp(baseexp):
                             ('DYB', 17.4),
                             ('HZ',  17.4),
                             ],
-                            uncertainty=None,
-                            mode='fixed'
+                            uncertainty=0.8,
+                            mode='percent'
                             ),
                         ),
                 target_protons = NestedDict(
@@ -355,6 +372,7 @@ class exp(baseexp):
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
+    def autodump(self):
         if self.opts.verbose>2:
             width = 40
             print('Outputs:')
@@ -441,7 +459,7 @@ class exp(baseexp):
             '''
 
     formula_back = [
-            'observation=rebin| ibd'
+            'observation=norm * rebin| ibd'
             ]
 
     lib = dict(
