@@ -2,6 +2,11 @@
 #include <algorithm>
 #include <iterator>
 #include <math.h>
+#include "TypesFunctions.hh"
+
+#include "config_vars.h"
+#include "cuElementary.hh"
+#include "GpuBasics.hh"
 
 Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_scale{pow(10, rounding)} {
   std::transform( edges, edges+n, m_new_edges.begin(), [this](double num){return this->round(num);} );
@@ -12,7 +17,16 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
     .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs& fargs){
            fargs.rets[0]=DataType().hist().edges(obj->m_new_edges);
            })
-    .func(&Rebin::calcSmear);
+    .func(&Rebin::calcSmear)
+#ifdef GNA_CUDA_SUPPORT
+    .func("gpu", &Rebin::calcSmear_gpu, DataLocation::Device)
+    .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
+        std::cout << "im in! !!! !!! !!! "<<(this->m_new_edges.size()-1) * fargs.args[0].size() << std::endl;
+        fargs.ints[0] = DataType().points().shape((this->m_new_edges.size()-1) * fargs.args[0].size());
+    })
+#endif
+
+    ;
 }
 
 void Rebin::calcSmear(FunctionArgs& fargs) {
@@ -20,8 +34,26 @@ void Rebin::calcSmear(FunctionArgs& fargs) {
   if( !m_initialized ){
       calcMatrix( args[0].type );
   }
+  std::cout << "msparse: " << std::endl << m_sparse_cache <<std::endl;
   fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
+
+void Rebin::calcSmear_gpu(FunctionArgs& fargs) {
+  auto& args=fargs.args;
+  auto& gpuargs = fargs.gpu;
+  gpuargs->provideSignatureDevice();
+  if( !m_initialized ){
+      calcMatrix( args[0].type );
+      Eigen::MatrixXd dMat = Eigen::MatrixXd(m_sparse_cache);
+      //std::cout << "ddddd" <<  gpuargs->ints[0] << std::endl;
+      copyH2D_NA(gpuargs->rets[0], dMat.data(), (unsigned int) fargs.rets[0].x.size() );// (unsigned int)args[0].x.size() *(m_new_edges.size()-1));
+      //fargs.ints[0] = dMat.data();
+      //gpuargs->provideSignatureDevice();
+  }
+  //curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, args[0].type.size(), fargs.rets[0].type.size());  
+  //fargs.rets[0].x = m_sparse_cache * args[0].vec;
+}
+
 
 void Rebin::calcMatrix(const DataType& type) {
   std::vector<double> edges(type.size()+1);

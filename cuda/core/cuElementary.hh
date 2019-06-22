@@ -33,3 +33,6 @@ void cuselfpower(float** array, float** ans_array, int n, int m, float scale);
 
 template<typename T> 
 void cunormalize(T** args, T** rets, size_t n );
+
+template<typename T>
+void curebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize);
