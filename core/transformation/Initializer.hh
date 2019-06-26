@@ -186,7 +186,7 @@ namespace TransformationTypes {
       }
       if(hasDefaultFunction()){
         auto& fcn = getDefaultFunction();
-        entry->switchFunction(fcn);
+        entry->switchFunction(fcn, /*strict*/false);
       }
 
       size_t idx = obj->addEntry(entry);
@@ -244,11 +244,11 @@ namespace TransformationTypes {
 #ifdef GNA_CUDA_SUPPORT
     /**
      * @brief Set the named function and its target device.
-     * 
-     * See InitializerT::func(const std::string& name, Function afunc) for more details. 
+     *
+     * See InitializerT::func(const std::string& name, Function afunc) for more details.
      * Additionally set the location (DataLocation::Host or DataLocation::Device).
      *
-     * @return `*this`.	
+     * @return `*this`.
      */
     InitializerType func(const std::string &name, Function afunc, DataLocation loc) {
       this->func(name, afunc);
@@ -342,7 +342,7 @@ namespace TransformationTypes {
 
     InitializerType setFuncLocation(const std::string& name, DataLocation loc) {
       m_data->entry->functions[name].funcLoc = loc;
-      return *this; 
+      return *this;
     }
 #endif
 

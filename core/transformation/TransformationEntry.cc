@@ -366,9 +366,12 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
  * @exception std::runtime_error in case the function `name` does not exist.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name){
-  initFunction(name);
-  evaluateTypes();
+bool EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name, bool strict){
+  if(initFunction(name, strict)){
+    evaluateTypes();
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -381,11 +384,14 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
  * @exception std::runtime_error in case the function `name` does not exist.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name){
+bool EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name, bool strict){
   auto it = functions.find(name);
   if(it==functions.end()){
-    auto msg = fmt::format("invalid function name {0}", name.data());
-    throw std::runtime_error(msg);
+    if(strict){
+      auto msg = fmt::format("invalid function name {0}", name.data());
+      throw std::runtime_error(msg);
+    }
+    return false;
   }
   fun = it->second.fun;
 #ifdef GNA_CUDA_SUPPORT
@@ -393,6 +399,7 @@ void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
 #endif
   funcname=name;
 //  evaluateTypes();
+  return true;
 }
 
 

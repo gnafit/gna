@@ -163,8 +163,8 @@ namespace TransformationTypes
     // Function args
     FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
-    void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
-    void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
+    bool switchFunction(const std::string& name, bool strict=true); ///< Use Function `name` as Entry::fun.
+    bool initFunction(const std::string& name, bool strict=true);   ///< Use Function `name` as Entry::fun. Does not update types.
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
 
