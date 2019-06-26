@@ -176,6 +176,8 @@ class ExpressionContext_v01(object):
 
         self.providers = dict()
         for name, cfg in self.bundles.items():
+            if not 'bundle' in cfg:
+                continue
             provider = ItemProvider(cfg, name)
             provider.register_in(self.providers)
 

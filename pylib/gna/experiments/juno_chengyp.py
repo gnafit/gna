@@ -3,6 +3,7 @@
 from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
+from gna import constructors as C
 from gna.expression.index import NIndex
 import numpy as np
 from load import ROOT as R
@@ -32,6 +33,7 @@ class exp(baseexp):
         self.init_nidx()
         self.init_formula()
         self.init_configuration()
+        self.preinit_variables()
         self.build()
         self.parameters()
         self.register()
@@ -62,12 +64,14 @@ class exp(baseexp):
 
         self.formula = list(self.formula_base)
 
+        mode_yb = False
         if self.opts.mode=='main':
             enu = self.formula_enu
             ibd = self.formula_ibd_noeffects
         elif self.opts.mode=='yb':
             enu = self.formula_enu_yb
             ibd = self.formula_ibd_noeffects_yb
+            mode_yb = True
         else:
             raise Exception('unsupported option')
         self.formula = self.formula + enu
@@ -86,7 +90,10 @@ class exp(baseexp):
 
         self.formula.append('ibd=' + energy_model_formula + ibd)
 
-        self.formula+=self.formula_back
+        if mode_yb:
+            self.formula+=self.formula_back_yb
+        else:
+            self.formula+=self.formula_back
 
     def parameters(self):
         ns = self.namespace
@@ -325,6 +332,9 @@ class exp(baseexp):
                         nph = 'subdetector200_nph.txt',
                         expose_matrix = False
                         ),
+                shape_uncertainty = NestedDict(
+                        unc = uncertain(1.0, 1.0, 'percent')
+                        )
                 )
 
         if mode_yb:
@@ -345,6 +355,35 @@ class exp(baseexp):
 
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
+
+    def preinit_variables(self):
+        mode_yb = self.opts.mode=='yb'
+        if not mode_yb:
+            return
+
+        spec = self.namespace('spectrum')
+        cfg = self.cfg.shape_uncertainty
+        unc = cfg.unc
+        edges = self.cfg.rebin_yb.edges
+
+        names = []
+        for bini in range(edges.size-1):
+            name = 'norm_bin_%03i'%bini
+            names.append(name)
+            label = 'Spectrum shape unc. bin %i (%.03f, %.03f) MeV'%(bini, edges[bini], edges[bini+1])
+            spec.reqparameter(name, cfg=unc, label=label)
+
+        with spec:
+            vararray = C.VarArray(names, labels='Spectrum shape norm')
+
+        self.cfg.shape_uncertainty = NestedDict(
+                bundle = dict(name='predefined', version='v01'),
+                name   = 'shape_norm',
+                inputs = None,
+                outputs = vararray.single(),
+                unc    = cfg.unc,
+                object = vararray
+                )
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -413,7 +452,7 @@ class exp(baseexp):
             fine = outputs.ibd.AD1
 
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
-        ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
+        ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -462,6 +501,10 @@ class exp(baseexp):
             'observation=norm * rebin| ibd'
             ]
 
+    formula_back_yb = [
+            'observation=norm * rebin(ibd) * shape_norm()'
+            ]
+
     lib = dict(
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                            label='anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'),
@@ -491,6 +534,8 @@ class exp(baseexp):
             countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
 
             observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
+            observation_bfshape     = dict(expr='rebin*shape_norm', label='Observation (best fit shape)'),
+            observation_bf          = dict(expr=('norm*observation_bfshape', 'norm*rebin'), label='Observation (best fit)'),
 
             iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
             reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
