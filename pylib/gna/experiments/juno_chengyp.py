@@ -360,13 +360,13 @@ class exp(baseexp):
         cfg = self.cfg.shape_uncertainty
         unc = cfg.unc
         if mode_yb:
-            edges = self.cfg.rebin_yb.edges
+            edges = self.cfg.kinint2_enu.edges
         else:
-            edges = self.cfg.rebin.edges
+            edges = self.cfg.kinint2.edges
 
         names = []
         for bini in range(edges.size-1):
-            name = 'norm_bin_%03i'%bini
+            name = 'norm_bin_%04i'%bini
             names.append(name)
             label = 'Spectrum shape unc. bin %i (%.03f, %.03f) MeV'%(bini, edges[bini], edges[bini+1])
             spec.reqparameter(name, cfg=unc, label=label)
@@ -434,8 +434,8 @@ class exp(baseexp):
             ns.addobservable("Enu",    outputs.enu_in, export=False)
         else:
             ns.addobservable("Enu",    outputs.enu, export=False)
-        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
-        fine = outputs.kinint2.AD1
+        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
+        fine = outputs.ibd_noeffects_bf.AD1
 
         if 'lsnl' in self.opts.energy_model:
             ns.addobservable("{0}_lsnl".format(self.detectorname),     outputs.lsnl.AD1)
@@ -475,7 +475,7 @@ class exp(baseexp):
     ]
 
     formula_ibd_noeffects = '''
-                            kinint2|
+                            kinint2(
                               sum[r]|
                                 baselineweight[r,d]*
                                 ibd_xsec(enu(), ctheta())*
@@ -483,20 +483,22 @@ class exp(baseexp):
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu())
+                            )*shape_norm()
             '''
 
     formula_ibd_noeffects_yb = '''
-                            kinint2|
+                            kinint2(
                               sum[r]|
                                 baselineweight[r,d]*
                                 ibd_xsec(enu_in_mesh(), ctheta())*
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu_in_mesh()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu_in_mesh())
+                            )*shape_norm()
             '''
 
     formula_back = [
-        'observation=norm * rebin(ibd) * shape_norm()'
+        'observation=norm * rebin| ibd'
         ]
 
     lib = dict(
@@ -508,6 +510,7 @@ class exp(baseexp):
             eres_weighted           = dict(expr='subdetector_fraction*eres', label='{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'),
             ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
             ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
+            ibd_noeffects_bf        = dict(expr='kinint2*shape_norm', label='Observed IBD spectrum (best fit, no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
@@ -528,8 +531,6 @@ class exp(baseexp):
             countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
 
             observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
-            observation_bfshape     = dict(expr='rebin*shape_norm', label='Observation (best fit shape)'),
-            observation_bf          = dict(expr=('norm*observation_bfshape', 'norm*rebin'), label='Observation (best fit)'),
 
             iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
             reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
