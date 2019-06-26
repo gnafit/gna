@@ -90,10 +90,7 @@ class exp(baseexp):
 
         self.formula.append('ibd=' + energy_model_formula + ibd)
 
-        if mode_yb:
-            self.formula+=self.formula_back_yb
-        else:
-            self.formula+=self.formula_back
+        self.formula+=self.formula_back
 
     def parameters(self):
         ns = self.namespace
@@ -358,13 +355,14 @@ class exp(baseexp):
 
     def preinit_variables(self):
         mode_yb = self.opts.mode=='yb'
-        if not mode_yb:
-            return
 
         spec = self.namespace('spectrum')
         cfg = self.cfg.shape_uncertainty
         unc = cfg.unc
-        edges = self.cfg.rebin_yb.edges
+        if mode_yb:
+            edges = self.cfg.rebin_yb.edges
+        else:
+            edges = self.cfg.rebin.edges
 
         names = []
         for bini in range(edges.size-1):
@@ -498,12 +496,8 @@ class exp(baseexp):
             '''
 
     formula_back = [
-            'observation=norm * rebin| ibd'
-            ]
-
-    formula_back_yb = [
-            'observation=norm * rebin(ibd) * shape_norm()'
-            ]
+        'observation=norm * rebin(ibd) * shape_norm()'
+        ]
 
     lib = dict(
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
