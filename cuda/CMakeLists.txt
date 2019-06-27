@@ -10,13 +10,23 @@ set(CMAKE_MODULE_PATH cmake)
 #set(CUDA_HOST_COMPILER "clang++")
 set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+set(CUDA_COMPUTING_CAPABILITY 52)
 
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_52,code=sm_52 -std=c++11 -Xcompiler -fPIC )
+execute_process(COMMAND bash -c "lspci | sed -r 's/^.*NVIDIA.*\\[(.*)\\].*$/\\1/;t;d' | head -n 1 | xargs echo -n" OUTPUT_VARIABLE CUDA_GPU_CARD)
+if(${CUDA_GPU_CARD} STREQUAL "GeForce GTX 950M")
+    set(CUDA_COMPUTING_CAPABILITY 50)
+#elseif(${CUDA_GPU_CARD} STREQUAL "GeForce GTX 950M")
+    #set(CUDA_COMPUTING_CAPABILITY 50)
+endif()
+
+message(STATUS "GPU: "${CUDA_GPU_CARD})
+message(STATUS "Computing capability: "${CUDA_COMPUTING_CAPABILITY})
+
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-gencode arch=compute_${CUDA_COMPUTING_CAPABILITY},code=sm_${CUDA_COMPUTING_CAPABILITY} -std=c++11 -Xcompiler -fPIC )
 
 include_directories(extra/ core/)
 configure_file( cuda_config_vars.h.in ${CMAKE_BINARY_DIR}/generated/cuda_config_vars.h)
 include_directories( ${CMAKE_BINARY_DIR}/generated/ )
-
 
 set(CUSOURCES
   core/GpuBasics.cu
