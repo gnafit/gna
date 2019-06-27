@@ -221,6 +221,8 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  *
  * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
  *
+ * If no inputs are connected, the funciton does nothing, unless EntryT::finalized is true.
+ *
  * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
  * in any case. Should be fixed.
  *
@@ -228,6 +230,9 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
+  if(sources.empty() && !finalized){
+    return;
+  }
   TypesFunctionArgsType fargs(this);
   StorageTypesFunctionArgsType sargs(fargs);
   bool success = false;
@@ -300,6 +305,13 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
   /// TODO: do it optionally
   functionargs->requireGPU();
   functionargs->updateTypes();
+}
+
+/** @brief Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.*/
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::finalize() {
+  finalized = true;
+  evaluateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */

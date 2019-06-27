@@ -25,14 +25,14 @@ namespace GNA {
 
       SumT();                                                   ///< Constructor.
       SumT(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Sum from vector of outputs
-    
+
       InputDescriptorT<FloatType, FloatType> add_input(const char* name);  ///< Add an input by name and leave unconnected.
-    
+
       /** @brief Add an input by name and leave unconnected. */
       InputDescriptorT<FloatType,FloatType> add(const char* name){
         return add_input(name);
       }
-    
+
       InputDescriptorT<FloatType,FloatType> add(SingleOutput &data);   ///< Add an input and connect it to the output.
       void sum_ongpu(FunctionArgs& fargs);
     };

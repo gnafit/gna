@@ -438,7 +438,7 @@ namespace TransformationTypes {
      * This methods adds the Entry to the Base, no further actions are possible.
      */
     InitializerType& finalize() {
-      m_data->entry->evaluateTypes();
+      m_data->entry->finalize();
       this->add();
       return *this;
     }
