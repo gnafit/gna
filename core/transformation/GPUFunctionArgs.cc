@@ -20,7 +20,6 @@ void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevic
 #else
 	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
 #endif
-
 }
 
 template<typename FloatType,typename SizeType>

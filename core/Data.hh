@@ -782,12 +782,11 @@ protected:
 
 #ifdef GNA_CUDA_SUPPORT
 
-template <typename T>
-DataLocation Data<T>::require_gpu() {
 /**
 Allocate GPU memory in case of GPU array is not inited yet
 */
-
+template <typename T>
+DataLocation Data<T>::require_gpu() {
   if (gpuArr == nullptr) {
     gpuArr.reset(new GpuArray<T>());
   }

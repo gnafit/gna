@@ -230,32 +230,34 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
-  if(sources.empty() && !finalized){
-    return;
-  }
+
   TypesFunctionArgsType fargs(this);
   StorageTypesFunctionArgsType sargs(fargs);
-  bool success = false;
-  TR_DPRINTF("evaluating types for %s: \n", name.c_str());
-  try {
-    for (auto &typefun: typefuns) {
-      typefun(fargs);
+  bool success = true;
+  if(!sources.empty() || finalized){
+    TR_DPRINTF("evaluating types for %s: \n", name.c_str());
+    try {
+      for (auto &typefun: typefuns) {
+        typefun(fargs);
+      }
+      for (auto &typeclass: typeclasses) {
+        typeclass.processTypes(fargs);
+      }
+      auto& itypefuns=functions[funcname].typefuns;
+      for (auto &typefun: itypefuns) {
+        typefun(sargs);
+      }
+    } catch (const TypeError &exc) {
+      TR_DPRINTF("types[%s]: failed\n", name.c_str());
+      success = false;
+      throw std::runtime_error(
+        (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
+    } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
+      success = false;
+      TR_DPRINTF("types[%s]: undefined\n", name.c_str());
     }
-    for (auto &typeclass: typeclasses) {
-      typeclass.processTypes(fargs);
-    }
-    auto& itypefuns=functions[funcname].typefuns;
-    for (auto &typefun: itypefuns) {
-      typefun(sargs);
-    }
-    success = true;
-  } catch (const TypeError &exc) {
-    TR_DPRINTF("types[%s]: failed\n", name.c_str());
-    throw std::runtime_error(
-      (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
-  } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
-    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
+
   if (success) {
     std::set<EntryType*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
@@ -298,12 +300,10 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
         intern.requireGPU(this->getEntryLocation());
       }
       // init gpu storage
+      functionargs->requireGPU();
     }
 #endif
   }
-
-  /// TODO: do it optionally
-  functionargs->requireGPU();
   functionargs->updateTypes();
 }
 

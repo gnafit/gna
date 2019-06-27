@@ -21,11 +21,12 @@ print( 'Data2:', arr2 )
 labels = [ 'arr1', 'arr2' ]
 weights = [ 'w1', 'w2' ]
 
-ndata=7
+ndata=20
 with context.manager(ndata) as manager, context.cuda(enabled=True):
     """Initialize environment"""
-    p1 = env.globalns.defparameter( weights[0], central= 1.0, sigma=0.1 )
-    p2 = env.globalns.defparameter( weights[1], central= 1.0, sigma=0.1 )
+    ns = env.globalns
+    p1 = ns.defparameter( weights[0], central= 1.0, sigma=0.1 )
+    p2 = ns.defparameter( weights[1], central= 1.0, sigma=0.1 )
 
     env.globalns.printparameters()
 #    reqparameters(env.globalns)
@@ -38,11 +39,9 @@ with context.manager(ndata) as manager, context.cuda(enabled=True):
     ws = C.WeightedSum( stdvector(weights), stdvector(labels) )
     points1.points >> ws.sum.arr1
     points2.points >> ws.sum.arr2
-#    pars = tuple(par.getVariable() for (name,par) in env.globalns.walknames())
-#    manager.setVariables(C.stdvector([par.getVariable() for (name, par) in ns.walknames()]))
-#    print('Set variables', pars)
-#    manager.setVariables(C.stdvector(pars))
-#    print('Variables set')
+
+    pars = tuple(par.getVariable() for (name,par) in ns.walknames())
+    manager.setVariables(C.stdvector(pars))
 
 #va = manager.getVarArray()
 #vaout = va.vararray.points
