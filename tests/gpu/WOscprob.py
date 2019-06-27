@@ -80,8 +80,6 @@ with context.manager(ndata) as manager, context.cuda(enabled=gpu):
         ws.sum.item13(oscprob.comp13)
         ws.sum.item23(oscprob.comp23)
         ws.sum.comp0(unity.fill)
-        if gpu:
-            ws.sum.switchFunction("gpu")
         ws.sum.setLabel('OscProb')
         ns.materializeexpressions()
         pars = tuple(par.getVariable() for (name,par) in ns.walknames())

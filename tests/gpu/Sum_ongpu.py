@@ -28,7 +28,7 @@ weights = [ 'w1', 'w2', 'w3' ]
 
 #with C.precision('double'):
 
-with context.manager(ndata) as manager:
+with context.manager(ndata) as manager, context.cuda(enabled=True):
   """Initialize transformations"""
   points1 = Points( arr1 )
   points1.points.setLabel("T1")
@@ -36,26 +36,21 @@ with context.manager(ndata) as manager:
   points2.points.setLabel("T2")
   points3 = Points( arr3 )
   points3.points.setLabel("T3")
-    
+
   """Mode1: a1+a2"""
   ws = R.Sum()
   ws.add(points1.points)
   ws.add(points2.points)
   ws.add(points3.points)
   ws.sum.setLabel("T4")
-    
-  ws.sum.switchFunction("gpu")
+
 print( 'Mode1: ' )
 print(  ws.sum.sum.data() )
 print()
 
+from gna.graphviz import savegraph
+savegraph(ws.sum, "dotfile.dot")
 
-from gna.graphviz import GNADot
-
-graph = GNADot( ws.sum )
-graph.write("dotfile.dot")
-
-   
 for x in range(0,20):
     ws.sum.taint()
     start_time = time.time()
@@ -63,4 +58,4 @@ for x in range(0,20):
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(elapsed_time)
-    
+
