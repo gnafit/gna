@@ -44,14 +44,21 @@ class cuda(object):
     """Context manager for GPU
     Makes Initializer to switch transformations to "gpu" function after initialization"""
     backup_function=''
-    def __init__(self):
+    def __init__(self, enabled=True):
         self.handle=R.TransformationTypes.InitializerBase
+        self._enabled = enabled
 
     def __enter__(self):
+        if not self._enabled:
+            return
+
         self.backup_function = self.handle.getDefaultFunction()
         self.handle.setDefaultFunction('gpu')
 
     def __exit__(self, *args):
+        if not self._enabled:
+            return
+
         self.handle.setDefaultFunction(self.backup_function)
 
 class allocator(object):

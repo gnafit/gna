@@ -33,17 +33,14 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 gpu = True
-#gpu = False
 
 E_arr = N.arange(1.0, 10.0, 0.01 )  #array energy (МеV)
-comp0 = N.array(N.ones(900))
 E = Points(E_arr)
-com = Points(comp0)
 E.points.setLabel("Energy")
 points1 = Points( arr1 )
 points2 = Points( arr2 )
 ndata=950
-with context.manager(ndata) as manager:
+with context.manager(ndata) as manager, context.cuda(enabled=gpu):
     ns.defparameter("L", central=52,sigma=0) #kilometre
 
     gna.parameters.oscillation.reqparameters(ns)
@@ -56,19 +53,13 @@ with context.manager(ndata) as manager:
         #Vacuum neutrino (same antineutrino)
         oscprob = C.OscProbPMNS(from_nu, to_nu)
         oscprob.comp12.inputs.Enu(E)
-        if gpu:
-            oscprob.comp12.switchFunction("gpu")
         data_osc = oscprob.comp12.comp12
         oscprob.comp12.setLabel('P | &#8710;m12')
         oscprob.comp13.inputs.Enu(E)
-        if gpu:
-            oscprob.comp13.switchFunction("gpu")
         data_osc2 = oscprob.comp13.comp13
         oscprob.comp13.setLabel('P | &#8710;m13')
 
         oscprob.comp23.inputs.Enu(E)
-        if gpu:
-            oscprob.comp23.switchFunction("gpu")
         data_osc3 = oscprob.comp23.comp23
         oscprob.comp23.setLabel('P | &#8710;m23')
 
@@ -133,11 +124,10 @@ print('Total time', elapsed_time)
 print('GNA time (%i trials)'%N, elapsed_time-fake_time)
 print('GNA time per event', (elapsed_time-fake_time)/N)
 
-from gna.graphviz import GNADot
+from gna.graphviz import savegraph
+savegraph(ws.sum, "dotfile.dot")
 
-graph = GNADot( ws.sum )
-graph.write("dotfile.dot")
-plt.rcParams.update({'font.size': 22})  
+plt.rcParams.update({'font.size': 22})
 plt.plot(E_arr, ws.sum.sum.data())
 plt.title(r'$\overline{\nu}_e$ survival probability at 52 km')
 plt.xlabel(r'$E_{\nu}$, MeV')
