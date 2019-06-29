@@ -31,6 +31,7 @@ set(CUSOURCES
   operations/poisson.cu
   operations/fillike.cu
   operations/normalize.cu
+  operations/rebin.cu
   extra/cuOscProbPMNS.cu
   )
 
