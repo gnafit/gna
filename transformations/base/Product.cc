@@ -1,10 +1,10 @@
 #include "Product.hh"
 #include "TypesFunctions.hh"
-#include "GNAObject.hh" 
+#include "GNAObject.hh"
 
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
-#include "cuElementary.hh"                             
+#include "cuElementary.hh"
 #include "DataLocation.hh"
 #endif
 
@@ -18,7 +18,7 @@ namespace GNA {
         .func([](FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
-            double factor=1.0;
+            FloatType factor=1.0;
             bool secondary=false;
             for (size_t i = 0; i < args.size(); ++i) {
               auto& data=args[i].x;
@@ -46,7 +46,7 @@ namespace GNA {
 #endif
     	;
     }
-    
+
     /**
      * @brief Construct Product from vector of SingleOutput instances
      */
@@ -56,7 +56,7 @@ namespace GNA {
         this->multiply(*output);
       }
     }
-    
+
     /**
      * @brief Add an input and connect it to the output.
      *
@@ -69,7 +69,7 @@ namespace GNA {
     InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::multiply(SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
-    
+
     /**
      * @brief Add an input by name and leave unconnected.
      * @param name -- a name for the new input.
@@ -80,7 +80,7 @@ namespace GNA {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(name));
     }
 
-#ifdef GNA_CUDA_SUPPORT    
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType>
     void ProductT<FloatType>::product_ongpu(FunctionArgs& fargs) {
     	fargs.args.touch();

@@ -174,7 +174,11 @@ namespace TransformationTypes{
     void GPUFunctionData<FloatType,SizeType>::fillContainersDevice(DataContainer& container){
         for (size_t i = 0; i < container.size(); ++i) {
             if(container[i].materialized()){
-                h_pointers_dev.push_back(container[i].getData()->gpuArr->devicePtr);
+                auto* gpuarr = container[i].getData()->gpuArr.get();
+                if(!gpuarr){
+                    throw std::runtime_error("gpuArr is not initialized");
+                }
+                h_pointers_dev.push_back(gpuarr->devicePtr);
             }
             else{
                 h_pointers_dev.push_back(nullptr);
