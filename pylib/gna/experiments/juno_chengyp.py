@@ -24,6 +24,8 @@ class exp(baseexp):
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
+        parser.add_argument('--parameters', choices=['default', 'yb'], default='default', help='set of parameters to load')
+        parser.add_argument('--reactors', choices=['yb', 'pessimistic'], default='yb', help='reactors setting')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -45,9 +47,13 @@ class exp(baseexp):
     def init_nidx(self):
         self.subdetectors_number = 200
         self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
+        self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
+        if self.opts.reactors=='pessimistic':
+            self.reactors.remove('TS3')
+            self.reactors.remove('TS4')
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
-            ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
+            ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names)
@@ -100,6 +106,11 @@ class exp(baseexp):
             ns[par].setFixed()
         for par in free_pars:
             ns[par].setFree()
+
+        if self.opts.parameters=='yb':
+            ns['pmns.SinSq12'].set(0.307)
+            ns['pmns.SinSq13'].set(0.024)
+            ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
         mode_yb = self.opts.mode=='yb'
@@ -349,9 +360,12 @@ class exp(baseexp):
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
             self.cfg.lsnl.correlations_pars = None
-
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
+
+        if self.opts.parameters=='yb':
+            self.cfg.eff.pars = uncertain(0.72, 'fixed')
+            # self.cfg.livetime.pars['AD1'] = uncertain( 6*300*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
         mode_yb = self.opts.mode=='yb'
