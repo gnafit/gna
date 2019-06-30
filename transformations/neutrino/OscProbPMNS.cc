@@ -23,7 +23,8 @@
 using namespace Eigen;
 using NeutrinoUnits::oscprobArgumentFactor;
 
-OscProbPMNSBase::OscProbPMNSBase(Neutrino from, Neutrino to)
+template<typename FloatType>
+GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::OscProbPMNSBaseT(Neutrino from, Neutrino to)
   : m_param(new OscillationVariables(this)), m_pmns(new PMNSVariables(this))
 {
   if (from.kind != to.kind) {
@@ -42,17 +43,17 @@ OscProbPMNSBase::OscProbPMNSBase(Neutrino from, Neutrino to)
   m_param->variable_("DeltaMSq23");
 }
 
-template <>
-double OscProbPMNSBase::DeltaMSq<1,2>() const { return m_param->DeltaMSq12; }
+template <typename FloatType>
+FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::DeltaMSq<1,2>() const { return this->m_param->DeltaMSq12; }
 
-template <>
-double OscProbPMNSBase::DeltaMSq<1,3>() const { return m_param->DeltaMSq13; }
+template <typename FloatType>
+FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::DeltaMSq<1,3>() const { return this->m_param->DeltaMSq13; }
 
-template <>
-double OscProbPMNSBase::DeltaMSq<2,3>() const { return m_param->DeltaMSq23; }
+template <typename FloatType>
+FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::DeltaMSq<2,3>() const { return this->m_param->DeltaMSq23; }
 
-template <int I, int J>
-double OscProbPMNSBase::weight() const {
+template <int I, int J, typename FloatType>
+FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::weight() const {
   return std::real(
     m_pmns->V[m_alpha][I-1].value()*
     m_pmns->V[m_beta][J-1].value()*
@@ -61,7 +62,8 @@ double OscProbPMNSBase::weight() const {
     );
 }
 
-double OscProbPMNSBase::weightCP() const {
+template<typename FloatType>
+FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT::weightCP() const {
   return m_lepton_charge*std::imag(
     m_pmns->V[m_alpha][0].value()*
     m_pmns->V[m_beta][1].value()*
@@ -245,7 +247,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(Function
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
+  cuCalcComponent<FloatType>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
 		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
 /*#ifdef TIME_COUNT_ON
    end = std::chrono::system_clock::now();
@@ -270,12 +272,9 @@ template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
-  //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
-//  gpuargs->readVariables(m_param);
   gpuargs->provideSignatureDevice();
-  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23, 
+  cuCalcComponentCP<FloatType>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23, 
 			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);  
-//  gpuargs->setAsDevice();
 }
 
 template<typename FloatType>
@@ -302,12 +301,7 @@ template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
- // std::vector<variable<double>> weights = 
-		//{(weight<1,2>()), weight<1,3>(), weight<2,3>() ,weightCP()};
-  //gpuargs->readVariables(weights);
-  //gpuargs->provideSignatureDevice();
-  //TODO add vector<double> to parameters on gpu
-  cuCalcSum(gpuargs->args, gpuargs->rets, weight<1,2>(), weight<1,3>(), weight<2,3>() ,weightCP(), (m_alpha == m_beta), fargs.args[0].arr.size());
+  cuCalcSum<FloatType>(gpuargs->args, gpuargs->rets, weight<1,2>(), weight<1,3>(), weight<2,3>() ,weightCP(), (m_alpha == m_beta), fargs.args[0].arr.size());
 }
 
 OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)

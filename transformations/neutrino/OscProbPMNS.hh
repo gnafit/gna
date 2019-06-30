@@ -10,32 +10,49 @@
 
 class OscillationVariables;
 class PMNSVariables;
-class OscProbPMNSBase: public GNAObject,
-                       public TransformationBind<OscProbPMNSBase> {
-protected:
-  OscProbPMNSBase(Neutrino from, Neutrino to);
-    
-  template <int I, int J>
-  double DeltaMSq() const;
-  
-  template <int I, int J>
-  double weight() const;
-    
-  double weightCP() const;
-    
-  std::unique_ptr<OscillationVariables> m_param;
-  std::unique_ptr<PMNSVariables> m_pmns;
-    
-  int m_alpha, m_beta, m_lepton_charge;
-};
-    
 
 namespace GNA {
   namespace GNAObjectTemplates {
     template<typename FloatType>
-    class OscProbPMNST: public OscProbPMNSBase,
-                        public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
+    class OscProbPMNSBaseT: public GNAObjectT<FloatType,FloatType>,
+                            public TransformationBind<OscProbPMNSBaseT<FloatType>, FloatType,FloatType> {
+
+    private:
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
+      using typename BaseClass::FunctionArgs;
+      using typename BaseClass::TypesFunctionArgs;
+
+    protected:
+      OscProbPMNSBaseT(Neutrino from, Neutrino to);
+        
+      template <int I, int J>
+      double DeltaMSq() const;
+      
+      template <int I, int J>
+      double weight() const;
+        
+      double weightCP() const;
+        
+      std::unique_ptr<OscillationVariables> m_param;
+      std::unique_ptr<PMNSVariables> m_pmns;
+        
+      int m_alpha, m_beta, m_lepton_charge;
+    };
+  }    
+}
+
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscProbPMNST: public OscProbPMNSBaseT<FloatType>,
+                        public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
+
+    private:
+      using BaseClass = OscProbPMNSBaseT<FloatType>;
+    public:
+      using typename BaseClass::FunctionArgs;
+      using typename BaseClass::TypesFunctionArgs;
       using TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType>::transformation_;
     
       OscProbPMNST<FloatType>(Neutrino from, Neutrino to, std::string l_name="L");
@@ -59,29 +76,42 @@ namespace GNA {
   }
 }
 
+
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscProbAveragedT: public OscProbPMNSBaseT<FloatType>,
+                           public TransformationBind<OscProbAveragedT<FloatType>, FloatType, FloatType> {
+      using BaseClass =  OscProbPMNSBaseT<FloatType>;
+    public:
+      using TransformationBind<OscProbAveragedT<FloatType>, FloatType,FloatType>::transformation_;
+      using typename BaseClass::FunctionArgs;
+      using typename BaseClass::TypesFunctionArgs;
     
-class OscProbAveraged: public OscProbPMNSBase,
-                       public TransformationBind<OscProbAveraged> {
-public:
-  using TransformationBind<OscProbAveraged>::transformation_;
+      OscProbAveragedT<FloatType>(Neutrino from, Neutrino to);
+    private:
 
-  OscProbAveraged(Neutrino from, Neutrino to);
-private:
-  void CalcAverage(FunctionArgs fargs);
-};
-
-class OscProbPMNSMult: public OscProbPMNSBase,
-                       public TransformationBind<OscProbPMNSMult> {
-public:
-  using TransformationBind<OscProbPMNSMult>::transformation_;
-
-  OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name="Lavg");
-
-  template <int I, int J>
-  void calcComponent(FunctionArgs fargs);
-  void calcSum(FunctionArgs fargs);
-protected:
-  variable<double> m_Lavg;
-
-  variable<double> m_weights;
-};
+      void CalcAverage(FunctionArgs fargs);
+    };
+    
+    template<typename FloatType>
+    class OscProbPMNSMultT: public OscProbPMNSBaseT<FloatType>,
+                           public TransformationBind<OscProbPMNSMultT<FloatType>,FloatType,FloatType> {
+      using BaseClass =  OscProbPMNSBaseT<FloatType>;
+    public:
+      using TransformationBind<OscProbPMNSMultT<FloatType>>::transformation_;
+      using typename BaseClass::FunctionArgs;
+      using typename BaseClass::TypesFunctionArgs;
+    
+      OscProbPMNSMultT<FloatType>(Neutrino from, Neutrino to, std::string l_name="Lavg");
+    
+      template <int I, int J>
+      void calcComponent(FunctionArgs fargs);
+      void calcSum(FunctionArgs fargs);
+    protected:
+      variable<double> m_Lavg;
+    
+      variable<double> m_weights;
+    }; 
+  }
+}
