@@ -52,8 +52,8 @@ void cuCalcComponent(T** xarg, T** xret, T** intern, T** params,
  * CUDA version of calcComponentCP function in OscProbPMNS::OscProbPMNS
  * 
  */
-template <typename T>
-__global__ void d_cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, T m12, T m13, T m23, T int m,
+template<typename T>
+__global__ void d_cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, T m12, T m13, T m23, int m,
 					T oscprobArgumentFactor, T m_L) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 //	xret[0][idx] = 1.0;
@@ -99,12 +99,11 @@ void cuCalcSum(T** xarg, T** xret, T w12, T w13, T w23, T wcp, bool isSame, unsi
 	cudaDeviceSynchronize();
 }
 
-template void cuCalcComponent<double>(double** xarg, double xret,  double w12, double w13, double w23, double wcp, bool isSame, unsigned int m);
-template void cuCalcComponent<float>(float** xarg, float xret,  float w12, float w13, float w23, float wcp, bool isSame, unsigned int m);
+template void cuCalcComponent<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m, unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
+template void cuCalcComponent<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
 
 template void cuCalcComponentCP<double>(double** xarg, double** xret, double** intern, double** params, double m12, double m13, double m23, unsigned int m, unsigned int n, double oscprobArgumentFactor, double m_L);
 template void cuCalcComponentCP<float>(float** xarg, float** xret, float** intern, float** params, float m12, float m13, float m23, unsigned int m, unsigned int n, float oscprobArgumentFactor, float m_L);
 
-template void cuCalcComponent<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m, unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
-template void cuCalcComponent<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
-
+template void cuCalcSum<double>(double** xarg, double** xret, double w12, double w13, double w23, double wcp, bool isSame, unsigned int m);
+template void cuCalcSum<float>(float** xarg, float** xret, float w12, float w13, float w23, float wcp, bool isSame, unsigned int m);
