@@ -364,7 +364,7 @@ class exp(baseexp):
             self.cfg.subdetector_fraction.correlations = None
 
         if self.opts.parameters=='yb':
-            self.cfg.eff.pars = uncertain(0.72, 'fixed')
+            self.cfg.eff.pars = uncertain(0.73, 'fixed')
             # self.cfg.livetime.pars['AD1'] = uncertain( 6*300*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
