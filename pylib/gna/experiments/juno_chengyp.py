@@ -364,8 +364,8 @@ class exp(baseexp):
             self.cfg.subdetector_fraction.correlations = None
 
         if self.opts.parameters=='yb':
-            self.cfg.eff.pars = uncertain(0.73*0.95, 'fixed') # 0.95 is from ILL+Vogel/Huber+Mueller
-            self.cfg.livetime.pars['AD1'] = uncertain( 6*333*seconds_per_day, 'fixed' )
+            self.cfg.eff.pars = uncertain(0.73, 'fixed')
+            self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
         mode_yb = self.opts.mode=='yb'
