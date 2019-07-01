@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from load import ROOT as R
+from collections import OrderedDict
 
 _current_precision = 'double'
 _current_precision_short = 'double'
@@ -53,6 +54,20 @@ class cuda(object):
 
     def __exit__(self, *args):
         self.handle.setDefaultFunction(self.backup_function)
+
+class entryContext(object):
+    def __init__(self, *args, **kwargs):
+        self.attrs = OrderedDict(*args, **kwargs)
+
+    def __enter__(self):
+        pusher = R.TransformationTypes.TransformationContext.pushAttr
+        for k, v in self.attrs.items():
+            pusher(k, v)
+
+    def __exit__(self, *args):
+        popper = R.TransformationTypes.TransformationContext.popAttr
+        for k in self.attrs.keys():
+            popper(k)
 
 class allocator(object):
     """Set allocator for arrayview"""

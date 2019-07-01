@@ -18,7 +18,7 @@ class VTContainer_v01(OrderedDict):
 
     def __missing__(self, key):
         newvar = Variable(key, order=self._order)
-        self[key] = newvar
+        self.__setitem__(key, newvar)
         return newvar
 
     def __setitem__(self, key, value):
@@ -26,7 +26,7 @@ class VTContainer_v01(OrderedDict):
             if value.name is undefinedname and key!='__tree__':
                 value.name = key
             value.nindex.arrange(self._order)
-            value.expandable=False
+            # value.expandable=False
         elif inspect.isclass(value) and issubclass(value, Operation):
             value.order=self._order
 
@@ -79,7 +79,11 @@ class Expression_v01(object):
         lib = dict()
         for k, v in ilib.items():
             v['name'] = k
-            lib[v['expr']] = v
+            exprs = v['expr']
+            if isinstance(exprs, str):
+                exprs=[exprs]
+            for expr in exprs:
+                lib[expr] = v
         for tree in self.trees:
             tree.guessname(lib, *args, **kwargs)
 
@@ -172,6 +176,8 @@ class ExpressionContext_v01(object):
 
         self.providers = dict()
         for name, cfg in self.bundles.items():
+            if not 'bundle' in cfg:
+                continue
             provider = ItemProvider(cfg, name)
             provider.register_in(self.providers)
 

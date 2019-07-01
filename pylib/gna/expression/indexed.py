@@ -52,7 +52,7 @@ class Indexed(object):
 
     def __str__(self):
         if self.nindex:
-            return '{}[{}]'.format(self.name, str(self.nindex))
+            return '{}[{}]'.format(self.name, self.nindex.comma_list())
         else:
             return self.name
 

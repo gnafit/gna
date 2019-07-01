@@ -21,7 +21,7 @@ class Operation(TCall,NestedTransformation):
         NestedTransformation.__init__(self)
 
     def __str__(self):
-        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce)
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self.nindex_to_reduce.comma_list())
 
     def __call__(self, *args):
         if self.call_lock:

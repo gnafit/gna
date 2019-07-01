@@ -281,6 +281,9 @@ class NIndex(object):
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
 
+    def comma_list(self, **kwargs):
+        return ','.join(self.indices.keys())
+
     def names(self, short=False, with_name=False):
         ret = []
         for k in self.order:

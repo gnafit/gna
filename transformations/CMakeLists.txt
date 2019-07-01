@@ -43,6 +43,7 @@ set(TRANSFORMATION_SOURCES
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
   transformations/hist/HistEdgesOffset.cc
+  transformations/hist/HistEdgesLinear.cc
   transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
   transformations/hist/RebinN.cc
@@ -152,6 +153,7 @@ set(TRANSFORMATION_HEADERS
   CovariatedPrediction.hh
   HistEdges.hh
   HistEdgesOffset.hh
+  HistEdgesLinear.hh
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh

@@ -52,9 +52,9 @@ class oscprob_v03(TransformationBundle):
 
                             trans = oscprob.transformations[component]
                             if self.nidx_minor:
-                                trans.setLabel( it.current_format('OP {component}:\n{reactor}->{detector}\n'+it_minor.current_format()) )
+                                trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}\n'+it_minor.current_format()) )
                             else:
-                                trans.setLabel( it.current_format('OP {component}:\n{reactor}->{detector}') )
+                                trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}') )
                             output = trans[component]
                             input  = trans['Enu']
 
@@ -71,6 +71,9 @@ class oscprob_v03(TransformationBundle):
             names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
             with ns_pmns:
                 R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
+                ns_pmns['Delta'].setFixed()
+                ns_pmns['SigmaDecohRel'].setFixed()
+                ns_pmns['SinSq23'].setFixed()
                 ns_pmns.materializeexpressions()
 
             for i, vname in enumerate(names):
