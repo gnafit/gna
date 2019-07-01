@@ -16,7 +16,7 @@ class integral_2d1d_v03(TransformationBundle):
     @staticmethod
     def _provides(cfg):
         var0, var1 = cfg.variables
-        return (), ('integral', var0, var1, var0+'_centers', var0+'_edges', var0+'_hist')
+        return (), ('integral', var0, var1, var0+'_centers', var0+'_edges', var0+'_hist', var0+'_mesh', var1+'_mesh')
 
     def check_cfg(self):
         if not 'name' in self.cfg:
@@ -56,6 +56,8 @@ class integral_2d1d_v03(TransformationBundle):
         self.set_output('{}_edges'.format(self.cfg.variables[0]), None, self.integrator.points.xedges)
         self.set_output('{}_centers'.format(self.cfg.variables[0]),  None, self.integrator.points.xcenters)
         self.set_output('{}_hist'.format(self.cfg.variables[0]),  None, self.integrator.points.xhist)
+        self.set_output('{}_mesh'.format(self.cfg.variables[0]),  None, self.integrator.points.xmesh)
+        self.set_output('{}_mesh'.format(self.cfg.variables[1]),  None, self.integrator.points.ymesh)
         self.set_output(self.cfg.variables[1],            None, self.integrator.points.y)
 
         hist = self.integrator.hist
