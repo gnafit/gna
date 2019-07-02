@@ -243,7 +243,7 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
       m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = args[i].arr;
       break;
     case CovarianceAction::Block:
-      std::cout << args[i].arr;
+      /* std::cout << args[i].arr; */
       m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = args[i].arr;
       break;
     }

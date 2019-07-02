@@ -115,7 +115,7 @@ class Dataset(object):
                 obs1, obs2 = list(covkey)
             for cov in covs:
                 prediction.covariate(cov, obs1, 1, obs2, 1)
-        if covparameters:
+        if any(par.influences(prediction.prediction) for par in covparameters):
             jac = ROOT.Jacobian()
             par_covs = ROOT.ParCovMatrix()
             for par in covparameters:
@@ -130,6 +130,7 @@ class Dataset(object):
             product.multiply(jac.jacobian)
             product.multiply(par_covs.unc_matrix)
             product.multiply(jac_T.transpose.T)
+
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 

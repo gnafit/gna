@@ -3,10 +3,10 @@
 #include <algorithm>
 
 void Jacobian::calcJacobian(FunctionArgs fargs) {
-    auto& arg=fargs.args[0];
-    auto& ret=fargs.rets[0];
+    auto& arg = fargs.args;
+    auto& to_ret = fargs.rets;
 
-    Eigen::MatrixXd storage(arg.x.size(), m_pars.size());
+    Eigen::MatrixXd storage(arg[0].x.size(), m_pars.size());
     storage.setZero();
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
@@ -23,22 +23,24 @@ void Jacobian::calcJacobian(FunctionArgs fargs) {
 
       x->set(points[0]);
 
-      Eigen::ArrayXd ret = f1*arg.x;
+      Eigen::ArrayXd ret = f1*arg[0].x;
 
       x->set(points[1]);
-      ret -= f1*arg.x;
+      ret -= f1*arg[0].x;
       x->set(points[2]);
-      ret -= f2*arg.x;
+      ret -= f2*arg[0].x;
       x->set(points[3]);
-      ret += f2*arg.x;
+      ret += f2*arg[0].x;
       x->set(x0);
 
       storage.col(i) = ret.matrix();
     }
 
-    ret.mat = storage;
+    to_ret[0].mat = storage;
+
+
 }
 
 void Jacobian::calcTypes(TypesFunctionArgs fargs){
-    fargs.rets[0] = DataType().points().shape(fargs.args[0].size(), m_pars.size());
+    fargs.rets[0] = DataType().points().shape(fargs.args[0].points().shape()[0], m_pars.size());
 }
