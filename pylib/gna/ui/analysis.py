@@ -33,12 +33,12 @@ class cmd(basecmd):
             if '/' in obs:
                 yield self.env.get(obs)
             else:
-                for param in get_parameters([obs]):
+                for param in get_parameters([obs], drop_fixed=True, drop_free=True):
                     yield param
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
-        parameters = get_parameters(self.opts.parameters)
+        parameters = get_parameters(self.opts.parameters, drop_fixed=True, drop_free=True)
         if self.opts.observables:
             observables = list(self.__extract_obs(self.opts.observables))
         else:

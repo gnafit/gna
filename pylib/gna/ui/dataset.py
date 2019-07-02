@@ -35,7 +35,7 @@ class cmd(basecmd):
 
         dataset = Dataset(desc=None)
         if self.opts.pull:
-            pull_pars = get_parameters(self.opts.pull)
+            pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
 
             for par in pull_pars:
                 dataset.assign(par, [par.central()], [par.sigma()**2])
