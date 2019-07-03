@@ -4,9 +4,10 @@ void Derivative::calcDerivative(FunctionArgs fargs) {
   auto& arg=fargs.args[0].x;
   auto& ret=fargs.rets[0].x;
   auto x0 = m_x->value();
+  auto reldelta_corrected = m_reldelta*x->step(); 
 
-  double f1 = 4.0/(3.0*m_reldelta);
-  double f2 = 1.0/(6.0*m_reldelta);
+  double f1 = 4.0/(3.0*reldelta_corrected);
+  double f2 = 1.0/(6.0*reldelta_corrected);
 
   std::array<double, 4> points;
   points[0] = m_x->relativeValue(+m_reldelta/2);
