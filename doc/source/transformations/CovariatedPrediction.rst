@@ -54,15 +54,17 @@ Description
 Calculate compound covariance matrix based on statistical uncertainties (diagonal)
 , optional covariation matrices for each prediction :math:`m_i`
 and between predictions :math:`m_i` and :math:`m_j`. The pull terms are
-included here. 
+included here.
 
 This is the constant predefined covariance matrix part: the base.
 
 Inputs
 """"""
 1) Covariance matrix. Options:
-   a) covariance matrix :math:`V_i` for model :math:`m_i`.
-   b) cross covariance matrix :math:`V_{ij}` for models :math:`m_i` :math:`m_j`.
+
+    a) covariance matrix :math:`V_i` for model :math:`m_i`.
+    b) cross covariance matrix :math:`V_{ij}` for models :math:`m_i` :math:`m_j`.
+
 2) etc.
 
 Inputs are assigned via ``covariate(cov, obs1, n1, obs2, n2)`` method.
@@ -85,7 +87,7 @@ Calculates :math:`V_\text{base}` as a block matrix:
    \dots    & \dots  & \dots
    \end{pmatrix}.
 
-   Returns constructed covariance matrix.
+Returns constructed covariance matrix.
 .. Returns the Cholesky decomposition :math:`L_\text{base}`.
 
 Cov transformation
