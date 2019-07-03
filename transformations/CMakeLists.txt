@@ -92,6 +92,7 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/Chi2.cc
   transformations/stats/CovarianceToyMC.cc
   transformations/stats/CovariatedPrediction.cc
+  transformations/stats/CovariatedPredictionV.cc
   transformations/stats/Covmat.cc
   transformations/stats/NormalToyMC.cc
   transformations/stats/Poisson.cc
@@ -151,6 +152,7 @@ set(TRANSFORMATION_HEADERS
   Jacobian.hh
   # Detector effects
   CovariatedPrediction.hh
+  CovariatedPredictionV.hh
   HistEdges.hh
   HistEdgesOffset.hh
   HistEdgesLinear.hh
