@@ -55,7 +55,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=ns)
+        self.walker = GraphWalker(*transformation, namespace=ns)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
