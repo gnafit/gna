@@ -22,7 +22,7 @@ class cmd(basecmd):
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)
 
-        loaded_parameters = get_parameters(self.opts.par)
+        loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False)
         statistic_parameters = []
         for par in loaded_parameters:
             if par.influences(self.opts.statistic):
