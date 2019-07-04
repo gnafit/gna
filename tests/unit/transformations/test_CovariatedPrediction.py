@@ -11,7 +11,7 @@ from gna.env import env
 from gna.unittest import *
 import numpy as N
 
-# graphviz = True
+graphviz = False
 
 def test_covariated_prediction_v01():
     n = 10

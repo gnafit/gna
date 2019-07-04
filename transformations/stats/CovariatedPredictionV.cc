@@ -266,7 +266,7 @@ void CovariatedPredictionV::calculateCov(FunctionArgs fargs) {
       auto& sys_covmat = args[1].arr;
       full_covmat += sys_covmat;
   }
-  fargs.rets[0].arr = full_covmat.inverse();
+  fargs.rets[0].arr = full_covmat.sqrt();
 }
 
 /**
