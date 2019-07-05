@@ -25,7 +25,7 @@ class exp(baseexp):
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
         parser.add_argument('--parameters', choices=['default', 'yb'], default='default', help='set of parameters to load')
-        parser.add_argument('--reactors', choices=['yb', 'pessimistic'], default='yb', help='reactors setting')
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -48,9 +48,12 @@ class exp(baseexp):
         self.subdetectors_number = 200
         self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
-        if self.opts.reactors=='pessimistic':
+        if 'pessimistic' in self.opts.reactors:
             self.reactors.remove('TS3')
             self.reactors.remove('TS4')
+        if 'far-off' in self.opts.reactors:
+            self.reactors.remove('DYB')
+            self.reactors.remove('HZ')
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     self.reactors],
@@ -212,7 +215,9 @@ class exp(baseexp):
                         ),
                 baselines = NestedDict(
                         bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
+                        reactors  = 'near-equal' in self.opts.reactors \
+                                     and 'data/juno_nominal/coordinates_reactors_equal.py' \
+                                     or 'data/juno_nominal/coordinates_reactors.py',
                         detectors = 'data/juno_nominal/coordinates_det.py',
                         unit = 'km'
                         ),
