@@ -11,7 +11,7 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('--analysis', type=env.parts.analysis, required=True,
                             help='Analysis from which covmatrices would be used')
-        parser.add_argument('--savefig', help='Path to save figure')
+        parser.add_argument('--savefig', '-o', '--output', help='Path to save figure')
         parser.add_argument('--show', action='store_true',
                                   help='Show plot of covariance matrix')
         parser.add_argument('--dump', help='File to dump covariance matrix')
