@@ -28,18 +28,23 @@ class cmd(basecmd):
         parser.add_argument('--error-type', choices=['pearson', 'neyman'],
                             default='pearson', help='The type of statistical errors to be used')
         parser.add_argument('--random-seed', type=int, help='Set random seed of numpy random generator to given value')
+        parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
     def run(self):
         if self.opts.random_seed:
             np.random.seed(self.opts.random_seed)
 
         dataset = Dataset(desc=None)
+        verbose = self.opts.verbose
+        if verbose:
+            print('Adding pull parameters to dataset', self.opts.name)
         if self.opts.pull:
             pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
 
             for par in pull_pars:
                 dataset.assign(par, [par.central()], [par.sigma()**2])
-                print (par, [par.central()], [par.sigma()**2])
+                if verbose:
+                    print (par, [par.central()], [par.sigma()**2])
 
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
