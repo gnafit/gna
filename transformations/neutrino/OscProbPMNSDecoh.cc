@@ -9,37 +9,40 @@
 using namespace Eigen;
 using namespace NeutrinoUnits;
 
-OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
-  : OscProbPMNSBase(from, to)
-{
-  variable_(&m_L, "L");
-  variable_(&m_sigma, "SigmaDecohRel");
+using namespace GNA::GNAObjectTemplates;
 
-  transformation_("comp12")
+template<typename FloatType>
+GNA::GNAObjectTemplates::OscProbPMNSDecohT<FloatType>::OscProbPMNSDecohT(Neutrino from, Neutrino to)
+  : OscProbPMNSBaseT<FloatType>(from, to)
+{
+  this->variable_(&m_L, "L");
+  this->variable_(&m_sigma, "SigmaDecohRel");
+
+  this->transformation_("comp12")
     .input("Enu")
     .output("comp12")
     .output("compCP12")
-    .depends(m_L, m_sigma, m_param->DeltaMSq12)
-    .func(&OscProbPMNSDecoh::calcComponent<1,2>);
-  transformation_("comp13")
+    .depends(m_L, m_sigma, this->m_param->DeltaMSq12)
+    .func(&OscProbPMNSDecohT<FloatType>::calcComponent<1,2>);
+  this->transformation_("comp13")
     .input("Enu")
     .output("comp13")
     .output("compCP13")
-    .depends(m_L, m_sigma,m_param->DeltaMSq13)
-    .func(&OscProbPMNSDecoh::calcComponent<1,3>);
-  transformation_("comp23")
+    .depends(m_L, m_sigma, this->m_param->DeltaMSq13)
+    .func(&OscProbPMNSDecohT<FloatType>::calcComponent<1,3>);
+  this->transformation_("comp23")
     .input("Enu")
     .output("comp23")
     .output("compCP23")
-    .depends(m_L, m_sigma,m_param->DeltaMSq23)
-    .func(&OscProbPMNSDecoh::calcComponent<2,3>);
-   auto probsum = transformation_("probsum")
+    .depends(m_L, m_sigma, this->m_param->DeltaMSq23)
+    .func(&OscProbPMNSDecohT<FloatType>::calcComponent<2,3>);
+   auto probsum = this->transformation_("probsum")
     .input("comp12")
     .input("comp13")
     .input("comp23")
     .output("probsum")
     .types(TypesFunctions::pass<0>)
-    .func(&OscProbPMNSDecoh::calcSum);
+    .func(&OscProbPMNSDecohT<FloatType>::calcSum);
   if (from.flavor != to.flavor) {
     probsum.input("compCP12");
     probsum.input("compCP13");
@@ -49,6 +52,7 @@ OscProbPMNSDecoh::OscProbPMNSDecoh(Neutrino from, Neutrino to)
   }
 }
 
+/* // Was replaced to header as it has template params
 template <int I, int J>
 void OscProbPMNSDecoh::calcComponent(FunctionArgs fargs) {
   auto& rets=fargs.rets;
@@ -68,16 +72,18 @@ void OscProbPMNSDecoh::calcComponent(FunctionArgs fargs) {
     rets[1].x = F*sin(phi_st+phi_d);
   }
 }
+*/
 
-void OscProbPMNSDecoh::calcSum(FunctionArgs fargs) {
+template<typename FloatType>
+void GNA::GNAObjectTemplates::OscProbPMNSDecohT<FloatType>::calcSum(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0].x;
-  ret = -3.0*weight<1,2>()*args[0].x;
-  ret+= -2.0*weight<1,3>()*args[1].x;
-  ret+= -2.0*weight<2,3>()*args[2].x;
-  if (m_alpha == m_beta) {
+  ret = -(this->template weight<1,2>())*(FloatType)3.0*args[0].x;
+  ret+= -2.0*(this->template weight<1,3>())*args[1].x;
+  ret+= -2.0*(this->template weight<2,3>())*args[2].x;
+  if (this->m_alpha == this->m_beta) {
     ret += args[3].x;
   } else {
-    ret += 8.0*weightCP()*(args[3].x-args[4].x+args[5].x);
+    ret += 8.0*this->weightCP()*(args[3].x-args[4].x+args[5].x);
   }
 }
