@@ -4,8 +4,6 @@
 import ROOT
 from gna.env import env
 from physlib import pdg
-curpdg = pdg[2016]
-
 
 # TODO: Add the way to automaticaly detect the current mass ordering and
 # switch the values of mixings to the current known global best fit for a
@@ -14,7 +12,9 @@ curpdg = pdg[2016]
 
 # DeltaMSqIJ = m^2_j - m^2_i
 
-def reqparameters(ns):
+def reqparameters(ns, pdgyear=2016):
+    curpdg = pdg[pdgyear]
+
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
                       sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
 

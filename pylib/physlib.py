@@ -60,6 +60,7 @@ pdg[2013]   = dict( pdg[2012]
     , neutron_lifetime = 880.1
     , neutron_lifetimee = 0.9
 )
+
 pdg['live'] = dict( pdg[2013] )
 
 pdg[2016]  = dict( pdg[2013]
@@ -84,6 +85,19 @@ pdg[2016]  = dict( pdg[2013]
     , sinSqtheta23_inverted_e = 0.05
     , dmSqEE = 2.5e-3  # Daya Bay long oscillation paper
     , dmSqEE_e = 0.8485e-3
+)
+
+pdg[2018]  = dict( pdg[2016]
+    , dmSq21 = 7.53e-5 #pdglive, 2013, Gando (KamLAND + solar + SBL + accelerator)
+    , dmSq21_e = 0.18e-5
+    , sinSqtheta12 = 0.307
+    , sinSqtheta12_e = 0.013
+    , sinSqtheta13 = 2.12e-2
+    , sinSqtheta13_e = 0.08e-2
+    , dmSq32_normal = 2.51e-3
+    , dmSq32_normal_e = 0.05e-3
+    , dmSq32_inverted = 2.56e-3
+    , dmSq32_inverted_e = 0.04e-3
 )
 
 pdg['dyboscar']  = dict( pdg[2013]

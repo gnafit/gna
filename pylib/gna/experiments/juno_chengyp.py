@@ -23,9 +23,11 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
-        parser.add_argument('--parameters', choices=['default', 'yb'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -103,8 +105,14 @@ class exp(baseexp):
 
     def parameters(self):
         ns = self.namespace
-        fixed_pars = ['pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
-        free_pars  = ['pmns.DeltaMSqEE']
+        if self.opts.free=='minimal':
+            fixed_pars = ['pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+            free_pars  = ['pmns.DeltaMSqEE']
+        elif self.opts.free=='osc':
+            fixed_pars = []
+            free_pars  = ['pmns.DeltaMSqEE', 'pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+        else:
+            raise Exception('Unsupported option')
         for par in fixed_pars:
             ns[par].setFixed()
         for par in free_pars:
@@ -152,7 +160,8 @@ class exp(baseexp):
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v02', major='rdc'),
+                    bundle = dict(name='oscprob', version='v03', major='rdc'),
+                    pdgyear = self.opts.pdgyear
                     ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -368,12 +377,12 @@ class exp(baseexp):
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
 
-        if self.opts.parameters=='yb':
+        if self.opts.parameters in ['yb', 'yb-noosc']:
             self.cfg.eff.pars = uncertain(0.73, 'fixed')
             self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
-        mode_yb = self.opts.mode=='yb'
+        mode_yb = self.opts.mode.startswith('yb')
 
         spec = self.namespace('spectrum')
         cfg = self.cfg.shape_uncertainty
