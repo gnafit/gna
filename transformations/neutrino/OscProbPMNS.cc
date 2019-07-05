@@ -23,6 +23,8 @@
 using namespace Eigen;
 using NeutrinoUnits::oscprobArgumentFactor;
 
+using namespace GNA::GNAObjectTemplates;
+
 template<typename FloatType>
 GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::OscProbPMNSBaseT(Neutrino from, Neutrino to)
   : m_param(new OscillationVariables(this)), m_pmns(new PMNSVariables(this))
@@ -65,6 +67,9 @@ FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::weight() const {
     );
 }
 i*/
+
+//template <int I, int J, typename FloatType>
+//FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::weight<int I, int J>() const;
 
 template<typename FloatType>
 FloatType GNA::GNAObjectTemplates::OscProbPMNSBaseT<FloatType>::weightCP() const {

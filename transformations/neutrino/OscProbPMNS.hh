@@ -37,7 +37,7 @@ namespace GNA {
       }
       
       template <int I, int J>
-      FloatType weight() const {
+      FloatType weight(){
         return std::real(
           this->m_pmns->V[m_alpha][I-1].value()*
           this->m_pmns->V[m_beta][J-1].value()*
@@ -62,8 +62,10 @@ namespace GNA {
     class OscProbPMNST: public OscProbPMNSBaseT<FloatType>,
                         public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
 
+
     private:
       using BaseClass = OscProbPMNSBaseT<FloatType>;
+      //using OscProbPMNSBaseT<FloatType>::weight<int I, int J>(); 
     public:
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;
