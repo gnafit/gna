@@ -61,7 +61,21 @@ void copyH2D_NA(T* dst, T* src, unsigned int N) {
         }
 }
 
-
+template<typename T>
+void copyH2D_NA(T** dst, T* src, size_t N) {
+        cudaError_t err;
+	T** tmpdst = new T*[1];
+	err = cudaMemcpy(tmpdst, dst, sizeof(T), cudaMemcpyDeviceToHost);
+        if (err != cudaSuccess) {
+                std::cerr << "1Err is " << cudaGetErrorString(err) << std::endl;
+        }
+	std::cout << "tmpdst[0]=" << tmpdst[0] << std::endl;
+        err = cudaMemcpy(tmpdst[0],  src, N * sizeof(T), cudaMemcpyHostToDevice);
+        if (err != cudaSuccess) {
+                std::cerr << "2Err is " << cudaGetErrorString(err) << std::endl;
+        }
+	
+}
 
 template<typename T>
 void copyD2D_NA(T* dst, T* src, unsigned int N) {
@@ -98,6 +112,7 @@ template void copyH2D_NA<unsigned int*>(unsigned int** dst, unsigned int** src, 
 template void copyH2D_NA<double*>(double** dst, double** src, unsigned int N);
 template void copyH2D_NA<unsigned int>(unsigned int* dst, unsigned int* src, unsigned int N);
 template void copyH2D_NA<double>(double* dst, double* src, unsigned int N);
+template void copyH2D_NA<double>(double** dst, double* src, size_t N);
 
 template void device_malloc<double>(double* &dst, unsigned int N);
 template void device_malloc<double*>(double** &dst, unsigned int N);

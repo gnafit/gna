@@ -7,6 +7,9 @@ template<typename T>
 void copyH2D_NA(T* dst, T* src, unsigned int N) ;
 
 template<typename T>
+void copyH2D_NA(T** dst, T* src, size_t N) ;
+
+template<typename T>
 void cuwr_free(T* &ptr);
 
 template<typename T>

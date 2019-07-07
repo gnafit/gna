@@ -14,16 +14,21 @@ template <typename T>
 __global__
 void rebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize ) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
-	//int y = blockDim.y * blockIdx.y + threadIdx.y;
-        rets[0][x] = 0;
+//	int y = blockDim.y * blockIdx.y + threadIdx.y;
+        //rets[0][x] = 0;
+	if (x>=argsize) return;
 	for(int i = 0; i < retsize;i++) {
-		rets[0][x] += ints[0][argsize*x+i]*args[0][i]
+		rets[i][x] = ints[0][argsize*i +x]*args[0][x];
 	}
+
+//	ints[0][x] = x;
+//	rets[0][x]  =ints[0][x];
+	printf("%d, %lf\n", retsize, rets[0][x]);
 }
 
 template<typename T>
 void curebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize) {
-	rebin<<<argsize / CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(T** args, T** ints, T** rets, size_t argsize, retsize);
+	rebin<<<argsize / CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(args, ints, rets, argsize, retsize);
 	cudaDeviceSynchronize();
 }
 
