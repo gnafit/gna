@@ -39,15 +39,18 @@ void Rebin::calcSmear(FunctionArgs& fargs) {
 }
 
 void Rebin::calcSmear_gpu(FunctionArgs& fargs) {
+  fargs.args.touch();
   auto& args=fargs.args;
   auto& gpuargs = fargs.gpu;
   gpuargs->provideSignatureDevice();
   if( !m_initialized ){
       calcMatrix( args[0].type );
       Eigen::MatrixXd dMat = Eigen::MatrixXd(m_sparse_cache);
-      copyH2D_NA(gpuargs->ints, dMat.data(), fargs.ints[0].x.size() );// (unsigned int)args[0].x.size() *(m_new_edges.size()-1));
+      double* tmp = dMat.data();
+      copyH2D_NA(gpuargs->ints, tmp, fargs.ints[0].x.size());// (unsigned int)args[0].x.size() *(m_new_edges.size()-1));
   }
-  curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, args[0].type.size(), fargs.rets[0].type.size());  
+  std::cout << "m new - " << (this->m_new_edges.size()-1)  << ", ret size = " << fargs.rets[0].x.size() <<std::endl;
+  curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, fargs.args[0].x.size(), fargs.rets[0].x.size());  
   //fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
