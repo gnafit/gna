@@ -13,6 +13,7 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
+
         self._update_covariances(bases)
 
     def _update_covariances(self, bases):
@@ -163,6 +164,7 @@ class Dataset(object):
         blocks = []
         for i, obsblock in enumerate(self.sortobservables(observables, covparameters)):
             prediction = ROOT.CovariatedPrediction()
+            import IPython; IPython.embed()
             for obs in obsblock:
                 prediction.append(obs)
             self.assigncovariances(set(obsblock), prediction, covparameters)
