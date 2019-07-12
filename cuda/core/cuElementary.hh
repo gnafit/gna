@@ -28,11 +28,14 @@ void cuexp(double** array, double** ans_array, int n, int m); /* ported */
 void cupoisson(double** array, double** ans_array, int* n, int amount, int maxn);
 void cupoissonapprox(double** array, double** ans_array, int* n, int amount, int maxn);
 
-void cuselfpower(double** array, double** ans_array, int n, int m, double scale);
-void cuselfpower(float** array, float** ans_array, int n, int m, float scale);
+void cuselfpower(double** array, double** ans_array, int n, int m, double scale); /*ported*/
+void cuselfpower(float** array, float** ans_array, int n, int m, float scale); /*ported*/
 
 template<typename T> 
 void cunormalize(T** args, T** rets, size_t n );
 
 template<typename T>
-void curebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize);
+void curebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize); /*ported*/
+
+template<typename T> 
+void cuproduct_mat2vec(T** args, T** rets, size_t n, size_t m) ;

@@ -15,7 +15,6 @@ __global__
 void rebin(T** args, T** ints, T** rets, size_t argsize, size_t retsize ) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
         rets[0][x] = 0;
-	//if (x>=retsize) return;
 	for(int i = 0; i < argsize;i++) {
 		rets[0][x] += ints[0][retsize*i +x]*args[0][i];
 	}
