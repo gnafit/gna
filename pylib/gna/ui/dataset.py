@@ -26,8 +26,6 @@ class cmd(basecmd):
         pull.add_argument('--pull-legacy', action='append', help='Parameters to be added as pull terms (legacy code)')
         pull.add_argument('--pull', action='append', dest='pull_legacy', help='Parameters to be added as pull terms')
 
-        parser.add_argument('--pull-observable', help='Create an observable for combined pull term')
-
         parser.add_argument('--asimov-data', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
                             default=[])
@@ -109,7 +107,7 @@ class cmd(basecmd):
         # Create an array, representing pull parameter values
         self.pull_vararray = VarArray(variables, labels='Nuisance: values')
         # Create an array, representing pull parameter central values
-        self.pull_centrals = Points(centrals, labels='Nuiscance: central')
+        self.pull_centrals = Points(centrals, labels='Nuisance: central')
 
         if correlations:
             # In case there are correlations:
@@ -124,14 +122,14 @@ class cmd(basecmd):
                     cov = pari.getCovariance(parj)
                     covariance[i,j]=covariance[j,i]=cov
 
-            self.pull_covariance = Points(covariance, labels='Nuiscance: covariance matrix')
+            self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
         else:
             # If there are no correlations, store only the uncertainties
             self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
 
         dataset.assign(self.pull_vararray.single(), self.pull_centrals.single(), self.pull_sigmas2.single())
 
-        if self.opts.pull_observable:
-            self.env.globalns.addobservable(self.opts.pull_observable, self.pull_vararray.single())
+        ns = self.env.globalns('pull')
+        ns.addobservable(self.opts.name, self.pull_vararray.single())
 
 
