@@ -13,6 +13,7 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
+
         self._update_covariances(bases)
 
     def _update_covariances(self, bases):
