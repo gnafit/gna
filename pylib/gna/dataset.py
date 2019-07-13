@@ -135,6 +135,7 @@ class Dataset(object):
             product.multiply(jac.jacobian)
             product.multiply(par_covs.unc_matrix)
             product.multiply(jac_T.transpose.T)
+            product.product.touch() # Fixme: should be controllable
 
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
