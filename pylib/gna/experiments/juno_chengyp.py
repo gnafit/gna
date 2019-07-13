@@ -28,6 +28,7 @@ class exp(baseexp):
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
+        parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -99,9 +100,15 @@ class exp(baseexp):
             energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
             self.formula.append('eres_matrix[s]| evis_hist')
 
-        self.formula.append('ibd=' + energy_model_formula + ibd)
+        formula_back = self.formula_back
 
-        self.formula+=self.formula_back
+        if self.opts.spectrum_unc=='initial':
+            ibd = ibd+'*shape_norm()'
+        elif self.opts.spectrum_unc=='final':
+            formula_back = formula_back+'*shape_norm()'
+
+        self.formula.append('ibd=' + energy_model_formula + ibd)
+        self.formula.append(formula_back)
 
     def parameters(self):
         ns = self.namespace
@@ -384,32 +391,44 @@ class exp(baseexp):
     def preinit_variables(self):
         mode_yb = self.opts.mode.startswith('yb')
 
-        spec = self.namespace('spectrum')
-        cfg = self.cfg.shape_uncertainty
-        unc = cfg.unc
-        if mode_yb:
-            edges = self.cfg.kinint2_enu.edges
+        if self.opts.spectrum_unc in ['final', 'initial']:
+            spec = self.namespace('spectrum')
+            cfg = self.cfg.shape_uncertainty
+            unc = cfg.unc
+
+            if self.opts.spectrum_unc=='initial':
+                if mode_yb:
+                    edges = self.cfg.kinint2_enu.edges
+                else:
+                    edges = self.cfg.kinint2.edges
+            elif self.opts.spectrum_unc=='final':
+                if mode_yb:
+                    edges = self.cfg.rebin_yb.edges
+                else:
+                    edges = self.cfg.rebin.edges
+
+            names = []
+            for bini in range(edges.size-1):
+                name = 'norm_bin_%04i'%bini
+                names.append(name)
+                label = 'Spectrum shape unc. final bin %i (%.03f, %.03f) MeV'%(bini, edges[bini], edges[bini+1])
+                spec.reqparameter(name, cfg=unc, label=label)
+
+            with spec:
+                vararray = C.VarArray(names, labels='Spectrum shape norm')
+
+            self.cfg.shape_uncertainty = NestedDict(
+                    bundle = dict(name='predefined', version='v01'),
+                    name   = 'shape_norm',
+                    inputs = None,
+                    outputs = vararray.single(),
+                    unc    = cfg.unc,
+                    object = vararray
+                    )
+        elif self.opts.spectrum_unc=='none':
+            pass
         else:
-            edges = self.cfg.kinint2.edges
-
-        names = []
-        for bini in range(edges.size-1):
-            name = 'norm_bin_%04i'%bini
-            names.append(name)
-            label = 'Spectrum shape unc. bin %i (%.03f, %.03f) MeV'%(bini, edges[bini], edges[bini+1])
-            spec.reqparameter(name, cfg=unc, label=label)
-
-        with spec:
-            vararray = C.VarArray(names, labels='Spectrum shape norm')
-
-        self.cfg.shape_uncertainty = NestedDict(
-                bundle = dict(name='predefined', version='v01'),
-                name   = 'shape_norm',
-                inputs = None,
-                outputs = vararray.single(),
-                unc    = cfg.unc,
-                object = vararray
-                )
+            raise Exception('Unknown spectrum shape uncertainty type: '+self.opts.spectrum_unc)
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -462,8 +481,13 @@ class exp(baseexp):
             ns.addobservable("Enu",    outputs.enu_in, export=False)
         else:
             ns.addobservable("Enu",    outputs.enu, export=False)
-        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
-        fine = outputs.ibd_noeffects_bf.AD1
+
+        if 'ibd_noeffects_bf' in outputs:
+            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
+            fine = outputs.ibd_noeffects_bf.AD1
+        else:
+            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
+            fine = outputs.kinint2.AD1
 
         if 'lsnl' in self.opts.energy_model:
             ns.addobservable("{0}_lsnl".format(self.detectorname),     outputs.lsnl.AD1)
@@ -511,7 +535,7 @@ class exp(baseexp):
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu())
-                            )*shape_norm()
+                            )
             '''
 
     formula_ibd_noeffects_yb = '''
@@ -522,12 +546,11 @@ class exp(baseexp):
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu_in_mesh()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu_in_mesh())
-                            )*shape_norm()
+                            )
             '''
 
-    formula_back = [
-        'observation=norm * rebin| ibd'
-        ]
+    formula_back = 'observation=norm * rebin(ibd)'
+
 
     lib = dict(
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
