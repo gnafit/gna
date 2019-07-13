@@ -29,11 +29,13 @@ HistSmear::HistSmear(bool upper) {
 }
 
 void HistSmear::calcSmearUpper(FunctionArgs fargs) {
+  std::cout << "Im on CPU upper" <<std::endl;
   auto& args=fargs.args;
   fargs.rets[0].x = args[1].mat.triangularView<Eigen::Upper>() * args[0].vec;
 }
 
-void HistSmear::calcSmearUpper_gpu(FunctionArgs fargs) {
+void HistSmear::calcSmearUpper_gpu(FunctionArgs& fargs) {
+  std::cout << "Im on GPU upper" <<std::endl;
   auto& args=fargs.args;
   fargs.rets[0].x = args[1].mat.triangularView<Eigen::Upper>() * args[0].vec;
 //TODO triangular view in cuda
@@ -41,15 +43,23 @@ void HistSmear::calcSmearUpper_gpu(FunctionArgs fargs) {
 }
 
 void HistSmear::calcSmear(FunctionArgs fargs) {
+  std::cout <<"Im on cpu " <<std::endl;
   auto& args=fargs.args;
   fargs.rets[0].x = args[1].mat * args[0].vec;
 }
 
 #ifdef GNA_CUDA_SUPPORT
-void HistSmear::calcSmear_gpu(FunctionArgs fargs) {
+void HistSmear::calcSmear_gpu(FunctionArgs& fargs) {
+  std::cout << "Im on GPU" <<std::endl;
   fargs.args.touch();
+  std::cout<<  "size1:" <<std::endl;
   auto& gpuargs=fargs.gpu;
-  //fargs.rets[0].x = args[1].mat * args[0].vec;
+  std::cout<<  "size2:" <<std::endl;
+  gpuargs->provideSignatureDevice();
+  //fargs.rets[0].x = args[1].mat * args[0].veci;
+  std::cout<<  "size3:" <<std::endl;
+  std::cout << "fargs.args cols = " << fargs.args[1].mat.cols() << std::endl;
+  std::cout << "fargs.args rows = " << fargs.args[1].mat.rows() << std::endl;
   cuproduct_mat2vec(gpuargs->args, gpuargs->rets, fargs.args[1].mat.cols(), fargs.args[1].mat.rows());
 }
 #endif
