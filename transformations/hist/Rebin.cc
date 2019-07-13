@@ -48,8 +48,8 @@ void Rebin::calcSmear_gpu(FunctionArgs& fargs) {
   gpuargs->provideSignatureDevice();
   if( !m_initialized ){
       calcMatrix( args[0].type );
-      Eigen::MatrixXd dMat = Eigen::MatrixXd(m_sparse_cache);
-      copyH2D_NA(gpuargs->ints, dMat.data(), fargs.ints[0].x.size());
+      fargs.ints[0].arr = Eigen::MatrixXd(m_sparse_cache);
+      copyH2D_NA(gpuargs->ints, fargs.ints[0].arr.data(), fargs.ints[0].x.size());
   }
   curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, fargs.args[0].x.size(), fargs.rets[0].x.size());  
 }
