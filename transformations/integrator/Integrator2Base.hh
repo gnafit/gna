@@ -37,4 +37,5 @@ private:
   void init_base(double* xedges, double* yedges);
   void check_base(TypesFunctionArgs&);
   void integrate(FunctionArgs&);
+  void integrate_gpu(FunctionArgs&);
 };

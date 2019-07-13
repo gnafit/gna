@@ -3,6 +3,13 @@
 
 #include <iostream>
 #include <iterator>
+#include "config_vars.h"
+
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#include "GpuBasics.hh"
+#endif
+
 
 using namespace Eigen;
 using namespace std;
@@ -46,6 +53,9 @@ TransformationDescriptor Integrator2Base::add_transformation(const std::string& 
         .types(TypesFunctions::ifPoints<0>, TypesFunctions::if2d<0>, &Integrator2Base::check_base)
         .types(TypesFunctions::ifSame)
         .func(&Integrator2Base::integrate)
+#ifdef GNA_CUDA_SUPPORT
+        .func("gpu", &Integrator2Base::integrate_gpu, DataLocation::Device)
+#endif
         ;
     reset_open_input();
     return transformations.back();
@@ -73,6 +83,15 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
         throw std::runtime_error("All integration orders should be >=1");
     }
 }
+
+#ifdef GNA_CUDA_SUPPORT
+void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
+  fargs.args.touch();
+  //gpuargs->provideSignatureDevice();
+  //cuintegrate2d();
+}
+
+#endif
 
 void Integrator2Base::integrate(FunctionArgs& fargs){
     auto& args=fargs.args;
