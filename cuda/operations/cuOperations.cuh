@@ -8,6 +8,9 @@
 // TODO comple with -fmad=true
 
 
+template<typename T>
+__global__ void d_product_mat2mat_EW(T* matL, T* matR, T** rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/);
+
 /* Inverse template function.
  * Float and double are availible.
  * @return 1/x

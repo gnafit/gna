@@ -4,6 +4,7 @@
 
 #include "cuElementary.hh"
 #include "cuda_config_vars.h" 
+#include "cuOperations.cuh"
 
 /*
 * @brief Element-wise product of N vectors of length M into one
@@ -34,6 +35,13 @@ __global__ void d_product_mat2vec(T** args, T** rets, size_t n, size_t m) {
 		rets[0][x] += args[1][m*i +x]*args[0][i];
 	}
 
+}
+
+template<typename T>
+__global__ void d_product_mat2mat_EW(T* matL, T* matR, T** rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/) {
+	int x = blockDim.x * blockIdx.x + threadIdx.x;
+	int y = blockDim.y * blockIdx.y + threadIdx.y;
+	rets[x+y*cols] = matL[x+y*cols]  * matR[x+y*cols];
 }
 
 template <typename T>
