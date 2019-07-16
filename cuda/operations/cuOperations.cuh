@@ -9,7 +9,13 @@
 
 
 template<typename T>
-__global__ void d_product_mat2mat_EW(T* matL, T* matR, T** rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/);
+__global__ void d_product_mat2mat_EW(T* matL, T* matR, T** rets, 
+		size_t cols /* cols in mat*/, size_t rows /* rows in mat*/) {
+
+	int x = blockDim.x * blockIdx.x + threadIdx.x;
+	int y = blockDim.y * blockIdx.y + threadIdx.y;
+	rets[x+y*cols] = matL[x+y*cols]  * matR[x+y*cols];
+}
 
 /* Inverse template function.
  * Float and double are availible.

@@ -37,12 +37,13 @@ __global__ void d_product_mat2vec(T** args, T** rets, size_t n, size_t m) {
 
 }
 
+/*
 template<typename T>
-__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/) {
+__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets, size_t cols, size_t rows ) {
 	int x = blockDim.x * blockIdx.x + threadIdx.x;
 	int y = blockDim.y * blockIdx.y + threadIdx.y;
 	rets[x+y*cols] = matL[x+y*cols]  * matR[x+y*cols];
-}
+}*/
 
 template <typename T>
 void cuproduct(T** array, T** ans_array, unsigned int n, unsigned int m) {
@@ -57,6 +58,8 @@ void cuproduct_mat2vec(T** args, T** rets, size_t n, size_t m) {
 	cudaDeviceSynchronize();
 }
 
+
+template __global__ void d_product_mat2mat_EW(double* matL, double* matR, double* rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/); 
 
 template void cuproduct<double>(double** array, double** ans_array, unsigned int n, unsigned int m); 
 template void cuproduct_mat2vec<double>(double** args, double** rets, size_t n, size_t m);
