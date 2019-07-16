@@ -57,7 +57,7 @@ TransformationDescriptor Integrator2Base::add_transformation(const std::string& 
 #ifdef GNA_CUDA_SUPPORT
         .func("gpu", &Integrator2Base::integrate_gpu, DataLocation::Device)
         .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
-            for (int i = 0; i < 2* fargs.args.size(); i++) {
+            for (size_t i = 0; i < 2* fargs.args.size(); i++) {
                  fargs.ints[i] = DataType().points().shape(fargs.args[0].size() + 2);
             }
         })
@@ -93,9 +93,9 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 #ifdef GNA_CUDA_SUPPORT
 void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
   fargs.args.touch();
-  gpuargs->provideSignatureDevice();
   auto& gpuargs = fargs.gpu;
-  cuintegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0]);
+  gpuargs->provideSignatureDevice();
+  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0]);
 }
 
 #endif
