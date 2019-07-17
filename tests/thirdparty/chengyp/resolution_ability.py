@@ -266,8 +266,11 @@ def main(opts):
     ax.set_ylabel( r'Dist/$\sigma$' )
     ax.set_title( 'Resolution ability' )
 
-    ax.plot( psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep), '-', markerfacecolor='none', label='true' )
-    ax.plot( psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl), '-', markerfacecolor='none', label='with LSNL' )
+    x1, y1 = psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep)
+    x2, y2 = psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl)
+
+    ax.plot( x1, y1, '-', markerfacecolor='none', label='true' )
+    ax.plot( x2, y2, '-', markerfacecolor='none', label='with LSNL' )
 
     ax.legend(loc='upper left')
     savefig(opts.output, suffix='_ability')
@@ -284,13 +287,13 @@ def main(opts):
     ax.set_ylabel( r'Dist/$\sigma$' )
     ax.set_title( 'Resolution ability difference (quenching-true)' )
 
-    x1, y1 = psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep),
-    x2, y2 = psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl)
-
     y2fcn = interp1d(x2, y2)
     y2_on_x1 = y2fcn(x1)
+    diff = y2_on_x1 - y1
+    from scipy.signal import savgol_filter
+    diff = savgol_filter(diff, 21, 3)
 
-    ax.plot(x1, y2_on_x1 - y1)
+    ax.plot(x1, diff)
 
     savefig(opts.output, suffix='_ability_diff')
 
