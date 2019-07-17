@@ -56,15 +56,16 @@ namespace GNA {
       if( use_fillvalue ){
         sum.func(&WeightedSumT<FloatType>::sumFill)
     #ifdef GNA_CUDA_SUPPORT
-           .func("gpu", &WeightedSumT<FloatType>::sumFill_ongpu, DataLocation::Device);
+           .func("gpu", &WeightedSumT<FloatType>::sumFill_ongpu, DataLocation::Device)
     #endif
-
+        ;
       }
       else{
         sum.func(&WeightedSumT<FloatType>::sum)
     #ifdef GNA_CUDA_SUPPORT
            .func("gpu", &WeightedSumT<FloatType>::sum_ongpu, DataLocation::Device);
     #endif
+        ;
       }
 //   	sum.finalize();
       m_vars.resize(weights.size());
@@ -105,6 +106,7 @@ namespace GNA {
         }
     }
 
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType>
     void WeightedSumT<FloatType>::sum_ongpu(FunctionArgs& fargs) {
         fargs.args.touch();
@@ -122,6 +124,7 @@ namespace GNA {
         cuweightedsumfill(gpuargs->args, gpuargs->rets, gpuargs->vars, m_fillvalue, fargs.args[0].arr.size(), gpuargs->nargs, gpuargs->nvars);
 //        gpuargs->setAsDevice();
     }
+#endif
   }
 }
 

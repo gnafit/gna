@@ -10,7 +10,7 @@
 #include "TypesFunctions.hh"
 #include "Units.hh"
 
-#ifdef GNA_CUDA_SUPPORT 
+#ifdef GNA_CUDA_SUPPORT
 //#include "extra/GNAcuOscProbFull.h"
 //#include "extra/GNAcuOscProbMem.hh"
 #include "cuOscProbPMNS.hh"
@@ -121,31 +121,40 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
     .func(&OscProbPMNST<FloatType>::calcComponent<1,2>)
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,2>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       //std::cout << fargs.ints[0].size() << std::endl;
-    });
+    })
+#endif
+  ;
   this->transformation_("comp13")
     .input("Enu")
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
     .func(&OscProbPMNST<FloatType>::calcComponent<1,3>)
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       //std::cout << fargs.ints[0].size() << std::endl;
-    });
+    })
+#endif
+  ;
   this->transformation_("comp23")
     .input("Enu")
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
     .func(&OscProbPMNST<FloatType>::calcComponent<2,3>)
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<2,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
       //std::cout << fargs.ints[0].size() << std::endl;
-    });
+    })
+#endif
+  ;
   if (m_alpha != m_beta) {
     this->transformation_("compCP")
       .input("Enu")
@@ -153,11 +162,13 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
       .func(&OscProbPMNST<FloatType>::calcComponentCP)
+#ifdef GNA_CUDA_SUPPORT
       .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponentCP, DataLocation::Device)
       .storage("gpu", [](StorageTypesFunctionArgs& fargs){
         fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
         //std::cout << fargs.ints[0].size() << std::endl;
       })
+#endif
       ;
   }
   auto probsum = this->transformation_("probsum")
@@ -168,7 +179,9 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .output("probsum")
     .types(TypesFunctions::pass<0>)
     .func(&OscProbPMNST<FloatType>::calcSum)
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcSum, DataLocation::Device)
+#endif
     ;
   if (from.flavor != to.flavor) {
     probsum.input("compCP");
@@ -232,7 +245,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArg
 */
 }
 
-
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 template < int I, int J>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(FunctionArgs& fargs) {
@@ -245,7 +258,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(Function
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, 
+  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
 		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
 /*#ifdef TIME_COUNT_ON
    end = std::chrono::system_clock::now();
@@ -255,6 +268,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(Function
 #endif
 */
 }
+#endif
 
 template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionArgs fargs) {
@@ -266,6 +280,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionA
   ret*= sin(DeltaMSq<2,3>()*tmp);
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(FunctionArgs& fargs) {
   fargs.args.touch();
@@ -273,10 +288,11 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(Functi
   //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
 //  gpuargs->readVariables(m_param);
   gpuargs->provideSignatureDevice();
-  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23, 
-			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);  
+  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23,
+			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);
 //  gpuargs->setAsDevice();
 }
+#endif
 
 template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs fargs) {
@@ -298,17 +314,19 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs farg
   }
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
- // std::vector<variable<double>> weights = 
+ // std::vector<variable<double>> weights =
 		//{(weight<1,2>()), weight<1,3>(), weight<2,3>() ,weightCP()};
   //gpuargs->readVariables(weights);
   //gpuargs->provideSignatureDevice();
   //TODO add vector<double> to parameters on gpu
   cuCalcSum(gpuargs->args, gpuargs->rets, weight<1,2>(), weight<1,3>(), weight<2,3>() ,weightCP(), (m_alpha == m_beta), fargs.args[0].arr.size());
 }
+#endif
 
 OscProbPMNSMult::OscProbPMNSMult(Neutrino from, Neutrino to, std::string l_name)
   : OscProbPMNSBase(from, to)

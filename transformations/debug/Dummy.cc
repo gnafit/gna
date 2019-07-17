@@ -23,9 +23,11 @@ GNA::GNAObjectTemplates::DummyT<FloatType>::DummyT(size_t shape, const char* lab
             }
           )
   .func(&DummyType::dummy_fcn)
+#ifdef GNA_CUDA_SUPPORT
   .func("dummy_gpuargs_h_local", &DummyType::dummy_gpuargs_h_local/*, DataLocation::Host*/)
   .func("dummy_gpuargs_h",       &DummyType::dummy_gpuargs_h/*,       DataLocation::Host*/)
   .func("dummy_gpuargs_d",       &DummyType::dummy_gpuargs_d,       DataLocation::Device)
+#endif
   .finalize();
 
   m_vars.resize(labels.size());
@@ -42,6 +44,7 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_fcn(typename GNAObjectT<F
     }
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
     fargs.args.touch();
@@ -81,8 +84,6 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObj
 
 template<typename FloatType>
 void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
-#ifdef GNA_CUDA_SUPPORT
-  
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->provideSignatureDevice(); /*global*/
@@ -97,11 +98,8 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObj
     std::cout << __PRETTY_FUNCTION__ << std::endl <<  "nvars = " << gpuargs->nvars << std::endl <<std::endl;
     debug_drop(gpuargs->vars, 3, 1);
      //gpuargs->dump();
-
-#else
-  throw std::runtime_error("CUDA support not implemented");
-#endif
 }
+#endif
 
 template class GNA::GNAObjectTemplates::DummyT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION

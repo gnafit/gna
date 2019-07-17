@@ -6,11 +6,11 @@
 #include <stdexcept>
 
 #include "config_vars.h"
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
 #include "cuInterpExpo.hh"
 #include "GpuBasics.hh"
 #include "DataLocation.hh"
-//#endif
+#endif
 
 
 using std::next;
@@ -58,9 +58,9 @@ TransformationDescriptor InterpExpo::add_transformation(const std::string& name)
     .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpExpo::do_interpolate)
-//#ifdef GNA_CUDA_SUPPORT
+#ifdef GNA_CUDA_SUPPORT
     .func("gpu", &InterpExpo::do_interpolate_ongpu , DataLocation::Device )
-//#endif
+#endif
     ;
 
   reset_open_input();
@@ -149,6 +149,7 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
   }
 }
 
+#ifdef GNA_CUDA_SUPPORT
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
 	std::cout << "START INTERP ON GPU" << std::endl;
 	fargs.args.touch();
@@ -160,6 +161,7 @@ void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
 	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size(), nseg );
 //	interpExpo_v2(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size() );
 }
+#endif
 
 
 //InterpExpo::Strategy InterpExpo::getStrategy(const std::string& strategy){

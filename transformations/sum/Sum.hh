@@ -34,7 +34,10 @@ namespace GNA {
       }
 
       InputDescriptorT<FloatType,FloatType> add(SingleOutput &data);   ///< Add an input and connect it to the output.
+
+#ifdef GNA_CUDA_SUPPORT
       void sum_ongpu(FunctionArgs& fargs);
+#endif
     };
   }
 }

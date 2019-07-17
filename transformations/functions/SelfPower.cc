@@ -37,12 +37,14 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
       ;
 }
 
+#ifdef GNA_CUDA_SUPPORT
 void SelfPower::gpu_calculate(FunctionArgs& fargs) {
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->provideSignatureDevice();
     cuselfpower(gpuargs->args, gpuargs->rets, fargs.args[0].arr.size(), gpuargs->nargs,m_scale.value());
 }
+#endif
 
 /**
  * @brief Calculate the value of function with positive power.

@@ -25,9 +25,11 @@ namespace GNA{
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;
       ExpT();                               ///< Constructor.
-    
+
       void calculate(FunctionArgs& fargs); ///< Calculate the value of function.
+#ifdef GNA_CUDA_SUPPORT
       void calc_gpu(FunctionArgs& fargs); ///< Calculate the value of function on GPU.
+#endif
     protected:
     };
   }

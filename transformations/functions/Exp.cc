@@ -24,7 +24,7 @@ namespace GNA {
     #endif
           ;
     }
-    
+
     /**
      * @brief Calculate the value of function.
      */
@@ -32,8 +32,9 @@ namespace GNA {
     void ExpT<FloatType>::calculate(FunctionArgs& fargs){
         fargs.rets[0].x = fargs.args[0].x.exp();
     }
-    
-    
+
+
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType>
     void ExpT<FloatType>::calc_gpu(FunctionArgs& fargs) {
             fargs.args.touch();
@@ -43,6 +44,7 @@ namespace GNA {
             auto** dest  =gpuargs->rets;
             cuexp(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
     }
+#endif
   }
 }
 

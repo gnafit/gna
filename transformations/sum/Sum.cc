@@ -1,10 +1,10 @@
 #include "Sum.hh"
 #include "TypesFunctions.hh"
-#include "GNAObject.hh" 
+#include "GNAObject.hh"
 
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
-#include "cuElementary.hh"                             
+#include "cuElementary.hh"
 #include "DataLocation.hh"
 #endif
 
@@ -40,10 +40,12 @@ namespace GNA {
               ret += args[j].x;                            ///<
             }                                              ///<
           })
+#ifdef GNA_CUDA_SUPPORT
          .func("gpu", &SumT<FloatType>::sum_ongpu, DataLocation::Device)
+#endif
     	;                                              ///<
     }
-    
+
     /**
      * @brief Construct Sum from vector of SingleOutput instances
      */
@@ -53,7 +55,7 @@ namespace GNA {
         this->add(*output);
       }
     }
-    
+
     /**
      * @brief Add an input and connect it to the output.
      *
@@ -66,7 +68,7 @@ namespace GNA {
     InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add(SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
-    
+
     /**
      * @brief Add an input by name and leave unconnected.
      * @param name -- a name for the new input.
@@ -76,7 +78,7 @@ namespace GNA {
     InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add_input(const char* name) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(name));
     }
-    
+
 /*    void sum_ongpu(FunctionArgs& fargs) {
     	fargs.args.touch();
     	auto& gpuargs=fargs.gpu;

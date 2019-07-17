@@ -23,8 +23,11 @@ public:
     SelfPower(const char* scalename="sp_scale"); ///< Constructor.
 
     void calculate(FunctionArgs& fargs);         ///< Calculate the value of function with positive power.
-    void gpu_calculate(FunctionArgs& fargs);         ///< Calculate the value of function with positive power.
     void calculate_inv(FunctionArgs& fargs);     ///< Calculate the value of function with negative power.
+
+#ifdef GNA_CUDA_SUPPORT
+    void gpu_calculate(FunctionArgs& fargs);     ///< Calculate the value of function with positive power.
+#endif
 protected:
     variable<double> m_scale;                    ///< The scale (a) variable.
 };

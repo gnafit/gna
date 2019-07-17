@@ -6,7 +6,7 @@
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
 #include "DataLocation.hh"
-#endif 
+#endif
 
 /**
  * @brief Default constructor.
@@ -52,12 +52,14 @@ void Normalize::doNormalize(FunctionArgs& fargs){
     fargs.rets[0].x=in/in.sum();
 }
 
+#ifdef GNA_CUDA_SUPPORT
 void Normalize::doNormalize_gpu(FunctionArgs& fargs) {
     fargs.args.touch();
     auto& gpuargs = fargs.gpu;
     gpuargs->provideSignatureDevice();
     cunormalize(gpuargs->args, gpuargs->rets, fargs.args[0].arr.size());
 }
+#endif
 
 /**
  * @brief Normalize subhistogram.
