@@ -36,11 +36,7 @@ with context.manager(ndata) as manager:
     with ns:
         labels=['Oscillation probability|%s'%s for s in ('component 12', 'component 13', 'component 23', 'full', 'probsum')]
         oscprob = C.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
-        oscprob.comp12.switchFunction("gpu")
-        oscprob.comp13.switchFunction("gpu")
-        oscprob.comp23.switchFunction("gpu")
-    
-    
+
         enu >> oscprob.full_osc_prob.Enu
         enu >> (oscprob.comp12.Enu, oscprob.comp13.Enu, oscprob.comp23.Enu)
 
@@ -56,7 +52,6 @@ with context.manager(ndata) as manager:
         #with context.manager(ndata) as manager:
         #    with ns:
         op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
-        op_sum.sum.switchFunction("gpu")
 
         # Print some information
         #oscprob.print()

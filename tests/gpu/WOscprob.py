@@ -25,7 +25,7 @@ arr2 = -arr1
 #print( 'Data2:', arr2 )
 
 labels = [ 'comp0', 'item12', 'item13','item23' ]
-weights = [ 'weight0', 'weight12neg', 'weight13neg', 'weight23neg' ]
+weights = [ 'weight0', 'weight12', 'weight13', 'weight23' ]
 
 ns = env.ns("")
 

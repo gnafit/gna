@@ -452,7 +452,7 @@ class exp(baseexp):
             ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             for reac in reactors:
                 for iso in isotopes:
-                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso), 
+                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
                                      outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
         for iso in isotopes:
@@ -534,7 +534,7 @@ class exp(baseexp):
             '''
 
         self.formula_ibd_simple = '''ibd =
-                          norm_bf* 
+                          norm_bf*
                           conversion_factor*nprotons_nominal*
                           eres[d]|
                             lsnl[d]|
@@ -564,7 +564,7 @@ class exp(baseexp):
                                                        label='Total number of anue in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
-                        count_rate              = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                        count_rate              = dict(expr='anue_produced_total*jacobian*xsec_weighted',
                                                         label='Countrate from {reactor} in {detector}'),
 
                         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
@@ -647,7 +647,7 @@ class exp(baseexp):
                                                        label='Total number of anue in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
-                        count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted', 
+                        count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted',
                                                        label='Countrate from {reactor} in {detector}'),
                         count_rate_d            = dict(expr='sum:r|countrate_rd',
                                                        label='Countrate in {detector}'),
@@ -667,9 +667,9 @@ class exp(baseexp):
                         ibd                     = dict(expr='eres*norm_bf', label='Observed IBD spectrum \n {detector}'),
 
 
-                        lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight', 
+                        lsnl_component_weighted = dict(expr='lsnl_component*lsnl_weight',
                                                        label='Weighted LSNL curve {lsnl_component}'),
-                        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted', 
+                        lsnl_correlated         = dict(expr='sum:l|lsnl_component_weighted',
                                                        label='Sum of LSNL curves'),
                         evis_after_escale       = dict(expr='escale*evis_edges',
                                                        label='Evis edges after escale, {detector}'),

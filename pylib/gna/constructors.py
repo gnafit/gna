@@ -73,21 +73,24 @@ def Points(array, *args, **kwargs):
     return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Identity object from list of SingleOutputs"""
-def Identity(outputs=None, *args, **kwargs):
+def Identity(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(*args, **kwargs)
 
     return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
-def Sum(outputs=None, *args, **kwargs):
+def Sum(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return Templates.SumT(context.current_precision())(*args, **kwargs)
 
     return Templates.SumT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
-def MultiSum(outputs=None, *args, **kwargs):
+def MultiSum(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
     if outputs is None:
         return cls(*args, **kwargs)
@@ -124,21 +127,24 @@ def OscProbPMNS(*args, **kwargs):
     return R.GNA.GNAObjectTemplates.OscProbPMNST(context.current_precision())(*args, **kwargs)
 
 """Construct SumBroadcast object from list of SingleOutputs"""
-def SumBroadcast(outputs=None, *args, **kwargs):
+def SumBroadcast(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return R.SumBroadcast(*args, **kwargs)
 
     return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def Product(outputs=None, *args, **kwargs):
+def Product(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return Templates.ProductT(context.current_precision())(*args, **kwargs)
 
     return Templates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def Exp(outputs=None, *args, **kwargs):
+def Exp(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return Templates.ExpT(context.current_precision())(*args, **kwargs)
     return Templates.ExpT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)

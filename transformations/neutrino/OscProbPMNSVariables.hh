@@ -27,9 +27,9 @@ public:
   variable<double> weight13;
   variable<double> weight23;
   variable<double> weightCP;
-  variable<double> weight12neg;
-  variable<double> weight13neg;
-  variable<double> weight23neg;
+  //variable<double> weight12neg;
+  //variable<double> weight13neg;
+  //variable<double> weight23neg;
 protected:
 
   Fields fields(Neutrino from, Neutrino to, const std::vector<std::string>& names) {
@@ -44,15 +44,15 @@ protected:
     if(names.empty()){
       varnames={"weight0",
                 "weight12" , "weight13" , "weight23",
+                //"weight12neg" , "weight13neg" , "weight23neg",
                 "weightCP",
-                "weight12neg" , "weight13neg" , "weight23neg",
       };
     }
     else if (names.size()==4u+static_cast<size_t>(m_alpha!=m_beta)){
       varnames=names;
     }
     else{
-      throw std::runtime_error("Should provide 4 component names");
+      throw std::runtime_error("Should provide 4(5) component names");
     }
 
     Fields allvars;
@@ -61,12 +61,12 @@ protected:
       .add(&weight12, varnames[1])
       .add(&weight13, varnames[2])
       .add(&weight23, varnames[3])
-      .add(&weight12neg, varnames[5])
-      .add(&weight13neg, varnames[6])
-      .add(&weight23neg, varnames[7])
+      //.add(&weight12neg, varnames[4])
+      //.add(&weight13neg, varnames[5])
+      //.add(&weight23neg, varnames[6])
     ;
     if(m_alpha!=m_beta){
-      allvars.add(&weightCP, varnames[4]);
+      allvars.add(&weightCP, varnames[7]);
     }
     for (size_t i = 0; i < Nnu; ++i) {
       for (size_t j = 0; j < Nnu; ++j) {
@@ -106,30 +106,30 @@ protected:
             std::conj(V[m_beta][1].complex())
             );
         })
-      .add(&weight12neg, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
-          return -2.0*std::real(
-            V[m_alpha][0].complex()*
-            V[m_beta][1].complex()*
-            std::conj(V[m_alpha][1].complex())*
-            std::conj(V[m_beta][0].complex())
-            );
-        })
-      .add(&weight13neg, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-          return -2.0*std::real(
-            V[m_alpha][0].complex()*
-            V[m_beta][2].complex()*
-            std::conj(V[m_alpha][2].complex())*
-            std::conj(V[m_beta][0].complex())
-            );
-        })
-      .add(&weight23neg, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-          return -2.0*std::real(
-            V[m_alpha][1].complex()*
-            V[m_beta][2].complex()*
-            std::conj(V[m_alpha][2].complex())*
-            std::conj(V[m_beta][1].complex())
-            );
-        })
+      //.add(&weight12neg, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
+          //return -2.0*std::real(
+            //V[m_alpha][0].complex()*
+            //V[m_beta][1].complex()*
+            //std::conj(V[m_alpha][1].complex())*
+            //std::conj(V[m_beta][0].complex())
+            //);
+        //})
+      //.add(&weight13neg, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+          //return -2.0*std::real(
+            //V[m_alpha][0].complex()*
+            //V[m_beta][2].complex()*
+            //std::conj(V[m_alpha][2].complex())*
+            //std::conj(V[m_beta][0].complex())
+            //);
+        //})
+      //.add(&weight23neg, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+          //return -2.0*std::real(
+            //V[m_alpha][1].complex()*
+            //V[m_beta][2].complex()*
+            //std::conj(V[m_alpha][2].complex())*
+            //std::conj(V[m_beta][1].complex())
+            //);
+        //})
       ;
     /// Mode B: delta + (1-cos) = delta + sin0.5
     //if (m_alpha==m_beta){

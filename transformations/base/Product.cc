@@ -14,7 +14,7 @@ namespace GNA {
     ProductT<FloatType>::ProductT() {
       this->transformation_("product")
         .output("product")
-        .types(TypesFunctions::ifSame, TypesFunctions::passNonSingle<0,0>) // check ifSame ... was ifSameShapeOrSingle TODO smth?
+        .types(TypesFunctions::ifSame, TypesFunctions::pass<0>) // check ifSame ... was ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0> TODO smth?
         .func([](FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
