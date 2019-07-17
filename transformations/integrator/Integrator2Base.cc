@@ -95,7 +95,10 @@ void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
   fargs.args.touch();
   auto& gpuargs = fargs.gpu;
   gpuargs->provideSignatureDevice();
-  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0]);
+  std::cout << "m_weights = " << m_weights.size() << std::endl 
+		<< m_weights.data() <<std::endl; 
+  std::memcpy(gpuargs->ints[0], m_weights.data(), m_weights.size() * sizeof(double));
+  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0], static_cast<size_t>(m_xorders.size()), static_cast<size_t>(m_yorders.size()));
 }
 
 #endif
