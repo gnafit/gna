@@ -8,6 +8,7 @@
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
 #include "GpuBasics.hh"
+#include "cuIntegrate.hh"
 #endif
 
 
@@ -55,6 +56,11 @@ TransformationDescriptor Integrator2Base::add_transformation(const std::string& 
         .func(&Integrator2Base::integrate)
 #ifdef GNA_CUDA_SUPPORT
         .func("gpu", &Integrator2Base::integrate_gpu, DataLocation::Device)
+        .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
+            for (size_t i = 0; i < 2* fargs.args.size(); i++) {
+                 fargs.ints[i] = DataType().points().shape(fargs.args[0].size() + 2);
+            }
+        })
 #endif
         ;
     reset_open_input();
@@ -87,8 +93,9 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 #ifdef GNA_CUDA_SUPPORT
 void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
   fargs.args.touch();
-  //gpuargs->provideSignatureDevice();
-  //cuintegrate2d();
+  auto& gpuargs = fargs.gpu;
+  gpuargs->provideSignatureDevice();
+  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0]);
 }
 
 #endif
@@ -96,15 +103,16 @@ void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
 void Integrator2Base::integrate(FunctionArgs& fargs){
     auto& args=fargs.args;
     auto& rets=fargs.rets;
-
+ //   std::cout << "argsize = " << args.size() <<std::endl;
     for (size_t i = 0; i < args.size(); ++i) {
       auto& arg=args[i].arr2d;
       auto& ret=rets[i].arr2d;
-
+//	std::cout << std::endl << args[i].shape << std::endl << std::endl << m_weights.size() << std::endl << "---------------" << std::endl;
       ArrayXXd prod = arg*m_weights;
       size_t x_offset=0;
       for (size_t ix = 0; ix < static_cast<size_t>(m_xorders.size()); ++ix) {
           size_t nx = m_xorders[ix];
+	  std::cout << "------------------nx = " << nx <<std::endl;
           size_t y_offset=0;
           for (size_t iy = 0; iy < static_cast<size_t>(m_yorders.size()); ++iy) {
               size_t ny = m_yorders[iy];

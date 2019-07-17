@@ -43,6 +43,7 @@ set(CUSOURCES
   operations/normalize.cu
   operations/rebin.cu
   extra/cuOscProbPMNS.cu
+  extra/cuIntegrate.cu
   )
 
 set(CUHEADERS
@@ -55,6 +56,7 @@ set(CUHEADERS
   extra/cuInterpExpo.hh
   core/cuElementary.hh
   extra/cuOscProbPMNS.hh
+  extra/cuIntegrate.hh
   )
 
 cuda_add_library(cuGNA SHARED ${CUSOURCES} ${CUHEADERS})

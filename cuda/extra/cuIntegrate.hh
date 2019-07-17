@@ -1,4 +1,5 @@
 #pragma once 
 
-template<typename T> 
-void cuintegrate2d(T** args, T** rets, size_t n, size_t m);
+template<typename T>
+void cuIntegrate2d(T** args, T** ints, T** rets, size_t n, size_t m, size_t  k);
+

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CUOPERATIONS_CUH
+#define CUOPERATIONS_CUH
+
 #include <iostream>
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -7,6 +9,17 @@
 
 // TODO comple with -fmad=true
 
+//template<typename T>
+//__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets, size_t cols , size_t rows);
+
+/*template<typename T>
+__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets, 
+		size_t cols , size_t rows) {
+
+	int x = blockDim.x * blockIdx.x + threadIdx.x;
+	int y = blockDim.y * blockIdx.y + threadIdx.y;
+	rets[x+y*cols] = matL[x+y*cols]  * matR[x+y*cols];
+}*/
 
 /* Inverse template function.
  * Float and double are availible.
@@ -88,3 +101,5 @@ __device__ void mult_by_arr_sin (double k, double* x, double* me) {
         me[idx] = me[idx] * sin(k*x[idx]);
 }
 
+
+#endif /* CUOPERATIONS_CUH*/
