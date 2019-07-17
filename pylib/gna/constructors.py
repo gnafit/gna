@@ -73,14 +73,16 @@ def Points(array, *args, **kwargs):
     return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Sum object from list of SingleOutputs"""
-def Sum(outputs=None, *args, **kwargs):
+def Sum(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return R.Sum(*args, **kwargs)
 
     return R.Sum(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
-def MultiSum(outputs=None, *args, **kwargs):
+def MultiSum(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
     if outputs is None:
         return cls(*args, **kwargs)
@@ -114,7 +116,8 @@ def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 
 """Construct SumBroadcast object from list of SingleOutputs"""
-def SumBroadcast(outputs=None, *args, **kwargs):
+def SumBroadcast(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
         return R.SumBroadcast(*args, **kwargs)
 
