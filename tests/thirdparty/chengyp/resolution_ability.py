@@ -42,7 +42,7 @@ def main(opts):
                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
                 ("Npescint",            (1341.38, 0.0059)),
                 ("kC",                      (0.5, 0.4737)),
-                ("normalizationEnergy",   (2.505, 'fixed'))
+                ("normalizationEnergy",   (12.0, 'fixed'))
              ],
             mode='relative'
             ),
@@ -53,7 +53,7 @@ def main(opts):
                         -0.97, -0.985, 1.0   ],
         fill_matrix=True,
         labels = dict(
-            normalizationEnergy = '60Co total gamma energy, MeV'
+            normalizationEnergy = 'Pessimistic'
             ),
         )
 
@@ -66,9 +66,32 @@ def main(opts):
     #
     # Input bins
     #
-    evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, 0.025)
+    evis_edges_full_input = N.arange(0.0, 15.0+1.e-6, 0.025)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
+
+    #
+    # Python energy model interpolation function
+    #
+    from scipy.interpolate import interp1d
+    lsnl_x = quench.histoffset.histedges.points_truncated.data()
+    lsnl_y = quench.positron_model_relative.single().data()
+    lsnl_fcn = interp1d(lsnl_x, lsnl_y, kind='quadratic')
+
+    #
+    # Energy resolution
+    #
+    def eres_sigma_rel(edep):
+        return 0.03/edep**0.5
+
+    def eres_sigma_abs(edep):
+        return 0.03*edep**0.5
+
+    #
+    # Energy offset
+    #
+    from physlib import pc
+    edep_offset = pc.DeltaNP - pc.ElectronMass
 
     #
     # Oscprob
@@ -79,11 +102,15 @@ def main(opts):
     gna.parameters.oscillation.reqparameters(ns)
     ns.defparameter(baselinename, central=52.0, fixed=True, label='Baseline, km')
 
+    #
     # Define energy range
-    enu_input = N.arange(1.0, 10.0, 0.01)
-    enu = C.Points(enu_input, labels='Neutrino energy, MeV')
+    #
+    enu_input = N.arange(1.8, 15.0, 0.001)
+    edep_input = enu_input - edep_offset
+    edep_lsnl = edep_input * lsnl_fcn(edep_input)
 
     # Initialize oscillation variables
+    enu = C.Points(enu_input, labels='Neutrino energy, MeV')
     component_names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
     with ns:
         R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), component_names, ns=ns)
@@ -100,18 +127,26 @@ def main(opts):
         op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
 
     psur = op_sum.single().data()
+
     from scipy.signal import argrelmin, argrelmax
     psur_minima, = argrelmin(psur)
     psur_maxima, = argrelmax(psur)
-    psur_extrema = N.sort(N.concatenate( [psur_minima, psur_maxima] ))
 
-    extrema_pos = enu_input[psur_extrema]
-    print(psur_extrema)
-    print(extrema_pos)
-    dist_x = (extrema_pos[1:] + extrema_pos[:-1])*0.5
-    dist   =  extrema_pos[1:] - extrema_pos[:-1]
-    print(dist_x)
-    print(dist)
+    def build_extrema(x):
+        data_min_x = (x[psur_minima][:-1] + x[psur_minima][1:])*0.5
+        data_min_y = (x[psur_minima][1:] - x[psur_minima][:-1])
+
+        data_max_x = (x[psur_maxima][:-1] + x[psur_maxima][1:])*0.5
+        data_max_y = (x[psur_maxima][1:] - x[psur_maxima][:-1])
+
+        data_ext_x = N.vstack([data_max_x, data_min_x]).T.ravel()
+        data_ext_y = N.vstack([data_max_y, data_min_y]).T.ravel()
+
+        return data_ext_x, data_ext_y
+
+    psur_ext_x_enu, psur_ext_y_enu = build_extrema(enu_input)
+    psur_ext_x_edep, psur_ext_y_edep = build_extrema(edep_input)
+    psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl = build_extrema(edep_lsnl)
 
     #
     # Plots and tests
@@ -130,26 +165,6 @@ def main(opts):
         pdfpagesfilename = ''
         pdfpages = None
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( 'Enu, MeV' )
-    ax.set_ylabel( 'Psur' )
-    ax.set_title( 'Survival probability' )
-    op_sum.single().plot_vs(enu.single(), label='full')
-    ax.plot(enu_input[psur_minima], psur[psur_minima], 'o', markerfacecolor='none', label='minima')
-    ax.plot(enu_input[psur_maxima], psur[psur_maxima], 'o', markerfacecolor='none', label='maxima')
-
-    fig = P.figure()
-    ax = P.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( 'Enu, MeV' )
-    ax.set_ylabel( 'Dist, MeV' )
-    ax.set_title( 'Extrema distance' )
-
-    ax.plot( dist_x, dist, 'o-', markerfacecolor='none' )
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -163,7 +178,121 @@ def main(opts):
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
 
     ax.legend(loc='lower right')
+    ax.set_ylim(0.8, 1.05)
     savefig(opts.output, suffix='_total_relative')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( r'$\sigma/E$' )
+    ax.set_title('Energy resolution')
+    ax.plot(edep_input, eres_sigma_rel(edep_input), '-')
+
+    savefig(opts.output, suffix='_eres_rel')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( r'$\sigma$' )
+    ax.set_title('Energy resolution')
+    ax.plot(edep_input, eres_sigma_abs(edep_input), '-')
+
+    savefig(opts.output, suffix='_eres_abs')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Enu, MeV' )
+    ax.set_ylabel( 'Psur' )
+    ax.set_title( 'Survival probability' )
+    op_sum.single().plot_vs(enu.single(), label='full')
+    ax.plot(enu_input[psur_minima], psur[psur_minima], 'o', markerfacecolor='none', label='minima')
+    ax.plot(enu_input[psur_maxima], psur[psur_maxima], 'o', markerfacecolor='none', label='maxima')
+
+    savefig(opts.output, suffix='_psur_enu')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Psur' )
+    ax.set_title( 'Survival probability' )
+    op_sum.single().plot_vs(edep_input, label='true')
+    op_sum.single().plot_vs(edep_lsnl, label='with LSNL')
+
+    ax.legend()
+
+    savefig(opts.output, suffix='_psur_edep')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Enu, MeV' )
+    ax.set_ylabel( 'Dist, MeV' )
+    ax.set_title( 'Nearest peaks distance' )
+
+    ax.plot( psur_ext_x_enu, psur_ext_y_enu, 'o-', markerfacecolor='none' )
+
+    savefig(opts.output, suffix='_dist_enu')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Dist, MeV' )
+    ax.set_title( 'Nearest peaks distance' )
+
+    ax.plot( psur_ext_x_edep, psur_ext_y_edep, '-', markerfacecolor='none', label='true' )
+    ax.plot( psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl, '-', markerfacecolor='none', label='with LSNL' )
+    ax.plot( edep_input, eres_sigma_abs(edep_input), '-', markerfacecolor='none', label=r'$\sigma$' )
+
+    ax.legend(loc='upper left')
+
+    savefig(opts.output, suffix='_dist')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( r'Dist/$\sigma$' )
+    ax.set_title( 'Resolution ability' )
+
+    ax.plot( psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep), '-', markerfacecolor='none', label='true' )
+    ax.plot( psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl), '-', markerfacecolor='none', label='with LSNL' )
+
+    ax.legend(loc='upper left')
+    savefig(opts.output, suffix='_ability')
+
+    ax.set_xlim(3, 4)
+    ax.set_ylim(5, 8)
+    savefig(opts.output, suffix='_ability_zoom')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( r'Dist/$\sigma$' )
+    ax.set_title( 'Resolution ability difference (quenching-true)' )
+
+    x1, y1 = psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep),
+    x2, y2 = psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl)
+
+    y2fcn = interp1d(x2, y2)
+    y2_on_x1 = y2fcn(x1)
+
+    ax.plot(x1, y2_on_x1 - y1)
+
+    savefig(opts.output, suffix='_ability_diff')
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
