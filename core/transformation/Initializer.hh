@@ -8,7 +8,6 @@
 #include "TypesFunctions.hh"
 
 #include "config_vars.h"
-#define GNA_CUDA_SUPPORT
 #ifdef GNA_CUDA_SUPPORT
 #include "DataLocation.hh"
 #endif

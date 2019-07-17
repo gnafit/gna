@@ -24,11 +24,14 @@ void TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>::readVari
 		//throw std::runtime_error("No ParametrizedBase pointer is set. Should not happen.");
 	}
 
+#ifdef GNA_CUDA_SUPPORT
   if(this->gpu){
     this->gpu->readVariables(m_parbase);
   }
+  #endif
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename SourceFloatType, typename SinkFloatType>
 void TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>::requireGPU(){
 	if(gpu){
@@ -40,12 +43,15 @@ void TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>::requireG
     this->gpu->readVariables(m_parbase);
 	}
 }
+#endif
 
 template<typename SourceFloatType, typename SinkFloatType>
 void TransformationTypes::FunctionArgsT<SourceFloatType,SinkFloatType>::updateTypes(){
+#ifdef GNA_CUDA_SUPPORT
 	if(gpu){
 		gpu->updateTypes();
 	}
+#endif
 }
 
 template class TransformationTypes::FunctionArgsT<double,double>;

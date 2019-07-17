@@ -49,9 +49,11 @@ namespace TransformationTypes
     RetsType rets; ///< return values, or transformation outputs (writable)
     IntsType ints; ///< preallocated data arrays for the transformation's internal usage (writable)
 
+#ifdef GNA_CUDA_SUPPORT
     GPUFunctionArgsPtr gpu=nullptr; ///< GPU function arguments
-
     void requireGPU();              ///< Initialize GPU function arguments
+#endif
+
     void updateTypes();             ///< Update arguments and types
 
     size_t getMapping(size_t input){ return m_entry->mapping[input]; }

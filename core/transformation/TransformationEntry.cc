@@ -287,8 +287,9 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       dep->evaluateTypes();
     }
     initInternals(sargs);
-std::cout << "REQ GPU" <<std::endl;
+
 #ifdef GNA_CUDA_SUPPORT
+std::cout << "REQ GPU" <<std::endl;
     // GPU: require GPU memory for previous transformation's sink
     if (this->getEntryLocation() == DataLocation::Device){
       for (auto &source : sources) {

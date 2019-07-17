@@ -53,7 +53,9 @@ namespace TransformationTypes{
         //}
 
         void updateTypesHost();
+#ifdef GNA_CUDA_SUPPORT
         void updateTypesDevice();
+#endif
 
         void updateTypes() {
             updateTypesHost();
@@ -64,7 +66,10 @@ namespace TransformationTypes{
 #endif
         }
         void provideSignatureHost(bool local=false);
+
+#ifdef GNA_CUDA_SUPPORT
         void provideSignatureDevice(bool local=false);
+#endif
         void dump();
 
         SizeType    nvars{0u};            ///< number of variables

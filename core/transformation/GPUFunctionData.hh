@@ -4,12 +4,11 @@
 #include <iostream>
 #include <Eigen/Dense>
 
-
 #include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
 #include "cuda_config_vars.h"
-//#ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
-//#endif
+#endif
 
 namespace TransformationTypes{
     enum class GPUShape {
@@ -32,15 +31,20 @@ namespace TransformationTypes{
         template<typename DataContainer>
         void fillContainersHost(DataContainer& container);                         ///< Read the date from Source/Sink/Storage containers
 
+        void allocateHost(size_t size);                                            ///< Reallocate memory (Host)
+
+        void provideSignatureHost(SizeType &ndata, FloatType** &data, SizeType** &datashapes);    ///< Provide the pointers for the GPU arguments
+
+#ifdef GNA_CUDA_SUPPORT
         template<typename DataContainer>
         void fillContainersDevice(DataContainer& container);                       ///< Read the date from gpu arrays of Source/Sink/Storage containers
 
-        void allocateHost(size_t size);                                            ///< Reallocate memory (Host)
         void allocateDevice();                                                     ///< Reallocate memory (Device)
         void deAllocateDevice();                                                   ///< Deallocate memory (Device)
 
-        void provideSignatureHost(SizeType &ndata, FloatType** &data, SizeType** &datashapes);    ///< Provide the pointers for the GPU arguments
         void provideSignatureDevice(SizeType &ndata, FloatType** &data, SizeType** &datashapes);  ///< Provide the pointers for the GPU arguments
+#endif
+
 
         void dump(const std::string& type);
 
@@ -80,6 +84,7 @@ namespace TransformationTypes{
      *
      * This method is also called in the destructor.
      */
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::deAllocateDevice(){
 	//size_t sh_size = h_shape_pointers_host.size();
@@ -102,6 +107,7 @@ namespace TransformationTypes{
         h_shape_pointers_dev.clear();
         h_shape_pointers_dev.reserve(h_pointers.size());
     }
+#endif
 
     /**
      * @brief Allocate the memory on Device and fill with relevant data
@@ -111,6 +117,7 @@ namespace TransformationTypes{
      * 3. Create host vector with pointers (Device) to the shape, relevant for each source/sink/storage.
      * 4. Allocate the memory for the list of pointers to shape data (Device). Copy the pointers.
      */
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::allocateDevice(){
         deAllocateDevice();
@@ -124,6 +131,7 @@ namespace TransformationTypes{
 	}
         copyH2D_ALL<SizeType*>(d_shape_pointers_dev, h_shape_pointers_dev.data(), (unsigned int)h_shape_pointers_dev.size());
     }
+#endif
 
     /**
      * @brief Fill the data from the sources/sinks/storages to the Device-friently list of pointers
@@ -169,6 +177,7 @@ namespace TransformationTypes{
         }
     }
 
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType,typename SizeType>
     template<typename DataContainer>
     void GPUFunctionData<FloatType,SizeType>::fillContainersDevice(DataContainer& container){
@@ -186,6 +195,7 @@ namespace TransformationTypes{
         }
         allocateDevice();
     }
+#endif
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::provideSignatureHost(SizeType &ndata, FloatType** &data, SizeType** &datashapes){
@@ -194,12 +204,14 @@ namespace TransformationTypes{
         datashapes=h_shape_pointers_host.data();
     }
 
+#ifdef GNA_CUDA_SUPPORT
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::provideSignatureDevice(SizeType &ndata, FloatType** &data, SizeType** &datashapes){
         ndata     =h_pointers_dev.size();
         data      =d_pointers_dev;
         datashapes=d_shape_pointers_dev;
     }
+#endif
 
     template<typename FloatType,typename SizeType>
     void GPUFunctionData<FloatType,SizeType>::dump(const std::string& type){

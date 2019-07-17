@@ -10,17 +10,17 @@ void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::updateTypesHost(
 	//provideSignatureHost();
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::updateTypesDevice(){
-#ifdef GNA_CUDA_SUPPORT
 	m_args.fillContainersDevice(m_entry->sources);
 	m_rets.fillContainersDevice(m_entry->sinks);
 	m_ints.fillContainersDevice(m_entry->storages);
 //	provideSignatureDevice();
-#else
-	std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
-#endif
+//#else
+	//std::cerr << "There is no CUDA support, so I can't switch your function to GPU-based one." << std::endl;
 }
+#endif
 
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::provideSignatureHost(bool local){
@@ -37,6 +37,7 @@ void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::provideSignature
 	argsmapping = m_entry->mapping.size() ? m_entry->mapping.data() : nullptr;
 }
 
+#ifdef GNA_CUDA_SUPPORT
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::provideSignatureDevice(bool local){
 	if(local){
@@ -51,6 +52,7 @@ void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::provideSignature
 
 	argsmapping = m_argsmapping_dev;
 }
+#endif
 
 template<typename FloatType,typename SizeType>
 void TransformationTypes::GPUFunctionArgsT<FloatType,SizeType>::dump(){
