@@ -37,7 +37,7 @@ namespace GNA{
            * @brief Constructor.
            */
             DummyTypeT(){
-              this->transformation_("dummytype").func(&SelfClass::dummytype_fcn).no_autotype();
+              this->transformation_("dummytype").func(&SelfClass::dummytype_fcn).no_autotype().finalize();
             }
 
           /** @brief Add an input by name and leave unconnected. */

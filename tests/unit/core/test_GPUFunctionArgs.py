@@ -6,9 +6,10 @@ from load import ROOT as R
 from gna import constructors as C
 
 def test_01():
-    arrays = ( [0.5], [ [1.5, 1.5, 1.5], [1.5, 1.5, 1.5] ], [ [2.0, 2.0, 2.0], [2.0, 2.0, 2.0] ] )
+    arrays = ( [ [1.5, 1.5, 1.5], [1.5, 1.5, 1.5] ], [ [2.0, 2.0, 2.0], [2.0, 2.0, 2.0] ] )
     objects = [C.Points(a) for a in arrays]
-    prod = C.Product([p.single() for p in objects])
+    prod = C.Product(outputs=[p.single() for p in objects])
+    prod.product.switchFunction('gpu')
 
     prod.print()
     print(prod.single().data())
