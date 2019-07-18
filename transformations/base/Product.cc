@@ -1,6 +1,7 @@
 #include "Product.hh"
-#include "TypesFunctions.hh"
 #include "GNAObject.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
 
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
@@ -14,8 +15,8 @@ namespace GNA {
     ProductT<FloatType>::ProductT() {
       this->transformation_("product")
         .output("product")
-        .types(TypesFunctions::ifSame, TypesFunctions::pass<0>) // check ifSame ... was ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0> TODO smth?
-        .func([](FunctionArgs& fargs) {
+        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0, {0,0})) // check ifSame ... was ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0> TODO smth?
+        .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
             FloatType factor=1.0;
@@ -51,7 +52,7 @@ namespace GNA {
      * @brief Construct Product from vector of SingleOutput instances
      */
     template<typename FloatType>
-    ProductT<FloatType>::ProductT(const OutputDescriptor::OutputDescriptors& outputs) : ProductT<FloatType>(){
+    ProductT<FloatType>::ProductT(const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs) : ProductT<FloatType>(){
       for(auto& output : outputs){
         this->multiply(*output);
       }
@@ -66,7 +67,7 @@ namespace GNA {
      * @return InputDescriptor instance for the newly created input.
      */
     template<typename FloatType>
-    InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::multiply(SingleOutput &out) {
+    InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::multiply(typename GNAObjectT<FloatType,FloatType>::SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
 
