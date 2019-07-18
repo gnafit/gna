@@ -15,31 +15,13 @@ namespace GNA {
     ProductT<FloatType>::ProductT() {
       this->transformation_("product")
         .output("product")
-        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0, {0,0})) // check ifSame ... was ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0> TODO smth?
+        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0, {0,0}))
         .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
-            FloatType factor=1.0;
-            bool secondary=false;
-            for (size_t i = 0; i < args.size(); ++i) {
-              auto& data=args[i].x;
-              if (data.size()!=1) {
-                if (secondary) {
-                  ret*=data;
-                } else {
-                  ret=data;
-                  secondary=true;
-                }
-              }
-              else{
-                factor*=data(0);
-              }
-            }
-            if(!secondary){
-              ret=factor;
-            }
-            else if(factor!=1){
-              ret*=factor;
+            ret = args[0].x;
+            for (size_t i = 1; i < args.size(); ++i) {
+                ret*=args[i].x;
             }
           })
 #ifdef GNA_CUDA_SUPPORT

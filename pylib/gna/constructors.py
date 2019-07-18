@@ -143,6 +143,14 @@ def Product(*args, **kwargs):
     return Templates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
+def ProductBC(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
+    if outputs is None:
+        return Templates.ProductBCT(context.current_precision())(*args, **kwargs)
+
+    return Templates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
+"""Construct Product object from list of SingleOutputs"""
 def Exp(*args, **kwargs):
     outputs = kwargs.pop('outputs', None)
     if outputs is None:

@@ -9,6 +9,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
   transformations/base/Product.cc
+  transformations/base/ProductBC.cc
   transformations/base/Snapshot.cc
   # Sums
   transformations/sum/MultiSum.cc
@@ -132,6 +133,7 @@ set(TRANSFORMATION_HEADERS
   ViewRear.hh
   ViewHistBased.hh
   Product.hh
+  ProductBC.hh
   Snapshot.hh
   # Sums
   PartialSum.hh
