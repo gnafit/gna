@@ -96,3 +96,44 @@ class manager(object):
     def __exit__(self, *args):
         self.manager.resetCurrent()
 
+class set_context(object):
+    """Set multiple contexts using a single one"""
+    def __init__(self, **kwargs):
+        self.gpu=kwargs.pop('gpu', None)
+        self.manager=kwargs.pop('manager', None)
+        self.precision=kwargs.pop('precision', None)
+        assert not kwargs, 'Unknown options: '+str(kwargs)
+
+        self.chain = []
+        self.rets = []
+
+        if self.precision:
+            assert self.precision in ('float', 'double'), 'Unsupported precision: '+self.precision
+            self.chain.append(precision(self.precision))
+
+        if self.manager:
+            assert isinstance(self.manager, int)
+            self.chain.append(manager(self.manager))
+
+        if self.gpu:
+            assert self.manager and self.gpu, 'For GPU support manager should be also set'
+            self.chain.append(cuda(enabled=self.gpu))
+
+    def __enter__(self):
+        for cntx in self.chain:
+            rets = cntx.__enter__()
+            if rets:
+                self.rets.append(rets)
+
+        lenrets = len(self.rets)
+        if lenrets==1:
+            return self.rets[0]
+        elif lenrets==0:
+            return
+
+        return tuple(self.rets)
+
+    def __exit__(self, *args, **kwargs):
+        for cntx in reversed(self.chain):
+            cntx.__exit__(*args, **kwargs)
+
