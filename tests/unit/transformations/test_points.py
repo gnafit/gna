@@ -28,7 +28,7 @@ def test_points():
     # Create transformations
     #
     points = C.Points(mat)
-    identity = R.Identity()
+    identity = C.Identity()
 
     identity.identity.source( points.points.points )
     res = identity.identity.target.data()

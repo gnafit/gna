@@ -13,13 +13,14 @@ namespace GNA {
                        public TransformationBind<WeightedSumT<FloatType>, FloatType, FloatType> {
 
     private:
-      using BaseClass = GNASingleObjectT<FloatType,FloatType>;
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;
+      using typename BaseClass::OutputDescriptor;
 
       WeightedSumT(const std::vector<std::string> &labels);
-      WeightedSumT(const std::vector<std::string> &weights, const OutputDescriptor::OutputDescriptors& outputs);
+      WeightedSumT(const std::vector<std::string> &weights, const typename OutputDescriptor::OutputDescriptors& outputs);
       WeightedSumT(const std::vector<std::string> &weights, const std::vector<std::string> &inputs);
       WeightedSumT(double fillvalue, const std::vector<std::string> &weights, const std::vector<std::string> &inputs);
 
@@ -33,7 +34,6 @@ namespace GNA {
       void sum_ongpu(FunctionArgs& fargs);
       void sumFill_ongpu(FunctionArgs& fargs);
 #endif
-
 
       std::vector<variable<FloatType>> m_vars;
 

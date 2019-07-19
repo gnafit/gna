@@ -1,6 +1,7 @@
 #include "Sum.hh"
-#include "TypesFunctions.hh"
 #include "GNAObject.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
 
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
@@ -26,13 +27,13 @@ namespace GNA {
      */
     template<typename FloatType>
     SumT<FloatType>::SumT() {
-      this->transformation_("sum")                               ///< Define the transformation `sum`:
+      this->transformation_("sum")                         ///< Define the transformation `sum`:
         .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
         .types(                                            ///<   - provide type checking functions:
-               TypesFunctions::ifSame,                     ///<     * check that inputs have the same type and size
-               TypesFunctions::pass<0>                     ///<     * the output type is derived from the first input type
+               new CheckSameTypesT<FloatType>({0,-1}),     ///<     * check that inputs have the same type and size
+               new PassTypeT<FloatType>(0,{0,0})           ///<     * the output type is derived from the first input type
                )                                           ///<
-        .func([](FunctionArgs& fargs) {                    ///<   - provide the calculation function:
+        .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) { ///<   - provide the calculation function:
             auto& args=fargs.args;                         ///<     * extract transformation inputs
             auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
             ret = args[0].x;                               ///<     * assign (copy) the first input to output
@@ -50,7 +51,7 @@ namespace GNA {
      * @brief Construct Sum from vector of SingleOutput instances
      */
     template<typename FloatType>
-    SumT<FloatType>::SumT(const OutputDescriptor::OutputDescriptors& outputs) : SumT(){
+    SumT<FloatType>::SumT(const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs) : SumT(){
       for(auto& output : outputs){
         this->add(*output);
       }
@@ -65,7 +66,7 @@ namespace GNA {
      * @return InputDescriptor instance for the newly created input.
      */
     template<typename FloatType>
-    InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add(SingleOutput &out) {
+    InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add(typename GNAObjectT<FloatType,FloatType>::SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
 

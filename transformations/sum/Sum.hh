@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GNAObject.hh"
-#include "TypesFunctions.hh"
 
 namespace GNA {
   namespace GNAObjectTemplates {
@@ -18,13 +17,15 @@ namespace GNA {
     class SumT: public GNASingleObjectT<FloatType,FloatType>,
                public TransformationBind<SumT<FloatType>, FloatType, FloatType> {
     private:
-      using BaseClass = GNASingleObjectT<FloatType,FloatType>;
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;
+      using typename BaseClass::SingleOutput;
+      using typename BaseClass::OutputDescriptor;
 
-      SumT();                                                   ///< Constructor.
-      SumT(const OutputDescriptor::OutputDescriptors& outputs); ///< Construct Sum from vector of outputs
+      SumT();                                                            ///< Constructor.
+      SumT(const typename OutputDescriptor::OutputDescriptors& outputs); ///< Construct Sum from vector of outputs
 
       InputDescriptorT<FloatType, FloatType> add_input(const char* name);  ///< Add an input by name and leave unconnected.
 

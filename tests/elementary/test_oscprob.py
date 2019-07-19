@@ -17,6 +17,8 @@ import time
 # Define the parameters
 #
 baselinename='L'
+
+# with context.precision('float'):
 ns = env.ns("testoscprob")
 gna.parameters.oscillation.reqparameters(ns)
 ns.defparameter(baselinename, central=2.0, fixed=True, label='Baseline, km')

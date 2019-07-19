@@ -5,6 +5,7 @@ import ROOT
 from gna.env import env
 from physlib import pdg
 curpdg = pdg[2016]
+from gna import constructors as C
 
 
 # TODO: Add the way to automaticaly detect the current mass ordering and
@@ -39,8 +40,8 @@ def reqparameters(ns):
     ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5, label='Relative momentum spread (decoherence)')
 
     with ns:
-        ROOT.OscillationExpressions(ns=ns)
-        ROOT.PMNSExpressions(ns=ns)
+        C.OscillationExpressions(ns=ns)
+        C.PMNSExpressions(ns=ns)
 
     ns['DeltaMSq23'].setLabel('Mass splitting (2, 3)')
     ns['DeltaMSq13'].setLabel('Mass splitting (1, 3)')

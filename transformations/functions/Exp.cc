@@ -1,5 +1,7 @@
 #include "Exp.hh"
-#include "TypesFunctions.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
+
 #include <Eigen/Core>
 #include "config_vars.h"
 
@@ -17,7 +19,7 @@ namespace GNA {
         this->transformation_("exp")
             .input("points")
     	    .output("result")
-    	    .types(TypesFunctions::ifPoints<0>, TypesFunctions::pass<0>)
+    	    .types(new CheckKindT<FloatType>(DataKind::Points), new PassTypeT<FloatType>(0, {0,-1}))
     	    .func(&ExpT<FloatType>::calculate)
     #ifdef GNA_CUDA_SUPPORT
     	    .func("gpu", &ExpT<FloatType>::calc_gpu, DataLocation::Device)

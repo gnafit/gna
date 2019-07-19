@@ -1,15 +1,23 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include "TypesFunctions.hh"
 
 #include "GNAObject.hh"
 #include "Neutrino.hh"
 #include "config_vars.h"
 
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscillationVariablesT;
 
-class OscillationVariables;
-class PMNSVariables;
+    template<typename FloatType>
+    class PMNSVariablesT;
+  }
+}
+using OscillationVariables = GNA::GNAObjectTemplates::OscillationVariablesT<double>;
+using PMNSVariables = GNA::GNAObjectTemplates::PMNSVariablesT<double>;
+
 class OscProbPMNSBase: public GNAObject,
                        public TransformationBind<OscProbPMNSBase> {
 protected:
@@ -35,18 +43,21 @@ namespace GNA {
     template<typename FloatType>
     class OscProbPMNST: public OscProbPMNSBase,
                         public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
+    protected:
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
       using TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType>::transformation_;
+      using typename BaseClass::FunctionArgs;
 
       OscProbPMNST<FloatType>(Neutrino from, Neutrino to, std::string l_name="L");
 
       template <int I, int J>
-      void calcComponent(FunctionArgs fargs);
-      void calcComponentCP(FunctionArgs fargs);
-      void calcSum(FunctionArgs fargs);
-      void calcFullProb(FunctionArgs fargs);
+      void calcComponent(FunctionArgs& fargs);
+      void calcComponentCP(FunctionArgs& fargs);
+      void calcSum(FunctionArgs& fargs);
+      void calcFullProb(FunctionArgs& fargs);
     #ifdef GNA_CUDA_SUPPORT
-      void calcFullProbGpu(FunctionArgs fargs);
+      void calcFullProbGpu(FunctionArgs& fargs);
       template <int I, int J>
       void gpuCalcComponent(FunctionArgs& fargs);
       void gpuCalcComponentCP(FunctionArgs& fargs);

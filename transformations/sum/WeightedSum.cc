@@ -1,5 +1,7 @@
 #include "WeightedSum.hh"
-#include "TypesFunctions.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
+
 #include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
@@ -22,7 +24,7 @@ namespace GNA {
       : WeightedSumT(true, weights, inputs) { m_fillvalue=fillvalue; }
 
     template<typename FloatType>
-    WeightedSumT<FloatType>::WeightedSumT(const std::vector<std::string> &weights, const OutputDescriptor::OutputDescriptors& outputs)
+    WeightedSumT<FloatType>::WeightedSumT(const std::vector<std::string> &weights, const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs)
       : WeightedSumT(false, weights, weights)
     {
       const auto &trans  = this->transformations.front();
@@ -50,7 +52,7 @@ namespace GNA {
       auto sum = this->transformation_("sum")
         .output("sum")
         .label("wsum")
-        .types(TypesFunctions::ifSame, TypesFunctions::pass<0>)
+        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0,{0,-1}))
         ;
 
       if( use_fillvalue ){

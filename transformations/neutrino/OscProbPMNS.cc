@@ -10,6 +10,10 @@
 #include "TypesFunctions.hh"
 #include "Units.hh"
 
+#include "TypesFunctions.hh"
+#include "TypeClasses.hh"
+using namespace TypeClasses;
+
 #ifdef GNA_CUDA_SUPPORT
 //#include "extra/GNAcuOscProbFull.h"
 //#include "extra/GNAcuOscProbMem.hh"
@@ -120,6 +124,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .input("Enu")
     .output("comp12")
     .depends(m_L, m_param->DeltaMSq12)
+    .types(new PassTypeT<FloatType>(0, {0,-1}))
     .func(&OscProbPMNST<FloatType>::calcComponent<1,2>)
 #ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,2>, DataLocation::Device)
@@ -133,6 +138,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .input("Enu")
     .output("comp13")
     .depends(m_L, m_param->DeltaMSq13)
+    .types(new PassTypeT<FloatType>(0, {0,-1}))
     .func(&OscProbPMNST<FloatType>::calcComponent<1,3>)
 #ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,3>, DataLocation::Device)
@@ -146,6 +152,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .input("Enu")
     .output("comp23")
     .depends(m_L, m_param->DeltaMSq23)
+    .types(new PassTypeT<FloatType>(0, {0,-1}))
     .func(&OscProbPMNST<FloatType>::calcComponent<2,3>)
 #ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<2,3>, DataLocation::Device)
@@ -161,6 +168,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
       .output("compCP")
       .depends(m_L)
       .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
+      .types(new PassTypeT<FloatType>(0, {0,-1}))
       .func(&OscProbPMNST<FloatType>::calcComponentCP)
 #ifdef GNA_CUDA_SUPPORT
       .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponentCP, DataLocation::Device)
@@ -177,7 +185,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .input("comp23")
     .input("comp0")
     .output("probsum")
-    .types(TypesFunctions::pass<0>)
+    .types(new PassTypeT<FloatType>(0, {0,-1}))
     .func(&OscProbPMNST<FloatType>::calcSum)
 #ifdef GNA_CUDA_SUPPORT
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcSum, DataLocation::Device)
@@ -191,12 +199,12 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
       .input("Enu")
       .output("oscprob")
       .depends(m_L, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-      .types(TypesFunctions::pass<0>)
+      .types(new PassTypeT<FloatType>(0, {0,-1}))
       .func(&OscProbPMNST<FloatType>::calcFullProb);
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(FunctionArgs fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
   auto& ret=fargs.rets[0].x;
   auto& Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.5)*Enu.inverse();
@@ -228,7 +236,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(FunctionArgs
 
 template<typename FloatType>
 template <int I, int J>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArgs fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
 /*#ifdef TIME_COUNT_ON
    std::chrono::time_point<std::chrono::system_clock> start, end;
    start = std::chrono::system_clock::now();
@@ -248,7 +256,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArg
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 template < int I, int J>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
 
 /*#ifdef TIME_COUNT_ON
    std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -271,7 +279,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(Function
 #endif
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionArgs fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
   auto& ret=fargs.rets[0].x;
   auto &Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.25)*Enu.inverse();
@@ -282,7 +290,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionA
 
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
@@ -295,7 +303,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(Functi
 #endif
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0].x;
   auto weight12=weight<1,2>();
@@ -316,7 +324,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs farg
 
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
  // std::vector<variable<double>> weights =
@@ -387,6 +395,6 @@ void OscProbPMNSMult::calcSum(FunctionArgs fargs) {
 
 template class GNA::GNAObjectTemplates::OscProbPMNST<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class GNA::GNAObjectTemplates::OscProbPMNST<float>;
+  //template class GNA::GNAObjectTemplates::OscProbPMNST<float>;
 #endif
 

@@ -39,7 +39,7 @@ public:
       variables(ParametrizedTypes::ParametrizedBase::m_entries),
       evaluables(m_eventries),
       transformations(TransformationBaseType::m_entries)
-    { }
+    {}
   //GNAObjectT(const GNAObjectType &other)
     //: TransformationBaseType(other),
       //ParametrizedTypes::ParametrizedBase(other),

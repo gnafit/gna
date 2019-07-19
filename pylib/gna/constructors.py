@@ -112,7 +112,7 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
     else:
         inputs = OutputDescriptors(inputs)
 
-    return R.WeightedSum(weights, inputs, *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.WeightedSumT(context.current_precision())(weights, inputs, *args, **kwargs)
 
 """Construct WeightedSumP object from lists outputs"""
 def WeightedSumP(inputs, *args, **kwargs):
@@ -141,6 +141,14 @@ def Product(*args, **kwargs):
         return Templates.ProductT(context.current_precision())(*args, **kwargs)
 
     return Templates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
+"""Construct Product object from list of SingleOutputs"""
+def ProductBC(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
+    if outputs is None:
+        return Templates.ProductBCT(context.current_precision())(*args, **kwargs)
+
+    return Templates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
 def Exp(*args, **kwargs):

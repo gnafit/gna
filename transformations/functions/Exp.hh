@@ -20,7 +20,7 @@ namespace GNA{
                public TransformationBind<ExpT<FloatType>, FloatType, FloatType> {
 
     private:
-      using BaseClass = GNASingleObjectT<FloatType,FloatType>;
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
       using typename BaseClass::FunctionArgs;
       using typename BaseClass::TypesFunctionArgs;

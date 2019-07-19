@@ -2,7 +2,6 @@
 
 #include "GNAObject.hh"
 
-
 namespace GNA {
   namespace GNAObjectTemplates {
     /**
@@ -15,8 +14,8 @@ namespace GNA {
      * @date 2015
      */
     template<typename FloatType>
-    class ProductT: public GNASingleObjectT<FloatType,FloatType>,
-                    public TransformationBind<ProductT<FloatType>, FloatType, FloatType> {
+    class ProductBCT: public GNASingleObjectT<FloatType,FloatType>,
+                    public TransformationBind<ProductBCT<FloatType>, FloatType, FloatType> {
 
     private:
       using BaseClass = GNAObjectT<FloatType,FloatType>;
@@ -26,25 +25,25 @@ namespace GNA {
       using typename BaseClass::SingleOutput;
       using typename BaseClass::OutputDescriptor;
 
-      ProductT();                                                   ///< Constructor
-      ProductT(const typename OutputDescriptor::OutputDescriptors& outputs); ///< Construct Product from vector of outputs
+      ProductBCT();                                                   ///< Constructor
+      ProductBCT(const typename OutputDescriptor::OutputDescriptors& outputs); ///< Construct ProductBC from vector of outputs
 
       /**
-       * @brief Construct a Product of two outputs
+       * @brief Construct a ProductBC of two outputs
        * @param data1 -- first SingleOutput instance.
        * @param data2 -- second SingleOutput instance.
        */
-      ProductT(SingleOutput& data1, SingleOutput& data2) : ProductT<FloatType>() {
+      ProductBCT(SingleOutput& data1, SingleOutput& data2) : ProductBCT<FloatType>() {
         multiply(data1, data2);
       }
 
       /**
-       * @brief Construct a Product of three outputs
+       * @brief Construct a ProductBC of three outputs
        * @param data1 -- first SingleOutput instance.
        * @param data2 -- second SingleOutput instance.
        * @param data3 -- third SingleOutput instance.
        */
-      ProductT(SingleOutput& data1, SingleOutput& data2, SingleOutput& data3) : ProductT<FloatType>() {
+      ProductBCT(SingleOutput& data1, SingleOutput& data2, SingleOutput& data3) : ProductBCT<FloatType>() {
         multiply(data1, data2, data3);
       }
 
@@ -81,9 +80,6 @@ namespace GNA {
         multiply(data1);
         return multiply(data2, data3);
       }
-#ifdef GNA_CUDA_SUPPORT
-      void product_ongpu(FunctionArgs& fargs);
-#endif
     };
   }
 }
