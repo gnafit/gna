@@ -83,13 +83,15 @@ class allocator(object):
 class manager(object):
     """Set TreeManager"""
     def __init__(self, manager=None):
-        cls = current_precision_manager()
-        if isinstance(manager, (int, None)):
-            self.manager = cls(manager)
-        else:
-            self.manager = manager or cls()
+        self.manager_arg = manager
 
     def __enter__(self):
+        cls = current_precision_manager()
+        if isinstance(self.manager_arg, (int, None)):
+            self.manager = cls(self.manager_arg)
+        else:
+            self.manager = self.manager_arg or cls()
+
         self.manager.makeCurrent()
         return self.manager
 

@@ -5,6 +5,7 @@ import ROOT as R
 from collections import deque, namedtuple, OrderedDict
 import numpy as N
 import types
+from gna.bindings import provided_precisions
 
 VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_entry', 'taints_entry', 'depends_var', 'taints_var'])
 
@@ -21,25 +22,28 @@ class GraphWalker(object):
             self.set_parameters(ns)
 
     def _add_entry_point(self, arg):
-        OutputHandle = R.TransformationTypes.OutputHandleT('double')
-        Handle = R.TransformationTypes.HandleT('double', 'double')
-        SingleOutput = R.SingleOutputT('double')
-
         if isinstance(arg, (types.GeneratorType)):
             arg = list(arg)
         if not isinstance(arg, (list, tuple)):
             arg = [arg]
 
         for t in arg:
-            if isinstance(t, OutputHandle):
-                entry = R.OpenOutputHandleT('double','double')(t).getEntry()
-            elif isinstance(t, Handle):
-                entry = R.OpenHandleT('double','double')(t).getEntry()
-            elif isinstance(t, SingleOutput):
-                entry = R.OpenOutputHandleT('double','double')(t.single()).getEntry()
+            for precision in provided_precisions:
+                OutputHandle = R.TransformationTypes.OutputHandleT(precision)
+                Handle = R.TransformationTypes.HandleT(precision, precision)
+                SingleOutput = R.SingleOutputT(precision)
+                if isinstance(t, OutputHandle):
+                    entry = R.OpenOutputHandleT(precision,precision)(t).getEntry()
+                    break
+                elif isinstance(t, Handle):
+                    entry = R.OpenHandleT(precision,precision)(t).getEntry()
+                    break
+                elif isinstance(t, SingleOutput):
+                    entry = R.OpenOutputHandleT(precision,precision)(t.single()).getEntry()
+                    break
             else:
                 # raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
-                raise TypeError('Unsupported argument type '+type(arg).__name__)
+                raise TypeError('Unsupported argument type '+type(t).__name__)
 
         self._entry_points.append(entry)
 
