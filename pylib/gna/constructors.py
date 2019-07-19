@@ -112,7 +112,7 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
     else:
         inputs = OutputDescriptors(inputs)
 
-    return R.WeightedSum(weights, inputs, *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.WeightedSumT(context.current_precision())(weights, inputs, *args, **kwargs)
 
 """Construct WeightedSumP object from lists outputs"""
 def WeightedSumP(inputs, *args, **kwargs):
