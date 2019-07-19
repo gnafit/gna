@@ -35,9 +35,6 @@ namespace GNA {
       variable<FloatType> weight13;
       variable<FloatType> weight23;
       variable<FloatType> weightCP;
-      //variable<FloatType> weight12neg;
-      //variable<FloatType> weight13neg;
-      //variable<FloatType> weight23neg;
     protected:
 
       Fields fields(Neutrino from, Neutrino to, const std::vector<std::string>& names) {
