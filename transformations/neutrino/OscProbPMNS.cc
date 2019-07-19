@@ -266,7 +266,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(typename
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
-  cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
+  cuCalcComponent<double>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
 		fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, DeltaMSq<I,J>(), m_L);
 /*#ifdef TIME_COUNT_ON
    end = std::chrono::system_clock::now();

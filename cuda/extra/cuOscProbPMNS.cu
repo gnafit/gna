@@ -31,18 +31,18 @@ __global__ void cuCalcComponent(float** xarg, float** xret, float** intern) {
  * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (doubles)
  * 
  */
-
-__global__ void d_cuCalcComponent(double** xarg, double** xret, double** intern, double** params,
-				unsigned int m, double oscprobArgumentFactor, double DeltaMSq, double m_L) { 
+template<typename T>
+__global__ void d_cuCalcComponent(T** xarg, T** xret, T** intern, T** params,
+				unsigned int m, T oscprobArgumentFactor, T DeltaMSq, T m_L) { 
 	inverse(xarg[0], intern[0], m);
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        xret[0][idx] = cos( DeltaMSq * m_L * oscprobArgumentFactor * 0.5 * intern[0][idx]);      
+        xret[0][idx] = cos( DeltaMSq * m_L * oscprobArgumentFactor * (T)0.5 * intern[0][idx]);      
 }
 
-
-void cuCalcComponent(double** xarg, double** xret, double** intern, double** params,
-		 unsigned int m, unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L) {
-	d_cuCalcComponent<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
+template<typename T>
+void cuCalcComponent(T** xarg, T** xret, T** intern, T** params,
+		 unsigned int m, unsigned int n, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
+	d_cuCalcComponent<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
 								 m, oscprobArgumentFactor, DeltaMSq, m_L);
 	cudaDeviceSynchronize();
 }
@@ -96,3 +96,6 @@ void cuCalcSum(double** xarg, double** xret, double w12, double w13, double w23,
 	d_cuCalcSum<<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, w12, w13, w23, wcp, isSame);
 	cudaDeviceSynchronize();
 }
+
+template void cuCalcComponent<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m , unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
+template void cuCalcComponent<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int  n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
