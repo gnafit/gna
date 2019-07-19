@@ -47,7 +47,7 @@ namespace GNA{
             });
       }
     protected:
-      double m_value;  /// The value to be writte to input array.
+      FloatType m_value;  /// The value to be writte to input array.
     };
   }
 }
