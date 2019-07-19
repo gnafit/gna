@@ -81,6 +81,7 @@ set(TRANSFORMATION_SOURCES
   transformations/neutrino/OscProb2nu.cc
   transformations/neutrino/OscProbMatterUniform.cc
   transformations/neutrino/OscProbPMNS.cc
+  transformations/neutrino/OscProb3.cc
   transformations/neutrino/OscProbPMNSDecoh.cc
   transformations/neutrino/PDGVariables.cc
   transformations/neutrino/PMNSVariables.cc
@@ -193,6 +194,7 @@ set(TRANSFORMATION_HEADERS
   OscProbPMNSVariables.hh
   OscProb2nu.hh
   OscProbPMNS.hh
+  OscProb3.hh
   OscProbPMNSDecoh.hh
   OscProbMatterUniform.hh
   EvisToEe.hh
