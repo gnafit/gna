@@ -18,12 +18,27 @@ namespace TransformationTypes{
   class GPUVariables;
 }
 
+namespace GNA{
+  namespace GNAObjectTemplates{
+    template<typename FloatType>
+    class ParametersGroupT;
+
+    template<typename FloatType>
+    class ExpressionsProviderT;
+  }
+}
+
 namespace ParametrizedTypes {
   using VariablesContainer = boost::ptr_vector<ParametrizedEntry>;
   using EvaluablesContainer = boost::ptr_vector<EvaluableEntry>;
 
   class ParametrizedBase {
-    friend class ::ParametersGroup;
+    template<typename FloatType>
+    friend class GNA::GNAObjectTemplates::ParametersGroupT;
+
+    template<typename FloatType>
+    friend class GNA::GNAObjectTemplates::ExpressionsProviderT;
+
     template<typename SourceFloatType, typename SinkFloatType>
     friend class ::GNAObjectT;
 
@@ -77,11 +92,13 @@ namespace ParametrizedTypes {
                             const std::vector<changeable> &sources);
 
     taintflag m_taintflag;
+  protected:
+    VariableHandle<void> getByField(const variable<void> *field);
+
   private:
     int findEntry(const std::string &name) const;
     ParametrizedEntry &getEntry(const std::string &name);
 
-    VariableHandle<void> getByField(const variable<void> *field);
 
     boost::ptr_vector<ParametrizedEntry> m_entries;
     std::vector<callback> m_callbacks;

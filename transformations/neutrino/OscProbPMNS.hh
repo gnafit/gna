@@ -6,9 +6,18 @@
 #include "Neutrino.hh"
 #include "config_vars.h"
 
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscillationVariablesT;
 
-class OscillationVariables;
-class PMNSVariables;
+    template<typename FloatType>
+    class PMNSVariablesT;
+  }
+}
+using OscillationVariables = GNA::GNAObjectTemplates::OscillationVariablesT<double>;
+using PMNSVariables = GNA::GNAObjectTemplates::PMNSVariablesT<double>;
+
 class OscProbPMNSBase: public GNAObject,
                        public TransformationBind<OscProbPMNSBase> {
 protected:

@@ -6,7 +6,13 @@
 #include "variable.hh"
 #include "parameter.hh"
 
-class ParametersGroup;
+namespace GNA{
+  namespace GNAObjectTemplates{
+    template<typename FloatType>
+    class ParametersGroupT;
+  }
+}
+
 template <typename SourceFloatType,typename SinkFloatType>
 class GNAObjectT;
 

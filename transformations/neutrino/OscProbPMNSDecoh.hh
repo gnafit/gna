@@ -5,8 +5,18 @@
 #include "OscProbPMNS.hh"
 #include "Neutrino.hh"
 
-class OscillationVariables;
-class PMNSVariables;
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscillationVariablesT;
+
+    template<typename FloatType>
+    class PMNSVariablesT;
+  }
+}
+using OscillationVariables = GNA::GNAObjectTemplates::OscillationVariablesT<double>;
+using PMNSVariables = GNA::GNAObjectTemplates::PMNSVariablesT<double>;
+
 class OscProbPMNSDecoh: public OscProbPMNSBase,
                         public TransformationBind<OscProbPMNSDecoh> {
 public:
