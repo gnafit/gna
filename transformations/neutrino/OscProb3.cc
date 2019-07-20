@@ -59,19 +59,20 @@ namespace GNA {
         template <int I>
         void OscProb3T<FloatType>::calcComponent(typename OscProb3T<FloatType>::FunctionArgs& fargs) {
           auto &Enu = fargs.args[0].x;
-          fargs.rets[0].x = cos((m_dm[I].value()*oscprobArgumentFactor*m_L.value()*0.5)*Enu.inverse());
+          auto& ret = fargs.rets[0].x;
+          ret = cos((m_dm[I].value()*oscprobArgumentFactor*m_L.value()*0.5)*Enu.inverse());
         }
 
 #ifdef GNA_CUDA_SUPPORT
-    template<typename FloatType>
-    template<int I>
-    void OscProb3T<FloatType>::gpuCalcComponent(typename OscProb3T<FloatType>::FunctionArgs& fargs) {
-      fargs.args.touch();
-      auto& gpuargs=fargs.gpu;
-      gpuargs->provideSignatureDevice();
-      cuCalcComponent<FloatType>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
-                      fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_dm[I].value(), m_L.value());
-    }
+        template<typename FloatType>
+        template<int I>
+        void OscProb3T<FloatType>::gpuCalcComponent(typename OscProb3T<FloatType>::FunctionArgs& fargs) {
+          fargs.args.touch();
+          auto& gpuargs=fargs.gpu;
+          gpuargs->provideSignatureDevice();
+          cuCalcComponent<FloatType>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
+                          fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_dm[I].value(), m_L.value());
+        }
 #endif
     }
 }

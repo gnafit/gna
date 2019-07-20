@@ -160,7 +160,6 @@ template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::update() {
   Status status = Status::Success;
   try {
-	std::cout << "UPDATE " << std::endl;
     evaluate();
 #ifdef GNA_CUDA_SUPPORT
     setEntryDataLocation(m_entryLoc);
@@ -289,19 +288,15 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
     initInternals(sargs);
 
 #ifdef GNA_CUDA_SUPPORT
-std::cout << "REQ GPU" <<std::endl;
     // GPU: require GPU memory for previous transformation's sink
     if (this->getEntryLocation() == DataLocation::Device){
       for (auto &source : sources) {
-std::cout << "REQ GPU 1" <<std::endl;
           source.requireGPU();
       }
       for (auto &sink : sinks) {
-std::cout << "REQ GPU 2" <<std::endl;
         sink.requireGPU(this->getEntryLocation());
       }
       for (auto &intern : storages) {
-std::cout << "REQ GPU 3" <<std::endl;
         intern.requireGPU(this->getEntryLocation());
       }
       // init gpu storage

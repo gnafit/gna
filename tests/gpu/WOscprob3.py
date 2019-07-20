@@ -25,12 +25,12 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = True
+gpu = False
 precision='double'
 precision='float' # Anna: uncomment for isngle precision
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
-E_arr = N.arange(1.0, 10.0, 0.0001)  #array energy (МеV)
+E_arr = N.arange(1.0, 10.0, 0.00001)  #array energy (МеV)
 
 with context.set_context(manager=ndata, gpu=gpu, precision=precision) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
@@ -57,32 +57,32 @@ with context.set_context(manager=ndata, gpu=gpu, precision=precision) as manager
         pars = tuple(par.getVariable() for (name,par) in ns.walknames())
         manager.setVariables(C.stdvector(pars))
 
-# N=1000
-# start_time = time.time()
-# for x in range(N):
-    # ws.sum.taint()
-    # oscprob.comp12.taint()
-    # oscprob.comp13.taint()
-    # oscprob.comp23.taint()
+N=100
+start_time = time.time()
+for x in range(N):
+    ws.sum.taint()
+    oscprob.comp12.taint()
+    oscprob.comp13.taint()
+    oscprob.comp23.taint()
 
-# end_time = time.time()
-# fake_time = end_time - start_time
-# print('Fake time', fake_time)
+end_time = time.time()
+fake_time = end_time - start_time
+print('Fake time', fake_time)
 
-# start_time = time.time()
-# for x in range(N):
-    # ws.sum.taint()
-    # oscprob.comp12.taint()
-    # oscprob.comp13.taint()
-    # oscprob.comp23.taint()
+start_time = time.time()
+for x in range(N):
+    ws.sum.taint()
+    oscprob.comp12.taint()
+    oscprob.comp13.taint()
+    oscprob.comp23.taint()
 
-    # ws.sum.sum.data()
-# end_time = time.time()
-# elapsed_time = end_time - start_time
-# print('Total time', elapsed_time)
+    ws.sum.sum.data()
+end_time = time.time()
+elapsed_time = end_time - start_time
+print('Total time', elapsed_time)
 
-# print('GNA time (%i trials)'%N, elapsed_time-fake_time)
-# print('GNA time per event', (elapsed_time-fake_time)/N)
+print('GNA time (%i trials)'%N, elapsed_time-fake_time)
+print('GNA time per event', (elapsed_time-fake_time)/N)
 
 from gna.graphviz import savegraph
 savegraph(ws.sum, "output/oscprob3.dot")
