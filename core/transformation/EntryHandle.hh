@@ -79,6 +79,7 @@ namespace TransformationTypes
      */
     void update(int i) const { (void)m_entry->data(i); }
     void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
+    void touch_global() const { m_entry->touch_global(); }  ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
 #ifdef GNA_CUDA_SUPPORT

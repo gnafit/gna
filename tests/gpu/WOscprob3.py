@@ -25,12 +25,12 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = False
+gpu = True
 precision='double'
-precision='float' # Anna: uncomment for isngle precision
+# precision='float' # Anna: uncomment for isngle precision
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
-E_arr = N.arange(1.0, 10.0, 0.00001)  #array energy (МеV)
+E_arr = N.arange(1.0, 10.0, 0.001)  #array energy (МеV)
 
 with context.set_context(manager=ndata, gpu=gpu, precision=precision) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
@@ -76,7 +76,8 @@ for x in range(N):
     oscprob.comp13.taint()
     oscprob.comp23.taint()
 
-    ws.sum.sum.data()
+    # ws.sum.sum.data()
+    ws.sum.touch_global()
 end_time = time.time()
 elapsed_time = end_time - start_time
 print('Total time', elapsed_time)
