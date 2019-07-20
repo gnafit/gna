@@ -72,7 +72,16 @@ namespace GNA {
     protected:
       void initFields(const std::vector<std::string> &params);
       void checkField(const std::string &name);
-      const std::string &fieldName(Field field) const;
+      const std::string &fieldName(Field field) const {
+        for (const auto &pair: m_fields.expose()) {
+          if (std::get<0>(pair.second) == field) {
+            return pair.first;
+          }
+        }
+        throw std::runtime_error(
+          (fmt::format("Parametrized::Group: unknown field `{0}'", field->name() ))
+          );
+      }
       virtual void setExpressions(ExpressionsProvider &/*provider*/) { }
 
       GNAObjectT<FloatType,FloatType>* m_parent;

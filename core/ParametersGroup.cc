@@ -31,17 +31,17 @@ namespace GNA {
       }
     }
 
-    template<typename FloatType>
-    const std::string &ParametersGroupT<FloatType>::fieldName(Field field) const {
-      for (const auto &pair: m_fields.expose()) {
-        if (std::get<0>(pair.second) == field) {
-          return pair.first;
-        }
-      }
-      throw std::runtime_error(
-        (fmt::format("Parametrized::Group: unknown field `{0}'", field->name() ))
-        );
-    }
+    //template<typename FloatType>
+    //const std::string &ParametersGroupT<FloatType>::fieldName(ParametersGroupT<FloatType>::Field field) const {
+      //for (const auto &pair: m_fields.expose()) {
+        //if (std::get<0>(pair.second) == field) {
+          //return pair.first;
+        //}
+      //}
+      //throw std::runtime_error(
+        //(fmt::format("Parametrized::Group: unknown field `{0}'", field->name() ))
+        //);
+    //}
 
     template<typename FloatType>
     void ParametersGroupT<FloatType>::dump() {
