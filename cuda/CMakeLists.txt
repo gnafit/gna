@@ -38,12 +38,12 @@ set(CUSOURCES
   operations/identity.cu
   operations/exp.cu
   operations/selfpower.cu
-  operations/poisson.cu
   operations/fillike.cu
   operations/normalize.cu
   operations/rebin.cu
   extra/cuOscProbPMNS.cu
   extra/cuIntegrate.cu
+  #  operations/poisson.cu
   )
 
 set(CUHEADERS
