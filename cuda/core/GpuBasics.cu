@@ -96,26 +96,34 @@ void cuwr_free(T* &ptr) {
 template void copyH2D_ALL<unsigned int>(unsigned int* &dst, unsigned int* src, unsigned int N);
 template void copyH2D_ALL<size_t>(size_t* &dst, size_t* src, unsigned int N);
 template void copyH2D_ALL<double>(double* &dst, double* src, unsigned int N);
+template void copyH2D_ALL<float>(float* &dst, float* src, unsigned int N);
 template void cuwr_free<unsigned int>(unsigned int* &ptr);
 template void cuwr_free<size_t>(size_t* &ptr);
 template void cuwr_free<double>(double* &ptr);
+template void cuwr_free<float>(float* &ptr);
 
 template void copyH2D_ALL<unsigned int*>(unsigned int** &dst, unsigned int** src, unsigned int N);
 template void copyH2D_ALL<size_t*>(size_t** &dst, size_t** src, unsigned int N);
 template void copyH2D_ALL<double*>(double** &dst, double** src, unsigned int N);
+template void copyH2D_ALL<float*>(float** &dst, float** src, unsigned int N);
 template void cuwr_free<unsigned int*>(unsigned int** &ptr);
 template void cuwr_free<size_t*>(size_t** &ptr);
 template void cuwr_free<double*>(double** &ptr);
+template void cuwr_free<float*>(float** &ptr);
 
 
 template void copyH2D_NA<unsigned int*>(unsigned int** dst, unsigned int** src, unsigned int N);
 template void copyH2D_NA<double*>(double** dst, double** src, unsigned int N);
+template void copyH2D_NA<float*>(float** dst, float** src, unsigned int N);
 template void copyH2D_NA<unsigned int>(unsigned int* dst, unsigned int* src, unsigned int N);
-template void copyH2D_NA<double>(double* dst, double* src, unsigned int N);
+template void copyH2D_NA<float>(float* dst, float* src, unsigned int N);
 template void copyH2D_NA<double>(double** dst, double* src, size_t N);
+template void copyH2D_NA<float>(float** dst, float* src, size_t N);
 
 template void device_malloc<double>(double* &dst, unsigned int N);
+template void device_malloc<float>(float* &dst, unsigned int N);
 template void device_malloc<double*>(double** &dst, unsigned int N);
+template void device_malloc<float*>(float** &dst, unsigned int N);
 
 template void debug_drop<double>(double* dst, unsigned int N);
 template void debug_drop<double*>(double** dst, unsigned int N);
