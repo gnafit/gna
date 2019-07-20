@@ -5,7 +5,6 @@
 #include "GNAObject.hh"
 #include "Neutrino.hh"
 #include "config_vars.h"
-#undef GNA_CUDA_SUPPORT
 
 namespace GNA {
     namespace GNAObjectTemplates {
