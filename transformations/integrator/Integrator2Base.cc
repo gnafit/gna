@@ -56,11 +56,11 @@ TransformationDescriptor Integrator2Base::add_transformation(const std::string& 
         .func(&Integrator2Base::integrate)
 #ifdef GNA_CUDA_SUPPORT
         .func("gpu", &Integrator2Base::integrate_gpu, DataLocation::Device)
-        .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
-            for (size_t i = 0; i < 2* fargs.args.size(); i++) {
-                 fargs.ints[i] = DataType().points().shape(fargs.args[0].size() + 2);
-            }
-        })
+//        .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
+        //    for (size_t i = 0; i < 2*fargs.args.size(); i++) {
+        //         fargs.ints[i] = DataType().points().shape( 2* m_weights.size());//fargs.args[0].size() + 2);
+       //     }
+//        })
 #endif
         ;
     reset_open_input();
@@ -93,9 +93,12 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
 #ifdef GNA_CUDA_SUPPORT
 void Integrator2Base::integrate_gpu(FunctionArgs& fargs){
   fargs.args.touch();
+  //fargs.ints[0].arr = m_weights;
+  std::cout << "I TOUCHED" << std::endl;
   auto& gpuargs = fargs.gpu;
   gpuargs->provideSignatureDevice();
-  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0]);
+  std::cout << "I COPIED" << std::endl;
+  cuIntegrate2d(gpuargs->args, gpuargs->ints, gpuargs->rets, fargs.args.size(),m_xorders.size()*m_xorders[0], m_yorders.size()*m_yorders[0], static_cast<size_t>(m_xorders.size()), static_cast<size_t>(m_yorders.size()));
 }
 
 #endif

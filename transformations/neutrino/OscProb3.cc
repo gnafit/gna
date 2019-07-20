@@ -69,7 +69,7 @@ namespace GNA {
           fargs.args.touch();
           auto& gpuargs=fargs.gpu;
           gpuargs->provideSignatureDevice();
-          cuCalcComponent(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
+          cuCalcComponent<FloatType>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars,
                           fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_dm[I].value(), m_L.value());
         }
 #endif
