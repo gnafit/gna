@@ -68,6 +68,6 @@ void cuweightedsumfill(T** array, T** ans_array, T** weights, T k, unsigned int 
 }
 
 template void cuweightedsum<double>(double** array, double** ans_array, double** weights, unsigned int n, unsigned int m, unsigned int nvars);
-template void cuweightedsumfill<double>(double** array, double** ans_array, double** weights, double k, unsigned int n, unsigned int m, unsigned int nvars);
 template void cuweightedsum<float>(float** array, float** ans_array, float** weights, unsigned int n, unsigned int m, unsigned int nvars);
+template void cuweightedsumfill<double>(double** array, double** ans_array, double** weights, double k, unsigned int n, unsigned int m, unsigned int nvars);
 template void cuweightedsumfill<float>(float** array, float** ans_array, float** weights, float k, unsigned int n, unsigned int m, unsigned int nvars);
