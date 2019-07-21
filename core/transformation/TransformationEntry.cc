@@ -305,6 +305,8 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 #endif
   }
   functionargs->updateTypes();
+
+  tainted.unfreeze();
 }
 
 /** @brief Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.*/
@@ -410,7 +412,6 @@ bool EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
   setEntryLocation(it->second.funcLoc);
 #endif
   funcname=name;
-//  evaluateTypes();
   return true;
 }
 

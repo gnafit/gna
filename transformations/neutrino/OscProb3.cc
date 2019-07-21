@@ -58,9 +58,9 @@ namespace GNA {
         template<typename FloatType>
         template <int I>
         void OscProb3T<FloatType>::calcComponent(typename OscProb3T<FloatType>::FunctionArgs& fargs) {
-          auto &Enu = fargs.args[0].x;
-          auto& ret = fargs.rets[0].x;
-          ret = cos((m_dm[I].value()*oscprobArgumentFactor*m_L.value()*0.5)*Enu.inverse());
+            auto &Enu = fargs.args[0].x;
+            auto& ret = fargs.rets[0].x;
+            ret = cos((m_dm[I].value()*oscprobArgumentFactor*m_L.value()*0.5)*Enu.inverse());
         }
 
 #ifdef GNA_CUDA_SUPPORT

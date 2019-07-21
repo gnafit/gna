@@ -52,7 +52,8 @@ namespace GNA {
       auto sum = this->transformation_("sum")
         .output("sum")
         .label("wsum")
-        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0,{0,-1}))
+        .types(new PassTypeT<FloatType>(0,{0,-1})) // FIXME: set back!!!
+        //.types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0,{0,-1}))
         ;
 
       if( use_fillvalue ){
