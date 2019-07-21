@@ -56,7 +56,7 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel('Input size')
-ax.set_ylabel('Time per execution, s')
+ax.set_ylabel('Ratio')
 ax.set_title('CPU, double precision, relative')
 
 ref = data['cpu']['double']['all'][first_element:]
@@ -91,7 +91,7 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel('Input size')
-ax.set_ylabel('Time per execution, s')
+ax.set_ylabel('Ratio')
 ax.set_title('CPU: double vs float (relative to double)')
 
 refa = data['cpu']['double']['all'][first_element:]
@@ -128,7 +128,7 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel('Input size')
-ax.set_ylabel('Time per execution, s')
+ax.set_ylabel('Ratio')
 ax.set_title('CPU and GPU, relative to double')
 
 refcpu = data['cpu']['double']['all'][first_element:]
@@ -161,7 +161,7 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel('Input size')
-ax.set_ylabel('Time per execution, s')
+ax.set_ylabel('Ratio')
 ax.set_title(r'CPU and GPU ($\theta_{13}$), relative to double')
 
 refcpu = data['cpu']['double']['SinSq13'][first_element:]
