@@ -15,6 +15,11 @@ from gna import context, bindings
 import ROOT
 import time
 
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument( '-g', '--graph' )
+args = parser.parse_args()
+
 ROOT.GNAObject
 
 labels = [ 'comp0', 'item12', 'item13','item23' ]
@@ -25,7 +30,7 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = True
+gpu = False
 precision='double'
 # precision='float' # Anna: uncomment for isngle precision
 
@@ -85,8 +90,13 @@ print('Total time', elapsed_time)
 print('GNA time (%i trials)'%N, elapsed_time-fake_time)
 print('GNA time per event', (elapsed_time-fake_time)/N)
 
-from gna.graphviz import savegraph
-savegraph(ws.sum, "output/oscprob3.dot")
+if args.graph:
+    from gna.graphviz import savegraph
+    savegraph(ws.sum, args.graph)
+
+    name, ext = args.graph.rsplit('.', 1)
+    savegraph(ws.sum, name+'_vars.'+ext, namespace=ns)
+
 
 from gna.bindings import common
 fig = plt.figure()
