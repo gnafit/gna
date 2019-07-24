@@ -21,11 +21,11 @@ namespace GNA {
 
       static const size_t Nnu = 3;
 
-      OscProbPMNSVariablesT(GNAObjectT<FloatType,FloatType> *parent, Neutrino from, Neutrino to, const std::vector<std::string>& names={})
-        : ParametersGroup(parent, fields(from, to, names))
+      OscProbPMNSVariablesT(GNAObjectT<FloatType,FloatType> *parent, Neutrino from, Neutrino to, const std::vector<std::string>& names={}, bool modecos=true)
+        : ParametersGroup(parent, fields(from, to, names)), m_modecos(modecos)
         { }
-      OscProbPMNSVariablesT(GNAObjectT<FloatType,FloatType> *parent, std::vector<std::string> params, Neutrino from, Neutrino to, const std::vector<std::string>& names={})
-        : OscProbPMNSVariablesT(parent, from, to, names)
+      OscProbPMNSVariablesT(GNAObjectT<FloatType,FloatType> *parent, std::vector<std::string> params, Neutrino from, Neutrino to, const std::vector<std::string>& names={}, bool modecos=true)
+        : OscProbPMNSVariablesT(parent, from, to, names, modecos)
         { initFields(params); }
 
       variable<FloatType> V[Nnu][Nnu];
@@ -67,7 +67,7 @@ namespace GNA {
           .add(&weight23, varnames[3])
         ;
         if(m_alpha!=m_beta){
-          allvars.add(&weightCP, varnames[7]);
+          allvars.add(&weightCP, varnames[4]);
         }
         for (size_t i = 0; i < Nnu; ++i) {
           for (size_t j = 0; j < Nnu; ++j) {
@@ -78,125 +78,93 @@ namespace GNA {
       }
 
       void setExpressions(ExpressionsProvider &provider) override {
-        /// Mode A: incoherent sum + cos
-        provider
-          .add(&weight0, {&weight12, &weight13, &weight23}, [&](){
-               return static_cast<FloatType>(m_alpha==m_beta)-(weight12.value()+weight13.value()+weight23.value());
-               })
-          .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
-              return 2.0*std::real(
-                V[m_alpha][0].complex()*
-                V[m_beta][1].complex()*
-                std::conj(V[m_alpha][1].complex())*
-                std::conj(V[m_beta][0].complex())
-                );
-            })
-          .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-              return 2.0*std::real(
-                V[m_alpha][0].complex()*
-                V[m_beta][2].complex()*
-                std::conj(V[m_alpha][2].complex())*
-                std::conj(V[m_beta][0].complex())
-                );
-            })
-          .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-              return 2.0*std::real(
-                V[m_alpha][1].complex()*
-                V[m_beta][2].complex()*
-                std::conj(V[m_alpha][2].complex())*
-                std::conj(V[m_beta][1].complex())
-                );
-            })
-          ;
-        /// Mode B: delta + (1-cos) = delta + sin0.5
-        //if (m_alpha==m_beta){
-          //provider
-            //.add(&weight0, {&weight12, &weight13, &weight23}, [&](){return 1.0;});
-        //}
-        //provider
-          //.add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
-              //return 4.0*std::real(
-                //V[m_alpha][0].value()*
-                //V[m_beta][1].value()*
-                //std::conj(V[m_alpha][1].value())*
-                //std::conj(V[m_beta][0].value())
-                //);
-            //})
-          //.add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-              //return 4.0*std::real(
-                //V[m_alpha][0].value()*
-                //V[m_beta][2].value()*
-                //std::conj(V[m_alpha][2].value())*
-                //std::conj(V[m_beta][0].value())
-                //);
-            //})
-          //.add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
-              //return 4.0*std::real(
-                //V[m_alpha][1].value()*
-                //V[m_beta][2].value()*
-                //std::conj(V[m_alpha][2].value())*
-                //std::conj(V[m_beta][1].value())
-                //);
-            //})
-          //;
-          //if(m_alpha!=m_beta){
-            //provider.add(&weightCP, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&](){
-              //return m_lepton_charge*8.0*std::imag(
-                //V[m_alpha][0].value()*
-                //V[m_beta][1].value()*
-                //std::conj(V[m_alpha][1].value())*
-                //std::conj(V[m_beta][0].value())
-                //);
-              //});
-          //}
-          //.add(&V[0][1], {&Theta12, &Theta13}, [&]() {
-              //return sin(Theta12)*cos(Theta13);
-            //})
-          //.add(&V[0][2], {&Theta13, &Delta}, [&]() {
-              //auto phase = exp(-std::complex<FloatType>(0, Delta));
-              //return sin(Theta13)*phase;
-            //})
-          //.add(&V[1][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-              //auto phase = exp(std::complex<FloatType>(0, Delta));
-              //return
-                //-sin(Theta12)*cos(Theta23)
-                //-cos(Theta12)*sin(Theta23)*sin(Theta13)*phase;
-            //})
-          //.add(&V[1][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-              //auto phase = exp(std::complex<FloatType>(0, Delta));
-              //return
-                 //cos(Theta12)*cos(Theta23)
-                //-sin(Theta12)*sin(Theta23)*sin(Theta13)*phase;
-            //})
-          //.add(&V[1][2], {&Theta13, &Theta23}, [&]() {
-              //return sin(Theta23)*cos(Theta13);
-            //})
-          //.add(&V[2][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-              //auto phase = exp(std::complex<FloatType>(0, Delta));
-              //return
-                //sin(Theta12)*sin(Theta23)
-                //-cos(Theta12)*cos(Theta23)*sin(Theta13)*phase;
-            //})
-          //.add(&V[2][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&]() {
-              //auto phase = exp(std::complex<FloatType>(0, Delta));
-              //return
-                //-cos(Theta12)*sin(Theta23)
-                //-sin(Theta12)*cos(Theta23)*sin(Theta13)*phase;
-            //})
-          //.add(&V[2][2], {&Theta13, &Theta23}, [&]() {
-              //return cos(Theta23)*cos(Theta13);
-            //})
-        //;
+        if(m_modecos){
+          /// Mode A:
+          /// P = Vak2 Vbk2 + 2 sum cos(.../2) + ...
+          provider
+            .add(&weight0, {&weight12, &weight13, &weight23}, [&](){
+                 return static_cast<FloatType>(m_alpha==m_beta)-(weight12.value()+weight13.value()+weight23.value());
+                 })
+            .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
+                return 2.0*std::real(
+                  V[m_alpha][0].complex()*
+                  V[m_beta][1].complex()*
+                  std::conj(V[m_alpha][1].complex())*
+                  std::conj(V[m_beta][0].complex())
+                  );
+              })
+            .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+                return 2.0*std::real(
+                  V[m_alpha][0].complex()*
+                  V[m_beta][2].complex()*
+                  std::conj(V[m_alpha][2].complex())*
+                  std::conj(V[m_beta][0].complex())
+                  );
+              })
+            .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+                return 2.0*std::real(
+                  V[m_alpha][1].complex()*
+                  V[m_beta][2].complex()*
+                  std::conj(V[m_alpha][2].complex())*
+                  std::conj(V[m_beta][1].complex())
+                  );
+              })
+            ;
+        }
+        else{
+          /// Mode B: delta + (1-cos) = delta + sin0.5
+          /// Mode B:
+          /// P = delta_ab - 4 sum sin²(.../4) + ...
+            provider
+              .add(&weight0, {&weight12, &weight13, &weight23}, [&](){return m_alpha==m_beta;})
+              .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
+                  return -4.0*std::real(
+                    V[m_alpha][0].value()*
+                    V[m_beta][1].value()*
+                    std::conj(V[m_alpha][1].value())*
+                    std::conj(V[m_beta][0].value())
+                    );
+                })
+              .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+                  return -4.0*std::real(
+                    V[m_alpha][0].value()*
+                    V[m_beta][2].value()*
+                    std::conj(V[m_alpha][2].value())*
+                    std::conj(V[m_beta][0].value())
+                    );
+                })
+              .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
+                  return -4.0*std::real(
+                    V[m_alpha][1].value()*
+                    V[m_beta][2].value()*
+                    std::conj(V[m_alpha][2].value())*
+                    std::conj(V[m_beta][1].value())
+                    );
+                })
+              ;
+        }
+
+        if(m_alpha!=m_beta){
+          provider.add(&weightCP, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&](){
+            return m_lepton_charge*8.0*std::imag(
+              V[m_alpha][0].value()*
+              V[m_beta][1].value()*
+              std::conj(V[m_alpha][1].value())*
+              std::conj(V[m_beta][0].value())
+              );
+            });
+          }
       }
 
       int m_alpha, m_beta, m_lepton_charge;
+      bool m_modecos;
     };
 
     template<typename FloatType>
     class OscProbPMNSExpressionsT: public ExpressionsProviderT<FloatType> {
     public:
-      OscProbPMNSExpressionsT(Neutrino from, Neutrino to, const std::vector<std::string>& names={})
-        : ExpressionsProviderT<FloatType>(new OscProbPMNSVariablesT<FloatType>(this, from, to, names))
+      OscProbPMNSExpressionsT(Neutrino from, Neutrino to, const std::vector<std::string>& names={}, bool modecos=true)
+        : ExpressionsProviderT<FloatType>(new OscProbPMNSVariablesT<FloatType>(this, from, to, names, modecos))
         { }
     };
   }
@@ -204,3 +172,4 @@ namespace GNA {
 
 using OscProbPMNSExpressions = GNA::GNAObjectTemplates::OscProbPMNSExpressionsT<double>;
 using OscProbPMNSVariables = GNA::GNAObjectTemplates::OscProbPMNSVariablesT<double>;
+

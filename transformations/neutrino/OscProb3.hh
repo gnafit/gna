@@ -24,12 +24,16 @@ namespace GNA {
                 OscProb3T(Neutrino from, Neutrino to, std::string l_name="L");
 
                 template<int I>
-                void calcComponent(FunctionArgs& fargs);
+                void calcComponent_modecos(FunctionArgs& fargs);
+                template<int I>
+                void calcComponent_modesin(FunctionArgs& fargs);
                 void calcComponentCP(FunctionArgs& fargs);
 
                 #ifdef GNA_CUDA_SUPPORT
                 template<int I>
-                void gpuCalcComponent(FunctionArgs& fargs);
+                void gpuCalcComponent_modecos(FunctionArgs& fargs);
+                template<int I>
+                void gpuCalcComponent_modesin(FunctionArgs& fargs);
                 void gpuCalcComponentCP(FunctionArgs& fargs);
                 #endif
 

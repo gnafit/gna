@@ -6,7 +6,7 @@
 #include <typeinfo>
 
 #include "cuRootMath.h"
-#include "../operations/cuOperations.cuh" 
+#include "../operations/cuOperations.cuh"
 #include <cuda.h>
 #include "cuda_config_vars.h"
 #include "cuOscProbPMNS.hh"
@@ -14,42 +14,61 @@
 
 /*
  * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (floats)
- * 
+ *
  */
 
 /*
 template <int I, int J>
 __global__ void cuCalcComponent(float** xarg, float** xret, float** intern) {
 	inverse(xarg, intern);
-	prodNumToVec (cosf(DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5f), 
+	prodNumToVec (cosf(DeltaMSq<I,J>() * oscprobArgumentFactor * m_L * 0.5f),
 				intern,
-				xret);	
+				xret);
 }
 */
 
 /*
  * CUDA version of calcComponent function in OscProbPMNS::OscProbPMNS (doubles)
- * 
+ *
  */
+/// Mode A: cos(.../2)
 template<typename T>
-__global__ void d_cuCalcComponent(T** xarg, T** xret, T** intern, T** params,
-				unsigned int m, T oscprobArgumentFactor, T DeltaMSq, T m_L) { 
+__global__ void d_cuCalcComponent_modecos(T** xarg, T** xret, T** intern, T** params,
+				unsigned int m, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
 	inverse(xarg[0], intern[0], m);
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        xret[0][idx] = cos( DeltaMSq * m_L * oscprobArgumentFactor * (T)0.5 * intern[0][idx]);      
+        xret[0][idx] = cos( DeltaMSq * m_L * oscprobArgumentFactor * (T)0.5 * intern[0][idx]);
 }
 
 template<typename T>
-void cuCalcComponent(T** xarg, T** xret, T** intern, T** params,
+void cuCalcComponent_modecos(T** xarg, T** xret, T** intern, T** params,
 		 unsigned int m, unsigned int n, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
-	d_cuCalcComponent<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
+	d_cuCalcComponent_modecos<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
+								 m, oscprobArgumentFactor, DeltaMSq, m_L);
+	cudaDeviceSynchronize();
+}
+
+/// Mode B: sin^2(.../4)
+template<typename T>
+__global__ void d_cuCalcComponent_modesin(T** xarg, T** xret, T** intern, T** params,
+				unsigned int m, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
+	inverse(xarg[0], intern[0], m);
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        //FIXME: Anya, need sin^2 (:
+        xret[0][idx] = sin( DeltaMSq * m_L * oscprobArgumentFactor * (T)0.25 * intern[0][idx]);
+}
+
+template<typename T>
+void cuCalcComponent_modesin(T** xarg, T** xret, T** intern, T** params,
+		 unsigned int m, unsigned int n, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
+	d_cuCalcComponent_modesin<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params,
 								 m, oscprobArgumentFactor, DeltaMSq, m_L);
 	cudaDeviceSynchronize();
 }
 
 /*
  * CUDA version of calcComponentCP function in OscProbPMNS::OscProbPMNS
- * 
+ *
  */
 
 
@@ -62,7 +81,7 @@ __global__ void d_cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, 
 	intern[0][idx] = oscprobArgumentFactor * m_L * 0.25 * intern[0][idx];
 	arr_sin(m12, intern[0], xret[0]);
 //	arr_sin(1.0, intern[0], xret[0]);
-	
+
 	mult_by_arr_sin(m13, intern[0], xret[0]);
 	mult_by_arr_sin(m23, intern[0], xret[0]);
 
@@ -73,9 +92,9 @@ __global__ void d_cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, 
 }
 
 template <typename T>
-void cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, T m12, T m13, T m23, 
+void cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, T m12, T m13, T m23,
 			unsigned int m, unsigned int n, T oscprobArgumentFactor, T m_L) {
-	d_cuCalcComponentCP<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params, m12, m13, m23, m, 
+	d_cuCalcComponentCP<T><<<m/CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(xarg, xret, intern, params, m12, m13, m23, m,
 								oscprobArgumentFactor, m_L);
 	cudaDeviceSynchronize();
 }
@@ -83,12 +102,12 @@ void cuCalcComponentCP(T** xarg, T** xret, T** intern, T** params, T m12, T m13,
 __global__ void d_cuCalcSum(double** xarg, double** xret, double w12, double w13, double w23, double wcp, bool isSame) {
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 /*	xret[0][idx]=2.0*(params[0][0]*xarg[0][idx]+params[0][1]*xarg[1][idx]+params[0][2]*xarg[2][idx])
-			+ (-2.0*(params[0][0]+params[0][1]+params[0][2]) 
+			+ (-2.0*(params[0][0]+params[0][1]+params[0][2])
 			+ 1.0*isSame) * xarg[3][idx]
 			+ 8.0*(!isSame)*params[0][4]*xarg[4][idx];
 */
 	xret[0][idx]=2.0*(w12*xarg[0][idx]+w13*xarg[1][idx]+w23*xarg[2][idx])
-			+ (-2.0*(w12+w13+w23) 
+			+ (-2.0*(w12+w13+w23)
 			+ 1.0*isSame) * xarg[3][idx]
 			+ 8.0*(!isSame)*wcp*xarg[4][idx];
 }
@@ -98,7 +117,10 @@ void cuCalcSum(double** xarg, double** xret, double w12, double w13, double w23,
 	cudaDeviceSynchronize();
 }
 
-template void cuCalcComponent<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m , unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
-template void cuCalcComponent<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int  n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
+template void cuCalcComponent_modecos<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m , unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
+template void cuCalcComponent_modesin<double>(double** xarg, double** xret, double** intern, double** params, unsigned int m , unsigned int n, double oscprobArgumentFactor, double DeltaMSq, double m_L);
 template void cuCalcComponentCP<double>(double** xarg, double** xret, double** intern, double** params, double m12, double m13, double m23, unsigned int m, unsigned int n, double oscprobArgumentFactor, double m_L);
+
+template void cuCalcComponent_modecos<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int  n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
+template void cuCalcComponent_modesin<float>(float** xarg, float** xret, float** intern, float** params, unsigned int m, unsigned int  n, float oscprobArgumentFactor, float DeltaMSq, float m_L);
 template void cuCalcComponentCP<float>(float** xarg, float** xret, float** intern, float** params, float m12, float m13, float m23, unsigned int m, unsigned int n, float oscprobArgumentFactor, float m_L);

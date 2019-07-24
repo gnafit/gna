@@ -30,7 +30,7 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = False
+gpu = True
 precision='double'
 # precision='float' # Anna: uncomment for isngle precision
 
