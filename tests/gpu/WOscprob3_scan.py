@@ -140,7 +140,7 @@ npoints_list = N.concatenate( [
     [10000,   20000,   50000],
     [100000,  200000,  500000],
     [1000000, 2000000, 5000000],
-    [10000000],
+    # [10000000],
     ] )
 
 opts.output.create_dataset('size', data=npoints_list)
@@ -157,6 +157,7 @@ for device in ('cpu', 'gpu'):
             for i, parname in enumerate(parnames):
                 pardata = group.create_dataset(parname, data=res[i])
 
+            scanner.set_n(1000)
             group.create_dataset('enu', data=scanner.E.points.points.data())
             group.create_dataset('psur', data=scanner.ws.sum.sum.data())
 

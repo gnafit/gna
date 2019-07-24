@@ -307,6 +307,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
   functionargs->updateTypes();
 
   tainted.unfreeze();
+  tainted.taint();
 }
 
 /** @brief Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.*/

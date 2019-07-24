@@ -296,8 +296,8 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(typena
   //std::vector<variable<double>> dmsq = {m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23};
 //  gpuargs->readVariables(m_param);
   gpuargs->provideSignatureDevice();
-  cuCalcComponentCP(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23,
-			fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);
+  cuCalcComponentCP<double>(gpuargs->args, gpuargs->rets, gpuargs->ints, gpuargs->vars, m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23,
+			    fargs.args[0].arr.size(), gpuargs->nargs, oscprobArgumentFactor, m_L);
 //  gpuargs->setAsDevice();
 }
 #endif

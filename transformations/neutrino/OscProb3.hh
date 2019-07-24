@@ -25,12 +25,12 @@ namespace GNA {
 
                 template<int I>
                 void calcComponent(FunctionArgs& fargs);
-                //void calcComponentCP(FunctionArgs& fargs);
+                void calcComponentCP(FunctionArgs& fargs);
 
                 #ifdef GNA_CUDA_SUPPORT
                 template<int I>
                 void gpuCalcComponent(FunctionArgs& fargs);
-                //void gpuCalcComponentCP(FunctionArgs& fargs);
+                void gpuCalcComponentCP(FunctionArgs& fargs);
                 #endif
 
             protected:
