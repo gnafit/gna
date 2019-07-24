@@ -30,8 +30,9 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = True
+gpu = False
 precision='double'
+modecos = True # default
 # precision='float' # Anna: uncomment for isngle precision
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
@@ -40,14 +41,14 @@ E_arr = N.arange(1.0, 10.0, 0.001)  #array energy (МеV)
 with context.set_context(manager=ndata, gpu=gpu, precision=precision) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
     gna.parameters.oscillation.reqparameters(ns)
-    pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, ns=ns)
+    pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
     ns.materializeexpressions()
     ns.printparameters()
 
     E = C.Points(E_arr, labels='Energy')
 
     with ns:
-        oscprob = C.OscProb3(from_nu, to_nu, labels=clabels)
+        oscprob = C.OscProb3(from_nu, to_nu, 'L', modecos, labels=clabels)
         unity = C.FillLike(1, labels='Unity')
 
         E >> (unity.fill, oscprob.comp12, oscprob.comp13, oscprob.comp23)

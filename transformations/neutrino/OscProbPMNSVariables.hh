@@ -163,8 +163,11 @@ namespace GNA {
     template<typename FloatType>
     class OscProbPMNSExpressionsT: public ExpressionsProviderT<FloatType> {
     public:
-      OscProbPMNSExpressionsT(Neutrino from, Neutrino to, const std::vector<std::string>& names={}, bool modecos=true)
+      OscProbPMNSExpressionsT(Neutrino from, Neutrino to, const std::vector<std::string>& names, bool modecos=true)
         : ExpressionsProviderT<FloatType>(new OscProbPMNSVariablesT<FloatType>(this, from, to, names, modecos))
+        { }
+      OscProbPMNSExpressionsT(Neutrino from, Neutrino to, bool modecos=true)
+        : ExpressionsProviderT<FloatType>(new OscProbPMNSVariablesT<FloatType>(this, from, to, {}, modecos))
         { }
     };
   }

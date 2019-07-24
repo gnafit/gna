@@ -12,8 +12,8 @@ using NeutrinoUnits::oscprobArgumentFactor;
 namespace GNA {
     namespace GNAObjectTemplates {
         template<typename FloatType>
-        OscProb3T<FloatType>::OscProb3T(Neutrino from, Neutrino to, std::string l_name)
-        : m_dm(3)
+        OscProb3T<FloatType>::OscProb3T(Neutrino from, Neutrino to, std::string l_name, bool modecos)
+        : m_modecos(modecos), m_dm(3)
         {
             if (from.kind != to.kind) {
                 throw std::runtime_error("particle-antiparticle oscillations");
@@ -56,9 +56,9 @@ namespace GNA {
                 .output(compnames[I])
                 .depends(m_L, m_dm[I])
                 .types(new PassTypeT<FloatType>(0, {0,-1}))
-                .func(&OscProb3::calcComponent_modecos<I>)
+                .func(m_modecos ? &OscProb3::calcComponent_modecos<I> : &OscProb3::calcComponent_modesin<I>)
 #ifdef GNA_CUDA_SUPPORT
-                .func("gpu", &OscProb3::gpuCalcComponent_modecos<I>, DataLocation::Device)
+                .func("gpu", m_modecos ? &OscProb3::gpuCalcComponent_modecos<I> : &OscProb3::gpuCalcComponent_modesin<I>, DataLocation::Device)
                 .storage("gpu", [](OscProb3::StorageTypesFunctionArgs& fargs){
                       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
                     })

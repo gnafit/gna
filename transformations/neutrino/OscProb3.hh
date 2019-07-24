@@ -21,7 +21,7 @@ namespace GNA {
                 using typename BaseClass::StorageTypesFunctionArgs;
                 using BaseClass::variable_;
 
-                OscProb3T(Neutrino from, Neutrino to, std::string l_name="L");
+                OscProb3T(Neutrino from, Neutrino to, std::string l_name="L", bool modecos=true);
 
                 template<int I>
                 void calcComponent_modecos(FunctionArgs& fargs);
@@ -42,6 +42,7 @@ namespace GNA {
                 void add_transformation();
 
                 int m_alpha, m_beta, m_lepton_charge;
+                bool m_modecos;
                 std::vector<variable<FloatType>> m_dm;
                 variable<FloatType> m_L;
             };
