@@ -43,6 +43,7 @@ def main(opts):
                 ("Npescint",            (1341.38, 0.0059)),
                 ("kC",                      (0.5, 0.4737)),
                 ("normalizationEnergy",   (2.505, 'fixed'))
+                # ("normalizationEnergy",   (12.0, 'fixed'))
              ],
             mode='relative'
             ),
@@ -54,6 +55,7 @@ def main(opts):
         fill_matrix=True,
         labels = dict(
             normalizationEnergy = '60Co total gamma energy, MeV'
+            # normalizationEnergy = 'Pessimistic norm point'
             ),
         )
 
@@ -396,6 +398,22 @@ def main(opts):
     ax.legend(loc='upper right')
 
     savefig(opts.output, suffix='_refsmear2')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Entries' )
+    ax.set_title( 'Annihilation gamma electrons' )
+
+    plot_hist(quench.annihilation_electrons_edges_input, quench.annihilation_electrons_p_input)
+    ax.set_yscale('log')
+    savefig(opts.output, suffix='_annihilation_electrons')
+
+    ax.set_yscale('linear')
+    ax.set_xlim(0.0, 0.1)
+    savefig(opts.output, suffix='_annihilation_electrons_lin')
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
