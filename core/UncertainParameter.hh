@@ -217,7 +217,7 @@ public:
     return !m_covariances.empty();
   }
 
-  std::vector<GaussianParameter<T>*>  getAllCovariatedWith() const {
+  std::vector<GaussianParameter<T>*>  getAllCorrelatedWith() const {
     std::vector<GaussianParameter<T>*> tmp;
     for (const auto& item: this->m_covariances){
       tmp.push_back(const_cast<GaussianParameter<T>*>(item.first));
