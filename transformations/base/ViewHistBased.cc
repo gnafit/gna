@@ -18,7 +18,7 @@ m_threshold(threshold), m_ceiling(ceiling)
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::ViewHistBasedT(SingleOutput& output, FloatType threshold, FloatType ceiling) :
+GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::ViewHistBasedT(typename GNAObjectT<FloatType,FloatType>::SingleOutput& output, FloatType threshold, FloatType ceiling) :
 ViewHistBasedT(threshold, ceiling)
 {
     set(output);
@@ -47,7 +47,7 @@ typename GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::TransformationDescr
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::histTypes(TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::histTypes(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
     auto& arg = fargs.args[0];
     auto& edges = arg.edges;
     m_full_length = arg.size();
@@ -90,7 +90,7 @@ void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::histTypes(TypesFunction
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::types(TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewHistBasedT<FloatType>::types(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
     if(!m_start || !m_len){
         return;
     }
