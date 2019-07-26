@@ -362,7 +362,8 @@ class exp(baseexp):
                         expose_matrix = False
                         ),
                 shape_uncertainty = NestedDict(
-                        unc = uncertain(1.0, 1.0, 'percent')
+                        unc = uncertain(1.0, 1.0, 'percent'),
+                        nbins = 200 # number of bins, the uncertainty is defined to
                         )
                 )
 
@@ -406,6 +407,10 @@ class exp(baseexp):
                     edges = self.cfg.rebin_yb.edges
                 else:
                     edges = self.cfg.rebin.edges
+
+            # bin-to-bin should take into account the number of bins it is applied to
+            unccorrection = ((edges.size-1.0)/cfg.nbins)**0.5
+            unc.uncertainty*=unccorrection
 
             names = []
             for bini in range(edges.size-1):
