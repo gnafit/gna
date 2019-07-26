@@ -1,6 +1,5 @@
 #include "MatrixProduct.hh"
 #include "fmt/format.h"
-#include "fmt/ostream.h"
 
 
 

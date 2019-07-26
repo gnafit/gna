@@ -13,7 +13,7 @@ GNAObjectBind1N<FloatType>("snapshot", "source", "result", 0, 0, 0)
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::SnapshotT<FloatType>::SnapshotT(SingleOutput& output) :
+GNA::GNAObjectTemplates::SnapshotT<FloatType>::SnapshotT(typename GNA::GNAObjectTemplates::SnapshotT<FloatType>::SingleOutput& output) :
 GNAObjectBind1N<FloatType>("snapshot", "source", "result", 0, 0, 0)
 {
     this->add_transformation();

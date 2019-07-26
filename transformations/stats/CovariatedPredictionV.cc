@@ -1,39 +1,39 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "CovariatedPrediction.hh"
+#include "CovariatedPredictionV.hh"
 
-using Segment = CovariatedPrediction::Segment;
+using Segment = CovariatedPredictionV::Segment;
 
-CovariatedPrediction::CovariatedPrediction()
+CovariatedPredictionV::CovariatedPredictionV()
   : m_finalized(false)
 {
   transformation_("prediction")
     .output("prediction")
-    .types(&CovariatedPrediction::calculateTypes)
-    .func(&CovariatedPrediction::calculatePrediction)
+    .types(&CovariatedPredictionV::calculateTypes)
+    .func(&CovariatedPredictionV::calculatePrediction)
     ;
   transformation_("covbase")
     .output("L")
-    .types(&CovariatedPrediction::calculateCovbaseTypes)
-    .func(&CovariatedPrediction::calculateCovbase)
+    .types(&CovariatedPredictionV::calculateCovbaseTypes)
+    .func(&CovariatedPredictionV::calculateCovbase)
     ;
   transformation_("cov")
     .input("Lbase")
     .output("L")
-    .types(&CovariatedPrediction::calculateCovTypes)
-    .func(&CovariatedPrediction::calculateCov)
+    .types(&CovariatedPredictionV::calculateCovTypes)
+    .func(&CovariatedPredictionV::calculateCov)
     ;
   m_transform = t_["prediction"];
 }
 
-CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other)
+CovariatedPredictionV::CovariatedPredictionV(const CovariatedPredictionV &other)
   : m_transform(t_["prediction"]),
     m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
 {
 }
 
-CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction &other) {
+CovariatedPredictionV& CovariatedPredictionV::operator=(const CovariatedPredictionV &other) {
   m_transform = t_["prediction"];
   m_inputs = other.m_inputs;
   m_finalized = other.m_finalized;
@@ -45,9 +45,9 @@ CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction
    * @brief Add observable into prediction transformation.
    * @param obs -- observable to connect to prediction.
 */
-void CovariatedPrediction::append(SingleOutput& obs) {
+void CovariatedPredictionV::append(SingleOutput& obs) {
   if (m_finalized) {
-    throw std::runtime_error("appending to finalized CovariatedPrediction");
+    throw std::runtime_error("appending to finalized CovariatedPredictionV");
   }
   t_["prediction"].input(obs);
   m_inputs.push_back(obs.single());
@@ -58,12 +58,12 @@ void CovariatedPrediction::append(SingleOutput& obs) {
    * types and forbids adding new inputs to prediction and covariations.
 */
 
-void CovariatedPrediction::prediction_ready() {
+void CovariatedPredictionV::prediction_ready() {
   m_prediction_ready = true;
   t_["prediction"].updateTypes();
 }
 
-void CovariatedPrediction::finalize() {
+void CovariatedPredictionV::finalize() {
   m_finalized = true;
   t_["prediction"].updateTypes();
   t_["covbase"].updateTypes();
@@ -72,11 +72,11 @@ void CovariatedPrediction::finalize() {
 
 /**
    * @brief Given an OutputDescriptor finds its' index in inputs of
-   * CovariatedPrediction
+   * CovariatedPredictionV
    * if present, else throws std::runtime_error
    * @param inp -- The OutputDescriptor for which we need to find index
 */
-size_t CovariatedPrediction::blockOffset(OutputDescriptor inp) {
+size_t CovariatedPredictionV::blockOffset(OutputDescriptor inp) {
   for (size_t i = 0; i < m_inputs.size(); ++i) {
     if (m_inputs[i].rawptr() == inp.rawptr()) {
       return i;
@@ -86,16 +86,16 @@ size_t CovariatedPrediction::blockOffset(OutputDescriptor inp) {
 }
 
 /**
-   * @brief Returns a number of inputs of CovariatedPrediction
+   * @brief Returns a number of inputs of CovariatedPredictionV
 */
-size_t CovariatedPrediction::blocksCount() const noexcept {
+size_t CovariatedPredictionV::blocksCount() const noexcept {
   return m_inputs.size();
 }
 
 
-void CovariatedPrediction::covariate(SingleOutput &cov,
-                                     SingleOutput &obs1, size_t n1,
-                                     SingleOutput &obs2, size_t n2) {
+void CovariatedPredictionV::covariate(SingleOutput &cov,
+                                       SingleOutput &obs1, size_t n1,
+                                       SingleOutput &obs2, size_t n2) {
   if (m_finalized) {
     throw std::runtime_error("prediction is finalized");
   }
@@ -107,37 +107,25 @@ void CovariatedPrediction::covariate(SingleOutput &cov,
     t_["covbase"].input(cov);
     m_covactions.push_back(act);
   } else {
-    CovarianceAction act(CovarianceAction::Block);
-    act.a = Segment{idx1, n1};
-    act.b = Segment{idx2, n2};
-    if (act.a->i < act.b->i) {
-      std::swap(act.a, act.b);
-    }
-    if (act.b->i + act.b->n > act.a->i) {
-      throw std::runtime_error("overlapping covariance");
-    }
-    t_["covbase"].input(cov);
-    m_covactions.push_back(act);
+    throw std::runtime_error("do not support offdiagonal cases");
   }
 }
-
-
-
 
 /**
    * @brief Add input vector to be used for rank-1 update of covariance matrix
    * @param vec -- vector to be added into inputs of "cov" transofrmation
 */
-void CovariatedPrediction::rank1(SingleOutput& vec) {
+void CovariatedPredictionV::rank1(SingleOutput& vec) {
   t_["cov"].input(vec);
 }
 
-void CovariatedPrediction::addSystematicCovMatrix(SingleOutput& sys_covmat) {
-  t_["cov"].input(sys_covmat);
+void CovariatedPredictionV::addSystematicCovMatrix(SingleOutput& sys_covmat) {
+  throw std::runtime_error("Do not support systematic covariance");
+  //t_["cov"].input(sys_covmat);
 }
 
-Segment CovariatedPrediction::resolveSegment(Atypes args,
-                                             const Segment& iseg) {
+Segment CovariatedPredictionV::resolveSegment(Atypes args,
+                                               const Segment& iseg) {
   Segment ret{0, 0};
   for (size_t i = 0; i < iseg.i; ++i) {
     ret.i += args[i].size();
@@ -148,7 +136,7 @@ Segment CovariatedPrediction::resolveSegment(Atypes args,
   return ret;
 }
 
-void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
+void CovariatedPredictionV::resolveCovarianceActions(Atypes args) {
   for (CovarianceAction &act: m_covactions) {
     if (act.a) {
       act.x = resolveSegment(args, *act.a);
@@ -159,7 +147,7 @@ void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
   }
 }
 
-void CovariatedPrediction::calculateTypes(TypesFunctionArgs fargs) {
+void CovariatedPredictionV::calculateTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (!m_finalized and !m_prediction_ready) {
@@ -184,7 +172,7 @@ void CovariatedPrediction::calculateTypes(TypesFunctionArgs fargs) {
    * copies data from inputs to outputs
 */
 
-void CovariatedPrediction::calculatePrediction(FunctionArgs fargs) {
+void CovariatedPredictionV::calculatePrediction(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto* buf = fargs.rets[0].x.data();
   for (size_t i = 0; i < args.size(); ++i) {
@@ -193,7 +181,7 @@ void CovariatedPrediction::calculatePrediction(FunctionArgs fargs) {
   }
 }
 
-void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
+void CovariatedPredictionV::calculateCovbaseTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (!m_finalized) {
@@ -206,6 +194,7 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
       expected.push_back(act.x->n);
     }
     if (act.y && act.y->n != 1) {
+      throw std::runtime_error("unsupported");
       expected.push_back(act.y->n);
     }
     std::vector<size_t> argshape = args[i].shape;
@@ -226,25 +215,21 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
       throw args.error(args[i], s);
     }
   }
-  rets[0] = DataType().points().shape(size(), size());
+  rets[0] = DataType().points().shape(size());
   /* m_lltbase = LLT(size()); */
   /* rets[0].preallocated(m_lltbase.matrixRef().data()); */
-  m_covbase.resize(size(), size());
-  rets[0].preallocated(m_covbase.matrix().data());
+  m_covbase.resize(size());
+  rets[0].preallocated(m_covbase.data());
 }
 
-void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
+void CovariatedPredictionV::calculateCovbase(FunctionArgs fargs) {
   auto& args=fargs.args;
   m_covbase.setZero();
   for (size_t i = 0; i < args.size(); ++i) {
     const CovarianceAction &act = m_covactions[i];
     switch (act.action) {
     case CovarianceAction::Diagonal:
-      m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = args[i].arr;
-      break;
-    case CovarianceAction::Block:
-      /* std::cout << args[i].arr; */
-      m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = args[i].arr;
+      m_covbase.segment(act.x->i, act.x->n) = args[i].arr;
       break;
     }
   }
@@ -258,7 +243,7 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
    * @brief Checks that dimensions of vectors and dimension of covbase
    * matrix match and preallocate covmatrix storage.
 */
-void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
+void CovariatedPredictionV::calculateCovTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   /* for (size_t i = 1; i < args.size(); ++i) {
@@ -267,41 +252,34 @@ void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
    *   }
    * } */
   rets[0] = args[0];
-  m_llt = LLT(size());
-  using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
-  rets[0].preallocated( const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()) );
 }
 
 /**
    * @brief Update covbase matrix using rank-1 updates with vectors of
    * derivatives
 */
-void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
+void CovariatedPredictionV::calculateCov(FunctionArgs fargs) {
   auto& args=fargs.args;
   (void)args[0].mat;
   auto full_covmat = m_covbase;
   if (args.size() > 1) {
-      auto& sys_covmat = args[1].arr2d;
+      auto& sys_covmat = args[1].arr;
       full_covmat += sys_covmat;
   }
-  m_llt.compute(full_covmat);
-  /* for (size_t i = 1; i < args.size(); ++i) {
-   *   m_llt.rankUpdate(args[i].vec);
-   * } */
-  (void)fargs.rets[0].mat;
+  fargs.rets[0].arr = full_covmat.sqrt();
 }
 
 /**
    * @brief Returns size of theoretical prediction (sum of sizes of all
    * prediction inputs.)
 */
-size_t CovariatedPrediction::size() const {
+size_t CovariatedPredictionV::size() const {
   return m_transform[0].type.size();
 }
 
 /**
    * @brief Force update of theoretical prediction.
 */
-void CovariatedPrediction::update() const {
+void CovariatedPredictionV::update() const {
   m_transform.update(0);
 }

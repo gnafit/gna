@@ -26,4 +26,7 @@ void Derivative::calcDerivative(FunctionArgs fargs) {
   ret += f2*arg;
 
   m_x->set(x0);
+
+  fargs.rets.untaint();
+  fargs.rets.freeze();
 }
