@@ -27,19 +27,19 @@ namespace GNA {
      */
     template<typename FloatType>
     SumT<FloatType>::SumT() {
-      this->transformation_("sum")                         ///< Define the transformation `sum`:
-        .output("sum")                                     ///<   - the transformation `sum` has a single output `sum`
-        .types(                                            ///<   - provide type checking functions:
-               new CheckSameTypesT<FloatType>({0,-1}),     ///<     * check that inputs have the same type and size
-               new PassTypeT<FloatType>(0,{0,0})           ///<     * the output type is derived from the first input type
-               )                                           ///<
+      this->transformation_("sum")                              ///< Define the transformation `sum`:
+        .output("sum")                                          ///<   - the transformation `sum` has a single output `sum`
+        .types(                                                 ///<   - provide type checking functions:
+               new CheckSameTypesT<FloatType>({0,-1}, "shape"), ///<     * check that inputs have the same type and size
+               new PassTypeT<FloatType>(0,{0,0})                ///<     * the output type is derived from the first input type
+               )                                                ///<
         .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) { ///<   - provide the calculation function:
-            auto& args=fargs.args;                         ///<     * extract transformation inputs
-            auto& ret=fargs.rets[0].x;                     ///<     * extract transformation output
-            ret = args[0].x;                               ///<     * assign (copy) the first input to output
-            for (size_t j = 1; j < args.size(); ++j) {     ///<     * iteratively add all the other inputs
-              ret += args[j].x;                            ///<
-            }                                              ///<
+            auto& args=fargs.args;                              ///<     * extract transformation inputs
+            auto& ret=fargs.rets[0].x;                          ///<     * extract transformation output
+            ret = args[0].x;                                    ///<     * assign (copy) the first input to output
+            for (size_t j = 1; j < args.size(); ++j) {          ///<     * iteratively add all the other inputs
+              ret += args[j].x;                                 ///<
+            }                                                   ///<
           })
 #ifdef GNA_CUDA_SUPPORT
          .func("gpu", &SumT<FloatType>::sum_ongpu, DataLocation::Device)
