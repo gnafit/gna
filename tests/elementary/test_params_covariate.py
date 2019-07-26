@@ -7,7 +7,7 @@ import numpy as np
 from gna.env import env
 from gna.parameters.parameter_loader import get_parameters
 from gna.config import cfg
-import gna.parameters.covariance_helpers as ch 
+import gna.parameters.covariance_helpers as ch
 import itertools
 
 def make_fake_covmat(dimension):
@@ -37,7 +37,7 @@ def test_par_cov():
     cov1 = 0.1
     print("Setting covariance of probe_1 with probe_2 to {0}".format(cov1))
     probe_1.setCovariance(probe_2, cov1)
-    print("Check that they are mutually covariated now.")
+    print("Check that they are mutually correlated now.")
 
     assert probe_1.isCorrelated(probe_2) and probe_2.isCorrelated(probe_1)
     print("Success")
