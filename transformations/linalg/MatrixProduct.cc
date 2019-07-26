@@ -31,8 +31,10 @@ void MatrixProduct::checkTypes(TypesFunctionArgs& fargs) {
 void MatrixProduct::product(FunctionArgs& fargs) {
     auto& args=fargs.args;
     auto& ret=fargs.rets[0].mat;
-    ret = args[0].mat;
+     /* TODO: update to use internal storage */
+    Eigen::MatrixXd tmp = args[0].mat;
     for (size_t i=1; i < args.size(); ++i) {
-        ret *= args[i].mat;
+        tmp *= args[i].mat;
     }
+    ret = tmp;
 }
