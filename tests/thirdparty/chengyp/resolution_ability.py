@@ -105,7 +105,7 @@ def main(opts):
     #
     # Define energy range
     #
-    enu_input = N.arange(1.8, 15.0, 0.001)
+    enu_input = N.arange(1.8, 15.0+1.e-6, 0.001)
     edep_input = enu_input - edep_offset
     edep_lsnl = edep_input * lsnl_fcn(edep_input)
 
@@ -126,27 +126,58 @@ def main(opts):
     with ns:
         op_sum = C.WeightedSum(component_names, [unity.fill.outputs[0], oscprob.comp12.comp12, oscprob.comp13.comp13, oscprob.comp23.comp23], labels='Oscillation probability sum')
 
-    psur = op_sum.single().data()
+    psur_nh = op_sum.single().data().copy()
+    ns['Alpha'].set('inverted')
+    psur_ih = op_sum.single().data().copy()
 
-    from scipy.signal import argrelmin, argrelmax
-    psur_minima, = argrelmin(psur)
-    psur_maxima, = argrelmax(psur)
+    def get_intersection(*arrs):
+        maxlen = min(arr.size for arr in arrs)
+        return (arr[-maxlen:] for arr in arrs)
 
-    def build_extrema(x):
-        data_min_x = (x[psur_minima][:-1] + x[psur_minima][1:])*0.5
-        data_min_y = (x[psur_minima][1:] - x[psur_minima][:-1])
+    def get_extrema(arr):
+        from scipy.signal import argrelmin, argrelmax
+        minima, = argrelmin(arr)
+        maxima, = argrelmax(arr)
 
-        data_max_x = (x[psur_maxima][:-1] + x[psur_maxima][1:])*0.5
-        data_max_y = (x[psur_maxima][1:] - x[psur_maxima][:-1])
+        return minima, maxima
 
-        data_ext_x = N.vstack([data_max_x, data_min_x]).T.ravel()
-        data_ext_y = N.vstack([data_max_y, data_min_y]).T.ravel()
+    def merge_extrema(*args):
+        if args[0][0] > args[0][1]:
+            args = reversed(args)
 
-        return data_ext_x, data_ext_y
+        return N.stack(args).T.ravel()
 
-    psur_ext_x_enu, psur_ext_y_enu = build_extrema(enu_input)
-    psur_ext_x_edep, psur_ext_y_edep = build_extrema(edep_input)
-    psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl = build_extrema(edep_lsnl)
+    psur_nh_minima, psur_nh_maxima = get_extrema(psur_nh)
+    psur_ih_minima, psur_ih_maxima = get_extrema(psur_ih)
+
+    psur_nh_maxima, psur_ih_maxima = get_intersection(psur_nh_maxima, psur_ih_maxima)
+
+    def get_smaller_diff(arr, brr):
+        a = arr[1:-1] - brr[0:-2]
+        b = arr[1:-1] - brr[1:-1]
+        c = arr[1:-1] - brr[2:]
+        diff = N.fabs(N.stack((a,b,c)))
+
+        a = arr[1:-1] + brr[0:-2]
+        b = arr[1:-1] + brr[1:-1]
+        c = arr[1:-1] + brr[2:]
+        center = N.stack((a,b,c))*0.5
+
+        idx = N.argmin(diff, axis=0)
+        idx2 = N.indices(idx.shape)
+
+        return center[idx, idx2][0], diff[idx, idx2][0]
+
+    def get_smaller_diff_and_merge(arr):
+        arr_max = arr[psur_nh_maxima]
+        brr_max = arr[psur_ih_maxima]
+        x_max, y_max = get_smaller_diff(arr_max, brr_max)
+
+        return x_max, y_max
+
+    data_x_enu, data_y_enu = get_smaller_diff_and_merge(enu_input)
+    data_x_edep, data_y_edep = get_smaller_diff_and_merge(edep_input)
+    data_x_lsnl, data_y_lsnl = get_smaller_diff_and_merge(edep_lsnl)
 
     #
     # Plots and tests
@@ -206,29 +237,28 @@ def main(opts):
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
-    ax.grid()
+    # ax.grid()
     ax.set_xlabel( 'Enu, MeV' )
     ax.set_ylabel( 'Psur' )
     ax.set_title( 'Survival probability' )
-    op_sum.single().plot_vs(enu.single(), label='full')
-    ax.plot(enu_input[psur_minima], psur[psur_minima], 'o', markerfacecolor='none', label='minima')
-    ax.plot(enu_input[psur_maxima], psur[psur_maxima], 'o', markerfacecolor='none', label='maxima')
+
+    color_nh = ax.plot(enu_input, psur_nh, label='NH')[0].get_color()
+    color_ih = ax.plot(enu_input, psur_ih, label='IH')[0].get_color()
+    ax.plot(enu_input[psur_nh_maxima], psur_nh[psur_nh_maxima], 'd', markerfacecolor='none', color=color_nh)
+    ax.plot(enu_input[psur_ih_maxima], psur_ih[psur_ih_maxima], 'o', markerfacecolor='none', color=color_ih)
+    ax.vlines(data_x_enu, 0, 1, linestyle='-', linewidth=1.0, color='magenta', label='between maxima')
+    ax.legend()
 
     savefig(opts.output, suffix='_psur_enu')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( 'Edep, MeV' )
-    ax.set_ylabel( 'Psur' )
-    ax.set_title( 'Survival probability' )
-    op_sum.single().plot_vs(edep_input, label='true')
-    op_sum.single().plot_vs(edep_lsnl, label='with LSNL')
+    ax.set_xlim(right=5.0)
+    savefig(opts.output, suffix='_psur_enu_zoom')
 
-    ax.legend()
+    ax.set_xlim(2.0, 3.0)
+    savefig(opts.output, suffix='_psur_enu_zoom1')
 
-    savefig(opts.output, suffix='_psur_edep')
+    # ax.set_xscale('log')
+    # savefig(opts.output, suffix='_psur_enu_log')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -238,21 +268,49 @@ def main(opts):
     ax.set_ylabel( 'Dist, MeV' )
     ax.set_title( 'Nearest peaks distance' )
 
-    ax.plot( psur_ext_x_enu, psur_ext_y_enu, 'o-', markerfacecolor='none' )
+    ax.plot(data_x_enu, data_y_enu, 'o-', markerfacecolor='none' )
 
     savefig(opts.output, suffix='_dist_enu')
 
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
+    # ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Psur' )
+    ax.set_title( 'Survival probability' )
+
+    color_nh = ax.plot(edep_input, psur_nh, '--', label='NH')[0].get_color()
+    color_ih = ax.plot(edep_input, psur_ih, '--', label='IH')[0].get_color()
+    ax.plot(edep_lsnl, psur_nh, label='NH with quenching', color=color_nh)[0]
+    ax.plot(edep_lsnl, psur_ih, label='IH with quenching', color=color_ih)[0]
+
+    ax.vlines(data_x_edep, 0, 1, linestyle='--', linewidth=1.0, alpha=0.5, color='teal', label='between maxima')
+    ax.vlines(data_x_lsnl, 0, 1, linestyle='-', linewidth=1.0, alpha=0.5, color='magenta', label='between maxima quench.')
+
+    ax.legend(loc='lower right')
+
+    savefig(opts.output, suffix='_psur_edep')
+
+    # ax.set_xscale('log')
+    ax.set_xlim(right=5.0)
+    savefig(opts.output, suffix='_psur_edep_zoom')
+
+    ax.set_xlim(2.0, 3.0)
+    savefig(opts.output, suffix='_psur_edep_zoom1')
+
+    fig = P.figure()
+    ax = P.subplot( 111 )
+    ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Dist, MeV' )
     ax.set_title( 'Nearest peaks distance' )
 
-    ax.plot( psur_ext_x_edep, psur_ext_y_edep, '-', markerfacecolor='none', label='true' )
-    ax.plot( psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl, '-', markerfacecolor='none', label='with LSNL' )
+    ax.plot( data_x_edep, data_y_edep, '-', markerfacecolor='none', label='true' )
+    ax.plot( data_x_lsnl, data_y_lsnl, '-', markerfacecolor='none', label='quenching' )
     ax.plot( edep_input, eres_sigma_abs(edep_input), '-', markerfacecolor='none', label=r'$\sigma$' )
+    ax.set_xlim(left=1.0)
 
     ax.legend(loc='upper left')
 
@@ -266,18 +324,14 @@ def main(opts):
     ax.set_ylabel( r'Dist/$\sigma$' )
     ax.set_title( 'Resolution ability' )
 
-    x1, y1 = psur_ext_x_edep, psur_ext_y_edep/eres_sigma_abs(psur_ext_x_edep)
-    x2, y2 = psur_ext_x_edep_lsnl, psur_ext_y_edep_lsnl/eres_sigma_abs(psur_ext_x_edep_lsnl)
+    x1, y1 = data_x_edep, data_y_edep/eres_sigma_abs(data_x_edep)
+    x2, y2 = data_x_lsnl, data_y_lsnl/eres_sigma_abs(data_x_lsnl)
 
-    ax.plot( x1, y1, '-', markerfacecolor='none', label='true' )
-    ax.plot( x2, y2, '-', markerfacecolor='none', label='with LSNL' )
+    ax.plot(x1, y1, '-', markerfacecolor='none', label='true')
+    ax.plot(x2, y2, '-', markerfacecolor='none', label='quenching')
 
-    ax.legend(loc='upper left')
+    ax.legend()
     savefig(opts.output, suffix='_ability')
-
-    ax.set_xlim(3, 4)
-    ax.set_ylim(5, 8)
-    savefig(opts.output, suffix='_ability_zoom')
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -287,7 +341,7 @@ def main(opts):
     ax.set_ylabel( r'Dist/$\sigma$' )
     ax.set_title( 'Resolution ability difference (quenching-true)' )
 
-    y2fcn = interp1d(x2, y2)
+    y2fcn = interp1d(x2, y2, bounds_error=False, fill_value=N.nan)
     y2_on_x1 = y2fcn(x1)
     diff = y2_on_x1 - y1
     from scipy.signal import savgol_filter
