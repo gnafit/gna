@@ -15,7 +15,6 @@ try:
     import sys
     if not sys.stdout.isatty():
         raise RuntimeError()
-
     from colorama import Fore, Style
 
     def colorize(string, color):

@@ -1,7 +1,7 @@
 #include "Sink.hh"
 
-template class TransformationTypes::SinkT<double>;
+template struct TransformationTypes::SinkT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::SinkT<float>;
+  template struct TransformationTypes::SinkT<float>;
 #endif
 

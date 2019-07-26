@@ -10,7 +10,7 @@
 
 namespace TransformationTypes
 {
-  template<typename FloatType,typename SizeType> struct GPUFunctionArgsT;
+  template<typename FloatType,typename SizeType> class GPUFunctionArgsT;
   template<typename SourceType,typename SinkType> class EntryT;
 
   /**

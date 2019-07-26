@@ -11,6 +11,8 @@ from gna.env import env
 from matplotlib import pyplot as P
 import numpy as np
 from mpl_tools import bindings
+from matplotlib.backends.backend_pdf import PdfPages
+from os.path import abspath
 from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
 R.GNAObject
 #
@@ -20,7 +22,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-parser.add_argument('-d', '--differential_xsec', action='store_true',
+parser.add_argument( '-o', '--output', help='path to dump figures')
+parser.add_argument('-d', '--differential_xsec', action='store_true', 
                     help='Plot differential cross section')
 parser.add_argument('-i', '--dyboscar-input', help='Path to inputs from dyboscar')
 
@@ -106,6 +109,8 @@ print( context.outputs )
 #
 # Do some plots
 #
+if args.output:
+    pp = PdfPages(abspath(args.output))
 #  Initialize figure
 fig = P.figure()
 ax = P.subplot( 111 )
@@ -128,6 +133,8 @@ if input_dyboscar is not None:
 ax.set_xlim(1.8, 12.)
 ax.legend(loc='upper left')
 
+if args.output:
+    pp.savefig(fig)
 fig = P.figure()
 ax = P.subplot( 111 )
 ax.minorticks_on()
@@ -144,12 +151,14 @@ for enu, cos, xsec in zip(enu_first, ctheta, xsec_first_order):
     if cos in dyboscar_ctheta:
         ax.plot(enu, xsec, label=r'GNA $\cos\,\theta = {}$'.format(cos))
 if input_dyboscar is not None:
-    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c0'], label=r'dybOscar $\cos\,\theta$ = 0')
-    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c1'], label=r'dybOscar $\cos\,\theta$ = 1')
+    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c0'], label=r'dybOscar $\cos\,\theta$ = 0') 
+    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c1'], label=r'dybOscar $\cos\,\theta$ = 1') 
 
 ax.set_xlim(1.8, 12.)
 ax.legend(loc='best')
 
+if args.output:
+    pp.savefig(fig)
 
 fig = P.figure()
 ax = P.subplot( 111 )
@@ -168,12 +177,15 @@ for enu, cos, jac in zip(enu_first, ctheta, jacobians):
     if cos in dyboscar_ctheta:
         ax.plot(ee_first, jac, label=r'GNA $\cos\,\theta = {}$'.format(cos))
 if input_dyboscar is not None:
-    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0')
-    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 0')
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0') 
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 0') 
 #  ax.set_xlim(1.8, 12.)
 ax.set_ylim(0.97, 1.03)
 
 ax.legend(loc='best')
+if args.output:
+    pp.savefig(fig)
+    pp.close()
 
 if args.show:
     P.show()

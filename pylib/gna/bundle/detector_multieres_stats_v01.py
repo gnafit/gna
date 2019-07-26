@@ -71,31 +71,34 @@ class detector_multieres_stats_v01(TransformationBundle):
                 'photon statistics',
                 'dark noise'
                 ]
-        self.names = list('abc')
 
-        nph = N.loadtxt(self.cfg.nph)
-        if nph.size!=self.nidx_major.get_size():
-            raise Exception('Number of input Nph values (%i) is not consistent with dimension (%i)'%(nph.size, self.nidx_major.get_size()))
-        par_b = nph**-0.5
-
-        if self.cfg.get('verbose', False):
-            print('Nph (%i):'%nph.size, nph)
-            print('b:', par_b)
+        import IPython; IPython.embed()
 
         parname = self.cfg.parameter
+        parscfg = self.cfg.pars
         labelfmt = self.cfg.get('label', '')
+        self.names = None
 
-        for it_major, central in zip(self.nidx_major, par_b):
+        for it_major in self.nidx_major:
             major_values = it_major.current_values()
+            pars = parscfg[major_values]
+
+            if self.names is None:
+                self.names = tuple(sorted(pars.keys()))
+            else:
+                assert self.names == tuple(sorted(pars.keys()))
 
             for i, name in enumerate(self.names):
                 it=it_major
 
-                if i==1:
-                    par = self.reqparameter(parname, it, central=central, fixed=True, extra=name)
+                if i==1
+                    unc = pars[name]
+                    # print(i, name, parname, unc)
+                    par = self.reqparameter(parname, it, cfg=unc, extra=name)
                 else:
                     par = self.reqparameter(parname, it, central=0.0, fixed=True, extra=name)
 
                 label = it.current_format(labelfmt, description=descriptions[i]) if labelfmt else descriptions[i]
                 self.set_label(par, 'parameter', it_major, '{description} {autoindex}', name=name, description=descriptions[i])
+
 

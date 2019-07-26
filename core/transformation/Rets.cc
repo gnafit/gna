@@ -78,7 +78,7 @@ void RetsT<SourceFloatType,SinkFloatType>::unfreeze()  {
   m_entry->tainted.unfreeze();
 }
 
-template class TransformationTypes::RetsT<double,double>;
+template struct TransformationTypes::RetsT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::RetsT<float,float>;
+  template struct TransformationTypes::RetsT<float,float>;
 #endif

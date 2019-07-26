@@ -13,7 +13,6 @@ class Dataset(object):
         self.covariance = defaultdict(list)
         for base in reversed(bases):
             self.data.update(base.data)
-
         self._update_covariances(bases)
 
     def _update_covariances(self, bases):
@@ -136,7 +135,6 @@ class Dataset(object):
             product.multiply(par_covs.unc_matrix)
             product.multiply(jac_T.transpose.T)
             product.product.touch() # Fixme: should be controllable
-
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 

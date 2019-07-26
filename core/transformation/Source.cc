@@ -45,7 +45,7 @@ void SourceT<FloatType>::connect(SinkT<FloatType> *newsink) {
   }
 }
 
-template class TransformationTypes::SourceT<double>;
+template struct TransformationTypes::SourceT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::SourceT<float>;
+  template struct TransformationTypes::SourceT<float>;
 #endif
