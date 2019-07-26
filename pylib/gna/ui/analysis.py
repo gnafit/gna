@@ -27,7 +27,6 @@ class cmd(basecmd):
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
         parser.add_argument('--toymc', choices=['covariance', 'poisson', 'asimov'], help='use random sampling to variate the data')
-
     def __extract_obs(self, obses):
         for obs in obses:
             if '/' in obs:
@@ -38,7 +37,6 @@ class cmd(basecmd):
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
-
         cov_parameters = get_parameters(self.opts.cov_parameters, drop_fixed=True, drop_free=True)
         if self.opts.observables:
             observables = list(self.__extract_obs(self.opts.observables))

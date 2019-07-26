@@ -30,7 +30,7 @@ def check_sum_broadcast(arrays):
     print('Truth:\n', truth, end='\n\n')
 
     points = [C.Points(array) for array in arrays]
-    sum = C.SumBroadcast([p.points.points for p in points])
+    sum = C.SumBroadcast(outputs=[p.points.points for p in points])
 
     calc =  sum.single().data()
     print('Result', calc, end='\n\n')

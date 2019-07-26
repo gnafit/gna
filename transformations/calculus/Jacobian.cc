@@ -12,7 +12,7 @@ void Jacobian::calcJacobian(FunctionArgs fargs) {
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
       auto x0 = x->value();
-      auto reldelta_corrected = m_reldelta*x->step();
+      auto reldelta_corrected = m_reldelta*x->step(); 
 
       double f1 = 4.0/(3.0*reldelta_corrected);
       double f2 = 1.0/(6.0*reldelta_corrected);

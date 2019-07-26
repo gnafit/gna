@@ -37,5 +37,4 @@ void MatrixProduct::product(FunctionArgs& fargs) {
         tmp *= args[i].mat;
     }
     ret = tmp;
-
 }
