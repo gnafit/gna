@@ -3,6 +3,11 @@
 #include <Eigen/Core>
 #include <cmath>
 
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#include "DataLocation.hh"
+#endif
+
 /**
  * @brief Default constructor.
  *
@@ -14,6 +19,9 @@ Normalize::Normalize() {
         .output("out")
         .types(TypesFunctions::pass<0>)
         .func(&Normalize::doNormalize)
+#ifdef GNA_CUDA_SUPPORT
+        .func("gpu", &Normalize::doNormalize_gpu, DataLocation::Device)
+#endif
         ;
 }
 
@@ -43,6 +51,15 @@ void Normalize::doNormalize(FunctionArgs& fargs){
     auto& in=fargs.args[0].x;
     fargs.rets[0].x=in/in.sum();
 }
+
+#ifdef GNA_CUDA_SUPPORT
+void Normalize::doNormalize_gpu(FunctionArgs& fargs) {
+    fargs.args.touch();
+    auto& gpuargs = fargs.gpu;
+    gpuargs->provideSignatureDevice();
+    cunormalize(gpuargs->args, gpuargs->rets, fargs.args[0].arr.size());
+}
+#endif
 
 /**
  * @brief Normalize subhistogram.
