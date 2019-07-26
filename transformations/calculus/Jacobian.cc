@@ -3,17 +3,19 @@
 #include <algorithm>
 
 void Jacobian::calcJacobian(FunctionArgs fargs) {
-    auto& arg=fargs.args[0];
-    auto& ret=fargs.rets[0];
+    auto& args = fargs.args;
+    auto& arg  = args[0].x;
+    auto& ret  = fargs.rets[0].mat;
+    ret.setZero();
 
-    Eigen::MatrixXd storage(arg.x.size(), m_pars.size());
-    storage.setZero();
+    Eigen::ArrayXd ret1(arg.size());
     for (size_t i=0; i < m_pars.size(); ++i) {
       auto* x = m_pars.at(i);
       auto x0 = x->value();
+      auto reldelta_corrected = m_reldelta*x->step(); 
 
-      double f1 = 4.0/(3.0*m_reldelta);
-      double f2 = 1.0/(6.0*m_reldelta);
+      double f1 = 4.0/(3.0*reldelta_corrected);
+      double f2 = 1.0/(6.0*reldelta_corrected);
 
       std::array<double, 4> points;
       points[0] = x->relativeValue(+m_reldelta/2);
@@ -21,22 +23,17 @@ void Jacobian::calcJacobian(FunctionArgs fargs) {
       points[2] = x->relativeValue(+m_reldelta);
       points[3] = x->relativeValue(-m_reldelta);
 
-      x->set(points[0]);
-
-      Eigen::ArrayXd ret = f1*arg.x;
-
-      x->set(points[1]);
-      ret -= f1*arg.x;
-      x->set(points[2]);
-      ret -= f2*arg.x;
-      x->set(points[3]);
-      ret += f2*arg.x;
+      x->set(points[0]); args.touch(); ret1  = f1*arg;
+      x->set(points[1]); args.touch(); ret1 -= f1*arg;
+      x->set(points[2]); args.touch(); ret1 -= f2*arg;
+      x->set(points[3]); args.touch(); ret1 += f2*arg;
       x->set(x0);
 
-      storage.col(i) = ret.matrix();
+      ret.col(i) = ret1.matrix();
     }
 
-    ret.mat = storage;
+    fargs.rets.untaint();
+    fargs.rets.freeze();
 }
 
 void Jacobian::calcTypes(TypesFunctionArgs fargs){
