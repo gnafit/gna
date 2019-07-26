@@ -3,6 +3,7 @@
 from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
+from gna import constructors as C
 from gna.expression.index import NIndex
 import numpy as np
 from load import ROOT as R
@@ -22,7 +23,12 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
+        parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -32,8 +38,11 @@ class exp(baseexp):
         self.init_nidx()
         self.init_formula()
         self.init_configuration()
+        self.preinit_variables()
         self.build()
+        self.parameters()
         self.register()
+        self.autodump()
 
         if self.opts.stats:
             self.print_stats()
@@ -41,9 +50,16 @@ class exp(baseexp):
     def init_nidx(self):
         self.subdetectors_number = 200
         self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
+        self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
+        if 'pessimistic' in self.opts.reactors:
+            self.reactors.remove('TS3')
+            self.reactors.remove('TS4')
+        if 'far-off' in self.opts.reactors:
+            self.reactors.remove('DYB')
+            self.reactors.remove('HZ')
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
-            ['r', 'reactor',     ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']],
+            ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names)
@@ -59,12 +75,15 @@ class exp(baseexp):
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
         self.formula = list(self.formula_base)
+
+        mode_yb = False
         if self.opts.mode=='main':
             enu = self.formula_enu
             ibd = self.formula_ibd_noeffects
         elif self.opts.mode=='yb':
             enu = self.formula_enu_yb
             ibd = self.formula_ibd_noeffects_yb
+            mode_yb = True
         else:
             raise Exception('unsupported option')
         self.formula = self.formula + enu
@@ -81,8 +100,35 @@ class exp(baseexp):
             energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
             self.formula.append('eres_matrix[s]| evis_hist')
 
+        formula_back = self.formula_back
+
+        if self.opts.spectrum_unc=='initial':
+            ibd = ibd+'*shape_norm()'
+        elif self.opts.spectrum_unc=='final':
+            formula_back = formula_back+'*shape_norm()'
+
         self.formula.append('ibd=' + energy_model_formula + ibd)
-        self.formula+=self.formula_back
+        self.formula.append(formula_back)
+
+    def parameters(self):
+        ns = self.namespace
+        if self.opts.free=='minimal':
+            fixed_pars = ['pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+            free_pars  = ['pmns.DeltaMSqEE']
+        elif self.opts.free=='osc':
+            fixed_pars = []
+            free_pars  = ['pmns.DeltaMSqEE', 'pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+        else:
+            raise Exception('Unsupported option')
+        for par in fixed_pars:
+            ns[par].setFixed()
+        for par in free_pars:
+            ns[par].setFree()
+
+        if self.opts.parameters=='yb':
+            ns['pmns.SinSq12'].set(0.307)
+            ns['pmns.SinSq13'].set(0.024)
+            ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
         mode_yb = self.opts.mode=='yb'
@@ -121,7 +167,8 @@ class exp(baseexp):
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v02', major='rdc'),
+                    bundle = dict(name='oscprob', version='v03', major='rdc'),
+                    pdgyear = self.opts.pdgyear
                     ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -184,9 +231,17 @@ class exp(baseexp):
                         ),
                 baselines = NestedDict(
                         bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
+                        reactors  = 'near-equal' in self.opts.reactors \
+                                     and 'data/juno_nominal/coordinates_reactors_equal.py' \
+                                     or 'data/juno_nominal/coordinates_reactors.py',
                         detectors = 'data/juno_nominal/coordinates_det.py',
                         unit = 'km'
+                        ),
+                norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = "norm",
+                        label = 'Reactor power/detection efficiency correlated normalization',
+                        pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
                         ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -206,8 +261,8 @@ class exp(baseexp):
                             ('DYB', 17.4),
                             ('HZ',  17.4),
                             ],
-                            uncertainty=None,
-                            mode='fixed'
+                            uncertainty=0.8,
+                            mode='percent'
                             ),
                         ),
                 target_protons = NestedDict(
@@ -306,6 +361,10 @@ class exp(baseexp):
                         nph = 'subdetector200_nph.txt',
                         expose_matrix = False
                         ),
+                shape_uncertainty = NestedDict(
+                        unc = uncertain(1.0, 1.0, 'percent'),
+                        nbins = 200 # number of bins, the uncertainty is defined to
+                        )
                 )
 
         if mode_yb:
@@ -323,9 +382,58 @@ class exp(baseexp):
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
             self.cfg.lsnl.correlations_pars = None
-
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
+
+        if self.opts.parameters in ['yb', 'yb-noosc']:
+            self.cfg.eff.pars = uncertain(0.73, 'fixed')
+            self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
+
+    def preinit_variables(self):
+        mode_yb = self.opts.mode.startswith('yb')
+
+        if self.opts.spectrum_unc in ['final', 'initial']:
+            spec = self.namespace('spectrum')
+            cfg = self.cfg.shape_uncertainty
+            unc = cfg.unc
+
+            if self.opts.spectrum_unc=='initial':
+                if mode_yb:
+                    edges = self.cfg.kinint2_enu.edges
+                else:
+                    edges = self.cfg.kinint2.edges
+            elif self.opts.spectrum_unc=='final':
+                if mode_yb:
+                    edges = self.cfg.rebin_yb.edges
+                else:
+                    edges = self.cfg.rebin.edges
+
+            # bin-to-bin should take into account the number of bins it is applied to
+            unccorrection = ((edges.size-1.0)/cfg.nbins)**0.5
+            unc.uncertainty*=unccorrection
+
+            names = []
+            for bini in range(edges.size-1):
+                name = 'norm_bin_%04i'%bini
+                names.append(name)
+                label = 'Spectrum shape unc. final bin %i (%.03f, %.03f) MeV'%(bini, edges[bini], edges[bini+1])
+                spec.reqparameter(name, cfg=unc, label=label)
+
+            with spec:
+                vararray = C.VarArray(names, labels='Spectrum shape norm')
+
+            self.cfg.shape_uncertainty = NestedDict(
+                    bundle = dict(name='predefined', version='v01'),
+                    name   = 'shape_norm',
+                    inputs = None,
+                    outputs = vararray.single(),
+                    unc    = cfg.unc,
+                    object = vararray
+                    )
+        elif self.opts.spectrum_unc=='none':
+            pass
+        else:
+            raise Exception('Unknown spectrum shape uncertainty type: '+self.opts.spectrum_unc)
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -353,6 +461,7 @@ class exp(baseexp):
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
+    def autodump(self):
         if self.opts.verbose>2:
             width = 40
             print('Outputs:')
@@ -376,9 +485,14 @@ class exp(baseexp):
         if self.opts.mode=='yb':
             ns.addobservable("Enu",    outputs.enu_in, export=False)
         else:
-        ns.addobservable("Enu",    outputs.enu, export=False)
-        ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
-        fine = outputs.kinint2.AD1
+            ns.addobservable("Enu",    outputs.enu, export=False)
+
+        if 'ibd_noeffects_bf' in outputs:
+            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
+            fine = outputs.ibd_noeffects_bf.AD1
+        else:
+            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
+            fine = outputs.kinint2.AD1
 
         if 'lsnl' in self.opts.energy_model:
             ns.addobservable("{0}_lsnl".format(self.detectorname),     outputs.lsnl.AD1)
@@ -393,7 +507,7 @@ class exp(baseexp):
             fine = outputs.ibd.AD1
 
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
-        ns.addobservable("{0}".format(self.detectorname),              outputs.rebin.AD1)
+        ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -406,6 +520,7 @@ class exp(baseexp):
 
     formula_enu = ['evis_hist=evis_hist()', 'enu| ee(evis()), ctheta()']
     formula_enu_yb = ['enu_in()', 'evis_hist = enuToEvis0(enu_in_hist())']
+
     formula_base = [
             'baseline[d,r]',
             'livetime[d]',
@@ -417,7 +532,7 @@ class exp(baseexp):
     ]
 
     formula_ibd_noeffects = '''
-                            kinint2|
+                            kinint2(
                               sum[r]|
                                 baselineweight[r,d]*
                                 ibd_xsec(enu(), ctheta())*
@@ -425,20 +540,22 @@ class exp(baseexp):
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu())
+                            )
             '''
 
     formula_ibd_noeffects_yb = '''
-                            kinint2|
+                            kinint2(
                               sum[r]|
                                 baselineweight[r,d]*
                                 ibd_xsec(enu_in_mesh(), ctheta())*
                                 (sum[i]|  power_livetime_factor*anuspec[i](enu_in_mesh()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu_in_mesh())
+                            )
             '''
-    formula_back = [
-            'observation=rebin| ibd'
-            ]
+
+    formula_back = 'observation=norm * rebin(ibd)'
+
 
     lib = dict(
             cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
@@ -449,6 +566,7 @@ class exp(baseexp):
             eres_weighted           = dict(expr='subdetector_fraction*eres', label='{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'),
             ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
             ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
+            ibd_noeffects_bf        = dict(expr='kinint2*shape_norm', label='Observed IBD spectrum (best fit, no effects) | {detector}'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
             oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),

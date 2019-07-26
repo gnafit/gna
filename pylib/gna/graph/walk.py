@@ -12,6 +12,9 @@ class GraphWalker(object):
     def __init__(self, *args, **kwargs):
         self._entry_points = []
         for arg in args:
+            if isinstance(arg, (list,tuple)):
+                for subarg in arg:
+                    self._add_entry_point(subarg)
             self._add_entry_point(arg)
 
         self._build_cache()

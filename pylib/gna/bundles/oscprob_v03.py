@@ -1,4 +1,7 @@
-"""Oscillation probability bundle v03, unlike v02 it is able to process minor indices by creating clones of the OP"""
+"""Oscillation probability bundle v03, unlike v02 it is:
+    - able to process minor indices by creating clones of the OP
+    - may configure the PDG year
+"""
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -63,10 +66,15 @@ class oscprob_v03(TransformationBundle):
 
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters
+        pmnspars_kwargs=dict()
+        pdgyear = self.cfg.get('pdgyear', None)
+        if pdgyear:
+            pmnspars_kwargs['pdgyear']=pdgyear
+
         for it in self.nidx_minor:
             name = it.current_values(name='pmns')
             ns_pmns=self.namespace(name)
-            reqparameters(ns_pmns)
+            reqparameters(ns_pmns, **pmnspars_kwargs)
 
             names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
             with ns_pmns:

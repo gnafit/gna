@@ -78,7 +78,7 @@ class detector_multieres_stats_v01(TransformationBundle):
             raise Exception('Number of input Nph values (%i) is not consistent with dimension (%i)'%(nph.size, self.nidx_major.get_size()))
         par_b = nph**-0.5
 
-        if self.cfg.verbose:
+        if self.cfg.get('verbose', False):
             print('Nph (%i):'%nph.size, nph)
             print('b:', par_b)
 
@@ -98,5 +98,4 @@ class detector_multieres_stats_v01(TransformationBundle):
 
                 label = it.current_format(labelfmt, description=descriptions[i]) if labelfmt else descriptions[i]
                 self.set_label(par, 'parameter', it_major, '{description} {autoindex}', name=name, description=descriptions[i])
-
 

@@ -15,7 +15,6 @@ try:
     import sys
     if not sys.stdout.isatty():
         raise RuntimeError()
-
     from colorama import Fore, Style
 
     def colorize(string, color):
@@ -81,7 +80,7 @@ class CovarianceStore():
 
     def add_to_store(self, par):
         if not any(self.__in_store(par)):
-            self.storage.append(set(chain((par,), par.getAllCovariatedWith())))
+            self.storage.append(set(chain((par,), par.getAllCorrelatedWith())))
         else:
             return
 
@@ -119,7 +118,7 @@ def print_correlated(cor_store):
 
 def print_parameters( ns, recursive=True, labels=False, cor_storage=None, stats=None):
     '''Pretty prints parameters in a given namespace. Prints parameters
-    and then outputs covariance matrices for covariated pars. '''
+    and then outputs covariance matrices for correlated pars. '''
     if cor_storage is None:
         cor_storage = CovarianceStore()
         top_level = True
@@ -279,7 +278,7 @@ def GaussianParameter__str( self, labels=False  ):
             sigma   = self.sigma(),
             color   = Fore.BLUE
             )
-    covariated = self.isCorrelated()
+    correlated = self.isCorrelated()
     limits  = self.limits()
     label = self.label()
     if not labels or label=='value':
@@ -301,7 +300,7 @@ def GaussianParameter__str( self, labels=False  ):
             else:
                 s+=' '*relsigma_len
 
-        if covariated:
+        if correlated:
             s += sepstr
             s += Fore.LIGHTGREEN_EX
             s += "[C]"

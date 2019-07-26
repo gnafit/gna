@@ -90,9 +90,10 @@ class ReactorGroup(object):
 
 class Detector(object):
     def __init__(self, name, edges, location,
-                 orders=None, protons=None, livetime=None):
+                 orders=None, protons=None, livetime=None, edges_final=None):
         self.name = name
         self.edges = edges
+        self.edges_final = edges_final
         self.orders = orders
 
         self.location = location
@@ -127,7 +128,7 @@ class GeoNeutrinoIsotope(object):
 
         try:
             Es_keV, self.ys = np.loadtxt(datapath(geo_flux_files[name]), unpack=True, skiprows=5)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} geo isotope from {1}".format(name, geo_flux_files[name]))
         self.Es = Es_keV*1e-3
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
@@ -139,7 +140,7 @@ class Isotope(object):
 
         try:
             self.Es, self.ys = np.loadtxt(datapath(spectrumfiles[name]), unpack=True)
-        except FileNotFoundError:
+        except OSError:
             raise Exception("Failed to load spectrum of {0} reactor isotope from {1}".format(name, datapath(spectrumfiles[name])))
 
         self.spectrum = ROOT.LinearInterpolator(len(self.Es), self.Es.copy(), self.ys.copy(), "use_zero")
@@ -164,8 +165,8 @@ class ReactorExperimentModel(baseexp):
                             default=[], help='Choose backgrounds you want to add')
         parser.add_argument('--oscprob', choices=self.oscprob_classes.keys(),
                             default='standard')
-        parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'),
-                            action='append', default=[])
+        parser.add_argument('--binning', nargs=4, metavar=('DETECTOR', 'EMIN', 'EMAX', 'NBINS'), action='append', default=[])
+        parser.add_argument('--binning-final', nargs=6, metavar=('DETECTOR', 'EMIN', 'E0', 'E1', 'NBINS01', 'EMAX'), action='append', default=[])
         parser.add_argument('--integration-order', type=int, default=4)
         parser.add_argument('--no-reactor-groups', action='store_true')
         parser.add_argument('--with-C14', action='store_true')
@@ -197,6 +198,15 @@ class ReactorExperimentModel(baseexp):
             else:
                 raise Exception("can't find detector {}".format(binopt[0]))
             det.edges = np.linspace(float(binopt[1]), float(binopt[2]), int(binopt[3]))
+        for (detname, emin, e0, e1, ne, emax) in self.opts.binning_final:
+            for det in self.detectors:
+                if det.name == detname:
+                    break
+            else:
+                raise Exception("can't find detector {}".format(detname))
+            det.edges_final = np.concatenate(([float(emin)],
+                                              np.linspace(float(e0), float(e1), int(ne)),
+                                              [float(emax)]))
         for det in self.detectors:
             det.assign(self.ns)
             if det.orders is None:
@@ -569,7 +579,17 @@ class ReactorExperimentModel(baseexp):
             detector.eres.matrix.Edges(self.integrator.points.xhist)
             detector.eres.smear.setLabel('Eres')
             detector.eres.smear.Ntrue(finalsum)
-            self.ns.addobservable("{0}".format(detector.name), detector.eres.smear)
+            finalsum = detector.eres.smear
+
+            if detector.edges_final is not None:
+                self.ns.addobservable("{0}_fine".format(detector.name), finalsum)
+
+                detector.rebin = C.Rebin(detector.edges_final, 6)
+                finalsum >> detector.rebin
+                finalsum = detector.rebin
+                self.ns.addobservable("{0}".format(detector.name), finalsum.single())
+            else:
+                self.ns.addobservable("{0}".format(detector.name), finalsum)
 
         det_ns = self.ns("detectors")(detector.name)
 

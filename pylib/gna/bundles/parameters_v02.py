@@ -10,6 +10,7 @@ New features include:
 from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
+import numpy as N
 from gna import constructors as C
 
 class parameters_v02(TransformationBundle):
@@ -26,6 +27,7 @@ class parameters_v02(TransformationBundle):
             return (cfg.parameter,), ()
 
     def define_variables(self):
+        self._par_container = []
         separate_uncertainty = self.cfg.get('separate_uncertainty', False)
         parname = self.cfg.parameter
         pars = self.cfg.pars
@@ -59,6 +61,37 @@ class parameters_v02(TransformationBundle):
 
                 self._par_container.append(par)
 
+        self._load_correlation_matrix()
+
     def build(self):
         pass
+
+    def _load_correlation_matrix(self):
+        filename = self.cfg.get('correlations', None)
+        if filename is None:
+            return
+
+        mat = N.loadtxt(filename)
+
+        if mat.shape[0]!=mat.shape[1]:
+            raise Exception('Non square matrix provided:', mat.shape[0], mat.shape[1])
+
+        if len(self._par_container)!=mat.shape[0]:
+            raise Exception('Unable to set correlation to %i parameters with %ix%i matrix'%(len(pars, mat.shape[0], mat.shape[1])))
+
+        mmin, mmax = mat.min(), mat.max()
+        if mmin<-1-1.e-12 or mmax>1.0+1.e-12:
+            raise Exception('Invalid min/max correlation values:', mmin, mmax)
+
+        diag = mat.diagonal()
+        ones = diag==1.0
+        if not ones.all():
+            raise Exception('There are values !=1 on the diagonal (d-1): ', diag[~ones]-1.0)
+
+        if self.cfg.get('verbose', 0)>1:
+            print('Load correlation matrix from %s:'%filename)
+            print(mat)
+
+        from gna.parameters import covariance_helpers as ch
+        ch.covariate_pars(self._par_container, mat)
 

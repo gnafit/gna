@@ -7,7 +7,7 @@ ParameterDouble = ROOT.Parameter("double")
 def __is_independent(par):
     return isinstance(par, ParameterDouble)
 
-def get_parameters(params, drop_fixed=True, drop_free=True):
+def get_parameters(params, drop_fixed=True, drop_free=False):
     special_chars = list('*?[]!')
     pars = []
     for candidate in params:

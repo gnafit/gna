@@ -49,10 +49,12 @@ class cmd(basecmd):
 
         detector = Detector(
             name='AD1',
-            edges=np.linspace(1., 10., 200+1),
+            edges=np.arange(0.6, 12.+1.e-5, 0.01, dtype='d'),
+            edges_final = np.concatenate([[0.7], np.arange(1.0, 8.0+1e-5, 0.02), [9.0, 12.0]]),
             location=0,
             protons=0.8*1.42e33, #TODO: is this detection efficiency of 80% ?
             livetime=[6*365*24*60*60.0],
         )
 
-        ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])
+        model = ReactorExperimentModel(self.opts, reactors=reactors, detectors=[detector])
+        self.env.parts.juno[model.opts.name] = model

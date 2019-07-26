@@ -20,31 +20,30 @@ class cmd(basecmd):
         parser.add_argument('-d', '--datasets', nargs='+', required=True,
                             type=env.parts.dataset,
                             metavar='dataset', help='datasets to use')
-        parser.add_argument('-p', '--parameters', nargs='+', default=[],
+        parser.add_argument('-p', '--cov-parameters', '--parameters', nargs='+', default=[],
                             metavar='par',
                             help='parameters for the covariance matrix')
         parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
         parser.add_argument('--toymc', choices=['covariance', 'poisson', 'asimov'], help='use random sampling to variate the data')
-
     def __extract_obs(self, obses):
         for obs in obses:
             if '/' in obs:
                 yield self.env.get(obs)
             else:
-                for param in get_parameters([obs]):
+                for param in get_parameters([obs], drop_fixed=True, drop_free=True):
                     yield param
 
     def run(self):
         dataset = Dataset(bases=self.opts.datasets)
-        parameters = get_parameters(self.opts.parameters)
+        cov_parameters = get_parameters(self.opts.cov_parameters, drop_fixed=True, drop_free=True)
         if self.opts.observables:
             observables = list(self.__extract_obs(self.opts.observables))
         else:
             observables = None
 
-        blocks = dataset.makeblocks(observables, parameters)
+        blocks = dataset.makeblocks(observables, cov_parameters)
 
         if self.opts.toymc:
             if self.opts.toymc == 'covariance':

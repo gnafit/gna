@@ -122,7 +122,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             #
             # Total positron model
             #
-            self.positron_model = C.SumBroadcast([
+            self.positron_model = C.SumBroadcast(outputs=[
                 self.electron_model.sum.sum,
                 self.npe_positron_offset.normconvolution.result
                 ],

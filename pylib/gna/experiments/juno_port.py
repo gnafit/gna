@@ -345,7 +345,10 @@ class exp(baseexp):
             evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
 
             oscprob_weighted        = dict(expr='oscprob*pmns'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability\nweight: {weight_label}'),
+            oscprob_full            = dict(expr='sum:c|oscprob_weighted',
+                # label='anue survival probability\nweight: {weight_label}'
+                label='anue survival probability\nweight: ???'
+                ),
             eper_fiss_transform     = dict(expr='eper_fission_transform',
                                            label='eper_fission for {isotope}' ),
 
@@ -358,7 +361,10 @@ class exp(baseexp):
             denom = dict(expr='sum_sum_sum_sum_sum_denom', label='Sum over all isotopes weighted eper_fission \nfor {reactor}'),
             power_lifetime_factor =   dict(expr='power_lifetime_factor'),
             anuspec_weighted        = dict(expr='anuspec*power_livetime_factor'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'),
+            anuspec_rd              = dict(expr='sum:i|anuspec_weighted',
+                # label='anue spectrum {reactor}->{detector}\nweight: {weight_label}'
+                label='anue spectrum {reactor}->{detector}\nweight: ???'
+                ),
 
             countrate_rd            = dict(expr='anuspec_rd*ibd_xsec*jacobian*oscprob_full'),
             countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
