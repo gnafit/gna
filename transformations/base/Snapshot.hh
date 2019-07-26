@@ -14,6 +14,7 @@ namespace GNA{
             using Snapshot = SnapshotT<FloatType>;
         public:
             using typename BaseClass::FunctionArgs;
+            using typename BaseClass::SingleOutput;
             using TransformationDescriptor = typename BaseClass::TransformationDescriptorType;
             SnapshotT();
             SnapshotT(SingleOutput& output);
