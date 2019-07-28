@@ -5,6 +5,8 @@
 
 #include "ParametersGroup.hh"
 
+using ParametersGroup = GNA::GNAObjectTemplates::ParametersGroupT<double>;
+
 class PDGVariables: public ParametersGroup {
 public:
   PDGVariables(GNAObject *parent)
