@@ -7,7 +7,7 @@ import numpy as N
 import root2numpy as R2N
 from mpl_tools import helpers
 from matplotlib import pyplot as P
-from gna.bindings import DataType
+from gna.bindings import DataType, provided_precisions
 
 def ifNd(output, ndim):
     dtype = output.datatype()
@@ -449,29 +449,23 @@ def bar3d_hist2(output, *args, **kwargs):
     return colorbar_or_not_3d(res, colorbar, Zw, cmap=cmap)
 
 def bind():
-    setattr( R.SingleOutput, 'plot',      plot_points )
-    setattr( R.SingleOutput, 'plot_vs',   plot_vs_points )
-    setattr( R.SingleOutput, 'vs_plot',   vs_plot_points )
-    setattr( R.SingleOutput, 'plot_bar',  bar_hist1 )
-    setattr( R.SingleOutput, 'plot_hist', plot_hist1 )
-    setattr( R.SingleOutput, 'plot_hist_centers', plot_hist1_centers )
-    setattr( R.SingleOutput, 'plot_errorbar', errorbar_hist1 )
-    setattr( R.SingleOutput, 'plot_matshow', matshow )
+    for p in provided_precisions:
+        setattr( R.SingleOutputT(p), 'plot',      plot_points )
+        setattr( R.SingleOutputT(p), 'plot_vs',   plot_vs_points )
+        setattr( R.SingleOutputT(p), 'vs_plot',   vs_plot_points )
+        setattr( R.SingleOutputT(p), 'plot_bar',  bar_hist1 )
+        setattr( R.SingleOutputT(p), 'plot_hist', plot_hist1 )
+        setattr( R.SingleOutputT(p), 'plot_hist_centers', plot_hist1_centers )
+        setattr( R.SingleOutputT(p), 'plot_errorbar', errorbar_hist1 )
+        setattr( R.SingleOutputT(p), 'plot_matshow', matshow )
 
-    setattr( R.SingleOutput, 'plot_pcolorfast', pcolorfast_hist2 )
-    setattr( R.SingleOutput, 'plot_pcolormesh', pcolormesh_hist2 )
-    setattr( R.SingleOutput, 'plot_pcolor',     pcolor_hist2 )
-    setattr( R.SingleOutput, 'plot_imshow',     imshow_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_pcolorfast', pcolorfast_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_pcolormesh', pcolormesh_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_pcolor',     pcolor_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_imshow',     imshow_hist2 )
 
-    setattr( R.SingleOutput, 'plot_bar3d',      bar3d_hist2 )
-    setattr( R.SingleOutput, 'plot_surface',    surface_hist2 )
-    setattr( R.SingleOutput, 'plot_wireframe',  wireframe_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_bar3d',      bar3d_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_surface',    surface_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_wireframe',  wireframe_hist2 )
 
-    setattr( R.SingleOutput, 'plot_wireframe_vs',  wireframe_points_vs )
-
-    # setattr( R.TGraph,            'plot',     graph_plot )
-    # setattr( R.TGraphErrors,      'errorbar', errorbar_graph )
-    # setattr( R.TGraphAsymmErrors, 'errorbar', errorbar_graph_asymm )
-
-    # setattr( R.TSpline, 'plot', spline_plot )
-
+        setattr( R.SingleOutputT(p), 'plot_wireframe_vs',  wireframe_points_vs )

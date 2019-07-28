@@ -17,8 +17,12 @@ import time
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
-parser.add_argument( '-g', '--graph' )
+parser.add_argument( '--graph' )
+parser.add_argument( '-p', '--precision', default='double', choices=['float', 'double'] )
+parser.add_argument( '-g', '--gpu', action='store_true' )
 args = parser.parse_args()
+print('Mode:', args.gpu and 'GPU' or 'CPU')
+print('Precision:', args.precision)
 
 ROOT.GNAObject
 
@@ -30,15 +34,12 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-gpu = False
-precision='double'
 modecos = True # default
-# precision='float' # Anna: uncomment for isngle precision
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
 E_arr = N.arange(1.0, 10.0, 0.001)  #array energy (МеV)
 
-with context.set_context(manager=ndata, gpu=gpu, precision=precision) as manager:
+with context.set_context(manager=ndata, gpu=args.gpu, precision=args.precision) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
     gna.parameters.oscillation.reqparameters(ns)
     pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
