@@ -26,7 +26,7 @@ AtypesT<SourceFloatType,SinkFloatType>::error(const DataType &dt, const std::str
   return ErrorType(source, message);
 }
 
-template class TransformationTypes::AtypesT<double,double>;
+template struct TransformationTypes::AtypesT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::AtypesT<float,float>;
+  template struct TransformationTypes::AtypesT<float,float>;
 #endif

@@ -32,6 +32,7 @@ const Data<SourceFloatType> &ArgsT<SourceFloatType,SinkFloatType>::operator[](in
   }
   src.sink->entry->touch();
 #ifdef GNA_CUDA_SUPPORT
+// FIXME: why commented?
 //  if (src.sink->data->gpuArr) {
 //    src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
 //  }
@@ -68,7 +69,7 @@ size_t ArgsT<SourceFloatType,SinkFloatType>::size() const {
   return m_entry->sources.size();
 }
 
-template class TransformationTypes::ArgsT<double,double>;
+template struct TransformationTypes::ArgsT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::ArgsT<float,float>;
+  template struct TransformationTypes::ArgsT<float,float>;
 #endif

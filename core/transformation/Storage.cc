@@ -1,7 +1,7 @@
 #include "Storage.hh"
 
-template class TransformationTypes::StorageT<double>;
+template struct TransformationTypes::StorageT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::StorageT<float>;
+  template struct TransformationTypes::StorageT<float>;
 #endif
 

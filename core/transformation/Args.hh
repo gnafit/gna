@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Data.hh"
-#include "TransformationEntry.hh"
 
 namespace TransformationTypes
 {

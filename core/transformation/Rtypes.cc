@@ -58,7 +58,7 @@ SinkTypeError<SinkT<SourceFloatType>> RtypesT<SourceFloatType,SinkFloatType>::er
   return SinkTypeError<SinkImpl>(sink, message);
 }
 
-template class TransformationTypes::RtypesT<double,double>;
+template struct TransformationTypes::RtypesT<double,double>;
 #ifdef PROVIDE_SINGLE_PRECISION
-  template class TransformationTypes::RtypesT<float,float>;
+  template struct TransformationTypes::RtypesT<float,float>;
 #endif

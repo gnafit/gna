@@ -15,6 +15,7 @@ set(CORE_SOURCES
   core/transformation/GPUVariables.cc
   core/transformation/GPUFunctionData.cc
   # Transformation
+  core/transformation/TransformationContext.cc
   core/transformation/TransformationEntry.cc
   core/transformation/TransformationFunctionArgs.cc
   core/transformation/Accessor.cc
@@ -84,6 +85,7 @@ set(CORE_HEADERS
   TransformationFunction.hh
   TransformationFunctionArgs.hh
   FunctionDescriptor.hh
+  TransformationContext.hh
   TransformationEntry.hh
   TransformationErrors.hh
   TransformationBind.hh

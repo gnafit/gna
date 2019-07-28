@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include "TransformationContext.hh"
 #include "TransformationFunctionArgs.hh"
 #include "Source.hh"
 #include "InputHandle.hh"
@@ -23,6 +24,7 @@ using TransformationTypes::AtypesT;
 using TransformationTypes::OutputHandleT;
 using TransformationTypes::InputHandleT;
 using TransformationTypes::TypeError;
+using TransformationTypes::TransformationContext;
 
 template<typename FloatType>
 using TypeClassT = TypeClasses::TypeClassT<FloatType>;
@@ -35,9 +37,10 @@ using TypeClassT = TypeClasses::TypeClassT<FloatType>;
  */
 template<typename SourceFloatType, typename SinkFloatType>
 EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const BaseT<SourceFloatType,SinkFloatType> *parent)
-  : name(name), attrs({{"_label", name}}), parent(parent), tainted(name.c_str()),
+  : name(name), attrs(TransformationContext::getContext()), parent(parent), tainted(name.c_str()),
     functionargs(new FunctionArgsType(this)), m_tmanager(GNA::TreeManager<SourceFloatType>::current())
 {
+  attrs["_label"] = name;
   if(m_tmanager){
     m_tmanager->registerTransformation(this);
   }
@@ -230,7 +233,6 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  */
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
-
   TypesFunctionArgsType fargs(this);
   StorageTypesFunctionArgsType sargs(fargs);
   bool success = true;
