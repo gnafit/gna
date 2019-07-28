@@ -4,9 +4,20 @@
 
 #include "GNAObject.hh"
 #include "Neutrino.hh"
+#include "config_vars.h"
 
-class OscillationVariables;
-class PMNSVariables;
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscillationVariablesT;
+
+    template<typename FloatType>
+    class PMNSVariablesT;
+  }
+}
+using OscillationVariables = GNA::GNAObjectTemplates::OscillationVariablesT<double>;
+using PMNSVariables = GNA::GNAObjectTemplates::PMNSVariablesT<double>;
+
 class OscProbPMNSBase: public GNAObject,
                        public TransformationBind<OscProbPMNSBase> {
 protected:
@@ -26,21 +37,40 @@ protected:
   int m_alpha, m_beta, m_lepton_charge;
 };
 
-class OscProbPMNS: public OscProbPMNSBase,
-                   public TransformationBind<OscProbPMNS> {
-public:
-  using TransformationBind<OscProbPMNS>::transformation_;
 
-  OscProbPMNS(Neutrino from, Neutrino to, std::string l_name="L");
+namespace GNA {
+  namespace GNAObjectTemplates {
+    template<typename FloatType>
+    class OscProbPMNST: public OscProbPMNSBase,
+                        public TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType> {
+    protected:
+      using BaseClass = GNAObjectT<FloatType,FloatType>;
+    public:
+      using TransformationBind<OscProbPMNST<FloatType>, FloatType, FloatType>::transformation_;
+      using typename BaseClass::FunctionArgs;
 
-  template <int I, int J>
-  void calcComponent(FunctionArgs fargs);
-  void calcComponentCP(FunctionArgs fargs);
-  void calcSum(FunctionArgs fargs);
-  void calcFullProb(FunctionArgs fargs);
-protected:
-  variable<double> m_L;
-};
+      OscProbPMNST<FloatType>(Neutrino from, Neutrino to, std::string l_name="L");
+
+      template <int I, int J>
+      void calcComponent(FunctionArgs& fargs);
+      void calcComponentCP(FunctionArgs& fargs);
+      void calcSum(FunctionArgs& fargs);
+      void calcFullProb(FunctionArgs& fargs);
+    #ifdef GNA_CUDA_SUPPORT
+      void calcFullProbGpu(FunctionArgs& fargs);
+      template <int I, int J>
+      void gpuCalcComponent(FunctionArgs& fargs);
+      void gpuCalcComponentCP(FunctionArgs& fargs);
+      void gpuCalcSum(FunctionArgs& fargs);
+    #endif
+
+    protected:
+      variable<FloatType> m_L;
+    };
+  }
+}
+
+using OscProbPMNS = GNA::GNAObjectTemplates::OscProbPMNST<double>;
 
 class OscProbAveraged: public OscProbPMNSBase,
                        public TransformationBind<OscProbAveraged> {
