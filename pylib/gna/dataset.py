@@ -26,9 +26,11 @@ class Dataset(object):
         #  for covariated pull terms
         underlaying_params = [(key, base.data.values()[0]) for base in bases for key in base.data.keys()
                               if isinstance(key, ROOT.Parameter('double'))
-                                 and not key.isFixed()]
+                                 and not key.isFixed() and key.isCorrelated()]
         for (par_1, base_1), (par_2, base_2) in combinations(underlaying_params, 2):
             mutual_cov =  par_1.getCovariance(par_2)
+            if mutual_cov==0.0:
+                continue
             self.covariance[frozenset([par_1, par_2])] = [self._pointize(mutual_cov)]
 
     def assign(self, obs, value, error):
@@ -52,8 +54,8 @@ class Dataset(object):
         """
         self.covariance[frozenset([obs1, obs2])].append(self._pointize(cov))
 
-    def iscovariated(self, obs1, obs2, covparameters):
-        """Checks whether two observables are covariated or affected by covparameters
+    def iscorrelated(self, obs1, obs2, covparameters):
+        """Checks whether two observables are correlated or affected by covparameters
         """
         if self.covariance.get(frozenset([obs1, obs2])):
             return True
@@ -64,7 +66,7 @@ class Dataset(object):
 
     def sortobservables(self, observables, covparameters):
         """Splits observables into such a groups that observables that are
-        all covariated with respect to a covparameters or pull terms
+        all correlated with respect to a covparameters or pull terms
 
         If observables are not provided: use ones stored in data
         """
@@ -75,7 +77,7 @@ class Dataset(object):
         groups = [[]]
         while to_process:
             for obs in to_process:
-                if not groups[-1] or any(self.iscovariated(obs, x, covparameters) for x in groups[-1]):
+                if not groups[-1] or any(self.iscorrelated(obs, x, covparameters) for x in groups[-1]):
                     groups[-1].append(obs)
                     break
             else:
@@ -90,7 +92,9 @@ class Dataset(object):
         groups = [[]]
         while to_process:
             for par in to_process:
-                if not groups[-1] or any(par.isCovariated(x) for x in groups[-1]):
+                if not par.isCorrelated:
+                    continue
+                if not groups[-1] or any(par.isCorrelated(x) for x in groups[-1]):
                     groups[-1].append(par)
                     break
             else:
@@ -115,7 +119,7 @@ class Dataset(object):
                 obs1, obs2 = list(covkey)
             for cov in covs:
                 prediction.covariate(cov, obs1, 1, obs2, 1)
-        if covparameters:
+        if any(par.influences(prediction.prediction) for par in covparameters):
             jac = ROOT.Jacobian()
             par_covs = ROOT.ParCovMatrix()
             for par in covparameters:
@@ -130,6 +134,7 @@ class Dataset(object):
             product.multiply(jac.jacobian)
             product.multiply(par_covs.unc_matrix)
             product.multiply(jac_T.transpose.T)
+            product.product.touch() # Fixme: should be controllable
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 

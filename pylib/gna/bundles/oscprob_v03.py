@@ -1,4 +1,7 @@
-"""Oscillation probability bundle v03, unlike v02 it is able to process minor indices by creating clones of the OP"""
+"""Oscillation probability bundle v03, unlike v02 it is:
+    - able to process minor indices by creating clones of the OP
+    - may configure the PDG year
+"""
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -52,9 +55,9 @@ class oscprob_v03(TransformationBundle):
 
                             trans = oscprob.transformations[component]
                             if self.nidx_minor:
-                                trans.setLabel( it.current_format('OP {component}:\n{reactor}->{detector}\n'+it_minor.current_format()) )
+                                trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}\n'+it_minor.current_format()) )
                             else:
-                                trans.setLabel( it.current_format('OP {component}:\n{reactor}->{detector}') )
+                                trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}') )
                             output = trans[component]
                             input  = trans['Enu']
 
@@ -63,14 +66,22 @@ class oscprob_v03(TransformationBundle):
 
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters
+        pmnspars_kwargs=dict()
+        pdgyear = self.cfg.get('pdgyear', None)
+        if pdgyear:
+            pmnspars_kwargs['pdgyear']=pdgyear
+
         for it in self.nidx_minor:
             name = it.current_values(name='pmns')
             ns_pmns=self.namespace(name)
-            reqparameters(ns_pmns)
+            reqparameters(ns_pmns, **pmnspars_kwargs)
 
             names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
             with ns_pmns:
                 R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
+                ns_pmns['Delta'].setFixed()
+                ns_pmns['SigmaDecohRel'].setFixed()
+                ns_pmns['SinSq23'].setFixed()
                 ns_pmns.materializeexpressions()
 
             for i, vname in enumerate(names):

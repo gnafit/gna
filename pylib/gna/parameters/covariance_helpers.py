@@ -9,7 +9,7 @@ def __keep_relative(**kwargs):
     cov_mat = kwargs.pop('cov_mat')
     pars = kwargs.pop('pars')
     _uncorr_uncs = np.array([par.sigma() for par in pars])
-    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]
     return cov_mat * tmp
 
 def __keep_absolute(**kwargs):
@@ -24,11 +24,11 @@ def __override_relative(**kwargs):
     cov_mat = kwargs.pop('cov_mat')
     pars = kwargs.pop('pars')
     _uncorr_uncs = kwargs.pop('uncorr_from_file')
-    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]  
+    tmp = np.vstack([_uncorr_uncs for _ in range(len(_uncorr_uncs))]) * _uncorr_uncs[..., np.newaxis]
     return cov_mat * tmp
 
-dispatch_modes = {('keep', 'relative'): __keep_relative, 
-                  ('keep', 'absolute'): __keep_absolute, 
+dispatch_modes = {('keep', 'relative'): __keep_relative,
+                  ('keep', 'absolute'): __keep_absolute,
                   ('override', 'relative'): __override_relative,
                   ('override', 'absolute'): __override_absolute,}
 
@@ -48,7 +48,7 @@ class CovarianceHandler(object):
         policy = self.cov_store['policy']
         mode = self.cov_store['mode']
         uncorr_uncs = np.array(self.cov_store['uncorr_uncs'])
-        pars_to_covariate = [par for par in get_parameters(self.passed_pars) 
+        pars_to_covariate = [par for par in get_parameters(self.passed_pars, drop_fixed=True, drop_free=True)
                              if par.name() in self.cov_store['params']]
         if all(_.name() in self.cov_store['params'] for _ in pars_to_covariate):
             # put params in order to match order in covariance matrix
@@ -58,10 +58,10 @@ class CovarianceHandler(object):
                            mode=mode,
                            policy=policy,
                            uncorr_uncs=uncorr_uncs)
- 
 
 
-        
+
+
 def covariate_ns(ns, cov_storage):
     cov_ns = env.ns(ns)
     pars_in_ns = [par[1] for par in cov_ns.walknames()]
@@ -71,13 +71,13 @@ def covariate_ns(ns, cov_storage):
     mutual_pars = [par for par in pars_in_store if par in pars_in_ns]
     for par1, par2 in itertools.combinations_with_replacement(mutual_pars, 2):
         par1.setCovariance(par2, cov_storage.get_cov(par1, par2))
-    
+
 def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=None):
     if isinstance(cov_mat, np.ndarray):
         _cov_initial = cov_mat
     else:
         _cov_initial = np.array(cov_mat)
-    
+
     keyword_args = {'cov_mat': _cov_initial,
                     'uncorr_from_file': uncorr_uncs,
                     'pars': pars,}

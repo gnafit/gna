@@ -249,7 +249,7 @@ class TransformationBundle(object):
 
         self._debug = self.bundlecfg.get('debug', self._debug)
 
-        assert not kwargs
+        assert not kwargs, 'Unparsed kwargs: '+str(kwargs)
 
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
@@ -362,5 +362,5 @@ class TransformationBundle(object):
 
         ndim = nidx.ndim();
         if not dmin<=ndim<=dmax:
-            raise self.exception('Ndim %i does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
+            raise self.exception('Ndim {} does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
 

@@ -111,7 +111,7 @@ class exp(baseexp):
                 order = 1,
                 ),
             oscprob = NestedDict(
-                bundle = dict(name='oscprob', version='v02', major='rdc'),
+                bundle = dict(name='oscprob', version='v03', major='rdc'),
                 ),
             anuspec = NestedDict(
                 bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -149,15 +149,32 @@ class exp(baseexp):
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
                     add_ff = True,
                     ),
+            nominal_thermal_power = NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter='nominal_thermal_power',
+                    label='Nominal thermal power [Gw] for {reactor}',
+                    pars = uncertaindict(
+                        [
+                            ( 'DB1', 2.895 ),
+                            ( 'DB2', 2.895 ),
+                            ( 'LA1', 2.895 ),
+                            ( 'LA2', 2.895 ),
+                            ( 'LA3', 2.895 ),
+                            ( 'LA4', 2.895 ),
+                            ],
+                        uncertainty = 5.0,
+                        mode = 'percent',
+                        ),
+                    ),
             eper_fission =  NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
                     parameter = "eper_fission",
                     label = 'Energy per fission for {isotope} in MeV',
                     pars = uncertaindict(
-                        [('Pu239', (209.99, 0.60)),
-                         ('Pu241', (213.60, 0.65)),
-                         ('U235',  (201.92, 0.46)),
-                         ('U238', (205.52, 0.96))],
+                        [('Pu239', (211.12, 0.34)),
+                         ('Pu241', (214.26, 0.33)),
+                         ('U235',  (202.36, 0.26)),
+                         ('U238', (205.99, 0.52))],
                         mode='absolute'
                         ),
                     ),
@@ -447,14 +464,16 @@ class exp(baseexp):
             ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
-            ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
-                             outputs.evis_nonlinear_correlated[ad], export=False )
-            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
+
+            #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
+                             #  outputs.evis_nonlinear_correlated[ad], export=False )
+            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             for reac in reactors:
                 for iso in isotopes:
                     ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
                                      outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
+        ns.addobservable("final_concat", outputs.concat_total)
         for iso in isotopes:
             ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
 
@@ -472,13 +491,14 @@ class exp(baseexp):
 
     def define_topology(self):
         self.formula_base = [
+            # Basic building blocks
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
             'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
             'livetime=accumulate("livetime", livetime_daily[d]())',
-            'ff = fission_fraction_corr[i,r] * fission_fractions[i,r]()',
+            'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
             'denom = sum[i] | eper_fission[i]*ff',
-            'power_livetime_factor_daily = efflivetime_daily[d]()*thermal_power[r]()*ff / denom',
+            'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             # Detector effects
             'eres_matrix| evis_hist()',
@@ -491,7 +511,15 @@ class exp(baseexp):
             'bkg_alphan   = days_in_second * efflivetime[d] * bkg_rate_alphan[d]               * bkg_spectrum_alphan[d]()',
             'bkg_lihe     = days_in_second * efflivetime[d] * bkg_rate_lihe[s]   * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
-            'norm_bf = global_norm*eff*effunc_uncorr[d]'
+            'norm_bf = global_norm*eff*effunc_uncorr[d]',
+            # Aliases
+            '''rate_in_detector =  conversion_factor*nprotons_nominal * kinint2| sum[r]|
+                                      baselineweight[r,d]*
+                                      ibd_xsec(enu(), ctheta())*
+                                      jacobian(enu(), ee(), ctheta())*
+                                      (sum[i]| power_livetime_factor*anuspec[i](enu())) *
+                                        sum[c]|
+                                          pmns[c]*oscprob[c,d,r](enu())'''
 
         ]
 
@@ -507,11 +535,7 @@ class exp(baseexp):
                                baselineweight[r,d]*
                                sum[i]|
                                  power_livetime_factor*
-                                 kinint2|
-                                   anuspec[i](enu())*
-                                   oscprob[c,d,r](enu())*
-                                     ibd_xsec(enu(), ctheta())*
-                                     jacobian(enu(), ee(), ctheta())
+                                 kinint2| anuspec[i](enu()) * oscprob[c,d,r](enu()) * ibd_xsec(enu(), ctheta()) * jacobian(enu(), ee(), ctheta())
             '''
 
         self.formula_ibd_mid = '''ibd =
@@ -535,18 +559,10 @@ class exp(baseexp):
 
         self.formula_ibd_simple = '''ibd =
                           norm_bf*
-                          conversion_factor*nprotons_nominal*
                           eres[d]|
                             lsnl[d]|
                               iav[d]|
-                                  kinint2|
-                                    sum[r]|
-                                      baselineweight[r,d]*
-                                      ibd_xsec(enu(), ctheta())*
-                                      jacobian(enu(), ee(), ctheta())*
-                                      (sum[i]| power_livetime_factor*anuspec[i](enu())) *
-                                        sum[c]|
-                                          pmns[c]*oscprob[c,d,r](enu())
+                                  rate_in_detector
             '''
 
         self.formula_back = [
@@ -639,6 +655,8 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        rate_in_detector        = dict(expr='rate_in_detector',
+                                                       label='Rate in {detector}' ),
                         denom                   = dict(expr='denom',
                                                        label='Denominator of reactor norm for {reactor}'),
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
@@ -699,6 +717,7 @@ class exp(baseexp):
                         #  ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
                         #  ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
                         #  ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
+                        #
 
                         # Accidentals
                         acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*days_in_second*efflivetime',             label='Acc num {detector}\n (best fit)}'),

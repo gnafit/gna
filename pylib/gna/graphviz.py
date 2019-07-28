@@ -36,12 +36,16 @@ def savegraph(obj, fname, *args, **kwargs):
 
 class GNADot(object):
     layers = 'variable:transformation'
+    make_subgraphs = True
     def __init__(self, transformation, **kwargs):
         kwargs.setdefault('fontsize', 10)
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
+        self.make_subgraphs = kwargs.get('subgraph', False)
         self.joints = kwargs.pop('joints', False)
         ns = kwargs.pop('namespace', None)
+
+        self.subgraphs = dict()
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
         self.layout = self.graph.layout
@@ -59,8 +63,24 @@ class GNADot(object):
 
         self._process_variables()
 
+    def _get_subgraph(self, entry):
+        if not self.make_subgraphs:
+            return self.graph
+
+        if not 'subgraph' in entry.attrs:
+            return self.graph
+
+        name = entry.attrs['subgraph']
+
+        subgraph = self.subgraphs.get(name)
+        if subgraph is not None:
+            return subgraph
+
+        subgraph=self.subgraphs[name]=self.graph.add_subgraph(name='cluster_'+name, label=name)
+
+        return subgraph
+
     def _process_variables(self):
-        # self.vargraph = self.graph.subgraph(name='cluster_var')
         self.vargraph=self.graph
         self.walker.variable_do(self._action_variable)
 
@@ -79,10 +99,12 @@ class GNADot(object):
         return uid
 
     def _action_entry(self, entry):
-        node = self.graph.add_node( self.entry_uid(entry), **self.style.node_attrs(entry) )
+        graph = self._get_subgraph(entry)
+
+        node = graph.add_node( self.entry_uid(entry), **self.style.node_attrs(entry) )
         nsinks = entry.sinks.size()
         for i, sink in enumerate(entry.sinks):
-            self._action_sink(sink, i, nsinks)
+            self._action_sink(sink, i, nsinks, graph=graph)
 
     def _action_variable(self, varentry):
         var=varentry.variable
@@ -103,12 +125,13 @@ class GNADot(object):
         self.graph.add_node( sourceuid, shape='point', label='in' )
         self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
-    def _action_sink(self, sink, i=0, nsinks=0):
+    def _action_sink(self, sink, i=0, nsinks=0, graph=None):
+        graph = graph or self.graph
         if sink.sources.size()==0:
             """In case sink is not connected, draw empty output"""
             sinkuid=self.entry_uid(sink, 'sink')
-            self.graph.add_node( sinkuid, shape='point', label='out' )
-            self.graph.add_edge( self.entry_uid(sink.entry), sinkuid, **self.style.edge_attrs(i, sink) )
+            graph.add_node( sinkuid, shape='point', label='out' )
+            graph.add_edge( self.entry_uid(sink.entry), sinkuid, **self.style.edge_attrs(i, sink) )
         elif sink.sources.size()==1 or not self.joints:
             """In case there is only one connection draw it as is"""
             sinkuid = self.entry_uid(sink.entry)
@@ -118,7 +141,7 @@ class GNADot(object):
         else:
             """In case there is more than one connections, merge them"""
             jointuid = self.entry_uid(sink, 'joint')
-            joint = self.graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.style.tail_label(None, sink) )
+            joint = graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.style.tail_label(None, sink) )
 
             sstyle=self.style.edge_attrs(i, sink, None, None)
             sstyle['arrowhead']='none'

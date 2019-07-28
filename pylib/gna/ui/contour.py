@@ -368,6 +368,7 @@ class cmd(basecmd):
             plt.yticks(list(plt.yticks()[0]) + list(levels))
             labels = ['%g' % loc for loc in plt.yticks()[0]]
             ticks, labels = plt.yticks(plt.yticks()[0], labels)
+            #plt.yticks(np.arange(self.opts.ylim[0], self.opts.ylim[1], (self.opts.ylim[1]-self.opts.ylim[0])/10.0))
             for level in levels:
                 plt.axhline(level, linestyle='-.')
             xlabel = r'{}'.format(self.opts.xlabel)
@@ -409,7 +410,7 @@ class cmd(basecmd):
         if self.opts.legend:
             plt.legend(loc=' '.join(self.opts.legend))
         if self.opts.title:
-            plt.title(r'{0}'.format(self.opts.title), fontsize=20)
+            plt.title(r'{0}'.format(self.opts.title))
         if self.opts.show:
             plt.show()
         if self.opts.output:
