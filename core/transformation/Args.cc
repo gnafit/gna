@@ -4,6 +4,8 @@
 #include "TransformationErrors.hh"
 #include "TransformationEntry.hh"
 
+#include "config_vars.h"
+
 using TransformationTypes::ArgsT;
 using TransformationTypes::CalculationError;
 
@@ -11,6 +13,8 @@ using TransformationTypes::CalculationError;
  * @brief Get i-th Source Data.
  * @param i -- index of a Source.
  * @return i-th Sources's Data as input (const).
+ *
+ * If CUDA enabled and relevant data is placed on GPU, it synchronizes data before return it.
  *
  * @exception CalculationError in case invalid index is queried.
  * @exception CalculationError in case input data is not initialized.
@@ -27,6 +31,12 @@ const Data<SourceFloatType> &ArgsT<SourceFloatType,SinkFloatType>::operator[](in
     throw CalculationError<EntryImpl>(m_entry, msg);
   }
   src.sink->entry->touch();
+#ifdef GNA_CUDA_SUPPORT
+// FIXME: why commented?
+//  if (src.sink->data->gpuArr) {
+//    src.sink->data->gpuArr->sync(this->m_entry->getEntryLocation());
+//  }
+#endif
   return *src.sink->data;
 }
 
@@ -41,6 +51,12 @@ void ArgsT<SourceFloatType,SinkFloatType>::touch() const {
       throw CalculationError<EntryImpl>(m_entry, msg);
     }
     source.sink->entry->touch();
+#ifdef GNA_CUDA_SUPPORT
+    auto& gpuarr=source.sink->data->gpuArr;
+    if (gpuarr) {
+      gpuarr->sync(this->m_entry->getEntryLocation());
+    }
+#endif
   }
 }
 

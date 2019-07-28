@@ -7,6 +7,11 @@
 #include "TransformationFunctionArgs.hh"
 #include "TypesFunctions.hh"
 
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT
+#include "DataLocation.hh"
+#endif
+
 template <typename Derived,typename SourceFloatType,typename SinkFloatType>
 class TransformationBind;
 
@@ -180,7 +185,7 @@ namespace TransformationTypes {
       }
       if(hasDefaultFunction()){
         auto& fcn = getDefaultFunction();
-        entry->switchFunction(fcn);
+        entry->switchFunction(fcn, /*strict*/false);
       }
 
       size_t idx = obj->addEntry(entry);
@@ -233,6 +238,24 @@ namespace TransformationTypes {
       this->func("main", afunc);
       return *this;
     }
+
+
+#ifdef GNA_CUDA_SUPPORT
+    /**
+     * @brief Set the named function and its target device.
+     *
+     * See InitializerT::func(const std::string& name, Function afunc) for more details.
+     * Additionally set the location (DataLocation::Host or DataLocation::Device).
+     *
+     * @return `*this`.
+     */
+    InitializerType func(const std::string &name, Function afunc, DataLocation loc) {
+      this->func(name, afunc);
+      setFuncLocation(name, loc);
+      return *this;
+    }
+#endif
+
 
     /**
      * @brief Set the named Function.
@@ -308,6 +331,19 @@ namespace TransformationTypes {
       this->func(name, m_data->obj->template bind<>(mfunc));
       return *this;
     }
+
+#ifdef GNA_CUDA_SUPPORT
+    InitializerType func(const std::string& name, MemFunction mfunc, DataLocation loc) {
+      this->func(name, mfunc);
+      setFuncLocation(name, loc);
+      return *this;
+    }
+
+    InitializerType setFuncLocation(const std::string& name, DataLocation loc) {
+      m_data->entry->functions[name].funcLoc = loc;
+      return *this;
+    }
+#endif
 
     /**
      * @brief Add new TypesFunction to the Entry.
@@ -401,7 +437,7 @@ namespace TransformationTypes {
      * This methods adds the Entry to the Base, no further actions are possible.
      */
     InitializerType& finalize() {
-      m_data->entry->evaluateTypes();
+      m_data->entry->finalize();
       this->add();
       return *this;
     }

@@ -5,6 +5,8 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
+#configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+
 if(CUDA_SUPPORT)
     find_package(CUDA REQUIRED)
     include_directories(cuda/operations/ cuda/extra/ cuda/core/)
@@ -28,6 +30,7 @@ if(CUDA_SUPPORT)
 	GpuBasics.hh
 	cuElementary.hh
 	cuOscProbPMNS.hh
+	cuIntegrate.hh
         )
 else()
     set(CUDA_SUPPORT 0)
@@ -62,6 +65,7 @@ set(HEADERS
     ${EXTRA_HEADERS}
     ${EXAMPLES_HEADERS}
     ${UNITTEST_HEADERS}
+    config_vars.h
     )
 
 include_directories(
@@ -131,7 +135,6 @@ add_subdirectory(fmt)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
-# list(APPEND CMAKE_PREFIX_PATH "$ENV{ROOTSYS}")
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
@@ -148,7 +151,6 @@ include_directories(SYSTEM "fmt")
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
 # include(${ROOT_USE_FILE})
-
 link_directories(${ROOT_LIBRARY_DIR})
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)

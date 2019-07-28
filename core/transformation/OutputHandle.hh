@@ -7,8 +7,16 @@
 #include "Data.hh"
 #include "taintflag.hh"
 
+#include "config_vars.h"
+#ifdef CUDA_SUPPORT
+#include "cuda_config_vars.h"
+#endif
+
 namespace TransformationTypes
 {
+  template<typename FloatType,typename SizeType>
+  class GPUVariables;
+
   /**
    * @brief Sink wrapper to make it user accessible from the Python.
    * InputHandle and OutputHandle classes give indirect access to Source and Sink instances
@@ -21,6 +29,9 @@ namespace TransformationTypes
   class OutputHandleT {
     template<typename FloatType1>
     friend class InputHandleT;
+
+    template<typename FloatType1,typename SizeType1>
+    friend class GPUVariables;
   public:
     /**
      * @brief Constructor.
@@ -49,6 +60,10 @@ namespace TransformationTypes
     size_t hash() const { return reinterpret_cast<size_t>(rawptr()); }          ///< Return a Source's hash value based on it's pointer address.
 
     bool depends(changeable x) const;                                           ///< Check that Sink depends on a changeable.
+
+#ifdef GNA_CUDA_SUPPORT
+    void requireGPU() { m_sink->requireGPU(); }                                 ///< Require output to be allocated on GPU.
+#endif
 
   protected:
     const FloatType *view() const { return m_sink->data->x.data(); }            ///< Return pointer to the Sink's data buffer without evaluation.

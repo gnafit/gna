@@ -743,6 +743,7 @@ public:
   }
 #ifdef GNA_CUDA_SUPPORT
   DataLocation require_gpu();
+  DataLocation require_gpu(DataLocation location);
 #endif // GNA_CUDA_SUPPORT
 
   const DataType type;                             ///< data type.
@@ -758,6 +759,10 @@ public:
   MatrixViewType mat{nullptr,   0,  0}; ///< 2D matrix view.
 
   ArrayViewType  &x = arr;    ///< 1D array  view shorthand.
+#ifdef GNA_CUDA_SUPPORT
+  std::unique_ptr<GpuArray<T>> gpuArr{nullptr};    ///< container for data on GPU, view to GPU array
+#endif
+
 
 protected:
   void init(T* buffer){
@@ -777,12 +782,11 @@ protected:
 
 #ifdef GNA_CUDA_SUPPORT
 
-template <typename T>
-DataLocation Data<T>::require_gpu() {
 /**
 Allocate GPU memory in case of GPU array is not inited yet
 */
-
+template <typename T>
+DataLocation Data<T>::require_gpu() {
   if (gpuArr == nullptr) {
     gpuArr.reset(new GpuArray<T>());
   }
@@ -794,13 +798,18 @@ Allocate GPU memory in case of GPU array is not inited yet
   }
   DataLocation tmp = DataLocation::NoData;
   if (type.shape.size() == 1) {
-        std::cout << "shape 1" << std::endl;
     tmp = gpuArr->Init(type.shape[0], buffer);
   } else if (type.shape.size() == 2) {
-        std::cout << "shape 2" << std::endl;
     tmp = gpuArr->Init(type.shape[0]*type.shape[1], buffer);
   }
   return tmp;
+}
+
+template <typename T>
+DataLocation Data<T>::require_gpu(DataLocation location) {
+  require_gpu();
+  gpuArr->setLocation(location);
+  return location;
 }
 #endif
 

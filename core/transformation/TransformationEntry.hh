@@ -124,6 +124,7 @@ namespace TransformationTypes
     void update();                                       ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
     void evaluateTypes();                                ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+    void finalize();                                     ///< Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.
 
     void touch();                                        ///< Update the transformation if it is not frozen and tainted.
     void touch_global();                                 ///< Update the transformation if it is not frozen and tainted.
@@ -150,21 +151,28 @@ namespace TransformationTypes
     FunctionDescriptorsContainerType functions;          ///< Map with FunctionDescriptor instances, containing several Function implementations.
     std::string funcname;                                ///< Active Function name.
 
+#ifdef GNA_CUDA_SUPPORT
+    void setEntryLocation(DataLocation loc);            ///< Sets the target (Host or Device) for execution of current transformation
+    void setEntryDataLocation(DataLocation loc);
+    DataLocation getEntryLocation() const;              ///<  Returns the target (Host or Device) for execution of current transformation
+#endif
+
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
+    bool finalized=false;                                ///< TypeFunctions should be evaluated even if there are no inputs.
 
     // Function args
     FunctionArgsPtr functionargs;                        ///< Transformation function arguments.
 
-    void switchFunction(const std::string& name);        ///< Use Function `name` as Entry::fun.
-    void initFunction(const std::string& name);          ///< Use Function `name` as Entry::fun. Do not update types.
+    bool switchFunction(const std::string& name, bool strict=true); ///< Use Function `name` as Entry::fun.
+    bool initFunction(const std::string& name, bool strict=true);   ///< Use Function `name` as Entry::fun. Does not update types.
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return entry address as size_t
 
     TreeManagerType* m_tmanager=nullptr;                 ///< Tree manager
 
 #ifdef GNA_CUDA_SUPPORT
-    void setLocation(DataLocation::Host loc) { m_entryLoc=loc; } ///< Change Entry location
+    void setLocation(DataLocation loc) { m_entryLoc=loc; } ///< Change Entry location
 #endif
   private:
 #ifdef GNA_CUDA_SUPPORT

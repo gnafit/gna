@@ -224,6 +224,8 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  *
  * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
  *
+ * If no inputs are connected, the funciton does nothing, unless EntryT::finalized is true.
+ *
  * @todo DataType instances created within StorageTypesFunction will trigger data reallocation
  * in any case. Should be fixed.
  *
@@ -233,27 +235,31 @@ template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
   TypesFunctionArgsType fargs(this);
   StorageTypesFunctionArgsType sargs(fargs);
-  bool success = false;
-  TR_DPRINTF("evaluating types for %s: \n", name.c_str());
-  try {
-    for (auto &typefun: typefuns) {
-      typefun(fargs);
+  bool success = true;
+  if(!sources.empty() || finalized){
+    TR_DPRINTF("evaluating types for %s: \n", name.c_str());
+    try {
+      for (auto &typefun: typefuns) {
+        typefun(fargs);
+      }
+      for (auto &typeclass: typeclasses) {
+        typeclass.processTypes(fargs);
+      }
+      auto& itypefuns=functions[funcname].typefuns;
+      for (auto &typefun: itypefuns) {
+        typefun(sargs);
+      }
+    } catch (const TypeError &exc) {
+      TR_DPRINTF("types[%s]: failed\n", name.c_str());
+      success = false;
+      throw std::runtime_error(
+        (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
+    } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
+      success = false;
+      TR_DPRINTF("types[%s]: undefined\n", name.c_str());
     }
-    for (auto &typeclass: typeclasses) {
-      typeclass.processTypes(fargs);
-    }
-    auto& itypefuns=functions[funcname].typefuns;
-    for (auto &typefun: itypefuns) {
-      typefun(sargs);
-    }
-    success = true;
-  } catch (const TypeError &exc) {
-    TR_DPRINTF("types[%s]: failed\n", name.c_str());
-    throw std::runtime_error(
-      (fmt::format("Transformation: type updates failed for `{0}': {1}", name, exc.what())));
-  } catch (const typename AtypesT<SourceFloatType,SinkFloatType>::Undefined&) {
-    TR_DPRINTF("types[%s]: undefined\n", name.c_str());
   }
+
   if (success) {
     std::set<EntryType*> deps;
     TR_DPRINTF("types[%s]: success\n", name.c_str());
@@ -285,27 +291,32 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 
 #ifdef GNA_CUDA_SUPPORT
     // GPU: require GPU memory for previous transformation's sink
-    if (this->getEntryLocation() == DataLocation::Device) {
-
+    if (this->getEntryLocation() == DataLocation::Device){
       for (auto &source : sources) {
-          source.sink->data->require_gpu();
+          source.requireGPU();
       }
       for (auto &sink : sinks) {
-        sink.data->require_gpu();
-        sink.data->gpuArr->setLocation( this->getEntryLocation() );
+        sink.requireGPU(this->getEntryLocation());
       }
       for (auto &intern : storages) {
-        intern.data->require_gpu();
-        intern.data->gpuArr->setLocation( this->getEntryLocation() );
+        intern.requireGPU(this->getEntryLocation());
       }
       // init gpu storage
+      functionargs->requireGPU();
     }
 #endif
   }
-
-  /// TODO: do it optionally
-  functionargs->requireGPU();
   functionargs->updateTypes();
+
+  tainted.unfreeze();
+  tainted.taint();
+}
+
+/** @brief Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.*/
+template<typename SourceFloatType, typename SinkFloatType>
+void EntryT<SourceFloatType,SinkFloatType>::finalize() {
+  finalized = true;
+  evaluateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */
@@ -355,7 +366,7 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
   }
   touch();
 #ifdef GNA_CUDA_SUPPORT
-  if (sink.data->gpuArr != nullptr) {
+  if (m_entryLoc==DataLocation::Device && sink.data->gpuArr) {
     sink.data->gpuArr->sync( DataLocation::Host );
   }
 #endif
@@ -372,9 +383,12 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
  * @exception std::runtime_error in case the function `name` does not exist.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name){
-  initFunction(name);
-  evaluateTypes();
+bool EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name, bool strict){
+  if(initFunction(name, strict)){
+    evaluateTypes();
+    return true;
+  }
+  return false;
 }
 
 /**
@@ -387,17 +401,21 @@ void EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& na
  * @exception std::runtime_error in case the function `name` does not exist.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name){
+bool EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name, bool strict){
   auto it = functions.find(name);
   if(it==functions.end()){
-    auto msg = fmt::format("invalid function name {0}", name.data());
-    throw std::runtime_error(msg);
+    if(strict){
+      auto msg = fmt::format("invalid function name {0}", name.data());
+      throw std::runtime_error(msg);
+    }
+    return false;
   }
   fun = it->second.fun;
 #ifdef GNA_CUDA_SUPPORT
   setEntryLocation(it->second.funcLoc);
 #endif
   funcname=name;
+  return true;
 }
 
 
@@ -417,7 +435,10 @@ void EntryT<SourceFloatType,SinkFloatType>::setEntryLocation(DataLocation loc) {
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::setEntryDataLocation(DataLocation loc) {
     for (const SinkType &s: sinks) {
-        s.data->gpuArr->setLocation(loc);
+      auto* gpuarr = s.data->gpuArr.get();
+      if(gpuarr) {
+        gpuarr->setLocation(loc);
+      }
     }
 }
 

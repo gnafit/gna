@@ -3,6 +3,7 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 #include <set>
+#include "config_vars.h"
 #include "variable.hh"
 
 template<typename FloatType>
@@ -66,6 +67,7 @@ namespace GNA{
 
         allocatorType* getAllocator() { return m_allocator.get(); }
         VarArrayType* getVarArray() { return m_vararray.get(); }
+        OutputDescriptorType* getOutput() { return m_output.get(); }
     protected:
         static void setCurrent(TreeManagerType* tmanager) noexcept { TreeManagerType::s_current_manager=tmanager; }
 

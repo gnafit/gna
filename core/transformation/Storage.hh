@@ -38,6 +38,13 @@ namespace TransformationTypes
 
     bool materialized() const { return (bool)data; } ///< Check if data is initialized
 
+    #ifdef GNA_CUDA_SUPPORT
+    void requireGPU(DataLocation location) const {
+      if(!data) return;
+      data->require_gpu(location);
+    }
+    #endif
+
     std::string name;                    ///< Storage's name.
     std::string label;                   ///< Storage's label.
     std::unique_ptr<DataType> data;      ///< Storage's Data.
