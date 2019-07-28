@@ -2,7 +2,3 @@
 #if @CUDA_SUPPORT@ == 1
         #define GNA_CUDA_SUPPORT 
 #endif
-
-#if @TIME_COUNT@ == TRUE
-	#define TIME_COUNT_ON
-#endif
