@@ -5,7 +5,7 @@ set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-#configure_file( core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+#configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 
 if(CUDA_SUPPORT)
     find_package(CUDA REQUIRED)
@@ -60,7 +60,7 @@ set(SOURCES
     ${EXTRA_SOURCES}
     ${EXAMPLES_SOURCES}
     ${UNITTEST_SOURCES}
-)
+    )
 
 set(HEADERS
     ${CUHEADERS}
