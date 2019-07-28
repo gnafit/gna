@@ -145,6 +145,8 @@ namespace TypeClasses{
                 bool eq = compare(args[aidx], *compare_to);
                 if (!eq) {
                     auto msg = fmt::format("Transformation {0}: all inputs should have same {3}, {1} and {2} differ", args.name(), first, aidx, m_comparison==ComparisonType::All?"type":"shape");
+                    compare_to->dump();
+                    args[aidx].dump();
                     throw args.error(args[aidx], msg);
                 }
             }

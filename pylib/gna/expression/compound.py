@@ -277,6 +277,10 @@ class TCall(IndexedContainer, Transformation):
 
 class TProduct(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
+        import ROOT as R
+        # pclass = R.GNA.GNAObjectTemplates.ProductT('double')
+        pclass = R.GNA.GNAObjectTemplates.ProductBCT('double')
+
         if not objects:
             raise Exception('Expect at least one variable for TProduct')
 
@@ -287,7 +291,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, TProduct) and o.expandable and not o is self:
+            if self.expandable and isinstance(o, pclass) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)
@@ -297,8 +301,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
         Transformation.__init__(self, name, *newobjects, **kwargs)
 
         self.set_operator( ' * ', '( ', ' )', text='_times_'  )
-        import ROOT as R
-        self.set_tinit( R.GNA.GNAObjectTemplates.ProductT('double') )
+        self.set_tinit( pclass )
 
 class TRatio(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
