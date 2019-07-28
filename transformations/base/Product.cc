@@ -15,7 +15,7 @@ namespace GNA {
     ProductT<FloatType>::ProductT() {
       this->transformation_("product")
         .output("product")
-        .types(new CheckSameTypesT<FloatType>({0,-1}), new PassTypeT<FloatType>(0, {0,0}))
+        .types(new CheckSameTypesT<FloatType>({0,-1}, "shape"), new PassTypeT<FloatType>(0, {0,0}))
         .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
