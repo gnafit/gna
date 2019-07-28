@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
-from gna.env import env
 import numpy as np
 import ROOT
 import itertools as it
@@ -26,6 +25,7 @@ def patchGNAclass(cls):
             msg = "unknown keywords %s in constructor of %r"
             msg = msg % (', '.join(kwargs.keys()), self)
             raise Exception(msg)
+        from gna.env import env
         env.register(self, bind=bind, freevars=freevars,
                      ns=ns, bindings=bindings)
 

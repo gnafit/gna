@@ -298,7 +298,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
 
         self.set_operator( ' * ', '( ', ' )', text='_times_'  )
         import ROOT as R
-        self.set_tinit( R.Product )
+        self.set_tinit( R.GNA.GNAObjectTemplates.ProductT('double') )
 
 class TRatio(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):

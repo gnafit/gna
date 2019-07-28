@@ -5,6 +5,9 @@ from contextlib import contextmanager
 import ROOT
 from gna.config import cfg
 
+provided_precisions = list(ROOT.GNA.provided_precisions())
+expressionproviders = tuple(ROOT.GNA.GNAObjectTemplates.ExpressionsProviderT(p) for p in provided_precisions)
+
 env = None
 
 class namespacedict(OrderedDict):
@@ -476,7 +479,7 @@ class _environment(object):
             ns.addexpressions(obj, bindings=bindings)
         if not kwargs.pop('bind', True):
             return obj
-        if isinstance(obj, ROOT.ExpressionsProvider):
+        if isinstance(obj, expressionproviders):
             return obj
         freevars = kwargs.pop('freevars', [])
 
