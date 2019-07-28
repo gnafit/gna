@@ -55,6 +55,17 @@ namespace TransformationTypes
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return sink address as size_t
 
+    #ifdef GNA_CUDA_SUPPORT
+    void requireGPU() const {
+      if(!data) return;
+      data->require_gpu();
+    }
+    void requireGPU(DataLocation location) const {
+      if(!data) return;
+      data->require_gpu(location);
+    }
+    #endif
+
     std::string name;                    ///< Sink's name.
     DataPtr data;                        ///< Sink's Data.
     std::vector<SourceType*> sources;    ///< Container with Source pointers which use this Sink as their input.

@@ -19,7 +19,6 @@ void PointsToHist::init(SingleOutput& points) {
         m_edges.resize(size_in);
         std::copy(points.data(), points.data()+size_in, m_edges.begin());
     }
-    m_fragile = fragile({points.single().getTaintflag()});
     transformation_("adapter")
         .input("points")
         .output("hist")
@@ -36,4 +35,5 @@ void PointsToHist::init(SingleOutput& points) {
         .finalize();
 
     points.single() >> transformations.front().inputs[0];
+    m_fragile = fragile({points.single().getTaintflag()});
 }

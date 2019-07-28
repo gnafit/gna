@@ -7,4 +7,6 @@ dictionary = dict(
     dm21_unit = r'$\text{eV}^2$',
     dm32 = r'$\Delta m^2_{32}$',
     dm32_unit = r'$\text{eV}^2$',
+    psur = r'$P_\mathrm{sur}$',
+    psur_unit= ''
 )

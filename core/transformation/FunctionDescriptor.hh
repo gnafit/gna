@@ -3,6 +3,12 @@
 #include <map>
 #include "TransformationFunction.hh"
 
+#include "config_vars.h"
+#ifdef GNA_CUDA_SUPPORT 
+#include "DataLocation.hh"
+#include "cuda_config_vars.h"
+#endif
+
 namespace TransformationTypes
 {
   template<typename FloatType> struct StorageT;
@@ -26,8 +32,22 @@ namespace TransformationTypes
    */
   template<typename SourceFloatType, typename SinkFloatType>
   struct FunctionDescriptorT {
+    FunctionDescriptorT()=default;
+    FunctionDescriptorT(const FunctionT<SourceFloatType,SinkFloatType> &infun, const StorageTypesFunctionsContainerT<SourceFloatType,SinkFloatType> &intypefuns) 
+					: fun(infun), typefuns(intypefuns) {  }
+    FunctionDescriptorT(const FunctionDescriptorT& other) : fun(other.fun), typefuns(other.typefuns) { }
+
+#ifdef GNA_CUDA_SUPPORT
+    FunctionDescriptorT(FunctionT<SourceFloatType,SinkFloatType> infun, StorageTypesFunctionsContainerT<SourceFloatType,SinkFloatType> intypefuns, DataLocation inloc) 
+														: fun(infun), typefuns(intypefuns), funcLoc(inloc) {  }
+//    FunctionDescriptorT(const FunctionDescriptorT& other) : fun(other.fun), typefuns(other.typefuns), funcLoc(other.funcLoc) { }
+#endif
+
     FunctionT<SourceFloatType,SinkFloatType>                       fun;      ///< The pointer to the transformation Function
     StorageTypesFunctionsContainerT<SourceFloatType,SinkFloatType> typefuns; ///< Container with TypesFunction specifying the storage requirements for this particular function
+#ifdef GNA_CUDA_SUPPORT
+    DataLocation funcLoc = DataLocation::Host;				     ///< Location for this function
+#endif    
   };
 
   template<typename SourceFloatType, typename SinkFloatType>

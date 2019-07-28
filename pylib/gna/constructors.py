@@ -72,13 +72,21 @@ def Points(array, *args, **kwargs):
     s = array_to_stdvector_size_t( a.shape )
     return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())( a.ravel( order='F' ), s, *args, **kwargs )
 
+"""Construct Identity object from list of SingleOutputs"""
+def Identity(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(*args, **kwargs)
+
+    return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
 """Construct Sum object from list of SingleOutputs"""
 def Sum(*args, **kwargs):
     outputs = kwargs.pop('outputs', None)
     if outputs is None:
-        return R.Sum(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(*args, **kwargs)
 
-    return R.Sum(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(*args, **kwargs):
@@ -104,7 +112,7 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
     else:
         inputs = OutputDescriptors(inputs)
 
-    return R.WeightedSum(weights, inputs, *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.WeightedSumT(context.current_precision())(weights, inputs, *args, **kwargs)
 
 """Construct WeightedSumP object from lists outputs"""
 def WeightedSumP(inputs, *args, **kwargs):
@@ -124,11 +132,27 @@ def SumBroadcast(*args, **kwargs):
     return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def Product(outputs=None, *args, **kwargs):
+def Product(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
     if outputs is None:
-        return R.Product(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
 
-    return R.Product(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
+"""Construct Product object from list of SingleOutputs"""
+def ProductBC(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(*args, **kwargs)
+
+    return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+
+"""Construct Product object from list of SingleOutputs"""
+def Exp(*args, **kwargs):
+    outputs = kwargs.pop('outputs', None)
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(*args, **kwargs)
+    return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins( array, *args, **kwargs ):

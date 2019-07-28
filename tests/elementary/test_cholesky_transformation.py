@@ -15,10 +15,10 @@ from gna.constructors import Points
 #
 def test_chol():
     size = 4
-    v = N.array(N.arange(size, dtype='d'))
-    v[size//2:] = N.arange(size//2, 0, -1)
+    v = N.matrix(N.arange(size, dtype='d'))
+    v.A1[size//2:] = N.arange(size//2, 0, -1)
 
-    mat = v.T[:, N.newaxis]*v + N.eye(size, size)*size*2
+    mat = v.T*v + N.eye( size, size )*size*2
 
     chol = N.linalg.cholesky( mat )
 
@@ -42,7 +42,7 @@ def test_chol():
     # Retrieve data
     #
     res = cholesky.cholesky.L.data()
-    res = N.tril(res)
+    res = N.matrix(N.tril( res ))
 
     #
     # Print data
@@ -52,7 +52,7 @@ def test_chol():
 
     assert N.allclose(chol, res), "C++ Cholesky and Python one doesn't match"
 
-    mat_back = N.matmul(res, res.T)
+    mat_back = res*res.T
 
     print( 'Matrix (rec)' )
     print( mat_back )

@@ -63,6 +63,24 @@ namespace GNA{
       }
 
       /**
+       * @brief Change array contents and update following datatypes
+       * @param points - pointer to an array of floats.
+       * @param cnt - the array size.
+       */
+      void set(const FloatType *points, size_t cnt)
+      {
+        m_points=Eigen::Map<const ArrayType>(points, cnt);
+
+        auto trans=this->transformations[0];
+        if(m_shape.size()!=1u || m_shape[0]!=cnt){
+          m_shape.resize(1);
+          m_shape[0]=cnt;
+          trans.updateTypes();
+        }
+        trans.taint();
+      }
+
+      /**
        * @brief Construct from just a single point.
        * @param single_point - just one FloatType.
        */

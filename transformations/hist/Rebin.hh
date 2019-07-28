@@ -5,6 +5,8 @@
 #include "GNAObject.hh"
 #include "Eigen/Sparse"
 
+#include "config_vars.h"
+
 class Rebin: public GNAObject,
              public TransformationBind<Rebin> {
 public:
@@ -17,6 +19,10 @@ private:
   void dump(size_t oldn, double* oldedges, size_t newn, double* newedges) const;
   void calcMatrix(const DataType& type);
   void calcSmear(FunctionArgs& fargs);
+#ifdef GNA_CUDA_SUPPORT
+  void calcSmear_gpu(FunctionArgs& fargs);
+#endif
+
   double round(double num);
 
   std::vector<double> m_new_edges;

@@ -4,6 +4,9 @@
 import ROOT
 from gna.env import env
 from physlib import pdg
+curpdg = pdg[2016]
+from gna import constructors as C
+
 
 # TODO: Add the way to automaticaly detect the current mass ordering and
 # switch the values of mixings to the current known global best fit for a
@@ -12,9 +15,7 @@ from physlib import pdg
 
 # DeltaMSqIJ = m^2_j - m^2_i
 
-def reqparameters(ns, pdgyear=2016):
-    curpdg = pdg[pdgyear]
-
+def reqparameters(ns):
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
                       sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
 
@@ -39,8 +40,8 @@ def reqparameters(ns, pdgyear=2016):
     ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5, label='Relative momentum spread (decoherence)')
 
     with ns:
-        ROOT.OscillationExpressions(ns=ns)
-        ROOT.PMNSExpressions(ns=ns)
+        C.OscillationExpressions(ns=ns)
+        C.PMNSExpressions(ns=ns)
 
     ns['DeltaMSq23'].setLabel('Mass splitting (2, 3)')
     ns['DeltaMSq13'].setLabel('Mass splitting (1, 3)')

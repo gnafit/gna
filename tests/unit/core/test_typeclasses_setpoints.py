@@ -26,7 +26,7 @@ def test_typeclass_setpoints_v01():
         assert dtype.shape.size()==1
         assert dtype.shape[0]==size
 
-def test_typeclass_setpoints_v01():
+def test_typeclass_setpoints_v02():
     sizes = ((1,2), (2,3), (5,3))
 
     for size in sizes:

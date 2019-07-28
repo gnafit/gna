@@ -1,5 +1,4 @@
 #define CUDA_MAT_SIZE_THRESHOLD @CUDA_MAT_SIZE_THRESHOLD@
-#if @CUDA_SUPPORT@ != 0
+#if @CUDA_SUPPORT@ == 1
         #define GNA_CUDA_SUPPORT 
 #endif
-

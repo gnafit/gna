@@ -60,7 +60,6 @@ pdg[2013]   = dict( pdg[2012]
     , neutron_lifetime = 880.1
     , neutron_lifetimee = 0.9
 )
-
 pdg['live'] = dict( pdg[2013] )
 
 pdg[2016]  = dict( pdg[2013]

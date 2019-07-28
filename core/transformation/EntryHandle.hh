@@ -79,10 +79,11 @@ namespace TransformationTypes
      */
     void update(int i) const { (void)m_entry->data(i); }
     void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
+    void touch_global() const { m_entry->touch_global(); }  ///< Call Entry::touch(). @copydoc Entry::touch()
     void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
 
 #ifdef GNA_CUDA_SUPPORT
-    void setLocation(DataLocation::Host loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
+    void setLocation(DataLocation loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location
 #endif
 
     void unfreeze() { m_entry->tainted.unfreeze(); }        ///< Unfreeze Entry's taintflag.
@@ -91,7 +92,8 @@ namespace TransformationTypes
     bool tainted() { return m_entry->tainted; }             ///< Return the Entry's taintflag status.
     taintflag& getTaintflag() const noexcept { return m_entry->tainted; } ///< Return taintflag of underlying Entry
 
-    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Read the variables
+    void readVariables(ParametrizedTypes::ParametrizedBase* parbase);  ///< Set parbase and read the variables
+    void readVariables();                                              ///< Read the variables from previously set ParametrizedBase
 
     /**
      * @brief Switch the active Function.

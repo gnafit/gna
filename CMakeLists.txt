@@ -6,6 +6,7 @@ set(LIBNAME GlobalNuAnalysis2)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 if(CUDA_SUPPORT)
+    message(STATUS "CUDA is enabled")
     find_package(CUDA REQUIRED)
     include_directories(cuda/operations/ cuda/extra/ cuda/core/)
     if(NOT CUDA_MAT_SIZE_THRESHOLD)
@@ -28,8 +29,10 @@ if(CUDA_SUPPORT)
 	GpuBasics.hh
 	cuElementary.hh
 	cuOscProbPMNS.hh
+	cuIntegrate.hh
         )
 else()
+    message(STATUS "CUDA is disabled")
     set(CUDA_SUPPORT 0)
     set(CUSOURCES "")
     set(CUHEADERS "")
@@ -65,6 +68,7 @@ set(HEADERS
     ${EXAMPLES_HEADERS}
     ${UNITTEST_HEADERS}
     ${CHENGYP_HEADERS}
+    config_vars.h
     )
 
 include_directories(

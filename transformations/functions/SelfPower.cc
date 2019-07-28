@@ -3,6 +3,12 @@
 #include <Eigen/Core>
 #include <cmath>
 
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#include "GpuBasics.hh"
+#include "DataLocation.hh"
+#endif
+
 /**
  * @brief Constructor.
  *
@@ -18,6 +24,9 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
 	.output("result")
 	.types(TypesFunctions::ifPoints<0>, TypesFunctions::pass<0>)
 	.func(&SelfPower::calculate)
+#ifdef GNA_CUDA_SUPPORT
+	.func("gpu", &SelfPower::gpu_calculate, DataLocation::Device)
+#endif
       ;
 
     transformation_("selfpower_inv")
@@ -27,6 +36,15 @@ SelfPower::SelfPower(const char* scalename/*="sp_scale"*/) {
 	.func(&SelfPower::calculate_inv)
       ;
 }
+
+#ifdef GNA_CUDA_SUPPORT
+void SelfPower::gpu_calculate(FunctionArgs& fargs) {
+    fargs.args.touch();
+    auto& gpuargs=fargs.gpu;
+    gpuargs->provideSignatureDevice();
+    cuselfpower(gpuargs->args, gpuargs->rets, fargs.args[0].arr.size(), gpuargs->nargs,m_scale.value());
+}
+#endif
 
 /**
  * @brief Calculate the value of function with positive power.

@@ -13,6 +13,7 @@
 
 #ifdef GNA_CUDA_SUPPORT
 #include "GpuBasics.hh"
+#include "DataLocation.hh"
 #endif
 
 namespace TransformationTypes{
@@ -31,28 +32,30 @@ namespace TransformationTypes{
         void readVariables(ParametrizedTypes::ParametrizedBase* parbase){
             m_vars.readVariables(parbase);
             m_vars_global.readVariables(parbase);
-            setAsDevice();
+            //setAsDevice();
         }
 
         void readVariablesLocal(){
             m_vars.readVariables();
-            setAsDevice();
+            //setAsDevice();
         }
 
-        void setAsDevice() {
-#ifdef GNA_CUDA_SUPPORT
-            m_entry->setEntryDataLocation(DataLocation::Device);
-#endif
-        }
+        //void setAsDevice() {
+//#ifdef GNA_CUDA_SUPPORT
+            //m_entry->setEntryDataLocation(DataLocation::Device);
+//#endif
+        //}
 
-        void setAsHost() {
-#ifdef GNA_CUDA_SUPPORT
-            m_entry->setEntryDataLocation(DataLocation::Host);
-#endif
-        }
+        //void setAsHost() {
+//#ifdef GNA_CUDA_SUPPORT
+            //m_entry->setEntryDataLocation(DataLocation::Host);
+//#endif
+        //}
 
         void updateTypesHost();
+#ifdef GNA_CUDA_SUPPORT
         void updateTypesDevice();
+#endif
 
         void updateTypes() {
             updateTypesHost();
@@ -63,7 +66,10 @@ namespace TransformationTypes{
 #endif
         }
         void provideSignatureHost(bool local=false);
+
+#ifdef GNA_CUDA_SUPPORT
         void provideSignatureDevice(bool local=false);
+#endif
         void dump();
 
         SizeType    nvars{0u};            ///< number of variables

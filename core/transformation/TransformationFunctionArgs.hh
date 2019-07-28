@@ -8,6 +8,10 @@
 #include "Rtypes.hh"
 #include "Itypes.hh"
 
+namespace ParametrizedTypes{
+  class ParametrizedBase;
+}
+
 namespace TransformationTypes
 {
   template<typename FloatType,typename SizeType> class GPUFunctionArgsT;
@@ -45,14 +49,20 @@ namespace TransformationTypes
     RetsType rets; ///< return values, or transformation outputs (writable)
     IntsType ints; ///< preallocated data arrays for the transformation's internal usage (writable)
 
-    GPUFunctionArgsPtr gpu; ///< GPU function arguments
+#ifdef GNA_CUDA_SUPPORT
+    GPUFunctionArgsPtr gpu=nullptr; ///< GPU function arguments
+    void requireGPU();              ///< Initialize GPU function arguments
+#endif
 
-    void requireGPU();                    ///< Initialize GPU function arguments
-    void updateTypes();                   ///< Update arguments and types
+    void updateTypes();             ///< Update arguments and types
 
     size_t getMapping(size_t input){ return m_entry->mapping[input]; }
+
+    void readVariables(ParametrizedTypes::ParametrizedBase* parbase); /// Read variables from ParametrizedBase instance
+    void readVariables();                                             /// Read variables from previous ParametrizedBase instance
   private:
-    EntryType *m_entry; ///< Entry instance to access Sinks.
+    EntryType *m_entry=nullptr;                              ///< Entry instance to access Sinks.
+    ParametrizedTypes::ParametrizedBase* m_parbase=nullptr;  ///< Access to the relevant ParametrizedBase instance
   };
 
   /**

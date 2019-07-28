@@ -2,6 +2,12 @@
 #include <algorithm>
 #include <iterator>
 #include <math.h>
+#include "TypesFunctions.hh"
+
+#ifdef GNA_CUDA_SUPPORT
+#include "cuElementary.hh"
+#include "GpuBasics.hh"
+#endif
 
 Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_scale{pow(10, rounding)} {
   std::transform( edges, edges+n, m_new_edges.begin(), [this](double num){return this->round(num);} );
@@ -12,7 +18,15 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
     .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs& fargs){
            fargs.rets[0]=DataType().hist().edges(obj->m_new_edges);
            })
-    .func(&Rebin::calcSmear);
+    .func(&Rebin::calcSmear)
+#ifdef GNA_CUDA_SUPPORT
+    .func("gpu", &Rebin::calcSmear_gpu, DataLocation::Device)
+    .storage("gpu", [this](StorageTypesFunctionArgs& fargs) {
+        fargs.ints[0] = DataType().points().shape((this->m_new_edges.size()-1) * fargs.args[0].size());
+    })
+#endif
+
+    ;
 }
 
 void Rebin::calcSmear(FunctionArgs& fargs) {
@@ -23,6 +37,20 @@ void Rebin::calcSmear(FunctionArgs& fargs) {
   fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
+#ifdef GNA_CUDA_SUPPORT
+void Rebin::calcSmear_gpu(FunctionArgs& fargs) {
+  fargs.args.touch();
+  auto& args=fargs.args;
+  auto& gpuargs = fargs.gpu;
+  gpuargs->provideSignatureDevice();
+  if( !m_initialized ){
+      calcMatrix( args[0].type );
+      fargs.ints[0].arr = Eigen::MatrixXd(m_sparse_cache);
+      copyH2D_NA(gpuargs->ints, fargs.ints[0].arr.data(), fargs.ints[0].x.size());
+  }
+  curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, fargs.args[0].x.size(), fargs.rets[0].x.size());
+}
+#endif
 void Rebin::calcMatrix(const DataType& type) {
   std::vector<double> edges(type.size()+1);
   std::transform( type.edges.begin(), type.edges.end(), edges.begin(), [this](double num){return this->round(num);} );

@@ -53,7 +53,7 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
             data_lt = data['livetime']+data_lt
             livetime    = C.Points(data['livetime'], labels=it.current_format('Livetime\n{autoindex}'))
             eff         = C.Points(data['eff'],      labels=it.current_format('Efficiency (mu*mult)\n{autoindex}'))
-            efflivetime = R.Product(livetime, eff,   labels=it.current_format('Livetime (eff)\n{autoindex}'))
+            efflivetime = C.Product(livetime, eff,   labels=it.current_format('Livetime (eff)\n{autoindex}'))
 
             self.context.objects[('livetime',ad)] = livetime
             self.context.objects[('eff',ad)] = eff

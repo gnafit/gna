@@ -57,6 +57,10 @@ namespace TransformationTypes
 
     size_t hash() const { return reinterpret_cast<size_t>((void*)this); } ///< Return source address as size_t
 
+    #ifdef GNA_CUDA_SUPPORT
+    void requireGPU() const { if(sink) sink->requireGPU(); }
+    #endif
+
     std::string name;                             ///< Source's name.
     const SinkType *sink = nullptr;               ///< Pointer to the Sink the Source is connected to.
     EntryType *entry;                             ///< Entry pointer the Source belongs to.

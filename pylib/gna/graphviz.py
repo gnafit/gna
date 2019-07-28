@@ -233,7 +233,7 @@ class TreeStyle(object):
             dim = getdim(entry.sinks[0])
         elif objectname in ('Histogram2d',):
             features.static=True
-            mark='h²'
+            mark=u'h²'
             dim = getdim(entry.sinks[0])
         elif objectname in ('Rebin',):
             mark='r'

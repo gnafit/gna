@@ -56,9 +56,11 @@ namespace GNA{
             }
 
             void dummy_fcn(FunctionArgs& fargs);
+#ifdef GNA_CUDA_SUPPORT
             void dummy_gpuargs_h_local(FunctionArgs& fargs);
             void dummy_gpuargs_h(FunctionArgs& fargs);
             void dummy_gpuargs_d(FunctionArgs& fargs);
+#endif
 
             std::vector<variable<FloatType>> m_vars;
         };

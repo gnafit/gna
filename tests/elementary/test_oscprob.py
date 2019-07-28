@@ -12,6 +12,7 @@ from gna.bindings import common   # plot outputs
 from gna.graphviz import savegraph
 from mpl_tools.helpers import savefig
 from gna.env import env
+from gna import context, bindings
 
 #
 # Define the parameters
@@ -34,7 +35,7 @@ def test_oscprob():
     # Initialize neutrino oscillations
     with ns:
         labels=['Oscillation probability|%s'%s for s in ('component 12', 'component 13', 'component 23', 'full', 'probsum')]
-        oscprob = R.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
+        oscprob = C.OscProbPMNS(R.Neutrino.ae(), R.Neutrino.ae(), baselinename, labels=labels)
 
     enu >> oscprob.full_osc_prob.Enu
     enu >> (oscprob.comp12.Enu, oscprob.comp13.Enu, oscprob.comp23.Enu)
