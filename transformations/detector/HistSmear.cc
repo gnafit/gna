@@ -2,7 +2,6 @@
 #include "HistSmear.hh"
 #include "TypesFunctions.hh"
 
-#include "config_vars.h"
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
 #include "DataLocation.hh"
@@ -34,6 +33,13 @@ void HistSmear::calcSmearUpper(FunctionArgs fargs) {
   fargs.rets[0].x = args[1].mat.triangularView<Eigen::Upper>() * args[0].vec;
 }
 
+void HistSmear::calcSmear(FunctionArgs fargs) {
+  std::cout <<"Im on cpu " <<std::endl;
+  auto& args=fargs.args;
+  fargs.rets[0].x = args[1].mat * args[0].vec;
+}
+
+#ifdef GNA_CUDA_SUPPORT
 void HistSmear::calcSmearUpper_gpu(FunctionArgs& fargs) {
   std::cout << "Im on GPU upper" <<std::endl;
   auto& args=fargs.args;
@@ -42,13 +48,6 @@ void HistSmear::calcSmearUpper_gpu(FunctionArgs& fargs) {
 
 }
 
-void HistSmear::calcSmear(FunctionArgs fargs) {
-  std::cout <<"Im on cpu " <<std::endl;
-  auto& args=fargs.args;
-  fargs.rets[0].x = args[1].mat * args[0].vec;
-}
-
-#ifdef GNA_CUDA_SUPPORT
 void HistSmear::calcSmear_gpu(FunctionArgs& fargs) {
   std::cout << "Im on GPU" <<std::endl;
   fargs.args.touch();
