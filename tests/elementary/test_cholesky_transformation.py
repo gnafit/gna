@@ -50,6 +50,8 @@ def test_chol():
     print( 'L' )
     print( res )
 
+    assert N.allclose(chol, res), "C++ Cholesky and Python one doesn't match"
+
     mat_back = res*res.T
 
     print( 'Matrix (rec)' )
