@@ -7,21 +7,21 @@
 
 void HistEdgesOffset::init(){
     auto trans = this->transformation_("histedges");
-    trans.input("hist_in", /*inactive*/true)
-         .output("points")                 // 0
-         .output("points_truncated")       // 1
-         .output("hist")                   // 2
-         .output("hist_truncated")         // 3
+    trans.input("hist_in", /*inactive*/true)// 0 - histogram with bins defined
+         .output("points")                  // 0 - array of bin edges
+         .output("points_truncated")        // 1 - array of bin edges, truncated due to integer offset
+         .output("hist")                    // 2 - histogram with edges, similar to input, empty
+         .output("hist_truncated")          // 3 - histogram with edges, truncated due to integer offset
          .types(new TypeClasses::CheckKindT<double>(DataKind::Hist), new TypeClasses::CheckNdimT<double>(1))
          .types(&HistEdgesOffset::types)
          .func(&HistEdgesOffset::func);
          ;
 
     if(m_threshold){
-        trans.output("hist_threshold")     // 4
-             .output("hist_offset")        // 5
-             .output("points_threshold")   // 6
-             .output("points_offset")      // 7
+        trans.output("hist_threshold")     // 4 - truncated histogram with first bin set to threshold
+             .output("hist_offset")        // 5 - truncated threshold histogram, offset so the first edges is on 0
+             .output("points_threshold")   // 6 - truncated threshold histogram bin edges as an array
+             .output("points_offset")      // 7 - truncated threshold offset histogram bin edges as an array
              ;
     }
 
