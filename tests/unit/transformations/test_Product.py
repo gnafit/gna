@@ -30,46 +30,58 @@ def check_product(arrays):
     print('Truth:\n', truth, end='\n\n')
 
     points = [C.Points(array) for array in arrays]
-    prod = C.Product([p.points.points for p in points])
+    prod = C.Product(outputs=[p.points.points for p in points])
 
     calc =  prod.single().data()
-    print('Result', calc, end='\n\n')
+    print('Result', calc, calc.dtype, end='\n\n')
 
     assert (calc==truth).all()
 
+@floatcopy(globals())
 def test_product_01():
     check_product([product_mat_m11])
 
+@floatcopy(globals())
 def test_product_01a():
     check_product([product_mat_m11*2, product_mat_m11*3, product_mat_m11*4])
 
+@floatcopy(globals())
 def test_product_01b():
     check_product([product_mat_m11*2, product_mat_m11*0])
 
+@floatcopy(globals())
 def test_product_02():
     check_product([product_mat_m34])
 
+@floatcopy(globals())
 def test_product_02b():
     check_product([product_mat_m34, product_mat_m34*0])
 
+@floatcopy(globals())
 def test_product_03():
-    check_product([2.0*product_mat_m11, 3.0*product_mat_m34])
+    check_product([3.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_04():
-    check_product([3.0*product_mat_m34, 2.0*product_mat_m11])
+    check_product([3.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_03():
-    check_product([2.0*product_mat_m11, 3.0*product_mat_m34, 4.0*product_mat_m34])
+    check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_04():
-    check_product([3.0*product_mat_m34, 2.0*product_mat_m11, 4.0*product_mat_m34])
+    check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_05():
-    check_product([3.0*product_mat_m34, 4.0*product_mat_m34, 2.0*product_mat_m11])
+    check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_06():
     check_product([3.0*product_mat_m34, 4.0*product_mat_m34, 2.0*product_mat_m34])
 
+@floatcopy(globals())
 def test_product_07():
     check_product([product_rup, product_rdown])
 

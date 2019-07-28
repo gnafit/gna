@@ -13,11 +13,10 @@ from matplotlib.ticker import MaxNLocator
 import gna.constructors as C
 from gna import context
 from gna.bindings import DataType, provided_precisions
+from gna.unittest import *
 
-#
-# Create the matrix
-#
-def test_points():
+@floatcopy(globals())
+def test_points_v01():
     mat = N.arange(12, dtype='d').reshape(3, 4)
 
     print( 'Input matrix (numpy)' )
@@ -28,7 +27,7 @@ def test_points():
     # Create transformations
     #
     points = C.Points(mat)
-    identity = R.Identity()
+    identity = C.Identity()
 
     identity.identity.source( points.points.points )
     res = identity.identity.target.data()
@@ -41,6 +40,9 @@ def test_points():
     identity.dump()
     print()
 
+    print( 'Points output' )
+    print(points.points.points.data())
+
     print( 'Result (C++ Data to numpy)' )
     print( res, res.dtype )
     print()
@@ -49,39 +51,20 @@ def test_points():
 
     assert N.allclose(mat, res), "C++ and Python results doesn't match"
 
+@floatcopy(globals())
+def test_points_v02():
+    arr = N.arange(12, dtype=context.current_precision_short())
 
-if 'float' in provided_precisions:
-    def test_pointsf():
-        mat = N.arange(12, dtype='f').reshape(3, 4)
+    points = C.Points(arr)
+    identity = C.Identity()
+    points >> identity
 
-        print( 'Input matrix (numpy)' )
-        print( mat )
-        print()
+    out = identity.single()
 
-        #
-        # Create transformations
-        #
-        with context.precision('float'):
-            points = C.Points(mat)
-
-        out = points.points.points
-        res = out.data()
-        dt  = out.datatype()
-
-        print( 'Result (C++ Data to numpy)' )
-        print( res, res.dtype )
-        print()
-
-        print( 'Datatype:', str(dt) )
-
-        assert N.allclose(mat, res), "C++ and Python results doesn't match"
+    for i in range(arr.size):
+        points.set(arr, i)
+        assert (out.data()==arr[:i]).all()
 
 if __name__ == "__main__":
-    glb = globals()
-    for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
-        print('call ', fcn)
-        glb[fcn]()
-        print()
-
-    print('All tests are OK!')
+    run_unittests(globals())
 
