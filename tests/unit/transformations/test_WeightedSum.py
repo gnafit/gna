@@ -34,7 +34,7 @@ def weightedsum_make(nsname):
 
     return ns, weights, arr1, p1, points1, arr2, p2, points2, zeros
 
-@floatcopy(globals(), addname=True)
+@clones(globals(), float=True, gpu=False, npars=10, addname=True)
 def test_weightedsum_01(function_name):
     ns, weights, arr1, p1, points1, arr2, p2, points2, zeros = weightedsum_make(function_name)
     outputs=[o.single() for o in [points1, points2]]
@@ -60,7 +60,7 @@ def test_weightedsum_01(function_name):
     assert (ws.sum.sum.data()==zeros).all()
     print()
 
-@floatcopy(globals(), addname=True)
+@clones(globals(), float=True, addname=True)
 def test_weightedsum_02(function_name):
     ns, weights, arr1, p1, points1, arr2, p2, points2, zeros = weightedsum_make(function_name)
     outputs=[o.single() for o in [points1]]

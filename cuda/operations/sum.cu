@@ -3,7 +3,7 @@
 #include <chrono>
 #include "cuElementary.hh"
 
-#include "cuda_config_vars.h" 
+#include "cuda_config_vars.h"
 
 /*
 * @brief Summation of N vectors of length M into one
@@ -28,3 +28,4 @@ void cusum(T** array, T** ans_array, unsigned int n, unsigned int m) {
 }
 
 template void cusum<double>(double** array, double** ans_array, unsigned int n, unsigned int m);
+template void cusum<float>(float** array, float** ans_array, unsigned int n, unsigned int m);

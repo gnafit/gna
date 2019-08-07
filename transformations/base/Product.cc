@@ -68,6 +68,7 @@ namespace GNA {
     void ProductT<FloatType>::product_ongpu(FunctionArgs& fargs) {
     	fargs.args.touch();
     	auto& gpuargs=fargs.gpu;
+        gpuargs->provideSignatureDevice();
     	auto** source=gpuargs->args;
         auto** dest  =gpuargs->rets;
     	cuproduct(source, dest, gpuargs->nargs, fargs.args[0].arr.size());

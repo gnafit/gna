@@ -37,51 +37,51 @@ def check_product(arrays):
 
     assert (calc==truth).all()
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_01():
     check_product([product_mat_m11])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_01a():
-    check_product([product_mat_m11*2, product_mat_m11*3, product_mat_m11*4])
+    check_product([product_mat_m11*1, product_mat_m11*3, product_mat_m11*4])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_01b():
     check_product([product_mat_m11*2, product_mat_m11*0])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_02():
     check_product([product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_02b():
     check_product([product_mat_m34, product_mat_m34*0])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_03():
     check_product([3.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_04():
     check_product([3.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_03():
     check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_04():
     check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_05():
     check_product([3.0*product_mat_m34, 4.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_06():
     check_product([3.0*product_mat_m34, 4.0*product_mat_m34, 2.0*product_mat_m34])
 
-@floatcopy(globals())
+@clones(globals(), float=True, gpu=True)
 def test_product_07():
     check_product([product_rup, product_rdown])
 

@@ -49,7 +49,7 @@ else:
 
 def addfcn(glb, name, addname=False):
     def adder(fcn):
-        if passname:
+        if addname:
             def newfcn(*args, **kwargs):
                 return fcn(*args, function_name=name, **kwargs)
         else:
@@ -78,6 +78,8 @@ def clones(glb, float=False, gpu=False, npars=0, addname=False):
     def decorator(fcn):
         for precision in precisions:
             for gpuon in gpus:
+                if precision=='double' and not gpuon:
+                    continue
                 suffix = '_'+precision
                 if gpuon:
                     suffix+='_gpu'

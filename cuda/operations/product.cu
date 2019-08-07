@@ -3,11 +3,11 @@
 #include <chrono>
 
 #include "cuElementary.hh"
-#include "cuda_config_vars.h" 
+#include "cuda_config_vars.h"
 
 /*
 * @brief Element-wise product of N vectors of length M into one
-* @return \f$c, c_i = a_i * b_i, i=1..M\f$ 
+* @return \f$c, c_i = a_i * b_i, i=1..M\f$
 *
 * @author Ilya Lebedev and Anna Fatkina
 * @date 2018
@@ -51,14 +51,16 @@ void cuproduct(T** array, T** ans_array, unsigned int n, unsigned int m) {
 }
 
 
-template<typename T> 
+template<typename T>
 void cuproduct_mat2vec(T** args, T** rets, size_t n, size_t m) {
 	d_product_mat2vec<<<n / CU_BLOCK_SIZE + 1, CU_BLOCK_SIZE>>>(args,rets, n, m);
 	cudaDeviceSynchronize();
 }
 
 
-//template __global__ void d_product_mat2mat_EW<double>(double* matL, double* matR, double* rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/); 
+//template __global__ void d_product_mat2mat_EW<double>(double* matL, double* matR, double* rets, size_t cols /* cols in mat*/, size_t rows /* rows in mat*/);
 
-template void cuproduct<double>(double** array, double** ans_array, unsigned int n, unsigned int m); 
+template void cuproduct<double>(double** array, double** ans_array, unsigned int n, unsigned int m);
 template void cuproduct_mat2vec<double>(double** args, double** rets, size_t n, size_t m);
+template void cuproduct<float>(float** array, float** ans_array, unsigned int n, unsigned int m);
+template void cuproduct_mat2vec<float>(float** args, float** rets, size_t n, size_t m);

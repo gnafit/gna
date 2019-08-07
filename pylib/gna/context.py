@@ -128,12 +128,12 @@ class set_context(object):
             assert self.precision in ('float', 'double'), 'Unsupported precision: '+self.precision
             self.chain.append(precision(self.precision))
 
-        if self.manager:
+        if self.manager is not None:
             assert isinstance(self.manager, int)
             self.chain.append(manager(self.manager))
 
         if self.gpu:
-            assert self.manager and self.gpu, 'For GPU support manager should be also set'
+            assert self.manager is not None and self.gpu, 'For GPU support manager should be also set'
             self.chain.append(cuda(enabled=self.gpu))
 
     def __enter__(self):
