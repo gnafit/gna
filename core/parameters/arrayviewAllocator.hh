@@ -13,6 +13,7 @@ public:
     virtual const T* data() const noexcept = 0;
     virtual T* data() noexcept = 0;
     virtual size_t size() const noexcept = 0;
+    virtual size_t maxSize() const noexcept = 0;
 
     static allocatorType* current() noexcept { return allocatorType::s_current; }
     static void setCurrent(allocatorType* current) noexcept { allocatorType::s_current=current; }

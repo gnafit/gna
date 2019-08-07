@@ -17,6 +17,7 @@ def passname(fcn):
     name = fcn.__name__
     def newfcn(*args, **kwargs):
         return fcn(*args, function_name=name, **kwargs)
+    newfcn.__name__ = name
     return newfcn
 
 if 'float' in R.GNA.provided_precisions():
@@ -45,3 +46,47 @@ else:
             else:
                 return fcn
         return decorator
+
+def addfcn(glb, name, addname=False):
+    def adder(fcn):
+        if passname:
+            def newfcn(*args, **kwargs):
+                return fcn(*args, function_name=name, **kwargs)
+        else:
+            newfcn=fcn
+        newfcn.__name__ = name
+        glb[name]=newfcn
+        return newfcn
+
+    return adder
+
+def wrapfcn(glb, fcn, newname, addname, **contextkwargs):
+    @addfcn(glb, newname, addname)
+    def newfcn(*args, **kwargs):
+        from gna import context
+        with context.set_context(**contextkwargs) as cntx:
+            return fcn(*args, **kwargs)
+
+def clones(glb, float=False, gpu=False, npars=0, addname=False):
+    precisions = [ 'double' ]
+    gpus = [ False ]
+    if float:
+        precisions.append('float')
+    if gpu:
+        gpus.append(True)
+
+    def decorator(fcn):
+        for precision in precisions:
+            for gpuon in gpus:
+                suffix = '_'+precision
+                if gpuon:
+                    suffix+='_gpu'
+                newname = fcn.__name__+suffix
+
+                wrapfcn(glb, fcn, newname, addname, precision=precision, gpu=gpuon, manager=npars)
+
+        if addname:
+            return passname(fcn)
+        else:
+            return fcn
+    return decorator
