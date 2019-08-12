@@ -4,47 +4,8 @@ project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-#configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
-
-if(CUDA_SUPPORT)
-    find_package(CUDA REQUIRED)
-    include_directories(cuda/operations/ cuda/extra/ cuda/core/)
-    if(NOT CUDA_MAT_SIZE_THRESHOLD)
-        set(CUDA_MAT_SIZE_THRESHOLD 100)
-    endif()
-#    message(STATUS "CUDA_MAT_SIZE_THRESHOLD = ${CUDA_MAT_SIZE_THRESHOLD}")
-    set(CUDA_ADD_LIBS)
-    IF (CUDA_FOUND)
-        add_subdirectory(cuda/)
-        #set (CUDA_ADD_LIBS ${CUDA_CUBLAS_LIBRARIES} -lgslcblas cuGNA)
-        set (CUDA_ADD_LIBS cuGNA)
-        link_directories(cuda/)
-    ENDIF()
-    set (CUSOURCES
-        )
-    set (CUHEADERS
-  	GpuArray.hh
-  	GpuArrayTypes.hh
-  	cuInterpExpo.hh
-	GpuBasics.hh
-	cuElementary.hh
-	cuOscProbPMNS.hh
-	cuIntegrate.hh
-        )
-else()
-    set(CUDA_SUPPORT 0)
-    set(CUSOURCES "")
-    set(CUHEADERS "")
-endif()
-
-if(NOT TIME_COUNT)
-    set(TIME_COUNT FALSE)
-endif()
-
-if (NOT CUDA_DEBUG_INFO)
-    set(CUDA_DEBUG_INFO 0)
-endif()
+include(compiler_selection)
+include(cuda_support)
 
 configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
 
