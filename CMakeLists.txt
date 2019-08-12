@@ -3,6 +3,25 @@ cmake_minimum_required(VERSION 3.5)
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
+#
+# Use COMPILER option to quickly switch between gcc/clang
+#
+if(COMPILER)
+    if(COMPILER STREQUAL "gcc")
+        message(STATUS "Using gcc/g++ compilers")
+        set(CMAKE_CXX_COMPILER, "g++")
+        set(CMAKE_C_COMPILER, "gcc")
+    elseif(COMPILER STREQUAL "clang")
+        message(STATUS "Using clang/clang++ compilers")
+        set(CMAKE_CXX_COMPILER, "clang++")
+        set(CMAKE_C_COMPILER, "clang")
+    else()
+        message(FATAL_ERROR "Option COMPILER is set, but the value is unsupported (${COMPILER})")
+    endif()
+else()
+    message(STATUS "Using system cc/c++ compilers")
+endif()
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 #configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
@@ -25,13 +44,13 @@ if(CUDA_SUPPORT)
     set (CUSOURCES
         )
     set (CUHEADERS
-  	GpuArray.hh
-  	GpuArrayTypes.hh
-  	cuInterpExpo.hh
-	GpuBasics.hh
-	cuElementary.hh
-	cuOscProbPMNS.hh
-	cuIntegrate.hh
+         GpuArray.hh
+         GpuArrayTypes.hh
+         cuInterpExpo.hh
+         GpuBasics.hh
+         cuElementary.hh
+         cuOscProbPMNS.hh
+         cuIntegrate.hh
         )
 else()
     message(STATUS "CUDA is disabled")
