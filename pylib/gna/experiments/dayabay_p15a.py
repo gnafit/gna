@@ -103,8 +103,15 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 7,
-                yorder   = 21,
+                xorders   = 6,
+                yorder   = 5,
+                ),
+            integral = NestedDict(
+                bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='integral')),
+                variables = ('x', 'y'),
+                edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
+                xorders   = 6,
+                yorder   = 5,
                 ),
             ibd_xsec = NestedDict(
                 bundle = dict(name='xsec_ibd', version='v02'),
@@ -465,6 +472,9 @@ class exp(baseexp):
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
+            ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.unoscillated_reactor_spectra_in_det[ad], export=False)
+            ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
+
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
@@ -513,27 +523,17 @@ class exp(baseexp):
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
             # Aliases
-            '''unoscillated_rate_in_detector = conversion_factor*nprotons_nominal*sum[r]|
-                                      baselineweight[r,d]*
+            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_nominal* baselineweight[r,d]*
                                       ibd_xsec(enu(), ctheta())*
                                       jacobian(enu(), ee(), ctheta())*
                                       (sum[i]| power_livetime_factor*anuspec[i](enu()))
             ''',
 
-            '''osccomp_rate_in_detector = kinint2 | oscprob[c,d,r](enu())*unoscillated_rate_in_detector
-            ''',
+            
+            '''osccomp_spectra_in_det = pmns[c]*kinint2| sum[r]| oscprob[c,d,r](enu())*unoscillated_reactor_flux_in_det''', 
+            
+            '''oscillated_spectra_in_det = sum[c]| osccomp_spectra_in_det''', 
 
-            '''oscillated_rate_in_detector = sum[c]| pmns[c]*osccomp_rate_in_detector
-            ''',
-
-
-            #'rate_in_detector =  conversion_factor*nprotons_nominal * kinint2| sum[r]|'
-                                      #  baselineweight[r,d]*
-                                      #  ibd_xsec(enu(), ctheta())*
-                                      #  jacobian(enu(), ee(), ctheta())*
-                                      #  (sum[i]| power_livetime_factor*anuspec[i](enu())) *
-                                        #  sum[c]|
-                                          #  pmns[c]*oscprob[c,d,r](enu())'''
 
         ]
 
@@ -576,14 +576,14 @@ class exp(baseexp):
                           eres[d]|
                             lsnl[d]|
                               iav[d]|
-                                  oscillated_rate_in_detector
-            '''
+                                  oscillated_spectra_in_det '''
 
         self.formula_back = [
                 'observation_noeffects=norm_bf*conversion_factor*nprotons_nominal*eres()',
                 'observation=rebin| ibd + bkg',
                 'total=concat[d]| observation'
                 ]
+
 
     def define_labels(self):
         self.libs = {
@@ -669,11 +669,13 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
-                        osccomp_rate_in_detector = dict(expr='osccomp_rate_in_detector',
-                                                        label='Reactor spectra * by osc comp {comp} in {detector}'),
-                        oscillated_rate_in_detector = dict(expr='oscillated_rate_in_detector',
-                                                           label='Oscillated reactor spectra in {detector}'),
-                        unoscillated_rate_in_detector = dict(expr='unoscillated_rate_in_detector', 
+                        osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
+                                                            label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
+                        oscillated_spectra_in_det = dict(expr='oscillated_spectra_in_det', 
+                                                        label='Oscillated reactor spectra in {detector}'),
+                        unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
+                                                             label='Unoscillated spectra in {detector}'),
+                        unoscillated_reactor_spectra_in_det = dict(expr='unoscillated_reactor_spectra_in_det', 
                                                              label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
