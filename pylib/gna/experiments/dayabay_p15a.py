@@ -447,12 +447,12 @@ class exp(baseexp):
         ns.addobservable("ee", outputs.ee, export=False)
         ns.addobservable("jacobian", outputs.jacobian, export=False)
         for ad in self.detectors:
-            if  self.opts.mode == 'dyboscar':
-                for comp in components:
-                    ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
-                            outputs.observation_noeffects[ad][comp], export=False)
-            else:
-                ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
+            #  if  self.opts.mode == 'dyboscar':
+                #  for comp in components:
+                    #  ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
+                            #  outputs.observation_noeffects[ad][comp], export=False)
+            #  else:
+                #  ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
             ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
             ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
@@ -513,13 +513,27 @@ class exp(baseexp):
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
             # Aliases
-            '''rate_in_detector =  conversion_factor*nprotons_nominal * kinint2| sum[r]|
+            '''unoscillated_rate_in_detector = conversion_factor*nprotons_nominal*sum[r]|
                                       baselineweight[r,d]*
                                       ibd_xsec(enu(), ctheta())*
                                       jacobian(enu(), ee(), ctheta())*
-                                      (sum[i]| power_livetime_factor*anuspec[i](enu())) *
-                                        sum[c]|
-                                          pmns[c]*oscprob[c,d,r](enu())'''
+                                      (sum[i]| power_livetime_factor*anuspec[i](enu()))
+            ''',
+
+            '''osccomp_rate_in_detector = kinint2 | oscprob[c,d,r](enu())*unoscillated_rate_in_detector
+            ''',
+
+            '''oscillated_rate_in_detector = sum[c]| pmns[c]*osccomp_rate_in_detector
+            ''',
+
+
+            #'rate_in_detector =  conversion_factor*nprotons_nominal * kinint2| sum[r]|'
+                                      #  baselineweight[r,d]*
+                                      #  ibd_xsec(enu(), ctheta())*
+                                      #  jacobian(enu(), ee(), ctheta())*
+                                      #  (sum[i]| power_livetime_factor*anuspec[i](enu())) *
+                                        #  sum[c]|
+                                          #  pmns[c]*oscprob[c,d,r](enu())'''
 
         ]
 
@@ -562,7 +576,7 @@ class exp(baseexp):
                           eres[d]|
                             lsnl[d]|
                               iav[d]|
-                                  rate_in_detector
+                                  oscillated_rate_in_detector
             '''
 
         self.formula_back = [
@@ -655,6 +669,12 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        osccomp_rate_in_detector = dict(expr='osccomp_rate_in_detector',
+                                                        label='Reactor spectra * by osc comp {comp} in {detector}'),
+                        oscillated_rate_in_detector = dict(expr='oscillated_rate_in_detector',
+                                                           label='Oscillated reactor spectra in {detector}'),
+                        unoscillated_rate_in_detector = dict(expr='unoscillated_rate_in_detector', 
+                                                             label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
                         denom                   = dict(expr='denom',
