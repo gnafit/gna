@@ -4,7 +4,6 @@
 import ROOT
 from gna.env import env
 from physlib import pdg
-curpdg = pdg[2016]
 from gna import constructors as C
 
 
@@ -15,7 +14,9 @@ from gna import constructors as C
 
 # DeltaMSqIJ = m^2_j - m^2_i
 
-def reqparameters(ns):
+def reqparameters(ns, **kwargs):
+    pdg_year = kwargs.get('pdg_year', 2016)
+    curpdg = pdg[pdg_year]
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
                       sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
 

@@ -67,9 +67,9 @@ class oscprob_v03(TransformationBundle):
     def define_variables(self):
         from gna.parameters.oscillation import reqparameters
         pmnspars_kwargs=dict()
-        pdgyear = self.cfg.get('pdgyear', None)
+        pdgyear = self.cfg.get('pdg_year', None)
         if pdgyear:
-            pmnspars_kwargs['pdgyear']=pdgyear
+            pmnspars_kwargs['pdg_year']=pdgyear
 
         for it in self.nidx_minor:
             name = it.current_values(name='pmns')

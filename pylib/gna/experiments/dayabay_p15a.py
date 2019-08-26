@@ -472,7 +472,7 @@ class exp(baseexp):
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
-            ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.unoscillated_reactor_spectra_in_det[ad], export=False)
+            #  ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.unoscillated_reactor_spectra_in_det[ad], export=False)
             ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
 
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
