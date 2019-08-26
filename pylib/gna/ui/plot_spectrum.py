@@ -41,8 +41,8 @@ class cmd(basecmd):
             except KeyError:
                 raise PartNotFoundError("observable", path)
 
-        parser.add_argument('-dp', '--difference-plot', default=[],
-                            action=append_typed(observable),
+        parser.add_argument('-dp', '--difference-plot', default=[], nargs=2,
+                            action=append_typed(observable, observable),
                             help='Subtract two obs, they MUST have the same binning')
         parser.add_argument('-p', '--plot', default=[],
                             metavar=('DATA',),
@@ -61,11 +61,12 @@ class cmd(basecmd):
         parser.add_argument('-s', '--show', action='store_true')
         parser.add_argument('--savefig', '-o', '--output', default='', help='Path to save figure')
         parser.add_argument('-t', '--title', nargs='+', help='Title to the figure')
-        parser.add_argument('--new-figure', action='store_true',
-                            help='Create new figure')
+        parser.add_argument('--new-figure', action='store_true', help='Create new figure')
+        parser.add_argument('--figsize', type=float, nargs=2, default=None, help='figure(figsize) option')
         parser.add_argument('--xlabel', nargs='+', required=False)
         parser.add_argument('--ylabel', nargs='+', required=False)
         parser.add_argument('--ylim', nargs='+', type=float, help='Y limits')
+        parser.add_argument('--xlim', nargs='+', type=float, help='X limits')
         parser.add_argument('--latex', action='store_true', help='Enable latex mode')
 
     def run(self):
@@ -87,7 +88,8 @@ class cmd(basecmd):
             self.legends.append('')
 
         if self.opts.new_figure:
-            plt.figure()
+            plt.figure(figsize=self.opts.figsize)
+
         minorLocatorx = AutoMinorLocator()
         minorLocatory = AutoMinorLocator()
         ax = plt.gca()
@@ -114,7 +116,7 @@ class cmd(basecmd):
 
         legends = self.legends[len(self.opts.plot):]
         if self.opts.difference_plot:
-            output1, output2 = self.opts.difference_plot
+            output1, output2 = self.opts.difference_plot[0]
             label = legends[0] if legends else ''
             output1.plot_hist(diff=output2, label=label, **plot_kwargs)
 
@@ -127,6 +129,8 @@ class cmd(basecmd):
                 edges, ratio, _ = edges_to_barpoints(np.array(descs[0].datatype().hist().edges()), datas[0]/datas[1])
                 plt.plot(edges, ratio)
 
+        if self.opts.xlim:
+            ax.set_xlim(*self.opts.xlim)
         if self.opts.ylim:
             ax.set_ylim(*self.opts.ylim)
 
