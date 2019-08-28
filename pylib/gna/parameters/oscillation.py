@@ -35,8 +35,15 @@ def reqparameters(ns, **kwargs):
     #  ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
                      #  sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1))
 
-    ns.reqparameter('DeltaMSqEE', central=curpdg['dmSqEE'],
-                      sigma=curpdg['dmSqEE_e'], limits=(0, 0.1), label='Reactor average mass splitting Δm²(ee)')
+    try:
+        ns.reqparameter('DeltaMSqEE', central=curpdg['dmSqEE'],
+                          sigma=curpdg['dmSqEE_e'], limits=(0, 0.1), label='Reactor average mass splitting Δm²(ee)')
+    except KeyError:
+        ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32'],
+                          sigma=curpdg['dmSq32_e'], limits=(0, 0.1), label='Mass splitting (2, 3)')
+
+
+
     ns.reqparameter('Delta', type='uniformangle', central=0.0, label='CP violation phase δ(CP)')
     ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5, label='Relative momentum spread (decoherence)')
 

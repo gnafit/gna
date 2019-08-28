@@ -106,18 +106,25 @@ pdg['dyboscar']  = dict( pdg[2013]
     , neutron_lifetime = 880.3
     , neutron_lifetimee = 1.1
     , dmSq21 = 7.53e-5
-    , dmSq21e = 0.18e-5
+    , dmSq21_e = 0.18e-5
     #
-    , dmSq32 = 2.44e-3
-    , dmSq32e = 0.06
+    , dmSq32 = 2.45e-3
+    , dmSq32_e = 0.02e-3
     #
     , sinSq2theta12 = 0.846
-    , sinSq2theta12e = 0.021
+    , sinSq2theta12_e = 0.021
+    , sinSqtheta12 = 0.304
+    , sinSqtheta12_e = 0.013
     #
-    , sinSq2theta13 = 0.093
-    , sinSq2theta13e = 0.008
+    , sinSq2theta13 = 0.084  
+    , sinSq2theta13_e = 0.002
+    , sinSqtheta13 = 2.3e-2
+    , sinSqtheta13_e = 2e-3
 
-
+    , sinSqtheta23_normal = 0.514 # pdglive, 2016, their own fit
+    , sinSqtheta23_normal_e = 0.055
+    , sinSqtheta23_inverted = 0.51
+    , sinSqtheta23_inverted_e = 0.055
 )
 
 class PhysicsConstants:

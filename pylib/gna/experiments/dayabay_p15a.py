@@ -19,6 +19,7 @@ class exp(baseexp):
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
+        parser.add_argument('--no-osc', action='store_true', help='Produce nooscillated prediction without detector related effects')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
 
@@ -119,6 +120,7 @@ class exp(baseexp):
                 ),
             oscprob = NestedDict(
                 bundle = dict(name='oscprob', version='v03', major='rdc'),
+                pdg_year='dyboscar',
                 ),
             anuspec = NestedDict(
                 bundle = dict(name='reactor_anu_spectra', version='v03'),
