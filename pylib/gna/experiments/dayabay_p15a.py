@@ -90,6 +90,8 @@ class exp(baseexp):
 
     def init_formula(self):
         self.formula = self.formula_base
+        if self.opts.no_osc:
+            return
         versions = dict(
                 simple = self.formula_ibd_simple,
                 dyboscar = self.formula_ibd_do,
@@ -157,6 +159,7 @@ class exp(baseexp):
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
                     fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
                     add_ff = True,
+                    nominal_power = False,
                     ),
             nominal_thermal_power = NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
@@ -455,6 +458,13 @@ class exp(baseexp):
         ns.addobservable("ctheta", outputs.ctheta, export=False)
         ns.addobservable("ee", outputs.ee, export=False)
         ns.addobservable("jacobian", outputs.jacobian, export=False)
+
+        for iso in isotopes:
+            ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
+
+        for reac in reactors:
+            ns.addobservable("thermal_power.{0}".format(reac), outputs.thermal_power[reac], export=False)
+
         for ad in self.detectors:
             #  if  self.opts.mode == 'dyboscar':
                 #  for comp in components:
@@ -462,8 +472,11 @@ class exp(baseexp):
                             #  outputs.observation_noeffects[ad][comp], export=False)
             #  else:
                 #  ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
-            ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
-            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            for reac in reactors:
+                for iso in isotopes:
+                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
+                                     outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
+
             ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
             ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
             ns.addobservable("bkg.fastn.{0}".format(ad), outputs.bkg_fastn[ad], export=False)
@@ -474,23 +487,16 @@ class exp(baseexp):
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
-            #  ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.unoscillated_reactor_spectra_in_det[ad], export=False)
-            ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
+            ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
+            #  ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
 
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
-            for reac in reactors:
-                for iso in isotopes:
-                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
-                                     outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
+            #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
+            #  ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
 
-        ns.addobservable("final_concat", outputs.concat_total)
-        for iso in isotopes:
-            ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
-
-        for reac in reactors:
-            ns.addobservable("thermal_power.{0}".format(reac), outputs.thermal_power[reac], export=False)
+        #  ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -524,20 +530,27 @@ class exp(baseexp):
             'bkg_lihe     = days_in_second * efflivetime[d] * bkg_rate_lihe[s]   * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
-            # Aliases
+
             '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_nominal* baselineweight[r,d]*
                                       ibd_xsec(enu(), ctheta())*
                                       jacobian(enu(), ee(), ctheta())*
                                       (sum[i]| power_livetime_factor*anuspec[i](enu()))
-            ''',
+            ''' ]
 
+        if self.opts.no_osc:
+            self.formula_base.extend([
+                ''' unoscillated_reactor_spectra = kinint2| norm_bf * sum[r]| unoscillated_reactor_flux_in_det, 
+                '''
+                ])
+        else:
+            self.formula_base.extend([
+            # Aliases
             
             '''osccomp_spectra_in_det = pmns[c]*kinint2| sum[r]| oscprob[c,d,r](enu())*unoscillated_reactor_flux_in_det''', 
             
             '''oscillated_spectra_in_det = sum[c]| osccomp_spectra_in_det''', 
+            ])
 
-
-        ]
 
         self.formula_ibd_do = '''ibd =
                      norm_bf*
@@ -677,7 +690,7 @@ class exp(baseexp):
                                                         label='Oscillated reactor spectra in {detector}'),
                         unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
                                                              label='Unoscillated spectra in {detector}'),
-                        unoscillated_reactor_spectra_in_det = dict(expr='unoscillated_reactor_spectra_in_det', 
+                        unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra', 
                                                              label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
