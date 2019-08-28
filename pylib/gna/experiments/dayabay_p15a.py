@@ -106,8 +106,8 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 6,
-                yorder   = 5,
+                xorders   = 2,
+                yorder   = 3,
                 ),
             integral = NestedDict(
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='integral')),
@@ -130,7 +130,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) ),
+                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
                 ),
             eff = NestedDict(
                 bundle = dict(name='efficiencies', version='v02',
