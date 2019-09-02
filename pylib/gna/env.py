@@ -163,14 +163,14 @@ class namespace(Mapping):
             if nsname not in self.namespaces:
                 self.namespaces[nsname] = otherns.namespaces[nsname]
 
-    def get_proper_ns(self, name):
+    def get_proper_ns(self, name, separator='.'):
         if isinstance(name, (tuple, list)):
             path, head = name[:-1], name[-1]
         else:
             path, head = (), name
 
-        if '.' in head:
-            newpath = tuple(head.split('.'))
+        if separator in head:
+            newpath = tuple(head.split(separator))
             path+=newpath[:-1]
             head = newpath[-1]
 
@@ -281,14 +281,28 @@ class namespace(Mapping):
         return pars
 
     def addobservable(self, name, output, export=True, ignorecheck=False):
+        ns, head = self.get_proper_ns(name, separator='/')
+        if ns:
+            return ns.addobservable(head, output, export, ignorecheck)
+
         if ignorecheck or output.check():
-            self.observables[name] = output
-            print('Add observable:', '%s/%s'%(self.path, name))
+            self.observables[head] = output
+            print('Add observable:', '%s/%s'%(self.path, head))
         else:
             print("observation", name, "is invalid")
             output.dump()
         if not export:
             self.observables_tags[name].add('internal')
+
+    def getobservable(self, name):
+        ns, head = self.get_proper_ns(name, separator='/')
+        if ns:
+            return ns.getobservable(head)
+
+        try:
+            return self.observables[head]
+        except:
+            print('Invalid observable', head)
 
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
