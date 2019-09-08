@@ -100,8 +100,9 @@ add_subdirectory(fmt)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-find_package(Eigen3 REQUIRED NO_MODULE)
+message(STATUS "Eigen version: ${EIGEN3_VERSION_OK}" )
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 find_package(Boost 1.40.0 REQUIRED)

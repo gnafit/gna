@@ -38,7 +38,7 @@ if(NOT Eigen3_FIND_VERSION)
 
   set(Eigen3_FIND_VERSION "${Eigen3_FIND_VERSION_MAJOR}.${Eigen3_FIND_VERSION_MINOR}.${Eigen3_FIND_VERSION_PATCH}")
 endif(NOT Eigen3_FIND_VERSION)
-
+message("${Eigen3_FIND_VERSION}")
 macro(_eigen3_check_version)
   file(READ "${EIGEN3_INCLUDE_DIR}/Eigen/src/Core/util/Macros.h" _eigen3_version_header)
 
