@@ -54,8 +54,10 @@ __global__ void d_cuCalcComponent_modesin(T** xarg, T** xret, T** intern, T** pa
 				unsigned int m, T oscprobArgumentFactor, T DeltaMSq, T m_L) {
 	inverse(xarg[0], intern[0], m);
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        //FIXME: Anya, need sin^2 (:
+        //FIXME: Anya, need sin^2 (: 
+	// Anna: Mhm.
         xret[0][idx] = sin( DeltaMSq * m_L * oscprobArgumentFactor * (T)0.25 * intern[0][idx]);
+ 	xret[0][idx] *= xret[0][idx] ;
 }
 
 template<typename T>

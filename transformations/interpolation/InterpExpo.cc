@@ -151,12 +151,9 @@ void InterpExpo::do_interpolate(FunctionArgs& fargs){
 
 #ifdef GNA_CUDA_SUPPORT
 void InterpExpo::do_interpolate_ongpu(FunctionArgs& fargs) {
-	std::cout << "START INTERP ON GPU" << std::endl;
 	fargs.args.touch();
         auto& gpuargs=fargs.gpu;
         gpuargs->provideSignatureDevice();
-
-//	std::cout << fargs.args[2].x << std::endl;
         int nseg=(int)fargs.args[1].x.size()-1;
 	interpExpo_v1(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size(), nseg );
 //	interpExpo_v2(gpuargs->args, gpuargs->rets, gpuargs->nrets, fargs.rets[0].arr.size() );
