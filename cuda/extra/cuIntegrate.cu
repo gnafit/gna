@@ -17,9 +17,9 @@ __global__ void d_integrate2d(T** args, T** ints, T** rets, size_t n, size_t m, 
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
 	int idy = blockIdx.y * blockDim.y + threadIdx.y;
 	int idz = blockIdx.z * blockDim.z + threadIdx.z;
-	if (idx >= n) return;
+	//if (idx >= n) return;
 	printf("idx = %d", idx);
-//	rets[idx][idy + m*idz] = 0;
+	rets[idx][idy + m*idz] = 0;
 /*	d_product_mat2mat_EW<T><<<1,n>>>(args[idx], ints[idx], ints[2*idx + 1], m, k );//ints[2+m*k], m,k);
 	for (int i = 0; i < m_ordersx_size; i++) {
 		for (int j = 0; j < m_ordersy_size; j++) {
@@ -34,6 +34,7 @@ __global__ void d_integrate2d(T** args, T** ints, T** rets, size_t n, size_t m, 
 
 template<typename T>
 void cuIntegrate2d(T** args, T** ints, T** rets, size_t n, size_t m, size_t  k,  size_t m_ordersx_size, size_t m_ordersy_size) {
+  //d_integrate2d<<<dim3(1, 1, 1), 
   d_integrate2d<<<dim3(n/CU_BLOCK_SIZE+1, m/CU_BLOCK_SIZE +1, k/CU_BLOCK_SIZE +1), 
 		  dim3(CU_BLOCK_SIZE, CU_BLOCK_SIZE, CU_BLOCK_SIZE)>>>
 			(args, ints, rets, n, m,k, m_ordersx_size, m_ordersy_size);

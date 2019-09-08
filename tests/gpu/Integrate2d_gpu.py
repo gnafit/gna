@@ -12,8 +12,12 @@ import ROOT as R
 from mpl_toolkits.mplot3d import Axes3D
 from gna import context, bindings
 
-ndata=100000
-with context.manager(ndata) as manager, context.cuda(enabled=True):
+#R.GNAObject
+ndata=10000
+
+precision='double'
+gpu=True
+with context.manager(ndata) as manager:
   # Make a variable for global namespace
   ns = env.globalns
     
@@ -41,16 +45,17 @@ with context.manager(ndata) as manager, context.cuda(enabled=True):
   
   # Initialize integrator
   integrator = R.Integrator2GL(x_nbins, x_orders, y_nbins, y_orders)
-  integrator.hist.switchFunction("gpu")
   integrator.points.edges(hist.hist.hist)
   int_points = integrator.points
   
   # Create integrable: a*sin(x) + b*cos(k*x)
   arg_t = C.WeightedSum( ['a', 'b'], [int_points.xmesh, int_points.ymesh] )
+  #arg_t.sum.switchFunction("gpu")
   sin_t = R.Sin(arg_t.sum.sum)
   
   # integrator.add_input(sint_t.sin.result)
   integrator.hist.f(sin_t.sin.result)
+  integrator.hist.switchFunction("gpu")
   X, Y = integrator.points.xmesh.data(), integrator.points.ymesh.data()
   
   integrator.print()
@@ -101,7 +106,8 @@ with context.manager(ndata) as manager, context.cuda(enabled=True):
 #from gna.graphviz import savegraph
 #savegraph(integrator.hist, "dotfile.dot")
 # Save the graph
-#from gna.graphviz import savegraph
-#savegraph(sin_t.sin, 'graph.png')
+from gna.graphviz import savegraph
+#savegraph(sin_t.sin, 'graph.pdf')
+savegraph(integrator.hist, 'graph.pdf')
 
 plt.show()
