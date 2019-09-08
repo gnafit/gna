@@ -3,8 +3,9 @@
 #include <iostream>
 
 
-template<typename T>
-__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets,           
+//template<typename T>
+//__global__ void d_product_mat2mat_EW(T* matL, T* matR, T* rets,           
+__global__ void d_product_mat2mat_EW(double* matL, double* matR, double* rets,           
                 size_t cols , size_t rows) {
 
         int x = blockDim.x * blockIdx.x + threadIdx.x;
@@ -19,14 +20,15 @@ __global__ void d_integrate2d(T** args, T** ints, T** rets, size_t n, size_t m, 
 	int idz = blockIdx.z * blockDim.z + threadIdx.z;
 	//if (idx >= n) return;
 	printf("idx = %d", idx);
-	rets[idx][idy + m*idz] = 0;
-/*	d_product_mat2mat_EW<T><<<1,n>>>(args[idx], ints[idx], ints[2*idx + 1], m, k );//ints[2+m*k], m,k);
+	//rets[idx][idy + m*idz] = 0;
+	d_product_mat2mat_EW<<<1,n>>>(args[idx], ints[idx], ints[2*idx + 1], m, k );//ints[2+m*k], m,k);
+	//d_product_mat2mat_EW<T>(args[idx], ints[idx], ints[2*idx + 1], m, k );//ints[2+m*k], m,k);
 	for (int i = 0; i < m_ordersx_size; i++) {
 		for (int j = 0; j < m_ordersy_size; j++) {
 			rets[idx][idy + m*idz]  += ints[2*idx+1][m*i*m_ordersx_size +j*m_ordersy_size ];
 		}
 	}			
-*/	
+	
 	// mat of 2d mats
 
 }
