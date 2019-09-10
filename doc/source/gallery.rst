@@ -1,10 +1,17 @@
 Example gallery
 """""""""""""""
-The full graph describing current **JUNO** model implementation. 
 
-Click to view it.  Beware, it is very wide.
+Gallery of various graphs, generated based on GNA models.
 
-.. image:: ../img/juno.svg
-    :target: _images/juno.svg
+.. list-table::
+   :widths: 40 10 30
+   :align: left
 
-            
+   * - JUNO model 1, with energy resolution
+     - 01.2018
+     - :download:`svg <../img/graph_gallery/juno_model_2018.01.svg>`
+   * - JUNO model 2, with scintillator quenching and energy resolution
+     - 06.2018
+     - :download:`svg <../img/graph_gallery/juno_model_2018.06.svg>`
+       :download:`pdf <../img/graph_gallery/juno_model_2018.06.pdf>`
+

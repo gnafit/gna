@@ -1,0 +1,37 @@
+"""Given an observable make it's snapshot via Snapshot transformation"""
+
+from __future__ import print_function
+from gna.ui import basecmd
+import argparse
+import os.path
+from pkgutil import iter_modules
+from gna.config import cfg
+from gna import constructors as C
+import sys
+
+class cmd(basecmd):
+    parserkwargs=dict(add_help=False)
+    @classmethod
+    def initparser(cls, parser, env):
+        parser.add_argument('name_in', help='input observable name')
+        parser.add_argument('name_out', help='observable name (output)')
+        parser.add_argument('--ns', help='namespace')
+        parser.add_argument('-H', '--hidden', action='store_true', help='make output hidden')
+        parser.add_argument('-l', '--label', help='Snapshot node label')
+
+    def __init__(self, *args, **kwargs):
+        basecmd.__init__(self, *args, **kwargs)
+
+    def init(self):
+        self.ns = self.env.globalns(self.opts.ns)
+        output = self.ns.getobservable(self.opts.name_in)
+
+        self.snapshot = C.Snapshot(output)
+        trans = self.snapshot.snapshot
+        if self.opts.label:
+            trans.setLabel(self.opts.label)
+        trans.touch_global()
+        self.ns.addobservable(self.opts.name_out, self.snapshot.single(), export=not self.opts.hidden)
+
+        self.env.parts.snapshot[self.opts.name_out] = self.snapshot
+
