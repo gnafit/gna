@@ -56,10 +56,9 @@ class exp(baseexp):
             self.nidx[3][2][:] = self.nidx[3][2][:1]
         elif self.opts.composition=='small':
             self.nidx[0][2][:] = self.nidx[0][2][:2]
-            self.nidx[1][2][:] = self.nidx[1][2][:3]
-            self.nidx[2][2][:] = self.nidx[2][2][:2]
-            self.nidx[3][2][:] = self.nidx[3][2][:1]
-
+            self.nidx[1][2][:] = ['AD11']
+            self.nidx[2][2][:] = ['DB1']
+            self.nidx[3][2][:] = ['U235']
         self.nidx = NIndex.fromlist(self.nidx)
 
         self.groups=NestedDict(
@@ -106,15 +105,8 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 2,
+                xorders   = 3,
                 yorder   = 3,
-                ),
-            integral = NestedDict(
-                bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='integral')),
-                variables = ('x', 'y'),
-                edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 6,
-                yorder   = 5,
                 ),
             ibd_xsec = NestedDict(
                 bundle = dict(name='xsec_ibd', version='v02'),
@@ -130,7 +122,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
+                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) ),
                 ),
             eff = NestedDict(
                 bundle = dict(name='efficiencies', version='v02',
@@ -487,16 +479,17 @@ class exp(baseexp):
             ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
-            ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
+            if self.opts.no_osc:
+                ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
             #  ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
 
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
-            #  ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
 
-        #  ns.addobservable("final_concat", outputs.concat_total)
+        ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -531,10 +524,10 @@ class exp(baseexp):
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
 
-            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_nominal* baselineweight[r,d]*
-                                      ibd_xsec(enu(), ctheta())*
-                                      jacobian(enu(), ee(), ctheta())*
-                                      (sum[i]| power_livetime_factor*anuspec[i](enu()))
+            '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
+                                (sum[i]| power_livetime_factor*anuspec[i](enu()))
+            ''',
+            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_nominal*baselineweight[r,d]*anue_rd
             ''' ]
 
         if self.opts.no_osc:
@@ -545,10 +538,9 @@ class exp(baseexp):
         else:
             self.formula_base.extend([
             # Aliases
+            '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''',
             
-            '''osccomp_spectra_in_det = pmns[c]*kinint2| sum[r]| oscprob[c,d,r](enu())*unoscillated_reactor_flux_in_det''', 
-            
-            '''oscillated_spectra_in_det = sum[c]| osccomp_spectra_in_det''', 
+            '''oscillated_spectra_in_det = kinint2| sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
             ])
 
 
@@ -666,7 +658,7 @@ class exp(baseexp):
 
                         # Fast neutrons
                         fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
-                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
+                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector} (w: {weight_label})'),
 
                         # AmC
                         amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
@@ -684,14 +676,24 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        anue_rd = dict(expr='anue_rd',
+                                       label='Anue in {detector} from {reactor}'),
+                        osc_prob_rd = dict(expr='osc_prob_rd',
+                                           label='Oscillation probability from {reactor} to {detector}'),
+                        osc_rate = dict(expr='anue_rd*osc_prob_rd', 
+                                        label='Oscillated spectra from {reactor} in {detector}'),
+                        osc_pred_det = dict(expr='kinint2| sum[r]| baselineweight*conversion_factor*nprotons_nominal*osc_rate',
+                                            label='Oscillated prediction in {detector}'),
+                        ibd_cross_section = dict(expr='ibd_xsec*jacobian',
+                                                 label='IBD cross section in first order'),
                         osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
                                                             label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
                         oscillated_spectra_in_det = dict(expr='oscillated_spectra_in_det', 
                                                         label='Oscillated reactor spectra in {detector}'),
                         unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
                                                              label='Unoscillated spectra in {detector}'),
-                        unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra', 
-                                                             label='Unoscillated spectra in {detector}'),
+                        #  unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra', 
+                                                             #  label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
                         denom                   = dict(expr='denom',
@@ -699,7 +701,7 @@ class exp(baseexp):
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
                                                        label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
                         anue_produced_total     = dict(expr='sum:i|anue_produced_iso',
-                                                       label='Total number of anue in {reactor}@{detector}'),
+                                                       label='Total number of anue produced in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
                         count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted',
@@ -728,10 +730,10 @@ class exp(baseexp):
                                                        label='Sum of LSNL curves'),
                         evis_after_escale       = dict(expr='escale*evis_edges',
                                                        label='Evis edges after escale, {detector}'),
-                        evis_nonlinear_correlated = dict(expr='evis_after_escale*lsnl_correlated',
-                                                         label='Edges after LSNL, {detector}'),
-                        evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
-
+                        evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
+                        #  evis_nonlinear_correlated = dict(expr='evis_after_escale*lsnl_correlated',
+                        evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated',
+                                                       label='Edges after LSNL, {detector}'),
                         oscprob_weighted        = dict(expr='oscprob*pmns'),
                         oscprob_full            = dict(expr='sum:c|oscprob_weighted',
                                                        label='anue survival probability\n {reactor}@{detector}'),
@@ -769,7 +771,7 @@ class exp(baseexp):
 
                         # Fast neutrons
                         fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
-                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
+                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector} (w: {weight_label})'),
 
                         # AmC
                         amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
