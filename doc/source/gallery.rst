@@ -14,4 +14,8 @@ Gallery of various graphs, generated based on GNA models.
      - 06.2018
      - :download:`svg <../img/graph_gallery/juno_model_2018.06.svg>`
        :download:`pdf <../img/graph_gallery/juno_model_2018.06.pdf>`
+   * - Daya Bay model, 8 detectors and 6 reactors
+     - 09.2019
+     - :download:`svg <../img/graph_gallery/dayabay_2019.09.svg>`
+       :download:`pdf <../img/graph_gallery/dayabay_2019.09.pdf>`
 
