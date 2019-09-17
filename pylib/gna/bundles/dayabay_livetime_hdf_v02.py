@@ -27,9 +27,9 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
             self.info = f['info'][0]
 
             byday = f['byday']
-            for key, addata in byday.items():
+            for key, ad_data in byday.items():
                 key = 'AD'+key
-                self.data[key] = addata[:]
+                self.data[key] = ad_data[:]
 
     def define_variables(self):
         daq = self.namespace('daq')

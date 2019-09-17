@@ -9,6 +9,7 @@ import numpy as N
 import ROOT as R
 
 seconds_per_day = 60*60*24
+percent=0.01
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
@@ -122,7 +123,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) ),
+                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
                 ),
             eff = NestedDict(
                 bundle = dict(name='efficiencies', version='v02',
@@ -194,6 +195,22 @@ class exp(baseexp):
                     parameter='nprotons_nominal',
                     label='Daya Bay nominal number of protons (20 tons x GdLS Np/ton)',
                     pars = uncertain(20.0*7.163e28, 'fixed'),
+                    ),
+            nprotons_corr = NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter = 'nprotons_corr',
+                    label='Correction to number of protot per AD',
+                    pars = uncertaindict([
+                        ('AD11', 1., ),
+                        ('AD12', 1+0.13*percent),
+                        ('AD21', 1-0.25*percent),
+                        ('AD22', 1+0.02*percent),
+                        ('AD31', 1-0.12*percent),
+                        ('AD32', 1+0.24*percent),
+                        ('AD33', 1-0.25*percent),
+                        ('AD34', 1-0.05*percent)],
+                        mode = 'fixed',
+                        ),
                     ),
             iav = NestedDict(
                     bundle     = dict(name='detector_iav_db_root_v03', major='d'),
@@ -487,9 +504,9 @@ class exp(baseexp):
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
-            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-
-        ns.addobservable("final_concat", outputs.concat_total)
+            else:
+                ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+                ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -527,7 +544,9 @@ class exp(baseexp):
             '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
                                 (sum[i]| power_livetime_factor*anuspec[i](enu()))
             ''',
-            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_nominal*baselineweight[r,d]*anue_rd
+            '''nprotons_ad = nprotons_nominal*nprotons_corr[d]
+            ''',
+            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_ad*baselineweight[r,d]*anue_rd
             ''' ]
 
         if self.opts.no_osc:
