@@ -58,7 +58,6 @@ class detector_iav_db_root_v03(TransformationBundle):
         if self.cfg.scale.central!=1.0:
             raise exception('IAV scale should be 1 by definition')
 
-        self.pars = OrderedDict()
         for it in self.nidx_major:
             self.reqparameter(self.cfg.parname, it, cfg=self.cfg.scale, label='IAV offdiagonal contribution scale at {autoindex}')
 

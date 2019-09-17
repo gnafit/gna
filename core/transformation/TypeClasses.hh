@@ -54,18 +54,18 @@ namespace TypeClasses{
         void dump(){
             printf("Range %i->%i", m_begin, m_end);
             if(singular()){
-                printf(" (singular)");
+                fmt::print(" (singular)");
             }
         }
 
         void dump(size_t size){
             printf("Range %i->%i", m_begin, m_end);
             if(singular()){
-                printf(" (singular)");
+                fmt::print(" (singular)");
             }
             size_t begin, end;
             getRangeAbs(size, begin, end, false);
-            printf(" for size %zu: %zu->%zu", size, begin, end);
+            fmt::print(" for size {}: {}->{}", size, begin, end);
         }
     private:
         void getRangeAbs(int size, size_t &begin, size_t &end, bool strict=true) const {
@@ -174,7 +174,7 @@ namespace TypeClasses{
 
         void dump(){
             const char* names[] = {"types", "shapes", "kinds"};
-            printf("TypeClass check same %s: args ", names[static_cast<size_t>(m_comparison)]);
+            fmt::print("TypeClass check same {}: args ", names[static_cast<size_t>(m_comparison)]);
             m_argsrange.dump();
         }
     private:
@@ -212,7 +212,7 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("TypeClass to check ndim is %zu ", m_ndim);
+            fmt::print("TypeClass to check ndim is {} ", m_ndim);
             m_argsrange.dump();
         }
     private:
@@ -245,7 +245,7 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("TypeClass to check kind is %zu ", size_t(m_kind));
+            fmt::print("TypeClass to check kind is {} ", size_t(m_kind));
             m_argsrange.dump();
         }
     private:
@@ -279,9 +279,9 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("TypeClass pass type: args ");
+            fmt::print("TypeClass pass type: args ");
             m_argsrange.dump();
-            printf("rets ");
+            fmt::print("rets ");
             m_retsrange.dump();
         }
     private:
@@ -310,7 +310,7 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("TypeClass set points: rets ");
+            fmt::print("TypeClass set points: rets ");
             m_retsrange.dump();
         }
     private:
@@ -351,19 +351,18 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("TypeClass pass each type: args ");
+            fmt::print("TypeClass pass each type: args ");
             m_argsrange.dump();
-            printf("rets ");
+            fmt::print("rets ");
             m_retsrange.dump();
         }
     private:
         void error(size_t nargs, size_t nrets){
-            printf("Args: ");
+            fmt::print("Args: ");
             m_argsrange.dump(nargs);
-            printf("\n");
-            printf("Rets: ");
+            fmt::print("\nRets: ");
             m_retsrange.dump(nrets);
-            printf("\n");
+            fmt::print("\n");
             throw std::runtime_error("Inconsistent ranges\n");
         }
         Range m_argsrange;
