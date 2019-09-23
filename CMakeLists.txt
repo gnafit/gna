@@ -99,7 +99,9 @@ add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
+# Add ROOT path with FindROOT.cmake
+# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
+list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
