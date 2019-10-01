@@ -554,6 +554,8 @@ class exp(baseexp):
             #  ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
             #  ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
+            for reac in reactors:
+                ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
             if self.opts.no_osc:
                 ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
 
@@ -562,11 +564,13 @@ class exp(baseexp):
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             else:
-                for reac in reactors:
-                    ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
                 ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
-                ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-                ns.addobservable("final_concat", outputs.concat_total)
+
+            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
+            ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
+            ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
+            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -624,6 +628,7 @@ class exp(baseexp):
             '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
                                 (sum[i]| power_livetime_factor*anuspec[i](enu()))
             ''',
+            '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''',
             '''nprotons_ad = nprotons_nominal*nprotons_corr[d]
             ''',
             '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_ad*baselineweight[r,d]*anue_rd
@@ -638,10 +643,9 @@ class exp(baseexp):
         else:
             self.formula_base.extend([
             # Aliases
-            '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''',
             
             '''oscillated_spectra_rd = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
-            '''oscillated_spectra_in_det = kinint2|  oscillated_spectra_rd''', 
+            '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_rd''', 
             ])
 
 
@@ -679,12 +683,17 @@ class exp(baseexp):
                                    jacobian(enu(), ee(), ctheta())
             '''
 
-        self.formula_ibd_simple = '''ibd =
-                          norm_bf*
-                          eres[d]|
-                            lsnl[d]|
-                              iav[d]|
-                                  oscillated_spectra_in_det '''
+        if self.opts.no_osc:
+            self.formula_ibd_simple = '''ibd =
+                              eres[d]|
+                                lsnl[d]|
+                                  iav[d]| kinint2| norm_bf * sum[r]| unoscillated_reactor_flux_in_det '''
+        else:
+            self.formula_ibd_simple = '''ibd =
+                              eres[d]|
+                                lsnl[d]|
+                                  iav[d]|
+                                      oscillated_spectra_in_det '''
 
         self.formula_back = [
                 'observation_noeffects=norm_bf*conversion_factor*nprotons_nominal*eres()',

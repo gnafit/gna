@@ -39,7 +39,9 @@ def plot_ratio(gna, dyboscar, **kwargs):
     ratio = gna.data() / dyb_data*weight
 
     plot_hist(dyb_bins, ratio, axis=axis_ratio, label='ratio')
-    axis_ratio.set_ylim((0.99, 1.008))
+    lims = kwargs.pop('lims')
+    if lims is not None:
+        axis_ratio.set_ylim(lims[0], lims[1])
     axis_ratio.axhline(y=1.0, linestyle='--', color='grey', alpha=0.5)
     axis_ratio.legend()
     axis_ratio.set_title("Ratio", fontsize=16)
@@ -49,7 +51,8 @@ def plot_ratio(gna, dyboscar, **kwargs):
         printer_to_file.savefig(fig)
         plt.close('all')
 
-def plot_all(gna_template, dyboscar_template, env, root_file, output=None, efflivetime_weights=None):
+def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
+             efflivetime_weights=None, lims=None):
     pp = None
     if efflivetime_weights is None:
         efflivetime_weights = np.ones(len(detectors_gna))
@@ -59,7 +62,7 @@ def plot_all(gna_template, dyboscar_template, env, root_file, output=None, effli
         gna_obs = env.get(gna_template.format(ad_gna))
         dyb_obs = root_file[dyboscar_template.format(ad_dyb)]
         print(weight)
-        plot_ratio(gna_obs, dyb_obs, title=ad_gna, pp=pp, weight=weight)
+        plot_ratio(gna_obs, dyb_obs, title=ad_gna, pp=pp, weight=weight, lims=lims)
     if pp:
         pp.close()
     else:
