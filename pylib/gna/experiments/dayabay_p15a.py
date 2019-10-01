@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as N
 import ROOT as R
 
-seconds_per_day = 60*60*24
+seconds_per_day = 60.*60.*24.
 percent=0.01
 class exp(baseexp):
     @classmethod
@@ -24,6 +24,7 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
+        parser.add_argument('--with-ihep-effs', action='store_true', help='Use IHEP p15a average efficiencies')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -405,23 +406,7 @@ class exp(baseexp):
                         ),
                     ),
         )
-        if self.opts.ihep_config:
-            self.cfg.livetime =  NestedDict(
-                                   bundle = dict(name="parameters", version = "v01"),
-                                   parameter = 'livetime',
-                                   label='Livetime for {detector}',
-                                   pars = uncertaindict([
-                                       ('AD11', 1117.178347),
-                                       ('AD12', 1117.178347),
-                                       ('AD21', 1114.336669),
-                                       ('AD22', 924.9328366),
-                                       ('AD31', 1106.915033),
-                                       ('AD32', 1106.915033),
-                                       ('AD33', 1106.915033),
-                                       ('AD34', 917.417216)],
-                                       mode = 'fixed',
-                                       ),
-                                   )
+        if self.opts.ihep_config or self.opts.with_ihep_effs:
             self.cfg['eff_mult'] = NestedDict(
                                     bundle = dict(name="parameters", version = "v01"),
                                     parameter = 'eff_mult',
@@ -454,6 +439,23 @@ class exp(baseexp):
                                         mode = 'fixed',
                                         )
                                     )
+        if self.opts.ihep_config:
+            self.cfg.livetime =  NestedDict(
+                                   bundle = dict(name="parameters", version = "v01"),
+                                   parameter = 'livetime',
+                                   label='Livetime for {detector}',
+                                   pars = uncertaindict([
+                                       ('AD11', 1117.178347 *seconds_per_day ),
+                                       ('AD12', 1117.178347 *seconds_per_day ),
+                                       ('AD21', 1114.336669 *seconds_per_day ),
+                                       ('AD22', 924.9328366 *seconds_per_day ),
+                                       ('AD31', 1106.915033 *seconds_per_day ),
+                                       ('AD32', 1106.915033 *seconds_per_day ),
+                                       ('AD33', 1106.915033 *seconds_per_day ),
+                                       ('AD34', 917.417216  *seconds_per_day )],
+                                       mode = 'fixed',
+                                       ),
+                                   )
             self.cfg['days_in_second'] = NestedDict(
                     bundle = dict(name="parameters", version="v02"),
                     parameter = 'days_in_second',
@@ -537,10 +539,10 @@ class exp(baseexp):
                             #  outputs.observation_noeffects[ad][comp], export=False)
             #  else:
                 #  ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
-            for reac in reactors:
-                for iso in isotopes:
-                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
-                                     outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
+            #  for reac in reactors:
+                #  for iso in isotopes:
+                    #  ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
+                                     #  outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
             ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
             ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
@@ -554,13 +556,15 @@ class exp(baseexp):
 
             if self.opts.no_osc:
                 ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
-            #  ns.addobservable("reactor_pred.{0}".format(ad), outputs.oscillated_spectra_in_det[ad], export=False)
 
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
             #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
             #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
             else:
+                for reac in reactors:
+                    ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
+                ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
                 ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
                 ns.addobservable("final_concat", outputs.concat_total)
 
@@ -584,17 +588,26 @@ class exp(baseexp):
         if self.opts.ihep_config:
             self.formula_base.extend([
                 'efflivetime=eff_mult[d]*eff_muon[d]*livetime[d]',
-                'power_livetime_factor_daily = efflivetime[d]*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_factor_daily = nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_factor = accumulate("power_factor", power_factor_daily)',
+                'power_livetime_factor = efflivetime[d]*power_factor'
+                ])
+        elif self.opts.with_ihep_effs:
+            self.formula_base.extend([
+                'livetime=accumulate("livetime", livetime_daily[d]())',
+                'efflivetime=eff_mult[d]*eff_muon[d]*livetime',
+                'power_livetime_factor_daily = eff_mult[d]*eff_muon[d]*livetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
                 ])
         else:
             self.formula_base.extend([
                 'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
                 'livetime=accumulate("livetime", livetime_daily[d]())',
                 'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
                 ])
 
         self.formula_base.extend([
-            'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             # Detector effects
             'eres_matrix| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
@@ -627,7 +640,8 @@ class exp(baseexp):
             # Aliases
             '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''',
             
-            '''oscillated_spectra_in_det = kinint2| sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
+            '''oscillated_spectra_rd = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
+            '''oscillated_spectra_in_det = kinint2|  oscillated_spectra_rd''', 
             ])
 
 
@@ -775,7 +789,7 @@ class exp(baseexp):
                                                  label='IBD cross section in first order'),
                         osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
                                                             label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
-                        oscillated_spectra_in_det = dict(expr='oscillated_spectra_in_det', 
+                        oscillated_spectra_in_det = dict(expr='kinint2| oscillated_spectra_d', 
                                                         label='Oscillated reactor spectra in {detector}'),
                         unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
                                                              label='Unoscillated spectra in {detector}'),
