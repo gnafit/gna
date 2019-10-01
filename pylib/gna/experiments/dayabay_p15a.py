@@ -23,6 +23,7 @@ class exp(baseexp):
         parser.add_argument('--no-osc', action='store_true', help='Produce nooscillated prediction without detector related effects')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+        parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -404,6 +405,61 @@ class exp(baseexp):
                         ),
                     ),
         )
+        if self.opts.ihep_config:
+            self.cfg.livetime =  NestedDict(
+                                   bundle = dict(name="parameters", version = "v01"),
+                                   parameter = 'livetime',
+                                   label='Livetime for {detector}',
+                                   pars = uncertaindict([
+                                       ('AD11', 1117.178347),
+                                       ('AD12', 1117.178347),
+                                       ('AD21', 1114.336669),
+                                       ('AD22', 924.9328366),
+                                       ('AD31', 1106.915033),
+                                       ('AD32', 1106.915033),
+                                       ('AD33', 1106.915033),
+                                       ('AD34', 917.417216)],
+                                       mode = 'fixed',
+                                       ),
+                                   )
+            self.cfg['eff_mult'] = NestedDict(
+                                    bundle = dict(name="parameters", version = "v01"),
+                                    parameter = 'eff_mult',
+                                    label='Average multiplicity cut eff for {detector}',
+                                    pars = uncertaindict([
+                                        ('AD11', 0.974404),
+                                        ('AD12', 0.974686),
+                                        ('AD21', 0.975737),
+                                        ('AD22', 0.975650),
+                                        ('AD31', 0.975882),
+                                        ('AD32', 0.975798),
+                                        ('AD33', 0.975586),
+                                        ('AD34', 0.975814)],
+                                        mode = 'fixed',
+                                        ),
+                                    )
+            self.cfg['eff_muon'] = NestedDict(
+                                    bundle = dict(name="parameters", version = "v01"),
+                                    parameter = 'eff_muon',
+                                    label='Average muon veto eff for {detector}',
+                                    pars = uncertaindict([
+                                        ('AD11', 0.825539509),
+                                        ('AD12', 0.822053461),
+                                        ('AD21', 0.857282239),
+                                        ('AD22', 0.857104494),
+                                        ('AD31', 0.98240566),
+                                        ('AD32', 0.982345731),
+                                        ('AD33', 0.982144065),
+                                        ('AD34', 0.982573523)],
+                                        mode = 'fixed',
+                                        )
+                                    )
+            self.cfg['days_in_second'] = NestedDict(
+                    bundle = dict(name="parameters", version="v02"),
+                    parameter = 'days_in_second',
+                    label='Number of days in second',
+                    pars = uncertain(1.0/(24.*60.*60.), 'fixed')
+                    )
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -492,9 +548,9 @@ class exp(baseexp):
             ns.addobservable("bkg.amc.{0}".format(ad), outputs.bkg_amc[ad], export=False)
             ns.addobservable("bkg.alphan.{0}".format(ad), outputs.bkg_alphan[ad], export=False)
             ns.addobservable("bkg.lihe.{0}".format(ad), outputs.bkg_lihe[ad], export=False)
-            ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
-            ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
-            ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
+            #  ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
+            #  ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
+            #  ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
 
             if self.opts.no_osc:
                 ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
@@ -522,11 +578,22 @@ class exp(baseexp):
             # Basic building blocks
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
-            'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
-            'livetime=accumulate("livetime", livetime_daily[d]())',
             'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
             'denom = sum[i] | eper_fission[i]*ff',
-            'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+        ]
+        if self.opts.ihep_config:
+            self.formula_base.extend([
+                'efflivetime=eff_mult[d]*eff_muon[d]*livetime[d]',
+                'power_livetime_factor_daily = efflivetime[d]*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                ])
+        else:
+            self.formula_base.extend([
+                'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+                'livetime=accumulate("livetime", livetime_daily[d]())',
+                'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                ])
+
+        self.formula_base.extend([
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             # Detector effects
             'eres_matrix| evis_hist()',
@@ -547,7 +614,8 @@ class exp(baseexp):
             '''nprotons_ad = nprotons_nominal*nprotons_corr[d]
             ''',
             '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_ad*baselineweight[r,d]*anue_rd
-            ''' ]
+            ''' ])
+
 
         if self.opts.no_osc:
             self.formula_base.extend([
