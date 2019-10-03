@@ -60,6 +60,31 @@ They may be installed as system packages via the package manager, or manually vi
 
 `pip2`, or on some systems `pip` will install only the packages, that are missing in the system.
 
+Environment variables
+---------------------
+
+The ROOT environment variables should be properly set. The necessary source files are provided within ROOT installation
+for bash/tcsh/fish [#]_. Assuming root is installed in `/home/user/path/to/root/`, one may use:
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.sh
+
+or
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.fish
+
+or
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.csh
+
+depending on the shell of the choice.
+
+
 Compilation
 -----------
 
@@ -142,3 +167,5 @@ To build GNA with CUDA some variables have to be set:
 
 
 Setting of the threshold value can be skipped as it has default value.
+
+.. [#] fish support was introduced recently, around ROOT 6.18
