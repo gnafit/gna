@@ -114,6 +114,7 @@ class exp(baseexp):
             ibd_xsec = NestedDict(
                 bundle = dict(name='xsec_ibd', version='v02'),
                 order = 1,
+                pdg_year='dyboscar'
                 ),
             oscprob = NestedDict(
                 bundle = dict(name='oscprob', version='v03', major='rdc'),
@@ -152,7 +153,7 @@ class exp(baseexp):
             thermal_power = NestedDict(
                     bundle = dict(name='dayabay_reactor_burning_info_v02', major='ri'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
-                    fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
+                    fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_djurcic.py',
                     add_ff = True,
                     nominal_power = False,
                     ),
@@ -201,7 +202,7 @@ class exp(baseexp):
             nprotons_corr = NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
                     parameter = 'nprotons_corr',
-                    label='Correction to number of protot per AD',
+                    label='Correction to number of protons per AD',
                     pars = uncertaindict([
                         ('AD11', 1., ),
                         ('AD12', 1+0.13*percent),
@@ -227,9 +228,12 @@ class exp(baseexp):
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                     pars = uncertaindict(
-                        [('a', 0.014764) ,
-                         ('b', 0.0869) ,
-                         ('c', 0.0271)],
+                        [('a', 0.016) ,
+                         ('b', 0.081) ,
+                         ('c', 0.026)],
+                        #  [('a', 0.014764) ,
+                         #  ('b', 0.0869) ,
+                         #  ('c', 0.0271)],
                         mode='percent',
                         uncertainty=30
                         ),
@@ -412,14 +416,22 @@ class exp(baseexp):
                                     parameter = 'eff_mult',
                                     label='Average multiplicity cut eff for {detector}',
                                     pars = uncertaindict([
-                                        ('AD11', 0.974404),
-                                        ('AD12', 0.974686),
-                                        ('AD21', 0.975737),
-                                        ('AD22', 0.975650),
-                                        ('AD31', 0.975882),
-                                        ('AD32', 0.975798),
-                                        ('AD33', 0.975586),
-                                        ('AD34', 0.975814)],
+                                        ('AD11', 0.9744),
+                                        ('AD12', 0.9747),
+                                        ('AD21', 0.9757),
+                                        ('AD22', 0.9757),
+                                        ('AD31', 0.9759),
+                                        ('AD32', 0.9758),
+                                        ('AD33', 0.9756),
+                                        ('AD34', 0.9758)],
+                                        #  ('AD11', 0.974404),
+                                        #  ('AD12', 0.974686),
+                                        #  ('AD21', 0.975737),
+                                        #  ('AD22', 0.975650),
+                                        #  ('AD31', 0.975882),
+                                        #  ('AD32', 0.975798),
+                                        #  ('AD33', 0.975586),
+                                        #  ('AD34', 0.975814)],
                                         mode = 'fixed',
                                         ),
                                     )
@@ -428,14 +440,22 @@ class exp(baseexp):
                                     parameter = 'eff_muon',
                                     label='Average muon veto eff for {detector}',
                                     pars = uncertaindict([
-                                        ('AD11', 0.825539509),
-                                        ('AD12', 0.822053461),
-                                        ('AD21', 0.857282239),
-                                        ('AD22', 0.857104494),
-                                        ('AD31', 0.98240566),
-                                        ('AD32', 0.982345731),
-                                        ('AD33', 0.982144065),
-                                        ('AD34', 0.982573523)],
+                                        ('AD11', 0.8255),
+                                        ('AD12', 0.8221),
+                                        ('AD21', 0.8573),
+                                        ('AD22', 0.8571),
+                                        ('AD31', 0.9824),
+                                        ('AD32', 0.9823),
+                                        ('AD33', 0.9821),
+                                        ('AD34', 0.9826)],
+                                        #  ('AD11', 0.825539509),
+                                        #  ('AD12', 0.822053461),
+                                        #  ('AD21', 0.857282239),
+                                        #  ('AD22', 0.857104494),
+                                        #  ('AD31', 0.98240566),
+                                        #  ('AD32', 0.982345731),
+                                        #  ('AD33', 0.982144065),
+                                        #  ('AD34', 0.982573523)],
                                         mode = 'fixed',
                                         )
                                     )
@@ -566,11 +586,11 @@ class exp(baseexp):
             else:
                 ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
 
-            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
-            ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
-            ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
-            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-            ns.addobservable("final_concat", outputs.concat_total)
+            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
+            #  ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
+            #  ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
+            #  ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
+            #  ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -637,15 +657,17 @@ class exp(baseexp):
 
         if self.opts.no_osc:
             self.formula_base.extend([
-                ''' unoscillated_reactor_spectra = kinint2| norm_bf * sum[r]| unoscillated_reactor_flux_in_det, 
+                ''' unoscillated_spectra_d = sum[r]| unoscillated_reactor_flux_in_det, 
+                ''',
+                ''' unoscillated_spectra_in_det = kinint2| norm_bf * unoscillated_spectra_d, 
                 '''
                 ])
         else:
             self.formula_base.extend([
             # Aliases
             
-            '''oscillated_spectra_rd = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
-            '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_rd''', 
+            '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
+            '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''', 
             ])
 
 
@@ -687,7 +709,8 @@ class exp(baseexp):
             self.formula_ibd_simple = '''ibd =
                               eres[d]|
                                 lsnl[d]|
-                                  iav[d]| kinint2| norm_bf * sum[r]| unoscillated_reactor_flux_in_det '''
+                                  iav[d]|
+                                      unoscillated_spectra_in_det'''
         else:
             self.formula_ibd_simple = '''ibd =
                               eres[d]|

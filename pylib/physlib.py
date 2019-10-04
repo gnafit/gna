@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 # Here we might collect some useful common things
-from math import  pow
+from math import  pow, sqrt
 
 #  TODO: how to correctly include hierarchy dependent \Delta m^2_{32} update?
 #  Before the MINOS 2011 was used
@@ -100,9 +100,9 @@ pdg[2018]  = dict( pdg[2016]
 )
 
 pdg['dyboscar']  = dict( pdg[2013]
-    , NeutronMass = 939.565346
-    , ProtonMass  = 938.272013
-    , ElectronMass = 0.51099891
+    , NeutronMass = 939.565379
+    , ProtonMass  = 938.272046
+    , ElectronMass = 0.510998928 
     , neutron_lifetime = 880.3
     , neutron_lifetimee = 1.1
     , dmSq21 = 7.53e-5
@@ -118,7 +118,7 @@ pdg['dyboscar']  = dict( pdg[2013]
     #
     , sinSq2theta13 = 0.084  
     , sinSq2theta13_e = 0.002
-    , sinSqtheta13 = 2.3e-2
+    , sinSqtheta13 = (1 - sqrt(1-0.084))/2
     , sinSqtheta13_e = 2e-3
 
     , sinSqtheta23_normal = 0.514 # pdglive, 2016, their own fit

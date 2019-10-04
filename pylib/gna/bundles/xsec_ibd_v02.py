@@ -131,5 +131,6 @@ class xsec_ibd_v02(TransformationBundle):
             # initialize necessary variables: neutron lifetime and mass (proton, neutron, electron)
             # in common namespace
             from gna.parameters import ibd
-            ibd.reqparameters(self.namespace('ibd'))
+            print('pdg_year', self.cfg.get('pdg_year'))
+            ibd.reqparameters(self.namespace('ibd'), self.cfg.get('pdg_year', None))
 

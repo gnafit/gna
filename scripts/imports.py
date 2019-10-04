@@ -37,6 +37,7 @@ def plot_ratio(gna, dyboscar, **kwargs):
     axis_spectra.set_title("Spectra {}".format(title), fontsize=16)
 
     ratio = gna.data() / dyb_data*weight
+    print(title + '\n', ratio)
 
     plot_hist(dyb_bins, ratio, axis=axis_ratio, label='ratio')
     lims = kwargs.pop('lims')
@@ -61,7 +62,6 @@ def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
     for ad_gna, ad_dyb, weight in zip(detectors_gna, detectors_dyboscar, efflivetime_weights):
         gna_obs = env.get(gna_template.format(ad_gna))
         dyb_obs = root_file[dyboscar_template.format(ad_dyb)]
-        print(weight)
         plot_ratio(gna_obs, dyb_obs, title=ad_gna, pp=pp, weight=weight, lims=lims)
     if pp:
         pp.close()
