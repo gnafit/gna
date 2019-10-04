@@ -22,12 +22,21 @@ IbdZeroOrder::IbdZeroOrder()
     .func(&IbdZeroOrder::calcXsec);
 }
 
+IbdZeroOrder::IbdZeroOrder(bool useEnu): IbdZeroOrder() {
+    this->useEnu = useEnu;
+}
+
 void IbdZeroOrder::calcEnu(FunctionArgs fargs) {
   fargs.rets[0].x = fargs.args[0].x + m_DeltaNP;
 }
 
 void IbdZeroOrder::calcXsec(FunctionArgs fargs) {
-  const auto &Ee = fargs.args[0].x;
+  Eigen::ArrayXd Ee;
+  if (this->useEnu) {
+      Ee = fargs.args[0].x - m_DeltaNP;
+  } else {
+      Ee = fargs.args[0].x;
+  }
 
   const double MeV2J = 1.E6 * TMath::Qe();
   const double J2MeV = 1./MeV2J;
