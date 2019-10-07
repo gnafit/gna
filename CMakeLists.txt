@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
+# Add ROOT path with FindROOT.cmake
+# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
+list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(compiler_selection)
 include(cuda_support)
@@ -98,10 +102,6 @@ include(debug_opts)
 add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Add ROOT path with FindROOT.cmake
-# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
