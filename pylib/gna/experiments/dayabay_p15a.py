@@ -9,7 +9,8 @@ import numpy as N
 import ROOT as R
 
 seconds_per_day = 60.*60.*24.
-percent=0.01
+percent = 0.01
+nominal = 20000.
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
@@ -204,14 +205,14 @@ class exp(baseexp):
                     parameter = 'nprotons_corr',
                     label='Correction to number of protons per AD',
                     pars = uncertaindict([
-                        ('AD11', 1., ),
-                        ('AD12', 1+0.13*percent),
-                        ('AD21', 1-0.25*percent),
-                        ('AD22', 1+0.02*percent),
-                        ('AD31', 1-0.12*percent),
-                        ('AD32', 1+0.24*percent),
-                        ('AD33', 1-0.25*percent),
-                        ('AD34', 1-0.05*percent)],
+                        ('AD11', 19941./nominal),
+                        ('AD12', 19967./nominal),
+                        ('AD21', 19891./nominal),
+                        ('AD22', 19944./nominal),
+                        ('AD31', 19917./nominal),
+                        ('AD32', 19989./nominal),
+                        ('AD33', 19892./nominal),
+                        ('AD34', 19931./nominal)],
                         mode = 'fixed',
                         ),
                     ),
@@ -545,6 +546,7 @@ class exp(baseexp):
         ns.addobservable("ctheta", outputs.ctheta, export=False)
         ns.addobservable("ee", outputs.ee, export=False)
         ns.addobservable("jacobian", outputs.jacobian, export=False)
+        ns.addobservable("iav_matrix_raw", outputs.iavmatrix_raw)
 
         for iso in isotopes:
             ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
@@ -586,11 +588,12 @@ class exp(baseexp):
             else:
                 ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
 
-            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
-            #  ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
-            #  ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
-            #  ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-            #  ns.addobservable("final_concat", outputs.concat_total)
+            ns.addobservable("iav_matrix.{0}".format(ad), outputs.iavmatrix[ad])
+            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
+            ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
+            ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
+            ns.addobservable("{0}".format(ad), outputs.rebin[ad])
+            ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -657,9 +660,11 @@ class exp(baseexp):
 
         if self.opts.no_osc:
             self.formula_base.extend([
-                ''' unoscillated_spectra_d = sum[r]| unoscillated_reactor_flux_in_det, 
+                ''' unoscillated_spectra_d = sum[r]| unoscillated_reactor_flux_in_det 
                 ''',
-                ''' unoscillated_spectra_in_det = kinint2| norm_bf * unoscillated_spectra_d, 
+                ''' eff_corrected_unosc_spectra =  norm_bf * unoscillated_spectra_d 
+                ''',
+                ''' unoscillated_spectra_in_det = kinint2| eff_corrected_unosc_spectra
                 '''
                 ])
         else:
@@ -709,8 +714,7 @@ class exp(baseexp):
             self.formula_ibd_simple = '''ibd =
                               eres[d]|
                                 lsnl[d]|
-                                  iav[d]|
-                                      unoscillated_spectra_in_det'''
+                                  iav[d]| kinint2 '''
         else:
             self.formula_ibd_simple = '''ibd =
                               eres[d]|
@@ -809,6 +813,12 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
+                                                           label='Eff corrected unosc spectra'),
+                        unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),
+                                                           label='Unoscillated flux in {detector}, not integrated'), 
+                        iav = dict(expr=('iav[d]| unoscillated_spectra_in_det', 'iav[d]| oscillated_spectra_in_det', 'iav[d]| kinint2'),
+                                   label='Anue spectra in {detector after IAV}'),
                         anue_rd = dict(expr='anue_rd',
                                        label='Anue in {detector} from {reactor}'),
                         osc_prob_rd = dict(expr='osc_prob_rd',

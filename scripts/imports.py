@@ -8,6 +8,21 @@ from os.path import join, abspath
 detectors_gna = ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34']
 detectors_dyboscar = ['EH1_AD1', 'EH1_AD2', 'EH2_AD1', 'EH2_AD2', 'EH3_AD1', 'EH3_AD2', 'EH3_AD3', 'EH3_AD4']
 reactors  = ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']
+__old = {}
+
+def restore_osc_prob():
+    ns = __old['ns']
+    ns['SinSq12'].set(__old['SinSq12'])
+    ns['SinSq13'].set(__old['SinSq13'])
+
+def set_noosc(osc_ns):
+    __old['ns'] = osc_ns
+    SinSq12 = osc_ns['SinSq12']
+    __old['SinSq12'] = SinSq12.value()
+    SinSq12.set(0.)
+    SinSq13 = osc_ns['SinSq13']
+    __old['SinSq13'] = SinSq13.value()
+    SinSq13.set(0.)
 
 def match(iterable, val):
     return [_ for _ in iterable if val in _]
@@ -53,13 +68,16 @@ def plot_ratio(gna, dyboscar, **kwargs):
         plt.close('all')
 
 def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
-             efflivetime_weights=None, lims=None):
+             efflivetime_weights=None, lims=None, draw_only=None):
     pp = None
     if efflivetime_weights is None:
         efflivetime_weights = np.ones(len(detectors_gna))
     if output:
         pp = PdfPages(str(abspath(output) + '.pdf'))
     for ad_gna, ad_dyb, weight in zip(detectors_gna, detectors_dyboscar, efflivetime_weights):
+        if draw_only is not None:
+            if ad_gna not in draw_only:
+                continue
         gna_obs = env.get(gna_template.format(ad_gna))
         dyb_obs = root_file[dyboscar_template.format(ad_dyb)]
         plot_ratio(gna_obs, dyb_obs, title=ad_gna, pp=pp, weight=weight, lims=lims)

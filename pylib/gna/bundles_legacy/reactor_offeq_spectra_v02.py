@@ -59,7 +59,7 @@ class reactor_offeq_spectra_v02(TransformationBundleLegacy):
             f = interp1d( energy, spectra, bounds_error=False, fill_value=0.0 )
             bin_number = len(self.cfg.edges) - 1
             offeq_histo = C.Histogram(self.cfg.edges, f(self.ibd.Enu.data()))
-            name = "offeq_cor"+isotope.current_format()
+            name = "offeq_cor."+isotope.current_format()
 
             offeq_histo.hist.setLabel("Offeq spectra for isotope {}".format(iso_name))
 

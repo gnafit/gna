@@ -93,8 +93,8 @@ class reactor_anu_spectra_v03(TransformationBundle):
             print( 'Bin edges:', self.model_edges )
 
         """Compute the values of spectra on the parametrization"""
-        self.spectra=OrderedDict()
-        self.shared.reactor_anu_fcn=OrderedDict()
+        self.spectra = OrderedDict()
+        self.shared.reactor_anu_fcn = OrderedDict()
         fcns = self.shared.reactor_anu_fcn
         for name, (x, y) in self.spectra_raw.items():
             f = interp1d( x, N.log(y), bounds_error=True )

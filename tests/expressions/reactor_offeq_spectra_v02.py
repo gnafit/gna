@@ -13,6 +13,8 @@ from mpl_tools.helpers import plot_hist, plot_bar, savefig
 import gna.constructors as C
 from gna.labelfmt import formatter as L
 
+from gna.bindings import common
+
 """Parse arguments"""
 #  from argparse import ArgumentParser
 #  parser = ArgumentParser()
@@ -57,3 +59,4 @@ from gna.bindings import OutputDescriptor
 env.globalns.printparameters( labels=True )
 print( 'outputs:' )
 print( context.outputs )
+import IPython; IPython.embed()
