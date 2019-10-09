@@ -51,7 +51,13 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
                 raise self.exception('Failed to retrieve data for %s from %s'%(ad, self.cfg.file))
 
             data_lt = data['livetime']+data_lt
-            livetime    = C.Points(data['livetime'], labels=it.current_format('Livetime\n{autoindex}'))
+            if self.cfg.scale_to_ext_livetime:
+                scale = self.cfg.scale_to_ext_livetime
+                livetime_external = scale[ad]
+                scaled = data['livetime'] * (livetime_external / data['livetime'].sum())
+                livetime = C.Points(scaled, labels=it.current_format('Livetime\n{autoindex}'))
+            else:
+                livetime    = C.Points(data['livetime'], labels=it.current_format('Livetime\n{autoindex}'))
             eff         = C.Points(data['eff'],      labels=it.current_format('Efficiency (mu*mult)\n{autoindex}'))
             efflivetime = C.Product(livetime, eff,   labels=it.current_format('Livetime (eff)\n{autoindex}'))
 

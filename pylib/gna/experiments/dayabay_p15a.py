@@ -144,7 +144,17 @@ class exp(baseexp):
             livetime = NestedDict(
                 bundle = dict(name='dayabay_livetime_hdf_v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-                ),
+                scale_to_ext_livetime  = dict([
+                                       ('AD11', 1117.178347 *seconds_per_day ),
+                                       ('AD12', 1117.178347 *seconds_per_day ),
+                                       ('AD21', 1114.336669 *seconds_per_day ),
+                                       ('AD22', 924.9328366 *seconds_per_day ),
+                                       ('AD31', 1106.915033 *seconds_per_day ),
+                                       ('AD32', 1106.915033 *seconds_per_day ),
+                                       ('AD33', 1106.915033 *seconds_per_day ),
+                                       ('AD34', 917.417216  *seconds_per_day )]
+                )
+            ),
             baselines = NestedDict(
                 bundle = dict(name='reactor_baselines', version='v01', major='rd'),
                 reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
@@ -224,6 +234,14 @@ class exp(baseexp):
                     filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
                     matrixname = 'iav_matrix',
                     ),
+            dyboscar_iav = NestedDict(
+                    bundle     = dict(name='detector_iav_db_root_v03', major='d'),
+                    parname    = 'OffdiagScale_dyb',
+                    scale      = uncertain(1.0, 4, 'percent'),
+                    ndiag      = 1,
+                    filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+                    matrixname = 'iav_matrix_dyboscar',
+                    ),
             eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
@@ -257,6 +275,13 @@ class exp(baseexp):
             #
             # Spectra
             #
+            raw_spectra_dyboscar = NestedDict(
+                bundle    = dict(name='root_histograms_v03'),
+                filename  = './data/p15a/dyboscar_new/fit_scaled_all.shape_cov.ihep_spec.root',
+                format    = 'reactor_noosc_Etrue_{site}_AD{adnum_local}',
+                name      = 'raw_spectra_dyboscar',
+                label     = 'Raw unoscillated spectra in {detector}, dyboscar',
+                ),
             bkg_spectrum_acc = NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
@@ -417,22 +442,22 @@ class exp(baseexp):
                                     parameter = 'eff_mult',
                                     label='Average multiplicity cut eff for {detector}',
                                     pars = uncertaindict([
-                                        ('AD11', 0.9744),
-                                        ('AD12', 0.9747),
-                                        ('AD21', 0.9757),
-                                        ('AD22', 0.9757),
-                                        ('AD31', 0.9759),
-                                        ('AD32', 0.9758),
-                                        ('AD33', 0.9756),
-                                        ('AD34', 0.9758)],
-                                        #  ('AD11', 0.974404),
-                                        #  ('AD12', 0.974686),
-                                        #  ('AD21', 0.975737),
-                                        #  ('AD22', 0.975650),
-                                        #  ('AD31', 0.975882),
-                                        #  ('AD32', 0.975798),
-                                        #  ('AD33', 0.975586),
-                                        #  ('AD34', 0.975814)],
+                                        #  ('AD11', 0.9744),
+                                        #  ('AD12', 0.9747),
+                                        #  ('AD21', 0.9757),
+                                        #  ('AD22', 0.9757),
+                                        #  ('AD31', 0.9759),
+                                        #  ('AD32', 0.9758),
+                                        #  ('AD33', 0.9756),
+                                        #  ('AD34', 0.9758)],
+                                        ('AD11', 0.974404),
+                                        ('AD12', 0.974686),
+                                        ('AD21', 0.975737),
+                                        ('AD22', 0.975650),
+                                        ('AD31', 0.975882),
+                                        ('AD32', 0.975798),
+                                        ('AD33', 0.975586),
+                                        ('AD34', 0.975814)],
                                         mode = 'fixed',
                                         ),
                                     )
@@ -441,22 +466,22 @@ class exp(baseexp):
                                     parameter = 'eff_muon',
                                     label='Average muon veto eff for {detector}',
                                     pars = uncertaindict([
-                                        ('AD11', 0.8255),
-                                        ('AD12', 0.8221),
-                                        ('AD21', 0.8573),
-                                        ('AD22', 0.8571),
-                                        ('AD31', 0.9824),
-                                        ('AD32', 0.9823),
-                                        ('AD33', 0.9821),
-                                        ('AD34', 0.9826)],
-                                        #  ('AD11', 0.825539509),
-                                        #  ('AD12', 0.822053461),
-                                        #  ('AD21', 0.857282239),
-                                        #  ('AD22', 0.857104494),
-                                        #  ('AD31', 0.98240566),
-                                        #  ('AD32', 0.982345731),
-                                        #  ('AD33', 0.982144065),
-                                        #  ('AD34', 0.982573523)],
+                                        #  ('AD11', 0.8255),
+                                        #  ('AD12', 0.8221),
+                                        #  ('AD21', 0.8573),
+                                        #  ('AD22', 0.8571),
+                                        #  ('AD31', 0.9824),
+                                        #  ('AD32', 0.9823),
+                                        #  ('AD33', 0.9821),
+                                        #  ('AD34', 0.9826)],
+                                        ('AD11', 0.825539509),
+                                        ('AD12', 0.822053461),
+                                        ('AD21', 0.857282239),
+                                        ('AD22', 0.857104494),
+                                        ('AD31', 0.98240566),
+                                        ('AD32', 0.982345731),
+                                        ('AD33', 0.982144065),
+                                        ('AD34', 0.982573523)],
                                         mode = 'fixed',
                                         )
                                     )
@@ -588,6 +613,7 @@ class exp(baseexp):
             else:
                 ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
 
+            #  ns.addobservable("dyboscar_after_iav.{0}".format(ad), outputs.dyboscar_gna_iav[ad])
             ns.addobservable("iav_matrix.{0}".format(ad), outputs.iavmatrix[ad])
             ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
             ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
@@ -647,6 +673,7 @@ class exp(baseexp):
             'bkg_lihe     = days_in_second * efflivetime[d] * bkg_rate_lihe[s]   * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
+            #  'dyboscar_gna_iav = dyboscar_iav| raw_spectra_dyboscar[d]()',
 
             '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
                                 (sum[i]| power_livetime_factor*anuspec[i](enu()))
@@ -813,6 +840,7 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        dyboscar_iav = dict(expr=('dyboscar_iav'), label='IAV for dyboscar pred'),
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),
                         unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),
