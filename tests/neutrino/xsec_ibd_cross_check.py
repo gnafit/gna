@@ -45,24 +45,32 @@ ns.printparameters()
 
 from gna.parameters.ibd import reqparameters
 
-reqparameters(ns)
+reqparameters(ns, pdg_year='dyboscar')
 
 with ns:
     econv = R.EvisToEe()
     ibd =   R.IbdZeroOrder(True)
     ibd_first = R.IbdFirstOrder()
+    
 
 Enue.points.points >> ibd.xsec.Ee
+Enue.points.points >> econv.Ee.Evis
 
 Enue_first.points.points >> ibd_first.xsec.Enu
 ctheta.points.points >> ibd_first.xsec.ctheta
+
+Enue.points.points >> ibd_first.Enu.Ee
+ctheta.points.points >> ibd_first.Enu.ctheta
+
+Enue.points.points >> ibd_first.jacobian.Ee
+ibd_first.Enu.Enu >> ibd_first.jacobian.Enu
+ctheta.points.points >> ibd_first.jacobian.ctheta
+
+Evis_edges = C.Points(np.linspace(0.0, 12.0, 1201, dtype='d'))
+
+#
 # Do some plots
 #
-
-#  print('Enu dyboscar')
-#  print(input_dyboscar['enu'])
-#  print('\nEnu GNA')
-#  print(context.outputs.evis.data())
 
 if args.output:
     pp = PdfPages(abspath(args.output))
@@ -113,7 +121,6 @@ ax_ratio.set_ylabel(r'Ratio')
 enue_first = Enue_first.data()
 
 xsec_first_order = ibd_first.xsec.data().T
-#  import IPython; IPython.embed()
 
 ax.plot(enue, xsec_first_order[0], label=r'GNA $\cos\,\theta = {}$'.format(0.))
 ax.plot(enue, xsec_first_order[1], label=r'GNA $\cos\,\theta = {}$'.format(1.))
@@ -129,6 +136,34 @@ ax_ratio.plot(input_dyboscar['enu'], xsec_first_order[1]/input_dyboscar['xsec1_c
 
 ax_ratio.set_xlim(1.8, 12.)
 ax_ratio.legend(loc='best')
+
+fig, (ax, ax_ratio) = P.subplots(nrows=2, ncols=1  )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel(r'$E_\nu$, MeV')
+ax.set_ylabel( r'Jacobian' )
+ax.set_title("Jacobian of transition")
+
+ee_first = Enue.single().data()
+jacobians = ibd_first.jacobian.jacobian.data().T
+
+ax.plot(ee_first, jacobians[0], label=r'GNA $\cos\,\theta = {0}$')
+ax.plot(ee_first, jacobians[1], label=r'GNA $\cos\,\theta = {1}$')
+if input_dyboscar is not None:
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0') 
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 1') 
+ax.set_ylim(0.97, 1.03)
+ax.legend(loc='best')
+
+ratio_c0 = jacobians[0] / input_dyboscar['jac_c0']
+ratio_c1 = jacobians[1] / input_dyboscar['jac_c1']
+
+
+ax_ratio.plot(ee_first, ratio_c0, label=r'$\cos\, \theta$ = 0')
+ax_ratio.plot(ee_first, ratio_c1, label=r'$\cos\, \theta$ = 1')
+ax_ratio.legend(loc='best')
+ax_ratio.set_xlim((0.3, 12))
+ax_ratio.set_ylim((0.9, 1.05))
 
 if args.output:
     pp.savefig(fig)
