@@ -50,17 +50,25 @@ def plot_ratio(gna, dyboscar, **kwargs):
     plot_hist(dyb_bins, dyb_data*weight, label='dyboscar', axis=axis_spectra)
     axis_spectra.legend()
     axis_spectra.set_title("Spectra {}".format(title), fontsize=16)
+    axis_spectra.minorticks_on()
+    axis_spectra.grid(alpha=0.5)
 
     ratio = gna.data() / dyb_data*weight
     print(title + '\n', ratio)
+    print(ratio.argmin())
 
-    plot_hist(dyb_bins, ratio, axis=axis_ratio, label='ratio')
+    plot_hist(dyb_bins, ratio, axis=axis_ratio, label='GNA/dybOscar')
     lims = kwargs.pop('lims')
     if lims is not None:
         axis_ratio.set_ylim(lims[0], lims[1])
     axis_ratio.axhline(y=1.0, linestyle='--', color='grey', alpha=0.5)
     axis_ratio.legend()
     axis_ratio.set_title("Ratio", fontsize=16)
+    axis_ratio.minorticks_on()
+    axis_ratio.grid(alpha=0.5)
+    axis_ratio.grid('minor', alpha=0.5)
+
+
 
     printer_to_file = kwargs.get('pp', None)
     if printer_to_file:
@@ -88,3 +96,4 @@ def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
 
 
 root_file = get_from_ROOT('./data/p15a/dyboscar_new/fit_scaled_all.shape_cov.ihep_spec.root')
+root_file_iav_matrices = get_from_ROOT('./data/p15a/dyboscar_new/dyboscar_iav_matrices.root')
