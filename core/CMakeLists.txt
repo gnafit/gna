@@ -61,6 +61,7 @@ set(CORE_HEADERS
   # core/ Common classes
   TreeManager.hh
   # core/
+  DataType.hh
   Data.hh
   Random.hh
   Exceptions.hh
