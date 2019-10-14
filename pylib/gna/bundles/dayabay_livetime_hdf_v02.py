@@ -51,7 +51,7 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
                 raise self.exception('Failed to retrieve data for %s from %s'%(ad, self.cfg.file))
 
             data_lt = data['livetime']+data_lt
-            if self.cfg.scale_to_ext_livetime:
+            if self.cfg.get('scale_to_ext_livetime'):
                 scale = self.cfg.scale_to_ext_livetime
                 livetime_external = scale[ad]
                 scaled = data['livetime'] * (livetime_external / data['livetime'].sum())

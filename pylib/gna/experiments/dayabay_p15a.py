@@ -10,7 +10,7 @@ import ROOT as R
 
 seconds_per_day = 60.*60.*24.
 percent = 0.01
-nominal = 20000.
+nominal_mass = 20000.
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
@@ -25,8 +25,7 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
-        parser.add_argument('--with-ihep-effs', action='store_true', help='Use IHEP p15a average efficiencies')
-        parser.add_argument('--use-dyboscar-input', action='store_true', help="Use dybOscar unoscillated prediction for P15A dataset, for checking detector effects")
+        parser.add_argument('--with-dyboscar-input', action='store_true', help="Use dybOscar unoscillated prediction for P15A dataset, for checking detector effects")
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -145,16 +144,6 @@ class exp(baseexp):
             livetime = NestedDict(
                 bundle = dict(name='dayabay_livetime_hdf_v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-                scale_to_ext_livetime  = dict([
-                                       ('AD11', 1117.178347 * seconds_per_day ),
-                                       ('AD12', 1117.178347 * seconds_per_day ),
-                                       ('AD21', 1114.336669 * seconds_per_day ),
-                                       ('AD22', 924.9328366 * seconds_per_day ),
-                                       ('AD31', 1106.915033 * seconds_per_day ),
-                                       ('AD32', 1106.915033 * seconds_per_day ),
-                                       ('AD33', 1106.915033 * seconds_per_day ),
-                                       ('AD34', 917.417216  * seconds_per_day )]
-                )
             ),
             baselines = NestedDict(
                 bundle = dict(name='reactor_baselines', version='v01', major='rd'),
@@ -216,14 +205,14 @@ class exp(baseexp):
                     parameter = 'nprotons_corr',
                     label='Correction to number of protons per AD',
                     pars = uncertaindict([
-                        ('AD11', 19941./nominal),
-                        ('AD12', 19967./nominal),
-                        ('AD21', 19891./nominal),
-                        ('AD22', 19944./nominal),
-                        ('AD31', 19917./nominal),
-                        ('AD32', 19989./nominal),
-                        ('AD33', 19892./nominal),
-                        ('AD34', 19931./nominal)],
+                        ('AD11', 19941./nominal_mass),
+                        ('AD12', 19967./nominal_mass),
+                        ('AD21', 19891./nominal_mass),
+                        ('AD22', 19944./nominal_mass),
+                        ('AD31', 19917./nominal_mass),
+                        ('AD32', 19989./nominal_mass),
+                        ('AD33', 19892./nominal_mass),
+                        ('AD34', 19931./nominal_mass)],
                         mode = 'fixed',
                         ),
                     ),
@@ -276,14 +265,6 @@ class exp(baseexp):
             #
             # Spectra
             #
-            raw_spectra_dyboscar = NestedDict(
-                bundle    = dict(name='root_histograms_v03'),
-                filename  = './data/p15a/dyboscar_new/fit_scaled_all.shape_cov.ihep_spec.root',
-                format    = 'reactor_noosc_Etrue_{site}_AD{adnum_local}',
-                name      = 'raw_spectra_dyboscar',
-                groups    = self.groups,
-                label     = 'Raw unoscillated spectra in {detector}, dyboscar',
-                ),
             bkg_spectrum_acc = NestedDict(
                 bundle    = dict(name='root_histograms_v03'),
                 filename  = 'data/dayabay/data_spectra/P15A_IHEP_data/P15A_All_raw_sepctrum_coarse.root',
@@ -438,7 +419,7 @@ class exp(baseexp):
                         ),
                     ),
         )
-        if self.opts.ihep_config or self.opts.with_ihep_effs:
+        if self.opts.ihep_config:
             self.cfg['eff_mult'] = NestedDict(
                                     bundle = dict(name="parameters", version = "v01"),
                                     parameter = 'eff_mult',
@@ -471,29 +452,29 @@ class exp(baseexp):
                                         mode = 'fixed',
                                         )
                                     )
-        if self.opts.ihep_config:
-            self.cfg.livetime =  NestedDict(
-                                   bundle = dict(name="parameters", version = "v01"),
-                                   parameter = 'livetime',
-                                   label='Livetime for {detector}',
-                                   pars = uncertaindict([
-                                       ('AD11', 1117.178347 *seconds_per_day ),
-                                       ('AD12', 1117.178347 *seconds_per_day ),
-                                       ('AD21', 1114.336669 *seconds_per_day ),
-                                       ('AD22', 924.9328366 *seconds_per_day ),
-                                       ('AD31', 1106.915033 *seconds_per_day ),
-                                       ('AD32', 1106.915033 *seconds_per_day ),
-                                       ('AD33', 1106.915033 *seconds_per_day ),
-                                       ('AD34', 917.417216  *seconds_per_day )],
-                                       mode = 'fixed',
-                                       ),
-                                   )
-            self.cfg['days_in_second'] = NestedDict(
-                    bundle = dict(name="parameters", version="v02"),
-                    parameter = 'days_in_second',
-                    label='Number of days in second',
-                    pars = uncertain(1.0/(24.*60.*60.), 'fixed')
-                    )
+            self.cfg['livetime'] =  NestedDict(
+                                bundle = dict(name='dayabay_livetime_hdf_v02'),
+                                file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
+                                scale_to_ext_livetime  = dict([
+                                                       ('AD11', 1117.178347 * seconds_per_day ),
+                                                       ('AD12', 1117.178347 * seconds_per_day ),
+                                                       ('AD21', 1114.336669 * seconds_per_day ),
+                                                       ('AD22', 924.9328366 * seconds_per_day ),
+                                                       ('AD31', 1106.915033 * seconds_per_day ),
+                                                       ('AD32', 1106.915033 * seconds_per_day ),
+                                                       ('AD33', 1106.915033 * seconds_per_day ),
+                                                       ('AD34', 917.417216  * seconds_per_day )]
+                                                       )
+                               )
+        if self.opts.with_dyboscar_input:
+            self.cfg['raw_spectra_dyboscar'] = NestedDict(
+                                bundle    = dict(name='root_histograms_v03'),
+                                filename  = './data/p15a/dyboscar_new/fit_scaled_all.shape_cov.ihep_spec.root',
+                                format    = 'reactor_noosc_Etrue_{site}_AD{adnum_local}',
+                                name      = 'raw_spectra_dyboscar',
+                                groups    = self.groups,
+                                label     = 'Raw unoscillated spectra in {detector}, dyboscar',
+                                )
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -626,13 +607,6 @@ class exp(baseexp):
         ]
         if self.opts.ihep_config:
             self.formula_base.extend([
-                'efflivetime=eff_mult[d]*eff_muon[d]*livetime[d]',
-                'power_factor_daily = nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
-                'power_factor = accumulate("power_factor", power_factor_daily)',
-                'power_livetime_factor = efflivetime[d]*power_factor'
-                ])
-        elif self.opts.with_ihep_effs:
-            self.formula_base.extend([
                 'livetime=accumulate("livetime", livetime_daily[d]())',
                 'efflivetime=eff_mult[d]*eff_muon[d]*livetime',
                 'power_livetime_factor_daily = eff_mult[d]*eff_muon[d]*livetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
@@ -728,7 +702,7 @@ class exp(baseexp):
                                 lsnl[d]|
                                   iav[d]| kinint2 '''
 
-        elif self.opts.use_dyboscar_input:
+        elif self.opts.with_dyboscar_input:
             self.formula_ibd_simple = '''ibd =
                               eres[d]|
                                 lsnl[d]|
