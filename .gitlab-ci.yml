@@ -1,5 +1,4 @@
 
-
 stages:
     - building
     - pages
@@ -7,8 +6,6 @@ stages:
 building:
     stage: building
     image: git.jinr.ru:5005/nifuki/gna-ci/root:6.14.06
-    tags:
-        - myown
     script:
         - echo $PWD
         - export DEBIAN_FRONTEND=noninteractive
@@ -24,6 +21,8 @@ building:
         - apt install python-pip -y && pip install pytest
         - rm tests/unit/core/test_GPUFunctionArgs.py
         - pytest
+    only:
+    - master
 
 
 pages:
