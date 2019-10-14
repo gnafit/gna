@@ -46,27 +46,35 @@ def plot_ratio(gna, dyboscar, **kwargs):
     fig.subplots_adjust(hspace=0.05)
     fig.set_tight_layout(True)
 
-    gna.plot_hist(axis=axis_spectra, label='gna')
-    plot_hist(dyb_bins, dyb_data*weight, label='dyboscar', axis=axis_spectra)
+    gna.plot_hist(axis=axis_spectra, label='GNA')
+    plot_hist(dyb_bins, dyb_data*weight, label='dybOscar', axis=axis_spectra)
     axis_spectra.legend()
-    axis_spectra.set_title("Spectra {}".format(title), fontsize=16)
+    axis_spectra.set_title("{}".format(title), fontsize=16)
     axis_spectra.minorticks_on()
-    axis_spectra.grid(alpha=0.5)
+    axis_spectra.grid('both', alpha=0.5)
+    axis_spectra.set_xlabel(r"$E_{\nu}$, MeV", fontsize=14)
+    axis_spectra.set_ylabel(r"Events per 50 keV", fontsize=14)
 
     ratio = gna.data() / dyb_data*weight
     print(title + '\n', ratio)
     print(ratio.argmin())
 
     plot_hist(dyb_bins, ratio, axis=axis_ratio, label='GNA/dybOscar')
-    lims = kwargs.pop('lims')
-    if lims is not None:
-        axis_ratio.set_ylim(lims[0], lims[1])
+    ylims = kwargs.pop('ylims')
+    if ylims is not None:
+        axis_ratio.set_ylim(ylims[0], ylims[1])
+    xlims = kwargs.pop('xlims')
+    if xlims is not None:
+        axis_spectra.set_xlim(xlims[0], xlims[1])
+        axis_ratio.set_xlim(xlims[0], xlims[1])
+
     axis_ratio.axhline(y=1.0, linestyle='--', color='grey', alpha=0.5)
     axis_ratio.legend()
-    axis_ratio.set_title("Ratio", fontsize=16)
+    axis_ratio.set_ylabel("Ratio", fontsize=14)
     axis_ratio.minorticks_on()
     axis_ratio.grid(alpha=0.5)
     axis_ratio.grid('minor', alpha=0.5)
+    axis_ratio.set_xlabel(r"$E_{\nu}$, MeV", fontsize=14)
 
 
 
@@ -76,7 +84,8 @@ def plot_ratio(gna, dyboscar, **kwargs):
         plt.close('all')
 
 def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
-             efflivetime_weights=None, lims=None, draw_only=None):
+             efflivetime_weights=None, draw_only=None, ylims=None, xlims=None,
+             title=None):
     pp = None
     if efflivetime_weights is None:
         efflivetime_weights = np.ones(len(detectors_gna))
@@ -88,7 +97,12 @@ def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
                 continue
         gna_obs = env.get(gna_template.format(ad_gna))
         dyb_obs = root_file[dyboscar_template.format(ad_dyb)]
-        plot_ratio(gna_obs, dyb_obs, title=ad_gna, pp=pp, weight=weight, lims=lims)
+        if title is not None:
+            title_ = title+ad_gna
+        else:
+            title_ = ad_gna
+        plot_ratio(gna_obs, dyb_obs, title=title_, pp=pp, weight=weight,
+                   xlims=xlims, ylims=ylims )
     if pp:
         pp.close()
     else:

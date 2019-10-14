@@ -444,14 +444,6 @@ class exp(baseexp):
                                     parameter = 'eff_mult',
                                     label='Average multiplicity cut eff for {detector}',
                                     pars = uncertaindict([
-                                        #  ('AD11', 0.9744),
-                                        #  ('AD12', 0.9747),
-                                        #  ('AD21', 0.9757),
-                                        #  ('AD22', 0.9757),
-                                        #  ('AD31', 0.9759),
-                                        #  ('AD32', 0.9758),
-                                        #  ('AD33', 0.9756),
-                                        #  ('AD34', 0.9758)],
                                         ('AD11', 0.974404),
                                         ('AD12', 0.974686),
                                         ('AD21', 0.975737),
@@ -468,14 +460,6 @@ class exp(baseexp):
                                     parameter = 'eff_muon',
                                     label='Average muon veto eff for {detector}',
                                     pars = uncertaindict([
-                                        #  ('AD11', 0.8255),
-                                        #  ('AD12', 0.8221),
-                                        #  ('AD21', 0.8573),
-                                        #  ('AD22', 0.8571),
-                                        #  ('AD31', 0.9824),
-                                        #  ('AD32', 0.9823),
-                                        #  ('AD33', 0.9821),
-                                        #  ('AD34', 0.9826)],
                                         ('AD11', 0.825539509),
                                         ('AD12', 0.822053461),
                                         ('AD21', 0.857282239),
@@ -593,7 +577,7 @@ class exp(baseexp):
                     #  ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
                                      #  outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
 
-            ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
+            ns.addobservable("bkg.{0}".format(ad),         outputs.bkg[ad], export=False)
             ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
             ns.addobservable("bkg.fastn.{0}".format(ad), outputs.bkg_fastn[ad], export=False)
             ns.addobservable("bkg.amc.{0}".format(ad), outputs.bkg_amc[ad], export=False)
