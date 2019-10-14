@@ -1,29 +1,5 @@
-
 stages:
-    - building
     - pages
-
-building:
-    stage: building
-    image: git.jinr.ru:5005/nifuki/gna-ci/root:6.14.06
-    script:
-        - echo $PWD
-        - export DEBIAN_FRONTEND=noninteractive
-        - export LD_LIBRARY_PATH=/root/root/lib && export DYLD_LIBRARY_PATH=/root/root/lib && export ROOTSYS=/root/root && export CMAKE_PREFIX_PATH=/root/root && export JUPYTER_PATH=/root/root/etc/notebook && export SHLIB_PATH=/root/root/lib && export LIBPATH=/root/root/lib && PYTHONPATH=/root/root/lib && export PATH=/root/root/bin:$PATH
-        - apt update 
-        - apt upgrade -y 
-        - apt install -y gcc g++ libboost1.65 libeigen3-dev libhdf5-dev python-numpy python-scipy python-matplotlib python-yaml ipython libboost-all-dev hdf5-tools hdf5-helpers hdfview libgsl-dev cmake libx11-dev libxpm-dev libxft-dev libxext-dev
-        - mkdir ./build && cd ./build && cmake ..
-        - cmake --build . -- -j2
-        - export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH
-        - export PYTHONPATH=$PWD/../pylib:$PYTHONPATH
-        - cd ..
-        - apt install python-pip -y && pip install pytest
-        - rm tests/unit/core/test_GPUFunctionArgs.py
-        - pytest
-    only:
-    - master
-
 
 pages:
     image: alpine
