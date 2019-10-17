@@ -88,7 +88,9 @@ endif()
 set(BUILD_SHARED_LIBS ON)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_CXX_STANDARD)
 set(CMAKE_CXX_STANDARD 14)
+endif()
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
@@ -115,7 +117,7 @@ include_directories(SYSTEM "fmt")
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
-# include(${ROOT_USE_FILE})
+include(${ROOT_USE_FILE})
 link_directories(${ROOT_LIBRARY_DIR})
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)

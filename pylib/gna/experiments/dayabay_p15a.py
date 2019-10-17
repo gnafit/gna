@@ -570,8 +570,6 @@ class exp(baseexp):
 
             for reac in reactors:
                 ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
-            if self.opts.no_osc:
-                ns.addobservable("reactor_pred_noosc.{0}".format(ad), outputs.kinint2[ad], export=False)
 
             #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
                              #  outputs.evis_nonlinear_correlated[ad], export=False )
@@ -644,22 +642,12 @@ class exp(baseexp):
             ''' ])
 
 
-        if self.opts.no_osc:
-            self.formula_base.extend([
-                ''' unoscillated_spectra_d = sum[r]| unoscillated_reactor_flux_in_det 
-                ''',
-                ''' eff_corrected_unosc_spectra =  norm_bf * unoscillated_spectra_d 
-                ''',
-                ''' unoscillated_spectra_in_det = kinint2| eff_corrected_unosc_spectra
-                '''
-                ])
-        else:
-            self.formula_base.extend([
-            # Aliases
-            
-            '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
-            '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''', 
-            ])
+        self.formula_base.extend([
+        # Aliases
+        
+        '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
+        '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''', 
+        ])
 
 
         self.formula_ibd_do = '''ibd =
@@ -696,13 +684,8 @@ class exp(baseexp):
                                    jacobian(enu(), ee(), ctheta())
             '''
 
-        if self.opts.no_osc:
-            self.formula_ibd_simple = '''ibd =
-                              eres[d]|
-                                lsnl[d]|
-                                  iav[d]| kinint2 '''
 
-        elif self.opts.with_dyboscar_input:
+        if self.opts.with_dyboscar_input:
             self.formula_ibd_simple = '''ibd =
                               eres[d]|
                                 lsnl[d]|
