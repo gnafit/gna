@@ -1,5 +1,8 @@
-Compilation
-==============
+Installation
+============
+
+Requirements
+------------
 
 You must have the following libraries installed prior to compilation:
 
@@ -7,7 +10,7 @@ You must have the following libraries installed prior to compilation:
 * `Eigen <http://eigen.tuxfamily.org/>`_ at least 3.2;
 * `ROOT <http://root.cern.ch/>`_, at least 6.06 built with Python
   bindings support. The branch 6.08 is more preffered for now since ROOT is
-  able to generate bindings following GCC5 ABI. 
+  able to generate bindings following GCC5 ABI.
 * `GSL <http://www.gnu.org/software/gsl/>`_
 * `hdf5 <https://www.hdfgroup.org/HDF5/>`_, at least 1.8.14
 * `h5py <http://www.h5py.org/>`_, at least 2.5.0
@@ -21,24 +24,71 @@ In case of Debian-like Linux distribution to install binary packages you can
 use the following command (tested in Ubuntu 16.04, depending on your distro
 packages can have different names):
 
-.. code-block:: bash 
+.. code-block:: bash
 
     sudo apt-get install libboost-all-dev hdf5-tools hdf5-helpers \
                           hdfview libeigen3-dev libgsl-dev
 
-
 In Fedora 26:
 
-.. code-block:: bash 
+.. code-block:: bash
 
     sudo yum install boost-devel hdf5-devel hdfview eigen3-devel \
                      gsl-devel
 
+In Arch:
 
-You also need Python 2.7, not very old `CMake
-<http://www.cmake.org/>`_ and modern C++11 compiler (GCC or
-clang). After all of that is installed, you can run the standard CMake
-procedure:
+.. code-block:: bash
+
+    sudo pacman -S boost hdf5 eigen gsl
+
+You also need Python 2.7, not very old `CMake <http://www.cmake.org/>`_
+and modern C++11 compiler (GCC or clang).
+
+Python requirements
+^^^^^^^^^^^^^^^^^^^
+
+The list of python modules, required fro GNA is listed in :download:`requirements.txt <../../requirements.txt>`:
+
+.. literalinclude:: ../../requirements.txt
+
+They may be installed as system packages via the package manager, or manually via pip2:
+
+.. code-block:: bash
+
+    pip2 install --user -r requirements.txt
+
+`pip2`, or on some systems `pip` will install only the packages, that are missing in the system.
+
+Environment variables
+---------------------
+
+The ROOT environment variables should be properly set. The necessary source files are provided within ROOT installation
+for bash/tcsh/fish [#]_. Assuming root is installed in `/home/user/path/to/root/`, one may use:
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.sh
+
+or
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.fish
+
+or
+
+.. code-block:: bash
+
+    source /home/user/path/to/root/bin/thisroot.csh
+
+depending on the shell of the choice.
+
+
+Compilation
+-----------
+
+After all of that is installed, you can run the standard CMake procedure:
 
 .. code-block:: bash
 
@@ -47,7 +97,7 @@ procedure:
    cmake ..
    cmake --build . -- {flags for underlying build engine here}
 
-If the build was successfull, you can run the program:
+If the build was sucessfull, you can run the program:
 
 .. code-block:: bash
 
@@ -60,7 +110,7 @@ If one wants to use the code at MACOS X, there can be problem with loading
 dynamic library. Note that by default configuration of cmake with flag SHARED
 for building the shared library the `.dylib` file will be produced. As far as
 I understand ROOT can't load it directly, so the solution is to make a symlink
-into like that:  
+into like that:
 
 .. code-block:: bash
 
@@ -82,7 +132,7 @@ the build directory and set:
 
    export CXX=clang++
 
-before starting the build procedure again. 
+before starting the build procedure again.
 
 In case you have GCC 5.X compiler or newer
 version you may use the following cmake command when generating the
@@ -97,7 +147,7 @@ Notice that if ABI mismatch encountered, the ROOT is also have to be recompiled
 from scratch with compilation flags above -- ROOT branch 6.06 doesn't support GCC5 ABI, but ROOT 6.08 does.
 
 Options
-~~~~~~~
+-------
 
 CUDA support
 ^^^^^^^^^^^^
@@ -117,3 +167,5 @@ To build GNA with CUDA some variables have to be set:
 
 
 Setting of the threshold value can be skipped as it has default value.
+
+.. [#] fish support was introduced recently, around ROOT 6.18

@@ -8,6 +8,7 @@ from gna.bundle import execute_bundles
 from matplotlib import pyplot as P
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
+from gna.bindings import common
 from gna.env import env
 import gna.constructors as C
 import numpy as N
@@ -27,7 +28,9 @@ args = parser.parse_args()
 #
 cfg = NestedDict(
     # Bundle name
-    bundle = 'detector_iav_db_root_v01',
+    bundle = dict(name='detector_iav_db_root', version='v03',
+        nidx=[('d', 'detector', ['D1'])],
+        ),
     # Parameter name
     parname = 'OffdiagScale',
     # Parameter uncertainty and its type (absolute or relative)
@@ -40,8 +43,9 @@ cfg = NestedDict(
     matrixname = 'iav_matrix'
     )
 b, = execute_bundles( cfg=cfg )
-smear, = b.transformations_out.values()
-par = b.common_namespace['OffdiagScale']
+smear = b.context.outputs.iav.D1
+b.namespace.printparameters()
+par = b.namespace['OffdiagScale.D1']
 
 #
 # Test bundle
@@ -55,9 +59,9 @@ def singularities( values, edges ):
 binwidth=0.05
 edges = N.arange( 0.0, 12.0001, binwidth )
 
-phist = singularities( [ 1.225, 4.025, 7.025 ], edges )
+phist = singularities( [4.025, 7.025, 9.025, 11.025 ], edges )
 hist = C.Histogram( edges, phist )
-smear.inputs.Ntrue( hist.hist )
+hist.hist >> b.context.inputs.iav.D1['00']
 
 #
 # Plot
@@ -70,9 +74,9 @@ ax.set_xlabel( r'$E_\nu$, MeV' )
 ax.set_ylabel( 'entries' )
 ax.set_title( 'IAV effect' )
 
-smeared = smear.Nrec.data().copy()
+smeared = smear.data().copy()
 par.set( 2.0 )
-smeared2 = smear.Nrec.data().copy()
+smeared2 = smear.data().copy()
 print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
 print( 'Sum check for {} (diff): {}'.format( 2.0, phist.sum()-smeared2.sum() ) )
 
@@ -85,6 +89,19 @@ if args.xlim:
     ax.set_xlim( *args.xlim )
 
 savefig( args.output )
+
+fig = P.figure()
+ax = P.subplot( 111 )
+ax.minorticks_on()
+ax.grid()
+ax.set_xlabel( '' )
+ax.set_ylabel( '' )
+ax.set_title( 'IAV matrix' )
+
+from matplotlib.colors import LogNorm
+b.context.outputs.iavmatrix.D1.plot_matshow(colorbar=True, norm=LogNorm())
+
+savefig( args.output, suffix='_mat' )
 
 #
 # Dump graph
