@@ -6,6 +6,7 @@ from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np 
 import argparse
+import os
 
 def example():
     parser = argparse.ArgumentParser()
@@ -17,10 +18,11 @@ def example():
     parser.add_argument('-L', '--distance', default=810., type=float, help='Set distance of propagation')
     parser.add_argument('--mass-ordering', default='normal', choices=['normal', 'inverted'], help='Set neutrino mass ordering (hierarchy)')
     parser.add_argument('--print-pars', action='store_true', help='Print all parameters in namespace')
+    parser.add_argument('--savefig', help='Path to save figure')
     opts = parser.parse_args()
 
-# For fast usage printing load GNA specific modules only after argument
-# parsing
+    # For fast usage printing load GNA specific modules only after argument
+    # parsing
     import ROOT
     ROOT.PyConfig.IgnoreCommandLineOptions = True #prevents ROOT from hijacking sys.argv
 
@@ -94,14 +96,18 @@ def example():
     ax.legend(loc='best')
     ax.grid(alpha=0.5)
 
-    #Plot ratio
+    # Plot ratio
     ax_ratio.plot(Enu, matter/vacuum , label='matter / vacuum')
     ax_ratio.set_xlabel("Neutrino energy, MeV", fontsize=14)
     ax_ratio.set_ylabel("Ratio", fontsize=14)
     ax_ratio.legend(loc='best')
     ax_ratio.grid(alpha=0.5)
 
-    plt.show()
+    # Convert path to absolute path and save figure or show
+    if opts.savefig:
+        plt.savefig(os.path.abspath(opts.savefig))
+    else:
+        plt.show()
 
 if __name__ == '__main__':
     example()
