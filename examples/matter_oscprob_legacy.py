@@ -15,10 +15,11 @@ def example():
     parser.add_argument('-f', '--flavors', metavar=('Initial_flavor', 'Final_flavor'),
                         default=['mu', 'mu'], nargs=2, help='Set initital and final flavors for oscillation probability')
     parser.add_argument('-r', '--density', default=2.75, type=float, help='Set density of matter in g/cm^3')
-    parser.add_argument('-L', '--distance', default=810., type=float, help='Set distance of propagation')
+    parser.add_argument('-L', '--distance', default=810., type=float, help='Set distance of propagation in kilometers')
     parser.add_argument('--mass-ordering', default='normal', choices=['normal', 'inverted'], help='Set neutrino mass ordering (hierarchy)')
     parser.add_argument('--print-pars', action='store_true', help='Print all parameters in namespace')
     parser.add_argument('--savefig', help='Path to save figure')
+    parser.add_argument('--graph', help='Path to save computational graph scheme')
     opts = parser.parse_args()
 
     # For fast usage printing load GNA specific modules only after argument
@@ -79,6 +80,7 @@ def example():
         # provided as output
         E_MeV.points >> oscprob_matter.oscprob.Enu
         E_MeV.points >> oscprob_vacuum.full_osc_prob
+        oscprob_vacuum.full_osc_prob.setLabel('Oscillation probability in vacuum')
 
     # Accessing the outputs of oscillation probability for plotting
 
@@ -108,6 +110,11 @@ def example():
         plt.savefig(os.path.abspath(opts.savefig))
     else:
         plt.show()
+
+    # Save a plot of computational graph scheme
+    if opts.graph:
+        from gna.graphviz import savegraph
+        savegraph(oscprob_matter.oscprob.oscprob, opts.graph, namespace=ns)
 
 if __name__ == '__main__':
     example()
