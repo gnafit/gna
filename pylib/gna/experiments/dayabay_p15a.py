@@ -8,7 +8,9 @@ from collections import OrderedDict
 import numpy as N
 import ROOT as R
 
-seconds_per_day = 60*60*24
+seconds_per_day = 60.*60.*24.
+percent = 0.01
+nominal_mass = 20000.
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
@@ -19,8 +21,11 @@ class exp(baseexp):
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
+        parser.add_argument('--no-osc', action='store_true', help='Produce nooscillated prediction without detector related effects')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+        parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
+        parser.add_argument('--with-dyboscar-input', action='store_true', help="Use dybOscar unoscillated prediction for P15A dataset, for checking detector effects")
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -55,10 +60,9 @@ class exp(baseexp):
             self.nidx[3][2][:] = self.nidx[3][2][:1]
         elif self.opts.composition=='small':
             self.nidx[0][2][:] = self.nidx[0][2][:2]
-            self.nidx[1][2][:] = self.nidx[1][2][:3]
-            self.nidx[2][2][:] = self.nidx[2][2][:2]
-            self.nidx[3][2][:] = self.nidx[3][2][:1]
-
+            self.nidx[1][2][:] = ['AD11']
+            self.nidx[2][2][:] = ['DB1']
+            self.nidx[3][2][:] = ['U235']
         self.nidx = NIndex.fromlist(self.nidx)
 
         self.groups=NestedDict(
@@ -89,6 +93,8 @@ class exp(baseexp):
 
     def init_formula(self):
         self.formula = self.formula_base
+        if self.opts.no_osc:
+            return
         versions = dict(
                 simple = self.formula_ibd_simple,
                 dyboscar = self.formula_ibd_do,
@@ -103,15 +109,17 @@ class exp(baseexp):
                 bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
-                xorders   = 7,
-                yorder   = 21,
+                xorders   = 4,
+                yorder   = 2,
                 ),
             ibd_xsec = NestedDict(
                 bundle = dict(name='xsec_ibd', version='v02'),
                 order = 1,
+                pdg_year='dyboscar'
                 ),
             oscprob = NestedDict(
                 bundle = dict(name='oscprob', version='v03', major='rdc'),
+                pdg_year='dyboscar',
                 ),
             anuspec = NestedDict(
                 bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -119,7 +127,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.25 ), [ 12.3 ] ) ),
+                edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
                 ),
             eff = NestedDict(
                 bundle = dict(name='efficiencies', version='v02',
@@ -136,7 +144,7 @@ class exp(baseexp):
             livetime = NestedDict(
                 bundle = dict(name='dayabay_livetime_hdf_v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
-                ),
+            ),
             baselines = NestedDict(
                 bundle = dict(name='reactor_baselines', version='v01', major='rd'),
                 reactors  = 'data/dayabay/reactor/coordinates/coordinates_docDB_9757.py',
@@ -146,8 +154,9 @@ class exp(baseexp):
             thermal_power = NestedDict(
                     bundle = dict(name='dayabay_reactor_burning_info_v02', major='ri'),
                     reactor_info = 'data/dayabay/reactor/power/WeeklyAvg_P15A_v1.txt.npz',
-                    fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.py',
+                    fission_uncertainty_info = 'data/dayabay/reactor/fission_fraction/2013.12.05_djurcic.py',
                     add_ff = True,
+                    nominal_power = False,
                     ),
             nominal_thermal_power = NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
@@ -191,6 +200,22 @@ class exp(baseexp):
                     label='Daya Bay nominal number of protons (20 tons x GdLS Np/ton)',
                     pars = uncertain(20.0*7.163e28, 'fixed'),
                     ),
+            nprotons_corr = NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter = 'nprotons_corr',
+                    label='Correction to number of protons per AD',
+                    pars = uncertaindict([
+                        ('AD11', 19941./nominal_mass),
+                        ('AD12', 19967./nominal_mass),
+                        ('AD21', 19891./nominal_mass),
+                        ('AD22', 19944./nominal_mass),
+                        ('AD31', 19917./nominal_mass),
+                        ('AD32', 19989./nominal_mass),
+                        ('AD33', 19892./nominal_mass),
+                        ('AD34', 19931./nominal_mass)],
+                        mode = 'fixed',
+                        ),
+                    ),
             iav = NestedDict(
                     bundle     = dict(name='detector_iav_db_root_v03', major='d'),
                     parname    = 'OffdiagScale',
@@ -199,14 +224,25 @@ class exp(baseexp):
                     filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
                     matrixname = 'iav_matrix',
                     ),
+            dyboscar_iav = NestedDict(
+                    bundle     = dict(name='detector_iav_db_root_v03', major='d'),
+                    names = dict(matrixname = 'iav_matrix'),
+                    parname    = 'OffdiagScale_dyb',
+                    scale      = uncertain(1.0, 4, 'percent'),
+                    ndiag      = 1,
+                    filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+                    ),
             eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                     pars = uncertaindict(
-                        [('a', 0.014764) ,
-                         ('b', 0.0869) ,
-                         ('c', 0.0271)],
+                        [('a', 0.016) ,
+                         ('b', 0.081) ,
+                         ('c', 0.026)],
+                        #  [('a', 0.014764) ,
+                         #  ('b', 0.0869) ,
+                         #  ('c', 0.0271)],
                         mode='percent',
                         uncertainty=30
                         ),
@@ -383,6 +419,62 @@ class exp(baseexp):
                         ),
                     ),
         )
+        if self.opts.ihep_config:
+            self.cfg['eff_mult'] = NestedDict(
+                                    bundle = dict(name="parameters", version = "v01"),
+                                    parameter = 'eff_mult',
+                                    label='Average multiplicity cut eff for {detector}',
+                                    pars = uncertaindict([
+                                        ('AD11', 0.974404),
+                                        ('AD12', 0.974686),
+                                        ('AD21', 0.975737),
+                                        ('AD22', 0.975650),
+                                        ('AD31', 0.975882),
+                                        ('AD32', 0.975798),
+                                        ('AD33', 0.975586),
+                                        ('AD34', 0.975814)],
+                                        mode = 'fixed',
+                                        ),
+                                    )
+            self.cfg['eff_muon'] = NestedDict(
+                                    bundle = dict(name="parameters", version = "v01"),
+                                    parameter = 'eff_muon',
+                                    label='Average muon veto eff for {detector}',
+                                    pars = uncertaindict([
+                                        ('AD11', 0.825539509),
+                                        ('AD12', 0.822053461),
+                                        ('AD21', 0.857282239),
+                                        ('AD22', 0.857104494),
+                                        ('AD31', 0.98240566),
+                                        ('AD32', 0.982345731),
+                                        ('AD33', 0.982144065),
+                                        ('AD34', 0.982573523)],
+                                        mode = 'fixed',
+                                        )
+                                    )
+            self.cfg['livetime'] =  NestedDict(
+                                bundle = dict(name='dayabay_livetime_hdf_v02'),
+                                file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
+                                scale_to_ext_livetime  = dict([
+                                                       ('AD11', 1117.178347 * seconds_per_day ),
+                                                       ('AD12', 1117.178347 * seconds_per_day ),
+                                                       ('AD21', 1114.336669 * seconds_per_day ),
+                                                       ('AD22', 924.9328366 * seconds_per_day ),
+                                                       ('AD31', 1106.915033 * seconds_per_day ),
+                                                       ('AD32', 1106.915033 * seconds_per_day ),
+                                                       ('AD33', 1106.915033 * seconds_per_day ),
+                                                       ('AD34', 917.417216  * seconds_per_day )]
+                                                       )
+                               )
+        if self.opts.with_dyboscar_input:
+            self.cfg['raw_spectra_dyboscar'] = NestedDict(
+                                bundle    = dict(name='root_histograms_v03'),
+                                filename  = './data/p15a/dyboscar_new/fit_scaled_all.shape_cov.ihep_spec.root',
+                                format    = 'reactor_noosc_Etrue_{site}_AD{adnum_local}',
+                                name      = 'raw_spectra_dyboscar',
+                                groups    = self.groups,
+                                label     = 'Raw unoscillated spectra in {detector}, dyboscar',
+                                )
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -446,39 +538,53 @@ class exp(baseexp):
         ns.addobservable("ctheta", outputs.ctheta, export=False)
         ns.addobservable("ee", outputs.ee, export=False)
         ns.addobservable("jacobian", outputs.jacobian, export=False)
-        for ad in self.detectors:
-            if  self.opts.mode == 'dyboscar':
-                for comp in components:
-                    ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
-                            outputs.observation_noeffects[ad][comp], export=False)
-            else:
-                ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
-            ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
-            ns.addobservable("{0}".format(ad),              outputs.rebin[ad])
-            ns.addobservable("bkg_{0}".format(ad),         outputs.bkg[ad], export=False)
-            ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
-            ns.addobservable("bkg.fastn.{0}".format(ad), outputs.bkg_fastn[ad], export=False)
-            ns.addobservable("bkg.amc.{0}".format(ad), outputs.bkg_amc[ad], export=False)
-            ns.addobservable("bkg.alphan.{0}".format(ad), outputs.bkg_alphan[ad], export=False)
-            ns.addobservable("bkg.lihe.{0}".format(ad), outputs.bkg_lihe[ad], export=False)
-            ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
-            ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
-            ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
+        ns.addobservable("iav_matrix_raw", outputs.iavmatrix_raw)
 
-            #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
-                             #  outputs.evis_nonlinear_correlated[ad], export=False )
-            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
-            for reac in reactors:
-                for iso in isotopes:
-                    ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
-                                     outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
-
-        ns.addobservable("final_concat", outputs.concat_total)
         for iso in isotopes:
             ns.addobservable("anuespec.{0}".format(iso), outputs.anuspec[iso], export=False)
 
         for reac in reactors:
             ns.addobservable("thermal_power.{0}".format(reac), outputs.thermal_power[reac], export=False)
+
+        for ad in self.detectors:
+            #  if  self.opts.mode == 'dyboscar':
+                #  for comp in components:
+                    #  ns.addobservable("{0}_{1}_noeffects".format(ad, comp),
+                            #  outputs.observation_noeffects[ad][comp], export=False)
+            #  else:
+                #  ns.addobservable("{0}_noeffects".format(ad),    outputs.observation_noeffects[ad], export=False)
+            #  for reac in reactors:
+                #  for iso in isotopes:
+                    #  ns.addobservable("power_livetime_daily.{0}.{1}.{2}".format(ad, reac, iso),
+                                     #  outputs.power_livetime_factor_daily[ad][reac][iso], export=False)
+
+            ns.addobservable("bkg.{0}".format(ad),         outputs.bkg[ad], export=False)
+            ns.addobservable("bkg.acc.{0}".format(ad),         outputs.bkg_acc[ad], export=False)
+            ns.addobservable("bkg.fastn.{0}".format(ad), outputs.bkg_fastn[ad], export=False)
+            ns.addobservable("bkg.amc.{0}".format(ad), outputs.bkg_amc[ad], export=False)
+            ns.addobservable("bkg.alphan.{0}".format(ad), outputs.bkg_alphan[ad], export=False)
+            ns.addobservable("bkg.lihe.{0}".format(ad), outputs.bkg_lihe[ad], export=False)
+            #  ns.addobservable("efflivetime.{0}".format(ad), outputs.efflivetime_daily[ad], export=False)
+            #  ns.addobservable("livetime.{0}".format(ad), outputs.livetime_daily[ad], export=False)
+            #  ns.addobservable("eff.{0}".format(ad), outputs.eff_daily[ad], export=False)
+
+            for reac in reactors:
+                ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
+
+            #  ns.addobservable("evis_nonlinear_correlated.{0}".format(ad),
+                             #  outputs.evis_nonlinear_correlated[ad], export=False )
+            #  ns.addobservable("iav.{0}".format(ad), outputs.iav[ad], export=False)
+            #  ns.addobservable("{0}_fine".format(ad),         outputs.observation_fine[ad])
+            else:
+                ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
+
+            #  ns.addobservable("dyboscar_after_iav.{0}".format(ad), outputs.dyboscar_gna_iav[ad])
+            ns.addobservable("iav_matrix.{0}".format(ad), outputs.iavmatrix[ad])
+            ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
+            ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
+            ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
+            ns.addobservable("{0}".format(ad), outputs.rebin[ad])
+            ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -494,12 +600,25 @@ class exp(baseexp):
             # Basic building blocks
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
-            'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
-            'livetime=accumulate("livetime", livetime_daily[d]())',
             'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
             'denom = sum[i] | eper_fission[i]*ff',
-            'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
-            'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
+        ]
+        if self.opts.ihep_config:
+            self.formula_base.extend([
+                'livetime=accumulate("livetime", livetime_daily[d]())',
+                'efflivetime=eff_mult[d]*eff_muon[d]*livetime',
+                'power_livetime_factor_daily = eff_mult[d]*eff_muon[d]*livetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
+                ])
+        else:
+            self.formula_base.extend([
+                'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
+                'livetime=accumulate("livetime", livetime_daily[d]())',
+                'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+                'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
+                ])
+
+        self.formula_base.extend([
             # Detector effects
             'eres_matrix| evis_hist()',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()',
@@ -512,16 +631,24 @@ class exp(baseexp):
             'bkg_lihe     = days_in_second * efflivetime[d] * bkg_rate_lihe[s]   * bracket| frac_li * bkg_spectrum_li() + frac_he * bkg_spectrum_he()',
             'bkg = bracket| bkg_acc + bkg_lihe + bkg_fastn + bkg_amc + bkg_alphan',
             'norm_bf = global_norm*eff*effunc_uncorr[d]',
-            # Aliases
-            '''rate_in_detector =  conversion_factor*nprotons_nominal * kinint2| sum[r]|
-                                      baselineweight[r,d]*
-                                      ibd_xsec(enu(), ctheta())*
-                                      jacobian(enu(), ee(), ctheta())*
-                                      (sum[i]| power_livetime_factor*anuspec[i](enu())) *
-                                        sum[c]|
-                                          pmns[c]*oscprob[c,d,r](enu())'''
 
-        ]
+            '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
+                                (sum[i]| power_livetime_factor*anuspec[i](enu()))
+            ''',
+            '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''',
+            '''nprotons_ad = nprotons_nominal*nprotons_corr[d]
+            ''',
+            '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_ad*baselineweight[r,d]*anue_rd
+            ''' ])
+
+
+        self.formula_base.extend([
+        # Aliases
+        
+        '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
+        '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''', 
+        ])
+
 
         self.formula_ibd_do = '''ibd =
                      norm_bf*
@@ -557,19 +684,26 @@ class exp(baseexp):
                                    jacobian(enu(), ee(), ctheta())
             '''
 
-        self.formula_ibd_simple = '''ibd =
-                          norm_bf*
-                          eres[d]|
-                            lsnl[d]|
-                              iav[d]|
-                                  rate_in_detector
-            '''
+
+        if self.opts.with_dyboscar_input:
+            self.formula_ibd_simple = '''ibd =
+                              eres[d]|
+                                lsnl[d]|
+                                  iav[d]|
+                                      raw_spectra_dyboscar[d]()'''
+        else:
+            self.formula_ibd_simple = '''ibd =
+                              eres[d]|
+                                lsnl[d]|
+                                  iav[d]|
+                                      oscillated_spectra_in_det'''
 
         self.formula_back = [
                 'observation_noeffects=norm_bf*conversion_factor*nprotons_nominal*eres()',
                 'observation=rebin| ibd + bkg',
                 'total=concat[d]| observation'
                 ]
+
 
     def define_labels(self):
         self.libs = {
@@ -637,7 +771,7 @@ class exp(baseexp):
 
                         # Fast neutrons
                         fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
-                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
+                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector} (w: {weight_label})'),
 
                         # AmC
                         amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),
@@ -655,6 +789,31 @@ class exp(baseexp):
                         ),
 
                 'simple': OrderedDict(
+                        dyboscar_iav = dict(expr=('dyboscar_iav', 'dyboscar_iav[d]| raw_spectra_dyboscar[d]()'), label='IAV for dyboscar pred'),
+                        eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
+                                                           label='Eff corrected unosc spectra'),
+                        unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),
+                                                           label='Unoscillated flux in {detector}, not integrated'), 
+                        iav = dict(expr=('iav[d]| unoscillated_spectra_in_det', 'iav[d]| oscillated_spectra_in_det', 'iav[d]| kinint2'),
+                                   label='Anue spectra in {detector after IAV}'),
+                        anue_rd = dict(expr='anue_rd',
+                                       label='Anue in {detector} from {reactor}'),
+                        osc_prob_rd = dict(expr='osc_prob_rd',
+                                           label='Oscillation probability from {reactor} to {detector}'),
+                        osc_rate = dict(expr='anue_rd*osc_prob_rd', 
+                                        label='Oscillated spectra from {reactor} in {detector}'),
+                        osc_pred_det = dict(expr='kinint2| sum[r]| baselineweight*conversion_factor*nprotons_nominal*osc_rate',
+                                            label='Oscillated prediction in {detector}'),
+                        ibd_cross_section = dict(expr='ibd_xsec*jacobian',
+                                                 label='IBD cross section in first order'),
+                        osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
+                                                            label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
+                        oscillated_spectra_in_det = dict(expr='kinint2| oscillated_spectra_d', 
+                                                        label='Oscillated reactor spectra in {detector}'),
+                        unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
+                                                             label='Unoscillated spectra in {detector}'),
+                        #  unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra', 
+                                                             #  label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
                         denom                   = dict(expr='denom',
@@ -662,7 +821,7 @@ class exp(baseexp):
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
                                                        label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
                         anue_produced_total     = dict(expr='sum:i|anue_produced_iso',
-                                                       label='Total number of anue in {reactor}@{detector}'),
+                                                       label='Total number of anue produced in {reactor}@{detector}'),
                         xsec_weighted           = dict(expr='baselineweight*ibd_xsec',
                                                        label="Cross section weighted by distance {reactor}@{detector}"),
                         count_rate_rd           = dict(expr='anue_produced_total*jacobian*xsec_weighted',
@@ -691,10 +850,10 @@ class exp(baseexp):
                                                        label='Sum of LSNL curves'),
                         evis_after_escale       = dict(expr='escale*evis_edges',
                                                        label='Evis edges after escale, {detector}'),
-                        evis_nonlinear_correlated = dict(expr='evis_after_escale*lsnl_correlated',
-                                                         label='Edges after LSNL, {detector}'),
-                        evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated'),
-
+                        evis_nonlinear_correlated = dict(expr='evis_edges*lsnl_correlated'),
+                        #  evis_nonlinear_correlated = dict(expr='evis_after_escale*lsnl_correlated',
+                        evis_nonlinear          = dict(expr='escale*evis_nonlinear_correlated',
+                                                       label='Edges after LSNL, {detector}'),
                         oscprob_weighted        = dict(expr='oscprob*pmns'),
                         oscprob_full            = dict(expr='sum:c|oscprob_weighted',
                                                        label='anue survival probability\n {reactor}@{detector}'),
@@ -732,7 +891,7 @@ class exp(baseexp):
 
                         # Fast neutrons
                         fastn_num_bf      = dict(expr='bkg_rate_fastn*days_in_second*efflivetime'),
-                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector}\n (w: {weight_label})'),
+                        bkg_fastn         = dict(expr='bkg_spectrum_fastn*fastn_num_bf',               label='Fast neutron {detector} (w: {weight_label})'),
 
                         # AmC
                         amc_num_bf        = dict(expr='bkg_rate_amc*days_in_second*efflivetime'),

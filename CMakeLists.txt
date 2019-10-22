@@ -92,7 +92,9 @@ endif()
 set(BUILD_SHARED_LIBS ON)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_CXX_STANDARD)
 set(CMAKE_CXX_STANDARD 14)
+endif()
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
@@ -100,8 +102,6 @@ include(compilation_opts)
 include(debug_opts)
 
 add_subdirectory(fmt)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
@@ -141,3 +141,5 @@ endif()
 if(UB_SANITIZE)
     target_link_libraries(${LIBNAME} PRIVATE "-fsanitize=undefined")
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
