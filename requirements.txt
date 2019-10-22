@@ -6,7 +6,6 @@ numpy
 pytest
 PyYAML
 scipy
-seaborn
 Sphinx
 sphinxcontrib-websupport
 sphinx-rtd-theme
