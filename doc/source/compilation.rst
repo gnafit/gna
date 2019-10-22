@@ -98,7 +98,7 @@ After dependencies are installed, one should follow the standard CMake procedure
    cmake ..
    cmake --build . -- {flags for underlying build engine here}
 
-For available options for configuration and build refer to :doc:`Build options <cheatsheet/compilation>`.
+For available options for configuration and build refer to :doc:`Build options <cheatsheet/build_options>`.
  
 In order to use GNA, the following environmental should be set:
 
@@ -168,11 +168,11 @@ The following software have to be installed additionally:
 * `CUDA Toolkit <https://developer.nvidia.com/cuda-downloads>`_, at least 7.5
 * GCC 5.x, G++ 5.x (not higher)
 
-To build GNA with CUDA some variables have to be set:
+To enable CUDA support in GNA some variables have to be set:
 
 .. code-block:: bash
 
-    cmake -DCUDA_SUPPORT=TRUE -DCUDA_MAT_SIZE_THRESHOLD=<value> ..
+    cmake -DSINGLE_PRECISION=ON -DCUDA_SUPPORT=1 -DCUDA_DEBUG_INFO=0 ..
 
 
 Setting of the threshold value can be skipped as it has default value.
