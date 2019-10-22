@@ -39,7 +39,6 @@ def get_from_ROOT(path):
 
 def plot_ratio(gna, dyboscar, **kwargs):
     title = kwargs.pop('title', '')
-    weight = kwargs.pop('weight')
 
     dyb_data, dyb_bins = dyboscar.numpy()
     fig, (axis_spectra, axis_ratio) = plt.subplots(ncols=1, nrows=2)
@@ -47,7 +46,7 @@ def plot_ratio(gna, dyboscar, **kwargs):
     fig.set_tight_layout(True)
 
     gna.plot_hist(axis=axis_spectra, label='GNA')
-    plot_hist(dyb_bins, dyb_data*weight, label='dybOscar', axis=axis_spectra)
+    plot_hist(dyb_bins, dyb_data, label='dybOscar', axis=axis_spectra)
     axis_spectra.legend()
     axis_spectra.set_title("{}".format(title), fontsize=16)
     axis_spectra.minorticks_on()
@@ -55,7 +54,7 @@ def plot_ratio(gna, dyboscar, **kwargs):
     axis_spectra.set_xlabel(r"$E_{\nu}$, MeV", fontsize=14)
     axis_spectra.set_ylabel(r"Events per 50 keV", fontsize=14)
 
-    ratio = gna.data() / dyb_data*weight
+    ratio = gna.data() / dyb_data
     print(title + '\n', ratio)
     print(ratio.argmin())
 
@@ -84,14 +83,11 @@ def plot_ratio(gna, dyboscar, **kwargs):
         plt.close('all')
 
 def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
-             efflivetime_weights=None, draw_only=None, ylims=None, xlims=None,
-             title=None):
+              draw_only=None, ylims=None, xlims=None, title=None):
     pp = None
-    if efflivetime_weights is None:
-        efflivetime_weights = np.ones(len(detectors_gna))
     if output:
         pp = PdfPages(str(abspath(output) + '.pdf'))
-    for ad_gna, ad_dyb, weight in zip(detectors_gna, detectors_dyboscar, efflivetime_weights):
+    for ad_gna, ad_dyb in zip(detectors_gna, detectors_dyboscar):
         if draw_only is not None:
             if ad_gna not in draw_only:
                 continue
@@ -101,8 +97,7 @@ def plot_all(gna_template, dyboscar_template, env, root_file, output=None,
             title_ = title+ad_gna
         else:
             title_ = ad_gna
-        plot_ratio(gna_obs, dyb_obs, title=title_, pp=pp, weight=weight,
-                   xlims=xlims, ylims=ylims )
+        plot_ratio(gna_obs, dyb_obs, title=title_, pp=pp, xlims=xlims, ylims=ylims)
     if pp:
         pp.close()
     else:
