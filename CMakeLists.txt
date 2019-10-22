@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.5)
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
+# Add ROOT path with FindROOT.cmake
+# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
+list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(compiler_selection)
 include(cuda_support)
@@ -14,7 +18,6 @@ add_subdirectory(transformations)
 add_subdirectory(extra)
 add_subdirectory(examples)
 add_subdirectory(unittest)
-add_subdirectory(thirdparty/chengyp)
 
 set(SOURCES
     ${CORE_SOURCES}
@@ -22,7 +25,6 @@ set(SOURCES
     ${EXTRA_SOURCES}
     ${EXAMPLES_SOURCES}
     ${UNITTEST_SOURCES}
-    ${CHENGYP_SOURCES}
     )
 
 set(HEADERS
@@ -32,7 +34,6 @@ set(HEADERS
     ${EXTRA_HEADERS}
     ${EXAMPLES_HEADERS}
     ${UNITTEST_HEADERS}
-    ${CHENGYP_HEADERS}
     config_vars.h
     )
 
@@ -62,7 +63,6 @@ include_directories(
                     extra/
                     examples/
                     unittest/
-                    thirdparty/chengyp/
                    )
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -102,8 +102,6 @@ include(debug_opts)
 add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake")
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})

@@ -196,6 +196,7 @@ def main(opts):
         pdfpagesfilename = ''
         pdfpages = None
 
+    eshift = -0.8
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -237,7 +238,7 @@ def main(opts):
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
-    # ax.grid()
+    ax.grid()
     ax.set_xlabel( 'Enu, MeV' )
     ax.set_ylabel( 'Psur' )
     ax.set_title( 'Survival probability' )
@@ -246,19 +247,23 @@ def main(opts):
     color_ih = ax.plot(enu_input, psur_ih, label='IH')[0].get_color()
     ax.plot(enu_input[psur_nh_maxima], psur_nh[psur_nh_maxima], 'd', markerfacecolor='none', color=color_nh)
     ax.plot(enu_input[psur_ih_maxima], psur_ih[psur_ih_maxima], 'o', markerfacecolor='none', color=color_ih)
-    ax.vlines(data_x_enu, 0, 1, linestyle='-', linewidth=1.0, color='magenta', label='between maxima')
-    ax.legend()
 
-    savefig(opts.output, suffix='_psur_enu')
+    ax.legend()
+    savefig(opts.output, suffix=('psur', 'enu'))
 
     ax.set_xlim(right=5.0)
     savefig(opts.output, suffix='_psur_enu_zoom')
 
     ax.set_xlim(2.0, 3.0)
+    ax.set_ylim(0.0, 0.7)
     savefig(opts.output, suffix='_psur_enu_zoom1')
 
-    # ax.set_xscale('log')
-    # savefig(opts.output, suffix='_psur_enu_log')
+    ax.vlines(data_x_enu, 0, 1, linestyle='-', linewidth=1.0, color='magenta', label='between maxima')
+    ax.set_ylim(0.0, 0.7)
+    ax.grid(False)
+    ax.legend()
+
+    savefig(opts.output, suffix=('psur', 'enu', 'lines'))
 
     fig = P.figure()
     ax = P.subplot( 111 )
@@ -275,29 +280,35 @@ def main(opts):
     fig = P.figure()
     ax = P.subplot( 111 )
     ax.minorticks_on()
-    # ax.grid()
+    ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Psur' )
     ax.set_title( 'Survival probability' )
 
     color_nh = ax.plot(edep_input, psur_nh, '--', label='NH')[0].get_color()
-    color_ih = ax.plot(edep_input, psur_ih, '--', label='IH')[0].get_color()
+    # color_ih = ax.plot(edep_input, psur_ih, '--', label='IH')[0].get_color()
     ax.plot(edep_lsnl, psur_nh, label='NH with quenching', color=color_nh)[0]
     ax.plot(edep_lsnl, psur_ih, label='IH with quenching', color=color_ih)[0]
 
-    ax.vlines(data_x_edep, 0, 1, linestyle='--', linewidth=1.0, alpha=0.5, color='teal', label='between maxima')
-    ax.vlines(data_x_lsnl, 0, 1, linestyle='-', linewidth=1.0, alpha=0.5, color='magenta', label='between maxima quench.')
-
     ax.legend(loc='lower right')
-
     savefig(opts.output, suffix='_psur_edep')
 
     # ax.set_xscale('log')
-    ax.set_xlim(right=5.0)
+    ax.set_xlim(eshift, 5.0+eshift)
+    ax.legend(loc='upper right')
     savefig(opts.output, suffix='_psur_edep_zoom')
 
-    ax.set_xlim(2.0, 3.0)
+    ax.set_xlim(2.0+eshift, 3.0+eshift)
+    ax.set_ylim(0.0, 0.7)
     savefig(opts.output, suffix='_psur_edep_zoom1')
+
+    ax.vlines(data_x_edep, 0, 1, linestyle='--', linewidth=1.0, alpha=0.5, color='teal', label='between maxima')
+    ax.vlines(data_x_lsnl, 0, 1, linestyle='-', linewidth=1.0, alpha=0.8, color='magenta', label='between maxima quench.')
+    ax.set_ylim(0.0, 0.7)
+    ax.grid(False)
+
+    ax.legend(loc='upper right')
+    savefig(opts.output, suffix='_psur_edep_lines')
 
     fig = P.figure()
     ax = P.subplot( 111 )

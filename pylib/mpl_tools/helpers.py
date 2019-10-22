@@ -75,6 +75,9 @@ def savefig( name, *args, **kwargs ):
         return
 
     suffix = kwargs.pop( 'suffix', None )
+    if not isinstance(suffix, str):
+        suffix = '_'+ '_'.join(suffix)
+
     addext = kwargs.pop( 'addext', [] )
     if suffix:
         from os.path import splitext
