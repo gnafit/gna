@@ -72,7 +72,7 @@ def test_chi2_v03():
     offset = 1.0
     dataa   = N.arange(start, start+n, dtype='d')
     theorya = dataa+offset
-    covmat  = N.matrix(N.diag(dataa)+2.0)
+    covmat  = N.diag(dataa)+2.0
     La      = N.linalg.cholesky(covmat)
 
     data   = C.Points(dataa, labels='Data')
@@ -89,13 +89,13 @@ def test_chi2_v03():
 
     res = chi.chi2.chi2.data()[0]
 
-    diff = N.matrix(dataa-theorya).T
-    res_expected1 = diff.T * N.linalg.inv(covmat) * diff
-    ndiff = N.linalg.inv(La) * diff
-    res_expected2 = ndiff.T * ndiff
+    diff = N.array(dataa-theorya).T
+    res_expected1 = N.matmul(diff.T, N.matmul(N.linalg.inv(covmat),  diff))
+    ndiff = N.matmul(N.linalg.inv(La), diff)
+    res_expected2 = N.matmul(ndiff.T, ndiff)
 
-    assert N.allclose(res, res_expected1, rtol=0, atol=1.e-16)
-    assert N.allclose(res, res_expected2, rtol=0, atol=1.e-16)
+    assert N.allclose(res, res_expected1, rtol=0, atol=1.e-15)
+    assert N.allclose(res, res_expected2, rtol=0, atol=1.e-15)
 
 if __name__ == "__main__":
     run_unittests(globals())

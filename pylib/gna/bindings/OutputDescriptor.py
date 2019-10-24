@@ -14,7 +14,7 @@ classes_td = tuple(R.TransformationDescriptorT(ft,ft) for ft in provided_precisi
 
 @patchROOTClass(classes, '__str__')
 def OutputDescriptor____str__(self, **kwargs):
-    ret = '[out] {:s}: {:s}'.format(self.name(), self.check() and self.datatype() or 'invalid')
+    ret = '[out] {}: {}'.format(self.name(), self.check() and self.datatype() or 'invalid')
     data, sl = kwargs.pop('data', False), kwargs.pop('slice', slice(None))
     if data and self.check() and self.datatype():
         values = str(self.data()[sl])
