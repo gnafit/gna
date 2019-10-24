@@ -1,6 +1,6 @@
 stages:
-    - pages
     - testing
+    - pages
 
 testing:
     image: git.jinr.ru:5005/gna/gna/root-minimal:latest
