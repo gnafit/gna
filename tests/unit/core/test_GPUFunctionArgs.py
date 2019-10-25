@@ -4,7 +4,9 @@
 from __future__ import print_function
 from load import ROOT as R
 from gna import constructors as C
+import pytest
 
+@pytest.raise.skip(reason="No way to effectively check for GPU-enabled configuration for now")
 def test_01():
     arrays = ( [ [1.5, 1.5, 1.5], [1.5, 1.5, 1.5] ], [ [2.0, 2.0, 2.0], [2.0, 2.0, 2.0] ] )
     objects = [C.Points(a) for a in arrays]
