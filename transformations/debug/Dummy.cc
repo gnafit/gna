@@ -37,7 +37,7 @@ GNA::GNAObjectTemplates::DummyT<FloatType>::DummyT(size_t shape, const char* lab
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_fcn(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_fcn(FunctionArgs& fargs){
     auto& rets = fargs.rets;
     for (size_t i = 0; i < rets.size(); ++i) {
         rets[i].x=static_cast<FloatType>(i);
@@ -46,7 +46,7 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_fcn(typename GNAObjectT<F
 
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
-void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->readVariablesLocal();
@@ -65,7 +65,7 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h_local(typename 
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->provideSignatureHost(); /*global*/
@@ -83,7 +83,7 @@ void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_h(typename GNAObj
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::DummyT<FloatType>::dummy_gpuargs_d(FunctionArgs& fargs){
     fargs.args.touch();
     auto& gpuargs=fargs.gpu;
     gpuargs->provideSignatureDevice(); /*global*/

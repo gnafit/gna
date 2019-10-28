@@ -7,7 +7,7 @@ GNA::GNAObjectTemplates::ViewT<FloatType>::ViewT(size_t start, size_t len) : m_s
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::ViewT<FloatType>::ViewT(typename GNAObjectT<FloatType,FloatType>::SingleOutput* output, size_t start, size_t len) :
+GNA::GNAObjectTemplates::ViewT<FloatType>::ViewT(SingleOutput* output, size_t start, size_t len) :
 ViewT(start, len)
 {
     output->single() >> this->transformations.back().inputs.back();
@@ -26,7 +26,7 @@ void GNA::GNAObjectTemplates::ViewT<FloatType>::init(){
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ViewT<FloatType>::types(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ViewT<FloatType>::types(TypesFunctionArgs& fargs){
     auto& args = fargs.args;
     auto& rets = fargs.rets;
     for (size_t i = 0; i < args.size(); ++i) {

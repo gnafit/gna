@@ -24,7 +24,7 @@ namespace GNA {
       : WeightedSumT(true, weights, inputs) { m_fillvalue=fillvalue; }
 
     template<typename FloatType>
-    WeightedSumT<FloatType>::WeightedSumT(const std::vector<std::string> &weights, const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs)
+    WeightedSumT<FloatType>::WeightedSumT(const std::vector<std::string> &weights, const typename OutputDescriptor::OutputDescriptors& outputs)
       : WeightedSumT(false, weights, weights)
     {
       const auto &trans  = this->transformations.front();
