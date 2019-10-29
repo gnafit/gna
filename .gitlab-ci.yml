@@ -13,7 +13,6 @@ testing:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     
     script:
-    - ls && pwd
     - source /soft/root-6.18.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
