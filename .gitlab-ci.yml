@@ -5,26 +5,27 @@ stages:
 testing:
     image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
     stage: testing
-    
+
     before_script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$ALLURE_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    
+
     script:
     - source /soft/root-6.18.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -D SINGLE_PRESICION=ON ..
     - cmake --build . -- -j$(nproc --all)
     - cd ..
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH
     - mkdir test_results
     - pytest --alluredir=test_results
+
     after_script:
     - scp -r test_results/* $ALLURE_USER@$ALLURE_SERVER:$ALLURE_LOGS
-    
+
     only:
     - master
 
