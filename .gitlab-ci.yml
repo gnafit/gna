@@ -18,7 +18,7 @@ testing:
     - mkdir test_results
     - pytest --alluredir=test_results
     after_script:
-    - scp -i $ALLURE_PRIVATE_KEY -r test_resuls/* $ALLURE_USER@$ALLURE_SERVER:$ALLURE_LOGS
+    - scp -i $ALLURE_PRIVATE_KEY -r test_results/* $ALLURE_USER@$ALLURE_SERVER:$ALLURE_LOGS
     only:
     - master
 
