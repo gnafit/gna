@@ -3,7 +3,7 @@ stages:
     - pages
 
 testing:
-    image: git.jinr.ru:5005/gna/gna/root-minimal:latest
+    image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
     stage: testing
     
     script:
@@ -15,7 +15,10 @@ testing:
     - cmake --build . -- -j$(nproc --all)
     - cd ..
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH
-    - pytest
+    - mkdir test_results
+    - pytest --alluredir=test_results
+    after_script:
+    - scp -i $ALLURE_PRIVATE_KEY -r test_resuls/* $ALLURE_USER@$ALLURE_SERVER:$ALLURE_LOGS
     only:
     - master
 
