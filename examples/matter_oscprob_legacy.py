@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 import matplotlib.pyplot as plt
-import numpy as np 
+import numpy as np
 import argparse
 import os
 
@@ -31,16 +31,16 @@ def example():
     from gna.parameters.oscillation import reqparameters
     from gna.bindings import common
     import gna.constructors as C
-    _flavors = { "e":   ROOT.Neutrino.e(), 
+    _flavors = { "e":   ROOT.Neutrino.e(),
                  "mu":  ROOT.Neutrino.mu(),
                  "tau": ROOT.Neutrino.tau(),
                  "ae":  ROOT.Neutrino.ae(),
                  "amu": ROOT.Neutrino.amu(),
-                 "atu": ROOT.Neutrino.atau()
+                 "atau": ROOT.Neutrino.atau()
                  }
 
     # Parsed arguments are put into opts object (of type argparse.Namespace) as attributes and can be accessed with a '.'
-    # like in examples below. 
+    # like in examples below.
     # Note that argparse translate dashes '-' into underscores '_' for attribute names.
 
     #initialize energy range
@@ -69,7 +69,7 @@ def example():
     #initialize neutrino oscillation probability in matter and in vacuum for comparison.
     # All neccessary parameters such as values of mixing angles, mass splittings,
     # propagation distance and density of matter are looked up in namespace ns
-    # upon creation of ROOT.OscProbMatter. 
+    # upon creation of ROOT.OscProbMatter.
     with ns:
         oscprob_matter = ROOT.OscProbMatter(initial_flavor, final_flavor, labels='Oscillation probability in matter')
         oscprob_vacuum = ROOT.OscProbPMNS(initial_flavor, final_flavor, labels='Oscillation probability in vacuum')
