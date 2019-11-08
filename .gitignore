@@ -46,3 +46,4 @@ makerst
 inputs
 .fish_functions
 .pre-commit-config.yaml
+pytest_results/*

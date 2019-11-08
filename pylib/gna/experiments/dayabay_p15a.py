@@ -254,6 +254,8 @@ class exp(baseexp):
                     filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
                     par        = uncertain(1.0, 0.2, 'percent'),
                     edges      = 'evis_edges',
+                    extrapolation_strategy = 'extrapolate',
+                    nonlin_range = (0.5, 12.)
                     ),
             rebin = NestedDict(
                     bundle = dict(name='rebin', version='v03', major=''),
@@ -644,9 +646,9 @@ class exp(baseexp):
 
         self.formula_base.extend([
         # Aliases
-        
-        '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''', 
-        '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''', 
+
+        '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''',
+        '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''',
         ])
 
 
@@ -793,14 +795,14 @@ class exp(baseexp):
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),
                         unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),
-                                                           label='Unoscillated flux in {detector}, not integrated'), 
+                                                           label='Unoscillated flux in {detector}, not integrated'),
                         iav = dict(expr=('iav[d]| unoscillated_spectra_in_det', 'iav[d]| oscillated_spectra_in_det', 'iav[d]| kinint2'),
                                    label='Anue spectra in {detector after IAV}'),
                         anue_rd = dict(expr='anue_rd',
                                        label='Anue in {detector} from {reactor}'),
                         osc_prob_rd = dict(expr='osc_prob_rd',
                                            label='Oscillation probability from {reactor} to {detector}'),
-                        osc_rate = dict(expr='anue_rd*osc_prob_rd', 
+                        osc_rate = dict(expr='anue_rd*osc_prob_rd',
                                         label='Oscillated spectra from {reactor} in {detector}'),
                         osc_pred_det = dict(expr='kinint2| sum[r]| baselineweight*conversion_factor*nprotons_nominal*osc_rate',
                                             label='Oscillated prediction in {detector}'),
@@ -808,11 +810,11 @@ class exp(baseexp):
                                                  label='IBD cross section in first order'),
                         osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
                                                             label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
-                        oscillated_spectra_in_det = dict(expr='kinint2| oscillated_spectra_d', 
+                        oscillated_spectra_in_det = dict(expr='kinint2| oscillated_spectra_d',
                                                         label='Oscillated reactor spectra in {detector}'),
-                        unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det', 
+                        unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det',
                                                              label='Unoscillated spectra in {detector}'),
-                        #  unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra', 
+                        #  unoscillated_reactor_spectra = dict(expr='unoscillated_reactor_spectra',
                                                              #  label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
