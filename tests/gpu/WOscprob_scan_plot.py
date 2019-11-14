@@ -224,7 +224,7 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( L.u('enu') )
-ax.set_ylabel( 'R-1' )
+ax.set_ylabel( '$\\mathrm{Ratio}-1$' )
 ax.set_title( 'Survival probability, ratio to CPU double' )
 
 ref = data['cpu']['double']['psur'][:][::stride]
@@ -241,14 +241,14 @@ ax = P.subplot( 111 )
 ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( L.u('enu') )
-ax.set_ylabel( 'R-1' )
+ax.set_ylabel( '$\\mathrm{Ratio}-1$' )
 ax.set_title( 'Survival probability, ratio to CPU double' )
 
 ref = data['cpu']['double']['psur'][:][::stride]
 # ax.plot( data['cpu']['double']['psur'][:][::stride]/ref-1, '-', label='CPU double', alpha=0.5, **opts )
 ax.plot( data['gpu']['double']['psur'][:][::stride]/ref-1, '-', label='GPU double', alpha=0.5, **opts )
 
-# ax.legend()
+ax.legend()
 savefig()
 
 if args.show:

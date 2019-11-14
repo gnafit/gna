@@ -44,7 +44,7 @@ with context.set_context(manager=ndata, gpu=args.gpu, precision=args.precision) 
     gna.parameters.oscillation.reqparameters(ns)
     pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
     ns.materializeexpressions()
-    ns.printparameters()
+    ns.printparameters(labels=True)
 
     E = C.Points(E_arr, labels='Energy')
 
