@@ -38,7 +38,7 @@ def plot_bar( lims, height, *args, **kwargs ):
 
     Plotter = kwargs.pop('axis', P)
 
-    return Plotter.plot( x, y, *args, **kwargs )
+    return Plotter.bar(left, height, widths, *args, **kwargs )
 
 def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""

@@ -13,7 +13,7 @@ GNAObjectBind1N<FloatType>("snapshot", "source", "result", 0, 0, 0)
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::SnapshotT<FloatType>::SnapshotT(typename GNAObjectT<FloatType,FloatType>::SingleOutput& output) :
+GNA::GNAObjectTemplates::SnapshotT<FloatType>::SnapshotT(SingleOutput& output) :
 GNAObjectBind1N<FloatType>("snapshot", "source", "result", 0, 0, 0)
 {
     this->add_transformation();
@@ -30,7 +30,7 @@ typename GNA::GNAObjectTemplates::SnapshotT<FloatType>::TransformationDescriptor
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::SnapshotT<FloatType>::makeSnapshot(typename GNA::GNAObjectTemplates::SnapshotT<FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::SnapshotT<FloatType>::makeSnapshot(FunctionArgs& fargs){
     auto& args = fargs.args;
     auto& rets = fargs.rets;
     for (size_t i = 0; i < args.size(); ++i) {

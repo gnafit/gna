@@ -84,7 +84,8 @@ if __name__ == "__main__":
     test_norm5()
     test_norm6()
     test_norm7()
-    P.show()
+    if "pytest" not in sys.modules:
+        P.show()
 
 
 

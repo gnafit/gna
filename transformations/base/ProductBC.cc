@@ -42,7 +42,7 @@ namespace GNA {
      * @brief Construct ProductBC from vector of SingleOutput instances
      */
     template<typename FloatType>
-    ProductBCT<FloatType>::ProductBCT(const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs) : ProductBCT<FloatType>(){
+    ProductBCT<FloatType>::ProductBCT(const typename OutputDescriptor::OutputDescriptors& outputs) : ProductBCT<FloatType>(){
       for(auto& output : outputs){
         this->multiply(*output);
       }
@@ -57,7 +57,7 @@ namespace GNA {
      * @return InputDescriptor instance for the newly created input.
      */
     template<typename FloatType>
-    InputDescriptorT<FloatType,FloatType> ProductBCT<FloatType>::multiply(typename GNAObjectT<FloatType,FloatType>::SingleOutput &out) {
+    InputDescriptorT<FloatType,FloatType> ProductBCT<FloatType>::multiply(SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
 
