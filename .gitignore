@@ -45,3 +45,5 @@ makerst
 *cmake_install.cmake
 inputs
 .fish_functions
+.local/
+.envrc
