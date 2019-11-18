@@ -1,5 +1,5 @@
 .gitignore
-build/
+build
 output/
 doc/doxygen
 config_local
@@ -49,3 +49,5 @@ inputs
 pytest_results/*
 .local/
 .envrc
+.direnv/
+builds/
