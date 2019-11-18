@@ -3,10 +3,6 @@ cmake_minimum_required(VERSION 3.5)
 project(GlobalNuAnalysis2)
 set(LIBNAME GlobalNuAnalysis2)
 
-# Add ROOT path with FindROOT.cmake
-# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
-
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(compiler_selection)
 include(cuda_support)
@@ -103,9 +99,11 @@ add_subdirectory(fmt)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Load Eigen
 find_package(Eigen3 REQUIRED NO_MODULE)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
+# Load Boost
 find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
     message(STATUS "found Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION} in ${Boost_INCLUDE_DIRS}")
@@ -115,13 +113,18 @@ endif(Boost_FOUND)
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 include_directories(SYSTEM "fmt")
 
+# Load GSL
 find_package(GSL REQUIRED)
+
+# Load ROOT and Generate dictionary
 find_package(ROOT REQUIRED)
-# include(${ROOT_USE_FILE})
+#find_package(ROOT CONFIG REQUIRED)
+#include(ROOTUseFile)
 link_directories(${ROOT_LIBRARY_DIR})
 
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
+# Setup library
 add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
 
 if(result)
