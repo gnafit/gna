@@ -1,5 +1,6 @@
 .gitignore
-build/
+build
+builds/
 output/
 doc/doxygen
 config_local
