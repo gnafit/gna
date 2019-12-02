@@ -46,6 +46,11 @@ makerst
 *cmake_install.cmake
 inputs
 .fish_functions
+.pre-commit-config.yaml
+pytest_results/*
+.local/
+.envrc
+.direnv/
 .envrc
 .direnv/
 .local/

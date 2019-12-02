@@ -51,7 +51,7 @@ namespace GNA {
      * @brief Construct Sum from vector of SingleOutput instances
      */
     template<typename FloatType>
-    SumT<FloatType>::SumT(const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs) : SumT(){
+    SumT<FloatType>::SumT(const typename OutputDescriptor::OutputDescriptors& outputs) : SumT(){
       for(auto& output : outputs){
         this->add(*output);
       }
@@ -66,7 +66,7 @@ namespace GNA {
      * @return InputDescriptor instance for the newly created input.
      */
     template<typename FloatType>
-    InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add(typename GNAObjectT<FloatType,FloatType>::SingleOutput &out) {
+    InputDescriptorT<FloatType,FloatType> SumT<FloatType>::add(SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
 

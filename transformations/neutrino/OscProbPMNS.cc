@@ -198,7 +198,7 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(FunctionArgs& fargs) {
   auto& ret=fargs.rets[0].x;
   auto& Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.5)*Enu.inverse();
@@ -230,7 +230,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcFullProb(typename GNA
 
 template<typename FloatType>
 template <int I, int J>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(FunctionArgs& fargs) {
   auto &Enu = fargs.args[0].x;
   fargs.rets[0].x = cos((DeltaMSq<I,J>()*oscprobArgumentFactor*m_L*0.5)*Enu.inverse());
 }
@@ -238,7 +238,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponent(typename GN
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
 template < int I, int J>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
@@ -248,7 +248,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponent(typename
 #endif
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(FunctionArgs& fargs) {
   auto& ret=fargs.rets[0].x;
   auto &Enu = fargs.args[0].x;
   ArrayXd tmp = (oscprobArgumentFactor*m_L*0.25)*Enu.inverse();
@@ -259,7 +259,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcComponentCP(typename 
 
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   gpuargs->provideSignatureDevice();
@@ -269,7 +269,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcComponentCP(typena
 #endif
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(FunctionArgs& fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0].x;
   auto weight12=weight<1,2>();
@@ -289,7 +289,7 @@ void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::calcSum(typename GNAObjec
 }
 #ifdef GNA_CUDA_SUPPORT
 template<typename FloatType>
-void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
+void GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::gpuCalcSum(FunctionArgs& fargs) {
   fargs.args.touch();
   auto& gpuargs=fargs.gpu;
   cuCalcSum(gpuargs->args, gpuargs->rets, weight<1,2>(), weight<1,3>(), weight<2,3>() ,weightCP(), (m_alpha == m_beta), fargs.args[0].arr.size());

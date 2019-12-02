@@ -13,12 +13,12 @@ GNA::GNAObjectTemplates::ArraySumT<FloatType>::ArraySumT::ArraySumT() {
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::ArraySumT<FloatType>::ArraySumT(typename GNAObjectT<FloatType,FloatType>::SingleOutput& out) : ArraySumT() {
+GNA::GNAObjectTemplates::ArraySumT<FloatType>::ArraySumT(SingleOutput& out) : ArraySumT() {
   out.single() >> this->transformations.back().inputs.back();
 }
 
 template<typename FloatType>
-GNA::GNAObjectTemplates::ArraySumT<FloatType>::ArraySumT(const std::string& name, typename GNAObjectT<FloatType,FloatType>::SingleOutput& out) : ArraySumT(out) {
+GNA::GNAObjectTemplates::ArraySumT<FloatType>::ArraySumT(const std::string& name, SingleOutput& out) : ArraySumT(out) {
   ArraySumType::initialize(name);
 }
 
@@ -34,12 +34,12 @@ void GNA::GNAObjectTemplates::ArraySumT<FloatType>::initialize(const std::string
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ArraySumT<FloatType>::check(typename GNAObjectT<FloatType,FloatType>::TypesFunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ArraySumT<FloatType>::check(TypesFunctionArgs& fargs){
     fargs.rets[0] = DataType().points().shape(1);
 }
 
 template<typename FloatType>
-void GNA::GNAObjectTemplates::ArraySumT<FloatType>::sum(typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs){
+void GNA::GNAObjectTemplates::ArraySumT<FloatType>::sum(FunctionArgs& fargs){
     fargs.rets[0].x(0) = fargs.args[0].x.sum();
 }
 

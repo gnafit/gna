@@ -15,6 +15,7 @@
 #include "TypeClasses.hh"
 #include "GPUFunctionArgs.hh"
 #include "TreeManager.hh"
+#include "Exceptions.hh"
 
 #include "config_vars.h"
 
@@ -406,7 +407,7 @@ bool EntryT<SourceFloatType,SinkFloatType>::initFunction(const std::string& name
   if(it==functions.end()){
     if(strict){
       auto msg = fmt::format("invalid function name {0}", name.data());
-      throw std::runtime_error(msg);
+      throw KeyError(msg);
     }
     return false;
   }

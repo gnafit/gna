@@ -12,7 +12,8 @@ class ParCovMatrix: public GNAObject,
                 .output("unc_matrix")
                 .types([](ParCovMatrix* obj, TypesFunctionArgs fargs){
                        fargs.rets[0] = DataType().points().shape(obj->m_pars.size(), obj->m_pars.size());})
-                .func(&ParCovMatrix::FillMatrix);
+                .func(&ParCovMatrix::FillMatrix)
+                .finalize();
         };
 
         ParCovMatrix(std::vector<GaussianParameter<double>*> pars): ParCovMatrix() {m_pars = pars;};

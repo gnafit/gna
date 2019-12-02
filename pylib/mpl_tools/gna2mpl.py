@@ -49,7 +49,9 @@ def plot_points( output, *args, **kwargs ):
     else:
         points=output.data().copy()
 
-    return P.plot(points, *args, **kwargs)
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.plot(points, *args, **kwargs )
 
 def plot_vs_points(outputy, outputx, *args, **kwargs):
     """Plot array using pyplot.plot
@@ -72,7 +74,9 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
     if kwargs.pop('transpose', False):
         pointsx, pointsy=pointsx.T, pointsy.T
 
-    return P.plot(pointsx, pointsy, *args, **kwargs)
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.plot(pointsx, pointsy, *args, **kwargs )
 
 def vs_plot_points(outputx, outputy, *args, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
@@ -136,7 +140,9 @@ def plot_hist1_centers(output, *args, **kwargs):
     height, lims, _ = get_1d_buffer(output, scale=kwargs.pop('scale',None))
     centers = (lims[1:] + lims[:-1])*0.5
 
-    return P.plot(centers, height, *args, **kwargs)
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.plot(centers, height, *args, **kwargs )
 
 def bar_hist1( output, *args, **kwargs ):
     """Plot 1-dimensinal histogram using pyplot.bar
@@ -164,7 +170,9 @@ def bar_hist1( output, *args, **kwargs ):
         left+=width*shift
 
     kwargs.setdefault( 'align', 'edge' )
-    return P.bar( left, height, width, *args, **kwargs )
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.bar( left, height, width, *args, **kwargs )
 
 def errorbar_hist1(output, yerr=None, *args, **kwargs):
     """Plot 1-dimensinal histogram using pyplot.errorbar
@@ -202,7 +210,9 @@ def errorbar_hist1(output, yerr=None, *args, **kwargs):
 
     kwargs.setdefault('fmt', 'none')
 
-    return P.errorbar(X, Y, Yerr, Xerr, *args, **kwargs)
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.errorbar(X, Y, Xerr, Yerr, Xerr, *args, **kwargs )
 
 def get_2d_buffer(output, transpose=False, mask=None):
     buf = output.data().copy()

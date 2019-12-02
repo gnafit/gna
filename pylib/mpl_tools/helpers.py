@@ -18,7 +18,9 @@ def plot_hist( lims, height, *args, **kwargs ):
         x = x[1:-1]
         y = y[1:-1]
 
-    return P.plot( x, y, *args, **kwargs )
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.plot( x, y, *args, **kwargs )
 
 def plot_bar( lims, height, *args, **kwargs ):
     """Plot bars with edges specified"""
@@ -34,7 +36,9 @@ def plot_bar( lims, height, *args, **kwargs ):
         widths/=float(n)
         left+=i*widths
 
-    return P.bar( left, height, widths, *args, **kwargs )
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.bar(left, height, widths, *args, **kwargs )
 
 def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""

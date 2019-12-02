@@ -29,20 +29,20 @@ class dayabay_fastn_power_v01(TransformationBundle):
             raise Exception('Was able to determine normalization region for Fast Neutrons (%f, %f)'%(emin, emax))
 
         self.integrator_gl = R.GaussLegendre(bins, self.cfg.order, bins.size-1, ns=self.namespace)
-        self.integrator_gl.points.setLabel('Fast neutron\nintegration points')
+        self.integrator_gl.points.setLabel('Fast neutron points')
         for it in self.nidx.iterate():
             parname = it.current_format(name=self.cfg.parameter)
             fcn  = R.SelfPower(parname, ns=self.namespace)
             fcn.selfpower_inv.points(self.integrator_gl.points.x)
-            fcn.selfpower_inv.setLabel(it.current_format('Fast neutron shape\n{site}'))
+            fcn.selfpower_inv.setLabel(it.current_format('Fast neutron shape {site}'))
 
             hist = R.GaussLegendreHist(self.integrator_gl)
             hist.hist.f(fcn.selfpower_inv.result)
-            hist.hist.setLabel(it.current_format('Fast neutron hist\n{site}'))
+            hist.hist.setLabel(it.current_format('Fast neutron hist {site}'))
 
             normalize = R.Normalize(imin, imax-imin)
             normalize.normalize.inp( hist.hist.hist )
-            normalize.normalize.setLabel(it.current_format('Fast neutron hist\n{site} (norm)'))
+            normalize.normalize.setLabel(it.current_format('Fast neutron hist {site} (norm)'))
 
             self.set_output(self.cfg.name, it, normalize.single())
 

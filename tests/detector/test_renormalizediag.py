@@ -37,10 +37,10 @@ pmat = C.Points( mat )
 rd = R.RenormalizeDiag( opts.ndiag, int(opts.offdiag), int(opts.upper) )
 rd.renorm.inmat( pmat.points )
 
-idt = R.Identity()
+idt = C.Identity()
 idt.identity.source( rd.renorm.outmat )
 
-idt0 = R.Identity()
+idt0 = C.Identity()
 idt0.identity.source( pmat.points )
 
 idt.identity.target.data()

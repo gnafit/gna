@@ -42,7 +42,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         newx = self.newx_out.data()
         newy = OrderedDict()
         for xy, name in zip(graphs, self.cfg.names):
-            f = interpolate( xy, newx )
+            f = self.interpolate( xy, newx )
             newy[name]=f
             self.storage[name] = f.copy()
 
@@ -73,7 +73,12 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
             for i, itd in enumerate(self.detector_idx.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
                 """Construct the nonlinearity calss"""
-                nonlin = R.HistNonlinearity(self.debug, labels=itd.current_format('NL matrix\n{autoindex}'))
+                nonlin = R.HistNonlinearity(self.debug, labels=itd.current_format('NL matrix {autoindex}'))
+                try:
+                    nonlin.set_range(*self.cfg.nonlin_range)
+                except KeyError:
+                    pass
+
                 self.context.objects[('nonlinearity',)+itd.current_values()] = nonlin
 
                 self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,         argument_number=0)
@@ -85,7 +90,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
                     if j:
                         trans = nonlin.add_transformation()
                         nonlin.add_input()
-                    trans.setLabel(it.current_format('NL\n {autoindex}'))
+                    trans.setLabel(it.current_format('NL {autoindex}'))
 
                     self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
                     self.set_output('lsnl', it, trans.Nrec)
@@ -117,7 +122,8 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         for it in self.detector_idx.iterate():
             self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
-def interpolate( (x, y), edges):
-    fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )
-    res = fcn( edges )
-    return res
+    def interpolate(self, (x, y), edges):
+        fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
+        fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
+        res = fcn( edges )
+        return res

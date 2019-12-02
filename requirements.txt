@@ -4,9 +4,8 @@ ipython
 matplotlib
 numpy
 pytest
-PyYAML
+pyyaml
 scipy
-seaborn
 Sphinx
 sphinxcontrib-websupport
 sphinx-rtd-theme

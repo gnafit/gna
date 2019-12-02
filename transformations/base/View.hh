@@ -18,10 +18,11 @@ namespace GNA{
         class ViewT: public GNAObjectT<FloatType,FloatType>,
                      public TransformationBind<ViewT<FloatType>,FloatType,FloatType> {
         private:
+        public:
             using BaseClass = GNAObjectT<FloatType,FloatType>;
             using typename BaseClass::TypesFunctionArgs;
             using typename BaseClass::FunctionArgs;
-        public:
+
             using ViewType = ViewT<FloatType>;
             using typename BaseClass::SingleOutput;
 

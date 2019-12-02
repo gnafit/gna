@@ -34,7 +34,7 @@ namespace GNA {
      * @brief Construct Product from vector of SingleOutput instances
      */
     template<typename FloatType>
-    ProductT<FloatType>::ProductT(const typename GNAObjectT<FloatType,FloatType>::OutputDescriptor::OutputDescriptors& outputs) : ProductT<FloatType>(){
+    ProductT<FloatType>::ProductT(const typename OutputDescriptor::OutputDescriptors& outputs) : ProductT<FloatType>(){
       for(auto& output : outputs){
         this->multiply(*output);
       }
@@ -49,7 +49,7 @@ namespace GNA {
      * @return InputDescriptor instance for the newly created input.
      */
     template<typename FloatType>
-    InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::multiply(typename GNAObjectT<FloatType,FloatType>::SingleOutput &out) {
+    InputDescriptorT<FloatType,FloatType> ProductT<FloatType>::multiply(SingleOutput &out) {
       return InputDescriptorT<FloatType,FloatType>(this->t_[0].input(out));
     }
 

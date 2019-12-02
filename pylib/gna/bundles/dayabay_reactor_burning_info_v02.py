@@ -89,6 +89,8 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
             days_in_period = np.array(core['days'])
 
             thermal_power_daily = np.repeat(core['power'], days_in_period)
+            if self.cfg.nominal_power:
+                thermal_power_daily = np.ones(len(thermal_power_daily))
             thermal_power_per_core = C.Points(thermal_power_daily, labels=rit.current_format('Thermal power\n{autoindex}'))
             self.context.objects[(core_name, 'thermal_power')]  = thermal_power_per_core
             self.set_output('thermal_power', rit, thermal_power_per_core.single())

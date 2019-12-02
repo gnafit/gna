@@ -46,7 +46,7 @@ protected:
   void init() {
     /// Check that at least two bin edges were passed
     if(m_edges.size()<2){
-      throw std::runtime_error("Bins transfomration should be initialized with at least two edges.");
+      throw std::runtime_error("Bins transformation should be initialized with at least two edges.");
     }
     transformation_("bins")                                               /// Initialize the transformation points.
       .output("edges")                                                    /// Add an output for edges.
