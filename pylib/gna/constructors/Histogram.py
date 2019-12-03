@@ -3,29 +3,43 @@
 from load import ROOT as R
 import numpy as np
 
-"""Construct Histogram object from two arrays: edges and data"""
-def Histogram(edges, data=None, *args, **kwargs):
-    edges = np.ascontiguousarray(edges, dtype='d')
-    reqsize = (edges.size-1)
-    if data is None:
-        data  = np.zeros(reqsize, dtype='d')
+"""Construct Histogram object from two arrays (edges and data) or from TH1"""
+def Histogram(arg1, arg2=None, *args, **kwargs):
+    if arg2 is None:
+        if isinstance(arg1, R.TH1):
+            edges = arg1.GetXaxis().get_bin_edges().astype('d')
+            data  = arg1.get_buffer().astype('d')
+        else:
+            edges = np.ascontiguousarray(arg1, dtype='d')
+            data  = np.zeros(edges.size-1, dtype='d')
     else:
-        if reqsize!=data.size:
-            raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
-        data  = np.ascontiguousarray(data,  dtype='d')
+        edges = np.ascontiguousarray(arg1, dtype='d')
+        data  = np.ascontiguousarray(arg2, dtype='d')
 
-    return R.Histogram( data.size, edges, data, *args, **kwargs )
+        if (edges.size-1)!=data.size:
+            raise Exception('Bin edges and data are not consistent (%i and %i)'%(edges.size, data.size))
+
+    return R.Histogram(data.size, edges, data, *args, **kwargs)
 
 """Construct Histogram2d object from two arrays: edges and data"""
-def Histogram2d(xedges, yedges, data=None, *args, **kwargs):
-    xedges = np.ascontiguousarray(xedges, dtype='d')
-    yedges = np.ascontiguousarray(yedges, dtype='d')
-    reqsize = (xedges.size-1)*(yedges.size-1)
-    if data is None:
-        data = np.zeros(reqsize, dtype='d')
+def Histogram2d(arg1, arg2=None, arg3=None, *args, **kwargs):
+    if arg2 is None and arg3 is None:
+        if isinstance(arg1, R.TH2):
+            xedges = arg1.GetXaxis().get_bin_edges().astype('d')
+            yedges = arg1.GetYaxis().get_bin_edges().astype('d')
+            data   = arg1.get_buffer().astype('d').ravel(order='F')
+        else:
+            raise Exception('Should provide (xedges, yedges[, data]) or (TH2) to construct Histogram2d')
     else:
-        if reqsize!=data.size:
-            raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
-        data = np.ascontiguousarray(data,   dtype='d').ravel(order='F')
+        xedges = np.ascontiguousarray(arg1, dtype='d')
+        yedges = np.ascontiguousarray(arg2, dtype='d')
 
-    return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
+        reqsize = (xedges.size-1)*(yedges.size-1)
+        if arg3 is None:
+            data = np.zeros(reqsize, dtype='d')
+        else:
+            if reqsize!=data.size:
+                raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
+            data = np.ascontiguousarray(data, dtype='d').ravel(order='F')
+
+    return R.Histogram2d(xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs)

@@ -15,9 +15,6 @@ from gna import context
 from Points import Points
 from Histogram import Histogram
 
-# Templates = R.GNA.GNAObjectTemplates
-# print('templates', Templates)
-
 def OutputDescriptors(outputs):
     descriptors=[]
     odescr = R.OutputDescriptorT(context.current_precision(), context.current_precision())
