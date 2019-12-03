@@ -6,11 +6,14 @@
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-from gna.converters import array_to_stdvector_size_t
 
 """Construct std::vector object from an array"""
 from gna.converters import list_to_stdvector as stdvector
 from gna import context
+
+# Import constructors, defined in the submodules
+from Points import Points
+from Histogram import Histogram
 
 # Templates = R.GNA.GNAObjectTemplates
 # print('templates', Templates)
@@ -62,15 +65,6 @@ def VarProduct(varnames, *args, **kwargs):
 """Construct Dummy object from vector of strings"""
 def Dummy(shape, name, varnames, *args, **kwargs):
     return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
-
-"""Construct Points object from numpy array"""
-def Points(array, *args, **kwargs):
-    """Convert array to Points"""
-    a = N.ascontiguousarray(array, dtype=context.current_precision_short())
-    if len(a.shape)>2:
-        raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
-    s = array_to_stdvector_size_t( a.shape )
-    return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())( a.ravel( order='F' ), s, *args, **kwargs )
 
 """Construct Identity object from list of SingleOutputs"""
 def Identity(*args, **kwargs):
@@ -161,33 +155,6 @@ def Bins( array, *args, **kwargs ):
     if len(a.shape)!=1:
         raise Exception( 'Edges should be 1d array' )
     return R.Bins( a, a.size-1, *args, **kwargs )
-
-"""Construct Histogram object from two arrays: edges and data"""
-def Histogram( edges, data=None, *args, **kwargs ):
-    edges = N.ascontiguousarray(edges, dtype='d')
-    reqsize = (edges.size-1)
-    if data is None:
-        data  = N.zeros(reqsize, dtype='d')
-    else:
-        if reqsize!=data.size:
-            raise Exception( 'Bin edges and data are not consistent (%i and %i)'%( edges.size, data.size ) )
-        data  = N.ascontiguousarray(data,  dtype='d')
-
-    return R.Histogram( data.size, edges, data, *args, **kwargs )
-
-"""Construct Histogram2d object from two arrays: edges and data"""
-def Histogram2d( xedges, yedges, data=None, *args, **kwargs ):
-    xedges = N.ascontiguousarray(xedges, dtype='d')
-    yedges = N.ascontiguousarray(yedges, dtype='d')
-    reqsize = (xedges.size-1)*(yedges.size-1)
-    if data is None:
-        data = N.zeros(reqsize, dtype='d')
-    else:
-        if reqsize!=data.size:
-            raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
-        data = N.ascontiguousarray(data,   dtype='d').ravel(order='F')
-
-    return R.Histogram2d( xedges.size-1, xedges, yedges.size-1, yedges, data, *args, **kwargs )
 
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):
