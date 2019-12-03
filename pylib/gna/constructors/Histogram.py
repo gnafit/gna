@@ -27,7 +27,7 @@ def Histogram2d(arg1, arg2=None, arg3=None, *args, **kwargs):
         if isinstance(arg1, R.TH2):
             xedges = arg1.GetXaxis().get_bin_edges().astype('d')
             yedges = arg1.GetYaxis().get_bin_edges().astype('d')
-            data   = arg1.get_buffer().astype('d').ravel(order='F')
+            data   = arg1.get_buffer().astype('d').ravel() # histogram is already in Fortran/ColumnMajor order
         else:
             raise Exception('Should provide (xedges, yedges[, data]) or (TH2) to construct Histogram2d')
     else:

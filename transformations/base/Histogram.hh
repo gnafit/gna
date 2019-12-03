@@ -45,7 +45,7 @@ public:
    *
    * @return std::vector with copy of data.
    */
-  std::vector<double> data() const { return std::vector<double>(m_data.data(), m_data.data()+m_data.size()); }
+  std::vector<double> dataCopy() const { return std::vector<double>(m_data.data(), m_data.data()+m_data.size()); }
 
   /**
    * @brief Return the size of an array.

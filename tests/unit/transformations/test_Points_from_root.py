@@ -13,19 +13,19 @@ from gna.bindings import DataType, provided_precisions
 from mpl_tools import bindings
 from gna.unittest import *
 
-def test_histogram_v01_TH1D():
-    hist = R.TH1D('testhist', 'testhist', 10, -5, 5)
+def test_points_v01_TH1D():
+    hist = R.TH1D('testhist', 'testhist', 20, -5, 5)
     hist.FillRandom('gaus', 10000)
 
-    p = C.Histogram(hist)
+    p = C.Points(hist)
 
     buf = hist.get_buffer()
     res = p.points.points()
 
     assert np.all(buf==res)
 
-def test_histogram_v02_TH2D():
-    hist = R.TH2D('testhist', 'testhist', 10, -5, 5, 12, -6, 6)
+def test_points_v02_TH2D():
+    hist = R.TH2D('testhist', 'testhist', 20, -5, 5, 24, -6, 6)
     hist.FillRandom('gaus', 10000)
 
     p = C.Points(hist)

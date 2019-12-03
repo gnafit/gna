@@ -82,7 +82,7 @@ def vs_plot_points(outputx, outputy, *args, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
 
 def get_1d_buffer(output, scale=None):
-    buf = output.data().copy()
+    buf = output.single().data().copy()
 
     lims  = N.array(output.datatype().edges)
     width = lims[1:] - lims[:-1]
