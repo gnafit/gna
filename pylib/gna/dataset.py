@@ -128,13 +128,10 @@ class Dataset(object):
             prediction.prediction_ready()
             par_covs.materialize()
             jac.jacobian.func(prediction.prediction)
-            jac_T = ROOT.Transpose()
-            jac_T.transpose.mat(jac.jacobian)
-            product = ROOT.MatrixProduct()
-            product.multiply(jac.jacobian)
-            product.multiply(par_covs.unc_matrix)
-            product.multiply(jac_T.transpose.T)
-            product.product.touch() # Fixme: should be controllable
+
+            product = ROOT.MatrixProductDVDt(jac.jacobian,  par_covs.unc_matrix)
+            product.product.touch()
+
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
 
