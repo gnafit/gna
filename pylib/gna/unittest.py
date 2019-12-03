@@ -45,3 +45,17 @@ else:
             else:
                 return fcn
         return decorator
+
+try:
+    import allure
+    def allure_attach_file(*args, **kwargs):
+        return allure.attach.file(*args, attachment_type=allure.attachment_type.PNG, **kwargs)
+except:
+    def allure_attach_file(*args, **kwargs):
+        pass
+
+try:
+    from gna.graphviz import savegraph
+except:
+    def savegraph(*args, **kwargs):
+        pass

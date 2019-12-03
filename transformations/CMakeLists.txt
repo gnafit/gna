@@ -72,6 +72,7 @@ set(TRANSFORMATION_SOURCES
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/MatrixProductDVDt.cc
   transformations/linalg/Transpose.cc
   # Neutrino physics
   transformations/neutrino/EvisToEe.cc
@@ -226,6 +227,7 @@ set(TRANSFORMATION_HEADERS
   C14Spectrum.hh
   ParCovMatrix.hh
   MatrixProduct.hh
+  MatrixProductDVDt.hh
   Transpose.hh
   GeoNeutrinoFluxNormed.hh
   # Debug

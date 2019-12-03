@@ -2,31 +2,31 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import numpy as N
+import numpy as np
 import os
 import matplotlib as mpl
 from matplotlib import pyplot as P
 from mpl_tools.helpers import savefig
 import pytest
-import allure
+from gna.unittest import allure_attach_file, savegraph
 
 from load import ROOT as R
-from gna.constructors import Points
+from gna import constructors as C
 
 @pytest.mark.parametrize('strategy', [R.GNA.Interpolation.Strategy.Extrapolate, R.GNA.Interpolation.Strategy.Constant])
 @pytest.mark.parametrize('interpolator', [R.InterpLinear, R.InterpExpo, R.InterpLog, R.InterpLogx])
 def test_interpolators(interpolator, strategy, tmp_path):
     '''Test various interpolators'''
 
-    segments   = N.arange(1.0, 10.1, 1.5, dtype='d')
-    segments_t = Points(segments)
+    segments   = np.arange(1.0, 10.1, 1.5, dtype='d')
+    segments_t = C.Points(segments)
 
-    points   = N.stack([N.linspace(0.0+i, 12.+i, 61, dtype='d') for i in [0, -0.1, 0.1, 0.3, 0.5]]).T
-    points_t = Points(points)
+    points   = np.stack([np.linspace(0.0+i, 12.+i, 61, dtype='d') for i in [0, -0.1, 0.1, 0.3, 0.5]]).T
+    points_t = C.Points(points)
 
-    fcn = N.exp( -(segments-segments[0])*0.5 )
-    fcn = N.exp(segments**(-0.5))
-    fcn_t = Points(fcn)
+    fcn = np.exp( -(segments-segments[0])*0.5 )
+    fcn = np.exp(segments**(-0.5))
+    fcn_t = C.Points(fcn)
 
     ie = interpolator()
 
@@ -56,6 +56,13 @@ def test_interpolators(interpolator, strategy, tmp_path):
         break
 
     ax.legend(loc='upper right')
-    path = os.path.join(str(tmp_path), '{}_{}.png'.format(ie.__class__.__name__, strategy_name))
+
+    suffix = '{}_{}'.format(ie.__class__.__name__, strategy_name)
+
+    path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
-    allure.attach.file(path, attachment_type=allure.attachment_type.PNG)
+    allure_attach_file(path)
+
+    path = os.path.join(str(tmp_path), suffix+'_graph.png')
+    savegraph(points_t.points, path, verbose=False)
+    allure_attach_file(path)

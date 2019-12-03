@@ -7,6 +7,7 @@ MatrixProductDVDt::MatrixProductDVDt() {
         .input("left")
         .input("square")
         .output("product")
+        .label("dvdt")
         .types(&TypesFunctions::if2d<0>)
         .types(&TypesFunctions::ifSquare<1>,&TypesFunctions::if2d<1>)
         .types(&MatrixProductDVDt::checkTypes)
@@ -34,8 +35,7 @@ void MatrixProductDVDt::checkTypes(TypesFunctionArgs& fargs) {
             throw std::runtime_error(msg);
     }
 
-    rets[0] = DataType().points().shape(left.shape[0], left.shape[1]);
-
+    rets[0] = DataType().points().shape(left.shape[0], left.shape[0]);
 }
 
 void MatrixProductDVDt::product(FunctionArgs& fargs) {
