@@ -14,6 +14,7 @@ from gna import context
 # Import constructors, defined in the submodules
 from Points import Points
 from Histogram import Histogram
+from Histogram import Histogram2d
 
 def OutputDescriptors(outputs):
     descriptors=[]
