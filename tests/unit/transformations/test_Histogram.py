@@ -97,8 +97,6 @@ def test_histogram_v02_2d(tmp_path):
     savegraph(hist.hist, path)
     allure_attach_file(path)
 
-    plt.show()
-
     # Test consistency
     assert np.all(res==data)
     assert np.all(edgesx==edgesx_dt)
