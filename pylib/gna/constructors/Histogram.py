@@ -38,6 +38,7 @@ def Histogram2d(arg1, arg2=None, arg3=None, *args, **kwargs):
         if arg3 is None:
             data = np.zeros(reqsize, dtype='d')
         else:
+            data = arg3
             if reqsize!=data.size:
                 raise Exception( 'Bin edges and data are not consistent (%i,%i and %i)'%( xedges.size, yedges.size, data.size ) )
             data = np.ascontiguousarray(data, dtype='d').ravel(order='F')

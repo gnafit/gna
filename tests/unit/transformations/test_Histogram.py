@@ -9,32 +9,31 @@ from matplotlib import pyplot as plt
 import numpy as np
 import gna.constructors as C
 from gna import context
+from mpl_toolkits.mplot3d import Axes3D
 from mpl_tools import bindings
 from mpl_tools.helpers import savefig
 import os
 from gna.unittest import *
 
-def test_histogram_v01_TH1D(tmp_path):
-    rhist = R.TH1D('testhist', 'testhist', 20, -5, 5)
-    rhist.FillRandom('gaus', 10000)
+def test_histogram_v01_1d(tmp_path):
+    edges = np.logspace(-3, 3, 40.0)
+    data  = np.arange(1.0, edges.size, dtype='d')
+    hist = C.Histogram(edges, data)
 
-    hist = C.Histogram(rhist)
-
-    buf = rhist.get_buffer()
     res = hist.hist.hist()
+    edges_dt = np.array(hist.hist.hist.datatype().edges)
 
     # Plot
     fig = plt.figure()
     ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel('X label')
+    ax.set_xlabel('X label, log scale')
     ax.set_ylabel('entries')
-    ax.set_title('Histogram')
+    ax.set_title('Example histogram')
+    ax.set_xscale('log')
 
-    rhist.plot(alpha=0.5, linestyle='dashed', label='ROOT histogram')
-    hist.hist.hist.plot_hist(alpha=0.5, linestyle='dashdot', label='GNA histogram')
-
+    hist.hist.hist.plot_hist(label='label')
     ax.legend()
 
     suffix = 'histogram1d'
@@ -47,33 +46,31 @@ def test_histogram_v01_TH1D(tmp_path):
     allure_attach_file(path)
 
     # Test consistency
-    assert np.all(buf==res)
+    assert np.all(res==data)
+    assert np.all(edges==edges_dt)
 
-def test_histogram_v02_TH2D(tmp_path):
-    rhist = R.TH2D('testhist', 'testhist', 20, 0, 10, 24, 0, 12)
+def test_histogram_v02_2d(tmp_path):
+    edgesx = np.logspace(0, 3, 6.0, base=2.0)
+    edgesy = np.linspace(0, 10, 20.0)
+    data  = np.arange(1.0, (edgesx.size-1)*(edgesy.size-1)+1, dtype='d').reshape(edgesx.size-1, edgesy.size-1)
 
-    xyg=R.TF2("xyg","exp([0]*x)*exp([1]*y)", 0, 10, 0, 12)
-    xyg.SetParameter(0, -1/2.)
-    xyg.SetParameter(1, -1/8.)
-    R.gDirectory.Add( xyg )
-
-    rhist.FillRandom('xyg', 10000)
-
-    hist = C.Histogram2d(rhist)
-
-    buf = rhist.get_buffer().T
+    hist = C.Histogram2d(edgesx, edgesy, data)
     res = hist.hist.hist()
+
+    edgesx_dt = np.array(hist.hist.hist.datatype().edgesNd[0])
+    edgesy_dt = np.array(hist.hist.hist.datatype().edgesNd[1])
 
     # Plot
     fig = plt.figure()
     ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel('X label')
-    ax.set_ylabel('Y label')
-    ax.set_title('ROOT histogram')
+    ax.set_xlabel('X (column), log scale')
+    ax.set_ylabel('Y row')
+    ax.set_title('2d histogram example')
+    ax.set_xscale('log')
 
-    rhist.pcolorfast(colorbar=True)
+    hist.hist.hist.plot_pcolor(colorbar=True)
 
     suffix = 'histogram2d'
     path = os.path.join(str(tmp_path), suffix+'.png')
@@ -81,16 +78,17 @@ def test_histogram_v02_TH2D(tmp_path):
     allure_attach_file(path)
 
     fig = plt.figure()
-    ax = plt.subplot( 111 )
+    ax = plt.subplot( 111, projection='3d' )
     ax.minorticks_on()
     ax.grid()
-    ax.set_xlabel('X label')
-    ax.set_ylabel('Y label')
-    ax.set_title('GNA histogram')
+    ax.set_xlabel('X (column)')
+    ax.set_ylabel('Y (row)')
+    ax.set_title('2d histogram example (3d)')
+    ax.azim-=70
 
-    hist.hist.hist.plot_pcolorfast(colorbar=True)
+    hist.hist.hist.plot_bar3d(cmap=True, colorbar=True)
 
-    suffix = 'histogram2d'
+    suffix = 'histogram2d_3d'
     path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
@@ -99,8 +97,12 @@ def test_histogram_v02_TH2D(tmp_path):
     savegraph(hist.hist, path)
     allure_attach_file(path)
 
+    plt.show()
+
     # Test consistency
-    assert np.all(buf==res)
+    assert np.all(res==data)
+    assert np.all(edgesx==edgesx_dt)
+    assert np.all(edgesy==edgesy_dt)
 
 if __name__ == "__main__":
     run_unittests(globals())
