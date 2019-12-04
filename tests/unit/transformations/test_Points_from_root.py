@@ -30,7 +30,7 @@ def test_points_v02_TH2D():
 
     p = C.Points(hist)
 
-    buf = hist.get_buffer()
+    buf = hist.get_buffer().T
     res = p.points.points()
 
     assert np.all(buf==res)

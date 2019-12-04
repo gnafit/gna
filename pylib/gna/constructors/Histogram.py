@@ -8,7 +8,7 @@ def Histogram(arg1, arg2=None, *args, **kwargs):
     if arg2 is None:
         if isinstance(arg1, R.TH1):
             edges = arg1.GetXaxis().get_bin_edges().astype('d')
-            data  = arg1.get_buffer().astype('d')
+            data  = np.ascontiguousarray(arg1.get_buffer().T, dtype='d') # Histogram buffer is transposed (y, x)
         else:
             edges = np.ascontiguousarray(arg1, dtype='d')
             data  = np.zeros(edges.size-1, dtype='d')
@@ -27,7 +27,7 @@ def Histogram2d(arg1, arg2=None, arg3=None, *args, **kwargs):
         if isinstance(arg1, R.TH2):
             xedges = arg1.GetXaxis().get_bin_edges().astype('d')
             yedges = arg1.GetYaxis().get_bin_edges().astype('d')
-            data   = arg1.get_buffer().astype('d').ravel() # histogram is already in Fortran/ColumnMajor order
+            data   = np.ascontiguousarray(arg1.get_buffer().T, dtype='d').ravel(order='F') # histogram buffer is transposed (y, x)
         else:
             raise Exception('Should provide (xedges, yedges[, data]) or (TH2) to construct Histogram2d')
     else:
