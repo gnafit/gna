@@ -13,7 +13,7 @@ from mpl_tools import bindings
 import os
 from gna.unittest import *
 
-def test_histogram_v01_TH1D(tmp_path='output'):
+def test_histogram_v01_TH1D(tmp_path):
     rhist = R.TH1D('testhist', 'testhist', 20, -5, 5)
     rhist.FillRandom('gaus', 10000)
 
@@ -48,7 +48,7 @@ def test_histogram_v01_TH1D(tmp_path='output'):
     # Test consistency
     assert np.all(buf==res)
 
-def test_histogram_v02_TH2D(tmp_path='output'):
+def test_histogram_v02_TH2D(tmp_path):
     rhist = R.TH2D('testhist', 'testhist', 20, 0, 10, 24, 0, 12)
 
     xyg=R.TF2("xyg","exp([0]*x)*exp([1]*y)", 0, 10, 0, 12)
