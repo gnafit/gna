@@ -12,7 +12,7 @@ transformation from the namespace. Let us look at the example:
 
 .. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
     :linenos:
-    :lines: 4-64, 70
+    :lines: 4-64, 68
     :emphasize-lines: 30
     :caption: :download:`04_weightedsum.py <../../../macro/tutorial/variables/04_weightedsum.py>`
 
@@ -57,7 +57,7 @@ Note, that ``print()`` method now prints the variables on which ``GNAObject`` de
 
 After initializing the object we make four plots:
 
-.. figure:: ../../img/tutorial/04_weightedsum.png
+.. figure:: ../../img/tutorial/variables/04_weightedsum.png
     :align: center
 
     A set of ``WeightedSum`` plots for different values of the parameters.
@@ -89,7 +89,7 @@ Now let us repeat the example above in a different setting.
 
 .. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
     :linenos:
-    :lines: 4-57,63
+    :lines: 4-57,61
     :emphasize-lines: 35-36
     :caption: :download:`05_weightedsum_nested.py <../../../macro/tutorial/variables/05_weightedsum_nested.py>`
 
@@ -97,7 +97,7 @@ We define two sets of variables. Parameters :math:`a` and :math:`b` in the globa
 :math:`b` and :math:`c` in namespace `group`.
 
 .. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
-    :lines: 16-21
+    :lines: 16-20
 
 Then we create two instances of ``WeightedSum`` with similar inputs, but depending on different variables. First:
 
@@ -139,7 +139,7 @@ Instances of ``WeightedSum`` depend on different sets of variables. We then plot
 .. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
     :lines: 53-54
 
-.. figure:: ../../img/tutorial/05_weightedsum_nested.png
+.. figure:: ../../img/tutorial/variables/05_weightedsum_nested.png
     :align: center
 
     A set of ``WeightedSum`` plots for different values of the parameters.
