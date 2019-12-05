@@ -82,7 +82,7 @@ def Sum(outputs=None, **kwargs):
 def MultiSum(outputs=None, **kwargs):
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
     if outputs is None:
-        return cls(*args, **kwargs)
+        return cls(**kwargs)
 
     return cls(OutputDescriptors(outputs), **kwargs)
 
