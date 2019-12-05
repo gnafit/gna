@@ -65,29 +65,26 @@ def Dummy(shape, name, varnames, *args, **kwargs):
     return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
 
 """Construct Identity object from list of SingleOutputs"""
-def Identity(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def Identity(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(**kwargs)
 
-    return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.IdentityT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
-def Sum(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def Sum(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(**kwargs)
 
-    return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
-def MultiSum(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def MultiSum(outputs=None, **kwargs):
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
     if outputs is None:
         return cls(*args, **kwargs)
 
-    return cls(OutputDescriptors(outputs), *args, **kwargs)
+    return cls(OutputDescriptors(outputs), **kwargs)
 
 def PolyRatio(nominator=[], denominator=[], *args, **kwargs):
     nominator = stdvector(nominator, 'string')
@@ -116,38 +113,34 @@ def EnergyResolution(weights, *args, **kwargs):
     return R.EnergyResolution(stdvector(weights), *args, **kwargs)
 
 """Construct SumBroadcast object from list of SingleOutputs"""
-def SumBroadcast(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def SumBroadcast(outputs=None, **kwargs):
     if outputs is None:
-        return R.SumBroadcast(*args, **kwargs)
+        return R.SumBroadcast(**kwargs)
 
-    return R.SumBroadcast(OutputDescriptors(outputs), *args, **kwargs)
+    return R.SumBroadcast(OutputDescriptors(outputs), **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def Product(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def Product(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(**kwargs)
 
-    return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def ProductBC(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def ProductBC(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(*args, **kwargs)
+        return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(**kwargs)
 
-    return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+    return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
-def Exp(*args, **kwargs):
-    outputs = kwargs.pop('outputs', None)
+def Exp(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(*args, **kwargs)
-    return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(OutputDescriptors(outputs), *args, **kwargs)
+        return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(**kwargs)
+    return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Bins object from numpy array"""
-def Bins( array, *args, **kwargs ):
+def Bins(array, *args, **kwargs):
     """Convert array to Points"""
     a = N.ascontiguousarray(array, dtype='d')
     if len(a.shape)!=1:
