@@ -36,6 +36,7 @@ public:
   InterpBase();                                                                                                ///< Constructor.
   InterpBase(SingleOutput& x, SingleOutput& newx);                                                             ///< Constructor.
   InterpBase(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                                            ///< Constructor.
+  virtual ~InterpBase() {};
 
   TransformationDescriptor add_transformation(const std::string& name="");
   void bind_transformations();
