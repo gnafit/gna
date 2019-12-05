@@ -3,13 +3,14 @@
 from __future__ import print_function
 from sys import argv
 from os import environ, path, makedirs
-from mpl_tools.helpers import savefig
-from gna.graphviz import savegraph
 
 # Setup headless mode
 if '--batch' in argv or not environ.get('DISPLAY', ''):
     import matplotlib
     matplotlib.use('Agg')
+
+from mpl_tools.helpers import savefig
+from gna.graphviz import savegraph
 
 # Robust output filename generating routine
 def tutorial_image_name(ext, suffix=''):

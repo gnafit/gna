@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig
 import load
 from gna.env import env
 import gna.constructors as C
 import numpy as np
 from matplotlib import pyplot as plt
 from gna.bindings import common
-from gna.tutorial import tutorial_image_name
 
 # Make a variable for global namespace
 ns = env.globalns
@@ -61,8 +61,6 @@ label = 'a={}, b={}, c={}'.format(w1.value(), w2.value(), w3.value())
 wsum.sum.sum.plot_vs(x, label=label)
 
 ax.legend(loc='lower right')
-
-from mpl_tools.helpers import savefig
 
 
 savefig(tutorial_image_name('png'))

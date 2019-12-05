@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
+
 
 # Create numpy arrays for 1d and 2d cases
 narray1 = np.arange(5, 10)
@@ -31,9 +31,7 @@ parray2.points.points.plot('-s', label='columns of 2d')
 
 ax.legend(loc='upper left')
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-savefig('output/tutorial/'+oname)
+
+savefig(tutorial_image_name('png'))
 
 plt.show()

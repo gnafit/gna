@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -43,8 +43,8 @@ hist.hist.hist.plot_bar(label='histogram 1 (bar)', alpha=0.6)
 ax.legend()
 
 from mpl_tools.helpers import savefig
-from sys import argv
-oname = argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-savefig('output/tutorial/'+oname)
+
+
+savefig(tutorial_image_name('png'))
 
 plt.show()

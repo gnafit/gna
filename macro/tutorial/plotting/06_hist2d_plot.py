@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -22,9 +22,9 @@ narray = np.exp(-0.5*(X-cx[15])**2/150.0**2 - 0.5*(Y-cy[20])**2/0.10**2)
 # and edges, sotred in `edges`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
+
+
+
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -35,7 +35,7 @@ ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_pcolormesh(colorbar=True)
 
-savefig(oname, suffix='_pcolormesh')
+savefig(tutorial_image_name('png', suffix='pcolormesh'))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -46,6 +46,6 @@ ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_pcolor(colorbar=True)
 
-savefig(oname, suffix='_pcolor')
+savefig(tutorial_image_name('png', suffix='pcolor'))
 
 plt.show()

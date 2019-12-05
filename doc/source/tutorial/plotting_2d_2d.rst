@@ -14,7 +14,7 @@ axis.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/03_matshow.py
     :linenos:
-    :lines: 4-26,32
+    :lines: 4-26,30
     :emphasize-lines: 22
     :caption: :download:`03_matshow.py <../../../macro/tutorial/plotting/03_matshow.py>`
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -21,9 +21,9 @@ hist1 = C.Histogram(edges, narray1)
 hist2 = C.Histogram(edges, narray2)
 hist3 = C.Histogram(edges, narray3)
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
+
+
+
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -39,7 +39,7 @@ hist2.hist.hist.plot_hist(label='exp(-)')
 hist3.hist.hist.plot_hist(label='gauss')
 
 ax.legend()
-savefig(oname, suffix='_hist')
+savefig(tutorial_image_name('png', suffix='hist'))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -55,7 +55,7 @@ hist2.hist.hist.plot_bar(label='exp(-)', alpha=0.4)
 hist3.hist.hist.plot_bar(label='gauss' , alpha=0.4)
 
 ax.legend()
-savefig(oname, suffix='_bar1')
+savefig(tutorial_image_name('png', suffix='bar1'))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -71,6 +71,6 @@ hist2.hist.hist.plot_bar(label='exp(-)', divide=3, shift=1)
 hist3.hist.hist.plot_bar(label='gauss' , divide=3, shift=2)
 
 ax.legend()
-savefig(oname, suffix='_bar2')
+savefig(tutorial_image_name('png', suffix='bar2'))
 
 plt.show()

@@ -14,7 +14,7 @@ The method works the same way for both arrays and histograms.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/01_points_plot.py
     :linenos:
-    :lines: 4-32,39
+    :lines: 4-32,37
     :emphasize-lines: 26,27
     :caption: :download:`01_points_plot.py <../../../macro/tutorial/plotting/01_points_plot.py>`
 

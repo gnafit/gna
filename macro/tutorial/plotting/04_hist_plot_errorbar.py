@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -41,9 +41,9 @@ hist.hist.hist.plot_errorbar(yerr='stat', label='with stat errors')
 
 ax.legend(loc='lower center')
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-savefig('output/tutorial/'+oname)
+
+
+
+savefig(tutorial_image_name('png'))
 
 plt.show()

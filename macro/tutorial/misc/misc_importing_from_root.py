@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig
 import load
 import gna.constructors as C
 from matplotlib import pyplot as plt
 from gna.bindings import common
 import ROOT as R
 import itertools as I
-from mpl_tools.helpers import savefig
-from sys import argv
 
-output_filename = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
+
+
+
 
 # Create ROOT objects
 roothist1d = R.TH1D('testhist', 'testhist', 10, -5, 5)
@@ -63,7 +63,7 @@ ax.legend(loc='upper center', ncol=3)
 
 ax.set_ylim(top=ax.get_ylim()[1]*1.1)
 
-savefig(output_filename, suffix='_1d')
+savefig(tutorial_image_name('png', suffix='1d'))
 
 # Check p2
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, figsize=(8, 8),
@@ -98,5 +98,5 @@ p2.points.points.plot_pcolorfast(colorbar=True)
 plt.sca(ax4)
 plt.axis('off')
 
-savefig(output_filename, suffix='_2d')
+savefig(tutorial_image_name('png', suffix='2d'))
 

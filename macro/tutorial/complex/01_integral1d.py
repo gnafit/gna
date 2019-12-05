@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 import load
 from gna.env import env
 import gna.constructors as C
@@ -104,11 +104,11 @@ ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 
 # Save figure and graph as images
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-savefig(oname+'.png')
-from gna.graphviz import savegraph
-savegraph(fcn.sum, oname+'_graph.png')
+
+
+
+savefig(tutorial_image_name('png'))
+
+savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'))
 
 plt.show()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 import load
 from gna.bundle import execute_bundle
 from gna.configurator import NestedDict, uncertaindict, uncertain
@@ -10,7 +10,7 @@ from gna.bindings import common
 from gna import constructors as C
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_tools.helpers import savefig
+
 
 cfg = NestedDict(
     bundle = dict(
@@ -31,8 +31,8 @@ cfg = NestedDict(
 b = execute_bundle(cfg)
 env.globalns.printparameters(labels=True); print()
 
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
+
+
 
 #
 # Prepare inputs
@@ -53,8 +53,8 @@ hist >> b.context.inputs.eres_matrix.values()
 hist >> b.context.inputs.eres.values()
 print( b.context )
 
-from gna.graphviz import savegraph
-savegraph(hist, oname+'_graph.png')
+
+savegraph(hist, tutorial_image_name('png', suffix='graph'))
 
 #
 # Plot
@@ -69,5 +69,5 @@ b.context.outputs.eres.plot_hist(label='Smeared histogram')
 
 ax.legend(loc='upper right')
 
-savefig(oname+'.png')
+savefig(tutorial_image_name('png'))
 plt.show()
