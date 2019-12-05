@@ -81,11 +81,19 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 def vs_plot_points(outputx, outputy, *args, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
 
-def get_1d_buffer(output, scale=None):
+def get_1d_data(output, scale=None):
+    ifNd(output, 1)
+
     buf = output.single().data().copy()
 
-    lims  = N.array(output.datatype().edges)
-    width = lims[1:] - lims[:-1]
+    dtype=output.datatype()
+    if dtype.kind==2:
+        lims = N.array(dtype.edges)
+        width = lims[1:] - lims[:-1]
+    else:
+        lims = N.arange(dtype.shape[0]+1, dtype='d')
+        width = 1.0
+
     if scale is None:
         pass
     elif scale=='width':
@@ -97,7 +105,7 @@ def get_1d_buffer(output, scale=None):
 
     return buf, lims, width
 
-def plot_hist1(output, *args, **kwargs):
+def plot_hist(output, *args, **kwargs):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
@@ -108,22 +116,19 @@ def plot_hist1(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    ifNd(output, 1)
-    ifHist(output)
-
     scale = kwargs.pop('scale',None)
-    height, lims, _ = get_1d_buffer(output, scale=scale)
+    height, lims, _ = get_1d_data(output, scale=scale)
 
     diff=kwargs.pop('diff', None)
     if diff is not None:
         ifSameType(output, diff)
-        height1, lims1, _ = get_1d_buffer(diff, scale)
+        height1, lims1, _ = get_1d_data(diff, scale)
 
         height-=height1
 
     return helpers.plot_hist(lims, height, *args, **kwargs)
 
-def plot_hist1_centers(output, *args, **kwargs):
+def plot_hist_centers(output, *args, **kwargs):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
@@ -134,17 +139,14 @@ def plot_hist1_centers(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    ifNd(output, 1)
-    ifHist(output)
-
-    height, lims, _ = get_1d_buffer(output, scale=kwargs.pop('scale',None))
+    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale',None))
     centers = (lims[1:] + lims[:-1])*0.5
 
     Plotter = kwargs.pop('axis', P)
 
     return Plotter.plot(centers, height, *args, **kwargs )
 
-def bar_hist1( output, *args, **kwargs ):
+def bar_hist( output, *args, **kwargs ):
     """Plot 1-dimensinal histogram using pyplot.bar
 
     executes pyplot.bar(left, height, width, *args, **kwargs) with first two arguments overridden
@@ -157,12 +159,10 @@ def bar_hist1( output, *args, **kwargs ):
 
     returns pyplot.bar() result
     """
-    ifNd(output, 1)
-    ifHist(output)
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
 
-    height, lims, width = get_1d_buffer(output, scale=kwargs.pop('scale',None))
+    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale',None))
     left  = lims[:-1]
 
     if divide:
@@ -174,7 +174,7 @@ def bar_hist1( output, *args, **kwargs ):
 
     return Plotter.bar( left, height, width, *args, **kwargs )
 
-def errorbar_hist1(output, yerr=None, *args, **kwargs):
+def errorbar_hist(output, yerr=None, *args, **kwargs):
     """Plot 1-dimensinal histogram using pyplot.errorbar
 
     executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with x, y and xerr overridden
@@ -186,12 +186,9 @@ def errorbar_hist1(output, yerr=None, *args, **kwargs):
 
     returns pyplot.errorbar() result
     """
-    ifNd(output, 1)
-    ifHist(output)
-
     scale = kwargs.pop('scale', None)
 
-    Y, lims, width = get_1d_buffer(output, scale=scale)
+    Y, lims, width = get_1d_data(output, scale=scale)
 
     X   =(lims[1:]+lims[:-1])*0.5
     Xerr=width*0.5
@@ -225,15 +222,20 @@ def get_2d_buffer(output, transpose=False, mask=None):
 
     return buf
 
-def get_hist2d_data(output, kwargs):
+def get_2d_data(output, kwargs):
     ifNd(output, 2)
-    ifHist(output)
 
     mask      = kwargs.pop( 'mask', None )
     transpose = kwargs.pop( 'transpose', False )
 
     dtype=output.datatype()
-    xedges, yedges = N.array(dtype.edgesNd[0]), N.array(dtype.edgesNd[1])
+
+    if dtype.kind == 2:
+        xedges, yedges = N.array(dtype.edgesNd[0]), N.array(dtype.edgesNd[1])
+    else:
+        xedges = N.arange(dtype.shape[0]+1, dtype='d')
+        yedges = N.arange(dtype.shape[1]+1, dtype='d')
+
     if transpose:
         xedges, yedges=yedges, xedges
 
@@ -251,8 +253,8 @@ def get_bin_width(edges):
 
     return widths[0]
 
-def get_hist2d_data_eq(output, kwargs):
-    buf, xedges, yedges = get_hist2d_data(output, kwargs)
+def get_2d_data_eq(output, kwargs):
+    buf, xedges, yedges = get_2d_data(output, kwargs)
 
     xw = get_bin_width(xedges)
     yw = get_bin_width(yedges)
@@ -289,9 +291,9 @@ def colorbar_or_not_3d(res, cbaropt, mappable=None, cmap=None):
 
     return res, cbar
 
-def pcolorfast_hist2(output, *args, **kwargs):
+def pcolorfast(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
-    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output, kwargs)
+    buf, xe, xedges, yw, yedges = get_2d_data_eq(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
     x = [yedges[0], yedges[-1]]
     y = [xedges[0], xedges[-1]]
@@ -301,8 +303,8 @@ def pcolorfast_hist2(output, *args, **kwargs):
 
     return colorbar_or_not(res, colorbar)
 
-def pcolormesh_hist2(output, *args, **kwargs):
-    buf, xedges, yedges = get_hist2d_data(output, kwargs)
+def pcolormesh(output, *args, **kwargs):
+    buf, xedges, yedges = get_2d_data(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
@@ -311,8 +313,8 @@ def pcolormesh_hist2(output, *args, **kwargs):
 
     return colorbar_or_not(res, colorbar)
 
-def pcolor_hist2(output, *args, **kwargs):
-    buf, xedges, yedges = get_hist2d_data(output, kwargs)
+def pcolor(output, *args, **kwargs):
+    buf, xedges, yedges = get_2d_data(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
@@ -321,9 +323,9 @@ def pcolor_hist2(output, *args, **kwargs):
 
     return colorbar_or_not(res, colorbar)
 
-def imshow_hist2(output, *args, **kwargs):
+def imshow(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
-    buf, xe, xedges, yw, yedges = get_hist2d_data_eq(output, kwargs)
+    buf, xe, xedges, yw, yedges = get_2d_data_eq(output, kwargs)
     colorbar  = kwargs.pop( 'colorbar', None )
 
     extent = [ yedges[0], yedges[-1], xedges[0], xedges[-1] ]
@@ -348,8 +350,8 @@ def matshow(output, *args, **kwargs):
 
     return colorbar_or_not(res, colorbar)
 
-def surface_hist2(output, *args, **kwargs):
-    Z, xedges, yedges = get_hist2d_data(output, kwargs)
+def surface(output, *args, **kwargs):
+    Z, xedges, yedges = get_2d_data(output, kwargs)
 
     xc=(xedges[1:]+xedges[:-1])*0.5
     yc=(yedges[1:]+yedges[:-1])*0.5
@@ -382,8 +384,8 @@ def apply_colors(buf, kwargs, colorsname):
     kwargs[colorsname] = res
     return res, cmap
 
-def wireframe_hist2(output, *args, **kwargs):
-    Z, xedges, yedges = get_hist2d_data(output, kwargs)
+def wireframe(output, *args, **kwargs):
+    Z, xedges, yedges = get_2d_data(output, kwargs)
 
     xc=(xedges[1:]+xedges[:-1])*0.5
     yc=(yedges[1:]+yedges[:-1])
@@ -430,8 +432,8 @@ def wireframe_points_vs(output, xmesh, ymesh, *args, **kwargs):
     res = ax.plot_wireframe(X, Y, Z, *args, **kwargs)
     return res
 
-def bar3d_hist2(output, *args, **kwargs):
-    Zw, xedges, yedges = get_hist2d_data(output, kwargs)
+def bar3d(output, *args, **kwargs):
+    Zw, xedges, yedges = get_2d_data(output, kwargs)
 
     xw=xedges[1:]-xedges[:-1]
     yw=yedges[1:]-yedges[:-1]
@@ -460,22 +462,22 @@ def bar3d_hist2(output, *args, **kwargs):
 
 def bind():
     for p in provided_precisions:
-        setattr( R.SingleOutputT(p), 'plot',      plot_points )
-        setattr( R.SingleOutputT(p), 'plot_vs',   plot_vs_points )
-        setattr( R.SingleOutputT(p), 'vs_plot',   vs_plot_points )
-        setattr( R.SingleOutputT(p), 'plot_bar',  bar_hist1 )
-        setattr( R.SingleOutputT(p), 'plot_hist', plot_hist1 )
-        setattr( R.SingleOutputT(p), 'plot_hist_centers', plot_hist1_centers )
-        setattr( R.SingleOutputT(p), 'plot_errorbar', errorbar_hist1 )
-        setattr( R.SingleOutputT(p), 'plot_matshow', matshow )
+        setattr( R.SingleOutputT(p), 'plot',              plot_points )
+        setattr( R.SingleOutputT(p), 'plot_vs',           plot_vs_points )
+        setattr( R.SingleOutputT(p), 'vs_plot',           vs_plot_points )
+        setattr( R.SingleOutputT(p), 'plot_bar',          bar_hist )
+        setattr( R.SingleOutputT(p), 'plot_hist',         plot_hist )
+        setattr( R.SingleOutputT(p), 'plot_hist_centers', plot_hist_centers )
+        setattr( R.SingleOutputT(p), 'plot_errorbar',     errorbar_hist )
+        setattr( R.SingleOutputT(p), 'plot_matshow',      matshow )
 
-        setattr( R.SingleOutputT(p), 'plot_pcolorfast', pcolorfast_hist2 )
-        setattr( R.SingleOutputT(p), 'plot_pcolormesh', pcolormesh_hist2 )
-        setattr( R.SingleOutputT(p), 'plot_pcolor',     pcolor_hist2 )
-        setattr( R.SingleOutputT(p), 'plot_imshow',     imshow_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_pcolorfast',   pcolorfast )
+        setattr( R.SingleOutputT(p), 'plot_pcolormesh',   pcolormesh )
+        setattr( R.SingleOutputT(p), 'plot_pcolor',       pcolor )
+        setattr( R.SingleOutputT(p), 'plot_imshow',       imshow )
 
-        setattr( R.SingleOutputT(p), 'plot_bar3d',      bar3d_hist2 )
-        setattr( R.SingleOutputT(p), 'plot_surface',    surface_hist2 )
-        setattr( R.SingleOutputT(p), 'plot_wireframe',  wireframe_hist2 )
+        setattr( R.SingleOutputT(p), 'plot_bar3d',        bar3d )
+        setattr( R.SingleOutputT(p), 'plot_surface',      surface )
+        setattr( R.SingleOutputT(p), 'plot_wireframe',    wireframe )
 
-        setattr( R.SingleOutputT(p), 'plot_wireframe_vs',  wireframe_points_vs )
+        setattr( R.SingleOutputT(p), 'plot_wireframe_vs', wireframe_points_vs )

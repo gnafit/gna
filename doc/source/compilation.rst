@@ -141,8 +141,8 @@ Incremental rebuild can be issued one of the commands:
    cmake --build build
 
 
-Troubleshouting ABI mismatch with old ROOT versions
-------------------------------------------
+Troubleshooting ABI mismatch with old ROOT versions
+---------------------------------------------------
 
 If you are using old ROOT versions (below 6.08) it is possible to get an ABI
 mismatch errors when compiling with GCC 5.X or newer. Those errors are caused
