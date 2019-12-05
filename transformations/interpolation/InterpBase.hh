@@ -29,7 +29,7 @@
  */
 
 class InterpBase: public InSegment,
-                    public TransformationBind<InterpBase> {
+                  public TransformationBind<InterpBase> {
 public:
   using TransformationBind<InterpBase>::transformation_;
 
