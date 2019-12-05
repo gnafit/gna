@@ -209,7 +209,7 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
 
     Plotter = kwargs.pop('axis', P)
 
-    return Plotter.errorbar(X, Y, Xerr, Yerr, Xerr, *args, **kwargs )
+    return Plotter.errorbar(X, Y, Yerr, Xerr, *args, **kwargs )
 
 def get_2d_buffer(output, transpose=False, mask=None):
     buf = output.data().copy()
