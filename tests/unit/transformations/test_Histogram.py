@@ -16,7 +16,7 @@ import os
 from gna.unittest import *
 
 def test_histogram_v01_1d(tmp_path):
-    edges = np.logspace(-3, 3, 40.0)
+    edges = np.logspace(-3, 3, 40)
     data  = np.arange(1.0, edges.size, dtype='d')
     hist = C.Histogram(edges, data)
 
@@ -51,7 +51,7 @@ def test_histogram_v01_1d(tmp_path):
 
 def test_histogram_v02_2d(tmp_path):
     edgesx = np.logspace(0, 3, 6.0, base=2.0)
-    edgesy = np.linspace(0, 10, 20.0)
+    edgesy = np.linspace(0, 10, 20)
     data  = np.arange(1.0, (edgesx.size-1)*(edgesy.size-1)+1, dtype='d').reshape(edgesx.size-1, edgesy.size-1)
 
     hist = C.Histogram2d(edgesx, edgesy, data)
