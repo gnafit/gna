@@ -104,9 +104,6 @@ ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 
 # Save figure and graph as images
-
-
-
 savefig(tutorial_image_name('png'))
 
 savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'), rankdir='TB')

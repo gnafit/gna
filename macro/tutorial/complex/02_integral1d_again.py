@@ -91,9 +91,6 @@ ax.legend(loc='lower right')
 ymin, ymax = ax.get_ylim()
 
 # Save figure and graph as images
-
-
-
 savefig(tutorial_image_name('png', suffix='1'))
 
 # Do more plotting
@@ -121,16 +118,12 @@ pa.set(0)
 pb.set(0.1)
 plot_sample()
 
-
 # Freeze axis limits and draw bin edges
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
-
 ax.legend(loc='lower right')
 
 savefig(tutorial_image_name('png', suffix='2'))
-
-
 savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

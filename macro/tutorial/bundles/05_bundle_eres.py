@@ -11,7 +11,6 @@ from gna import constructors as C
 import numpy as np
 from matplotlib import pyplot as plt
 
-
 cfg = NestedDict(
     bundle = dict(
         name='detector_eres',
@@ -30,9 +29,6 @@ cfg = NestedDict(
 )
 b = execute_bundle(cfg)
 env.globalns.printparameters(labels=True); print()
-
-
-
 
 #
 # Prepare inputs
@@ -53,12 +49,11 @@ hist >> b.context.inputs.eres_matrix.values()
 hist >> b.context.inputs.eres.values()
 print( b.context )
 
-
-savegraph(hist, tutorial_image_name('png', suffix='graph'), rankdir='TB')
-
 #
 # Plot
 #
+savegraph(hist, tutorial_image_name('png', suffix='graph'), rankdir='TB')
+
 fig = plt.figure()
 ax = plt.subplot(111, xlabel='E, MeV', ylabel='', title='Energy smearing')
 ax.minorticks_on()

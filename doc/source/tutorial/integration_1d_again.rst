@@ -16,7 +16,7 @@ Here is the code:
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 31,34,35,44,107-119
+    :emphasize-lines: 31,34,35,44,104-116
     :caption: :download:`02_integral1d_again.py <../../../macro/tutorial/complex/02_integral1d_again.py>`
 
 First of all, instead of passing the bin edges as an argument we make a histogram first.
@@ -67,12 +67,12 @@ In order to illustrate the impact of the parameters on the results let us create
 :eq:`integral_1d_function`, its integrals for the current values of the parameters:
 
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
-    :lines: 110-114
+    :lines: 107-111
 
 Now we make three plots for different values of the parameters:
 
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
-    :lines: 116-122
+    :lines: 113-119
 
 The result is shown on the figure below:
 

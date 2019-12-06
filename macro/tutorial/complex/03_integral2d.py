@@ -69,9 +69,6 @@ ax.set_aspect('equal')
 integrator.hist.hist.plot_pcolormesh(colorbar=True)
 
 # Save figure
-
-
-
 savefig(tutorial_image_name('png'))
 
 # Add integration points and save
@@ -91,10 +88,8 @@ ax.view_init(elev=17., azim=-33)
 integrator.hist.hist.plot_surface(cmap='viridis', colorbar=True)
 sin_t.sin.result.plot_wireframe_vs(X, Y, rstride=8, cstride=8)
 
+# Save the figure and the graph
 savefig(tutorial_image_name('png', suffix='3d'))
-
-
-
 savegraph(sin_t.sin, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

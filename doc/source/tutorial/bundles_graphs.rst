@@ -121,14 +121,14 @@ After executing the bundle let us make an input:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres.py
     :linenos:
-    :lines: 40-48
+    :lines: 36-44
 
 Here we defined a histogram for energy between 0 and 12 MeV with three peaks: at 1 MeV, 6 MeV and 10 MeV. The histogram
-output is then bound to the inputs as follows:
+output is then bind to the inputs as follows:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres.py
     :linenos:
-    :lines: 52-54
+    :lines: 48-50
 
 The last line prints the contents of the context:
 
@@ -194,7 +194,7 @@ Let us look at the configuration in more details. First of all we defined indice
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 20-22
+    :lines: 18-20
 
 We assume that there are three detectors `D1`, `D2` and `D3` with same energy resolution parameters. In the same time,
 each of the detectors has two zones `z1` and `z2` with own parameters. The zone index `z` is thus major while the
@@ -203,7 +203,7 @@ detector index `d` is minor. The parameters configuration contains a value and u
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 28-40
+    :lines: 26-38
 
 One may see that there are parameters for more zones in the configuration, but only ones, defined by indices, will be
 read.
@@ -213,7 +213,7 @@ dictionary `names` in the bundle configuration:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 23-25
+    :lines: 21-23
 
 Here we have defined a new name `smearing_matrix` for the `eres_matrix`. Name substitutions are realized by the GNA.
 
@@ -249,14 +249,14 @@ a separate histogram for each detector with the peaks in the different positions
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 57-82
+    :lines: 52-77
 
 We bind the first histogram to the `matrix` input. Each histogram `hist1`, `hist2` and `hist3` is the binded to all the
 inputs of detectors `D1`, `D2` and `D3` respectively.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 90-93
+    :lines: 85-88
 
 We have used `nestsed=True` key that returns all the values in all the nested dictionaries regardless of the structure.
 The full graph now looks as follows:

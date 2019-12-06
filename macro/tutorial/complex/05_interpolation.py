@@ -98,12 +98,7 @@ ax.vlines(edges_data, ymin, ymax, linestyle='--', label='Segment edges', alpha=0
 ax.legend(loc='upper right')
 
 # Save figure and graph as images
-
-
-
 savefig(tutorial_image_name('png'))
-
 savegraph(points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()
-

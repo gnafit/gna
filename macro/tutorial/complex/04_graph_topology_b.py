@@ -144,9 +144,6 @@ dbg2a.debug.setLabel('Debug 2\n(before integral 2)')
 dbg1b.debug.setLabel('Debug 1\n(after integral 1)')
 dbg2b.debug.setLabel('Debug 2\n(after integral 2)')
 
-
-
-
 savegraph(int_points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

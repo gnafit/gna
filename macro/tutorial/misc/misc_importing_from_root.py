@@ -9,10 +9,6 @@ from gna.bindings import common
 import ROOT as R
 import itertools as I
 
-
-
-
-
 # Create ROOT objects
 roothist1d = R.TH1D('testhist', 'testhist', 10, -5, 5)
 roothist2d = R.TH2D('testhist', 'testhist', 20, 0, 10, 24, 0, 12)

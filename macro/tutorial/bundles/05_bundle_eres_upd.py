@@ -11,8 +11,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from gna.bindings import common
 
-
-
 cfg = NestedDict(
     bundle = dict(
         name='detector_eres',
@@ -47,9 +45,6 @@ cfg = NestedDict(
 )
 b = execute_bundle(cfg)
 env.globalns.printparameters(labels=True); print()
-
-
-
 
 #
 # Prepare inputs

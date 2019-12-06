@@ -22,10 +22,6 @@ narray = np.exp(-0.5*(X-15.0)**2/10.0**2 - 0.5*(Y-30.0)**2/3.0**2)
 # and edges, sotred in `edges`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
-
-
-
-
 fig = plt.figure()
 ax = plt.subplot( 111 )
 ax.set_title( 'pcolorfast' )
@@ -60,4 +56,3 @@ hist.hist.hist.plot_matshow(colorbar=True)
 savefig(tutorial_image_name('png', suffix='matshow'))
 
 plt.show()
-

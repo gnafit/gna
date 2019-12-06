@@ -60,7 +60,7 @@ Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 4-24,29-37,62
+    :lines: 4-34,58
     :emphasize-lines: 29
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
@@ -78,7 +78,7 @@ The second method ``plot_imshow()`` is using
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 47
+    :lines: 43
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_imshow.png
@@ -95,7 +95,7 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 58
+    :lines: 54
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_matshow.png
