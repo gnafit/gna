@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from tutorial import tutorial_image_name, savefig
+from gna.tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -67,6 +67,6 @@ hist2.hist.hist.plot_bar(label='exp(-)', divide=3, shift=1)
 hist3.hist.hist.plot_bar(label='gauss' , divide=3, shift=2)
 
 ax.legend()
-savefig(tutorial_image_name('png', suffix='bar2'))
+savefig(tutorial_image_name('png', suffix='bar1'))
 
 plt.show()

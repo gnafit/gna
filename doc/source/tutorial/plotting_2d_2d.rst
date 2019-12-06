@@ -117,7 +117,7 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot.py
    :linenos:
-   :lines: 4-24,29-37,51
+   :lines: 4-37,47
    :emphasize-lines: 29
    :caption: :download:`06_hist2d_plot.py <../../../macro/tutorial/plotting/06_hist2d_plot.py>`
 
