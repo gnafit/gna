@@ -62,7 +62,6 @@ wsum.sum.sum.plot_vs(x, label=label)
 
 ax.legend(loc='lower right')
 
-
 savefig(tutorial_image_name('png'))
 
 plt.show()

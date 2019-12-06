@@ -14,7 +14,7 @@ The method works the same way for both arrays and histograms.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/01_points_plot.py
     :linenos:
-    :lines: 4-32,37
+    :lines: 3-31,35
     :emphasize-lines: 26,27
     :caption: :download:`01_points_plot.py <../../../macro/tutorial/plotting/01_points_plot.py>`
 
@@ -42,7 +42,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 .. literalinclude:: ../../../macro/tutorial/plotting/02_points_plot_vs.py
     :linenos:
-    :lines: 4-28,33
+    :lines: 4-28,32
     :emphasize-lines: 23
     :caption: :download:`02_points_plot_vs.py <../../../macro/tutorial/plotting/02_points_plot_vs.py>`
 
@@ -66,7 +66,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 Plotting histograms
 '''''''''''''''''''
 
-There are two options to plot 1d histograms provided. First one ``plot_hist()`` is producing regular line plot via 
+There are two options to plot 1d histograms provided. First one ``plot_hist()`` is producing regular line plot via
 `pyplot.plot() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot>`_, the second one ``plot_bar()`` is
 passing data to `pyplot.bar() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.bar>`_. See the example
 below.
@@ -76,14 +76,14 @@ histogram that affects how the edges of first and last bins are plotted: they ar
 
 .. literalinclude:: ../../../macro/tutorial/plotting/04_hist_plot.py
     :linenos:
-    :lines: 4-44,50
+    :lines: 4-44,49
     :emphasize-lines: 26,38
     :caption: :download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
 
 .. figure:: ../../img/tutorial/plotting/04_hist_plot.png
     :align: center
 
-    An example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
+    An example ``output.plot_hist()`` and ``output.plot_bar()`` methods for outputs.
 
 .. table:: Keyword options for ``plot_hist()``
 
@@ -91,10 +91,19 @@ histogram that affects how the edges of first and last bins are plotted: they ar
     | `zero_level=0.0` | set the ground level of the histogram |
     +------------------+---------------------------------------+
 
+Histograms may be plotted with `errorbar()` method. See the file
+:download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
+for example.
+
+.. figure:: ../../img/tutorial/plotting/04_hist_plot_errorbar.png
+    :align: center
+
+    An example ``output.plot_errorbar()`` method for outputs.
+
 Overlapping histograms
 ''''''''''''''''''''''
 
-Both plotting methods may be used for plotting multiple histograms. 
+Both plotting methods may be used for plotting multiple histograms.
 
 Line plots
 ++++++++++
@@ -103,7 +112,7 @@ Multiple `plot_hist()` are plotted as regular plots.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
    :linenos:
-   :lines: 4-23,28-41,76
+   :lines: 4-37,72
    :emphasize-lines: 30-32
    :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
@@ -112,7 +121,7 @@ Multiple `plot_hist()` are plotted as regular plots.
 
    Several histograms superimposed in ``plot_hist()`` version.
 
-For the bar version there are two ways to plot overlapping histograms. 
+For the bar version there are two ways to plot overlapping histograms.
 
 Bars' transparency
 ++++++++++++++++++
@@ -121,7 +130,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
-    :lines: 44-57,76
+    :lines: 40-53,72
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
@@ -140,7 +149,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
-    :lines: 60-73,76
+    :lines: 56-69,72
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 

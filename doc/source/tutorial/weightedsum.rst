@@ -12,7 +12,7 @@ transformation from the namespace. Let us look at the example:
 
 .. literalinclude:: ../../../macro/tutorial/variables/04_weightedsum.py
     :linenos:
-    :lines: 4-64, 68
+    :lines: 4-64, 67
     :emphasize-lines: 30
     :caption: :download:`04_weightedsum.py <../../../macro/tutorial/variables/04_weightedsum.py>`
 
@@ -89,7 +89,7 @@ Now let us repeat the example above in a different setting.
 
 .. literalinclude:: ../../../macro/tutorial/variables/05_weightedsum_nested.py
     :linenos:
-    :lines: 4-57,61
+    :lines: 4-57,60
     :emphasize-lines: 35-36
     :caption: :download:`05_weightedsum_nested.py <../../../macro/tutorial/variables/05_weightedsum_nested.py>`
 

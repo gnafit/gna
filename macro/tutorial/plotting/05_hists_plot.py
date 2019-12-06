@@ -21,10 +21,6 @@ hist1 = C.Histogram(edges, narray1)
 hist2 = C.Histogram(edges, narray2)
 hist3 = C.Histogram(edges, narray3)
 
-
-
-
-
 fig = plt.figure()
 ax = plt.subplot( 111 )
 ax.set_title( 'Plot title (left)' )

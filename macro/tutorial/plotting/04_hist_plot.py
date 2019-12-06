@@ -44,7 +44,6 @@ ax.legend()
 
 from mpl_tools.helpers import savefig
 
-
 savefig(tutorial_image_name('png'))
 
 plt.show()

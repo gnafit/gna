@@ -41,9 +41,6 @@ hist.hist.hist.plot_errorbar(yerr='stat', label='with stat errors')
 
 ax.legend(loc='lower center')
 
-
-
-
 savefig(tutorial_image_name('png'))
 
 plt.show()

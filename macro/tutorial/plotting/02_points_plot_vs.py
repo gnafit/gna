@@ -27,7 +27,6 @@ parray_y.points.points.plot_vs(parray_x.points.points, '-o', label='plot Y vs X'
 
 ax.legend(loc='upper right')
 
-
 savefig(tutorial_image_name('png'))
 
 plt.show()

@@ -55,7 +55,6 @@ wsum2.sum.sum.plot_vs(x, label='Weighted sum 2: a={a}, b={b}, c={c}'.format(**ws
 
 ax.legend(loc='lower right')
 
-
 savefig(tutorial_image_name('png'))
 
 plt.show()

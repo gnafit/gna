@@ -24,7 +24,6 @@ ax.set_title( 'Plot title' )
 
 parray2.points.points.plot_matshow(mask=0.0, colorbar=True)
 
-
 savefig(tutorial_image_name('png'))
 
 plt.show()
