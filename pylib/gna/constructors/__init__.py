@@ -23,16 +23,16 @@ def OutputDescriptors(outputs):
     singleoutput = R.SingleOutputT(context.current_precision())
     for output in outputs:
         if isinstance(output, odescr):
-            output = output
+            append = output
         elif isinstance(output, ohandle):
-            output = odescr(output)
+            append = odescr(output)
         elif isinstance(output, singleoutput):
-            output=odescr(output.single())
+            append = odescr(output.single())
         else:
             raise Exception('Expect OutputHandle or SingleOutput object')
-        descriptors.append(output)
+        descriptors.append(append)
 
-    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>*'%(context.current_precision(),context.current_precision()))
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(),context.current_precision()))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -122,9 +122,11 @@ def SumBroadcast(outputs=None, **kwargs):
 """Construct Product object from list of SingleOutputs"""
 def Product(outputs=None, **kwargs):
     if outputs is None:
-        return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(**kwargs)
+        args=()
+    else:
+        args=OutputDescriptors(outputs),
 
-    return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
+    return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
 
 """Construct Product object from list of SingleOutputs"""
 def ProductBC(outputs=None, **kwargs):

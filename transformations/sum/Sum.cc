@@ -52,8 +52,8 @@ namespace GNA {
      */
     template<typename FloatType>
     SumT<FloatType>::SumT(const typename OutputDescriptor::OutputDescriptors& outputs) : SumT(){
-      for(auto& output : outputs){
-        this->add(*output);
+      for(auto output : outputs){
+        this->add(output);
       }
     }
 

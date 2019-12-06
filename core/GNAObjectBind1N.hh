@@ -24,7 +24,6 @@ public:
     using typename GNAObject::OutputDescriptor;
     using typename GNAObject::InputDescriptor;
     using TransformationDescriptor = typename GNAObject::TransformationDescriptorType;
-    using OutputDescriptors = typename OutputDescriptor::OutputDescriptors;
 
     GNAObjectBind1N(const std::string& transformation, const std::string& input, const std::string& output,
                     size_t transformation_offsset, size_t input_offset, size_t output_offset);

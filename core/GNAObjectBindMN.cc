@@ -74,8 +74,8 @@ typename GNAObjectBindMN<FloatType>::OutputDescriptor GNAObjectBindMN<FloatType>
 
 template<typename FloatType>
 void GNAObjectBindMN<FloatType>::add_inputs(const typename GNAObjectBindMN<FloatType>::OutputDescriptors& outputs){
-    for(const auto& output: outputs){
-        add_input(*output);
+    for(auto output: outputs){
+        add_input(output);
     }
 }
 

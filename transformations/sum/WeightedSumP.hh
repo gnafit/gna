@@ -9,7 +9,7 @@ class WeightedSumP: public GNASingleObject,
                     public TransformationBind<WeightedSumP> {
 public:
   WeightedSumP();
-  WeightedSumP(const OutputDescriptor::OutputDescriptors& outputs);
+  WeightedSumP(OutputDescriptor::OutputDescriptors& outputs);
 
   void add(SingleOutput &a, SingleOutput &b);
 

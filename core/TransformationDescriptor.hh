@@ -146,7 +146,7 @@ public:
 
   BaseClass single() override { return *this; }
 
-  typedef std::vector<OutputDescriptorType*> OutputDescriptors;
+  typedef std::vector<OutputDescriptorType> OutputDescriptors;
 };
 
 template<typename SourceFloatType, typename SinkFloatType>

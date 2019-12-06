@@ -43,8 +43,8 @@ namespace GNA {
      */
     template<typename FloatType>
     ProductBCT<FloatType>::ProductBCT(const typename OutputDescriptor::OutputDescriptors& outputs) : ProductBCT<FloatType>(){
-      for(auto& output : outputs){
-        this->multiply(*output);
+      for(auto output : outputs){
+        this->multiply(output);
       }
     }
 
