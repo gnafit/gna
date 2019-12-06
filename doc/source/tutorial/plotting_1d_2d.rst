@@ -21,7 +21,7 @@ The method works the same way for both arrays and histograms.
 When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
 The latter produces the blue line on the following figure while the former produces orange, green and red lines.
 
-.. figure:: ../../img/tutorial/01_points_plot.png
+.. figure:: ../../img/tutorial/plotting/01_points_plot.png
     :align: center
 
     An example ``output.plot()`` method for outputs with 1d and 2d arrays.
@@ -46,7 +46,7 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
     :emphasize-lines: 23
     :caption: :download:`02_points_plot_vs.py <../../../macro/tutorial/plotting/02_points_plot_vs.py>`
 
-.. figure:: ../../img/tutorial/02_points_plot_vs.png
+.. figure:: ../../img/tutorial/plotting/02_points_plot_vs.png
     :align: center
 
     An example ``output_x.plot_vs(output_y)`` method for outputs.
@@ -80,7 +80,7 @@ histogram that affects how the edges of first and last bins are plotted: they ar
     :emphasize-lines: 26,38
     :caption: :download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
 
-.. figure:: ../../img/tutorial/04_hist_plot.png
+.. figure:: ../../img/tutorial/plotting/04_hist_plot.png
     :align: center
 
     An example ``output.plot_hist()`` and ``output.plot_bar()`` method for outputs.
@@ -107,7 +107,7 @@ Multiple `plot_hist()` are plotted as regular plots.
    :emphasize-lines: 30-32
    :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/05_hists_plot_hist.png
+.. figure:: ../../img/tutorial/plotting/05_hists_plot_hist.png
    :align: center
 
    Several histograms superimposed in ``plot_hist()`` version.
@@ -125,7 +125,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/05_hists_plot_bar1.png
+.. figure:: ../../img/tutorial/plotting/05_hists_plot_bar1.png
    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with transparency.
@@ -144,7 +144,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
-.. figure:: ../../img/tutorial/05_hists_plot_bar2.png
+.. figure:: ../../img/tutorial/plotting/05_hists_plot_bar2.png
    :align: center
 
    Several histograms superimposed in ``plot_bar()`` version with shrunk bins.

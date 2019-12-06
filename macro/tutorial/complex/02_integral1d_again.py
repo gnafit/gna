@@ -131,6 +131,6 @@ ax.legend(loc='lower right')
 savefig(tutorial_image_name('png', suffix='2'))
 
 
-savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'))
+savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

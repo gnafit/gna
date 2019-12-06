@@ -95,6 +95,6 @@ savefig(tutorial_image_name('png', suffix='3d'))
 
 
 
-savegraph(sin_t.sin, tutorial_image_name('png', suffix='graph'))
+savegraph(sin_t.sin, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

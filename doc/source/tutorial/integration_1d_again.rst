@@ -49,7 +49,7 @@ recalculated. Multiple transformations should be used in case such a behaviour i
 
 The code produces the following computational chain:
 
-.. figure:: ../../img/tutorial/02_integral1d_again_graph.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_graph.png
     :align: center
 
     Computatinal graph used to integrate function :math:`f(x)=a\sin(x)+b\cos(kx)`. The bin edges are passed via input.
@@ -57,7 +57,7 @@ The code produces the following computational chain:
 Then we repeat the same procedure with cross checking the calculation. The plot below illustrates the variable bin
 widths as well as variable integration orders.
 
-.. figure:: ../../img/tutorial/02_integral1d_again_1.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_1.png
     :align: center
 
     The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function`. Variable bin width and
@@ -76,7 +76,7 @@ Now we make three plots for different values of the parameters:
 
 The result is shown on the figure below:
 
-.. figure:: ../../img/tutorial/02_integral1d_again_2.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_2.png
     :align: center
 
     The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function` for different values of the

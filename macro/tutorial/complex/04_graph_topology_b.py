@@ -147,6 +147,6 @@ dbg2b.debug.setLabel('Debug 2\n(after integral 2)')
 
 
 
-savegraph(int_points, tutorial_image_name('png', suffix='graph'))
+savegraph(int_points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

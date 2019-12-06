@@ -156,7 +156,7 @@ have used `.values()` method that returns an iterator on all the values to avoid
 
 When empty multi-index is provided the resulting graph looks as follows:
 
-.. figure:: ../../img/tutorial/05_bundle_eres_graph.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_graph.png
     :align: center
 
     The resulting graph of the energy resolution bundle for the case of empty index.
@@ -167,7 +167,7 @@ only to define the matrix shape: it does not read the histogram and does not pro
 
 The example produces the following plot:
 
-.. figure:: ../../img/tutorial/05_bundle_eres.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres.png
     :align: center
 
     A histogram with bins at 1 MeV, 6 MeV and 10 MeV smeared with  :Ref:`EnergyResolution` bundle.
@@ -224,7 +224,7 @@ bundle of version `ex02`.
 
 Executing the bundle we produce the following graph:
 
-.. figure:: ../../img/tutorial/05_bundle_eres_upd_graph0.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_upd_graph0.png
     :align: center
 
     The resulting graph of the energy resolution bundle (version `ex02`). Inputs are open.
@@ -261,14 +261,14 @@ inputs of detectors `D1`, `D2` and `D3` respectively.
 We have used `nestsed=True` key that returns all the values in all the nested dictionaries regardless of the structure.
 The full graph now looks as follows:
 
-.. figure:: ../../img/tutorial/05_bundle_eres_upd_graph1.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_upd_graph1.png
     :align: center
 
     The resulting graph of the energy resolution bundle (version `ex02`). Inputs are bound.
 
 And the result of the smearing plotted:
 
-.. figure:: ../../img/tutorial/05_bundle_eres_upd.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_upd.png
     :align: center
 
     Three histograms (`D1`, `D2` and `D3`) smeared with two smear matrices each (`z1` and `z2`).
@@ -281,7 +281,7 @@ parameter `split_transformations`, which is by default `True`. This means that e
 a new transformation: each input taintflag is propagated in separate. If `split_transformations` is set to `False`, all
 the inputs for the same major iteration are handled by the same transformation as shown in the following graph.
 
-.. figure:: ../../img/tutorial/05_bundle_eres_upd_merged_graph0.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_upd_merged_graph0.png
     :align: center
 
     The resulting graph of the energy resolution bundle (version `ex02`) with `split_transformations=False`. Inputs are
@@ -289,7 +289,7 @@ the inputs for the same major iteration are handled by the same transformation a
 
 When the histograms are bound to the inputs, the graph looks as follows:
 
-.. figure:: ../../img/tutorial/05_bundle_eres_upd_merged_graph1.png
+.. figure:: ../../img/tutorial/bundles/05_bundle_eres_upd_merged_graph1.png
     :align: center
 
     The resulting graph of the energy resolution bundle (version `ex02`) with `split_transformations=False`. Inputs are

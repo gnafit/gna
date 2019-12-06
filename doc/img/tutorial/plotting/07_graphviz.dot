@@ -1,0 +1,67 @@
+digraph "" {
+	graph [fontsize=10,
+		labelfontsize=10,
+		layers="variable:transformation",
+		rankdir=TB
+	];
+	node [label="\N"];
+	entry_0000	[label="{{*|[3x4]}|Scaled matrix}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0001_sink	[label=out,
+		shape=point];
+	entry_0000 -> entry_0001_sink	[arrowhead=empty,
+		layer=transformation];
+	entry_0002	[label="{{+|[3x4]}|Sum of matrices}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0002 -> entry_0000	[layer=transformation,
+		sametail=0];
+	entry_0003	[color=azure3,
+		label="{{a|[3x4]}|Scale S}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0003 -> entry_0000	[color=azure3,
+		layer=transformation,
+		sametail=0];
+	entry_0004	[color=azure3,
+		label="{{a|[3x4]}|Sum input:
+P0}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0004 -> entry_0002	[color=azure3,
+		layer=transformation,
+		sametail=0];
+	entry_0005	[color=azure3,
+		label="{{a|[3x4]}|Sum input:
+P1}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0005 -> entry_0002	[color=azure3,
+		layer=transformation,
+		sametail=0];
+	entry_0006	[color=azure3,
+		label="{{a|[3x4]}|Sum input:
+P2}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0006 -> entry_0002	[color=azure3,
+		layer=transformation,
+		sametail=0];
+	entry_0007	[color=azure3,
+		label="{{a|[3x4]}|Sum input:
+P3}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0007 -> entry_0002	[color=azure3,
+		layer=transformation,
+		sametail=0];
+	entry_0008	[color=azure3,
+		label="{{a|[3x4]}|Sum input:
+P4}",
+		layer=transformation,
+		shape=Mrecord];
+	entry_0008 -> entry_0002	[color=azure3,
+		layer=transformation,
+		sametail=0];
+}

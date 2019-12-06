@@ -28,14 +28,14 @@ It should be noted, that
 
 The difference between array-like and histogram-like representation may be seen from the following figures.
 
-.. figure:: ../../img/tutorial/misc_importing_from_root_1d.png
+.. figure:: ../../img/tutorial/misc/misc_importing_from_root_1d.png
    :align: center
 
    1d histograms plotted from ROOT.TH1D, GNA.Histogram and GNA.Points.
 
 When `Points` object is plotted as histogram, it is assumed that first bin starts at 0 and bin width is 1.
 
-.. figure:: ../../img/tutorial/misc_importing_from_root_2d.png
+.. figure:: ../../img/tutorial/misc/misc_importing_from_root_2d.png
    :align: center
 
    2d histograms plotted from ROOT.TH2D, GNA.Histogram2d and GNA.Points.

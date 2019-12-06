@@ -109,6 +109,6 @@ ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4
 
 savefig(tutorial_image_name('png'))
 
-savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'))
+savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

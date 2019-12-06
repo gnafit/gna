@@ -29,6 +29,12 @@ GNA introduces convenience pythonic methods for its types that may be loaded as 
 
 They include the methods for printing and plotting with matplotlib.
 
+Tutorial functions
+""""""""""""""""""
+
+We will use the function `tutorial_image_name()` to generate the proper names for output images.
+The names will be printed to the output. The function call may be replaced by a simple string.
+
 Tutorial options
 """"""""""""""""
 

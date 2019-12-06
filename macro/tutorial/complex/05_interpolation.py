@@ -103,7 +103,7 @@ ax.legend(loc='upper right')
 
 savefig(tutorial_image_name('png'))
 
-savegraph(points, tutorial_image_name('png', suffix='graph'))
+savegraph(points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()
 

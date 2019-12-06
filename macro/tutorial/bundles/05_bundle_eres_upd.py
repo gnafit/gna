@@ -85,7 +85,7 @@ hist3.hist.setLabel('Input histogram 3')
 # Bind outputs
 #
 suffix = '' if cfg.split_transformations else 'merged_'
-savegraph(b.context.outputs.smearing_matrix.values(), tutorial_image_name('png', suffix=suffix+'graph0'))
+savegraph(b.context.outputs.smearing_matrix.values(), tutorial_image_name('png', suffix=suffix+'graph0'), rankdir='TB')
 
 hist1   >> b.context.inputs.smearing_matrix.values(nested=True)
 hist1   >> b.context.inputs.eres.D1.values(nested=True)
@@ -93,7 +93,7 @@ hist2   >> b.context.inputs.eres.D2.values(nested=True)
 hist3   >> b.context.inputs.eres.D3.values(nested=True)
 print( b.context )
 
-savegraph(hist1, tutorial_image_name('png', suffix=suffix+'graph1'))
+savegraph(hist1, tutorial_image_name('png', suffix=suffix+'graph1'), rankdir='TB')
 
 #
 # Plot

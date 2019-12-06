@@ -4,7 +4,7 @@ Plotting the graph structure
 GNA is equipped with a module, that dumps the graph structure to the `graphviz`_ format. The computational graphs are
 therefore may be plotted with ``dot`` command. In order to be used, a python module `pygraphviz`_ should be installed.
 
-The computational graph may be plotted with ``plotgraph`` function provided within ``gna.graphviz`` module. See the
+The computational graph may be plotted with ``savegraph`` function provided within ``gna.graphviz`` module. See the
 usage example in the following macro:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
@@ -23,7 +23,7 @@ formula:
 Five matrices :math:`P` are added together within ``Sum`` transformation. The result is then scaled by ``Product``
 transformation. The corresponding graph may be found below.
 
-.. figure:: ../../img/tutorial/07_graphviz.png
+.. figure:: ../../img/tutorial/plotting/07_graphviz.png
     :align: center
 
     Example computational graph representing :math:`R_{ij} = S_{ij} \sum\limits_{k=1}^5 P_k`.
@@ -52,8 +52,11 @@ Now, there is enough information to plot the graph with ``savegraph(transformati
     :lines: 42-44
 
 The first argument is transformation, output or list of transformations and outputs. The file format is either `.dot`,
-or an image format (`.png`, `.pdf`). While the images are ready to use, the dot file may be opened with `dot`/`xdot`
-[#]_ applications:
+or an image format (`.png`, `.pdf`). 
+
+Optional argument `rankdir` defines the graph growth direction: 'TB' for top to bottom and 'LR' for left to right.
+
+While the images are ready to use, the dot file may be opened with `dot`/`xdot` [#]_ applications:
 
 .. code-block:: bash
 

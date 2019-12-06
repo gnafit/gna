@@ -54,7 +54,7 @@ hist >> b.context.inputs.eres.values()
 print( b.context )
 
 
-savegraph(hist, tutorial_image_name('png', suffix='graph'))
+savegraph(hist, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 #
 # Plot

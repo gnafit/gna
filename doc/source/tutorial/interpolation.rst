@@ -96,7 +96,7 @@ interpolate several input functions in one call. Here inputs `y` and `y_02` are 
 
 The overall code produces the following graph:
 
-.. figure:: ../../img/tutorial/05_interpolation_graph.png
+.. figure:: ../../img/tutorial/complex/05_interpolation_graph.png
    :align: center
 
    Calculation graph representing the interpolation process for two input functions.
@@ -125,7 +125,7 @@ curve we set each odd parameter to 2 to compensate the saw-like structure.
 After plotting `y1` and `y2` let us set each even :math:`p_1` to 0.5 and plot again. The result may be found on the
 picture below.
 
-.. figure:: ../../img/tutorial/05_interpolation.png
+.. figure:: ../../img/tutorial/complex/05_interpolation.png
     :align: center
 
     Example of exponential interpolation.
