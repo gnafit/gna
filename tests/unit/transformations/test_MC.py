@@ -3,26 +3,27 @@
 
 from __future__ import print_function
 from load import ROOT as R
-import numpy as N
-from matplotlib import pyplot as P
+import numpy as np
+from matplotlib import pyplot as plt
 from mpl_tools.helpers import savefig
 import pytest
 from gna.unittest import allure_attach_file, savegraph
 from gna import constructors as C
-from gan.bindings import common
+from gna.bindings import common
+import os
 
-@pytest.mark.parametrize('mc', ['Snapshot']) #, 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC'])
-@pytest.mark.parametrize('data', [10.0, 100.0, 1000.0])
-def test_mc(mc, data):
-    print(mc, data)
-    size = 10
-    data1 = N.ones(size, dtype='d')*data
-    data2 = N.arange(size, dtype='d')*data
-    data3 = (size - N.arange(size, dtype='d'))*data
+@pytest.mark.parametrize('scale', [10.0, 100.0, 1000.0])
+@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC']) #, 'NormalToyMC', 'CovarianceToyMC'])
+# @pytest.mark.parametrize('mc', ['NormalToyMC']) #, 'CovarianceToyMC'])
+def test_mc(mc, scale, tmp_path):
+    size = 100
+    data1 = np.ones(size, dtype='d')*scale
+    data2 = (1.0+np.arange(size, dtype='d'))*scale
+    data3 = (size - np.arange(size, dtype='d'))*scale
 
     data_v = (data1, data2, data3)
     err_v  = tuple(data**0.5 for data in data_v)
-    hists  = tuple(C.Histogram(N.arange(data.size+1, dtype='d'), data) for data in data_v)
+    hists  = tuple(C.Histogram(np.arange(data.size+1, dtype='d'), data) for data in data_v)
     errs   = tuple(C.Points(err) for err in err_v)
 
     if mc=='NormalToyMC':
@@ -40,13 +41,46 @@ def test_mc(mc, data):
 
     mcobject.printtransformations()
 
-    for out in mcobject.trans
-    fig = P.figure()
-    ax = P.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( '' )
-    ax.set_ylabel( '' )
-    ax.set_title( '' )
+    for i, (hist, out) in enumerate(zip(hists, mcobject.transformations[0].outputs.values())):
+        fig = plt.figure()
+        ax = plt.subplot( 111 )
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlabel( '' )
+        ax.set_ylabel( '' )
+        ax.set_title('Check {}, input {}, scale {}'.format(mc, i, scale))
 
+        hist.plot_hist(color='black', label='input')
+        out.plot_errorbar(yerr='stat', linestyle='--', label='output')
 
+        ax.legend()
+
+        suffix = '_'.join((mc, str(int(scale)), str(i)))
+        path = os.path.join(str(tmp_path), suffix+'.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+
+        data_mean = hist.single().data()
+        data_mc = out()
+        data_diff =  data_mc - data_mean
+        if mc=='Snapshot':
+            assert (data_diff==0.0).all()
+        else:
+            if mc!='PoissonToyMC':
+                assert (data_diff!=0.0).all()
+
+            fdata_diff = np.fabs(data_diff)
+            err = err_v[i]
+
+            nsigma = 4.0
+            assert (fdata_diff<nsigma*err).all()
+
+            sum  = data_diff.sum()
+            fsum = np.fabs(sum)
+            assert fsum < nsigma * data_mean.sum()**0.5
+
+            reldiff = data_diff/err
+
+            chi2 = (reldiff**2).sum()
+            chi2_diff = chi2 - size
+            assert chi2_diff < nsigma*(2.0*size)**0.5
