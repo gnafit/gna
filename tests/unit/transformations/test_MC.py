@@ -61,6 +61,8 @@ def test_mc(mc, scale, tmp_path):
         savefig(path, dpi=300)
         allure_attach_file(path)
 
+        plt.close()
+
         data_mean = hist.single().data()
         data_mc = out()
         data_diff =  data_mc - data_mean
