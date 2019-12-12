@@ -13,8 +13,8 @@ from gna.bindings import common
 import os
 
 @pytest.mark.parametrize('scale', [10.0, 100.0, 1000.0])
-@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC']) #, 'NormalToyMC', 'CovarianceToyMC'])
-# @pytest.mark.parametrize('mc', ['NormalToyMC']) #, 'CovarianceToyMC'])
+# @pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC']) #, 'CovarianceToyMC'])
+@pytest.mark.parametrize('mc', ['NormalToyMC']) #, 'CovarianceToyMC'])
 def test_mc(mc, scale, tmp_path):
     size = 100
     data1 = np.ones(size, dtype='d')*scale
