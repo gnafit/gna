@@ -93,7 +93,7 @@ bool GNAObjectBindkN::needs_output(){
 
   int req_outputs = ninputs/m_input_names.size();
 
-  return req_outputs<noutputs;
+  return req_outputs>noutputs;
 }
 
 InputDescriptor GNAObjectBindkN::add_input(const std::string& iname){
