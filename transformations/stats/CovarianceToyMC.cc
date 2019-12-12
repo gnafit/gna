@@ -60,7 +60,7 @@ void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
 
 TransformationDescriptor CovarianceToyMC::add_transformation(const std::string& name){
   this->transformation_(new_transformation_name(name))
-    .types(new TypeClasses::PassEachTypeT<double>())
+    .types(new TypeClasses::PassEachTypeT<double>({0,-1,2}))
     .func(&CovarianceToyMC::calcToyMC);
 
   reset_open_input();

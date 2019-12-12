@@ -4,13 +4,13 @@
 
 NormalToyMC::NormalToyMC(bool autofreeze) :
 GNAObjectBindkN("toymc", {"theory", "sigma"}, "toymc", 0, 0, 0),
-  m_autofreeze(autofreeze) {
-    this->add_transformation();
-    this->add_inputs();
-    this->set_open_input();
+m_autofreeze(autofreeze) {
+  this->add_transformation();
+  this->add_inputs();
+  this->set_open_input();
 
-    GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
-  }
+  GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
+}
 
 void NormalToyMC::nextSample() {
   for (size_t i = 0; i < this->transformations.size(); ++i) {
@@ -59,7 +59,7 @@ void NormalToyMC::calcToyMC(FunctionArgs fargs) {
 
 TransformationDescriptor NormalToyMC::add_transformation(const std::string& name){
   transformation_(new_transformation_name(name))
-    .types(new TypeClasses::PassEachTypeT<double>())
+    .types(new TypeClasses::PassEachTypeT<double>({0,-1,2}))
     .func(&NormalToyMC::calcToyMC);
 
   reset_open_input();

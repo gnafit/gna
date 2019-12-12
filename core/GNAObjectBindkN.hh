@@ -15,6 +15,10 @@ public:
     OutputDescriptor add_inputs(const std::vector<std::string>& inames={}, const std::string& oname="");
     OutputDescriptor add_inputs(const SingleOutputsContainer& outputs, const std::string& oname="");
 
+    OutputDescriptor add_inputs(SingleOutput* output, const std::string& oname="")                                                { return add_inputs(SingleOutputsContainer({output}), oname); }
+    OutputDescriptor add_inputs(SingleOutput* output1, SingleOutput* output2, const std::string& oname="")                        { return add_inputs(SingleOutputsContainer({output1, output2}), oname); }
+    OutputDescriptor add_inputs(SingleOutput* output1, SingleOutput* output2, SingleOutput* output3, const std::string& oname="") { return add_inputs(SingleOutputsContainer({output1, output2, output3}), oname); }
+
 protected:
     void set_transformation_offset(size_t offset) { m_transformation_offset=offset; }
     void set_input_offset(size_t offset)          { m_input_offset=offset; }

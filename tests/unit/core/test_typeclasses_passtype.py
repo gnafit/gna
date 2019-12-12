@@ -77,6 +77,37 @@ def test_typeclass_passeach():
     assert doutputs[3].datatype()==dtb
     assert doutputs[4].datatype()==dtc
 
+def test_typeclass_passeach_02():
+    """Pass with step 2"""
+    objects = [
+            C.Histogram2d(np.arange(4), np.arange(5)),
+            C.Histogram(np.arange(4)),
+            C.Points(np.arange(20).reshape(4,5))
+            ]
+    outputs = [p.single() for p in objects]
+
+    obj = C.DummyType()
+    map(obj.add_input, outputs)
+    map(obj.add_input, outputs)
+    for i in range(3):
+        obj.add_output()
+
+    dt1 = R.TypeClasses.PassEachTypeT(context.current_precision())((0,-1,2), (0,-1))
+    dt1.dump(); print()
+    obj.add_typeclass(dt1)
+    res = obj.process_types();
+    assert res
+
+    obj.print()
+    dta = outputs[0].datatype()
+    dtb = outputs[1].datatype()
+    dtc = outputs[2].datatype()
+
+    doutputs = obj.transformations.back().outputs
+    assert doutputs[0].datatype()==dta
+    assert doutputs[1].datatype()==dtc
+    assert doutputs[2].datatype()==dtb
+
 if __name__ == "__main__":
     run_unittests(globals())
 

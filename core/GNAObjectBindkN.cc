@@ -35,12 +35,12 @@ std::string GNAObjectBindkN::new_name(const std::string& base, size_t num, size_
 }
 
 OutputDescriptor GNAObjectBindkN::add_inputs(const std::vector<std::string>& inames_arg, const std::string& oname){
-  add_inputs(inames_arg);
+  add_inputs_only(inames_arg);
   return add_output(oname);
 }
 
 OutputDescriptor GNAObjectBindkN::add_inputs(const SingleOutputsContainer& outputs, const std::string& oname){
-  add_inputs(outputs);
+  add_inputs_only(outputs);
   return add_output(oname);
 }
 
@@ -85,12 +85,13 @@ InputDescriptor GNAObjectBindkN::add_input(const std::string& iname){
 
     if(m_open_inputs){
         auto input=trans.inputs[-m_open_inputs];
+        printf("check %zu: %i %s\n", m_open_inputs, int(-m_open_inputs), input.name().c_str() );
         if(!input.bound()){
             --m_open_inputs;
             return input;
         }
         else{
-          throw std::runtime_error("Unable to fine proper open input");
+          throw std::runtime_error("Unable to find proper open input");
         }
     }
 

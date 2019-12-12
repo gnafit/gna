@@ -30,12 +30,12 @@ public:
 
   T operator[](int i) const {
     if(i<0){
-      i = static_cast<int>(size())>+i;
+      i += static_cast<int>(size());
     }
     if (i<0 || static_cast<size_t>(i)>=size()) {
       return T::invalid(i);
     }
-    return at(i);
+    return T(m_container->at(i));
   }
 
   T back() const {

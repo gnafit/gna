@@ -31,13 +31,14 @@ def test_mc(mc, scale, tmp_path):
     elif mc=='CovarianceToyMC':
         inputs = tuple(zip(hists, errs))
     else:
-        inputs = hists
+        inputs = tuple((hist,) for hist in hists)
 
     MCclass = getattr(C, mc)
     mcobject = MCclass()
 
+    mcobject.printtransformations()
     for inp in inputs:
-        mcobject.add_input(inp.single())
+        mcobject.add_inputs(*inp)
 
     mcobject.printtransformations()
 
