@@ -12,31 +12,31 @@ from gna import constructors as C
 from gna.bindings import common
 import os
 
-@pytest.mark.parametrize('scale', [10.0, 100.0, 1000.0])
-@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC']) #, 'CovarianceToyMC'])
-# @pytest.mark.parametrize('mc', ['NormalToyMC']) #, 'CovarianceToyMC'])
+@pytest.mark.parametrize('scale', [0.1, 10.0, 100.0, 1000.0])
+@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC'])
 def test_mc(mc, scale, tmp_path):
-    size = 100
+    size = 20
     data1 = np.ones(size, dtype='d')*scale
     data2 = (1.0+np.arange(size, dtype='d'))*scale
     data3 = (size - np.arange(size, dtype='d'))*scale
 
     data_v = (data1, data2, data3)
     err_v  = tuple(data**0.5 for data in data_v)
+    covmat_stat_l_v = tuple(np.diag(err) for err in err_v)
     hists  = tuple(C.Histogram(np.arange(data.size+1, dtype='d'), data) for data in data_v)
     errs   = tuple(C.Points(err) for err in err_v)
+    covmats_l = tuple(C.Points(l) for l in covmat_stat_l_v)
 
     if mc=='NormalToyMC':
         inputs = tuple(zip(hists, errs))
     elif mc=='CovarianceToyMC':
-        inputs = tuple(zip(hists, errs))
+        inputs = tuple(zip(hists, covmats_l))
     else:
         inputs = tuple((hist,) for hist in hists)
 
     MCclass = getattr(C, mc)
     mcobject = MCclass()
 
-    mcobject.printtransformations()
     for inp in inputs:
         mcobject.add_inputs(*inp)
 
