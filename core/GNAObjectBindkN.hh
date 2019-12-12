@@ -12,12 +12,12 @@ public:
 
     virtual TransformationDescriptor add_transformation(const std::string& name="");
 
-    OutputDescriptor add_inputs(const std::vector<std::string>& inames={}, const std::string& oname="");
-    OutputDescriptor add_inputs(const SingleOutputsContainer& outputs, const std::string& oname="");
+    void add_inputs(const std::vector<std::string>& inames={});
+    void add_inputs(const SingleOutputsContainer& outputs);
 
-    OutputDescriptor add_inputs(SingleOutput* output, const std::string& oname="")                                                { return add_inputs(SingleOutputsContainer({output}), oname); }
-    OutputDescriptor add_inputs(SingleOutput* output1, SingleOutput* output2, const std::string& oname="")                        { return add_inputs(SingleOutputsContainer({output1, output2}), oname); }
-    OutputDescriptor add_inputs(SingleOutput* output1, SingleOutput* output2, SingleOutput* output3, const std::string& oname="") { return add_inputs(SingleOutputsContainer({output1, output2, output3}), oname); }
+    void add_inputs(SingleOutput* output)                                                { return add_inputs(SingleOutputsContainer({output})); }
+    void add_inputs(SingleOutput* output1, SingleOutput* output2)                        { return add_inputs(SingleOutputsContainer({output1, output2})); }
+    void add_inputs(SingleOutput* output1, SingleOutput* output2, SingleOutput* output3) { return add_inputs(SingleOutputsContainer({output1, output2, output3})); }
 
 protected:
     void set_transformation_offset(size_t offset) { m_transformation_offset=offset; }
@@ -36,6 +36,7 @@ private:
     void add_inputs_only(const SingleOutputsContainer& outputs);
     InputDescriptor add_input(const std::string& iname="");
     void add_input(SingleOutput& output, const std::string& iname="");
+    bool needs_output();
     OutputDescriptor add_output(const std::string& oname="");
 
     std::string m_transformation_name="";

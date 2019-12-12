@@ -339,14 +339,15 @@ namespace TypeClasses{
             auto rit = rrange.begin();
             for(auto aidx: arange){
                 if(rit==rrange.end()){
-                    error(args.size(), rets.size());
+                    break;
+                    //error(args.size(), rets.size());
                 }
                 rets[*rit]=args[aidx];
                 std::advance(rit, 1);
             }
-            if(rit!=rrange.end()){
-                error(args.size(), rets.size());
-            }
+            //if(rit!=rrange.end()){
+                //error(args.size(), rets.size());
+            //}
         }
 
         void dump(){

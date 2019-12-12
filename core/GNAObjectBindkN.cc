@@ -34,14 +34,12 @@ std::string GNAObjectBindkN::new_name(const std::string& base, size_t num, size_
   return base;
 }
 
-OutputDescriptor GNAObjectBindkN::add_inputs(const std::vector<std::string>& inames_arg, const std::string& oname){
+void GNAObjectBindkN::add_inputs(const std::vector<std::string>& inames_arg){
   add_inputs_only(inames_arg);
-  return add_output(oname);
 }
 
-OutputDescriptor GNAObjectBindkN::add_inputs(const SingleOutputsContainer& outputs, const std::string& oname){
+void GNAObjectBindkN::add_inputs(const SingleOutputsContainer& outputs){
   add_inputs_only(outputs);
-  return add_output(oname);
 }
 
 OutputDescriptor GNAObjectBindkN::add_output(const std::string& oname){
@@ -80,12 +78,29 @@ void GNAObjectBindkN::add_inputs_only(const SingleOutputsContainer& outputs){
   }
 }
 
+bool GNAObjectBindkN::needs_output(){
+  auto trans=transformations.back();
+
+  int ninputs = static_cast<int>(trans.inputs.size())-m_input_offset;
+  if(ninputs<=0){
+    return false;
+  }
+
+  int noutputs = static_cast<int>(trans.outputs.size())-m_output_offset;
+  if(noutputs<0){
+    return false;
+  }
+
+  int req_outputs = ninputs/m_input_names.size();
+
+  return req_outputs<noutputs;
+}
+
 InputDescriptor GNAObjectBindkN::add_input(const std::string& iname){
     auto trans=transformations.back();
 
     if(m_open_inputs){
         auto input=trans.inputs[-m_open_inputs];
-        printf("check %zu: %i %s\n", m_open_inputs, int(-m_open_inputs), input.name().c_str() );
         if(!input.bound()){
             --m_open_inputs;
             return input;
@@ -100,6 +115,10 @@ InputDescriptor GNAObjectBindkN::add_input(const std::string& iname){
         throw std::runtime_error(fmt::format("Unable to add input {}. Already in the list.", newname));
     }
     auto input=trans.input(newname);
+
+    if(needs_output()){
+      add_output();
+    }
 
     return input;
 }
