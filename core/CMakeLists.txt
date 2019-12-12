@@ -42,6 +42,7 @@ set(CORE_SOURCES
   core/TransformationDescriptor.cc
   core/GNAObject.cc
   core/GNAObjectBind1N.cc
+  core/GNAObjectBindkN.cc
   core/GNAObjectBindMN.cc
   # core/parametrized
   core/parametrized/ParametrizedEntry.cc
@@ -123,6 +124,7 @@ set(CORE_HEADERS
   TransformationDescriptor.hh
   GNAObject.hh
   GNAObjectBind1N.hh
+  GNAObjectBindkN.hh
   GNAObjectBindMN.hh
   PARENT_SCOPE
  )

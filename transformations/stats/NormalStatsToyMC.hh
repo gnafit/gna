@@ -2,14 +2,15 @@
 
 #include "Random.hh"
 #include "GNAObject.hh"
-#include "GNAObjectBindkN.hh"
+#include "GNAObjectBind1N.hh"
 
-class CovarianceToyMC: public GNAObjectBindkN,
-                       public TransformationBind<CovarianceToyMC> {
+class NormalStatsToyMC: public GNAObjectBind1N<double>,
+                        public TransformationBind<NormalStatsToyMC> {
 public:
-  CovarianceToyMC(bool autofreeze=true);
+  NormalStatsToyMC(bool autofreeze=true);
 
-  void add(SingleOutput& theory, SingleOutput &cov) { add_inputs(SingleOutputsContainer({&theory, &cov}));  }
+  void add(SingleOutput& theory, SingleOutput &cov) { add( theory ); }
+  void add(SingleOutput& theory) { this->add_input(theory); }
   void nextSample();
 
   void reset() { m_distr.reset(); }

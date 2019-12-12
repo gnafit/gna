@@ -1,25 +1,23 @@
 #include "CovarianceToyMC.hh"
+#include "TypeClasses.hh"
 #include <fmt/format.h>
 
-CovarianceToyMC::CovarianceToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
-  transformation_("toymc")
-    .output("toymc")
-    .types(&CovarianceToyMC::calcTypes)
-    .func(&CovarianceToyMC::calcToyMC)
-  ;
+CovarianceToyMC::CovarianceToyMC( bool autofreeze ) :
+GNAObjectBindkN("toymc", {"theory", "cov_L"}, "toymc", 0, 0, 0),
+  m_autofreeze( autofreeze ) {
+    this->add_transformation();
+    this->add_inputs();
+    this->set_open_input();
 
-  GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
-}
-
-void CovarianceToyMC::add(SingleOutput &theory, SingleOutput &cov) {
-  auto n = t_["toymc"].inputs().size()/2 + 1;
-  t_["toymc"].input(fmt::format("theory_{0}", n)).connect(theory.single());
-  t_["toymc"].input(fmt::format("cov_{0}", n)).connect(cov.single());
-}
+    GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
+  }
 
 void CovarianceToyMC::nextSample() {
-  t_["toymc"].unfreeze();
-  t_["toymc"].taint();
+  for (size_t i = 0; i < this->transformations.size(); ++i) {
+    auto trans = this->transformations[i];
+    trans.unfreeze();
+    trans.taint();
+  }
 }
 
 void CovarianceToyMC::calcTypes(TypesFunctionArgs fargs) {
@@ -58,4 +56,13 @@ void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
     rets.untaint();
     rets.freeze();
   }
+}
+
+TransformationDescriptor CovarianceToyMC::add_transformation(const std::string& name){
+  this->transformation_(new_transformation_name(name))
+    .types(new TypeClasses::PassEachTypeT<double>())
+    .func(&CovarianceToyMC::calcToyMC);
+
+  reset_open_input();
+  return transformations.back();
 }
