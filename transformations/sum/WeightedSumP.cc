@@ -1,10 +1,10 @@
 #include "WeightedSumP.hh"
 #include "TypesFunctions.hh"
 
-WeightedSumP::WeightedSumP(const OutputDescriptor::OutputDescriptors& outputs) : WeightedSumP()
+WeightedSumP::WeightedSumP(OutputDescriptor::OutputDescriptors& outputs) : WeightedSumP()
 {
   for (size_t i{0}, j{1}; j<outputs.size();) {
-    add(*outputs[i], *outputs[j]);
+    add(outputs[i], outputs[j]);
     i+=2; j+=2;
   }
 }

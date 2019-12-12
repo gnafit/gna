@@ -10,7 +10,7 @@ testing:
     - source /soft/root-6.18.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
-    - cmake -D SINGLE_PRECISION=ON ..
+    - cmake ..
     - cmake --build . -- -j$(nproc --all)
     - cd ..
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH

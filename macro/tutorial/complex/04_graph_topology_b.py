@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savegraph
 import load
 from gna.env import env
 import gna.constructors as C
@@ -144,9 +144,6 @@ dbg2a.debug.setLabel('Debug 2\n(before integral 2)')
 dbg1b.debug.setLabel('Debug 1\n(after integral 1)')
 dbg2b.debug.setLabel('Debug 2\n(after integral 2)')
 
-from gna.graphviz import savegraph
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-savegraph(int_points, oname+'_graph.png')
+savegraph(int_points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

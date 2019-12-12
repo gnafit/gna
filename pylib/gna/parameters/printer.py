@@ -80,7 +80,7 @@ class CovarianceStore():
 
     def add_to_store(self, par):
         if not any(self.__in_store(par)):
-            self.storage.append(set(chain((par,), par.getAllCorrelatedWith())))
+            self.storage.append(list(chain((par,), par.getAllCorrelatedWith())))
         else:
             return
 
@@ -93,14 +93,13 @@ class CovarianceStore():
             for item in par_set:
                 yield par == item
 
-def print_correlated(cor_store):
-    if len(cor_store) == 0:
-        return
-    raw = "\nCorrelations between parameters:"
-    title = colorize(raw, Fore.RED)
-    print(title)
-    for par_set in cor_store.storage:
-        max_offset = max((len(x.qualifiedName()) for x in par_set))
+def print_correlated_parameters_block(par_set, correlations='short'):
+    max_offset = max((len(x.qualifiedName()) for x in par_set))
+
+    npars = len(par_set)
+    if correlations=='short' and npars>10:
+        print('{} parameters: first is {}'.format(npars, par_set[0].qualifiedName()))
+    else:
         for pivot in par_set:
             full_name = pivot.qualifiedName()
             s = colorize(full_name, Fore.CYAN)
@@ -114,9 +113,18 @@ def print_correlated(cor_store):
                 s += '{:6g}'.format(par.getCorrelation(pivot))
                 s += " "
             print(s)
+
+def print_correlated_parameters(cor_store, correlations='short'):
+    if len(cor_store) == 0:
+        return
+    raw = "\nCorrelations between parameters:"
+    title = colorize(raw, Fore.RED)
+    print(title)
+    for par_set in cor_store.storage:
+        print_correlated_parameters_block(par_set, correlations)
         print("")
 
-def print_parameters( ns, recursive=True, labels=False, cor_storage=None, stats=None):
+def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=None, correlations='short'):
     '''Pretty prints parameters in a given namespace. Prints parameters
     and then outputs covariance matrices for correlated pars. '''
     if cor_storage is None:
@@ -149,8 +157,8 @@ def print_parameters( ns, recursive=True, labels=False, cor_storage=None, stats=
         for sns in ns.namespaces.itervalues():
             print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats)
 
-    if top_level:
-        print_correlated(cor_storage)
+    if correlations and top_level:
+        print_correlated_parameters(cor_storage, correlations)
 
 def varstats(var, stats):
     if stats is None:

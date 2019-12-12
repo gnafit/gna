@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from gna.tutorial import tutorial_image_name, savegraph
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
@@ -39,6 +39,6 @@ print(tprod.transformations[0].outputs[0].data())
 print()
 
 from gna.graphviz import savegraph
-savegraph(tprod.transformations[0], 'output/07_graphviz.dot')
-savegraph(tprod.transformations[0], 'output/07_graphviz.pdf')
-savegraph(tprod.transformations[0], 'output/07_graphviz.png')
+savegraph(tprod.transformations[0], tutorial_image_name('dot'), rankdir='TB')
+savegraph(tprod.transformations[0], tutorial_image_name('pdf'), rankdir='TB')
+savegraph(tprod.transformations[0], tutorial_image_name('png'), rankdir='TB')

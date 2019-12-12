@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 import load
 from gna.env import env
 import gna.constructors as C
@@ -69,17 +69,14 @@ ax.set_aspect('equal')
 integrator.hist.hist.plot_pcolormesh(colorbar=True)
 
 # Save figure
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-savefig(oname+'.png')
+savefig(tutorial_image_name('png'))
 
 # Add integration points and save
 ax.scatter(X, Y, c='red', marker='.', s=0.2)
 ax.set_xlim(-0.5, 0.5)
 ax.set_ylim(0.0, 1.0)
 
-savefig(oname+'_zoom.png')
+savefig(tutorial_image_name('png', suffix='zoom'))
 
 # Plot 3d function and a histogram
 fig = plt.figure()
@@ -91,10 +88,8 @@ ax.view_init(elev=17., azim=-33)
 integrator.hist.hist.plot_surface(cmap='viridis', colorbar=True)
 sin_t.sin.result.plot_wireframe_vs(X, Y, rstride=8, cstride=8)
 
-savefig(oname+'_3d.png')
-
-# Save the graph
-from gna.graphviz import savegraph
-savegraph(sin_t.sin, oname+'_graph.png')
+# Save the figure and the graph
+savefig(tutorial_image_name('png', suffix='3d'))
+savegraph(sin_t.sin, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

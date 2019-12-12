@@ -37,8 +37,8 @@ SumBroadcast::SumBroadcast() {
  * @brief Construct SumBroadcast from vector of SingleOutput instances
  */
 SumBroadcast::SumBroadcast(const OutputDescriptor::OutputDescriptors& outputs) : SumBroadcast(){
-  for(auto& output : outputs){
-    this->add(*output);
+  for(auto output : outputs){
+    this->add(output);
   }
 }
 

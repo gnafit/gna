@@ -16,7 +16,7 @@ Here is the code:
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 31,34,35,44,107-119
+    :emphasize-lines: 31,34,35,44,104-116
     :caption: :download:`02_integral1d_again.py <../../../macro/tutorial/complex/02_integral1d_again.py>`
 
 First of all, instead of passing the bin edges as an argument we make a histogram first.
@@ -49,7 +49,7 @@ recalculated. Multiple transformations should be used in case such a behaviour i
 
 The code produces the following computational chain:
 
-.. figure:: ../../img/tutorial/02_integral1d_again_graph.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_graph.png
     :align: center
 
     Computatinal graph used to integrate function :math:`f(x)=a\sin(x)+b\cos(kx)`. The bin edges are passed via input.
@@ -57,7 +57,7 @@ The code produces the following computational chain:
 Then we repeat the same procedure with cross checking the calculation. The plot below illustrates the variable bin
 widths as well as variable integration orders.
 
-.. figure:: ../../img/tutorial/02_integral1d_again_1.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_1.png
     :align: center
 
     The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function`. Variable bin width and
@@ -67,16 +67,16 @@ In order to illustrate the impact of the parameters on the results let us create
 :eq:`integral_1d_function`, its integrals for the current values of the parameters:
 
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
-    :lines: 110-114
+    :lines: 107-111
 
 Now we make three plots for different values of the parameters:
 
 .. literalinclude:: ../../../macro/tutorial/complex/02_integral1d_again.py
-    :lines: 116-122
+    :lines: 113-119
 
 The result is shown on the figure below:
 
-.. figure:: ../../img/tutorial/02_integral1d_again_2.png
+.. figure:: ../../img/tutorial/complex/02_integral1d_again_2.png
     :align: center
 
     The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function` for different values of the

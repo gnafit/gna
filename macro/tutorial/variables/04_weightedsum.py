@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig
 import load
 from gna.env import env
 import gna.constructors as C
@@ -62,9 +62,6 @@ wsum.sum.sum.plot_vs(x, label=label)
 
 ax.legend(loc='lower right')
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-savefig('output/tutorial/'+oname)
+savefig(tutorial_image_name('png'))
 
 plt.show()

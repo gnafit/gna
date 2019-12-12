@@ -32,7 +32,7 @@ The first example goes as follows:
 
 It produces the following graph.
 
-.. figure:: ../../img/tutorial/04_graph_topology_a_graph.png
+.. figure:: ../../img/tutorial/complex/04_graph_topology_a_graph.png
     :align: center
 
     Computatinal graph used to compute integrals of functions :eq:`graph_structure_functions`. Each integration is
@@ -174,7 +174,7 @@ These lines represent the binding of the integrator inputs. As we do not create 
 
 The graph looks as follows [#]_.
 
-.. figure:: ../../img/tutorial/04_graph_topology_b_graph.png
+.. figure:: ../../img/tutorial/complex/04_graph_topology_b_graph.png
     :align: center
 
     Computatinal graph used to compute integrals of functions :eq:`graph_structure_functions`. Both integrations are

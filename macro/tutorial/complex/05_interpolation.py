@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
@@ -98,12 +98,7 @@ ax.vlines(edges_data, ymin, ymax, linestyle='--', label='Segment edges', alpha=0
 ax.legend(loc='upper right')
 
 # Save figure and graph as images
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-savefig(oname+'.png')
-from gna.graphviz import savegraph
-savegraph(points, oname+'_graph.png')
+savefig(tutorial_image_name('png'))
+savegraph(points, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()
-

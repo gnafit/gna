@@ -2,7 +2,6 @@
 
 #include "GNAObject.hh"
 
-
 namespace GNA {
   namespace GNAObjectTemplates {
     /**

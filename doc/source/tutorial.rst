@@ -17,4 +17,5 @@ Tutorial (Under construction)
    tutorial/bundles
    tutorial/ui
    tutorial/fitting
+   tutorial/miscellaneous
 

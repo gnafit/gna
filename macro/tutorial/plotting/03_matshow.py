@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -24,9 +24,6 @@ ax.set_title( 'Plot title' )
 
 parray2.points.points.plot_matshow(mask=0.0, colorbar=True)
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-savefig('output/tutorial/'+oname)
+savefig(tutorial_image_name('png'))
 
 plt.show()

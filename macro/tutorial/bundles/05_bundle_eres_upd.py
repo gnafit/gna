@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 import load
 from gna.bundle import execute_bundle
 from gna.configurator import NestedDict, uncertaindict, uncertain
@@ -10,8 +10,6 @@ from gna.env import env
 import numpy as np
 from matplotlib import pyplot as plt
 from gna.bindings import common
-from gna.graphviz import savegraph
-from mpl_tools.helpers import savefig
 
 cfg = NestedDict(
     bundle = dict(
@@ -48,9 +46,6 @@ cfg = NestedDict(
 b = execute_bundle(cfg)
 env.globalns.printparameters(labels=True); print()
 
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-
 #
 # Prepare inputs
 #
@@ -84,8 +79,8 @@ hist3.hist.setLabel('Input histogram 3')
 #
 # Bind outputs
 #
-suffix = '' if cfg.split_transformations else '_merged'
-savegraph(b.context.outputs.smearing_matrix.values(), oname+suffix+'_graph0.png')
+suffix = '' if cfg.split_transformations else 'merged_'
+savegraph(b.context.outputs.smearing_matrix.values(), tutorial_image_name('png', suffix=suffix+'graph0'), rankdir='TB')
 
 hist1   >> b.context.inputs.smearing_matrix.values(nested=True)
 hist1   >> b.context.inputs.eres.D1.values(nested=True)
@@ -93,7 +88,7 @@ hist2   >> b.context.inputs.eres.D2.values(nested=True)
 hist3   >> b.context.inputs.eres.D3.values(nested=True)
 print( b.context )
 
-savegraph(hist1, oname+suffix+'_graph1.png')
+savegraph(hist1, tutorial_image_name('png', suffix=suffix+'graph1'), rankdir='TB')
 
 #
 # Plot
@@ -112,5 +107,5 @@ for i, det in enumerate(['D1', 'D2', 'D3']):
 
     ax.legend(loc='upper right')
 
-savefig(oname+'.png')
+savefig(tutorial_image_name('png'))
 plt.show()

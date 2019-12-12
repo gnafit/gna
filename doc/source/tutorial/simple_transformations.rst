@@ -5,6 +5,11 @@ Here we will review several simple transformations. Simple means that they do no
 inputs. There are currently three transformations `Points`, `Histogram` and `Histogram2d` that enable user to initialize
 the input data (arrays or histograms) in forms of transformation outputs.
 
+.. note::
+
+    `Points`, `Histogram` and `Histogram2d` objects may be constructed from `TH1`, `TH2` and `TMatrix`. See
+    :ref:`tutorial_misc_importing_root` for the example.
+
 Points
 """"""
 
@@ -193,10 +198,12 @@ The code produces the following output:
     Bin edges: [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0]
     Data: [  0. 100. 324. 576. 784. 900. 900. 784. 576. 324. 100.   0.]
 
+.. _histogram2d:
+
 Histogram2d
 """""""""""
 
-The :ref:`Histogram2d <Histogram2d>` is 2-dimensional version of a histogram. It holds the 2-dimensional array and its
+The :ref:`Histogram2d <histogram2d>` is 2-dimensional version of a histogram. It holds the 2-dimensional array and its
 datatype has two sets of bin edges.
 
 .. literalinclude:: ../../../macro/tutorial/basic/03_hist2d.py

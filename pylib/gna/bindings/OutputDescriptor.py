@@ -51,6 +51,7 @@ def OutputDescriptor______cmp__(a,b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')
 
 @patchROOTClass(classes, 'data')
+@patchROOTClass(classes, '__call__')
 def OutputDescriptor__data(self):
     buf = self.__data_orig()
     datatype = self.datatype()

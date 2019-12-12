@@ -108,7 +108,7 @@ The code produces the following graph. The sampler now produces two arrays for :
 passed to the computational chain representing the integrand function and the output of the chain is passed back to the
 integrator, which computes the histogram.
 
-.. figure:: ../../img/tutorial/03_integral2d_graph.png
+.. figure:: ../../img/tutorial/complex/03_integral2d_graph.png
     :align: center
 
     Computatinal graph used to compute double integral of a function :math:`f(x,y)=\sin(ax+by)`.
@@ -166,20 +166,20 @@ integrator:
 That is it. Then the output `integrator.hist.hist` contains the 2d histogram with integrated function, which may be
 plotted:
 
-.. figure:: ../../img/tutorial/03_integral2d.png
+.. figure:: ../../img/tutorial/complex/03_integral2d.png
     :align: center
 
     Double Gauss-Legendre quadrature application to the function :eq:`integral_2d_function`.
 
 We then zoom the plot to display the integration points.
 
-.. figure:: ../../img/tutorial/03_integral2d_zoom.png
+.. figure:: ../../img/tutorial/complex/03_integral2d_zoom.png
     :align: center
 
     Double Gauss-Legendre quadrature application to the function :eq:`integral_2d_function`. Red dots represent the
     integration points.
 
-.. figure:: ../../img/tutorial/03_integral2d_3d.png
+.. figure:: ../../img/tutorial/complex/03_integral2d_3d.png
     :align: center
 
     Double Gauss-Legendre quadrature application to the function :eq:`integral_2d_function` compared to the function

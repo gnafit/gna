@@ -35,8 +35,8 @@ namespace GNA {
      */
     template<typename FloatType>
     ProductT<FloatType>::ProductT(const typename OutputDescriptor::OutputDescriptors& outputs) : ProductT<FloatType>(){
-      for(auto& output : outputs){
-        this->multiply(*output);
+      for(auto output : outputs){
+        this->multiply(output);
       }
     }
 

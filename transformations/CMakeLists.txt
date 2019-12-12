@@ -61,6 +61,7 @@ set(TRANSFORMATION_SOURCES
   # Interpolation
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
+  transformations/interpolation/InterpBase.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
   transformations/interpolation/InterpLog.cc
@@ -71,6 +72,7 @@ set(TRANSFORMATION_SOURCES
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/MatrixProductDVDt.cc
   transformations/linalg/Transpose.cc
   # Neutrino physics
   transformations/neutrino/EvisToEe.cc
@@ -225,6 +227,7 @@ set(TRANSFORMATION_HEADERS
   C14Spectrum.hh
   ParCovMatrix.hh
   MatrixProduct.hh
+  MatrixProductDVDt.hh
   Transpose.hh
   GeoNeutrinoFluxNormed.hh
   # Debug
@@ -239,5 +242,7 @@ set(TRANSFORMATION_HEADERS
   Integrator2GL.hh
   InterpExpoSorted.hh
   LinearInterpolator.hh
+  InterpStrategy.hh
+  InterpBase.hh
   PARENT_SCOPE
 )

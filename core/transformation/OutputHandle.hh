@@ -54,6 +54,7 @@ namespace TransformationTypes
     void unfreeze() { m_sink->entry->tainted.unfreeze(); }
 
     const FloatType *data() const;                                              ///< Return pointer to the Sink's data buffer. Evaluate the data if needed in advance.
+    const FloatType* operator()() const { return data(); }
     const DataType &datatype() const { return m_sink->data->type; }             ///< Return Sink's DataType.
 
     const void *rawptr() const { return static_cast<const void*>(m_sink); }     ///< Return Source's pointer as void pointer.

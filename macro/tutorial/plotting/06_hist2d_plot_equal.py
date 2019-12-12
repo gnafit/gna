@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from gna import tutorial
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -22,10 +22,6 @@ narray = np.exp(-0.5*(X-15.0)**2/10.0**2 - 0.5*(Y-30.0)**2/3.0**2)
 # and edges, sotred in `edges`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '.png')
-
 fig = plt.figure()
 ax = plt.subplot( 111 )
 ax.set_title( 'pcolorfast' )
@@ -35,7 +31,7 @@ ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_pcolorfast(colorbar=True)
 
-savefig(oname, suffix='_pcolorfast')
+savefig(tutorial_image_name('png', suffix='pcolorfast'))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -46,7 +42,7 @@ ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_imshow(colorbar=True)
 
-savefig(oname, suffix='_imshow')
+savefig(tutorial_image_name('png', suffix='imshow'))
 
 fig = plt.figure()
 ax = plt.subplot( 111 )
@@ -57,7 +53,6 @@ ax.set_ylabel( 'y label' )
 
 hist.hist.hist.plot_matshow(colorbar=True)
 
-savefig(oname, suffix='_matshow')
+savefig(tutorial_image_name('png', suffix='matshow'))
 
 plt.show()
-

@@ -28,7 +28,7 @@ The example script is below. We will use the Gauss-Legendre quadrature rule with
 Before going into details let us first look at the graph that follows the procedure described in
 :ref:`tutorial_integration_intro`.
 
-.. figure:: ../../img/tutorial/01_integral1d_graph.png
+.. figure:: ../../img/tutorial/complex/01_integral1d_graph.png
     :align: center
 
     Computatinal graph used to integrate function :math:`f(x)=a\sin(x)+b\cos(kx)`.
@@ -90,7 +90,7 @@ In order to cross check the integrator let us also implement the analytical solu
 Here we obtain the values of the parameters, compute the antiderivative for each bin edge and then compute the
 integrals as differences. The result our the computations is shown on the figure below.
 
-.. figure:: ../../img/tutorial/01_integral1d.png
+.. figure:: ../../img/tutorial/complex/01_integral1d.png
     :align: center
 
     The Gauss-Legendre quadrature application to the function :eq:`integral_1d_function`.

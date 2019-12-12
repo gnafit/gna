@@ -35,7 +35,7 @@ namespace GNA {
       }
 
       for (size_t i = 0; i < outputs.size(); ++i) {
-        inputs[i](*outputs[i]);
+        outputs[i] >> inputs[i];
       }
     }
 

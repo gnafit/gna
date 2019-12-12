@@ -58,5 +58,7 @@ Each input and output has methods ``data()`` and ``datatype()``:
   - ``data()`` returns numpy view on the relevant data with proper shape.
   - ``datatype()`` returns ``DataType`` object with information on data shape and bin edges (for histogram).
 
+Each output's data may be accessed via function call: `trans.output()` works the same way as `trans.output.data()`.
+
 Let us no see the actual code examples.
 

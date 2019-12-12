@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from tutorial import tutorial_image_name, savefig, savegraph
 import load
 from gna.env import env
 import gna.constructors as C
@@ -91,10 +91,7 @@ ax.legend(loc='lower right')
 ymin, ymax = ax.get_ylim()
 
 # Save figure and graph as images
-from mpl_tools.helpers import savefig
-from sys import argv
-oname = 'output/tutorial/'+argv[0].rsplit('/', 1).pop().replace('.py', '')
-savefig(oname+'_1.png')
+savefig(tutorial_image_name('png', suffix='1'))
 
 # Do more plotting
 fig = plt.figure()
@@ -121,16 +118,12 @@ pa.set(0)
 pb.set(0.1)
 plot_sample()
 
-
 # Freeze axis limits and draw bin edges
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
-
 ax.legend(loc='lower right')
 
-savefig(oname+'_2.png')
-
-from gna.graphviz import savegraph
-savegraph(fcn.sum, oname+'_graph.png')
+savefig(tutorial_image_name('png', suffix='2'))
+savegraph(fcn.sum, tutorial_image_name('png', suffix='graph'), rankdir='TB')
 
 plt.show()

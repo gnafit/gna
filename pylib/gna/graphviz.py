@@ -246,8 +246,11 @@ class TreeStyle(object):
             mark='c'
             dim = getdim(entry.sinks[0])
             npars=0
-        elif objectname in ('HistSmearSparse', 'HistSmear'):
+        elif objectname in ('HistSmearSparse', 'HistSmear', 'MatrixProduct'):
             mark='@'
+            dim = getdim(entry.sinks[0])
+        elif objectname in ('MatrixProductDVDt'):
+            mark='@@t'
             dim = getdim(entry.sinks[0])
         # else:
             # print(objectname, entryname, features.label)

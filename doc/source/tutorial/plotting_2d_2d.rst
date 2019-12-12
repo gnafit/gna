@@ -14,11 +14,11 @@ axis.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/03_matshow.py
     :linenos:
-    :lines: 4-26,32
+    :lines: 4-26,29
     :emphasize-lines: 22
     :caption: :download:`03_matshow.py <../../../macro/tutorial/plotting/03_matshow.py>`
 
-.. figure:: ../../img/tutorial/03_matshow.png
+.. figure:: ../../img/tutorial/plotting/03_matshow.png
     :align: center
 
     An example ``output2d.plot_matshow()`` method for outputs.
@@ -60,11 +60,11 @@ Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 4-24,29-37,62
+    :lines: 4-34,58
     :emphasize-lines: 29
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot_equal_pcolorfast.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_pcolorfast.png
     :align: center
 
     2d histogram plotted via ``plot_pcolorfast()`` method.
@@ -78,10 +78,10 @@ The second method ``plot_imshow()`` is using
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 47
+    :lines: 43
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot_equal_imshow.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_imshow.png
    :align: center
 
    2d histogram plotted via ``plot_imshow()`` method.
@@ -95,10 +95,10 @@ The relevant plot, produced by the ``plot_matshow()`` may be found below.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 58
+    :lines: 54
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot_equal_matshow.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_matshow.png
    :align: center
 
    2d histogram, plotted as matrix.
@@ -117,11 +117,11 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot.py
    :linenos:
-   :lines: 4-24,29-37,51
+   :lines: 4-37,47
    :emphasize-lines: 29
    :caption: :download:`06_hist2d_plot.py <../../../macro/tutorial/plotting/06_hist2d_plot.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot_pcolormesh.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot_pcolormesh.png
    :align: center
 
    2d histogram with variable binning.

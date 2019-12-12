@@ -16,13 +16,13 @@ matplotlib function passing output data as `X`, `Y` and `Z`.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
-   :lines: 4-23,29-39,64
-   :emphasize-lines: 21,24,30
+   :lines: 4-39,60
+   :emphasize-lines: 22,25,31
    :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
 In order the surface was colorized ``cmap`` option should be passed with a valid colormap name (use `viridis`).
 
-.. figure:: ../../img/tutorial/06_hist2d_plot3d_surface.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot3d_surface.png
    :align: center
 
    2d histogram, plotted via ``plot_surface()`` method.
@@ -43,10 +43,10 @@ By default the bars are not colorized: ``cmap=True`` may be used to colorize the
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
-   :lines: 49
+   :lines: 45
    :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot3d_bar3d.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot3d_bar3d.png
    :align: center
 
    2d histogram, plotted via ``plot_bar3d()`` method.
@@ -62,10 +62,10 @@ By default wire frame is not colorized: ``cmap=True`` may be used to colorize th
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot3d.py
    :linenos:
-   :lines: 60
+   :lines: 56
    :caption: :download:`06_hist2d_plot3d.py <../../../macro/tutorial/plotting/06_hist2d_plot3d.py>`
 
-.. figure:: ../../img/tutorial/06_hist2d_plot3d_wireframe.png
+.. figure:: ../../img/tutorial/plotting/06_hist2d_plot3d_wireframe.png
    :align: center
 
    2d histogram, plotted via ``plot_wireframe()`` method.
