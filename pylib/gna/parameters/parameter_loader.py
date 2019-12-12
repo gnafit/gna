@@ -25,11 +25,12 @@ def get_parameters(params, drop_fixed=True, drop_free=True):
             pars.append(par)
         except KeyError:
             par_namespace = env.ns(candidate)
-            if par_namespace != env.globalns:
+            if par_namespace is not env.globalns:
                 independent_pars  = [par for _, par in par_namespace.walknames()
                                      if __is_independent(par)]
             else:
                 independent_pars = [env.globalns.get(candidate)]
+
             pars.extend(independent_pars)
 
     if drop_fixed:
