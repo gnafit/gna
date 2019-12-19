@@ -20,6 +20,8 @@ namespace GNA{
             SnapshotT();
             SnapshotT(SingleOutput& output);
 
+            void nextSample();
+
             TransformationDescriptor add_transformation(const std::string& name="");
 
         protected:

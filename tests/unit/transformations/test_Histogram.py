@@ -40,10 +40,12 @@ def test_histogram_v01_1d(tmp_path):
     path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
+    plt.close()
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph(hist.hist, path)
     allure_attach_file(path)
+    plt.close()
 
     # Test consistency
     assert np.all(res==data)
@@ -76,6 +78,7 @@ def test_histogram_v02_2d(tmp_path):
     path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
+    plt.close()
 
     fig = plt.figure()
     ax = plt.subplot( 111, projection='3d' )
@@ -92,10 +95,12 @@ def test_histogram_v02_2d(tmp_path):
     path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
+    plt.close()
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph(hist.hist, path)
     allure_attach_file(path)
+    plt.close()
 
     # Test consistency
     assert np.all(res==data)

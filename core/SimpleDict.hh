@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <stdexcept>
 
 class SimpleDictBase {
 public:
@@ -18,13 +19,23 @@ public:
   }
 
   T at(int i) const {
+    if(i<0){
+      i = static_cast<int>(size())>+i;
+    }
+    if(i<0){
+      throw std::out_of_range("Negative index too 'large'");
+    }
     return T(m_container->at(i));
   }
+
   T operator[](int i) const {
-    if (static_cast<size_t>(i) >= size()) {
+    if(i<0){
+      i += static_cast<int>(size());
+    }
+    if (i<0 || static_cast<size_t>(i)>=size()) {
       return T::invalid(i);
     }
-    return at(i);
+    return T(m_container->at(i));
   }
 
   T back() const {

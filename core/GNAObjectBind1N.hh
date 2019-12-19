@@ -31,6 +31,8 @@ public:
     virtual TransformationDescriptor add_transformation(const std::string& name="");
     InputDescriptor  add_input(const std::string& iname="", const std::string& oname="");
     OutputDescriptor add_input(SingleOutput& output, const std::string& iname="", const std::string& oname="");
+    OutputDescriptor add_inputs(SingleOutputsContainer& outputs, const std::string& oname="") { return add_input(*outputs[0], "", oname); }
+    OutputDescriptor add_inputs(SingleOutput& output, const std::string& oname="") { return add_input(output, "", oname); }
 
 protected:
     void set_transformation_offset(size_t offset) { m_transformation_offset=offset; }

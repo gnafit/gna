@@ -26,3 +26,4 @@ public:
 };
 
 using SingleOutput = SingleOutputT<double>;
+using SingleOutputsContainer = std::vector<SingleOutput*>;

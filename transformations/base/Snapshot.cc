@@ -21,11 +21,23 @@ GNAObjectBind1N<FloatType>("snapshot", "source", "result", 0, 0, 0)
 }
 
 template<typename FloatType>
+void GNA::GNAObjectTemplates::SnapshotT<FloatType>::nextSample() {
+    for (size_t i = 0; i < this->transformations.size(); ++i) {
+        auto trans = this->transformations[i];
+        trans.unfreeze();
+        trans.taint();
+    }
+}
+
+
+template<typename FloatType>
 typename GNA::GNAObjectTemplates::SnapshotT<FloatType>::TransformationDescriptor GNA::GNAObjectTemplates::SnapshotT<FloatType>::add_transformation(const std::string& name){
-    this->transformation_("snapshot")
+    this->transformation_(this->new_transformation_name(name))
         .types(new TypeClasses::PassEachTypeT<FloatType>())
         .func(&Snapshot::makeSnapshot)
         ;
+
+    this->reset_open_input();
     return this->transformations.back();
 }
 

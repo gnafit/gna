@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/range/counting_range.hpp>
+#include <boost/range/irange.hpp>
 #include <stdexcept>
 #include <vector>
 #include <string>
@@ -12,11 +12,9 @@
 namespace TypeClasses{
     class Range {
     public:
-        using RangeIterator = boost::iterator_range<boost::counting_iterator<size_t>>;
-
         /// End is inclusive
-        Range(int begin)          : m_begin(begin), m_end(begin) {}
-        Range(int begin, int end) : m_begin(begin), m_end(end) {}
+        Range(int begin)                          : m_begin(begin), m_end(begin), m_step(1u) {}
+        Range(int begin, int end, size_t step=1u) : m_begin(begin), m_end(end), m_step(step) {}
         Range(const Range& other) = default;
 
         bool singular() const { return m_end == m_begin; }
@@ -35,16 +33,16 @@ namespace TypeClasses{
             return end;
         }
 
-        RangeIterator iterate(size_t size, bool strict=true) const {
+        decltype(auto) iterate(size_t size, bool strict=true) const {
             size_t begin, end;
             getRangeAbs(size, begin, end, strict);
             if(begin==-1lu){
-                return boost::counting_range(begin, end);
+                return boost::irange(begin, end, m_step);
             }
-            return boost::counting_range(begin, end+1);
+            return boost::irange(begin, end+1, m_step);
         }
 
-        RangeIterator iterateSafe(size_t size) const { return iterate(size, false); }
+        decltype(auto) iterateSafe(size_t size) const { return iterate(size, false); }
 
         std::vector<size_t> vector(size_t size, bool strict=true) const {
             auto it=iterate(size, strict);
@@ -52,14 +50,14 @@ namespace TypeClasses{
         }
 
         void dump(){
-            printf("Range %i->%i", m_begin, m_end);
+            printf("Range %i->%i, step %zu", m_begin, m_end, m_step);
             if(singular()){
                 fmt::print(" (singular)");
             }
         }
 
         void dump(size_t size){
-            printf("Range %i->%i", m_begin, m_end);
+            printf("Range %i->%i, step %zu", m_begin, m_end, m_step);
             if(singular()){
                 fmt::print(" (singular)");
             }
@@ -97,6 +95,7 @@ namespace TypeClasses{
 
         int m_begin;
         int m_end;
+        size_t m_step;
     };
 
     template<typename FloatType>
@@ -340,14 +339,15 @@ namespace TypeClasses{
             auto rit = rrange.begin();
             for(auto aidx: arange){
                 if(rit==rrange.end()){
-                    error(args.size(), rets.size());
+                    break;
+                    //error(args.size(), rets.size());
                 }
                 rets[*rit]=args[aidx];
                 std::advance(rit, 1);
             }
-            if(rit!=rrange.end()){
-                error(args.size(), rets.size());
-            }
+            //if(rit!=rrange.end()){
+                //error(args.size(), rets.size());
+            //}
         }
 
         void dump(){

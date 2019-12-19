@@ -1,25 +1,23 @@
 #include "NormalToyMC.hh"
+#include "TypeClasses.hh"
 #include <fmt/format.h>
 
-NormalToyMC::NormalToyMC( bool autofreeze ) : m_autofreeze( autofreeze ) {
-  transformation_("toymc")
-    .output("toymc")
-    .types(&NormalToyMC::calcTypes)
-    .func(&NormalToyMC::calcToyMC)
-  ;
+NormalToyMC::NormalToyMC(bool autofreeze) :
+GNAObjectBindkN("toymc", {"theory", "sigma"}, "toymc", 0, 0, 0),
+m_autofreeze(autofreeze) {
+  this->add_transformation();
+  this->add_inputs();
+  this->set_open_input();
 
   GNA::Random::register_callback( [this]{ this->m_distr.reset(); } );
 }
 
-void NormalToyMC::add(SingleOutput &theory, SingleOutput &sigma) {
-  auto n = t_["toymc"].inputs().size()/2 + 1;
-  t_["toymc"].input(fmt::format("theory_{0}", n)).connect(theory.single());
-  t_["toymc"].input(fmt::format("sigma_{0}", n)).connect(sigma.single());
-}
-
 void NormalToyMC::nextSample() {
-  t_["toymc"].unfreeze();
-  t_["toymc"].taint();
+  for (size_t i = 0; i < this->transformations.size(); ++i) {
+    auto trans = this->transformations[i];
+    trans.unfreeze();
+    trans.taint();
+  }
 }
 
 void NormalToyMC::calcTypes(TypesFunctionArgs fargs) {
@@ -57,4 +55,14 @@ void NormalToyMC::calcToyMC(FunctionArgs fargs) {
     rets.untaint();
     rets.freeze();
   }
+}
+
+TransformationDescriptor NormalToyMC::add_transformation(const std::string& name){
+  transformation_(new_transformation_name(name))
+    .types(new TypeClasses::PassEachTypeT<double>({0,-1,2}))
+    .func(&NormalToyMC::calcToyMC);
+
+  reset_open_input();
+
+  return transformations.back();
 }

@@ -99,6 +99,7 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/CovariatedPredictionV.cc
   transformations/stats/Covmat.cc
   transformations/stats/NormalToyMC.cc
+  transformations/stats/NormalStatsToyMC.cc
   transformations/stats/Poisson.cc
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
@@ -175,6 +176,7 @@ set(TRANSFORMATION_HEADERS
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
+  NormalStatsToyMC.hh
   PoissonToyMC.hh
   # Functions
   Inverse.hh
