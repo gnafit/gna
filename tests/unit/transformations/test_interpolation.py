@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import os
 import matplotlib as mpl
-from matplotlib import pyplot as P
+from matplotlib import pyplot as plt
 from mpl_tools.helpers import savefig
 import pytest
 from gna.unittest import allure_attach_file, savegraph
@@ -38,8 +38,8 @@ def test_interpolators(interpolator, strategy, tmp_path):
 
     res = ie.interp.interp.data()
 
-    fig = P.figure()
-    ax = P.subplot(111)
+    fig = plt.figure()
+    ax = plt.subplot(111)
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel('x')
@@ -62,7 +62,9 @@ def test_interpolators(interpolator, strategy, tmp_path):
     path = os.path.join(str(tmp_path), suffix+'.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
+    plt.close()
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph(points_t.points, path, verbose=False)
     allure_attach_file(path)
+    plt.close()

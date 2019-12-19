@@ -19,7 +19,7 @@ class MCTestData(object):
     figures = tuple()
     correlation  = 0.95
     syst_unc_rel = 2
-    nsigma = 5
+    nsigma = 4
     def __init__(self, data, mctype, **info):
         self.info     = Namespace(**info)
         self.info.index = str(self.info.index)
@@ -174,6 +174,7 @@ class MCTestData(object):
 @pytest.mark.parametrize('scale', [0.1, 100.0, 10000.0])
 @pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC'])
 def test_mc(mc, scale, tmp_path):
+    R.GNA.Random.seed( 3 ) # With 4 sigma acceptance level failures do happen. Fix the random seed to guarantee the correct behaviour.
     size = 20
     data1 = np.ones(size, dtype='d')*scale
     data2 = (1.0+np.arange(size, dtype='d'))*scale
