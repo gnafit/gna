@@ -186,30 +186,9 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
 
     returns pyplot.errorbar() result
     """
-    scale = kwargs.pop('scale', None)
+    Y, lims, width = get_1d_data(output)
 
-    Y, lims, width = get_1d_data(output, scale=scale)
-
-    X   =(lims[1:]+lims[:-1])*0.5
-    Xerr=width*0.5
-
-    if isinstance(yerr, str) and yerr=='stat':
-        Yerr=output.data()**0.5
-    else:
-        Yerr=yerr
-
-    if scale is None or Yerr is None:
-        pass
-    elif scale=='width':
-        Yerr/=width
-    else:
-        Yerr*=scale
-
-    kwargs.setdefault('fmt', 'none')
-
-    Plotter = kwargs.pop('axis', P)
-
-    return Plotter.errorbar(X, Y, Yerr, Xerr, *args, **kwargs )
+    return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs )
 
 def get_2d_buffer(output, transpose=False, mask=None):
     buf = output.data().copy()

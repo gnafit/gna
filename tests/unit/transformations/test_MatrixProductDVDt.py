@@ -13,8 +13,8 @@ from gna.unittest import allure_attach_file, savegraph
 from load import ROOT as R
 from gna import constructors as C
 
-@pytest.mark.parametrize('n1', range(1,8))
-@pytest.mark.parametrize('n2', range(1,8))
+@pytest.mark.parametrize('n1', range(1,8,3))
+@pytest.mark.parametrize('n2', range(1,8,3))
 def test_MatrixProductDVDt(n1, n2, tmp_path):
     '''Matrix product of D V Dt'''
 

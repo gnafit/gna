@@ -5,7 +5,7 @@ from __future__ import print_function
 from matplotlib import pyplot as P
 import numpy as N
 
-def plot_hist( lims, height, *args, **kwargs ):
+def plot_hist(lims, height, *args, **kwargs):
     """Plot histogram with lines. Like bar(), but without lines between bars."""
     zero_value = kwargs.pop( 'zero_value', 0.0 )
 
@@ -21,6 +21,42 @@ def plot_hist( lims, height, *args, **kwargs ):
     Plotter = kwargs.pop('axis', P)
 
     return Plotter.plot( x, y, *args, **kwargs )
+
+def plot_hist_errorbar(lims, Y, yerr=None, *args, **kwargs):
+    """Plot 1-dimensinal histogram using pyplot.errorbar
+
+    executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with x, y and xerr overridden
+    all other arguments passes as is.
+
+    Options:
+        yerr=array or 'stat' - Y errors
+        scale=float or 'width' - multiply bin by a scale or divide by bin width
+
+    returns pyplot.errorbar() result
+    """
+    scale = kwargs.pop('scale', None)
+
+    width = lims[1:]-lims[:-1]
+    X     = (lims[1:]+lims[:-1])*0.5
+    Xerr=width*0.5
+
+    if isinstance(yerr, str) and yerr=='stat':
+        Yerr=Y**0.5
+    else:
+        Yerr=yerr
+
+    if scale is None or Yerr is None:
+        pass
+    elif scale=='width':
+        Yerr/=width
+    else:
+        Yerr*=scale
+
+    kwargs.setdefault('fmt', 'none')
+
+    Plotter = kwargs.pop('axis', P)
+
+    return Plotter.errorbar(X, Y, Yerr, Xerr, *args, **kwargs)
 
 def plot_bar( lims, height, *args, **kwargs ):
     """Plot bars with edges specified"""
