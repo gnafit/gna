@@ -1,15 +1,37 @@
-.gitignore
+# Build related folders
 build
-output/
+builds/
 doc/doxygen
+
+# Other folders
+legacy/
+data
+inputs
+output
+
+# Local configuration files and folders
 config_local
-# transient
+.local/
+.direnv/
+.envrc
+.fish_functions
+
+# Transient files (vim, etc)
 *~
 *.swp
 \#*
 .\#*
 .cache
-# latex
+
+# vim
+UltiSnips/*
+.viminfo
+.vimrc
+.nvimrc
+*.vim
+.ycm_extra_conf.py
+
+# Latex
 *.aux
 *.pda
 *.toc
@@ -21,34 +43,10 @@ config_local
 *.snm
 *.nav
 # code
+
+# Code
 tags
 *.pyc
 *.o
 compile_commands.json
-# vim
-.viminfo
-.vimrc
-.nvimrc
-*.vim
-.ycm_extra_conf.py
-data/dayabay/
-config_local
-.gitignore
-.viminfo
-tags
-.cache
-data/*
-UltiSnips/*
-makerst
-*CMakeFiles*
-*Makefile*
-*cmake_install.cmake
-inputs
-.fish_functions
-.pre-commit-config.yaml
-pytest_results/*
-.local/
-.envrc
-.direnv/
-builds/
-legacy/
+
