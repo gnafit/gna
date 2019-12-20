@@ -95,7 +95,8 @@ def run():
             listmodules(modules, True)
             sys.exit(0)
 
-        name = group[0] = group[0].replace('-', '_')
+        name = group[0].replace('-', '_')
+        group = group[1:]
         if name not in modules:
             msg = 'unknown module %s' % name
             raise Exception(msg)
