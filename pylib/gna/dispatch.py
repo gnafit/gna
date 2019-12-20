@@ -38,10 +38,13 @@ def loadcmdclass(modules, name, args):
     module=loadmodule(modules, name)
     cls = getattr(module, 'cmd')
 
-    parserkwargs = getattr(cls, 'parserkwargs', {})
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
-    cls.initparser(subparsers.add_parser(name, **parserkwargs), env)
+    parserkwargs0 = getattr(cls, 'parserkwargs', {})
+    parserkwargs = dict(dict(prog='gna -- {}'.format(name),
+        description=cls.__doc__ or module.__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter),
+        **parserkwargs0)
+    parser = argparse.ArgumentParser(**parserkwargs)
+    cls.initparser(parser, env)
     opts = parser.parse_args(args, namespace=LazyNamespace())
 
     return cls, opts

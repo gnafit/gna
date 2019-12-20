@@ -10,7 +10,6 @@ from gna import constructors as C
 import sys
 
 class cmd(basecmd):
-    parserkwargs=dict(add_help=False)
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('name_in', help='input observable name')

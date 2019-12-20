@@ -10,6 +10,23 @@ from load import ROOT as R
 
 seconds_per_day = 60*60*24
 class exp(baseexp):
+    """
+JUNO experiment implementation
+
+Derived from: Daya Bay model from dybOscar and GNA
+Implements:
+    - Reactor antineutrino flux: Huber+Mueller
+    - NO off-equilibrium and NO SNF contribution
+    - Vacuum 3nu oscillations
+    - Two modes for kinematics:
+        * Enu mode with 1d integration (similar to YB fitter)
+        * Evis mode with 2d integration (similary to dybOscar)
+    - [optional] Birks-Cherenkov detector energy responce (Yaping)
+    - [optional] Detector energy resolution
+    - [optional] Multi-detector energy resolution (Yaping)
+
+The model is succeeded by juno_sensitivity_v01 model.
+    """
     detectorname = 'AD1'
 
     @classmethod

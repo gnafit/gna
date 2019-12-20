@@ -44,7 +44,10 @@ class cmd(basecmd):
 
         ns = self.env.globalns(self.opts.ns)
 
-        parser = argparse.ArgumentParser(prog='gna -- exp '+self.expname)
+        parser = argparse.ArgumentParser(prog='gna -- exp '+self.expname,
+                description=expcls.__doc__,
+                formatter_class=argparse.RawDescriptionHelpFormatter
+                )
         expcls.initparser(parser, ns)
         if self.opts.help:
             print('Experiment %s help'%self.expname)
