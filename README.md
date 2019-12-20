@@ -23,3 +23,16 @@ The project is on the alpha stage.
 | Documentation             | http://gna.pages.jinr.ru/gna/              |
 | Public mirror (master)    | https://github.com/gnafit/gna              |
 | Main repository (private) | https://git.jinr.ru/gna/gna                |
+
+# Input data
+
+Most of the experiment related input data is restricted and located in a separate
+repository.
+
+External data repositories should be available under `data/` subfolder of the 
+GNA root.
+
+| Experiment and dataset  | Repository                                 |
+| ------                  | ------                                     |
+| Daya Bay                | https://git.jinr.ru/gna/data_dayabay       |
+| JUNO                    | https://git.jinr.ru/gna/data_juno          | 
