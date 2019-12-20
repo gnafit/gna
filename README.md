@@ -32,7 +32,8 @@ repository.
 External data repositories should be available under `data/` subfolder of the 
 GNA root.
 
-| Experiment and dataset  | Repository                                 |
-| ------                  | ------                                     |
-| Daya Bay                | https://git.jinr.ru/gna/data_dayabay       |
-| JUNO                    | https://git.jinr.ru/gna/data_juno          | 
+| Experiment and dataset  | Repository                                 | Comments |
+| ------                  | ------                                     | --- | 
+| Daya Bay                | https://git.jinr.ru/gna/data_dayabay       | |
+| JUNO                    | https://git.jinr.ru/gna/data_juno          | |
+| JUNO nominal            | https://git.jinr.ru/gna/juno_nominal       | public |
