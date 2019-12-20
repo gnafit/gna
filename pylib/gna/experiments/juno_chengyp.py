@@ -301,9 +301,9 @@ class exp(baseexp):
                         ),
                 lsnl = NestedDict(
                         bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
-                        stopping_power='stoppingpower.txt',
+                        stopping_power='data/data_juno/energy_model/2019_birks_cherenkov_v01/stoppingpower.txt',
                         annihilation_electrons=dict(
-                            file='input/hgamma2e.root',
+                            file='data/data_juno/energy_model/2019_birks_cherenkov_v01/hgamma2e.root',
                             histogram='hgamma2e_1KeV',
                             scale=1.0/50000 # events simulated
                             ),
@@ -352,13 +352,13 @@ class exp(baseexp):
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        correlations = 'covariance/corrmap_xuyu.txt'
+                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
                         ),
                 multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
-                        nph = 'subdetector200_nph.txt',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
                         expose_matrix = False
                         ),
                 shape_uncertainty = NestedDict(

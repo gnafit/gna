@@ -26,6 +26,9 @@ class cmd(basecmd):
         self.ns = self.env.globalns(self.opts.ns)
         output = self.ns.getobservable(self.opts.name_in)
 
+        if not output:
+            raise Exception('Invalid or missing output: {}'.format(self.opts.name_in))
+
         self.snapshot = C.Snapshot(output)
         trans = self.snapshot.snapshot
         if self.opts.label:
