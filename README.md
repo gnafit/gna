@@ -35,4 +35,4 @@ GNA root.
 | Experiment and dataset  | Repository                                 |
 | ------                  | ------                                     |
 | Daya Bay                | https://git.jinr.ru/gna/data_dayabay       |
-| JUNO                    | https://git.jinr.ru/gna/juno-data          | 
+| JUNO                    | https://git.jinr.ru/gna/data_juno          | 
