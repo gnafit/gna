@@ -59,7 +59,7 @@ def init_bundle(cfg, *args, **kwargs):
 
     names = kwargs.pop('name', None)
     if not names:
-        name, version=cfg.bundle['name'], cfg.bundle['version']
+        name, version=cfg.bundle['name'], cfg.bundle.get('version', '')
         names = (name, version),
 
     if not isinstance(names, (list, tuple)):
