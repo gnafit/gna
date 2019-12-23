@@ -1,6 +1,9 @@
 """Oscillation probability bundle v03, unlike v02 it is:
     - able to process minor indices by creating clones of the OP
     - may configure the PDG year
+
+Warning!:
+    - should not be used with minor indices!
 """
 # -*- coding: utf-8 -*-
 
