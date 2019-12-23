@@ -85,7 +85,6 @@ def listmodules(modules, printdoc=False):
 
 def run():
     modules = getmodules()
-    objects = []
     for group in arggroups(sys.argv):
         if not group:
             continue
@@ -102,9 +101,6 @@ def run():
             msg = 'unknown module %s' % name
             raise Exception(msg)
         cmdcls, cmdopts = loadcmdclass(modules, name, group)
-        objects.append( (cmdcls, cmdopts) )
-
-    for cmdcls, cmdopts in objects:
         obj = cmdcls(env, cmdopts)
         obj.init()
         obj.run()
