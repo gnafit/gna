@@ -1,6 +1,7 @@
-"""Oscillation probability bundle v04. Updates since v03:
-    - Switch from OscProbmPMNS to OscProb3 oscillation probability class
-    - Correct behavior for minor indices
+"""Oscillation probability (matter) bundle v01. Based on vacuum oscillation bundle oscprob_v04.
+
+Changes since origin:
+    - Switch from OscProb3 oscillation probability class to OscProbMatter
 """
 # -*- coding: utf-8 -*-
 
@@ -10,7 +11,7 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
 
-class oscprob_v04(TransformationBundle):
+class oscprob_matter_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(3, 3, 'major')
@@ -19,9 +20,14 @@ class oscprob_v04(TransformationBundle):
             source_name, detector_name, component_name = self.cfg.bundle.major
         except:
             raise Exception('Unable to obtain major indices: source, detector and OP component')
+
         self.idx_source = self.nidx_major.get_subset(source_name)
         self.idx_detector = self.nidx_major.get_subset(detector_name)
         self.idx_component = self.nidx_major.get_subset(component_name)
+
+        compsize = self.idx_component.get_size()
+        if compsize!=1:
+            raise Exception('OscProbMatter has only one component, not {}'.format())
 
     @staticmethod
     def _provides(cfg):
@@ -82,6 +88,8 @@ class oscprob_v04(TransformationBundle):
             ns_pmns['SigmaDecohRel'].setFixed()
             ns_pmns['SinSq23'].setFixed()
             ns_pmns.materializeexpressions()
+
+        ns_pmns.reqparameter('rho', central=0.0, fixed=True, label='Matter electron density g/cm3')
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
