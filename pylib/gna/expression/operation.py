@@ -41,22 +41,10 @@ class Operation(TCall,NestedTransformation):
 
         label=None
 
-        #TODO: quick fix! Need more attention
-        def __in_lib_values(cname):
-            for subdict in lib.values():
-                if cname == subdict['name']:
-                    return subdict
-            return None
-
-        from_lib =  __in_lib_values(cname)
-
         if newname in lib:
             libentry = lib[newname]
             newname = libentry['name']
             label   = libentry.get('label', None)
-        elif from_lib is not None:
-            newname = from_lib['name']
-            label = from_lib.get('label', None)
         else:
             newname = '{}{}'.format(self.text_operator, cname)
 
