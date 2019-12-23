@@ -47,7 +47,7 @@ class oscprob_matter_v01(TransformationBundle):
                 with self.namespace:
                     with self.namespace(pmns_name):
                         for it_minor in self.nidx_minor:
-                            oscprob = self.context.objects[pmns_name+(oscprobkey,)] = C.OscProb3(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                            oscprob = self.context.objects[pmns_name+(oscprobkey,)] = C.OscProbMatter(R.Neutrino.ae(), R.Neutrino.ae())
 
                             for it_component in self.idx_component:
                                 component, = it_component.current_values()
@@ -89,7 +89,7 @@ class oscprob_matter_v01(TransformationBundle):
             ns_pmns['SinSq23'].setFixed()
             ns_pmns.materializeexpressions()
 
-        ns_pmns.reqparameter('rho', central=0.0, fixed=True, label='Matter electron density g/cm3')
+        ns_pmns.reqparameter('rho', central=1.e-6, fixed=True, label='Matter electron density g/cm3')
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
