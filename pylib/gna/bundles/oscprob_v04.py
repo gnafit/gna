@@ -1,6 +1,9 @@
 """Oscillation probability bundle v04. Updates since v03:
     - Switch from OscProbmPMNS to OscProb3 oscillation probability class
+
+Miscellaneous:
     - Correct behavior for minor indices
+    - Properly define the namespace name
 """
 # -*- coding: utf-8 -*-
 
@@ -30,6 +33,7 @@ class oscprob_v04(TransformationBundle):
     def build(self):
         self.comp0 = R.FillLike(1.0, labels='OP comp0')
 
+        pmns_name = self.get_globalname('pmns')
         for it_source in self.idx_source:
             for it_detector in self.idx_detector:
                 it_dist = it_source+it_detector
@@ -37,7 +41,6 @@ class oscprob_v04(TransformationBundle):
 
                 oscprobkey = it_dist.current_format('{autoindex}')[1:]
 
-                pmns_name = 'pmns'
                 with self.namespace:
                     with self.namespace(pmns_name):
                         for it_minor in self.nidx_minor:
@@ -71,8 +74,8 @@ class oscprob_v04(TransformationBundle):
         if pdgyear:
             pmnspars_kwargs['pdg_year']=pdgyear
 
-        name = 'pmns'
-        ns_pmns=self.namespace(name)
+        pmns_name = self.get_globalname('pmns')
+        ns_pmns=self.namespace(pmns_name)
         reqparameters(ns_pmns, **pmnspars_kwargs)
 
         names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])

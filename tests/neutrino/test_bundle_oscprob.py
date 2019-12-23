@@ -5,7 +5,7 @@ from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
 from gna.bundle import execute_bundles
-from matplotlib import pyplot as P
+from matplotlib import pyplot as plt
 from matplotlib.colors import LogNorm
 from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.env import env
@@ -21,9 +21,11 @@ parser = ArgumentParser()
 args = parser.parse_args()
 args.make_idx=True
 
+km = 1000.0
+L1, L2 = 52*km, 100*km
 detectors = {
-    'AD1' : [ 52000,  0.0, 0.0 ],
-    'AD2' : [ 100000, 0.0, 0.0 ],
+    'AD1' : [ L1, 0.0, 0.0 ],
+    'AD2' : [ L2, 0.0, 0.0 ],
 }
 reactors = {
     'Core0' : [0.0, 0.0, 0.0],
@@ -35,11 +37,11 @@ indices = [('r', 'reactor', list(reactors.keys()) ),
            ('c', 'component', ['comp0', 'comp12', 'comp13', 'comp23'])
            ]
 
-expr = '''
-        baseline[r,d]()
-        sum[c]| pmns[c]*oscprob[c,d,r](enu())
-        sum[c]| pmns_matter[c]*oscprob_matter[c,d,r](enu())
-'''
+expr = [
+        "baseline[r,d]()",
+        "sum[c]| pmns[c]*oscprob[c,d,r](enu())",
+        "sum[c]| pmns_matter[c]*oscprob_matter[c,d,r](enu())"
+]
 
 a =  Expression_v01(expr, indices=indices)
 a.parse()
@@ -52,6 +54,8 @@ lib = dict(
 a.guessname(lib, save=True)
 a.tree.dump(True)
 
+enu = C.Points(np.arange(1.0, 12.0+1.e-9, 0.001))
+enu_o = enu.single()
 #
 # Initialize bundles
 #
@@ -78,9 +82,10 @@ cfg_idx = NestedDict(
             pdgyear = 2016
             ),
         enu = NestedDict(
-            bundle = NestedDict(name='predefined', version='v01', major=''), name = 'enu',
+            bundle = NestedDict(name='predefined', version='v01', major=''),
+            name = 'enu',
             inputs = None,
-            outputs = C.Points(np.arange(0.0, 12.0, 0.001)),
+            outputs = enu.single(),
             ),
         )
 context = ExpressionContext_v01(cfg_idx, ns=env.globalns)
@@ -91,9 +96,18 @@ env.globalns.printparameters(labels=True)
 #
 # Test bundle
 #
-fig = P.figure()
-ax = P.subplot(111, xlabel='Enu', ylabel='P', title='Oscillation probability comparison')
-ax.minorticks_on()
-ax.grid()
+def plot(vacuum, matter, title):
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='Enu', ylabel='P', title=title)
+    ax.minorticks_on()
+    ax.grid()
 
+    vacuum.plot_vs(       enu_o, linestyle='dashed', alpha=0.6, label='Vacuum')
+    matter.plot_vs(enu_o, linestyle='dotted', alpha=0.6, label='Matter')
 
+    ax.legend()
+
+for (vacuum, matter, L) in zip(context.outputs.oscprob_full.Core0.values(), context.outputs.oscprob_full_matter.Core0.values(), (L1, L2)):
+    plot(vacuum, matter, title='Oscillation probability comparison, L={} km'.format(L/km))
+
+plt.show()
