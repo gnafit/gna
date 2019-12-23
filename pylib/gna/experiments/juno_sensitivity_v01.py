@@ -29,6 +29,10 @@ Implements:
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
     - [optional] Multi-detector energy resolution (Yaping)
+
+Misc changes:
+    - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
+
     """
 
     detectorname = 'AD1'
@@ -163,7 +167,7 @@ Implements:
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v03', major='rdc'),
+                    bundle = dict(name='oscprob', version='v04', major='rdc'),
                     pdgyear = self.opts.pdgyear
                     ),
                 anuspec = NestedDict(
