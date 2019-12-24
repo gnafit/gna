@@ -36,6 +36,16 @@ class Operation(TCall,NestedTransformation):
         for o in self.objects:
             o.guessname(lib, save)
 
+        if self.name is not undefinedname:
+            if not self.label:
+                for cfg in lib.values():
+                    if cfg['name']!=self.name:
+                        continue
+                    newlabel = cfg.get('label', None)
+                    if newlabel:
+                        self.label=newlabel
+            return self.name
+
         cname = TCall.guessname(self, lib=lib)
         newname='{}:{}|{}'.format(self.operation, self.nindex_to_reduce.ident(), cname)
 

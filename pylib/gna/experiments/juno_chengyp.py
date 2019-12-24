@@ -493,7 +493,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         if self.opts.verbose or self.opts.stats:
             print('Parameters:')
             self.stats = dict()
-            correlations = self.opts.verbose>1 and 'full' or 'short'
+            correlations = self.opts.verbose>2 and 'full' or 'short'
             self.namespace.printparameters(labels=True, stats=self.stats, correlations=correlations)
 
     def register(self):
