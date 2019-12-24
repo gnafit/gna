@@ -53,6 +53,7 @@ Misc changes:
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -100,7 +101,8 @@ Misc changes:
 
         self.formula = list(self.formula_base)
 
-        ibd = self.formula_ibd_noeffects
+        oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
+        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part)
         self.formula = self.formula + self.formula_enu
 
         energy_model_formula = ''
@@ -167,14 +169,14 @@ Misc changes:
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v04', major='rdc'),
+                    bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
                     pdgyear = self.opts.pdgyear
                     ),
                 oscprob_matter = NestedDict(
-                    bundle = dict(name='oscprob_matter', version='v01', major='rd',
-                        names=dict(pmns='pmns_matter', oscprob='oscprob_matter')),
+                    bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
+                        names=dict(oscprob='oscprob_matter')),
                     density = 2.6, # g/cm3
-                    pdgyear = 2016
+                    pdgyear = self.opts.pdgyear
                     ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -522,10 +524,12 @@ Misc changes:
                                 ibd_xsec(enu(), ctheta())*
                                 jacobian(enu(), ee(), ctheta())*
                                 expand(sum[i]|  power_livetime_factor*anuspec[i](enu()))*
-                                sum[c]|
-                                  pmns[c]*oscprob[c,d,r](enu())
+                                {oscprob}
                             )
             '''
+
+    formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
+    formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
 
     formula_back = 'observation=norm * rebin(ibd)'
 
