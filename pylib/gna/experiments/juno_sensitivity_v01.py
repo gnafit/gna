@@ -170,6 +170,12 @@ Misc changes:
                     bundle = dict(name='oscprob', version='v04', major='rdc'),
                     pdgyear = self.opts.pdgyear
                     ),
+                oscprob_matter = NestedDict(
+                    bundle = dict(name='oscprob_matter', version='v01', major='rd',
+                        names=dict(pmns='pmns_matter', oscprob='oscprob_matter')),
+                    density = 2.6, # g/cm3
+                    pdgyear = 2016
+                    ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
                     name = 'anuspec',
@@ -515,7 +521,7 @@ Misc changes:
                                 baselineweight[r,d]*
                                 ibd_xsec(enu(), ctheta())*
                                 jacobian(enu(), ee(), ctheta())*
-                                (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                expand(sum[i]|  power_livetime_factor*anuspec[i](enu()))*
                                 sum[c]|
                                   pmns[c]*oscprob[c,d,r](enu())
                             )
@@ -524,44 +530,85 @@ Misc changes:
     formula_back = 'observation=norm * rebin(ibd)'
 
 
-    lib = dict(
-            cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
-                                           label='anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'),
-            cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
-            cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-
-            eres_weighted           = dict(expr='subdetector_fraction*eres', label='{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'),
-            ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
-            ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
-            ibd_noeffects_bf        = dict(expr='kinint2*shape_norm', label='Observed IBD spectrum (best fit, no effects) | {detector}'),
-
-            oscprob_weighted        = dict(expr='oscprob*pmns'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
-
-            fission_fractions       = dict(expr='fission_fractions[r,i]()', label="Fission fraction for {isotope} at {reactor}"),
-            eper_fission_weight     = dict(expr='eper_fission_weight', label="Weighted eper_fission for {isotope} at {reactor}"),
-            eper_fission_weighted   = dict(expr='eper_fission*fission_fractions', label="{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"),
-
-            eper_fission_avg        = dict(expr='eper_fission_avg', label='Average energy per fission at {reactor}'),
-            power_livetime_factor   = dict(expr='power_livetime_factor', label='{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'),
-            numerator               = dict(expr='numerator', label='{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'),
-            power_livetime_scale    = dict(expr='eff*livetime*thermal_power*conversion_factor*target_protons', label='{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'),
-            anuspec_weighted        = dict(expr='anuspec*power_livetime_factor', label='{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='{{Antineutrino spectrum|{reactor}-\\>{detector}}}'),
-
-            countrate_rd            = dict(expr=('anuspec_rd*ibd_xsec*jacobian*oscprob_full', 'anuspec_rd*ibd_xsec*oscprob_full'), label='Countrate {reactor}-\\>{detector}'),
-            countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-            countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
-
-            observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
-
-            iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
-            reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
-            reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
-            ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
-            ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
-            ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
-
-            eres_cw           = dict(expr='eres*pmns'),
-            )
-
+    lib = """
+        cspec_diff:
+          expr: 'anuspec*ibd_xsec*jacobian*oscprob'
+          label: 'anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'
+        cspec_diff_reac_l:
+          expr: 'baselineweight*cspec_diff_reac'
+        cspec_diff_det_weighted:
+          expr: 'pmns*cspec_diff_det'
+        eres_weighted:
+          expr: 'subdetector_fraction*eres'
+          label: '{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'
+        ibd:
+          expr:
+          - 'eres'
+          - 'sum:c|eres_weighted'
+          label: 'Observed IBD spectrum | {detector}'
+        ibd_noeffects:
+          expr: 'kinint2'
+          label: 'Observed IBD spectrum (no effects) | {detector}'
+        ibd_noeffects_bf:
+          expr: 'kinint2*shape_norm'
+          label: 'Observed IBD spectrum (best fit, no effects) | {detector}'
+        oscprob_weighted:
+          expr: 'oscprob*pmns'
+        oscprob_full:
+          expr: 'sum:c|oscprob_weighted'
+          label: 'anue survival probability | weight: {weight_label}'
+        fission_fractions:
+          expr: 'fission_fractions[r,i]()'
+          label: "Fission fraction for {isotope} at {reactor}"
+        eper_fission_weight:
+          expr: 'eper_fission_weight'
+          label: "Weighted eper_fission for {isotope} at {reactor}"
+        eper_fission_weighted:
+          expr: 'eper_fission*fission_fractions'
+          label: "{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"
+        eper_fission_avg:
+          expr: 'eper_fission_avg'
+          label: 'Average energy per fission at {reactor}'
+        power_livetime_factor:
+          expr: 'power_livetime_factor'
+          label: '{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'
+        numerator:
+          expr: 'numerator'
+          label: '{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'
+        power_livetime_scale:
+          expr: 'eff*livetime*thermal_power*conversion_factor*target_protons'
+          label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'
+        anuspec_weighted:
+          expr: 'anuspec*power_livetime_factor'
+          label: '{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'
+        anuspec_rd:
+          expr: 'sum:i|anuspec_weighted'
+          label: '{{Antineutrino spectrum|{reactor}-\\>{detector}}}'
+        countrate_rd:
+          expr:
+          - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
+          - 'anuspec_rd*ibd_xsec*oscprob_full'
+          label: 'Countrate {reactor}-\\>{detector}'
+        countrate_weighted:
+          expr: 'baselineweight*countrate_rd'
+        countrate:
+          expr: 'sum:r|countrate_weighted'
+          label: '{{Count rate at {detector}|weight: {weight_label}}}'
+        observation_raw:
+          expr: 'bkg+ibd'
+          label: 'Observed spectrum | {detector}'
+        iso_spectrum_w:
+          expr: 'kinint2*power_livetime_factor'
+        reac_spectrum:
+          expr: 'sum:i|iso_spectrum_w'
+        reac_spectrum_w:
+          expr: 'baselineweight*reac_spectrum'
+        ad_spectrum_c:
+          expr: 'sum:r|reac_spectrum_w'
+        ad_spectrum_cw:
+          expr: 'pmns*ad_spectrum_c'
+        ad_spectrum_w:
+          expr: 'sum:c|ad_spectrum_cw'
+        eres_cw:
+          expr: 'eres*pmns'
+    """
