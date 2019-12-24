@@ -151,7 +151,7 @@ class OProd(Operation):
         self.set_operator( ' Π ', text='prod_' )
 
         import ROOT as R
-        self.set_tinit( R.GNA.GNAObjectTemplates.ProductBCT('double') )
+        self.set_tinit( R.GNA.GNAObjectTemplates.ProductT('double') )
 
 class OConcat(Operation):
     def __init__(self, *indices, **kwargs):
