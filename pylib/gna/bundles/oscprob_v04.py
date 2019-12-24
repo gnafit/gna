@@ -58,9 +58,9 @@ class oscprob_v04(TransformationBundle):
 
                                     trans = oscprob.transformations[component]
                                     if self.nidx_minor:
-                                        trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}\n'+it_minor.current_format()) )
+                                        trans.setLabel( it.current_format('OP {component}:|{reactor}-\\>{detector}|'+it_minor.current_format()) )
                                     else:
-                                        trans.setLabel( it.current_format('OP {component}:\n{reactor}-\\>{detector}') )
+                                        trans.setLabel( it.current_format('OP {component}:|{reactor}-\\>{detector}') )
                                     output = trans[component]
                                     input  = trans['Enu']
 
