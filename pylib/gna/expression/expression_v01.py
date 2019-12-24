@@ -76,6 +76,13 @@ class Expression_v01(object):
         self.tree=self.trees[-1]
 
     def guessname(self, ilib, *args, **kwargs):
+        if isinstance(ilib, str):
+            import yaml
+            try:
+                ilib = yaml.load(ilib, yaml.FullLoader)
+            except:
+                raise Exception('Unable to parse name library (yaml)')
+
         lib = dict()
         for k, v in ilib.items():
             v['name'] = k
