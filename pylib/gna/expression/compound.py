@@ -291,7 +291,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
                     hasattr(o, 'name') and o.name or '', type(o).__name__
                     ))
 
-            if self.expandable and isinstance(o, pclass) and o.expandable and not o is self:
+            if self.expandable and isinstance(o, TProduct) and o.expandable and not o is self:
                 newobjects+=o.objects
             else:
                 newobjects.append(o)

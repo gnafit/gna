@@ -61,3 +61,15 @@ print( tp2, '=', tp2.estr() )
 print()
 print('ident', 'tp2', tp2.ident())
 print('ident full', 'tp2', tp2.ident_full())
+
+print()
+print('Triple sum')
+ts3 = t10 + t11 + t01
+ts3.name = 'sum3'
+print( ts3, '=', ts3.estr() )
+
+print()
+print('Triple product')
+tp3 = t10 * t11 * t01
+tp3.name = 'prod3'
+print( tp3, '=', tp3.estr() )

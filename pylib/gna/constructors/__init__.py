@@ -61,8 +61,11 @@ def VarProduct(varnames, *args, **kwargs):
     return R.GNA.GNAObjectTemplates.VarProductT(context.current_precision())(stdvector(varnames), *args, **kwargs)
 
 """Construct Dummy object from vector of strings"""
-def Dummy(shape, name, varnames, *args, **kwargs):
-    return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
+def Dummy(shape, name, varnames=None, *args, **kwargs):
+    if varnames:
+        return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, stdvector(varnames), *args, **kwargs)
+
+    return R.GNA.GNAObjectTemplates.DummyT(context.current_precision())(shape, name, *args, **kwargs)
 
 """Construct Identity object from list of SingleOutputs"""
 def Identity(outputs=None, **kwargs):
