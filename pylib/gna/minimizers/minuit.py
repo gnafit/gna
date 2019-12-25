@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ROOT
 from argparse import Namespace
 import numpy as np
@@ -132,7 +133,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self._patchresult()
         return self.result
 
-    def fit(self):
+    def fit(self, minoserrors=[]):
         if not self.pars:
             return self.evalstatistic()
 
@@ -162,6 +163,10 @@ class Minuit(ROOT.TMinuitMinimizer):
         }
         self.result = Namespace(**resultdict)
         self._patchresult()
+
+        if minoserrors:
+            self.minoserrors(minoserrors, self.result)
+
         return self.result
 
     def _patchresult(self):
@@ -178,3 +183,37 @@ class Minuit(ROOT.TMinuitMinimizer):
         if not res.success:
             return None
         return res.fun
+
+    def minoserrors(self, names, fitresult):
+        errs = fitresult.minos = OrderedDict()
+        if names:
+            print('Caclulating statistics profile for:', end=' ')
+        for name in names:
+            if isinstance(name, int):
+                idx = name
+                name = self.VariableName(idx)
+            else:
+                idx = self.result.names.index(name)
+            print(name, end=', ')
+            left, right = self.get_minoserror(idx=idx)
+            errs[name] = (left, right)
+
+    def get_minoserror(self, name=None, idx=None, verbose=False):
+        if idx==None:
+            idx = self.VariableIndex( name )
+
+        if not name:
+            name = self.VariableName( idx )
+
+        if verbose:
+            print( '    variable %i %s'%( idx, name ), end='' )
+
+        low, up = np.zeros( 1, dtype='d' ), np.zeros( 1, dtype='d' )
+        try:
+            self.GetMinosError( idx, low, up )
+        except:
+            print( 'Minuit error!' )
+            return [ 0.0, 0.0 ]
+
+        print( ':', low[0], up[0] )
+        return [ low[0], up[0] ]
