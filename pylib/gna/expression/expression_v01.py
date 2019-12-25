@@ -34,7 +34,7 @@ class VTContainer_v01(OrderedDict):
         return value
 
 class Expression_v01(object):
-    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket, inverse=OInverse )
+    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket, expand=expand, inverse=OInverse )
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
         if isinstance(expression, basestring):
@@ -76,6 +76,13 @@ class Expression_v01(object):
         self.tree=self.trees[-1]
 
     def guessname(self, ilib, *args, **kwargs):
+        if isinstance(ilib, str):
+            import yaml
+            try:
+                ilib = yaml.load(ilib, yaml.FullLoader)
+            except:
+                raise Exception('Unable to parse name library (yaml)')
+
         lib = dict()
         for k, v in ilib.items():
             v['name'] = k

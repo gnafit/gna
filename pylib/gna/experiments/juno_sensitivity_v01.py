@@ -13,20 +13,28 @@ class exp(baseexp):
     """
 JUNO experiment implementation
 
-Derived from: Daya Bay model from dybOscar and GNA
+Derived [2019.12] from:
+    - Daya Bay model from dybOscar and GNA
+    - juno_chengyp
+
+Changes since previous implementation [juno_chengyp]:
+    - Dropped Enu-mode support
+    - TODO: add matter oscillations
+
 Implements:
     - Reactor antineutrino flux: Huber+Mueller
     - NO off-equilibrium and NO SNF contribution
     - Vacuum 3nu oscillations
-    - Two modes for kinematics:
-        * Enu mode with 1d integration (similar to YB fitter)
-        * Evis mode with 2d integration (similary to dybOscar)
+    - Evis mode with 2d integration (similary to dybOscar)
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
     - [optional] Multi-detector energy resolution (Yaping)
 
-The model is succeeded by juno_sensitivity_v01 model.
+Misc changes:
+    - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
+
     """
+
     detectorname = 'AD1'
 
     @classmethod
@@ -41,11 +49,11 @@ The model is succeeded by juno_sensitivity_v01 model.
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -93,17 +101,9 @@ The model is succeeded by juno_sensitivity_v01 model.
 
         self.formula = list(self.formula_base)
 
-        mode_yb = False
-        if self.opts.mode=='main':
-            enu = self.formula_enu
-            ibd = self.formula_ibd_noeffects
-        elif self.opts.mode=='yb':
-            enu = self.formula_enu_yb
-            ibd = self.formula_ibd_noeffects_yb
-            mode_yb = True
-        else:
-            raise Exception('unsupported option')
-        self.formula = self.formula + enu
+        oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
+        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part)
+        self.formula = self.formula + self.formula_enu
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
@@ -148,10 +148,9 @@ The model is succeeded by juno_sensitivity_v01 model.
             ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
-        mode_yb = self.opts.mode=='yb'
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2'), inactive=mode_yb),
+                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
                     edges    = np.arange(0.6, 12.001, 0.01),
                     #  edges    = np.linspace(0.0, 12.001, 601),
@@ -159,23 +158,9 @@ The model is succeeded by juno_sensitivity_v01 model.
                     yorder   = 5,
                     ),
                 rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v03', major='', inactive=mode_yb),
+                        bundle = dict(name='rebin', version='v03', major=''),
                         rounding = 3,
                         edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
-                        name = 'rebin',
-                        label = 'Final histogram {detector}'
-                        ),
-                kinint2_enu = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2'), inactive=not mode_yb),
-                    variables = ('enu_in', 'ctheta'),
-                    edges     = np.linspace(1.8, 8.0, 601),
-                    xorders   = 4,
-                    yorder   = 5,
-                    ),
-                rebin_yb = NestedDict(
-                        bundle = dict(name='rebin', version='v03', major='', inactive=not mode_yb),
-                        rounding = 3,
-                        edges = np.linspace(1.8, 8.0, 201) ,
                         name = 'rebin',
                         label = 'Final histogram {detector}'
                         ),
@@ -184,7 +169,13 @@ The model is succeeded by juno_sensitivity_v01 model.
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v03', major='rdc'),
+                    bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
+                    pdgyear = self.opts.pdgyear
+                    ),
+                oscprob_matter = NestedDict(
+                    bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
+                        names=dict(oscprob='oscprob_matter')),
+                    density = 2.6, # g/cm3
                     pdgyear = self.opts.pdgyear
                     ),
                 anuspec = NestedDict(
@@ -384,18 +375,6 @@ The model is succeeded by juno_sensitivity_v01 model.
                         )
                 )
 
-        if mode_yb:
-            from physlib import PhysicsConstants
-            pc = PhysicsConstants(2016)
-            shift = pc.DeltaNP - pc.ElectronMass
-            histshift = R.HistEdgesLinear(1.0, -shift)
-            self.cfg.enuToEvis0 = NestedDict(
-                bundle  = dict(name='predefined', version='v01'),
-                name    = 'enuToEvis0',
-                inputs  = (histshift.histedges.hist_in,),
-                outputs = histshift.histedges.hist,
-                object  = histshift
-                )
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
             self.cfg.lsnl.correlations_pars = None
@@ -407,23 +386,15 @@ The model is succeeded by juno_sensitivity_v01 model.
             self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
-        mode_yb = self.opts.mode.startswith('yb')
-
         if self.opts.spectrum_unc in ['final', 'initial']:
             spec = self.namespace('spectrum')
             cfg = self.cfg.shape_uncertainty
             unc = cfg.unc
 
             if self.opts.spectrum_unc=='initial':
-                if mode_yb:
-                    edges = self.cfg.kinint2_enu.edges
-                else:
-                    edges = self.cfg.kinint2.edges
+                edges = self.cfg.kinint2.edges
             elif self.opts.spectrum_unc=='final':
-                if mode_yb:
-                    edges = self.cfg.rebin_yb.edges
-                else:
-                    edges = self.cfg.rebin.edges
+                edges = self.cfg.rebin.edges
 
             # bin-to-bin should take into account the number of bins it is applied to
             unccorrection = ((edges.size-1.0)/cfg.nbins)**0.5
@@ -500,10 +471,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         ns = self.namespace
         outputs = self.context.outputs
         #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-        if self.opts.mode=='yb':
-            ns.addobservable("Enu",    outputs.enu_in, export=False)
-        else:
-            ns.addobservable("Enu",    outputs.enu, export=False)
+        ns.addobservable("Enu",    outputs.enu, export=False)
 
         if 'ibd_noeffects_bf' in outputs:
             ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
@@ -555,64 +523,96 @@ The model is succeeded by juno_sensitivity_v01 model.
                                 baselineweight[r,d]*
                                 ibd_xsec(enu(), ctheta())*
                                 jacobian(enu(), ee(), ctheta())*
-                                (sum[i]|  power_livetime_factor*anuspec[i](enu()))*
-                                sum[c]|
-                                  pmns[c]*oscprob[c,d,r](enu())
+                                expand(sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                {oscprob}
                             )
             '''
 
-    formula_ibd_noeffects_yb = '''
-                            kinint2(
-                              sum[r]|
-                                baselineweight[r,d]*
-                                ibd_xsec(enu_in_mesh(), ctheta())*
-                                (sum[i]|  power_livetime_factor*anuspec[i](enu_in_mesh()))*
-                                sum[c]|
-                                  pmns[c]*oscprob[c,d,r](enu_in_mesh())
-                            )
-            '''
+    formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
+    formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
 
     formula_back = 'observation=norm * rebin(ibd)'
 
 
-    lib = dict(
-            cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
-                                           label='anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'),
-            cspec_diff_reac_l       = dict(expr='baselineweight*cspec_diff_reac'),
-            cspec_diff_det_weighted = dict(expr='pmns*cspec_diff_det'),
-
-            eres_weighted           = dict(expr='subdetector_fraction*eres', label='{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'),
-            ibd                     = dict(expr=('eres', 'sum:c|eres_weighted'), label='Observed IBD spectrum | {detector}'),
-            ibd_noeffects           = dict(expr='kinint2', label='Observed IBD spectrum (no effects) | {detector}'),
-            ibd_noeffects_bf        = dict(expr='kinint2*shape_norm', label='Observed IBD spectrum (best fit, no effects) | {detector}'),
-
-            oscprob_weighted        = dict(expr='oscprob*pmns'),
-            oscprob_full            = dict(expr='sum:c|oscprob_weighted', label='anue survival probability | weight: {weight_label}'),
-
-            fission_fractions       = dict(expr='fission_fractions[r,i]()', label="Fission fraction for {isotope} at {reactor}"),
-            eper_fission_weight     = dict(expr='eper_fission_weight', label="Weighted eper_fission for {isotope} at {reactor}"),
-            eper_fission_weighted   = dict(expr='eper_fission*fission_fractions', label="{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"),
-
-            eper_fission_avg        = dict(expr='eper_fission_avg', label='Average energy per fission at {reactor}'),
-            power_livetime_factor   = dict(expr='power_livetime_factor', label='{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'),
-            numerator               = dict(expr='numerator', label='{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'),
-            power_livetime_scale    = dict(expr='eff*livetime*thermal_power*conversion_factor*target_protons', label='{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'),
-            anuspec_weighted        = dict(expr='anuspec*power_livetime_factor', label='{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'),
-            anuspec_rd              = dict(expr='sum:i|anuspec_weighted', label='{{Antineutrino spectrum|{reactor}-\\>{detector}}}'),
-
-            countrate_rd            = dict(expr=('anuspec_rd*ibd_xsec*jacobian*oscprob_full', 'anuspec_rd*ibd_xsec*oscprob_full'), label='Countrate {reactor}-\\>{detector}'),
-            countrate_weighted      = dict(expr='baselineweight*countrate_rd'),
-            countrate               = dict(expr='sum:r|countrate_weighted', label='{{Count rate at {detector}|weight: {weight_label}}}'),
-
-            observation_raw         = dict(expr='bkg+ibd', label='Observed spectrum | {detector}'),
-
-            iso_spectrum_w          = dict(expr='kinint2*power_livetime_factor'),
-            reac_spectrum           = dict(expr='sum:i|iso_spectrum_w'),
-            reac_spectrum_w         = dict(expr='baselineweight*reac_spectrum'),
-            ad_spectrum_c           = dict(expr='sum:r|reac_spectrum_w'),
-            ad_spectrum_cw          = dict(expr='pmns*ad_spectrum_c'),
-            ad_spectrum_w           = dict(expr='sum:c|ad_spectrum_cw'),
-
-            eres_cw           = dict(expr='eres*pmns'),
-            )
-
+    lib = """
+        cspec_diff:
+          expr: 'anuspec*ibd_xsec*jacobian*oscprob'
+          label: 'anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'
+        cspec_diff_reac_l:
+          expr: 'baselineweight*cspec_diff_reac'
+        cspec_diff_det_weighted:
+          expr: 'pmns*cspec_diff_det'
+        eres_weighted:
+          expr: 'subdetector_fraction*eres'
+          label: '{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'
+        ibd:
+          expr:
+          - 'eres'
+          - 'sum:c|eres_weighted'
+          label: 'Observed IBD spectrum | {detector}'
+        ibd_noeffects:
+          expr: 'kinint2'
+          label: 'Observed IBD spectrum (no effects) | {detector}'
+        ibd_noeffects_bf:
+          expr: 'kinint2*shape_norm'
+          label: 'Observed IBD spectrum (best fit, no effects) | {detector}'
+        oscprob_weighted:
+          expr: 'oscprob*pmns'
+        oscprob_full:
+          expr: 'sum:c|oscprob_weighted'
+          label: 'anue survival probability | weight: {weight_label}'
+        fission_fractions:
+          expr: 'fission_fractions[r,i]()'
+          label: "Fission fraction for {isotope} at {reactor}"
+        eper_fission_weight:
+          expr: 'eper_fission_weight'
+          label: "Weighted eper_fission for {isotope} at {reactor}"
+        eper_fission_weighted:
+          expr: 'eper_fission*fission_fractions'
+          label: "{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"
+        eper_fission_avg:
+          expr: 'eper_fission_avg'
+          label: 'Average energy per fission at {reactor}'
+        power_livetime_factor:
+          expr: 'power_livetime_factor'
+          label: '{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'
+        numerator:
+          expr: 'numerator'
+          label: '{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'
+        power_livetime_scale:
+          expr: 'eff*livetime*thermal_power*conversion_factor*target_protons'
+          label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'
+        anuspec_weighted:
+          expr: 'anuspec*power_livetime_factor'
+          label: '{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'
+        anuspec_rd:
+          expr: 'sum:i|anuspec_weighted'
+          label: '{{Antineutrino spectrum|{reactor}-\\>{detector}}}'
+        countrate_rd:
+          expr:
+          - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
+          - 'anuspec_rd*ibd_xsec*oscprob_full'
+          label: 'Countrate {reactor}-\\>{detector}'
+        countrate_weighted:
+          expr: 'baselineweight*countrate_rd'
+        countrate:
+          expr: 'sum:r|countrate_weighted'
+          label: '{{Count rate at {detector}|weight: {weight_label}}}'
+        observation_raw:
+          expr: 'bkg+ibd'
+          label: 'Observed spectrum | {detector}'
+        iso_spectrum_w:
+          expr: 'kinint2*power_livetime_factor'
+        reac_spectrum:
+          expr: 'sum:i|iso_spectrum_w'
+        reac_spectrum_w:
+          expr: 'baselineweight*reac_spectrum'
+        ad_spectrum_c:
+          expr: 'sum:r|reac_spectrum_w'
+        ad_spectrum_cw:
+          expr: 'pmns*ad_spectrum_c'
+        ad_spectrum_w:
+          expr: 'sum:c|ad_spectrum_cw'
+        eres_cw:
+          expr: 'eres*pmns'
+    """

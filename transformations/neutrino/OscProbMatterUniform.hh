@@ -10,7 +10,7 @@ class  OscProbMatter: public OscProbPMNSBase,
                       public TransformationBind<OscProbMatter> {
 public:
     using TransformationBind<OscProbMatter>::transformation_;
-    OscProbMatter(Neutrino from, Neutrino to);
+    OscProbMatter(Neutrino from, Neutrino to, const std::string& baseline="L", const std::string& rho="rho");
 
     void calcOscProb(FunctionArgs fargs);
 

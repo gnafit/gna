@@ -45,9 +45,10 @@ class Index(object):
             args = []
             self.current=kwargs.pop( 'current', None )
 
-            varcheck = set(self.variants)
-            if len(varcheck)!=len(self.variants):
-                raise Exception('There are duplicated indices ({name}): {idxlist!s}'.format(name=self.name, idxlist=self.variants))
+            if self.variants is not None:
+                varcheck = set(self.variants)
+                if len(varcheck)!=len(self.variants):
+                    raise Exception('There are duplicated indices ({name}): {idxlist!s}'.format(name=self.name, idxlist=self.variants))
 
             slave = kwargs.pop('slave', None)
             if slave:

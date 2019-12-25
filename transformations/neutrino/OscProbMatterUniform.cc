@@ -6,15 +6,15 @@
 #include "TMath.h"
 #include "TypesFunctions.hh"
 
-OscProbMatter::OscProbMatter(Neutrino from, Neutrino to)
+OscProbMatter::OscProbMatter(Neutrino from, Neutrino to, const std::string& baseline, const std::string& rho)
     : OscProbPMNSBase(from, to), m_from(from), m_to(to)
 {
     if (from.kind != to.kind) {
       throw std::runtime_error("Particle-antiparticle oscillations");
     };
 
-    variable_(&m_L, "L");
-    variable_(&m_rho, "rho"); // g/cm3
+    variable_(&m_L, baseline);
+    variable_(&m_rho, rho); // g/cm3
     transformation_("oscprob")
         .input("Enu") //MeV
         .output("oscprob")

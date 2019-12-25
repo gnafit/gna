@@ -298,8 +298,11 @@ class TransformationBundle(object):
     def exception(self, message):
         return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
 
+    def get_globalname(self, localname):
+        return self.bundlecfg['names'].get(localname, localname)
+
     def get_path(self, localname, nidx=None, argument_number=None, join=False, extra=None):
-        name=self.bundlecfg['names'].get(localname, localname)
+        name=self.get_globalname(localname)
 
         if nidx is None:
             path = name,
