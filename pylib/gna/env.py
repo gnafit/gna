@@ -85,7 +85,12 @@ class ExpressionsEntry(object):
         for expr in path:
             v = expr.get()
             if self._label is not None:
-                v.setLabel(self._label)
+                otherlabel = v.label()
+                if otherlabel:
+                    newlabel = '{}: {}'.format(self._label, otherlabel)
+                else:
+                    newlabel = self._label
+                v.setLabel(newlabel)
         return v
 
     def resolvepath(self, seen, known):
@@ -316,6 +321,7 @@ class namespace(Mapping):
 
     def addevaluable(self, name, var):
         evaluable = ROOT.Variable(var.typeName())(name, var)
+        evaluable.setLabel(var.label())
         evaluable.ns = self
         self[name] = evaluable
         return evaluable
@@ -359,7 +365,10 @@ class namespace(Mapping):
         for v in self.itervalues():
             if not isinstance(v, ExpressionsEntry):
                 continue
-            v.get()
+            try:
+                v.get()
+            except:
+                pass
 
         if recursive:
             for ns in self.namespaces.values():

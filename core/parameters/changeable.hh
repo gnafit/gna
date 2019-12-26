@@ -36,7 +36,7 @@ enum class TaintStatus {
 };
 
 struct inconstant_header {
-  inconstant_header(const char* aname="", bool autoname=false, size_t size=1u) : name(aname), size(size) {
+  inconstant_header(const char* aname="", const char* alabel="", bool autoname=false, size_t size=1u) : name(aname), label(alabel), size(size) {
     static size_t ih_counter=0;
     autoname = autoname || !name.size();
     if(autoname){
@@ -46,6 +46,7 @@ struct inconstant_header {
   }
   virtual ~inconstant_header()=default;
   std::string name = "";
+  std::string label = "";
   references observers;
   references emitters;
   bool tainted = true;
@@ -57,7 +58,7 @@ struct inconstant_header {
 
 template <typename ValueType>
 struct inconstant_data: public inconstant_header {
-  inconstant_data(size_t size=1u, const char* name="", bool autoname=false) : inconstant_header(name, autoname, size), value(size) {
+  inconstant_data(size_t size=1u, const char* name="", const char* label="", bool autoname=false) : inconstant_header(name, label, autoname, size), value(size) {
     //printf("make %s of size %zu\n", this->name.c_str(), size);
     type = &typeid(ValueType);
   }
@@ -101,6 +102,9 @@ public:
   }
   const char *name() const {
     return m_hdr->name.c_str();
+  }
+  const char *label() const {
+    return m_hdr->label.c_str();
   }
   bool operator==(changeable const &other) const {
     return m_hdr == other.m_hdr;
@@ -267,7 +271,7 @@ protected:
     m_hdr.reset(hdr);
   }
   void init(const char* name="", bool autoname=false, size_t size=0u) {
-    alloc(new inconstant_header(name, autoname, size));
+    alloc(new inconstant_header(name, "", autoname, size));
     DPRINTF("constructed header");
   }
   template <typename T>
