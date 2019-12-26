@@ -21,13 +21,13 @@ def reqparameters(ns, **kwargs):
                      sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
 
     ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
-                      sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting Δm²₂₁')
+                      sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
 
     ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
                      sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
-                     variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass hierarchy')
+                     variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
                       sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
@@ -37,7 +37,7 @@ def reqparameters(ns, **kwargs):
 
     try:
         ns.reqparameter('DeltaMSqEE', central=curpdg['dmSqEE'],
-                          sigma=curpdg['dmSqEE_e'], limits=(0, 0.1), label='Reactor average mass splitting Δm²(ee)')
+                          sigma=curpdg['dmSqEE_e'], limits=(0, 0.1), label='Reactor average mass splitting |Δm²(ee)|')
     except KeyError:
         ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32'],
                           sigma=curpdg['dmSq32_e'], limits=(0, 0.1), label='Mass splitting (2, 3)')
@@ -51,32 +51,24 @@ def reqparameters(ns, **kwargs):
         C.OscillationExpressions(ns=ns)
         C.PMNSExpressions(ns=ns)
 
-    flavors = [ 'e', 'μ', 'τ' ]
-    with ns:
-        for iflavor in range(3):
-            for jmass in range(3):
-                name = 'V{0}{1}'.format(iflavor,jmass)
-                ns[name].get()
-                ns[name].setLabel('PMNS element {0}{1}'.format(flavors[iflavor], jmass))
-
 def reqparameters_reactor(ns, **kwargs):
     """Reqctor oscillation parameters"""
     pdg_year = kwargs.get('pdg_year', 2016)
     curpdg = pdg[pdg_year]
     ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
-                     sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1), label='Mass splitting Δm²₂₃')
+                     sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1), label='Mass splitting |Δm²₂₃|')
 
-    ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
-                     sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
+    ns.reqparameter('SinSqDouble13', central=curpdg['sinSq2theta13'],
+                     sigma=curpdg['sinSq2theta13_e'], limits=(0,1), label='Reactor mixing angle sin²2θ₁₃ ')
+
+    ns.reqparameter('SinSqDouble12', central=curpdg['sinSq2theta12'],
+                     sigma=curpdg['sinSq2theta12_e'], limits=(0,1), label='Solar mixing angle sin²2θ₁₂')
 
     ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
-                      sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting Δm²₂₁')
-
-    ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
-                     sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
+                      sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
-                     variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass hierarchy α')
+                     variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
                       sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
@@ -87,11 +79,3 @@ def reqparameters_reactor(ns, **kwargs):
     with ns:
         C.OscillationExpressions(ns=ns)
         C.PMNSExpressions(ns=ns)
-
-    flavors = [ 'e', 'μ', 'τ' ]
-    with ns:
-        for iflavor in range(3):
-            for jmass in range(3):
-                name = 'V{0}{1}'.format(iflavor,jmass)
-                ns[name].get()
-                ns[name].setLabel('PMNS element {0}{1}'.format(flavors[iflavor], jmass))

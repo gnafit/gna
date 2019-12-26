@@ -140,7 +140,10 @@ class PhysicsConstants:
     ##end def function__init__
 ##end class PhysicsConstants
 
-def add2theta(d, varname):
+def addDoubleTheta(year, varname, verbose=False):
+    d = pdg[year]
+    assert varname.startswith('sinSqtheta')
+
     errname = varname+'_e'
 
     central = d[varname]
@@ -148,7 +151,29 @@ def add2theta(d, varname):
 
     left, right = central-sigma, central+sigma
 
-    # sin2 2theta
+    newname = varname.replace('sinSq', 'sinSq2')
+    newerrname = newname+'_e'
+
+    def cnv(v):
+        return 4.0*v*(1.0-v)
+
+    newcentral = cnv(central)
+    newleft = cnv(left)
+    newright = cnv(right)
+
+    newerr = (newright-newleft)*0.5
+    asymm  = (newright+newleft)*0.5 - newcentral
+
+    d[newname] = newcentral
+    d[newerrname]  = newerr
+
+    if verbose:
+        print(u'[{year}] Add evaluated {name}={central}±{err}. Asymmetry: {asymm}'.format(year=year, name=newname, central=newcentral, err=newerr, asymm=asymm))
+
+addDoubleTheta(2016, 'sinSqtheta13')
+addDoubleTheta(2016, 'sinSqtheta12')
+addDoubleTheta(2018, 'sinSqtheta13')
+addDoubleTheta(2018, 'sinSqtheta12')
 
 pc = PhysicsConstants()
 percent = 0.01
