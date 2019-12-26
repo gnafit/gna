@@ -51,11 +51,42 @@ def reqparameters(ns, **kwargs):
         C.OscillationExpressions(ns=ns)
         C.PMNSExpressions(ns=ns)
 
-    ns['DeltaMSq23'].setLabel('Mass splitting (2, 3)')
-    ns['DeltaMSq13'].setLabel('Mass splitting (1, 3)')
-    ns['DeltaMSqMM'].setLabel('Accelerator average mass splitting Δm²(μμ)')
-    ns['Phase'].setLabel('CP violation factor exp(-iδ)')
-    ns['PhaseC'].setLabel('Conjugated CP violation factor exp(+iδ)')
+    flavors = [ 'e', 'μ', 'τ' ]
+    with ns:
+        for iflavor in range(3):
+            for jmass in range(3):
+                name = 'V{0}{1}'.format(iflavor,jmass)
+                ns[name].get()
+                ns[name].setLabel('PMNS element {0}{1}'.format(flavors[iflavor], jmass))
+
+def reqparameters_reactor(ns, **kwargs):
+    """Reqctor oscillation parameters"""
+    pdg_year = kwargs.get('pdg_year', 2016)
+    curpdg = pdg[pdg_year]
+    ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
+                     sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1), label='Mass splitting Δm²₂₃')
+
+    ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
+                     sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
+
+    ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
+                      sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting Δm²₂₁')
+
+    ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
+                     sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
+
+    ns.reqparameter('Alpha', type='discrete', default='normal',
+                     variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass hierarchy α')
+
+    ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
+                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
+
+    ns.reqparameter('Delta', type='uniformangle', central=0.0, label='CP violation phase δ(CP)')
+    ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5, label='Relative momentum spread (decoherence)')
+
+    with ns:
+        C.OscillationExpressions(ns=ns)
+        C.PMNSExpressions(ns=ns)
 
     flavors = [ 'e', 'μ', 'τ' ]
     with ns:
