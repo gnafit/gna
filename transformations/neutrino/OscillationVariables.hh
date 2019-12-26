@@ -149,7 +149,9 @@ namespace GNA {
           .add(&SinSq12, {&CosSq12}, [&]() { return 1.0-CosSq12.value(); }, "sin²θ₁₂=1-cos²θ₁₂")
           .add(&SinSq13, {&CosSq13}, [&]() { return 1.0-CosSq13.value(); }, "sin²θ₁₃=1-cos²θ₁₃")
           .add(&SinSq23, {&CosSq23}, [&]() { return 1.0-CosSq23.value(); }, "sin²θ₂₃=1-cos²θ₂₃")
-          // Sine and cos
+          // Squared cos from squared sine
+          .add(&CosSq23, {&SinSq23}, [&]() { return 1.0-SinSq23.value(); }, "cos²θ₂₃=1-sin²θ₂₃")
+          // Sine and cos from mixing angles
           .add(&Sin12, {&SinSq12}, [&]() { return sqrt(SinSq12.value()); }, "sinθ₁₂=√sin²θ₁₂")
           .add(&Sin13, {&SinSq13}, [&]() { return sqrt(SinSq13.value()); }, "sinθ₁₃=√sin²θ₁₃")
           .add(&Sin23, {&SinSq23}, [&]() { return sqrt(SinSq23.value()); }, "sinθ₂₃=√sin²θ₂₃")

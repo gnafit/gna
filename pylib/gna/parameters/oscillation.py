@@ -78,4 +78,4 @@ def reqparameters_reactor(ns, **kwargs):
 
     with ns:
         C.OscillationExpressions(ns=ns)
-        C.PMNSExpressions(ns=ns)
+        C.PMNSExpressionsC(ns=ns)
