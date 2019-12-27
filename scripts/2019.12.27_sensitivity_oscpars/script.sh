@@ -38,6 +38,7 @@ function run(){
     echo $file_output
     echo $file_err
     echo $file_result
+    echo
 
     sem -j$nproc \
       ./gna \
@@ -55,6 +56,8 @@ function run(){
 
 run "Minimal" vacuum eres
 run "+LSNL"   vacuum lsnl eres
+echo Wating to finish...
 
 parallel --wait
-echo Done
+echo
+echo Done!
