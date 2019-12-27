@@ -55,8 +55,9 @@ class Minuit(ROOT.TMinuitMinimizer):
         if isinstance(value, spec.dynamicvalue):
             value = value.value(par)
         step = parspec.get('step', par.step())
+        qualifiedName = par.qualifiedName()
         if step==0:
-            raise Exception( '"%s" initial step is undefined. Specify its sigma explicitly.'%par.name() )
+            raise Exception( '"%s" initial step is undefined. Specify its sigma explicitly.'%qualifiedName )
 
         try:
             vmin, vmax = parspec['limits']
@@ -69,15 +70,15 @@ class Minuit(ROOT.TMinuitMinimizer):
         fixed = parspec.get('fixed', False)
 
         if fixed:
-            self.SetFixedVariable(i, par.name(), value)
+            self.SetFixedVariable(i, qualifiedName, value)
         elif (vmin, vmax) == (float('-inf'), float('+inf')):
-            self.SetVariable(i, par.name(), value, step)
+            self.SetVariable(i, qualifiedName, value, step)
         elif vmax == float('+inf'):
-            self.SetLowerLimitedVariable(i, par.name(), value, step, vmin)
+            self.SetLowerLimitedVariable(i, qualifiedName, value, step, vmin)
         elif vmin == float('-inf'):
-            self.SetUpperLimitedVariable(i, par.name(), value, step, vmax)
+            self.SetUpperLimitedVariable(i, qualifiedName, value, step, vmax)
         else:
-            self.SetLimitedVariable(i, par.name(), value, step, vmin, vmax)
+            self.SetLimitedVariable(i, qualifiedName, value, step, vmin, vmax)
 
     def setuppars(self):
         self._minimizable = ROOT.Minimizable(self.statistic)
@@ -90,6 +91,13 @@ class Minuit(ROOT.TMinuitMinimizer):
             self.setuppar(i, par, spec.get(par, {}))
 
         self._reset = False
+
+    def resetpars(self):
+        if self._reset:
+            return
+        spec = self.spec
+        for i, par in enumerate(self.pars):
+            self.setuppar(i, par, spec.get(par, {}))
 
     def affects(self, par):
         if par not in self.pars:
@@ -133,7 +141,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self._patchresult()
         return self.result
 
-    def fit(self, minoserrors=[]):
+    def fit(self, profile_errors=[]):
         if not self.pars:
             return self.evalstatistic()
 
@@ -152,8 +160,8 @@ class Minuit(ROOT.TMinuitMinimizer):
         errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
 
         resultdict = {
-            'x': argmin.copy(),
-            'errors': errors.copy(),
+            'x': argmin.tolist(),
+            'errors': errors.tolist(),
             'success': not self.Status(),
             'fun': self.MinValue(),
             'nfev': self.NCalls(),
@@ -164,8 +172,8 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.result = Namespace(**resultdict)
         self._patchresult()
 
-        if minoserrors:
-            self.minoserrors(minoserrors, self.result)
+        if profile_errors:
+            self.profile_errors(profile_errors, self.result)
 
         return self.result
 
@@ -184,8 +192,8 @@ class Minuit(ROOT.TMinuitMinimizer):
             return None
         return res.fun
 
-    def minoserrors(self, names, fitresult):
-        errs = fitresult.minos = OrderedDict()
+    def profile_errors(self, names, fitresult):
+        errs = fitresult.errors_profile = OrderedDict()
         if names:
             print('Caclulating statistics profile for:', end=' ')
         for name in names:
@@ -195,10 +203,10 @@ class Minuit(ROOT.TMinuitMinimizer):
             else:
                 idx = self.result.names.index(name)
             print(name, end=', ')
-            left, right = self.get_minoserror(idx=idx)
-            errs[name] = (left, right)
+            left, right = self.get_profile_error(idx=idx)
+            errs[name] = [left.tolist(), right.tolist()]
 
-    def get_minoserror(self, name=None, idx=None, verbose=False):
+    def get_profile_error(self, name=None, idx=None, verbose=False):
         if idx==None:
             idx = self.VariableIndex( name )
 
