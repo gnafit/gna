@@ -42,7 +42,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc', 'junosens1'], default='default', help='set of parameters to load')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
@@ -146,6 +146,9 @@ The model is succeeded by juno_sensitivity_v01 model.
             ns['pmns.SinSq12'].set(0.307)
             ns['pmns.SinSq13'].set(0.024)
             ns['pmns.DeltaMSq12'].set(7.54e-5)
+
+        if self.opts.parameters=='junosens1':
+            ns['pmns.DeltaMSqEE'].set(0.0024924088)
 
     def init_configuration(self):
         mode_yb = self.opts.mode=='yb'

@@ -95,6 +95,8 @@ class ExpressionsEntry(object):
                 v.setLabel(newlabel)
         return v
 
+    materialize = get
+
     def resolvepath(self, seen, known):
         minexpr, minpaths = None, None
         for expr in self.exprs:
@@ -367,10 +369,7 @@ class namespace(Mapping):
         for v in self.itervalues():
             if not isinstance(v, ExpressionsEntry):
                 continue
-            try:
-                v.get()
-            except:
-                pass
+            v.materialize()
 
         if recursive:
             for ns in self.namespaces.values():
