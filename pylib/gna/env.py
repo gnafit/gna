@@ -81,7 +81,9 @@ class ExpressionsEntry(object):
     def get(self):
         path = self.resolvepath({self}, OrderedDict())
         if not path:
-            raise KeyError()
+            names = [expr.expr.name() for expr in self.exprs]
+            reqs = [var.name() for expr in self.exprs for var in expr.expr.sources.values()]
+            raise KeyError('Unable to provide required variables for {!s}. Something is missing from: {!s}'.format(names, reqs))
         for expr in path:
             v = expr.get()
             if self._label is not None:
