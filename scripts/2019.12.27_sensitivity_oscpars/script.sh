@@ -14,7 +14,7 @@ function join_by { local IFS="$1"; shift; echo "$*"; }
 
 # The main functions
 function run(){
-    description=$1; shift
+    info=$1; shift
 
     # Make filename
     suffix=$(join_by _ $iteration $*)
@@ -47,8 +47,14 @@ function run(){
           -- analysis --name juno --datasets juno \
           -- chi2 stats-chi2 juno \
           -- minimizer min minuit stats-chi2 juno.pmns \
-          -- fit min -sp -o $file_result --profile juno.pmns.DeltaMSq23 ">$file_output" "2>$file_err"
+          -- fit min -sp -o $file_result --profile juno.pmns.DeltaMSq23 \
+                     -a label "$info" \
+          ">$file_output" "2>$file_err"
+
 }
 
 run "Minimal" vacuum eres
 run "+LSNL"   vacuum lsnl eres
+
+parallel --wait
+echo Done

@@ -10,9 +10,9 @@ class cmd(basecmd):
         parser.add_argument('minimizer', action=set_typed(env.parts.minimizer), help='Minimizer to use', metavar='name')
         parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
-        parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
         parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
-        # parser.add_argument('-o', '--output', help='Output file (yaml/hdf5)', metavar='filename')
+        parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
+        parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
 
     def init(self):
         minimizer = self.opts.minimizer
@@ -56,5 +56,7 @@ class cmd(basecmd):
             data = self.result.__dict__.copy()
             for key in ('errorsdict', 'errors_profile', 'xdict'):
                 data[key] = dict(data[key])
+            if self.opts.append:
+                data.update(self.opts.append)
 
             ofile.write(yaml.dump(data))

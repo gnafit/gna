@@ -106,7 +106,7 @@ def add_colorbar( colormapable, **kwargs ):
     P.sca( ax )
     return cbar
 
-def savefig( name, *args, **kwargs ):
+def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
     if not name: return
     if type(name)==list:
@@ -119,6 +119,10 @@ def savefig( name, *args, **kwargs ):
     if suffix:
         from os.path import splitext
         basename, ext = splitext( name )
+
+        if not isinstance(suffix, str):
+            suffix = '_'.join(suffix)
+
         name = basename+suffix+ext
 
     P.savefig( name, *args, **kwargs )
