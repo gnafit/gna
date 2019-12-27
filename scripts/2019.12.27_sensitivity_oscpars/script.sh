@@ -6,16 +6,18 @@ nproc=$(nproc)
 # Define the output directory
 outputdir=output/2019.12.27_sensitivity_oscpars
 mkdir -p $outputdira 2>/dev/null
+echo Save output data to $outputdir
 
+# Define global variables and helper functions
 iteration=00
 function join_by { local IFS="$1"; shift; echo "$*"; }
 
-
+# The main functions
 function run(){
     description=$1; shift
 
     # Make filename
-    suffix=$(join_by _ $*)
+    suffix=$(join_by _ $iteration $*)
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".out"
     file_result=$outputdir/$suffix".yaml"
