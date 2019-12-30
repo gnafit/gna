@@ -186,20 +186,43 @@ class TreeStyle(object):
 
             return tuple('%i'%(d+offset) for d in sink.data.type.shape)
 
-        mark=None
         dim=None
-        npars=0
-        if objectname in ('Sum', 'MultiSum', 'SumBroadcast'):
-            mark='+'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('WeightedSum'):
-            mark='+w'
+
+        marks = {
+                'Sum':               '+',
+                'MultiSum':          '+',
+                'SumBroadcast':      '+',
+                'WeightedSum':       '+w',
+                'Product':           '*',
+                'Points':            'a',
+                'View':              'v',
+                'Histogram':         'h',
+                'Histogram2d':       u'h²',
+                'Rebin':             'r',
+                'Concat':            '..',
+                'FillLike':          'c',
+                'HistSmearSparse':   '@',
+                'HistSmear':         '@',
+                'MatrixProduct':     '@',
+                'Snapshot':          r'\|o\|',
+                'MatrixProductDVDt': '@@t',
+                'InSegment':         u'∈'
+                }
+        if objectname in marks:
+            mark = marks.get(objectname)
+            dim = getdim(entry.sinks.back())
+        else:
+            mark = None
+
+        if objectname in ('Points', 'Histogram', 'Histogram2d', 'FillLike',):
+            features.static=True
+
+        npars = 0
+        if objectname in ('WeightedSum'):
             npars=entry.sources.size()
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('Product',):
-            mark='*'
-            dim = getdim(entry.sinks[0])
-        elif objectname.startswith('Integrator'):
+
+
+        if objectname.startswith('Integrator'):
             if entry.name == 'points':
                 mark='x'
                 features.static=True
@@ -216,44 +239,9 @@ class TreeStyle(object):
             mark='~'
             dim = getdim(entry.sinks.back())
         elif objectname in ('InSegment',):
-            mark=u'∈'
             dim1 = 'x'.join(getdim(entry.sinks[0]))
             dim2 = 'x'.join(getdim(entry.sinks[1], 1))
             dim = u']∈['.join((dim1, dim2)),
-        elif objectname in ('Points',):
-            features.static=True
-            mark='a'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('View',):
-            mark='v'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('Histogram',):
-            features.static=True
-            mark='h'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('Histogram2d',):
-            features.static=True
-            mark=u'h²'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('Rebin',):
-            mark='r'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('Concat',):
-            mark='..'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('FillLike',):
-            features.static=True
-            mark='c'
-            dim = getdim(entry.sinks[0])
-            npars=0
-        elif objectname in ('HistSmearSparse', 'HistSmear', 'MatrixProduct'):
-            mark='@'
-            dim = getdim(entry.sinks[0])
-        elif objectname in ('MatrixProductDVDt'):
-            mark='@@t'
-            dim = getdim(entry.sinks[0])
-        # else:
-            # print(objectname, entryname, features.label)
 
         if entry.funcname=='gpu':
             features.gpu=True
