@@ -22,9 +22,7 @@ class cmd(basecmd):
         parser.add_argument('--name', required=True, help='Dataset name', metavar='dataset')
 
         pull = parser.add_mutually_exclusive_group()
-        pull.add_argument('--pull-new', action='append', help='Parameters to be added as pull terms (legacy code)')
-        pull.add_argument('--pull-legacy', action='append', help='Parameters to be added as pull terms (legacy code)')
-        pull.add_argument('--pull', action='append', dest='pull_legacy', help='Parameters to be added as pull terms')
+        pull.add_argument('--pull', action='append', help='Parameters to be added as pull terms')
 
         parser.add_argument('--asimov-data', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
@@ -45,11 +43,9 @@ class cmd(basecmd):
         verbose = self.opts.verbose
         if verbose:
             print('Adding pull parameters to dataset', self.opts.name)
-        if self.opts.pull_legacy:
-            self.load_pulls_legacy(dataset)
 
-        if self.opts.pull_new:
-            self.load_pulls_new(dataset)
+        if self.opts.pull:
+            self.load_pulls(dataset)
 
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
@@ -76,21 +72,13 @@ class cmd(basecmd):
 
         self.env.parts.dataset[self.opts.name] = dataset
 
-    def load_pulls_legacy(self, dataset):
-        pull_pars = get_parameters(self.opts.pull_legacy, drop_fixed=True, drop_free=True)
-
-        for par in pull_pars:
-            dataset.assign(par, [par.central()], [par.sigma()**2])
-            if self.opts.verbose:
-                print (par, [par.central()], [par.sigma()**2])
-
-    def load_pulls_new(self, dataset):
+    def load_pulls(self, dataset):
         #
         # Load nuisance parameters
         #
 
         # Get list of UncertainParameter objects, drop free and fixed
-        pull_pars = get_parameters(self.opts.pull_new, drop_fixed=True, drop_free=True)
+        pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
         npars = len(pull_pars)
 
         variables, centrals, sigmas = [None]*npars, np.zeros(npars, dtype='d'), np.zeros(npars, dtype='d')
