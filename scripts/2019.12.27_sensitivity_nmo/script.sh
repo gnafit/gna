@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Run GNA several times: fit JUNO model with different options to estimate osc. pars sensitivity
+# Run GNA several times: fit JUNO model with different options to estimate NMO sensitivity
 #
 
 # Estimate the number of processors, may be changed manually
@@ -12,7 +12,7 @@ mode=${1:-echo}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2019.12.27_sensitivity_oscpars
+outputdir=output/2019.12.27_sensitivity_nmo
 mkdir -p $outputdir 2>/dev/null
 echo Save output data to $outputdir
 
@@ -53,13 +53,17 @@ function run(){
     command="
       ./gna \
           -- exp  --ns juno juno_sensitivity_v01 -vv --energy-model $energy --free osc --oscprob $oscprob \
-          -- snapshot juno/AD1 juno/asimov \
-          -- dataset --name juno --asimov-data juno/AD1 juno/asimov \
-          -- analysis --name juno --datasets juno \
+          -- snapshot juno/AD1 juno/asimov_no \
+          -- ns --value juno.pmns.Alpha inverted \
+          -- ns -n juno.pmns --print \
+          -- spectrum -p juno/AD1 -p juno/asimov_no -l 'IO (model)' -l 'NO (Asimov)' --plot-type hist --scale --grid -o $outputdir/$suffix'_spectra.pdf' \
+          -- dataset  --name juno_hier --asimov-data juno/AD1 juno/asimov_no \
+          -- analysis --name juno_hier --datasets juno_hier \
                       $covpars
-          -- chi2 stats-chi2 juno \
+          -- chi2 stats-chi2 juno_hier \
+          -- graphviz juno/asimov_no -o $outputdir/$suffix"_graph.dot" \
           -- minimizer min minuit stats-chi2 juno.pmns \
-          -- fit min -sp -o $file_result --profile juno.pmns.DeltaMSq23 \
+          -- fit min -sp -o $file_result \
                      -a label '$info' \
           >$file_output 2>$file_err
         "
