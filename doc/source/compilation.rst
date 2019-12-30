@@ -10,7 +10,7 @@ You must have the following libraries installed prior to compilation:
 * `Eigen <http://eigen.tuxfamily.org/>`_ at least 3.2;
 * `CMake <http://www.cmake.org/>`_  at least 3.5;
 * `ROOT <http://root.cern.ch/>`_, at least 6.06 built with Python2
-  bindings support. The branch 6.08 is more preffered for now since ROOT is
+  bindings support and C++14 standard enabled. The branch 6.08 is more preffered for now since ROOT is
   able to generate bindings following GCC5 ABI.
 * `GSL <http://www.gnu.org/software/gsl/>`_
 * `hdf5 <https://www.hdfgroup.org/HDF5/>`_, at least 1.8.14
