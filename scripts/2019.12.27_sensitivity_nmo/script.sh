@@ -52,7 +52,9 @@ function run(){
 
     command="
       ./gna \
-          -- exp  --ns juno juno_sensitivity_v01 -vv --energy-model $energy --free osc --oscprob $oscprob \
+          -- exp --ns juno juno_sensitivity_v01 -vv \
+                 --energy-model $energy --free osc --oscprob $oscprob \
+                 --dm ee \
           -- snapshot juno/AD1 juno/asimov_no \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
