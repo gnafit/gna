@@ -55,7 +55,9 @@ class cmd(basecmd):
         with open(filename, mode) as ofile:
             data = self.result.__dict__.copy()
             for key in ('errorsdict', 'errors_profile', 'xdict'):
-                data[key] = dict(data[key])
+                if key in data:
+                    data[key] = dict(data[key])
+
             if self.opts.append:
                 data.update(self.opts.append)
 
