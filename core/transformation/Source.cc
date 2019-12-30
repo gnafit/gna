@@ -11,8 +11,8 @@ using TransformationTypes::SourceT;
  *
  * After the connection:
  *   - the current Entry is subscribed to the Sink's taintflag to track dependencies.
- *   - Execute Sink::evaluateTypes() is called to define the input data types if not already defined.
- *   - Execute Entry::evaluateTypes() to check input data types and derive output data types if needed.
+ *   - Execute Sink::touchTypes() is called to define the input data types if not already defined.
+ *   - Execute Entry::updateTypes() to check input data types and derive output data types if needed.
  *
  * @param newsink -- sink to connect to.
  *
@@ -36,8 +36,8 @@ void SourceT<FloatType>::connect(SinkT<FloatType> *newsink) {
   }
   newsink->sources.push_back(this);
   try {
-    newsink->entry->evaluateTypes();
-    entry->evaluateTypes();
+    newsink->entry->touchTypes();
+    entry->updateTypes();
   } catch (const std::exception &exc) {
     std::cerr << "exception in types calculation: ";
     std::cerr << exc.what() << "\n";

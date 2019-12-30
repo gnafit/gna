@@ -28,7 +28,7 @@ namespace TransformationTypes
   /**
    * @brief TypesFunction, that does the input types checking and output types derivation.
    *
-   * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
+   * The function is used within Entry::updateTypes().
    *
    * @param TypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).
    */
@@ -41,7 +41,7 @@ namespace TransformationTypes
   /**
    * @brief StorageTypesFunction, that does the storage types derivation
    *
-   * The function is used within Entry::evaluateTypes() and Entry::updateTypes().
+   * The function is used within Entry::updateTypes().
    * Unlike the TypesFunction the StorageTypesFunction is not able to modify Rets (outputs).
    *
    * @param StorageTypesFunctionArgs -- container with transformation types (Atypes, Rtypes, Itypes).

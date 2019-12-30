@@ -122,7 +122,7 @@ namespace TransformationTypes
 
     void evaluate();                                     ///< Do actual calculation by calling Entry::fun.
     void update();                                       ///< Do actual calculation by calling Entry::fun via evaluate() and resets the taintflag.
-    void evaluateTypes();                                ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
+    void touchTypes();                                   ///< If Needed, evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void updateTypes();                                  ///< Evaluate output types based on input types via Entry::typefuns call, allocate memory.
     void finalize();                                     ///< Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.
 
@@ -159,6 +159,7 @@ namespace TransformationTypes
 
     // Status
     taintflag tainted;                                   ///< taintflag shows whether the result is up to date.
+    taintflag typestainted;                              ///< taintflag shows whether the datatype is up to date.
     bool finalized=false;                                ///< TypeFunctions should be evaluated even if there are no inputs.
 
     // Function args

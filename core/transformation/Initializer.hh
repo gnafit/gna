@@ -428,9 +428,9 @@ namespace TransformationTypes {
     }
 
     /**
-     * @brief Force Entry::evaluateTypes() call.
+     * @brief Force Entry::updateTypes() call.
      *
-     * Entry::evaluateTypes() is usually called when outputs are connected to the inputs of other
+     * Entry::updateTypes() is usually called when outputs are connected to the inputs of other
      * transformations. This function should be used in case when it's known
      * that transformation has no inputs and its DataType may be derived immediately.
      *
