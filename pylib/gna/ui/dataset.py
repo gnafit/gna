@@ -13,6 +13,7 @@ from gna.env import env
 from itertools import chain
 from gna.dataset import Dataset
 from gna.parameters.parameter_loader import get_parameters
+from gna import constructors as C
 
 class cmd(basecmd):
     pull_vararray, pull_centrals, pull_sigmas2, pull_covariance = None, None, None, None
@@ -47,16 +48,19 @@ class cmd(basecmd):
         if self.opts.pull:
             self.load_pulls(dataset)
 
+        self.snapshots = dict()
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
+                theory, data = env.get(theory_path), env.get(data_path)
                 if self.opts.error_type == 'neyman':
-                    dataset.assign(env.get(theory_path),
-                                   env.get(data_path),
-                                   env.get(data_path))
+                    error=data.single()
                 elif self.opts.error_type == 'pearson':
-                    dataset.assign(env.get(theory_path),
-                                   env.get(data_path),
-                                   env.get(theory_path))
+                    error=theory.single()
+
+                if not error.getTaintflag().frozen():
+                    snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
+
+                dataset.assign(obs=theory, value=data, error=snapshot.single())
 
         # if self.opts.asimov_poisson:
             # for theory_path, data_path in self.opts.asimov_poisson:
