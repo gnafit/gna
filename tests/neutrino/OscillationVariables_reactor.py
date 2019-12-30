@@ -17,7 +17,7 @@ nsreac = env.globalns('reac')
 
 from gna.parameters.oscillation import reqparameters, reqparameters_reactor
 print('Initialize variables')
-reqparameters_reactor(nsreac)
+reqparameters_reactor(nsreac, '23')
 reqparameters(nsosc)
 nsreac['Delta'].set(N.pi*1.5)
 nsosc['Delta'].set(N.pi*1.5)

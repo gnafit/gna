@@ -26,6 +26,9 @@ class oscprob_v04(TransformationBundle):
         self.idx_detector = self.nidx_major.get_subset(detector_name)
         self.idx_component = self.nidx_major.get_subset(component_name)
 
+        assert 'dm' in self.cfg, "Expect 'dm' option"
+        assert self.cfg.dm in ('23', 'ee'), "Expect 'dm' option to be '23', or 'ee'"
+
     @staticmethod
     def _provides(cfg):
         return ('pmns',), ('oscprob',)
@@ -76,7 +79,7 @@ class oscprob_v04(TransformationBundle):
 
         pmns_name = self.get_globalname('pmns')
         ns_pmns=self.namespace(pmns_name)
-        reqparameters(ns_pmns, **pmnspars_kwargs)
+        reqparameters(ns_pmns, self.cfg.dm, **pmnspars_kwargs)
 
         names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
         with ns_pmns:

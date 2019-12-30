@@ -50,6 +50,7 @@ Misc changes:
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
+        parser.add_argument('--dm', choices=('23', 'ee'), required=True, help='Δm² parameter to use')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
@@ -129,12 +130,13 @@ Misc changes:
 
     def parameters(self):
         ns = self.namespace
+        dmxx = 'pmns.DeltaMSq'+str(self.opts.dm).upper()
         if self.opts.free=='minimal':
             fixed_pars = ['pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-            free_pars  = ['pmns.DeltaMSq23']
+            free_pars  = [dmxx]
         elif self.opts.free=='osc':
             fixed_pars = []
-            free_pars  = ['pmns.DeltaMSq23', 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
+            free_pars  = [dmxx, 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
         else:
             raise Exception('Unsupported option')
         for par in fixed_pars:
@@ -171,7 +173,8 @@ Misc changes:
                     ),
                 oscprob = NestedDict(
                     bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
-                    pdgyear = self.opts.pdgyear
+                    pdgyear = self.opts.pdgyear,
+                    dm      = self.opts.dm
                     ),
                 oscprob_matter = NestedDict(
                     bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
