@@ -130,11 +130,11 @@ Misc changes:
     def parameters(self):
         ns = self.namespace
         if self.opts.free=='minimal':
-            fixed_pars = ['pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
-            free_pars  = ['pmns.DeltaMSqEE']
+            fixed_pars = ['pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
+            free_pars  = ['pmns.DeltaMSq23']
         elif self.opts.free=='osc':
             fixed_pars = []
-            free_pars  = ['pmns.DeltaMSqEE', 'pmns.SinSq13', 'pmns.SinSq12', 'pmns.DeltaMSq12']
+            free_pars  = ['pmns.DeltaMSq23', 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
         else:
             raise Exception('Unsupported option')
         for par in fixed_pars:
@@ -143,8 +143,9 @@ Misc changes:
             ns[par].setFree()
 
         if self.opts.parameters=='yb':
-            ns['pmns.SinSq12'].set(0.307)
-            ns['pmns.SinSq13'].set(0.024)
+            assert False
+            ns['pmns.SinSqDouble12'].set(0.307)
+            ns['pmns.SinSqDouble13'].set(0.024)
             ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):

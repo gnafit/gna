@@ -56,44 +56,44 @@ namespace GNA {
         provider
           .add(&V[0][0], {&Theta12, &Theta13}, [&](arrayview<FloatType>& ret) {
               ret.complex() = cos(Theta12.value())*cos(Theta13.value());
-            }, 2)
+            }, 2, "PMNS matrix element V[e1] (θ)")
           .add(&V[0][1], {&Theta12, &Theta13}, [&](arrayview<FloatType>& ret) {
               ret.complex() = sin(Theta12.value())*cos(Theta13.value());
-            }, 2)
+            }, 2, "PMNS matrix element V[e2] (θ)")
           .add(&V[0][2], {&Theta13, &Delta}, [&](arrayview<FloatType>& ret) {
               auto phase = exp(-std::complex<FloatType>(0, Delta.value()));
               ret.complex() = sin(Theta13.value())*phase;
-            }, 2)
+            }, 2, "PMNS matrix element V[e3] (θ)")
           .add(&V[1][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<FloatType>& ret) {
               auto phase = exp(std::complex<FloatType>(0, Delta.value()));
               ret.complex() =
                 -sin(Theta12.value())*cos(Theta23.value())
                 -cos(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
-            }, 2)
+            }, 2, "PMNS matrix element V[μ1] (θ)")
           .add(&V[1][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<FloatType>& ret) {
               auto phase = exp(std::complex<FloatType>(0, Delta.value()));
               ret.complex() =
                  cos(Theta12.value())*cos(Theta23.value())
                 -sin(Theta12.value())*sin(Theta23.value())*sin(Theta13.value())*phase;
-            }, 2)
+            }, 2, "PMNS matrix element V[μ2] (θ)")
           .add(&V[1][2], {&Theta13, &Theta23}, [&](arrayview<FloatType>& ret) {
               ret.complex() = sin(Theta23.value())*cos(Theta13.value());
-            }, 2)
+            }, 2, "PMNS matrix element V[μ3] (θ)")
           .add(&V[2][0], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<FloatType>& ret) {
               auto phase = exp(std::complex<FloatType>(0, Delta.value()));
               ret.complex() =
                 sin(Theta12.value())*sin(Theta23.value())
                 -cos(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
-            }, 2)
+            }, 2, "PMNS matrix element V[τ1] (θ)")
           .add(&V[2][1], {&Theta12, &Theta13, &Theta23, &Delta}, [&](arrayview<FloatType>& ret) {
               auto phase = exp(std::complex<FloatType>(0, Delta.value()));
               ret.complex() =
                 -cos(Theta12.value())*sin(Theta23.value())
                 -sin(Theta12.value())*cos(Theta23.value())*sin(Theta13.value())*phase;
-            }, 2)
+            }, 2, "PMNS matrix element V[τ2] (θ)")
           .add(&V[2][2], {&Theta13, &Theta23}, [&](arrayview<FloatType>& ret) {
               ret.complex() = cos(Theta23.value())*cos(Theta13.value());
-            }, 2)
+            }, 2, "PMNS matrix element V[τ3] (θ)")
         ;
       }
     };
@@ -146,39 +146,39 @@ namespace GNA {
         provider
           .add(&V[0][0], {&Cos12, &Cos13}, [&](arrayview<FloatType>& ret) {
               ret.complex() = Cos12.value()*Cos13.value();
-            }, 2)
+            }, 2, "PMNS matrix element V[e1] (sin/cos)")
           .add(&V[0][1], {&Sin12, &Cos13}, [&](arrayview<FloatType>& ret) {
               ret.complex() = Sin12.value()*Cos13.value();
-            }, 2)
+            }, 2, "PMNS matrix element V[e2] (sin/cos)")
           .add(&V[0][2], {&Sin13, &Phase}, [&](arrayview<FloatType>& ret) {
               ret.complex() = Sin13.value()*Phase.complex();
-            }, 2)
+            }, 2, "PMNS matrix element V[e3] (sin/cos)")
           .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<FloatType>& ret) {
               ret.complex() =
                 -Sin12.value()*Cos23.value()
                 -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
-            }, 2)
+            }, 2, "PMNS matrix element V[μ1] (sin/cos)")
           .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<FloatType>& ret) {
               ret.complex() =
                  Cos12.value()*Cos23.value()
                 -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
-            }, 2)
+            }, 2, "PMNS matrix element V[μ2] (sin/cos)")
           .add(&V[1][2], {&Cos13, &Sin23}, [&](arrayview<FloatType>& ret) {
               ret.complex() = Sin23.value()*Cos13.value();
-            }, 2)
+            }, 2, "PMNS matrix element V[μ3] (sin/cos)")
           .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<FloatType>& ret) {
               ret.complex() =
                 Sin12.value()*Sin23.value()
                 -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
-            }, 2)
+            }, 2, "PMNS matrix element V[τ1] (sin/cos)")
           .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&](arrayview<FloatType>& ret) {
               ret.complex() =
                 -Cos12.value()*Sin23.value()
                 -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
-            }, 2)
+            }, 2, "PMNS matrix element V[τ2] (sin/cos)")
           .add(&V[2][2], {&Cos13, &Cos23}, [&](arrayview<FloatType>& ret) {
               ret.complex() = Cos23.value()*Cos13.value();
-            }, 2)
+            }, 2, "PMNS matrix element V[τ3] (sin/cos)")
         ;
       }
     };

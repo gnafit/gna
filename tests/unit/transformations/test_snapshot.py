@@ -40,6 +40,10 @@ def test_snapshot_01(function_name):
         print('    Result', res)
         print('    Vars', vars)
 
+        tainted = snapshot.snapshot.tainted()
+        print('    Taintflag', tainted)
+        assert not tainted
+
         if iname:
             assert (res!=vars).any()
         else:

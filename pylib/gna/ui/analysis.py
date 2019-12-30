@@ -20,7 +20,7 @@ class cmd(basecmd):
         parser.add_argument('-d', '--datasets', nargs='+', required=True,
                             type=env.parts.dataset,
                             metavar='dataset', help='datasets to use')
-        parser.add_argument('-p', '--cov-parameters', '--parameters', nargs='+', default=[],
+        parser.add_argument('-p', '--cov-parameters', nargs='+', default=[],
                             metavar='par',
                             help='parameters for the covariance matrix')
         parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')

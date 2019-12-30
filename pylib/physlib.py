@@ -102,7 +102,7 @@ pdg[2018]  = dict( pdg[2016]
 pdg['dyboscar']  = dict( pdg[2013]
     , NeutronMass = 939.565379
     , ProtonMass  = 938.272046
-    , ElectronMass = 0.510998928 
+    , ElectronMass = 0.510998928
     , neutron_lifetime = 880.3
     , neutron_lifetimee = 1.1
     , dmSq21 = 7.53e-5
@@ -116,7 +116,7 @@ pdg['dyboscar']  = dict( pdg[2013]
     , sinSqtheta12 = 0.304
     , sinSqtheta12_e = 0.013
     #
-    , sinSq2theta13 = 0.084  
+    , sinSq2theta13 = 0.084
     , sinSq2theta13_e = 0.002
     , sinSqtheta13 = (1 - sqrt(1-0.084))/2
     , sinSqtheta13_e = 2e-3
@@ -139,6 +139,41 @@ class PhysicsConstants:
         self.ProtonMass2   = self.ProtonMass**2
     ##end def function__init__
 ##end class PhysicsConstants
+
+def addDoubleTheta(year, varname, verbose=False):
+    d = pdg[year]
+    assert varname.startswith('sinSqtheta')
+
+    errname = varname+'_e'
+
+    central = d[varname]
+    sigma = d[errname]
+
+    left, right = central-sigma, central+sigma
+
+    newname = varname.replace('sinSq', 'sinSq2')
+    newerrname = newname+'_e'
+
+    def cnv(v):
+        return 4.0*v*(1.0-v)
+
+    newcentral = cnv(central)
+    newleft = cnv(left)
+    newright = cnv(right)
+
+    newerr = (newright-newleft)*0.5
+    asymm  = (newright+newleft)*0.5 - newcentral
+
+    d[newname] = newcentral
+    d[newerrname]  = newerr
+
+    if verbose:
+        print(u'[{year}] Add evaluated {name}={central}±{err}. Asymmetry: {asymm}'.format(year=year, name=newname, central=newcentral, err=newerr, asymm=asymm))
+
+addDoubleTheta(2016, 'sinSqtheta13')
+addDoubleTheta(2016, 'sinSqtheta12')
+addDoubleTheta(2018, 'sinSqtheta13')
+addDoubleTheta(2018, 'sinSqtheta12')
 
 pc = PhysicsConstants()
 percent = 0.01

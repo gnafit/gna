@@ -67,7 +67,7 @@ namespace GNA{
 
           bool process_types(){
               try {
-                  OpenHandleT<FloatType,FloatType>(transformations.back()).getEntry()->evaluateTypes();
+                  transformations.back().updateTypes();
               }
               catch(const std::runtime_error& ex) {
                   std::cout<<ex.what()<<std::endl;

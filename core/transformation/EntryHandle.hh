@@ -80,7 +80,8 @@ namespace TransformationTypes
     void update(int i) const { (void)m_entry->data(i); }
     void touch() const { m_entry->touch(); }                ///< Call Entry::touch(). @copydoc Entry::touch()
     void touch_global() const { m_entry->touch_global(); }  ///< Call Entry::touch(). @copydoc Entry::touch()
-    void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::evaluateTypes(). @copydoc Entry::evaluateTypes()
+    void touchTypes() { m_entry->touchTypes(); }            ///< Call Entry::touchTypes(). @copydoc Entry::touchTypes()
+    void updateTypes() { m_entry->updateTypes(); }          ///< Call Entry::updateTypes(). @copydoc Entry::updateTypes()
 
 #ifdef GNA_CUDA_SUPPORT
     void setLocation(DataLocation loc) { m_entry->setLocation(loc); m_entry->updateTypes(); } ///< Change Entry location

@@ -85,11 +85,11 @@ namespace ParametrizedTypes {
     template <typename T>
     dependant<T> evaluable_(const std::string &name,
                             std::function<T()> func,
-                            const std::vector<changeable> &sources);
+                            const std::vector<changeable> &sources, const std::string& label="");
     template <typename T>
     dependant<T> evaluable_(const std::string &name,
                             size_t size, std::function<void(arrayview<T>&)> vfunc,
-                            const std::vector<changeable> &sources);
+                            const std::vector<changeable> &sources, const std::string& label="");
 
     taintflag m_taintflag;
   protected:
@@ -109,7 +109,7 @@ namespace ParametrizedTypes {
   inline dependant<T>
   ParametrizedBase::evaluable_(const std::string &name,
                    std::function<T()> func,
-                   const std::vector<changeable> &sources)
+                   const std::vector<changeable> &sources, const std::string& label)
   {
     //return evaluable_(name, 1, [](arrayview<T>& ret){ ret[0]=func(); }, sources);
     SourcesContainer depentries;
@@ -122,7 +122,7 @@ namespace ParametrizedTypes {
       }
     }
     DPRINTFS("make evaluable: %i deps", int(sources.size()));
-    dependant<T> dep = dependant<T>(func, sources, name.c_str());
+    dependant<T> dep = dependant<T>(func, sources, name.c_str(), 1u, label.c_str());
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
     return dep;
   }
@@ -130,7 +130,7 @@ namespace ParametrizedTypes {
   inline dependant<T>
   ParametrizedBase::evaluable_(const std::string &name,
                    size_t size, std::function<void(arrayview<T>&)> vfunc,
-                   const std::vector<changeable> &sources)
+                   const std::vector<changeable> &sources, const std::string& label)
   {
     SourcesContainer depentries;
     for (changeable chdep: sources) {
@@ -142,7 +142,7 @@ namespace ParametrizedTypes {
       }
     }
     DPRINTFS("make evaluable: %i deps", int(sources.size()));
-    dependant<T> dep = dependant<T>(vfunc, sources, name.c_str(), size);
+    dependant<T> dep = dependant<T>(vfunc, sources, name.c_str(), size, label.c_str());
     m_eventries.push_back(new EvaluableEntry{name, depentries, dep, this});
     return dep;
   }

@@ -68,7 +68,7 @@ class oscprob_v04(TransformationBundle):
                                 self.set_output('oscprob', it, output)
 
     def define_variables(self):
-        from gna.parameters.oscillation import reqparameters
+        from gna.parameters.oscillation import reqparameters_reactor as reqparameters
         pmnspars_kwargs=dict()
         pdgyear = self.cfg.get('pdg_year', None)
         if pdgyear:

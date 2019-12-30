@@ -81,12 +81,21 @@ class ExpressionsEntry(object):
     def get(self):
         path = self.resolvepath({self}, OrderedDict())
         if not path:
-            raise KeyError()
+            names = [expr.expr.name() for expr in self.exprs]
+            reqs = [var.name() for expr in self.exprs for var in expr.expr.sources.values()]
+            raise KeyError('Unable to provide required variables for {!s}. Something is missing from: {!s}'.format(names, reqs))
         for expr in path:
             v = expr.get()
             if self._label is not None:
-                v.setLabel(self._label)
+                otherlabel = v.label()
+                if otherlabel:
+                    newlabel = '{}: {}'.format(self._label, otherlabel)
+                else:
+                    newlabel = self._label
+                v.setLabel(newlabel)
         return v
+
+    materialize = get
 
     def resolvepath(self, seen, known):
         minexpr, minpaths = None, None
@@ -316,6 +325,7 @@ class namespace(Mapping):
 
     def addevaluable(self, name, var):
         evaluable = ROOT.Variable(var.typeName())(name, var)
+        evaluable.setLabel(var.label())
         evaluable.ns = self
         self[name] = evaluable
         return evaluable
@@ -359,7 +369,7 @@ class namespace(Mapping):
         for v in self.itervalues():
             if not isinstance(v, ExpressionsEntry):
                 continue
-            v.get()
+            v.materialize()
 
         if recursive:
             for ns in self.namespaces.values():

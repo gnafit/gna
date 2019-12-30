@@ -97,6 +97,8 @@ def save_converter( from_type, to_type ):
 
 def get_cpp_type( array ):
     """Guess appropriate C++ type to store data based on array.dtype or type"""
+    if len(array)==0:
+        raise Exception('Unable to determine type of the elements of the empty array')
     if hasattr( array, 'dtype' ):
         typemap = {
                 'int32':   'int',

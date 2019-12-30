@@ -164,7 +164,7 @@ def patchDescriptor(cls):
     cls.__eq__ = __eq__
 
 def importcommon():
-    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject
+    from gna.bindings import DataType, OutputDescriptor, InputDescriptor, TransformationDescriptor, GNAObject, Variable
 
 def legacytypes():
     ROOT.TransformationTypes.OutputHandle=ROOT.TransformationTypes.OutputHandleT('double')

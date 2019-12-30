@@ -19,7 +19,7 @@ print('Initialize variables')
 reqparameters(ns)
 ns['Delta'].set(N.pi*1.5)
 print('Materialize expressions')
-env.globalns.materializeexpressions()
+ns.materializeexpressions()
 
 print('Status:')
 env.globalns.printparameters(labels=True)

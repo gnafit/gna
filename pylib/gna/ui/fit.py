@@ -10,12 +10,13 @@ class cmd(basecmd):
         parser.add_argument('minimizer', action=set_typed(env.parts.minimizer), help='Minimizer to use', metavar='name')
         parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
+        parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
         parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
-        # parser.add_argument('-o', '--output', help='Output file (yaml/hdf5)', metavar='filename')
+        parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
 
     def init(self):
         minimizer = self.opts.minimizer
-        result = self.result = minimizer.fit()
+        result = self.result = minimizer.fit(profile_errors=self.opts.profile_errors)
 
         if self.opts.set and result.success:
             for par, value in zip(minimizer.pars, result.x):
@@ -52,5 +53,12 @@ class cmd(basecmd):
         mode='w'
 
         with open(filename, mode) as ofile:
-            data = self.result.__dict__
+            data = self.result.__dict__.copy()
+            for key in ('errorsdict', 'errors_profile', 'xdict'):
+                if key in data:
+                    data[key] = dict(data[key])
+
+            if self.opts.append:
+                data.update(self.opts.append)
+
             ofile.write(yaml.dump(data))

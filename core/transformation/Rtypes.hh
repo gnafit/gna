@@ -17,7 +17,7 @@ namespace TransformationTypes
    *
    * Rtypes instance is passed to each of the Entry's TypeFunction objects.
    *
-   * @note Rtypes will NOT write to Entry's output DataType types by itself. The actual assignment happens in the Entry::evaluateTypes() method.
+   * @note Rtypes will NOT write to Entry's output DataType types by itself. The actual assignment happens in the Entry::updateTypes() method.
    *
    * @author Dmitry Taychenachev
    * @date 2015

@@ -37,8 +37,8 @@ protected:
     d.vfunc = vf;
     this->initdeps(deps);
   }
-  evaluable(const char *name="", size_t size=1u) {
-    base_type::alloc(new inconstant_data<ValueType>(size, name));
+  evaluable(const char *name="", size_t size=1u, const char *label="") {
+    base_type::alloc(new inconstant_data<ValueType>(size, name, label));
     DPRINTF("constructed evaluable");
   }
   evaluable(const base_type &other)

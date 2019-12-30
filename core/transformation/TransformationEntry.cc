@@ -204,7 +204,7 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
 /**
  * @brief Evaluate output types based on input types, allocate memory.
  *
- * evaluateTypes() calls:
+ * updateTypes() calls:
  *   - each of the TypeFunction functions;
  *   - each of the current functions StorageTypesFunction functions.
  *
@@ -220,7 +220,7 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  *
  * In case any output DataType has been changed or created:
  *   - the corresponding Data instance is created. Memory allocation happens here.
- *   - if sources are connected further, the subsequent Entry::evaluateTypes() are
+ *   - if sources are connected further, the subsequent Entry::updateTypes() are
  *   also executed.
  *
  * If CUDA enabled, allocates memory for sources (in case it wasn't allocated earlier) and sinks.
@@ -233,7 +233,7 @@ void EntryT<SourceFloatType,SinkFloatType>::dump(size_t level) const {
  * @exception std::runtime_error in case any of type functions fails.
  */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
+void EntryT<SourceFloatType,SinkFloatType>::updateTypes() {
   TypesFunctionArgsType fargs(this);
   StorageTypesFunctionArgsType sargs(fargs);
   bool success = true;
@@ -286,7 +286,7 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
       }
     }
     for (auto *dep: deps) {
-      dep->evaluateTypes();
+      dep->updateTypes();
     }
     initInternals(sargs);
 
@@ -311,19 +311,24 @@ void EntryT<SourceFloatType,SinkFloatType>::evaluateTypes() {
 
   tainted.unfreeze();
   tainted.taint();
+
+  typestainted=false;
 }
 
 /** @brief Called on initialization to indicate, that no inputs are expected, but TypeFunctions should be evaluated.*/
 template<typename SourceFloatType, typename SinkFloatType>
 void EntryT<SourceFloatType,SinkFloatType>::finalize() {
   finalized = true;
-  evaluateTypes();
+  updateTypes();
 }
 
 /** @brief Evaluate output types based on input types via Entry::typefuns call, allocate memory. */
 template<typename SourceFloatType, typename SinkFloatType>
-void EntryT<SourceFloatType,SinkFloatType>::updateTypes() {
-  evaluateTypes();
+void EntryT<SourceFloatType,SinkFloatType>::touchTypes() {
+  if(!typestainted){
+    return;
+  }
+  updateTypes();
 }
 
 /** @brief Update the transformation if it is not frozen and tainted. */
@@ -378,7 +383,7 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
  * @brief Use Function `name` as Entry::fun.
  *
  * The method replaces the transformation function Entry::fun with another function from the
- * Entry::functions map. The function triggers Entry::evaluateTypes() function.
+ * Entry::functions map. The function triggers Entry::updateTypes() function.
  *
  * @param name -- function name.
  * @exception std::runtime_error in case the function `name` does not exist.
@@ -386,7 +391,7 @@ const Data<SinkFloatType> &EntryT<SourceFloatType,SinkFloatType>::data(int i) {
 template<typename SourceFloatType, typename SinkFloatType>
 bool EntryT<SourceFloatType,SinkFloatType>::switchFunction(const std::string& name, bool strict){
   if(initFunction(name, strict)){
-    evaluateTypes();
+    updateTypes();
     return true;
   }
   return false;

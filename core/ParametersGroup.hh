@@ -103,28 +103,28 @@ namespace GNA {
       template <typename T, typename FuncType>
       ExpressionsProvider &add(variable<T> *field,
                                const typename ParametersGroup::FieldsVector &sources,
-                               FuncType func) {
+                               FuncType func, const std::string& label="") {
         std::string name = m_pgroup->fieldName(field);
         std::vector<changeable> deps;
         for (typename ParametersGroup::Field f: sources) {
           m_pgroup->variable_(m_pgroup->fieldName(f)).required(false);
           deps.push_back(*f);
         }
-        this->evaluable_(name, std::function<T()>(func), deps);
+        this->evaluable_(name, std::function<T()>(func), deps, label);
         return *this;
       }
 
       template <typename T, typename FuncType>
       ExpressionsProvider &add(variable<T> *field,
                                const typename ParametersGroup::FieldsVector &sources,
-                               FuncType func, size_t size) {
+                               FuncType func, size_t size, const std::string& label="") {
         std::string name = m_pgroup->fieldName(field);
         std::vector<changeable> deps;
         for (typename ParametersGroup::Field f: sources) {
           m_pgroup->variable_(m_pgroup->fieldName(f)).required(false);
           deps.push_back(*f);
         }
-        this->evaluable_(name, size, std::function<void(arrayview<T>&)>(func), deps);
+        this->evaluable_(name, size, std::function<void(arrayview<T>&)>(func), deps, label);
         return *this;
       }
     protected:

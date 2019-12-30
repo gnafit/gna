@@ -84,7 +84,7 @@ namespace GNA {
           provider
             .add(&weight0, {&weight12, &weight13, &weight23}, [&](){
                  return static_cast<FloatType>(m_alpha==m_beta)-(weight12.value()+weight13.value()+weight23.value());
-                 })
+                 }, "Osc. prob. weight 0 (*cos(.../4)")
             .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
                 return 2.0*std::real(
                   V[m_alpha][0].complex()*
@@ -92,7 +92,7 @@ namespace GNA {
                   std::conj(V[m_alpha][1].complex())*
                   std::conj(V[m_beta][0].complex())
                   );
-              })
+              }, "Osc. prob. weight 12 (*cos(.../4)")
             .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
                 return 2.0*std::real(
                   V[m_alpha][0].complex()*
@@ -100,7 +100,7 @@ namespace GNA {
                   std::conj(V[m_alpha][2].complex())*
                   std::conj(V[m_beta][0].complex())
                   );
-              })
+              }, "Osc. prob. weight 12 (*cos(.../4)")
             .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
                 return 2.0*std::real(
                   V[m_alpha][1].complex()*
@@ -108,7 +108,7 @@ namespace GNA {
                   std::conj(V[m_alpha][2].complex())*
                   std::conj(V[m_beta][1].complex())
                   );
-              })
+              }, "Osc. prob. weight 23 (*cos(.../4)")
             ;
         }
         else{
@@ -116,7 +116,7 @@ namespace GNA {
           /// Mode B:
           /// P = delta_ab - 4 sum sin²(.../4) + ...
             provider
-              .add(&weight0, {&weight12, &weight13, &weight23}, [&](){return m_alpha==m_beta;})
+              .add(&weight0, {&weight12, &weight13, &weight23}, [&](){return m_alpha==m_beta;}, "Osc. prob. weight 0=δ (*sin²(.../4))")
               .add(&weight12, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][1], &V[m_beta][1]}, [&]() {
                   return -4.0*std::real(
                     V[m_alpha][0].value()*
@@ -124,7 +124,7 @@ namespace GNA {
                     std::conj(V[m_alpha][1].value())*
                     std::conj(V[m_beta][0].value())
                     );
-                })
+                }, "Osc. prob. weight 12 (*sin²(.../4))")
               .add(&weight13, {&V[m_alpha][0], &V[m_beta][0], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
                   return -4.0*std::real(
                     V[m_alpha][0].value()*
@@ -132,7 +132,7 @@ namespace GNA {
                     std::conj(V[m_alpha][2].value())*
                     std::conj(V[m_beta][0].value())
                     );
-                })
+                }, "Osc. prob. weight 13 (*sin²(.../4))")
               .add(&weight23, {&V[m_alpha][1], &V[m_beta][1], &V[m_alpha][2], &V[m_beta][2]}, [&]() {
                   return -4.0*std::real(
                     V[m_alpha][1].value()*
@@ -140,7 +140,7 @@ namespace GNA {
                     std::conj(V[m_alpha][2].value())*
                     std::conj(V[m_beta][1].value())
                     );
-                })
+                }, "Osc. prob. weight 23 (*sin²(.../4))")
               ;
         }
 
@@ -152,7 +152,7 @@ namespace GNA {
               std::conj(V[m_alpha][1].value())*
               std::conj(V[m_beta][0].value())
               );
-            });
+            }, "Osc. prob. weight CP");
           }
       }
 
