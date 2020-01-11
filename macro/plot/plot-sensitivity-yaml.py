@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+        formatter = ax.xaxis.get_major_formatter()
+        formatter.set_useOffset(False)
+        formatter.set_powerlimits((-2,2))
+        formatter.useMathText=True
 
 """Read a set of yaml files with fit results and plot sensitivity to parameters"""
 

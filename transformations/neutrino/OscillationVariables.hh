@@ -23,13 +23,13 @@ namespace GNA {
         : OscillationVariablesT(parent)
         { initFields(params); }
 
+      // Effective mass splittings
+      variable<FloatType> DeltaMSqEE;
+      variable<FloatType> DeltaMSqMM;
       // Mass splittings
       variable<FloatType> DeltaMSq12;
       variable<FloatType> DeltaMSq13;
       variable<FloatType> DeltaMSq23;
-      // Effective mass splittings
-      variable<FloatType> DeltaMSqEE;
-      variable<FloatType> DeltaMSqMM;
       // Neutrino mass ordering
       variable<FloatType> Alpha;
       // Sines (squared) of mixing agles

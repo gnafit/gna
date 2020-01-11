@@ -97,6 +97,7 @@ pdg[2018]  = dict( pdg[2016]
     , dmSq32_normal_e = 0.05e-3
     , dmSq32_inverted = 2.56e-3
     , dmSq32_inverted_e = 0.04e-3
+    , dmSqEE = 0.0024924088
 )
 
 pdg['dyboscar']  = dict( pdg[2013]
