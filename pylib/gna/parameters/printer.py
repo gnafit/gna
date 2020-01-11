@@ -309,9 +309,8 @@ def GaussianParameter__str( self, labels=False  ):
                 s+=' '*relsigma_len
 
         if correlated:
-            s += sepstr
             s += Fore.LIGHTGREEN_EX
-            s += "[C]"
+            s += " [C]"
 
         if limits.size():
             s+=sepstr
