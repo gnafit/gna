@@ -48,13 +48,13 @@ Misc changes:
         parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
-        parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
-        parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres_sum', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
-        parser.add_argument('--dm', choices=('23', 'ee'), required=True, help='Δm² parameter to use')
+        parser.add_argument('--dm', default='ee', choices=('23', 'ee'), required=True, help='Δm² parameter to use')
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
@@ -78,8 +78,10 @@ Misc changes:
             self.print_stats()
 
     def init_nidx(self):
-        self.subdetectors_number = 200
-        self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
+        if self.opts.subdetectors_number:
+            self.subdetectors_names = ['subdet%03i'%i for i in range(self.opts.subdetectors_number)]
+        else:
+            self.subdetectors_names = ()
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
         if 'pessimistic' in self.opts.reactors:
             self.reactors.remove('TS3')
@@ -94,15 +96,11 @@ Misc changes:
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names)
         ]
-        if self.opts.composition=='minimal':
-            self.nidx[1][2] = self.nidx[1][2][:1]
-            self.nidx[2][2] = self.nidx[2][2][:1]
-
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
-        if 'eres' in self.opts.energy_model and ('multieres' in self.opts.energy_model or 'multieres_sum' in self.opts.energy_model):
-            raise Exception('Energy model options "eres" and "multieres*" are mutually exclusive: use only one of them')
+        if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
+            raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
         self.formula = list(self.formula_base)
 
@@ -112,20 +110,23 @@ Misc changes:
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
+        concat_subdetectors=False
         if 'lsnl' in energy_model:
             energy_model_formula = 'lsnl| '
             self.formula.append('evis_edges_hist| evis_hist')
         if 'eres' in energy_model:
             energy_model_formula = 'eres| '+energy_model_formula
             self.formula.append('eres_matrix| evis_hist')
-        elif 'multieres_sum' in energy_model:
-            energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-            self.formula.append('eres_matrix[s]| evis_hist')
         elif 'multieres' in energy_model:
-            energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-            self.formula.append('eres_matrix[s]| evis_hist')
+            if self.opts.subdetectors_number==200:
+                energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
+                self.formula.append('eres_matrix[s]| evis_hist')
+            elif self.opts.subdetectors_number==5:
+                energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
+                self.formula.append('eres_matrix[s]| evis_hist')
+                concat_subdetectors = True
 
-        if 'multieres' in energy_model:
+        if concat_subdetectors:
             formula_back = 'observation=norm * ibd'
         else:
             formula_back = 'observation=norm * rebin(ibd)'
@@ -161,7 +162,6 @@ Misc changes:
             ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
-        multieres = 'multieres' in self.opts.energy_model or 'multieres_sum' in self.opts.energy_model
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
                     bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -357,38 +357,46 @@ Misc changes:
                             normalizationEnergy = 'Conservative normalization point at 12 MeV'
                             ),
                         ),
-                eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive=multieres),
-                        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
-                        parameter = 'eres',
-                        pars = uncertaindict([
-                            ('a', (0.000, 'fixed')) ,
-                            ('b', (0.03, 'fixed')) ,
-                            ('c', (0.000, 'fixed'))
-                            ]),
-                        expose_matrix = False
-                        ),
-                subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v02"),
-                        parameter = "subdetector_fraction",
-                        label = 'Subdetector fraction weight for {subdetector}',
-                        pars = uncertaindict(
-                            [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            ),
-                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
-                        ),
-                multieres = NestedDict(
-                        bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive=not multieres),
-                        # pars: sigma_e/e = sqrt(b^2/E),
-                        parameter = 'eres',
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
-                        expose_matrix = False
-                        ),
                 shape_uncertainty = NestedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
                         )
                 )
+
+        if 'eres' in self.opts.energy_model:
+            self.cfg.eres = NestedDict(
+                    bundle = dict(name='detector_eres_normal', version='v01', major=''),
+                    # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                    parameter = 'eres',
+                    pars = uncertaindict([
+                        ('a', (0.000, 'fixed')) ,
+                        ('b', (0.03, 'fixed')) ,
+                        ('c', (0.000, 'fixed'))
+                        ]),
+                    expose_matrix = False
+                    )
+        elif 'multieres' in self.opts.energy_model:
+            if self.opts.subdetectors_number==200:
+                self.cfg.subdetector_fraction = NestedDict(
+                        bundle = dict(name="parameters", version = "v02"),
+                        parameter = "subdetector_fraction",
+                        label = 'Subdetector fraction weight for {subdetector}',
+                        pars = uncertaindict(
+                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
+                            ),
+                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
+                        )
+                self.cfg.multieres = NestedDict(
+                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
+                        # pars: sigma_e/e = sqrt(b^2/E),
+                        parameter = 'eres',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
+                        expose_matrix = False
+                        )
+            else:
+                assert False
+        else:
+            assert False
 
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
