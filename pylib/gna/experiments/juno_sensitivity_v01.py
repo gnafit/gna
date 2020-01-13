@@ -47,20 +47,26 @@ Misc changes:
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
         parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
-        parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+
+        # Energy model
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
+        parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
+
+        # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), required=True, help='Δm² parameter to use')
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
-        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
+
+        # Configuration
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -118,10 +124,10 @@ Misc changes:
             energy_model_formula = 'eres| '+energy_model_formula
             self.formula.append('eres_matrix| evis_hist')
         elif 'multieres' in energy_model:
-            if self.opts.subdetectors_number==200:
+            if self.opts.multieres=='sum':
                 energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
                 self.formula.append('eres_matrix[s]| evis_hist')
-            elif self.opts.subdetectors_number==5:
+            elif self.opts.multieres=='concat':
                 energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
                 self.formula.append('eres_matrix[s]| evis_hist')
                 concat_subdetectors = True
@@ -174,7 +180,13 @@ Misc changes:
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v03', major=''),
                         rounding = 3,
-                        edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
+                        edges = np.concatenate( (
+                                    [0.7],
+                                    np.arange(1, 6.0, 0.02),
+                                    np.arange(6, 7.0, 0.1),
+                                    [7.0, 7.5, 12.0]
+                                )
+                            ),
                         name = 'rebin',
                         label = 'Final histogram {detector}'
                         ),
@@ -393,6 +405,24 @@ Misc changes:
                         nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
                         expose_matrix = False
                         )
+            elif self.opts.subdetectors_number==5:
+                self.cfg.subdetector_fraction = NestedDict(
+                        bundle = dict(name="parameters", version = "v03"),
+                        parameter = "subdetector_fraction",
+                        label = 'Subdetector fraction weight for {subdetector}',
+                        pars = uncertaindict(
+                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
+                            ),
+                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt',
+                        verbose = 2
+                        )
+                self.cfg.multieres = NestedDict(
+                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
+                        # pars: sigma_e/e = sqrt(b^2/E),
+                        parameter = 'eres',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
+                        expose_matrix = False
+                        )
             else:
                 assert False
         else:
@@ -512,6 +542,10 @@ Misc changes:
             fine = outputs.eres.AD1
 
         if 'multieres' in self.opts.energy_model:
+            if self.opts.multieres=='concat' and self.opts.subdetectors_number<10:
+                sns = ns('{}_sub'.format(self.detectorname))
+                for i, out in enumerate(outputs.rebin.AD1.values()):
+                    sns.addobservable("sub{:02d}".format(i), out)
             ns.addobservable("{0}_eres".format(self.detectorname),     outputs.ibd.AD1)
             fine = outputs.ibd.AD1
 
