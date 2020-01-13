@@ -31,13 +31,8 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
-            if not '/' in path:
-                nspath=''
-                name=path
-            else:
-                nspath, name = path.split('/')
             try:
-                return env.ns(nspath).observables[name]
+                return env.ns('').getobservable(path)
             except KeyError:
                 raise PartNotFoundError("observable", path)
 
