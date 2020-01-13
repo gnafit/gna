@@ -19,7 +19,7 @@ Derived [2019.12] from:
 
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
-    - TODO: add matter oscillations
+    - WIP: add matter oscillations
 
 Implements:
     - Reactor antineutrino flux: Huber+Mueller
@@ -35,7 +35,7 @@ Implements:
 Misc changes:
     - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
     - Switch to double angle parameters for theta12 and theta13
-    - [WIP] add concatenated subdetectors
+    - Added concatenated subdetectors
 
     """
 
@@ -56,13 +56,13 @@ Misc changes:
         parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
 
         eres = parser.add_mutually_exclusive_group()
-        eres.add_argument('--eres-sigma', type=float, default=2.88, help='Energy resolution at 1 MeV')
-        eres.add_argument('--eres-nph', type=float, help='Average Npe at 1 MeV')
+        eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
+        eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
 
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
-        parser.add_argument('--dm', default='ee', choices=('23', 'ee'), required=True, help='Δm² parameter to use')
+        parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
@@ -160,6 +160,7 @@ Misc changes:
             free_pars  = [dmxx, 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
         else:
             raise Exception('Unsupported option')
+
         for par in fixed_pars:
             ns[par].setFixed()
         for par in free_pars:
@@ -172,9 +173,11 @@ Misc changes:
             ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
-        if self.opts.eres_nph:
-            self.opts.eres_sigma = self.opts.eres_nph**-0.5
-        print('Energy resolution at 1 MeV: {}%'.format(self.opts.eres_sigma*100))
+        if self.opts.eres_npe:
+            self.opts.eres_sigma = self.opts.eres_npe**-0.5
+        else:
+            self.opts.eres_npe = self.opts.eres_sigma**-2
+        print('Energy resolution at 1 MeV: {}% ({} pe)'.format(self.opts.eres_sigma*100, self.opts.eres_npe))
 
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
@@ -209,9 +212,10 @@ Misc changes:
                     ),
                 oscprob_matter = NestedDict(
                     bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
-                        names=dict(oscprob='oscprob_matter')),
+                                  names=dict(oscprob='oscprob_matter')),
                     density = 2.6, # g/cm3
-                    pdgyear = self.opts.pdgyear
+                    pdgyear = self.opts.pdgyear,
+                    dm      = self.opts.dm
                     ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -411,6 +415,7 @@ Misc changes:
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
+                        rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
             elif self.opts.subdetectors_number==5:
@@ -421,14 +426,14 @@ Misc changes:
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt',
-                        verbose = 2
+                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt'
                         )
                 self.cfg.multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
+                        rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
             else:

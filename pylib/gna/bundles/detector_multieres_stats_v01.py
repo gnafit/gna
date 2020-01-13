@@ -76,6 +76,12 @@ class detector_multieres_stats_v01(TransformationBundle):
         nph = N.loadtxt(self.cfg.nph)
         if nph.size!=self.nidx_major.get_size():
             raise Exception('Number of input Nph values (%i) is not consistent with dimension (%i)'%(nph.size, self.nidx_major.get_size()))
+
+        if 'rescale_nph' in self.cfg:
+            factor = self.cfg.rescale_nph/nph.mean()
+            print('Subdetector resolution: rescaling Npe to {} pe at 1 MeV, factor {}'.format(self.cfg.rescale_nph, factor))
+            nph*=factor
+
         par_b = nph**-0.5
 
         if self.cfg.get('verbose', False):
