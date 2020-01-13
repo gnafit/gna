@@ -15,13 +15,6 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to, const std::string& base
 
     variable_(&m_L, baseline);
     variable_(&m_rho, rho); // g/cm3
-    transformation_("oscprob")
-        .input("Enu") //MeV
-        .output("oscprob")
-        .depends(m_L)
-        .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
-        .types(TypesFunctions::pass<0>)
-        .func(&OscProbMatter::calcOscProb);
 
     m_param->variable_("DeltaMSq12");
     m_param->variable_("DeltaMSq13");
@@ -32,6 +25,15 @@ OscProbMatter::OscProbMatter(Neutrino from, Neutrino to, const std::string& base
     m_param->variable_("Alpha");
     m_param->variable_("Delta");
 
+    transformation_("oscprob")
+        .input("Enu") //MeV
+        .output("oscprob")
+        .depends(m_L, m_rho)
+        .depends(m_param->DeltaMSq12, m_param->DeltaMSq13, m_param->DeltaMSq23)
+        .depends(m_param->Alpha, m_param->Delta)
+        .depends(m_param->Theta12, m_param->Theta13, m_param->Theta23)
+        .types(TypesFunctions::pass<0>)
+        .func(&OscProbMatter::calcOscProb);
 }
 
 void OscProbMatter::calcOscProb(FunctionArgs fargs) {
