@@ -63,11 +63,26 @@ class NMOSensPlotter(object):
 
         ax=self.figure(r'$\chi^2$')
         ax.barh(self.info, chi2)
+        ax.set_ylim(reversed(ax.get_ylim()))
 
         self.savefig(suffix+('rel', ))
 
+        ax=self.figure(r'$\chi^2$')
+
+        prev = 0
+        for i, (label, c) in enumerate(zip(self.info, chi2)):
+            ax.broken_barh([(prev, c-prev)], (-i, 0.9))
+            prev = c
+
+        ax.set_ylim(-len(self.info), 0)
+        ax.set_yticks(range(-len(self.info), 0))
+        ax.set_yticklabels(reversed(self.info))
+
+        self.savefig(suffix+('rel1', ))
+
         ax=self.figure(r'$\Delta\chi^2$')
         ax.barh(self.info, shift)
+        ax.set_ylim(reversed(ax.get_ylim()))
 
         self.savefig(suffix+('relshift', ))
 
