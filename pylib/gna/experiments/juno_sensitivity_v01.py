@@ -55,6 +55,10 @@ Misc changes:
         parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
         parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
 
+        eres = parser.add_mutually_exclusive_group()
+        eres.add_argument('--eres-sigma', type=float, default=2.88, help='Energy resolution at 1 MeV')
+        eres.add_argument('--eres-nph', type=float, help='Average Npe at 1 MeV')
+
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
@@ -168,6 +172,10 @@ Misc changes:
             ns['pmns.DeltaMSq12'].set(7.54e-5)
 
     def init_configuration(self):
+        if self.opts.eres_nph:
+            self.opts.eres_sigma = self.opts.eres_nph**-0.5
+        print('Energy resolution at 1 MeV: {}%'.format(self.opts.eres_sigma*100))
+
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
                     bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -382,7 +390,7 @@ Misc changes:
                     parameter = 'eres',
                     pars = uncertaindict([
                         ('a', (0.000, 'fixed')) ,
-                        ('b', (0.03, 'fixed')) ,
+                        ('b', (self.opts.eres_sigma, 'fixed')) ,
                         ('c', (0.000, 'fixed'))
                         ]),
                     expose_matrix = False

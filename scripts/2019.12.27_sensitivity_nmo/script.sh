@@ -12,7 +12,7 @@ mode=${1:-echo}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2019.12.27_sensitivity_nmo
+outputdir=output/2020.01.13_sensitivity_nmo
 mkdir -p $outputdir 2>/dev/null
 echo Save output data to $outputdir
 
@@ -25,14 +25,14 @@ function run(){
     info=$1; shift
 
     # Make filename
-    suffix=$(join_by _ $iteration $*)
+    suffix=$1; shift
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".out"
     file_result=$outputdir/$suffix".yaml"
 
     # Get arguments
     oscprob=$1; shift
-    energy=$*
+    energy=$1
 
     # Update counter
     iteration=$(printf "%02d" $(($iteration+1)))
@@ -48,17 +48,27 @@ function run(){
     echo $file_result
     echo
 
+    if test -f $file_result
+    then
+        echo File exists, skipping
+        return
+    fi
+
     covpars=""
 
     command="
       ./gna \
           -- exp --ns juno juno_sensitivity_v01 -vv \
-                 --energy-model $energy --free osc --oscprob $oscprob \
+                 --energy-model $energy \
+                 --free osc \
+                 --oscprob $oscprob \
                  --dm ee \
           -- snapshot juno/AD1 juno/asimov_no \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
-          -- spectrum -p juno/AD1 -p juno/asimov_no -l 'IO (model)' -l 'NO (Asimov)' --plot-type hist --scale --grid -o $outputdir/$suffix'_spectra.pdf' \
+          -- spectrum -p juno/AD1 -l 'IO (model)' \
+                      -p juno/asimov_no -l 'NO (Asimov)' \
+                      --plot-type hist --scale --grid -o $outputdir/$suffix'_spectra.pdf' \
           -- dataset  --name juno_hier --asimov-data juno/AD1 juno/asimov_no \
           -- analysis --name juno_hier --datasets juno_hier \
                       $covpars
@@ -87,8 +97,9 @@ function run(){
     esac
 }
 
-run "Minimal" vacuum eres
-run "+LSNL"   vacuum lsnl eres
+run "Minimal"   vac_eres      vacuum "eres"
+run "Multieres" vac_meres     vacuum "multieres --subdetectors-number 5 --multieres concat"
+run "+LSNL"     vac_lsnl_eres vacuum "lsnl eres"
 echo Wating to finish...
 
 parallel --wait
