@@ -47,7 +47,6 @@ class cmd(basecmd):
                             default=[])
         parser.add_argument('--fix', action='append', nargs=1,
                             metavar=('PAR'), default=[])
-
         parser.add_argument('--covariance', action='append', nargs='*',
                 default=[],
                             metavar=('COVARIANCE_SET', 'PARS'), help='First '
@@ -55,6 +54,7 @@ class cmd(basecmd):
                             'of parameters to covariate')
         #  parser.add_argument('--correlation', action='append', nargs='*',
                             #  metavar=('CORRELATION_SET', 'PARS'))
+        parser.add_argument('-o', '--output', help='dump variables to the yaml file')
 
         parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
 
@@ -63,6 +63,7 @@ class cmd(basecmd):
             namespace = self.env.globalns(self.opts.name)
         else:
             namespace = self.env.globalns
+        self.namespace = namespace
 
         for sub in self.opts.new:
             namespace(sub)
@@ -130,3 +131,48 @@ class cmd(basecmd):
                 namespace(self.opts.print or '').printparameters(labels=True)
         except Exception as e:
             print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))
+
+        if self.opts.output:
+            self.dump(self.opts.output)
+
+    def dump(self, filename):
+        assert self.opts.output.endswith('.yaml'), 'Expect output filename to end with .yaml'
+        data = OrderedDict()
+        for fullname, par in self.namespace.walknames():
+            path, name = fullname.rsplit('.', 1)
+            try:
+                value = par.value()
+            except:
+                value = '?'
+            datum = OrderedDict([('name', name), ('value', value)])
+
+            try:
+                datum['central'] = par.central()
+            except:
+                pass
+
+            try:
+                if par.isFixed():
+                    datum['sigma'] = 'fixed'
+                elif par.isFree():
+                    datum['sigma'] = 'free'
+                else:
+                    datum['sigma'] = par.sigma()
+            except:
+                pass
+
+            try:
+                datum['label'] = par.label()
+            except:
+                pass
+
+            sub = data
+            for subname in path.split('.'):
+                sub = sub.setdefault(subname, OrderedDict())
+
+            sub[name] = datum
+
+        from tools.yaml import ordered_dump
+        print('Write variables to:', self.opts.output)
+        ordered_dump(data, open(self.opts.output, 'w'))
+

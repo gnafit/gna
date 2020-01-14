@@ -7,6 +7,10 @@
 # Estimate the number of processors, may be changed manually
 nproc=$(nproc)
 
+
+# Filter string
+filter='s/ -- / \\\n  -- /g; s/ --\S/ \\\n      \0/g;'
+
 # Running mode
 mode=${1:-echo}; shift
 force=${1:-0}
@@ -29,7 +33,8 @@ function run(){
     suffix=$(join_by _ $iteration $1); shift
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".out"
-    file_result=$outputdir/$suffix".yaml"
+    file_result_nmo=$outputdir/$suffix"_nmo.yaml"
+    file_result_pars=$outputdir/$suffix"_pars.yaml"
 
     # Get arguments
     oscprob=$1; shift
@@ -46,7 +51,8 @@ function run(){
 
     echo $file_output
     echo $file_err
-    echo $file_result
+    echo $file_result_nmo
+    echo $file_result_pars
     echo
 
     covpars=""
@@ -64,23 +70,24 @@ function run(){
           -- analysis --name juno --datasets juno \
                       $covpars
           -- chi2 stats-chi2 juno \
-          -- graphviz juno/asimov -o $outputdir/$suffix"_graph.dot" \
+          -- graphviz juno/asimov_no -o $outputdir/$suffix"_graph.dot" \
           -- minimizer min minuit stats-chi2 juno.pmns \
-          -- fit min -sp -o $file_result --profile juno.pmns.DeltaMSq23 \
+          -- fit min -sp -o $file_result_pars --profile juno.pmns.DeltaMSqEE \
                      -a label '$info' \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
           -- spectrum -p juno/AD1 -l 'IO (model)' \
                       -p juno/asimov_no -l 'NO (Asimov)' \
                       --plot-type hist --scale --grid -o $outputdir/$suffix'_spectra.pdf' \
-          -- fit min -sp -o $file_result \
+          -- fit min -sp -o $file_result_nmo \
                      -a label '$info' \
+          -- \
           >$file_output 2>$file_err
         "
 
-    if test -f $file_result -a $force -ne 1
+    if test -f $file_result_nmo -a -f $file_result_pars -a $force -ne 1
     then
-        echo $command | sed 's/ -- / \\\n  -- /g'
+        echo $command | sed -E "$filter"
         echo
         echo File exists, skipping!
         echo
@@ -89,7 +96,7 @@ function run(){
 
     case $mode in
         echo)
-            echo $command | sed 's/ -- / \\\n  -- /g'
+            echo $command | sed -E "$filter"
             ;;
         run)
             eval $command
@@ -105,8 +112,8 @@ function run(){
 }
 
 run "Default"               vac_eres          vacuum "eres"
-run "Multieres"             vac_meres         vacuum "multieres --subdetectors-number 5   --multieres concat"
-run "Multieres (sum)"       vac_meres_sum     vacuum "multieres --subdetectors-number 5   --multieres sum"
+run "Multieres (5)"         vac_meres         vacuum "multieres --subdetectors-number 5   --multieres concat"
+run "Multieres (sum 5)"     vac_meres_sum     vacuum "multieres --subdetectors-number 5   --multieres sum"
 run "Multieres (sum 200)"   vac_meres_sum200  vacuum "multieres --subdetectors-number 200 --multieres sum"
 run "+LSNL"                 vac_lsnl_eres     vacuum "lsnl eres"
 run "Meres+LSNL"            vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"
