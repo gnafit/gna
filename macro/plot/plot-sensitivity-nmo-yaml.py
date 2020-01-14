@@ -32,11 +32,11 @@ class NMOSensPlotter(object):
             raise Exception('Unable to skip/make transient first entry')
         skip=0
         for i in range(1, len(self.skip)):
+            if skip:
+                self.skip[i]+=skip
             if self.trans[i]:
                 skip+=1
             else:
-                if skip:
-                    self.skip[i]+=skip
                 skip=0
 
         # Chi2 values
@@ -101,7 +101,7 @@ class NMOSensPlotter(object):
         self.savefig(suffix+('rel1', ))
 
         ax.set_xlim(left=self.chi2.min()-2)
-        ax.text(0.00, -0.022, '(!0)', transform=ax.transAxes, ha='left', va='top')
+        ax.text(0.00, -0.065, '(!0)', transform=ax.transAxes, ha='left', va='top')
 
         self.savefig(suffix+('rel1', ))
 
@@ -159,12 +159,15 @@ class NMOSensPlotter(object):
 
         ax1.set_ylim(*ax.get_ylim())
         ax1.set_yticks(ax.get_yticks())
-        labels = [u'{:+.1g}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
+        labels = [u'{:+.2g}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
         labels[-1]=''
         labels = ax1.set_yticklabels(labels)
-        for label in labels:
+        for label, fc, shift in zip(labels, reversed(self.facecolors), reversed(self.shift)):
             label.set_bbox(bbox_right)
             label.set_ha('right')
+            label.set_color(fc)
+            if np.fabs(shift)>0.5:
+                label.set_fontweight('bold')
 
         ax2.set_ylim(*ax.get_ylim())
         ax2.set_yticks(ax.get_yticks())
@@ -181,7 +184,6 @@ class NMOSensPlotter(object):
 
     def savefig(self, suffix):
         savefig(self.opts.output, dpi=300, suffix=suffix)
-
 
 if __name__ == '__main__':
     from argparse import ArgumentParser, Namespace

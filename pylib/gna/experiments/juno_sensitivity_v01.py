@@ -70,7 +70,7 @@ Misc changes:
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
         # Configuration
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
     def __init__(self, namespace, opts):
@@ -99,6 +99,8 @@ Misc changes:
             self.reactors.remove('TS4')
         if 'far-off' in self.opts.reactors:
             self.reactors.remove('DYB')
+            self.reactors.remove('HZ')
+        if 'nohz' in self.opts.reactors:
             self.reactors.remove('HZ')
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
