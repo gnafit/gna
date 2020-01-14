@@ -26,18 +26,18 @@ class NMOSensPlotter(object):
     def load_data(self):
         # Labels
         self.info = [data.label.decode('utf-8') for data in self.opts.files]
-        self.skip = np.array([data.__dict__.get('skip', 0) for data in self.opts.files])
-        if self.skip[0]:
-            raise Exception('Unable to skip first entry')
+        self.skip  = np.array([int(data.__dict__.get('skip', 0)) for data in self.opts.files])
+        self.trans = np.array([int(data.__dict__.get('transient', 0)) for data in self.opts.files])
+        if self.skip[0] or self.trans[0]:
+            raise Exception('Unable to skip/make transient first entry')
+        skip=0
         for i in range(1, len(self.skip)):
-            prev, current = self.skip[i-1], self.skip[i]
-            if not current:
-                continue
-            self.skip[i] = current+prev
-        for i in reversed(range(1, len(self.skip))):
-            prev, current = self.skip[i-1], self.skip[i]
-            if prev and not current:
-                self.skip[i] = prev+1
+            if self.trans[i]:
+                skip+=1
+            else:
+                if skip:
+                    self.skip[i]+=skip
+                skip=0
 
         # Chi2 values
         self.chi2_full = np.zeros(self.size+1, dtype='d')
@@ -62,7 +62,7 @@ class NMOSensPlotter(object):
 
         # Previous idx
         self.idx_prev = np.arange(0, len(self.chi2))
-        # self.idx_prev -= self.skip
+        self.idx_prev -= self.skip
 
         # Previous step data
         self.chi2_prev = self.chi2_full[self.idx_prev]
