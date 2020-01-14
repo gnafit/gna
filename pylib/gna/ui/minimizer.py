@@ -18,11 +18,12 @@ class cmd(basecmd):
         parser.add_argument('statistic', action=set_typed(env.parts.statistic), help='Statistic name',
                                          metavar='statmodule')
         parser.add_argument('par', nargs='*', help='Parameters to minimize')
+        parser.add_argument('--drop-constrained', action='store_true', help='drop constrained arguments')
 
     def init(self):
         minimizer = minimizers[self.opts.type](self.opts.statistic)
 
-        loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False)
+        loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False, drop_constrained=self.opts.drop_constrained)
         statistic_parameters = []
         for par in loaded_parameters:
             if par.influences(self.opts.statistic):

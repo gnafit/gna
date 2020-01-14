@@ -100,6 +100,8 @@ class cmd(basecmd):
                     par.setRelSigma(par.cast(v))
                 elif k=='fixed' and v in ['true', 'True', True, 1]:
                     par.setFixed()
+                elif k=='free':
+                    par.setFree(v in ['true', 'True', True, 1])
                 else:
                     raise Exception('Unknown parameter option: {}={}'.format(k,v))
 

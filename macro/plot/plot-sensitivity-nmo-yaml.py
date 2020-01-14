@@ -25,7 +25,7 @@ class NMOSensPlotter(object):
 
     def load_data(self):
         # Labels
-        self.info = [data.label for data in self.opts.files]
+        self.info = [data.label.decode('utf-8') for data in self.opts.files]
 
         # Chi2 values
         self.chi2_full = np.zeros(self.size+1, dtype='d')
