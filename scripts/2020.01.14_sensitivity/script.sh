@@ -19,6 +19,7 @@ echo Run mode: $mode
 # Define the output directory
 outputdir=output/2020.01.14_sensitivity
 mkdir -p $outputdir 2>/dev/null
+mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
 
 # Define global variables and helper functions
@@ -33,8 +34,9 @@ function run(){
     suffix=$(join_by _ $iteration $1); shift
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".out"
-    file_result_nmo=$outputdir/$suffix"_nmo.yaml"
-    file_result_pars=$outputdir/$suffix"_pars.yaml"
+    file_values=$outputdir/$suffix"_parameters.yaml"
+    file_result_nmo=$outputdir/nmo/$suffix"_nmo.yaml"
+    file_result_pars=$outputdir/pars/$suffix"_pars.yaml"
 
     # Get arguments
     oscprob=$1; shift
@@ -66,6 +68,7 @@ function run(){
                  --oscprob $oscprob \
                  --dm ee \
           -- snapshot juno/AD1 juno/asimov_no \
+          -- ns --output $file_values \
           -- dataset  --name juno --asimov-data juno/AD1 juno/asimov_no \
           -- analysis --name juno --datasets juno \
                       $covpars
