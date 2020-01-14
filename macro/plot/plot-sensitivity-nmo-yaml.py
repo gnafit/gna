@@ -50,11 +50,9 @@ class NMOSensPlotter(object):
 
         # Previous idx
         self.idx_prev = np.arange(0, len(self.chi2))
-        print('idx prev before', self.idx_prev)
         for cur, prev in self.opts.previous:
             assert cur!=0
             self.idx_prev[cur]=prev+1
-        print('idx prev after', self.idx_prev)
 
         # Previous step data
         self.chi2_prev = self.chi2_full[self.idx_prev]
@@ -62,10 +60,6 @@ class NMOSensPlotter(object):
         self.facecolors = [s>0 and 'green' or 'red' for s in self.shift]
 
         self.ytop_prev = self.ytop_full[self.idx_prev]
-
-        print('ytop', self.ytop)
-        print('ytop_prev', self.ytop_prev)
-        print('ybottom', self.ybottom)
 
     def plot_nmo_sensitivity(self):
         suffix = ('nmo', 'sens')
@@ -97,6 +91,8 @@ class NMOSensPlotter(object):
         self.savefig(suffix+('rel1', ))
 
         ax.set_xlim(left=self.chi2.min()-3)
+        ax.text(0.00, -0.022, '(!0)', transform=ax.transAxes, ha='left', va='top')
+
         self.savefig(suffix+('rel1', ))
 
         # #
