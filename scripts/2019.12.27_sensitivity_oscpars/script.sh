@@ -60,7 +60,7 @@ function run(){
                  --oscprob $oscprob \
                  --dm ee \
           -- snapshot juno/AD1 juno/asimov \
-          -- dataset --name juno --asimov-data juno/AD1 juno/asimov \
+          -- dataset  --name juno --asimov-data juno/AD1 juno/asimov \
           -- analysis --name juno --datasets juno \
                       $covpars
           -- chi2 stats-chi2 juno \

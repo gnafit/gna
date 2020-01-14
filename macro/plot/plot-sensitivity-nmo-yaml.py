@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# encoding: utf-8
 
 """Read a set of yaml files with fit results and plot sensitivity to neutrino mass hierachy (NMO)
 
@@ -137,8 +138,10 @@ class NMOSensPlotter(object):
         plt.yticks(sorted(range(0, -len(self.info), -1)))
         labels = ax.set_yticklabels(reversed(self.info))
         ax1 = ax.twinx()
-        ax1.set_ylabel(r'$\Delta\chi^2$')
+        # ax1.set_ylabel(r'$\Delta\chi^2$')
         plt.tick_params(axis='y', direction='in', pad=-7)
+        ax2 = ax.twinx()
+        plt.tick_params(axis='y', direction='out')
 
         bbox_left  = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
         bbox_right = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
@@ -146,16 +149,23 @@ class NMOSensPlotter(object):
             label.set_bbox(bbox_left)
             label.set_ha('left')
 
-        plt.subplots_adjust(left=0.05, right=0.95)
+        plt.subplots_adjust(left=0.02, right=0.90)
 
         ax1.set_ylim(*ax.get_ylim())
         ax1.set_yticks(ax.get_yticks())
-        ax1.set_yticks(ax.get_yticks())
-        labels = ax1.set_yticklabels(['{:.2f}'.format(c) for c in reversed(self.chi2)])
-
+        labels = [u'{:+.1f}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
+        labels[-1]=''
+        labels = ax1.set_yticklabels(labels)
         for label in labels:
             label.set_bbox(bbox_right)
             label.set_ha('right')
+
+        ax2.set_ylim(*ax.get_ylim())
+        ax2.set_yticks(ax.get_yticks())
+        labels = ax2.set_yticklabels(['{:.2f}'.format(c) for c in reversed(self.chi2)])
+        for label in labels:
+            label.set_bbox(bbox_right)
+            label.set_ha('left')
 
         if self.opts.lines:
             xlim = ax.get_xlim()
