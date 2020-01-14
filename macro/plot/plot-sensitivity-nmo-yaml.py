@@ -26,6 +26,18 @@ class NMOSensPlotter(object):
     def load_data(self):
         # Labels
         self.info = [data.label.decode('utf-8') for data in self.opts.files]
+        self.skip = np.array([data.__dict__.get('skip', 0) for data in self.opts.files])
+        if self.skip[0]:
+            raise Exception('Unable to skip first entry')
+        for i in range(1, len(self.skip)):
+            prev, current = self.skip[i-1], self.skip[i]
+            if not current:
+                continue
+            self.skip[i] = current+prev
+        for i in reversed(range(1, len(self.skip))):
+            prev, current = self.skip[i-1], self.skip[i]
+            if prev and not current:
+                self.skip[i] = prev+1
 
         # Chi2 values
         self.chi2_full = np.zeros(self.size+1, dtype='d')
@@ -50,9 +62,7 @@ class NMOSensPlotter(object):
 
         # Previous idx
         self.idx_prev = np.arange(0, len(self.chi2))
-        for cur, prev in self.opts.previous:
-            assert cur!=0
-            self.idx_prev[cur]=prev+1
+        # self.idx_prev -= self.skip
 
         # Previous step data
         self.chi2_prev = self.chi2_full[self.idx_prev]
@@ -90,7 +100,7 @@ class NMOSensPlotter(object):
 
         self.savefig(suffix+('rel1', ))
 
-        ax.set_xlim(left=self.chi2.min()-3)
+        ax.set_xlim(left=self.chi2.min()-2)
         ax.text(0.00, -0.022, '(!0)', transform=ax.transAxes, ha='left', va='top')
 
         self.savefig(suffix+('rel1', ))
@@ -149,7 +159,7 @@ class NMOSensPlotter(object):
 
         ax1.set_ylim(*ax.get_ylim())
         ax1.set_yticks(ax.get_yticks())
-        labels = [u'{:+.1f}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
+        labels = [u'{:+.1g}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
         labels[-1]=''
         labels = ax1.set_yticklabels(labels)
         for label in labels:
@@ -184,7 +194,6 @@ if __name__ == '__main__':
     parser.add_argument('files', nargs='+', help='Yaml file to load', type=loader)
     parser.add_argument('-o', '--output', help='output file')
     parser.add_argument('-s', '--show', action='store_true', help='show figures')
-    parser.add_argument('-p', '--previous', type=int, default=[], nargs=2, action='append', help='previous value to calculate diff')
     parser.add_argument('-l', '--lines', type=int, nargs='+', default=[], help='add separator lines after values')
 
     plotter=NMOSensPlotter(parser.parse_args())

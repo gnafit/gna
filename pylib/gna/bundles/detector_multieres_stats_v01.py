@@ -91,6 +91,8 @@ class detector_multieres_stats_v01(TransformationBundle):
         parname = self.cfg.parameter
         labelfmt = self.cfg.get('label', '')
 
+        relsigma = self.cfg.get('relsigma', None)
+        uncopts = relsigma and dict(relsigma=relsigma) or dict(fixed=True)
         for it_major, central in zip(self.nidx_major, par_b):
             major_values = it_major.current_values()
 
@@ -98,7 +100,7 @@ class detector_multieres_stats_v01(TransformationBundle):
                 it=it_major
 
                 if i==1:
-                    par = self.reqparameter(parname, it, central=central, fixed=True, extra=name)
+                    par = self.reqparameter(parname, it, central=central, extra=name, **uncopts)
                 else:
                     par = self.reqparameter(parname, it, central=0.0, fixed=True, extra=name)
 

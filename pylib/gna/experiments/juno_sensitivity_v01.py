@@ -54,6 +54,7 @@ Misc changes:
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
         parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
+        parser.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
 
         eres = parser.add_mutually_exclusive_group()
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
@@ -388,13 +389,14 @@ Misc changes:
                 )
 
         if 'eres' in self.opts.energy_model:
+            bconf = self.opts.eres_b_relsigma and (self.opts.eres_b_relsigma, 'relative') or ('fixed',)
             self.cfg.eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                     parameter = 'eres',
                     pars = uncertaindict([
                         ('a', (0.000, 'fixed')) ,
-                        ('b', (self.opts.eres_sigma, 'fixed')) ,
+                        ('b', (self.opts.eres_sigma,)+bconf) ,
                         ('c', (0.000, 'fixed'))
                         ]),
                     expose_matrix = False
@@ -414,6 +416,7 @@ Misc changes:
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
+                        relsigma = self.opts.eres_b_relsigma,
                         nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
@@ -432,6 +435,7 @@ Misc changes:
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
+                        relsigma = self.opts.eres_b_relsigma,
                         nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
