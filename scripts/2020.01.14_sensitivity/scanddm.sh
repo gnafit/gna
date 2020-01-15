@@ -83,7 +83,7 @@ function run(){
                     parameters="--parameters $val"
                     ;;
                 dmee)
-                    setdm="--value juno.pmns.DeltaMSqEE $val"
+                    setdm="--set juno.pmns.DeltaMSqEE values=$val"
                     ;;
                 *)
                     echo Invalid option: $keyval
