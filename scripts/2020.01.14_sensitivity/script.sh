@@ -16,7 +16,7 @@ force=${1:-0}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2020.01.15_sensitivity1
+outputdir=output/2020.01.15_sensitivity2
 mkdir -p $outputdir 2>/dev/null
 mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
@@ -178,8 +178,11 @@ function run(){
 
 function syst {
     run "Default"               vac_eres_ybpars   vacuum "eres" reactors=all parameters=yb
-    run "New oscpars"           vac_eres          vacuum "eres" reactors=all
-    run "+global Δm²₂₁"         vac_eres          vacuum "eres" reactors=all parameters=latest transient
+    run "+new θ(12)"            vac_eres          vacuum "eres" reactors=all parameters=yb_t12
+    run "+new θ(13)"            vac_eres          vacuum "eres" reactors=all parameters=yb_t12_t13
+    run "+new Δm²(21)"          vac_eres          vacuum "eres" reactors=all parameters=yb_t12_t13_dm12
+    run "+new Δm²(ee)"          vac_eres          vacuum "eres" reactors=all
+    run "+global Δm²(21)"       vac_eres          vacuum "eres" reactors=all parameters=global transient
     run "+no TS3/4"             vac_eres_nots     vacuum "eres" reactors=nots
     run "+no HZ"                vac_eres_nohz     vacuum "eres"
     run "+U(θ13)"               vac_eres          vacuum "eres"                                                                        unctheta                          covpars="          juno.pmns.SinSqDouble13"

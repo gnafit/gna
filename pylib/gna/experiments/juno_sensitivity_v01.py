@@ -62,7 +62,7 @@ Misc changes:
 
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc', 'latest'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
@@ -176,7 +176,16 @@ Misc changes:
             ns['pmns.SinSqDouble13'].set(0.094)
             ns['pmns.DeltaMSq12'].set(7.54e-5)
             ns['pmns.DeltaMSqEE'].set(2.43e-3)
-        elif self.opts.parameters=='latest':
+        elif self.opts.parameters=='yb_t12':
+            ns['pmns.SinSqDouble13'].set(0.094)
+            ns['pmns.DeltaMSq12'].set(7.54e-5)
+            ns['pmns.DeltaMSqEE'].set(2.43e-3)
+        elif self.opts.parameters=='yb_t12_t13':
+            ns['pmns.DeltaMSq12'].set(7.54e-5)
+            ns['pmns.DeltaMSqEE'].set(2.43e-3)
+        elif self.opts.parameters=='yb_t12_t13_dm12':
+            ns['pmns.DeltaMSqEE'].set(2.43e-3)
+        elif self.opts.parameters=='global':
             ns['pmns.DeltaMSq12'].set(7.39e-5)
 
     def init_configuration(self):
@@ -457,7 +466,6 @@ Misc changes:
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
 
-        # if self.opts.parameters in ['yb', 'yb-noosc']:
         self.cfg.eff.pars = uncertain(0.73, 'fixed')
         self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
