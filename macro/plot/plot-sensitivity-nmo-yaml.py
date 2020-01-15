@@ -86,7 +86,7 @@ class NMOSensPlotter(object):
         #
         #
         ax=self.figure(r'$\Delta\chi^2$')
-        ax.set_xlim(self.chi2.min()-3, self.chi2.max()+1.5)
+        ax.set_xlim(self.chi2.min()-4, self.chi2.max()+1.5)
 
         for i in range(len(self.chi2)):
             chi2_prev = self.chi2_prev[i]
@@ -113,7 +113,6 @@ class NMOSensPlotter(object):
 
             self.savefig(suffix+('rel1', str(i)))
 
-
         # #
         # #
         # #
@@ -129,7 +128,7 @@ class NMOSensPlotter(object):
             plt.show()
 
     def figure(self, ylabel):
-        fig = plt.figure()
+        fig = plt.figure(figsize=self.opts.figsize)
         ax = plt.subplot(111, xlabel=ylabel, title='NMO sensitivity')
         ax.minorticks_on()
         ax.tick_params(axis='y', direction='inout', which='minor', left=False, right=False, length=0.0)
@@ -216,6 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--show', action='store_true', help='show figures')
     parser.add_argument('-l', '--lines', type=int, nargs='+', default=[], help='add separator lines after values')
     parser.add_argument('--zoom-save', '--zs', nargs=3, default=[], action='append')
+    parser.add_argument('--figsize', nargs=2, type=float, help='figsize')
 
     plotter=NMOSensPlotter(parser.parse_args())
     plotter.plot()
