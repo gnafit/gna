@@ -143,11 +143,14 @@ class NMOSensPlotter(object):
         ax.tick_params(axis='y', which='major', direction='in', pad=-10)
         plt.yticks(sorted(range(0, -len(self.info), -1)))
         labels = ax.set_yticklabels(reversed(self.info))
-        ax1 = ax.twinx()
-        # ax1.set_ylabel(r'$\Delta\chi^2$')
+        ax_right1 = ax.twinx()
+        # ax_right1.set_ylabel(r'$\Delta\chi^2$')
         plt.tick_params(axis='y', direction='in', pad=-7)
-        ax2 = ax.twinx()
+        ax_right2 = ax.twinx()
         plt.tick_params(axis='y', direction='out')
+
+        ax_left2 = ax.twinx()
+        plt.tick_params(axis='y', direction='out', labelleft=True, labelright=False)
 
         bbox_left  = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
         bbox_right = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
@@ -155,13 +158,17 @@ class NMOSensPlotter(object):
             label.set_bbox(bbox_left)
             label.set_ha('left')
 
-        plt.subplots_adjust(left=0.02, right=0.90)
+        plt.subplots_adjust(left=0.07, right=0.90)
 
-        ax1.set_ylim(*ax.get_ylim())
-        ax1.set_yticks(ax.get_yticks())
+        ax_left2.set_ylim(*ax.get_ylim())
+        ax_left2.set_yticks(ax.get_yticks())
+        labels = ax_left2.set_yticklabels(['{: 2d}'.format(i) for i in reversed(range(len(self.shift)))])
+
+        ax_right1.set_ylim(*ax.get_ylim())
+        ax_right1.set_yticks(ax.get_yticks())
         labels = [u'{:+.2g}'.format(c).replace(u'-',u'–') for c in reversed(self.shift)]
         labels[-1]=''
-        labels = ax1.set_yticklabels(labels)
+        labels = ax_right1.set_yticklabels(labels)
         for label, fc, shift in zip(labels, reversed(self.facecolors), reversed(self.shift)):
             label.set_bbox(bbox_right)
             label.set_ha('right')
@@ -169,9 +176,9 @@ class NMOSensPlotter(object):
             if np.fabs(shift)>0.5:
                 label.set_fontweight('bold')
 
-        ax2.set_ylim(*ax.get_ylim())
-        ax2.set_yticks(ax.get_yticks())
-        labels = ax2.set_yticklabels(['{:.2f}'.format(c) for c in reversed(self.chi2)])
+        ax_right2.set_ylim(*ax.get_ylim())
+        ax_right2.set_yticks(ax.get_yticks())
+        labels = ax_right2.set_yticklabels(['{:.2f}'.format(c) for c in reversed(self.chi2)])
         for label in labels:
             label.set_bbox(bbox_right)
             label.set_ha('left')
