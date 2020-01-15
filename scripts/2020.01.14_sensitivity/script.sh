@@ -174,8 +174,7 @@ function syst {
     run "+no TS3/4"             vac_eres_nots     vacuum "eres" nots
     run "+no HZ"                vac_eres_nohz     vacuum "eres"
     run "+U(θ13)"               vac_eres          vacuum "eres"                                                                        unctheta                          covpars="          juno.pmns.SinSqDouble13"
-    run "+U(…, power)"          vac_eres          vacuum "eres"                                                                        unctheta                          covpars="          juno.pmns.SinSqDouble13           juno.thermal_power"
-    run "+U(…, eff)"            vac_eres          vacuum "eres"                                                                        unctheta                          covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power"
+    run "+U(…, power, eff)"     vac_eres          vacuum "eres"                                                                        unctheta                          covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power"
     run "+U(…, spec 1%)"        vac_eres          vacuum "eres"                                                                        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
     run "+U(…, eres 30%)*"      vac_eres          vacuum "eres"                                                       transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum"
     run "Meres (sum 200)*"      vac_meres_sum200  vacuum "multieres --subdetectors-number 200 --multieres sum"        transient        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
