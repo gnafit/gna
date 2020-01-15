@@ -137,9 +137,9 @@ function run(){
           -- graphviz juno/asimov_no -o $outputdir/$suffix"_graph.dot" \
           -- minimizer min minuit stats-chi2 juno.pmns \
                        --drop-constrained \
-          #-- fit min -sp -o $file_result_pars \
-                     #--profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
-                     #-a label '$info' $extrainfo \
+          -- fit min -sp -o $file_result_pars \
+                     --profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
+                     -a label '$info' $extrainfo \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
           -- spectrum -p juno/AD1 -l 'IO (model)' \
