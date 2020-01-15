@@ -86,6 +86,7 @@ class NMOSensPlotter(object):
         #
         #
         ax=self.figure(r'$\Delta\chi^2$')
+        ax.set_xlim(self.chi2.min()-3, self.chi2.max()+1.5)
 
         for i in range(len(self.chi2)):
             chi2_prev = self.chi2_prev[i]
@@ -98,9 +99,6 @@ class NMOSensPlotter(object):
 
         self.patch_yticklabels()
 
-        self.savefig(suffix+('rel1', ))
-
-        ax.set_xlim(left=self.chi2.min()-2)
         ax.text(0.00, -0.065, '(!0)', transform=ax.transAxes, ha='left', va='top')
 
         self.savefig(suffix+('rel1', ))
@@ -188,6 +186,8 @@ class NMOSensPlotter(object):
             linesy = -np.array(self.opts.lines)+0.5
             ax.hlines(linesy, xlim[0], xlim[1], linestyle='dashed', linewidth=1.0, alpha=0.6)
             ax.set_xlim(*xlim)
+
+        return ax, ax_left2, ax_right1, ax_right2
 
     def savefig(self, suffix):
         savefig(self.opts.output, dpi=300, suffix=suffix)

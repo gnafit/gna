@@ -185,7 +185,7 @@ function syst {
     run "+new θ(13)"            vac_eres          vacuum "eres" reactors=all parameters=yb_t12_t13
     run "+new Δm²(21)"          vac_eres          vacuum "eres" reactors=all parameters=yb_t12_t13_dm12
     run "+new Δm²(ee)"          vac_eres          vacuum "eres" reactors=all
-    run "+global Δm²(21)"       vac_eres          vacuum "eres" reactors=all parameters=global transient
+    run "+global Δm²(21)*"      vac_eres          vacuum "eres" reactors=all parameters=global transient
     run "+no TS3/4"             vac_eres_nots     vacuum "eres" reactors=nots
     run "+no HZ"                vac_eres_nohz     vacuum "eres"
     run "+U(θ13)"               vac_eres          vacuum "eres"                                                                        unctheta                          covpars="          juno.pmns.SinSqDouble13"
