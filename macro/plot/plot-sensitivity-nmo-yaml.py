@@ -9,7 +9,7 @@ It expects the fit data: the model (IO) fit against asimov prediction of model w
 
 from __future__ import print_function
 from matplotlib import pyplot as plt
-from yaml import load, FullLoader
+from yaml import load, Loader
 from mpl_tools.helpers import savefig
 import numpy as np
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     parser = ArgumentParser(description=__doc__)
     def loader(name):
         with open(name, 'r') as input:
-            data = load(input, FullLoader)
+            data = load(input, Loader)
             return Namespace(**data)
 
     parser.add_argument('files', nargs='+', help='Yaml file to load', type=loader)
