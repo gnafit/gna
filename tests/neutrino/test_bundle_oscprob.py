@@ -72,13 +72,15 @@ cfg_idx = NestedDict(
             ),
         oscprob = NestedDict(
             bundle = dict(name='oscprob', version='v04', major='rdc'),
-            pdgyear = 2016
+            pdgyear = 2016,
+            dm = 'ee'
             ),
         oscprob_matter = NestedDict(
             bundle = dict(name='oscprob_matter', version='v01', major='rd',
                           names=dict(pmns='pmns_matter', oscprob='oscprob_matter')),
             density = 2.6, # g/cm3
-            pdgyear = 2016
+            pdgyear = 2016,
+            dm = 'ee'
             ),
         enu = NestedDict(
             bundle = NestedDict(name='predefined', version='v01', major=''),
@@ -117,6 +119,6 @@ def plot(vacuum, matter, title):
 
 
 for (vacuum, matter, L) in zip(context.outputs.oscprob_full.Core0.values(), context.outputs.oscprob_matter.Core0.values(), (L1, L2)):
-    plot(vacuum, matter, title='Oscillation probability comparison, L={} km'.format(L/km))
+    plot(vacuum, matter, title='Oscillation probability, L={} km, $\\rho$={:g}'.format(L/km, cfg_idx.oscprob_matter.density))
 
 plt.show()

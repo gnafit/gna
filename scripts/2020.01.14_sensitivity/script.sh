@@ -16,7 +16,7 @@ force=${1:-0}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2020.01.14_sensitivity3
+outputdir=output/2020.01.15_sensitivity1
 mkdir -p $outputdir 2>/dev/null
 mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
@@ -44,8 +44,7 @@ function run(){
 
     iteration=$(($iteration+1))
 
-    unset spectrum constrain eresunc covpars extrainfo
-    reactors="--reactors pessimistic nohz"
+    unset spectrum constrain eresunc covpars extrainfo reactors parameters
     {
         for keyval in "$@"
         do
@@ -69,11 +68,18 @@ function run(){
                 skip)
                     extrainfo="$extrainfo -a skip $val"
                     ;;
-                allreactors)
-                    unset reactors
+                reactors)
+                    case $val in
+                        nots)
+                            reactors="--reactors pessimistic"
+                            ;;
+                        all)
+                            reactors=" "
+                            ;;
+                    esac
                     ;;
-                nots)
-                    reactors="--reactors pessimistic"
+                parameters)
+                    parameters="--parameters $val"
                     ;;
                 *)
                     echo Invalid option: $keyval
@@ -115,7 +121,8 @@ function run(){
                  --dm ee \
                  $spectrum \
                  $eresunc \
-                 $reactors \
+                 ${reactors:-"--reactors pessimistic nohz"}
+                 $parameters \
           -- snapshot juno/AD1 juno/asimov_no \
           -- ns $constrain \
           -- ns --output $file_values \
@@ -170,22 +177,24 @@ function run(){
 }
 
 function syst {
-    run "Default"               vac_eres          vacuum "eres" allreactors
-    run "+no TS3/4"             vac_eres_nots     vacuum "eres" nots
+    run "Default"               vac_eres_ybpars   vacuum "eres" reactors=all parameters=yb
+    run "New oscpars"           vac_eres          vacuum "eres" reactors=all
+    run "+global Δm²₂₁"         vac_eres          vacuum "eres" reactors=all parameters=latest transient
+    run "+no TS3/4"             vac_eres_nots     vacuum "eres" reactors=nots
     run "+no HZ"                vac_eres_nohz     vacuum "eres"
     run "+U(θ13)"               vac_eres          vacuum "eres"                                                                        unctheta                          covpars="          juno.pmns.SinSqDouble13"
-    run "+U(…, power, eff)"     vac_eres          vacuum "eres"                                                                        unctheta                          covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power"
-    run "+U(…, spec 1%)"        vac_eres          vacuum "eres"                                                                        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
-    run "+U(…, eres 30%)*"      vac_eres          vacuum "eres"                                                       transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum"
-    run "Meres (sum 200)*"      vac_meres_sum200  vacuum "multieres --subdetectors-number 200 --multieres sum"        transient        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
-    run "Meres (sum 5)*"        vac_meres_sum     vacuum "multieres --subdetectors-number 5   --multieres sum"        transient        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
-    run "Meres (5)"             vac_meres         vacuum "multieres --subdetectors-number 5   --multieres concat"                      unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
-    run "+U(…, sub)"            vac_meres_sum_u   vacuum "multieres --subdetectors-number 5   --multieres sum"                         unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction"
-    run "eres+LSNL*"            vac_lsnl_eres     vacuum "lsnl eres"                                                  transient skip=5 unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
-    run "Meres+LSNL"            vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction"
-    run "+U(…, lsnl)"           vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
-    run "+U(…, eres 30%)*"      vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"  transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum                           juno.Npescint juno.kC juno.birks"
-    run "Meres+LSNL, matter"    mat_lsnl_meres    matter "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
+    #run "+U(…, power, eff)"     vac_eres          vacuum "eres"                                                                        unctheta                          covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power"
+    #run "+U(…, spec 1%)"        vac_eres          vacuum "eres"                                                                        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
+    #run "+U(…, eres 30%)*"      vac_eres          vacuum "eres"                                                       transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum"
+    #run "Meres (sum 200)*"      vac_meres_sum200  vacuum "multieres --subdetectors-number 200 --multieres sum"        transient        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
+    #run "Meres (sum 5)*"        vac_meres_sum     vacuum "multieres --subdetectors-number 5   --multieres sum"        transient        unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
+    #run "Meres (5)"             vac_meres         vacuum "multieres --subdetectors-number 5   --multieres concat"                      unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
+    #run "+U(…, sub)"            vac_meres_sum_u   vacuum "multieres --subdetectors-number 5   --multieres sum"                         unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction"
+    #run "eres+LSNL*"            vac_lsnl_eres     vacuum "lsnl eres"                                                  transient skip=5 unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum"
+    #run "Meres+LSNL"            vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction"
+    #run "+U(…, lsnl)"           vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
+    #run "+U(…, eres 30%)*"      vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"  transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum                           juno.Npescint juno.kC juno.birks"
+    #run "Meres+LSNL, matter"    mat_lsnl_meres    matter "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
 }
 syst
 echo Wating to finish...

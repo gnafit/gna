@@ -62,9 +62,9 @@ Misc changes:
 
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc', 'latest'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
-        parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
+        parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
@@ -169,11 +169,15 @@ Misc changes:
         for par in free_pars:
             ns[par].setFree()
 
+        def single2double(v):
+            return 4.0*v*(1.0-v)
         if self.opts.parameters=='yb':
-            assert False
-            ns['pmns.SinSqDouble12'].set(0.307)
-            ns['pmns.SinSqDouble13'].set(0.024)
+            ns['pmns.SinSqDouble12'].set(single2double(0.307))
+            ns['pmns.SinSqDouble13'].set(0.094)
             ns['pmns.DeltaMSq12'].set(7.54e-5)
+            ns['pmns.DeltaMSqEE'].set(2.43e-3)
+        elif self.opts.parameters=='latest':
+            ns['pmns.DeltaMSq12'].set(7.39e-5)
 
     def init_configuration(self):
         if self.opts.eres_npe:
@@ -453,9 +457,9 @@ Misc changes:
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
 
-        if self.opts.parameters in ['yb', 'yb-noosc']:
-            self.cfg.eff.pars = uncertain(0.73, 'fixed')
-            self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
+        # if self.opts.parameters in ['yb', 'yb-noosc']:
+        self.cfg.eff.pars = uncertain(0.73, 'fixed')
+        self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
         if self.opts.spectrum_unc in ['final', 'initial']:
