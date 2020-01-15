@@ -44,7 +44,7 @@ function run(){
 
     iteration=$(($iteration+1))
 
-    unset spectrum constrain eresunc covpars extrainfo reactors parameters
+    unset spectrum constrain eresunc covpars extrainfo reactors parameters setdm
     {
         for keyval in "$@"
         do
@@ -80,6 +80,9 @@ function run(){
                     ;;
                 parameters)
                     parameters="--parameters $val"
+                    ;;
+                dmee)
+                    setdm="--value juno.pmns.DeltaMSqEE $val"
                     ;;
                 *)
                     echo Invalid option: $keyval
@@ -124,7 +127,7 @@ function run(){
                  ${reactors:-"--reactors pessimistic nohz"}
                  $parameters \
           -- snapshot juno/AD1 juno/asimov_no \
-          -- ns $constrain \
+          -- ns $constrain $setdm \
           -- ns --output $file_values \
           -- dataset  --name juno --asimov-data juno/AD1 juno/asimov_no \
           -- analysis --name juno --datasets juno \
@@ -133,9 +136,9 @@ function run(){
           -- graphviz juno/asimov_no -o $outputdir/$suffix"_graph.dot" \
           -- minimizer min minuit stats-chi2 juno.pmns \
                        --drop-constrained \
-          -- fit min -sp -o $file_result_pars \
-                     --profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
-                     -a label '$info' $extrainfo \
+          #-- fit min -sp -o $file_result_pars \
+                     #--profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
+                     #-a label '$info' $extrainfo \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
           -- spectrum -p juno/AD1 -l 'IO (model)' \
@@ -200,6 +203,7 @@ function syst {
     run "Meres+LSNL, matter"    mat_lsnl_meres    matter "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
 }
 syst
+
 echo Wating to finish...
 
 parallel --wait

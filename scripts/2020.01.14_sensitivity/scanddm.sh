@@ -16,7 +16,7 @@ force=${1:-0}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2020.01.15_sensitivity2
+outputdir=output/2020.01.15_scandm
 mkdir -p $outputdir 2>/dev/null
 mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
@@ -44,7 +44,7 @@ function run(){
 
     iteration=$(($iteration+1))
 
-    unset spectrum constrain eresunc covpars extrainfo reactors parameters
+    unset spectrum constrain eresunc covpars extrainfo reactors parameters setdm
     {
         for keyval in "$@"
         do
@@ -80,6 +80,9 @@ function run(){
                     ;;
                 parameters)
                     parameters="--parameters $val"
+                    ;;
+                dmee)
+                    setdm="--value juno.pmns.DeltaMSqEE $val"
                     ;;
                 *)
                     echo Invalid option: $keyval
@@ -124,7 +127,7 @@ function run(){
                  ${reactors:-"--reactors pessimistic nohz"}
                  $parameters \
           -- snapshot juno/AD1 juno/asimov_no \
-          -- ns $constrain \
+          -- ns $constrain $setdm \
           -- ns --output $file_values \
           -- dataset  --name juno --asimov-data juno/AD1 juno/asimov_no \
           -- analysis --name juno --datasets juno \
@@ -199,7 +202,16 @@ function syst {
     run "+U(…, eres 30%)*"      vac_lsnl_meres    vacuum "lsnl multieres --subdetectors-number 5 --multieres concat"  transient        unctheta unceres spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum                           juno.Npescint juno.kC juno.birks"
     run "Meres+LSNL, matter"    mat_lsnl_meres    matter "lsnl multieres --subdetectors-number 5 --multieres concat"                   unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
 }
-syst
+#syst
+
+function rundm {
+    run "$1"                    scandm            vacuum "lsnl multieres --subdetectors-number 5 --multieres concat" dmee=$1           unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
+}
+
+for val in $(seq 2.3e-3 0.005e-3 2.6e-3)
+do
+    rundm $val
+done
 echo Wating to finish...
 
 parallel --wait
