@@ -31,7 +31,7 @@ function run(){
     info=$1; shift
 
     # Make filename
-    suffix=$(join_by _ $iteration_manual $1); shift
+    suffix=$(join_by _ $(printf "%02d" $iteration) $1); shift
     file_cmd=$outputdir/$suffix".sh"
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".err"
@@ -205,7 +205,7 @@ function syst {
 #syst
 
 function rundm {
-    run "$1"                    scandm            vacuum "lsnl multieres --subdetectors-number 5 --multieres concat" dmee=$1           unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
+    run 000 "$1"                    scandm            vacuum "lsnl multieres --subdetectors-number 5 --multieres concat" dmee=$1           unctheta         spectrum=initial covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.subdetector_fraction juno.Npescint juno.kC juno.birks"
 }
 
 for val in $(seq 2.3e-3 0.005e-3 2.6e-3)
