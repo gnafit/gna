@@ -9,7 +9,7 @@ It expects the fit data: the model (IO) fit against asimov prediction of model w
 
 from __future__ import print_function
 from matplotlib import pyplot as plt
-from yaml import load, FullLoader
+from yaml import load, BaseLoader as Loader
 from mpl_tools.helpers import savefig
 import numpy as np
 
@@ -20,8 +20,8 @@ class Plotter(object):
 	if opts.data is not None:
 	    self.chi2, self.dm = opts.data
 	else:
-	    self.chi2 = [file['fun'] for file in self.opts.chi2]
-	    self.dm   = [file['juno']['pmns']['DeltaMSqEE']['value'] for file in self.opts.dm]
+	    self.chi2 = [float(file['fun']) for file in self.opts.chi2]
+	    self.dm   = [float(file['juno']['pmns']['DeltaMSqEE']['value']) for file in self.opts.dm]
 
     def plot(self):
 	fig = plt.figure()
@@ -40,6 +40,8 @@ class Plotter(object):
 	f.set_powerlimits((-2,2))
 	f.useMathText=True
 
+	savefig(self.opts.output)
+
 	plt.show()
 
 if __name__ == '__main__':
@@ -47,11 +49,12 @@ if __name__ == '__main__':
     parser = ArgumentParser(description=__doc__)
     def loader(name):
         with open(name, 'r') as input:
-            return load(input, FullLoader)
+            return load(input, Loader)
 
     parser.add_argument('--chi2', nargs='+', help='Yaml file to load', type=loader)
     parser.add_argument('--dm', nargs='+', help='Yaml file to load', type=loader)
     parser.add_argument('--data', nargs=2, type=np.loadtxt)
+    parser.add_argument('-o', '--output')
 
     plotter=Plotter(parser.parse_args())
     plotter.plot()

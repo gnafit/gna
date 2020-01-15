@@ -60,6 +60,9 @@ Misc changes:
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
         eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
 
+        # binning
+        parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
+
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
@@ -220,7 +223,7 @@ Misc changes:
                         rounding = 3,
                         edges = np.concatenate( (
                                     [0.7],
-                                    np.arange(1, 6.0, 0.02),
+                                    np.arange(1, 6.0, self.opts.estep),
                                     np.arange(6, 7.0, 0.1),
                                     [7.0, 7.5, 12.0]
                                 )

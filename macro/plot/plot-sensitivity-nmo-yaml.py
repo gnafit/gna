@@ -97,11 +97,22 @@ class NMOSensPlotter(object):
         else:
             ax.vlines(self.chi2[-1], self.ytop[-1], self.ybottom[-1], color='black', linewidth=1.5, linestyle='-')
 
-        self.patch_yticklabels()
-
+        axes = self.patch_yticklabels()
         ax.text(0.00, -0.065, '(!0)', transform=ax.transAxes, ha='left', va='top')
 
         self.savefig(suffix+('rel1', ))
+
+        for i, (axis, a, b) in enumerate(self.opts.zoom_save):
+            a, b = float(a), float(b)
+            if axis=='x':
+                for ax in axes:
+                    ax.set_xlim(a, b)
+            elif axis=='y':
+                for ax in axes:
+                    ax.set_ylim(a, b)
+
+            self.savefig(suffix+('rel1', str(i)))
+
 
         # #
         # #
@@ -204,6 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='output file')
     parser.add_argument('-s', '--show', action='store_true', help='show figures')
     parser.add_argument('-l', '--lines', type=int, nargs='+', default=[], help='add separator lines after values')
+    parser.add_argument('--zoom-save', '--zs', nargs=3, default=[], action='append')
 
     plotter=NMOSensPlotter(parser.parse_args())
     plotter.plot()
