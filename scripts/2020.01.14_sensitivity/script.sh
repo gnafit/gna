@@ -127,9 +127,9 @@ function run(){
                  $eresunc \
                  ${reactors:-"--reactors pessimistic nohz"}
                  $parameters \
-          -- snapshot juno/AD1 juno/asimov_no \
           -- ns $constrain $setdm \
           -- ns --output $file_values \
+          -- snapshot juno/AD1 juno/asimov_no \
           -- dataset  --name juno --asimov-data juno/AD1 juno/asimov_no \
           -- analysis --name juno --datasets juno \
                       $covpars
