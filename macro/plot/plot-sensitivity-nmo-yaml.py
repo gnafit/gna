@@ -13,6 +13,106 @@ from yaml import load, Loader
 from mpl_tools.helpers import savefig
 import numpy as np
 
+import itertools as I
+def bars_relative(labels, values, y=None, height=0.9, **kwargs):
+    if len(labels)!=len(values):
+        raise Exception('Labels and values length should have similar length')
+
+    ax=plt.gca()
+
+    if y is None:
+        y=np.arange(len(labels))
+    else:
+        if len(y)!=len(values):
+            raise Exception('y and values length should have similar length')
+
+    if isinstance(height, (int, float)):
+        height_it = I.repeat(height)
+    else:
+        height_it = height
+
+    align = kwargs.pop('align', 'center')
+    if not align in ('top', 'bottom', 'center'):
+        raise Exception('Invalid alignment: '+align)
+
+    ticks_at = y
+    if align=='top':
+        y = y-height
+    elif align=='center':
+        y = y-height*0.5
+
+    prev_value = kwargs.pop('initial_value', 0.0)
+    values = np.asanyarray(values)
+    changes = values.copy()
+    changes[1:]-=values[:-1]
+    changes[0]=values[0]-prev_value
+    for i, (label, value, change, yi, h) in enumerate(zip(labels, values, changes, y, height_it)):
+        # label, value
+        # chi2_prev = self.chi2_prev[i]
+        # shift = self.shift[i]
+        # ytop, ybottom, ytop_prev = self.ytop[i], self.ybottom[i], self.ytop_prev[i]
+        # ax.broken_barh([(chi2_prev, shift)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], alpha=0.7)
+        # ax.vlines(chi2_prev, ytop_prev, ybottom, color='black', linewidth=1.5, linestyle='-')
+
+        # ax.broken_barh([(initial_value, value-initial_value)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], **kwargs)
+        ax.broken_barh([(prev_value, change)], (yi, h), **kwargs)
+        prev_value = value
+    # else:
+        # ax.vlines(self.chi2[-1], self.ytop[-1], self.ybottom[-1], color='black', linewidth=1.5, linestyle='-')
+
+    ax_right1 = ax.twinx()
+    plt.tick_params(axis='y', direction='in', pad=-7)
+    ax_right2 = ax.twinx()
+    plt.tick_params(axis='y', direction='out')
+    ax_left2 = ax.twinx()
+    plt.tick_params(axis='y', direction='out', labelleft=True, labelright=False)
+    yax_left2 = ax_left2.yaxis
+    yax_right1= ax_right1.yaxis
+    yax_right2= ax_right2.yaxis
+
+    yax_list = [ax.yaxis, ax_left2.yaxis, ax_right1.yaxis, ax_right2.yaxis]
+    fmt_list = ['{index}', u'{label}', '{change:+.2f}', '{value:.2f}']
+    alignment = ['right', 'left', 'right', 'left']
+
+    bbox = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
+    def yobserver(yax):
+        y1, y2 = yax.get_data_interval()
+        if y2<y1:
+            y1, y2 = y2, y1
+        newticks, newlabels = [], [[], [], [], []]
+        if ax.yaxis_inverted():
+            iterator = enumerate(zip(ticks_at, reversed(labels), reversed(values), reversed(changes)))
+        else:
+            iterator = enumerate(zip(ticks_at, labels, values, changes))
+        for i, (tick, label, value, change) in iterator:
+            if tick<y1 or tick>y2:
+                continue
+
+            newticks.append(tick)
+            for labelslist, fmt in zip(newlabels, fmt_list):
+                labelslist.append(fmt.format(index=i, label=label, change=change, value=value))
+
+        v1, v2 = yax.get_view_interval()
+
+        for yax, ls, align in zip(yax_list, newlabels, alignment):
+            yax.set_view_interval(v1, v2)
+            yax.set_ticks(newticks, minor=False)
+            ylabels = yax.set_ticklabels(ls)
+
+            for label, in zip(ylabels):
+                label.set_bbox(bbox)
+                label.set_ha(align)
+                # label.set_color(fc)
+                # if np.fabs(shift)>0.5:
+                    # label.set_fontweight('bold')
+
+    ax.yaxis.add_callback(yobserver)
+    yobserver(ax.yaxis)
+
+    # labels = ax.set_yticklabels(reversed(self.info))
+    # axes = self.patch_yticklabels()
+    # ax.text(0.00, -0.065, '(!0)', transform=ax.transAxes, ha='left', va='top')
+
 class NMOSensPlotter(object):
     chi2 = None
     def __init__(self, opts):
@@ -102,7 +202,8 @@ class NMOSensPlotter(object):
 
         self.savefig(suffix+('rel1', ))
 
-        for i, (axis, a, b) in enumerate(self.opts.zoom_save):
+        i=0
+        for axis, a, b, save in self.opts.zoom_save:
             a, b = float(a), float(b)
             if axis=='x':
                 for ax in axes:
@@ -111,11 +212,16 @@ class NMOSensPlotter(object):
                 for ax in axes:
                     ax.set_ylim(a, b)
 
-            self.savefig(suffix+('rel1', str(i)))
+            if save=='1':
+                self.savefig(suffix+('rel1', str(i)))
+                i+=1
 
-        # #
-        # #
-        # #
+        ax=self.figure(r'$\Delta\chi^2$')
+        ax.set_xlim(self.chi2.min()-4, self.chi2.max()+1.5)
+
+        bars_relative(self.info, self.chi2, alpha=0.7)
+        # ax.invert_yaxis()
+
         # ax=self.figure(r'$\Delta\chi^2$')
         # ax.barh(self.info, self.shift, color=self.facecolors)
         # ax.set_ylim(reversed(ax.get_ylim()))
@@ -214,7 +320,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='output file')
     parser.add_argument('-s', '--show', action='store_true', help='show figures')
     parser.add_argument('-l', '--lines', type=int, nargs='+', default=[], help='add separator lines after values')
-    parser.add_argument('--zoom-save', '--zs', nargs=3, default=[], action='append')
+    parser.add_argument('--zoom-save', '--zs', nargs=4, default=[], action='append')
     parser.add_argument('--figsize', nargs=2, type=float, help='figsize')
 
     plotter=NMOSensPlotter(parser.parse_args())

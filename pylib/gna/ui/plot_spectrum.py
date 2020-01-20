@@ -111,9 +111,8 @@ class cmd(basecmd):
 
         legends = self.legends[len(self.opts.plot):]
         if self.opts.difference_plot:
-            output1, output2 = self.opts.difference_plot[0]
-            label = legends[0] if legends else ''
-            output1.plot_hist(diff=output2, label=label, **plot_kwargs)
+            for ((output1, output2), label) in zip(self.opts.difference_plot, legends):
+                output1.plot_hist(diff=output2, label=label, **plot_kwargs)
 
         if self.opts.ratio:
             for pair in self.opts.ratio:
