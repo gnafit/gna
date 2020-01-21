@@ -6,6 +6,14 @@
 
 using namespace Eigen;
 
+Poisson::Poisson(bool ln_approx) {
+  transformation_("poisson")
+    .output("poisson")
+    .types(&Poisson::checkTypes)
+    .func(ln_approx ? &Poisson::calcPoissonApprox : &Poisson::calcPoisson)
+    ;
+  m_transform = t_["poisson"];
+}
 
 void Poisson::add(SingleOutput &theory, SingleOutput &data) {
   t_["poisson"].input(theory);
@@ -33,16 +41,17 @@ void Poisson::checkTypes(TypesFunctionArgs fargs) {
 
 double addOneInLnGamma(double in)
 {
-        return TMath::LnGamma(in + 1);
+  return TMath::LnGamma(in + 1);
 }
 
 double lnFactorialApprox(double x)
 {
-        if (!(x == 0.0 || x == 1.0))
-        {
-                return x * std::log(x);
-        }
-        else            return 0;
+  if (!(x == 0.0 || x == 1.0))
+  {
+    return x * std::log(x);
+  }
+  else
+    return 0;
 }
 
 void Poisson::calcPoissonApprox(FunctionArgs fargs) {
@@ -57,9 +66,9 @@ void Poisson::calcPoissonApprox(FunctionArgs fargs) {
 
   double res(0.0);
   for (size_t i = 0; i < args.size(); i+=2) {
-    res += (args[i+0].arr.log() * args[i+1].arr
-          - args[i+0].arr
-          - args[i+1].arr.unaryExpr(&lnFactorialApprox)).sum();
+    auto& theory=args[i+0].arr;
+    auto& data=args[i+1].arr;
+    res += (data*theory.log() - theory - data.unaryExpr(&lnFactorialApprox)).sum();
   }
   fargs.rets[0].arr(0) = -2*res;
 }
@@ -76,10 +85,9 @@ void Poisson::calcPoisson(FunctionArgs fargs) {
 
   double res(0.0);
   for (size_t i = 0; i < args.size(); i+=2) {
-    res += (args[i+0].arr.log() * args[i+1].arr
-         - args[i+0].arr
-         - args[i+1].arr.unaryExpr(&addOneInLnGamma) )
-           .sum();
+    auto& theory=args[i+0].arr;
+    auto& data=args[i+1].arr;
+    res += (data*theory.log() - theory - data.unaryExpr(&addOneInLnGamma) ).sum();
   }
   fargs.rets[0].arr(0) = -2*res;
 }

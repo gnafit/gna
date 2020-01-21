@@ -50,3 +50,5 @@ tags
 *.o
 compile_commands.json
 
+# Various specific scripts
+doc/makerst

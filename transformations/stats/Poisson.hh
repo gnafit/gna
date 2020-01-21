@@ -7,14 +7,7 @@ class Poisson: public GNASingleObject,
                public TransformationBind<Poisson>,
                public Statistic  {
 public:
- Poisson(bool ln_approx = false) {
-    transformation_("poisson")
-        .output("poisson")
-        .types(&Poisson::checkTypes)
-        .func(ln_approx ? &Poisson::calcPoissonApprox : &Poisson::calcPoisson)
-      ;
-    m_transform = t_["poisson"];
-  }
+  Poisson(bool ln_approx=false);
 
   void add(SingleOutput &theory, SingleOutput &data);
 
