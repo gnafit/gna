@@ -14,11 +14,63 @@ from mpl_tools.helpers import savefig
 import numpy as np
 
 import itertools as I
+import inspect
 def bars_relative(labels, values, y=None, height=0.9, **kwargs):
     if len(labels)!=len(values):
         raise Exception('Labels and values length should have similar length')
 
     ax=plt.gca()
+
+    label_style_fcn = kwargs.pop('label_style_fcn', lambda col, i, value, shift, text: None)
+
+    facecolors = kwargs.pop('facecolors', None)
+    if isinstance(facecolors, list) and len(facecolors)>0:
+        if isinstance(facecolors[0], tuple):
+            def get_color(i):
+                try:
+                    ecolor = facecolors[i]
+                    return ecolor[0] if changes[i]<0 else ecolor[1]
+                except:
+                    return None
+        else:
+            def get_color(i):
+                try:
+                    return facecolors[i]
+                except:
+                    return None
+    elif isinstance(facecolors, tuple):
+        def get_color(i):
+            try:
+                return facecolors[0] if changes[i]<0 else facecolors[1]
+            except:
+                return None
+    elif isinstance(facecolors, str):
+        def get_color(i):
+            return facecolors
+    elif inspect.isroutine(facecolors):
+        get_color=facecolors
+    else:
+        def get_color(i):
+            return None
+
+    features = kwargs.pop('features', None)
+    if isinstance(features, dict):
+        def get_feature(i):
+            return features.get(i, {})
+    elif isinstance(features, list):
+        def get_feature(i):
+            try:
+                ret = features[i]
+                if not isinstance(ret, dict):
+                    return {}
+                return {}
+            except:
+                return {}
+    elif inspect.isroutine(features):
+        get_feature = features
+    else:
+        def get_feature(i):
+            return {}
 
     if y is None:
         y=np.arange(len(labels))
@@ -54,18 +106,18 @@ def bars_relative(labels, values, y=None, height=0.9, **kwargs):
         # ax.broken_barh([(chi2_prev, shift)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], alpha=0.7)
         # ax.vlines(chi2_prev, ytop_prev, ybottom, color='black', linewidth=1.5, linestyle='-')
 
-        # ax.broken_barh([(initial_value, value-initial_value)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], **kwargs)
-        ax.broken_barh([(prev_value, change)], (yi, h), **kwargs)
+        feature = get_feature(i)
+        ax.broken_barh([(prev_value, change)], (yi, h), facecolors=get_color(i), **kwargs)
         prev_value = value
     # else:
         # ax.vlines(self.chi2[-1], self.ytop[-1], self.ybottom[-1], color='black', linewidth=1.5, linestyle='-')
 
-    ax_right1 = ax.twinx()
-    plt.tick_params(axis='y', direction='in', pad=-7)
-    ax_right2 = ax.twinx()
-    plt.tick_params(axis='y', direction='out')
     ax_left2 = ax.twinx()
-    plt.tick_params(axis='y', direction='out', labelleft=True, labelright=False)
+    ax_left2.tick_params(axis='y', direction='out', labelleft=True, labelright=False, pad=-10)
+    ax_right1 = ax.twinx()
+    ax_right1.tick_params(axis='y', direction='in', pad=-7)
+    ax_right2 = ax.twinx()
+    ax_right2.tick_params(axis='y', direction='out')
     yax_left2 = ax_left2.yaxis
     yax_right1= ax_right1.yaxis
     yax_right2= ax_right2.yaxis
@@ -73,6 +125,7 @@ def bars_relative(labels, values, y=None, height=0.9, **kwargs):
     yax_list = [ax.yaxis, ax_left2.yaxis, ax_right1.yaxis, ax_right2.yaxis]
     fmt_list = ['{index}', u'{label}', '{change:+.2f}', '{value:.2f}']
     alignment = ['right', 'left', 'right', 'left']
+    colorizers = [None, None, get_color, None]
 
     bbox = dict(alpha=0.8, color='white', fill=True, boxstyle='round', linewidth=0.0)
     def yobserver(yax):
@@ -94,17 +147,22 @@ def bars_relative(labels, values, y=None, height=0.9, **kwargs):
 
         v1, v2 = yax.get_view_interval()
 
-        for yax, ls, align in zip(yax_list, newlabels, alignment):
+        for col, (yax, ls, align, colorizer) in enumerate(zip(yax_list, newlabels, alignment, colorizers)):
             yax.set_view_interval(v1, v2)
             yax.set_ticks(newticks, minor=False)
             ylabels = yax.set_ticklabels(ls)
 
-            for label, in zip(ylabels):
+            if ax.yaxis_inverted():
+                label_iterator = reversed(ylabels)
+            else:
+                label_iterator = ylabels
+            for i, label, in enumerate(label_iterator):
                 label.set_bbox(bbox)
                 label.set_ha(align)
-                # label.set_color(fc)
-                # if np.fabs(shift)>0.5:
-                    # label.set_fontweight('bold')
+
+                if colorizer:
+                    label.set_color(get_color(i))
+                label_style_fcn(col, i, values[i], changes[i], label)
 
     ax.yaxis.add_callback(yobserver)
     yobserver(ax.yaxis)
@@ -218,9 +276,16 @@ class NMOSensPlotter(object):
 
         ax=self.figure(r'$\Delta\chi^2$')
         ax.set_xlim(self.chi2.min()-4, self.chi2.max()+1.5)
+        plt.subplots_adjust(left=0.07, right=0.90)
+        ax.invert_yaxis()
 
-        bars_relative(self.info, self.chi2, alpha=0.7)
-        # ax.invert_yaxis()
+        def label_style_fcn(col, i, val, change, text):
+            if col!=2:
+                return
+            if np.fabs(change)>0.5:
+                text.set_fontweight('bold')
+
+        bars_relative(self.info, self.chi2, alpha=0.7, facecolors=('red', 'green'), label_style_fcn=label_style_fcn)
 
         # ax=self.figure(r'$\Delta\chi^2$')
         # ax.barh(self.info, self.shift, color=self.facecolors)
