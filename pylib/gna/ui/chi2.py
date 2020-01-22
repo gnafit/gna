@@ -15,7 +15,6 @@ class cmd(basecmd):
     def init(self):
         chi2 = ROOT.Chi2()
         for block in self.opts.analysis:
-            import IPython; IPython.embed()
             chi2.add(block.theory, block.data, block.cov)
 
         self.env.parts.statistic[self.opts.name] = chi2
