@@ -23,13 +23,13 @@ namespace GNA {
         : OscillationVariablesT(parent)
         { initFields(params); }
 
+      // Effective mass splittings
+      variable<FloatType> DeltaMSqEE;
+      variable<FloatType> DeltaMSqMM;
       // Mass splittings
       variable<FloatType> DeltaMSq12;
       variable<FloatType> DeltaMSq13;
       variable<FloatType> DeltaMSq23;
-      // Effective mass splittings
-      variable<FloatType> DeltaMSqEE;
-      variable<FloatType> DeltaMSqMM;
       // Neutrino mass ordering
       variable<FloatType> Alpha;
       // Sines (squared) of mixing agles
@@ -106,22 +106,30 @@ namespace GNA {
          * for computation}, lambda that defines computation  */
         provider
           // Mass splittings
+          // 13, 23 from (ee)
+          .add(&DeltaMSq23,
+               {&DeltaMSqEE, &Alpha, &CosSq12, &DeltaMSq12}, [&]() {
+                 return DeltaMSqEE.value() - Alpha.value()*CosSq12.value()*DeltaMSq12.value();
+               }, "|Δm²₂₃|=|Δm²(ee)|-αcos²0₁₂|Δm²₁₂|")
+          .add(&DeltaMSq13,
+               {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
+                 return DeltaMSqEE.value() + Alpha.value()*SinSq12.value()*DeltaMSq12.value();
+               }, "|Δm²₁₃|=|Δm²(ee)|+αsin²0₁₂|Δm²₁₂|")
+          // 13, 23 from 13, 23
           .add(&DeltaMSq13,
                {&DeltaMSq23, &Alpha, &DeltaMSq12}, [&]() {
                  return DeltaMSq23.value() + Alpha.value()*DeltaMSq12.value();
-               }, "|Δm²₁₃|=|Δm²₂₃| + α|Δm²₁₂|")
+               }, "|Δm²₁₃|=|Δm²₂₃|+α|Δm²₁₂|")
           .add(&DeltaMSq23,
                {&DeltaMSq13, &Alpha, &DeltaMSq12}, [&]() {
                  return DeltaMSq13.value() - Alpha.value()*DeltaMSq12.value();
-               }, "|Δm²₂₃|=|Δm²₁₃| - α|Δm²₁₂|")
-          .add(&DeltaMSq23,
-               {&DeltaMSqEE, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
-                 return DeltaMSqEE.value() + Alpha.value()*(SinSq12.value() - 1)*DeltaMSq12.value();
-               }, "|Δm²₂₃|=|Δm²(ee)| + α w₁₂ |Δm₁₂²|")
+               }, "|Δm²₂₃|=|Δm²₁₃|-α|Δm²₁₂|")
+          // ee from 23
           .add(&DeltaMSqEE,
-               {&DeltaMSq23, &Alpha, &SinSq12, &DeltaMSq12}, [&]() {
-                 return DeltaMSq23.value() - Alpha.value()*(SinSq12.value() - 1)*DeltaMSq12.value();
-               }, "|Δm²(ee)|=|Δm²₂₃| - α w₁₂ |Δm₁₂²|")
+               {&DeltaMSq23, &Alpha, &CosSq12, &DeltaMSq12}, [&]() {
+                 return DeltaMSq23.value() + Alpha.value()*CosSq12.value()*DeltaMSq12.value();
+               }, "|Δm²(ee)|=|Δm²₂₃|+αcos²θ₁₂|Δm²₁₂|")
+          // μμ from others, ee from μμ
           .add(&DeltaMSqMM, {&DeltaMSqEE, &Alpha, &Theta12, &Delta, &DeltaMSq12, &Theta23, &Theta13}, [&](){
                   return DeltaMSqEE.value() - Alpha.value()*sin(2*Theta12.value())
                          + cos(Delta.value())*sin(Theta13.value())*sin(2*Theta12.value())*tan(Theta23.value())*DeltaMSq12.value();},
