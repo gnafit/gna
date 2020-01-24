@@ -156,6 +156,14 @@ class Minuit(ROOT.TMinuitMinimizer):
         self._patchresult()
         return self.result
 
+    def pushpars(self):
+        for par in self.pars:
+            par.push()
+
+    def poppars(self):
+        for par in self.pars:
+            par.pop()
+
     def fit(self, profile_errors=[]):
         if not self.pars:
             return self.evalstatistic()
@@ -165,11 +173,15 @@ class Minuit(ROOT.TMinuitMinimizer):
         else:
             self.SetFunction(self._minimizable)
 
+        self.pushpars()
+
         wall = time.time()
         clock = time.clock()
         self.Minimize()
         clock = time.clock() - clock
         wall = time.time() - wall
+
+        self.poppars()
 
         argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
         errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())

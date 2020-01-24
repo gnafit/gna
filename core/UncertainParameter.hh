@@ -119,6 +119,11 @@ public:
   virtual void set(T value)
     { m_par = value; }
 
+  T push() {
+    m_stack.push(this->value());
+    return this->value();
+  }
+
   T push(T value) {
     m_stack.push(this->value());
     this->set(value);

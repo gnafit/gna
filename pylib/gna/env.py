@@ -420,16 +420,16 @@ class parametersview(object):
         return res
 
     @contextmanager
-    def update(self, newvalues):
-        oldvalues = OrderedDict()
+    def update(self, newvalues={}):
+        params=[]
         for p, v in newvalues.iteritems():
             if isinstance(p, str):
                 p = self[p]
-            oldvalues[p] = p.value()
-            p.set(v)
+            p.push(v)
+            params.append(p)
         yield
-        for p, v in oldvalues.iteritems():
-            p.set(v)
+        for p in params:
+            p.pop()
 
     @contextmanager
     def save(self, params):
