@@ -51,21 +51,28 @@ def reqparameters(ns, **kwargs):
         C.OscillationExpressions(ns=ns)
         C.PMNSExpressions(ns=ns)
 
-def reqparameters_reactor(ns, **kwargs):
-    """Reqctor oscillation parameters"""
+def reqparameters_reactor(ns, dm, **kwargs):
+    """Reactor oscillation parameters"""
     pdg_year = kwargs.get('pdg_year', 2016)
     curpdg = pdg[pdg_year]
-    ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
-                     sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1), label='Mass splitting |Δm²₂₃|')
+
+    if dm=='23':
+        ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
+                         sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1), label='Mass splitting |Δm²₂₃|')
+    elif dm=='ee':
+        ns.reqparameter('DeltaMSqEE', central=curpdg['dmSqEE'],
+                          sigma=curpdg['dmSqEE_e'], limits=(0, 0.1), label='Reactor average mass splitting |Δm²(ee)|')
+    else:
+        raise Exception('Invalid Δm² definition: '+str(dm))
 
     ns.reqparameter('SinSqDouble13', central=curpdg['sinSq2theta13'],
                      sigma=curpdg['sinSq2theta13_e'], limits=(0,1), label='Reactor mixing angle sin²2θ₁₃ ')
 
-    ns.reqparameter('SinSqDouble12', central=curpdg['sinSq2theta12'],
-                     sigma=curpdg['sinSq2theta12_e'], limits=(0,1), label='Solar mixing angle sin²2θ₁₂')
-
     ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
                       sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
+
+    ns.reqparameter('SinSqDouble12', central=curpdg['sinSq2theta12'],
+                     sigma=curpdg['sinSq2theta12_e'], limits=(0,1), label='Solar mixing angle sin²2θ₁₂')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
                      variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')

@@ -15,6 +15,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.statistic = statistic
 
         self.pars = []
+        self.parsdict = OrderedDict()
         self.spec = {}
         self.addpars(pars)
 
@@ -47,7 +48,9 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.SetTolerance(tolerance)
 
     def addpars(self, pars):
-        self.pars.extend(pars)
+        for par in pars:
+            self.pars.append(par)
+            self.parsdict[par.qualifiedName()] = par
         self._reset = True
 
     def setuppar(self, i, par, parspec):
@@ -98,6 +101,18 @@ class Minuit(ROOT.TMinuitMinimizer):
         spec = self.spec
         for i, par in enumerate(self.pars):
             self.setuppar(i, par, spec.get(par, {}))
+
+    def fixpar(self, name, val):
+        try:
+            par = self.parsdict[name]
+        except:
+            raise Exception('Variable {} is not known to minimizer'.format(name))
+
+        parspec=self.spec.setdefault(par, {})
+        parspec['fixed']=True
+        parspec['value']=val
+
+        self._reset = True
 
     def affects(self, par):
         if par not in self.pars:

@@ -106,6 +106,19 @@ def add_colorbar( colormapable, **kwargs ):
     P.sca( ax )
     return cbar
 
+def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
+    cbaropt.setdefault('aspect', 4)
+    cbaropt.setdefault('shrink', 0.5)
+
+    if mappable is None:
+        cbar = P.colorbar(res, **cbaropt)
+    else:
+        colourMap = P.cm.ScalarMappable()
+        colourMap.set_array(mappable)
+        cbar = P.colorbar(colourMap, **cbaropt)
+
+    return res, cbar
+
 def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
     if not name: return

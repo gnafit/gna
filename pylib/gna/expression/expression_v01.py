@@ -79,7 +79,7 @@ class Expression_v01(object):
         if isinstance(ilib, str):
             import yaml
             try:
-                ilib = yaml.load(ilib, yaml.FullLoader)
+                ilib = yaml.load(ilib, yaml.Loader)
             except:
                 raise Exception('Unable to parse name library (yaml)')
 

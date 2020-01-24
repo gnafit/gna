@@ -1,4 +1,5 @@
 """Analysis module combines multiple datasets for the analysis (fit)"""
+from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -43,6 +44,8 @@ class cmd(basecmd):
         else:
             observables = None
 
+        if self.opts.cov_parameters:
+            print('Compute covariance matrix for {} parameters:'.format(len(cov_parameters)), *self.opts.cov_parameters)
         blocks = dataset.makeblocks(observables, cov_parameters)
 
         if self.opts.toymc:
