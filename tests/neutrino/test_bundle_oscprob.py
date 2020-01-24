@@ -18,6 +18,8 @@ from gna.bindings import common
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
+parser.add_argument('-o', '--output')
+parser.add_argument('--rho', type=float)
 args = parser.parse_args()
 args.make_idx=True
 
@@ -32,8 +34,8 @@ reactors = {
 }
 # components
 
-indices = [('r', 'reactor', list(reactors.keys()) ),
-           ('d', 'detector', list(detectors.keys()) ),
+indices = [('r', 'reactor', list(sorted(reactors.keys())) ),
+           ('d', 'detector', list(sorted(detectors.keys())) ),
            ('c', 'component', ['comp0', 'comp12', 'comp13', 'comp23'])
            ]
 
@@ -72,13 +74,15 @@ cfg_idx = NestedDict(
             ),
         oscprob = NestedDict(
             bundle = dict(name='oscprob', version='v04', major='rdc'),
-            pdgyear = 2016
+            pdgyear = 2018,
+            dm = 'ee'
             ),
         oscprob_matter = NestedDict(
             bundle = dict(name='oscprob_matter', version='v01', major='rd',
                           names=dict(pmns='pmns_matter', oscprob='oscprob_matter')),
             density = 2.6, # g/cm3
-            pdgyear = 2016
+            pdgyear = 2018,
+            dm = 'ee'
             ),
         enu = NestedDict(
             bundle = NestedDict(name='predefined', version='v01', major=''),
@@ -102,8 +106,8 @@ def plot(vacuum, matter, title):
     ax.minorticks_on()
     ax.grid()
 
-    vacuum.plot_vs(       enu_o, linestyle='dashed', alpha=0.6, label='Vacuum')
-    matter.plot_vs(enu_o, linestyle='dotted', alpha=0.6, label='Matter')
+    vacuum.plot_vs(enu_o, linestyle='solid', linewidth=2, alpha=0.7, label='Vacuum')
+    matter.plot_vs(enu_o, linestyle='solid', label='Matter')
     ax.legend()
 
     ax2 = plt.subplot(grid[2], xlabel='Enu', ylabel='reldiff', sharex=ax)
@@ -112,11 +116,24 @@ def plot(vacuum, matter, title):
 
     data_vac = vacuum.data()
     data_mat = matter.data()
-    reldif = data_vac/data_mat - 1.0
-    ax2.plot(enu_o.data(), reldif)
+    reldif = 1.0 - data_vac/data_mat
 
+    p = int(np.floor(np.log10(np.fabs(reldif).max())))
+    ax2.set_ylabel(r'(matter-vac/matter), $\times10^{{{}}}$'.format(str(p)))
+    ax2.plot(enu_o.data(), reldif/10**p)
+
+rho = env.globalns('pmns_matter')['rho']
+for (vacuum, matter, L) in zip(context.outputs.oscprob_full.Core0.values(), context.outputs.oscprob_matter.Core0.values(), (L1, L2)):
+    lkm = L/km
+    plot(vacuum, matter, title='Oscillation probability, L={} km, $\\rho$={:g}'.format(lkm, rho.value()))
+    savefig(args.output, suffix=('', '{:.0f}'.format(lkm), 'rho1'))
+
+if args.rho:
+    rho.set(args.rho)
 
 for (vacuum, matter, L) in zip(context.outputs.oscprob_full.Core0.values(), context.outputs.oscprob_matter.Core0.values(), (L1, L2)):
-    plot(vacuum, matter, title='Oscillation probability comparison, L={} km'.format(L/km))
+    lkm = L/km
+    plot(vacuum, matter, title='Oscillation probability, L={} km, $\\rho$={:g}'.format(lkm, rho.value()))
+    savefig(args.output, suffix=('', '{:.0f}'.format(lkm), 'rho0'))
 
 plt.show()
