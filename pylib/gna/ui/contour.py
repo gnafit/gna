@@ -223,7 +223,7 @@ class cmd(basecmd):
         parser.add_argument('--ylim', type=float, nargs=2)
         parser.add_argument('--xlim', type=float, nargs=2)
         parser.add_argument('--labels', nargs='+')
-        parser.add_argument('--legend', nargs=2)
+        parser.add_argument('--legend', nargs='+', help='legend position')
         parser.add_argument('--title', default='', required=False,
                             help='Set a title to the plot')
         parser.add_argument('--no-bestfit', action='store_false',
@@ -232,6 +232,7 @@ class cmd(basecmd):
         parser.add_argument('--minimizer-chi2', action=set_typed(env.parts.minimizer))
         parser.add_argument('--xlabel', default='', required=False)
         parser.add_argument('--ylabel', default='', required=False)
+        parser.add_argument('--figure', action='store_true', help='Create new figure')
 
     def statistic(self, name):
         if self.opts.no_shift:
@@ -250,7 +251,7 @@ class cmd(basecmd):
         minimizer.PrintResults()
         assert res.success
         self.statistics[name] = res.fun
-        print minimizer.pars, res.x
+        # print minimizer.pars, res.x
         self.statpoints[name] = dict(zip(minimizer.pars, res.x))
         return res.fun
 
@@ -331,7 +332,11 @@ class cmd(basecmd):
 
         minorLocatorx = AutoMinorLocator()
         minorLocatory = AutoMinorLocator()
-        ax = plt.gca()
+        if self.opts.figure:
+            plt.figure()
+            ax = plt.subplot( 111 )
+        else:
+            ax = plt.gca()
 
         levels = set()
         colors = iter('bgrcmyk')
@@ -365,9 +370,9 @@ class cmd(basecmd):
                     pointsfile.touch(path)
             self.plotpoints(ax, points[0])
         if self.ndim == 1:
-            plt.yticks(list(plt.yticks()[0]) + list(levels))
-            labels = ['%g' % loc for loc in plt.yticks()[0]]
-            ticks, labels = plt.yticks(plt.yticks()[0], labels)
+            # plt.yticks(list(plt.yticks()[0]) + list(levels))
+            # labels = ['%g' % loc for loc in plt.yticks()[0]]
+            # ticks, labels = plt.yticks(plt.yticks()[0], labels)
             #plt.yticks(np.arange(self.opts.ylim[0], self.opts.ylim[1], (self.opts.ylim[1]-self.opts.ylim[0])/10.0))
             for level in levels:
                 plt.axhline(level, linestyle='-.')

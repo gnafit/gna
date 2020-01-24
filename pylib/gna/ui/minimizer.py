@@ -26,7 +26,7 @@ class cmd(basecmd):
         loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False, drop_constrained=self.opts.drop_constrained)
         statistic_parameters = []
         for par in loaded_parameters:
-            if par.influences(self.opts.statistic):
+            if par.influences(self.opts.statistic.transformations.back()):
                 statistic_parameters.append(par)
             elif cfg.debug_par_fetching:
                 warnings.warn("parameter {} doesn't influence the statistic and is being dropped".format(par.name()))

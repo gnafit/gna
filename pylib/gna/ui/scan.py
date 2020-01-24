@@ -33,7 +33,7 @@ class cmd(basecmd):
                             action=append_typed(env.parts.minimizer))
         parser.add_argument('--toymc', action=set_typed(env.parts.toymc))
         parser.add_argument('--toymc-type', choices=['static', 'grid'])
-        parser.add_argument('--verbose', action='store_true')
+        parser.add_argument('-v', '--verbose', action='count')
 
     def makerandomizer(self, randdesc):
         assert len(randdesc) >= 1
@@ -159,7 +159,8 @@ class cmd(basecmd):
             res = minimizer.fit()
             props = self.minprops[fitid]
 
-            # minimizer.PrintResults()
+            if self.opts.verbose>1:
+                minimizer.PrintResults()
             if res is None:
                 failed = True
                 break
