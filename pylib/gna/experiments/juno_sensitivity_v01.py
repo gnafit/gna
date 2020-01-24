@@ -19,7 +19,7 @@ Derived [2019.12] from:
 
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
-    - TODO: add matter oscillations
+    - WIP: add matter oscillations
 
 Implements:
     - Reactor antineutrino flux: Huber+Mueller
@@ -29,9 +29,13 @@ Implements:
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
     - [optional] Multi-detector energy resolution (Yaping)
+        * subdetectors summed togather
+        * subdetectors concatenated
 
 Misc changes:
     - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
+    - Switch to double angle parameters for theta12 and theta13
+    - Added concatenated subdetectors
 
     """
 
@@ -43,19 +47,34 @@ Misc changes:
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
         parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
-        parser.add_argument('-e', '--embed', action='store_true', help='embed')
-        parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+
+        # Energy model
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
+        parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
+        parser.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
+
+        eres = parser.add_mutually_exclusive_group()
+        eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
+        eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
+
+        # binning
+        parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
+
+        # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc'], default='default', help='set of parameters to load')
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
-        parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
+        parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
+        parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
-        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
+
+        # Configuration
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
@@ -73,8 +92,10 @@ Misc changes:
             self.print_stats()
 
     def init_nidx(self):
-        self.subdetectors_number = 200
-        self.subdetectors_names = ['subdet%03i'%i for i in range(self.subdetectors_number)]
+        if self.opts.subdetectors_number:
+            self.subdetectors_names = ['subdet%03i'%i for i in range(self.opts.subdetectors_number)]
+        else:
+            self.subdetectors_names = ()
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
         if 'pessimistic' in self.opts.reactors:
             self.reactors.remove('TS3')
@@ -82,6 +103,11 @@ Misc changes:
         if 'far-off' in self.opts.reactors:
             self.reactors.remove('DYB')
             self.reactors.remove('HZ')
+        if 'nohz' in self.opts.reactors:
+            self.reactors.remove('HZ')
+        if 'dayabay' in self.opts.reactors:
+            self.reactors=['DYB']
+
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     self.reactors],
@@ -89,10 +115,6 @@ Misc changes:
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names)
         ]
-        if self.opts.composition=='minimal':
-            self.nidx[1][2] = self.nidx[1][2][:1]
-            self.nidx[2][2] = self.nidx[2][2][:1]
-
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
@@ -107,6 +129,7 @@ Misc changes:
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
+        concat_subdetectors=False
         if 'lsnl' in energy_model:
             energy_model_formula = 'lsnl| '
             self.formula.append('evis_edges_hist| evis_hist')
@@ -114,10 +137,18 @@ Misc changes:
             energy_model_formula = 'eres| '+energy_model_formula
             self.formula.append('eres_matrix| evis_hist')
         elif 'multieres' in energy_model:
-            energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-            self.formula.append('eres_matrix[s]| evis_hist')
+            if self.opts.multieres=='sum':
+                energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
+                self.formula.append('eres_matrix[s]| evis_hist')
+            elif self.opts.multieres=='concat':
+                energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
+                self.formula.append('eres_matrix[s]| evis_hist')
+                concat_subdetectors = True
 
-        formula_back = self.formula_back
+        if concat_subdetectors:
+            formula_back = 'observation=norm * ibd'
+        else:
+            formula_back = 'observation=norm * rebin(ibd)'
 
         if self.opts.spectrum_unc=='initial':
             ibd = ibd+'*shape_norm()'
@@ -129,26 +160,58 @@ Misc changes:
 
     def parameters(self):
         ns = self.namespace
+        dmxx = 'pmns.DeltaMSq'+str(self.opts.dm).upper()
         if self.opts.free=='minimal':
             fixed_pars = ['pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-            free_pars  = ['pmns.DeltaMSq23']
+            free_pars  = [dmxx]
         elif self.opts.free=='osc':
             fixed_pars = []
-            free_pars  = ['pmns.DeltaMSq23', 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
+            free_pars  = [dmxx, 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
         else:
             raise Exception('Unsupported option')
+
         for par in fixed_pars:
             ns[par].setFixed()
         for par in free_pars:
             ns[par].setFree()
 
+        def single2double(v):
+            return 4.0*v*(1.0-v)
         if self.opts.parameters=='yb':
-            assert False
-            ns['pmns.SinSqDouble12'].set(0.307)
-            ns['pmns.SinSqDouble13'].set(0.024)
-            ns['pmns.DeltaMSq12'].set(7.54e-5)
+            ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
+            ns['pmns.SinSqDouble13'].setCentral(0.094)
+            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
+            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
+            ns['pmns.SinSqDouble12'].reset()
+            ns['pmns.SinSqDouble13'].reset()
+            ns['pmns.DeltaMSq12'].reset()
+            ns['pmns.DeltaMSqEE'].reset()
+        elif self.opts.parameters=='yb_t12':
+            ns['pmns.SinSqDouble13'].setCentral(0.094)
+            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
+            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
+            ns['pmns.SinSqDouble13'].reset()
+            ns['pmns.DeltaMSq12'].reset()
+            ns['pmns.DeltaMSqEE'].reset()
+        elif self.opts.parameters=='yb_t12_t13':
+            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
+            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
+            ns['pmns.DeltaMSq12'].reset()
+            ns['pmns.DeltaMSqEE'].reset()
+        elif self.opts.parameters=='yb_t12_t13_dm12':
+            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
+            ns['pmns.DeltaMSqEE'].reset()
+        elif self.opts.parameters=='global':
+            ns['pmns.DeltaMSq12'].setCentral(7.39e-5)
+            ns['pmns.DeltaMSq12'].reset()
 
     def init_configuration(self):
+        if self.opts.eres_npe:
+            self.opts.eres_sigma = self.opts.eres_npe**-0.5
+        else:
+            self.opts.eres_npe = self.opts.eres_sigma**-2
+        print('Energy resolution at 1 MeV: {}% ({} pe)'.format(self.opts.eres_sigma*100, self.opts.eres_npe))
+
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
                     bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -161,7 +224,13 @@ Misc changes:
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v03', major=''),
                         rounding = 3,
-                        edges = np.concatenate(( [0.7], np.arange(1, 8.001, 0.02), [9.0, 12.0] )),
+                        edges = np.concatenate( (
+                                    [0.7],
+                                    np.arange(1, 6.0, self.opts.estep),
+                                    np.arange(6, 7.0, 0.1),
+                                    [7.0, 7.5, 12.0]
+                                )
+                            ),
                         name = 'rebin',
                         label = 'Final histogram {detector}'
                         ),
@@ -171,13 +240,15 @@ Misc changes:
                     ),
                 oscprob = NestedDict(
                     bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
-                    pdgyear = self.opts.pdgyear
+                    pdgyear = self.opts.pdgyear,
+                    dm      = self.opts.dm
                     ),
                 oscprob_matter = NestedDict(
                     bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
-                        names=dict(oscprob='oscprob_matter')),
+                                  names=dict(oscprob='oscprob_matter')),
                     density = 2.6, # g/cm3
-                    pdgyear = self.opts.pdgyear
+                    pdgyear = self.opts.pdgyear,
+                    dm      = self.opts.dm
                     ),
                 anuspec = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v03'),
@@ -343,38 +414,68 @@ Misc changes:
                             normalizationEnergy = 'Conservative normalization point at 12 MeV'
                             ),
                         ),
-                eres = NestedDict(
-                        bundle = dict(name='detector_eres_normal', version='v01', major='', inactive='multieres' in self.opts.energy_model),
-                        # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
-                        parameter = 'eres',
-                        pars = uncertaindict([
-                            ('a', (0.000, 'fixed')) ,
-                            ('b', (0.03, 'fixed')) ,
-                            ('c', (0.000, 'fixed'))
-                            ]),
-                        expose_matrix = False
-                        ),
-                subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v02"),
-                        parameter = "subdetector_fraction",
-                        label = 'Subdetector fraction weight for {subdetector}',
-                        pars = uncertaindict(
-                            [(subdet_name, (1.0/self.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            ),
-                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
-                        ),
-                multieres = NestedDict(
-                        bundle = dict(name='detector_multieres_stats', version='v01', major='s', inactive='multieres' not in self.opts.energy_model),
-                        # pars: sigma_e/e = sqrt(b^2/E),
-                        parameter = 'eres',
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
-                        expose_matrix = False
-                        ),
                 shape_uncertainty = NestedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
                         )
                 )
+
+        if 'eres' in self.opts.energy_model:
+            bconf = self.opts.eres_b_relsigma and (self.opts.eres_b_relsigma, 'relative') or ('fixed',)
+            self.cfg.eres = NestedDict(
+                    bundle = dict(name='detector_eres_normal', version='v01', major=''),
+                    # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
+                    parameter = 'eres',
+                    pars = uncertaindict([
+                        ('a', (0.000, 'fixed')) ,
+                        ('b', (self.opts.eres_sigma,)+bconf) ,
+                        ('c', (0.000, 'fixed'))
+                        ]),
+                    expose_matrix = False
+                    )
+        elif 'multieres' in self.opts.energy_model:
+            if self.opts.subdetectors_number==200:
+                self.cfg.subdetector_fraction = NestedDict(
+                        bundle = dict(name="parameters", version = "v02"),
+                        parameter = "subdetector_fraction",
+                        label = 'Subdetector fraction weight for {subdetector}',
+                        pars = uncertaindict(
+                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
+                            ),
+                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
+                        )
+                self.cfg.multieres = NestedDict(
+                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
+                        # pars: sigma_e/e = sqrt(b^2/E),
+                        parameter = 'eres',
+                        relsigma = self.opts.eres_b_relsigma,
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
+                        rescale_nph = self.opts.eres_npe,
+                        expose_matrix = False
+                        )
+            elif self.opts.subdetectors_number==5:
+                self.cfg.subdetector_fraction = NestedDict(
+                        bundle = dict(name="parameters", version = "v03"),
+                        parameter = "subdetector_fraction",
+                        label = 'Subdetector fraction weight for {subdetector}',
+                        pars = uncertaindict(
+                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
+                            ),
+                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt'
+                        )
+                self.cfg.multieres = NestedDict(
+                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
+                        # pars: sigma_e/e = sqrt(b^2/E),
+                        parameter = 'eres',
+                        relsigma = self.opts.eres_b_relsigma,
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
+                        rescale_nph = self.opts.eres_npe,
+                        expose_matrix = False
+                        )
+            else:
+                assert False
+        else:
+            assert False
 
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
@@ -382,9 +483,8 @@ Misc changes:
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
 
-        if self.opts.parameters in ['yb', 'yb-noosc']:
-            self.cfg.eff.pars = uncertain(0.73, 'fixed')
-            self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
+        self.cfg.eff.pars = uncertain(0.73, 'fixed')
+        self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
         if self.opts.spectrum_unc in ['final', 'initial']:
@@ -490,6 +590,10 @@ Misc changes:
             fine = outputs.eres.AD1
 
         if 'multieres' in self.opts.energy_model:
+            if self.opts.multieres=='concat' and self.opts.subdetectors_number<10:
+                sns = ns('{}_sub'.format(self.detectorname))
+                for i, out in enumerate(outputs.rebin.AD1.values()):
+                    sns.addobservable("sub{:02d}".format(i), out)
             ns.addobservable("{0}_eres".format(self.detectorname),     outputs.ibd.AD1)
             fine = outputs.ibd.AD1
 
@@ -506,7 +610,6 @@ Misc changes:
         print('Parameter statistics', self.stats)
 
     formula_enu = ['evis_hist=evis_hist()', 'enu| ee(evis()), ctheta()']
-    formula_enu_yb = ['enu_in()', 'evis_hist = enuToEvis0(enu_in_hist())']
 
     formula_base = [
             'baseline[d,r]',
@@ -531,9 +634,6 @@ Misc changes:
 
     formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
     formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
-
-    formula_back = 'observation=norm * rebin(ibd)'
-
 
     lib = """
         cspec_diff:
