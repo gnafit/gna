@@ -56,7 +56,7 @@ class oscprob_matter_v01(TransformationBundle):
                         self.set_output('oscprob', it, trans.oscprob)
 
     def define_variables(self):
-        from gna.parameters.oscillation import reqparameters
+        from gna.parameters.oscillation import reqparameters_reactor as reqparameters
         pmnspars_kwargs=dict()
         pdgyear = self.cfg.get('pdg_year', None)
         if pdgyear:
@@ -64,7 +64,7 @@ class oscprob_matter_v01(TransformationBundle):
 
         pmns_name = self.get_globalname('pmns')
         ns_pmns=self.namespace(pmns_name)
-        reqparameters(ns_pmns, **pmnspars_kwargs)
+        reqparameters(ns_pmns, self.cfg.dm, **pmnspars_kwargs)
 
         names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
         with ns_pmns:
