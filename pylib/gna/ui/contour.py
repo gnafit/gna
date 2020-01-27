@@ -4,6 +4,7 @@ from gna.ui import basecmd, set_typed
 
 import argparse
 from matplotlib import pyplot as plt
+from mpl_tools.helpers import savefig
 
 from matplotlib.ticker import AutoMinorLocator
 
@@ -218,7 +219,7 @@ class cmd(basecmd):
         parser.add_argument('--savepoints', dest='savepoints',
                             required=False)
         parser.add_argument('--xlog', action='store_true', help='Use log scale over x-axis')
-        parser.add_argument('--drawgrid', action='store_true')
+        parser.add_argument('--drawgrid', '--grid', action='store_true')
         parser.add_argument('--dm32', action='store_true')
         parser.add_argument('--ylim', type=float, nargs=2)
         parser.add_argument('--xlim', type=float, nargs=2)
@@ -419,7 +420,7 @@ class cmd(basecmd):
         if self.opts.show:
             plt.show()
         if self.opts.output:
-            plt.savefig(self.opts.output)
+            savefig(self.opts.output)
         return True
 
     def fixaxes(self, axes):

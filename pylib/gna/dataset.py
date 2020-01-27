@@ -118,6 +118,8 @@ class Dataset(object):
             else:
                 obs1, obs2 = list(covkey)
             for cov in covs:
+                # Make sure the inputs (that may be Snapshots) are evaluated
+                cov.single().touch(); obs1.single().touch(); obs2.single().touch()
                 prediction.covariate(cov, obs1, 1, obs2, 1)
         if any(par.influences(prediction.prediction) for par in covparameters):
             jac = ROOT.Jacobian()

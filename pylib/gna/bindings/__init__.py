@@ -16,7 +16,7 @@ def patchGNAclass(cls):
         self.__original_init__(*args)
         if not self:
             return
-        labels = kwargs.pop('labels', [])
+        labels = kwargs.pop('labels', None) or []
         bind = kwargs.pop('bind', True)
         freevars = kwargs.pop('freevars', ())
         bindings = kwargs.pop('bindings', {})

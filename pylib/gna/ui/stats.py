@@ -15,12 +15,15 @@ class cmd(basecmd):
         parser.add_argument('-p', '--lnpoisson',  default=[], action='append', type=env.parts.analysis, help=u'lnPoisson contribution')
         parser.add_argument('--lnpoisson-legacy', default=[], action='append', type=env.parts.analysis, help=u'lnPoisson contribution (legacy)')
         parser.add_argument('--poisson-approx', action='store_true', help='Use approximate lnPoisson formula (Stirling)')
+        parser.add_argument('--labels', nargs='+', default=[], help='Node labels')
 
     def init(self):
         self.components = []
+        labels = list(reversed(self.opts.labels))
 
         if self.opts.chi2:
-            self.chi2 = ROOT.Chi2()
+            clabel = labels and labels.pop() or ''
+            self.chi2 = ROOT.Chi2(labels=clabel)
             for analysis in self.opts.chi2:
                 for block in analysis:
                     self.chi2.add(block.theory, block.data, block.cov)
@@ -28,7 +31,8 @@ class cmd(basecmd):
             self.components.append(self.chi2)
 
         if self.opts.lnpoisson_legacy:
-            self.lnpoisson_legacy = ROOT.Poisson(self.opts.poisson_approx)
+            clabel = labels and labels.pop() or ''
+            self.lnpoisson_legacy = ROOT.Poisson(self.opts.poisson_approx, labels='')
             for analysis in self.opts.lnpoisson_legacy:
                 for block in analysis:
                     self.lnpoisson_legacy.add(block.theory, block.data)
@@ -36,7 +40,8 @@ class cmd(basecmd):
             self.components.append(self.lnpoisson_legacy)
 
         if self.opts.lnpoisson:
-            self.lnpoisson = ROOT.LnPoissonSplit(self.opts.poisson_approx)
+            clabel = labels and labels.pop() or ''
+            self.lnpoisson = ROOT.LnPoissonSplit(self.opts.poisson_approx, labels=(clabel+' (const)', clabel))
             for analysis in self.opts.lnpoisson:
                 for block in analysis:
                     self.lnpoisson.add(block.theory, block.data)
@@ -46,6 +51,7 @@ class cmd(basecmd):
         if len(self.components)==1:
             self.statistic = self.components[0]
         else:
-            self.statistic = C.Sum([comp.single() for comp in self.components])
+            clabel = labels and labels.pop() or ''
+            self.statistic = C.Sum([comp.transformations.back() for comp in self.components], labels=clabel)
 
         self.env.parts.statistic[self.opts.name] = self.statistic

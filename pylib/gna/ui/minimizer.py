@@ -21,7 +21,8 @@ class cmd(basecmd):
         parser.add_argument('--drop-constrained', action='store_true', help='drop constrained arguments')
 
     def init(self):
-        minimizer = minimizers[self.opts.type](self.opts.statistic)
+        statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())
+        minimizer = minimizers[self.opts.type](statistic)
 
         loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False, drop_constrained=self.opts.drop_constrained)
         statistic_parameters = []
