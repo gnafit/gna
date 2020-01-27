@@ -2,6 +2,7 @@
 
 class Statistic {
 public:
-  virtual ~Statistic() = default;
-  virtual double value() = 0;
+    virtual ~Statistic() = default;
+    virtual double value() = 0;
 };
+

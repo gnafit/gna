@@ -55,6 +55,8 @@ set(CORE_SOURCES
   # Parameter representation
   core/ParametersGroup.cc
   core/UncertainParameter.cc
+  # others
+  core/StatisticOutput.cc
   PARENT_SCOPE
  )
 
@@ -126,5 +128,8 @@ set(CORE_HEADERS
   GNAObjectBind1N.hh
   GNAObjectBindkN.hh
   GNAObjectBindMN.hh
+  # others
+  Statistic.hh
+  StatisticOutput.hh
   PARENT_SCOPE
  )
