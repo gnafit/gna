@@ -131,6 +131,7 @@ public:
   using BaseClass            = TransformationTypes::OutputHandleT<SinkFloatType>;
   using GNASingleObjectType  = GNASingleObjectT<SourceFloatType,SinkFloatType>;
   using BaseClass::data;
+  using BaseClass::datatype;
 
   OutputDescriptorT(const BaseClass &other)
     : BaseClass(other)

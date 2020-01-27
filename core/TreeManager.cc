@@ -62,7 +62,7 @@ void GNA::TreeManager<FloatType>::update() {
             data.gpuArr->sync(DataLocation::Device);
         }
 #else
-        m_transformation->touch();
+        m_transformation->touch_local();
 #endif
     }
 }
