@@ -32,7 +32,7 @@ class cmd(basecmd):
         trans = self.snapshot.snapshot
         if self.opts.label:
             trans.setLabel(self.opts.label)
-        trans.touch_global()
+        trans.touch()
         self.ns.addobservable(self.opts.name_out, self.snapshot.single(), export=not self.opts.hidden)
 
         self.env.parts.snapshot[self.opts.name_out] = self.snapshot

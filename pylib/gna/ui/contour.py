@@ -417,10 +417,10 @@ class cmd(basecmd):
             plt.legend(loc=' '.join(self.opts.legend))
         if self.opts.title:
             plt.title(r'{0}'.format(self.opts.title))
-        if self.opts.show:
-            plt.show()
         if self.opts.output:
             savefig(self.opts.output)
+        if self.opts.show:
+            plt.show()
         return True
 
     def fixaxes(self, axes):
