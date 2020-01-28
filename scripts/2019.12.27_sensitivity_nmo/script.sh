@@ -13,7 +13,7 @@ force=${1:-0}
 echo Run mode: $mode
 
 # Define the output directory
-outputdir=output/2020.01.28_sensitivity_nmo
+outputdir=output/2020.01.13_sensitivity_nmo
 mkdir -p $outputdir 2>/dev/null
 echo Save output data to $outputdir
 
