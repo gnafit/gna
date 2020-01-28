@@ -59,6 +59,7 @@ class cmd(basecmd):
 
                 if not error.getTaintflag().frozen():
                     snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
+                    snapshot.single().touch()
 
                 dataset.assign(obs=theory, value=data, error=snapshot.single())
 
