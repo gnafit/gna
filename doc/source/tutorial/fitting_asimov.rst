@@ -1,3 +1,5 @@
+.. _fitting_asimov:
+
 Fitting to Asimov dataset
 """""""""""""""""""""""""
 

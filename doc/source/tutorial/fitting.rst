@@ -47,5 +47,6 @@ Minimizer
 .. toctree::
 
     fitting_asimov
+    fitting_using_snapshots
 
 
