@@ -27,9 +27,7 @@ class exp(baseexp):
         parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
         parser.add_argument('--with-dyboscar-input', action='store_true', help="Use dybOscar unoscillated prediction for P15A dataset, for checking detector effects")
 
-    def __init__(self, namespace, opts):
-        baseexp.__init__(self, namespace, opts)
-
+    def init(self):
         self.init_nidx()
         self.define_topology()
         self.define_labels()

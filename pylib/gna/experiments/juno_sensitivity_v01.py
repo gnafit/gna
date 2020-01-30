@@ -76,9 +76,7 @@ Misc changes:
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
-    def __init__(self, namespace, opts):
-        baseexp.__init__(self, namespace, opts)
-
+    def init(self):
         self.init_nidx()
         self.init_formula()
         self.init_configuration()
