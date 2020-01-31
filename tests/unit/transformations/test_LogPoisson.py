@@ -16,9 +16,9 @@ import pytest
 
 graphviz = False
 
-@pytest.mark.parametrize('cls', [R.Poisson, R.LnPoissonSplit])
+@pytest.mark.parametrize('cls', [R.Poisson, R.LogPoissonSplit])
 @pytest.mark.parametrize('approx', [True, False])
-def test_lnpoisson_v01(cls, approx, tmp_path):
+def test_logpoisson_v01(cls, approx, tmp_path):
     n = 10
     start = 10
     offset = 1.0
@@ -28,15 +28,10 @@ def test_lnpoisson_v01(cls, approx, tmp_path):
     data   = C.Points(dataa, labels='Data')
     theory = C.Points(theorya, labels='Theory')
 
-    lnpoisson = cls(approx, labels='LnPoisson')
-    lnpoisson.add(theory, data)
+    logpoisson = cls(approx, labels='LogPoisson')
+    logpoisson.add(theory, data)
 
-    if graphviz:
-        lnpoisson.print()
-        from gna.graphviz import savegraph
-        savegraph(data.single(), 'output/unit_lnpoisson_v01.dot')
-
-    res = lnpoisson.poisson.poisson.data()[0]
+    res = logpoisson.poisson.poisson.data()[0]
 
     if approx:
         res_expected = 2.0*((theorya - dataa*N.log(theorya)).sum() + (dataa*N.log(dataa)).sum())

@@ -1,4 +1,4 @@
-#include "LnPoissonSplit.hh"
+#include "LogPoissonSplit.hh"
 #include "TypeClasses.hh"
 using namespace TypeClasses;
 #include "TMath.h"
@@ -7,18 +7,18 @@ using namespace TypeClasses;
 
 using namespace Eigen;
 
-LnPoissonSplit::LnPoissonSplit(bool ln_approx) {
+LogPoissonSplit::LogPoissonSplit(bool ln_approx) {
   transformation_("poisson_const")
     .output("const")
     .types(new CheckSameTypesT<double>({0,-1}, "shape"))
-    .types(&LnPoissonSplit::checkTypesConst)
-    .func(ln_approx ? &LnPoissonSplit::calcPoissonConstApprox : &LnPoissonSplit::calcPoissonConst)
+    .types(&LogPoissonSplit::checkTypesConst)
+    .func(ln_approx ? &LogPoissonSplit::calcPoissonConstApprox : &LogPoissonSplit::calcPoissonConst)
     ;
 
   transformation_("poisson")
     .output("poisson")
-    .types(&LnPoissonSplit::checkTypes)
-    .func(&LnPoissonSplit::calcPoisson)
+    .types(&LogPoissonSplit::checkTypes)
+    .func(&LogPoissonSplit::calcPoisson)
     ;
 
   auto poisson = transformations["poisson"];
@@ -28,7 +28,7 @@ LnPoissonSplit::LnPoissonSplit(bool ln_approx) {
   m_transform = t_["poisson"];
 }
 
-void LnPoissonSplit::add(SingleOutput &theory, SingleOutput &data) {
+void LogPoissonSplit::add(SingleOutput &theory, SingleOutput &data) {
   auto poisson_const = transformations["poisson_const"];
   poisson_const.input(data);
 
@@ -37,12 +37,12 @@ void LnPoissonSplit::add(SingleOutput &theory, SingleOutput &data) {
   poisson.input(data);
 }
 
-void LnPoissonSplit::checkTypesConst(TypesFunctionArgs fargs) {
+void LogPoissonSplit::checkTypesConst(TypesFunctionArgs fargs) {
   auto& rets=fargs.rets;
   rets[0] = DataType().points().shape(1);
 }
 
-void LnPoissonSplit::checkTypes(TypesFunctionArgs fargs) {
+void LogPoissonSplit::checkTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;
   if (args.size()%2 != 1) {
@@ -74,7 +74,7 @@ double lnFactorialStirling(double x)
     return 0;
 }
 
-void LnPoissonSplit::calcPoisson(FunctionArgs fargs) {
+void LogPoissonSplit::calcPoisson(FunctionArgs fargs) {
   /***************************************************************************
    *       Formula: log of Poisson
    *        -2 * ln(Poisson) =
@@ -92,7 +92,7 @@ void LnPoissonSplit::calcPoisson(FunctionArgs fargs) {
   fargs.rets[0].arr(0) = 2*res;
 }
 
-void LnPoissonSplit::calcPoissonConstApprox(FunctionArgs fargs) {
+void LogPoissonSplit::calcPoissonConstApprox(FunctionArgs fargs) {
   /***************************************************************************
    *       Formula: log of Poisson
    *        -2 * ln(Poisson) =
@@ -110,7 +110,7 @@ void LnPoissonSplit::calcPoissonConstApprox(FunctionArgs fargs) {
   fargs.rets[0].arr(0) = res;
 }
 
-void LnPoissonSplit::calcPoissonConst(FunctionArgs fargs) {
+void LogPoissonSplit::calcPoissonConst(FunctionArgs fargs) {
   /***************************************************************************
    *       Formula: log of Poisson
    *

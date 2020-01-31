@@ -101,7 +101,7 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/NormalToyMC.cc
   transformations/stats/NormalStatsToyMC.cc
   transformations/stats/Poisson.cc
-  transformations/stats/LnPoissonSplit.cc
+  transformations/stats/LogPoissonSplit.cc
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
   # Variables manipulation
@@ -174,7 +174,7 @@ set(TRANSFORMATION_HEADERS
   Cholesky.hh
   Chi2.hh
   Poisson.hh
-  LnPoissonSplit.hh
+  LogPoissonSplit.hh
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
