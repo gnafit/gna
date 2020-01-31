@@ -1,38 +1,32 @@
 #!/bin/bash
 
-OUTPUT=output/tutorial
+OUTPUT=output/tutorial_img/fit
 mkdir -p $OUTPUT ^/dev/null
-FIG1=$OUTPUT/01_fit_models_initial.png
-FIG2=$OUTPUT/01_fit_models_fit.png
-YAML=$OUTPUT/01_fit_models.yaml
+FIG1=$OUTPUT/02_fit_models_snapshot.png
+YAML=$OUTPUT/02_fit_models_snapshot.yaml
+GRAPH=$OUTPUT/02_fit_models_snapshot_graph.png
 
 ./gna \
-      -- gaussianpeak --name peak_MC --nbins 50 \
-      -- gaussianpeak --name peak_f  --nbins 50 \
-      -- ns --name peak_MC --print \
-            --set E0             values=2    fixed \
-            --set Width          values=0.5  fixed \
-            --set Mu             values=2000 fixed \
-            --set BackgroundRate values=1000 fixed \
-      -- ns --name peak_f --print \
-            --set E0             values=4    relsigma=0.2 \
-            --set Width          values=0.2  relsigma=0.2 \
-            --set Mu             values=100  relsigma=0.25 \
-            --set BackgroundRate values=2000 relsigma=0.25 \
-      -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' -o $FIG1 \
-      -- dataset  --name peak --asimov-data peak_f/spectrum peak_MC/spectrum \
+      -- gaussianpeak --name peak  --nbins 50 \
+      -- ns --name peak --print \
+            --set E0             values=2    free \
+            --set Width          values=0.5  free \
+            --set Mu             values=2000 free \
+            --set BackgroundRate values=1000 free \
+      -- snapshot peak/spectrum peak/spectrum_MC --label 'Asimov MC' \
+      -- dataset  --name peak --asimov-data peak/spectrum peak/spectrum_MC \
       -- analysis --name analysis --datasets peak \
-      -- chi2 stats analysis \
-      -- minimizer min minuit stats peak_f \
+      -- chi2 stats_chi2 analysis \
+      -- minimizer min minuit stats_chi2 peak \
+      -- ns --name peak --print \
+            --set E0             value=3   \
+            --set Width          value=0.2 \
+            --set Mu             value=100  \
+            --set BackgroundRate value=2000 \
+      -- plot-spectrum -p peak/spectrum_MC -l 'Asimov MC' --plot-type errorbar \
+                       --xlabel 'Energy, MeV' large --ylabel entries large --grid \
+      -- graphviz peak/spectrum -o $GRAPH \
+      -- plot-spectrum -p peak/spectrum -l 'Model (initial)' \
       -- fit min -s -p -o $YAML \
-      -- ns --print peak_f \
-      -- spectrum --new-figure -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Best fit model' -o $FIG2
-
-if test "$1" = "save"
-then
-    mkdir -p doc/img/tutorial/fit ^/dev/null && cp -v $FIG1 $FIG2 $YAML doc/img/tutorial/fit/
-fi
+      -- ns --print peak \
+      -- plot-spectrum  -p peak/spectrum -l 'Best fit' -o $FIG1
