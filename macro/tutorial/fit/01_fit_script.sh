@@ -13,9 +13,6 @@
             --set Width          values=0.5  free \
             --set Mu             values=2000 free \
             --set BackgroundRate values=1000 free \
-      -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' -s \
       -- dataset  --name peak --asimov-data peak_f/spectrum peak_MC/spectrum \
       -- analysis --name analysis --datasets peak \
       -- graphviz peak_f/spectrum -o output/fit_01_graph.pdf \
@@ -26,6 +23,9 @@
             --set Mu             value=100  \
             --set BackgroundRate value=2000 \
       -- minimizer min minuit stats_chi2 peak_f \
+      -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
+                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
+      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' -s \
       -- fit min -s -p -o output/fit_01.yaml \
       -- ns --print peak_f \
       -- spectrum --new-figure -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \

@@ -5,6 +5,7 @@ mkdir -p $OUTPUT ^/dev/null
 FIG1=$OUTPUT/02_fit_models_snapshot.png
 YAML=$OUTPUT/02_fit_models_snapshot.yaml
 GRAPH=$OUTPUT/02_fit_models_snapshot_graph.png
+OUT=$OUTPUT/02_fit_models_snapshot.out
 
 ./gna \
       -- gaussianpeak --name peak  --nbins 50 \
@@ -25,8 +26,9 @@ GRAPH=$OUTPUT/02_fit_models_snapshot_graph.png
             --set BackgroundRate value=2000 \
       -- plot-spectrum -p peak/spectrum_MC -l 'Asimov MC' --plot-type errorbar \
                        --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- graphviz peak/spectrum -o $GRAPH \
+      -- graphviz peak/spectrum -o $GRAPH --option rankdir TB \
       -- plot-spectrum -p peak/spectrum -l 'Model (initial)' \
       -- fit min -s -p -o $YAML \
       -- ns --print peak \
-      -- plot-spectrum  -p peak/spectrum -l 'Best fit' -o $FIG1
+      -- plot-spectrum  -p peak/spectrum -l 'Best fit' -o $FIG1 \
+      > $OUT
