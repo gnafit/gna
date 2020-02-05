@@ -60,8 +60,9 @@ class cmd(basecmd):
                 if not error.getTaintflag().frozen():
                     snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
                     snapshot.single().touch()
+                    error = snapshot
 
-                dataset.assign(obs=theory, value=data, error=snapshot.single())
+                dataset.assign(obs=theory, value=data, error=error.single())
 
         # if self.opts.asimov_poisson:
             # for theory_path, data_path in self.opts.asimov_poisson:
