@@ -22,7 +22,7 @@ testing:
     - ssh-add <(echo "$ALLURE_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - scp -r test_results/* $ALLURE_USER@$ALLURE_SERVER:$ALLURE_LOGS
+    - sftp -b $BATCH_TRANSFER $ALLURE_USER@$ALLURE_SERVER
 
     only:
     - master
