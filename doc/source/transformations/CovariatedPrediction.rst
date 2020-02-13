@@ -34,7 +34,7 @@ Vectors :math:`m_i` are added via ``append(obs)`` method.
 Outputs
 """""""
 
-1) ``'prediction'`` — Prediction vector :math:`\mu`.
+1) ``'prediction.prediction'`` — Prediction vector :math:`\mu`.
 
 Implementation
 """"""""""""""
@@ -72,7 +72,7 @@ Inputs are assigned via ``covariate(cov, obs1, n1, obs2, n2)`` method.
 Outputs
 """""""
 
-1) ``'V'`` — basic covariance matrix with optional pull-terms.
+1) ``'covbase.covbase'`` — basic covariance matrix with optional pull-terms.
 
 Implementation
 """"""""""""""
@@ -105,7 +105,7 @@ Calculate the final covariance matrix based on:
 Inputs
 """"""
 
-1) Base covariance matrix :math:`V_\text{base}`.
+1) ``'cov.covbase'`` — Base covariance matrix :math:`V_\text{base}`.
 2) Optional systematical covariance matrix due to propagation of uncertain parameters.
 
 See ``Jacobian``, ``ParMatrix`` and ``MatrixProduct`` transformations. Parameters :math:`\eta_i` are meant to be uncorrelated.
@@ -114,7 +114,7 @@ See ``Jacobian``, ``ParMatrix`` and ``MatrixProduct`` transformations. Parameter
 Outputs
 """""""
 
-1) ``'L'`` — full covariance matrix Cholesky decomposition :math:`L`: :math:`V=LL^T`.
+1) ``'cov.L'`` — full covariance matrix Cholesky decomposition :math:`L`: :math:`V=LL^T`.
 
 **IMPORTANT**: Be sure to use :math:`L` as lower triangular matrix
 (use `numpy.tril` or `triangularView<Eigen::Lower>`). Upper triangular part

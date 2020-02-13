@@ -14,6 +14,10 @@ public:
    */
   struct Segment {
     size_t i, n;
+
+    void dump() const {
+      printf("i=%zu, n=%zu, i+n=%zu", i, n, i+n);
+    }
   };
 
   CovariatedPrediction();
@@ -64,6 +68,15 @@ protected:
 
     bool resolved = false;
     boost::optional<Segment> x, y;
+
+    void dump() const {
+      printf("Covariance action on %s:", action==Diagonal ? "diag" : "block");
+      if(a) { printf("a "); a->dump(); }
+      if(x) { printf(", x "); x->dump(); }
+      if(b) { printf(", b "); b->dump(); }
+      if(y) { printf(", y "); y->dump(); }
+      printf("\n");
+    }
   };
 
 /**

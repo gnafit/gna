@@ -14,12 +14,12 @@ CovariatedPrediction::CovariatedPrediction()
     .func(&CovariatedPrediction::calculatePrediction)
     ;
   transformation_("covbase")
-    .output("L")
+    .output("covbase")
     .types(&CovariatedPrediction::calculateCovbaseTypes)
     .func(&CovariatedPrediction::calculateCovbase)
     ;
   transformation_("cov")
-    .input("Lbase")
+    .input("covbase")
     .output("L")
     .types(&CovariatedPrediction::calculateCovTypes)
     .func(&CovariatedPrediction::calculateCov)
@@ -212,6 +212,14 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
     while (argshape.size() > 1 && argshape.back() == 1) {
       argshape.pop_back();
     }
+
+    if(act.action==CovarianceAction::Diagonal && argshape.size()>1 && expected.size()==1){
+      // In case action is diagonal, accept both:
+      //   1d - fill diagonal
+      //   2d - fill block
+      expected.push_back(expected.front());
+    }
+
     if (argshape != expected) {
       std::string s = "invalid block size (";
       for (size_t j = 0; j < argshape.size(); ++j) {
@@ -237,15 +245,21 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
   auto& args=fargs.args;
   m_covbase.setZero();
   for (size_t i = 0; i < args.size(); ++i) {
+    auto& arg = args[i];
     const CovarianceAction &act = m_covactions[i];
     switch (act.action) {
-    case CovarianceAction::Diagonal:
-      m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = args[i].arr;
-      break;
-    case CovarianceAction::Block:
-      /* std::cout << args[i].arr; */
-      m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = args[i].arr;
-      break;
+      case CovarianceAction::Diagonal:
+        if(arg.type.shape.size()>1){
+          m_covbase.block(act.x->i, act.x->i, act.x->n, act.x->n) = arg.arr2d;
+        }
+        else{
+          m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = arg.arr;
+        }
+        break;
+      case CovarianceAction::Block:
+        /* std::cout << arg.arr; */
+        m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = arg.arr2d;
+        break;
     }
   }
 

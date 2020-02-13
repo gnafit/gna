@@ -109,19 +109,19 @@ class cmd(basecmd):
             # - fill the diagonal it with the value of sigma**2
             # - fill the off-diagonal elements with covarainces
             # - create Points, representing the covariance matrix
-            covariance = np.diag(sigma**2)
+            covariance = np.diag(sigmas**2)
             for i in range(npars):
                 for j in range(i):
                     pari, parj = pull_pars[i], pull_pars[j]
                     cov = pari.getCovariance(parj)
                     covariance[i,j]=covariance[j,i]=cov
 
-            self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
+            cov = self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
         else:
             # If there are no correlations, store only the uncertainties
-            self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
+            cov = self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
 
-        dataset.assign(self.pull_vararray.single(), self.pull_centrals.single(), self.pull_sigmas2.single())
+        dataset.assign(self.pull_vararray.single(), self.pull_centrals.single(), cov.single())
 
         ns = self.env.globalns('pull')
         ns.addobservable(self.opts.name, self.pull_vararray.single())

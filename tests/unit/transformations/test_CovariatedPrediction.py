@@ -9,74 +9,114 @@ from load import ROOT as R
 from gna import constructors as C
 from gna.env import env
 from gna.unittest import *
-import numpy as N
+import numpy as np
+import pytest
+from gna.unittest import allure_attach_file, savegraph
+from matplotlib import pyplot as plt
+from gna.bindings import common
+from mpl_tools.helpers import savefig
+import os
 
-graphviz = False
+@pytest.mark.parametrize('diag',   [False, True])
+@pytest.mark.parametrize('syst1',  [None, True])
+@pytest.mark.parametrize('syst2',  [None, True])
+def test_covariated_prediction(diag, syst1, syst2, tmp_path):
+    if diag and (syst1 or syst2):
+        return
 
-def test_covariated_prediction_v01():
     n = 10
     start = 10
-    dataa   = N.arange(start, start+n)
+    data = np.arange(start, start+n, dtype='d')
+    stat2 = data.copy()
 
-    data = C.Points(dataa, labels='Data')
-    stat = C.Points(dataa, labels='Stat errors')
+    fullcovmat = np.diag(stat2)
 
-    cp = C.CovariatedPrediction(labels=['Concatenated prediction', 'Concatenated base covariance matrix', 'Full cov mat Cholesky decomposition'])
-    cp.append(data)
-    cp.covariate(stat, data, 1, data, 1)
-    cp.covbase.L >> cp.cov.Lbase
-    cp.finalize()
+    if syst1:
+        syst1 = np.ones((n,n), dtype='d')*1.5
+        fullcovmat+=syst1
+        cov = fullcovmat.copy()
+        covbase = cov
+    else:
+        cov = stat2
+        covbase = fullcovmat.copy()
 
+    Data   = C.Points(data, labels='Data')
+    Covmat = C.Points(cov, labels='Input covariance matrix')
 
-    if graphviz:
-        cp.print()
-        from gna.graphviz import savegraph
-        savegraph([data.single(),cp.covbase.L], 'output/unit_covariated_prediction_01.dot')
+    if syst2:
+        syst2 = np.ones((n,n), dtype='d')*0.5
+        Syst   = C.Points(syst2, labels='Input systematic matrix')
+        fullcovmat+=syst2
+    else:
+        Syst = None
 
-    datao   = cp.prediction.prediction.data()
-    covbase = cp.covbase.L.data()
-    L = cp.cov.L.data()
+    if diag:
+        Cp = C.CovariatedPredictionV(labels=['Concatenated prediction', 'Base uncertainties squared', 'Full uncertainties'])
+    else:
+        Cp = C.CovariatedPrediction(labels=['Concatenated prediction', 'Base covariance matrix', 'Full cov mat Cholesky decomposition'])
+    Cp.append(Data)
+    Cp.covariate(Covmat, Data, 1, Data, 1)
+    if Syst:
+        Cp.addSystematicCovMatrix(Syst)
+    Cp.covbase.covbase >> Cp.cov.covbase
+    Cp.finalize()
 
-    covbase_expect = N.diag(dataa)
-    L_expect = N.linalg.cholesky(covbase_expect)
+    Cp.printtransformations()
 
-    assert (dataa==datao).all()
-    assert (covbase==covbase_expect).all()
-    assert (L==L_expect).all()
+    suffix = 'covariated_prediction_{}_{}_{}'.format(diag and 'diag' or 'block', syst1 is not None and 'basediag' or 'baseblock', syst2 is not None and 'syst' or 'nosyst')
 
-def test_covariated_prediction_v02():
-    n = 10
-    start = 10
-    dataa   = N.arange(start, start+n)
-    systa = N.ones((n,n), dtype='d')*1.5
+    if not diag:
+        fig = plt.figure()
+        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix base')
+        ax.minorticks_on()
+        ax.grid()
+        Cp.covbase.covbase.plot_matshow(colorbar=True)
+        path = os.path.join(str(tmp_path), suffix+'_covbase.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+        plt.close()
 
-    data = C.Points(dataa, labels='Data')
-    stat = C.Points(dataa, labels='Stat errors')
-    syst = C.Points(systa, labels='Syst matrix')
+        fig = plt.figure()
+        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix full')
+        ax.minorticks_on()
+        ax.grid()
+        plt.matshow(fullcovmat, fignum=False)
+        path = os.path.join(str(tmp_path), suffix+'_cov.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+        plt.close()
 
-    cp = C.CovariatedPrediction(labels=['Concatenated prediction', 'Concatenated base covariance matrix', 'Full cov mat Cholesky decomposition'])
-    cp.append(data)
-    cp.covariate(stat, data, 1, data, 1)
-    cp.addSystematicCovMatrix(syst)
-    cp.covbase.L >> cp.cov.Lbase
-    cp.finalize()
+    path = os.path.join(str(tmp_path), suffix+'_graph.png')
+    savegraph([Data.single(),Cp.covbase.covbase], path, verbose=False)
+    allure_attach_file(path)
 
-    if graphviz:
-        cp.print()
-        from gna.graphviz import savegraph
-        savegraph([data.single(),cp.covbase.L], 'output/unit_covariated_prediction_02.dot')
+    data_o    = Cp.prediction.prediction.data()
+    covbase_o = Cp.covbase.covbase.data()
+    if diag:
+        L_o      = Cp.cov.L.data()
+        L_expect = stat2**0.5
+    else:
+        L_o       = np.tril(Cp.cov.L.data())
+        L_expect = np.linalg.cholesky(fullcovmat)
 
-    datao   = cp.prediction.prediction.data()
-    covbase = cp.covbase.L.data()
-    L = N.tril(cp.cov.L.data())
+    if not diag:
+        fig = plt.figure()
+        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='L: covariance matrix decomposition')
+        ax.minorticks_on()
+        ax.grid()
+        plt.matshow(L_o, fignum=False)
+        path = os.path.join(str(tmp_path), suffix+'_L.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+        plt.close()
 
-    covbase_expect = N.diag(dataa)
-    L_expect = N.linalg.cholesky(covbase_expect+systa)
+    assert (data==data_o).all()
 
-    assert (dataa==datao).all()
-    assert (covbase==covbase_expect).all()
-    assert N.allclose(L, L_expect)
+    if diag:
+        assert (covbase_o==data).all()
+    else:
+        assert (covbase==covbase_o).all()
 
-if __name__ == "__main__":
-    run_unittests(globals())
+    assert np.allclose(L_o, L_expect)
+
 
