@@ -99,6 +99,6 @@ protected:
 
   bool m_finalized;
   bool m_prediction_ready;
-  LLT m_lltbase, m_llt;
+  LLT m_llt;
   Eigen::ArrayXXd m_covbase;
 };

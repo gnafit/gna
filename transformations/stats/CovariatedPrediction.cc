@@ -235,8 +235,6 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
     }
   }
   rets[0] = DataType().points().shape(size(), size());
-  /* m_lltbase = LLT(size()); */
-  /* rets[0].preallocated(m_lltbase.matrixRef().data()); */
   m_covbase.resize(size(), size());
   rets[0].preallocated(m_covbase.matrix().data());
 }
@@ -259,13 +257,10 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
       case CovarianceAction::Block:
         /* std::cout << arg.arr; */
         m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = arg.arr2d;
+        m_covbase.block(act.y->i, act.x->i, act.y->n, act.x->n) = arg.arr2d.transpose();
         break;
     }
   }
-
-  /* Force materialization of matrix */
-  (void)fargs.rets[0].mat;
-  /* m_lltbase.compute(m_covbase); */
 }
 
 /**
