@@ -17,12 +17,19 @@ from gna.bindings import common
 from mpl_tools.helpers import savefig
 import os
 
-@pytest.mark.parametrize('diag',   [False, True])
+# @pytest.mark.parametrize('diag',   [False, True])
+# @pytest.mark.parametrize('syst1',  [None, True])
+# @pytest.mark.parametrize('syst2',  [None, True])
+@pytest.mark.parametrize('diag',   [False])
 @pytest.mark.parametrize('syst1',  [None, True])
 @pytest.mark.parametrize('syst2',  [None, True])
 def test_covariated_prediction(diag, syst1, syst2, tmp_path):
     if diag and (syst1 or syst2):
         return
+
+    diag1 = False
+    if not syst1 and not syst2:
+        diag1 = True
 
     n = 10
     start = 10
@@ -65,7 +72,7 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
 
     suffix = 'covariated_prediction_{}_{}_{}'.format(diag and 'diag' or 'block', syst1 is not None and 'basediag' or 'baseblock', syst2 is not None and 'syst' or 'nosyst')
 
-    if not diag:
+    if not diag and not diag1:
         fig = plt.figure()
         ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix base')
         ax.minorticks_on()
@@ -92,14 +99,14 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
 
     data_o    = Cp.prediction.prediction.data()
     covbase_o = Cp.covbase.covbase.data()
-    if diag:
+    if diag or diag1:
         L_o      = Cp.cov.L.data()
         L_expect = stat2**0.5
     else:
         L_o       = np.tril(Cp.cov.L.data())
         L_expect = np.linalg.cholesky(fullcovmat)
 
-    if not diag:
+    if not diag and not diag1:
         fig = plt.figure()
         ax = plt.subplot(111, xlabel='X', ylabel='Y', title='L: covariance matrix decomposition')
         ax.minorticks_on()
@@ -112,7 +119,7 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
 
     assert (data==data_o).all()
 
-    if diag:
+    if diag or diag1:
         assert (covbase_o==data).all()
     else:
         assert (covbase==covbase_o).all()

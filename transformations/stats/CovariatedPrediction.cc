@@ -199,6 +199,7 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
   if (!m_finalized) {
     throw args.undefined();
   }
+  bool require_2d=false;
   for (size_t i = 0; i < args.size(); ++i) {
     const CovarianceAction& act = m_covactions[i];
     std::vector<size_t> expected;
@@ -220,6 +221,10 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
       expected.push_back(expected.front());
     }
 
+    if(act.action==CovarianceAction::Block || argshape.size()>1){
+      require_2d=true;
+    }
+
     if (argshape != expected) {
       std::string s = "invalid block size (";
       for (size_t j = 0; j < argshape.size(); ++j) {
@@ -234,30 +239,42 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
       throw args.error(args[i], s);
     }
   }
-  rets[0] = DataType().points().shape(size(), size());
-  m_covbase.resize(size(), size());
-  rets[0].preallocated(m_covbase.matrix().data());
+
+  auto& ret=rets[0];
+  if(require_2d){
+    ret.points().shape(size(), size());
+  }
+  else{
+    ret.points().shape(size());
+  }
 }
 
 void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
   auto& args=fargs.args;
-  m_covbase.setZero();
+  auto& ret=fargs.rets[0];
+  ret.x.setZero();
+  bool require2d=ret.type.shape.size()>1;
   for (size_t i = 0; i < args.size(); ++i) {
     auto& arg = args[i];
     const CovarianceAction &act = m_covactions[i];
     switch (act.action) {
       case CovarianceAction::Diagonal:
         if(arg.type.shape.size()>1){
-          m_covbase.block(act.x->i, act.x->i, act.x->n, act.x->n) = arg.arr2d;
+          ret.mat.block(act.x->i, act.x->i, act.x->n, act.x->n) = arg.arr2d;
         }
         else{
-          m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = arg.arr;
+          if(require2d){
+            ret.mat.diagonal().segment(act.x->i, act.x->n) = arg.arr;
+          }
+          else{
+            ret.arr.segment(act.x->i, act.x->n) = arg.arr;
+          }
         }
         break;
       case CovarianceAction::Block:
         /* std::cout << arg.arr; */
-        m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = arg.arr2d;
-        m_covbase.block(act.y->i, act.x->i, act.y->n, act.x->n) = arg.arr2d.transpose();
+        ret.mat.block(act.x->i, act.y->i, act.x->n, act.y->n) = arg.arr2d;
+        ret.mat.block(act.y->i, act.x->i, act.y->n, act.x->n) = arg.arr2d.transpose();
         break;
     }
   }
@@ -269,16 +286,33 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
 */
 void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
-  auto& rets=fargs.rets;
-  /* for (size_t i = 1; i < args.size(); ++i) {
-   *   if (args[i].size() != size()) {
-   *     throw args.error(args[i], "rank1 vec size does not match prediction size");
-   *   }
-   * } */
-  rets[0] = args[0];
-  m_llt = LLT(size());
-  using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
-  rets[0].preallocated( const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()) );
+  auto& ret=fargs.rets[0];
+
+  size_t req_size=size();
+  bool require_2d=false;
+  for (size_t i = 0; i < args.size(); ++i) {
+    auto& argi=args[i];
+
+    if(argi.shape.size()>1){
+      require_2d=true;
+    }
+    for(auto dim: argi.shape){
+      if(dim!=req_size){
+        throw args.error(argi, "argument has invalid size");
+      }
+    }
+  }
+
+  if(require_2d){
+    ret.points().shape(req_size, req_size);
+
+    m_llt = LLT(size());
+    using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
+    ret.preallocated(const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()));
+  }
+  else{
+    ret.points().shape(req_size);
+  }
 }
 
 /**
@@ -287,17 +321,36 @@ void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
 */
 void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
   auto& args=fargs.args;
-  (void)args[0].mat;
-  auto full_covmat = m_covbase;
-  if (args.size() > 1) {
-      auto& sys_covmat = args[1].arr2d;
-      full_covmat += sys_covmat;
+  auto& ret=fargs.rets[0];
+
+  bool require2d=ret.type.shape.size()>1;
+  Eigen::MatrixXd fullcovmat;
+  if(require2d){
+    fullcovmat.resize(ret.mat.rows(), ret.mat.cols());
   }
-  m_llt.compute(full_covmat);
-  /* for (size_t i = 1; i < args.size(); ++i) {
-   *   m_llt.rankUpdate(args[i].vec);
-   * } */
-  (void)fargs.rets[0].mat;
+  else{
+    fullcovmat.resize(ret.arr.size(), 1);
+  }
+  fullcovmat.setZero();
+
+  for (size_t i = 0; i < args.size(); ++i) {
+    auto& arg=args[i];
+    bool arg2d = arg.type.shape.size()>1;
+
+    if(arg2d==require2d){
+      fullcovmat.array()+=arg.arr;
+    }
+    else{
+      fullcovmat+=arg.vec.asDiagonal();
+    }
+  }
+
+  if(require2d){
+    m_llt.compute(fullcovmat);
+  }
+  else{
+    ret.arr=fullcovmat.col(0).array().sqrt();
+  }
 }
 
 /**
