@@ -12,7 +12,7 @@ import numpy as np
 from gna.env import env
 from itertools import chain
 from gna.dataset import Dataset
-from gna.parameters.parameter_loader import get_parameters
+from gna.parameters.parameter_loader import get_parameters, get_uncertainties
 from gna import constructors as C
 
 class cmd(basecmd):
@@ -85,17 +85,9 @@ class cmd(basecmd):
 
         # Get list of UncertainParameter objects, drop free and fixed
         pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
+        variables = [par.getVariable() for par in pull_pars]
+        sigmas, centrals, covariance = get_uncertainties(pull_pars)
         npars = len(pull_pars)
-
-        variables, centrals, sigmas = [None]*npars, np.zeros(npars, dtype='d'), np.zeros(npars, dtype='d')
-        correlations = False
-
-        # Get variables, central values and sigmas, check that there are (no) correlations
-        for i, par in enumerate(pull_pars):
-            variables[i]=par.getVariable()
-            centrals[i]=par.central()
-            sigmas[i]=par.sigma()
-            correlations = correlations or par.isCorrelated()
 
         from gna.constructors import VarArray, Points
         # Create an array, representing pull parameter values
@@ -103,19 +95,7 @@ class cmd(basecmd):
         # Create an array, representing pull parameter central values
         self.pull_centrals = Points(centrals, labels='Nuisance: central')
 
-        if correlations:
-            # In case there are correlations:
-            # - create covariance matrix
-            # - fill the diagonal it with the value of sigma**2
-            # - fill the off-diagonal elements with covarainces
-            # - create Points, representing the covariance matrix
-            covariance = np.diag(sigmas**2)
-            for i in range(npars):
-                for j in range(i):
-                    pari, parj = pull_pars[i], pull_pars[j]
-                    cov = pari.getCovariance(parj)
-                    covariance[i,j]=covariance[j,i]=cov
-
+        if covariance:
             cov = self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
         else:
             # If there are no correlations, store only the uncertainties
