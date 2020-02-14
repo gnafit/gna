@@ -14,7 +14,7 @@ import pytest
 from gna.unittest import allure_attach_file, savegraph
 from matplotlib import pyplot as plt
 from gna.bindings import common
-from mpl_tools.helpers import savefig
+from mpl_tools.helpers import savefig, add_colorbar
 import os
 
 @pytest.mark.parametrize('syst1',  [None, True])
@@ -59,7 +59,7 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
 
     Cp.printtransformations()
 
-    suffix = 'covariated_prediction_{}_{}'.format(syst1 is not None and 'basediag' or 'baseblock', syst2 is not None and 'syst' or 'nosyst')
+    suffix = 'covariated_prediction_{}_{}'.format(syst1 is not None and 'baseblock' or 'basediag', syst2 is not None and 'syst' or 'nosyst')
 
     fig = plt.figure()
     ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix base')
@@ -79,7 +79,8 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
     ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix full')
     ax.minorticks_on()
     ax.grid()
-    plt.matshow(fullcovmat, fignum=False)
+    c=plt.matshow(np.ma.array(fullcovmat, mask=fullcovmat==0.0), fignum=False)
+    add_colorbar(c)
     path = os.path.join(str(tmp_path), suffix+'_cov.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
@@ -106,7 +107,8 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
         Cp.cov.L.plot_hist(label='diag')
         ax.legend()
     else:
-        plt.matshow(np.ma.array(L_o,mask=L_o==0.0), fignum=False)
+        c=plt.matshow(np.ma.array(L_o,mask=L_o==0.0), fignum=False)
+        add_colorbar(c)
     path = os.path.join(str(tmp_path), suffix+'_L.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
@@ -121,7 +123,7 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
 
     assert np.allclose(L_o, L_expect)
 
-def test_covariated_prediction_01(tmp_path):
+def test_covariated_prediction_blocks(tmp_path):
     ns = [1, 3, 4, 1]
     start = 10
     dataset = [np.arange(start, start+n, dtype='d') for n in ns]
@@ -190,7 +192,8 @@ def test_covariated_prediction_01(tmp_path):
     ax = plt.subplot(111, xlabel='X', ylabel='Y', title='L: covariance matrix decomposition')
     ax.minorticks_on()
     ax.grid()
-    plt.matshow(np.ma.array(L_o,mask=L_o==0.0), fignum=False)
+    c=plt.matshow(np.ma.array(L_o,mask=L_o==0.0), fignum=False)
+    add_colorbar(c)
     path = os.path.join(str(tmp_path), suffix+'_L.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
