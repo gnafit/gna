@@ -17,19 +17,11 @@ from gna.bindings import common
 from mpl_tools.helpers import savefig
 import os
 
-# @pytest.mark.parametrize('diag',   [False, True])
-# @pytest.mark.parametrize('syst1',  [None, True])
-# @pytest.mark.parametrize('syst2',  [None, True])
-@pytest.mark.parametrize('diag',   [False])
 @pytest.mark.parametrize('syst1',  [None, True])
 @pytest.mark.parametrize('syst2',  [None, True])
-def test_covariated_prediction(diag, syst1, syst2, tmp_path):
-    if diag and (syst1 or syst2):
-        return
-
-    diag1 = False
-    if not syst1 and not syst2:
-        diag1 = True
+def test_covariated_prediction(syst1, syst2, tmp_path):
+    covbase_diag=not bool(syst1)
+    cov_diag=not bool(syst2) and covbase_diag
 
     n = 10
     start = 10
@@ -57,10 +49,7 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
     else:
         Syst = None
 
-    if diag:
-        Cp = C.CovariatedPredictionV(labels=['Concatenated prediction', 'Base uncertainties squared', 'Full uncertainties'])
-    else:
-        Cp = C.CovariatedPrediction(labels=['Concatenated prediction', 'Base covariance matrix', 'Full cov mat Cholesky decomposition'])
+    Cp = C.CovariatedPrediction(labels=['Concatenated prediction', 'Base covariance matrix', 'Full cov mat Cholesky decomposition'])
     Cp.append(Data)
     Cp.covariate(Covmat, Data, 1, Data, 1)
     if Syst:
@@ -70,28 +59,31 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
 
     Cp.printtransformations()
 
-    suffix = 'covariated_prediction_{}_{}_{}'.format(diag and 'diag' or 'block', syst1 is not None and 'basediag' or 'baseblock', syst2 is not None and 'syst' or 'nosyst')
+    suffix = 'covariated_prediction_{}_{}'.format(syst1 is not None and 'basediag' or 'baseblock', syst2 is not None and 'syst' or 'nosyst')
 
-    if not diag and not diag1:
-        fig = plt.figure()
-        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix base')
-        ax.minorticks_on()
-        ax.grid()
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix base')
+    ax.minorticks_on()
+    ax.grid()
+    if covbase_diag:
+        Cp.covbase.covbase.plot_hist(label='diag')
+        ax.legend()
+    else:
         Cp.covbase.covbase.plot_matshow(colorbar=True)
-        path = os.path.join(str(tmp_path), suffix+'_covbase.png')
-        savefig(path, dpi=300)
-        allure_attach_file(path)
-        plt.close()
+    path = os.path.join(str(tmp_path), suffix+'_covbase.png')
+    savefig(path, dpi=300)
+    allure_attach_file(path)
+    plt.close()
 
-        fig = plt.figure()
-        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix full')
-        ax.minorticks_on()
-        ax.grid()
-        plt.matshow(fullcovmat, fignum=False)
-        path = os.path.join(str(tmp_path), suffix+'_cov.png')
-        savefig(path, dpi=300)
-        allure_attach_file(path)
-        plt.close()
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix full')
+    ax.minorticks_on()
+    ax.grid()
+    plt.matshow(fullcovmat, fignum=False)
+    path = os.path.join(str(tmp_path), suffix+'_cov.png')
+    savefig(path, dpi=300)
+    allure_attach_file(path)
+    plt.close()
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph([Data.single(),Cp.covbase.covbase], path, verbose=False)
@@ -99,27 +91,30 @@ def test_covariated_prediction(diag, syst1, syst2, tmp_path):
 
     data_o    = Cp.prediction.prediction.data()
     covbase_o = Cp.covbase.covbase.data()
-    if diag or diag1:
+    if cov_diag:
         L_o      = Cp.cov.L.data()
         L_expect = stat2**0.5
     else:
         L_o       = np.tril(Cp.cov.L.data())
         L_expect = np.linalg.cholesky(fullcovmat)
 
-    if not diag and not diag1:
-        fig = plt.figure()
-        ax = plt.subplot(111, xlabel='X', ylabel='Y', title='L: covariance matrix decomposition')
-        ax.minorticks_on()
-        ax.grid()
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='X', ylabel='Y', title='L: covariance matrix decomposition')
+    ax.minorticks_on()
+    ax.grid()
+    if cov_diag:
+        Cp.cov.L.plot_hist(label='diag')
+        ax.legend()
+    else:
         plt.matshow(np.ma.array(L_o,mask=L_o==0.0), fignum=False)
-        path = os.path.join(str(tmp_path), suffix+'_L.png')
-        savefig(path, dpi=300)
-        allure_attach_file(path)
-        plt.close()
+    path = os.path.join(str(tmp_path), suffix+'_L.png')
+    savefig(path, dpi=300)
+    allure_attach_file(path)
+    plt.close()
 
     assert (data==data_o).all()
 
-    if diag or diag1:
+    if covbase_diag:
         assert (covbase_o==data).all()
     else:
         assert (covbase==covbase_o).all()

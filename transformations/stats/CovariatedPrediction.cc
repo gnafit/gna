@@ -24,22 +24,19 @@ CovariatedPrediction::CovariatedPrediction()
     .types(&CovariatedPrediction::calculateCovTypes)
     .func(&CovariatedPrediction::calculateCov)
     ;
-  m_transform = t_["prediction"];
 }
 
-CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other)
-  : m_transform(t_["prediction"]),
-    m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
-{
-}
+//CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other) :
+    //m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
+//{
+//}
 
-CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction &other) {
-  m_transform = t_["prediction"];
-  m_inputs = other.m_inputs;
-  m_finalized = other.m_finalized;
-  m_prediction_ready = other.m_prediction_ready;
-  return *this;
-}
+//CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction &other) {
+  //m_inputs = other.m_inputs;
+  //m_finalized = other.m_finalized;
+  //m_prediction_ready = other.m_prediction_ready;
+  //return *this;
+//}
 
 /**
    * @brief Add observable into prediction transformation.
@@ -161,22 +158,24 @@ void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
 
 void CovariatedPrediction::calculateTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
-  auto& rets=fargs.rets;
+  auto& ret=fargs.rets[0];
+  m_size=0u;
   if (!m_finalized and !m_prediction_ready) {
     throw args.undefined();
   }
   if (args.size() == 0) {
-    throw rets.error(rets[0]);
+    throw fargs.rets.error(ret);
   } else if (args.size() == 1) {
-    rets[0] = args[0];
+    ret = args[0];
   } else {
     size_t size = 0;
     for (size_t i = 0; i < args.size(); ++i) {
       size += args[i].size();
     }
-    rets[0] = DataType().points().shape(size);
+    ret = DataType().points().shape(size);
   }
   resolveCovarianceActions(args);
+  m_size=ret.size();
 }
 
 /**
@@ -199,7 +198,7 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
   if (!m_finalized) {
     throw args.undefined();
   }
-  bool require_2d=false;
+  m_diagonal_covbase=true;
   for (size_t i = 0; i < args.size(); ++i) {
     const CovarianceAction& act = m_covactions[i];
     std::vector<size_t> expected;
@@ -222,7 +221,7 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
     }
 
     if(act.action==CovarianceAction::Block || argshape.size()>1){
-      require_2d=true;
+      m_diagonal_covbase=false;
     }
 
     if (argshape != expected) {
@@ -241,11 +240,11 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
   }
 
   auto& ret=rets[0];
-  if(require_2d){
-    ret.points().shape(size(), size());
+  if(m_diagonal_covbase){
+    ret.points().shape(size());
   }
   else{
-    ret.points().shape(size());
+    ret.points().shape(size(), size());
   }
 }
 
@@ -253,7 +252,6 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0];
   ret.x.setZero();
-  bool require2d=ret.type.shape.size()>1;
   for (size_t i = 0; i < args.size(); ++i) {
     auto& arg = args[i];
     const CovarianceAction &act = m_covactions[i];
@@ -263,11 +261,11 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
           ret.mat.block(act.x->i, act.x->i, act.x->n, act.x->n) = arg.arr2d;
         }
         else{
-          if(require2d){
-            ret.mat.diagonal().segment(act.x->i, act.x->n) = arg.arr;
+          if(m_diagonal_covbase){
+            ret.arr.segment(act.x->i, act.x->n) = arg.arr;
           }
           else{
-            ret.arr.segment(act.x->i, act.x->n) = arg.arr;
+            ret.mat.diagonal().segment(act.x->i, act.x->n) = arg.arr;
           }
         }
         break;
@@ -289,12 +287,12 @@ void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
   auto& ret=fargs.rets[0];
 
   size_t req_size=size();
-  bool require_2d=false;
+  m_diagonal_cov=true;
   for (size_t i = 0; i < args.size(); ++i) {
     auto& argi=args[i];
 
     if(argi.shape.size()>1){
-      require_2d=true;
+      m_diagonal_cov=false;
     }
     for(auto dim: argi.shape){
       if(dim!=req_size){
@@ -303,15 +301,15 @@ void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
     }
   }
 
-  if(require_2d){
+  if(m_diagonal_cov){
+    ret.points().shape(req_size);
+  }
+  else{
     ret.points().shape(req_size, req_size);
 
     m_llt = LLT(size());
     using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
     ret.preallocated(const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()));
-  }
-  else{
-    ret.points().shape(req_size);
   }
 }
 
@@ -323,21 +321,20 @@ void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& ret=fargs.rets[0];
 
-  bool require2d=ret.type.shape.size()>1;
   Eigen::MatrixXd fullcovmat;
-  if(require2d){
-    fullcovmat.resize(ret.mat.rows(), ret.mat.cols());
+  if(m_diagonal_cov){
+    fullcovmat.resize(ret.arr.size(), 1);
   }
   else{
-    fullcovmat.resize(ret.arr.size(), 1);
+    fullcovmat.resize(ret.mat.rows(), ret.mat.cols());
   }
   fullcovmat.setZero();
 
   for (size_t i = 0; i < args.size(); ++i) {
     auto& arg=args[i];
-    bool arg2d = arg.type.shape.size()>1;
+    bool argdiag = arg.type.shape.size()==1;
 
-    if(arg2d==require2d){
+    if(argdiag==m_diagonal_cov){
       fullcovmat.array()+=arg.arr;
     }
     else{
@@ -345,11 +342,11 @@ void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
     }
   }
 
-  if(require2d){
-    m_llt.compute(fullcovmat);
+  if(m_diagonal_cov){
+    ret.arr=fullcovmat.col(0).array().sqrt();
   }
   else{
-    ret.arr=fullcovmat.col(0).array().sqrt();
+    m_llt.compute(fullcovmat);
   }
 }
 
@@ -358,12 +355,12 @@ void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
    * prediction inputs.)
 */
 size_t CovariatedPrediction::size() const {
-  return m_transform[0].type.size();
+  return m_size;
 }
 
 /**
    * @brief Force update of theoretical prediction.
 */
 void CovariatedPrediction::update() const {
-  m_transform.update(0);
+  transformations[0].touch();
 }

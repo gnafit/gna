@@ -21,9 +21,9 @@ public:
   };
 
   CovariatedPrediction();
-  CovariatedPrediction(const CovariatedPrediction &other);
+  //CovariatedPrediction(const CovariatedPrediction &other);
 
-  CovariatedPrediction &operator=(const CovariatedPrediction &other);
+  //CovariatedPrediction &operator=(const CovariatedPrediction &other);
 
   void append(SingleOutput &obs);
   void finalize();
@@ -91,13 +91,14 @@ protected:
     Eigen::MatrixXd& matrixRef() { return this->m_matrix; }
   };
 
-  Handle m_transform;
-
   std::vector<OutputDescriptor> m_inputs;
 
   std::vector<CovarianceAction> m_covactions;
 
   bool m_finalized;
   bool m_prediction_ready;
+  bool m_diagonal_covbase=false;
+  bool m_diagonal_cov=false;
+  size_t m_size=0u;
   LLT m_llt;
 };
