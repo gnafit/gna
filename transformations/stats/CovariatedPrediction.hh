@@ -14,12 +14,16 @@ public:
    */
   struct Segment {
     size_t i, n;
+
+    void dump() const {
+      printf("i=%zu, n=%zu, i+n=%zu", i, n, i+n);
+    }
   };
 
   CovariatedPrediction();
-  CovariatedPrediction(const CovariatedPrediction &other);
+  //CovariatedPrediction(const CovariatedPrediction &other);
 
-  CovariatedPrediction &operator=(const CovariatedPrediction &other);
+  //CovariatedPrediction &operator=(const CovariatedPrediction &other);
 
   void append(SingleOutput &obs);
   void finalize();
@@ -64,6 +68,15 @@ protected:
 
     bool resolved = false;
     boost::optional<Segment> x, y;
+
+    void dump() const {
+      printf("Covariance action on %s:", action==Diagonal ? "diag" : "block");
+      if(a) { printf("a "); a->dump(); }
+      if(x) { printf(", x "); x->dump(); }
+      if(b) { printf(", b "); b->dump(); }
+      if(y) { printf(", y "); y->dump(); }
+      printf("\n");
+    }
   };
 
 /**
@@ -78,14 +91,14 @@ protected:
     Eigen::MatrixXd& matrixRef() { return this->m_matrix; }
   };
 
-  Handle m_transform;
-
   std::vector<OutputDescriptor> m_inputs;
 
   std::vector<CovarianceAction> m_covactions;
 
   bool m_finalized;
   bool m_prediction_ready;
-  LLT m_lltbase, m_llt;
-  Eigen::ArrayXXd m_covbase;
+  bool m_diagonal_covbase=false;
+  bool m_diagonal_cov=false;
+  size_t m_size=0u;
+  LLT m_llt;
 };

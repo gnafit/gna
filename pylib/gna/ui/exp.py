@@ -58,5 +58,7 @@ class cmd(basecmd):
         with ns:
             self.exp_instance = expcls(ns, expopts)
 
+        self.exp_instance.init()
+
         if self.opts.ns:
             self.env.parts.exp[self.opts.ns] = self.exp_instance

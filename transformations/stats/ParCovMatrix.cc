@@ -9,7 +9,6 @@ void ParCovMatrix::FillMatrix(FunctionArgs fargs) {
             auto*  primary_par = m_pars.at(row);
             auto*  secondary_par = m_pars.at(col);
             pars_covmat(row, col) = pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
-            pars_covmat(col, row) = primary_par->getCovariance(*secondary_par);
         }
     }
     fargs.rets[0].mat = pars_covmat;

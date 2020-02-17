@@ -1,44 +1,32 @@
-cpu: 0.060144000000001085
-errors: !!python/object/apply:numpy.core.multiarray._reconstruct
-  args:
-  - &id001 !!python/name:numpy.ndarray ''
-  - !!python/tuple [0]
-  - b
-  state: !!python/tuple
-  - 1
-  - !!python/tuple [4]
-  - &id002 !!python/object/apply:numpy.dtype
-    args: [f8, 0, 1]
-    state: !!python/tuple [3, <, null, null, null, -1, -1, 0]
-  - false
-  - !!binary |
-    S8Vn31wLNUB8zRh9zHdWQCmo3X5bZ5Q/4pJa5T8Xlj8=
-errorsdict: !!python/object/apply:collections.OrderedDict
-- - [BackgroundRate, 21.044385874590528]
-  - [Mu, 89.87185599729668]
-  - [E0, 0.01992552720859223]
-  - [Width, 0.021573065160413026]
-fun: 4.5194080095753067e-07
+cpu: 0.010507000000000488
+errors:
+- 21.044786843888083
+- 89.87411551001028
+- 0.019925689550693886
+- 0.021573688772678953
+errorsdict:
+  peak_f.BackgroundRate: 21.044786843888083
+  peak_f.E0: 0.019925689550693886
+  peak_f.Mu: 89.87411551001028
+  peak_f.Width: 0.021573688772678953
+fun: 4.6533546220329065e-08
 maxcv: 0.01
-names: [BackgroundRate, Mu, E0, Width]
-nfev: 162
+names:
+- peak_f.BackgroundRate
+- peak_f.Mu
+- peak_f.E0
+- peak_f.Width
+nfev: 166
 npars: 4
 success: true
-wall: 0.06045103073120117
-x: !!python/object/apply:numpy.core.multiarray._reconstruct
-  args:
-  - *id001
-  - !!python/tuple [0]
-  - b
-  state: !!python/tuple
-  - 1
-  - !!python/tuple [4]
-  - *id002
-  - false
-  - !!binary |
-    gCiREwhAj0C4LqHP3j+fQDi901P0//8/eTKd4uf/3z8=
-xdict: !!python/object/apply:collections.OrderedDict
-- - [BackgroundRate, 1000.0039435711369]
-  - [Mu, 1999.9675889191403]
-  - [E0, 1.9999888681885079]
-  - [Width, 0.49999425058630426]
+wall: 0.010529041290283203
+x:
+- 1000.000584000211
+- 1999.989446718792
+- 2.0000031405938894
+- 0.4999998136336317
+xdict:
+  peak_f.BackgroundRate: 1000.000584000211
+  peak_f.E0: 2.0000031405938894
+  peak_f.Mu: 1999.989446718792
+  peak_f.Width: 0.4999998136336317

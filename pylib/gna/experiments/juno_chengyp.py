@@ -49,9 +49,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
-    def __init__(self, namespace, opts):
-        baseexp.__init__(self, namespace, opts)
-
+    def init(self):
         self.init_nidx()
         self.init_formula()
         self.init_configuration()

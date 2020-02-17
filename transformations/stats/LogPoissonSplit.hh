@@ -3,11 +3,11 @@
 #include "GNAObject.hh"
 #include "Statistic.hh"
 
-class LnPoissonSplit: public GNAObject,
-                      public TransformationBind<LnPoissonSplit>,
+class LogPoissonSplit: public GNAObject,
+                      public TransformationBind<LogPoissonSplit>,
                       public Statistic  {
 public:
-  LnPoissonSplit(bool ln_approx=false);
+  LogPoissonSplit(bool ln_approx=false);
 
   void add(SingleOutput &theory, SingleOutput &data);
 

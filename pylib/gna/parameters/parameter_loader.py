@@ -2,6 +2,7 @@ from __future__ import print_function
 from gna.env import env
 from gna.config import cfg
 import ROOT
+import numpy as np
 
 ParameterDouble = ROOT.Parameter("double")
 def __is_independent(par):
@@ -43,4 +44,31 @@ def get_parameters(params, drop_fixed=True, drop_free=True, drop_constrained=Fal
         pars = [par for par in pars if par.isFree()]
 
     return pars
+
+def get_uncertainties(parlist):
+    npars = len(parlist)
+    centrals, sigmas = np.zeros(npars, dtype='d'), np.zeros(npars, dtype='d')
+    correlations = False
+
+    for i, par in enumerate(parlist):
+        centrals[i]=par.central()
+        sigmas[i]=par.sigma()
+        correlations = correlations or par.isCorrelated()
+
+    if correlations:
+        # In case there are correlations:
+        # - create covariance matrix
+        # - fill the diagonal it with the value of sigma**2
+        # - fill the off-diagonal elements with covarainces
+        # - create Points, representing the covariance matrix
+        covariance = np.diag(sigmas**2)
+        for i in range(npars):
+            for j in range(i):
+                pari, parj = parlist[i], parlist[j]
+                cov = pari.getCovariance(parj)
+                covariance[i,j]=covariance[j,i]=cov
+
+        return sigmas, centrals, covariance
+
+    return sigmas, centrals, correlations
 

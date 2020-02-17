@@ -6,9 +6,7 @@ from gna import dispatch
 if __name__ == "__main__":
     argv = sys.argv
     sys.argv = [argv[0]]
-
     import load
-
     sys.argv = argv
 
     dispatch.run()

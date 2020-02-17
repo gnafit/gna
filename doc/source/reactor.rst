@@ -99,9 +99,9 @@ Here ``ns`` stands for namespace of the experiment.
 Let's see how this works on example of the JUNO experiment. The
 initialization is done in the ``pylib/gna/ui/juno.py``:
 
-.. literalinclude:: ../../pylib/gna/ui/juno.py
-   :language: py
-   :linenos:
+.. caution:: 
+
+    This section is outdated. The file is no longer supported.
 
 In the ``initparser()`` classmethod we just call the corresponding
 methods in ``basecmd`` and ``ReactorExperimentModel`` to define the

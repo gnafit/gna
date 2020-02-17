@@ -166,7 +166,7 @@ class Dataset(object):
             data = self.makedata(obsblock)
             if data is None:
                 raise Exception("no data constructed")
-            prediction.cov.Lbase(prediction.covbase.L)
+            prediction.cov.covbase(prediction.covbase.covbase)
 
             if len(obsblock)>1:
                 blocks.append(Block(prediction.prediction, data, prediction.cov))

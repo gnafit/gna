@@ -36,6 +36,10 @@ class cmd(basecmd):
             except KeyError:
                 raise PartNotFoundError("observable", path)
 
+        def yamlload(s):
+            ret = yaml.load(s, Loader=yaml.Loader)
+            return ret
+
         parser.add_argument('-dp', '--difference-plot', default=[], nargs=2,
                             action=append_typed(observable, observable),
                             help='Subtract two obs, they MUST have the same binning')
@@ -63,6 +67,7 @@ class cmd(basecmd):
         parser.add_argument('--ylim', nargs='+', type=float, help='Y limits')
         parser.add_argument('--xlim', nargs='+', type=float, help='X limits')
         parser.add_argument('--latex', action='store_true', help='Enable latex mode')
+        parser.add_argument('--powerlimits', nargs=3, help='axis formatter powerlimits', metavar=('axis', 'min', 'max'))
 
     def run(self):
         self.legends = self.opts.legend
@@ -89,13 +94,24 @@ class cmd(basecmd):
         minorLocatory = AutoMinorLocator()
         ax = plt.gca()
         if self.opts.drawgrid:
-            ax.xaxis.set_minor_locator(minorLocatorx)
-            ax.yaxis.set_minor_locator(minorLocatory)
-            plt.tick_params(which='both', width=1)
-            plt.tick_params(which='major', length=7)
-            plt.tick_params(which='minor', length=4, color='k')
-            ax.grid(which = 'minor', alpha = 0.3)
-            ax.grid(which = 'major', alpha = 0.7)
+            ax.grid()
+            # ax.xaxis.set_minor_locator(minorLocatorx)
+            # ax.yaxis.set_minor_locator(minorLocatory)
+            # plt.tick_params(which='both', width=1)
+            # plt.tick_params(which='major', length=7)
+            # plt.tick_params(which='minor', length=4, color='k')
+            # ax.grid(which = 'minor', alpha = 0.3)
+            # ax.grid(which = 'major', alpha = 0.7)
+
+        if self.opts.powerlimits:
+            axis, p1, p2 = self.opts.powerlimits
+            assert axis in ('x', 'y')
+            p1, p2 = float(p1), float(p2)
+
+            axis = getattr(ax, axis+'axis')
+            formatter = axis.get_major_formatter()
+            formatter.set_powerlimits((p1, p2))
+            formatter.useMathText=True
 
         for output, legend in zip(self.opts.plot, self.legends):
             if self.opts.plot_type=='bar':
@@ -142,7 +158,7 @@ class cmd(basecmd):
                     fontsize=list_get(self.opts.title, 1, 'medium'))
 
         if self.opts.savefig:
-            savefig(self.opts.savefig)
+            savefig(self.opts.savefig, dpi=300)
 
         if self.opts.show:
             plt.show()

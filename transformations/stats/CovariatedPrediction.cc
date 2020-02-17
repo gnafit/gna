@@ -14,32 +14,29 @@ CovariatedPrediction::CovariatedPrediction()
     .func(&CovariatedPrediction::calculatePrediction)
     ;
   transformation_("covbase")
-    .output("L")
+    .output("covbase")
     .types(&CovariatedPrediction::calculateCovbaseTypes)
     .func(&CovariatedPrediction::calculateCovbase)
     ;
   transformation_("cov")
-    .input("Lbase")
+    .input("covbase")
     .output("L")
     .types(&CovariatedPrediction::calculateCovTypes)
     .func(&CovariatedPrediction::calculateCov)
     ;
-  m_transform = t_["prediction"];
 }
 
-CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other)
-  : m_transform(t_["prediction"]),
-    m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
-{
-}
+//CovariatedPrediction::CovariatedPrediction(const CovariatedPrediction &other) :
+    //m_inputs(other.m_inputs), m_finalized(other.m_finalized), m_prediction_ready(other.m_prediction_ready)
+//{
+//}
 
-CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction &other) {
-  m_transform = t_["prediction"];
-  m_inputs = other.m_inputs;
-  m_finalized = other.m_finalized;
-  m_prediction_ready = other.m_prediction_ready;
-  return *this;
-}
+//CovariatedPrediction& CovariatedPrediction::operator=(const CovariatedPrediction &other) {
+  //m_inputs = other.m_inputs;
+  //m_finalized = other.m_finalized;
+  //m_prediction_ready = other.m_prediction_ready;
+  //return *this;
+//}
 
 /**
    * @brief Add observable into prediction transformation.
@@ -161,22 +158,24 @@ void CovariatedPrediction::resolveCovarianceActions(Atypes args) {
 
 void CovariatedPrediction::calculateTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
-  auto& rets=fargs.rets;
+  auto& ret=fargs.rets[0];
+  m_size=0u;
   if (!m_finalized and !m_prediction_ready) {
     throw args.undefined();
   }
   if (args.size() == 0) {
-    throw rets.error(rets[0]);
+    throw fargs.rets.error(ret);
   } else if (args.size() == 1) {
-    rets[0] = args[0];
+    ret = args[0];
   } else {
     size_t size = 0;
     for (size_t i = 0; i < args.size(); ++i) {
       size += args[i].size();
     }
-    rets[0] = DataType().points().shape(size);
+    ret = DataType().points().shape(size);
   }
   resolveCovarianceActions(args);
+  m_size=ret.size();
 }
 
 /**
@@ -199,6 +198,7 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
   if (!m_finalized) {
     throw args.undefined();
   }
+  m_diagonal_covbase=true;
   for (size_t i = 0; i < args.size(); ++i) {
     const CovarianceAction& act = m_covactions[i];
     std::vector<size_t> expected;
@@ -212,6 +212,18 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
     while (argshape.size() > 1 && argshape.back() == 1) {
       argshape.pop_back();
     }
+
+    if(act.action==CovarianceAction::Diagonal && argshape.size()>1 && expected.size()==1){
+      // In case action is diagonal, accept both:
+      //   1d - fill diagonal
+      //   2d - fill block
+      expected.push_back(expected.front());
+    }
+
+    if(act.action==CovarianceAction::Block || argshape.size()>1){
+      m_diagonal_covbase=false;
+    }
+
     if (argshape != expected) {
       std::string s = "invalid block size (";
       for (size_t j = 0; j < argshape.size(); ++j) {
@@ -226,32 +238,44 @@ void CovariatedPrediction::calculateCovbaseTypes(TypesFunctionArgs fargs) {
       throw args.error(args[i], s);
     }
   }
-  rets[0] = DataType().points().shape(size(), size());
-  /* m_lltbase = LLT(size()); */
-  /* rets[0].preallocated(m_lltbase.matrixRef().data()); */
-  m_covbase.resize(size(), size());
-  rets[0].preallocated(m_covbase.matrix().data());
+
+  auto& ret=rets[0];
+  if(m_diagonal_covbase){
+    ret.points().shape(size());
+  }
+  else{
+    ret.points().shape(size(), size());
+  }
 }
 
 void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
   auto& args=fargs.args;
-  m_covbase.setZero();
+  auto& ret=fargs.rets[0];
+  ret.x.setZero();
   for (size_t i = 0; i < args.size(); ++i) {
+    auto& arg = args[i];
     const CovarianceAction &act = m_covactions[i];
     switch (act.action) {
-    case CovarianceAction::Diagonal:
-      m_covbase.matrix().diagonal().segment(act.x->i, act.x->n) = args[i].arr;
-      break;
-    case CovarianceAction::Block:
-      /* std::cout << args[i].arr; */
-      m_covbase.block(act.x->i, act.y->i, act.x->n, act.y->n) = args[i].arr;
-      break;
+      case CovarianceAction::Diagonal:
+        if(arg.type.shape.size()>1){
+          ret.mat.block(act.x->i, act.x->i, act.x->n, act.x->n) = arg.arr2d;
+        }
+        else{
+          if(m_diagonal_covbase){
+            ret.arr.segment(act.x->i, act.x->n) = arg.arr;
+          }
+          else{
+            ret.mat.diagonal().segment(act.x->i, act.x->n) = arg.arr;
+          }
+        }
+        break;
+      case CovarianceAction::Block:
+        /* std::cout << arg.arr; */
+        ret.mat.block(act.x->i, act.y->i, act.x->n, act.y->n) = arg.arr2d;
+        ret.mat.block(act.y->i, act.x->i, act.y->n, act.x->n) = arg.arr2d.transpose();
+        break;
     }
   }
-
-  /* Force materialization of matrix */
-  (void)fargs.rets[0].mat;
-  /* m_lltbase.compute(m_covbase); */
 }
 
 /**
@@ -260,16 +284,33 @@ void CovariatedPrediction::calculateCovbase(FunctionArgs fargs) {
 */
 void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
   auto& args=fargs.args;
-  auto& rets=fargs.rets;
-  /* for (size_t i = 1; i < args.size(); ++i) {
-   *   if (args[i].size() != size()) {
-   *     throw args.error(args[i], "rank1 vec size does not match prediction size");
-   *   }
-   * } */
-  rets[0] = args[0];
-  m_llt = LLT(size());
-  using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
-  rets[0].preallocated( const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()) );
+  auto& ret=fargs.rets[0];
+
+  size_t req_size=size();
+  m_diagonal_cov=true;
+  for (size_t i = 0; i < args.size(); ++i) {
+    auto& argi=args[i];
+
+    if(argi.shape.size()>1){
+      m_diagonal_cov=false;
+    }
+    for(auto dim: argi.shape){
+      if(dim!=req_size){
+        throw args.error(argi, "argument has invalid size");
+      }
+    }
+  }
+
+  if(m_diagonal_cov){
+    ret.points().shape(req_size);
+  }
+  else{
+    ret.points().shape(req_size, req_size);
+
+    m_llt = LLT(size());
+    using dataPtrMatrix_t = decltype(m_llt.matrixRef().data());
+    ret.preallocated(const_cast<dataPtrMatrix_t>(m_llt.matrixRef().data()));
+  }
 }
 
 /**
@@ -278,17 +319,35 @@ void CovariatedPrediction::calculateCovTypes(TypesFunctionArgs fargs) {
 */
 void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
   auto& args=fargs.args;
-  (void)args[0].mat;
-  auto full_covmat = m_covbase;
-  if (args.size() > 1) {
-      auto& sys_covmat = args[1].arr2d;
-      full_covmat += sys_covmat;
+  auto& ret=fargs.rets[0];
+
+  Eigen::MatrixXd fullcovmat;
+  if(m_diagonal_cov){
+    fullcovmat.resize(ret.arr.size(), 1);
   }
-  m_llt.compute(full_covmat);
-  /* for (size_t i = 1; i < args.size(); ++i) {
-   *   m_llt.rankUpdate(args[i].vec);
-   * } */
-  (void)fargs.rets[0].mat;
+  else{
+    fullcovmat.resize(ret.mat.rows(), ret.mat.cols());
+  }
+  fullcovmat.setZero();
+
+  for (size_t i = 0; i < args.size(); ++i) {
+    auto& arg=args[i];
+    bool argdiag = arg.type.shape.size()==1;
+
+    if(argdiag==m_diagonal_cov){
+      fullcovmat.array()+=arg.arr;
+    }
+    else{
+      fullcovmat+=arg.vec.asDiagonal();
+    }
+  }
+
+  if(m_diagonal_cov){
+    ret.arr=fullcovmat.col(0).array().sqrt();
+  }
+  else{
+    m_llt.compute(fullcovmat);
+  }
 }
 
 /**
@@ -296,12 +355,12 @@ void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
    * prediction inputs.)
 */
 size_t CovariatedPrediction::size() const {
-  return m_transform[0].type.size();
+  return m_size;
 }
 
 /**
    * @brief Force update of theoretical prediction.
 */
 void CovariatedPrediction::update() const {
-  m_transform.update(0);
+  transformations[0].touch();
 }

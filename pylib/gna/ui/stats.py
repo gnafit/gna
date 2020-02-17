@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-u"""Build test statistic based on arbitrary sum of χ² and lnPoisson functions"""
+u"""Build test statistic based on arbitrary sum of χ² and logPoisson functions"""
 
 from gna.ui import basecmd
 import ROOT
@@ -12,9 +12,9 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('name', help='statistic name')
         parser.add_argument('-c', '--chi2',       default=[], action='append', type=env.parts.analysis, help=u'χ² contribution')
-        parser.add_argument('-p', '--lnpoisson',  default=[], action='append', type=env.parts.analysis, help=u'lnPoisson contribution')
-        parser.add_argument('--lnpoisson-legacy', default=[], action='append', type=env.parts.analysis, help=u'lnPoisson contribution (legacy)')
-        parser.add_argument('--poisson-approx', action='store_true', help='Use approximate lnPoisson formula (Stirling)')
+        parser.add_argument('-p', '--logpoisson',  default=[], action='append', type=env.parts.analysis, help=u'logPoisson contribution')
+        parser.add_argument('--logpoisson-legacy', default=[], action='append', type=env.parts.analysis, help=u'logPoisson contribution (legacy)')
+        parser.add_argument('--poisson-approx', action='store_true', help='Use approximate logPoisson formula (Stirling)')
         parser.add_argument('--labels', nargs='+', default=[], help='Node labels')
 
     def init(self):
@@ -30,23 +30,23 @@ class cmd(basecmd):
 
             self.components.append(self.chi2)
 
-        if self.opts.lnpoisson_legacy:
+        if self.opts.logpoisson_legacy:
             clabel = labels and labels.pop() or ''
-            self.lnpoisson_legacy = ROOT.Poisson(self.opts.poisson_approx, labels='')
-            for analysis in self.opts.lnpoisson_legacy:
+            self.logpoisson_legacy = ROOT.Poisson(self.opts.poisson_approx, labels='')
+            for analysis in self.opts.logpoisson_legacy:
                 for block in analysis:
-                    self.lnpoisson_legacy.add(block.theory, block.data)
+                    self.logpoisson_legacy.add(block.theory, block.data)
 
-            self.components.append(self.lnpoisson_legacy)
+            self.components.append(self.logpoisson_legacy)
 
-        if self.opts.lnpoisson:
+        if self.opts.logpoisson:
             clabel = labels and labels.pop() or ''
-            self.lnpoisson = ROOT.LnPoissonSplit(self.opts.poisson_approx, labels=(clabel+' (const)', clabel))
-            for analysis in self.opts.lnpoisson:
+            self.logpoisson = ROOT.LogPoissonSplit(self.opts.poisson_approx, labels=(clabel+' (const)', clabel))
+            for analysis in self.opts.logpoisson:
                 for block in analysis:
-                    self.lnpoisson.add(block.theory, block.data)
+                    self.logpoisson.add(block.theory, block.data)
 
-            self.components.append(self.lnpoisson)
+            self.components.append(self.logpoisson)
 
         if len(self.components)==1:
             self.statistic = self.components[0]
