@@ -22,7 +22,9 @@ Changes since previous implementation [juno_chengyp]:
     - WIP: add matter oscillations
 
 Implements:
-    - Reactor antineutrino flux: Huber+Mueller
+    - Reactor antineutrino flux:
+      * Huber+Mueller
+      * ILL+Vogel
     - NO off-equilibrium and NO SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
@@ -63,6 +65,13 @@ Misc changes:
         # binning
         parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
 
+        # reactor flux
+        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], help='Antineutrino flux')
+
+        # osc prob
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
+
         # Parameters
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
@@ -72,9 +81,6 @@ Misc changes:
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
-        # Configuration
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
-        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
     def init(self):
         self.init_nidx()
@@ -248,19 +254,19 @@ Misc changes:
                     pdgyear = self.opts.pdgyear,
                     dm      = self.opts.dm
                     ),
-                anuspec = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
-                    name = 'anuspec',
-                    filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
-                    ),
-                anuspec_1 = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
+                anuspec_hm = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
+                    ),
+                anuspec_ill = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
+                    name = 'anuspec',
+                    filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
+                                'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
                     ),

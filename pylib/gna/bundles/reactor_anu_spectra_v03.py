@@ -74,7 +74,7 @@ class reactor_anu_spectra_v03(TransformationBundle):
             """Store data"""
             self.set_output(self.cfg.name, it, interp_output)
 
-            self.context.objects[('spectrum', isotope)]     = spectrum_t
+            self.context.objects[('spectrum', isotope)] = spectrum_t
 
     def load_data(self):
         """Read raw input spectra"""
