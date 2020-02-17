@@ -67,7 +67,7 @@ Misc changes:
 
         # reactor flux
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
-        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], help='Antineutrino flux')
+        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='huber-mueller', help='Antineutrino flux')
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
