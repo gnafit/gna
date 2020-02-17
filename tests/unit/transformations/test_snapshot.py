@@ -51,6 +51,7 @@ def test_snapshot_01(function_name):
         print()
 
     snapshot.snapshot.unfreeze()
+    assert snapshot.snapshot.tainted()
     res = snapshot.snapshot.result.data()
     print('Result', res)
     print('Vars', vars)
