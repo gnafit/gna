@@ -23,9 +23,11 @@ Changes since previous implementation [juno_chengyp]:
 
 Implements:
     - Reactor antineutrino flux:
-      * Huber+Mueller
-      * ILL+Vogel
-    - NO off-equilibrium and NO SNF contribution
+      * Spectra:
+        + Huber+Mueller
+        + ILL+Vogel
+      * [optional] Off-equilibrium corrections (Mueller)
+      * NO SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
@@ -68,6 +70,7 @@ Misc changes:
         # reactor flux
         parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='huber-mueller', help='Antineutrino flux')
+        parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
@@ -80,7 +83,6 @@ Misc changes:
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
-
 
     def init(self):
         self.init_nidx()
@@ -128,7 +130,8 @@ Misc changes:
         self.formula = list(self.formula_base)
 
         oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
-        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part)
+        offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else ''
+        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction)
         self.formula = self.formula + self.formula_enu
 
         energy_model_formula = ''
@@ -254,21 +257,26 @@ Misc changes:
                     pdgyear = self.opts.pdgyear,
                     dm      = self.opts.dm
                     ),
-                anuspec_hm = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
+                anuspec = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03'),
+                    name = 'anuspec',
+                    filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
+                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
+                    ),
+                anuspec_1 = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
                     ),
-                anuspec_ill = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
-                    name = 'anuspec',
-                    filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                                'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
+                offeq_correction = NestedDict(
+                    bundle = dict(name='reactor_offeq_spectra',
+                                  version='v03', major='ir'),
+                    offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                     ),
                 eff = NestedDict(
                     bundle = dict(
@@ -629,7 +637,8 @@ Misc changes:
                                 baselineweight[r,d]*
                                 ibd_xsec(enu(), ctheta())*
                                 jacobian(enu(), ee(), ctheta())*
-                                expand(sum[i]|  power_livetime_factor*anuspec[i](enu()))*
+                                expand(sum[i]|
+                                power_livetime_factor*anuspec[i](enu()){offeq_correction})*
                                 {oscprob}
                             )
             '''

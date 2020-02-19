@@ -18,6 +18,11 @@ public:
             ;
     }
 
+    Jacobian(OutputDescriptor* out, double reldelta=1.e-1) :
+        Jacobian(reldelta) {
+            *out >> transformations["jacobian"].inputs["func"];
+        }
+
     void calcTypes(TypesFunctionArgs fargs);
     void calcJacobian(FunctionArgs fargs);
     void dump();
