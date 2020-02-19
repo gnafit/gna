@@ -456,14 +456,14 @@ Misc changes:
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
+                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/corrmap_xuyu.txt'
                         )
                 self.cfg.multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector200_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
@@ -475,14 +475,14 @@ Misc changes:
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt'
+                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_cov.txt'
                         )
                 self.cfg.multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
