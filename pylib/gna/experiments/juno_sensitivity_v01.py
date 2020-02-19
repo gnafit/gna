@@ -40,7 +40,9 @@ Misc changes:
     - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
     - Switch to double angle parameters for theta12 and theta13
     - Added concatenated subdetectors
-
+    - Uncomment uncertainties:
+      * energy per fission
+      * fission fractions
     """
 
     detectorname = 'AD1'
@@ -297,23 +299,11 @@ Misc changes:
                     pars = uncertain(1, 'free'),
                     ),
                 fission_fractions = NestedDict(
-                    bundle = dict(name="parameters",
-                        version = "v01",
-                        major = 'i'
-                        ),
+                    bundle = dict(name="parameters_yaml_v01", major = 'i'),
                     parameter = "fission_fractions",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
-                    pars = uncertaindict([
-                        ('U235',  0.60),
-                        ('Pu239', 0.27),
-                        ('U238',  0.07),
-                        ('Pu241', 0.06)
-                        ],
-                        # uncertainty = 30.0,
-                        # mode = 'percent',
-                        mode = 'fixed',
-                        ),
+                    data = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.yaml'
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -380,17 +370,12 @@ Misc changes:
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [
-                              # ('U235',  (201.92, 0.46)),
-                              # ('U238',  (205.52, 0.96)),
-                              # ('Pu239', (209.99, 0.60)),
-                              # ('Pu241', (213.60, 0.65))
-                              ('U235',  201.92),
-                              ('U238',  205.52),
-                              ('Pu239', 209.99),
-                              ('Pu241', 213.60)
+                              ('U235',  (201.92, 0.46)),
+                              ('U238',  (205.52, 0.96)),
+                              ('Pu239', (209.99, 0.60)),
+                              ('Pu241', (213.60, 0.65))
                               ],
-                            # mode='absolute'
-                            mode='fixed'
+                            mode='absolute'
                             ),
                         ),
                 lsnl = NestedDict(
