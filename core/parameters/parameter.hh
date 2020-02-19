@@ -70,8 +70,8 @@ public:
     auto &d = base_type::data();
     auto& values=d.value;
     if( !std::equal(values.begin(), values.end(), other) ){
-        base_type::notify();
         std::copy(other, std::next(other, values.size()), values.data());
+        base_type::notify();
     }
     d.tainted = false;
   }
