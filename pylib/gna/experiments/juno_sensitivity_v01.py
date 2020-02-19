@@ -478,8 +478,6 @@ Misc changes:
                         )
             else:
                 assert False
-        else:
-            assert False
 
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
