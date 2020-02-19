@@ -32,14 +32,14 @@ from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
 ndata=950
-modecos = True # default
+modecos = False # default
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
 E_arr = N.arange(1.0, 10.0, 0.001)  #array energy (МеV)
 
 with context.set_context(manager=ndata, precision=args.precision) as manager:
     ns.defparameter("L", central=52,sigma=0) #kilometre
-    gna.parameters.oscillation.reqparameters(ns)
+    gna.parameters.oscillation.reqparameters_reactor(ns, dm='23')
     pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
     ns.materializeexpressions()
     ns.printparameters(labels=True)
@@ -69,6 +69,7 @@ if args.graph:
     name, ext = args.graph.rsplit('.', 1)
     savegraph(ws.sum, name+'_vars.'+ext, namespace=ns)
 
+out = ws.sum.sum
 
 from gna.bindings import common
 fig = plt.figure()
@@ -78,8 +79,14 @@ ax.grid()
 ax.set_title(r'$\overline{\nu}_e$ survival probability at 52 km')
 ax.set_xlabel(r'$E_{\nu}$, MeV')
 ax.set_ylabel(u'$P_{ee}$')
-ws.sum.sum.plot_vs(E_arr)
+out.plot_vs(E_arr, label='Full')
 
+ns['SinSqDouble13'].push(0.0)
+out.plot_vs(E_arr, label=r'Only solar: $\sin^22\theta_{13}=0$')
+print('Solar mode')
+ns.printparameters(labels=True)
+
+ax.legend()
 print(ws.sum.sum)
 plt.show()
 

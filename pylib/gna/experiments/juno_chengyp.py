@@ -43,7 +43,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
         parser.add_argument('--mode', choices=['main', 'yb'], default='main', help='analysis mode')
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb-noosc', 'junosens1'], default='default', help='set of parameters to load')
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=None, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
@@ -72,6 +72,8 @@ The model is succeeded by juno_sensitivity_v01 model.
         if 'far-off' in self.opts.reactors:
             self.reactors.remove('DYB')
             self.reactors.remove('HZ')
+        if 'single' in self.opts.reactors:
+            self.reactors = ['YJ1']
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     self.reactors],

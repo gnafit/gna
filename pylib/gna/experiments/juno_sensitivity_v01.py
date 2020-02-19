@@ -68,7 +68,7 @@ Misc changes:
         parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
 
         # reactor flux
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='huber-mueller', help='Antineutrino flux')
         parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
 
@@ -113,6 +113,8 @@ Misc changes:
             self.reactors.remove('HZ')
         if 'dayabay' in self.opts.reactors:
             self.reactors=['DYB']
+        if 'single' in self.opts.reactors:
+            self.reactors=['YJ1']
 
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
