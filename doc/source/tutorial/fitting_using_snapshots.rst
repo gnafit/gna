@@ -35,4 +35,4 @@ the model parameters.
 .. figure:: ../../img/tutorial/fit/02_fit_models_snapshot_graph.png
    :align: center
 
-    The computational graph used to fit the current model.
+   The computational graph used to fit the current model.
