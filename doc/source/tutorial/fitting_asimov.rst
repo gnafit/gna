@@ -37,7 +37,7 @@ there still may exist a dataset and an analysis with the same name.
 The Dataset is defined by the `dataset` module.
 
 .. literalinclude:: ../../../macro/tutorial/fit/01_fit_script.sh
-    :lines: 18
+    :lines: 16
 
 We have just created dataset `peak`, that makes a correspondence between the output `peak_f/spectrum` and output
 `peak_MC/spectrum` (data). The option :code:`--asimov-data` indicates that `peak_MC` will have no fluctuations added.
@@ -57,13 +57,13 @@ uncertainties defined in data set will be ignored.
 In case of a single Asimov dataset the Analysis definition is straightforward:
 
 .. literalinclude:: ../../../macro/tutorial/fit/01_fit_script.sh
-    :lines: 19
+    :lines: 17
 
 Here we define Analysis, named `analysis`, which is using a single dataset `peak`. The analysis now may be used to
 define the statistics. Let us use the :math:`\chi^2` statistics:
 
 .. literalinclude:: ../../../macro/tutorial/fit/01_fit_script.sh
-    :lines: 21
+    :lines: 19
 
 The syntax is similar. The module `chi2` defines the :math:`\chi^2` statistics with name `stats_chi2` and assigns it to
 the analysis `analysis`.

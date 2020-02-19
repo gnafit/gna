@@ -1,0 +1,56 @@
+Loading config file: config/gna/gnacfg.py
+Loading config file: config_local/gna/gnacfg.py
+Add observable: peak_MC/spectrum
+Add observable: peak_f/spectrum
+Variables in namespace 'peak_MC':
+  BackgroundRate                =       1000 │                 [fixed]                 │ Flat background rate 0
+  Mu                            =       2000 │                 [fixed]                 │ Peak 0 amplitude
+  E0                            =          2 │                 [fixed]                 │ Peak 0 position
+  Width                         =        0.5 │                 [fixed]                 │ Peak 0 width
+Variables in namespace 'peak_f':
+  BackgroundRate                =       1000 │        1000±           5 [free]         │ Flat background rate 0
+  Mu                            =       2000 │        2000±          10 [free]         │ Peak 0 amplitude
+  E0                            =          2 │           2±        0.05 [free]         │ Peak 0 position
+  Width                         =        0.5 │         0.5±       0.005 [free]         │ Peak 0 width
+Write graph to: output/tutorial_img/fit/01_fit_models_graph.png
+Variables in namespace 'peak_f':
+  BackgroundRate                =       2000 │        1000±           5 [free]         │ Flat background rate 0
+  Mu                            =        100 │        2000±          10 [free]         │ Peak 0 amplitude
+  E0                            =          3 │           2±        0.05 [free]         │ Peak 0 position
+  Width                         =        0.2 │         0.5±       0.005 [free]         │ Peak 0 width
+Save figure output/tutorial_img/fit/01_fit_models_initial.png
+Fit result:${
+  cpu : 0.010507,
+  errors : [21.044786843888083, 89.87411551001028, 0.019925689550693886, 0.021573688772678953],
+  errorsdict : ${
+    peak_f : ${
+      BackgroundRate : 21.0447868439,
+      Mu : 89.87411551,
+      E0 : 0.0199256895507,
+      Width : 0.0215736887727,
+    },
+  },
+  fun : 4.65335462203e-08,
+  maxcv : 0.01,
+  names : ['peak_f.BackgroundRate', 'peak_f.Mu', 'peak_f.E0', 'peak_f.Width'],
+  nfev : 166,
+  npars : 4,
+  success : True,
+  wall : 0.0105290412903,
+  x : [1000.000584000211, 1999.989446718792, 2.0000031405938894, 0.4999998136336317],
+  xdict : ${
+    peak_f : ${
+      BackgroundRate : 1000.000584,
+      Mu : 1999.98944672,
+      E0 : 2.00000314059,
+      Width : 0.499999813634,
+    },
+  },
+}
+Save output file: output/tutorial_img/fit/01_fit_models.yaml
+Variables in namespace 'peak_f':
+  BackgroundRate                =       1000 │        1000±           5 [free]         │ Flat background rate 0
+  Mu                            =    1999.99 │        2000±          10 [free]         │ Peak 0 amplitude
+  E0                            =          2 │           2±        0.05 [free]         │ Peak 0 position
+  Width                         =        0.5 │         0.5±       0.005 [free]         │ Peak 0 width
+Save figure output/tutorial_img/fit/01_fit_models_fit.png
