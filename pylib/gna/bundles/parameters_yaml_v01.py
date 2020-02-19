@@ -21,6 +21,7 @@ class parameters_yaml_v01(TransformationBundle):
         self._par_container = []
         TransformationBundle.__init__(self, *args, **kwargs)
 
+        self.check_nidx_dim(1, 1, 'major')
         self.load_data()
 
     def load_data(self):
@@ -37,12 +38,17 @@ class parameters_yaml_v01(TransformationBundle):
             if not name in data:
                 raise Exception('Input file {} misses field {}'.format(self.cfg.data, name))
 
-        if ('correlations' in data or 'uncertainties' in data) and 'covariance' in data:
-            raise Exception('Conflicting fields in data: correlations/uncertainties and covariance')
+        # if ('correlations' in data or 'uncertainties' in data) and 'covariance' in data:
+            # raise Exception('Conflicting fields in data: correlations/uncertainties and covariance')
 
-        for field in ('values', 'uncertainties', 'correlations', 'covariance'):
+        for field in ('values', 'uncertainties', 'correlations'): #, 'covariance'
             if field in data:
                 data[field] = N.asanyarray(data[field])
+
+        if 'correlations' in data:
+            if self.cfg.get('verbose', 0)>1:
+                print('Correlation matrix')
+                print(self.data['correlations'], )
 
     @staticmethod
     def _provides(cfg):
@@ -53,63 +59,65 @@ class parameters_yaml_v01(TransformationBundle):
             return (cfg.parameter,), ()
 
     def define_variables(self):
+        from gna.parameters import covariance_helpers as ch
+
         self._par_container = []
         separate_uncertainty = self.cfg.get('separate_uncertainty', False)
         parname = self.cfg.parameter
-        pars = self.cfg.pars
         labelfmt = self.cfg.get('label', '')
 
-        for it_major in self.nidx_major:
-            major_values = it_major.current_values()
-            if major_values:
-                parcfg = pars[major_values]
-            else:
-                parcfg = pars
+        data = self.data
+        values = data['values']
+        names = data['names']
+        unc = data['uncertainties']
+        mode = data['mode']
+        if mode=='percent':
+            relunc = unc/100.
+            unc = values*relunc
+        elif mode=='relative':
+            relunc = unc
+            unc = values*relunc
+        elif mode=='absolute':
+            relunc = unc/values
+        else:
+            raise Exception('Invalid uncertainty mode: '+mode)
 
-            for it_minor in self.nidx_minor:
+        for it_minor in self.nidx_minor:
+            container = []
+
+            for it_major in self.nidx_major:
+                major_values, = it_major.current_values()
+                if not major_values in names:
+                    raise Exception('Variable {} is not in the list'.format(major_values))
+                data_idx = names.index(major_values)
+
                 it=it_major+it_minor
                 label = it.current_format(labelfmt) if labelfmt else ''
 
                 if separate_uncertainty:
-                    if parcfg.mode=='fixed':
-                        raise self.exception('Can not separate uncertainty for fixed parameters')
-
-                    unccfg = parcfg.get_unc()
-                    uncpar = self.reqparameter(separate_uncertainty, it, cfg=unccfg, label=label+' (norm)')
-                    parcfg.mode='fixed'
-
-                par = self.reqparameter(parname, it, cfg=parcfg, label=label)
+                    uncpar = self.reqparameter(separate_uncertainty, it, central=1.0, sigma=relunc[data_idx],
+                                               label=label+' (norm)')
+                    par = self.reqparameter(parname, it, central=values[data_idx], fixed=True, label=label)
+                    container.append(uncpar)
+                else:
+                    par = self.reqparameter(parname, it, central=values[data_idx], sigma=unc[data_idx], label=label)
+                    container.append(par)
 
                 if self.cfg.get("objectize"):
                     trans=par.transformations.value
                     trans.setLabel(label)
                     self.set_output(parname, it, trans.single())
 
-                self._par_container.append(par)
+            self._par_container.append(container)
 
-        if 'correlations' in self.cfg:
-            self._load_correlation_matrix()
-        elif 'covariance' in self.cfg:
-            self._load_covariance_matrix()
+            if 'correlations' in self.data:
+                self._checkmatrix(self.data['correlations'], container, is_correlation=True)
+                ch.covariate_pars(container, self.data['correlations'])
+        # elif 'covariance' in self.cfg:
+            # self._load_covariance_matrix()
 
     def build(self):
         pass
-
-    def _load_correlation_matrix(self):
-        filename = self.cfg.get('correlations', None)
-        assert filename
-
-        corrmat = N.loadtxt(filename)
-        if self.cfg.get('verbose', 0)>1:
-            print('Load correlation matrix from %s:'%filename)
-            print(corrmat)
-
-        self._checkmatrix(corrmat, is_correlation=True)
-
-        self.corrmat = corrmat
-
-        from gna.parameters import covariance_helpers as ch
-        ch.covariate_pars(self._par_container, corrmat)
 
     def _load_covariance_matrix(self):
         filename = self.cfg.get('covariance', None)
@@ -139,11 +147,11 @@ class parameters_yaml_v01(TransformationBundle):
         ch.covariate_pars(self._par_container, corrmat)
 
 
-    def _checkmatrix(self, mat, is_correlation):
+    def _checkmatrix(self, mat, par_container, is_correlation):
         if mat.shape[0]!=mat.shape[1]:
             raise Exception('Non square matrix provided:', mat.shape[0], mat.shape[1])
 
-        if len(self._par_container)!=mat.shape[0]:
+        if len(par_container)!=mat.shape[0]:
             raise Exception('Unable to set correlation to %i parameters with %ix%i matrix'%(len(pars, mat.shape[0], mat.shape[1])))
 
         mmin, mmax = mat.min(), mat.max()
