@@ -303,7 +303,7 @@ Misc changes:
                     parameter = "fission_fractions",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
-                    data = 'data/dayabay/reactor/fission_fraction/2013.12.05_xubo.yaml'
+                    data = 'data/data_dayabay/reactor/fission_fraction/2013.12.05_xubo.yaml'
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
