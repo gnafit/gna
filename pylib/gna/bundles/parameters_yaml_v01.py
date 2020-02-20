@@ -30,7 +30,7 @@ class parameters_yaml_v01(TransformationBundle):
 
         try:
             with open(self.cfg.data, 'r') as stream:
-                data = self.data = yaml.load(stream, Loader=yaml.FullLoader)
+                data = self.data = yaml.load(stream, Loader=yaml.Loader)
         except:
             raise Exception('Unable to load input data file: '+self.cfg.data)
 
