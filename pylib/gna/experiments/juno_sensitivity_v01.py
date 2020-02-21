@@ -24,12 +24,15 @@ Changes since previous implementation [juno_chengyp]:
 Implements:
     - Reactor antineutrino flux:
       * Spectra:
+        + ILL+Vogel (now default)
         + Huber+Mueller
-        + ILL+Vogel
       * [optional] Off-equilibrium corrections (Mueller)
       * NO SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
+    - Final binning:
+      * 20 keV
+      * 10 keV (default)
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
     - [optional] Multi-detector energy resolution (Yaping)
@@ -67,19 +70,18 @@ Misc changes:
         eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
 
         # binning
-        parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
+        parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
 
         # reactor flux
         parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
-        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='huber-mueller', help='Antineutrino flux')
+        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
         parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
         # Parameters
-        parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
@@ -172,18 +174,7 @@ Misc changes:
     def parameters(self):
         ns = self.namespace
         dmxx = 'pmns.DeltaMSq'+str(self.opts.dm).upper()
-        if self.opts.free=='minimal':
-            fixed_pars = ['pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-            free_pars  = [dmxx]
-        elif self.opts.free=='osc':
-            fixed_pars = []
-            free_pars  = [dmxx, 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-        else:
-            raise Exception('Unsupported option')
-
-        for par in fixed_pars:
-            ns[par].setFixed()
-        for par in free_pars:
+        for par in [dmxx, 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']:
             ns[par].setFree()
 
         def single2double(v):
@@ -197,19 +188,14 @@ Misc changes:
             ns['pmns.SinSqDouble13'].reset()
             ns['pmns.DeltaMSq12'].reset()
             ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12':
-            ns['pmns.SinSqDouble13'].setCentral(0.094)
+        elif self.opts.parameters=='yb_t13':
+            ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
             ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.SinSqDouble13'].reset()
+            ns['pmns.SinSqDouble12'].reset()
             ns['pmns.DeltaMSq12'].reset()
             ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12_t13':
-            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
-            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.DeltaMSq12'].reset()
-            ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12_t13_dm12':
+        elif self.opts.parameters=='yb_t13_t12_dm12':
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
             ns['pmns.DeltaMSqEE'].reset()
         elif self.opts.parameters=='global':
