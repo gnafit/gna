@@ -67,7 +67,7 @@ Misc changes:
 
         eres = parser.add_mutually_exclusive_group()
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
-        eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
+        eres.add_argument('--eres-npe', type=float, default=1350.0, help='Average Npe at 1 MeV')
 
         # binning
         parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')

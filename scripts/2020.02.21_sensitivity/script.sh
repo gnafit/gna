@@ -135,7 +135,6 @@ function run(){
           -- exp --ns juno juno_sensitivity_v01 -vv \
                  --energy-model $energy \
                  --eres-npe $npe \
-                 --free osc \
                  --oscprob $oscprob \
                  --dm ee \
                  $spectrum \
@@ -199,8 +198,8 @@ function run(){
 
 function syst {
     run 000 "Default"                 vac_eres_ybpars   vacuum oldnpe energy="          eres" reactors=all parameters=yb                   coarse        freetheta
-    run 001 "10 keV binning"          vac_eres_ybpars   vacuum oldnpe energy="          eres" reactors=all parameters=yb                                 freetheta
-    run 002 "Default (Huber+Mueller)" vac_eres_ybpars   vacuum oldnpe energy="          eres" reactors=all parameters=yb                   hubermueller  freetheta transient
+    run 001 "+10 keV binning"         vac_eres_ybpars   vacuum oldnpe energy="          eres" reactors=all parameters=yb                                 freetheta
+    run 002 "Huber+Mueller*"          vac_eres_ybpars   vacuum oldnpe energy="          eres" reactors=all parameters=yb                   hubermueller  freetheta transient
     run 010 "+new θ(13)"              vac_eres          vacuum oldnpe energy="          eres" reactors=all parameters=yb_t13                             freetheta
     run 020 "+new θ(12), Δm²(21)"     vac_eres          vacuum oldnpe energy="          eres" reactors=all parameters=yb_t13_t12_dm12                    freetheta
     run 030 "+new Δm²(ee)"            vac_eres          vacuum oldnpe energy="          eres" reactors=all                                               freetheta
@@ -211,13 +210,13 @@ function syst {
     run 102 "+U(power, eff, spec 1%, ff, e/f)" vac_eres vacuum oldnpe energy="          eres"                                                                                          spectrum=initial       covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission"
     run 103 "+offeq+U(…)"             vac_eres          vacuum oldnpe energy="          eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale"
     run 105 "+Npe=1350"               vac_eres          vacuum        energy="          eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale"
-    run 110 "+U(…, eres 30%)*"        vac_eres          vacuum        energy="          eres"                                                            unceres   transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale"
+    run 110 "+U(eres 30%)*"           vac_eres          vacuum        energy="          eres"                                                            unceres   transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13 juno.eres juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale"
     run 140 "Meres (5)+U(sub)*"       vac_meres         vacuum        energy="     multieres --subdetectors-number 5   --multieres concat"                         transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.subdetector_fraction"
-    run 170 "Meres+LSNL*"             vac_lsnl_meres    vacuum        energy="lsnl multieres --subdetectors-number 5   --multieres concat"                         transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.subdetector_fraction"
+    run 170 "Meres+LSNL*"             vac_lsnl_eres     vacuum        energy="lsnl multieres --subdetectors-number 5   --multieres concat"                         transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.subdetector_fraction"
     run 160 "eres+LSNL"               vac_lsnl_eres     vacuum        energy="lsnl      eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale"
-    run 180 "+U(lsnl)"                vac_lsnl_meres    vacuum        energy="lsnl      eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
-    run 190 "+YB oscpars*"            vac_lsnl_meres    vacuum        energy="lsnl      eres"                                              parameters=yb           transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
-    run 210 "Meres+LSNL, matter"      mat_lsnl_meres    matter        energy="lsnl      eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
+    run 180 "+U(lsnl)"                vac_lsnl_eres     vacuum        energy="lsnl      eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
+    run 190 "+YB oscpars*"            vac_lsnl_eres     vacuum        energy="lsnl      eres"                                              parameters=yb           transient           spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
+    run 210 "Matter oscprob"          mat_lsnl_eres     matter        energy="lsnl      eres"                                                                                          spectrum=initial offeq covpars="juno.norm juno.pmns.SinSqDouble13           juno.thermal_power juno.spectrum juno.fission_fractions juno.eper_fission juno.offeq_scale juno.Npescint juno.kC juno.birks"
 }
 syst
 
