@@ -247,21 +247,21 @@ Misc changes:
                     pdgyear = self.opts.pdgyear,
                     dm      = self.opts.dm
                     ),
-                anuspec = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
+                anuspec_hm = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                         'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
-                anuspec_1 = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
+                anuspec_ill = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
                     name = 'anuspec',
-                    filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
+                                'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 offeq_correction = NestedDict(
                     bundle = dict(name='reactor_offeq_spectra',
