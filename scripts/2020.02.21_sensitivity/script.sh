@@ -55,7 +55,7 @@ function run(){
                     spectrum="--spectrum $val"
                     ;;
                 freetheta)
-                    constrain="--set juno.pmns.SinSqDouble13 free=1"
+                    constrain="--set juno.pmns.SinSqDouble13 free=true"
                     ;;
                 unceres)
                     eresunc="--eres-b-relsigma 0.3"
