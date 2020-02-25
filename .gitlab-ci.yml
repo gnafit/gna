@@ -1,10 +1,11 @@
 stages:
-    - testing
+    - build
+    - allure
     - pages
 
-testing:
+build:
     image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
-    stage: testing
+    stage: build
 
     script:
     - source /soft/root-6.18.04/build/bin/thisroot.sh
@@ -17,7 +18,14 @@ testing:
     - mkdir test_results
     - pytest --alluredir=test_results
 
-    after_script:
+    only:
+    - master
+    - feature-datatype
+
+allure:
+    stage: allure
+
+    script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$ALLURE_PRIVATE_KEY")
     - mkdir -p ~/.ssh
