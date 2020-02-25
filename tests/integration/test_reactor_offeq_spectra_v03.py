@@ -20,7 +20,7 @@ from gna.expression.index import NIndex
 import gna.constructors as C
 
 
-def test_offeq_correction(tmp_path): 
+def test_offeq_correction(tmp_path):
     """ Test implementation of off-equilibrium contribution to antineutrino  spectra
     from nuclear fission in commercial reactors. The reason that contribution
     appears is the fact the electron conversion spectra measured at ILL doesn't
@@ -54,27 +54,29 @@ def test_offeq_correction(tmp_path):
             for _input in iso.values():
                 Enu >> _input.values()
         except AttributeError:
-                Enu >> iso 
+                Enu >> iso
 
     fig, ax = plt.subplots()
     for iso in indices[0][2]:
         corrected_spectra = offeq.context.outputs.offeq_correction[iso]['DB1'].data()
         ax.plot(Enu.single().data(), corrected_spectra -1., label=iso)
-    ax.set_title("Offequilibrium correction for reactor DB1", fontsize=16)
-    ax.legend(loc='best', fontsize=14)
-    ax.set_xlabel("Antineutrino energy, MeV", fontsize=14)
-    ax.set_ylabel("(Corrected - nominal) / nominal", fontsize=14)
+    ax.set_title("Offequilibrium correction")
+    ax.grid()
+    ax.legend(loc='best')
+    ax.set_xlabel("Antineutrino energy, MeV")
+    ax.set_ylabel("(Corrected - nominal) / nominal")
 
     suffix = 'correction'
     path = os.path.join(str(tmp_path), suffix + '.png')
     savefig(path, dpi=300)
+    savefig(path.replace('.png','.pdf'), dpi=300)
     allure_attach_file(path)
 
     path = os.path.join(str(tmp_path), suffix + '_graph.png')
     savegraph(offeq.context.outputs.offeq_correction['U235']['DB1'], path)
     allure_attach_file(path)
 
-def test_offeq_correction_expression(tmp_path): 
+def test_offeq_correction_expression(tmp_path):
     """Same test but build bundle with expressions"""
 
     _enu = np.linspace(1., 8.0, 500, dtype='d')
@@ -115,14 +117,16 @@ def test_offeq_correction_expression(tmp_path):
     for iso in indices[0][2]:
         corrected_spectra = context.outputs.offeq_correction[iso]['DB1'].data()
         ax.plot(Enu.single().data(), corrected_spectra -1., label=iso)
-    ax.set_title("Offequilibrium correction for reactor DB1", fontsize=16)
-    ax.legend(loc='best', fontsize=14)
-    ax.set_xlabel("Antineutrino energy, MeV", fontsize=14)
-    ax.set_ylabel("(Corrected - nominal) / nominal", fontsize=14)
+    ax.set_title("Offequilibrium correction")
+    ax.legend(loc='best')
+    ax.grid()
+    ax.set_xlabel("Antineutrino energy, MeV")
+    ax.set_ylabel("(Corrected - nominal) / nominal")
 
     suffix = 'correction'
     path = os.path.join(str(tmp_path), suffix + '.png')
     savefig(path, dpi=300)
+    savefig(path.replace('.png','.pdf'), dpi=300)
     allure_attach_file(path)
 
     path = os.path.join(str(tmp_path), suffix + '_graph.png')
