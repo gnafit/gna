@@ -244,13 +244,13 @@ class NMOSensPlotter(object):
         #
         #
         ax=self.figure(r'$\Delta\chi^2$')
-        ax.set_xlim(self.chi2.min()-4, self.chi2.max()+1.5)
+        ax.set_xlim(self.chi2.min()-5, self.chi2.max()+1.5)
 
         for i in range(len(self.chi2)):
             chi2_prev = self.chi2_prev[i]
             shift = self.shift[i]
             ytop, ybottom, ytop_prev = self.ytop[i], self.ybottom[i], self.ytop_prev[i]
-            ax.broken_barh([(chi2_prev, shift)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], alpha=0.7)
+            ax.broken_barh([(chi2_prev, shift)], (ytop, ybottom-ytop), facecolor=self.facecolors[i], alpha=0.9)
             ax.vlines(chi2_prev, ytop_prev, ybottom, color='black', linewidth=1.5, linestyle='-')
         else:
             ax.vlines(self.chi2[-1], self.ytop[-1], self.ybottom[-1], color='black', linewidth=1.5, linestyle='-')
@@ -354,6 +354,7 @@ class NMOSensPlotter(object):
             label.set_color(fc)
             if np.fabs(shift)>0.5:
                 label.set_fontweight('bold')
+            label.set_zorder(-1)
 
         ax_right2.set_ylim(*ax.get_ylim())
         ax_right2.set_yticks(ax.get_yticks())
