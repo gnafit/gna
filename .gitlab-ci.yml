@@ -17,6 +17,10 @@ build:
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH
     - mkdir test_results
     - pytest --alluredir=test_results
+    artifacts:
+        paths:
+            - test_results
+        expire_in: 3 mins
 
     only:
     - master
