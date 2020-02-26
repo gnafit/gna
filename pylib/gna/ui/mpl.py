@@ -38,10 +38,15 @@ class cmd(basecmd):
         axis.add_argument('--minor-ticks', '--mt', action='store_true', help='minor ticks')
         axis.add_argument('--ticks-extra', '--te', nargs='+', default=[], help='Add extra ticks', metavar=('axis', 'tick1'))
 
+        fig1 = parser.add_argument_group(title='figure (after)', description='Figure parameters (after)')
+        fig1.add_argument('-o', '--output', '--savefig', nargs='+', help='path to save figure')
+        fig1.add_argument('-s', '--show', action='store_true', help='show the figure')
+
     def init(self):
         self.configure_mpl()
         self.configure_figure()
         self.configure_axis()
+        self.configure_figure1()
 
     def configure_mpl(self):
         import matplotlib as mpl
@@ -72,6 +77,15 @@ class cmd(basecmd):
             if not self.opts.figure:
                 self.opts.figure={}
             plt.figure(**self.opts.figure)
+
+    def configure_figure1(self):
+        from matplotlib import pyplot as plt
+        if self.opts.output:
+            from mpl_tools.helpers import savefig
+            savefig(self.opts.output)
+
+        if self.opts.show:
+            plt.show()
 
     def configure_axis(self):
         from matplotlib import pyplot as plt
