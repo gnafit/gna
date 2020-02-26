@@ -35,7 +35,9 @@ class cmd(basecmd):
         if self.opts.verbose>1 and self.opts.rcparam:
             print('Matplotlib extra options')
             for d in self.opts.rcparam:
-                pprint.pprint(d)
+                if d:
+                    pprint.pprint(d)
 
         for d in self.opts.rcparam:
-            mpl.rcParams.update(d)
+            if d:
+                mpl.rcParams.update(d)
