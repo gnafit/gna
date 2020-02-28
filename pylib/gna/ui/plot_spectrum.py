@@ -86,11 +86,11 @@ class cmd(basecmd):
             for ((output1, output2), label) in zip(self.opts.difference_plot, legends):
                 output1.plot_hist(diff=output2, label=label, **plot_kwargs)
         if self.opts.ratio:
-            for ((output1, output2), label) in zip(self.opts.difference_plot, legends):
+            for ((output1, output2), label) in zip(self.opts.ratio, legends):
                 output1.plot_hist(ratio=output2, label=label, **plot_kwargs)
         if self.opts.offset_ratio:
-            for ((output1, output2), label) in zip(self.opts.difference_plot, legends):
-                output1.plot_hist(offsetratio=output2, label=label, **plot_kwargs)
+            for ((output1, output2), label) in zip(self.opts.offset_ratio, legends):
+                output1.plot_hist(offset_ratio=output2, label=label, **plot_kwargs)
 
         if show_legend:
             ax = plt.gca()
