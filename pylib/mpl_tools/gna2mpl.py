@@ -126,6 +126,23 @@ def plot_hist(output, *args, **kwargs):
 
         height-=height1
 
+    ratio=kwargs.pop('ratio', None)
+    if ratio is not None:
+        ifSameType(output, ratio)
+        height1, lims1, _ = get_1d_data(ratio, scale)
+
+        height/=height1
+        height[np.isnan(height)]=1.0
+
+    offset_ratio=kwargs.pop('offset_ratio', None)
+    if offset_ratio is not None:
+        ifSameType(output, offset_ratio)
+        height1, lims1, _ = get_1d_data(offset_ratio, scale)
+
+        height/=height1
+        height-=1.0
+        height[np.isnan(height)]=0.0
+
     return helpers.plot_hist(lims, height, *args, **kwargs)
 
 def plot_hist_centers(output, *args, **kwargs):

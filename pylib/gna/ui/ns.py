@@ -17,7 +17,7 @@ def list_to_dict(lst):
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-n', '--name', help='the namespace to work with')
+        parser.add_argument('-n', '--name', '--ns', help='the namespace to work with')
         parser.add_argument('--new', nargs='+', default=[], help='Create one or more namespaces')
         parser.add_argument('--push', nargs='+', default=[],
                             metavar='NS',

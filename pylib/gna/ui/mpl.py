@@ -33,6 +33,7 @@ class cmd(basecmd):
         axis.add_argument('--ylabel', '--yl', help='y label')
         axis.add_argument('--ylim', nargs='+', type=float, help='Y limits')
         axis.add_argument('--xlim', nargs='+', type=float, help='X limits')
+        axis.add_argument('--legend', nargs='?', default=undefined, help='legend (optional: position)')
 
         axis.add_argument('-g', '--grid', action='store_true', help='draw grid')
         axis.add_argument('--minor-ticks', '--mt', action='store_true', help='minor ticks')
@@ -112,6 +113,12 @@ class cmd(basecmd):
 
         if self.opts.minor_ticks:
             ax.minorticks_on()
+
+        if self.opts.legend is not undefined:
+            if self.opts.legend:
+                ax.legend(self.opts.legend)
+            else:
+                ax.legend()
 
         fig.canvas.draw()
 
