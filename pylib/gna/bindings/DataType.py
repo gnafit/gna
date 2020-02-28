@@ -56,3 +56,27 @@ def DataType____str__(self):
         return 'datatype, unsupported'
 
     return 'datatype, undefined'
+
+@patchROOTClass
+def DataType____eq__(self, other):
+    if self.kind!=other.kind:
+        return False
+
+    if list(self.shape)!=list(other.shape):
+        return False
+
+    if self.kind!=2:
+        return True
+
+    for (e1, e2) in zip(self.edgesNd, other.edgesNd):
+        edges1 = N.asanyarray(e1)
+        edges2 = N.asanyarray(e2)
+
+        if not N.allclose(edges1, edges2, rtol=0, atol=1.e-14):
+            return False
+
+    return True
+
+@patchROOTClass
+def DataType____ne__(self, other):
+    return not DataType____eq__(self, other)
