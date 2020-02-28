@@ -181,7 +181,7 @@ Misc changes:
             return 4.0*v*(1.0-v)
         if self.opts.parameters=='yb':
             ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
-            ns['pmns.SinSqDouble13'].setCentral(0.094)
+            ns['pmns.SinSqDouble13'].setCentral(single2double(0.024))
             ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
             ns['pmns.SinSqDouble12'].reset()
@@ -213,7 +213,7 @@ Misc changes:
                 kinint2 = NestedDict(
                     bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
-                    edges    = np.arange(0.6, 12.001, 0.01),
+                    edges    = np.arange(0.0, 12.001, 0.01), #FIXME
                     #  edges    = np.linspace(0.0, 12.001, 601),
                     xorders   = 4,
                     yorder   = 5,
