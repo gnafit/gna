@@ -128,11 +128,11 @@ Simple example of using:
                         prediction.append(obs[1])
                         grid.append(obs[1].data().shape[0])
                         print(obs[0]+' added')
-        self.data['prediction'] = prediction.data().copy()
         name = splited[0]
 	covmat = C.Covmat()
 	covmat.cov.stat.connect(prediction)
         covmat.cov.setLabel('Covmat')
+        self.data['prediction'] = prediction.data().copy()
         for group, gname in zip(groups, gnames):
             cov_pars = get_parameters([name+'.'+g for g in group], drop_fixed=True, drop_free=True)
             cov_names = [x.qualifiedName()[len(name)+1:] for x  in cov_pars]
@@ -170,7 +170,7 @@ Simple example of using:
             num = 0
             path = str(self.opts.out_fig).split('.')
             fig, ax = plt.subplots(figsize=(12, 9), dpi=300)
-            data = self.data['prediction']**0.5
+            data = self.data['prediction']
             self.plot_diag(fig, ax, data, '', 'stat.')
             fig.tight_layout()
             if self.opts.out_fig:
