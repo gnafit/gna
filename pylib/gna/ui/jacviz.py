@@ -58,7 +58,7 @@ Simple example of using:
         im = ax.matshow(data, aspect=float(data.shape[1])/data.shape[0])
         ax.ticklabel_format(axis='both', useMathText=True)
         ax.set_xlim(-.5, data.shape[1]-.5)
-        ax.set_ylim(-.5, data.shape[0]-.5)
+        ax.set_ylim(data.shape[0]-.5, -.5)
         cb = fig.colorbar(im)
         cb.formatter.set_powerlimits((0, 0))
         cb.ax.yaxis.set_offset_position('right')
