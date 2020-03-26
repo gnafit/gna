@@ -17,6 +17,10 @@ build:
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH
     - mkdir test_results
     - pytest --alluredir=test_results
+    artifacts:
+        paths:
+            - test_results
+        expire_in: 3 mins
 
     only:
     - master
@@ -24,7 +28,8 @@ build:
 
 allure:
     stage: allure
-
+    image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
+    
     script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$ALLURE_PRIVATE_KEY")
