@@ -41,6 +41,17 @@ Simple example of using:
                 'full': 'Full covariance matrix', 'diag': 'diagonal',
                 'syst_corl': 'Correlation matrix: systematic',
                 'full_corl': 'Correlation matrix: full', 'Chol': 'Cholesky decomposition'}
+
+    def PathToDict(self, parameters):
+        res_dict = {}
+        for par in parameters:
+            parts = par.qualifiedName().split('.')
+            branch = res_dict
+            for part in parts[0:-2]:
+                branch = branch.setdefault(part, {})
+            branch = branch.setdefault(parts[-2], [])
+            branch.append(parts[-1])
+        return res_dict
  
     def make_jac(self, prediction, cov_pars, gname):
         jac = C.Jacobian()
@@ -133,10 +144,12 @@ Simple example of using:
 	covmat.cov.stat.connect(prediction)
         covmat.cov.setLabel('Covmat')
         self.data['prediction'] = prediction.data().copy()
+        names_of_parameters = {group: [] for group in gnames}
         for group, gname in zip(groups, gnames):
             cov_pars = get_parameters([name+'.'+g for g in group], drop_fixed=True, drop_free=True)
             cov_names = [x.qualifiedName()[len(name)+1:] for x  in cov_pars]
             jac, par_covs = self.make_jac(prediction, cov_pars, gname)
+            names_of_parameters[gname] = self.PathToDict(cov_pars)
 
             product = np.matmul(jac.data().copy(), par_covs.data().copy())
             product = np.matmul(product.copy(), jac.data().copy().T)
@@ -154,6 +167,7 @@ Simple example of using:
             for gname in gnames:
                 if any(self.data[gname]) is None:
                     raise "None {} for {}".format(self.data_names[key], gname)
+        print(names_of_parameters)
 
         if self.opts.out_hdf5:
             path = self.opts.out_hdf5
