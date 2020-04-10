@@ -385,7 +385,7 @@ Misc changes:
                                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
                                 ("Npescint",            (1341.38, 0.0059)),
                                 ("kC",                      (0.5, 0.4737)),
-                                ("normalizationEnergy",   (12.0, 'fixed'))
+                                ("normalizationEnergy",   (11.99, 'fixed'))
                                 ],
                             mode='relative'
                             ),
