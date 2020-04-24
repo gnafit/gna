@@ -262,7 +262,7 @@ def patchROOTClass(classes=None, methods=None):
         function = classes
         classname, method = function.__name__.split( '__', 1 )
         setattr(getattr(ROOT, classname), method, function)
-        return
+        return classes
 
     # Used as function returning decorator
     if not isinstance(classes, (list,tuple)):

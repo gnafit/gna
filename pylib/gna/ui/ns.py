@@ -17,7 +17,7 @@ def list_to_dict(lst):
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-n', '--name', help='the namespace to work with')
+        parser.add_argument('-n', '--name', '--ns', help='the namespace to work with')
         parser.add_argument('--new', nargs='+', default=[], help='Create one or more namespaces')
         parser.add_argument('--push', nargs='+', default=[],
                             metavar='NS',
@@ -98,10 +98,10 @@ class cmd(basecmd):
                     par.setSigma(par.cast(v))
                 elif k=='relsigma':
                     par.setRelSigma(par.cast(v))
-                elif k=='fixed' and v in ['true', 'True', True, 1]:
+                elif k=='fixed' and v in ['true', 'True', True, 1, '1']:
                     par.setFixed()
                 elif k=='free':
-                    par.setFree(v in ['true', 'True', True, 1])
+                    par.setFree(v in ['true', 'True', True, 1, '1'])
                 else:
                     raise Exception('Unknown parameter option: {}={}'.format(k,v))
 

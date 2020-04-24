@@ -22,11 +22,17 @@ Changes since previous implementation [juno_chengyp]:
     - WIP: add matter oscillations
 
 Implements:
-    - Reactor antineutrino flux: Huber+Mueller
-    - NO SNF contribution
+    - Reactor antineutrino flux:
+      * Spectra:
+        + ILL+Vogel (now default)
+        + Huber+Mueller
+      * [optional] Off-equilibrium corrections (Mueller)
+      * NO SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
-    - [optional] Offequilibrium correction to antineutrino spectrum
+    - Final binning:
+      * 20 keV
+      * 10 keV (default)
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
     - [optional] Multi-detector energy resolution (Yaping)
@@ -37,7 +43,9 @@ Misc changes:
     - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
     - Switch to double angle parameters for theta12 and theta13
     - Added concatenated subdetectors
-
+    - Uncomment uncertainties:
+      * energy per fission
+      * fission fractions
     """
 
     detectorname = 'AD1'
@@ -59,24 +67,26 @@ Misc changes:
 
         eres = parser.add_mutually_exclusive_group()
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
-        eres.add_argument('--eres-npe', type=float, default=1200.0, help='Average Npe at 1 MeV')
+        eres.add_argument('--eres-npe', type=float, default=1350.0, help='Average Npe at 1 MeV')
 
         # binning
-        parser.add_argument('--estep', default=0.02, choices=[0.02, 0.01], type=float, help='Binning step')
+        parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
+
+        # reactor flux
+        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
+        parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
+
+        # osc prob
+        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
         # Parameters
-        parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t12', 'yb_t12_t13', 'yb_t12_t13_dm12', 'global'], default='default', help='set of parameters to load')
+        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
-        parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
-
-        # Configuration
-        parser.add_argument('--reactors', choices=['near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
-        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
     def init(self):
         self.init_nidx()
@@ -107,6 +117,8 @@ Misc changes:
             self.reactors.remove('HZ')
         if 'dayabay' in self.opts.reactors:
             self.reactors=['DYB']
+        if 'single' in self.opts.reactors:
+            self.reactors=['YJ1']
 
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
@@ -162,44 +174,28 @@ Misc changes:
     def parameters(self):
         ns = self.namespace
         dmxx = 'pmns.DeltaMSq'+str(self.opts.dm).upper()
-        if self.opts.free=='minimal':
-            fixed_pars = ['pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-            free_pars  = [dmxx]
-        elif self.opts.free=='osc':
-            fixed_pars = []
-            free_pars  = [dmxx, 'pmns.SinSqDouble13', 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']
-        else:
-            raise Exception('Unsupported option')
-
-        for par in fixed_pars:
-            ns[par].setFixed()
-        for par in free_pars:
+        for par in [dmxx, 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']:
             ns[par].setFree()
 
         def single2double(v):
             return 4.0*v*(1.0-v)
         if self.opts.parameters=='yb':
             ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
-            ns['pmns.SinSqDouble13'].setCentral(0.094)
+            ns['pmns.SinSqDouble13'].setCentral(single2double(0.024))
             ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
             ns['pmns.SinSqDouble12'].reset()
             ns['pmns.SinSqDouble13'].reset()
             ns['pmns.DeltaMSq12'].reset()
             ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12':
-            ns['pmns.SinSqDouble13'].setCentral(0.094)
+        elif self.opts.parameters=='yb_t13':
+            ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
             ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.SinSqDouble13'].reset()
+            ns['pmns.SinSqDouble12'].reset()
             ns['pmns.DeltaMSq12'].reset()
             ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12_t13':
-            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
-            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.DeltaMSq12'].reset()
-            ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t12_t13_dm12':
+        elif self.opts.parameters=='yb_t13_t12_dm12':
             ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
             ns['pmns.DeltaMSqEE'].reset()
         elif self.opts.parameters=='global':
@@ -217,7 +213,7 @@ Misc changes:
                 kinint2 = NestedDict(
                     bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
-                    edges    = np.arange(0.6, 12.001, 0.01),
+                    edges    = np.arange(0.0, 12.001, 0.01), #FIXME
                     #  edges    = np.linspace(0.0, 12.001, 601),
                     xorders   = 4,
                     yorder   = 5,
@@ -251,11 +247,19 @@ Misc changes:
                     pdgyear = self.opts.pdgyear,
                     dm      = self.opts.dm
                     ),
-                anuspec = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
+                anuspec_hm = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                         'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
+                    ),
+                anuspec_ill = NestedDict(
+                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
+                    name = 'anuspec',
+                    filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
+                                'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                     # strategy = dict( underflow='constant', overflow='extrapolate' ),
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
@@ -263,14 +267,6 @@ Misc changes:
                     bundle = dict(name='reactor_offeq_spectra',
                                   version='v03', major='ir'),
                     offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
-                    ),
-                anuspec_1 = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03'),
-                    name = 'anuspec',
-                    filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
-                    edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.05 ), [ 12.3 ] ) ),
                     ),
                 eff = NestedDict(
                     bundle = dict(
@@ -289,23 +285,11 @@ Misc changes:
                     pars = uncertain(1, 'free'),
                     ),
                 fission_fractions = NestedDict(
-                    bundle = dict(name="parameters",
-                        version = "v01",
-                        major = 'i'
-                        ),
+                    bundle = dict(name="parameters_yaml_v01", major = 'i'),
                     parameter = "fission_fractions",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
-                    pars = uncertaindict([
-                        ('U235',  0.60),
-                        ('Pu239', 0.27),
-                        ('U238',  0.07),
-                        ('Pu241', 0.06)
-                        ],
-                        # uncertainty = 30.0,
-                        # mode = 'percent',
-                        mode = 'fixed',
-                        ),
+                    data = 'data/data_juno/fission_fractions/2013.12.05_xubo.yaml'
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -372,17 +356,12 @@ Misc changes:
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [
-                              # ('U235',  (201.92, 0.46)),
-                              # ('U238',  (205.52, 0.96)),
-                              # ('Pu239', (209.99, 0.60)),
-                              # ('Pu241', (213.60, 0.65))
-                              ('U235',  201.92),
-                              ('U238',  205.52),
-                              ('Pu239', 209.99),
-                              ('Pu241', 213.60)
+                              ('U235',  (201.92, 0.46)),
+                              ('U238',  (205.52, 0.96)),
+                              ('Pu239', (209.99, 0.60)),
+                              ('Pu241', (213.60, 0.65))
                               ],
-                            # mode='absolute'
-                            mode='fixed'
+                            mode='absolute'
                             ),
                         ),
                 lsnl = NestedDict(
@@ -406,7 +385,7 @@ Misc changes:
                                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
                                 ("Npescint",            (1341.38, 0.0059)),
                                 ("kC",                      (0.5, 0.4737)),
-                                ("normalizationEnergy",   (12.0, 'fixed'))
+                                ("normalizationEnergy",   (11.99, 'fixed'))
                                 ],
                             mode='relative'
                             ),
@@ -448,14 +427,14 @@ Misc changes:
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/corrmap_xuyu.txt'
+                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/corrmap_xuyu.txt'
                         )
                 self.cfg.multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector200_nph.txt',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector200_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
@@ -467,21 +446,19 @@ Misc changes:
                         pars = uncertaindict(
                             [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
                             ),
-                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_cov.txt'
+                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_cov.txt'
                         )
                 self.cfg.multieres = NestedDict(
                         bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                         # pars: sigma_e/e = sqrt(b^2/E),
                         parameter = 'eres',
                         relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200/subdetector5_nph.txt',
+                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_nph.txt',
                         rescale_nph = self.opts.eres_npe,
                         expose_matrix = False
                         )
             else:
                 assert False
-        else:
-            assert False
 
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
@@ -638,7 +615,6 @@ Misc changes:
                                 {oscprob}
                             )
             '''
-
 
     formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
     formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
