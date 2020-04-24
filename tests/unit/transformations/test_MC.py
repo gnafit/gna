@@ -20,6 +20,8 @@ class MCTestData(object):
     correlation  = 0.95
     syst_unc_rel = 2
     nsigma = 4
+    PoissonTreshold = {0.1: [1, 11, 10], 100.0: [18, 18, 19],
+            10000.0: [19, 19, 19]}
     def __init__(self, data, mctype, **info):
         self.info     = Namespace(**info)
         self.info.index = str(self.info.index)
@@ -69,7 +71,8 @@ class MCTestData(object):
 
         self.input_L = C.Points(self.covmat_L)
 
-    def set_mc(self, mcoutput):
+    def set_mc(self, mcobject, mcoutput):
+        self.mcobject = mcobject
         self.mcoutput = mcoutput
         self.mcdata = mcoutput.data()
         self.mcdiff = self.mcdata - self.data
@@ -171,6 +174,24 @@ class MCTestData(object):
             chi2_diff = chi2 - self.data.size
             assert chi2_diff < self.nsigma*(2.0*self.data.size)**0.5
 
+    def check_nextSample(self):
+        mcobject = self.mcobject
+        self.first_data = np.array([mc.data().copy() for mc in
+            mcobject.transformations[0].outputs.values()])
+        self.mcobject.nextSample()
+        self.second_data = np.array([mc.data().copy() for mc in
+            mcobject.transformations[0].outputs.values()])
+        self.mcdiff_nextSample = self.first_data - self.second_data
+        if self.mctype=='Snapshot':
+            assert (self.mcdiff_nextSample==0).all()
+        elif self.mctype=='PoissonToyMC':
+            _, scale = [val for val in vars(self.info).values()]
+            assert ((self.mcdiff_nextSample!=0).sum(axis=1)
+                    > self.PoissonTreshold[scale]).all()
+        else:
+            assert (self.mcdiff_nextSample!=0).all()
+
+
 @pytest.mark.parametrize('scale', [0.1, 100.0, 10000.0])
 @pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC'])
 def test_mc(mc, scale, tmp_path):
@@ -190,11 +211,12 @@ def test_mc(mc, scale, tmp_path):
 
     mcobject.printtransformations()
 
-    map(lambda (o, out): MCTestData.set_mc(o, out), zip(mcdata_v, mcobject.transformations[0].outputs.values()))
+    map(lambda (o, out): MCTestData.set_mc(o, mcobject, out), zip(mcdata_v, mcobject.transformations[0].outputs.values()))
 
     tmp_path = os.path.join(str(tmp_path), '_'.join((mc, str(int(scale)))) )
     map(lambda o: MCTestData.plot(o, tmp_path), mcdata_v)
 
     map(MCTestData.close, mcdata_v)
+    map(MCTestData.check_nextSample, mcdata_v)
     map(MCTestData.check_stats, mcdata_v)
 
