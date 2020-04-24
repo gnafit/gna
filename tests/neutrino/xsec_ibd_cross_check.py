@@ -23,7 +23,7 @@ parser = ArgumentParser()
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '-o', '--output', help='path to dump figures')
-parser.add_argument('-d', '--differential_xsec', action='store_true', 
+parser.add_argument('-d', '--differential_xsec', action='store_true',
                     help='Plot differential cross section')
 parser.add_argument('-i', '--dyboscar-input', help='Path to inputs from dyboscar')
 
@@ -51,7 +51,7 @@ with ns:
     econv = R.EvisToEe()
     ibd =   R.IbdZeroOrder(True)
     ibd_first = R.IbdFirstOrder()
-    
+
 
 Enue.points.points >> ibd.xsec.Ee
 Enue.points.points >> econv.Ee.Evis
@@ -125,8 +125,8 @@ xsec_first_order = ibd_first.xsec.data().T
 ax.plot(enue, xsec_first_order[0], label=r'GNA $\cos\,\theta = {}$'.format(0.))
 ax.plot(enue, xsec_first_order[1], label=r'GNA $\cos\,\theta = {}$'.format(1.))
 if input_dyboscar is not None:
-    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c0'], label=r'dybOscar $\cos\,\theta$ = 0', alpha=0.5) 
-    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c1'], label=r'dybOscar $\cos\,\theta$ = 1', alpha=0.5) 
+    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c0'], label=r'dybOscar $\cos\,\theta$ = 0', alpha=0.5)
+    ax.plot(input_dyboscar['enu'], input_dyboscar['xsec1_c1'], label=r'dybOscar $\cos\,\theta$ = 1', alpha=0.5)
 
 ax.set_xlim(1.8, 12.)
 ax.legend(loc='best')
@@ -150,8 +150,8 @@ jacobians = ibd_first.jacobian.jacobian.data().T
 ax.plot(ee_first, jacobians[0], label=r'GNA $\cos\,\theta = {0}$')
 ax.plot(ee_first, jacobians[1], label=r'GNA $\cos\,\theta = {1}$')
 if input_dyboscar is not None:
-    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0') 
-    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 1') 
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0')
+    ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 1')
 ax.set_ylim(0.97, 1.03)
 ax.legend(loc='best')
 

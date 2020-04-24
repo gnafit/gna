@@ -11,11 +11,12 @@ from load import ROOT as R
 seconds_per_day = 60*60*24
 class exp(baseexp):
     """
-JUNO experiment implementation v01 (frozen)
+JUNO experiment implementation v02 -> current
 
-Derived [2019.12] from:
-    - Daya Bay model from dybOscar and GNA
-    - juno_chengyp
+Derived from:
+    - [2019.12] Daya Bay model from dybOscar and GNA
+    - [2019.12] juno_chengyp
+    - [2020.04] juno_sensitivity_v01
 
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
