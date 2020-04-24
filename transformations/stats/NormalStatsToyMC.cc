@@ -40,7 +40,7 @@ void NormalStatsToyMC::calcToyMC(FunctionArgs fargs) {
 
 TransformationDescriptor NormalStatsToyMC::add_transformation(const std::string& name){
   transformation_(new_transformation_name(name))
-    .types(new TypeClasses::CheckNdimT<double>(1), new TypeClasses::PassEachTypeT<double>())
+    .types(new TypeClasses::PassEachTypeT<double>())
     .func(&NormalStatsToyMC::calcToyMC);
 
   reset_open_input();
