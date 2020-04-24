@@ -20,26 +20,6 @@ void NormalToyMC::nextSample() {
   }
 }
 
-void NormalToyMC::calcTypes(TypesFunctionArgs fargs) {
-  auto& args=fargs.args;
-  auto& rets=fargs.rets;
-  if (args.size()%2 != 0) {
-    throw args.undefined();
-  }
-  for (size_t i = 0; i < args.size(); i+=2) {
-    if (args[i+0].shape.size() != 1) {
-      throw rets.error(rets[0], "non-vector theory");
-    }
-    if (args[i+1].shape.size() != 1 ) {
-      throw rets.error(rets[0], "incompatible sigma shape");
-    }
-    if (args[i+1].shape[0] != args[i+0].shape[0]) {
-      throw rets.error(rets[0], "incompatible sigma shape 2");
-    }
-    rets[i/2] = args[i+0];
-  }
-}
-
 void NormalToyMC::calcToyMC(FunctionArgs fargs) {
   auto& args=fargs.args;
   auto& rets=fargs.rets;

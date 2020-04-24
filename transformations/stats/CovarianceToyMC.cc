@@ -38,7 +38,6 @@ void CovarianceToyMC::calcTypes(TypesFunctionArgs fargs) {
     if (args[i+1].shape[0] != args[i+0].shape[0]) {
       throw rets.error(rets[0], "incompatible covmat shape 2");
     }
-    rets[i/2] = args[i+0];
   }
 }
 
@@ -61,6 +60,7 @@ void CovarianceToyMC::calcToyMC(FunctionArgs fargs) {
 TransformationDescriptor CovarianceToyMC::add_transformation(const std::string& name){
   this->transformation_(new_transformation_name(name))
     .types(new TypeClasses::PassEachTypeT<double>({0,-1,2}))
+    .types(&CovarianceToyMC::calcTypes)
     .func(&CovarianceToyMC::calcToyMC);
 
   reset_open_input();
