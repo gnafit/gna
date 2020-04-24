@@ -19,7 +19,7 @@ Derived [2019.12] from:
 
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
-    - WIP: add matter oscillations
+    - Add matter oscillations
 
 Implements:
     - Reactor antineutrino flux:

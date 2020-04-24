@@ -20,7 +20,11 @@ Derived from:
 
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
-    - WIP: add matter oscillations
+    - Add matter oscillations
+    - WIP: add geo-neutrino
+    - TODO: add accidentals
+    - TODO: add 9Li/8He
+    - TODO: add fast neutrons
 
 Implements:
     - Reactor antineutrino flux:
@@ -47,6 +51,7 @@ Misc changes:
     - Uncomment uncertainties:
       * energy per fission
       * fission fractions
+    - [2020.04.24] Modify fluxes summation and integration sequence to introduce geo-neutrino spectra
     """
 
     detectorname = 'AD1'
@@ -608,12 +613,16 @@ Misc changes:
     formula_ibd_noeffects = '''
                             kinint2(
                               sum[r]|
-                                baselineweight[r,d]*
-                                ibd_xsec(enu(), ctheta())*
-                                jacobian(enu(), ee(), ctheta())*
-                                expand(sum[i]|
-                                power_livetime_factor*anuspec[i](enu()){offeq_correction})*
-                                {oscprob}
+                                (
+                                    baselineweight[r,d]*
+                                    expand(sum[i]|
+                                      power_livetime_factor*anuspec[i](enu()){offeq_correction})*
+                                    {oscprob}
+                                )*
+                                bracket(
+                                    ibd_xsec(enu(), ctheta())*
+                                    jacobian(enu(), ee(), ctheta())
+                                )
                             )
             '''
 
@@ -679,6 +688,9 @@ Misc changes:
           - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
           - 'anuspec_rd*ibd_xsec*oscprob_full'
           label: 'Countrate {reactor}-\\>{detector}'
+        ibd_xsec_rescaled:
+          expr: 'ibd_xsec*jacobian'
+          label: IBD cross section vs Evis
         countrate_weighted:
           expr: 'baselineweight*countrate_rd'
         countrate:
@@ -693,6 +705,9 @@ Misc changes:
           expr: 'sum:i|iso_spectrum_w'
         reac_spectrum_w:
           expr: 'baselineweight*reac_spectrum'
+        reac_spectrum_oscillated:
+          expr: 'anuspec_rd*oscprob_full'
+          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
         ad_spectrum_c:
           expr: 'sum:r|reac_spectrum_w'
         ad_spectrum_cw:
