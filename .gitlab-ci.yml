@@ -20,7 +20,6 @@ build:
     artifacts:
         paths:
             - test_results
-        expire_in: 3 mins
 
     only:
     - master
