@@ -46,6 +46,9 @@ class geoneutrino_spectrum_v01(TransformationBundle):
             interp.set_underflow_strategy(R.GNA.Interpolation.Stratety.Constant)
             interp.set_overflow_strategy(R.GNA.Interpolation.Stratety.Constant)
 
+            interp.printtransformations()
+            import IPython; IPython.embed()
+
         # for idx in self.nidx.iterate():
             # offeq_spectra.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
             # offeq_spectra.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
