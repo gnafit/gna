@@ -36,43 +36,17 @@ class geoneutrino_spectrum_v01(TransformationBundle):
 
             self.data[iso]=datum
 
-        import IPython; IPython.embed()
-        data_template = self.cfg.offeq_data
-        for isotope in self.nidx.get_subset('i'):
-            iso_name, = isotope.current_values()
-            datapath = data_template.format(isotope=iso_name)
-            try:
-                self.offeq_raw_spectra[iso_name] = np.loadtxt(datapath, unpack=True)
-            except IOError:
-                # U238 doesn't have offequilibrium correction
-                if iso_name == 'U238':
-                    pass
-                else:
-                    raise
-            assert len(self.offeq_raw_spectra) != 0, "No data loaded"
-
     def build(self):
-        pass
-        # for idx in self.nidx.iterate():
-            # if 'isotope' in idx.names()[0]:
-                # iso, reac = idx.current_values()
-            # else:
-                # reac, iso = idx.current_values()
-            # name = "offeq_correction." + idx.current_format()
-            # try:
-                # _offeq_energy, _offeq_spectra = map(C.Points, self.offeq_raw_spectra[iso])
-                # _offeq_energy.points.setLabel("Original energies for offeq spectrum of {}".format(iso))
-            # except KeyError:
-            # # U238 doesn't have offequilibrium correction so just pass 1.
-                # if iso != 'U238':
-                    # raise
-                # ones = C.FillLike(1., labels='Offeq correction to {0} spectrum in {1} reactor'.format(iso, reac))
-                # self.context.objects[name] = ones
-                # self.set_input('offeq_correction', idx, ones.single_input(), argument_number=0)
-                # self.set_output("offeq_correction", idx, ones.single())
-                # continue
+        self.inputs = {}
+        for k, v in self.data.items():
+            x = C.Points(v[0])
+            y = C.Points(v[0])
 
-            # offeq_spectra = C.InterpLinear(labels='Correction for {} spectra'.format(iso))
+            interp = C.InterpLinear(labels='{} geo-neutrino spectra'.format(k))
+            interp.set_underflow_strategy(R.GNA.Interpolation.Stratety.Constant)
+            interp.set_overflow_strategy(R.GNA.Interpolation.Stratety.Constant)
+
+        # for idx in self.nidx.iterate():
             # offeq_spectra.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
             # offeq_spectra.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
 

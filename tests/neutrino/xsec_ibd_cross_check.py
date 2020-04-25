@@ -89,21 +89,20 @@ ax_ratio.set_ylabel(r'Ratio')
 enue = __enu
 xsec_zero_order = ibd.xsec.xsec.data()
 
-assert(np.allclose(enue, input_dyboscar['enu']))
-
-
 ax.plot(enue, 1e41*xsec_zero_order, label='GNA')
 if input_dyboscar is not None:
+    assert(np.allclose(enue, input_dyboscar['enu']))
     ax.plot(input_dyboscar['enu'], 1e41*input_dyboscar['xsec0'], label='dyboscar')
 
 ax.set_xlim(1.8, 12.)
 ax.legend(loc='upper left')
 
-ratio = xsec_zero_order/input_dyboscar['xsec0']
+if input_dyboscar is not None:
+    ratio = xsec_zero_order/input_dyboscar['xsec0']
 
-ax_ratio.plot(input_dyboscar['enu'], xsec_zero_order / input_dyboscar['xsec0'], label='gna/dyboscar')
-ax_ratio.legend(loc='upper left')
-ax_ratio.set_ylim(0.9, 3)
+    ax_ratio.plot(input_dyboscar['enu'], xsec_zero_order / input_dyboscar['xsec0'], label='gna/dyboscar')
+    ax_ratio.legend(loc='upper left')
+    ax_ratio.set_ylim(0.9, 3)
 
 if args.output:
     pp.savefig(fig)
@@ -131,8 +130,9 @@ if input_dyboscar is not None:
 ax.set_xlim(1.8, 12.)
 ax.legend(loc='best')
 
-ax_ratio.plot(input_dyboscar['enu'], xsec_first_order[0]/input_dyboscar['xsec1_c0'], label=r'$\cos\,\theta = {}$'.format(0.))
-ax_ratio.plot(input_dyboscar['enu'], xsec_first_order[1]/input_dyboscar['xsec1_c1'], label=r'$\cos\,\theta = {}$'.format(1.))
+if input_dyboscar is not None:
+    ax_ratio.plot(input_dyboscar['enu'], xsec_first_order[0]/input_dyboscar['xsec1_c0'], label=r'$\cos\,\theta = {}$'.format(0.))
+    ax_ratio.plot(input_dyboscar['enu'], xsec_first_order[1]/input_dyboscar['xsec1_c1'], label=r'$\cos\,\theta = {}$'.format(1.))
 
 ax_ratio.set_xlim(1.8, 12.)
 ax_ratio.legend(loc='best')
@@ -152,18 +152,19 @@ ax.plot(ee_first, jacobians[1], label=r'GNA $\cos\,\theta = {1}$')
 if input_dyboscar is not None:
     ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c0'], label=r'dybOscar $\cos\,\theta$ = 0')
     ax.plot(input_dyboscar['enu'], input_dyboscar['jac_c1'], label=r'dybOscar $\cos\,\theta$ = 1')
+
 ax.set_ylim(0.97, 1.03)
 ax.legend(loc='best')
 
-ratio_c0 = jacobians[0] / input_dyboscar['jac_c0']
-ratio_c1 = jacobians[1] / input_dyboscar['jac_c1']
+if input_dyboscar is not None:
+    ratio_c0 = jacobians[0] / input_dyboscar['jac_c0']
+    ratio_c1 = jacobians[1] / input_dyboscar['jac_c1']
 
-
-ax_ratio.plot(ee_first, ratio_c0, label=r'$\cos\, \theta$ = 0')
-ax_ratio.plot(ee_first, ratio_c1, label=r'$\cos\, \theta$ = 1')
-ax_ratio.legend(loc='best')
-ax_ratio.set_xlim((0.3, 12))
-ax_ratio.set_ylim((0.9, 1.05))
+    ax_ratio.plot(ee_first, ratio_c0, label=r'$\cos\, \theta$ = 0')
+    ax_ratio.plot(ee_first, ratio_c1, label=r'$\cos\, \theta$ = 1')
+    ax_ratio.legend(loc='best')
+    ax_ratio.set_xlim((0.3, 12))
+    ax_ratio.set_ylim((0.9, 1.05))
 
 if args.output:
     pp.savefig(fig)

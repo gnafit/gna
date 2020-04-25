@@ -26,7 +26,7 @@ def test_geoneutrino_spectrum_v01(tmp_path):
 
     cfg = NestedDict(
                 bundle = dict(name='geoneutrino_spectrum', version='v01'),
-                data   = 'data/data-common/geo-neutrino/2006-sanshiro/AntineutrinoSpectrum_{isotope}.knt'
+                data   = 'data/data-common/geo-neutrino/2006-sanshiro/AntineutrinoSpectrum_{isotope}_truncated.knt'
             )
     ns = env.globalns('geonu')
 
