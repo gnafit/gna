@@ -46,7 +46,8 @@ public:
   void set_fill_value(double x) noexcept {m_fill_value = x;};
   void set(SingleOutput& x, SingleOutput& newx);
 
-  OutputDescriptor interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);                        ///< Initialize transformations by connecting `x`, `y` and `newx` outputs.
+  OutputDescriptor interpolate(SingleOutput& x, SingleOutput& y, SingleOutput& newx);  ///< Initialize transformations by connecting `x`, `y` and `newx` outputs.
+  OutputDescriptor setXY(SingleOutput& x, SingleOutput& y);                    ///< Initialize transformations by connecting `x`, `y` and `newx` outputs.
 
   void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
 private:
