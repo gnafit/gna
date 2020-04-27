@@ -13,7 +13,7 @@ class geoneutrino_spectrum_v01(TransformationBundle):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 0, 'major')
 
-        self.isotopes=['238U', '232Th']
+        self.isotopes=['U238', 'Th232']
         self.data={}
         if not self.cfg.data:
             raise Exception('Data path not provided')
@@ -28,65 +28,39 @@ class geoneutrino_spectrum_v01(TransformationBundle):
     def _load_data(self):
         """Read raw input spectra"""
         for iso in self.isotopes:
-            path = self.cfg.data.format(isotope=iso)
+            iso_reverse = iso[-3:]+iso[:-3]
+            path = self.cfg.data.format(isotope=iso_reverse)
             try:
                 datum = np.loadtxt(path, unpack=True)
             except:
                 raise Exception('Unable to read input file: '+path)
 
+            datum[0]*=1.e-3 # keV to MeV
             self.data[iso]=datum
 
     def build(self):
         self.inputs = {}
+        self.outputs = {}
+        self.points = {}
+        self.interp = {}
         for k, v in self.data.items():
-            x = C.Points(v[0])
-            y = C.Points(v[0])
+            x = C.Points(v[0], labels='{} geo-nu X0'.format(k))
+            y = C.Points(v[1], labels='{} geo-nu Y0'.format(k))
 
-            interp = C.InterpLinear(labels='{} geo-neutrino spectra'.format(k))
-            interp.set_underflow_strategy(R.GNA.Interpolation.Stratety.Constant)
-            interp.set_overflow_strategy(R.GNA.Interpolation.Stratety.Constant)
+            interp = C.InterpLinear(labels=('{} X insegment'.format(k), '{} geo-neutrino spectra'.format(k)))
+            interp.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
+            interp.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
+            interp.set_fill_value(0.0)
+            interp.setXY(x,y)
 
-            interp.printtransformations()
-            import IPython; IPython.embed()
+            self.points[k] = (x, y)
+            self.interp[k] = interp
 
-        # for idx in self.nidx.iterate():
-            # offeq_spectra.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
-            # offeq_spectra.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
-
-            # insegment = offeq_spectra.transformations.front()
-            # insegment.setLabel("Segments")
-
-            # interpolator_trans = offeq_spectra.transformations.back()
-            # interpolator_trans.setLabel("Interpolated spectral correction for {}".format(iso))
-
-            # ones = C.FillLike(1., labels="Nominal spectra for {}".format(iso))
-            # _offeq_energy >> (insegment.edges, interpolator_trans.x)
-            # _offeq_spectra >> interpolator_trans.y
-
-            # self.set_input('offeq_correction', idx, (insegment.points,
-                            # interpolator_trans.newx, ones.single_input()), argument_number=0)
-
-            # par_name = "offeq_scale"
-            # self.reqparameter(par_name, idx, central=1., relsigma=0.3,
-                    # labels="Offequilibrium norm for reactor {1} and iso "
-                    # "{0}".format(iso, reac))
-            # self.reqparameter("dummy_scale", idx, central=1,
-                    # fixed=True, labels="Dummy weight for reactor {1} and iso "
-                    # "{0} for offeq correction".format(iso, reac))
-
-
-            # outputs = [ones.single(), interpolator_trans.single()]
-            # weights = ['.'.join(("dummy_scale", idx.current_format())),
-                       # '.'.join((par_name, idx.current_format()))]
-
-            # with self.namespace:
-                # final_sum = C.WeightedSum(weights, outputs, labels='Offeq correction to '
-                            # '{0} spectrum in {1} reactor'.format(iso, reac))
-
-
-            # self.context.objects[name] = final_sum
-            # self.set_output("offeq_correction", idx, final_sum.single())
-
+        for idx in self.nidx.iterate():
+            for k in self.data.keys():
+                interp = self.interp[k]
+                self.set_input('geonu', idx, (interp.insegment.points, interp.interp.newx), argument_number=0, extra=k)
+                self.set_output('geonu', idx, interp.interp.interp, extra=k)
 
     def define_variables(self):
         pass
