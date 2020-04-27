@@ -83,6 +83,18 @@ OutputDescriptor InterpBase::interpolate(SingleOutput& x, SingleOutput& y, Singl
   return output;
 }
 
+OutputDescriptor InterpBase::setXY(SingleOutput& x, SingleOutput& y){
+  auto segments = transformations.front();
+  auto sinputs  = segments.inputs;
+  auto interp = transformations.back();
+  auto& inputs = interp.inputs;
+  x.single() >> sinputs[1];
+  x.single() >> inputs[1];
+
+  auto output = add_input(y);
+  return output;
+}
+
 void InterpBase::do_interpolate(FunctionArgs& fargs){
   const auto& args = fargs.args;                                                  /// name inputs
   auto& rets = fargs.rets;                                                        /// name outputs
@@ -114,7 +126,7 @@ void InterpBase::do_interpolate(FunctionArgs& fargs){
       if( *insegment<0 ) {                                                  /// underflow
         switch (m_underflow_strategy) {
             case (Strategy::Constant):
-                *result = 0;
+                *result = m_fill_value;
                 break;
             case (Strategy::Extrapolate):
                 idx = 0u;
@@ -125,7 +137,7 @@ void InterpBase::do_interpolate(FunctionArgs& fargs){
       else if( *insegment>=nseg ) {                                         /// overflow
         switch (m_overflow_strategy) {
             case (Strategy::Constant):
-                *result = 0;
+                *result = m_fill_value;
                 break;
             case (Strategy::Extrapolate):
                 idx = nseg-1u;
