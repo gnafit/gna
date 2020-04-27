@@ -9,11 +9,11 @@ from gna.bundle import *
 from gna.env import env
 
 class geoneutrino_spectrum_v01(TransformationBundle):
+    isotopes=['U238', 'Th232']
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 0, 'major')
 
-        self.isotopes=['U238', 'Th232']
         self.data={}
         if not self.cfg.data:
             raise Exception('Data path not provided')
@@ -23,7 +23,7 @@ class geoneutrino_spectrum_v01(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('geoneutrino_spectrum',), ()
+        return ('geonu_spectrum_{}'.format(k) for k in self.isotopes), ('geonu_norm_{}'.format(k) for k in self.isotopes)
 
     def _load_data(self):
         """Read raw input spectra"""
@@ -36,6 +36,7 @@ class geoneutrino_spectrum_v01(TransformationBundle):
                 raise Exception('Unable to read input file: '+path)
 
             datum[0]*=1.e-3 # keV to MeV
+            datum[1]*=1.e3  # 1/keV to 1/MeV
             self.data[iso]=datum
 
     def build(self):
@@ -59,8 +60,10 @@ class geoneutrino_spectrum_v01(TransformationBundle):
         for idx in self.nidx.iterate():
             for k in self.data.keys():
                 interp = self.interp[k]
-                self.set_input('geonu', idx, (interp.insegment.points, interp.interp.newx), argument_number=0, extra=k)
-                self.set_output('geonu', idx, interp.interp.interp, extra=k)
+                self.set_input('geonu_spectrum_{}'.format(k), idx, (interp.insegment.points, interp.interp.newx), argument_number=0)
+                self.set_output('geonu_spectrum_{}'.format(k), idx, interp.interp.interp)
 
     def define_variables(self):
-        pass
+        for iso in self.isotopes:
+            self.reqparameter('geonu_norm_%s'%iso, None, central=1.0, free=True, label='%s normalization factor'%iso)
+

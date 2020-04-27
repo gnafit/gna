@@ -26,29 +26,35 @@ def test_geoneutrino_spectrum_v01(tmp_path):
 
     cfg = NestedDict(
                 bundle = dict(name='geoneutrino_spectrum', version='v01'),
-                data   = 'data/data-common/geo-neutrino/2006-sanshiro/AntineutrinoSpectrum_{isotope}_truncated.knt'
+                data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
             )
     ns = env.globalns('geonu')
 
     geonu, = execute_bundles(cfg, namespace=ns)
     ns.printparameters(labels=True)
 
-    Enu >> geonu.context.inputs.geonu.values(nested=True)
+    Enu >> geonu.context.inputs.values(nested=True)
 
+    # Dump some info
     print(geonu.context.inputs)
     print(geonu.context.outputs)
     geonu.interp.values()[0].printtransformations()
+    geonu.interp.values()[1].printtransformations()
 
+    # Plot figures and graphs
     fig = plt.figure()
-    ax = plt.subplot(111, xlabel='', ylabel='', title='')
+    ax = plt.subplot(111, xlabel=r'$E_{\nu}$, MeV', ylabel='N/MeV/s', title='Geo-neutrino luminosity (truncated at 1.7 MeV)')
     ax.minorticks_on()
     ax.grid()
 
-    for k, v in geonu.context.outputs.geonu.items():
+    for k, v in geonu.context.outputs.items():
         ax.plot(_enu, v.data(), label=k)
 
     ax.legend()
+    plt.show()
 
     savefig(os.path.join(str(tmp_path), '_spectra.png'))
     savegraph(Enu, os.path.join(str(tmp_path), '_graph.png'))
+
+    ns.printparameters(labels=True)
 
