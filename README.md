@@ -36,4 +36,4 @@ GNA root.
 | ------                  | ------                                     | --- | 
 | Daya Bay                | https://git.jinr.ru/gna/data_dayabay       | |
 | JUNO                    | https://git.jinr.ru/gna/data_juno          | |
-| JUNO nominal            | https://git.jinr.ru/gna/juno_nominal       | public |
+| Common                  | https://git.jinr.ru/gna-public/data-common | public |
