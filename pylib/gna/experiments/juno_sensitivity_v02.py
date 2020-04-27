@@ -66,14 +66,20 @@ Misc changes:
         parser.add_argument('--stats', action='store_true', help='print stats')
 
         # Energy model
-        parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
-        parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
-        parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
-        parser.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
+        emodel = parser.add_argument_group('emodel', description='Energy model parameters')
+        emodel.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        emodel.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
+        emodel.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
+        emodel.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
 
-        eres = parser.add_mutually_exclusive_group()
+        eres = emodel.add_mutually_exclusive_group()
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
         eres.add_argument('--eres-npe', type=float, default=1350.0, help='Average Npe at 1 MeV')
+
+        # Backgrounds and geo-neutrino
+        bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
+        bkg_choices = ['geo']
+        bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable group')
 
         # binning
         parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
@@ -143,7 +149,8 @@ Misc changes:
 
         oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
         offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else ''
-        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction)
+        geonu = self.formula_geoneutrio if 'geo' in self.opts.bkg else ''
+        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction, geonu=geonu)
         self.formula = self.formula + self.formula_enu
 
         energy_model_formula = ''
@@ -274,6 +281,10 @@ Misc changes:
                                   version='v03', major='ir'),
                     offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                     ),
+                geonu = NestedDict(
+                    bundle = dict(name='geoneutrino_spectrum', version='v01'),
+                    data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
+                ),
                 eff = NestedDict(
                     bundle = dict(
                         name='parameters',
@@ -604,11 +615,14 @@ Misc changes:
             'baseline[d,r]',
             'livetime[d]',
             'conversion_factor',
+            'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
             'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
     ]
+
+    formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
 
     formula_ibd_noeffects = '''
                             kinint2(
@@ -618,6 +632,7 @@ Misc changes:
                                     expand(sum[i]|
                                       power_livetime_factor*anuspec[i](enu()){offeq_correction})*
                                     {oscprob}
+                                    {geonu}
                                 )*
                                 bracket(
                                     ibd_xsec(enu(), ctheta())*

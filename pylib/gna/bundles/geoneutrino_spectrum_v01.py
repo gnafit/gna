@@ -21,9 +21,9 @@ class geoneutrino_spectrum_v01(TransformationBundle):
             raise Exception('Data path does not contain format: {isotope}')
         self._load_data()
 
-    @staticmethod
-    def _provides(cfg):
-        return ('geonu_spectrum_{}'.format(k) for k in self.isotopes), ('geonu_norm_{}'.format(k) for k in self.isotopes)
+    @classmethod
+    def _provides(cls, cfg):
+        return ('geonu_spectrum_{}'.format(k) for k in cls.isotopes), ('geonu_norm_{}'.format(k) for k in cls.isotopes)
 
     def _load_data(self):
         """Read raw input spectra"""
