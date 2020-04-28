@@ -58,6 +58,14 @@ def DataType____str__(self):
     return 'datatype, undefined'
 
 @patchROOTClass
+def DataType__isHist(self):
+    return self.defined() and self.kind==2
+
+@patchROOTClass
+def DataType__isPoints(self):
+    return self.defined() and self.kind==1
+
+@patchROOTClass
 def DataType____eq__(self, other):
     if self.kind!=other.kind:
         return False
