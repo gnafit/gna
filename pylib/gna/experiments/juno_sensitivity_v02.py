@@ -427,12 +427,13 @@ Misc changes:
                         ),
                 # Backgrounds
                 acc_spectrum = NestedDict(
-                    bundle    = dict(name='root_histograms_v03'),
+                    bundle    = dict(name='root_histograms_v04'),
                     filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
                     format    = 'hAcc',
                     name      = 'acc_spectrum',
                     label     = 'Accidentals\n (norm spectrum)',
                     normalize = True,
+                    xscale    = 1.e-3,
                     ),
                 acc_rate = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -620,6 +621,8 @@ Misc changes:
 
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
         ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
+
+        import IPython; IPython.embed()
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
