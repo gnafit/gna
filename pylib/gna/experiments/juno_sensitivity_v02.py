@@ -171,15 +171,14 @@ Misc changes:
                 self.formula.append('eres_matrix[s]| evis_hist')
                 concat_subdetectors = True
 
-        if concat_subdetectors:
-            formula_back = 'observation=norm * ibd'
-        else:
-            formula_back = 'observation=norm * rebin(ibd)'
-
         if self.opts.spectrum_unc=='initial':
             ibd = ibd+'*shape_norm()'
-        elif self.opts.spectrum_unc=='final':
-            formula_back = formula_back+'*shape_norm()'
+
+        formula=dict(
+                ibd = concat_subdetectors and 'ibd' or 'rebin(ibd)',
+                accidentals = 'acc' in self.opts.bkg and '+accidentals' or ''
+                )
+        formula_back = 'observation=norm*{ibd} {accidentals}'.format(**formula)
 
         self.formula.append('ibd=' + energy_model_formula + ibd)
         self.formula.append(formula_back)
@@ -233,7 +232,7 @@ Misc changes:
                     ),
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v04', major=''),
-                        rounding = 3,
+                        rounding = 5,
                         edges = np.concatenate( (
                                     [0.7],
                                     np.arange(1, 6.0, self.opts.estep),
@@ -621,8 +620,6 @@ Misc changes:
 
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
         ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
-
-        import IPython; IPython.embed()
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
