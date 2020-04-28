@@ -21,8 +21,8 @@ Derived from:
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
     - Add matter oscillations
-    - WIP: add geo-neutrino
-    - TODO: add accidentals
+    - WIP: geo-neutrino
+    - WIP: accidentals
     - TODO: add 9Li/8He
     - TODO: add fast neutrons
 
@@ -78,7 +78,7 @@ Misc changes:
 
         # Backgrounds and geo-neutrino
         bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
-        bkg_choices = ['geo']
+        bkg_choices = ['acc'] # ['geo', 'acc']
         bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable group')
 
         # binning
@@ -232,7 +232,7 @@ Misc changes:
                     yorder   = 5,
                     ),
                 rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v03', major=''),
+                        bundle = dict(name='rebin', version='v04', major=''),
                         rounding = 3,
                         edges = np.concatenate( (
                                     [0.7],
@@ -241,8 +241,7 @@ Misc changes:
                                     [7.0, 7.5, 12.0]
                                 )
                             ),
-                        name = 'rebin',
-                        label = 'Final histogram {detector}'
+                        instances={'rebin': 'Final histogram {detector}', 'acc_rebin': 'Accidentals {autoindex}'}
                         ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
@@ -367,6 +366,12 @@ Misc changes:
                         #taken from transformations/neutrino/ReactorNorm.cc
                         pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                         ),
+                days_in_second =  NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter='days_in_second',
+                        label='Number of days in a second',
+                        pars = uncertain(1.0/(24.0*60.0*60.0), 'fixed'),
+                        ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "eper_fission",
@@ -419,7 +424,23 @@ Misc changes:
                 shape_uncertainty = NestedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
-                        )
+                        ),
+                # Backgrounds
+                acc_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
+                    format    = 'hAcc',
+                    name      = 'acc_spectrum',
+                    label     = 'Accidentals\n (norm spectrum)',
+                    normalize = True,
+                    ),
+                acc_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'acc_rate',
+                        label='Acc rate',
+                        pars = uncertain(0.9, 1, 'percent'),
+                        separate_uncertainty='acc_norm',
+                        ),
                 )
 
         if 'eres' in self.opts.energy_model:
@@ -615,11 +636,13 @@ Misc changes:
             'baseline[d,r]',
             'livetime[d]',
             'conversion_factor',
+            'efflivetime = eff * livetime[d]',
             'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
             'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
+            'accidentals = days_in_second * livetime[d] * acc_rate * acc_norm * acc_rebin[d]| acc_spectrum[d]()',
     ]
 
     formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
