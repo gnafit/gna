@@ -18,6 +18,8 @@ class DiscreteParameter(object):
             msg = "DiscreteParameter variants dict is not a bijection"
             raise Exception(msg)
 
+        self.stack = []
+
     def name(self):
         return self._name
 
@@ -50,6 +52,21 @@ class DiscreteParameter(object):
 
     def setLabel(self, label):
         self._label=label
+
+    def push(self, value=None):
+        prev = self.value()
+        if value is not None:
+            self.stack.append(prev)
+            self.set(value)
+            return value
+
+        self.stack.append(prev)
+        return prev
+
+    def pop(self):
+        val = self.stack.pop()
+        self.set(val)
+        return val
 
 def makeparameter(ns, name, cfg=None, **kwargs):
     from gna import constructors as C
