@@ -42,23 +42,95 @@ def merge_extrema(x_min, x_max, y_min, y_max):
 def merge_extrema(x_min, x_max, y_min, y_max):
     return x_min, y_min
 
-class Data(Namespace):
-    def __init__(self, dshape, extshape):
-        self.psur = N.zeros(dshape)
-        self.psur_ext_x_enu       = N.ma.array(N.zeros(extshape), mask=N.zeros(extshape))
-        self.psur_ext_y_enu       = self.psur_ext_x_enu.copy()
-        self.psur_ext_x_edep      = self.psur_ext_x_enu.copy()
-        self.psur_ext_y_edep      = self.psur_ext_x_enu.copy()
-        self.psur_ext_x_edep_lsnl = self.psur_ext_x_enu.copy()
-        self.psur_ext_y_edep_lsnl = self.psur_ext_x_enu.copy()
+class DataE(object):
+    def __init__(self, dshape, e, eres_fcn):
+        self.dshape=dshape
+        self.extshape=(dshape[0], 100)
+        self.eres_fcn=eres_fcn
 
-    def set_eres(self, fcn):
-        self.eres_edep      = fcn(self.psur_ext_x_edep)
-        self.eres_edep_lsnl = fcn(self.psur_ext_x_edep_lsnl)
+        self.e = e
+        self.extrema_x = N.ma.array(N.zeros(self.extshape), mask=N.zeros(self.extshape))
+        self.extrema_y = self.extrema_x.copy()
+        self.eres      = self.extrema_x.copy()
 
-        self.rel_psur_ext_y_edep = self.psur_ext_y_edep/self.eres_edep
-        self.rel_psur_ext_y_edep_lsnl = self.psur_ext_y_edep_lsnl/self.eres_edep_lsnl
+    def build_datum(self, ext_idx):
+        data_x = (self.e[ext_idx][:-1] + self.e[ext_idx][1:])*0.5
+        data_y = (self.e[ext_idx][1:] - self.e[ext_idx][:-1])
+        return data_x, data_y
 
+    def build_data(self, i, minima_idx, maxima_idx):
+        data_ext_x, data_ext_y = self.build_datum(maxima_idx)
+
+        target_x, target_y = self.extrema_x[i], self.extrema_y[i]
+
+        target_x[:data_ext_x.size] = data_ext_x
+        target_x.mask[:data_ext_x.size] = False
+        target_x.mask[data_ext_x.size:] = True
+
+        target_y[:data_ext_y.size] = data_ext_y
+        target_y.mask[:data_ext_y.size] = False
+        target_y.mask[data_ext_y.size:] = True
+
+        self.eres[i] = self.eres_fcn(target_x)
+
+class DataNMO(object):
+    def __init__(self, dshape, enu, edep, edep_lsnl, eres_fcn, nmo):
+        self.psur           = N.zeros(dshape)
+        self.data_enu       = DataE(dshape, enu, eres_fcn)
+        self.data_edep      = DataE(dshape, edep, eres_fcn)
+        self.data_edep_lsnl = DataE(dshape, edep_lsnl, eres_fcn)
+        self.nmo            = nmo
+
+        self.data = (self.data_enu, self.data_edep, self.data_edep_lsnl)
+
+    def build_data(self, i, psuri):
+        self.psur[i] = psuri
+        minima_idx, = argrelmin(psuri)
+        maxima_idx, = argrelmax(psuri)
+
+        self.data_enu.build_data(i, minima_idx, maxima_idx)
+        self.data_edep.build_data(i, minima_idx, maxima_idx)
+        self.data_edep_lsnl.build_data(i, minima_idx, maxima_idx)
+
+class Data(object):
+    fcn = None
+    def __init__(self, enu, lsnl_fcn, eres_fcn):
+        self.enu     = enu
+        self.dmrange = N.linspace(2.4e-3, 2.6e-3, 21)
+        self.dmmid_idx = int((self.dmrange.size-1)//2)
+        self.dshape  = (self.dmrange.size, enu.size)
+        self.lsnl_fcn = lsnl_fcn
+        self.eres_fcn = eres_fcn
+
+        from physlib import pc
+        edep_offset = pc.DeltaNP - pc.ElectronMass
+        self.edep = self.enu - edep_offset
+        self.edep_lsnl = self.edep * lsnl_fcn(self.edep)
+
+        self.data_no = DataNMO(self.dshape, self.enu, self.edep, self.edep_lsnl, eres_fcn=eres_fcn, nmo='normal')
+        self.data_io = DataNMO(self.dshape, self.enu, self.edep, self.edep_lsnl, eres_fcn=eres_fcn, nmo='inverted')
+
+    def set_psur_fcn(self, fcn):
+        self.psur_fcn = fcn
+
+    def set_dm_par(self, dmpar):
+        self.dm_par = dmpar
+
+    def set_nmo_par(self, nmopar):
+        self.nmo_par = nmopar
+
+    def build(self):
+        self.nmo_par.push()
+        self.dm_par.push()
+
+        for data in (self.data_no, self.data_io):
+            self.nmo_par.set(data.nmo)
+            for i, dm in enumerate(self.dmrange):
+                self.dm_par.set(dm)
+                data.build_data(i, self.psur_fcn())
+
+        self.dm_par.pop()
+        self.nmo_par.pop()
 #
 # Plots and tests
 #
@@ -153,12 +225,6 @@ def main(opts):
         return 0.03*edep**0.5
 
     #
-    # Energy offset
-    #
-    from physlib import pc
-    edep_offset = pc.DeltaNP - pc.ElectronMass
-
-    #
     # Oscprob
     #
     baselinename='L'
@@ -170,16 +236,10 @@ def main(opts):
     #
     # Define energy range
     #
-    enu_input = N.arange(1.8, 12.0, 0.001)
-    edep_input = enu_input - edep_offset
-    edep_lsnl = edep_input * lsnl_fcn(edep_input)
-    dmrange = N.linspace(2.4e-3, 2.6e-3, 21)
-    dmmid_idx = int((dmrange.size-1)//2)
-    dshape   = (dmrange.size, enu_input.size)
-    extshape = (dmrange.size, 100)
+    data = Data(N.arange(1.8, 12.0, 0.001), lsnl_fcn=lsnl_fcn, eres_fcn=eres_sigma_abs)
 
     # Initialize oscillation variables
-    enu = C.Points(enu_input, labels='Neutrino energy, MeV')
+    enu = C.Points(data.enu, labels='Neutrino energy, MeV')
     component_names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
     with ns:
         R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), component_names, ns=ns)
@@ -198,6 +258,12 @@ def main(opts):
     oscprob.printtransformations()
     env.globalns.printparameters(labels=True)
 
+    ns = env.globalns('oscprob')
+    data.set_dm_par(ns['DeltaMSqEE'])
+    data.set_nmo_par(ns['Alpha'])
+    data.set_psur_fcn(op_sum.single().data)
+    data.build()
+
     #
     # Positron non-linearity
     #
@@ -209,7 +275,7 @@ def main(opts):
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
     ax.legend(loc='lower right')
     ax.set_ylim(0.8, 1.05)
-    savefig(opts.output, suffix='_total_relative', close=True)
+    savefig(opts.output, suffix='_total_relative', close=not opts.show_all)
 
     #
     # Energy resolution
@@ -217,158 +283,113 @@ def main(opts):
     fig = P.figure()
     ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'$\sigma/E$', title='Energy resolution')
     ax.minorticks_on(); ax.grid()
-    ax.plot(edep_input, eres_sigma_rel(edep_input), '-')
-    savefig(opts.output, suffix='_eres_rel', close=True)
+    ax.plot(data.edep, eres_sigma_rel(data.edep), '-')
+    savefig(opts.output, suffix='_eres_rel', close=not opts.show_all)
 
-    #
-    # Energy resolution
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel= 'Edep, MeV', ylabel= r'$\sigma$', title='Energy resolution')
-    ax.minorticks_on(); ax.grid()
-    ax.plot(edep_input, eres_sigma_abs(edep_input), '-')
-    savefig(opts.output, suffix='_eres_abs', close=True)
+    # #
+    # # Energy resolution
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel= 'Edep, MeV', ylabel= r'$\sigma$', title='Energy resolution')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot(edep_input, eres_sigma_abs(edep_input), '-')
+    # savefig(opts.output, suffix='_eres_abs', close=not opts.show_all)
 
-    # Calculation function
-    data_no = Data(dshape, extshape)
-    data_io = Data(dshape, extshape)
-    def calc(data, i):
-        psuri = data.psur[i] = op_sum.single().data()
-        psur_minima, = argrelmin(psuri)
-        psur_maxima, = argrelmax(psuri)
+    # #
+    # # Survival probability vs Enu
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Psur', title='Survival probability')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot(enu.single().data(), data_no.psur[dmmid_idx], label=r'full NO')
+    # ax.plot(enu.single().data(), data_io.psur[dmmid_idx], label=r'full IO')
+    # # ax.plot(enu_input[data_no.psur_minima], data_no.psur[data_no.psur_minima], 'o', markerfacecolor='none', label='minima')
+    # # ax.plot(enu_input[data_no.psur_maxima], data_no.psur[data_no.psur_maxima], 'o', markerfacecolor='none', label='maxima')
+    # savefig(opts.output, suffix='_psur_enu', close=not opts.show_all)
 
-        def build_extrema(x, target_x, target_y):
-            data_min_x = (x[psur_minima][:-1] + x[psur_minima][1:])*0.5
-            data_min_y = (x[psur_minima][1:] - x[psur_minima][:-1])
+    # #
+    # # Survival probability vs Edep
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Psur', title='Survival probability')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot(edep_input, data_no.psur[dmmid_idx], label='true NO')
+    # ax.plot(edep_lsnl,  data_no.psur[dmmid_idx], label=r'with LSNL NO')
+    # ax.plot(edep_lsnl,  data_io.psur[dmmid_idx], label=r'with LSNL IO')
+    # ax.legend()
+    # savefig(opts.output, suffix='_psur_edep')
 
-            data_max_x = (x[psur_maxima][:-1] + x[psur_maxima][1:])*0.5
-            data_max_y = (x[psur_maxima][1:] - x[psur_maxima][:-1])
+    # #
+    # # Distance between nearest peaks vs Enu
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot(data_no.psur_ext_x_enu[dmmid_idx], data_no.psur_ext_y_enu[dmmid_idx], 'o-', markerfacecolor='none')
+    # savefig(opts.output, suffix='_dist_enu', close=not opts.show_all)
 
-            data_ext_x, data_ext_y = merge_extrema(data_min_x, data_max_x, data_min_y, data_max_y)
-
-            target_x[:data_ext_x.size] = data_ext_x
-            target_x.mask[:data_ext_x.size] = False
-            target_x.mask[data_ext_x.size:] = True
-
-            target_y[:data_ext_y.size] = data_ext_y
-            target_y.mask[:data_ext_y.size] = False
-            target_y.mask[data_ext_y.size:] = True
-
-        build_extrema(enu_input, data.psur_ext_x_enu[i], data.psur_ext_y_enu[i])
-        build_extrema(edep_input, data.psur_ext_x_edep[i], data.psur_ext_y_edep[i])
-        build_extrema(edep_lsnl, data.psur_ext_x_edep_lsnl[i], data.psur_ext_y_edep_lsnl[i])
-
-    def calcall(nmo):
-        ns = env.globalns('oscprob')
-        dmpar = ns['DeltaMSqEE']
-        alpha = ns['Alpha']
-        prev = alpha.value()
-        alpha.set(nmo)
-        dmpar.push()
-        data = nmo=='normal' and data_no or data_io
-        for i, dm in enumerate(dmrange):
-            dmpar.set(dm)
-            calc(data, i)
-        dmpar.pop()
-        alpha.set(prev)
-    calcall('normal')
-    calcall('inverted')
-
-    #
-    # Survival probability vs Enu
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Psur', title='Survival probability')
-    ax.minorticks_on(); ax.grid()
-    ax.plot(enu.single().data(), data_no.psur[dmmid_idx], label=r'full NO')
-    ax.plot(enu.single().data(), data_io.psur[dmmid_idx], label=r'full IO')
-    # ax.plot(enu_input[data_no.psur_minima], data_no.psur[data_no.psur_minima], 'o', markerfacecolor='none', label='minima')
-    # ax.plot(enu_input[data_no.psur_maxima], data_no.psur[data_no.psur_maxima], 'o', markerfacecolor='none', label='maxima')
-    savefig(opts.output, suffix='_psur_enu', close=True)
-
-    #
-    # Survival probability vs Edep
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Psur', title='Survival probability')
-    ax.minorticks_on(); ax.grid()
-    ax.plot(edep_input, data_no.psur[dmmid_idx], label='true NO')
-    ax.plot(edep_lsnl,  data_no.psur[dmmid_idx], label=r'with LSNL NO')
-    ax.plot(edep_lsnl,  data_io.psur[dmmid_idx], label=r'with LSNL IO')
-    ax.legend()
-    savefig(opts.output, suffix='_psur_edep')
-
-    #
-    # Distance between nearest peaks vs Enu
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
-    ax.minorticks_on(); ax.grid()
-    ax.plot(data_no.psur_ext_x_enu[dmmid_idx], data_no.psur_ext_y_enu[dmmid_idx], 'o-', markerfacecolor='none')
-    savefig(opts.output, suffix='_dist_enu', close=True)
-
-    #
-    # Distance between nearest peaks vs Edep, single
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
-    ax.minorticks_on(); ax.grid()
-    ax.plot( data_no.psur_ext_x_edep[dmmid_idx], data_no.psur_ext_y_edep[dmmid_idx], '-', markerfacecolor='none', label='true' )
-    ax.plot( data_no.psur_ext_x_edep_lsnl[dmmid_idx], data_no.psur_ext_y_edep_lsnl[dmmid_idx], '-', markerfacecolor='none', label='with LSNL' )
-    ax.plot( edep_input, eres_sigma_abs(edep_input), '-', markerfacecolor='none', label=r'$\sigma$' )
-    ax.legend(loc='upper left')
-    savefig(opts.output, suffix='_dist')
-
-    #
-    # Distance between nearest peaks vs Edep
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
-    ax.minorticks_on(); ax.grid()
-    stride=10
-    ax.plot( data_no.psur_ext_x_edep.T[:,::stride], data_no.psur_ext_y_edep.T[:,::stride], '-',  color='blue', markerfacecolor='none', alpha=0.5 )
-    ax.plot( data_io.psur_ext_x_edep.T[:,::stride], data_io.psur_ext_y_edep.T[:,::stride], '--',  color='red', markerfacecolor='none', alpha=0.5 )
-    # ax.plot( data_no.psur_ext_x_edep_lsnl.T[:,::stride], data_no.psur_ext_y_edep_lsnl.T[:,::stride], '--', color='green', markerfacecolor='none', alpha=0.5 )
+    # #
+    # # Distance between nearest peaks vs Edep, single
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot( data_no.psur_ext_x_edep[dmmid_idx], data_no.psur_ext_y_edep[dmmid_idx], '-', markerfacecolor='none', label='true' )
+    # ax.plot( data_no.psur_ext_x_edep_lsnl[dmmid_idx], data_no.psur_ext_y_edep_lsnl[dmmid_idx], '-', markerfacecolor='none', label='with LSNL' )
     # ax.plot( edep_input, eres_sigma_abs(edep_input), '-', markerfacecolor='none', label=r'$\sigma$' )
-    ax.legend(loc='upper left')
-    savefig(opts.output, suffix='_dist')
+    # ax.legend(loc='upper left')
+    # savefig(opts.output, suffix='_dist')
 
-    data_no.set_eres(eres_sigma_abs)
-    data_io.set_eres(eres_sigma_abs)
-    #
-    # Resolution ability, single
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability')
-    ax.minorticks_on(); ax.grid()
-    ax.plot(data_no.psur_ext_x_edep[dmmid_idx], data_no.rel_psur_ext_y_edep[dmmid_idx], '-',  color='blue', markerfacecolor='none')
-    ax.plot(data_io.psur_ext_x_edep[dmmid_idx], data_io.rel_psur_ext_y_edep[dmmid_idx], '--', color='red', markerfacecolor='none')
-    ax.legend(loc='upper left')
-    savefig(opts.output, suffix='_ability')
+    # #
+    # # Distance between nearest peaks vs Edep
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Dist, MeV', title='Nearest peaks distance')
+    # ax.minorticks_on(); ax.grid()
+    # stride=10
+    # ax.plot( data_no.psur_ext_x_edep.T[:,::stride], data_no.psur_ext_y_edep.T[:,::stride], '-',  color='blue', markerfacecolor='none', alpha=0.5 )
+    # ax.plot( data_io.psur_ext_x_edep.T[:,::stride], data_io.psur_ext_y_edep.T[:,::stride], '--',  color='red', markerfacecolor='none', alpha=0.5 )
+    # # ax.plot( data_no.psur_ext_x_edep_lsnl.T[:,::stride], data_no.psur_ext_y_edep_lsnl.T[:,::stride], '--', color='green', markerfacecolor='none', alpha=0.5 )
+    # # ax.plot( edep_input, eres_sigma_abs(edep_input), '-', markerfacecolor='none', label=r'$\sigma$' )
+    # ax.legend(loc='upper left')
+    # savefig(opts.output, suffix='_dist')
 
-    #
-    # Resolution ability
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability')
-    ax.minorticks_on(); ax.grid()
-    stride=10
-    ax.plot(data_no.psur_ext_x_edep.T[:,::stride], data_no.rel_psur_ext_y_edep.T[:,::stride], '-',  color='blue', markerfacecolor='none')
-    ax.plot(data_io.psur_ext_x_edep.T[:,::stride], data_io.rel_psur_ext_y_edep.T[:,::stride], '--', color='red', markerfacecolor='none')
-    ax.legend(loc='upper left')
-    savefig(opts.output, suffix='_ability')
+    # data_no.set_eres(eres_sigma_abs)
+    # data_io.set_eres(eres_sigma_abs)
+    # #
+    # # Resolution ability, single
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability')
+    # ax.minorticks_on(); ax.grid()
+    # ax.plot(data_no.psur_ext_x_edep[dmmid_idx], data_no.rel_psur_ext_y_edep[dmmid_idx], '-',  color='blue', markerfacecolor='none')
+    # ax.plot(data_io.psur_ext_x_edep[dmmid_idx], data_io.rel_psur_ext_y_edep[dmmid_idx], '--', color='red', markerfacecolor='none')
+    # ax.legend(loc='upper left')
+    # savefig(opts.output, suffix='_ability')
 
-    #
-    # Resolution ability
-    #
-    fig = P.figure()
-    ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability LSNL')
-    ax.minorticks_on(); ax.grid()
-    stride=10
-    ax.plot(data_no.psur_ext_x_edep_lsnl.T[:,::stride], data_no.rel_psur_ext_y_edep_lsnl.T[:,::stride], '-',  color='blue', markerfacecolor='none')
-    ax.plot(data_io.psur_ext_x_edep_lsnl.T[:,::stride], data_io.rel_psur_ext_y_edep_lsnl.T[:,::stride], '--', color='red', markerfacecolor='none')
-    ax.legend(loc='upper left')
-    savefig(opts.output, suffix='_ability')
+    # #
+    # # Resolution ability
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability')
+    # ax.minorticks_on(); ax.grid()
+    # stride=10
+    # ax.plot(data_no.psur_ext_x_edep.T[:,::stride], data_no.rel_psur_ext_y_edep.T[:,::stride], '-',  color='blue', markerfacecolor='none')
+    # ax.plot(data_io.psur_ext_x_edep.T[:,::stride], data_io.rel_psur_ext_y_edep.T[:,::stride], '--', color='red', markerfacecolor='none')
+    # ax.legend(loc='upper left')
+    # savefig(opts.output, suffix='_ability')
+
+    # #
+    # # Resolution ability
+    # #
+    # fig = P.figure()
+    # ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'Dist/$\sigma$', title='Resolution ability LSNL')
+    # ax.minorticks_on(); ax.grid()
+    # stride=10
+    # ax.plot(data_no.psur_ext_x_edep_lsnl.T[:,::stride], data_no.rel_psur_ext_y_edep_lsnl.T[:,::stride], '-',  color='blue', markerfacecolor='none')
+    # ax.plot(data_io.psur_ext_x_edep_lsnl.T[:,::stride], data_io.rel_psur_ext_y_edep_lsnl.T[:,::stride], '--', color='red', markerfacecolor='none')
+    # ax.legend(loc='upper left')
+    # savefig(opts.output, suffix='_ability')
 
     # ax.set_xlim(3, 4)
     # ax.set_ylim(5, 8)
@@ -398,7 +419,7 @@ def main(opts):
 
     # savegraph(quench.histoffset.histedges.points_truncated, opts.graph, namespace=ns)
 
-    if opts.show:
+    if opts.show or opts.show_all:
         P.show()
 
 if __name__ == '__main__':
@@ -408,5 +429,6 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--graph', help='Output file for graph')
     parser.add_argument('-s', '--show', action='store_true', help='Show the plots')
     parser.add_argument('-m', '--mapping', action='store_true', help='Do mapping plot')
+    parser.add_argument('-S', '--show-all', action='store_true', help='Show all')
 
     main( parser.parse_args() )
