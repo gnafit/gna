@@ -52,24 +52,28 @@ class DataE(object):
         self.extrema_x = N.ma.array(N.zeros(self.extshape), mask=N.zeros(self.extshape))
         self.extrema_y = self.extrema_x.copy()
         self.eres      = self.extrema_x.copy()
+        self.psur      = self.extrema_x.copy()
 
     def build_datum(self, ext_idx):
         data_x = (self.e[ext_idx][:-1] + self.e[ext_idx][1:])*0.5
         data_y = (self.e[ext_idx][1:] - self.e[ext_idx][:-1])
         return data_x, data_y
 
-    def build_data(self, i, minima_idx, maxima_idx):
+    def build_data(self, i, psur, minima_idx, maxima_idx):
         data_ext_x, data_ext_y = self.build_datum(maxima_idx)
 
         target_x, target_y = self.extrema_x[i], self.extrema_y[i]
 
-        target_x[:data_ext_x.size] = data_ext_x
-        target_x.mask[:data_ext_x.size] = False
-        target_x.mask[data_ext_x.size:] = True
+        size = data_ext_x.size
 
-        target_y[:data_ext_y.size] = data_ext_y
-        target_y.mask[:data_ext_y.size] = False
-        target_y.mask[data_ext_y.size:] = True
+        target_x[:size] = data_ext_x
+        target_y[:size] = data_ext_y
+        target_x.mask[:size] = False
+        target_x.mask[size:] = True
+        target_y.mask = target_x.mask
+
+        self.psur[i,:size] = psur[maxima_idx]
+        self.psur[i].mask = target_x.mask
 
         self.eres[i] = self.eres_fcn(target_x)
 
@@ -88,9 +92,9 @@ class DataNMO(object):
         minima_idx, = argrelmin(psuri)
         maxima_idx, = argrelmax(psuri)
 
-        self.data_enu.build_data(i, minima_idx, maxima_idx)
-        self.data_edep.build_data(i, minima_idx, maxima_idx)
-        self.data_edep_lsnl.build_data(i, minima_idx, maxima_idx)
+        self.data_enu.build_data(i, psuri, minima_idx, maxima_idx)
+        self.data_edep.build_data(i, psuri, minima_idx, maxima_idx)
+        self.data_edep_lsnl.build_data(i, psuri, minima_idx, maxima_idx)
 
 class Data(object):
     fcn = None
@@ -180,7 +184,7 @@ def main(opts):
                 ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
                 ("Npescint",            (1341.38, 0.0059)),
                 ("kC",                      (0.5, 0.4737)),
-                ("normalizationEnergy",   (11.999, 'fixed'))
+                ("normalizationEnergy",   (11.9999999, 'fixed'))
              ],
             mode='relative'
             ),
@@ -203,7 +207,7 @@ def main(opts):
     #
     # Input bins
     #
-    evis_edges_full_input = N.arange(0.0, 15.0+1.e-6, 0.025)
+    evis_edges_full_input = N.arange(0.0, 15.0+1.e-6, 0.001)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
 
@@ -213,7 +217,7 @@ def main(opts):
     from scipy.interpolate import interp1d
     lsnl_x = quench.histoffset.histedges.points_truncated.data()
     lsnl_y = quench.positron_model_relative.single().data()
-    lsnl_fcn = interp1d(lsnl_x, lsnl_y, kind='quadratic')
+    lsnl_fcn = interp1d(lsnl_x, lsnl_y, kind='quadratic', bounds_error=False, fill_value='extrapolate')
 
     #
     # Energy resolution
@@ -286,26 +290,26 @@ def main(opts):
     ax.plot(data.edep, eres_sigma_rel(data.edep), '-')
     savefig(opts.output, suffix='_eres_rel', close=not opts.show_all)
 
-    # #
-    # # Energy resolution
-    # #
-    # fig = P.figure()
-    # ax = P.subplot(111, xlabel= 'Edep, MeV', ylabel= r'$\sigma$', title='Energy resolution')
-    # ax.minorticks_on(); ax.grid()
-    # ax.plot(edep_input, eres_sigma_abs(edep_input), '-')
-    # savefig(opts.output, suffix='_eres_abs', close=not opts.show_all)
+    #
+    # Energy resolution
+    #
+    fig = P.figure()
+    ax = P.subplot(111, xlabel= 'Edep, MeV', ylabel= r'$\sigma$', title='Energy resolution')
+    ax.minorticks_on(); ax.grid()
+    ax.plot(data.edep, eres_sigma_abs(data.edep), '-')
+    savefig(opts.output, suffix='_eres_abs', close=not opts.show_all)
 
-    # #
-    # # Survival probability vs Enu
-    # #
-    # fig = P.figure()
-    # ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Psur', title='Survival probability')
-    # ax.minorticks_on(); ax.grid()
-    # ax.plot(enu.single().data(), data_no.psur[dmmid_idx], label=r'full NO')
-    # ax.plot(enu.single().data(), data_io.psur[dmmid_idx], label=r'full IO')
-    # # ax.plot(enu_input[data_no.psur_minima], data_no.psur[data_no.psur_minima], 'o', markerfacecolor='none', label='minima')
-    # # ax.plot(enu_input[data_no.psur_maxima], data_no.psur[data_no.psur_maxima], 'o', markerfacecolor='none', label='maxima')
-    # savefig(opts.output, suffix='_psur_enu', close=not opts.show_all)
+    #
+    # Survival probability vs Enu
+    #
+    fig = P.figure()
+    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Psur', title='Survival probability')
+    ax.minorticks_on(); ax.grid()
+    ax.plot(data.enu, data.data_no.psur, label=r'full NO')
+    ax.plot(data.enu, data.data_io.psur, label=r'full IO')
+    # ax.plot(enu_input[data_no.psur_minima], data_no.psur[data_no.psur_minima], 'o', markerfacecolor='none', label='minima')
+    # ax.plot(enu_input[data_no.psur_maxima], data_no.psur[data_no.psur_maxima], 'o', markerfacecolor='none', label='maxima')
+    savefig(opts.output, suffix='_psur_enu', close=not opts.show_all)
 
     # #
     # # Survival probability vs Edep
