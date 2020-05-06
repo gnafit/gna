@@ -225,14 +225,15 @@ Misc changes:
             self.opts.eres_npe = self.opts.eres_sigma**-2
         print('Energy resolution at 1 MeV: {}% ({} pe)'.format(self.opts.eres_sigma*100, self.opts.eres_npe))
 
+        edges    = np.arange(0.0, 12.001, 0.01) #FIXME
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
+                    bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
-                    edges    = np.arange(0.0, 12.001, 0.01), #FIXME
-                    #  edges    = np.linspace(0.0, 12.001, 601),
+                    edges     = edges,
+                    #  edges   = np.linspace(0.0, 12.001, 601),
                     xorders   = 4,
-                    yorder   = 5,
+                    yorder    = 5,
                     ),
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v04', major=''),
@@ -244,7 +245,9 @@ Misc changes:
                                     [7.0, 7.5, 12.0]
                                 )
                             ),
-                        instances={'rebin': 'Final histogram {detector}', 'acc_rebin': 'Accidentals {autoindex}'}
+                        instances={'rebin': 'Final histogram {detector}',
+                                   'acc_rebin': 'Accidentals {autoindex}',
+                                   'fastn_rebin': 'Accidentals {autoindex}'}
                         ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
@@ -429,29 +432,42 @@ Misc changes:
                         nbins = 200 # number of bins, the uncertainty is defined to
                         ),
                 # Backgrounds
-                # acc_spectrum = NestedDict(
-                    # bundle    = dict(name='root_histograms_v04'),
-                    # filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
-                    # format    = 'hAcc',
-                    # name      = 'acc_spectrum',
-                    # label     = 'Accidentals\n (norm spectrum)',
-                    # normalize = True,
-                    # xscale    = 1.e-3,
-                    # ),
-                bkg_spectra = NestedDict(
-                    bundle    = dict(name='root_histograms_v05'),
-                    filename  = 'data/data_juno/bkg/group/2020-05-JUNO-YB/JunoBkg_evis_2400.root',
-                    formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',   'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
-                    names      = ['acc_spectrum',                'lihe_spectrum',       'fn_spectrum',            'alphan_spectrum',        'geonu_spectrum'],
-                    labels     = ['Accidentals|(norm spectrum)', '9Li|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
-                    normalize = True,
+                acc_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v04'),
+                    filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
+                    format    = 'hAcc',
+                    name      = 'acc_spectrum',
+                    label     = 'Accidentals\n (norm spectrum)',
+                    normalize = slice(200,-1),
+                    xscale    = 1.e-3,
                     ),
+                fastn_spectrum=NestedDict(
+                        bundle=dict(name='histogram_flat_v01'),
+                        name='fastn_spectrum',
+                        edges=edges,
+                        normalize=(0.7, 12.0),
+                        ),
+                # bkg_spectra = NestedDict(
+                    # bundle    = dict(name='root_histograms_v05'),
+                    # filename  = 'data/data_juno/bkg/group/2020-05-JUNO-YB/JunoBkg_evis_2400.root',
+                    # formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',   'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
+                    # names      = ['acc_spectrum',                'lihe_spectrum',       'fn_spectrum',            'alphan_spectrum',        'geonu_spectrum'],
+                    # labels     = ['Accidentals|(norm spectrum)', '9Li|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
+                    # normalize = True,
+                    # ),
                 acc_rate = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = 'acc_rate',
                         label='Acc rate',
                         pars = uncertain(0.9, 1, 'percent'),
                         separate_uncertainty='acc_norm',
+                        ),
+                 fastn_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'fastn_rate',
+                        label='Fast n rate',
+                        pars = uncertain(0.1, 100, 'percent'),
+                        separate_uncertainty='fastn_norm',
                         ),
                 )
 
@@ -655,6 +671,7 @@ Misc changes:
             'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
             'accidentals = days_in_second * efflivetime * acc_rate * acc_norm * acc_rebin[d]| acc_spectrum[d]()',
+            'fastn       = days_in_second * efflivetime * fastn_rate * fastn_norm * fastn_rebin[d]| fastn_spectrum[d]()',
             # 'lihe        = days_in_second * livetime[d] * lihe_rate * lihe_norm * acc_rebin[d]| acc_spectrum[d]()',
     ]
 
