@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Dataset initialization. Configures the dataset for a single experiment.
 Dataset defines:
     - Observable (model) to be used as fitted function
@@ -95,15 +96,21 @@ class cmd(basecmd):
         # Create an array, representing pull parameter central values
         self.pull_centrals = Points(centrals, labels='Nuisance: central')
 
-        if covariance:
-            cov = self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
-        else:
-            # If there are no correlations, store only the uncertainties
-            cov = self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
+        try:
+            if covariance:
+                cov = self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
+            else:
+                # If there are no correlations, store only the uncertainties
+                cov = self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
+        except ValueError:
+            # handle case with covariance matrix
+            if covariance.any():
+                cov = self.pull_covariance = Points(covariance, labels='Nuisance: covariance matrix')
+            else:
+                # If there are no correlations, store only the uncertainties
+                cov = self.pull_sigmas2  = Points(sigmas**2, labels='Nuisance: sigma')
 
         dataset.assign(self.pull_vararray.single(), self.pull_centrals.single(), cov.single())
 
         ns = self.env.globalns('pull')
         ns.addobservable(self.opts.name, self.pull_vararray.single())
-
-

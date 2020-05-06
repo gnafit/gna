@@ -22,6 +22,7 @@ class exp(baseexp):
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
+        parser.add_argument('--no-snf', action='store_true', help='Disable SNF')
         parser.add_argument('--lihe-fractions', default='no', choices=['no','common', 'independent'],
                             help='Split the data over two time windows after muon veto to '
                             'allow suppression of Li/He background')
@@ -171,6 +172,24 @@ class exp(baseexp):
                         mode = 'percent',
                         ),
                     ),
+            snf_ff = NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter = 'snf_fission_fractions',
+                    objectize=True,
+                    label='SNF fission fraction {isotope}',
+                    pars = uncertaindict([
+                        ('U235', 0.563),
+                        ('U238', 0.079),
+                        ('Pu239', 0.301),
+                        ('Pu241', 0.057)],
+                        mode = 'fixed',
+                        ),
+                    ),
+            snf_correction = NestedDict(
+                bundle = dict(name='reactor_snf_spectra',
+                              version='v04', major='r'),
+                snf_average_spectra = './data/reactor_anu_spectra/SNF/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
+                ),
             eper_fission =  NestedDict(
                     bundle = dict(name="parameters", version = "v01"),
                     parameter = "eper_fission",
@@ -539,6 +558,7 @@ class exp(baseexp):
             'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
             'denom = sum[i] | eper_fission[i]*ff',
             'nprotons_ad = nprotons_nominal*nprotons_corr[d]',
+            'anuspec[i](enu())',
         ]
         self.formula['livetime'] = [
             'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
@@ -546,6 +566,16 @@ class exp(baseexp):
             'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             ]
+
+        if self.opts.no_snf:
+            pass
+        else:
+            self.formula['snf'] = [
+                    'snf_denom = sum[i]| eper_fission[i]*snf_fission_fractions[i]()',
+                    'snf_plf_daily = nominal_thermal_power[r]*snf_fission_fractions[i]() / snf_denom',
+                    'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
+                    'snf_in_reac = snf_correction(enu(), nominal_spec_per_reac)',
+                    ]
 
         # Detector effects initialization
         self.formula['det_effects_base'] = [
@@ -572,11 +602,18 @@ class exp(baseexp):
                     'bkg = bracket|  bkg_lihe +  bkg_acc + bkg_fastn + bkg_amc + bkg_alphan',
                     ]
 
-        self.formula['anue_spectra'] = ['anuspec[i](enu())',
-            '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
-                                (sum[i]|
-                                power_livetime_factor*offeq_correction[i,r](enu(), anuspec[i]()))
-            ''']
+        if self.opts.no_snf:
+            self.formula['anue_spectra'] = [
+                '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
+                                    (sum[i]| power_livetime_factor*offeq_correction[i,r](enu(), anuspec[i]()))
+                ''']
+        else:
+            self.formula['anue_spectra'] = [
+                '''anue_rd = ibd_xsec(enu(), ctheta())*jacobian(enu(), ee(), ctheta())*
+                                    ((sum[i]|
+                                    power_livetime_factor*offeq_correction[i,r](enu(),
+                                    anuspec[i]())) + efflivetime*snf_in_reac)
+                ''']
 
         self.formula['oscprob'] = [ '''osc_prob_rd = sum[c]| pmns[c]*oscprob[c,d,r](enu())''' ]
 
