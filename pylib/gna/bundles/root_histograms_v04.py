@@ -17,6 +17,7 @@ class root_histograms_v04(TransformationBundle):
 
     Updates:
         v04 - scale X/Y axes with 'xscale' and 'yscale' options
+        v04 - normalize may be a slice
     """
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
@@ -36,6 +37,7 @@ class root_histograms_v04(TransformationBundle):
 
         print( 'Read input file {}:'.format(file.GetName()) )
 
+        normalize=self.cfg.get('normalize', False)
         for it in self.nidx.iterate():
             if it.ndim()>0:
                 subst, = it.current_values()
@@ -50,9 +52,12 @@ class root_histograms_v04(TransformationBundle):
 
             edges = get_bin_edges_axis( h.GetXaxis() )
             data  = get_buffer_hist1( h )
-            if self.cfg.get( 'normalize', False ):
+            data=N.ascontiguousarray(data, dtype='d')
+            if isinstance(normalize, slice):
                 print( '[normalized]', end=' ' )
-                data=N.ascontiguousarray(data, dtype='d')
+                data=data/data[normalize].sum()
+            elif normalize:
+                print( '[normalized]', end=' ' )
                 data=data/data.sum()
             else:
                 print()
