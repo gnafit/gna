@@ -39,6 +39,7 @@ void NormalToyMC::calcToyMC(FunctionArgs fargs) {
 
 TransformationDescriptor NormalToyMC::add_transformation(const std::string& name){
   transformation_(new_transformation_name(name))
+    .types(new TypeClasses::CheckSameTypesT<double>({0,-1}, "shape"))
     .types(new TypeClasses::PassEachTypeT<double>({0,-1,2}))
     .func(&NormalToyMC::calcToyMC);
 
