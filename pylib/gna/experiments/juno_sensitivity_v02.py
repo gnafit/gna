@@ -176,9 +176,13 @@ Misc changes:
 
         formula=dict(
                 ibd = concat_subdetectors and 'ibd' or 'rebin(ibd)',
-                accidentals = 'acc' in self.opts.bkg and '+accidentals' or ''
+                accidentals = 'acc'    in self.opts.bkg and '+accidentals' or '',
+                lihe        = 'lihe'   in self.opts.bkg and '+lihe'        or '',
+                alphan      = 'alphan' in self.opts.bkg and '+alphan'      or '',
+                fastn       = 'fastn'  in self.opts.bkg and '+fastn'       or '',
+                geonu       = 'geonu'  in self.opts.bkg and '+geonu'       or '',
                 )
-        formula_back = 'observation=norm*{ibd} {accidentals}'.format(**formula)
+        formula_back = 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula)
 
         self.formula.append('ibd=' + energy_model_formula + ibd)
         self.formula.append(formula_back)
@@ -425,14 +429,22 @@ Misc changes:
                         nbins = 200 # number of bins, the uncertainty is defined to
                         ),
                 # Backgrounds
-                acc_spectrum = NestedDict(
-                    bundle    = dict(name='root_histograms_v04'),
-                    filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
-                    format    = 'hAcc',
-                    name      = 'acc_spectrum',
-                    label     = 'Accidentals\n (norm spectrum)',
+                # acc_spectrum = NestedDict(
+                    # bundle    = dict(name='root_histograms_v04'),
+                    # filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
+                    # format    = 'hAcc',
+                    # name      = 'acc_spectrum',
+                    # label     = 'Accidentals\n (norm spectrum)',
+                    # normalize = True,
+                    # xscale    = 1.e-3,
+                    # ),
+                bkg_spectra = NestedDict(
+                    bundle    = dict(name='root_histograms_v05'),
+                    filename  = 'data/data_juno/bkg/group/2020-05-JUNO-YB/JunoBkg_evis_2400.root',
+                    formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',   'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
+                    names      = ['acc_spectrum',                'lihe_spectrum',       'fn_spectrum',            'alphan_spectrum',        'geonu_spectrum'],
+                    labels     = ['Accidentals|(norm spectrum)', '9Li|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
                     normalize = True,
-                    xscale    = 1.e-3,
                     ),
                 acc_rate = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -637,12 +649,13 @@ Misc changes:
             'livetime[d]',
             'conversion_factor',
             'efflivetime = eff * livetime[d]',
-            'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
+            # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
             'numerator = eff * livetime[d] * thermal_power[r] * '
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
-            'accidentals = days_in_second * livetime[d] * acc_rate * acc_norm * acc_rebin[d]| acc_spectrum[d]()',
+            'accidentals = days_in_second * efflivetime * acc_rate * acc_norm * acc_rebin[d]| acc_spectrum[d]()',
+            # 'lihe        = days_in_second * livetime[d] * lihe_rate * lihe_norm * acc_rebin[d]| acc_spectrum[d]()',
     ]
 
     formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
