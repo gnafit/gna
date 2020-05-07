@@ -102,6 +102,14 @@ class cmd(basecmd):
                     par.setFixed()
                 elif k=='free':
                     par.setFree(v in ['true', 'True', True, 1, '1'])
+                elif k=='pop':
+                    par.pop()
+                elif k=='push':
+                    if v is True:
+                        par.push()
+                    else:
+                        v=par.cast(v)
+                        par.push(v)
                 else:
                     raise Exception('Unknown parameter option: {}={}'.format(k,v))
 
