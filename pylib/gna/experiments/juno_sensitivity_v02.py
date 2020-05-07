@@ -22,9 +22,7 @@ Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
     - Add matter oscillations
     - WIP: geo-neutrino
-    - WIP: accidentals, fastn
-    - TODO: add 9Li/8He
-    - TODO: add fast neutrons
+    - WIP: accidentals, fastn, Li/He, AlphaN
 
 Implements:
     - Reactor antineutrino flux:
@@ -78,8 +76,8 @@ Misc changes:
 
         # Backgrounds and geo-neutrino
         bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
-        bkg_choices = ['acc', 'fastn'] # ['geo', 'acc']
-        bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable group')
+        bkg_choices = ['acc', 'lihe', 'fastn', 'alphan']
+        bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable background group')
 
         # binning
         parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
@@ -245,9 +243,14 @@ Misc changes:
                                     [7.0, 7.5, 12.0]
                                 )
                             ),
-                        instances={'rebin': 'Final histogram {detector}',
-                                   'acc_rebin': 'Accidentals {autoindex}',
-                                   'fastn_rebin': 'Accidentals {autoindex}'}
+                        instances={
+                            'rebin': 'Final histogram {detector}',
+                            'rebin_acc': 'Accidentals {autoindex}',
+                            'rebin_li': '9Li {autoindex}',
+                            'rebin_he': '8He {autoindex}',
+                            'rebin_fastn': 'Fast neutrons {autoindex}',
+                            'rebin_alphan': 'C(alpha,n)O {autoindex}'
+                            }
                         ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
@@ -432,19 +435,60 @@ Misc changes:
                         nbins = 200 # number of bins, the uncertainty is defined to
                         ),
                 # Backgrounds
-                acc_spectrum = NestedDict(
-                    bundle    = dict(name='root_histograms_v04'),
+                acc_spectrum_db = NestedDict(
+                    bundle    = dict(name='root_histograms_v04', inactive=True),
                     filename  = 'data/data_juno/bkg/acc/2016_acc_dayabay_p15a/dayabay_acc_spectrum_p15a.root',
                     format    = 'accidentals',
                     name      = 'acc_spectrum',
-                    label     = 'Accidentals\n (norm spectrum)',
+                    label     = 'Accidentals|norm spectrum',
                     normalize = True
+                    ),
+                acc_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v04'),
+                    filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
+                    format    = 'hAcc',
+                    name      = 'acc_spectrum',
+                    label     = 'Accidentals|norm spectrum',
+                    normalize = slice(200,-1),
+                    xscale    = 1.e-3,
                     ),
                 fastn_spectrum=NestedDict(
                         bundle=dict(name='histogram_flat_v01'),
                         name='fastn_spectrum',
                         edges=edges,
                         normalize=(0.7, 12.0),
+                        ),
+                li_spectrum=NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyli9spec_BCWmodel_v1_2400.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'li_spectrum',
+                    label     = '9Li spectrum|norm',
+                    normalize = True,
+                    ),
+                he_spectrum= NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyhe8spec_BCWmodel_v1_2400.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'he_spectrum',
+                    label     = '8He spectrum|norm',
+                    normalize = True,
+                    ),
+                alphan_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/alphan/2012_dayabay_alphan/P12B_alphan_2400.root',
+                    format    = 'AD1',
+                    name      = 'alphan_spectrum',
+                    label     = 'C(alpha,n) spectrum|(norm)',
+                    normalize = True,
+                    ),
+                lihe_fractions=NestedDict(
+                        bundle = dict(name='var_fractions_v02'),
+                        names = [ 'li', 'he' ],
+                        format = 'frac_{component}',
+                        fractions = uncertaindict(
+                            li = ( 0.95, 0.05, 'relative' )
+                            ),
                         ),
                 # bkg_spectra = NestedDict(
                     # bundle    = dict(name='root_histograms_v05'),
@@ -461,12 +505,26 @@ Misc changes:
                         pars = uncertain(0.9, 1, 'percent'),
                         separate_uncertainty='acc_norm',
                         ),
-                 fastn_rate = NestedDict(
+                fastn_rate = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = 'fastn_rate',
                         label='Fast n rate',
                         pars = uncertain(0.1, 100, 'percent'),
                         separate_uncertainty='fastn_norm',
+                        ),
+                lihe_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'lihe_rate',
+                        label='9Li/8He rate',
+                        pars = uncertain(1.6, 20, 'percent'),
+                        separate_uncertainty='lihe_norm',
+                        ),
+                alphan_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'alphan_rate',
+                        label='C(alpha,n)O rate',
+                        pars = uncertain(0.05, 50, 'percent'),
+                        separate_uncertainty='alphan_norm',
                         ),
                 )
 
@@ -669,9 +727,10 @@ Misc changes:
                  'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
             'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
             'power_livetime_factor = numerator / eper_fission_avg',
-            'accidentals = days_in_second * efflivetime * acc_rate * acc_norm * acc_rebin[d]| acc_spectrum[d]()',
-            'fastn       = days_in_second * efflivetime * fastn_rate * fastn_norm * fastn_rebin[d]| fastn_spectrum[d]()',
-            # 'lihe        = days_in_second * livetime[d] * lihe_rate * lihe_norm * acc_rebin[d]| acc_spectrum[d]()',
+            'accidentals = days_in_second * efflivetime * acc_rate    * acc_norm    * rebin_acc[d]|    acc_spectrum[d]()',
+            'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
+            'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
+            'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
     ]
 
     formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
