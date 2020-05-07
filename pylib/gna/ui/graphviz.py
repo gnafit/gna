@@ -28,7 +28,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', nargs='+', default=[], dest='outputs', help='output dot/pdf/png file')
         parser.add_argument('-O', '--stdout', action='store_true', help='output to stdout')
         parser.add_argument('-E', '--stderr', action='store_true', help='output to stderr')
-        parser.add_argument('-n', '--namespace', default=cls.undefined, nargs='?', help='use <namespace> to read parameters', metavar='namespace')
+        parser.add_argument('-n', '--namespace', '--ns', default=cls.undefined, nargs='?', help='use <namespace> to read parameters', metavar='namespace')
         parser.add_argument('--option', nargs=2, action='append', dest='options', default=[], help='AGraph kwargs key value pair')
 
     def init(self):
