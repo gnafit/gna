@@ -269,19 +269,25 @@ Misc changes:
                     dm      = self.opts.dm
                     ),
                 anuspec_hm = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
+                    bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    free_params=True, # enable free spectral model
+                    varmode='log',
+                    varname='anue_weight_{index:02d}',
+                    ns_name='spectral_weights',
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 anuspec_ill = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
+                    bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='ill-vogel'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                    free_params=True, # enable free spectral model
+                    varmode='log',
+                    varname='anue_weight_{index:02d}',
+                    ns_name='spectral_weights',
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 offeq_correction = NestedDict(
@@ -456,6 +462,7 @@ Misc changes:
                         bundle=dict(name='histogram_flat_v01'),
                         name='fastn_spectrum',
                         edges=edges,
+                        label='Fast neutron|norm spectrum',
                         normalize=(0.7, 12.0),
                         ),
                 li_spectrum=NestedDict(
