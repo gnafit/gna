@@ -78,7 +78,7 @@ Misc changes:
 
         # Backgrounds and geo-neutrino
         bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
-        bkg_choices = ['acc'] # ['geo', 'acc']
+        bkg_choices = ['acc', 'fastn'] # ['geo', 'acc']
         bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable group')
 
         # binning

@@ -31,6 +31,7 @@ class histogram_flat_v01(TransformationBundle):
 
         data=N.zeros(edges.size-1)
         data[imin:imax]=1.0
+        data/=data.sum()
 
         for it in self.nidx.iterate():
             hist = C.Histogram(edges, data)
