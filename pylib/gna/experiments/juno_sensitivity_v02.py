@@ -21,14 +21,17 @@ Derived from:
 Changes since previous implementation [juno_chengyp]:
     - Dropped Enu-mode support
     - Add matter oscillations
+    - Accidentals, fastn, Li/He, AlphaN
+    - Add free spectral parameters
     - WIP: geo-neutrino
-    - WIP: accidentals, fastn, Li/He, AlphaN
+    - WIP: SNF
 
 Implements:
     - Reactor antineutrino flux:
       * Spectra:
         + ILL+Vogel (now default)
         + Huber+Mueller
+        + Free
       * [optional] Off-equilibrium corrections (Mueller)
       * NO SNF contribution
     - Vacuum 3nu oscillations
