@@ -33,8 +33,9 @@ class histogram_flat_v01(TransformationBundle):
         data[imin:imax]=1.0
         data/=data.sum()
 
+        label=self.cfg.get('label', 'hist {autoindex}')
         for it in self.nidx.iterate():
-            hist = C.Histogram(edges, data)
+            hist = C.Histogram(edges, data, labels=it.current_format(label))
             self.set_output(self.cfg.name, it, hist.single())
 
             # """Provide the outputs and objects"""
