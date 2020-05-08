@@ -146,13 +146,45 @@ Misc changes:
         if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
-        self.formula = list(self.formula_base)
+        self.formula = [
+                # Some common definitions
+                'baseline[d,r]',
+                'livetime[d]',
+                'conversion_factor',
+                'efflivetime = eff * livetime[d]',
+                # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
+                #
+                # Reactor part
+                'numerator = efflivetime * thermal_power[r] * '
+                     'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
+                'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
+                'power_livetime_factor = numerator / eper_fission_avg',
+                #
+                # Backgrounds
+                #
+                'accidentals = days_in_second * efflivetime * acc_rate    * acc_norm    * rebin_acc[d]|    acc_spectrum[d]()',
+                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
+                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
+                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
+        ]
 
         oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
         offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else ''
         geonu = self.formula_geoneutrio if 'geo' in self.opts.bkg else ''
         ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction, geonu=geonu)
-        self.formula = self.formula + self.formula_enu
+        self.formula+=[
+                #
+                # Neutrino energy
+                #
+                'evis_hist=evis_hist()',
+                'enu| ee(evis()), ctheta()',
+                #
+                # SNF
+                #
+                'snf_plf_daily = thermal_power[r]*fission_fractions[r,i]() / eper_fission_avg',
+                'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
+                'snf_in_reac = efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
+                ]
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
@@ -324,6 +356,10 @@ Misc changes:
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
                     data = 'data/data_juno/fission_fractions/2013.12.05_xubo.yaml'
+                    ),
+                snf_correction = NestedDict(
+                    bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
+                    snf_average_spectra = './data/data-common/snf/2004.12-kopeikin/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -724,24 +760,6 @@ Misc changes:
         report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
         print('Statistics', walker.get_stats())
         print('Parameter statistics', self.stats)
-
-    formula_enu = ['evis_hist=evis_hist()', 'enu| ee(evis()), ctheta()']
-
-    formula_base = [
-            'baseline[d,r]',
-            'livetime[d]',
-            'conversion_factor',
-            'efflivetime = eff * livetime[d]',
-            # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
-            'numerator = eff * livetime[d] * thermal_power[r] * '
-                 'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
-            'power_livetime_factor = numerator / eper_fission_avg',
-            'accidentals = days_in_second * efflivetime * acc_rate    * acc_norm    * rebin_acc[d]|    acc_spectrum[d]()',
-            'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
-            'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
-            'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
-    ]
 
     formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
 
