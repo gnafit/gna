@@ -146,6 +146,20 @@ Misc changes:
         if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
+        formula_options = dict(
+                oscprob = dict(
+                    vacuum='sum[c]| pmns[c]*oscprob[c,d,r](enu())' ,
+                    matter='oscprob_matter[d,r](enu())'
+                    )[self.opts.oscprob],
+                offeq_correction = '*offeq_correction[i,r](enu())',
+                geonu = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
+                )
+
+        if not self.opts.offequilibrium_corr:
+            formula_options['offeq_correction'] = ''
+        if not 'geo' in self.opts.bkg:
+            formula_options['geonu'] = ''
+
         self.formula = [
                 # Some common definitions
                 'baseline[d,r]',
@@ -166,13 +180,6 @@ Misc changes:
                 'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
                 'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
-        ]
-
-        oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
-        offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else ''
-        geonu = self.formula_geoneutrio if 'geo' in self.opts.bkg else ''
-        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction, geonu=geonu)
-        self.formula+=[
                 #
                 # Neutrino energy
                 #
@@ -185,6 +192,23 @@ Misc changes:
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
                 'snf_in_reac = efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
                 ]
+
+        ibd =   '''
+                    kinint2(
+                      sum[r]|
+                        (
+                            baselineweight[r,d]*
+                            expand(sum[i]|
+                              power_livetime_factor*anuspec[i](enu()){offeq_correction})*
+                            {oscprob}
+                            {geonu}
+                        )*
+                        bracket(
+                            ibd_xsec(enu(), ctheta())*
+                            jacobian(enu(), ee(), ctheta())
+                        )
+                    )
+                '''.format(**formula_options)
 
         energy_model_formula = ''
         energy_model = self.opts.energy_model
@@ -760,28 +784,6 @@ Misc changes:
         report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
         print('Statistics', walker.get_stats())
         print('Parameter statistics', self.stats)
-
-    formula_geoneutrio = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
-
-    formula_ibd_noeffects = '''
-                            kinint2(
-                              sum[r]|
-                                (
-                                    baselineweight[r,d]*
-                                    expand(sum[i]|
-                                      power_livetime_factor*anuspec[i](enu()){offeq_correction})*
-                                    {oscprob}
-                                    {geonu}
-                                )*
-                                bracket(
-                                    ibd_xsec(enu(), ctheta())*
-                                    jacobian(enu(), ee(), ctheta())
-                                )
-                            )
-            '''
-
-    formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
-    formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
 
     lib = """
         cspec_diff:
