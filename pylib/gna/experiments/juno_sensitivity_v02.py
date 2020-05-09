@@ -143,20 +143,27 @@ Misc changes:
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
-        if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
+        energy_model = self.opts.energy_model
+        concat_subdetectors='multieres' in energy_model and self.opts.multieres=='concat'
+        if 'eres' in energy_model and 'multieres' in energy_model:
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
-        energy_model = self.opts.energy_model
+        #
         # Optional formula parts
+        #
         formula_options = dict(
+                #
                 # Oscillation probability
+                #
                 oscprob = dict(
                     vacuum='sum[c]| pmns[c]*oscprob[c,d,r](enu())' ,
                     matter='oscprob_matter[d,r](enu())'
                     )[self.opts.oscprob],
+                #
                 # Geo neutrino
-                geonu = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
-                        if 'geo' in self.opts.bkg else '',
+                #
+                geonu_spectrum = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
+                                 if 'geo' in self.opts.bkg else '',
                 #
                 # Reactor
                 #
@@ -170,6 +177,18 @@ Misc changes:
                        'sum[s]|           subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model and self.opts.multieres=='sum' else
                        'concat[s]| rebin| subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model and self.opts.multieres=='concat' else
                        '',
+                #
+                # Backgrounds
+                #
+                accidentals = '+accidentals' if 'acc'    in self.opts.bkg else '',
+                lihe        = '+lihe'        if 'lihe'   in self.opts.bkg else '',
+                alphan      = '+alphan'      if 'alphan' in self.opts.bkg else '',
+                fastn       = '+fastn'       if 'fastn'  in self.opts.bkg else '',
+                # geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
+                #
+                # IBD rebinning
+                #
+                ibd         = 'ibd'          if concat_subdetectors       else 'rebin(ibd)',
                 )
 
         self.formula = [
@@ -203,15 +222,16 @@ Misc changes:
                 'snf_plf_daily = thermal_power[r]*fission_fractions[r,i]() / eper_fission_avg',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
                 'snf_in_reac = efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
+                #
                 # Energy model
+                #
                 'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
                 'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
                 'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
-                ]
-
-
-        # IBD part
-        ibd =   '''ibd={eres} {lsnl}
+                #
+                # IBD part
+                #
+                '''ibd={eres} {lsnl}
                     kinint2(
                       sum[r]|
                         (
@@ -219,28 +239,19 @@ Misc changes:
                             expand(sum[i]|
                               power_livetime_factor*anuspec[i](enu()){offeq_correction})*
                             {oscprob}
-                            {geonu}
+                            {geonu_spectrum}
                         )*
                         bracket(
                             ibd_xsec(enu(), ctheta())*
                             jacobian(enu(), ee(), ctheta())
                         )
                     ) {shape_norm}
-                '''.format(**formula_options)
-
-        concat_subdetectors='multieres' in energy_model and self.opts.multieres=='concat'
-        formula=dict(
-                ibd         = 'ibd'          if concat_subdetectors       else 'rebin(ibd)',
-                accidentals = '+accidentals' if 'acc'    in self.opts.bkg else '',
-                lihe        = '+lihe'        if 'lihe'   in self.opts.bkg else '',
-                alphan      = '+alphan'      if 'alphan' in self.opts.bkg else '',
-                fastn       = '+fastn'       if 'fastn'  in self.opts.bkg else '',
-                geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
-                )
-        formula_back = 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula)
-
-        self.formula.append(ibd)
-        self.formula.append(formula_back)
+                '''.format(**formula_options),
+                #
+                # Total observation
+                #
+                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn}'.format(**formula_options)
+                ]
 
     def parameters(self):
         ns = self.namespace
