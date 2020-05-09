@@ -97,7 +97,7 @@ Misc changes:
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
-        parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
+        parser.add_argument('--spectrum-unc', action='store_true', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -146,19 +146,31 @@ Misc changes:
         if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
+        energy_model = self.opts.energy_model
+        # Optional formula parts
         formula_options = dict(
+                # Oscillation probability
                 oscprob = dict(
                     vacuum='sum[c]| pmns[c]*oscprob[c,d,r](enu())' ,
                     matter='oscprob_matter[d,r](enu())'
                     )[self.opts.oscprob],
-                offeq_correction = '*offeq_correction[i,r](enu())',
-                geonu = '''+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'''
+                # Geo neutrino
+                geonu = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
+                        if 'geo' in self.opts.bkg else '',
+                #
+                # Reactor
+                #
+                offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else '',
+                shape_norm       = '*shape_norm()'                 if self.opts.spectrum_unc else '',
+                #
+                # Energy model
+                #
+                lsnl = 'lsnl|'                                                if 'lsnl' in energy_model else '',
+                eres = 'eres|'                                                if 'eres' in energy_model else
+                       'sum[s]|           subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model and self.opts.multieres=='sum' else
+                       'concat[s]| rebin| subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model and self.opts.multieres=='concat' else
+                       '',
                 )
-
-        if not self.opts.offequilibrium_corr:
-            formula_options['offeq_correction'] = ''
-        if not 'geo' in self.opts.bkg:
-            formula_options['geonu'] = ''
 
         self.formula = [
                 # Some common definitions
@@ -191,9 +203,15 @@ Misc changes:
                 'snf_plf_daily = thermal_power[r]*fission_fractions[r,i]() / eper_fission_avg',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
                 'snf_in_reac = efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
+                # Energy model
+                'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
+                'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
+                'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
                 ]
 
-        ibd =   '''
+
+        # IBD part
+        ibd =   '''ibd={eres} {lsnl}
                     kinint2(
                       sum[r]|
                         (
@@ -207,41 +225,21 @@ Misc changes:
                             ibd_xsec(enu(), ctheta())*
                             jacobian(enu(), ee(), ctheta())
                         )
-                    )
+                    ) {shape_norm}
                 '''.format(**formula_options)
 
-        energy_model_formula = ''
-        energy_model = self.opts.energy_model
-        concat_subdetectors=False
-        if 'lsnl' in energy_model:
-            energy_model_formula = 'lsnl| '
-            self.formula.append('evis_edges_hist| evis_hist')
-        if 'eres' in energy_model:
-            energy_model_formula = 'eres| '+energy_model_formula
-            self.formula.append('eres_matrix| evis_hist')
-        elif 'multieres' in energy_model:
-            if self.opts.multieres=='sum':
-                energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-                self.formula.append('eres_matrix[s]| evis_hist')
-            elif self.opts.multieres=='concat':
-                energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-                self.formula.append('eres_matrix[s]| evis_hist')
-                concat_subdetectors = True
-
-        if self.opts.spectrum_unc=='initial':
-            ibd = ibd+'*shape_norm()'
-
+        concat_subdetectors='multieres' in energy_model and self.opts.multieres=='concat'
         formula=dict(
-                ibd = concat_subdetectors and 'ibd' or 'rebin(ibd)',
-                accidentals = 'acc'    in self.opts.bkg and '+accidentals' or '',
-                lihe        = 'lihe'   in self.opts.bkg and '+lihe'        or '',
-                alphan      = 'alphan' in self.opts.bkg and '+alphan'      or '',
-                fastn       = 'fastn'  in self.opts.bkg and '+fastn'       or '',
-                geonu       = 'geonu'  in self.opts.bkg and '+geonu'       or '',
+                ibd         = 'ibd'          if concat_subdetectors       else 'rebin(ibd)',
+                accidentals = '+accidentals' if 'acc'    in self.opts.bkg else '',
+                lihe        = '+lihe'        if 'lihe'   in self.opts.bkg else '',
+                alphan      = '+alphan'      if 'alphan' in self.opts.bkg else '',
+                fastn       = '+fastn'       if 'fastn'  in self.opts.bkg else '',
+                geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
                 )
         formula_back = 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula)
 
-        self.formula.append('ibd=' + energy_model_formula + ibd)
+        self.formula.append(ibd)
         self.formula.append(formula_back)
 
     def parameters(self):
@@ -663,15 +661,11 @@ Misc changes:
         self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
-        if self.opts.spectrum_unc in ['final', 'initial']:
+        if self.opts.spectrum_unc:
             spec = self.namespace('spectrum')
             cfg = self.cfg.shape_uncertainty
             unc = cfg.unc
-
-            if self.opts.spectrum_unc=='initial':
-                edges = self.cfg.kinint2.edges
-            elif self.opts.spectrum_unc=='final':
-                edges = self.cfg.rebin.edges
+            edges = self.cfg.rebin.edges
 
             # bin-to-bin should take into account the number of bins it is applied to
             unccorrection = ((edges.size-1.0)/cfg.nbins)**0.5
@@ -695,10 +689,6 @@ Misc changes:
                     unc    = cfg.unc,
                     object = vararray
                     )
-        elif self.opts.spectrum_unc=='none':
-            pass
-        else:
-            raise Exception('Unknown spectrum shape uncertainty type: '+self.opts.spectrum_unc)
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
