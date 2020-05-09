@@ -63,6 +63,8 @@ class Expression_v01(object):
 
         self.trees = []
         for expr in self.expressions:
+            if not expr:
+                continue
             texpr = '__tree__ = '+expr
             try:
                 exec(texpr, self.globals, self.globals)
