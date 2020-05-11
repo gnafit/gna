@@ -198,11 +198,31 @@ Misc changes:
                 'efflivetime = eff * livetime[d]',
                 # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
                 #
+                # Neutrino energy
+                #
+                'evis_hist=evis_hist()',
+                'enu| ee(evis()), ctheta()',
+                #
+                # Energy model
+                #
+                'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
+                'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
+                'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
+                #
                 # Reactor part
-                'numerator = efflivetime * thermal_power[r] * '
-                     'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-                'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
+                #
+                'numerator = efflivetime * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                     'fission_fractions_nominal[r,i]() * conversion_factor * target_protons[d] ',
+                'eper_fission_avg = sum[i] | eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions[r,i]()',
                 'power_livetime_factor = numerator / eper_fission_avg',
+                'anuspec[i](enu())',
+                #
+                # SNF
+                #
+                'eper_fission_avg_nominal = sum[i] | eper_fission_nominal[i] * fission_fractions[r,i]()',
+                'snf_plf_daily = conversion_factor * thermal_power_nominal[r] * fission_fractions[r,i]() / eper_fission_avg_nominal',
+                'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i]()',
+                'snf_in_reac = snf_norm * efflivetime * target_protons[d] * snf_correction(enu(), nominal_spec_per_reac)',
                 #
                 # Backgrounds
                 #
@@ -211,23 +231,6 @@ Misc changes:
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
                 'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
                 #
-                # Neutrino energy
-                #
-                'evis_hist=evis_hist()',
-                'enu| ee(evis()), ctheta()',
-                #
-                # SNF
-                #
-                'snf_plf_daily = thermal_power[r]*fission_fractions[r,i]() / eper_fission_avg',
-                'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
-                'snf_in_reac = snf_norm * efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
-                #
-                # Energy model
-                #
-                'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
-                'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
-                'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
-                #
                 # IBD part
                 #
                 '''ibd={eres} {lsnl}
@@ -235,8 +238,7 @@ Misc changes:
                       sum[r]|
                         (
                             baselineweight[r,d]*
-                            ( (sum[i]|
-                              power_livetime_factor*anuspec[i](enu()){offeq_correction}) {snf} )*
+                            ( (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
                             {oscprob}
                             {geonu_spectrum}
                         )*
@@ -397,7 +399,8 @@ Misc changes:
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters_yaml_v01", major = 'i'),
-                    parameter = "fission_fractions",
+                    parameter = "fission_fractions_nominal",
+                    separate_uncertainty = "fission_fractions_scale",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
                     data = 'data/data_juno/fission_fractions/2013.12.05_xubo.yaml'
@@ -430,7 +433,7 @@ Misc changes:
                         ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
-                        parameter = "thermal_power",
+                        parameter = "thermal_power_nominal",
                         label = 'Thermal power of {reactor} in GWt',
                         pars = uncertaindict([
                             ('TS1',  4.6),
@@ -449,6 +452,7 @@ Misc changes:
                             uncertainty=0.8,
                             mode='percent'
                             ),
+                        separate_uncertainty = 'thermal_power_scale'
                         ),
                 target_protons = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -473,7 +477,7 @@ Misc changes:
                         ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
-                        parameter = "eper_fission",
+                        parameter = 'eper_fission_nominal',
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [
@@ -484,6 +488,7 @@ Misc changes:
                               ],
                             mode='absolute'
                             ),
+                        separate_uncertainty = 'eper_fission_scale'
                         ),
                 lsnl = NestedDict(
                         bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
@@ -829,7 +834,7 @@ Misc changes:
           expr: 'numerator'
           label: '{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'
         power_livetime_scale:
-          expr: 'eff*livetime*thermal_power*conversion_factor*target_protons'
+          expr: 'eff*livetime*thermal_power_scale*thermal_power_nominal*conversion_factor*target_protons'
           label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'
         anuspec_weighted:
           expr: 'anuspec*power_livetime_factor'
