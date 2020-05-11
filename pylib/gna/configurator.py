@@ -376,7 +376,7 @@ class uncertain(object):
     def get_unc(self):
         if self.mode=='relative':
             relunc = self.uncertainty
-        elif self.mode=='relative':
+        elif self.mode=='absolute':
             relunc = self.uncertainty/self.central
         elif self.mode=='fixed':
             return None
