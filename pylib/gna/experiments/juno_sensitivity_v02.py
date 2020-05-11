@@ -211,16 +211,18 @@ Misc changes:
                 #
                 # Reactor part
                 #
-                'numerator = efflivetime * thermal_power_scale[r] * thermal_power_nominal[r] * '
-                     'fission_fractions_nominal[r,i]() * conversion_factor * target_protons[d] ',
-                'eper_fission_avg = sum[i] | eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions[r,i]()',
+                'numerator = efflivetime * reactor_active_norm * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                             'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
+                             'conversion_factor * target_protons[d]',
+                'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
+                'eper_fission_avg = sum[i]| isotope_weight * fission_fractions_nominal[r,i]()',
                 'power_livetime_factor = numerator / eper_fission_avg',
                 'anuspec[i](enu())',
                 #
                 # SNF
                 #
-                'eper_fission_avg_nominal = sum[i] | eper_fission_nominal[i] * fission_fractions[r,i]()',
-                'snf_plf_daily = conversion_factor * thermal_power_nominal[r] * fission_fractions[r,i]() / eper_fission_avg_nominal',
+                'eper_fission_avg_nominal = sum[i] | eper_fission_nominal[i] * fission_fractions_nominal[r,i]()',
+                'snf_plf_daily = conversion_factor * thermal_power_nominal[r] * fission_fractions_nominal[r,i]() / eper_fission_avg_nominal',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i]()',
                 'snf_in_reac = snf_norm * efflivetime * target_protons[d] * snf_correction(enu(), nominal_spec_per_reac)',
                 #
@@ -399,7 +401,7 @@ Misc changes:
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters_yaml_v01", major = 'i'),
-                    parameter = "fission_fractions_nominal",
+                    parameter = 'fission_fractions_nominal',
                     separate_uncertainty = "fission_fractions_scale",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
@@ -533,6 +535,12 @@ Misc changes:
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = 'snf_norm',
                         label='SNF norm',
+                        pars = uncertain(1.0, 'fixed'),
+                        ),
+                reactor_active_norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'reactor_active_norm',
+                        label='Reactor nu (active norm)',
                         pars = uncertain(1.0, 'fixed'),
                         ),
                 #
