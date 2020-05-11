@@ -116,7 +116,7 @@ class exp(baseexp):
                 filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                 free_params=True, # enable free spectral model
-                varmode='log',
+                varmode='plain',
                 varname='anue_weight_{index}',
                 ns_name='spectral_weights',
                 edges = N.concatenate( ( N.arange( 1.8, 8.7, 0.5 ), [ 12.3 ] ) ),
@@ -139,7 +139,7 @@ class exp(baseexp):
                 efficiencies = 'data/dayabay/efficiency/P15A_efficiency.py'
                 ),
             livetime = NestedDict(
-                bundle = dict(name='dayabay_livetime_hdf_v02'),
+                bundle = dict(name='dayabay_livetime_hdf', version='v02'),
                 file   = 'data/dayabay/data/P15A/dubna/dayabay_data_dubna_v15_bcw_adsimple.hdf5',
             ),
             baselines = NestedDict(
@@ -168,7 +168,7 @@ class exp(baseexp):
                             ( 'LA3', 2.895 ),
                             ( 'LA4', 2.895 ),
                             ],
-                        uncertainty = 5.0,
+                        uncertainty = 0.5,
                         mode = 'percent',
                         ),
                     ),
