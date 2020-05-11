@@ -442,6 +442,14 @@ def main(opts):
     ax.set_xlim(0.0, 15.0)
     savefig(opts.output, suffix='_dist_edep_lsnl')
 
+    poly = N.polynomial.polynomial.Polynomial([0, 1, 0])
+    x = data.data_no.data_edep_lsnl.diff_x[data.dmmid_idx]
+    pf = poly.fit(x, data.data_no.data_edep_lsnl.diff[data.dmmid_idx], 2)
+    print(pf)
+    ax.plot(x, pf(x), label=r'NO fit')
+    ax.legend()
+    savefig(opts.output, suffix='_dist_edep_lsnl_fit', close=not opts.show_all)
+
     #
     # Distance between nearest peaks vs Edep, multiple
     #
