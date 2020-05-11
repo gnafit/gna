@@ -23,8 +23,8 @@ Changes since previous implementation [juno_chengyp]:
     - Add matter oscillations
     - Accidentals, fastn, Li/He, AlphaN
     - Add free spectral parameters
-    - WIP: geo-neutrino
     - WIP: SNF
+    - WIP: geo-neutrino
 
 Implements:
     - Reactor antineutrino flux:
@@ -33,7 +33,7 @@ Implements:
         + Huber+Mueller
         + Free
       * [optional] Off-equilibrium corrections (Mueller)
-      * NO SNF contribution
+      * [optional] SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
     - Final binning:
@@ -53,6 +53,7 @@ Misc changes:
     - [2020.04.24] Modify fluxes summation and integration sequence to introduce geo-neutrino spectra
     - [2020.05.05] Add backgrounds
     - [2020.05.11] Remove multieres summation mode
+    - [2020.05.11] Add SNF
     """
 
     detectorname = 'AD1'
@@ -84,9 +85,10 @@ Misc changes:
         parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
 
         # reactor flux
-        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'halfts', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
         parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
+        parser.add_argument('--snf', action='store_true', help="Enable SNF contribution")
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
@@ -118,7 +120,7 @@ Misc changes:
         else:
             self.subdetectors_names = ()
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
-        if 'pessimistic' in self.opts.reactors:
+        if 'halfts' in self.opts.reactors:
             self.reactors.remove('TS3')
             self.reactors.remove('TS4')
         if 'far-off' in self.opts.reactors:
@@ -166,6 +168,7 @@ Misc changes:
                 #
                 offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else '',
                 shape_norm       = '*shape_norm()'                 if self.opts.spectrum_unc else '',
+                snf              = '+snf_in_reac'                  if self.opts.snf else '',
                 #
                 # Energy model
                 #
@@ -217,7 +220,7 @@ Misc changes:
                 #
                 'snf_plf_daily = thermal_power[r]*fission_fractions[r,i]() / eper_fission_avg',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
-                'snf_in_reac = efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
+                'snf_in_reac = snf_norm * efflivetime * snf_correction(enu(), nominal_spec_per_reac)',
                 #
                 # Energy model
                 #
@@ -232,8 +235,8 @@ Misc changes:
                       sum[r]|
                         (
                             baselineweight[r,d]*
-                            expand(sum[i]|
-                              power_livetime_factor*anuspec[i](enu()){offeq_correction})*
+                            ( (sum[i]|
+                              power_livetime_factor*anuspec[i](enu()){offeq_correction}) {snf} )*
                             {oscprob}
                             {geonu_spectrum}
                         )*
@@ -521,7 +524,15 @@ Misc changes:
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
                         ),
+                snf_norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'snf_norm',
+                        label='SNF norm',
+                        pars = uncertain(1.0, 'fixed'),
+                        ),
+                #
                 # Backgrounds
+                #
                 acc_spectrum_db = NestedDict(
                     bundle    = dict(name='root_histograms_v04', inactive=True),
                     filename  = 'data/data_juno/bkg/acc/2016_acc_dayabay_p15a/dayabay_acc_spectrum_p15a.root',
