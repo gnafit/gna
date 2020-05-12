@@ -13,7 +13,7 @@ class cmd(basecmd):
         parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
         parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
         parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
-        parser.add_argument('-s', '--simulate', action='store_true', help='do nothing')
+        parser.add_argument('--simulate', action='store_true', help='do nothing')
 
     def init(self):
         minimizer = self.opts.minimizer
