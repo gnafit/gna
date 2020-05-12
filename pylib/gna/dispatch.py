@@ -67,6 +67,7 @@ def listmodules(modules, printdoc=False):
         except Exception as e:
             print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.message, namelen=namelen))
         else:
+            pyname = module.__file__
             if module.__file__.endswith('.pyc'):
                 pyname = module.__file__[:-1]
 
