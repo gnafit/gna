@@ -87,7 +87,7 @@ function run(){
                 reactors)
                     case $val in
                         halfts)
-                            reactors="--reactors halfthalfts"
+                            reactors="--reactors halfts"
                             ;;
                         all)
                             reactors=" "
@@ -146,7 +146,7 @@ function run(){
                  --dm ee \
                  $spectrum \
                  $eresunc \
-                 ${reactors:-"--reactors halfthalfts nohz"} \
+                 ${reactors:-"--reactors halfts nohz"} \
                  $parameters \
                  $offeq $coarse $hubermueller \
           -- ns $constrain $setdm \
