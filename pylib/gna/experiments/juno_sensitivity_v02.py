@@ -357,7 +357,7 @@ Misc changes:
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    free_params=True, # enable free spectral model
+                    free_params=False, # enable free spectral model
                     varmode='log',
                     varname='anue_weight_{index:02d}',
                     ns_name='spectral_weights',
@@ -368,7 +368,7 @@ Misc changes:
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    free_params=True, # enable free spectral model
+                    free_params=False, # enable free spectral model
                     varmode='log',
                     varname='anue_weight_{index:02d}',
                     ns_name='spectral_weights',

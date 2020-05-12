@@ -110,9 +110,9 @@ class reactor_anu_spectra_v04(TransformationBundle):
             self.spectra[name] = model
 
     def define_variables(self):
+        self.reac_ns = self.namespace(self.cfg.ns_name) if self.cfg.get('ns_name') else self.namespace
         if self.cfg.free_params:
             varmode = self.cfg.varmode
-            self.reac_ns = self.namespace(self.cfg.ns_name) if self.cfg.get('ns_name') else self.namespace
             if not varmode in ['log', 'plain']:
                 raise KeyError('Unknown varmode {} (should be log or plain)'.format(varmode))
 
