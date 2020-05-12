@@ -54,7 +54,7 @@ function run(){
             IFS='=' read key val <<< $keyval
             case $key in
                 spectrum)
-                    spectrum="--spectrum $val"
+                    spectrum="--spectrum-unc"
                     ;;
                 freetheta)
                     constrain="--set juno.pmns.SinSqDouble13 free=true"
