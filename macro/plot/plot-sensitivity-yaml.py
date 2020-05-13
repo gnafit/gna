@@ -125,7 +125,7 @@ class UncertaintyPlotter(object):
         return centrals_full[1:], errs_full[1:], shift, facecolors
 
     def figure(self, varname, ylabel):
-        fig = plt.figure()
+        fig = plt.figure(figsize=self.opts.figsize)
         ax = plt.subplot(111, xlabel=ylabel, title=varname)
         ax.minorticks_on()
         ax.tick_params(axis='y', direction='inout', which='minor', left=False, right=False, length=0.0)
@@ -202,6 +202,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', help='output file')
     parser.add_argument('-s', '--show', action='store_true', help='show figures')
     parser.add_argument('-l', '--lines', type=int, nargs='+', default=[], help='add separator lines after values')
+    parser.add_argument('--figsize', nargs=2, type=float, help='figsize')
 
     plotter=UncertaintyPlotter(parser.parse_args())
     plotter.plot()

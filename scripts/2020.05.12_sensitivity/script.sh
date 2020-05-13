@@ -100,7 +100,7 @@ function run(){
                     offeq="--offequilibrium-corr"
                     ;;
                 snf)
-                    offeq="--snf"
+                    snf="--snf"
                     ;;
                 parameters)
                     parameters="--parameters $val"

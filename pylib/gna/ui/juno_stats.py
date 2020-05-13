@@ -21,5 +21,7 @@ class cmd(basecmd):
         self.init_variables()
 
     def init_variables(self):
-        pass
+        ns = self.namespace
+
+        import IPython; IPython.embed()
 
