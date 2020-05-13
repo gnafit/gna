@@ -131,8 +131,10 @@ public:
   }
 
   T pop() {
-    this->set(m_stack.top());
-    m_stack.pop();
+    if(!m_stack.empty()){
+      this->set(m_stack.top());
+      m_stack.pop();
+    }
     return this->value();
   }
 

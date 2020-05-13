@@ -64,9 +64,12 @@ class DiscreteParameter(object):
         return prev
 
     def pop(self):
-        val = self.stack.pop()
-        self.set(val)
-        return val
+        if self.stack:
+            val = self.stack.pop()
+            self.set(val)
+            return val
+
+        return self.value()
 
 def makeparameter(ns, name, cfg=None, **kwargs):
     from gna import constructors as C
