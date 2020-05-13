@@ -2,8 +2,16 @@
 
 from __future__ import print_function
 from tools.classwrapper import ClassWrapper
+from gna.env import env
+import gna.env
+import gna.parameters.oscillation
 
 class NamespaceWrapper(ClassWrapper):
+    def __new__(cls, obj):
+        if not isinstance(obj, gna.env.namespace):
+            return obj
+        return ClassWrapper.__new__(cls)
+
     def __init__(self, obj):
         ClassWrapper.__init__(self, obj, NamespaceWrapper)
 
@@ -23,8 +31,6 @@ class NamespaceWrapper(ClassWrapper):
                 except Exception:
                     pass
 
-from gna.env import env
-import gna.parameters.oscillation
 
 ns = env.globalns
 gna.parameters.oscillation.reqparameters_reactor(ns('pmns'), dm='23')
