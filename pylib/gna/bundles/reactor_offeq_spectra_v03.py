@@ -18,7 +18,7 @@ class reactor_offeq_spectra_v03(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-            return ('offeq_scale',), ('offeq_correction',)
+            return ('offeq_scale', 'offeq_norm'), ('offeq_correction',)
 
     def _load_data(self):
         """Read raw input spectra"""
@@ -51,7 +51,7 @@ class reactor_offeq_spectra_v03(TransformationBundle):
                 if iso != 'U238':
                     raise
                 ones = C.FillLike(1., labels='Offeq correction to {0} spectrum in {1} reactor'.format(iso, reac))
-                self.context.objects[name] = ones 
+                self.context.objects[name] = ones
                 self.set_input('offeq_correction', idx, ones.single_input(), argument_number=0)
                 self.set_output("offeq_correction", idx, ones.single())
                 continue
@@ -81,7 +81,6 @@ class reactor_offeq_spectra_v03(TransformationBundle):
                     fixed=True, labels="Dummy weight for reactor {1} and iso "
                     "{0} for offeq correction".format(iso, reac))
 
-
             outputs = [ones.single(), interpolator_trans.single()]
             weights = ['.'.join(("dummy_scale", idx.current_format())),
                        '.'.join((par_name, idx.current_format()))]
@@ -93,7 +92,6 @@ class reactor_offeq_spectra_v03(TransformationBundle):
 
             self.context.objects[name] = final_sum
             self.set_output("offeq_correction", idx, final_sum.single())
-
 
     def define_variables(self):
         pass

@@ -1,6 +1,13 @@
-"""Print JUNO related stats and plot default figures, latex friendly"""
+"""Print JUNO related stats and plot default figures, latex friendly.
+   Tweaked for juno_sensitivity_v02
+"""
 from __future__ import print_function
 from gna.ui import basecmd
+from collections import OrderedDict
+
+class ClassWrapper(object):
+    def __init__(self, obj):
+        self.obj = obj
 
 class cmd(basecmd):
     @classmethod
@@ -23,5 +30,7 @@ class cmd(basecmd):
     def init_variables(self):
         ns = self.namespace
 
-        import IPython; IPython.embed()
+        self.bkg=OrderedDict([(k, ns[k]) for k in (k0+'_norm' for k0 in ('acc', 'lihe', 'fastn', 'alphan')) if k in ns])
+        self.reac=OrderedDict([(k, ns[k]) for k in (k0+'_norm' for k0 in ('reactor_active', 'snf')) if k in ns])
+        self.reac['offeq']=ns('offeq_scale')
 

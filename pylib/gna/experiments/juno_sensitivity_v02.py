@@ -211,7 +211,7 @@ Misc changes:
                 #
                 # Reactor part
                 #
-                'numerator = efflivetime * reactor_active_norm * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                'numerator = efflivetime * thermal_power_scale[r] * thermal_power_nominal[r] * '
                              'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
                              'conversion_factor * target_protons[d]',
                 'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
@@ -240,7 +240,7 @@ Misc changes:
                       sum[r]|
                         (
                             baselineweight[r,d]*
-                            ( (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
+                            ( reactor_active_norm * (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
                             {oscprob}
                             {geonu_spectrum}
                         )*

@@ -96,6 +96,11 @@ class UncertaintyPlotter(object):
 
         # ebopts=dict(fmt='o', markerfacecolor='none')
         # ax.errorbar(self.arange, centrals, errs, **ebopts)
+        #
+        ax=self.figure(varname, 'Absolute error')
+        ax.barh(self.yc, errs, self.ywidth, color=facecolors)
+        self.patch_yticklabels()
+        self.savefig(suffix+('abs', ))
 
         ax=self.figure(varname, 'Relative error, %')
         ax.barh(self.yc, relerr, self.ywidth, color=facecolors)

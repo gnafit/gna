@@ -202,6 +202,20 @@ class namespace(Mapping):
             return env.nsview[v]
         return v
 
+    def get(self, name, *args):
+        if not name:
+            return self
+
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage.get(head, *args)
+        if isinstance(v, basestring):
+            return env.nsview[v]
+        return v
+
     def __setitem__(self, name, value):
         ns, head = self.get_proper_ns(name)
         if ns:
