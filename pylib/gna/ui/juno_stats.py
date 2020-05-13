@@ -4,10 +4,27 @@
 from __future__ import print_function
 from gna.ui import basecmd
 from collections import OrderedDict
+from tools.classwrapper import ClassWrapper
 
-class ClassWrapper(object):
+class NamespaceWrapper(ClassWrapper):
     def __init__(self, obj):
-        self.obj = obj
+        ClassWrapper.__init__(self, obj, NamespaceWrapper)
+
+    def push(self, value):
+        for ns in self.walknstree():
+            for var in ns.storage.values():
+                try:
+                    var.push(value)
+                except Exception:
+                    pass
+
+    def pop(self):
+        for ns in self.walknstree():
+            for var in ns.storage.values():
+                try:
+                    var.pop()
+                except Exception:
+                    pass
 
 class cmd(basecmd):
     @classmethod
