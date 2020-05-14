@@ -301,6 +301,11 @@ def main(opts):
     data.build()
 
     #
+    # Plotting
+    #
+    xmax = 12.0
+
+    #
     # Positron non-linearity
     #
     fig = P.figure()
@@ -311,7 +316,7 @@ def main(opts):
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
     ax.legend(loc='lower right')
     ax.set_ylim(0.8, 1.05)
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_total_relative', close=not opts.show_all)
 
     #
@@ -328,7 +333,7 @@ def main(opts):
     ax.plot(ec, dedf)
     ax.legend(loc='lower right')
     ax.set_ylim(0.975, 1.01)
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_total_derivative', close=not opts.show_all)
 
     #
@@ -343,9 +348,12 @@ def main(opts):
     esmod_shifted = esmod*(es[-1]/esmod[-1])
     ax.vlines(es, 0.0, 1.0, linestyle='--', linewidth=2, alpha=0.5, color='green', label='Edep')
     ax.vlines(esmod, 0.0, 1.0, linestyle='-', color='red', label='Edep quenched')
+    ax.legend()
+    savefig(opts.output, suffix='_quenching_effect_0')
+
     ax.vlines(esmod_shifted, 0.0, 1.0, linestyle=':', color='blue', label='Edep quenched, scaled')
     ax.legend()
-    savefig(opts.output, suffix='_quenching_effect', close=not opts.show_all)
+    savefig(opts.output, suffix='_quenching_effect_1', close=not opts.show_all)
 
     #
     # Energy resolution
@@ -354,7 +362,7 @@ def main(opts):
     ax = P.subplot(111, xlabel='Edep, MeV', ylabel=r'$\sigma/E$', title='Energy resolution')
     ax.minorticks_on(); ax.grid()
     ax.plot(data.edep, eres_sigma_rel(data.edep), '-')
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_eres_rel', close=not opts.show_all)
 
     #
@@ -364,7 +372,7 @@ def main(opts):
     ax = P.subplot(111, xlabel= 'Edep, MeV', ylabel= r'$\sigma$', title='Energy resolution')
     ax.minorticks_on(); ax.grid()
     ax.plot(data.edep, eres_sigma_abs(data.edep), '-')
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_eres_abs', close=not opts.show_all)
 
     #
@@ -377,8 +385,11 @@ def main(opts):
     ax.plot(data.enu, data.data_io.psur[data.dmmid_idx], label=r'full IO')
     ax.plot(data.data_no.data_enu.psur_e[data.dmmid_idx], data.data_no.data_enu.psur[data.dmmid_idx], '^', markerfacecolor='none')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
-    savefig(opts.output, suffix='_psur_enu', close=not opts.show_all)
+    ax.set_xlim(0.0, xmax)
+    savefig(opts.output, suffix='_psur_enu')
+
+    ax.set_xlim(2.0, 4.5)
+    savefig(opts.output, suffix='_psur_enu_zoom', close=not opts.show_all)
 
     #
     # Survival probability vs Edep
@@ -390,8 +401,11 @@ def main(opts):
     ax.plot(data.edep, data.data_io.psur[data.dmmid_idx], label=r'full IO')
     ax.plot(data.data_no.data_edep.psur_e[data.dmmid_idx], data.data_no.data_edep.psur[data.dmmid_idx], '^', markerfacecolor='none')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
-    savefig(opts.output, suffix='_psur_edep', close=not opts.show_all)
+    ax.set_xlim(0.0, xmax)
+    savefig(opts.output, suffix='_psur_edep')
+
+    ax.set_xlim(1.2, 3.7)
+    savefig(opts.output, suffix='_psur_edep_zoom', close=not opts.show_all)
 
     #
     # Survival probability vs Edep_lsnl
@@ -403,8 +417,11 @@ def main(opts):
     ax.plot(data.edep_lsnl, data.data_io.psur[data.dmmid_idx], label=r'full IO')
     ax.plot(data.data_no.data_edep_lsnl.psur_e[data.dmmid_idx], data.data_no.data_edep_lsnl.psur[data.dmmid_idx], '^', markerfacecolor='none')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_psur_edep_lsnl')
+
+    ax.set_xlim(1.2, 3.7)
+    savefig(opts.output, suffix='_psur_edep_lsnl_zoom', close=not opts.show_all)
 
     #
     # Distance between nearest peaks vs Enu, single
@@ -415,8 +432,13 @@ def main(opts):
     ax.plot(data.data_no.data_enu.diff_x[data.dmmid_idx], data.data_no.data_enu.diff[data.dmmid_idx], label=r'NO')
     ax.plot(data.data_io.data_enu.diff_x[data.dmmid_idx], data.data_io.data_enu.diff[data.dmmid_idx], label=r'IO')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
-    savefig(opts.output, suffix='_dist_enu', close=not opts.show_all)
+    ax.set_xlim(0.0, xmax)
+    ax.set_ylim(bottom=0.0)
+    savefig(opts.output, suffix='_dist_enu')
+
+    ax.set_xlim(2.0, 5.0)
+    ax.set_ylim(top=0.5)
+    savefig(opts.output, suffix='_dist_enu_zoom', close=not opts.show_all)
 
     #
     # Distance between nearest peaks vs Edep, single
@@ -427,8 +449,13 @@ def main(opts):
     ax.plot(data.data_no.data_edep.diff_x[data.dmmid_idx], data.data_no.data_edep.diff[data.dmmid_idx], label=r'NO')
     ax.plot(data.data_io.data_edep.diff_x[data.dmmid_idx], data.data_io.data_edep.diff[data.dmmid_idx], label=r'IO')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
-    savefig(opts.output, suffix='_dist_edep', close=not opts.show_all)
+    ax.set_xlim(0.0, xmax)
+    ax.set_ylim(bottom=0.0)
+    savefig(opts.output, suffix='_dist_edep')
+
+    ax.set_xlim(1.2, 4.2)
+    ax.set_ylim(top=0.5)
+    savefig(opts.output, suffix='_dist_edep_zoom', close=not opts.show_all)
 
     #
     # Distance between nearest peaks vs Edep, single
@@ -439,8 +466,13 @@ def main(opts):
     ax.plot(data.data_no.data_edep_lsnl.diff_x[data.dmmid_idx], data.data_no.data_edep_lsnl.diff[data.dmmid_idx], label=r'NO')
     ax.plot(data.data_io.data_edep_lsnl.diff_x[data.dmmid_idx], data.data_io.data_edep_lsnl.diff[data.dmmid_idx], label=r'IO')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
+    ax.set_ylim(bottom=0.0)
     savefig(opts.output, suffix='_dist_edep_lsnl')
+
+    ax.set_xlim(1.2, 4.2)
+    ax.set_ylim(top=0.5)
+    savefig(opts.output, suffix='_dist_edep_lsnl_zoom')
 
     poly = N.polynomial.polynomial.Polynomial([0, 1, 0])
     x = data.data_no.data_edep_lsnl.diff_x[data.dmmid_idx]
@@ -461,14 +493,14 @@ def main(opts):
     for idx in (0, 5, 15, 20):
         ax.plot(data.data_io.data_edep_lsnl.diff_x[idx], data.data_io.data_edep_lsnl.diff[idx], '--')
     ax.legend()
-    ax.set_xlim(0.0, 15.0)
+    ax.set_xlim(0.0, xmax)
     savefig(opts.output, suffix='_dist_edep_lsnl_multi', close=not opts.show_all)
 
     #
     # Distance between nearest peaks difference
     #
     fig = P.figure()
-    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='Dist(IO) - Dist(NO), MeV', title='Nearest peaks distance diff: IO-NO')
+    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='Dist(IO) - Dist(NO), MeV', title='Nearest peaks distance diff: IO-NO')
     ax.minorticks_on(); ax.grid()
     ax.plot(data.e, data.diffs.edep[data.dmmid_idx], '-', markerfacecolor='none', label='Edep')
     ax.plot(data.e, data.diffs.edep_lsnl[data.dmmid_idx], '-', markerfacecolor='none', label='Edep quenched')
@@ -484,7 +516,7 @@ def main(opts):
     # Distance between nearest peaks difference relative to sigma
     #
     fig = P.figure()
-    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='(Dist(IO) - Dist(NO))/$\\sigma$', title='Nearest peaks distance diff: IO-NO')
+    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='(Dist(IO) - Dist(NO))/$\\sigma$', title='Nearest peaks distance diff: IO-NO')
     ax.minorticks_on(); ax.grid()
     ax.plot(data.e, data.diffs_rel.edep[data.dmmid_idx], '-', markerfacecolor='none', label='Edep')
     ax.plot(data.e, data.diffs_rel.edep_lsnl[data.dmmid_idx], '-', markerfacecolor='none', label='Edep quenched')
@@ -495,7 +527,7 @@ def main(opts):
     # Distance between nearest peaks difference relative to sigma
     #
     fig = P.figure()
-    ax = P.subplot(111, xlabel='Enu, MeV', ylabel='(Dist(IO) - Dist(NO))/$\\sigma$', title='Nearest peaks distance diff: IO-NO')
+    ax = P.subplot(111, xlabel='Edep, MeV', ylabel='(Dist(IO) - Dist(NO))/$\\sigma$', title='Nearest peaks distance diff: IO-NO')
     ax.minorticks_on(); ax.grid()
     ledep   = ax.plot(data.e, data.diffs_rel.edep[data.dmmid_idx],      '--', markerfacecolor='none', label='Edep')[0]
     lquench = ax.plot(data.e, data.diffs_rel.edep_lsnl[data.dmmid_idx], '-',  color=ledep.get_color(), markerfacecolor='none', label='Edep quenched')[0]
@@ -512,7 +544,7 @@ def main(opts):
     #
     fig = P.figure()
     ax = P.subplot(111, ylabel=r'$\Delta m^2_\mathrm{ee}$', xlabel='Edep quenched, MeV',
-                   title='Nearest peaks distance diff: IO-NO')
+                   title='Nearest peaks distance diff: IO-NO/$\\sigma$')
     ax.minorticks_on(); ax.grid()
     formatter = ax.yaxis.get_major_formatter()
     formatter.set_useOffset(False)
