@@ -78,7 +78,7 @@ class reactor_snf_spectra_v04(TransformationBundle):
                                 labels='Product of nominal spectrum to SNF correction in {}'.format(reac))
 
             par_name = "snf_scale"
-            self.reqparameter(par_name, idx, central=1., relsigma=0.3,
+            self.reqparameter(par_name, idx, central=1., relsigma=1,
                               labels="SNF norm for reactor {0}".format(reac))
 
             outputs = [product.single()]
