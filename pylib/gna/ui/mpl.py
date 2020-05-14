@@ -34,6 +34,7 @@ class cmd(basecmd):
         axis.add_argument('--ylim', nargs='+', type=float, help='Y limits')
         axis.add_argument('--xlim', nargs='+', type=float, help='X limits')
         axis.add_argument('--legend', nargs='?', default=undefined, help='legend (optional: position)')
+        axis.add_argument('--scale', nargs=2, help='axis scale', metavar=('axis', 'scale'))
 
         axis.add_argument('-g', '--grid', action='store_true', help='draw grid')
         axis.add_argument('--minor-ticks', '--mt', action='store_true', help='minor ticks')
@@ -102,6 +103,11 @@ class cmd(basecmd):
         if self.opts.ylabel:
             ax.set_ylabel(self.opts.ylabel)
 
+        if self.opts.scale:
+            axis, scale = self.opts.scale
+            set_scale=getattr(ax, 'set_{axis}scale'.format(axis=axis))
+            set_scale(scale)
+
         if self.opts.xlim:
             ax.set_xlim(*self.opts.xlim)
 
@@ -127,4 +133,10 @@ class cmd(basecmd):
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
             axis = getattr(ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
+
+        if self.opts.xlim:
+            ax.set_xlim(*self.opts.xlim)
+
+        if self.opts.ylim:
+            ax.set_ylim(*self.opts.ylim)
 
