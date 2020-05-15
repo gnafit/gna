@@ -28,10 +28,8 @@ def arggroups(argv):
 
 def getmodules():
     modules = OrderedDict()
-    for pkgpath in cfg.pkgpaths: # TODO: deprecate
-        modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
-    for pkgpath in iterate_module_paths('ui'):
-        modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
+    modules.update([(name, loader) for loader, name, _ in iter_modules(cfg.pkgpaths)]) # Deprecate
+    modules.update([(name, loader) for loader, name, _ in iter_modules(iterate_module_paths('ui'))])
     return modules
 
 def loadmodule(modules, name):

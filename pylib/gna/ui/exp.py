@@ -6,8 +6,11 @@ import os.path
 from pkgutil import iter_modules
 from gna.config import cfg
 import sys
+from collections import OrderedDict
+from gna.packages import iterate_module_paths
 
-expmodules = {name: loader for loader, name, _ in iter_modules(cfg.experimentpaths)}
+expmodules = OrderedDict([(name, loader) for loader, name, _ in iter_modules(cfg.experimentpaths)])
+expmodules.update([(name, loader) for loader, name, _ in iter_modules(iterate_module_paths('experiments'))])
 
 class cmd(basecmd):
     parserkwargs=dict(add_help=False)
