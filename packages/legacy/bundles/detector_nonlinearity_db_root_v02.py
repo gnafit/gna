@@ -96,7 +96,9 @@ class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
 
         graphs = [ get_buffers_graph(g) for g in graphs ]
 
-        return self.build_graphs( graphs )
+        ret = self.build_graphs( graphs )
+        tfile.Close()
+        return ret
 
     def define_variables(self):
         idxl, idxother = self.idx.split( ('l') )
