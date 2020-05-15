@@ -6,22 +6,23 @@ from gna.config import cfg
 from pkgutil import iter_modules
 from gna.configurator import NestedDict
 import re
+from collections import OrderedDict
+from gna.packages import iterate_module_paths
 
-bundle_modules = {}
+bundle_modules = None
 bundles = {}
 
 def get_bundle(name):
+    global bundle_modules, bundles
     if isinstance(name, tuple):
         name = '_'.join((o for o in name if o))
 
     if name in bundles:
         return bundles[name]
 
-    if not bundle_modules:
-        for bundlepath in cfg.bundlepaths:
-            for loader, lname, _ in iter_modules([bundlepath]):
-                # print( 'init', lname, loader )
-                bundle_modules.update({lname: loader})
+    if bundle_modules is None:
+        bundle_modules=OrderedDict([(lname, loader) for loader, lname, _ in iter_modules(cfg.bundlepaths)]) # TODO: deprecate
+        bundle_modules.update([(lname, loader) for loader, lname, _ in iter_modules(iterate_module_paths('bundles'))])
 
     loader = bundle_modules.get( name )
     if not loader:
