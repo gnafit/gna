@@ -7,6 +7,7 @@ from gna.env import env
 import gna.ui
 from gna.config import cfg
 from gna.packages import iterate_module_paths
+from collections import OrderedDict
 
 class LazyNamespace(argparse.Namespace):
     def __getattribute__(self, name):
@@ -26,7 +27,7 @@ def arggroups(argv):
         yield argv[start:end]
 
 def getmodules():
-    modules = {}
+    modules = OrderedDict()
     for pkgpath in cfg.pkgpaths: # TODO: deprecate
         modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
     for pkgpath in iterate_module_paths('ui'):
@@ -61,8 +62,7 @@ def listmodules(modules, printdoc=False):
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
     wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
-    modnames = sorted(modules.
-            keys())
+    modnames = modules.keys()
     for modname in modnames:
         modname_print = modname.replace('_', '-')
         try:
