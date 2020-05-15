@@ -3,6 +3,7 @@
 from __future__ import print_function
 from gna.ui import basecmd, set_typed
 from gna.configurator import NestedDict
+import pickle
 
 class cmd(basecmd):
     @classmethod
@@ -11,7 +12,7 @@ class cmd(basecmd):
         parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
         parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
-        parser.add_argument('-o', '--output', help='Output file (yaml)', metavar='filename')
+        parser.add_argument('-o', '--output', nargs='+', help='Output file(s) (yaml, pickle)', metavar='filename')
         parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
         parser.add_argument('--simulate', action='store_true', help='do nothing')
 
@@ -31,38 +32,33 @@ class cmd(basecmd):
 
         ofile = self.opts.output
         if ofile:
-            if ofile.endswith('.yaml'):
-                self.save_yaml(ofile)
-            # elif ofile.endswith('.hdf5'):
-                # self.save_hdf5(ofile)
-            else:
-                raise Exception('Unsupported output format or '+ofile)
-            print('Save output file:', ofile)
+            self.save(ofile)
 
     def print(self):
         print('Fit result:', end='')
         print(NestedDict(self.result.__dict__))
 
-    # def save_hdf5(self, filename):
-        # from h5py import File
-
-        # mode = 'w'
-
-        # with File(filename, mode) as ofile:
-            # data = self.result.__dict__
-            # import IPython; IPython.embed()
-
-    def save_yaml(self, filename):
+    def save(self, filenames):
         import yaml
         mode='w'
 
-        with open(filename, mode) as ofile:
-            data = self.result.__dict__.copy()
-            for key in ('errorsdict', 'errors_profile', 'xdict'):
-                if key in data:
-                    data[key] = dict(data[key])
+        data = self.result.__dict__.copy()
+        if self.opts.append:
+            data.update(self.opts.append)
 
-            if self.opts.append:
-                data.update(self.opts.append)
+        for filename in filenames:
+            if filename.endswith('.yaml'):
+                odata=data.copy()
+                for key in ('errorsdict', 'errors_profile', 'xdict'):
+                    if key in odata:
+                        odata[key] = dict(odata[key])
+                with open(filename, mode) as ofile:
+                    ofile.write(yaml.dump(odata))
+            elif filename.endswith('.pkl'):
+                with open(filename, mode+'b') as ofile:
+                    pickle.dump(data, ofile, pickle.HIGHEST_PROTOCOL)
+            else:
+                raise Exception('Unsupported output format or '+filename)
 
-            ofile.write(yaml.dump(data))
+            print('Save output file:', filename)
+
