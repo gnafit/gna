@@ -6,6 +6,7 @@ from pkgutil import iter_modules
 from gna.env import env
 import gna.ui
 from gna.config import cfg
+from gna.packages import iterate_module_paths
 
 class LazyNamespace(argparse.Namespace):
     def __getattribute__(self, name):
@@ -26,7 +27,9 @@ def arggroups(argv):
 
 def getmodules():
     modules = {}
-    for pkgpath in cfg.pkgpaths:
+    for pkgpath in cfg.pkgpaths: # TODO: deprecate
+        modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
+    for pkgpath in iterate_module_paths('ui'):
         modules.update({name: loader for loader, name, _ in iter_modules([pkgpath])})
     return modules
 
