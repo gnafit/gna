@@ -37,6 +37,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('exp', help='JUNO exp instance')
+        parser.add_argument('-l', '--latex', action='store_true', help='Enable LaTeX format')
 
     def init(self):
         try:
@@ -64,38 +65,53 @@ class cmd(basecmd):
         data = OrderedDict()
         total = data['Total']   = self.observation().sum(),
 
+        ibd = None
+        def add(name, value=None):
+            if value is None:
+                value = self.observation().sum()
+            if ibd:
+                data[name] = value, value/ibd*100.0
+            else:
+                data[name] = value,
+            return value
+
         for p in self.bkg.values(): p.push(0.0)
-        data['Reactor+SNF'] = self.observation().sum(),
+        add('Reactor+SNF')
         self.reac['snf_norm'].push(0.0)
-        ibd = data['Reactor only'] = self.observation().sum(),
+        ibd = add('Reactor active')
         self.reac['offeq'].push(0.0)
-        data['Offequilibrium'] = data['Reactor only'][0] - self.observation().sum(),
+        add('Offequilibrium', data['Reactor active'][0] - self.observation().sum())
         self.reac['reactor_active_norm'].push(0.0)
 
         assert self.observation().sum()==0.0
         self.reac['snf_norm'].pop()
-        data['SNF'] = self.observation().sum(),
+        add('SNF')
 
         self.reac['snf_norm'].push(0.0)
 
         for name, par in self.bkg.iteritems():
             par.pop()
             name = name.split('_')[0].capitalize()
-            d = self.observation().sum()
-            data[name] = d, d/ibd*100.
+            add(name)
             par.push(0.0)
 
         assert self.observation().sum()==0.0
 
         for p in self.bkg.values(): p.push(1.0)
-        data['Bkg'] = self.observation().sum(),
+        add('Bkg')
 
         data = [ (k,)+v for k,v in data.iteritems() ]
 
-        t = tabulate(data)
-        headers=['Name', 'total events', '/reac, %']
+        headers=['Name', 'total events', 'N/reactor active, %']
+        options=dict(
+            floatfmt='.2f',
+            tablefmt='plain'
+            )
+        if self.opts.latex:
+            options['tablefmt']='latex_booktabs'
+        t = tabulate(data, headers, **options)
         print('JUNO stats')
-        print(t, headers)
+        print(t)
 
 
 
