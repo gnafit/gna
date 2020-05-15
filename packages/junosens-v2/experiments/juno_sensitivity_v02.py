@@ -54,6 +54,7 @@ Misc changes:
     - [2020.05.05] Add backgrounds
     - [2020.05.11] Remove multieres summation mode
     - [2020.05.11] Add SNF
+    - [2020.05.15] Remove multieres option. Keep the code (not working)
     """
 
     detectorname = 'AD1'
@@ -69,7 +70,7 @@ Misc changes:
 
         # Energy model
         emodel = parser.add_argument_group('emodel', description='Energy model parameters')
-        emodel.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
+        emodel.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres'], default=['lsnl', 'eres'], help='Energy model components')
         emodel.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
 
         eres = emodel.add_mutually_exclusive_group()
@@ -81,8 +82,11 @@ Misc changes:
         bkg_choices = ['acc', 'lihe', 'fastn', 'alphan']
         bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable background group')
 
-        # binning
-        parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
+        # Binning
+        binning=parser.add_argument_group('binning', description='Binning related options')
+        binning.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Internal binning step')
+        binning.add_argument('--final-emin', type=float, help='Final binning Emin')
+        binning.add_argument('--final-emax', type=float, help='Final binning Emax')
 
         # reactor flux
         parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'halfts', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
@@ -295,6 +299,21 @@ Misc changes:
         print('Energy resolution at 1 MeV: {}% ({} pe)'.format(self.opts.eres_sigma*100, self.opts.eres_npe))
 
         edges    = np.arange(0.0, 12.001, 0.01) #FIXME
+        edges_final = np.concatenate( (
+                                    [0.7],
+                                    np.arange(1, 6.0, self.opts.estep),
+                                    np.arange(6, 7.0, 0.1),
+                                    [7.0, 7.5, 12.0]
+                                )
+                            )
+        if self.opts.final_emin is not None:
+            print('Truncate final binning E>={}'.format(self.opts.final_emin))
+            edges_final = edges_final[edges_final>=self.opts.final_emin]
+        if self.opts.final_emax is not None:
+            print('Truncate final binning E<={}'.format(self.opts.final_emax))
+            edges_final = edges_final[edges_final<=self.opts.final_emax]
+        if self.opts.final_emin is not None or self.opts.final_emax is not None:
+            print('Final binning:', edges_final)
         self.cfg = NestedDict(
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -307,13 +326,7 @@ Misc changes:
                 rebin = NestedDict(
                         bundle = dict(name='rebin', version='v04', major=''),
                         rounding = 5,
-                        edges = np.concatenate( (
-                                    [0.7],
-                                    np.arange(1, 6.0, self.opts.estep),
-                                    np.arange(6, 7.0, 0.1),
-                                    [7.0, 7.5, 12.0]
-                                )
-                            ),
+                        edges = edges_final,
                         instances={
                             'rebin': 'Final histogram {detector}',
                             }
@@ -321,13 +334,7 @@ Misc changes:
                 rebin_bkg = NestedDict(
                         bundle = dict(name='rebin', version='v04', major=''),
                         rounding = 5,
-                        edges = np.concatenate( (
-                                    [0.7],
-                                    np.arange(1, 6.0, self.opts.estep),
-                                    np.arange(6, 7.0, 0.1),
-                                    [7.0, 7.5, 12.0]
-                                )
-                            ),
+                        edges = edges_final,
                         instances={
                             'rebin_acc': 'Accidentals {autoindex}',
                             'rebin_li': '9Li {autoindex}',
