@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# Run GNA several times: fit JUNO model with different options to estimate NMO/osc. pars sensitivity
+# Test impact of binning
 #
 
 # Estimate the number of processors, may be changed manually
@@ -19,7 +19,7 @@ echo Run mode: $mode
 echo Simulate: $simulate
 
 # Define the output directory
-outputdir=output/2020.05.18_scan_edges
+outputdir=output/2020.05.18_scan_edges_lsnl
 mkdir -p $outputdir 2>/dev/null
 mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
@@ -156,7 +156,7 @@ function run(){
                  $eresunc \
                  ${reactors:-"--reactors halfts nohz"} \
                  $parameters \
-                 $offeq $coarse $hubermueller \
+                 $offeq $snf $coarse $hubermueller \
                  $extra \
           -- ns $constrain $setdm \
           -- ns --output $file_values \
@@ -217,11 +217,12 @@ function run(){
 
 function runall {
     it=0
-    for high in $(seq 1.5 0.5 8.0) 10.0 12.0; do
-        for low in 0.7 $(seq 1.0 0.5 8.0); do
+    for high in $(seq 1.6 0.2 4.0) 4.5 5.0 6.0 9.0 12.0; do
+        for low in 0.7 $(seq 1.0 0.2 3.0); do
             if (( $(echo "$low >= $high" | bc -l) )); then continue; fi
             it=$(($it+1))
-            run $(printf %03d $it) "edges" scan_edges vacuum --final-emin=$low --final-emax=$high extrainfo="emin $low" extrainfo="emax $high" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf covpars=juno
+            run $(printf %03d $it) "edges_lsnl"   scan_edges_lsnl   vacuum --final-emin=$low --final-emax=$high extrainfo="emin $low" extrainfo="emax $high" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf covpars=juno
+            run $(printf %03d $it) "edges_nolsnl" scan_edges_nolsnl vacuum --final-emin=$low --final-emax=$high extrainfo="emin $low" extrainfo="emax $high" energy="eres"      bkg="acc lihe fastn alphan" offeq snf covpars=juno
         done
     done
 }
