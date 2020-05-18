@@ -188,7 +188,7 @@ function run(){
     echo Iteration $iteration_manual "($iteration)"
     echo $command | sed -E "$filter" | tee $file_cmd
 
-    if test -f $file_test -a -a $force -ne 1
+    if test -f $file_test -a $force -ne 1
     then
         echo
         echo File exists, skipping!
