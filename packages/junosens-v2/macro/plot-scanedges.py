@@ -7,6 +7,7 @@ import numpy as np
 from mpl_tools.helpers import add_to_labeled_items, add_colorbar, savefig
 from matplotlib.colors import LinearSegmentedColormap
 import pickle
+import itertools as it
 
 colors = [(0.4, 0.4, 0.4), (0.8, 0.8, 0.8), (0.4, 0.8, 0.4)]  #
 cm = LinearSegmentedColormap.from_list('cmsimple', colors, N=3)
@@ -23,9 +24,14 @@ def show_values(pc, fmt="%.2f", **kw):
             color = (1.0, 1.0, 1.0)
         ax.text(x, y, fmt % value, ha="center", va="center", color=color, **kw)
 
-def plot_boxes(low, high, data=None):
+def plot_boxes(low, high, data=None, title=None):
     fig = plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111, xlabel='E low', ylabel='E high', title='Energy limits map')
+    if title is None:
+        title = 'Energy limits map'
+    else:
+        title = 'Energy limits map: '+title
+
+    ax = plt.subplot(111, xlabel='E low', ylabel='E high', title=title)
     # ax.minorticks_on()
     ax.set_xticks(low)
     ax.set_yticks(high)
@@ -127,42 +133,53 @@ def plot_boxes(low, high, data=None):
     ax.grid(**gridopts)
 
 def load_data(args):
-    data = []
-    emin_all = set()
-    emax_all = set()
-    for name in args.input:
-        with open(name, 'r') as f:
-            d=pickle.load(f)
-            emin, emax = float(d['emin']), float(d['emax'])
-            fun = d['fun']
-            emin_all.add(emin)
-            emax_all.add(emax)
-            data.append((emin, emax, fun))
+    datasets = []
+    for inp in args.input:
+        data = []
+        emin_all = set()
+        emax_all = set()
+        for name in inp:
+            with open(name, 'r') as f:
+                d=pickle.load(f)
+                emin, emax = float(d['emin']), float(d['emax'])
+                fun = d['fun']
+                emin_all.add(emin)
+                emax_all.add(emax)
+                data.append((emin, emax, fun))
 
-    emin_all = list(sorted(emin_all))
-    emax_all = list(sorted(emax_all))
-    emin_all.append(emax_all[-1])
-    emax_all = [emin_all[0]] + emax_all
-    return emin_all, emax_all, data
+        emin_all = list(sorted(emin_all))
+        emax_all = list(sorted(emax_all))
+        emin_all.append(emax_all[-1])
+        emax_all = [emin_all[0]] + emax_all
+        datasets.append((emin_all, emax_all, data))
+
+    return datasets
 
 def main(args):
-    low, high, data = load_data(args)
+    hasmap = False
 
-    plot_boxes(low, high)
-    savefig(args.output, suffix='_map')
-    plot_boxes(low, high, data)
-    savefig(args.output, suffix='_full')
+    datasets = load_data(args)
 
-    ax=plt.gca()
-    ax.set_xlim(right=4.0)
-    savefig(args.output, suffix='_zoom')
+    for i, ((low, high, data), title) in enumerate(it.izip_longest(datasets, args.title)):
+        if not hasmap:
+            plot_boxes(low, high)
+            savefig(args.output, suffix='_map')
+            hasmap=True
+
+        plot_boxes(low, high, data, title=title)
+        savefig(args.output, suffix='_{}_full'.format(i))
+
+        ax=plt.gca()
+        ax.set_xlim(right=4.0)
+        savefig(args.output, suffix='_{}_zoom'.format(i))
 
     plt.show()
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument('input', nargs='+', help='input files')
+    parser.add_argument('--input', nargs='+', action='append', help='input files')
+    parser.add_argument('--title', default=[], action='append', help='titles')
     parser.add_argument('--output', help='output file')
 
     args=parser.parse_args()
