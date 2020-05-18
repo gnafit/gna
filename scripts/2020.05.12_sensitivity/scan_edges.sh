@@ -39,8 +39,9 @@ function run(){
     file_output=$outputdir/$suffix".out"
     file_err=$outputdir/$suffix".err"
     file_values=$outputdir/$suffix"_parameters.yaml"
-    file_result_nmo=$outputdir/nmo/$suffix"_nmo.yaml"
-    file_result_pars=$outputdir/pars/$suffix"_pars.yaml"
+    file_result_nmo="$outputdir/nmo/"$suffix"_nmo.yaml $outputdir/nmo/"$suffix"_nmo.pkl"
+    file_result_pars="$outputdir/pars/"$suffix"_pars.yaml $outputdir/pars/"$suffix"_pars.pkl"
+    file_test="$outputdir/pars/"$suffix"_pars.yaml"
 
     # Get arguments
     oscprob=$1; shift
@@ -187,7 +188,7 @@ function run(){
     echo Iteration $iteration_manual "($iteration)"
     echo $command | sed -E "$filter" | tee $file_cmd
 
-    if test -f $file_result_nmo -a -f $file_result_pars -a $force -ne 1
+    if test -f $file_test -a -a $force -ne 1
     then
         echo
         echo File exists, skipping!
