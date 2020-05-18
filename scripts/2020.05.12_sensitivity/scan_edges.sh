@@ -221,9 +221,7 @@ function runall {
             if (( $(echo "$low >= $high" | bc -l) )); then continue; fi
             it=$(($it+1))
             run $(printf %03d $it) "edges" scan_edges vacuum --final-emin=$low --final-emax=$high extrainfo="emin $low" extrainfo="emax $high" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf covpars=juno
-            break
         done
-        break
     done
 }
 runall
