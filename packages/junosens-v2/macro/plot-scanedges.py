@@ -34,7 +34,7 @@ def MakeEqualScale(edges):
 
     return forward, inverse
 
-def show_values(pc, fmt="% .2f", **kw):
+def show_values(pc, fmt="%.2f", **kw):
     pc.update_scalarmappable()
     ax = plt.gca()
     for p, color, value in zip(pc.get_paths(), pc.get_facecolors(), pc.get_array()):
@@ -77,25 +77,22 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
 
     if data is None:
         # Helper rectangle
-        if scale:
-            rpos = (1.0,2.0)
-            rwidth, rheight = 0.2, 0.2
-        else:
-            rpos = (4.0,2.0)
-            rwidth, rheight = 1.0, 1.0
+        rpos = (0.60, 0.05)
+        rwidth, rheight = 0.1, 0.1
         hlen = rwidth*0.1
         hwidth = hlen
         rcenter_x = rpos[0]+rwidth*0.5
         rcenter_y = rpos[1]+rheight*0.5
-        rect_example = Rectangle(rpos, rwidth, rheight, color='white', zorder=zorder)
+        rect_example = Rectangle(rpos, rwidth, rheight, color='white', zorder=zorder, transform=ax.transAxes)
         ax.add_artist(rect_example)
         # Arrows
-        opts = dict(zorder=zorder+2, head_width=hwidth, head_length=hlen, ec='black', fc='black')
+        opts = dict(zorder=zorder+2, head_width=hwidth, head_length=hlen, ec='black', fc='black', transform=ax.transAxes)
         ax.arrow(rpos[0], rcenter_y, rwidth*0.4-hlen, 0.0, **opts)
         ax.arrow(rcenter_x, rcenter_y+rheight*0.1, 0.0, rheight*0.4-hlen, **opts)
-        # Highlight sides
-        ax.vlines(rpos[0], rpos[1], rpos[1]+rheight, color='gray', zorder=zorder+1, linewidth=2.0)
-        ax.hlines(rpos[1]+rheight, rpos[0], rpos[0]+rwidth,  color='gray', zorder=zorder+1, linewidth=2.0)
+        # # # Highlight sides
+        opts = dict(linewidth=2.5, color='black', zorder=zorder+1, transform=ax.transAxes, head_width=0.0, head_length=0.0)
+        ax.arrow(rpos[0], rpos[1], 0.0, rheight, **opts)
+        ax.arrow(rpos[0], rpos[1]+rheight, rwidth, 0.0, **opts)
 
     if data is None:
         # Total
@@ -109,9 +106,9 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
     else:
         # rect_min = Rectangle((emin, emax-ew), ew, ew, fc='none', ec='yellow', linestyle='dashed', zorder=zorder)
         pass
-    goodlineopts = dict(zorder=zorder+1, linestyle='--', color='yellow')
-    goodline = ax.vlines(emin+ew, emax-ew, emaximal, **goodlineopts)
-    ax.hlines(emax-ew, eminimal, emin+ew, **goodlineopts)
+    goodlineopts = dict(zorder=zorder+1, linestyle='--', color='yellow', alpha=0.5)
+    goodline = ax.vlines(emin, emax, emaximal, **goodlineopts)
+    ax.hlines(emax, eminimal, emin, **goodlineopts)
 
     if data is None:
         #
@@ -195,7 +192,7 @@ def load_data(args):
 
 def main(args):
     low = np.concatenate( ( [0.7], np.arange(1.0, 8.0, 0.5) ) )
-    high = np.concatenate( (np.arange(1.5, 8.0, 0.5), [10.0, 12.0] ) )
+    high = np.concatenate( (np.arange(1.5, 6.0, 0.5), [9.0, 12.0] ) )
     plot_boxes(low, high)
     savefig(args.output, suffix='_map')
     hasmap=True
