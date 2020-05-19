@@ -34,7 +34,7 @@ def MakeEqualScale(edges):
 
     return forward, inverse
 
-def show_values(pc, fmt="%.2f", **kw):
+def show_values(pc, fmt="% .2f", **kw):
     pc.update_scalarmappable()
     ax = plt.gca()
     for p, color, value in zip(pc.get_paths(), pc.get_facecolors(), pc.get_array()):
@@ -194,20 +194,17 @@ def load_data(args):
     return datasets
 
 def main(args):
-    hasmap = False
+    low = np.concatenate( ( [0.7], np.arange(1.0, 8.0, 0.5) ) )
+    high = np.concatenate( (np.arange(1.5, 8.0, 0.5), [10.0, 12.0] ) )
+    plot_boxes(low, high)
+    savefig(args.output, suffix='_map')
+    hasmap=True
+
+    plot_boxes(low, high, scale=True)
+    savefig(args.output, suffix='_map_scaled')
 
     datasets = load_data(args)
-
     for i, ((low, high, data), title) in enumerate(it.zip_longest(datasets, args.title)):
-        if not hasmap:
-            plot_boxes(low, high)
-            savefig(args.output, suffix='_map')
-            hasmap=True
-
-            plot_boxes(low, high, scale=True)
-            savefig(args.output, suffix='_map_scaled')
-            hasmap=True
-
         plot_boxes(low, high, data, title=title)
         savefig(args.output, suffix='_{}_full'.format(i))
 
