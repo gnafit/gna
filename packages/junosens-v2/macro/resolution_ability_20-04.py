@@ -520,6 +520,13 @@ def main(opts):
     ax.minorticks_on(); ax.grid()
     ax.plot(data.e, data.diffs_rel.edep[data.dmmid_idx], '-', markerfacecolor='none', label='Edep')
     ax.plot(data.e, data.diffs_rel.edep_lsnl[data.dmmid_idx], '-', markerfacecolor='none', label='Edep quenched')
+
+    i_edep=N.argmax(data.diffs_rel.edep[data.dmmid_idx])
+    i_edep_lsnl=N.argmax(data.diffs_rel.edep_lsnl[data.dmmid_idx])
+    ediff = data.e[i_edep] - data.e[i_edep_lsnl]
+    ax.axvline(data.e[i_edep], linestyle='dashed', label='Max location diff: %.2f MeV'%(ediff))
+    ax.axvline(data.e[i_edep_lsnl], linestyle='dashed')
+
     ax.legend()
     savefig(opts.output, suffix='_dist_diff_rel')
 
