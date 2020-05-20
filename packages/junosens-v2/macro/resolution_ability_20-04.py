@@ -524,8 +524,9 @@ def main(opts):
     i_edep=N.argmax(data.diffs_rel.edep[data.dmmid_idx])
     i_edep_lsnl=N.argmax(data.diffs_rel.edep_lsnl[data.dmmid_idx])
     ediff = data.e[i_edep] - data.e[i_edep_lsnl]
-    ax.axvline(data.e[i_edep], linestyle='dashed', label='Max location diff: %.2f MeV'%(ediff))
-    ax.axvline(data.e[i_edep_lsnl], linestyle='dashed')
+    ax.axvline(data.e[i_edep], linestyle='dashed', label='Max location: %.3f MeV'%(data.e[i_edep]))
+    ax.axvline(data.e[i_edep_lsnl], linestyle='dashed', label='Max location: %.3f MeV'%(data.e[i_edep_lsnl]))
+    ax.axvspan(data.e[i_edep], data.e[i_edep_lsnl], alpha=0.2, label='Max location diff: %.3f MeV'%(ediff))
 
     ax.legend()
     savefig(opts.output, suffix='_dist_diff_rel')

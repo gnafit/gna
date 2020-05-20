@@ -138,11 +138,12 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
     #
     # Data
     #
-    Data = np.zeros_like(L, dtype='d')
-    for emin, emax, fun in data:
+    Data = np.ma.array(np.zeros_like(L, dtype='d'), mask=np.zeros_like(L, dtype='i'))
+    for emin, emax, fun, success in data:
         imin = np.searchsorted(low, emin)
         imax = np.searchsorted(high, emax)-1
         Data[imin, imax] = fun
+        Data.mask[imin, imax] = not success
 
         if fun>12.5:
             # Data[imin, imax] = -1
@@ -179,7 +180,7 @@ def load_data(args):
                 fun = d['fun']
                 emin_all.add(emin)
                 emax_all.add(emax)
-                data.append((emin, emax, fun))
+                data.append((emin, emax, fun, d['success']))
 
         emin_all = list(sorted(emin_all))
         emax_all = list(sorted(emax_all))
