@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import numpy as np
 from collections import OrderedDict
@@ -101,11 +102,11 @@ class PointSet(object):
                 grid = np.array([cast(x) for x in griddesc])
             else:
                 message = "unknown grid type `{}'".format(gridtype)
-                raise Exception(message)
+                raise ValueError(message)
             grids[pname] = np.unique(np.hstack([grids.get(pname, []), grid]))
         return list(grids.values())
 
-    def iterpathvalues(self):
+    def iterpathvalues(self, ngrids=None, grid_idx=None):
         it = self.pointsfactory()
         if self.opts.pointspaths:
             for path in self.opts.pointspaths:
@@ -116,5 +117,9 @@ class PointSet(object):
             assert(len(self.opts.pointsrange) <= 3)
             sliceargs = islice(chain(self.opts.pointsrange, repeat(None)), 3)
             it = islice(it, *sliceargs)
+
+        if (ngrids is not None) and (grid_idx is not None):
+           total = np.array_split(list(it), ngrids)
+           it = iter(total[grid_idx])
         for values in it:
             yield ('/'.join([str(x) for x in values]), values)
