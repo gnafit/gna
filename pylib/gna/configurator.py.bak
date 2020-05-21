@@ -48,7 +48,7 @@ class NestedDict(object):
         meta[self] = dict()
 
         if iterable:
-            if isinstance(iterable, dict):
+            if type(iterable) is dict:
                 iterable = sorted(iterable.items())
             self.__import__(OrderedDict(iterable))
 
@@ -274,7 +274,7 @@ class NestedDict(object):
 
             if type(subst) in [ list, tuple ]:
                 filenames = [ filename.format( s ) for s in subst ]
-            elif isinstance(subst, dict):
+            elif type(subst) is dict:
                 filenames = [ filename.format( **{ subst['key']: v } ) for v in subst['values'] ]
             else:
                 raise Exception( "Unsupported 'subst' type "+type(subst).__name__.__repr__() )

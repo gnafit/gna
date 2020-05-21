@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# encoding: utf-8
 
 from __future__ import print_function
 from matplotlib import pyplot as P
@@ -89,7 +89,7 @@ def add_colorbar( colormapable, **kwargs ):
     cbar = P.gcf().colorbar( colormapable, cax=cax, **kwargs )
 
     if minorticks:
-        if isinstance(minorticks, str):
+        if type(minorticks) is str:
             if minorticks=='linear':
                 pass
             elif minorticks=='log':
@@ -122,7 +122,7 @@ def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
 def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
     if not name: return
-    if isinstance(name, list):
+    if type(name)==list:
         for n in name:
             savefig( n, *args, **kwargs.copy() )
         return
@@ -142,7 +142,7 @@ def savefig(name, *args, **kwargs):
     print( 'Save figure', name )
 
     if addext:
-        if not isinstance(addext, list):
+        if not type( addext )==list:
             addext = [ addext ]
         from os import path
         basename, extname = path.splitext( name )

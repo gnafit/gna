@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from matplotlib import pyplot as plt
@@ -24,7 +23,7 @@ def plot_lines(text, *args, **kwargs):
     sep     = kwargs.pop('separator', u'\n')
     if not isinstance(text, str):
         linefmt = kwargs.pop('linefmt', u'{}')
-        if isinstance(linefmt, str) or isinstance(linefmt, unicode):
+        if type(linefmt) is str or type(linefmt) is unicode:
             fmt = linefmt
             linefmt = lambda *a: fmt.format(*a)
         lines = []
@@ -44,7 +43,7 @@ def plot_lines(text, *args, **kwargs):
     if outside:
         loc='upper left'
         kwargs.setdefault('borderpad', 0.0)
-    if isinstance(loc, str):
+    if type(loc)==str:
         loc = location_numbers[loc]
     if not loc:
         loc = 1
