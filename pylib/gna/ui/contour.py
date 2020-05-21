@@ -441,7 +441,7 @@ class cmd(basecmd):
         if ndim == 1:
             X = pvmap.data.grids[0]
             if self.labels:
-                label = self.labels.next()
+                label = next(self.labels)
             else:
                 label = pvmap.name
             lines = ax.plot(X, pvmap.data, label=label)
@@ -466,7 +466,7 @@ class cmd(basecmd):
             for c in CS.collections:
                 c.set_color(color)
                 if self.labels:
-                    c.set_label(self.labels.next())
+                    c.set_label(next(self.labels))
                 else:
                     c.set_label("{} {}".format(pvmap.name, pvspec))
 

@@ -88,7 +88,7 @@ def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=No
 
     is_covmat(pars, cov_matrix)
 
-    for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+    for first, second in itertools.combinations_with_replacement(list(range(len(pars))), 2):
         covariance = cov_matrix[first, second]
         pars[first].setCovariance(pars[second], covariance)
 

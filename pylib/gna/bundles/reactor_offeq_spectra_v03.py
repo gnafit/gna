@@ -45,7 +45,7 @@ class reactor_offeq_spectra_v03(TransformationBundle):
                 reac, iso = idx.current_values()
             name = "offeq_correction." + idx.current_format()
             try:
-                _offeq_energy, _offeq_spectra = map(C.Points, self.offeq_raw_spectra[iso])
+                _offeq_energy, _offeq_spectra = list(map(C.Points, self.offeq_raw_spectra[iso]))
                 _offeq_energy.points.setLabel("Original energies for offeq spectrum of {}".format(iso))
             except KeyError:
             # U238 doesn't have offequilibrium correction so just pass 1.

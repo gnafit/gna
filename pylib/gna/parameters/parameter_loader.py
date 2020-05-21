@@ -20,7 +20,7 @@ def get_parameters(params, drop_fixed=True, drop_free=True, drop_constrained=Fal
         if any(char in candidate for char in special_chars):
             import fnmatch as fn
             matched_names = fn.filter((_[0] for _ in env.globalns.walknames()), candidate)
-            matched_pars = map(env.get, matched_names)
+            matched_pars = list(map(env.get, matched_names))
             pars.extend(matched_pars)
             continue
         try:

@@ -50,10 +50,10 @@ class reactor_snf_spectra_v04(TransformationBundle):
             reac, = idx.current_values()
             name = "snf_correction" + idx.current_format()
             try:
-                _snf_energy, _snf_spectra = map(C.Points, self.snf_raw_data[reac])
+                _snf_energy, _snf_spectra = list(map(C.Points, self.snf_raw_data[reac]))
             except KeyError:
             # U238 doesn't have offequilibrium correction so just pass 1.
-                _snf_energy, _snf_spectra = map(C.Points, self.snf_raw_data['average'])
+                _snf_energy, _snf_spectra = list(map(C.Points, self.snf_raw_data['average']))
 
             _snf_energy.points.setLabel("Original energies for SNF spectrum of {}".format(reac))
 

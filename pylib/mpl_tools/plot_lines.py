@@ -25,7 +25,7 @@ def plot_lines(text, *args, **kwargs):
     sep     = kwargs.pop('separator', u'\n')
     if not isinstance(text, str):
         linefmt = kwargs.pop('linefmt', u'{}')
-        if isinstance(linefmt, str) or isinstance(linefmt, unicode):
+        if isinstance(linefmt, str):
             fmt = linefmt
             linefmt = lambda *a: fmt.format(*a)
         lines = []

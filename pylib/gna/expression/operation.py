@@ -11,8 +11,7 @@ class OperationMeta(type):
             args = args,
         return cls(*args)
 
-class Operation(TCall, NestedTransformation):
-    __metaclass__ = OperationMeta
+class Operation(TCall, NestedTransformation, metaclass=OperationMeta):
     call_lock=False
     order_from=None
     def __init__(self, operation, *indices, **kwargs):

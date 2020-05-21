@@ -85,7 +85,7 @@ def get_bin_edges_axis( ax, type=False, rep=None ):
     if rep and rep>1:
         res = [ lims ]
         delta = -lims[0]
-        for i in xrange( rep-1 ):
+        for i in range( rep-1 ):
             res.append( res[-1][-1] + lims[1:] + delta )
         lims = N.concatenate( res )
 

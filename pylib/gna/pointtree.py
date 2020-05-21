@@ -82,20 +82,20 @@ class PointTree(object):
 
         while True:
             try:
-                yield groups[-1][its[-1].next()]
+                yield groups[-1][next(its[-1])]
             except StopIteration:
                 if len(its) == 1:
                     break
-                for i in reversed(range(len(its)-1)):
+                for i in reversed(list(range(len(its)-1))):
                     try:
-                        groups[i+1] = groups[i][its[i].next()]
+                        groups[i+1] = groups[i][next(its[i])]
                     except StopIteration:
                         if i == 0:
                             raise StopIteration()
                         continue
                     for j in range(i+1, len(its)-1):
                         its[j] = iter(groups[j])
-                        groups[j+1] = groups[j][its[j].next()]
+                        groups[j+1] = groups[j][next(its[j])]
                     its[-1] = iter(groups[-1])
 
     def iterall(self, depth=None):

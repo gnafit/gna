@@ -6,7 +6,7 @@ import time
 
 def timeit(fcn, n=1, dummy=None, pre=None, pre_dummy=None):
     t1 = time.clock()
-    for i in xrange(n):
+    for i in range(n):
         if pre:
             pre()
         fcn()
@@ -16,7 +16,7 @@ def timeit(fcn, n=1, dummy=None, pre=None, pre_dummy=None):
         dummy=fcn
 
     t2 = time.clock()
-    for i in xrange(n):
+    for i in range(n):
         if pre_dummy:
             pre_dummy()
         dummy()

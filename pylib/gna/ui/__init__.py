@@ -56,7 +56,7 @@ def append_typed(*types, **kwargs):
                     if len(rest) < f.count:
                         msg = 'expected at least {0} arguments'
                         raise argparse.ArgumentError(self, msg.format(i+f.count))
-                    funcs.append(lambda x: map(f.f, x))
+                    funcs.append(lambda x: list(map(f.f, x)))
                     newvalues.append(rest)
                     break
                 elif isinstance(f, qualified):

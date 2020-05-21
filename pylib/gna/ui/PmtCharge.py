@@ -40,7 +40,7 @@ class cmd(basecmd):
         #ff_points = C.Points(ff)
         #print(ff, ff_points)
         with ns:
-            for i in xrange(1, n+1):
+            for i in range(1, n+1):
                 print(i, n)
                 model[i] =  ROOT.GaussianPeakWithBackground(i)
                 model[i].rate.E(integrator.points.x)

@@ -39,7 +39,7 @@ class cmd(basecmd):
         if not self.expname or self.opts.list_experiments:
             print("Search paths: ", ', '.join(cfg.experimentpaths))
             print("UI exp list of experiments:")
-            map(lambda l: print('   ', l), expmodules.keys())
+            list(map(lambda l: print('   ', l), expmodules.keys()))
 
             sys.exit(0)
 
