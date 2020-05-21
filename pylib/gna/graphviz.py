@@ -321,7 +321,7 @@ class TreeStyle(object):
         attrs=dict(obj.attrs)
         if not self.markhead:
             return None
-        if isinstance(obj, basestring):
+        if isinstance(obj, str):
             return obj
 
         if i is None:
@@ -333,7 +333,7 @@ class TreeStyle(object):
         attrs=dict(obj.attrs)
         if not self.marktail:
             return None
-        if isinstance(obj, basestring):
+        if isinstance(obj, str):
             return obj
 
         if i is None:

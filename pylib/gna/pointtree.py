@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import h5py
 import numpy as np
 
 class PointTree(object):
     def __init__(self, env, container, mode='r'):
         self.env = env
-        if isinstance(container, basestring):
+        if isinstance(container, str):
             self.root = h5py.File(container, mode)
         else:
             self.root = container
@@ -40,7 +41,7 @@ class PointTree(object):
     def params(self, params):
         self._params = []
         for param in params:
-            if isinstance(param, basestring):
+            if isinstance(param, str):
                 self._params.append(self.env.pars[param])
             else:
                 self._params.append(param)
@@ -54,7 +55,7 @@ class PointTree(object):
             return self.root.create_group(path)
 
     def values(self, node):
-        if isinstance(node, basestring):
+        if isinstance(node, str):
             path = node
         elif isinstance(node, h5py.Group):
             path = node.name

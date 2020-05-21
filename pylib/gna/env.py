@@ -35,7 +35,7 @@ class ExpressionWithBindings(object):
         for src in self.expr.sources.itervalues():
             depname = src.name()
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
-            if isinstance(dep, basestring):
+            if isinstance(dep, str):
                 if dep in known:
                     continue
                 try:
@@ -59,7 +59,7 @@ class ExpressionWithBindings(object):
             if not v.isFree():
                 continue
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
-            if isinstance(dep, basestring):
+            if isinstance(dep, str):
                 dep = env.nsview[dep]
             v.bind(dep.getVariable())
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
@@ -155,7 +155,7 @@ class namespace(Mapping):
         if not nsname:
             return self
 
-        if isinstance(nsname, basestring):
+        if isinstance(nsname, str):
             if nsname=='':
                 return self
             parts = nsname.split('.')
@@ -199,7 +199,7 @@ class namespace(Mapping):
             return ns.__getitem__(head)
 
         v = self.storage[head]
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             return env.nsview[v]
         return v
 
@@ -517,7 +517,7 @@ class _environment(object):
                 continue
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
-            if isinstance(param, basestring):
+            if isinstance(param, str):
                 param = self.nsview[param]
             if isinstance(param, ExpressionsEntry):
                 param = param.get()

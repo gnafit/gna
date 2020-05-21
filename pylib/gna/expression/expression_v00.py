@@ -37,7 +37,7 @@ class Expression(object):
     operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket)
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
-        if isinstance(expression, basestring):
+        if isinstance(expression, str):
             self.expressions_raw = [expression]
         elif isinstance(expression, (tuple, list)):
             self.expressions_raw = list(expression)
@@ -267,4 +267,3 @@ class ExpressionContext(object):
             # input  = self.get_input( sink, nidx )
 
         # input( output )
-

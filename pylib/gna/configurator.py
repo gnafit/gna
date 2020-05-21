@@ -24,7 +24,7 @@ def set_option(nd, option, value):
 
 def process_key(key):
     listkey = None
-    if isinstance( key, basestring ):
+    if isinstance( key, str ):
         if '.' in key:
             listkey = tuple(key.split('.'))
     elif isinstance( key, (list, tuple) ):
@@ -73,7 +73,7 @@ class NestedDict(object):
                 res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
             if isinstance( v, NestedDict ):
                 res+=v.__str__(margin, nested)
-            elif isinstance( v, basestring ):
+            elif isinstance( v, str ):
                 res+=repr(v)
             else:
                 res+=str(v)
@@ -251,7 +251,7 @@ class NestedDict(object):
                     return cfg.__call__( rest )
                 return self.__storage__.get(key).__call__(rest)
 
-        if isinstance( key, basestring ):
+        if isinstance( key, str ):
             if '.' in key:
                 return self.__call__(key.split('.'))
 
@@ -305,7 +305,7 @@ class NestedDict(object):
 
     def __import__(self, dic):
         for k, v in dic.items():
-            if isinstance(k, basestring) and k.startswith('__'):
+            if isinstance(k, str) and k.startswith('__'):
                 continue
             if meta[self].get('verbose', False):
                 if k in self:

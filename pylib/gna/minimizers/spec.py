@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import yaml
 import numpy as np
 
@@ -81,7 +82,7 @@ def load(env, minimizer, spec):
     ret = {}
     for k, fields in spec.iteritems():
         par = None
-        if isinstance(k, basestring):
+        if isinstance(k, str):
             try:
                 par = env.pars[k]
             except KeyError:
