@@ -15,7 +15,7 @@ class histogram_flat_v01(TransformationBundle):
     """The bundle produces flat normalized histogram"""
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(0,1)
+        self.check_nidx_dim(0, 1)
 
     @staticmethod
     def _provides(cfg):

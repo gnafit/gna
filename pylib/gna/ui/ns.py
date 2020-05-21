@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Manage parameters and namespaces
 """
@@ -111,7 +112,7 @@ class cmd(basecmd):
                         v=par.cast(v)
                         par.push(v)
                 else:
-                    raise Exception('Unknown parameter option: {}={}'.format(k,v))
+                    raise Exception('Unknown parameter option: {}={}'.format(k, v))
 
         for name, sigma in self.opts.sigma:
             p = namespace[name]
@@ -185,4 +186,3 @@ class cmd(basecmd):
         from tools.yaml import ordered_dump
         print('Write variables to:', self.opts.output)
         ordered_dump(data, open(self.opts.output, 'w'))
-

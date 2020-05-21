@@ -47,7 +47,7 @@ class GNADot(object):
 
         self.subgraphs = dict()
 
-        self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
+        self.graph=G.AGraph(directed=True, strict=False, layers=self.layers, **kwargs)
         self.layout = self.graph.layout
         self.write = self.graph.write
         self.draw = self.graph.draw
@@ -395,4 +395,3 @@ class TreeStyle(object):
             ret['weight']=1.0
 
         return ret
-

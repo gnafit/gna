@@ -23,7 +23,7 @@ class exp(baseexp):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--no-snf', action='store_true', help='Disable SNF')
-        parser.add_argument('--lihe-fractions', default='no', choices=['no','common', 'independent'],
+        parser.add_argument('--lihe-fractions', default='no', choices=['no', 'common', 'independent'],
                             help='Split the data over two time windows after muon veto to '
                             'allow suppression of Li/He background')
 
@@ -252,8 +252,8 @@ class exp(baseexp):
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                     pars = uncertaindict(
-                        [('a', 0.016) ,
-                         ('b', 0.081) ,
+                        [('a', 0.016),
+                         ('b', 0.081),
                          ('c', 0.026)],
                         #  [('a', 0.014764) ,
                          #  ('b', 0.0869) ,

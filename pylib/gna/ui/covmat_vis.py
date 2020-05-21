@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from gna.env import env
 from gna.ui import basecmd
@@ -24,7 +25,7 @@ class cmd(basecmd):
         matrix_stack = [np.matmul(chol, chol.T) for chol in chol_blocks]
         covmat = self.make_blocked_matrix(matrix_stack)
         sdiag = np.diagonal(covmat)**0.5
-        cormat = covmat/sdiag/sdiag[:,None]
+        cormat = covmat/sdiag/sdiag[:, None]
 
         if self.opts.mask:
             covmat = np.ma.array(covmat, mask=(covmat == 0.))

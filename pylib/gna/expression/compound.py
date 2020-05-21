@@ -125,7 +125,7 @@ class IndexedContainer(object):
                             output = obj.get_output(idx, context)
                             inputs  = self.get_input(idx, context, clone=i)
 
-                            if not isinstance(inputs, (list,tuple)):
+                            if not isinstance(inputs, (list, tuple)):
                                 inputs = inputs,
                             for input in inputs:
                                 if not input.materialized(): #Fixme: should be configurable
@@ -244,7 +244,7 @@ class TCall(IndexedContainer, Transformation):
             objects.append(arg)
 
         IndexedContainer.__init__(self, *objects)
-        Transformation.__init__(self,name, *(list(args)+list(objects)), **kwargs)
+        Transformation.__init__(self, name, *(list(args)+list(objects)), **kwargs)
         self.set_operator( ', ', '(', ')', text='_and_'  )
 
         self.inputs_connected = not self.nonempty()
@@ -408,5 +408,3 @@ class WeightedTransformation(NestedTransformation, IndexedContainer, Transformat
             print('index', it.current_format())
             print('  weight', self.weight.current_format(it))
             print('  obj', self.object.current_format(it))
-
-

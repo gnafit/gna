@@ -412,8 +412,8 @@ Misc changes:
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                     parameter = 'eres',
                     pars = uncertaindict([
-                        ('a', (0.000, 'fixed')) ,
-                        ('b', (self.opts.eres_sigma,)+bconf) ,
+                        ('a', (0.000, 'fixed')),
+                        ('b', (self.opts.eres_sigma,)+bconf),
                         ('c', (0.000, 'fixed'))
                         ]),
                     expose_matrix = False

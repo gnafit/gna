@@ -14,7 +14,7 @@ from gna.bundle import TransformationBundle
 class dayabay_fastn_power_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1,1)
+        self.check_nidx_dim(1, 1)
 
     @staticmethod
     def _provides(cfg):

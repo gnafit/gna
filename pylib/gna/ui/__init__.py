@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 from gna.env import PartNotFoundError
 
@@ -33,7 +34,7 @@ def append_typed(*types, **kwargs):
             def gettyped(f, v):
                 try:
                     return f(v)
-                except PartNotFoundError, e:
+                except PartNotFoundError as e:
                     msg = "no {0} named {1!r}"
                     raise argparse.ArgumentError(self, msg.format(e.parttype, e.partname))
 
@@ -94,7 +95,7 @@ def set_typed(parttype):
         def __call__(self, parser, namespace, values, option_string=None):
             try:
                 setattr(namespace, self.dest, parttype(values))
-            except PartNotFoundError, e:
+            except PartNotFoundError as e:
                 msg = "no {0} named {1!r}"
                 raise argparse.ArgumentError(self, msg.format(e.parttype, values))
 

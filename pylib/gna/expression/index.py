@@ -66,7 +66,7 @@ class Index(object):
         short = slave['short']
         name = slave['name']
         map = slave['map']
-        if isinstance(map, (list,tuple)):
+        if isinstance(map, (list, tuple)):
             map=OrderedDict(map)
         variants = list(map.keys())
 
@@ -434,4 +434,3 @@ class NameUndefined():
         return self.__str__()+other
 
 undefinedname = NameUndefined()
-

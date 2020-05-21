@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Oscillation probability (matter) bundle v01. Based on vacuum oscillation bundle oscprob_v04.
 
 Changes since origin:
@@ -42,7 +43,7 @@ class oscprob_matter_v01(TransformationBundle):
 
                 with self.namespace, self.namespace(pmns_name):
                     for it_minor in self.nidx_minor:
-                        oscprob = self.context.objects[(pmns_name,oscprobkey)] = C.OscProbMatter(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                        oscprob = self.context.objects[(pmns_name, oscprobkey)] = C.OscProbMatter(R.Neutrino.ae(), R.Neutrino.ae(), dist)
 
                         it = it_source+it_detector
 
@@ -78,4 +79,3 @@ class oscprob_matter_v01(TransformationBundle):
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
-

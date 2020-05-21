@@ -32,7 +32,7 @@ def OutputDescriptors(outputs):
             raise Exception('Expect OutputHandle or SingleOutput object')
         descriptors.append(append)
 
-    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(),context.current_precision()))
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(), context.current_precision()))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -210,4 +210,3 @@ Parameter             = _wrap_parameter('Parameter')
 GaussianParameter     = _wrap_parameter('GaussianParameter')
 UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
 ParameterWrapper      = _wrap_parameter('ParameterWrapper')
-

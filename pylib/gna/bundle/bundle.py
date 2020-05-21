@@ -225,7 +225,7 @@ class TransformationBundle(object):
 
         # Init multidimensional index
         self.nidx=self.bundlecfg.get('nidx', [])
-        if isinstance(self.nidx, (tuple,list)):
+        if isinstance(self.nidx, (tuple, list)):
             self.nidx=NIndex(fromlist=self.nidx)
         assert isinstance(self.nidx, NIndex)
 
@@ -279,7 +279,7 @@ class TransformationBundle(object):
     def provides(cls, cfg):
         variables, objects = cls._provides(cfg)
         names = cfg.bundle.get('names', {})
-        ret = tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
+        ret = tuple((names.get(a, a) for a in variables)), tuple((names.get(a, a) for a in objects))
 
         if cfg.bundle.get('debug', False):
             print('Bundle', cls.__name__, 'provides')
@@ -313,7 +313,7 @@ class TransformationBundle(object):
         if extra:
             if isinstance(extra, str):
                 path+=extra,
-            elif isinstance(extra, (list,tuple)):
+            elif isinstance(extra, (list, tuple)):
                 path+=tuple(extra)
             else:
                 raise Exception('Unsupported extra field: '+str(extra))
@@ -367,4 +367,3 @@ class TransformationBundle(object):
         ndim = nidx.ndim();
         if not dmin<=ndim<=dmax:
             raise self.exception('Ndim {} does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
-

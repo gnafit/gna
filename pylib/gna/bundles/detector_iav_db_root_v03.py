@@ -11,7 +11,7 @@ class detector_iav_db_root_v03(TransformationBundle):
     iavmatrix=None
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1,1, 'major')
+        self.check_nidx_dim(1, 1, 'major')
 
     @staticmethod
     def _provides(cfg):
@@ -32,7 +32,7 @@ class detector_iav_db_root_v03(TransformationBundle):
         for itdet in self.nidx_major:
             parname = itdet.current_format(name=self.cfg.parname)
             # Target=OffDiagonal, Mode=Upper
-            renormdiag = R.RenormalizeDiag(ndiag, 1, 1, parname, ns=self.namespace, labels=itdet.current_format('IAV matrix\n {autoindex}')) 
+            renormdiag = R.RenormalizeDiag(ndiag, 1, 1, parname, ns=self.namespace, labels=itdet.current_format('IAV matrix\n {autoindex}'))
             renormdiag.renorm.inmat(points.points)
             self.set_output('iavmatrix', itdet, renormdiag.single())
 
@@ -61,4 +61,3 @@ class detector_iav_db_root_v03(TransformationBundle):
 
         for it in self.nidx_major:
             self.reqparameter(self.cfg.parname, it, cfg=self.cfg.scale, label='IAV offdiagonal contribution scale at {autoindex}')
-

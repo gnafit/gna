@@ -10,7 +10,7 @@ cfg = configurator( '{location}/gna/labels.py', subst='default', debug=False )
 
 class LFormatter(string.Formatter):
     def get_value( self, key, args, kwargs ):
-        if isinstance( key, (int, long) ):
+        if isinstance( key, (int, int) ):
             return args[key]
 
         res = dictionaries.get(key, kwargs)
@@ -94,6 +94,3 @@ def load_dictionaries( path ):
         reg_dictionary( filename[:-2], cfg.dictionary )
 
 load_dictionaries( './config/dictionaries' )
-
-
-

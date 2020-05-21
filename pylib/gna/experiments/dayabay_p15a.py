@@ -235,8 +235,8 @@ class exp(baseexp):
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                     pars = uncertaindict(
-                        [('a', 0.016) ,
-                         ('b', 0.081) ,
+                        [('a', 0.016),
+                         ('b', 0.081),
                          ('c', 0.026)],
                         #  [('a', 0.014764) ,
                          #  ('b', 0.0869) ,

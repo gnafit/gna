@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 
 import ROOT
 import numpy as np
@@ -34,7 +34,7 @@ geo_flux_files = {
 }
 
 geo_flux_normalizations = {
-    'U238' : (2.7e3/5, 0.3),
+    'U238': (2.7e3/5, 0.3),
     'Th232': (0.8e3/5, 0.3),
 }
 
@@ -161,7 +161,7 @@ class ReactorExperimentModel(baseexp):
             #  }[name]
         parser.add_argument('--name', required=True)
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
-        parser.add_argument('--backgrounds',choices=['geo'], action='append',
+        parser.add_argument('--backgrounds', choices=['geo'], action='append',
                             default=[], help='Choose backgrounds you want to add')
         parser.add_argument('--oscprob', choices=self.oscprob_classes.keys(),
                             default='standard')
@@ -565,7 +565,7 @@ class ReactorExperimentModel(baseexp):
 
             if self.opts.with_C14:
                 with self.ns('ibd'), detector.ns:
-                    detector.c14 = ROOT.C14Spectrum(8,5)
+                    detector.c14 = ROOT.C14Spectrum(8, 5)
                     detector.c14.smear.inputs(inter_sum)
                     finalsum = detector.c14.smear
 
@@ -615,4 +615,3 @@ class ReactorExperimentModel(baseexp):
         for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
             geo_isons = ns("geo_isotopes")(geo_isoname)
             geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
-

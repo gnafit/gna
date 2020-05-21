@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import defaultdict, deque, Mapping, OrderedDict
 import parameters
@@ -158,7 +159,7 @@ class namespace(Mapping):
             if nsname=='':
                 return self
             parts = nsname.split('.')
-        elif isinstance(nsname, (list,tuple)):
+        elif isinstance(nsname, (list, tuple)):
             parts = nsname
         if not parts:
             return self

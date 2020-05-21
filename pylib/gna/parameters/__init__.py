@@ -153,7 +153,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
                 raise Exception(msg)
             param.setSigma(sigma)
             if debug:
-                print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma,relsigma=rs,perc=rs*100.0), end=' ' )
+                print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma, relsigma=rs, perc=rs*100.0), end=' ' )
         elif 'sigma' in kwargs:
             sigma = param.cast(kwargs['sigma'])
             if sigma==0.0:
@@ -208,4 +208,3 @@ def makeparameter(ns, name, cfg=None, **kwargs):
         print()
     param.setNamespace(ns.path)
     return param
-

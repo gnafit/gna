@@ -10,7 +10,7 @@ class OperationMeta(type):
             args = args,
         return cls(*args)
 
-class Operation(TCall,NestedTransformation):
+class Operation(TCall, NestedTransformation):
     __metaclass__ = OperationMeta
     call_lock=False
     order_from=None

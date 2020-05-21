@@ -5,7 +5,7 @@ from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
 
-classes = [R.TransformationDescriptorT(ft,ft) for ft in provided_precisions]
+classes = [R.TransformationDescriptorT(ft, ft) for ft in provided_precisions]
 
 @patchROOTClass(classes, '__str__')
 def TransformationDescriptor____str__(self):
@@ -55,5 +55,5 @@ def TransformationDescriptor______lshift__(self, output):
 
 @patchROOTClass(classes, '__gt__')
 @patchROOTClass(classes, '__lt__')
-def TransformationDescriptor______cmp__(a,b):
+def TransformationDescriptor______cmp__(a, b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

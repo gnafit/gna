@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
@@ -98,7 +98,7 @@ def get_1d_data(output, scale=None):
         pass
     elif scale=='width':
         buf/=width
-    elif isinstance(scale, (float,int)):
+    elif isinstance(scale, (float, int)):
         buf*=float(scale)
     else:
         raise Exception('Unsupported scale:', scale)
@@ -116,7 +116,7 @@ def plot_hist(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    scale = kwargs.pop('scale',None)
+    scale = kwargs.pop('scale', None)
     height, lims, _ = get_1d_data(output, scale=scale)
 
     diff=kwargs.pop('diff', None)
@@ -156,7 +156,7 @@ def plot_hist_centers(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale',None))
+    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale', None))
     centers = (lims[1:] + lims[:-1])*0.5
 
     Plotter = kwargs.pop('axis', P)
@@ -179,7 +179,7 @@ def bar_hist( output, *args, **kwargs ):
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
 
-    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale',None))
+    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale', None))
     left  = lims[:-1]
 
     if divide:
@@ -397,7 +397,7 @@ def wireframe(output, *args, **kwargs):
         kwargs['ccount']=Z.shape[1]
         kwargs['shade']=False
         res = ax.plot_surface(X, Y, Z, **kwargs)
-        res.set_facecolor((0,0,0,0))
+        res.set_facecolor((0, 0, 0, 0))
 
         return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 
@@ -421,7 +421,7 @@ def wireframe_points_vs(output, xmesh, ymesh, *args, **kwargs):
         kwargs['ccount']=Z.shape[1]
         kwargs['shade']=False
         res = ax.plot_surface(X, Y, Z, **kwargs)
-        res.set_facecolor((0,0,0,0))
+        res.set_facecolor((0, 0, 0, 0))
 
         return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 

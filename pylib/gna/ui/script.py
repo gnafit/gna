@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from gna.ui import basecmd
 import argparse
 import numpy as np
@@ -11,4 +12,4 @@ class cmd(basecmd):
         parser.add_argument("args", nargs=argparse.REMAINDER)
 
     def run(self):
-        exec self.opts.script.read()
+        exec(self.opts.script.read())

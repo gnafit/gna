@@ -55,6 +55,6 @@ class root_histograms_v03(TransformationBundle):
             hist=Histogram(edges, data, labels=it.current_format(fmt, name=self.cfg.name))
             self.set_output(self.cfg.name, it, hist.single())
 
-            self.context.objects[('hist',subst)]    = hist
+            self.context.objects[('hist', subst)]    = hist
 
         file.Close()

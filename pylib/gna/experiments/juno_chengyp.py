@@ -178,7 +178,7 @@ The model is succeeded by juno_sensitivity_v01 model.
                 rebin_yb = NestedDict(
                         bundle = dict(name='rebin', version='v03', major='', inactive=not mode_yb),
                         rounding = 3,
-                        edges = np.linspace(1.8, 8.0, 201) ,
+                        edges = np.linspace(1.8, 8.0, 201),
                         name = 'rebin',
                         label = 'Final histogram {detector}'
                         ),
@@ -359,8 +359,8 @@ The model is succeeded by juno_sensitivity_v01 model.
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
-                            ('a', (0.000, 'fixed')) ,
-                            ('b', (0.03, 'fixed')) ,
+                            ('a', (0.000, 'fixed')),
+                            ('b', (0.03, 'fixed')),
                             ('c', (0.000, 'fixed'))
                             ]),
                         expose_matrix = False
@@ -618,4 +618,3 @@ The model is succeeded by juno_sensitivity_v01 model.
 
             eres_cw           = dict(expr='eres*pmns'),
             )
-

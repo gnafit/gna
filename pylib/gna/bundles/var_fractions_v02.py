@@ -13,7 +13,7 @@ from gna.bundle import TransformationBundle
 class var_fractions_v02(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(0,0)
+        self.check_nidx_dim(0, 0)
 
     @staticmethod
     def _provides(cfg):

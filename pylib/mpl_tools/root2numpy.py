@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function, division
 import ROOT as R
@@ -14,7 +14,7 @@ def get_buffer_hist1( h, flows=False ):
     if flows=False, exclude underflow and overflow
     """
     buf = h.GetArray()
-    buf = N.frombuffer(buf , N.dtype( buf.typecode ), h.GetNbinsX()+2 )
+    buf = N.frombuffer(buf, N.dtype( buf.typecode ), h.GetNbinsX()+2 )
     if not flows: buf = buf[1:-1]
     return buf
 
@@ -39,7 +39,7 @@ def get_buffer_hist2( h, **kwargs ):
     buf = h.GetArray()
     res = N.frombuffer( buf, N.dtype( buf.typecode ), (nx+2)*(ny+2) ).reshape( ( ny+2, nx+2 ) )
     if not kwargs.pop( 'flows', False ):
-        res = res[1:ny+1,1:nx+1]
+        res = res[1:ny+1, 1:nx+1]
 
     if kwargs.pop( 'asmatrix', False ):
         res = numpy.matrix( res )
@@ -63,7 +63,7 @@ def get_err_buffer_hist2( h, **kwargs ):
     res = N.frombuffer( buf, N.dtype( buf.typecode ), (nx+2)*(ny+2) ).reshape( ( ny+2, nx+2 ) )
 
     if not kwargs.pop( 'flows', False ):
-        res = res[1:ny+1,1:nx+1]
+        res = res[1:ny+1, 1:nx+1]
 
     return res
 

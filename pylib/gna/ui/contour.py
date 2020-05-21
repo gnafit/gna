@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 
 from gna.ui import basecmd, set_typed
 
@@ -470,7 +470,7 @@ class cmd(basecmd):
 
     def plotpoints(self, ax, pts):
         points = np.array([[float(x) for x in path.split('/')] for path in pts])
-        xy = [points[:,1], points[:,0]]
+        xy = [points[:, 1], points[:, 0]]
         ax.plot(xy[0], xy[1], 'o')
         return xy
 

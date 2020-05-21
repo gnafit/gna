@@ -10,8 +10,8 @@ import numpy as np
 classes = []
 classes_single=[]
 for ft in provided_precisions:
-    classes.append(R.GNAObjectT(ft,ft))
-    classes_single.append(R.GNASingleObjectT(ft,ft))
+    classes.append(R.GNAObjectT(ft, ft))
+    classes_single.append(R.GNASingleObjectT(ft, ft))
     classes_single.append(R.SingleOutputT(ft))
 
 @patchROOTClass(classes+classes_single, '__getattr__')
@@ -120,5 +120,5 @@ def GNAObject____lshift__(obj, output):
     output>>obj.single_input()
 
 @patchROOTClass(classes, ('__gt__', '__lt__'))
-def GNAObject______cmp__(a,b):
+def GNAObject______cmp__(a, b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

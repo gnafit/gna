@@ -185,11 +185,11 @@ def setup(ROOT):
     simpledicts=[]
     for ft in provided_precisions:
         simpledicts += [
-            ROOT.GNAObjectT(ft,ft).Variables,
-            ROOT.GNAObjectT(ft,ft).Evaluables,
-            ROOT.GNAObjectT(ft,ft).Transformations,
-            ROOT.TransformationDescriptorT(ft,ft).Inputs,
-            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+            ROOT.GNAObjectT(ft, ft).Variables,
+            ROOT.GNAObjectT(ft, ft).Evaluables,
+            ROOT.GNAObjectT(ft, ft).Transformations,
+            ROOT.TransformationDescriptorT(ft, ft).Inputs,
+            ROOT.TransformationDescriptorT(ft, ft).Outputs,
         ]
     simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
@@ -197,9 +197,9 @@ def setup(ROOT):
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
     for ft in provided_precisions:
-        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
-        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
-        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft, ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft, ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft, ft))
 
     patchStatistic(ROOT.Statistic)
 
@@ -265,12 +265,12 @@ def patchROOTClass(classes=None, methods=None):
         return classes
 
     # Used as function returning decorator
-    if not isinstance(classes, (list,tuple)):
+    if not isinstance(classes, (list, tuple)):
         classes = (classes,)
 
     classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
 
-    if methods is not None and not isinstance(methods, (list,tuple)):
+    if methods is not None and not isinstance(methods, (list, tuple)):
         methods = (methods,)
 
     def decorator(function):

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from gna.env import env
 from gna.config import cfg
@@ -66,9 +67,8 @@ def get_uncertainties(parlist):
             for j in range(i):
                 pari, parj = parlist[i], parlist[j]
                 cov = pari.getCovariance(parj)
-                covariance[i,j]=covariance[j,i]=cov
+                covariance[i, j]=covariance[j, i]=cov
 
         return sigmas, centrals, covariance
 
     return sigmas, centrals, correlations
-

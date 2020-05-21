@@ -7,10 +7,10 @@ from printing import printl, nextlevel
 import types
 import numpy as np
 
-classes = tuple(R.OutputDescriptorT(ft,ft) for ft in provided_precisions)
-classes_input = tuple(R.InputDescriptorT(ft,ft) for ft in provided_precisions)
-classes_object = tuple(R.GNAObjectT(ft,ft) for ft in provided_precisions)
-classes_td = tuple(R.TransformationDescriptorT(ft,ft) for ft in provided_precisions)
+classes = tuple(R.OutputDescriptorT(ft, ft) for ft in provided_precisions)
+classes_input = tuple(R.InputDescriptorT(ft, ft) for ft in provided_precisions)
+classes_object = tuple(R.GNAObjectT(ft, ft) for ft in provided_precisions)
+classes_td = tuple(R.TransformationDescriptorT(ft, ft) for ft in provided_precisions)
 
 @patchROOTClass(classes, '__str__')
 def OutputDescriptor____str__(self, **kwargs):
@@ -33,7 +33,7 @@ def OutputDescriptor__single(self):
 def OutputDescriptor______rshift__(output, inputs):
     if isinstance(inputs, classes_input):
         inputs.connect(output)
-    elif isinstance(inputs, (list, tuple,types.GeneratorType)):
+    elif isinstance(inputs, (list, tuple, types.GeneratorType)):
         for inp in inputs:
             OutputDescriptor______rshift__(output, inp)
     elif isinstance(inputs, classes_object+classes_td):
@@ -47,7 +47,7 @@ def OutputDescriptor______rlshift__(output, inputs):
 
 @patchROOTClass(classes, '__gt__')
 @patchROOTClass(classes, '__lt__')
-def OutputDescriptor______cmp__(a,b):
+def OutputDescriptor______cmp__(a, b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')
 
 @patchROOTClass(classes, 'data')

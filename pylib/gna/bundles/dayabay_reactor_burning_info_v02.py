@@ -18,8 +18,8 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
         Info is read from npz file.
         '''
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(2,2,'major')
-        self.check_nidx_dim(0,0,'minor')
+        self.check_nidx_dim(2, 2, 'major')
+        self.check_nidx_dim(0, 0, 'minor')
 
         self.nidx_reactor = self.nidx.get_subset(self.bundlecfg.major[0])
         self.nidx_isotope = self.nidx.get_subset(self.bundlecfg.major[1])
@@ -67,7 +67,7 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
                 ff_name = it.current_format(name='fission_fraction_corr')
                 label="Fission fraction of isotope {iso} in reactor {reac}".format(iso=iso_name, reac=reac_name)
 
-                isotope_pac.append((ff_name, {'central':1, 'relsigma': relsigma, 'label':label,}))
+                isotope_pac.append((ff_name, {'central': 1, 'relsigma': relsigma, 'label': label,}))
 
             # check the order of isotopes matches corresponding order from
             # configuration
@@ -110,5 +110,3 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
                     fission_per_iso_add = C.Points(fission_fractions_daily[iso_name], labels=label_add)
                     self.context.objects[it.current_values(name='fission_fractions_add')] = fission_per_iso_add
                     self.set_output('fission_fractions_add', it, fission_per_iso_add.single())
-
-

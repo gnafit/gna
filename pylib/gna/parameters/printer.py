@@ -314,8 +314,8 @@ def GaussianParameter__str( self, labels=False  ):
 
         if limits.size():
             s+=sepstr
-            for (a,b) in limits:
-                s+=limitsfmt.format(a,b)
+            for (a, b) in limits:
+                s+=limitsfmt.format(a, b)
 
     if labels:
         s+=sepstr
@@ -348,4 +348,3 @@ def DiscreteParameter____str__(self, labels=False):
 
     return s
 DiscreteParameter.__str__ = DiscreteParameter____str__
-
