@@ -3,6 +3,7 @@
 #include <map>
 #include <stack>
 #include <string>
+#include <stdexcept>
 
 namespace TransformationTypes{
     using Attrs      = std::map<std::string,std::string>;
