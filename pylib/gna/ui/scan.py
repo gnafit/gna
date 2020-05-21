@@ -1,5 +1,6 @@
-from gna.ui import basecmd, set_typed, append_typed
-
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import os
 import numpy as np
 import argparse
 import itertools
@@ -10,10 +11,23 @@ from collections import namedtuple
 
 from gna.pointtree import PointTree
 from gna.grids import PointSet
+from gna.ui import basecmd, set_typed, append_typed
 
 MinimizerProperties = namedtuple('MinimizerProperties',
                                  ['local', 'idxes', 'nres', 'names',
                                   'fitvars'])
+
+class SegmentValidation(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        nseg, cur_seg = values
+        if nseg < 0:
+            raise ValueError('Passed negative number of segments')
+        if cur_seg < 0:
+            raise ValueError('Passed negative index for current segments')
+        if cur_seg >= nseg:
+            raise ValueError('Request for segment index larger then number of segments')
+        setattr(namespace, self.dest, values)
+
 
 class cmd(basecmd):
     @classmethod
@@ -22,7 +36,7 @@ class cmd(basecmd):
         parser.add_argument('--pullminimizer', action=set_typed(env.parts.minimizer))
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--samples', type=int, default=None)
-        parser.add_argument('--output', type=str, required=True)
+        parser.add_argument('--output', type=os.path.abspath, required=True)
         group = parser.add_mutually_exclusive_group()
         group.add_argument('--fcscan')
         group.add_argument('--points')
@@ -34,6 +48,10 @@ class cmd(basecmd):
         parser.add_argument('--toymc', action=set_typed(env.parts.toymc))
         parser.add_argument('--toymc-type', choices=['static', 'grid'])
         parser.add_argument('-v', '--verbose', action='count')
+        parser.add_argument('--segments', nargs=2, action=SegmentValidation, type=int,
+                metavar=('NSEGMENTS', 'CURRENT_SEGMENT'),
+                help='Split the grid over which scan is performed into '
+                'NSEGMENTS segments and scan only CURRENT_SEGMENT now')
 
     def makerandomizer(self, randdesc):
         assert len(randdesc) >= 1
@@ -87,7 +105,20 @@ class cmd(basecmd):
         return randomizers
 
     def initoutput(self, pointset, minimizers):
-        f = PointTree(self.env, self.opts.output, "w")
+        if self.opts.segments:
+            _, cur_seg = self.opts.segments
+            dirname, basename = os.path.split(self.opts.output)
+            try:
+                base, suffix = basename.split('.')
+            except ValueError:
+                # output name contains multiple '.'
+                spl = basename.split('.')
+                base, suffix = '.'.join(spl[:-1]), spl[-1]
+            new_basename = "{}_{}.{}".format(base, cur_seg, suffix)
+            output = os.path.join(dirname, new_basename)
+            f = PointTree(self.env, output, "w")
+        else:
+            f = PointTree(self.env, self.opts.output, "w")
         f.params = pointset.params
         f.attrs["allparams"] = [p.name() for p in self.allparams]
         f.attrs["minimizers"] = [n for p in self.minprops for n in p.names]
@@ -167,8 +198,8 @@ class cmd(basecmd):
 #                or not res.success:
             fitresults[fitid] = (res, [])
         if failed:
-            print res
-            print "minimization failed"
+            print(res)
+            print("minimization failed")
             return False
         resid = -1
         for fitid, (enabled, (res, allres)) in enumerate(zip(mask, fitresults)):
@@ -205,28 +236,36 @@ class cmd(basecmd):
     def printfit(self, path, idx, chi2s=None):
         if chi2s is not None and self.opts.verbose:
             if self.single:
-                print path, ' '.join(chi2s.astype(str))
+                print(path, ' '.join(chi2s.astype(str)))
             else:
-                print path, idx, ' '.join(chi2s.astype(str))
+                print(path, idx, ' '.join(chi2s.astype(str)))
         if self.single:
             return
         nprint = 50
         if self.nwait == nprint or chi2s is None:
             t = time.time()
             msg = "{} fits, {:.2f} s, path: {}"
-            print msg.format(self.nwait, t-self.tlast, path)
+            print(msg.format(self.nwait, t-self.tlast, path))
             self.nwait = 0
         if self.nwait == 0:
             self.tlast = time.time()
         self.nwait += 1
 
     def fcscan(self, pointset, getsampling, minimizers, outfile):
-        for path, values in pointset.iterpathvalues():
+        #  for path, values in tqdm.tqdm(pointset.iterpathvalues()):
+        if self.opts.segments:
+            nseg, cur_seg = self.opts.segments
+            if self.opts.verbose:
+                print("Scanning {} segments out of {}".format(cur_seg, nseg))
+        else:
+            nseg, cur_seg = None, None
+            print('Scanning over {} out of {} segments'.format(cur_seg, nseg))
+        for path, values in pointset.iterpathvalues(nseg, cur_seg):
             seed, nsamples = getsampling(path)
 
             if self.toymc:
                 import ROOT as R
-                R.GNA.Random.seed( seed )
+                R.GNA.Random.seed(seed)
                 self.toymc.reset()
             data = self.makedata(nsamples)
             parvalues = dict(zip(pointset.params, values))
@@ -294,7 +333,7 @@ class cmd(basecmd):
     def run(self):
         if self.opts.toymc:
             if not self.opts.toymc_type:
-                raise Exception("pleas specify --toymc-type with --toymc")
+                raise ValueError("please specify --toymc-type with --toymc")
             samples_type = self.opts.toymc_type
         else:
             samples_type = 'grid'
@@ -316,7 +355,6 @@ class cmd(basecmd):
         self.randomizers = self.initrandomizers()
 
         self.toymc = self.opts.toymc
-
         outfile = self.initoutput(pointset, minimizers)
 
         self.tstarted = time.time()
