@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import physlib
 
 def reqparameters(ns, pdg_year=None):

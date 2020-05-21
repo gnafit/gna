@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """Simple fit module. Makes the minimizer fit the model."""
 
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.ui import basecmd, set_typed
 from gna.configurator import NestedDict
 import pickle
@@ -61,4 +63,3 @@ class cmd(basecmd):
                 raise Exception('Unsupported output format or '+filename)
 
             print('Save output file:', filename)
-

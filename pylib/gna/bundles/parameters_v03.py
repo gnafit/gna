@@ -10,6 +10,7 @@ New features include:
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N

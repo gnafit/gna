@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
-import root2numpy as R2N
+from . import root2numpy as R2N
 from mpl_tools import helpers
 from matplotlib import pyplot as P
 from gna.bindings import DataType, provided_precisions

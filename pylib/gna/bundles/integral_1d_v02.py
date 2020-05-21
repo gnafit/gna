@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -102,4 +103,3 @@ class integral_1d_v02(TransformationBundle):
     def define_variables(self):
         """Defines the variables (no variables are needed for integral)"""
         pass
-

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd
 import ROOT
 import gna.constructors as C
@@ -32,7 +34,7 @@ class cmd(basecmd):
         oscprob_full.full_osc_prob.inputs.Enu(Enu_p)
         data_osc = oscprob_full.full_osc_prob.oscprob
         data_osc.data()
-        print data_osc.data()
+        print(data_osc.data())
         plt.figure()
         plt.plot(Enu_arr, data_osc.data())
         plt.savefig('test.pdf')

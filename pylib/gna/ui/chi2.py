@@ -1,7 +1,8 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 #
 """Build test statistic based on χ² function"""
 
+from __future__ import absolute_import
 from gna.ui import basecmd
 import ROOT
 import numpy as np

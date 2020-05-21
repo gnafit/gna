@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
@@ -51,7 +52,7 @@ class reactor_offeq_spectra_v03(TransformationBundle):
                 if iso != 'U238':
                     raise
                 ones = C.FillLike(1., labels='Offeq correction to {0} spectrum in {1} reactor'.format(iso, reac))
-                self.context.objects[name] = ones 
+                self.context.objects[name] = ones
                 self.set_input('offeq_correction', idx, ones.single_input(), argument_number=0)
                 self.set_output("offeq_correction", idx, ones.single())
                 continue

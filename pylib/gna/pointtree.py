@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import h5py
 import numpy as np
 
@@ -61,7 +62,7 @@ class PointTree(object):
             path = node.name
         else:
             raise Exception("unknown pointtree node: `%s'" % repr(node))
-        return [p.cast(str(x)) for p, x in zip(self._params, filter(None, path.rsplit('/')))]
+        return [p.cast(str(x)) for p, x in zip(self._params, [_f for _f in path.rsplit('/') if _f])]
 
     def path(self, values):
         if isinstance(values, str):

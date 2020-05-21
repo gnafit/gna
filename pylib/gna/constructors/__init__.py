@@ -4,6 +4,7 @@
 """Define user constructors for C++ classes to simplify calling from python"""
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 
@@ -12,9 +13,9 @@ from gna.converters import list_to_stdvector as stdvector
 from gna import context
 
 # Import constructors, defined in the submodules
-from Points import Points
-from Histogram import Histogram
-from Histogram import Histogram2d
+from .Points import Points
+from .Histogram import Histogram
+from .Histogram import Histogram2d
 
 def OutputDescriptors(outputs):
     descriptors=[]

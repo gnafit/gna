@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 import ROOT
 import numpy as np
 from collections import defaultdict

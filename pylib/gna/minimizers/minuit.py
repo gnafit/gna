@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
 import ROOT
 from argparse import Namespace
 import numpy as np
 import time
-import spec
+from . import spec
 from collections import OrderedDict
 
 class Minuit(ROOT.TMinuitMinimizer):

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Load experement definition, that provides observables and parameters"""
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.ui import basecmd
 import argparse
 import os.path

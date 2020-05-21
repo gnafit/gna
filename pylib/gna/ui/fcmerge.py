@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd
 import numpy as np
 import h5py
@@ -23,7 +26,7 @@ class cmd(basecmd):
         dsnames = set()
         ds.visititems(lambda name, obj: addds(dsnames, name, obj))
         if not dsnames:
-            print "skipping empty group", ds
+            print("skipping empty group", ds)
             return
         mergednames = set()
         mergedds.visititems(lambda name, obj: addds(mergednames, name, obj))
@@ -93,8 +96,8 @@ class cmd(basecmd):
         for attr in same:
             if attr in attrs:
                 if not equal(attrs[attr], tree.attrs.get(attr)):
-                    print attrs[attr]
-                    print tree.attrs.get(attr)
+                    print(attrs[attr])
+                    print(tree.attrs.get(attr))
                     msg = "%s: conflicting values for %r"
                     raise Exception(msg % (fname, attr))
             else:
@@ -126,7 +129,7 @@ class cmd(basecmd):
             try:
                 tree = PointTree(fname)
             except IOError:
-                print "ignoring", fname
+                print("ignoring", fname)
                 continue
             attrs = self.mergeattrs(attrs, tree,
                                     same=['allparams', 'params', 'minimizers',
@@ -139,7 +142,7 @@ class cmd(basecmd):
                                                 same=['parvalues'],
                                                 merged=['seed', 'entries'])
                 cnt[path] += self.merge(mergedds, ds)
-            print "processed", fname
+            print("processed", fname)
             tree.close()
 
         for path in paths:
@@ -148,15 +151,15 @@ class cmd(basecmd):
             if totalentries != cnt[path]:
                 msg = "%s: invalid entries count %d, expected %d"
                 raise Exception(msg % (path, cnt[path], totalentries))
-            print "{:20}: {} entries".format(path, cnt[path]),
+            print("{:20}: {} entries".format(path, cnt[path]), end=' ')
             seeds = dsattrs[path].get('seed')
             if seeds is not None:
-                print ", seeds:", seeds
+                print(", seeds:", seeds)
                 if len(set(seed)) != len(seed):
                     msg = "%s: non-unique seeds"
                     raise Exception(msg % ds.name)
             else:
-                print ""
+                print("")
             for attr, value in dsattrs[path].iteritems():
                 if value is not None:
                     mergedds.attrs[attr] = value

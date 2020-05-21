@@ -6,6 +6,7 @@ implements 1-parameter energy resolution for a detector with multiple zones
 """
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -106,4 +107,3 @@ class detector_multieres_stats_v01(TransformationBundle):
 
                 label = it.current_format(labelfmt, description=descriptions[i]) if labelfmt else descriptions[i]
                 self.set_label(par, 'parameter', it_major, '{description} {autoindex}', name=name, description=descriptions[i])
-

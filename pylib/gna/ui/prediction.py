@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -30,4 +33,4 @@ class cmd(basecmd):
 
         blocks = dataset.makeblocks(observables, parameters)
         self.env.parts.prediction[name] = blocks
-        print blocks
+        print(blocks)

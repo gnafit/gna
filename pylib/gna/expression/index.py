@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 import itertools as I
 from collections import OrderedDict
 from gna.expression.printl import *

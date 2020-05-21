@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 import argparse
 import numpy as np
 from collections import OrderedDict
@@ -111,7 +112,7 @@ class PointSet(object):
         if self.opts.pointspaths:
             for path in self.opts.pointspaths:
                 path = path.strip('/')
-                yield path, [p.cast(x) for p, x in zip(self.params, filter(None, path.rsplit('/')))]
+                yield path, [p.cast(x) for p, x in zip(self.params, [_f for _f in path.rsplit('/') if _f])]
             return
         if self.opts.pointsrange:
             assert(len(self.opts.pointsrange) <= 3)

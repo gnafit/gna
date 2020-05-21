@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.env import env
 from gna.ui import basecmd
 import ROOT
@@ -37,7 +38,7 @@ class cmd(basecmd):
         cbar = fig.colorbar(im)
         plt.title("Covariance matrix")
 
-	savefig(self.opts.savefig, suffix='_cov')
+        savefig(self.opts.savefig, suffix='_cov')
 
         fig, ax = plt.subplots()
         im = ax.matshow(cormat)
@@ -45,7 +46,7 @@ class cmd(basecmd):
         cbar = fig.colorbar(im)
         plt.title("Correlation matrix")
 
-	savefig(self.opts.savefig, suffix='_cor')
+        savefig(self.opts.savefig, suffix='_cor')
 
         if self.opts.dump:
             np.savez(self.opts.dump, covmat)

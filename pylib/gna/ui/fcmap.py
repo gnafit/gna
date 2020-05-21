@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd
 import numpy as np
 import h5py
@@ -30,7 +33,7 @@ class cmd(basecmd):
             if points and path not in points:
                 continue
             chi2s = ds["chi2s"]
-            print "{:20}: {} entries".format(path, len(chi2s))
+            print("{:20}: {} entries".format(path, len(chi2s)))
             for ctx in self.opts.contexts:
                 mfield = ctx
                 dchi2s = chi2s[:, ifield] - chi2s[:, mfield]

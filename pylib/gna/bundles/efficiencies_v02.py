@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -73,4 +74,3 @@ class efficiencies_v02(TransformationBundle):
         if self.cfg.get('uncorrelated'):
             for i, it in enumerate(self.nidx_minor.iterate()):
                 self.reqparameter('effunc_uncorr', it, central=1.0, sigma=relunc_uncorr_tot, label='Uncorrelated efficiency uncertainty (relative)'  )
-

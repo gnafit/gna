@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -70,4 +71,3 @@ class oscprob_v02(TransformationBundle):
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
-

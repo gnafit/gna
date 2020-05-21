@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """Example model: gaussian peak with flat background"""
 
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.exp import baseexp
 from gna.env import env
 import ROOT

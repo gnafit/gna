@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd, set_typed
 
 import argparse
@@ -69,11 +71,11 @@ def estimatepvalue(grp, obs):
     idx = dist.searchsorted(obs)
     if idx == 0:
         msg = "WARNING: statistic={} is smaller than any sample (min={})!"
-        print msg.format(obs, dist[0])
+        print(msg.format(obs, dist[0]))
         return 1
     if idx == len(dist):
         msg = "WARNING: statistic={} is larger than any sample (max={})!"
-        print msg.format(obs, dist[-1])
+        print(msg.format(obs, dist[-1]))
         return 0
     p, n = dist[idx-1:idx+1]
     z = idx-1 + (obs-p)/(n-p)
@@ -389,7 +391,7 @@ class cmd(basecmd):
                xy = [self.statpoints['chi2min'][par] for par in
                        reversed(self.opts.minimizer.pars)]
                #  self.fixaxes(xy)
-               print 'bestfit', xy[0], xy[1]
+               print('bestfit', xy[0], xy[1])
                ax.plot(xy[0], xy[1], 'o', label='Best fit')
 
             #  ax.set_xlabel(r'$\sigma_{rel}$', fontsize='xx-large')
@@ -427,7 +429,7 @@ class cmd(basecmd):
         for i, param in enumerate(reversed(self.params)):
             if param == 'dm31' and self.opts.dm32:
                 dm21 = self.localenv.exp.getPar("dm21").GetValue()
-                print "dm21", dm21
+                print("dm21", dm21)
                 axes[i] -= dm21
 
     def plotmap(self, ax, pvmap):
@@ -566,7 +568,7 @@ class cmd(basecmd):
                 #if abs(abs(cv)-abs(nv)) < (1-level)/10:
                     #continue
                 splits[ecell][...] = 1
-            print abs(window)
+            print(abs(window))
             for axis in range(naxis):
                 p = projection(axis, cell)
                 dx = egrids[axis][p[axis]]

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+from __future__ import absolute_import
 from collections import defaultdict, deque, Mapping, OrderedDict
-import parameters
+from . import parameters
 from contextlib import contextmanager
 import ROOT
 from gna.config import cfg

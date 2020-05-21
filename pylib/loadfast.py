@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Loader module like `load`
 doesn't initialize bindings"""
+from __future__ import absolute_import
 import ROOT
 ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
 ROOT.gDirectory.AddDirectory( False )

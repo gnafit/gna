@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Analysis module combines multiple datasets for the analysis (fit)"""
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np

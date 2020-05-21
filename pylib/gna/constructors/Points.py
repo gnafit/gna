@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from load import ROOT as R
 import numpy as np
 from gna.converters import array_to_stdvector_size_t
@@ -24,4 +26,3 @@ def Points(array, *args, **kwargs):
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( array.shape )
     return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())(array.ravel(order='F'), s, *args, **kwargs)
-

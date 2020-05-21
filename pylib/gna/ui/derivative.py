@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from gna.ui import basecmd, append_typed
 import ROOT
 import numpy as np

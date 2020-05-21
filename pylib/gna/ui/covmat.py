@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least, qualified
 import ROOT
 import argparse
@@ -25,11 +28,11 @@ class cmd(basecmd):
             covmat.cov.stat.connect(diag)
             covmat.cholesky.cov(covmat.cov)
             self.env.parts.covmat[name] = covmat
-            print 'Covmat', name, 'from', diag
+            print('Covmat', name, 'from', diag)
 
 
         for covmat in self.opts.fix:
             covmat.setFixed(True)
 
         for covmat in getattr(self.opts, 'print'):
-            print covmat.data()
+            print(covmat.data())

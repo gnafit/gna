@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 
 # Here we might collect some useful common things
+from __future__ import print_function
+from __future__ import absolute_import
 from math import  pow, sqrt
 
 #  TODO: how to correctly include hierarchy dependent \Delta m^2_{32} update?
@@ -178,6 +180,3 @@ addDoubleTheta(2018, 'sinSqtheta12')
 
 pc = PhysicsConstants()
 percent = 0.01
-
-
-

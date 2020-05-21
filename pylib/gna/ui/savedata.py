@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
 """Plot 1d ovservables"""
 
+from __future__ import absolute_import
+from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
 from matplotlib import pyplot as plt
@@ -55,4 +58,4 @@ class cmd(basecmd):
         except:
             raise Exception('Unable to write data to: '+self.opts.output)
 
-        print('Dump data to: '+self.opts.output)
+        print(('Dump data to: '+self.opts.output))

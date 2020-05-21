@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.env import env
 import pygraphviz as G
 import ROOT as R
 from collections import OrderedDict
-from configurator import NestedDict
+from .configurator import NestedDict
 
 import re
 pattern = re.compile('^.*::([^:<]+)(T<[^>]*>)*$')

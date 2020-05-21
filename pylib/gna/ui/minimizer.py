@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 """Minimizer module: initializes minimizer for a given statistic and set of parameters"""
 
+from __future__ import absolute_import
 import ROOT
 from gna.ui import basecmd, set_typed
 from gna.minimizers import minimizers

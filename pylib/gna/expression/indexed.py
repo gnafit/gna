@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.expression.index import *
 
 class Indexed(object):
@@ -96,5 +97,3 @@ class Indexed(object):
     def current_format(self, nidx, fmt=None, *args, **kwargs):
         nidx = self.nindex.get_relevant(nidx)
         return nidx.current_format( fmt, *args, name=self.name, **kwargs )
-
-

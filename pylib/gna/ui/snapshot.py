@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 """Given an observable make it's snapshot via Snapshot transformation"""
 
 from __future__ import print_function
+from __future__ import absolute_import
 from gna.ui import basecmd
 import argparse
 import os.path
@@ -36,4 +38,3 @@ class cmd(basecmd):
         self.ns.addobservable(self.opts.name_out, self.snapshot.single(), export=not self.opts.hidden)
 
         self.env.parts.snapshot[self.opts.name_out] = self.snapshot
-

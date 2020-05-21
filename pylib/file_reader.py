@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from os.path import splitext
 
 def read_object_root( filename, name, *args, **kwargs ):
@@ -38,5 +39,3 @@ def read_object_auto( filename, *args, **kwargs ):
         raise Exception( "Can not read file with extension '%s'"%ext )
 
     return readers[ext]( filename, *args, **kwargs )
-
-
