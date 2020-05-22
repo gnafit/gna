@@ -139,11 +139,17 @@ class DictWrapper(ClassWrapper):
 
         return True
 
+    def items(self):
+        for k, v in self._obj.iteritems():
+            if isinstance(v, dictclasses):
+                v = DictWrapper(v, parent=self)
+            yield k, v
+    iteritems=items
+
     def walkitems(self):
         for k, v in self.items():
             k = k,
-            if isinstance(v, dictclasses):
-                v = DictWrapper(v, parent=self)
+            if isinstance(v, DictWrapper):
                 for k1, v1 in v.walkitems():
                     yield k+k1, v1
             else:
