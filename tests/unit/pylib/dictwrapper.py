@@ -1,6 +1,7 @@
 from __future__ import print_function
 from tools.dictwrapper import DictWrapper
 import pytest
+from collections import OrderedDict
 
 def test_dictwrapper_01():
     dw = DictWrapper({})
@@ -27,48 +28,124 @@ def test_dictwrapper_03():
 @pytest.mark.parametrize('split', [None, '.'])
 def test_dictwrapper_03(split):
     dct = dict(a=1, b=2, c=3, d=dict(e=4), f=dict(g=dict(h=5)))
-    dw = DictWrapper(dct)
+    dct['z.z.z'] = 0
+    print(dct)
+    dw = DictWrapper(dct, split=split)
 
+    #
+    # Test self access
+    #
     assert dw.get(()).unwrap() is dct
     assert dw[()].unwrap() is dct
+
+    #
+    # Test wrapping
+    #
     assert isinstance(dw.get('d'), DictWrapper)
     assert isinstance(dw.get(('f', 'g')), DictWrapper)
-    assert dw.get('d.e') is None
+
+    #
+    # Test get tuple
+    #
     assert dw.get(('d', 'e'))==4
-    assert dw[('d', 'e')]==4
+    assert dw.get(('d', 'e1')) is None
+    assert dw.get(('f', 'g', 'h'))==5
     try:
-        assert dw['d.e']==4
-        assert split is None
+        dw.get(('z', 'z', 'z'))
+        assert False
     except KeyError:
         pass
-    assert dw.get(('d', 'e1')) is None
+
+    #
+    # Test getitem tuple
+    #
+    assert dw[('d', 'e')]==4
     try:
         dw[('d', 'e1')]
         assert False
     except KeyError:
         pass
-    assert dw.get(('f', 'g', 'h'))==5
     assert dw[('f', 'g', 'h')]==5
+
     try:
-        assert dw['f.g.h']==5
-        assert dw[('f.g', 'h')]==5
-        assert split is None
+        dw[('z', 'z', 'z')]
+        assert False
     except KeyError:
         pass
 
+    #
+    # Test get split
+    #
+    if split:
+        assert dw.get('d.e')==4
+    else:
+        assert dw.get('d.e') is None
+
+    if split:
+        try:
+            dw.get('z.z.z')
+            assert False
+        except KeyError:
+            pass
+    else:
+        assert dw.get('z.z.z')==0
+
+    #
+    # Test getitem split
+    #
+    try:
+        assert dw['d.e']==4
+        assert split is not None
+    except KeyError:
+        pass
+
+    try:
+        assert dw['f.g.h']==5
+        assert dw[('f.g', 'h')]==5
+        assert split is not None
+    except KeyError:
+        pass
+
+    if split:
+        try:
+            dw['z.z.z']
+            assert False
+        except KeyError:
+            pass
+    else:
+        assert dw['z.z.z']==0
+
+    #
+    # Test contains
+    #
     assert 'a' in dw
     assert not 'a1' in dw
     assert 'd' in dw
+
+    #
+    # Test contains tuple
+    #
     assert ('d', 'e') in dw
     assert not ('k', 'e') in dw
     assert ('f', 'g', 'h') in dw
+    assert ('f.g.h' in dw) == bool(split)
+    assert ('z.z.z' in dw) == bool(not split)
 
+    #
+    # Test parents
+    #
     g = dw.get(('f', 'g'))
     assert g.parent().parent() is dw
 
+    #
+    # Test children
+    #
     m=dw.child(('k', 'l', 'm'))
     assert dw.get(('k', 'l', 'm')).unwrap() is m.unwrap()
 
+    #
+    # Test recursive setitem
+    #
     dw[('k', 'l', 'm', 'n')] = 5
     try:
         dw.child(tuple('klmn'))
@@ -82,4 +159,38 @@ def test_dictwrapper_03(split):
     if not split:
         assert dw.unwrap()['o.l.m.n'] == 6
 
+    #
+    # Test attribute access
+    #
+    assert dw._.a==1
+    assert dw._.b==2
+    assert dw._.c==3
+    assert dw._.d.e==4
+    assert dw._.f.g.h==5
 
+    dw._.f.g.h=6
+    assert dw._.f.g.h==6
+
+
+def test_dictwrapper_04():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z.z.z'] = 0
+    dw = DictWrapper(dct)
+
+    keys0 = (('a',) , ('b',) , ('c',) , ('d', 'e'), ('f', 'g', 'h'), ('z.z.z', ))
+    values0 = (1, 2, 3, 4, 5, 0)
+
+    keys = tuple(dw.walkkeys())
+    values = tuple(dw.walkvalues())
+    assert keys==keys0
+    assert values==values0
+
+    class Visitor(object):
+        keys, values = (), ()
+        def __call__(self, k, v):
+            self.keys+=k,
+            self.values+=v,
+    v = Visitor()
+    dw.visit(v)
+    assert v.keys==keys0
+    assert v.values==values0

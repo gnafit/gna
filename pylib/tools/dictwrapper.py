@@ -5,7 +5,13 @@ from collections import OrderedDict, Iterable
 dictclasses = (dict, OrderedDict)
 
 class DictWrapper(ClassWrapper):
-    """Dictionary wrapper managing nested dictionaries"""
+    """Dictionary wrapper managing nested dictionaries
+        The following functionality is implemented:
+        - Tuple keys are treated to access nested dictionaries ('key1', 'key2', 'key3')
+        - Optionally split symbol may be set to automatically split string keys into tuple keys:
+          'key1.key2.key3' will be treated as a nested key if '.' is set for the split symbol
+        - self._ may be used to access nested dictionaries via attributes: dw.key1.key2.key3
+    """
     _split = None
     _parent = None
     _type = OrderedDict
@@ -20,6 +26,7 @@ class DictWrapper(ClassWrapper):
             self._parent = parent
             self._split = parent._split
         ClassWrapper.__init__(self, dic, DictWrapper)
+        self._ = DictWrapperAccess(self)
 
     def parent(self):
         return self._parent
@@ -97,7 +104,7 @@ class DictWrapper(ClassWrapper):
             sub = self.__getattr__('get')(key)
         else:
             sub = self._obj[key] = self._type()
-            sub = DictWrapper(sub)
+            sub = DictWrapper(sub, parent=self)
             # # cfg._set_parent( self )
 
         sub.setdefault(rest, value)
@@ -113,7 +120,7 @@ class DictWrapper(ClassWrapper):
             sub = self.__getattr__('get')(key)
         else:
             sub = self._obj[key] = self._type()
-            sub = DictWrapper(sub)
+            sub = DictWrapper(sub, parent=self)
             # # cfg._set_parent( self )
 
         sub.set(rest, value)
@@ -132,9 +139,44 @@ class DictWrapper(ClassWrapper):
 
         return True
 
+    def walkitems(self):
+        for k, v in self.items():
+            k = k,
+            if isinstance(v, dictclasses):
+                v = DictWrapper(v, parent=self)
+                for k1, v1 in v.walkitems():
+                    yield k+k1, v1
+            else:
+                if isinstance(v, dictclasses):
+                    v = DictWrapper(v, parent=self)
+                yield k, v
 
-if __name__ == "__main__":
-    d = dict(a=1, b=2, c=dict(d=1))
-    dw = DictWrapper(d, split='.')
+    def walkkeys(self):
+        for k, v in self.walkitems():
+            yield k
 
-    import IPython; IPython.embed()
+    def walkvalues(self):
+        for k, v in self.walkitems():
+            yield v
+
+    def visit(self, fcn):
+        for k, v in self.walkitems():
+            fcn(k, v)
+
+class DictWrapperAccess(object):
+    '''DictWrapper wrapper. Enables attribute based access to nested dictionaries'''
+    _dict = None
+    def __init__(self, dct):
+        self.__dict__['_dict'] = dct
+
+    def __getattr__(self, key):
+        ret = self._dict[key]
+
+        if isinstance(ret, DictWrapper):
+            return ret._
+
+        return ret
+
+    def __setattr__(self, key, value):
+        self._dict[key]=value
+
