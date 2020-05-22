@@ -7,14 +7,33 @@ dictclasses = (dict, OrderedDict)
 class DictWrapper(ClassWrapper):
     _split = None
     _parent = None
+    _type = dict
     def __new__(cls, dic, *args, **kwargs):
         if not isinstance(dic, dictclasses):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, split=None):
+    def __init__(self, dic, split=None, parent=None):
         self._split = split
+        if parent:
+            self._parent = parent
+            self._split = parent._split
         ClassWrapper.__init__(self, dic, DictWrapper)
+
+    def parent(self):
+        return self._parent
+
+    def child(self, key):
+        try:
+            ret = self.get(key)
+        except KeyError:
+            ret = self[key]=self._type()
+            return DictWrapper(ret, parent=self)
+
+        if not isinstance(ret, DictWrapper):
+            raise KeyError('Child {!s} is not DictWrapper'.format(key))
+
+        return ret
 
     def iterkey(self, key):
         if isinstance(key, basestring):
@@ -41,14 +60,46 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            return self._obj.get(key, *args, **kwargs)
+            return self.__getattr__('get')(key, *args, **kwargs)
 
         sub = self.__getattr__('get')(key)
         if sub is None:
             if args:
                 return args[0]
             raise KeyError( "No nested key '%s'"%key )
-        return sub.get( rest, *args, **kwargs )
+        return sub.get(rest, *args, **kwargs)
+
+    def __getitem__(self, key):
+        if key is ():
+            return self
+        key, rest=self.splitkey(key)
+
+        sub = self.__getattr__('__getitem__')(key)
+        if not rest:
+            return sub
+
+        if sub is None:
+            if args:
+                return args[0]
+            raise KeyError( "No nested key '%s'"%key )
+
+        return sub[rest]
+
+    def setdefault(self, key, value):
+        key, rest=self.splitkey(key)
+
+        if not rest:
+            self.setdefault(key, value)
+            return
+
+        if key in self:
+            sub = self.__getattr__('get')(key)
+        else:
+            sub = self._obj[key] = self._type()
+            sub = DictWrapper(sub)
+            # # cfg._set_parent( self )
+
+        sub.setdefault(rest, value)
 
     def set(self, key, value):
         key, rest=self.splitkey(key)
@@ -60,7 +111,7 @@ class DictWrapper(ClassWrapper):
         if key in self:
             sub = self.__getattr__('get')(key)
         else:
-            sub = self._obj[key] = {}
+            sub = self._obj[key] = self._type()
             sub = DictWrapper(sub)
             # # cfg._set_parent( self )
 
@@ -68,40 +119,24 @@ class DictWrapper(ClassWrapper):
 
     __setitem__= set
 
+    def __contains__(self, key):
+        key, rest=self.splitkey(key)
+
+        if not key in self._obj:
+            return False
+
+        if rest:
+            sub = self.__getattr__('get')(key)
+            return rest in sub
+
+        return True
+
 
 if __name__ == "__main__":
     d = dict(a=1, b=2, c=dict(d=1))
     dw = DictWrapper(d, split='.')
 
     import IPython; IPython.embed()
-
-    # def _set_parent(self, parent):
-        # super(NestedDict, self).__setattr__('__parent__', parent)
-
-    # def parent(self, n=1):
-        # if n==1:
-            # return self.__parent__
-
-        # if n==0:
-            # return self
-
-        # if n<0:
-            # raise Exception('Invalid parent depth')
-
-        # if self.__parent__ is None:
-            # raise Exception('No parent')
-
-        # return self.__parent__.parent( n-1 )
-
-    # def parent_key(self):
-        # if self.__parent__ is None:
-            # return None
-
-        # for k, v in self.__parent__.items():
-            # if v is self:
-                # return k
-
-        # raise KeyError( "Failed to determine own key in the parent dictionary" )
 
     # def __getitem__(self, key):
         # key, rest=process_key(key)
@@ -118,22 +153,6 @@ if __name__ == "__main__":
                 # return self(key)
 
             # raise
-
-    # def setdefault(self, key, value):
-        # if isinstance(value, dict):
-            # value = NestedDict(value)
-        # if isinstance(value, NestedDict):
-            # value._set_parent( self )
-
-        # key, rest=process_key(key)
-        # if rest:
-            # if not key in self.__storage__:
-                # cfg = self.__storage__[key]=NestedDict()
-                # cfg._set_parent( self )
-                # return cfg.setdefault( rest, value )
-            # return self.__storage__.get(key).setdefault( rest, value )
-
-        # return self.__storage__.setdefault(key, value)
 
     # def values(self, nested=False):
         # for v in self.__storage__.values():
@@ -166,17 +185,6 @@ if __name__ == "__main__":
         # else:
             # for k in self.__storage__.keys():
                 # yield k
-
-    # def __contains__(self, key):
-        # key, rest=process_key(key)
-
-        # if not self.__storage__.__contains__(key):
-            # return False
-
-        # if rest:
-            # return self.__storage__.get(key).__contains__(rest)
-
-        # return True
 
     # def __call__(self, key):
         # if isinstance( key, (list, tuple) ):
