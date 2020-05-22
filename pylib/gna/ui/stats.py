@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-u"""Build test statistic based on arbitrary sum of χ² and logPoisson functions"""
+"""Build test statistic based on arbitrary sum of χ² and logPoisson functions"""
 
-from __future__ import absolute_import
+
 from gna.ui import basecmd
 import ROOT
 import numpy as np
@@ -12,9 +12,9 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('name', help='statistic name')
-        parser.add_argument('-c', '--chi2',       default=[], action='append', type=env.parts.analysis, help=u'χ² contribution')
-        parser.add_argument('-p', '--logpoisson',  default=[], action='append', type=env.parts.analysis, help=u'logPoisson contribution')
-        parser.add_argument('--logpoisson-legacy', default=[], action='append', type=env.parts.analysis, help=u'logPoisson contribution (legacy)')
+        parser.add_argument('-c', '--chi2',       default=[], action='append', type=env.parts.analysis, help='χ² contribution')
+        parser.add_argument('-p', '--logpoisson',  default=[], action='append', type=env.parts.analysis, help='logPoisson contribution')
+        parser.add_argument('--logpoisson-legacy', default=[], action='append', type=env.parts.analysis, help='logPoisson contribution (legacy)')
         parser.add_argument('--poisson-approx', action='store_true', help='Use approximate logPoisson formula (Stirling)')
         parser.add_argument('--labels', nargs='+', default=[], help='Node labels')
 

@@ -163,7 +163,7 @@ class GraphWalker(object):
         return self._list_do(self.cache_sources, *args)
 
     def variable_do(self, *args):
-        return self._list_do(self.cache_variables.values(), *args)
+        return self._list_do(list(self.cache_variables.values()), *args)
 
     def source_open_do(self, *args):
         return self._list_do(self.cache_sources_open, *args)

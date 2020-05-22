@@ -87,7 +87,7 @@ class dayabay_reactor_burning_info_v02(TransformationBundle):
         for rit in self.nidx_reactor:
             core_name, = rit.current_values()
             core = self.core_info_daily[core_name]
-            days_in_period = np.array(core['days'])
+            days_in_period = np.array(core['days']).astype(int)
 
             thermal_power_daily = np.repeat(core['power'], days_in_period)
             if self.cfg.nominal_power:

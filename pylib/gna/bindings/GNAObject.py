@@ -46,8 +46,7 @@ def GNAObject__printtransformations(self, **kwargs):
     printl(str(self))
     if self.transformations.size():
         with nextlevel():
-            # printl('Transformations:')
-            for i, t in enumerate(self.transformations.itervalues()):
+            for i, t in enumerate(self.transformations.values()):
                 printl('{:2d}'.format(i), end=' ')
                 t.print(**kwargs)
 
@@ -75,7 +74,7 @@ def GNAObject__printvariables(self):
 @patchROOTClass(classes, 'variablevalues')
 def GNAObject__variablevalues(self):
     ns = self.currentns
-    return dict([(ns[k].name(), ns[k].value()) if k in ns else (k+'_unknown', 0) for k in self.variables.iterkeys()])
+    return dict([(ns[k].name(), ns[k].value()) if k in ns else (k+'_unknown', 0) for k in self.variables.keys()])
 
 R.SingleOutput.__single_orig = R.SingleOutput.single
 @patchROOTClass(classes, 'single')

@@ -460,7 +460,7 @@ class exp(baseexp):
         lib = self.libs
         self.expression.guessname(lib, save=True)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose and self.opts.verbose>1:
             print('Expression tree:')
             self.expression.tree.dump(True)
             print()
@@ -469,7 +469,7 @@ class exp(baseexp):
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose and self.opts.verbose>1:
             width = 40
             print('Outputs:')
             print(self.context.outputs.__str__(nested=True, width=width))
@@ -564,7 +564,7 @@ class exp(baseexp):
         self.formula['livetime'] = [
             'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
             'livetime=accumulate("livetime", livetime_daily[d]())',
-            'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+            'power_livetime_factor_daily = bracket(efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff) * inverse(denom)',
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             ]
 
@@ -573,7 +573,7 @@ class exp(baseexp):
         else:
             self.formula['snf'] = [
                     'snf_denom = sum[i]| eper_fission[i]*snf_fission_fractions[i]()',
-                    'snf_plf_daily = nominal_thermal_power[r]*snf_fission_fractions[i]() / snf_denom',
+                    'snf_plf_daily = nominal_thermal_power[r]*snf_fission_fractions[i]() * inverse(snf_denom)',
                     'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
                     'snf_in_reac = snf_correction(enu(), nominal_spec_per_reac)',
                     ]

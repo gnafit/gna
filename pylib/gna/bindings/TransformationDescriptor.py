@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
+
+
 from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
@@ -16,10 +16,10 @@ def TransformationDescriptor____str__(self):
 def TransformationDescriptor__print(self, **kwargs):
     printl(str(self))
     with nextlevel():
-        for i, inp in enumerate(self.inputs.itervalues()):
+        for i, inp in enumerate(self.inputs.values()):
             printl('{:2d}'.format(i), end=' ')
             inp.print(**kwargs)
-        for i, o in enumerate(self.outputs.itervalues()):
+        for i, o in enumerate(self.outputs.values()):
             printl('{:2d}'.format(i), end=' ')
             o.print(**kwargs)
 

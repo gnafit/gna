@@ -198,7 +198,7 @@ class TreeStyle(object):
                 'Points':            'a',
                 'View':              'v',
                 'Histogram':         'h',
-                'Histogram2d':       u'h²',
+                'Histogram2d':       'h²',
                 'Rebin':             'r',
                 'Concat':            '..',
                 'FillLike':          'c',
@@ -207,7 +207,7 @@ class TreeStyle(object):
                 'MatrixProduct':     '@',
                 'Snapshot':          r'\|o\|',
                 'MatrixProductDVDt': '@@t',
-                'InSegment':         u'∈'
+                'InSegment':         '∈'
                 }
         if objectname in marks:
             mark = marks.get(objectname)
@@ -242,7 +242,7 @@ class TreeStyle(object):
         elif objectname in ('InSegment',):
             dim1 = 'x'.join(getdim(entry.sinks[0]))
             dim2 = 'x'.join(getdim(entry.sinks[1], 1))
-            dim = u']∈['.join((dim1, dim2)),
+            dim = ']∈['.join((dim1, dim2)),
 
         if entry.funcname=='gpu':
             features.gpu=True

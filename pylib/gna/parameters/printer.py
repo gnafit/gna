@@ -135,7 +135,7 @@ def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=N
         top_level = False
 
     header = False
-    for name, var in ns.iteritems():
+    for name, var in ns.items():
         if isinstance( ns.storage[name], str ):
             print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
             continue
@@ -155,7 +155,7 @@ def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=N
         print(var.__str__(labels=labels))
         varstats(var, stats)
     if recursive:
-        for sns in ns.namespaces.itervalues():
+        for sns in ns.namespaces.values():
             print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats)
 
     if correlations and top_level:

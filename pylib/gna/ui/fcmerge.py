@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from gna.ui import basecmd
 import numpy as np
 import h5py
@@ -160,11 +160,11 @@ class cmd(basecmd):
                     raise Exception(msg % ds.name)
             else:
                 print("")
-            for attr, value in dsattrs[path].iteritems():
+            for attr, value in dsattrs[path].items():
                 if value is not None:
                     mergedds.attrs[attr] = value
 
-        for attr, value in attrs.iteritems():
+        for attr, value in attrs.items():
             if value is not None:
                 fcmerged.attrs[attr] = value
 

@@ -29,7 +29,7 @@ class Operation(TCall, NestedTransformation, metaclass=OperationMeta):
         self.call_lock=True
 
         self.set_objects(*args)
-        self.set_indices(*args, ignore=self.nindex_to_reduce.indices.keys())
+        self.set_indices(*args, ignore=list(self.nindex_to_reduce.indices.keys()))
         return self
 
     def guessname(self, lib={}, save=False):

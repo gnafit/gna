@@ -64,7 +64,7 @@ def readchi2(grp, obs):
     return grp['datafit'][0]
 
 def estimatepvalue(grp, obs):
-    names = grp['dchi2s'].keys()
+    names = list(grp['dchi2s'].keys())
     assert len(names) == 1
     dist = grp['dchi2s'][names[0]][:]
     # dist = dist[dist >= 0]

@@ -91,7 +91,7 @@ def patchSimpleDict(cls):
         return self.size()
 
     def __iter__(self):
-        return self.iterkeys()
+        return iter(self.keys())
 
     def __getattr__(self, attr):
         if attr in self:
@@ -106,7 +106,7 @@ def patchSimpleDict(cls):
             return default
 
     def __dir__(self):
-        return dir(cls) + self.keys()
+        return dir(cls) + list(self.keys())
 
     cls.itervalues = itervalues
     cls.values = values

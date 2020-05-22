@@ -140,7 +140,7 @@ class namespace(Mapping):
     def pathto(self, name):
         return '.'.join((self.path, name)) if self.path else name
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def __repr__(self):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
+
+
 from gna.ui import basecmd
 import ROOT
 import gna.constructors as C
@@ -51,17 +51,17 @@ class cmd(basecmd):
       }
       oscprobs = {}
       data = {}
-      for name, cls in oscprob_classes.iteritems():
+      for name, cls in oscprob_classes.items():
           oscprob = cls(from_neutrino, to_neutrino)
-          for compname in oscprob.probsum.inputs.keys():
+          for compname in list(oscprob.probsum.inputs.keys()):
             if compname != 'comp0':
-              for tname, tf in oscprob.transformations.iteritems():
+              for tname, tf in oscprob.transformations.items():
                 if compname in tf.outputs:
                   oscprob.probsum[compname](tf[compname])
                   break
             else:
               oscprob.probsum[compname](C.Points(np.ones_like(Enu_arr)))
-          for tf in oscprob.transformations.itervalues():
+          for tf in oscprob.transformations.values():
             if 'Enu' in tf.inputs:
               tf.inputs.Enu(Enu)
           self.ns.addobservable('probability_{0}'.format(name), oscprob.probsum)

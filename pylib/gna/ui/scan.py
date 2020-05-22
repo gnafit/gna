@@ -157,14 +157,14 @@ class cmd(basecmd):
             'fcparams': ((self.nchi2, len(self.allparams)), 'f8'),
         })
         return {name: np.full((nsamples,)+shape, np.nan, dtype)
-                for name, (shape, dtype) in types.iteritems()}
+                for name, (shape, dtype) in types.items()}
 
     def store(self, f, path, datasets, parvalues, seed=None):
         pars = np.full(len(self.allparams), np.nan, 'f8')
-        for pname, v in parvalues.iteritems():
+        for pname, v in parvalues.items():
             pars[self.paramidx[pname]] = v
         f.touch(path).attrs['parvalues'] = pars
-        for name, data in datasets.iteritems():
+        for name, data in datasets.items():
             if self.single:
                 assert data.shape[0] == 1
                 data = data.reshape(data.shape[1:])
@@ -178,7 +178,7 @@ class cmd(basecmd):
     def maketoyprediction(self):
         if not self.opts.toymc:
             return
-        for param, randomizer in self.randomizers.iteritems():
+        for param, randomizer in self.randomizers.items():
             param.set(randomizer(self.toymc.random))
         self.toymc.nextSample()
 
@@ -228,7 +228,7 @@ class cmd(basecmd):
         return dict(parvalues.items(), **dict(zip(pullmin.pars, res.x)))
 
     def setminparams(self, envs, pdict):
-        for pname, v in pdict.iteritems():
+        for pname, v in pdict.items():
             for env in envs:
                 par = env.pars.min.GetPar(pname)
                 if par:

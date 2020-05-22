@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Analysis module combines multiple datasets for the analysis (fit)"""
-from __future__ import print_function
-from __future__ import absolute_import
+
+
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -65,7 +65,7 @@ class cmd(basecmd):
                 add(block.theory, block.cov)
 
             blocks = [ block._replace(data=toymc_out)
-                      for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.itervalues()) ]
+                      for (block, toymc_out) in zip(blocks, iter(toymc.transformations.front().outputs.values())) ]
 
             self.env.parts.toymc[self.opts.name] = toymc
         self.env.parts.analysis[self.opts.name] = blocks

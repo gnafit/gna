@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 import yaml
 import numpy as np
 
@@ -67,7 +67,7 @@ fieldfuncs = {
 
 def loadfields(par, fields):
     ret = {}
-    for field, value in fields.iteritems():
+    for field, value in fields.items():
         try:
             func = fieldfuncs[field]
         except KeyError:
@@ -81,7 +81,7 @@ def loadfields(par, fields):
 
 def load(env, minimizer, spec):
     ret = {}
-    for k, fields in spec.iteritems():
+    for k, fields in spec.items():
         par = None
         if isinstance(k, str):
             try:
@@ -118,7 +118,7 @@ def merge(basespec, spec):
     for k in spec:
         if spec[k] is None:
             continue
-        fields = dict(basespec.get(k, {}).items())
+        fields = dict(list(basespec.get(k, {}).items()))
         fields.update(spec[k])
-        merged[k] = {field: v for (field, v) in fields.iteritems() if v is not None}
+        merged[k] = {field: v for (field, v) in fields.items() if v is not None}
     return merged

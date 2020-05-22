@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from __future__ import absolute_import
+
+
 from gna.configurator import uncertain
 
 debug=False
@@ -13,7 +13,7 @@ class DiscreteParameter(object):
         self._name = name
         self._namespace = kwargs.get("namespace", "")
         self._variants = variants
-        self._inverse = dict(zip(variants.itervalues(), variants.iterkeys()))
+        self._inverse = dict(zip(variants.values(), variants.keys()))
         self._label = kwargs.pop('label', '')
         if  len(self._inverse) != len(self._variants):
             msg = "DiscreteParameter variants dict is not a bijection"
@@ -154,7 +154,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
                 raise Exception(msg)
             param.setSigma(sigma)
             if debug:
-                print( u'*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma, relsigma=rs, perc=rs*100.0), end=' ' )
+                print( '*(1±{relsigma}) [±{sigma}] [{perc}%]'.format(sigma=sigma, relsigma=rs, perc=rs*100.0), end=' ' )
         elif 'sigma' in kwargs:
             sigma = param.cast(kwargs['sigma'])
             if sigma==0.0:
@@ -162,7 +162,7 @@ def makeparameter(ns, name, cfg=None, **kwargs):
 
             param.setSigma(sigma)
             if debug:
-                print( u'±{sigma}'.format(sigma=param.sigma() ), end=' ' )
+                print( '±{sigma}'.format(sigma=param.sigma() ), end=' ' )
                 if param.central():
                     print( '[{perc}%]'.format(perc=param.sigma()/param.central() ), end=' ' )
         else:
