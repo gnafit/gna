@@ -72,7 +72,7 @@ The output of a transformation in `Expressions v1` is represented by a function 
     a()
 
 will work the same way as the previous one with the only difference: the `Expression` will search for a (bundle,
-configuration) that is able to provide an Transformation output, named `a`. An empty argument lists indicates that an
+configuration) that is able to provide an `Transformation` output, named `a`. An empty argument lists indicates that an
 object `a` has an output and no inputs.
 
 The function call represents a binding action, when the input is connected to the output. The code
@@ -86,7 +86,7 @@ will require bundles to create outputs `a` and `b` and an input for `b`. The out
 
 .. caution::
 
-    Once the connection is performed it may not be changed. Any subsequent useage of the output `b()` should be used
+    Once the connection is performed it may not be changed. Any subsequent usage of the output `b()` should be used
     with an empty argument list.
 
 Multiple arguments are supported. The code
