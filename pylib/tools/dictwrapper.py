@@ -153,8 +153,6 @@ class DictWrapper(ClassWrapper):
                 for k1, v1 in v.walkitems():
                     yield k+k1, v1
             else:
-                if isinstance(v, dictclasses):
-                    v = DictWrapper(v, parent=self)
                 yield k, v
 
     def walkkeys(self):
@@ -165,9 +163,24 @@ class DictWrapper(ClassWrapper):
         for k, v in self.walkitems():
             yield v
 
-    def visit(self, fcn):
-        for k, v in self.walkitems():
-            fcn(k, v)
+    def visit(self, visitor, parentkey=()):
+        visitor = DictWrapperVisitor(visitor)
+
+        if not parentkey:
+            visitor.start(self)
+
+        visitor.enterdict(parentkey, self)
+        for k, v in self.items():
+            key = parentkey + (k,)
+            if isinstance(v, DictWrapper):
+                v.visit(visitor, parentkey=key)
+            else:
+                visitor.visit(key, v)
+
+        visitor.exitdict(parentkey, self)
+
+        if not parentkey:
+            visitor.stop(self)
 
 class DictWrapperAccess(object):
     '''DictWrapper wrapper. Enables attribute based access to nested dictionaries'''
@@ -186,3 +199,54 @@ class DictWrapperAccess(object):
     def __setattr__(self, key, value):
         self._dict[key]=value
 
+class DictWrapperVisitor(object):
+    def __new__(cls, fcn_or_visitor=None):
+        if isinstance(fcn_or_visitor, DictWrapperVisitor):
+            return fcn_or_visitor
+
+        ret=object.__new__(cls)
+        if fcn_or_visitor is not None:
+            ret.visit = fcn_or_visitor
+        return ret
+
+    def start(self, dct):
+        pass
+
+    def enterdict(self, k, v):
+        pass
+
+    def visit(self, k, v):
+        pass
+
+    def exitdict(self, k, v):
+        pass
+
+    def stop(self, dct):
+        pass
+
+class DictWrapperPrinter(DictWrapperVisitor):
+    fmt = '{action:7s} {depth!s:>5s} {key!s:<{keylen}s} {vtype!s:<{typelen}s} {value}'
+    opts = dict(keylen=20, typelen=15)
+    def typestring(self, v):
+        return type(v).__name__
+
+    def start(self, d):
+        v = object.__repr__(d.unwrap())
+        print('Start printing dictionary:', v)
+        print(self.fmt.format(action='Action', depth='Depth', key='Key', vtype='Type', value='Value', **self.opts))
+
+    def stop(self, d):
+        print('Done printing dictionary')
+
+    def enterdict(self, k, d):
+        d = d.unwrap()
+        v = object.__repr__(d)
+        print(self.fmt.format(action='Enter', depth=len(k), key=k, vtype=self.typestring(d), value=v, **self.opts))
+
+    def exitdict(self, k, d):
+        d = d.unwrap()
+        v = object.__repr__(d)
+        print(self.fmt.format(action='Visit', depth=len(k), key=k, vtype=self.typestring(d), value=v, **self.opts))
+
+    def visit(self, k, v):
+        print(self.fmt.format(action='Exit', depth=len(k), key=k, vtype=self.typestring(v), value=v, **self.opts))

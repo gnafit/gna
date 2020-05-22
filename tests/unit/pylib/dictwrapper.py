@@ -1,5 +1,5 @@
 from __future__ import print_function
-from tools.dictwrapper import DictWrapper
+from tools.dictwrapper import DictWrapper, DictWrapperPrinter
 import pytest
 from collections import OrderedDict
 
@@ -194,3 +194,10 @@ def test_dictwrapper_04():
     dw.visit(v)
     assert v.keys==keys0
     assert v.values==values0
+
+def test_dictwrapper_05():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z.z.z'] = 0
+    dw = DictWrapper(dct)
+
+    dw.visit(DictWrapperPrinter())
