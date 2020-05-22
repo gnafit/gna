@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-from __future__ import absolute_import
+
 import inspect
 
 class ClassWrapper(object):
@@ -22,6 +21,18 @@ class ClassWrapper(object):
     def __dir__(self):
         return dir(self._obj)
 
+    def __len__(self):
+        return len(self._obj)
+
+    def __bool__(self):
+        return bool(self._obj)
+
+    def __iter__(self):
+        return iter(self._obj)
+
+    def __contains__(self, v):
+        return v in self._obj
+
     def __getattr__(self, attr):
         method = getattr(self._obj, attr)
         return self._wrap(method)
@@ -40,7 +51,7 @@ class ClassWrapper(object):
             return obj
         if inspect.isgenerator(obj) or inspect.isgeneratorfunction(obj):
             return self._wrapgenerator(obj)
-        if inspect.isfunction(obj) or inspect.ismethod(obj):
+        if inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj):
             return self._wrapmethod(obj)
         if isinstance(obj, type(self._obj)):
             return self._wrapper_class(obj)
