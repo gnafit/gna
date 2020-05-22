@@ -25,32 +25,32 @@ Commits to the `master` branch are commonly prohibited. Please, contribute your 
 ## RST sections structure
 
 ```rst
-    #########
-    Part name
-    #########
+#########
+Part name
+#########
 
-    ************
-    Chapter name
-    ************
+************
+Chapter name
+************
 
-    Section name
-    ============
+Section name
+============
 
-    Subsection name
-    ---------------
+Subsection name
+---------------
 
-    Subsubsection name
-    ^^^^^^^^^^^^^^^^^^
+Subsubsection name
+^^^^^^^^^^^^^^^^^^
 
-    Paragraph name
-    """"""""""""""
+Paragraph name
+""""""""""""""
 
-    Subparagraph name
-    '''''''''''''''''
+Subparagraph name
+'''''''''''''''''
 
-    Subsubparagraph name
-    ++++++++++++++++++++
+Subsubparagraph name
+++++++++++++++++++++
 
-    Subsubsubparagraph name
-    ```````````````````````
+Subsubsubparagraph name
+.......................
 ```
