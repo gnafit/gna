@@ -5,9 +5,10 @@ from collections import OrderedDict, Iterable
 dictclasses = (dict, OrderedDict)
 
 class DictWrapper(ClassWrapper):
+    """Dictionary wrapper managing nested dictionaries"""
     _split = None
     _parent = None
-    _type = dict
+    _type = OrderedDict
     def __new__(cls, dic, *args, **kwargs):
         if not isinstance(dic, dictclasses):
             return dic
@@ -137,76 +138,3 @@ if __name__ == "__main__":
     dw = DictWrapper(d, split='.')
 
     import IPython; IPython.embed()
-
-    # def __getitem__(self, key):
-        # key, rest=process_key(key)
-        # if rest:
-            # return self.__storage__.__getitem__(key).__getitem__( rest )
-
-        # if key is ():
-            # return self
-
-        # try:
-            # return self.__storage__.__getitem__(key)
-        # except KeyError as e:
-            # if meta[self].get('createmissing', False):
-                # return self(key)
-
-            # raise
-
-    # def values(self, nested=False):
-        # for v in self.__storage__.values():
-            # if nested and isinstance(v, NestedDict):
-                # for nv in v.values(nested=True):
-                    # yield nv
-            # else:
-                # yield v
-
-    # def items(self, nested=False):
-        # if nested:
-            # for k, v in self.__storage__.items():
-                # if isinstance(v, NestedDict):
-                    # for nk, nv in v.items(nested=True):
-                        # yield (k,)+nk, nv
-                # else:
-                    # yield (k,), v
-        # else:
-            # for k, v in self.__storage__.items():
-                # yield k, v
-
-    # def keys(self, nested=False):
-        # if nested:
-            # for k, v in self.__storage__.items():
-                # if isinstance(v, NestedDict):
-                    # for nk in v.keys(nested=True):
-                        # yield (k,)+nk
-                # else:
-                    # yield k,
-        # else:
-            # for k in self.__storage__.keys():
-                # yield k
-
-    # def __call__(self, key):
-        # if isinstance( key, (list, tuple) ):
-            # key, rest = key[0], key[1:]
-            # if rest:
-                # if not key in self.__storage__:
-                    # cfg = self.__storage__[key]=NestedDict()
-                    # cfg._set_parent( self )
-                    # return cfg.__call__( rest )
-                # return self.__storage__.get(key).__call__(rest)
-
-        # if isinstance( key, basestring ):
-            # if '.' in key:
-                # return self.__call__(key.split('.'))
-
-        # other = self.__storage__.get(key, None)
-        # if other is None:
-            # value = self.__storage__[key] = NestedDict()
-            # value._set_parent( self )
-            # return value
-
-        # if isinstance(other, NestedDict):
-            # return other
-
-        # raise KeyError( "Can not create nested configuration as soon as soon as the key '%s' already exists"%key )

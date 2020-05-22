@@ -77,3 +77,9 @@ def test_dictwrapper_03(split):
         pass
     assert dw.get(('k', 'l', 'm', 'n')) == 5
 
+    dw[('o.l.m.n')] = 6
+    assert dw['o.l.m.n'] == 6
+    if not split:
+        assert dw.unwrap()['o.l.m.n'] == 6
+
+
