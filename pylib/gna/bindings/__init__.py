@@ -6,6 +6,7 @@ import numpy as np
 import ROOT
 import itertools as it
 import types
+import inspect
 
 ROOT.GNAObjectT
 provided_precisions = list(ROOT.GNA.provided_precisions())
@@ -55,7 +56,7 @@ class GNAObjectTemplates(object):
 
     @staticmethod
     def patchGNATemplate(template):
-        if not isinstance(template, types.InstanceType):
+        if inspect.isclass(template):
             return
 
         for pp in provided_precisions:

@@ -55,7 +55,7 @@ class Expression(object):
         self.set_operations()
 
     def set_operations(self):
-        for name, op in self.operations.iteritems():
+        for name, op in self.operations.items():
             self.globals[name]=op
 
     def parse(self):

@@ -62,7 +62,7 @@ def listmodules(modules, printdoc=False):
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
     wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
-    modnames = modules.keys()
+    modnames = list(modules.keys())
     for modname in modnames:
         modname_print = modname.replace('_', '-')
         try:

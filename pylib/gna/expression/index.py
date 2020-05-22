@@ -397,7 +397,7 @@ class NIndex(object):
             if major.master:
                 used+=major.master.short,
 
-        for short, idx in self.indices.iteritems():
+        for short, idx in self.indices.items():
             if short in used:
                 continue
 
