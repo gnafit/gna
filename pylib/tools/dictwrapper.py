@@ -22,7 +22,7 @@ class DictWrapper(ClassWrapper):
 
     def __init__(self, dic, split=None, parent=None, *args, **kwargs):
         self._split = split
-        ClassWrapper.__init__(self, dic, DictWrapper, types=dictclasses)
+        ClassWrapper.__init__(self, dic, types=dictclasses)
         if parent:
             self._parent = parent
             self._split = parent._split
@@ -201,6 +201,9 @@ class DictWrapperAccess(object):
 
     def __setattr__(self, key, value):
         self._[key]=value
+
+    def __dir__(self):
+        return list(self._.keys())
 
 class DictWrapperVisitor(object):
     def __new__(cls, fcn_or_visitor=None):

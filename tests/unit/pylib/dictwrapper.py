@@ -173,9 +173,10 @@ def test_dictwrapper_03(split):
 
     dw._.f.g.h=6
     assert dw._.f.g.h==6
+    assert dw._._ is dw
 
 
-def test_dictwrapper_04():
+def test_dictwrapper_04_visitor():
     dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
@@ -198,9 +199,32 @@ def test_dictwrapper_04():
     assert v.keys==keys0
     assert v.values==values0
 
-def test_dictwrapper_05():
+def test_dictwrapper_05_visitor():
     dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
 
     dw.visit(DictWrapperPrinter())
+
+def test_dictwrapper_06_inheritance():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5, i=6)))])
+    dct['z.z.z'] = 0
+
+    class DictWrapperA(DictWrapper):
+        def count(self):
+            return len(tuple(self.walkitems()))
+
+        def depth(self):
+            return max([len(k) for k in self.walkkeys()])
+
+    dw = DictWrapperA(dct, split='.')
+    assert dw.count()==7
+    assert dw['d'].count()==1
+    assert dw['f'].count()==2
+    assert dw['f.g'].count()==2
+    assert dw._.f._.count()==2
+
+    assert dw.depth()==3
+    assert dw['d'].depth()==1
+    assert dw['f'].depth()==2
+
