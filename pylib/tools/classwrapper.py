@@ -7,8 +7,12 @@ class ClassWrapper(object):
         - getattr
         - call
         calls, wrap the result if the class is of the same type"""
-    def __init__(self, obj, wrapper=None, parent=None):
+    def __init__(self, obj, wrapper=None, parent=None, types=None):
         self._obj = obj
+        if types:
+            self._types = types
+        else:
+            self._types = type(obj)
         self._wrapper_class = wrapper or ClassWrapper
 
     def unwrap(self):
@@ -55,7 +59,11 @@ class ClassWrapper(object):
             return self._wrapgenerator(obj)
         if inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj):
             return self._wrapmethod(obj)
-        if isinstance(obj, type(self._obj)):
+
+        return self._wrapobject(obj)
+
+    def _wrapobject(self, obj):
+        if isinstance(obj, self._types):
             return self._wrapper_class(obj, parent=self)
 
         return obj

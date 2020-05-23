@@ -20,12 +20,13 @@ class DictWrapper(ClassWrapper):
             return dic
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, dic, split=None, parent=None):
+    def __init__(self, dic, split=None, parent=None, *args, **kwargs):
         self._split = split
+        ClassWrapper.__init__(self, dic, DictWrapper, types=dictclasses)
         if parent:
             self._parent = parent
             self._split = parent._split
-        ClassWrapper.__init__(self, dic, DictWrapper)
+            self._types = parent._types
         self._ = DictWrapperAccess(self)
 
     def parent(self):
@@ -36,12 +37,16 @@ class DictWrapper(ClassWrapper):
             ret = self.get(key)
         except KeyError:
             ret = self[key]=self._type()
-            return DictWrapper(ret, parent=self)
+            return self._wrapobject(ret)
 
-        if not isinstance(ret, DictWrapper):
+        if not isinstance(ret, self._wrapper_class):
             raise KeyError('Child {!s} is not DictWrapper'.format(key))
 
         return ret
+
+    def keys(self):
+        return self._obj.iterkeys()
+    iterkeys = keys
 
     def iterkey(self, key):
         if isinstance(key, basestring):
@@ -104,7 +109,7 @@ class DictWrapper(ClassWrapper):
             sub = self.__getattr__('get')(key)
         else:
             sub = self._obj[key] = self._type()
-            sub = DictWrapper(sub, parent=self)
+            sub = self._wrapobject(sub)
             # # cfg._set_parent( self )
 
         sub.setdefault(rest, value)
@@ -120,7 +125,7 @@ class DictWrapper(ClassWrapper):
             sub = self.__getattr__('get')(key)
         else:
             sub = self._obj[key] = self._type()
-            sub = DictWrapper(sub, parent=self)
+            sub = self._wrapobject(sub)
             # # cfg._set_parent( self )
 
         sub.set(rest, value)
@@ -141,15 +146,13 @@ class DictWrapper(ClassWrapper):
 
     def items(self):
         for k, v in self._obj.iteritems():
-            if isinstance(v, dictclasses):
-                v = DictWrapper(v, parent=self)
-            yield k, v
+            yield k, self._wrapobject(v)
     iteritems=items
 
     def walkitems(self):
         for k, v in self.items():
             k = k,
-            if isinstance(v, DictWrapper):
+            if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems():
                     yield k+k1, v1
             else:
@@ -172,7 +175,7 @@ class DictWrapper(ClassWrapper):
         visitor.enterdict(parentkey, self)
         for k, v in self.items():
             key = parentkey + (k,)
-            if isinstance(v, DictWrapper):
+            if isinstance(v, self._wrapper_class):
                 v.visit(visitor, parentkey=key)
             else:
                 visitor.visit(key, v)
@@ -184,20 +187,20 @@ class DictWrapper(ClassWrapper):
 
 class DictWrapperAccess(object):
     '''DictWrapper wrapper. Enables attribute based access to nested dictionaries'''
-    _dict = None
+    _ = None
     def __init__(self, dct):
-        self.__dict__['_dict'] = dct
+        self.__dict__['_'] = dct
 
     def __getattr__(self, key):
-        ret = self._dict[key]
+        ret = self._[key]
 
-        if isinstance(ret, DictWrapper):
+        if isinstance(ret, self._._wrapper_class):
             return ret._
 
         return ret
 
     def __setattr__(self, key, value):
-        self._dict[key]=value
+        self._[key]=value
 
 class DictWrapperVisitor(object):
     def __new__(cls, fcn_or_visitor=None):
