@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from load import ROOT as R
@@ -41,7 +41,7 @@ def test_jacobian_v01():
     print('Jacobian:', res.shape, res)
 
     req = N.eye(len(names), len(names)-1)
-    assert N.allclose(res, req, atol=1.e-15)
+    assert N.allclose(res, req, atol=1.e-12)
 
     t = jac.jacobian
     tf1 = t.getTaintflag()
@@ -62,7 +62,7 @@ def test_jacobian_v01():
     assert not tf1.frozen()
 
     res=jac.jacobian.jacobian.data()
-    assert N.allclose(res, req, atol=1.e-15)
+    assert N.allclose(res, req, atol=1.e-12)
     assert not tf0.tainted()
     assert not tf1.tainted()
     assert tf1.frozen()
