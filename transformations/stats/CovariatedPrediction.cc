@@ -335,7 +335,12 @@ void CovariatedPrediction::calculateCov(FunctionArgs fargs) {
     bool argdiag = arg.type.shape.size()==1;
 
     if(argdiag==m_diagonal_cov){
-      fullcovmat.array()+=arg.arr;
+        if (argdiag) {
+          fullcovmat.array()+=arg.arr;
+          }
+        else {
+          fullcovmat.matrix()+=arg.mat;
+        }
     }
     else{
       fullcovmat+=arg.vec.asDiagonal();
