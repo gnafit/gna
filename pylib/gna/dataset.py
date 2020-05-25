@@ -11,6 +11,7 @@ class Dataset(object):
         self.desc = desc
         self.data = {}
         self.covariance = defaultdict(list)
+        self.jac, self.prediction = None, None
         for base in reversed(bases):
             self.data.update(base.data)
         self._update_covariances(bases)
@@ -128,6 +129,8 @@ class Dataset(object):
             prediction.prediction_ready()
             par_covs.materialize()
             jac.jacobian.func(prediction.prediction)
+            self.jac = jac.jacobian
+            self.par_covs = covparameters
 
             product = ROOT.MatrixProductDVDt(jac.jacobian,  par_covs.unc_matrix)
             product.product.touch()
@@ -167,9 +170,19 @@ class Dataset(object):
             if data is None:
                 raise Exception("no data constructed")
             prediction.cov.covbase(prediction.covbase.covbase)
+            self.prediction = prediction
 
             if len(obsblock)>1:
                 blocks.append(Block(prediction.prediction, data, prediction.cov))
             else:
                 blocks.append(Block(obsblock[0].single(), data, prediction.cov))
         return blocks
+
+    def reset_errors(self):
+        self.prediction.covbase.covbase.unfreeze()
+        self.prediction.covbase.covbase.data()
+        if self.jac:
+            self.jac.unfreeze()
+            self.jac.data()
+            self.jac.taint()
+        self.prediction.cov.touch()
