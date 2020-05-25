@@ -46,7 +46,7 @@ In addition to data and theory outputs dataset defines statistical uncertainties
 they may be used by the static, for example by :math:`\chi^2` function. In case log-Poisson is used the statistical
 uncertainties defined in data set will be ignored.
 
-.. attention:: 
+.. attention::
 
     By default Pearson's definition for statistical uncertainties is used: For each bin :math:`i`
     :math:`\sigma_\text{stat}=\sqrt{N_i}`, where :math:`N_i` comes from theory. Therefore statistical uncertainties
@@ -140,3 +140,25 @@ The full version of the command is below:
     :linenos:
     :caption: :download:`01_fit_script.sh <../../../macro/tutorial/fit/01_fit_script.sh>`
 
+Saving fit result to other formats
+''''''''''''''''''''''''''''''''''
+
+The result may be saved to the `pickle <https://docs.python.org/2/library/pickle.html>`_ binary format. In order to
+achieve this the output extension should be set to `.pkl`:
+
+.. code-block:: bash
+
+    ... \
+    -- fit min -s -p -o output/fit_01.pkl \
+    ... \
+
+The `-o` option accepts multiple arguments, so the output may be saved into multiple files:
+
+.. code-block:: bash
+
+    ... \
+    -- fit min -s -p -o output/fit_01.pkl output/fit_01.yaml \
+    ... \
+
+
+While `YAML` is easier to read, the `pickle` binary format loads faster.
