@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 import gna.constructors as C
 
 constant = 1.2345
 
 def make(nsources, ntargets):
-    sources=[C.Points([constant]) for i in xrange(nsources)]
-    targets=[R.DebugTransformation('debug_%02d'%i) for i in xrange(ntargets)]
+    sources=[C.Points([constant]) for i in range(nsources)]
+    targets=[R.DebugTransformation('debug_%02d'%i) for i in range(ntargets)]
 
     return sources+targets
 
@@ -188,7 +188,7 @@ def test_binding_16():
 
 if __name__ == "__main__":
     glb = globals()
-    for fcn in sorted([name for name in glb.keys() if name.startswith('test_')]):
+    for fcn in sorted([name for name in list(glb.keys()) if name.startswith('test_')]):
         print('call ', fcn)
         glb[fcn]()
         print()

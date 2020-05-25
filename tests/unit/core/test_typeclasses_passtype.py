@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -18,7 +18,7 @@ def test_typeclass_passtype():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
     for i in range(5):
         obj.add_output()
 
@@ -52,7 +52,7 @@ def test_typeclass_passeach():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
     for i in range(5):
         obj.add_output()
 
@@ -87,8 +87,8 @@ def test_typeclass_passeach_02():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
+    list(map(obj.add_input, outputs))
     for i in range(3):
         obj.add_output()
 
@@ -110,4 +110,3 @@ def test_typeclass_passeach_02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -13,7 +13,7 @@ def test_typeclass_kind_v01():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
     dt_points.dump(); print()
@@ -35,7 +35,7 @@ def test_typeclass_kind_v02():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
     dt_points.dump(); print()
@@ -54,4 +54,3 @@ def test_typeclass_kind_v02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-
