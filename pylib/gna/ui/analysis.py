@@ -11,6 +11,7 @@ from gna import constructors as C
 class cmd(basecmd):
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
+        self.dataset = None
 
         if self.opts.observables:
             if len(self.opts.observables)!=len(self.opts.datasets):
@@ -27,7 +28,7 @@ class cmd(basecmd):
         parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
-        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'asimov'], help='use random sampling to variate the data')
+        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data')
     def __extract_obs(self, obses):
         for obs in obses:
             if '/' in obs:
@@ -55,6 +56,12 @@ class cmd(basecmd):
             elif self.opts.toymc == 'poisson':
                 toymc = ROOT.PoissonToyMC()
                 add = lambda t, c: toymc.add(t)
+            elif self.opts.toymc == 'normal':
+                toymc = C.NormalToyMC()
+                add = toymc.add
+            elif self.opts.toymc == 'normalStats':
+                toymc = C.NormalStatsToyMC()
+                add = toymc.add
             elif self.opts.toymc == 'asimov':
                 toymc = C.Snapshot()
                 add = lambda t, c: toymc.add_input(t)
@@ -66,4 +73,9 @@ class cmd(basecmd):
                       for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.itervalues()) ]
 
             self.env.parts.toymc[self.opts.name] = toymc
+            for toymc in toymc.transformations.values():
+                toymc.setLabel(self.opts.toymc+' ToyMC '+self.opts.name)
         self.env.parts.analysis[self.opts.name] = blocks
+        self.env.parts.analysis_errors[self.opts.name] = dataset
+
+
