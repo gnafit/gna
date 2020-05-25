@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 import numpy as np
 from matplotlib import pyplot as plt
@@ -96,7 +96,7 @@ class MCTestData(object):
         return fig
 
     def close(self):
-        map(plt.close, self.figures)
+        list(map(plt.close, self.figures))
 
     def savefig(self, *args):
         path = '_'.join((self.tmp_path,)+tuple(args))+'.png'
@@ -177,15 +177,15 @@ class MCTestData(object):
     def check_nextSample(self):
         mcobject = self.mcobject
         self.first_data = np.array([mc.data().copy() for mc in
-            mcobject.transformations[0].outputs.values()])
+            list(mcobject.transformations[0].outputs.values())])
         self.mcobject.nextSample()
         self.second_data = np.array([mc.data().copy() for mc in
-            mcobject.transformations[0].outputs.values()])
+            list(mcobject.transformations[0].outputs.values())])
         self.mcdiff_nextSample = self.first_data - self.second_data
         if self.mctype=='Snapshot':
             assert (self.mcdiff_nextSample==0).all()
         elif self.mctype=='PoissonToyMC':
-            _, scale = [val for val in vars(self.info).values()]
+            _, scale = [val for val in list(vars(self.info).values())]
             assert ((self.mcdiff_nextSample!=0).sum(axis=1)
                     > self.PoissonTreshold[scale]).all()
         else:
@@ -211,12 +211,11 @@ def test_mc(mc, scale, tmp_path):
 
     mcobject.printtransformations()
 
-    map(lambda (o, out): MCTestData.set_mc(o, mcobject, out), zip(mcdata_v, mcobject.transformations[0].outputs.values()))
+    list(map(lambda o_out: MCTestData.set_mc(o_out[0], mcobject, o_out[1]), list(zip(mcdata_v, list(mcobject.transformations[0].outputs.values())))))
 
     tmp_path = os.path.join(str(tmp_path), '_'.join((mc, str(int(scale)))) )
-    map(lambda o: MCTestData.plot(o, tmp_path), mcdata_v)
+    list(map(lambda o: MCTestData.plot(o, tmp_path), mcdata_v))
 
-    map(MCTestData.close, mcdata_v)
-    map(MCTestData.check_nextSample, mcdata_v)
-    map(MCTestData.check_stats, mcdata_v)
-
+    list(map(MCTestData.close, mcdata_v))
+    list(map(MCTestData.check_nextSample, mcdata_v))
+    list(map(MCTestData.check_stats, mcdata_v))

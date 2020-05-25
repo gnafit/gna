@@ -67,7 +67,8 @@ sepstr='{} │ '.format(Style.RESET_ALL)
 
 fixedstr='[fixed]'
 fixedstr_len = (centralsigma_len+relsigma_len-1-len(fixedstr))
-fixedstr = (fixedstr_len/2)*' ' + fixedstr + (fixedstr_len/2)*" "
+fixed_half_width = int(fixedstr_len/2)
+fixedstr = fixed_half_width*' ' + fixedstr + fixed_half_width*" "
 
 freestr =' [free]'
 
