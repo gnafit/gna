@@ -23,7 +23,6 @@ public:
    */
   Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false)
     : m_edges(edges, edges+nbins+1), m_raw_buffer{data, data+nbins}
-      /* m_data(Eigen::Map<const Eigen::ArrayXd>(m_raw_buffer.data(), nbins)) */
   {
     if( fcn_copy ){
       init_copy();
@@ -72,7 +71,10 @@ protected:
           fargs.rets[0] = DataType().hist().edges(obj->edges()); ///   - assign the data shape and bin edges for the first output (hist).
           fargs.rets[0].preallocated(obj->m_raw_buffer.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
         })
-      .func([](FunctionArgs& fargs) {})                          /// Assign empty Function.
+      .func([](Histogram* obj, FunctionArgs& fargs) {            /// Define the function.
+              fargs.rets[0].x=Eigen::Map<const Eigen::ArrayXd>(obj->m_raw_buffer.data(),
+                                                               obj->m_raw_buffer.size());                       /// Copy data.
+            })                          /// Assign empty Function.
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   void init_copy() {

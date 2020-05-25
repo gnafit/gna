@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -16,7 +16,7 @@ def test_typeclass_same_v01():
     outputs = [p.points.points for p in points]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((0,-1))
     dt.dump(); print()
@@ -34,7 +34,7 @@ def test_typeclass_same_v02():
     print(outputs)
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-2))
     dt.dump(); print()
@@ -57,7 +57,7 @@ def test_typeclass_same_v03():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
@@ -79,7 +79,7 @@ def test_typeclass_same_v04():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
     dt.dump(); print()
@@ -96,4 +96,3 @@ def test_typeclass_same_v04():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

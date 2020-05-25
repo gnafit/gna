@@ -65,9 +65,12 @@ protected:
       .output("hist")                                            /// Add an output hist.
       .types([](Histogram2d *obj, TypesFunctionArgs& fargs) {    /// Define the TypesFunction:
           fargs.rets[0] = DataType().hist().edges(obj->xedges(), obj->yedges()); ///   - assign the data shape and bin edges for the first output (hist).
-          fargs.rets[0].preallocated(obj->m_raw_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
+          /* fargs.rets[0].preallocated(obj->m_raw_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data). */
         })
-      .func([](FunctionArgs& fargs) {})
+      .func([](Histogram2d* obj, FunctionArgs& fargs) {
+              fargs.rets[0].arr2d = Eigen::Map<Eigen::ArrayXXd>(obj->m_raw_data.data(),
+                                                                obj->m_xedges.size(),
+                                                                obj->m_yedges.size());})
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_xedges;                                  ///< Vector with X bin edges.
