@@ -16,9 +16,11 @@ def test_typeclass_kind_v01():
     list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
+    R.SetOwnership(dt_points, False)
     dt_points.dump(); print()
 
     dt_hist = R.TypeClasses.CheckKindT(context.current_precision())(2)
+    R.SetOwnership(dt_hist, False)
     dt_hist.dump(); print()
 
     obj.add_typeclass(dt_hist)
@@ -38,9 +40,11 @@ def test_typeclass_kind_v02():
     list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
+    R.SetOwnership(dt_points, False)
     dt_points.dump(); print()
 
     dt_hist = R.TypeClasses.CheckKindT(context.current_precision())(2)
+    R.SetOwnership(dt_hist, False)
     dt_hist.dump(); print()
 
     obj.add_typeclass(dt_points)

@@ -19,6 +19,7 @@ def test_typeclass_same_v01():
     list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((0,-1))
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
@@ -37,12 +38,14 @@ def test_typeclass_same_v02():
     list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-2))
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((-2,-1))
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -60,12 +63,14 @@ def test_typeclass_same_v03():
     list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'kind')
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -82,12 +87,14 @@ def test_typeclass_same_v04():
     list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1), 'shape')
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckSameTypesT(context.current_precision())((1,-1),)
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')

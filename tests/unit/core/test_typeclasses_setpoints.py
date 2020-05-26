@@ -16,6 +16,7 @@ def test_typeclass_setpoints_v01():
         obj.add_output('out')
 
         dt = R.TypeClasses.SetPointsT(context.current_precision())(size)
+        R.SetOwnership(dt, False)
         dt.dump(); print()
         obj.add_typeclass(dt)
         res = obj.process_types();
@@ -34,6 +35,7 @@ def test_typeclass_setpoints_v02():
         obj.add_output('out')
 
         dt = R.TypeClasses.SetPointsT(context.current_precision())(*size)
+        R.SetOwnership(dt, False)
         dt.dump(); print()
         obj.add_typeclass(dt)
         res = obj.process_types();
@@ -47,4 +49,3 @@ def test_typeclass_setpoints_v02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-
