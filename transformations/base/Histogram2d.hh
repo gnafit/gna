@@ -23,13 +23,7 @@ public:
    * @param yedges - pointer to an array with nbins+1 edges.
    * @param data - pointer to an array with data points of shape Xbins x Ybins (column-major).
    */
-  Histogram2d(size_t xbins, const double *xedges, size_t ybins, const double *yedges, const double *data) :
-    m_xedges{xedges, xedges+xbins+1},
-    m_yedges{yedges, yedges+ybins+1},
-    m_raw_data{data, data+(xbins+1)*(ybins+1)}
-  {
-    init();
-  }
+  Histogram2d(size_t xbins, const double *xedges, size_t ybins, const double *yedges, const double *data);
 
   /**
    * @brief Return the vector with histogram X edges.
@@ -48,7 +42,7 @@ public:
    * @return number of elements in an array.
    */
   size_t size() const {
-    return m_raw_data.size();
+    return m_data.size();
   }
 
   /**
@@ -56,7 +50,7 @@ public:
    * @return array pointer.
    */
   const double *ptr() const {
-    return m_raw_data.data();
+    return m_data.data();
   }
 
 protected:
@@ -65,15 +59,13 @@ protected:
       .output("hist")                                            /// Add an output hist.
       .types([](Histogram2d *obj, TypesFunctionArgs& fargs) {    /// Define the TypesFunction:
           fargs.rets[0] = DataType().hist().edges(obj->xedges(), obj->yedges()); ///   - assign the data shape and bin edges for the first output (hist).
-          /* fargs.rets[0].preallocated(obj->m_raw_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data). */
+          /* fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data). */
         })
       .func([](Histogram2d* obj, FunctionArgs& fargs) {
-              fargs.rets[0].arr2d = Eigen::Map<Eigen::ArrayXXd>(obj->m_raw_data.data(),
-                                                                obj->m_xedges.size(),
-                                                                obj->m_yedges.size());})
+              fargs.rets[0].arr2d = obj->m_data;})
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_xedges;                                  ///< Vector with X bin edges.
   std::vector<double> m_yedges;                                  ///< Vector with Y bin edges.
-  std::vector<double> m_raw_data;                                ///< Vector with raw bin content.
+  Eigen::ArrayXXd m_data;                                 ///< Array with raw bin content.
 };

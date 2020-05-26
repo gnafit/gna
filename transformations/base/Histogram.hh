@@ -1,6 +1,8 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <vector>
+#include "Data.hh"
 #include "GNAObject.hh"
 
 /**
@@ -21,16 +23,7 @@ public:
    * @param edegs - pointer to an array with nbins+1 edges.
    * @param edegs - pointer to an array with nbins data points.
    */
-  Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false)
-    : m_edges(edges, edges+nbins+1), m_raw_buffer{data, data+nbins}
-  {
-    if( fcn_copy ){
-      init_copy();
-    }
-    else {
-      init();
-    }
-  }
+  Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false);
 
   /**
    * @brief Return the vector with histogram edges.
@@ -45,14 +38,14 @@ public:
    *
    * @return std::vector with copy of data.
    */
-  std::vector<double> dataCopy() const { return m_raw_buffer; }
+  std::vector<double> dataCopy() const { return std::vector<double>(m_data.data(), m_data.data()+m_data.size()); }
 
   /**
    * @brief Return the size of an array.
    * @return number of elements in an array.
    */
   size_t size() const {
-    return m_raw_buffer.size();
+    return m_data.size();
   }
 
   /**
@@ -60,7 +53,7 @@ public:
    * @return array pointer.
    */
   const double *ptr() const {
-    return m_raw_buffer.data();
+    return m_data.data();
   }
 
 protected:
@@ -69,12 +62,9 @@ protected:
       .output("hist")                                            /// Add an output hist.
       .types([](Histogram *obj, TypesFunctionArgs& fargs) {      /// Define the TypesFunction:
           fargs.rets[0] = DataType().hist().edges(obj->edges()); ///   - assign the data shape and bin edges for the first output (hist).
-          fargs.rets[0].preallocated(obj->m_raw_buffer.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
+          fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
         })
-      .func([](Histogram* obj, FunctionArgs& fargs) {            /// Define the function.
-              fargs.rets[0].x=Eigen::Map<const Eigen::ArrayXd>(obj->m_raw_buffer.data(),
-                                                               obj->m_raw_buffer.size());                       /// Copy data.
-            })                          /// Assign empty Function.
+      .func([](FunctionArgs& fargs) {})                          /// Assign empty Function.
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   void init_copy() {
@@ -84,11 +74,10 @@ protected:
           fargs.rets[0] = DataType().hist().edges(obj->edges()); ///   - assign the data shape and bin edges for the first output (hist).
         })
       .func([](Histogram* obj, FunctionArgs& fargs) {            /// Define the function.
-              fargs.rets[0].x=Eigen::Map<const Eigen::ArrayXd>(obj->m_raw_buffer.data(),
-                                                               obj->m_raw_buffer.size());                       /// Copy data.
+              fargs.rets[0].x=obj->m_data;                       /// Copy data.
             })
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_edges;                                   ///< Vector with bin edges.
-  std::vector<double> m_raw_buffer;                              ///< Vector with raw bin content
+  Eigen::ArrayXd m_data;                                         ///< Array with raw bin content
 };
