@@ -115,10 +115,8 @@ def get_buffers_graph( g ):
     """Get TGraph x and y buffers"""
     npoints = g.GetN()
     if npoints:
-        # return N.frombuffer(g.GetX(), dtype=N.double, count=npoints), \
-               # N.frombuffer(g.GetY(), dtype=N.double, count=npoints)
-        return N.array(g.GetX(), dtype=N.double), \
-               N.array(g.GetY(), dtype=N.double)
+        return (N.frombuffer(g.GetX(), dtype=N.double, count=npoints),
+               N.frombuffer(g.GetY(), dtype=N.double, count=npoints))
 
     return None, None
 

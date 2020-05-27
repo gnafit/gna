@@ -41,7 +41,7 @@ class dayabay_fastn_power_v01(TransformationBundle):
             hist.hist.f(fcn.selfpower_inv.result)
             hist.hist.setLabel(it.current_format('Fast neutron hist {site}'))
 
-            normalize = R.Normalize(imin, imax-imin)
+            normalize = R.Normalize(int(imin), int(imax-imin))
             normalize.normalize.inp( hist.hist.hist )
             normalize.normalize.setLabel(it.current_format('Fast neutron hist {site} (norm)'))
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
-# -*- coding: utf-8 -*-
-
 from __future__ import print_function
 from __future__ import absolute_import
 from load import ROOT as R
@@ -20,7 +18,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
     debug = False
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(2, 2, 'major')
+        self.check_nidx_dim(1, 2, 'major')
 
         try:
             detector_name, component_name = self.cfg.bundle.major
@@ -33,7 +31,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_component', 'lsnl_edges')
+        return ('escale', 'lsnl_weight', '__lsnl_dummy'), ('lsnl', 'lsnl_component', 'lsnl_edges')
 
     def build_graphs( self, graphs ):
         #
@@ -101,7 +99,6 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         tfile = R.TFile( self.cfg.filename, 'READ' )
         if tfile.IsZombie():
             raise IOError( 'Can not read ROOT file: '+self.cfg.filename )
-
         graphs = [ tfile.Get( name ) for name in self.cfg.names ]
         if not all( graphs ):
             raise IOError( 'Some objects were not read from file: '+filename )
@@ -123,6 +120,10 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
         for it in self.detector_idx.iterate():
             self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
+        for idx_pair in self.nidx.iterate():
+            self.reqparameter('__lsnl_dummy', idx_pair, central=0.0, fixed=True,
+                    label='Just ignore it, dirty fix for problem with expressions')
+
 
     def interpolate(self, xxx_todo_changeme, edges):
         (x, y) = xxx_todo_changeme
