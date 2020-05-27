@@ -124,10 +124,10 @@ def get_err_buffers_graph( g ):
     """Get TGraphErrors x and y error buffers"""
     npoints = g.GetN()
     if npoints:
-        # return N.frombuffer(g.GetEX(), dtype=N.double, count=npoints), \
-               # N.frombuffer(g.GetEY(), dtype=N.double, count=npoints)
-        return N.array(g.GetEX(), dtype=N.double), \
-               N.array(g.GetEY(), dtype=N.double)
+        return N.frombuffer(g.GetEX(), dtype=N.double, count=npoints), \
+               N.frombuffer(g.GetEY(), dtype=N.double, count=npoints)
+        #  return N.array(g.GetEX(), dtype=N.double), \
+               #  N.array(g.GetEY(), dtype=N.double)
 
     return None, None
 
