@@ -18,7 +18,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
     debug = False
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1, 2, 'major')
+        self.check_nidx_dim(2, 2, 'major')
 
         try:
             detector_name, component_name = self.cfg.bundle.major

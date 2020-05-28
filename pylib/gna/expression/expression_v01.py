@@ -144,11 +144,10 @@ class ItemProvider(object):
         variables, objects = self.bundleclass.provides(self.cfg)
         self.items = variables+objects
 
-    def register_in(self, dct):
+    def register_in(self):
         if self.cfg.bundle.get('inactive', False):
             return
-        for key in self.items:
-            dct[key] = self
+        return {key: self for key in self.items}
 
     def build(self, **kwargs):
         if self.bundle:
@@ -189,7 +188,7 @@ class ExpressionContext_v01(object):
             if not 'bundle' in cfg:
                 continue
             provider = ItemProvider(cfg, name)
-            provider.register_in(self.providers)
+            self.providers.update(provider.register_in())
 
         self.required_bundles = OrderedDict()
 
