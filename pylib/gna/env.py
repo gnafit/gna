@@ -499,6 +499,9 @@ class _environment(object):
         self.pars = self.parameters
         self.parts = envparts()
 
+        from tools.dictwrapper import DictWrapper
+        self.future = DictWrapper({})
+
     def view(self, ns):
         if ns != self.globalns:
             return nsview([ns, self.globalns])
