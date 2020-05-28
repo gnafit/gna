@@ -3,7 +3,7 @@
 from __future__ import print_function
 import ROOT
 from gna.ui import basecmd
-from gna.parameters.parameter_loader import get_parameters
+from packages.parameters.lib.parameter_loader import get_parameters
 from collections import OrderedDict
 import warnings
 
