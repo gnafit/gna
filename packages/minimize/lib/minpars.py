@@ -11,7 +11,8 @@ class MinPar(object):
         self._par  = par
 
         self.fixed = kwargs.pop('fixed', par.isFixed())
-        self.limits = kwargs.pop('limits', False)
+        self.vmin = kwargs.pop('vmin', None)
+        self.vmax = kwargs.pop('vmax', None)
         self.constrained = kwargs.pop('constrained', False)
         self.scanvalues = kwargs.pop('scanvalues', None)
 
@@ -67,12 +68,21 @@ class MinPar(object):
         self._base.modified = True
 
     @property
-    def limits(self):
-        return self._limits
+    def vmin(self):
+        return self._vmin
 
-    @limits.setter
-    def limits(self, limits):
-        self._limits = limits
+    @vmin.setter
+    def vmin(self, vmin):
+        self._vmin = vmin
+        self._base.modified = True
+
+    @property
+    def vmax(self):
+        return self._vmax
+
+    @vmax.setter
+    def vmax(self, vmax):
+        self._vmax = vmax
         self._base.modified = True
 
     @property
@@ -88,6 +98,11 @@ class MinPars(object):
     def __init__(self):
         self.pars=OrderedDict()
         self._modified=True
+        self._resized=True
+
+    def reset(self):
+        self.modified = False
+        self.resized = False
 
     @property
     def modified(self):
@@ -97,8 +112,20 @@ class MinPars(object):
     def modified(self, modified):
         self._modified = modified
 
+    @property
+    def resized(self):
+        return self._resized
+
+    @resized.setter
+    def resized(self, resized):
+        self._resized = resized
+
     def addpar(self, par, **kwargs):
         name = par.qualifiedName()
         if name in self.pars or par in self.pars.values():
             raise Exception('The parameter {} added twice'.format(name))
 
+        self.pars[name] = MinPar(self, par, **kwargs)
+
+        self.modified=True
+        self.resized=True
