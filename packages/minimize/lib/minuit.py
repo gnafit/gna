@@ -12,7 +12,7 @@ class Minuit(ROOT.TMinuitMinimizer):
 
         ROOT.TMinuitMinimizer.UseStaticMinuit(False)
         self.statistic = statistic
-        self.pars = minpars
+        self.parspecs = minpars
         self.result = None
 
     @property
@@ -22,7 +22,7 @@ class Minuit(ROOT.TMinuitMinimizer):
     @statistic.setter
     def statistic(self, statistic):
         self._statistic = statistic
-        self._reset = True
+        self._minimizable = None
 
     @property
     def tolerance(self):
@@ -33,76 +33,41 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.SetTolerance(tolerance)
 
     def setuppars(self):
-        if not self.pars.modified:
+        if not self.parspecs.modified:
             return
 
-        if self._minimizable is None or self.pars.resized:
+        if self._minimizable is None or self.parspecs.resized:
             self._minimizable = ROOT.Minimizable(self.statistic)
 
-            # for parspec in self.pars:
-                # self._minimizable.addParameter(par)
-        # self.SetFunction(self._minimizable)
+            for parspec in self.parspecs.specs():
+                self._minimizable.addParameter(parspec.par)
 
-        # spec = self.spec
-        # for i, par in enumerate(self.pars):
-            # self.setuppar(i, par, spec.get(par, {}))
+        self.SetFunction(self._minimizable)
 
-        # self.pars.modified = False
+        for i, (name, parspec) in enumerate(self.parspecs.items()):
+            self.setuppar(i, name, parspec)
 
-    # def setuppar(self, i, parspec):
+        self.parspecs.resetstatus()
 
-        # vmin, vmax = float('-inf'), float('+inf')
-
-        # if fixed:
-            # self.SetFixedVariable(i, qualifiedName, value)
-        # elif (vmin, vmax) == (float('-inf'), float('+inf')):
-            # self.SetVariable(i, qualifiedName, value, step)
-        # elif vmax == float('+inf'):
-            # self.SetLowerLimitedVariable(i, qualifiedName, value, step, vmin)
-        # elif vmin == float('-inf'):
-            # self.SetUpperLimitedVariable(i, qualifiedName, value, step, vmax)
-        # else:
-            # self.SetLimitedVariable(i, qualifiedName, value, step, vmin, vmax)
+    def setuppar(self, i, name, parspec):
+        vmin, vmax = parspec.vmin, parspec.vmax
+        if parspec.fixed:
+            self.SetFixedVariable(i, name, parspec.value)
+        elif (vmin, vmax) == (None, None):
+            self.SetVariable(i, name, parspec.value, parspeec.step)
+        elif vmax is None:
+            self.SetLowerLimitedVariable(i, name, parspec.value, parspec.step, vmin)
+        elif vmin is None:
+            self.SetUpperLimitedVariable(i, name, parspec.value, parspec.step, vmax)
+        else:
+            self.SetLimitedVariable(i, name, parspec.value, parspec.step, vmin, vmax)
 
     # def resetpars(self):
         # if self._reset:
             # return
         # spec = self.spec
-        # for i, par in enumerate(self.pars):
+        # for i, par in enumerate(self.parspecs):
             # self.setuppar(i, par, spec.get(par, {}))
-
-    # def fixpar(self, name, val=None, fixed=True):
-        # try:
-            # par = self.parsdict[name]
-        # except:
-            # raise Exception('Variable {} is not known to minimizer'.format(name))
-
-        # parspec=self.spec.setdefault(par, {})
-        # parspec['fixed']=fixed
-        # if val is not None:
-            # parspec['value']=val
-
-        # self._reset = True
-
-    # def affects(self, par):
-        # if par not in self.pars:
-            # return False
-        # spec = self.spec.get(par, {})
-        # fixed = spec.get('fixed', False)
-        # if not fixed:
-            # return True
-        # if 'value' in spec:
-            # return True
-        # return False
-
-    # def freepars(self):
-        # res = []
-        # for par in self.pars:
-            # spec = self.spec.get(par, {})
-            # if spec.get('fixed', False):
-                # continue
-            # res.append(par)
-        # return res
 
     # def evalstatistic(self):
         # wall = time.time()
@@ -111,7 +76,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         # clock = time.clock() - clock
         # wall = time.time() - wall
 
-        # x = [par.value() for par in self.pars]
+        # x = [par.value() for par in self.parspecs]
         # resultdict = {
             # 'x': np.array(x),
             # 'errors': np.zeros_like(x),
@@ -126,62 +91,52 @@ class Minuit(ROOT.TMinuitMinimizer):
         # self._patchresult()
         # return self.result
 
-    # def pushpars(self):
-        # for par in self.pars:
-            # par.push()
 
-    # def poppars(self):
-        # for par in self.pars:
-            # par.pop()
-
-    # def fit(self, profile_errors=[]):
-        # if not self.pars:
+    def fit(self, profile_errors=[]):
+        assert self.parspecs
+        # if not self.parspecs:
             # return self.evalstatistic()
 
-        # if self._reset:
-            # self.setuppars()
-        # else:
-            # self.SetFunction(self._minimizable)
+        self.setuppars()
 
-        # self.pushpars()
+        self.parspecs.pushpars()
 
-        # wall = time.time()
-        # clock = time.clock()
-        # self.Minimize()
-        # clock = time.clock() - clock
-        # wall = time.time() - wall
+        wall = time.time()
+        clock = time.clock()
+        self.Minimize()
+        clock = time.clock() - clock
+        wall = time.time() - wall
 
-        # self.poppars()
+        self.parspecs.poppars()
 
-        # argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
-        # errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
+        argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
+        errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
 
-        # resultdict = {
-            # 'x': argmin.tolist(),
-            # 'errors': errors.tolist(),
-            # 'success': not self.Status(),
-            # 'fun': self.MinValue(),
-            # 'nfev': self.NCalls(),
-            # 'maxcv': self.Tolerance(),
-            # 'wall': wall,
-            # 'cpu': clock,
-        # }
-        # self.result = Namespace(**resultdict)
-        # self._patchresult()
+        self.result = {
+            'x': argmin.tolist(),
+            'errors': errors.tolist(),
+            'success': not self.Status(),
+            'fun': self.MinValue(),
+            'nfev': self.NCalls(),
+            'maxcv': self.Tolerance(),
+            'wall': wall,
+            'cpu': clock,
+        }
+        self._patchresult()
 
-        # if profile_errors:
-            # self.profile_errors(profile_errors, self.result)
+        if profile_errors:
+            self.profile_errors(profile_errors, self.result)
 
-        # return self.result
+        return self.result
 
-    # def _patchresult(self):
-        # names = [self.VariableName(i) for i in range(self.NDim())]
-        # self.result.xdict      = OrderedDict(zip(names, (float(x) for x in self.result.x)))
-        # self.result.errorsdict = OrderedDict(zip(names, (float(e) for e in self.result.errors)))
-        # self.result.names = names
-        # self.result.npars = int(self.NDim())
-        # self.result.nfev = int(self.result.nfev)
-        # self.result.npars = int(self.result.npars)
+    def _patchresult(self):
+        names = [self.VariableName(i) for i in range(self.NDim())]
+        self.result['xdict']      = OrderedDict(zip(names, (float(x) for x in self.result['x'])))
+        self.result['errorsdict'] = OrderedDict(zip(names, (float(e) for e in self.result['errors'])))
+        self.result['names'] = names
+        self.result['npars'] = int(self.NDim())
+        self.result['nfev'] = int(self.result['nfev'])
+        self.result['npars'] = int(self.result.npars)
 
     # def __call__(self):
         # res = self.fit()

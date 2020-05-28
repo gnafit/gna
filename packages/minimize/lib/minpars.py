@@ -10,6 +10,9 @@ class MinPar(object):
         self._base = base
         self._par  = par
 
+        self.setup(**kwargs)
+
+    def setup(self, **kwargs):
         self.fixed = kwargs.pop('fixed', par.isFixed())
         self.vmin = kwargs.pop('vmin', None)
         self.vmax = kwargs.pop('vmax', None)
@@ -30,6 +33,8 @@ class MinPar(object):
 
         if step==0.0
             raise Exception('"%s" initial step is undefined. Specify its sigma explicitly.'%par.qualifiedName())
+
+        assert kwargs, 'Unparser MinPar arguments: {!s}'.format(kwargs)
 
     @property
     def value(self):
@@ -96,11 +101,42 @@ class MinPar(object):
 
 class MinPars(object):
     def __init__(self):
-        self.pars=OrderedDict()
+        self._specs=OrderedDict()
+        self._parmap=OrderedDict()
         self._modified=True
         self._resized=True
 
-    def reset(self):
+    def parspec(self, idx):
+        if isinstance(idx, str):
+            return self._specs[idx]
+        elif isinstance(idx, int):
+            return list(self._specs.values())[idx]
+
+        # Assume idx is parameter instance
+        return self._parmap[idx]
+
+    def names(self):
+        return self._specs.keys()
+
+    def specs(self):
+        return self._specs.values()
+
+    def items(self):
+        return self._specs.items()
+
+    def npars(self):
+        return len(self._specs)
+
+    def nfixed(self):
+        return sum(1 for spec in self._specs if spec.fixed)
+
+    def nconstrained(self):
+        return sum(1 for spec in self._specs if spec.constrained and not spec.fixed)
+
+    def nfree(self):
+        return sum(1 for spec in self._specs if not spec.constrained and not spec.fixed)
+
+    def resetstatus(self):
         self.modified = False
         self.resized = False
 
@@ -122,10 +158,19 @@ class MinPars(object):
 
     def addpar(self, par, **kwargs):
         name = par.qualifiedName()
-        if name in self.pars or par in self.pars.values():
+        if name in self._specs or par in self._specs.values():
             raise Exception('The parameter {} added twice'.format(name))
 
-        self.pars[name] = MinPar(self, par, **kwargs)
+        spec = self._specs[name] = MinPar(self, par, **kwargs)
+        self._parmap[par] = spec
 
         self.modified=True
         self.resized=True
+
+    def pushpars(self):
+        for par in self._parmap:
+            par.push()
+
+    def poppars(self):
+        for par in self._parmap:
+            par.pop()
