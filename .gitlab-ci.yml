@@ -8,7 +8,7 @@ build:
     stage: build
 
     script:
-    - source /soft/root-6.18.04/build/bin/thisroot.sh
+    - source /soft/root-6.20.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
     - cmake ..
@@ -44,7 +44,6 @@ pages:
     stage: pages
 
     script:
-    - pip2 install ipython
     - cd doc
     - make html
     - make doxygen
