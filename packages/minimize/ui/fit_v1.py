@@ -9,7 +9,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('minimizer', type=env.future['minimizer'].get, help='Minimizer to use', metavar='name')
-        parser.add_argument('-p', '--print', action='store_true', help='Print fit result to stdout')
+        parser.add_argument('-v', '--verbose', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
         parser.add_argument('-p', '--push',   action='store_true', help='Set (push) best fit parameters')
         # parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
@@ -36,7 +36,7 @@ class cmd(basecmd):
             else:
                 print('Fit failed: not setting parameters')
 
-        if self.opts.print:
+        if self.opts.verbose:
             self.print()
 
         ofile = self.opts.output
