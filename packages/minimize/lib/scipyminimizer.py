@@ -3,20 +3,19 @@
 
 from __future__ import print_function
 from scipy.optimize import minimize
+from packages.minimize.lib.base import MinimizerBase
 import ROOT
-import numpy as np
+import numpy as np, time
 
-class SciPyMinimizer(object):
+class SciPyMinimizer(MinimizerBase):
+    _label       = 'scipy'
     _minimizable = None
-    _method = 'BFGS'
-    _kwargs = None
+    _method      = 'BFGS'
+    _kwargs      = None
     def __init__(self, statistic, minpars, method=None):
+        MinimizerBase.__init__(self, statistic, minpars)
         if method:
             self._method = method
-
-        self.statistic = statistic
-        self.parspecs = minpars
-        self.result = None
 
     @property
     def kwargs(self):
@@ -24,7 +23,7 @@ class SciPyMinimizer(object):
 
     @property
     def label(self):
-        return '.'.join(('scipy', self._method))
+        return '.'.join((self._label, self._method))
 
     def setuppars(self):
         if self.kwargs is not None and not self.parspecs.modified:
@@ -53,7 +52,7 @@ class SciPyMinimizer(object):
                 bounded=True
 
         if not bounded:
-            self.bounds=None
+            del self._kwargs['bounds']
 
         self.parspecs.resetstatus()
 
@@ -79,17 +78,16 @@ class SciPyMinimizer(object):
 
         self._result = {
             'x':       self._res.x,
-            'errors':  None,
+            'errors':  [],
             'success': self._res.success,
             'message': self._res.message,
             'fun':     self._res.fun,
             'nfev':    self._res.nit,
-            'maxcv':   self._res.maxcv,
             'wall':    wall,
             'cpu':     clock,
             'label':   self.label
         }
-        self._patchresult()
+        self.patchresult()
 
         return self.result
 

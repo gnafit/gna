@@ -107,7 +107,7 @@ class MinuitBase(MinimizerBase):
             'message':   '',
             'fun':       self.MinValue(),
             'nfev':      int(self.NCalls()),
-            'maxcv':     self.Tolerance(),
+            # 'maxcv':     self.Tolerance(),
             'wall':      wall,
             'cpu':       clock,
             'minimizer': self.label
