@@ -5,9 +5,10 @@ import numpy as np
 import time
 from collections import OrderedDict
 
+"""WIP"""
 import IPython; IPython.embed()
 
-class Minuit2(ROOT.TMinuitMinimizer):
+class Minuit2(ROOT.Minuit2.Minuit2Minimizer):
     _minimizable = None
     def __init__(self, statistic, minpars):
         super(Minuit, self).__init__()
