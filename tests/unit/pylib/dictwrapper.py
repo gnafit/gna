@@ -253,3 +253,5 @@ def test_dictwrapper_08_create():
 
     dw._('i.k').l=3
     assert dw._.i.k.l==3
+
+    import IPython; IPython.embed()
