@@ -197,6 +197,9 @@ class DictWrapperAccess(object):
     def __init__(self, dct):
         self.__dict__['_'] = dct
 
+    def __call__(self, key):
+        return self._.child(key)._
+
     def __getattr__(self, key):
         ret = self._[key]
 

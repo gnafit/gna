@@ -245,3 +245,11 @@ def test_dictwrapper_07_delete():
     del dw._.f.g.h
     assert ('f', 'g', 'h') not in dw
     assert ('f', 'g') in dw
+
+def test_dictwrapper_08_create():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z.z.z'] = 0
+    dw = DictWrapper(dct, split='.')
+
+    dw._('i.k').l=3
+    assert dw._.i.k.l==3
