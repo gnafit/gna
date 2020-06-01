@@ -25,7 +25,10 @@ class DictWrapper(ClassWrapper):
             self._parent = parent
             self._split = parent._split
             self._types = parent._types
-        self._ = DictWrapperAccess(self)
+
+    @property
+    def _(self):
+        return DictWrapperAccess(self)
 
     def parent(self):
         return self._parent
