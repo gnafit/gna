@@ -92,11 +92,21 @@ class DictWrapper(ClassWrapper):
             return sub
 
         if sub is None:
-            if args:
-                return args[0]
             raise KeyError( "No nested key '%s'"%key )
 
         return sub[rest]
+
+    def __delitem__(self, key):
+        if key is ():
+            raise Exception('May not delete itself')
+        key, rest=self.splitkey(key)
+
+        sub = self.__getattr__('__getitem__')(key)
+        if not rest:
+            del self._obj[key]
+            return
+
+        del sub[rest]
 
     def setdefault(self, key, value):
         key, rest=self.splitkey(key)
@@ -201,6 +211,9 @@ class DictWrapperAccess(object):
 
     def __setattr__(self, key, value):
         self._[key]=value
+
+    def __delattr__(self, key):
+        del self._[key]
 
     def __dir__(self):
         return list(self._.keys())
