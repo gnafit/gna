@@ -9,6 +9,6 @@ minimizers = {
 try:
     from packages.minimize.lib import minuit2
     minimizers['minuit2'] = minuit2.Minuit2
-finally:
+except Exception:
     pass
 
