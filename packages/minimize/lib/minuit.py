@@ -121,6 +121,7 @@ class Minuit(ROOT.TMinuitMinimizer):
             'maxcv': self.Tolerance(),
             'wall': wall,
             'cpu': clock,
+            'minimizer': 'TMinuit2'
         }
         self._patchresult()
 

@@ -5,15 +5,11 @@ import numpy as np
 import time
 from collections import OrderedDict
 
-"""WIP"""
-import IPython; IPython.embed()
-
 class Minuit2(ROOT.Minuit2.Minuit2Minimizer):
     _minimizable = None
     def __init__(self, statistic, minpars):
-        super(Minuit, self).__init__()
+        super(Minuit2, self).__init__()
 
-        ROOT.TMinuitMinimizer.UseStaticMinuit(False)
         self.statistic = statistic
         self.parspecs = minpars
         self.result = None
@@ -124,6 +120,7 @@ class Minuit2(ROOT.Minuit2.Minuit2Minimizer):
             'maxcv': self.Tolerance(),
             'wall': wall,
             'cpu': clock,
+            'minimizer': 'TMinuit2'
         }
         self._patchresult()
 
