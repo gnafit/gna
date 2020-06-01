@@ -110,7 +110,9 @@ class MinuitBase(MinimizerBase):
             # 'maxcv':     self.Tolerance(),
             'wall':      wall,
             'cpu':       clock,
-            'minimizer': self.label
+            'minimizer': self.label,
+            'hess_inv':  None,
+            'jac':       None,
         }
         self.patchresult()
 

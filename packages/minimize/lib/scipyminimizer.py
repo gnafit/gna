@@ -78,14 +78,16 @@ class SciPyMinimizer(MinimizerBase):
 
         self._result = {
             'x':       self._res.x,
-            'errors':  [],
+            'errors':  2.0*np.diag(self._res.hess_inv),
             'success': self._res.success,
             'message': self._res.message,
             'fun':     self._res.fun,
             'nfev':    self._res.nit,
             'wall':    wall,
             'cpu':     clock,
-            'label':   self.label
+            'label':   self.label,
+            'hess_inv': self._res.hess_inv,
+            'jac':      self._res.jac,
         }
         self.patchresult()
 
