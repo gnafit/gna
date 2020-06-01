@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import time
+from collections import OrderedDict
 
 class MinimizerBase(object):
     _minimizable = None
@@ -34,3 +35,13 @@ class MinimizerBase(object):
     def fit(self, profile_errors=[]):
         raise Exception('Calling unimplemented base.fit() method')
 
+    def patchresult(self):
+        names = list(self._parspecs.names())
+        result = self._result
+        result['xdict']      = OrderedDict(zip(names, (float(x) for x in self.result['x'])))
+        result['errorsdict'] = OrderedDict(zip(names, (float(e) for e in self.result['errors'])))
+        result['names']      = names
+        result['npars']      = self._parspecs.nvariable()
+        result['nfree']      = self._parspecs.nfree()
+        result['nfixed']     = self._parspecs.nfixed()
+        result['nconstrained'] = self._parspecs.nconstrained()

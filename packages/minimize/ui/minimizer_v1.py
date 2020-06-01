@@ -13,7 +13,7 @@ class cmd(basecmd):
                                          metavar='statmodule')
         parser.add_argument('pargroup', help='Parameters group to minimize')
 
-        parser.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit',
+        parser.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit2',
                                     help='Minimizer type {%(choices)s}', metavar='minimizer')
 
         parser.add_argument('-v', '--verbose', action='count', help='increase verbosity level')

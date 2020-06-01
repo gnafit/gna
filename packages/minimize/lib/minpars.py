@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 class MinPar(object):
     def __init__(self, base, par, **kwargs):
-        assert base
+        assert base is not None
 
         self._base = base
         self._par  = par
@@ -134,6 +134,9 @@ class MinPars(object):
         # Assume idx is parameter instance
         return self._parmap[idx]
 
+    def __len__(self):
+        return len(self._specs)
+
     def names(self):
         return self._specs.keys()
 
@@ -147,13 +150,16 @@ class MinPars(object):
         return len(self._specs)
 
     def nfixed(self):
-        return sum(1 for spec in self._specs if spec.fixed)
+        return sum(1 for spec in self._specs.values() if spec.fixed)
 
     def nconstrained(self):
-        return sum(1 for spec in self._specs if spec.constrained and not spec.fixed)
+        return sum(1 for spec in self._specs.values() if spec.constrained and not spec.fixed)
 
     def nfree(self):
-        return sum(1 for spec in self._specs if not spec.constrained and not spec.fixed)
+        return sum(1 for spec in self._specs.values() if not spec.constrained and not spec.fixed)
+
+    def nvariable(self):
+        return sum(1 for spec in self._specs.values() if not spec.fixed)
 
     def resetstatus(self):
         self.modified = False

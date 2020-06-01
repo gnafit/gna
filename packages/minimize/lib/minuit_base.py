@@ -97,37 +97,29 @@ class MinuitBase(MinimizerBase):
         clock = time.clock() - clock
         wall = time.time() - wall
 
-        self.parspecs.poppars()
-
         argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
         errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
 
         self._result = {
-            'x': argmin.tolist(),
-            'errors': errors.tolist(),
-            'success': not self.Status(),
-            'fun': self.MinValue(),
-            'nfev': self.NCalls(),
-            'maxcv': self.Tolerance(),
-            'wall': wall,
-            'cpu': clock,
+            'x':         argmin,
+            'errors':    errors,
+            'success':   not self.Status(),
+            'message':   '',
+            'fun':       self.MinValue(),
+            'nfev':      int(self.NCalls()),
+            'maxcv':     self.Tolerance(),
+            'wall':      wall,
+            'cpu':       clock,
             'minimizer': self.label
         }
-        self._patchresult()
+        self.patchresult()
 
         if profile_errors:
             self.profile_errors(profile_errors, self.result)
 
-        return self.result
+        self.parspecs.poppars()
 
-    def _patchresult(self):
-        names = [self.VariableName(i) for i in range(self.NDim())]
-        self.result['xdict']      = OrderedDict(zip(names, (float(x) for x in self.result['x'])))
-        self.result['errorsdict'] = OrderedDict(zip(names, (float(e) for e in self.result['errors'])))
-        self.result['names'] = names
-        self.result['npars'] = int(self.NDim())
-        self.result['nfev'] = int(self.result['nfev'])
-        self.result['npars'] = int(self.result['npars'])
+        return self.result
 
     # def __call__(self):
         # res = self.fit()
@@ -135,36 +127,36 @@ class MinuitBase(MinimizerBase):
             # return None
         # return res.fun
 
-    # def profile_errors(self, names, fitresult):
-        # errs = fitresult.errors_profile = OrderedDict()
-        # if names:
-            # print('Caclulating statistics profile for:', end=' ')
-        # for name in names:
-            # if isinstance(name, int):
-                # idx = name
-                # name = self.VariableName(idx)
-            # else:
-                # idx = self.result.names.index(name)
-            # print(name, end=', ')
-            # left, right = self.get_profile_error(idx=idx)
-            # errs[name] = [left.tolist(), right.tolist()]
+    def profile_errors(self, names, fitresult):
+        errs = fitresult['errors_profile'] = OrderedDict()
+        if names:
+            print('Caclulating statistics profile for:', end=' ')
+        for name in names:
+            if isinstance(name, int):
+                idx = name
+                name = self.VariableName(idx)
+            else:
+                idx = self.result['names'].index(name)
+            print(name, end=', ')
+            left, right = self.get_profile_error(idx=idx)
+            errs[name] = [left.tolist(), right.tolist()]
 
-    # def get_profile_error(self, name=None, idx=None, verbose=False):
-        # if idx==None:
-            # idx = self.VariableIndex( name )
+    def get_profile_error(self, name=None, idx=None, verbose=False):
+        if idx==None:
+            idx = self.VariableIndex( name )
 
-        # if not name:
-            # name = self.VariableName( idx )
+        if not name:
+            name = self.VariableName( idx )
 
-        # if verbose:
-            # print( '    variable %i %s'%( idx, name ), end='' )
+        if verbose:
+            print( '    variable %i %s'%( idx, name ), end='' )
 
-        # low, up = np.zeros( 1, dtype='d' ), np.zeros( 1, dtype='d' )
-        # try:
-            # self.GetMinosError( idx, low, up )
-        # except:
-            # print( 'Minuit error!' )
-            # return [ 0.0, 0.0 ]
+        low, up = np.zeros( 1, dtype='d' ), np.zeros( 1, dtype='d' )
+        try:
+            self.GetMinosError( idx, low, up )
+        except:
+            print( 'Minuit error!' )
+            return [ 0.0, 0.0 ]
 
-        # print( ':', low[0], up[0] )
-        # return [ low[0], up[0] ]
+        print( ':', low[0], up[0] )
+        return [ low[0], up[0] ]

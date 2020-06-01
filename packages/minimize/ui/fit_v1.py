@@ -8,22 +8,21 @@ from pprint import pprint
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('minimizer', type=env.future['minimizer'].get, help='Minimizer to use', metavar='name')
+        parser.add_argument('minimizer', help='Minimizer to use', metavar='name')
         parser.add_argument('-v', '--verbose', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',   action='store_true', help='Set best fit parameters')
         parser.add_argument('-p', '--push',   action='store_true', help='Set (push) best fit parameters')
-        # parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
+        parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
         parser.add_argument('-o', '--output', nargs='+', help='Output file(s) (yaml, pickle)', metavar='filename')
         parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
         parser.add_argument('--simulate', action='store_true', help='do nothing')
 
     def init(self):
-        minimizer = self.opts.minimizer
+        minimizer = self.env.future['minimizer'][self.opts.minimizer]
         if self.opts.simulate:
             return
 
-        # result = self.result = minimizer.fit(profile_errors=self.opts.profile_errors)
-        result = self.result = minimizer.fit()
+        result = self.result = minimizer.fit(profile_errors=self.opts.profile_errors)
 
         if self.opts.set or self.opts.push:
             push = self.opts.push
@@ -44,7 +43,7 @@ class cmd(basecmd):
             self.save(ofile)
 
     def print(self):
-        print('Fit result:', end='')
+        print('Fit result for {}:'.format(self.opts.minimizer))
         pprint(self.result)
 
     def save(self, filenames):
