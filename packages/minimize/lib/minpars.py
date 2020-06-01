@@ -4,7 +4,7 @@ import numpy as np
 from collections import OrderedDict
 
 class MinPar(object):
-    def init(self, base, par, **kwargs):
+    def __init__(self, base, par, **kwargs):
         assert base
 
         self._base = base
@@ -12,8 +12,16 @@ class MinPar(object):
 
         self.setup(**kwargs)
 
+    def __str__(self):
+        return '{name:<25} {_value:8}, limits=[{_vmin}, {_vmax}]' \
+               '  constrained={_constrained}' \
+               '  fixed={_fixed}' \
+               '  step={_step}' \
+               ''.format(**self.__dict__)
+
     def setup(self, **kwargs):
-        self.fixed = kwargs.pop('fixed', par.isFixed())
+        self.name  = self._par.qualifiedName()
+        self.fixed = kwargs.pop('fixed', self._par.isFixed())
         self.vmin = kwargs.pop('vmin', None)
         self.vmax = kwargs.pop('vmax', None)
         self.constrained = kwargs.pop('constrained', False)
@@ -21,20 +29,24 @@ class MinPar(object):
 
         value = kwargs.pop('value', None)
         if value is None:
-            self.value = par.central()
+            self.value = self._par.central()
         else:
             self.value = value
 
         step = kwargs.pop('step', None)
         if step is None:
-            self.step = par.step()
+            self.step = self._par.step()
         else:
             self.step = step
 
-        if step==0.0
-            raise Exception('"%s" initial step is undefined. Specify its sigma explicitly.'%par.qualifiedName())
+        if step==0.0:
+            raise Exception('"%s" initial step is undefined. Specify its sigma explicitly.'%self._par.qualifiedName())
 
-        assert kwargs, 'Unparser MinPar arguments: {!s}'.format(kwargs)
+        assert not kwargs, 'Unparsed MinPar arguments: {!s}'.format(kwargs)
+
+    @property
+    def par(self):
+        return self._par
 
     @property
     def value(self):
@@ -100,11 +112,18 @@ class MinPar(object):
         # No need to modify the base as it does not affect the minimization behaviour (it is just a flag)
 
 class MinPars(object):
-    def __init__(self):
+    def __init__(self, pars):
         self._specs=OrderedDict()
         self._parmap=OrderedDict()
         self._modified=True
         self._resized=True
+
+        for k, v in pars.items():
+            self.addpar(v)
+
+    def dump(self):
+        for i, (k, v) in enumerate(self._specs.items()):
+            print('% 3d'%i, v)
 
     def parspec(self, idx):
         if isinstance(idx, str):

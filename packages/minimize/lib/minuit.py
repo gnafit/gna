@@ -54,7 +54,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         if parspec.fixed:
             self.SetFixedVariable(i, name, parspec.value)
         elif (vmin, vmax) == (None, None):
-            self.SetVariable(i, name, parspec.value, parspeec.step)
+            self.SetVariable(i, name, parspec.value, parspec.step)
         elif vmax is None:
             self.SetLowerLimitedVariable(i, name, parspec.value, parspec.step, vmin)
         elif vmin is None:
@@ -136,7 +136,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.result['names'] = names
         self.result['npars'] = int(self.NDim())
         self.result['nfev'] = int(self.result['nfev'])
-        self.result['npars'] = int(self.result.npars)
+        self.result['npars'] = int(self.result['npars'])
 
     # def __call__(self):
         # res = self.fit()
