@@ -1,8 +1,6 @@
 from __future__ import print_function
 from tools.classwrapper import ClassWrapper
-from collections import OrderedDict, Iterable
-
-dictclasses = (dict, OrderedDict)
+from collections import OrderedDict, Iterable, MutableMapping
 
 class DictWrapper(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -16,18 +14,21 @@ class DictWrapper(ClassWrapper):
     _parent = None
     _type = OrderedDict
     def __new__(cls, dic, *args, **kwargs):
-        if not isinstance(dic, dictclasses):
+        if not isinstance(dic, MutableMapping):
             return dic
         return ClassWrapper.__new__(cls)
 
     def __init__(self, dic, split=None, parent=None, *args, **kwargs):
         self._split = split
-        ClassWrapper.__init__(self, dic, types=dictclasses)
+        ClassWrapper.__init__(self, dic, types=MutableMapping)
         if parent:
             self._parent = parent
             self._split = parent._split
             self._types = parent._types
-        self._ = DictWrapperAccess(self)
+
+    @property
+    def _(self):
+        return DictWrapperAccess(self)
 
     def parent(self):
         return self._parent
@@ -45,11 +46,10 @@ class DictWrapper(ClassWrapper):
         return ret
 
     def keys(self):
-        return self._obj.iterkeys()
-    iterkeys = keys
+        return self._obj.keys()
 
     def iterkey(self, key):
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             if self._split:
                 for s in key.split(self._split):
                     yield s
@@ -92,11 +92,21 @@ class DictWrapper(ClassWrapper):
             return sub
 
         if sub is None:
-            if args:
-                return args[0]
             raise KeyError( "No nested key '%s'"%key )
 
         return sub[rest]
+
+    def __delitem__(self, key):
+        if key is ():
+            raise Exception('May not delete itself')
+        key, rest=self.splitkey(key)
+
+        sub = self.__getattr__('__getitem__')(key)
+        if not rest:
+            del self._obj[key]
+            return
+
+        del sub[rest]
 
     def setdefault(self, key, value):
         key, rest=self.splitkey(key)
@@ -145,9 +155,8 @@ class DictWrapper(ClassWrapper):
         return True
 
     def items(self):
-        for k, v in self._obj.iteritems():
+        for k, v in self._obj.items():
             yield k, self._wrapobject(v)
-    iteritems=items
 
     def walkitems(self):
         for k, v in self.items():
@@ -191,6 +200,9 @@ class DictWrapperAccess(object):
     def __init__(self, dct):
         self.__dict__['_'] = dct
 
+    def __call__(self, key):
+        return self._.child(key)._
+
     def __getattr__(self, key):
         ret = self._[key]
 
@@ -201,6 +213,9 @@ class DictWrapperAccess(object):
 
     def __setattr__(self, key, value):
         self._[key]=value
+
+    def __delattr__(self, key):
+        del self._[key]
 
     def __dir__(self):
         return list(self._.keys())

@@ -228,3 +228,29 @@ def test_dictwrapper_06_inheritance():
     assert dw['d'].depth()==1
     assert dw['f'].depth()==2
 
+def test_dictwrapper_07_delete():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z.z.z'] = 0
+    dw = DictWrapper(dct)
+
+    assert 'a' in dw
+    del dw['a']
+    assert 'a' not in dw
+
+    assert ('d', 'e') in dw
+    del dw[('d', 'e')]
+    assert ('d', 'e') not in dw
+
+    assert ('f', 'g', 'h') in dw
+    del dw._.f.g.h
+    assert ('f', 'g', 'h') not in dw
+    assert ('f', 'g') in dw
+
+def test_dictwrapper_08_create():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z.z.z'] = 0
+    dw = DictWrapper(dct, split='.')
+
+    dw._('i.k').l=3
+    assert dw._.i.k.l==3
+
