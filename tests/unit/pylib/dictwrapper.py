@@ -254,3 +254,6 @@ def test_dictwrapper_08_create():
     dw._('i.k').l=3
     assert dw._.i.k.l==3
 
+    child = dw.child('child')
+    assert dw['child'].unwrap()=={}
+
