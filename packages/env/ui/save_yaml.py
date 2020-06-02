@@ -1,4 +1,4 @@
-"""Simple fit module. Makes the minimizer fit the model."""
+"""Save given path within env to the yaml file"""
 
 from __future__ import print_function
 from gna.ui import basecmd
