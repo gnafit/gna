@@ -35,7 +35,7 @@ class DictWrapper(ClassWrapper):
 
     def child(self, key):
         try:
-            ret = self.get(key)
+            ret = self[key]
         except KeyError:
             ret = self[key]=self._type()
             return self._wrapobject(ret)
