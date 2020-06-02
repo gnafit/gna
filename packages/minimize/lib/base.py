@@ -69,8 +69,14 @@ class MinimizerBase(object):
     def result(self):
         return self._result
 
-    def fit(self, profile_errors=[]):
+    def _child_fit(self, profile_errors=[]):
         raise Exception('Calling unimplemented base.fit() method')
+
+    def fit(self, profile_errors=[]):
+        if len(self.parspecs)==0:
+            return self.evalstatistic()
+
+        return self._child_fit(profile_errors)
 
     def patchresult(self):
         names = list(self._parspecs.names())
@@ -89,8 +95,8 @@ class MinimizerBase(object):
 
         fr.set(x=[], errors=[], fun=fun,
                success=True, message='stastitics evaluation (no parameters)',
-               minimizer='none', nfev=1)
-                )
+               minimizer='none', nfev=1
+               )
         self._result = fr.result
         self.patchresult()
 

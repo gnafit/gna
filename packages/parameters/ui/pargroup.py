@@ -11,7 +11,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('name', help='Parameters group name')
-        parser.add_argument('pars', nargs='+', help='Parameters to store')
+        parser.add_argument('pars', nargs='*', help='Parameters to store')
 
         choices = ['free', 'constrained', 'fixed']
         parser.add_argument('-m', '--modes', nargs='+', default=['free', 'constrained'], choices=choices, help='Parameters to take')

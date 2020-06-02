@@ -58,10 +58,8 @@ class MinuitBase(MinimizerBase):
         # for i, par in enumerate(self.parspecs):
             # self.setuppar(i, par, spec.get(par, {}))
 
-    def fit(self, profile_errors=[]):
+    def _child_fit(self, profile_errors=[]):
         assert self.parspecs
-        # if not self.parspecs:
-            # return self.evalstatistic()
 
         self.setuppars()
         with self.parspecs:

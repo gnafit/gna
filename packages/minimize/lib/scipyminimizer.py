@@ -61,8 +61,7 @@ class SciPyMinimizer(MinimizerBase):
         args = np.ascontiguousarray(args0, dtype='d')
         return self._minimizable.DoEval(args)
 
-    def fit(self, profile_errors=None):
-        assert self.parspecs
+    def _child_fit(self, profile_errors=None):
         assert not profile_errors
 
         self.parspecs.pushpars()
