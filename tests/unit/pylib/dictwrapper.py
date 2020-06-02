@@ -1,5 +1,5 @@
 from __future__ import print_function
-from tools.dictwrapper import DictWrapper, DictWrapperPrinter
+from tools.dictwrapper import DictWrapper, DictWrapperVisitorDemostrator
 import pytest
 from collections import OrderedDict
 
@@ -204,7 +204,7 @@ def test_dictwrapper_05_visitor():
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
 
-    dw.visit(DictWrapperPrinter())
+    dw.visit(DictWrapperVisitorDemostrator())
 
 def test_dictwrapper_06_inheritance():
     dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5, i=6)))])

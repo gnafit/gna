@@ -1,6 +1,7 @@
 from __future__ import print_function
 from tools.classwrapper import ClassWrapper
 from collections import OrderedDict, Iterable, MutableMapping
+import inspect
 
 class DictWrapper(ClassWrapper):
     """Dictionary wrapper managing nested dictionaries
@@ -14,11 +15,13 @@ class DictWrapper(ClassWrapper):
     _parent = None
     _type = OrderedDict
     def __new__(cls, dic, *args, **kwargs):
-        if not isinstance(dic, MutableMapping):
+        if not isinstance(dic, (MutableMapping, DictWrapper)):
             return dic
         return ClassWrapper.__new__(cls)
 
     def __init__(self, dic, split=None, parent=None, *args, **kwargs):
+        if isinstance(dic, DictWrapper):
+            dic = dic._obj
         self._split = split
         ClassWrapper.__init__(self, dic, types=MutableMapping)
         if parent:
@@ -176,7 +179,7 @@ class DictWrapper(ClassWrapper):
             yield v
 
     def visit(self, visitor, parentkey=()):
-        visitor = DictWrapperVisitor(visitor)
+        visitor = MakeDictWrapperVisitor(visitor)
 
         if not parentkey:
             visitor.start(self)
@@ -220,16 +223,18 @@ class DictWrapperAccess(object):
     def __dir__(self):
         return list(self._.keys())
 
+def MakeDictWrapperVisitor(fcn):
+    if isinstance(fcn, DictWrapperVisitor):
+        return fcn
+
+    if not inspect.isfunction(fcn) and not hasattr(fcn, '__call__'):
+        raise Exception('Expect function, got '+type(fcn).__name__)
+
+    ret=DictWrapperVisitor()
+    ret.visit = fcn
+    return ret
+
 class DictWrapperVisitor(object):
-    def __new__(cls, fcn_or_visitor=None):
-        if isinstance(fcn_or_visitor, DictWrapperVisitor):
-            return fcn_or_visitor
-
-        ret=object.__new__(cls)
-        if fcn_or_visitor is not None:
-            ret.visit = fcn_or_visitor
-        return ret
-
     def start(self, dct):
         pass
 
@@ -245,7 +250,7 @@ class DictWrapperVisitor(object):
     def stop(self, dct):
         pass
 
-class DictWrapperPrinter(DictWrapperVisitor):
+class DictWrapperVisitorDemostrator(DictWrapperVisitor):
     fmt = '{action:7s} {depth!s:>5s} {key!s:<{keylen}s} {vtype!s:<{typelen}s} {value}'
     opts = dict(keylen=20, typelen=15)
     def typestring(self, v):
@@ -267,7 +272,7 @@ class DictWrapperPrinter(DictWrapperVisitor):
     def exitdict(self, k, d):
         d = d.unwrap()
         v = object.__repr__(d)
-        print(self.fmt.format(action='Visit', depth=len(k), key=k, vtype=self.typestring(d), value=v, **self.opts))
+        print(self.fmt.format(action='Exit', depth=len(k), key=k, vtype=self.typestring(d), value=v, **self.opts))
 
     def visit(self, k, v):
-        print(self.fmt.format(action='Exit', depth=len(k), key=k, vtype=self.typestring(v), value=v, **self.opts))
+        print(self.fmt.format(action='Visit', depth=len(k), key=k, vtype=self.typestring(v), value=v, **self.opts))
