@@ -14,10 +14,11 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', help='Output fil ename')
 
     def init(self):
+        storage = DictWrapper(self.env.future, split='.')
         data = DictWrapper({}, split='.')
         for path in self.opts.paths:
             try:
-                data[path] = self.env.future[path]
+                data[path] = storage[path].unwrap()
             except KeyError:
                 raise Exception('Unable to read data path: '+path)
 

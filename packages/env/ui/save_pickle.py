@@ -4,6 +4,7 @@ from __future__ import print_function
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
+from collections import OrderedDict
 import pickle
 
 class cmd(basecmd):
@@ -14,10 +15,11 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', help='Output fil ename')
 
     def init(self):
-        data = DictWrapper({}, split='.')
+        storage = DictWrapper(self.env.future, split='.')
+        data = DictWrapper(OrderedDict(), split='.')
         for path in self.opts.paths:
             try:
-                data[path] = self.env.future[path]
+                data[path] = storage[path].unwrap()
             except KeyError:
                 raise Exception('Unable to read data path: '+path)
 
