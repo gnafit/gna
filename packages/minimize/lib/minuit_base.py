@@ -1,8 +1,7 @@
 from __future__ import print_function
 import ROOT
 import numpy as np
-import time
-from packages.minimize.lib.base import MinimizerBase
+from packages.minimize.lib.base import MinimizerBase, FitResult
 from collections import OrderedDict
 
 class MinuitBase(MinimizerBase):
@@ -59,75 +58,29 @@ class MinuitBase(MinimizerBase):
         # for i, par in enumerate(self.parspecs):
             # self.setuppar(i, par, spec.get(par, {}))
 
-    # def evalstatistic(self):
-        # wall = time.time()
-        # clock = time.clock()
-        # value = self._statistic()
-        # clock = time.clock() - clock
-        # wall = time.time() - wall
-
-        # x = [par.value() for par in self.parspecs]
-        # resultdict = {
-            # 'x': np.array(x),
-            # 'errors': np.zeros_like(x),
-            # 'success': True,
-            # 'fun': value,
-            # 'nfev': 1,
-            # 'maxcv': 0.0,
-            # 'wall': wall,
-            # 'cpu': clock,
-        # }
-        # self.result = Namespace(**resultdict)
-        # self._patchresult()
-        # return self.result
-
-
     def fit(self, profile_errors=[]):
         assert self.parspecs
         # if not self.parspecs:
             # return self.evalstatistic()
 
         self.setuppars()
+        with self.parspecs:
+            with FitResult() as fr:
+                self.Minimize()
 
-        self.parspecs.pushpars()
+            argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
+            errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
+            fr.set(x=argmin, errors=errors, fun=self.MinValue(),
+                   success=not self.Status(), message='',
+                   minimizer=self.label, nfev=int(self.NCalls())
+                    )
+            self._result = fr.result
+            self.patchresult()
 
-        wall = time.time()
-        clock = time.clock()
-        self.Minimize()
-        clock = time.clock() - clock
-        wall = time.time() - wall
-
-        argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
-        errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
-
-        self._result = {
-            'x':         argmin,
-            'errors':    errors,
-            'success':   not self.Status(),
-            'message':   '',
-            'fun':       self.MinValue(),
-            'nfev':      int(self.NCalls()),
-            # 'maxcv':     self.Tolerance(),
-            'wall':      wall,
-            'cpu':       clock,
-            'minimizer': self.label,
-            'hess_inv':  None,
-            'jac':       None,
-        }
-        self.patchresult()
-
-        if profile_errors:
-            self.profile_errors(profile_errors, self.result)
-
-        self.parspecs.poppars()
+            if profile_errors:
+                self.profile_errors(profile_errors, self.result)
 
         return self.result
-
-    # def __call__(self):
-        # res = self.fit()
-        # if not res.success:
-            # return None
-        # return res.fun
 
     def profile_errors(self, names, fitresult):
         errs = fitresult['errors_profile'] = OrderedDict()

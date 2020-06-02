@@ -44,7 +44,7 @@ class cmd(basecmd):
 
     def print(self):
         print('Fit result for {}:'.format(self.opts.minimizer))
-        pprint(self.result)
+        pprint(dict(self.result))
 
     def save(self, filenames):
         import yaml

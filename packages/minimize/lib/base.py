@@ -3,6 +3,43 @@ import numpy as np
 import time
 from collections import OrderedDict
 
+class FitResult(object):
+    def __init__(self):
+        self._result = OrderedDict()
+
+    @property
+    def result(self):
+        return self._result
+
+    def __enter__(self):
+        self._wall  = time.time()
+        self._clock = time.clock()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._clock = time.clock() - self._clock
+        self._wall  = time.time()  - self._wall
+
+    def set(self, x, errors, fun, success, message, minimizer, nfev, **kwargs):
+        result = self._result
+
+        result['x']         = x
+        result['errors']    = errors
+        result['fun']       = fun
+        result['success']   = success
+        result['message']   = message
+        result['nfev']      = nfev
+        result['minimizer'] = minimizer
+        hess_inv = result['hess_inv']  = kwargs.pop('hess_inv', None)
+        result['jac']       = kwargs.pop('jac', None)
+
+        if errors is None and hess_inv is not None:
+            result['errors'] = np.diag(hess_inv)*2.0
+
+        result['clock'] = self._clock
+        result['wall']  = self._wall
+
+
 class MinimizerBase(object):
     _minimizable = None
     _parspecs    = None
@@ -45,3 +82,16 @@ class MinimizerBase(object):
         result['nfree']      = self._parspecs.nfree()
         result['nfixed']     = self._parspecs.nfixed()
         result['nconstrained'] = self._parspecs.nconstrained()
+
+    def evalstatistic(self):
+        with FitResult() as fr:
+            fun = self._statistic()
+
+        fr.set(x=[], errors=[], fun=fun,
+               success=True, message='stastitics evaluation (no parameters)',
+               minimizer='none', nfev=1)
+                )
+        self._result = fr.result
+        self.patchresult()
+
+        return self.result

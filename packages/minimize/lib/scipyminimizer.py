@@ -3,9 +3,9 @@
 
 from __future__ import print_function
 from scipy.optimize import minimize
-from packages.minimize.lib.base import MinimizerBase
+from packages.minimize.lib.base import MinimizerBase, FitResult
 import ROOT
-import numpy as np, time
+import numpy as np
 
 class SciPyMinimizer(MinimizerBase):
     _label       = 'scipy'
@@ -67,28 +67,17 @@ class SciPyMinimizer(MinimizerBase):
 
         self.parspecs.pushpars()
         self.setuppars()
+        with self.parspecs:
+            with FitResult() as fr:
+                self._res = minimize(self.call, **self._kwargs)
 
-        wall = time.time()
-        clock = time.clock()
-        self._res = minimize(self.call, **self._kwargs)
-        clock = time.clock() - clock
-        wall = time.time() - wall
-
-        self.parspecs.poppars()
-
-        self._result = {
-            'x':       self._res.x,
-            'errors':  2.0*np.diag(self._res.hess_inv),
-            'success': self._res.success,
-            'message': self._res.message,
-            'fun':     self._res.fun,
-            'nfev':    self._res.nit,
-            'wall':    wall,
-            'cpu':     clock,
-            'label':   self.label,
-            'hess_inv': self._res.hess_inv,
-            'jac':      self._res.jac,
-        }
+        fr.set(x=self._res.x, errors=None, fun=self._res.fun,
+               success=self._res.success, message=self._res.message,
+               minimizer=self.label, nfev=self._res.nit,
+               hess_inv = self._res.hess_inv,
+               jac = self._res.jac
+                )
+        self._result = fr.result
         self.patchresult()
 
         return self.result

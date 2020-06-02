@@ -199,3 +199,9 @@ class MinPars(object):
     def poppars(self):
         for par in self._parmap:
             par.pop()
+
+    def __enter__(self):
+        self.pushpars()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.poppars()
