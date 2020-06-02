@@ -5,6 +5,17 @@ from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
 import yaml
+import numpy as np
+from collections import OrderedDict
+
+def ndarrayRepresenter(dumper, data):
+    return dumper.represent_str(repr(data))
+
+def ordereddictRepresenter(dumper, data):
+    return dumper.represent_dict(data)
+
+yaml.add_representer(np.ndarray, ndarrayRepresenter)
+yaml.add_representer(OrderedDict, ordereddictRepresenter)
 
 class cmd(basecmd):
     @classmethod
