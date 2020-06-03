@@ -500,7 +500,7 @@ class _environment(object):
         self.parts = envparts()
 
         from tools.dictwrapper import DictWrapper
-        self.future = DictWrapper({}, split='.')
+        self.future = DictWrapper(OrderedDict(), split='.')
 
     def view(self, ns):
         if ns != self.globalns:

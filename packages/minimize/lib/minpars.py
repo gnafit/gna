@@ -161,8 +161,11 @@ class MinPars(object):
     def npars(self):
         return len(self._specs)
 
+    def fixed(self):
+        return [spec.name for spec in self._specs.values() if spec.fixed]
+
     def nfixed(self):
-        return sum(1 for spec in self._specs.values() if spec.fixed)
+        return len(self.fixed())
 
     def nconstrained(self):
         return sum(1 for spec in self._specs.values() if spec.constrained and not spec.fixed)

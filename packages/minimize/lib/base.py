@@ -96,8 +96,9 @@ class MinimizerBase(object):
         result['names']      = names
         result['npars']      = self._parspecs.nvariable()
         result['nfree']      = self._parspecs.nfree()
-        result['nfixed']     = self._parspecs.nfixed()
         result['nconstrained'] = self._parspecs.nconstrained()
+        fixed = result['fixed'] = self._parspecs.fixed()
+        result['nfixed']        = len(fixed)
 
     def evalstatistic(self):
         with FitResult() as fr:

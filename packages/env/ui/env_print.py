@@ -27,9 +27,8 @@ class DictWrapperPrinter(DictWrapperVisitor):
     def enterdict(self, k, d):
         if not k:
             return
-        print(self.fmt.format(depth=len(k), key=k[-1], vtype=self.typestring(d), value='', **self.opts))
+        print(self.fmt.format(depth=len(k), key=k[-1], vtype=self.typestring(d), value='<print below>', **self.opts))
         k = '.'.join(k)
-        print('      Print {}'.format(k))
 
     def exitdict(self, k, d):
         pass

@@ -42,6 +42,8 @@ class SciPyMinimizer(MinimizerBase):
             self._kwargs['x0'][i]     = parspec.value
             bounds                    = (parspec.vmin, parspec.vmax)
             self._kwargs['bounds'][i] =  bounds
+            if parspec.fixed:
+                raise Exception('Do not work with fixed parameters')
 
             if bounds!=(None, None):
                 bounded=True
