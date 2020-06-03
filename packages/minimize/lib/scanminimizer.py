@@ -86,7 +86,6 @@ class ScanMinimizer(MinimizerBase):
         storage['results'] = self._results
         storage['result_min'] = self._result_min
         storage['result_improved'] = self._result_improved
-        import IPython; IPython.embed()
 
 class ParOnGrid(object):
     def __init__(self, minpar, grid):
