@@ -257,3 +257,17 @@ def test_dictwrapper_08_create():
     child = dw.child('child')
     assert dw['child'].unwrap()=={}
 
+def test_dictwrapper_09_dictcopy():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z'] = {}
+    dw = DictWrapper(dct, split='.')
+
+    dw1 = dw.deepcopy()
+    for i, (k, v) in enumerate(dw1.walkdicts()):
+        print(i, k)
+        assert k in dw
+        assert v._obj==dw[k]._obj
+        assert v._obj is not dw[k]._obj
+        assert type(v._obj) is type(dw[k]._obj)
+    assert i==2
+

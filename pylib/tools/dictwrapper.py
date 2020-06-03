@@ -23,6 +23,7 @@ class DictWrapper(ClassWrapper):
         if isinstance(dic, DictWrapper):
             dic = dic._obj
         self._split = split
+        self._type = type(dic)
         ClassWrapper.__init__(self, dic, types=MutableMapping)
         if parent:
             self._parent = parent
@@ -146,6 +147,8 @@ class DictWrapper(ClassWrapper):
     __setitem__= set
 
     def __contains__(self, key):
+        if key is ():
+            return True
         key, rest=self.splitkey(key)
 
         if not key in self._obj:
@@ -161,6 +164,19 @@ class DictWrapper(ClassWrapper):
         for k, v in self._obj.items():
             yield k, self._wrapobject(v)
 
+    def deepcopy(self):
+        new = DictWrapper(self._type())
+        for k, v in self.items():
+            k = k,
+            if isinstance(v, self._wrapper_class):
+                new[k] = v.deepcopy()._obj
+            else:
+                new[k] = v
+
+        new._split = self._split
+
+        return new
+
     def walkitems(self):
         for k, v in self.items():
             k = k,
@@ -169,6 +185,17 @@ class DictWrapper(ClassWrapper):
                     yield k+k1, v1
             else:
                 yield k, v
+
+    def walkdicts(self):
+        yieldself= True
+        for k, v in self.items():
+            k = k,
+            if isinstance(v, self._wrapper_class):
+                yieldself=False
+                for k1, v1 in v.walkdicts():
+                    yield k+k1, v1
+        if yieldself:
+            yield (), self
 
     def walkkeys(self):
         for k, v in self.walkitems():
