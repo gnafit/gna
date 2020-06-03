@@ -5,6 +5,6 @@ TMinuit2 = ROOT.Minuit2.Minuit2Minimizer
 
 class Minuit2(TMinuit2, MinuitBase):
     _label = 'TMinuit'
-    def __init__(self, statistic, minpars):
+    def __init__(self, statistic, minpars, **kwargs):
         TMinuit2.__init__(self)
-        MinuitBase.__init__(self, statistic, minpars)
+        MinuitBase.__init__(self, statistic, minpars, **kwargs)

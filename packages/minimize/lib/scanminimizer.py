@@ -12,8 +12,8 @@ class ScanMinimizer(MinimizerBase):
     _results         = None
     _result_min      = None
     _result_improved = None
-    def __init__(self, statistic, minpars, gridpars, extraminimizerclass, extraminimizeropts={}):
-        MinimizerBase.__init__(self, statistic, minpars)
+    def __init__(self, statistic, minpars, gridpars, extraminimizerclass, extraminimizeropts={}, **kwargs):
+        MinimizerBase.__init__(self, statistic, minpars, **kwargs)
         self._extraminimizer = extraminimizerclass(statistic, minpars, **extraminimizeropts)
         self._grid = ParsGrid(minpars, gridpars)
 
@@ -78,9 +78,15 @@ class ScanMinimizer(MinimizerBase):
                )
         self._result = fr.result
         self.patchresult()
-        import IPython; IPython.embed()
 
         return self._result
+
+    def saveresult(self, loc):
+        storage = loc.child(self.name)
+        storage['results'] = self._results
+        storage['result_min'] = self._result_min
+        storage['result_improved'] = self._result_improved
+        import IPython; IPython.embed()
 
 class ParOnGrid(object):
     def __init__(self, minpar, grid):

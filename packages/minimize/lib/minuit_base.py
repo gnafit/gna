@@ -6,8 +6,8 @@ from collections import OrderedDict
 
 class MinuitBase(MinimizerBase):
     _label = 'TMinuit?'
-    def __init__(self, statistic, minpars):
-        MinimizerBase.__init__(self, statistic, minpars)
+    def __init__(self, statistic, minpars, **kwargs):
+        MinimizerBase.__init__(self, statistic, minpars, **kwargs)
 
     @property
     def tolerance(self):

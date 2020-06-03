@@ -11,8 +11,8 @@ class SciPyMinimizer(MinimizerBase):
     _label       = 'scipy'
     _method      = 'BFGS'
     _kwargs      = None
-    def __init__(self, statistic, minpars, method=None):
-        MinimizerBase.__init__(self, statistic, minpars)
+    def __init__(self, statistic, minpars, method=None, **kwargs):
+        MinimizerBase.__init__(self, statistic, minpars, **kwargs)
         if method:
             self._method = method
 

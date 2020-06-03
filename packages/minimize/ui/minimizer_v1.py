@@ -25,6 +25,6 @@ class cmd(basecmd):
         if self.opts.verbose>1:
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
-        self.minimizer = minimizers[self.opts.type](self.statistic, self.minpars)
+        self.minimizer = minimizers[self.opts.type](self.statistic, self.minpars, name=self.opts.name)
 
         self.env.future[('minimizer', self.opts.name)] = self.minimizer

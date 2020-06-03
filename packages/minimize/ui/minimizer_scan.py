@@ -32,6 +32,6 @@ class cmd(basecmd):
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
         minimizerclass = minimizers[self.opts.type]
-        self.minimizer = ScanMinimizer(self.statistic, self.minpars, self.gridpars, minimizerclass)
+        self.minimizer = ScanMinimizer(self.statistic, self.minpars, self.gridpars, minimizerclass, name=self.opts.name)
 
         self.env.future[('minimizer', self.opts.name)] = self.minimizer

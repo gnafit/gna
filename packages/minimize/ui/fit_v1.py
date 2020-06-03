@@ -37,6 +37,7 @@ class cmd(basecmd):
             self.print()
 
         self.env.future.child('fitresult')[self.opts.minimizer] = result
+        minimizer.saveresult(self.env.future.child('fitresults'))
 
     def print(self):
         print('Fit result for {}:'.format(self.opts.minimizer))

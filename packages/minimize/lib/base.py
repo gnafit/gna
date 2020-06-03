@@ -42,16 +42,22 @@ class FitResult(object):
 
 
 class MinimizerBase(object):
+    _name        = ''
     _minimizable = None
     _parspecs    = None
     _result      = None
-    def __init__(self, statistic, minpars):
+    def __init__(self, statistic, minpars, name=''):
         self.statistic = statistic
         self.parspecs = minpars
+        self._name = name
 
     @property
     def statistic(self):
         return self._statistic
+
+    @property
+    def name(self):
+        return self._name
 
     @statistic.setter
     def statistic(self, statistic):
@@ -112,3 +118,6 @@ class MinimizerBase(object):
         self.patchresult()
 
         return self.result
+
+    def saveresult(self, loc):
+        pass
