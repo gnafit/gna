@@ -67,7 +67,7 @@ class ScanMinimizer(MinimizerBase):
                     val = self._result_min['xdict'][parname]
                     self._parspecs[parname].value=val
 
-                self._result_improved = self._extraminimizer.fit()
+                self._result_improved = self._extraminimizer.fit(profile_errors=profile_errors)
 
         nfev = sum(r['nfev'] for r in self._results) + self._result_improved['nfev']
         fr.set(x=self._result_improved['x'], errors=self._result_improved['errors'], fun=self._result_improved['fun'],
