@@ -8,11 +8,13 @@ import yaml
 
 class DictWrapperPrinter(DictWrapperVisitor):
     fmt = '{depth!s:>5s} {key!s:<{keylen}s} {vtype!s:<{typelen}s} {value}'
-    opts = dict(keylen=30, typelen=10)
+    opts = dict(keylen=30, typelen=15)
     def __init__(self, title):
         self._title = title
 
     def typestring(self, v):
+        if isinstance(v, DictWrapper):
+            v=v.unwrap()
         return type(v).__name__
 
     def start(self, d):
@@ -25,6 +27,7 @@ class DictWrapperPrinter(DictWrapperVisitor):
     def enterdict(self, k, d):
         if not k:
             return
+        print(self.fmt.format(depth=len(k), key=k[-1], vtype=self.typestring(d), value='', **self.opts))
         k = '.'.join(k)
         print('      Print {}'.format(k))
 

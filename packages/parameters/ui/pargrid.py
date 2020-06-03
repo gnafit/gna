@@ -15,13 +15,17 @@ class cmd(basecmd):
         parser.add_argument('name', help='Parameters group name')
 
         parser.add_argument('--range', dest='grids', action=gridaction('range', env), default=[],
-                            nargs=4, metavar=("PARAM", "START", "END", "STEP"))
+                            nargs=4, metavar=("PARAM", "START", "END", "STEP"),
+                            help='range grid (np.arange)')
         parser.add_argument('--logspace', dest='grids', action=gridaction('logspace', env), default=[],
-                            nargs=4, metavar=("PARAM", "START", "END", "COUNT"))
+                            nargs=4, metavar=("PARAM", "START", "END", "COUNT"),
+                            help='linear grid (np.linespace)')
         parser.add_argument('--linspace', dest='grids', action=gridaction('linspace', env), default=[],
-                            nargs=4, metavar=("PARAM", "START", "END", "COUNT"))
+                            nargs=4, metavar=("PARAM", "START", "END", "COUNT"),
+                            help='logspace grid (np.geomspace)')
         parser.add_argument('--list', dest='grids', action=gridaction('list', env), default=[],
-                            nargs='+', metavar=("PARAM", "VALUE"))
+                            nargs='+', metavar=("PARAM", "VALUE"),
+                            help='grid, spericied via a list of values')
 
     def init(self):
         storage = self.env.future.child(('pargrid', self.opts.name))
@@ -62,7 +66,7 @@ def gridaction(gridtype, env):
                 param, start, end, count = values
                 start, end = float(start), float(end)
                 count = self.getcount(count)
-                grid = np.logspace(np.log10(start), np.log10(end), count, dtype='d')
+                grid = np.geomspace(start, end, count, dtype='d')
             elif gridtype == 'linspace':
                 param, start, end, count = values
                 start, end = float(start), float(end)
