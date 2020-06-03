@@ -169,6 +169,12 @@ function run(){
           -- pargroup oscpars juno.pmns -vv \
           -- pargrid  scandm32 --linspace juno.pmns.DeltaMSqEE 2.4e-3 2.6e-3 21 \
           -- minimizer-scan min stats-chi2 oscpars scandm32 -vv \
+          -- fit-v1 min -p \
+                     $simulate \
+                     --profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
+          -- save-yaml   fitresult.min -o "$file_result_pars".yaml -v \
+          -- save-yaml   fitresults    -o "$file_result_pars"_details.yaml -v \
+          -- save-pickle fitresult fitresults -o "$file_result_pars".pkl -v \
           -- ns --value juno.pmns.Alpha inverted \
           -- ns -n juno.pmns --print \
           -- spectrum -p juno/AD1 -l 'IO (model)' \
@@ -177,15 +183,11 @@ function run(){
           -- mpl --grid -o $outputdir/$suffix'_spectra.pdf' \
           -- fit-v1 min -p $simulate \
           -- save-yaml   fitresult.min -o "$file_result_nmo".yaml -v \
-          -- save-yaml   fitresults    -o "$file_result_nmo"_details.yaml-v \
+          -- save-yaml   fitresults    -o "$file_result_nmo"_details.yaml -v \
           -- save-pickle fitresult fitresults -o "$file_result_nmo".pkl -v \
           -- \
           $redirection
     "
-
-          #-- fit-v1 min -p \
-                     #$simulate \
-                     #--profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
 
     echo Iteration $iteration_manual "($iteration)"
     echo $command | sed -E "$filter" | tee $file_cmd
