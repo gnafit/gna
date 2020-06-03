@@ -9,7 +9,6 @@ import numpy as np
 
 class SciPyMinimizer(MinimizerBase):
     _label       = 'scipy'
-    _minimizable = None
     _method      = 'BFGS'
     _kwargs      = None
     def __init__(self, statistic, minpars, method=None):
@@ -60,7 +59,6 @@ class SciPyMinimizer(MinimizerBase):
     def _child_fit(self, profile_errors=None):
         assert not profile_errors
 
-        self.parspecs.pushpars()
         self.setuppars()
         with self.parspecs:
             with FitResult() as fr:

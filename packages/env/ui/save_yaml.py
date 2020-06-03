@@ -25,7 +25,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', help='Output fil ename')
 
     def init(self):
-        storage = DictWrapper(self.env.future, split='.')
+        storage = self.env.future
         data = DictWrapper({}, split='.')
         for path in self.opts.paths:
             try:

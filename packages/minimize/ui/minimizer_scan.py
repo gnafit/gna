@@ -7,6 +7,7 @@ import ROOT
 from gna.ui import basecmd, set_typed
 from packages.minimize.lib import minimizers
 from packages.minimize.lib.minpars import MinPars
+from packages.minimize.lib.scanminimizer import ScanMinimizer
 
 class cmd(basecmd):
     @classmethod
@@ -26,9 +27,11 @@ class cmd(basecmd):
         self.statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())
         self.minpars = self.env.future['parameter_groups'][self.opts.pargroup]
         self.minpars = MinPars(self.minpars)
+        self.gridpars = self.env.future['pargrid'][self.opts.pargrid]
         if self.opts.verbose>1:
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
-        self.minimizer = minimizers[self.opts.type](self.statistic, self.minpars)
+        minimizerclass = minimizers[self.opts.type]
+        self.minimizer = ScanMinimizer(self.statistic, self.minpars, self.gridpars, minimizerclass)
 
         self.env.future[('minimizer', self.opts.name)] = self.minimizer

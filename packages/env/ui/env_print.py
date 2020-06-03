@@ -46,7 +46,7 @@ class cmd(basecmd):
         # parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
 
     def init(self):
-        storage = DictWrapper(self.env.future, split='.')
+        storage = self.env.future
         for path in self.opts.paths:
             printer = DictWrapperPrinter(path)
             try:

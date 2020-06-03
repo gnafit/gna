@@ -28,10 +28,10 @@ class cmd(basecmd):
                             help='grid, spericied via a list of values')
 
     def init(self):
-        storage = self.env.future.child(('pargrid', self.opts.name))
+        storage = self.env.future.child(('pargrid', self.opts.name.split('.')))
 
-        for parname, grid in self.opts.grids:
-            storage[parname] = grid
+        for parname, par, grid in self.opts.grids:
+            storage[parname] = dict(par=par, grid=grid)
 
 class _AddGridActionBase(argparse.Action):
     def getcount(self, count):
@@ -75,6 +75,7 @@ def gridaction(gridtype, env):
             elif gridtype == 'list':
                 param = values[0]
                 grid = values[1:]
-            namespace.grids.append((param, grid))
+            par = env.pars[param]
+            namespace.grids.append((param, par, grid))
     return GridAction
 

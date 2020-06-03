@@ -121,6 +121,9 @@ class MinPars(object):
         for k, v in pars.items():
             self.addpar(v)
 
+    def __str__(self):
+        return str(self._specs)
+
     def dump(self):
         for i, (k, v) in enumerate(self._specs.items()):
             print('% 3d'%i, v)
@@ -133,6 +136,15 @@ class MinPars(object):
 
         # Assume idx is parameter instance
         return self._parmap[idx]
+
+    __getitem__ = parspec
+
+    def __contains__(self, key):
+        try:
+            self[key]
+        except KeyError:
+            return False
+        return True
 
     def __len__(self):
         return len(self._specs)
