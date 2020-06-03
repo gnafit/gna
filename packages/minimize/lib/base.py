@@ -2,6 +2,7 @@ from __future__ import print_function
 import numpy as np
 import time
 from collections import OrderedDict
+import ROOT
 
 class FitResult(object):
     def __init__(self):
@@ -56,6 +57,15 @@ class MinimizerBase(object):
     def statistic(self, statistic):
         self._statistic = statistic
         self._minimizable = None
+
+    def update_minimizable(self):
+        if self._minimizable is None or self.parspecs.resized:
+            self._minimizable = ROOT.Minimizable(self.statistic)
+
+            for parspec in self.parspecs.specs():
+                self._minimizable.addParameter(parspec.par)
+
+        return self._minimizable
 
     @property
     def parspecs(self):

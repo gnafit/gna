@@ -25,11 +25,7 @@ class MinuitBase(MinimizerBase):
         if not self.parspecs.modified:
             return
 
-        if self._minimizable is None or self.parspecs.resized:
-            self._minimizable = ROOT.Minimizable(self.statistic)
-
-            for parspec in self.parspecs.specs():
-                self._minimizable.addParameter(parspec.par)
+        self.update_minimizable()
 
         self.SetFunction(self._minimizable)
 

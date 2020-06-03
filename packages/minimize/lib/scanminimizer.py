@@ -8,7 +8,7 @@ import ROOT
 import numpy as np
 
 class SciPyMinimizer(MinimizerBase):
-    _label       = 'scipy'
+    _label       = 'scan'
     _minimizable = None
     _method      = 'BFGS'
     _kwargs      = None
