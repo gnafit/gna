@@ -82,10 +82,10 @@ function run(){
                     coarse="--estep 0.02"
                     ;;
                 transient)
-                    extrainfo="$extrainfo -a transient 1"
+                    extrainfo="$extrainfo -y transient 1"
                     ;;
                 skip)
-                    extrainfo="$extrainfo -a skip $val"
+                    extrainfo="$extrainfo -y skip $val"
                     ;;
                 oldnpe)
                     npe=1200
@@ -113,7 +113,7 @@ function run(){
                     setdm="--set juno.pmns.DeltaMSqEE values=$val"
                     ;;
                 extrainfo)
-                    extrainfo="$extrainfo -a $val"
+                    extrainfo="$extrainfo -y $val"
                     ;;
                 *)
                     extra="$extra $key=$val"
@@ -172,6 +172,7 @@ function run(){
           -- fit-v1 min -p \
                      $simulate \
                      --profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
+          -- env-set  -r fitresult.min $extrainfo \
           -- save-yaml   fitresult.min -o "$file_result_pars".yaml -v \
           -- save-yaml   fitresults    -o "$file_result_pars"_details.yaml -v \
           -- save-pickle fitresult fitresults -o "$file_result_pars".pkl -v \
@@ -182,6 +183,7 @@ function run(){
                       --plot-type hist --scale \
           -- mpl --grid -o $outputdir/$suffix'_spectra.pdf' \
           -- fit-v1 min -p $simulate \
+          -- env-set  -r fitresult.min $extrainfo \
           -- save-yaml   fitresult.min -o "$file_result_nmo".yaml -v \
           -- save-yaml   fitresults    -o "$file_result_nmo"_details.yaml -v \
           -- save-pickle fitresult fitresults -o "$file_result_nmo".pkl -v \
