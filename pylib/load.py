@@ -11,10 +11,10 @@ import scipy.stats
 
 import ROOT
 
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
 ROOT.gDirectory.AddDirectory( False )
 ROOT.TH1.AddDirectory( False )
-ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 ROOT.gSystem.Load('libGlobalNuAnalysis2')
 

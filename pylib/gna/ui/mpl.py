@@ -19,7 +19,7 @@ undefined=object()
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count',default=0, help='verbosity level')
 
         mpl = parser.add_argument_group(title='matplotlib', description='General matplotlib parameters')
         mpl.add_argument( '-i', '--interactive', action='store_true', help='switch to interactive matplotlib' )
@@ -131,7 +131,7 @@ class cmd(basecmd):
         fig.canvas.draw()
 
         if len(self.opts.ticks_extra)>1:
-            axisname, ticks = self.opts.ticks_extra[0], list(map(float, self.opts.ticks_extra[1:]))
+            axisname, ticks = self.opts.ticks_extra[0], [float(_) for _ in self.opts.ticks_extra[1:]]
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
             axis = getattr(ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
