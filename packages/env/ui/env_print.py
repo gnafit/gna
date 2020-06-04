@@ -31,7 +31,7 @@ class DictWrapperPrinter(DictWrapperVisitor):
         k = '.'.join(k)
 
     def exitdict(self, k, d):
-        print()
+        pass
 
     def visit(self, k, v):
         depth = len(k)

@@ -15,7 +15,7 @@ class cmd(basecmd):
         parser.add_argument('-r', '--root', help='root environment')
         parser.add_argument('-a', '--append', nargs=2, action='append', default=[], help='add custom fields to the output')
         parser.add_argument('-y', '--yaml', dest='append_yaml', nargs=2, action='append', default=[], help='add custom fields to the (value parsed by yaml)')
-        parser.add_argument('yaml', nargs='*', type=yamlload, help='yaml input to update the dictionary')
+        parser.add_argument('update_yaml', nargs='*', type=yamlload, help='yaml input to update the dictionary')
 
     def init(self):
         storage = self.env.future
@@ -28,5 +28,5 @@ class cmd(basecmd):
         for k, v in self.opts.append_yaml:
             storage[k] = yamlload(v)
 
-        for yaml in self.opts.yaml:
+        for yaml in self.opts.update_yaml:
             storage.update(yaml)
