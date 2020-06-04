@@ -168,7 +168,7 @@ function run(){
           -- graphviz juno/asimov_no -o $outputdir/$suffix"_graph.dot" \
           -- pargroup oscpars juno.pmns -vv \
           -- pargrid  scandm32 --linspace juno.pmns.DeltaMSqEE 2.4e-3 2.6e-3 21 \
-          -- minimizer-scan min stats-chi2 oscpars scandm32 -vv \
+          -- minimizer-scan min stats-chi2 oscpars scandm32 -t minuit -vv \
           -- fit-v1 min -p \
                      $simulate \
                      --profile juno.pmns.DeltaMSqEE juno.pmns.DeltaMSq12 juno.pmns.SinSqDouble12 \
