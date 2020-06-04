@@ -20,7 +20,11 @@ class cmd(basecmd):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
 
         mpl = parser.add_argument_group(title='matplotlib', description='General matplotlib parameters')
-        mpl.add_argument( '-i', '--interactive', action='store_true', help='switch to interactive matplotlib' )
+
+        inter = mpl.add_mutually_exclusive_group()
+        inter.add_argument( '-i', '--interactive', action='store_true', help='switch to interactive matplotlib' )
+        inter.add_argument('-b', '--batch', action='store_true', help='run in batch mode')
+
         mpl.add_argument('-l', '--latex', action='store_true', help='enable latex mode')
         mpl.add_argument('-r', '--rcparam', '--rc', nargs='+', default=[], type=yaml_load, help='YAML dictionary with RC configuration')
 
@@ -52,6 +56,11 @@ class cmd(basecmd):
 
     def configure_mpl(self):
         import matplotlib as mpl
+        if self.opts.batch:
+            if self.opts.verbose:
+                print('Batch mode matplotlib')
+            mpl.use('Agg', force=True)
+
         if self.opts.interactive:
             if self.opts.verbose:
                 print('Interactive matplotlib')
