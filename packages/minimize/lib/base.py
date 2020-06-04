@@ -40,6 +40,7 @@ class FitResult(object):
         result['clock'] = self._clock
         result['wall']  = self._wall
 
+        result.update(kwargs)
 
 class MinimizerBase(object):
     _name        = ''

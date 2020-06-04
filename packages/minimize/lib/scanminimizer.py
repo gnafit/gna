@@ -74,7 +74,8 @@ class ScanMinimizer(MinimizerBase):
                success=self._result_improved['success'], message=self._result_improved['message'],
                minimizer=self.label, nfev=nfev,
                hess_inv = self._result_improved.get('hess_inv'),
-               jac = self._result_improved.get('jac')
+               jac = self._result_improved.get('jac'),
+               errors_profile = self._result_improved.get('errors_profile', {})
                )
         self._result = fr.result
         self.patchresult()
