@@ -229,9 +229,7 @@ function runall {
             it=$(($it+1))
             run $(printf %03d $it) "edges_lsnl"   scan_edges_lsnl   vacuum --final-emin=$low --final-emax=$high extrainfo="info.emin $low" extrainfo="info.emax $high" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf covpars=juno
             run $(printf %03d $it) "edges_nolsnl" scan_edges_nolsnl vacuum --final-emin=$low --final-emax=$high extrainfo="info.emin $low" extrainfo="info.emax $high" energy="eres"      bkg="acc lihe fastn alphan" offeq snf covpars=juno
-            break
         done
-        break
     done
 }
 runall
