@@ -59,7 +59,7 @@ class cmd(basecmd):
         if self.opts.batch:
             if self.opts.verbose:
                 print('Batch mode matplotlib')
-            mpl.use('Agg')
+            mpl.use('Agg', force=True)
 
         if self.opts.interactive:
             if self.opts.verbose:
