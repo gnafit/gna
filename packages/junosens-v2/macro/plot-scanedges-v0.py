@@ -143,7 +143,9 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
         imin = np.searchsorted(low, emin)
         imax = np.searchsorted(high, emax)-1
         Data[imin, imax] = fun
-        Data.mask[imin, imax] = not success
+
+        if not args.unmask:
+            Data.mask[imin, imax] = not success
 
         if fun>12.5:
             # Data[imin, imax] = -1
@@ -224,6 +226,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--input', nargs='+', action='append', help='input files')
     parser.add_argument('--title', default=[], action='append', help='titles')
+    parser.add_argument('--unmask', action='store_true', help='uncover failed fits')
     parser.add_argument('-o', '--output', help='output file')
 
     args=parser.parse_args()
