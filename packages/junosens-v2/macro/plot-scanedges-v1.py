@@ -55,11 +55,6 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         low, high, data = dataall['scan']
         split = dataall['split']
 
-    if title is None:
-        title = 'Energy limits map'
-    else:
-        title = 'Energy limits map: '+title
-
     xlabel='E low'
     ylabel='E high'
     eminimal = low[0]
@@ -80,7 +75,7 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     # Make figure
     #
     fig = plt.figure(figsize=(8, 6))
-    ax = plt.subplot(111, xlabel=xlabel, ylabel=ylabel, title=title)
+    ax = plt.subplot(111, xlabel=xlabel, ylabel=ylabel, title='Energy limits map: '+title)
     if scale:
         ax.set_xscale('function', functions=(fwd_x, inv_x))
         ax.set_yscale('function', functions=(fwd_y, inv_y))
