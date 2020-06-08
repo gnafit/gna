@@ -211,6 +211,38 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     # show_values(c, fontsize='x-small')
 
     #
+    # Combination
+    #
+    fig = plt.figure()
+    axc = plt.subplot(111, xlabel='E split, MeV', ylabel=dchi2, title='Split test: '+title)
+    axc.xaxis.set_tick_params(top=True, labeltop=True, which='both')
+    axc.minorticks_on()
+    axc.grid()
+
+    left_x, left_y = split['left']
+    right_x, right_y = split['right']
+
+    left_x = np.around(left_x, 6)
+    axc.plot(left_x, left_y, label='left: [0.7, x] MeV')
+    axc.plot(right_x, right_y, label='right: [x, 12] MeV')
+
+    idx_right = np.in1d(right_x, left_x)
+    idx_left  = np.in1d(left_x, right_x)
+
+    both_x = left_x[idx_left]
+    both_y = left_y[idx_left] + right_y[idx_right]
+    axc.plot(both_x, both_y, label='combined: uncorrelated sum')
+
+    idx = np.argmin(both_y)
+    worst_split_low_idx = np.argwhere(low==both_x[idx])[0,0]
+    worst_split_high_idx = np.argwhere(high==both_x[idx])[0,0]-1
+
+    worst_dchi2 = both_x[idx]
+    worst_split = both_y[idx]
+    axc.axvline(both_x[idx], linestyle='--', alpha=0.5, label='worst split: {}={:.2f} at {} MeV'.format(dchi2, worst_split, worst_dchi2))
+    axc.legend()
+
+    #
     # Moving window
     #
     fig = plt.figure()
@@ -219,6 +251,7 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     ax.minorticks_on()
     ax.grid()
     ax.axhline(np.max(Data), linestyle='--', label='Full')
+    ax.axhline(worst_dchi2, linestyle='--', label='Worst split', alpha=0.6, color='blue')
 
     Wunique = np.unique(W)
 
@@ -244,34 +277,6 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
 
     plt.subplots_adjust(right=0.81)
     ax.legend(title='Width:', bbox_to_anchor=(1.0, 1.0), loc='upper left')
-
-    #
-    # Combination
-    #
-    fig = plt.figure()
-    axc = plt.subplot(111, xlabel='E split, MeV', ylabel=dchi2, title='Split test: '+title)
-    axc.xaxis.set_tick_params(top=True, labeltop=True, which='both')
-    axc.minorticks_on()
-    axc.grid()
-
-    left_x, left_y = split['left']
-    right_x, right_y = split['right']
-
-    left_x = np.around(left_x, 6)
-    axc.plot(left_x, left_y, label='left: [0.7, x] MeV')
-    axc.plot(right_x, right_y, label='right: [x, 12] MeV')
-
-    idx_right = np.in1d(right_x, left_x)
-    idx_left  = np.in1d(left_x, right_x)
-
-    both_x = left_x[idx_left]
-    both_y = left_y[idx_left] + right_y[idx_right]
-    axc.plot(both_x, both_y, label='combined: uncorrelated sum')
-    axc.legend()
-
-    idx = np.argmin(both_y)
-    low_idx = np.argwhere(low==both_x[idx])[0,0]
-    high_idx = np.argwhere(high==both_x[idx])[0,0]-1
 
     #
     # Max path on the main plot
@@ -300,11 +305,18 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         maxpath_y.append(Hcenter[mask][0])
     axd.plot(maxpath_x, maxpath_y, '--o', color='red', alpha=0.8, markerfacecolor='none', label='Moving window maximum position')
 
-    x = [Lcenter[0, 0],        Lcenter[low_idx, -1]]
-    y = [Hcenter[0, high_idx], Hcenter[0, -1]]
+    x = [Lcenter[0, 0],        Lcenter[worst_split_low_idx, -1]]
+    y = [Hcenter[0, worst_split_high_idx], Hcenter[0, -1]]
     axd.plot(x, y, 'o', color='cyan', alpha=0.8, markerfacecolor='none', label='Worst split')
 
-    axd.legend(bbox_to_anchor=(1.2, -0.15), loc='lower right', ncol=2, fontsize='small', numpoints=2)
+    equiv_idx = np.argmin((Data-worst_dchi2)**2)
+    equiv_idx = np.unravel_index(equiv_idx, Data.shape)
+    equiv_idx1 = np.argmin((maxpath_fun-worst_dchi2)**2)
+    x = [Lcenter[equiv_idx[0], equiv_idx[1]], maxpath_x[equiv_idx1]]
+    y = [Hcenter[equiv_idx[0], equiv_idx[1]], maxpath_y[equiv_idx1]]
+    axd.plot(x, y, 'o', color='red', alpha=0.8, markerfacecolor='red', label='Closest to worst split')
+
+    axd.legend(bbox_to_anchor=(1.2, -0.15), loc='lower right', ncol=3, fontsize='small', numpoints=2)
 
     return axd, ax, axc
 
@@ -348,16 +360,16 @@ def load_data(args):
     return data
 
 def main(args):
-    low = np.concatenate( ( [0.7], np.arange(1.0, 8.0, 0.5) ) )
-    high = np.concatenate( (np.arange(1.5, 6.0, 0.5), [9.0, 12.0] ) )
-    plot_boxes(low=low, high=high)
-    savefig(args.output, suffix='_map')
-    hasmap=True
-    plt.close()
+    if args.plot_map:
+        low = np.concatenate( ( [0.7], np.arange(1.0, 8.0, 0.5) ) )
+        high = np.concatenate( (np.arange(1.5, 6.0, 0.5), [9.0, 12.0] ) )
+        plot_boxes(low=low, high=high)
+        savefig(args.output, suffix='_map')
+        plt.close()
 
-    plot_boxes(low=low, high=high, scale=True)
-    savefig(args.output, suffix='_map_scaled')
-    plt.close()
+        plot_boxes(low=low, high=high, scale=True)
+        savefig(args.output, suffix='_map_scaled')
+        plt.close()
 
     data = load_data(args)
     for i, (idata, title) in enumerate(it.zip_longest(data.values(), args.title)):
@@ -389,6 +401,7 @@ if __name__ == "__main__":
     parser.add_argument('--input', nargs='+', action='append', help='input files')
     parser.add_argument('--title', default=[], action='append', help='titles')
     parser.add_argument('-o', '--output', help='output file')
+    parser.add_argument('--plot-map', '--map', action='store_true', help='plot map')
 
     args=parser.parse_args()
     main(args)
