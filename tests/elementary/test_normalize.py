@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Check the Normalize transformation"""
@@ -86,6 +86,3 @@ if __name__ == "__main__":
     test_norm7()
     if "pytest" not in sys.modules:
         P.show()
-
-
-

@@ -39,7 +39,10 @@ class exp(baseexp):
         self.define_labels()
         self.init_configuration()
         self.build()
-        self.register()
+        try:
+            self.register()
+        except:
+            pass
 
         if self.opts.stats:
             self.print_stats()
@@ -250,14 +253,6 @@ class exp(baseexp):
                     filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
                     matrixname = 'iav_matrix',
                     ),
-            dyboscar_iav = NestedDict(
-                    bundle     = dict(name='detector_iav_db_root_v03', major='d'),
-                    names = dict(matrixname = 'iav_matrix'),
-                    parname    = 'OffdiagScale_dyb',
-                    scale      = uncertain(1.0, 4, 'percent'),
-                    ndiag      = 1,
-                    filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-                    ),
             eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
@@ -344,7 +339,7 @@ class exp(baseexp):
                         ),
                     ),
             bkg_spectrum_fastn=NestedDict(
-                    bundle=dict(name='dayabay_fastn_power_v01'),
+                    bundle=dict(name='dayabay_fastn_power', version='v02', major='s'),
                     parameter='fastn_shape',
                     name='bkg_spectrum_fastn',
                     normalize=(0.7, 12.0),
@@ -457,7 +452,8 @@ class exp(baseexp):
 
     def build(self):
         # Initialize the expression and indices
-        l = list(chain.from_iterable(self.formula.values()))
+        l = list(chain.from_iterable(self.formula.values()))[:19]
+        a = [print(_) for _ in l]
         self.expression = Expression_v01(l, self.nidx)
 
         # Dump the information
@@ -669,7 +665,6 @@ class exp(baseexp):
     def define_labels(self):
         self.libs =  OrderedDict(
                       eper_ff_var  = dict(expr='eper_fission[i]*fission_fraction_corr[i,r]',label='Product of energy per fission to fission fraction'),
-                        dyboscar_iav = dict(expr=('dyboscar_iav', 'dyboscar_iav[d]| raw_spectra_dyboscar[d]()'), label='IAV for dyboscar pred'),
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),
                         unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),

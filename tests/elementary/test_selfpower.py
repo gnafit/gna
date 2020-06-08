@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Check the SelfPower transformation"""
@@ -33,7 +33,7 @@ def test_selfpower():
     Plot results
     (Plot for positive power)
     """
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
@@ -46,7 +46,7 @@ def test_selfpower():
     par.set(1)
     data = selfpower.selfpower.result.data().copy()
 
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         ax.plot( arr, data, label='$a=1$' )
 
     checks += data - (arr/par.value())**(arr/par.value()),
@@ -55,7 +55,7 @@ def test_selfpower():
     par.set(2)
     data = selfpower.selfpower.result.data().copy()
 
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         ax.plot( arr, data, label='$a=2$' )
         ax.legend(loc='upper left')
 
@@ -65,7 +65,7 @@ def test_selfpower():
     """
     Plot for negative power
     """
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         fig = P.figure()
         ax = P.subplot( 111 )
         ax.minorticks_on()
@@ -78,7 +78,7 @@ def test_selfpower():
     par.set(1)
     data = selfpower.selfpower_inv.result.data().copy()
 
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         ax.plot( arr, data, label='$a=1$' )
 
     checks += data - (arr/par.value())**(-arr/par.value()),
@@ -87,7 +87,7 @@ def test_selfpower():
     par.set(2)
     data = selfpower.selfpower_inv.result.data().copy()
 
-    if not "pytest" in sys.modules: 
+    if not "pytest" in sys.modules:
         ax.plot( arr, data, label='$a=2$' )
         ax.legend(loc='upper right')
         P.show()
