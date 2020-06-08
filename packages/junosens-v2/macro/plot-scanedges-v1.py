@@ -167,12 +167,41 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
 
     ax.grid(**gridopts)
 
+def plot_combination(split, title):
+    #
+    # Combination
+    #
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='E split, MeV', ylabel=r'$\Delta \chi^2$', title='Split test: '+title)
+    ax.minorticks_on()
+    ax.grid()
+
+    left_x, left_y = split['left']
+    right_x, right_y = split['right']
+
+    left_x = np.around(left_x, 6)
+    ax.plot(left_x, left_y, label='left: [0.7, x] MeV')
+    ax.plot(right_x, right_y, label='right: [x, 12] MeV')
+
+    idx_right = np.in1d(right_x, left_x)
+    idx_left  = np.in1d(left_x, right_x)
+
+    both_x = left_x[idx_left]
+    both_y = left_y[idx_left] + right_y[idx_right]
+    ax.plot(both_x, both_y, label='combined: uncorrelated sum')
+    ax.legend()
+
+
 def load_data(args):
-    datasets = []
-    for inp in args.input:
-        data = []
+    data = {}
+
+    threshold, ceiling = 0.7, 12.0
+    for i, inp in enumerate(args.input):
+        dataset = []
         emin_all = set()
         emax_all = set()
+        split_left = ()
+        split_right = ()
         for name in inp:
             with open(name, 'rb') as f:
                 d=pickle.load(f, encoding='latin1')['fitresult']['min']
@@ -180,16 +209,27 @@ def load_data(args):
                 fun = d['fun']
                 emin_all.add(emin)
                 emax_all.add(emax)
-                data.append((emin, emax, fun, d['success']))
+                dataset.append((emin, emax, fun, d['success']))
+
+                if np.isclose(emin, threshold):
+                    split_left += (emax, fun),
+                if np.isclose(emax, ceiling):
+                    split_right += (emin, fun),
 
         emin_all = list(sorted(emin_all))
         emax_all = list(sorted(emax_all))
         emin_all.append(emax_all[-1])
         emax_all = [emin_all[0]] + emax_all
         emin_all, emax_all = np.array(emin_all), np.array(emax_all)
-        datasets.append((emin_all, emax_all, data))
 
-    return datasets
+        idata = data[str(i)] = {}
+        idata['scan'] = (emin_all, emax_all, dataset)
+
+        split = idata['split'] = {}
+        split['left'] = np.array(split_left).T
+        split['right'] = np.array(split_right).T
+
+    return data
 
 def main(args):
     low = np.concatenate( ( [0.7], np.arange(1.0, 8.0, 0.5) ) )
@@ -201,21 +241,25 @@ def main(args):
     plot_boxes(low, high, scale=True)
     savefig(args.output, suffix='_map_scaled')
 
-    datasets = load_data(args)
-    for i, ((low, high, data), title) in enumerate(it.zip_longest(datasets, args.title)):
-        plot_boxes(low, high, data, title=title)
+    data = load_data(args)
+    for i, (idata, title) in enumerate(it.zip_longest(data.values(), args.title)):
+        low, high, scan = idata['scan']
+        plot_boxes(low, high, scan, title=title)
         savefig(args.output, suffix='_{}_full'.format(i))
 
         ax=plt.gca()
         ax.set_xlim(right=4.0)
         savefig(args.output, suffix='_{}_zoom'.format(i))
 
-        plot_boxes(low, high, data, title=title, scale=True)
+        plot_boxes(low, high, scan, title=title, scale=True)
         savefig(args.output, suffix='_{}_scaled_full'.format(i))
 
         ax=plt.gca()
         ax.set_xlim(right=4.0)
         savefig(args.output, suffix='_{}_scaled_zoom'.format(i))
+
+        plot_combination(idata['split'], title)
+        savefig(args.output, suffix='_{}_split'.format(i))
 
     plt.show()
 
