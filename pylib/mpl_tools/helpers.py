@@ -80,6 +80,7 @@ def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""
     rasterized = kwargs.pop( 'rasterized', True )
     minorticks = kwargs.pop( 'minorticks', False )
+    label = kwargs.pop( 'label', None )
     minorticks_values = kwargs.pop( 'minorticks_values', None )
 
     ax = P.gca()
@@ -103,6 +104,9 @@ def add_colorbar( colormapable, **kwargs ):
 
     if rasterized:
         cbar.solids.set_rasterized( True )
+
+    if label is not None:
+        cbar.set_label(label, rotation=270)
     P.sca( ax )
     return cbar
 
@@ -121,35 +125,37 @@ def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
 
 def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
-    if not name: return
-    if type(name)==list:
-        for n in name:
-            savefig( n, *args, **kwargs.copy() )
-        return
+    close = kwargs.pop('close', False)
+    if name:
+        if type(name)==list:
+            for n in name:
+                savefig( n, *args, **kwargs.copy() )
+        else:
+            suffix = kwargs.pop( 'suffix', None )
+            addext = kwargs.pop( 'addext', [] )
+            if suffix:
+                from os.path import splitext
+                basename, ext = splitext( name )
 
-    suffix = kwargs.pop( 'suffix', None )
-    addext = kwargs.pop( 'addext', [] )
-    if suffix:
-        from os.path import splitext
-        basename, ext = splitext( name )
+                if not isinstance(suffix, str):
+                    suffix = '_'.join(suffix)
 
-        if not isinstance(suffix, str):
-            suffix = '_'.join(suffix)
+                name = basename+suffix+ext
 
-        name = basename+suffix+ext
-
-    P.savefig( name, *args, **kwargs )
-    print( 'Save figure', name )
-
-    if addext:
-        if not type( addext )==list:
-            addext = [ addext ]
-        from os import path
-        basename, extname = path.splitext( name )
-        for ext in addext:
-            name = '%s.%s'%( basename, ext )
-            print( 'Save figure', name )
             P.savefig( name, *args, **kwargs )
+            print( 'Save figure', name )
+
+            if addext:
+                if not type( addext )==list:
+                    addext = [ addext ]
+                from os import path
+                basename, extname = path.splitext( name )
+                for ext in addext:
+                    name = '%s.%s'%( basename, ext )
+                    print( 'Save figure', name )
+                    P.savefig( name, *args, **kwargs )
+    if close:
+        P.close()
 
 def add_to_labeled_items(o, l, ax=None):
     ax = ax or P.gca()
