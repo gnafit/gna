@@ -271,9 +271,9 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         if mask.sum()>=3:
             maxpath_fun.append(ymax)
 
-        if mask.sum()>=4:
+        if mask.sum()>=3:
             color = ax.plot(x, y, label=str(w))[0].get_color()
-            ax.errorbar([xmax], [ymax], xerr=w*0.5, alpha=0.2, color=color, linewidth=5)
+            ax.errorbar([xmax], [ymax], xerr=w*0.5, alpha=0.4, color=color, linewidth=3)
 
     plt.subplots_adjust(right=0.81)
     ax.legend(title='Width:', bbox_to_anchor=(1.0, 1.0), loc='upper left')
