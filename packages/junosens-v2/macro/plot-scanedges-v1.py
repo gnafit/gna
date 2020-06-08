@@ -271,7 +271,7 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         if mask.sum()>=3:
             maxpath_fun.append(ymax)
 
-        if mask.sum()>=3:
+        if mask.sum()>=4:
             color = ax.plot(x, y, label=str(w))[0].get_color()
             ax.errorbar([xmax], [ymax], xerr=w*0.5, alpha=0.2, color=color, linewidth=5)
 
@@ -284,18 +284,27 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     plt.sca(axd)
 
     maxpath_fun = sorted(maxpath_fun)
+    fun_prev = None
     while True:
         fun = maxpath_fun[-1]
         mask = np.isclose(Data, fun)
-        idx = np.argwhere(mask)[0]
+        idxs = np.argwhere(mask)
+
         cmpto=[]
-        if idx[0]>0:
-            cmpto.append(Data[idx[0]-1, idx[1]])
-        if idx[1]<Data.shape[1]-1:
-            cmpto.append(Data[idx[0], idx[1]+1])
+        for idx in idxs:
+            if idx[0]>0:
+                app = Data[idx[0]-1, idx[1]]
+                if app!=fun and app!=fun_prev:
+                    cmpto.append(app)
+            if idx[1]<Data.shape[1]-1:
+                app = Data[idx[0], idx[1]+1]
+                if app!=fun and app!=fun_prev:
+                    cmpto.append(app)
+
         if not cmpto:
             break
         maxpath_fun.append(max(cmpto))
+        fun_prev = fun
 
     Lcenter = 0.85*L[1:,1:] +0.15*L[:-1,1:]
     Hcenter = 0.80*H[:-1,1:]+0.20*H[:-1,:-1]
@@ -303,11 +312,11 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         mask = np.isclose(Data, fun)
         maxpath_x.append(Lcenter[mask][0])
         maxpath_y.append(Hcenter[mask][0])
-    axd.plot(maxpath_x, maxpath_y, '--o', color='red', alpha=0.8, markerfacecolor='none', label='Moving window maximum position')
+    axd.plot(maxpath_x, maxpath_y, 'o', color='red', markerfacecolor='none', label='Moving window maximum position')
 
     x = [Lcenter[0, 0],        Lcenter[worst_split_low_idx, -1]]
     y = [Hcenter[0, worst_split_high_idx], Hcenter[0, -1]]
-    axd.plot(x, y, 'o', color='cyan', alpha=0.8, markerfacecolor='none', label='Worst split')
+    axd.plot(x, y, 'o', color='cyan', markerfacecolor='none', label='Worst split')
 
     equiv_idx = np.argmin((Data-worst_dchi2)**2)
     equiv_idx = np.unravel_index(equiv_idx, Data.shape)
@@ -335,6 +344,8 @@ def load_data(args):
                 d=pickle.load(f, encoding='latin1')['fitresult']['min']
                 emin, emax = d['info']['emin'], d['info']['emax']
                 fun = d['fun']
+                if np.isclose(emax, 9.0):
+                    continue
                 emin_all.add(emin)
                 emax_all.add(emax)
                 dataset.append((emin, emax, fun, d['success']))
@@ -381,11 +392,11 @@ def main(args):
         # savefig(args.output, suffix='_{}_zoom'.format(i))
 
         _, axw, axc = plot_boxes(idata, title=title, scale=True)
-        savefig(args.output, suffix='_{}_scaled_full'.format(i))
+        # savefig(args.output, suffix='_{}_scaled_full'.format(i))
 
-        # ax=plt.gca()
-        # ax.set_xlim(right=4.0)
-        # savefig(args.output, suffix='_{}_scaled_zoom'.format(i))
+        ax=plt.gca()
+        ax.set_xlim(right=3.4)
+        savefig(args.output, suffix='_{}_scaled_zoom'.format(i))
 
         plt.sca(axw)
         savefig(args.output, suffix='_{}_window'.format(i))
