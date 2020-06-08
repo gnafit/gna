@@ -251,7 +251,7 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     ax.minorticks_on()
     ax.grid()
     ax.axhline(np.max(Data), linestyle='--', label='Full')
-    ax.axhline(worst_dchi2, linestyle='--', label='Worst split', alpha=0.6, color='blue')
+    ax.axhline(worst_dchi2, linestyle='--', label='Min split', alpha=0.6, color='blue')
 
     Wunique = np.unique(W)
 
@@ -273,10 +273,15 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
 
         if mask.sum()>=3:
             color = ax.plot(x, y, label=str(w))[0].get_color()
-            ax.errorbar([xmax], [ymax], xerr=w*0.5, alpha=0.4, color=color, linewidth=3)
+
+            # if mask.sum()>=4:
+                # eopts=dict(alpha=0.4, linewidth=3)
+            # else:
+            eopts=dict(alpha=1, linewidth=0.5, capsize=3)
+            ax.errorbar([xmax], [ymax], xerr=w*0.5, fmt='o-', markerfacecolor='none', color=color, **eopts)
 
     plt.subplots_adjust(right=0.81)
-    ax.legend(title='Width:', bbox_to_anchor=(1.0, 1.0), loc='upper left')
+    ax.legend(title='Width:', bbox_to_anchor=(1.0, 1.15), loc='upper left', labelspacing=0.1)
 
     #
     # Max path on the main plot
