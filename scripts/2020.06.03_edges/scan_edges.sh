@@ -19,7 +19,8 @@ echo Run mode: $mode
 echo Simulate: $simulate
 
 # Define the output directory
-outputdir=output/2020.06.03_scan_edges_lsnl
+#outputdir=output/2020.06.03_scan_edges_lsnl
+outputdir=output/2020.06.08_scan_edges_lsnl_fine
 mkdir -p $outputdir 2>/dev/null
 mkdir $outputdir/nmo $outputdir/pars 2>/dev/null
 echo Save output data to $outputdir
@@ -223,8 +224,8 @@ function run(){
 
 function runall {
     it=0
-    for high in $(seq 1.6 0.2 4.0) 4.5 5.0 6.0 9.0 12.0; do
-        for low in 0.7 $(seq 1.0 0.2 3.0); do
+    for high in $(seq 1.6 0.2 5.0) 6.0 7.0 8.0 9.0 12.0; do
+        for low in 0.7 $(seq 0.8 0.2 5.0); do
             if (( $(echo "$low >= $high" | bc -l) )); then continue; fi
             it=$(($it+1))
             run $(printf %03d $it) "edges_lsnl"   scan_edges_lsnl   vacuum --final-emin=$low --final-emax=$high extrainfo="info.emin $low" extrainfo="info.emax $high" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf covpars=juno

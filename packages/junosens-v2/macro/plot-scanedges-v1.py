@@ -52,7 +52,9 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
     else:
         title = 'Energy limits map: '+title
 
-    ax = plt.subplot(111, xlabel='E low', ylabel='E high', title=title)
+    xlabel='E low'
+    ylabel='E high'
+    ax = plt.subplot(111, xlabel=xlabel, ylabel=ylabel, title=title)
     # ax.minorticks_on()
 
     if scale:
@@ -138,7 +140,7 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
     #
     # Data
     #
-    Data = np.ma.array(np.zeros_like(L, dtype='d'), mask=np.zeros_like(L, dtype='i'))
+    Data = np.ma.array(np.zeros_like(L, dtype='d'), mask=np.zeros_like(L, dtype='i'))[:-1,:-1]
     for emin, emax, fun, success in data:
         imin = np.searchsorted(low, emin)
         imax = np.searchsorted(high, emax)-1
@@ -166,8 +168,50 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
         show_values(c, fontsize='x-small')
 
     ax.grid(**gridopts)
+    axd = ax
 
-    import IPython; IPython.embed()
+    #
+    # Test data
+    #
+    if not scale:
+        return
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel=xlabel, ylabel=ylabel, title='Range, MeV')
+    ax.minorticks_on()
+    ax.grid()
+
+    ax.set_xscale('function', functions=(fwd_x, inv_x))
+    ax.set_yscale('function', functions=(fwd_y, inv_y))
+    ax.set_xticks(low)
+    ax.set_yticks(high)
+
+    W = np.around(H[1:, 1:] - L[:-1, :-1], 6)
+    Center = np.around(H[1:, 1:] + L[:-1, :-1], 6)*0.5
+    c = ax.pcolormesh(L, H, W)
+    add_colorbar(c)
+    show_values(c, fontsize='x-small')
+
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='Window center', ylabel=r'$\Delta\chi^2$', title='Moving window')
+    ax.minorticks_on()
+    ax.grid()
+    ax.axhline(np.max(Data), linestyle='--')
+
+    Wunique = np.unique(W)
+    for w in Wunique:
+        if w<=0.0 or w>4:
+            continue
+
+        mask = W==w
+        if mask.sum()<3:
+            continue
+        x = Center[mask]
+        y = Data[mask]
+
+        ax.plot(x, y, label=str(w))
+    ax.legend(title='Window width:')
+
+    plt.sca(axd)
 
 def plot_combination(split, title):
     #
