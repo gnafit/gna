@@ -167,6 +167,8 @@ def plot_boxes(low, high, data=None, title=None, scale=False):
 
     ax.grid(**gridopts)
 
+    import IPython; IPython.embed()
+
 def plot_combination(split, title):
     #
     # Combination
