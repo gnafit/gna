@@ -80,6 +80,7 @@ def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""
     rasterized = kwargs.pop( 'rasterized', True )
     minorticks = kwargs.pop( 'minorticks', False )
+    label = kwargs.pop( 'label', None )
     minorticks_values = kwargs.pop( 'minorticks_values', None )
 
     ax = P.gca()
@@ -103,6 +104,9 @@ def add_colorbar( colormapable, **kwargs ):
 
     if rasterized:
         cbar.solids.set_rasterized( True )
+
+    if label is not None:
+        cbar.set_label(label, rotation=270)
     P.sca( ax )
     return cbar
 
