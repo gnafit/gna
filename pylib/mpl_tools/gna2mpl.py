@@ -209,7 +209,10 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
     return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs )
 
 def get_2d_buffer(output, transpose=False, mask=None):
-    buf = output.data().copy()
+    if isinstance(output, N.ndarray):
+        buf = output
+    else:
+        buf = output.data().copy()
 
     if mask is not None:
         buf = N.ma.array(buf, mask=buf==mask)

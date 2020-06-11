@@ -474,7 +474,7 @@ class exp(baseexp):
         # Put the expression into context
         self.context = ExpressionContext_v01(self.cfg, ns=self.namespace)
         self.expression.build(self.context)
-        #  import IPython; IPython.embed()
+        self.correlate_escale_and_eff()
 
         if self.opts.verbose and self.opts.verbose>1:
             width = 40
@@ -491,6 +491,18 @@ class exp(baseexp):
             print('Parameters:')
             self.stats = dict()
             self.namespace.printparameters(labels=True, stats=self.stats)
+
+    def correlate_escale_and_eff(self):
+        #TODO: fix with proper bundle
+        root = self.namespace
+        escale_ns = root('escale')
+        eff_ns = root('effunc_uncorr')
+        for ad in escale_ns.keys():
+            rel_escale = escale_ns[ad]
+            rel_eff = eff_ns[ad]
+            sigma_escale, sigma_eff = rel_escale.sigma(), rel_eff.sigma()
+            cov = sigma_escale*sigma_eff * 0.545
+            rel_eff.setCovariance(rel_escale, cov)
 
     def register(self):
         ns = self.namespace

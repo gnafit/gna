@@ -9,6 +9,10 @@ import numpy
 import matplotlib
 import scipy.stats
 
+from os import environ
+if not environ.get('DISPLAY'):
+    matplotlib.use('Agg')
+
 import ROOT
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
