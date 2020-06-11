@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+#! /usr/bin/env python3
 import os
 import argparse
 import warnings
@@ -8,7 +8,6 @@ import glob
 from collections import defaultdict
 import numpy as np
 import h5py
-from gna.ui import basecmd
 
 def _check_pathes(pathes, strict=True):
     filtered = []
@@ -49,20 +48,14 @@ def get_all_keys(obj, keys=None):
 def _depth(hdf_key):
     return hdf_key.count('/')
 
-class cmd(basecmd):
+class Merger():
     '''Simple CLI utility to merge HDF5 files with chi-square maps
     after likelihood profiling in different segments of the grid
-    produced by scan module'''
-
-    @classmethod
-    def initparser(cls, parser, env):
-        parser.add_argument('input', nargs='*', type=os.path.abspath,
-           action=Glob_HDF5, help='List of HDF5 files to merge with possible globbing, duplicates are removed')
-        parser.add_argument('--output', type=os.path.abspath, required=True)
-
-    def run(self):
-        with h5py.File(self.opts.output, 'w') as f:
-            for path in self.opts.input:
+    produced by scan module. Top-level attributes are assumed to be identical for all
+    merged files'''
+    def __init__(self, opts):
+        with h5py.File(opts.output, 'w') as f:
+            for path in opts.input:
                 input_file = h5py.File(path, 'r')
                 for key in input_file:
                     try:
@@ -91,4 +84,18 @@ class cmd(basecmd):
                             if isinstance(input_object, h5py.Dataset):
                                 f.create_dataset(missed_key, data=input_object[:])
 
+                for attr, value in input_file['/'].attrs.items():
+                    f['/'].attrs[attr] = value
+
                 input_file.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='''Simple tool to merge HDF5 after
+             likelihood profiling by scan module''')
+    parser.add_argument('input', nargs='*', type=os.path.abspath,
+           action=Glob_HDF5, help='List of HDF5 files to merge with possible globbing, duplicates are removed')
+    parser.add_argument('--output', type=os.path.abspath, required=True,
+            help='Path to merged output file')
+    opts = parser.parse_args()
+    merger = Merger(opts)
