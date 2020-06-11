@@ -11,21 +11,22 @@ from load import ROOT as R
 seconds_per_day = 60*60*24
 class exp(baseexp):
     """
-JUNO experiment implementation v02 -> frozen
-(next version is v03-common)
+JUNO experiment implementation v03 (common) -> current
+
+This version is using common inputs
 
 Derived from:
     - [2019.12] Daya Bay model from dybOscar and GNA
     - [2019.12] juno_chengyp
     - [2020.04] juno_sensitivity_v01
+    - [2020.06] juno_sensitivity_v02
 
-Changes since previous implementation [juno_sensitivity_v01]:
-    - Dropped Enu-mode support
-    - Add matter oscillations
-    - Accidentals, fastn, Li/He, AlphaN
-    - Add free spectral parameters
-    - SNF, Off-equilibrium
+Changes since previous implementation [juno_sensitivity_v02]:
+    - Switch to dm32 (usin scan minimizer)
     - WIP: geo-neutrino
+    - Common inputs from: https://disk.jinr.ru/index.php/s/oq9nLxKBBjmsoXk
+      * Reactors
+        + Power, no TS3/TS4
 
 Implements:
     - Reactor antineutrino flux:
@@ -90,7 +91,6 @@ Misc changes:
         binning.add_argument('--final-emax', type=float, help='Final binning Emax')
 
         # reactor flux
-        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'halfts', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
         parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
         parser.add_argument('--snf', action='store_true', help="Enable SNF contribution")
@@ -100,7 +100,6 @@ Misc changes:
 
         # Parameters
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
-        parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', action='store_true', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
@@ -124,19 +123,7 @@ Misc changes:
             self.subdetectors_names = ['subdet%03i'%i for i in range(5)]
         else:
             self.subdetectors_names = ()
-        self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
-        if 'halfts' in self.opts.reactors:
-            self.reactors.remove('TS3')
-            self.reactors.remove('TS4')
-        if 'far-off' in self.opts.reactors:
-            self.reactors.remove('DYB')
-            self.reactors.remove('HZ')
-        if 'nohz' in self.opts.reactors:
-            self.reactors.remove('HZ')
-        if 'dayabay' in self.opts.reactors:
-            self.reactors=['DYB']
-        if 'single' in self.opts.reactors:
-            self.reactors=['YJ1']
+        self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'DYB', 'HZ']
 
         self.nidx = [
             ('d', 'detector',    [self.detectorname]),
@@ -263,7 +250,7 @@ Misc changes:
 
     def parameters(self):
         ns = self.namespace
-        dmxx = 'pmns.DeltaMSq'+str(self.opts.dm).upper()
+        dmxx = 'pmns.DeltaMSq23'
         for par in [dmxx, 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']:
             ns[par].setFree()
 
@@ -429,9 +416,7 @@ Misc changes:
                         ),
                 baselines = NestedDict(
                         bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                        reactors  = 'near-equal' in self.opts.reactors \
-                                     and 'data/juno_nominal/coordinates_reactors_equal.py' \
-                                     or 'data/juno_nominal/coordinates_reactors.py',
+                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
                         detectors = 'data/juno_nominal/coordinates_det.py',
                         unit = 'km'
                         ),
