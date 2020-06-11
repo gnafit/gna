@@ -104,7 +104,6 @@ include(debug_opts)
 add_subdirectory(fmt)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
@@ -112,23 +111,23 @@ if(Boost_FOUND)
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories(SYSTEM "fmt")
 
 find_package(GSL REQUIRED)
 find_package(ROOT REQUIRED)
-# include(${ROOT_USE_FILE})
+include(${ROOT_USE_FILE})
 link_directories(${ROOT_LIBRARY_DIR})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
 
-add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
+add_library(${LIBNAME} SHARED ${SOURCES}  ${CONTRIB_SRC})
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" MODULE ${LIBNAME} OPTIONS -interpreteronly)
 
 if(result)
     set_property(TARGET ${LIBNAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
+target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(${LIBNAME} SYSTEM PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS}  -lPyROOT)
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
