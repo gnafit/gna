@@ -15,6 +15,8 @@ def yaml_load(s):
 undefined=object()
 
 class cmd(basecmd):
+    _ax = None
+    _fig = None
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
@@ -53,6 +55,20 @@ class cmd(basecmd):
         self.configure_figure()
         self.configure_axis()
         self.configure_figure1()
+
+    @property
+    def ax(self):
+        if self._ax is None:
+            from matplotlib import pyplot as plt
+            self._ax = plt.gca()
+        return self._ax
+
+    @property
+    def fig(self):
+        if self._fig is None:
+            from matplotlib import pyplot as plt
+            self._fig = plt.gcf()
+        return self._fig
 
     def configure_mpl(self):
         import matplotlib as mpl
@@ -99,18 +115,14 @@ class cmd(basecmd):
             plt.show()
 
     def configure_axis(self):
-        from matplotlib import pyplot as plt
-        fig=plt.gcf()
-        ax=plt.gca()
-
         if self.opts.title:
-            ax.set_title(self.opts.title)
+            self.ax.set_title(self.opts.title)
 
         if self.opts.xlabel:
-            ax.set_xlabel(self.opts.xlabel)
+            self.ax.set_xlabel(self.opts.xlabel)
 
         if self.opts.ylabel:
-            ax.set_ylabel(self.opts.ylabel)
+            self.ax.set_ylabel(self.opts.ylabel)
 
         if self.opts.scale:
             axis, scale = self.opts.scale
@@ -118,34 +130,35 @@ class cmd(basecmd):
             set_scale(scale)
 
         if self.opts.xlim:
-            ax.set_xlim(*self.opts.xlim)
+            self.ax.set_xlim(*self.opts.xlim)
 
         if self.opts.ylim:
-            ax.set_ylim(*self.opts.ylim)
+            self.ax.set_ylim(*self.opts.ylim)
 
         if self.opts.grid:
-            ax.grid()
+            self.ax.grid()
 
         if self.opts.minor_ticks:
-            ax.minorticks_on()
+            self.ax.minorticks_on()
 
         if self.opts.legend is not undefined:
             if self.opts.legend:
-                ax.legend(self.opts.legend)
+                self.ax.legend(self.opts.legend)
             else:
-                ax.legend()
-
-        fig.canvas.draw()
+                self.ax.legend()
 
         if len(self.opts.ticks_extra)>1:
+            self.fig.canvas.draw()
             axisname, ticks = self.opts.ticks_extra[0], list(map(float, self.opts.ticks_extra[1:]))
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
             axis = getattr(ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
 
         if self.opts.xlim:
-            ax.set_xlim(*self.opts.xlim)
+            self.fig.canvas.draw()
+            self.ax.set_xlim(*self.opts.xlim)
 
         if self.opts.ylim:
-            ax.set_ylim(*self.opts.ylim)
+            self.fig.canvas.draw()
+            self.ax.set_ylim(*self.opts.ylim)
 
