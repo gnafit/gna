@@ -63,7 +63,6 @@ class cmd(basecmd):
             if self.opts.verbose:
                 print('Matplotlib with latex')
             mpl.rcParams['text.usetex'] = True
-            mpl.rcParams['text.latex.unicode'] = True
             mpl.rcParams['font.size'] = 13
 
         if self.opts.verbose>1 and self.opts.rcparam:

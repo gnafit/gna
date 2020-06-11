@@ -452,8 +452,7 @@ class exp(baseexp):
 
     def build(self):
         # Initialize the expression and indices
-        l = list(chain.from_iterable(self.formula.values()))[:19]
-        a = [print(_) for _ in l]
+        l = list(chain.from_iterable(self.formula.values()))
         self.expression = Expression_v01(l, self.nidx)
 
         # Dump the information
