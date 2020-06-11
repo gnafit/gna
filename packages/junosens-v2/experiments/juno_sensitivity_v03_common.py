@@ -338,14 +338,14 @@ Misc changes:
                 oscprob = NestedDict(
                     bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
                     pdgyear = self.opts.pdgyear,
-                    dm      = self.opts.dm
+                    dm      = '23'
                     ),
                 oscprob_matter = NestedDict(
                     bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
                                   names=dict(oscprob='oscprob_matter')),
                     density = 2.6, # g/cm3
                     pdgyear = self.opts.pdgyear,
-                    dm      = self.opts.dm
+                    dm      = '23'
                     ),
                 anuspec_hm = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='huber-mueller'),
