@@ -8,7 +8,6 @@ from gna.expression.index import NIndex
 import numpy as np
 from load import ROOT as R
 
-seconds_per_day = 60*60*24
 class exp(baseexp):
     """
 JUNO experiment implementation v03 (common) -> current
@@ -27,11 +26,11 @@ Changes since previous implementation [juno_sensitivity_v02]:
     - Common inputs from
       * Reactors
         + Power, no TS3/TS4
-        + Power, HZ factor ((max(y-2,0) + max(y-3,0))/(y*2)) - not variable
-        + Duty cycle: 11.12
+        + WIP: Power, HZ factor ((max(y-2,0) + max(y-3,0))/(y*2)) - not variable
+        + Duty cycle: 11/12
       * DAQ
         + 6 years
-        + 8 years (6 times no TS3/4)
+        + # 8 years (6 times no TS3/4)
 
 Implements:
     - Reactor antineutrino flux:
@@ -190,9 +189,9 @@ Misc changes:
         self.formula = [
                 # Some common definitions
                 'baseline[d,r]',
-                'livetime[d]',
+                'livetime=daq_years*seconds_in_year',
                 'conversion_factor',
-                'efflivetime = eff * livetime[d]',
+                'efflivetime = eff * livetime',
                 # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
                 #
                 # Neutrino energy
@@ -208,7 +207,7 @@ Misc changes:
                 #
                 # Reactor part
                 #
-                'numerator = efflivetime * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                'numerator = efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
                              'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
                              'conversion_factor * target_protons[d]',
                 'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
@@ -309,18 +308,23 @@ Misc changes:
             print('Final binning:', edges_final)
         self.cfg = NestedDict(
                 numbers = NestedDict(
-                    bundle = dict(
-                        name='parameters',
-                        version='v04'),
+                    bundle = dict(name='parameters', version='v04'),
                     labels=dict(
-                        eff = 'Detection efficiency'
+                        eff               = 'Detection efficiency',
+                        daq_years         = 'Number of DAQ years',
+                        duty_cycle        = 'Reactor duty cycle (per year)',
+                        seconds_in_year   = 'Number of seconds in year',
+                        conversion_factor = 'Conversion factor from GWt to MeV',
                         ),
-                    pars = uncertaindict([
-                        ('eff', (0.8, 'fixed')),
-                        ])
-                    # years      = 6.0,
-                    # duty_cycle = 11.0/12.0,
-                    # efficiency = 0.82,
+                    pars = uncertaindict(
+                        dict(
+                            eff               = 0.82,
+                            daq_years         = 6.0,
+                            duty_cycle        = 11.0/12.0,
+                            seconds_in_year   = 365.0*24.0*60.0*60.0,
+                            conversion_factor = R.NeutrinoUnits.reactorPowerConversion, #taken from transformations/neutrino/ReactorNorm.cc
+                            ),
+                        mode='fixed')
                     ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -417,14 +421,6 @@ Misc changes:
                     bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
                     snf_average_spectra = './data/data-common/snf/2004.12-kopeikin/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
                     ),
-                livetime = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = "livetime",
-                        label = 'Livetime of {detector} in seconds',
-                        pars = uncertaindict(
-                            [('AD1', (6*365*seconds_per_day, 'fixed'))],
-                            ),
-                        ),
                 baselines = NestedDict(
                         bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
                         reactors  = 'data/juno_nominal/coordinates_reactors.py',
@@ -467,13 +463,6 @@ Misc changes:
                         pars = uncertaindict(
                             [('AD1', (1.42e33, 'fixed'))],
                             ),
-                        ),
-                conversion_factor =  NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter='conversion_factor',
-                        label='Conversion factor from GWt to MeV',
-                        #taken from transformations/neutrino/ReactorNorm.cc
-                        pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                         ),
                 days_in_second =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -682,8 +671,6 @@ Misc changes:
             self.cfg.lsnl.correlations_pars = None
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
-
-        self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
         if self.opts.spectrum_unc:
