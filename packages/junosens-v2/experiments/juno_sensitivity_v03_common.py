@@ -24,9 +24,14 @@ Derived from:
 Changes since previous implementation [juno_sensitivity_v02]:
     - Switch to dm32 (usin scan minimizer)
     - WIP: geo-neutrino
-    - Common inputs from: https://disk.jinr.ru/index.php/s/oq9nLxKBBjmsoXk
+    - Common inputs from
       * Reactors
         + Power, no TS3/TS4
+        + Power, HZ factor ((max(y-2,0) + max(y-3,0))/(y*2)) - not variable
+        + Duty cycle: 11.12
+      * DAQ
+        + 6 years
+        + 8 years (6 times no TS3/4)
 
 Implements:
     - Reactor antineutrino flux:
@@ -303,6 +308,20 @@ Misc changes:
         if self.opts.final_emin is not None or self.opts.final_emax is not None:
             print('Final binning:', edges_final)
         self.cfg = NestedDict(
+                numbers = NestedDict(
+                    bundle = dict(
+                        name='parameters',
+                        version='v04'),
+                    labels=dict(
+                        eff = 'Detection efficiency'
+                        ),
+                    pars = uncertaindict([
+                        ('eff', (0.8, 'fixed')),
+                        ])
+                    # years      = 6.0,
+                    # duty_cycle = 11.0/12.0,
+                    # efficiency = 0.82,
+                    ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
@@ -378,14 +397,6 @@ Misc changes:
                     bundle = dict(name='geoneutrino_spectrum', version='v01'),
                     data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
                 ),
-                eff = NestedDict(
-                    bundle = dict(
-                        name='parameters',
-                        version='v01'),
-                    parameter="eff",
-                    label='Detection efficiency',
-                    pars = uncertain(0.8, 'fixed')
-                    ),
                 global_norm = NestedDict(
                     bundle = dict(
                         name='parameters',
@@ -433,8 +444,8 @@ Misc changes:
                         pars = uncertaindict([
                             ('TS1',  4.6),
                             ('TS2',  4.6),
-                            ('TS3',  4.6),
-                            ('TS4',  4.6),
+                            ('TS3',  4.6), # inactive
+                            ('TS4',  4.6), # inactive
                             ('YJ1',  2.9),
                             ('YJ2',  2.9),
                             ('YJ3',  2.9),
@@ -442,7 +453,7 @@ Misc changes:
                             ('YJ5',  2.9),
                             ('YJ6',  2.9),
                             ('DYB', 17.4),
-                            ('HZ',  17.4),
+                            ('HZ',  17.4), # corrected by factor
                             ],
                             uncertainty=0.8,
                             mode='percent'
@@ -672,7 +683,6 @@ Misc changes:
         if not 'subdetectors' in self.opts.correlation:
             self.cfg.subdetector_fraction.correlations = None
 
-        self.cfg.eff.pars = uncertain(0.73, 'fixed')
         self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
