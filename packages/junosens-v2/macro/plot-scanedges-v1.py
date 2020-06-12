@@ -46,7 +46,7 @@ def show_values(pc, fmt="%.2f", **kw):
             color = (1.0, 1.0, 1.0)
         ax.text(x, y, fmt % value, ha="center", va="center", color=color, **kw)
 
-def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
+def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None, output=None, suffix=()):
     if dataall is None:
         assert low is not None
         assert high is not None
@@ -185,6 +185,9 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     ax.axhline(high[-2], **lines2opts)
     axd = ax
 
+    ax.set_xlim(right=3.4)
+    savefig(output, suffix=suffix+('zoom',))
+
     if not scale:
         return axd, None, None
     #
@@ -237,6 +240,8 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     axc.axvline(both_x[idx], linestyle='--', alpha=0.5, label='worst split: {}={:.2f} at {} MeV'.format(dchi2, worst_split, worst_dchi2))
     axc.legend()
 
+    savefig(output, suffix=suffix+('split',))
+
     #
     # Moving window
     #
@@ -245,15 +250,15 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
     ax.xaxis.set_tick_params(top=True, labeltop=True, which='both')
     ax.minorticks_on()
     ax.grid()
-    ax.axhline(np.max(Data), linestyle='--', label='Full')
-    ax.axhline(worst_dchi2, linestyle='--', label='Min split', alpha=0.6, color='blue')
+    plt.subplots_adjust(right=0.81)
 
     Wunique = np.unique(W)
 
     maxpath_x = []
     maxpath_y = []
     maxpath_fun = []
-    for w in reversed(Wunique):
+    counter = 0
+    for w in Wunique:
         if w<=0.0:
             continue
 
@@ -274,9 +279,20 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
             # else:
             eopts=dict(alpha=1, linewidth=0.5, capsize=3)
             ax.errorbar([xmax], [ymax], xerr=w*0.5, fmt='o-', markerfacecolor='none', color=color, **eopts)
+            counter+=1
 
-    plt.subplots_adjust(right=0.81)
-    ax.legend(title='Width:', bbox_to_anchor=(1.0, 1.15), loc='upper left', labelspacing=0.1)
+            if counter%5==0:
+                handles, labels = ax.get_legend_handles_labels()
+                ax.legend(handles[::-1], labels[::-1], title='Width:', bbox_to_anchor=(1.0, 1.15), loc='upper left', labelspacing=0.1)
+                savefig(output, suffix=suffix+('window',str(counter)))
+
+            if counter==8:
+                ax.axhline(worst_dchi2, linestyle='--', label='Min split', alpha=0.6, color='blue')
+
+    ax.axhline(np.max(Data), linestyle='--', label='Full')
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], title='Width:', bbox_to_anchor=(1.0, 1.15), loc='upper left', labelspacing=0.1)
+    savefig(output, suffix=suffix+('window',))
 
     #
     # Max path on the main plot
@@ -312,22 +328,28 @@ def plot_boxes(dataall=None, title=None, scale=False, low=None, high=None):
         mask = np.isclose(Data, fun)
         maxpath_x.append(Lcenter[mask][0])
         maxpath_y.append(Hcenter[mask][0])
-    axd.plot(maxpath_x, maxpath_y, 'o', color='red', markerfacecolor='none', label='Moving window maximum position')
 
-    x = [Lcenter[0, 0],        Lcenter[worst_split_low_idx, -1]]
-    y = [Hcenter[0, worst_split_high_idx], Hcenter[0, -1]]
-    axd.plot(x, y, 'o', color='cyan', markerfacecolor='none', label='Worst split')
+    # Max path
+    xworst = [Lcenter[0, 0],        Lcenter[worst_split_low_idx, -1]]
+    yworst = [Hcenter[0, worst_split_high_idx], Hcenter[0, -1]]
 
     equiv_idx = np.argmin((Data-worst_dchi2)**2)
     equiv_idx = np.unravel_index(equiv_idx, Data.shape)
     equiv_idx1 = np.argmin((maxpath_fun-worst_dchi2)**2)
     x = [Lcenter[equiv_idx[0], equiv_idx[1]], maxpath_x[equiv_idx1]]
     y = [Hcenter[equiv_idx[0], equiv_idx[1]], maxpath_y[equiv_idx1]]
-    axd.plot(x, y, 'o', color='red', alpha=0.8, markerfacecolor='red', label='Closest to worst split')
 
+    # plot
+    axd.plot(xworst, yworst, 'o', color='cyan', markerfacecolor='none', label='Worst split')
     axd.legend(bbox_to_anchor=(1.2, -0.15), loc='lower right', ncol=3, fontsize='small', numpoints=2)
 
-    return axd, ax, axc
+    savefig(output, suffix=suffix+('zoom_2',))
+
+    axd.plot(maxpath_x, maxpath_y, 'o', color='red', markerfacecolor='none', label='Moving window maximum position')
+    axd.plot(x, y, 'o', color='red', alpha=0.8, markerfacecolor='red', label='Closest to worst split')
+    axd.legend(bbox_to_anchor=(1.2, -0.15), loc='lower right', ncol=3, fontsize='small', numpoints=2)
+
+    savefig(output, suffix=suffix+('zoom_3',))
 
 def load_data(args):
     data = {}
@@ -384,25 +406,7 @@ def main(args):
 
     data = load_data(args)
     for i, (idata, title) in enumerate(it.zip_longest(data.values(), args.title)):
-        # plot_boxes(low, high, scan, title=title)
-        # savefig(args.output, suffix='_{}_full'.format(i))
-
-        # ax=plt.gca()
-        # ax.set_xlim(right=4.0)
-        # savefig(args.output, suffix='_{}_zoom'.format(i))
-
-        _, axw, axc = plot_boxes(idata, title=title, scale=True)
-        # savefig(args.output, suffix='_{}_scaled_full'.format(i))
-
-        ax=plt.gca()
-        ax.set_xlim(right=3.4)
-        savefig(args.output, suffix='_{}_scaled_zoom'.format(i))
-
-        plt.sca(axw)
-        savefig(args.output, suffix='_{}_window'.format(i))
-
-        plt.sca(axc)
-        savefig(args.output, suffix='_{}_split'.format(i))
+        plot_boxes(idata, title=title, scale=True, output=args.output, suffix=('_{}_scaled'.format(i),))
 
     plt.show()
 
