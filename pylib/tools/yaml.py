@@ -29,3 +29,6 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
+def yaml_load(s):
+    ret = yaml.load(s, Loader=yaml.Loader)
+    return ret
