@@ -46,7 +46,8 @@ def saveobjects(odir, obj, verbose):
         for k, v in obj.walkitems():
             path, name = k[:-1], k[-1]
             if path:
-                subdir = odir.mkdir('/'.join(path), '', True)
+                path = '/'.join(path)
+                subdir = odir.GetDirectory(path) or odir.mkdir(path)
             else:
                 subdir = odir
             saveobjects(subdir, v, verbose)

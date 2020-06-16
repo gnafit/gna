@@ -25,7 +25,7 @@ def unpack(output, *args, **kwargs):
             raise ValueError('Invalid histogram dimension '+str(ndim))
     elif dtype.kind==1:
         # return unpack_points(output, dtype, *args, **kwargs)
-        raise Exception('Saving array is not implemented')
+        raise Exception('Saving TArray is not implemented')
 
     raise ValueError('Uninitialized output')
 
