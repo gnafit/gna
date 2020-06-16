@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
 # -*- coding: utf-8 -*-
@@ -41,6 +42,8 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         self.annihilation_electrons_p_input = buf
         self.annihilation_electrons_edges_input = edges
         self.annihilation_electrons_centers_input = 0.5*(edges[1:]+edges[:-1])
+
+        file.Close()
 
     def build(self):
         with entryContext(subgraph='LSNL'):
@@ -230,4 +233,3 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             from gna.parameters import covariance_helpers as ch
             pars=[ns[par] for par in correlations_pars]
             ch.covariate_pars(pars, corrmatrix)
-

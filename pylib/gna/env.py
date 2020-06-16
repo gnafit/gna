@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 from collections import defaultdict, deque, Mapping, OrderedDict
 import parameters
@@ -198,6 +199,20 @@ class namespace(Mapping):
             return ns.__getitem__(head)
 
         v = self.storage[head]
+        if isinstance(v, basestring):
+            return env.nsview[v]
+        return v
+
+    def get(self, name, *args):
+        if not name:
+            return self
+
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage.get(head, *args)
         if isinstance(v, basestring):
             return env.nsview[v]
         return v
@@ -484,6 +499,9 @@ class _environment(object):
         self.parameters = parametersview()
         self.pars = self.parameters
         self.parts = envparts()
+
+        from tools.dictwrapper import DictWrapper
+        self.future = DictWrapper(OrderedDict(), split='.')
 
     def view(self, ns):
         if ns != self.globalns:

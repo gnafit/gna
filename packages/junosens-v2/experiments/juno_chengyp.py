@@ -618,4 +618,3 @@ The model is succeeded by juno_sensitivity_v01 model.
 
             eres_cw           = dict(expr='eres*pmns'),
             )
-
