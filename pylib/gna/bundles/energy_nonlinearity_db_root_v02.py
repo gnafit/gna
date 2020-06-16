@@ -126,7 +126,8 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         for it in self.detector_idx.iterate():
             self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
-    def interpolate(self, x, y, edges):
+    def interpolate(self, todo_good_name, edges):
+        x, y = todo_good_name
         fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
         fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
         res = fcn( edges )

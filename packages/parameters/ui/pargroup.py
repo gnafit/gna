@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A group of paraeters UI: select a set of parameters and store"""
+"""A group of parameters UI: select a set of parameters and store"""
 
 from __future__ import print_function
 import ROOT
