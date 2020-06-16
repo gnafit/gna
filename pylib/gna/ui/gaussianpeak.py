@@ -60,6 +60,8 @@ class cmd(basecmd):
 
         common_ns.addobservable('spectrum', peak_sum)
         futurens['spectrum'] = peak_sum.single()
+        futurens[('fcn', 'x')] = integrator.points.x
+        futurens[('fcn', 'y')] = model.rate.rate
 
         if self.opts.with_eres:
             with common_ns:
