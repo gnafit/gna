@@ -1,5 +1,6 @@
 """Plot 1d ovservables"""
 
+from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
 from matplotlib import pyplot as plt
@@ -9,39 +10,32 @@ import numpy as np
 from tools.yaml import yaml_load
 from gna.bindings import common
 from gna.env import PartNotFoundError, env
-from mpl_tools.gna2mpl import is
 
-def unpack(out):
+def unpack(output):
     dtype = output.datatype()
     if dtype.kind==2:
-        return unpack_hist(out, dtype)
+        return unpack_hist(output, dtype)
     elif dtype.kind==1:
-        return unpack_points(out, dtype)
+        return unpack_points(output, dtype)
 
     raise ValueError('Uninitialized output')
 
-def unpack_hist(out, dtype):
-    dtype = dtype or out.datatype()
+def unpack_common(output, dtype, **kwargs):
+    dtype = dtype or output.datatype()
 
     ret = dict(
-        type  = 'hist',
-        data  = out.data(),
-        edges = [np.array(e) for e in dtype.edgesNd],
+        data  = output.data().copy(),
         shape = np.array(dtype.shape),
         ndim  = len(dtype.shape)
         )
+    ret.update(kwargs)
     return ret
 
-def unpack_points(out, dtype):
-    dtype = dtype or out.datatype()
+def unpack_hist(output, dtype):
+    return unpack_common(output, dtype, type='hist', edges=[np.array(e) for e in dtype.edgesNd])
 
-    ret = dict(
-        type  = 'points',
-        data  = out.data(),
-        shape = np.array(dtype.shape),
-        ndim  = len(dtype.shape)
-        )
-    return ret
+def unpack_points(output, dtype):
+    return unpack_common(output, dtype, type='points')
 
 class cmd(basecmd):
     def __init__(self, *args, **kwargs):
@@ -49,18 +43,32 @@ class cmd(basecmd):
 
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-c', '--copy', nargs=2, action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
+        parser.add_argument('-s', '--root-source', default=(), help='root namespace to copy from')
+        parser.add_argument('-t', '--root-target', default=(), help='root namespace to copy to')
+        parser.add_argument('-c', '--copy', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
+        # parser.add_argument('-p', '--copy-plot', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
 
     def run(self):
-        ns = self.env.future
-        for frm, to in self.opts.copy:
+        source = self.env.future.child(self.opts.root_source)
+        target = self.env.future.child(self.opts.root_target)
+        for copydef in self.opts.copy:
+            if len(copydef)<2:
+                raise Exception('Invalid number of `copy` arguments: '+str(len(copydef)))
+            (frm, to), extra = copydef[:2], copydef[2:]
             try:
-                obs = ns[frm]
+                obs = source[frm]
             except KeyError:
                 print('Unable to find key:', frm)
 
             data = unpack(obs)
-            self.env.future[to] = data
+            target[to] = data
+
+            for ext in extra:
+                try:
+                    upd = yaml_load(ext)
+                except Exception:
+                    print('Unable to parse extra info:', ext)
+                data.update(upd)
 
 def list_get(lst, idx, default):
     return lst[idx] if idx<len(lst) else default
