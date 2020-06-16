@@ -69,3 +69,5 @@ class exp(baseexp):
             obs = C.Histogram(edges, data)
             self.data.append(obs)
             self.namespace.addobservable(name, obs.hist)
+
+        roo_file.Close()

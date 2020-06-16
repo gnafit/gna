@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from __future__ import absolute_import
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna import constructors as C
@@ -12,23 +11,30 @@ from load import ROOT as R
 seconds_per_day = 60*60*24
 class exp(baseexp):
     """
-JUNO experiment implementation
+JUNO experiment implementation v02 -> frozen
+(next version is v03-common)
 
-Derived [2019.12] from:
-    - Daya Bay model from dybOscar and GNA
-    - juno_chengyp
+Derived from:
+    - [2019.12] Daya Bay model from dybOscar and GNA
+    - [2019.12] juno_chengyp
+    - [2020.04] juno_sensitivity_v01
 
-Changes since previous implementation [juno_chengyp]:
+Changes since previous implementation [juno_sensitivity_v01]:
     - Dropped Enu-mode support
-    - WIP: add matter oscillations
+    - Add matter oscillations
+    - Accidentals, fastn, Li/He, AlphaN
+    - Add free spectral parameters
+    - SNF, Off-equilibrium
+    - WIP: geo-neutrino
 
 Implements:
     - Reactor antineutrino flux:
       * Spectra:
         + ILL+Vogel (now default)
         + Huber+Mueller
+        + Free
       * [optional] Off-equilibrium corrections (Mueller)
-      * NO SNF contribution
+      * [optional] SNF contribution
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
     - Final binning:
@@ -36,9 +42,7 @@ Implements:
       * 10 keV (default)
     - [optional] Birks-Cherenkov detector energy responce (Yaping)
     - [optional] Detector energy resolution
-    - [optional] Multi-detector energy resolution (Yaping)
-        * subdetectors summed togather
-        * subdetectors concatenated
+    - [optional] Multi-detector energy resolution (Yaping), concatenated
 
 Misc changes:
     - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
@@ -47,6 +51,11 @@ Misc changes:
     - Uncomment uncertainties:
       * energy per fission
       * fission fractions
+    - [2020.04.24] Modify fluxes summation and integration sequence to introduce geo-neutrino spectra
+    - [2020.05.05] Add backgrounds
+    - [2020.05.11] Remove multieres summation mode
+    - [2020.05.11] Add SNF
+    - [2020.05.15] Remove multieres option. Keep the code (not working)
     """
 
     detectorname = 'AD1'
@@ -61,22 +70,30 @@ Misc changes:
         parser.add_argument('--stats', action='store_true', help='print stats')
 
         # Energy model
-        parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
-        parser.add_argument('--subdetectors-number', type=int, choices=(200, 5), help='Number of subdetectors (multieres mode)')
-        parser.add_argument('--multieres', default='sum', choices=['sum', 'concat'], help='How to treat subdetectors (multieres mode)')
-        parser.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
+        emodel = parser.add_argument_group('emodel', description='Energy model parameters')
+        emodel.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres'], default=['lsnl', 'eres'], help='Energy model components')
+        emodel.add_argument('--eres-b-relsigma', type=float, help='Energy resolution parameter (b) relative uncertainty')
 
-        eres = parser.add_mutually_exclusive_group()
+        eres = emodel.add_mutually_exclusive_group()
         eres.add_argument('--eres-sigma', type=float, help='Energy resolution at 1 MeV')
         eres.add_argument('--eres-npe', type=float, default=1350.0, help='Average Npe at 1 MeV')
 
-        # binning
-        parser.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Binning step')
+        # Backgrounds and geo-neutrino
+        bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
+        bkg_choices = ['acc', 'lihe', 'fastn', 'alphan']
+        bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable background group')
+
+        # Binning
+        binning=parser.add_argument_group('binning', description='Binning related options')
+        binning.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Internal binning step')
+        binning.add_argument('--final-emin', type=float, help='Final binning Emin')
+        binning.add_argument('--final-emax', type=float, help='Final binning Emax')
 
         # reactor flux
-        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'pessimistic', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
+        parser.add_argument('--reactors', choices=['single', 'near-equal', 'far-off', 'halfts', 'nohz', 'dayabay'], default=[], nargs='+', help='reactors options')
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
         parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
+        parser.add_argument('--snf', action='store_true', help="Enable SNF contribution")
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
@@ -85,7 +102,7 @@ Misc changes:
         parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--dm', default='ee', choices=('23', 'ee'), help='Δm² parameter to use')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
-        parser.add_argument('--spectrum-unc', choices=['initial', 'final', 'none'], default='none', help='type of the spectral uncertainty')
+        parser.add_argument('--spectrum-unc', action='store_true', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
@@ -103,12 +120,12 @@ Misc changes:
             self.print_stats()
 
     def init_nidx(self):
-        if self.opts.subdetectors_number:
-            self.subdetectors_names = ['subdet%03i'%i for i in range(self.opts.subdetectors_number)]
+        if 'multieres' in self.opts.energy_model:
+            self.subdetectors_names = ['subdet%03i'%i for i in range(5)]
         else:
             self.subdetectors_names = ()
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'TS3', 'TS4', 'DYB', 'HZ']
-        if 'pessimistic' in self.opts.reactors:
+        if 'halfts' in self.opts.reactors:
             self.reactors.remove('TS3')
             self.reactors.remove('TS4')
         if 'far-off' in self.opts.reactors:
@@ -131,46 +148,118 @@ Misc changes:
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
-        if 'eres' in self.opts.energy_model and 'multieres' in self.opts.energy_model:
+        energy_model = self.opts.energy_model
+        if 'eres' in energy_model and 'multieres' in energy_model:
             raise Exception('Energy model options "eres" and "multieres" are mutually exclusive: use only one of them')
 
-        self.formula = list(self.formula_base)
+        #
+        # Optional formula parts
+        #
+        formula_options = dict(
+                #
+                # Oscillation probability
+                #
+                oscprob = dict(
+                    vacuum='sum[c]| pmns[c]*oscprob[c,d,r](enu())' ,
+                    matter='oscprob_matter[d,r](enu())'
+                    )[self.opts.oscprob],
+                #
+                # Geo neutrino
+                #
+                geonu_spectrum = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
+                                 if 'geo' in self.opts.bkg else '',
+                #
+                # Reactor
+                #
+                offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else '',
+                shape_norm       = '*shape_norm()'                 if self.opts.spectrum_unc else '',
+                snf              = '+snf_in_reac'                  if self.opts.snf else '',
+                #
+                # Energy model
+                #
+                lsnl = 'lsnl|'                                                if 'lsnl' in energy_model else '',
+                eres = 'eres|'                                                if 'eres' in energy_model else
+                       'concat[s]| rebin| subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model else
+                       '',
+                #
+                # Backgrounds
+                #
+                accidentals = '+accidentals' if 'acc'    in self.opts.bkg else '',
+                lihe        = '+lihe'        if 'lihe'   in self.opts.bkg else '',
+                alphan      = '+alphan'      if 'alphan' in self.opts.bkg else '',
+                fastn       = '+fastn'       if 'fastn'  in self.opts.bkg else '',
+                # geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
+                #
+                # IBD rebinning
+                #
+                ibd         = 'ibd'          if 'multieres' in energy_model else 'rebin(ibd)',
+                )
 
-        oscprob_part = self.opts.oscprob=='vacuum' and self.formula_oscprob_vacuum or self.formula_oscprob_matter
-        offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else ''
-        ibd = self.formula_ibd_noeffects.format(oscprob=oscprob_part, offeq_correction=offeq_correction)
-        self.formula = self.formula + self.formula_enu
-
-        energy_model_formula = ''
-        energy_model = self.opts.energy_model
-        concat_subdetectors=False
-        if 'lsnl' in energy_model:
-            energy_model_formula = 'lsnl| '
-            self.formula.append('evis_edges_hist| evis_hist')
-        if 'eres' in energy_model:
-            energy_model_formula = 'eres| '+energy_model_formula
-            self.formula.append('eres_matrix| evis_hist')
-        elif 'multieres' in energy_model:
-            if self.opts.multieres=='sum':
-                energy_model_formula = 'sum[s]| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-                self.formula.append('eres_matrix[s]| evis_hist')
-            elif self.opts.multieres=='concat':
-                energy_model_formula = 'concat[s]| rebin| subdetector_fraction[s] * eres[s]| '+energy_model_formula
-                self.formula.append('eres_matrix[s]| evis_hist')
-                concat_subdetectors = True
-
-        if concat_subdetectors:
-            formula_back = 'observation=norm * ibd'
-        else:
-            formula_back = 'observation=norm * rebin(ibd)'
-
-        if self.opts.spectrum_unc=='initial':
-            ibd = ibd+'*shape_norm()'
-        elif self.opts.spectrum_unc=='final':
-            formula_back = formula_back+'*shape_norm()'
-
-        self.formula.append('ibd=' + energy_model_formula + ibd)
-        self.formula.append(formula_back)
+        self.formula = [
+                # Some common definitions
+                'baseline[d,r]',
+                'livetime[d]',
+                'conversion_factor',
+                'efflivetime = eff * livetime[d]',
+                # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
+                #
+                # Neutrino energy
+                #
+                'evis_hist=evis_hist()',
+                'enu| ee(evis()), ctheta()',
+                #
+                # Energy model
+                #
+                'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
+                'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
+                'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
+                #
+                # Reactor part
+                #
+                'numerator = efflivetime * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                             'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
+                             'conversion_factor * target_protons[d]',
+                'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
+                'eper_fission_avg = sum[i]| isotope_weight * fission_fractions_nominal[r,i]()',
+                'power_livetime_factor = numerator / eper_fission_avg',
+                'anuspec[i](enu())',
+                #
+                # SNF
+                #
+                'eper_fission_avg_nominal = sum[i] | eper_fission_nominal[i] * fission_fractions_nominal[r,i]()',
+                'snf_plf_daily = conversion_factor * thermal_power_nominal[r] * fission_fractions_nominal[r,i]() / eper_fission_avg_nominal',
+                'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i]()',
+                'snf_in_reac = snf_norm * efflivetime * target_protons[d] * snf_correction(enu(), nominal_spec_per_reac)',
+                #
+                # Backgrounds
+                #
+                'accidentals = days_in_second * efflivetime * acc_rate    * acc_norm    * rebin_acc[d]|    acc_spectrum[d]()',
+                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
+                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
+                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
+                #
+                # IBD part
+                #
+                '''ibd={eres} {lsnl}
+                    kinint2(
+                      sum[r]|
+                        (
+                            baselineweight[r,d]*
+                            ( reactor_active_norm * (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
+                            {oscprob}
+                            {geonu_spectrum}
+                        )*
+                        bracket(
+                            ibd_xsec(enu(), ctheta())*
+                            jacobian(enu(), ee(), ctheta())
+                        )
+                    ) {shape_norm}
+                '''.format(**formula_options),
+                #
+                # Total observation
+                #
+                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn}'.format(**formula_options)
+                ]
 
     def parameters(self):
         ns = self.namespace
@@ -210,27 +299,50 @@ Misc changes:
             self.opts.eres_npe = self.opts.eres_sigma**-2
         print('Energy resolution at 1 MeV: {}% ({} pe)'.format(self.opts.eres_sigma*100, self.opts.eres_npe))
 
-        self.cfg = NestedDict(
-                kinint2 = NestedDict(
-                    bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
-                    variables = ('evis', 'ctheta'),
-                    edges    = np.arange(0.0, 12.001, 0.01), #FIXME
-                    #  edges    = np.linspace(0.0, 12.001, 601),
-                    xorders   = 4,
-                    yorder   = 5,
-                    ),
-                rebin = NestedDict(
-                        bundle = dict(name='rebin', version='v03', major=''),
-                        rounding = 3,
-                        edges = np.concatenate( (
+        edges    = np.arange(0.0, 12.001, 0.01) #FIXME
+        edges_final = np.concatenate( (
                                     [0.7],
                                     np.arange(1, 6.0, self.opts.estep),
                                     np.arange(6, 7.0, 0.1),
                                     [7.0, 7.5, 12.0]
                                 )
-                            ),
-                        name = 'rebin',
-                        label = 'Final histogram {detector}'
+                            )
+        if self.opts.final_emin is not None:
+            print('Truncate final binning E>={}'.format(self.opts.final_emin))
+            edges_final = edges_final[edges_final>=self.opts.final_emin]
+        if self.opts.final_emax is not None:
+            print('Truncate final binning E<={}'.format(self.opts.final_emax))
+            edges_final = edges_final[edges_final<=self.opts.final_emax]
+        if self.opts.final_emin is not None or self.opts.final_emax is not None:
+            print('Final binning:', edges_final)
+        self.cfg = NestedDict(
+                kinint2 = NestedDict(
+                    bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
+                    variables = ('evis', 'ctheta'),
+                    edges     = edges,
+                    #  edges   = np.linspace(0.0, 12.001, 601),
+                    xorders   = 4,
+                    yorder    = 5,
+                    ),
+                rebin = NestedDict(
+                        bundle = dict(name='rebin', version='v04', major=''),
+                        rounding = 5,
+                        edges = edges_final,
+                        instances={
+                            'rebin': 'Final histogram {detector}',
+                            }
+                        ),
+                rebin_bkg = NestedDict(
+                        bundle = dict(name='rebin', version='v04', major=''),
+                        rounding = 5,
+                        edges = edges_final,
+                        instances={
+                            'rebin_acc': 'Accidentals {autoindex}',
+                            'rebin_li': '9Li {autoindex}',
+                            'rebin_he': '8He {autoindex}',
+                            'rebin_fastn': 'Fast neutrons {autoindex}',
+                            'rebin_alphan': 'C(alpha,n)O {autoindex}'
+                            }
                         ),
                 ibd_xsec = NestedDict(
                     bundle = dict(name='xsec_ibd', version='v02'),
@@ -249,19 +361,25 @@ Misc changes:
                     dm      = self.opts.dm
                     ),
                 anuspec_hm = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='huber-mueller'),
+                    bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                        'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                                'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                    free_params=False, # enable free spectral model
+                    varmode='log',
+                    varname='anue_weight_{index:02d}',
+                    ns_name='spectral_weights',
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 anuspec_ill = NestedDict(
-                    bundle = dict(name='reactor_anu_spectra', version='v03', inactive=self.opts.flux!='ill-vogel'),
+                    bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='ill-vogel'),
                     name = 'anuspec',
                     filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                                 'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                    # strategy = dict( underflow='constant', overflow='extrapolate' ),
+                    free_params=False, # enable free spectral model
+                    varmode='log',
+                    varname='anue_weight_{index:02d}',
+                    ns_name='spectral_weights',
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 offeq_correction = NestedDict(
@@ -269,6 +387,10 @@ Misc changes:
                                   version='v03', major='ir'),
                     offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                     ),
+                geonu = NestedDict(
+                    bundle = dict(name='geoneutrino_spectrum', version='v01'),
+                    data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
+                ),
                 eff = NestedDict(
                     bundle = dict(
                         name='parameters',
@@ -287,10 +409,15 @@ Misc changes:
                     ),
                 fission_fractions = NestedDict(
                     bundle = dict(name="parameters_yaml_v01", major = 'i'),
-                    parameter = "fission_fractions",
+                    parameter = 'fission_fractions_nominal',
+                    separate_uncertainty = "fission_fractions_scale",
                     label = 'Fission fraction of {isotope} in reactor {reactor}',
                     objectize=True,
                     data = 'data/data_juno/fission_fractions/2013.12.05_xubo.yaml'
+                    ),
+                snf_correction = NestedDict(
+                    bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
+                    snf_average_spectra = './data/data-common/snf/2004.12-kopeikin/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
                     ),
                 livetime = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -316,7 +443,7 @@ Misc changes:
                         ),
                 thermal_power = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
-                        parameter = "thermal_power",
+                        parameter = "thermal_power_nominal",
                         label = 'Thermal power of {reactor} in GWt',
                         pars = uncertaindict([
                             ('TS1',  4.6),
@@ -335,6 +462,7 @@ Misc changes:
                             uncertainty=0.8,
                             mode='percent'
                             ),
+                        separate_uncertainty = 'thermal_power_scale'
                         ),
                 target_protons = NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -351,9 +479,15 @@ Misc changes:
                         #taken from transformations/neutrino/ReactorNorm.cc
                         pars = uncertain(R.NeutrinoUnits.reactorPowerConversion, 'fixed'),
                         ),
+                days_in_second =  NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter='days_in_second',
+                        label='Number of days in a second',
+                        pars = uncertain(1.0/(24.0*60.0*60.0), 'fixed'),
+                        ),
                 eper_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
-                        parameter = "eper_fission",
+                        parameter = 'eper_fission_nominal',
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [
@@ -364,6 +498,7 @@ Misc changes:
                               ],
                             mode='absolute'
                             ),
+                        separate_uncertainty = 'eper_fission_scale'
                         ),
                 lsnl = NestedDict(
                         bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
@@ -403,7 +538,114 @@ Misc changes:
                 shape_uncertainty = NestedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
-                        )
+                        ),
+                snf_norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'snf_norm',
+                        label='SNF norm',
+                        pars = uncertain(1.0, 'fixed'),
+                        ),
+                reactor_active_norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'reactor_active_norm',
+                        label='Reactor nu (active norm)',
+                        pars = uncertain(1.0, 'fixed'),
+                        ),
+                #
+                # Backgrounds
+                #
+                acc_spectrum_db = NestedDict(
+                    bundle    = dict(name='root_histograms_v04', inactive=True),
+                    filename  = 'data/data_juno/bkg/acc/2016_acc_dayabay_p15a/dayabay_acc_spectrum_p15a.root',
+                    format    = 'accidentals',
+                    name      = 'acc_spectrum',
+                    label     = 'Accidentals|norm spectrum',
+                    normalize = True
+                    ),
+                acc_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v04'),
+                    filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
+                    format    = 'hAcc',
+                    name      = 'acc_spectrum',
+                    label     = 'Accidentals|norm spectrum',
+                    normalize = slice(200,-1),
+                    xscale    = 1.e-3,
+                    ),
+                fastn_spectrum=NestedDict(
+                        bundle=dict(name='histogram_flat_v01'),
+                        name='fastn_spectrum',
+                        edges=edges,
+                        label='Fast neutron|norm spectrum',
+                        normalize=(0.7, 12.0),
+                        ),
+                li_spectrum=NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyli9spec_BCWmodel_v1_2400.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'li_spectrum',
+                    label     = '9Li spectrum|norm',
+                    normalize = True,
+                    ),
+                he_spectrum= NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyhe8spec_BCWmodel_v1_2400.root',
+                    format    = 'h_eVisAllSmeared',
+                    name      = 'he_spectrum',
+                    label     = '8He spectrum|norm',
+                    normalize = True,
+                    ),
+                alphan_spectrum = NestedDict(
+                    bundle    = dict(name='root_histograms_v03'),
+                    filename  = 'data/data_juno/bkg/alphan/2012_dayabay_alphan/P12B_alphan_2400.root',
+                    format    = 'AD1',
+                    name      = 'alphan_spectrum',
+                    label     = 'C(alpha,n) spectrum|(norm)',
+                    normalize = True,
+                    ),
+                lihe_fractions=NestedDict(
+                        bundle = dict(name='var_fractions_v02'),
+                        names = [ 'li', 'he' ],
+                        format = 'frac_{component}',
+                        fractions = uncertaindict(
+                            li = ( 0.95, 0.05, 'relative' )
+                            ),
+                        ),
+                # bkg_spectra = NestedDict(
+                    # bundle    = dict(name='root_histograms_v05'),
+                    # filename  = 'data/data_juno/bkg/group/2020-05-JUNO-YB/JunoBkg_evis_2400.root',
+                    # formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',   'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
+                    # names      = ['acc_spectrum',                'lihe_spectrum',       'fn_spectrum',            'alphan_spectrum',        'geonu_spectrum'],
+                    # labels     = ['Accidentals|(norm spectrum)', '9Li|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
+                    # normalize = True,
+                    # ),
+                acc_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'acc_rate',
+                        label='Acc rate',
+                        pars = uncertain(0.9, 1, 'percent'),
+                        separate_uncertainty='acc_norm',
+                        ),
+                fastn_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'fastn_rate',
+                        label='Fast n rate',
+                        pars = uncertain(0.1, 100, 'percent'),
+                        separate_uncertainty='fastn_norm',
+                        ),
+                lihe_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'lihe_rate',
+                        label='9Li/8He rate',
+                        pars = uncertain(1.6, 20, 'percent'),
+                        separate_uncertainty='lihe_norm',
+                        ),
+                alphan_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'alphan_rate',
+                        label='C(alpha,n)O rate',
+                        pars = uncertain(0.05, 50, 'percent'),
+                        separate_uncertainty='alphan_norm',
+                        ),
                 )
 
         if 'eres' in self.opts.energy_model:
@@ -413,53 +655,31 @@ Misc changes:
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                     parameter = 'eres',
                     pars = uncertaindict([
-                        ('a', (0.000, 'fixed')),
-                        ('b', (self.opts.eres_sigma,)+bconf),
+                        ('a', (0.000, 'fixed')) ,
+                        ('b', (self.opts.eres_sigma,)+bconf) ,
                         ('c', (0.000, 'fixed'))
                         ]),
                     expose_matrix = False
                     )
         elif 'multieres' in self.opts.energy_model:
-            if self.opts.subdetectors_number==200:
-                self.cfg.subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v02"),
-                        parameter = "subdetector_fraction",
-                        label = 'Subdetector fraction weight for {subdetector}',
-                        pars = uncertaindict(
-                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            ),
-                        correlations = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/corrmap_xuyu.txt'
-                        )
-                self.cfg.multieres = NestedDict(
-                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
-                        # pars: sigma_e/e = sqrt(b^2/E),
-                        parameter = 'eres',
-                        relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector200_nph.txt',
-                        rescale_nph = self.opts.eres_npe,
-                        expose_matrix = False
-                        )
-            elif self.opts.subdetectors_number==5:
-                self.cfg.subdetector_fraction = NestedDict(
-                        bundle = dict(name="parameters", version = "v03"),
-                        parameter = "subdetector_fraction",
-                        label = 'Subdetector fraction weight for {subdetector}',
-                        pars = uncertaindict(
-                            [(subdet_name, (1.0/self.opts.subdetectors_number, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
-                            ),
-                        covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_cov.txt'
-                        )
-                self.cfg.multieres = NestedDict(
-                        bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
-                        # pars: sigma_e/e = sqrt(b^2/E),
-                        parameter = 'eres',
-                        relsigma = self.opts.eres_b_relsigma,
-                        nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_nph.txt',
-                        rescale_nph = self.opts.eres_npe,
-                        expose_matrix = False
-                        )
-            else:
-                assert False
+            self.cfg.subdetector_fraction = NestedDict(
+                    bundle = dict(name="parameters", version = "v03"),
+                    parameter = "subdetector_fraction",
+                    label = 'Subdetector fraction weight for {subdetector}',
+                    pars = uncertaindict(
+                        [(subdet_name, (0.2, 0.04, 'relative')) for subdet_name in self.subdetectors_names],
+                        ),
+                    covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_cov.txt'
+                    )
+            self.cfg.multieres = NestedDict(
+                    bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
+                    # pars: sigma_e/e = sqrt(b^2/E),
+                    parameter = 'eres',
+                    relsigma = self.opts.eres_b_relsigma,
+                    nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_nph.txt',
+                    rescale_nph = self.opts.eres_npe,
+                    expose_matrix = False
+                    )
 
         if not 'lsnl' in self.opts.correlation:
             self.cfg.lsnl.correlations = None
@@ -471,15 +691,11 @@ Misc changes:
         self.cfg.livetime.pars['AD1'] = uncertain( 6*330*seconds_per_day, 'fixed' )
 
     def preinit_variables(self):
-        if self.opts.spectrum_unc in ['final', 'initial']:
+        if self.opts.spectrum_unc:
             spec = self.namespace('spectrum')
             cfg = self.cfg.shape_uncertainty
             unc = cfg.unc
-
-            if self.opts.spectrum_unc=='initial':
-                edges = self.cfg.kinint2.edges
-            elif self.opts.spectrum_unc=='final':
-                edges = self.cfg.rebin.edges
+            edges = self.cfg.rebin.edges
 
             # bin-to-bin should take into account the number of bins it is applied to
             unccorrection = ((edges.size-1.0)/cfg.nbins)**0.5
@@ -503,10 +719,6 @@ Misc changes:
                     unc    = cfg.unc,
                     object = vararray
                     )
-        elif self.opts.spectrum_unc=='none':
-            pass
-        else:
-            raise Exception('Unknown spectrum shape uncertainty type: '+self.opts.spectrum_unc)
 
     def build(self):
         from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
@@ -574,10 +786,9 @@ Misc changes:
             fine = outputs.eres.AD1
 
         if 'multieres' in self.opts.energy_model:
-            if self.opts.multieres=='concat' and self.opts.subdetectors_number<10:
-                sns = ns('{}_sub'.format(self.detectorname))
-                for i, out in enumerate(outputs.rebin.AD1.values()):
-                    sns.addobservable("sub{:02d}".format(i), out)
+            sns = ns('{}_sub'.format(self.detectorname))
+            for i, out in enumerate(outputs.rebin.AD1.values()):
+                sns.addobservable("sub{:02d}".format(i), out)
             ns.addobservable("{0}_eres".format(self.detectorname),     outputs.ibd.AD1)
             fine = outputs.ibd.AD1
 
@@ -592,33 +803,6 @@ Misc changes:
         report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
         print('Statistics', walker.get_stats())
         print('Parameter statistics', self.stats)
-
-    formula_enu = ['evis_hist=evis_hist()', 'enu| ee(evis()), ctheta()']
-
-    formula_base = [
-            'baseline[d,r]',
-            'livetime[d]',
-            'conversion_factor',
-            'numerator = eff * livetime[d] * thermal_power[r] * '
-                 'fission_fractions[r,i]() * conversion_factor * target_protons[d] ',
-            'eper_fission_avg = sum[i] | eper_fission[i] * fission_fractions[r,i]()',
-            'power_livetime_factor = numerator / eper_fission_avg',
-    ]
-
-    formula_ibd_noeffects = '''
-                            kinint2(
-                              sum[r]|
-                                baselineweight[r,d]*
-                                ibd_xsec(enu(), ctheta())*
-                                jacobian(enu(), ee(), ctheta())*
-                                expand(sum[i]|
-                                power_livetime_factor*anuspec[i](enu()){offeq_correction})*
-                                {oscprob}
-                            )
-            '''
-
-    formula_oscprob_vacuum = 'sum[c]| pmns[c]*oscprob[c,d,r](enu())'
-    formula_oscprob_matter = 'oscprob_matter[d,r](enu())'
 
     lib = """
         cspec_diff:
@@ -666,7 +850,7 @@ Misc changes:
           expr: 'numerator'
           label: '{{Power-livetime factor (~MW)|{reactor}.{isotope}-\\>{detector}}}'
         power_livetime_scale:
-          expr: 'eff*livetime*thermal_power*conversion_factor*target_protons'
+          expr: 'eff*livetime*thermal_power_scale*thermal_power_nominal*conversion_factor*target_protons'
           label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}-\\>{detector}}}'
         anuspec_weighted:
           expr: 'anuspec*power_livetime_factor'
@@ -679,6 +863,9 @@ Misc changes:
           - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
           - 'anuspec_rd*ibd_xsec*oscprob_full'
           label: 'Countrate {reactor}-\\>{detector}'
+        ibd_xsec_rescaled:
+          expr: 'ibd_xsec*jacobian'
+          label: IBD cross section vs Evis
         countrate_weighted:
           expr: 'baselineweight*countrate_rd'
         countrate:
@@ -693,6 +880,9 @@ Misc changes:
           expr: 'sum:i|iso_spectrum_w'
         reac_spectrum_w:
           expr: 'baselineweight*reac_spectrum'
+        reac_spectrum_oscillated:
+          expr: 'anuspec_rd*oscprob_full'
+          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
         ad_spectrum_c:
           expr: 'sum:r|reac_spectrum_w'
         ad_spectrum_cw:

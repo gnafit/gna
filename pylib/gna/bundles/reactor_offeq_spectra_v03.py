@@ -19,7 +19,7 @@ class reactor_offeq_spectra_v03(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-            return ('offeq_scale',), ('offeq_correction',)
+            return ('offeq_scale', 'offeq_norm'), ('offeq_correction',)
 
     def _load_data(self):
         """Read raw input spectra"""
@@ -82,7 +82,6 @@ class reactor_offeq_spectra_v03(TransformationBundle):
                     fixed=True, labels="Dummy weight for reactor {1} and iso "
                     "{0} for offeq correction".format(iso, reac))
 
-
             outputs = [ones.single(), interpolator_trans.single()]
             weights = ['.'.join(("dummy_scale", idx.current_format())),
                        '.'.join((par_name, idx.current_format()))]
@@ -94,7 +93,6 @@ class reactor_offeq_spectra_v03(TransformationBundle):
 
             self.context.objects[name] = final_sum
             self.set_output("offeq_correction", idx, final_sum.single())
-
 
     def define_variables(self):
         pass

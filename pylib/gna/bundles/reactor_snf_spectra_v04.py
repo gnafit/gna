@@ -79,7 +79,7 @@ class reactor_snf_spectra_v04(TransformationBundle):
                                 labels='Product of nominal spectrum to SNF correction in {}'.format(reac))
 
             par_name = "snf_scale"
-            self.reqparameter(par_name, idx, central=1., relsigma=1.0,
+            self.reqparameter(par_name, idx, central=1., relsigma=1,
                               labels="SNF norm for reactor {0}".format(reac))
 
             outputs = [product.single()]
@@ -88,10 +88,8 @@ class reactor_snf_spectra_v04(TransformationBundle):
             with self.namespace:
                 final_sum = C.WeightedSum(weights, outputs, labels='SNF spectrum from {0} reactor'.format(reac))
 
-
             self.context.objects[name] = final_sum
             self.set_output("snf_correction", idx, final_sum.single())
-
 
     def define_variables(self):
         pass

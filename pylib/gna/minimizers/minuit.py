@@ -104,15 +104,16 @@ class Minuit(ROOT.TMinuitMinimizer):
         for i, par in enumerate(self.pars):
             self.setuppar(i, par, spec.get(par, {}))
 
-    def fixpar(self, name, val):
+    def fixpar(self, name, val=None, fixed=True):
         try:
             par = self.parsdict[name]
         except:
             raise Exception('Variable {} is not known to minimizer'.format(name))
 
         parspec=self.spec.setdefault(par, {})
-        parspec['fixed']=True
-        parspec['value']=val
+        parspec['fixed']=fixed
+        if val is not None:
+            parspec['value']=val
 
         self._reset = True
 
