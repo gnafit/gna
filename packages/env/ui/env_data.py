@@ -9,7 +9,7 @@ from mpl_tools.helpers import savefig
 import numpy as np
 from tools.yaml import yaml_load
 from gna.bindings import common
-from gna.env import PartNotFoundError, env
+from gna.env import env
 
 def unpack(output):
     dtype = output.datatype()
@@ -72,12 +72,18 @@ class cmd(basecmd):
         source = self.env.future.child(self.opts.root_source)
         target = self.env.future.child(self.opts.root_target)
 
+        if self.opts.verbose:
+            print('Converting to numpy')
         for copydef in self.opts.copy:
             if len(copydef)<2:
                 raise Exception('Invalid number of `copy` arguments: '+str(len(copydef)))
             (frmpath, to), extra = copydef[:2], copydef[2:]
-
-            for key, obs in source.walkitems(startfromkey=frmpath):
+            upd = yaml_load(extra)
+            try:
+                iterator = source.walkitems(startfromkey=frmpath)
+            except KeyError:
+                raise Exception('Invalid path: '+str(frmpath))
+            for key, obs in iterator:
                 try:
                     data = unpack(obs)
                 except ValueError:
@@ -87,9 +93,8 @@ class cmd(basecmd):
                 target[targetkey] = data
 
                 if self.opts.verbose:
-                    print('Convert {}->{}'.format('.'.join((frmpath,)+key), '.'.join(targetkey)))
+                    print('  {}->{}'.format('.'.join((frmpath,)+key), '.'.join(targetkey)))
 
-                upd = yaml_load(extra)
                 data.update(upd)
 
         for copydef in self.opts.copy_graph:

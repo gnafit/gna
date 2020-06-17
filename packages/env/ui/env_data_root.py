@@ -25,7 +25,7 @@ def unpack(output, *args, **kwargs):
             raise ValueError('Invalid histogram dimension '+str(ndim))
     elif dtype.kind==1:
         # return unpack_points(output, dtype, *args, **kwargs)
-        raise Exception('Saving TArray is not implemented')
+        raise ValueError('Saving TArray is not implemented')
 
     raise ValueError('Uninitialized output')
 
@@ -95,23 +95,34 @@ class cmd(basecmd):
         parser.add_argument('-t', '--root-target', default=(), help='root namespace to copy to')
         parser.add_argument('-c', '--copy', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
         parser.add_argument('-g', '--copy-graph', nargs='+', action='append', default=[], help='Data to read (x,y) and address to write', metavar=('x', 'y'))
+        parser.add_argument('-v', '--verbose', action='count', help='verbosity')
 
     def run(self):
         source = self.env.future.child(self.opts.root_source)
         target = self.env.future.child(self.opts.root_target)
+        if self.opts.verbose:
+            print('Converting to ROOT')
         for copydef in self.opts.copy:
             if len(copydef)<2:
                 raise Exception('Invalid number of `copy` arguments: '+str(len(copydef)))
-            (frm, to), extra = copydef[:2], copydef[2:]
+            (frmpath, to), extra = copydef[:2], copydef[2:]
             try:
-                obs = source[frm]
+                iterator = source.walkitems(startfromkey=frmpath)
             except KeyError:
-                print('Unable to find key:', frm)
+                raise Exception('Invalid path: '+str(frmpath))
+            for key, obs in iterator:
+                kwargs = yaml_load(extra)
+                kwargs.setdefault('name', to.rsplit('.', 1)[-1])
+                try:
+                    data = unpack(obs, kwargs)
+                except ValueError:
+                    print('Skipping unsupported object:', '.'.join(key))
+                    continue
+                targetkey = (to,)+key
+                target[targetkey] = data
 
-            kwargs = yaml_load(extra)
-            kwargs.setdefault('name', to.rsplit('.', 1)[-1])
-            data = unpack(obs, kwargs)
-            target[to] = data
+                if self.opts.verbose:
+                    print('    {}->{}'.format('.'.join((frmpath,)+key), '.'.join(targetkey)))
 
         for copydef in self.opts.copy_graph:
             if len(copydef)<3:
