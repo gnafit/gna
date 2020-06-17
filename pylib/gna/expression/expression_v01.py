@@ -146,7 +146,7 @@ class ItemProvider(object):
 
     def register_in(self):
         if self.cfg.bundle.get('inactive', False):
-            return
+            return dict()
         return {key: self for key in self.items}
 
     def build(self, **kwargs):
