@@ -2,7 +2,6 @@
 """Example model: gaussian peak with flat background"""
 
 from __future__ import print_function
-from __future__ import absolute_import
 from gna.ui import basecmd
 from gna.env import env
 import ROOT
@@ -30,6 +29,8 @@ class cmd(basecmd):
             peak_sum = ROOT.Sum(labels='Sum of\nsignals')
         common_ns = env.ns(self.opts.name)
 
+        futurens = env.future.child(('spectra', self.opts.name))
+
         if self.opts.with_eres:
             common_ns.reqparameter("Eres_a", central=0.0, sigma=0)
             common_ns.reqparameter("Eres_b", central=0.03, sigma=0)
@@ -54,10 +55,14 @@ class cmd(basecmd):
             if peak_sum:
                 peak_sum.add(out)
                 locns.addobservable('spectrum', out)
+                futurens[(name, 'spectrum')] = peak_sum.single()
             else:
                 peak_sum=out
 
         common_ns.addobservable('spectrum', peak_sum)
+        futurens['spectrum'] = peak_sum.single()
+        futurens[('fcn', 'x')] = integrator.points.x
+        futurens[('fcn', 'y')] = model.rate.rate
 
         if self.opts.with_eres:
             with common_ns:

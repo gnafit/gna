@@ -3,7 +3,7 @@
 
 from __future__ import absolute_import
 import yaml
-from collections import OrderedDict
+from collections import OrderedDict, Iterable
 
 def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     """
@@ -26,6 +26,19 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     def _dict_representer(dumper, data):
         return dumper.represent_mapping(
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-            list(data.items()))
+            data.items())
     OrderedDumper.add_representer(OrderedDict, _dict_representer)
     return yaml.dump(data, stream, OrderedDumper, **kwds)
+
+def yaml_load(string):
+    if isinstance(string, str):
+        return yaml.load(s, Loader=yaml.Loader)
+
+    if not isinstance(string, Iterable):
+        raise TypeError('Invalid yaml_load argument type')
+
+    ret = dict()
+    for s in string:
+        d=yaml.load(s, Loader=yaml.Loader)
+        ret.update(d)
+    return ret
