@@ -177,14 +177,20 @@ class DictWrapper(ClassWrapper):
 
         return new
 
-    def walkitems(self):
-        for k, v in self.items():
+    def walkitems(self, startfromkey=(), appendstartkey=False):
+        v0 = self[startfromkey]
+        k0 = tuple(self.iterkey(startfromkey)) if appendstartkey else ()
+        if not isinstance(v0, self._wrapper_class):
+            yield startfromkey, v0
+            return
+
+        for k, v in v0.items():
             k = k,
             if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems():
-                    yield k+k1, v1
+                    yield k0+k+k1, v1
             else:
-                yield k, v
+                yield k0+k, v
 
     def walkdicts(self):
         yieldself= True
@@ -197,12 +203,12 @@ class DictWrapper(ClassWrapper):
         if yieldself:
             yield (), self
 
-    def walkkeys(self):
-        for k, v in self.walkitems():
+    def walkkeys(self, startfromkey=()):
+        for k, v in self.walkitems(startfromkey):
             yield k
 
-    def walkvalues(self):
-        for k, v in self.walkitems():
+    def walkvalues(self, startfromkey=()):
+        for k, v in self.walkitems(startfromkey):
             yield v
 
     def visit(self, visitor, parentkey=()):
