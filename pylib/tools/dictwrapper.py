@@ -179,10 +179,13 @@ class DictWrapper(ClassWrapper):
 
     def walkitems(self, startfromkey=(), appendstartkey=False):
         v0 = self[startfromkey]
-        k0 = tuple(self.iterkey(startfromkey)) if appendstartkey else ()
+        k0 = tuple(self.iterkey(startfromkey))
         if not isinstance(v0, self._wrapper_class):
-            yield startfromkey, v0
+            yield k0, v0
             return
+
+        if not appendstartkey:
+            k0 = ()
 
         for k, v in v0.items():
             k = k,
