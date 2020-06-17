@@ -103,7 +103,6 @@ Misc changes:
         parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
         # Parameters
-        parser.add_argument('--parameters', choices=['default', 'yb', 'yb_t13', 'yb_t13_t12', 'yb_t13_t12_dm12', 'global'], default='default', help='set of parameters to load')
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
         parser.add_argument('--spectrum-unc', action='store_true', help='type of the spectral uncertainty')
         correlations = [ 'lsnl', 'subdetectors' ]
@@ -260,28 +259,6 @@ Misc changes:
 
         def single2double(v):
             return 4.0*v*(1.0-v)
-        if self.opts.parameters=='yb':
-            ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
-            ns['pmns.SinSqDouble13'].setCentral(single2double(0.024))
-            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
-            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.SinSqDouble12'].reset()
-            ns['pmns.SinSqDouble13'].reset()
-            ns['pmns.DeltaMSq12'].reset()
-            ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t13':
-            ns['pmns.SinSqDouble12'].setCentral(single2double(0.307))
-            ns['pmns.DeltaMSq12'].setCentral(7.54e-5)
-            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.SinSqDouble12'].reset()
-            ns['pmns.DeltaMSq12'].reset()
-            ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='yb_t13_t12_dm12':
-            ns['pmns.DeltaMSqEE'].setCentral(2.43e-3)
-            ns['pmns.DeltaMSqEE'].reset()
-        elif self.opts.parameters=='global':
-            ns['pmns.DeltaMSq12'].setCentral(7.39e-5)
-            ns['pmns.DeltaMSq12'].reset()
 
     def init_configuration(self):
         if self.opts.eres_npe:
