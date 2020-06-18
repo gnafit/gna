@@ -44,6 +44,7 @@ class IndexedContainer(object):
                     newlabel = cfg.get('label', None)
                     if newlabel:
                         self.label=newlabel
+                    self.expandable = cfg.get('expand', self.expandable)
             return self.name
 
         newname = '{expr}'.format(
@@ -58,17 +59,13 @@ class IndexedContainer(object):
         for nn in tuple(variants):
             variants.append(nn+':'+self.nindex.ident())
 
-        guessed = False
         label = None
         for var in variants:
             if var in lib:
                 libentry = lib[var]
-                guessed = libentry['name']
+                newname = libentry['name']
                 label   = libentry.get('label', None)
                 break
-
-        if guessed:
-            newname = guessed
         else:
             newname = '{expr}'.format(
                         expr = self.text_operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),

@@ -188,9 +188,9 @@ Misc changes:
         self.formula = [
                 # Some common definitions
                 'baseline[d,r]',
-                'livetime=daq_years*seconds_in_year',
+                'livetime=bracket(daq_years*seconds_in_year)',
                 'conversion_factor',
-                'efflivetime = eff * livetime',
+                'efflivetime = bracket(eff * livetime)',
                 # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons[d]',
                 #
                 # Neutrino energy
@@ -775,6 +775,44 @@ Misc changes:
         print('Parameter statistics', self.stats)
 
     lib = """
+        #
+        # Control
+        #
+        livetime:
+            expr: 'daq_years*seconds_in_year'
+        #
+        # Reactor part
+        #
+        powerlivetime_factor:
+            expr: 'conversion_factor*duty_cycle*efflivetime*fission_fractions_scale*target_protons*thermal_power_nominal*thermal_power_scale'
+            label: 'Power/Livetime/Mass factor, nominal'
+        power_factor_snf:
+            expr: 'conversion_factor*duty_cycle*thermal_power_nominal'
+            label: 'Power factor for SNF'
+        livetime_factor_snf:
+            expr: 'efflivetime*snf_norm*target_protons'
+            label: 'Livetime/mass factor for SNF, b.fit'
+        baselinewight_switch:
+            expr: 'baselineweight*reactor_active_norm'
+            label: 'Baselineweight (toggle)'
+        #
+        # Backgrounds
+        #
+        acc_num:
+            expr: 'acc_norm*acc_rate*days_in_second*efflivetime'
+            label: Number of accidentals (b.fit)
+        fastn_num:
+            expr: 'days_in_second*efflivetime*fastn_norm*fastn_rate'
+            label: Number of fast neutrons (b.fit)
+        alphan_num:
+            expr: 'alphan_norm*alphan_rate*days_in_second*efflivetime'
+            label: Number of alpha-n (b.fit)
+        lihe_num:
+            expr: 'days_in_second*efflivetime*lihe_norm*lihe_rate'
+            label: Number of 9Li/8He (b.fit)
+        #
+        # Others
+        #
         cspec_diff:
           expr: 'anuspec*ibd_xsec*jacobian*oscprob'
           label: 'anu count rate | {isotope}@{reactor}-\\>{detector} ({component})'
