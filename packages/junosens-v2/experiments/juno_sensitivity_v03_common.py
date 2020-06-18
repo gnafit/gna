@@ -721,7 +721,7 @@ Misc changes:
             print('Parameters:')
             self.stats = dict()
             correlations = self.opts.verbose>2 and 'full' or 'short'
-            self.namespace.printparameters(labels=True, stats=self.stats, correlations=correlations)
+            self.namespace.printparameters(labels=55, stats=self.stats, correlations=correlations)
 
     def register(self):
         ns = self.namespace
