@@ -35,22 +35,22 @@ for precision in provided_precisions:
     unctypes += ( ROOT.Variable(precision), ROOT.Variable('complex<%s>'%precision) )
 unctypes+=(DiscreteParameter,)
 
-namefmt='{name:30}'
+namefmt=u'{name:30}'
 
-valfmt='={color}{val:11.6g}'
-valdfmt='={color}{val:>11s}'
+valfmt=u'={color}{val:11.6g}'
+valdfmt=u'={color}{val:>11s}'
 
-centralfmt='{central:11.6g}'
+centralfmt=u'{central:11.6g}'
 
-cvalfmt='={color}{rval:11.6g}+i{ival:11.6g}'
+cvalfmt=u'={color}{rval:11.6g}+i{ival:11.6g}'
 
-ccentralfmt='{rcentral:11.6g}+i{icentral:11.6g}'
+ccentralfmt=u'{rcentral:11.6g}+i{icentral:11.6g}'
 
-sigmafmt='± {sigma:11.6g}'
-limitsfmt=' ({:11.6g}, {:11.6g})'
+sigmafmt=u'± {sigma:11.6g}'
+limitsfmt=u' ({:11.6g}, {:11.6g})'
 centralsigmafmt= centralfmt + sigmafmt
-relsigmafmt=' [{relsigma:11.6g}%]'
-npifmt     =' [{npi:11.6g}π]'
+relsigmafmt=u' [{relsigma:11.6g}%]'
+npifmt     =u' [{npi:11.6g}π]'
 
 centralsigma_len=len(centralsigmafmt.format(central=0, sigma=0))
 central_len=len(centralfmt.format(central=0))
@@ -62,17 +62,28 @@ centralrel_empty =(central_reg_len)*' '
 sigmarel_empty =(sigma_len+relsigma_len-1)*' '
 sigma_empty =(sigma_len-1)*' '
 
-sepstr='{} │ '.format(Style.RESET_ALL)
+sepstr=u'{} │ '.format(Style.RESET_ALL)
 
-fixedstr='[fixed]'
+fixedstr=u'[fixed]'
 fixedstr_len = (centralsigma_len+relsigma_len-1-len(fixedstr))
 fixedstr = (fixedstr_len/2)*' ' + fixedstr + (fixedstr_len/2)*" "
 
-freestr =' [free]'
+freestr =u' [free]'
 
-freestr+=' '*(relsigma_len-len(freestr))
+freestr+=u' '*(relsigma_len-len(freestr))
 
-variants_fmt = ' {variants:^{width}s}'
+variants_fmt = u' {variants:^{width}s}'
+
+def formatlabel(label, length):
+    if length==False:
+        return ''
+
+    if not isinstance(length, int):
+        return Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+
+    label = label[:length]+u'…'
+
+    return Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
 class CovarianceStore():
     def __init__(self):
@@ -105,19 +116,19 @@ def print_correlated_parameters_block(par_set, correlations='short'):
             s = colorize(full_name, Fore.CYAN)
             current_offset = len(full_name)
             if max_offset != current_offset:
-                initial_sep = " "*(max_offset-current_offset +1)
+                initial_sep = u" "*(max_offset-current_offset +1)
             else:
-                initial_sep = " "
+                initial_sep = u" "
             s += initial_sep
             for par in par_set:
                 s += '{:6g}'.format(par.getCorrelation(pivot))
-                s += " "
+                s += u" "
             print(s)
 
 def print_correlated_parameters(cor_store, correlations='short'):
     if len(cor_store) == 0:
         return
-    raw = "\nCorrelations between parameters:"
+    raw = u"\nCorrelations between parameters:"
     title = colorize(raw, Fore.RED)
     print(title)
     for par_set in cor_store.storage:
@@ -200,17 +211,17 @@ def Variable__str( self, labels=False ):
             val     = self.value(),
             color = Fore.BLUE
             )
-    label = self.label()
+    label = self.label().decode('utf8')
     if not labels or label=='value':
-        label=''
+        label=u''
 
-    s= namefmt.format(**fmt)
+    s=namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
 
     if labels:
         s+=sepstr+centralrel_empty+sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+        s+= formatlabel(label, labels)
 
     s += Style.RESET_ALL
     return s
@@ -225,9 +236,9 @@ def Variable_complex__str(self, labels=False, value=None):
             ival  = value.imag(),
             color = Fore.BLUE
             )
-    label = self.label()
+    label = self.label().decode('utf8')
     if not labels or label=='value':
-        label=''
+        label=u''
 
     s= namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
@@ -239,7 +250,7 @@ def Variable_complex__str(self, labels=False, value=None):
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+        s+= formatlabel(label, labels)
 
     s += Style.RESET_ALL
     return s
@@ -253,9 +264,9 @@ def UniformAngleParameter__str( self, labels=False  ):
             npi     = self.value()/N.pi,
             color   = Fore.BLUE
             )
-    label = self.label()
+    label = self.label().decode('utf8')
     if not labels or label=='value':
-        label=''
+        label=u''
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
@@ -267,12 +278,12 @@ def UniformAngleParameter__str( self, labels=False  ):
         s+= sigma_empty
         s+= npifmt.format(**fmt)
 
-        s+=sepstr+' (-π, π)                   '
+        s+=sepstr+u' (-π, π)                   '
 
     if labels:
         s+=sepstr
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+        s+= formatlabel(label, labels)
 
     s += Style.RESET_ALL
     return s
@@ -288,9 +299,9 @@ def GaussianParameter__str( self, labels=False  ):
             )
     correlated = self.isCorrelated()
     limits  = self.limits()
-    label = self.label()
+    label = self.label().decode('utf8')
     if not labels or label=='value':
-        label=''
+        label=u''
 
     s= namefmt.format(**fmt)
     s+=valfmt.format(**fmt)
@@ -310,7 +321,7 @@ def GaussianParameter__str( self, labels=False  ):
 
         if correlated:
             s += Fore.LIGHTGREEN_EX
-            s += " [C]"
+            s += u" [C]"
 
         if limits.size():
             s+=sepstr
@@ -321,7 +332,7 @@ def GaussianParameter__str( self, labels=False  ):
         s+=sepstr
 
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+        s+= formatlabel(label, labels)
 
     s += Style.RESET_ALL
 
@@ -334,7 +345,7 @@ def DiscreteParameter____str__(self, labels=False):
         variants = str(self.getVariants()),
         color   = Fore.BLUE
         )
-    label = self.getLabel()
+    label = self.getLabel().decode('utf8')
 
     s= namefmt.format(**fmt)
     s+=valdfmt.format(**fmt)
@@ -344,7 +355,7 @@ def DiscreteParameter____str__(self, labels=False):
         s+=sepstr
 
     if label:
-        s+= Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
+        s+= formatlabel(label, labels)
 
     return s
 DiscreteParameter.__str__ = DiscreteParameter____str__
