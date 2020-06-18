@@ -100,7 +100,8 @@ Misc changes:
         parser.add_argument('--snf', action='store_true', help="Enable SNF contribution")
 
         # osc prob
-        parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
+        parser.add_argument('--oscprob', choices=['vacuum'], default='vacuum', help='oscillation probability type')
+        # parser.add_argument('--oscprob', choices=['vacuum', 'matter'], default='vacuum', help='oscillation probability type')
 
         # Parameters
         parser.add_argument('--pdgyear', choices=[2016, 2018], default=2018, type=int, help='PDG version to read the oscillation parameters')
@@ -257,9 +258,6 @@ Misc changes:
         for par in [dmxx, 'pmns.SinSqDouble12', 'pmns.DeltaMSq12']:
             ns[par].setFree()
 
-        def single2double(v):
-            return 4.0*v*(1.0-v)
-
     def init_configuration(self):
         if self.opts.eres_npe:
             self.opts.eres_sigma = self.opts.eres_npe**-0.5
@@ -336,17 +334,23 @@ Misc changes:
                     order = 1,
                     ),
                 oscprob = NestedDict(
-                    bundle = dict(name='oscprob', version='v04', major='rdc', inactive=self.opts.oscprob=='matter'),
-                    pdgyear = self.opts.pdgyear,
-                    dm      = '23'
+                    bundle = dict(name='oscprob', version='v05', major='rdc', inactive=self.opts.oscprob=='matter'),
+                    parameters = dict(
+                        DeltaMSq23    = 2.444e-03,
+                        DeltaMSq12    = 7.53e-05,
+                        SinSqDouble13 = (0.08529904, 0.00267792),
+                        SinSqDouble12 = 0.851004,
+                        # SinSq13 = (0.0218, 0.0007),
+                        # SinSq12 = 0.307,
+                        )
                     ),
-                oscprob_matter = NestedDict(
-                    bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
-                                  names=dict(oscprob='oscprob_matter')),
-                    density = 2.6, # g/cm3
-                    pdgyear = self.opts.pdgyear,
-                    dm      = '23'
-                    ),
+                # oscprob_matter = NestedDict(
+                    # bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
+                                  # names=dict(oscprob='oscprob_matter')),
+                    # density = 2.6, # g/cm3
+                    # pdgyear = self.opts.pdgyear,
+                    # dm      = '23'
+                    # ),
                 anuspec_hm = NestedDict(
                     bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='huber-mueller'),
                     name = 'anuspec',
