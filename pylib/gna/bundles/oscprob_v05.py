@@ -107,15 +107,15 @@ class oscprob_v05(TransformationBundle):
         # Define PMNS oscillation parameters
         #
         with ns_pmns:
-            C.OscillationExpressions(ns=ns_pmns)
-            C.PMNSExpressionsC(ns=ns_pmns)
+            self._expressions_pars=C.OscillationExpressions(ns=ns_pmns)
+            self._expressions_pmns=C.PMNSExpressionsC(ns=ns_pmns)
 
         #
         # Define oscillation weights
         #
         names = C.stdvector(['comp0', 'comp12', 'comp13', 'comp23'])
         with ns_pmns:
-            R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
+            self._expressions_oscprob=R.OscProbPMNSExpressions(R.Neutrino.ae(), R.Neutrino.ae(), names, ns=ns_pmns)
             ns_pmns.materializeexpressions()
 
         for i, vname in enumerate(names):

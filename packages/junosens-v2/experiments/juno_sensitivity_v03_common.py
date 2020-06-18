@@ -799,6 +799,12 @@ Misc changes:
         baselinewight_switch:
             expr: 'baselineweight*reactor_active_norm'
             label: 'Baselineweight (toggle)'
+        eper_fission_fraction:
+            expr: 'fission_fractions_nominal*isotope_weight'
+            label: Fractional energy per fission
+        eper_fission_avg:
+          expr: 'eper_fission_avg'
+          label: 'Average energy per fission at {reactor}'
         #
         # Backgrounds
         #
@@ -815,7 +821,7 @@ Misc changes:
             expr: 'days_in_second*efflivetime*lihe_norm*lihe_rate'
             label: Number of 9Li/8He (b.fit)
         #
-        # Others
+        # Spectrum and oscillations
         #
         cspec_diff:
           expr: 'anuspec*ibd_xsec*jacobian*oscprob'
@@ -824,6 +830,24 @@ Misc changes:
           expr: 'baselineweight*cspec_diff_reac'
         cspec_diff_det_weighted:
           expr: 'pmns*cspec_diff_det'
+        reac_spectrum_oscillated:
+          expr: 'anuspec_rd*oscprob_full'
+          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
+        #
+        # Detector stage
+        #
+        reac_spectrum_at_detector:
+          expr: 'baselinewight_switch*reac_spectrum_oscillated'
+          label: '{reactor} spectrum at {detector}'
+        observable_spectrum_reac:
+          expr: 'ibd_xsec_rescaled*reac_spectrum_at_detector'
+          label: 'Observable spectrum from {reactor} at {detector}'
+        observable_spectrum:
+          expr: 'sum:r|observable_spectrum_reac'
+          label: 'Observable spectrum at {detector}'
+        #
+        # Others
+        #
         eres_weighted:
           expr: 'subdetector_fraction*eres'
           label: '{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'
@@ -852,9 +876,6 @@ Misc changes:
         eper_fission_weighted:
           expr: 'eper_fission*fission_fractions'
           label: "{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"
-        eper_fission_avg:
-          expr: 'eper_fission_avg'
-          label: 'Average energy per fission at {reactor}'
         power_livetime_factor:
           expr: 'power_livetime_factor'
           label: '{{Power-livetime factor (~nu/s)|{reactor}.{isotope}-\\>{detector}}}'
@@ -892,9 +913,6 @@ Misc changes:
           expr: 'sum:i|iso_spectrum_w'
         reac_spectrum_w:
           expr: 'baselineweight*reac_spectrum'
-        reac_spectrum_oscillated:
-          expr: 'anuspec_rd*oscprob_full'
-          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
         ad_spectrum_c:
           expr: 'sum:r|reac_spectrum_w'
         ad_spectrum_cw:
