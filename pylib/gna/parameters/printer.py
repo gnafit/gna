@@ -81,7 +81,8 @@ def formatlabel(label, length):
     if not isinstance(length, int):
         return Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
-    label = label[:length]+u'…'
+    if len(label)>=length:
+        label = label[:length]+u'…'
 
     return Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
