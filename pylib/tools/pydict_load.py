@@ -1,8 +1,7 @@
 import runpy
 import inspect
-import numpy
 
-def loaddict(filename, init_globals={}, verbose=False):
+def pydict_load(filename, init_globals={}, verbose=False):
     if verbose:
         print('Loading dictionary from:', filename)
 

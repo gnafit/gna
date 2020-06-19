@@ -1,0 +1,13 @@
+from tools.yaml import yaml_load_file
+from tools.pydict_load import pydict_load
+
+def cfg_load(filename, verbose=False):
+    if verbose:
+        print('Loading dictionary from:', filename)
+
+    if filename.endswith('.yaml'):
+	return yaml_load_file(filename)
+    elif filename.endswith('.py'):
+	return pydict_load(filename)
+
+    raise ValueError('Invalid configuration file type: '+filename)
