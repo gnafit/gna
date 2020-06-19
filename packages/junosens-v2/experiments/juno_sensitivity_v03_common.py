@@ -31,6 +31,8 @@ Changes since previous implementation [juno_sensitivity_v02]:
       * DAQ
         + 6 years
         + # 8 years (6 times no TS3/4)
+      * Oscillation parameters:
+        + Now configured via the bundle, not physlib
 
 Implements:
     - Reactor antineutrino flux:
@@ -38,8 +40,8 @@ Implements:
         + ILL+Vogel (now default)
         + Huber+Mueller
         + Free
-      * [optional] Off-equilibrium corrections (Mueller)
-      * [optional] SNF contribution
+      * SNF contribution
+      * Off-equilibrium corrections (Mueller)
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
     - Final binning:
@@ -96,8 +98,6 @@ Misc changes:
 
         # reactor flux
         parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
-        parser.add_argument('--offequilibrium-corr', action='store_true', help="Turn on offequilibrium correction to antineutrino spectra")
-        parser.add_argument('--snf', action='store_true', help="Enable SNF contribution")
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum'], default='vacuum', help='oscillation probability type')
@@ -162,9 +162,9 @@ Misc changes:
                 #
                 # Reactor
                 #
-                offeq_correction = '*offeq_correction[i,r](enu())' if self.opts.offequilibrium_corr else '',
+                offeq_correction = '*offeq_correction[i,r](enu())',
                 shape_norm       = '*shape_norm()'                 if self.opts.spectrum_unc else '',
-                snf              = '+snf_in_reac'                  if self.opts.snf else '',
+                snf              = '+snf_in_reac',
                 #
                 # Energy model
                 #
@@ -798,13 +798,32 @@ Misc changes:
             label: 'Livetime/mass factor for SNF, b.fit'
         baselinewight_switch:
             expr: 'baselineweight*reactor_active_norm'
-            label: 'Baselineweight (toggle)'
+            label: 'Baselineweight (toggle) for {reactor}-\\>{detector}'
         eper_fission_fraction:
             expr: 'fission_fractions_nominal*isotope_weight'
             label: Fractional energy per fission
         eper_fission_avg:
           expr: 'eper_fission_avg'
           label: 'Average energy per fission at {reactor}'
+        #
+        # Reactor spectrum
+        #
+        reac_spectrum_oscillated:
+          expr:
+          - 'anuspec_rd*oscprob_full'
+          - 'anuspec_rd_full*oscprob_full'
+          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
+        anuspec_rd:
+          expr:
+          - 'sum:i|anuspec_weighted'
+          - 'sum:i|anuspec_weighted_offeq'
+          label: '{{Antineutrino spectrum|{reactor}-\\>{detector}}}'
+        anuspec_rd_switch:
+          expr: 'anuspec_rd*reactor_active_norm'
+          label: '{{Antineutrino spectrum|{reactor}-\\>{detector}}}'
+        anuspec_rd_full:
+          expr: 'anuspec_rd_switch+snf_in_reac'
+          label: '{{Antineutrino spectrum+SNF|{reactor}-\\>{detector}}}'
         #
         # Backgrounds
         #
@@ -821,6 +840,14 @@ Misc changes:
             expr: 'days_in_second*efflivetime*lihe_norm*lihe_rate'
             label: Number of 9Li/8He (b.fit)
         #
+        # Oscillation probability
+        #
+        oscprob_weighted:
+          expr: 'oscprob*pmns'
+        oscprob_full:
+          expr: 'sum:c|oscprob_weighted'
+          label: 'anue survival probability|{reactor}-\\>{detector}}|weight: {weight_label}'
+        #
         # Spectrum and oscillations
         #
         cspec_diff:
@@ -830,14 +857,13 @@ Misc changes:
           expr: 'baselineweight*cspec_diff_reac'
         cspec_diff_det_weighted:
           expr: 'pmns*cspec_diff_det'
-        reac_spectrum_oscillated:
-          expr: 'anuspec_rd*oscprob_full'
-          label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
         #
         # Detector stage
         #
         reac_spectrum_at_detector:
-          expr: 'baselinewight_switch*reac_spectrum_oscillated'
+          expr:
+          - 'baselineweight_switch*reac_spectrum_oscillated'
+          - 'baselineweight*reac_spectrum_oscillated'
           label: '{reactor} spectrum at {detector}'
         observable_spectrum_reac:
           expr: 'ibd_xsec_rescaled*reac_spectrum_at_detector'
@@ -862,11 +888,6 @@ Misc changes:
         ibd_noeffects_bf:
           expr: 'kinint2*shape_norm'
           label: 'Observed IBD spectrum (best fit, no effects) | {detector}'
-        oscprob_weighted:
-          expr: 'oscprob*pmns'
-        oscprob_full:
-          expr: 'sum:c|oscprob_weighted'
-          label: 'anue survival probability | weight: {weight_label}'
         fission_fractions:
           expr: 'fission_fractions[r,i]()'
           label: "Fission fraction for {isotope} at {reactor}"
@@ -888,9 +909,9 @@ Misc changes:
         anuspec_weighted:
           expr: 'anuspec*power_livetime_factor'
           label: '{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'
-        anuspec_rd:
-          expr: 'sum:i|anuspec_weighted'
-          label: '{{Antineutrino spectrum|{reactor}-\\>{detector}}}'
+        anuspec_weighted_offeq:
+          expr: 'anuspec*offeq_correction*power_livetime_factor'
+          label: '{{Antineutrino spectrum (+offeq)|{reactor}.{isotope}-\\>{detector}}}'
         countrate_rd:
           expr:
           - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
