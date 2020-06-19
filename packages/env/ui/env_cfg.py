@@ -14,7 +14,8 @@ class DictWrapperVerbose(DictWrapper):
             action='Overwrite'
         else:
             action='Set'
-        print('{action} {key}: {value}'.format(action=action, key=k, value=v))
+        key = '.'.join(k)
+        print('{action} {key}: {value}'.format(action=action, key=key, value=v))
         DictWrapper.__setitem__(self, k, v)
 
 class cmd(basecmd):
