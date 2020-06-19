@@ -31,13 +31,23 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
 
 def yaml_load(string):
     if isinstance(string, str):
-        return yaml.load(s, Loader=yaml.Loader)
+        return ordered_load(string)
 
     if not isinstance(string, Iterable):
         raise TypeError('Invalid yaml_load argument type')
 
     ret = dict()
     for s in string:
-        d=yaml.load(s, Loader=yaml.Loader)
+        d=ordered_load(s, Loader=yaml.Loader)
         ret.update(d)
     return ret
+
+def yaml_load_file(filename):
+    try:
+        with open(filename, 'r') as stream:
+            data = ordered_load(stream)
+    except:
+        raise Exception('Unable to load input data file: '+filename)
+
+    return data
+

@@ -1,0 +1,7 @@
+lst:
+    - a
+    - b
+    - 3
+float: 1.5
+int: 2
+string: test
