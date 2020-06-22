@@ -290,7 +290,7 @@ Misc changes:
                     ),
                 numbers = NestedDict(
                     bundle = dict(name='parameters', version='v05'),
-                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/detector_numbers.py',
+                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/juno_input_numbers.py',
                     skip = ('percent'),
                     mode = 'fixed'
                     ),
