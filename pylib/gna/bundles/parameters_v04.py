@@ -35,8 +35,6 @@ class parameters_v04(TransformationBundle):
 
         for name, parcfg in pars.items():
             label = labels.get(name, '')
-            if not label:
-                import IPython; IPython.embed()
             par = self.reqparameter(name, None, cfg=parcfg, label=label)
 
             if objectize:

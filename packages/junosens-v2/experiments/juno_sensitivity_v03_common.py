@@ -203,7 +203,7 @@ Misc changes:
                 #
                 # Reactor part
                 #
-                'numerator = efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                'numerator = global_norm * efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
                              'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
                              'conversion_factor * target_protons',
                 'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
@@ -271,16 +271,6 @@ Misc changes:
             edges_final = edges_final[edges_final<=self.opts.final_emax]
         if self.opts.final_emin is not None or self.opts.final_emax is not None:
             print('Final binning:', edges_final)
-        from scipy import constants
-        percent=0.01
-        numbers = OrderedDict(
-            eff               = 0.82,
-            daq_years         = 6.0,
-            duty_cycle        = 11.0/12.0,
-            juno_mass_kt      = 20,
-            hydrogen_fraction = 12.01*percent,
-            )
-        numbers['target_protons'] = numbers['juno_mass_kt']*1e6*numbers['hydrogen_fraction']/constants.proton_mass
 
         self.cfg = NestedDict(
                 numbers0 = NestedDict(
@@ -299,16 +289,10 @@ Misc changes:
                         )
                     ),
                 numbers = NestedDict(
-                    bundle = dict(name='parameters', version='v04'),
-                    labels=dict(
-                        eff               = 'Detection efficiency',
-                        daq_years         = 'Number of DAQ years',
-                        duty_cycle        = 'Reactor duty cycle (per year)',
-                        hydrogen_fraction = 'Hydrogen mass fraction',
-                        juno_mass_kt      = 'JUNO nominal mass, kt',
-                        target_protons    = 'Number of target protons',
-                        ),
-                    pars = uncertaindict(numbers, mode='fixed')
+                    bundle = dict(name='parameters', version='v05'),
+                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/detector_numbers.py',
+                    skip = ('percent'),
+                    mode = 'fixed'
                     ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -390,14 +374,6 @@ Misc changes:
                 geonu = NestedDict(
                         bundle = dict(name='geoneutrino_spectrum', version='v01'),
                         data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
-                        ),
-                global_norm = NestedDict(
-                        bundle = dict(
-                            name='parameters',
-                            version='v01'),
-                        parameter="global_norm",
-                        label='Global normalization',
-                        pars = uncertain(1, 'free'),
                         ),
                 fission_fractions = NestedDict(
                         bundle = dict(name="parameters_yaml_v01", major = 'i'),
@@ -787,7 +763,7 @@ Misc changes:
         # Reactor part
         #
         powerlivetime_factor:
-            expr: 'conversion_factor*duty_cycle*efflivetime*fission_fractions_scale*target_protons*thermal_power_nominal*thermal_power_scale'
+            expr: 'conversion_factor*duty_cycle*efflivetime*fission_fractions_scale*global_norm*target_protons*thermal_power_nominal*thermal_power_scale'
             label: 'Power/Livetime/Mass factor, nominal'
         power_factor_snf:
             expr: 'conversion_factor*duty_cycle*thermal_power_nominal'
