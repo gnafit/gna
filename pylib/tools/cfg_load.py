@@ -11,3 +11,9 @@ def cfg_load(filename, verbose=False):
 	return pydict_load(filename)
 
     raise ValueError('Invalid configuration file type: '+filename)
+
+def cfg_parse(filename_or_dict, verbose=False):
+    if isinstance(filename_or_dict, str):
+	return cfg_load(filename_or_dict)
+
+    return filename_or_dict
