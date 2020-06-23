@@ -24,8 +24,8 @@ class parameters_v05(TransformationBundle):
         self.check_nidx_dim(0, 0, 'major')
         self.check_nidx_dim(0, 0, 'minor')
 
-        if 'mode' in self.cfg and not self.cfg.mode in ('fixed', 'free'):
-            raise ValueError('Invalid mode: '+self.cfg.mode)
+        if 'state' in self.cfg and not self.cfg.state in ('fixed', 'free'):
+            raise ValueError('Invalid state: '+self.cfg.state)
 
     @staticmethod
     def _provides(cfg):
@@ -46,7 +46,8 @@ class parameters_v05(TransformationBundle):
         objectize = self.cfg.get('objectize')
         skip = self.cfg.get('skip', ())
 
-        mode = self.cfg.get('mode', None)
+        state = self.cfg.get('state', None)
+        uncertainty_mode_common = self.cfg.get('uncertainty_mode', 'absolute')
         for name, parcfg in pars.items():
             if name in skip or name=='labels':
                 continue
@@ -55,20 +56,23 @@ class parameters_v05(TransformationBundle):
                 parcfg=list(parcfg)
                 if len(parcfg)==1:
                     kwargs['central'] = parcfg[0]
-                    kwargs[mode] = True
-                elif len(parcfg)==2:
-                    kwargs['central'], kwargs['sigma'] = parcfg
-                elif len(parcfg)==3:
-                    kwargs['central'], err, mode = parcfg
-                    if mode=='absolute':
+                    kwargs[state] = True
+                else:
+                    if len(parcfg)==2:
+                        kwargs['central'], kwargs['sigma'] = parcfg
+                        uncertainty_mode = uncertainty_mode_common
+                    elif len(parcfg)==3:
+                        kwargs['central'], err, uncertainty_mode = parcfg
+
+                    if uncertainty_mode=='absolute':
                         kwargs['sigma'] = err
-                    elif mode=='relative':
+                    elif uncertainty_mode=='relative':
                         kwargs['relsigma'] = err
-                    elif mode=='percent':
+                    elif uncertainty_mode=='percent':
                         kwargs['relsigma'] = err*0.01
             else:
                 kwargs['central'] = parcfg
-                kwargs[mode] = True
+                kwargs[state] = True
 
             if name in labels:
                 kwargs['label'] = labels[name]

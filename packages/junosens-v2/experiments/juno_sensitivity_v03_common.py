@@ -273,26 +273,40 @@ Misc changes:
 
         self.cfg = NestedDict(
                 numbers0 = NestedDict(
-                    bundle = dict(name='parameters', version='v04'),
+                    bundle = dict(name='parameters', version='v05'),
+                    state='fixed',
                     labels=dict(
                         seconds_in_year   = 'Number of seconds in year',
                         days_in_second    = 'Number of days in a second',
                         conversion_factor = 'Conversion factor: W[GW]/[MeV] N[fissions]->N[fissions]/T[s]',
                         ),
-                    pars = uncertaindict( dict(
+                    pars =  dict(
                             seconds_in_year   = 365.0*24.0*60.0*60.0,
                             days_in_second    = 1.0/(24.0*60.0*60.0),
                             conversion_factor = R.NeutrinoUnits.reactorPowerConversion, #taken from transformations/neutrino/ReactorNorm.cc
                             ),
-                            mode='fixed'
-                        )
                     ),
                 numbers = NestedDict(
                     bundle = dict(name='parameters', version='v05'),
-                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/juno_input_numbers.py',
+                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/juno_input_numbers.py',
                     skip = ('percent'),
-                    mode = 'fixed'
+                    state= 'fixed'
                     ),
+                eper_fission =  NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = 'eper_fission_nominal',
+                        label = 'Energy per fission for {isotope} in MeV',
+                        pars = uncertaindict(
+                            [
+                                ('U235',  (201.92, 0.46)),
+                                ('U238',  (205.52, 0.96)),
+                                ('Pu239', (209.99, 0.60)),
+                                ('Pu241', (213.60, 0.65))
+                                ],
+                            mode='absolute'
+                            ),
+                        separate_uncertainty = 'eper_fission_scale'
+                        ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
@@ -380,7 +394,7 @@ Misc changes:
                         separate_uncertainty = "fission_fractions_scale",
                         label = 'Fission fraction of {isotope} in reactor {reactor}',
                         objectize=True,
-                        data = 'data/data_juno/fission_fractions/2013.12.05_xubo.yaml'
+                        data = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/fission_fractions.yaml'
                         ),
                 snf_correction = NestedDict(
                         bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
@@ -420,21 +434,6 @@ Misc changes:
                             mode='percent'
                             ),
                         separate_uncertainty = 'thermal_power_scale'
-                        ),
-                eper_fission =  NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'eper_fission_nominal',
-                        label = 'Energy per fission for {isotope} in MeV',
-                        pars = uncertaindict(
-                            [
-                                ('U235',  (201.92, 0.46)),
-                                ('U238',  (205.52, 0.96)),
-                                ('Pu239', (209.99, 0.60)),
-                                ('Pu241', (213.60, 0.65))
-                                ],
-                            mode='absolute'
-                            ),
-                        separate_uncertainty = 'eper_fission_scale'
                         ),
                 lsnl = NestedDict(
                         bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
