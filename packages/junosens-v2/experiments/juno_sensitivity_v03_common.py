@@ -88,7 +88,6 @@ Misc changes:
 
         # Binning
         binning=parser.add_argument_group('binning', description='Binning related options')
-        binning.add_argument('--estep', default=0.01, choices=[0.02, 0.01], type=float, help='Internal binning step')
         binning.add_argument('--final-emin', type=float, help='Final binning Emin')
         binning.add_argument('--final-emax', type=float, help='Final binning Emax')
 
@@ -258,7 +257,7 @@ Misc changes:
         edges    = np.arange(0.0, 12.001, 0.01) #FIXME
         edges_final = np.concatenate( (
                                     [0.7],
-                                    np.arange(1, 6.0, self.opts.estep),
+                                    np.arange(1, 6.0, 0.02),
                                     np.arange(6, 7.0, 0.1),
                                     [7.0, 7.5, 12.0]
                                 )
