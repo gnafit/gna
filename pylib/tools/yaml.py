@@ -20,6 +20,7 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     return yaml.load(stream, OrderedLoader)
 
 def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
+    """Dump OrderedDict"""
     class OrderedDumper(Dumper):
         pass
     def _dict_representer(dumper, data):
@@ -30,6 +31,7 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 def yaml_load(string):
+    """Parse multiple strings as yaml data. Multiple dictionaries are combined togather."""
     if isinstance(string, str):
         return ordered_load(string)
 
@@ -43,6 +45,7 @@ def yaml_load(string):
     return ret
 
 def yaml_load_file(filename):
+    """Load python dictionary from *.py file"""
     try:
         with open(filename, 'r') as stream:
             data = ordered_load(stream)
