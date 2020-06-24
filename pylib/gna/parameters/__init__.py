@@ -203,7 +203,10 @@ def makeparameter(ns, name, cfg=None, **kwargs):
     param.ns = ns
 
     if 'label' in kwargs:
-        param.setLabel(kwargs['label'])
+        label = kwargs['label']
+        if not isinstance(label, str):
+            label = label.encode('utf8')
+        param.setLabel(label)
     if debug:
         print()
     param.setNamespace(ns.path)
