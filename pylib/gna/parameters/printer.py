@@ -78,7 +78,7 @@ def formatlabel(label, length):
     if length==False:
         return ''
 
-    if not isinstance(length, int):
+    if length is True or not isinstance(length, int):
         return Fore.LIGHTGREEN_EX + label + Style.RESET_ALL
 
     if len(label)>=length:
