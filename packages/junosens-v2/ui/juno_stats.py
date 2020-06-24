@@ -9,12 +9,12 @@ import gna.env
 from tabulate import tabulate
 
 class NamespaceWrapper(ClassWrapper):
-    def __new__(cls, obj):
+    def __new__(cls, obj, *args, **kwargs):
         if not isinstance(obj, gna.env.namespace):
             return obj
         return ClassWrapper.__new__(cls)
 
-    def __init__(self, obj):
+    def __init__(self, obj, parent=None):
         ClassWrapper.__init__(self, obj, NamespaceWrapper)
 
     def push(self, value):

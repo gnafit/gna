@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Parameters v05 bundle
-Implements a set of unrelated parameters.
+"""Parameters v06 bundle
+Implements a set of parameters, defined via
+- dictionary
+- python file (as dictionary)
+- yaml file (as dictionary)
 
-Unlike v04, does not depend on uncertaindict
-
-Based on: parameters_v04
+Based on: parameters_v05
+Implements:
+- Indices
+- Separate uncertainty
 """
 
 from __future__ import print_function
@@ -31,7 +35,7 @@ class parameters_v05(TransformationBundle):
     def _provides(cfg):
         pars = cfg_parse(cfg.pars, verbose=False)
         names = list(pars.keys())
-        skips = list(cfg.get('skip', ()))+['meta']
+        skips = list(cfg.get('skip', ()))+['labels']
         for skip in skips:
             try:
                 names.remove(skip)
@@ -68,7 +72,7 @@ class parameters_v05(TransformationBundle):
     def define_variables(self):
         self._par_container = []
         pars = cfg_parse(self.cfg.pars, verbose=True)
-        labels = self.cfg.get('labels', pars.get('meta', {}).get('labels', {}))
+        labels = self.cfg.get('labels', pars.get('labels', {}))
         objectize = self.cfg.get('objectize')
         skip = self.cfg.get('skip', ())
 
