@@ -4,7 +4,7 @@
 
 ## Storage update
 
-### `DictWrapper` 
+### Easy nested dictionaries with `DictWrapper` 
 
 ### Future storage `env.future`
 
