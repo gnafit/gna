@@ -219,10 +219,10 @@ Misc changes:
                 #
                 # Backgrounds
                 #
-                'accidentals = days_in_second * efflivetime * acc_rate    * acc_norm    * rebin_acc[d]|    acc_spectrum[d]()',
-                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
-                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_norm * rebin_alphan[d]| alphan_spectrum[d]()',
-                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
+                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]|    acc_spectrum[d]()',
+                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
+                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum[d]()',
+                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
                 #
                 # IBD part
                 #
@@ -272,6 +272,9 @@ Misc changes:
             print('Final binning:', edges_final)
 
         self.cfg = NestedDict(
+                #
+                # Numbers
+                #
                 numbers0 = NestedDict(
                     bundle = dict(name='parameters', version='v05'),
                     state='fixed',
@@ -292,27 +295,21 @@ Misc changes:
                     skip = ('percent',),
                     state= 'fixed'
                     ),
+                # Reactor
                 energy_per_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v06"),
-                        parameter = 'energy_per_fission',
                         pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/energy_per_fission.yaml',
                         separate_uncertainty = '{}_scale'
                         ),
-                # energy_per_fission =  NestedDict(
-                        # bundle = dict(name="parameters", version = "v01"),
-                        # parameter = 'energy_per_fission',
-                        # label = 'Energy per fission for {isotope} in MeV',
-                        # pars = uncertaindict(
-                            # [
-                                # ('U235',  (201.92, 0.46)),
-                                # ('U238',  (205.52, 0.96)),
-                                # ('Pu239', (209.99, 0.60)),
-                                # ('Pu241', (213.60, 0.65))
-                                # ],
-                            # mode='absolute'
-                            # ),
-                        # separate_uncertainty = 'energy_per_fission_scale'
-                        # ),
+                # Backgrounds
+                bkg_rate = NestedDict(
+                        bundle = dict(name="parameters", version = "v06"),
+                        pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/bkg_rates.yaml',
+                        separate_uncertainty = '{}_norm'
+                    ),
+                #
+                # Transformations
+                #
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
@@ -551,42 +548,6 @@ Misc changes:
                             li = ( 0.95, 0.05, 'relative' )
                             ),
                         ),
-                # bkg_spectra = NestedDict(
-                    # bundle    = dict(name='root_histograms_v05'),
-                    # filename  = 'data/data_juno/bkg/group/2020-05-JUNO-YB/JunoBkg_evis_2400.root',
-                    # formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',   'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
-                    # names      = ['acc_spectrum',                'lihe_spectrum',       'fn_spectrum',            'alphan_spectrum',        'geonu_spectrum'],
-                    # labels     = ['Accidentals|(norm spectrum)', '9Li|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
-                    # normalize = True,
-                    # ),
-                acc_rate = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'acc_rate',
-                        label='Acc rate',
-                        pars = uncertain(0.9, 1, 'percent'),
-                        separate_uncertainty='acc_norm',
-                        ),
-                fastn_rate = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'fastn_rate',
-                        label='Fast n rate',
-                        pars = uncertain(0.1, 100, 'percent'),
-                        separate_uncertainty='fastn_norm',
-                        ),
-                lihe_rate = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'lihe_rate',
-                        label='9Li/8He rate',
-                        pars = uncertain(1.6, 20, 'percent'),
-                        separate_uncertainty='lihe_norm',
-                        ),
-                alphan_rate = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'alphan_rate',
-                        label='C(alpha,n)O rate',
-                        pars = uncertain(0.05, 50, 'percent'),
-                        separate_uncertainty='alphan_norm',
-                        ),
                 )
 
         if 'eres' in self.opts.energy_model:
@@ -807,16 +768,16 @@ Misc changes:
         # Backgrounds
         #
         acc_num:
-            expr: 'acc_norm*acc_rate*days_in_second*efflivetime'
+            expr: 'acc_rate*acc_rate_norm*days_in_second*efflivetime'
             label: Number of accidentals (b.fit)
         fastn_num:
-            expr: 'days_in_second*efflivetime*fastn_norm*fastn_rate'
+            expr: 'days_in_second*efflivetime*fastn_rate*fastn_rate_norm'
             label: Number of fast neutrons (b.fit)
         alphan_num:
-            expr: 'alphan_norm*alphan_rate*days_in_second*efflivetime'
+            expr: 'alphan_rate*alphan_rate_norm*days_in_second*efflivetime'
             label: Number of alpha-n (b.fit)
         lihe_num:
-            expr: 'days_in_second*efflivetime*lihe_norm*lihe_rate'
+            expr: 'days_in_second*efflivetime*lihe_rate*lihe_rate_norm'
             label: Number of 9Li/8He (b.fit)
         #
         # Oscillation probability

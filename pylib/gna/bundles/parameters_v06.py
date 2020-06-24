@@ -104,7 +104,7 @@ class parameters_v06(TransformationBundle):
             del kwargsscale['relsigma']
             del kwargspar['relsigma']
         elif 'percent' in kwargsscale:
-            kwargsscale['sigma'] = kwargsscale['relsigma']*0.01
+            kwargsscale['sigma'] = kwargsscale['percent']*0.01
             del kwargsscale['percent']
             del kwargspar['percent']
         elif 'sigma' in kwargsscale:
@@ -127,7 +127,7 @@ class parameters_v06(TransformationBundle):
         skip = list(self.cfg.get('skip', ()))+self.skip
 
         state = self.cfg.get('state', None)
-        uncertainty_mode_common = self.cfg.get('uncertainty_mode', 'absolute')
+        uncertainty_mode_common = self.cfg.get('uncertainty_mode', pars.get('uncertainty_mode', 'absolute'))
         for name in pars.keys():
             if name in skip:
                 continue
