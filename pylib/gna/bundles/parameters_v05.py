@@ -39,6 +39,32 @@ class parameters_v05(TransformationBundle):
                 pass
         return names, names if cfg.get('objectize') else ()
 
+    def get_parameter_kwargs(self, parcfg, state, uncertainty_mode_common):
+        kwargs=dict()
+        if isinstance(parcfg, Iterable):
+            parcfg=list(parcfg)
+            if len(parcfg)==1:
+                kwargs['central'] = parcfg[0]
+                kwargs[state] = True
+            else:
+                if len(parcfg)==2:
+                    kwargs['central'], kwargs['sigma'] = parcfg
+                    uncertainty_mode = uncertainty_mode_common
+                elif len(parcfg)==3:
+                    kwargs['central'], err, uncertainty_mode = parcfg
+
+                if uncertainty_mode=='absolute':
+                    kwargs['sigma'] = err
+                elif uncertainty_mode=='relative':
+                    kwargs['relsigma'] = err
+                elif uncertainty_mode=='percent':
+                    kwargs['relsigma'] = err*0.01
+        else:
+            kwargs['central'] = parcfg
+            kwargs[state] = True
+
+        return kwargs
+
     def define_variables(self):
         self._par_container = []
         pars = cfg_parse(self.cfg.pars, verbose=True)
@@ -46,34 +72,14 @@ class parameters_v05(TransformationBundle):
         objectize = self.cfg.get('objectize')
         skip = self.cfg.get('skip', ())
 
+
         state = self.cfg.get('state', None)
         uncertainty_mode_common = self.cfg.get('uncertainty_mode', 'absolute')
         for name, parcfg in pars.items():
             if name in skip or name=='labels':
                 continue
-            kwargs=dict()
-            if isinstance(parcfg, Iterable):
-                parcfg=list(parcfg)
-                if len(parcfg)==1:
-                    kwargs['central'] = parcfg[0]
-                    kwargs[state] = True
-                else:
-                    if len(parcfg)==2:
-                        kwargs['central'], kwargs['sigma'] = parcfg
-                        uncertainty_mode = uncertainty_mode_common
-                    elif len(parcfg)==3:
-                        kwargs['central'], err, uncertainty_mode = parcfg
 
-                    if uncertainty_mode=='absolute':
-                        kwargs['sigma'] = err
-                    elif uncertainty_mode=='relative':
-                        kwargs['relsigma'] = err
-                    elif uncertainty_mode=='percent':
-                        kwargs['relsigma'] = err*0.01
-            else:
-                kwargs['central'] = parcfg
-                kwargs[state] = True
-
+            kwargs=self.get_parameter_kwargs(parcfg, state=state, uncertainty_mode_common=uncertainty_mode_common)
             if name in labels:
                 kwargs['label'] = labels[name]
             par = self.reqparameter(name, None, **kwargs)

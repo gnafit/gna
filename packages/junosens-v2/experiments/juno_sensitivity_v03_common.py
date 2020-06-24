@@ -205,15 +205,15 @@ Misc changes:
                 'numerator = global_norm * efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
                              'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
                              'conversion_factor * target_protons',
-                'isotope_weight = eper_fission_scale[i] * eper_fission_nominal[i] * fission_fractions_scale[r,i]',
-                'eper_fission_avg = sum[i]| isotope_weight * fission_fractions_nominal[r,i]()',
-                'power_livetime_factor = numerator / eper_fission_avg',
+                'isotope_weight = energy_per_fission_scale[i] * energy_per_fission[i] * fission_fractions_scale[r,i]',
+                'energy_per_fission_avg = sum[i]| isotope_weight * fission_fractions_nominal[r,i]()',
+                'power_livetime_factor = numerator / energy_per_fission_avg',
                 'anuspec[i](enu())',
                 #
                 # SNF
                 #
-                'eper_fission_avg_nominal = sum[i] | eper_fission_nominal[i] * fission_fractions_nominal[r,i]()',
-                'snf_plf_daily = conversion_factor * duty_cycle * thermal_power_nominal[r] * fission_fractions_nominal[r,i]() / eper_fission_avg_nominal',
+                'energy_per_fission_avg_nominal = sum[i] | energy_per_fission[i] * fission_fractions_nominal[r,i]()',
+                'snf_plf_daily = conversion_factor * duty_cycle * thermal_power_nominal[r] * fission_fractions_nominal[r,i]() / energy_per_fission_avg_nominal',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i]()',
                 'snf_in_reac = snf_norm * efflivetime * target_protons * snf_correction(enu(), nominal_spec_per_reac)',
                 #
@@ -292,9 +292,9 @@ Misc changes:
                     skip = ('percent'),
                     state= 'fixed'
                     ),
-                eper_fission =  NestedDict(
+                energy_per_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v01"),
-                        parameter = 'eper_fission_nominal',
+                        parameter = 'energy_per_fission',
                         label = 'Energy per fission for {isotope} in MeV',
                         pars = uncertaindict(
                             [
@@ -305,7 +305,7 @@ Misc changes:
                                 ],
                             mode='absolute'
                             ),
-                        separate_uncertainty = 'eper_fission_scale'
+                        separate_uncertainty = 'energy_per_fission_scale'
                         ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
@@ -772,11 +772,11 @@ Misc changes:
         baselinewight_switch:
             expr: 'baselineweight*reactor_active_norm'
             label: 'Baselineweight (toggle) for {reactor}-\\>{detector}'
-        eper_fission_fraction:
+        energy_per_fission_fraction:
             expr: 'fission_fractions_nominal*isotope_weight'
             label: Fractional energy per fission
-        eper_fission_avg:
-          expr: 'eper_fission_avg'
+        energy_per_fission_avg:
+          expr: 'energy_per_fission_avg'
           label: 'Average energy per fission at {reactor}'
         #
         # Reactor spectrum
@@ -864,11 +864,11 @@ Misc changes:
         fission_fractions:
           expr: 'fission_fractions[r,i]()'
           label: "Fission fraction for {isotope} at {reactor}"
-        eper_fission_weight:
-          expr: 'eper_fission_weight'
-          label: "Weighted eper_fission for {isotope} at {reactor}"
-        eper_fission_weighted:
-          expr: 'eper_fission*fission_fractions'
+        energy_per_fission_weight:
+          expr: 'energy_per_fission_weight'
+          label: "Weighted energy_per_fission for {isotope} at {reactor}"
+        energy_per_fission_weighted:
+          expr: 'energy_per_fission*fission_fractions'
           label: "{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"
         power_livetime_factor:
           expr: 'power_livetime_factor'
