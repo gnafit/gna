@@ -76,7 +76,7 @@ class parameters_v05(TransformationBundle):
         state = self.cfg.get('state', None)
         uncertainty_mode_common = self.cfg.get('uncertainty_mode', 'absolute')
         for name, parcfg in pars.items():
-            if name in skip or name=='labels':
+            if name in skip or name=='meta':
                 continue
 
             kwargs=self.get_parameter_kwargs(parcfg, state=state, uncertainty_mode_common=uncertainty_mode_common)

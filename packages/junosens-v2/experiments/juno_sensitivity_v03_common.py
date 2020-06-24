@@ -287,26 +287,32 @@ Misc changes:
                             ),
                     ),
                 numbers = NestedDict(
-                    bundle = dict(name='parameters', version='v05'),
+                    bundle = dict(name='parameters', version='v06'),
                     pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/juno_input_numbers.py',
-                    skip = ('percent'),
+                    skip = ('percent',),
                     state= 'fixed'
                     ),
                 energy_per_fission =  NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
+                        bundle = dict(name="parameters", version = "v06"),
                         parameter = 'energy_per_fission',
-                        label = 'Energy per fission for {isotope} in MeV',
-                        pars = uncertaindict(
-                            [
-                                ('U235',  (201.92, 0.46)),
-                                ('U238',  (205.52, 0.96)),
-                                ('Pu239', (209.99, 0.60)),
-                                ('Pu241', (213.60, 0.65))
-                                ],
-                            mode='absolute'
-                            ),
-                        separate_uncertainty = 'energy_per_fission_scale'
+                        pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/energy_per_fission.yaml',
+                        separate_uncertainty = '{}_scale'
                         ),
+                # energy_per_fission =  NestedDict(
+                        # bundle = dict(name="parameters", version = "v01"),
+                        # parameter = 'energy_per_fission',
+                        # label = 'Energy per fission for {isotope} in MeV',
+                        # pars = uncertaindict(
+                            # [
+                                # ('U235',  (201.92, 0.46)),
+                                # ('U238',  (205.52, 0.96)),
+                                # ('Pu239', (209.99, 0.60)),
+                                # ('Pu241', (213.60, 0.65))
+                                # ],
+                            # mode='absolute'
+                            # ),
+                        # separate_uncertainty = 'energy_per_fission_scale'
+                        # ),
                 kinint2 = NestedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
