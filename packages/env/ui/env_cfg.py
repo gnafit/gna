@@ -14,7 +14,7 @@ class DictWrapperVerbose(DictWrapper):
             action='Overwrite'
         else:
             action='Set'
-        key = '.'.join(k)
+        key = '.'.join(self.iterkey(k))
         print('{action} {key}: {value}'.format(action=action, key=key, value=v))
         DictWrapper.__setitem__(self, k, v)
 
