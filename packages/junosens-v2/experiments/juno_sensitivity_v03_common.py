@@ -84,7 +84,7 @@ Misc changes:
         # Backgrounds and geo-neutrino
         bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
         bkg_choices = ['acc', 'lihe', 'fastn', 'alphan']
-        bkg.add_argument('-b', '--bkg', nargs='*', default=[], choices=bkg_choices, help='Enable background group')
+        bkg.add_argument('-b', '--bkg', nargs='*', default=bkg_choices, choices=bkg_choices, help='Enable background group')
 
         # Binning
         binning=parser.add_argument_group('binning', description='Binning related options')
@@ -152,8 +152,8 @@ Misc changes:
                 #
                 # Geo neutrino
                 #
-                geonu_spectrum = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
-                                 if 'geo' in self.opts.bkg else '',
+                # geonu_spectrum = '+geonu_scale*bracket(geonu_norm_U238*geonu_spectrum_U238(enu()) + geonu_norm_Th232*geonu_spectrum_Th232(enu()))'
+                                 # if 'geo' in self.opts.bkg else '',
                 #
                 # Reactor
                 #
@@ -174,7 +174,7 @@ Misc changes:
                 lihe        = '+lihe'        if 'lihe'   in self.opts.bkg else '',
                 alphan      = '+alphan'      if 'alphan' in self.opts.bkg else '',
                 fastn       = '+fastn'       if 'fastn'  in self.opts.bkg else '',
-                # geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
+                geonu       = '+geonu'       if 'geonu'  in self.opts.bkg else '',
                 #
                 # IBD rebinning
                 #
@@ -219,10 +219,11 @@ Misc changes:
                 #
                 # Backgrounds
                 #
-                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]|    acc_spectrum[d]()',
-                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d]|  fastn_spectrum[d]()',
-                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum[d]()',
-                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * bracket| frac_li * rebin_li[d](li_spectrum()) + frac_he * rebin_he[d](he_spectrum())',
+                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]|    acc_spectrum()',
+                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d]|  fastn_spectrum()',
+                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
+                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]|   lihe_spectrum()',
+                'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d]|  geonu_spectrum()',
                 #
                 # IBD part
                 #
@@ -233,7 +234,6 @@ Misc changes:
                             baselineweight[r,d]*
                             ( reactor_active_norm * (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
                             {oscprob}
-                            {geonu_spectrum}
                         )*
                         bracket(
                             ibd_xsec(enu(), ctheta())*
@@ -244,7 +244,7 @@ Misc changes:
                 #
                 # Total observation
                 #
-                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn}'.format(**formula_options)
+                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options)
                 ]
 
     def parameters(self):
@@ -254,12 +254,19 @@ Misc changes:
             ns[par].setFree()
 
     def init_configuration(self):
-        edges    = np.arange(0.0, 12.001, 0.01) #FIXME
+        # edges    = np.arange(0.0, 12.001, 0.01) #FIXME
+        # edges_final = np.concatenate( (
+                                    # [0.7],
+                                    # np.arange(1, 6.0, 0.02),
+                                    # np.arange(6, 7.0, 0.1),
+                                    # [7.0, 7.5, 12.0]
+                                # )
+                            # )
+        edges    = np.arange(0.8, 12.001, 0.0112)
         edges_final = np.concatenate( (
-                                    [0.7],
-                                    np.arange(1, 6.0, 0.02),
-                                    np.arange(6, 7.0, 0.1),
-                                    [7.0, 7.5, 12.0]
+                                    np.arange(0.8, 6.0, 0.0224),
+                                    np.arange(6.008, 7.0, 0.1008),
+                                    [7.0048, 7.4976, 12.0]
                                 )
                             )
         if self.opts.final_emin is not None:
@@ -332,10 +339,10 @@ Misc changes:
                     edges = edges_final,
                     instances={
                         'rebin_acc': 'Accidentals {autoindex}',
-                        'rebin_li': '9Li {autoindex}',
-                        'rebin_he': '8He {autoindex}',
+                        'rebin_lihe': '9Li/8He {autoindex}',
                         'rebin_fastn': 'Fast neutrons {autoindex}',
-                        'rebin_alphan': 'C(alpha,n)O {autoindex}'
+                        'rebin_alphan': 'C(alpha,n)O {autoindex}',
+                        'rebin_geonu': 'Geo-nu {autoindex}'
                         }
                     ),
                 ibd_xsec = NestedDict(
@@ -386,10 +393,6 @@ Misc changes:
                         bundle = dict(name='reactor_offeq_spectra',
                             version='v03', major='ir'),
                         offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
-                        ),
-                geonu = NestedDict(
-                        bundle = dict(name='geoneutrino_spectrum', version='v01'),
-                        data   = 'data/data-common/geo-neutrino/2006-sanshiro/geoneutrino-luminosity_{isotope}_truncated.knt'
                         ),
                 fission_fractions = NestedDict(
                         bundle = dict(name="parameters_yaml_v01", major = 'i'),
@@ -492,62 +495,14 @@ Misc changes:
                 #
                 # Backgrounds
                 #
-                acc_spectrum_db = NestedDict(
-                        bundle    = dict(name='root_histograms_v04', inactive=True),
-                        filename  = 'data/data_juno/bkg/acc/2016_acc_dayabay_p15a/dayabay_acc_spectrum_p15a.root',
-                        format    = 'accidentals',
-                        name      = 'acc_spectrum',
-                        label     = 'Accidentals|norm spectrum',
-                        normalize = True
-                        ),
-                acc_spectrum = NestedDict(
-                        bundle    = dict(name='root_histograms_v04'),
-                        filename  = 'data/data_juno/bkg/acc/2019_acc_malyshkin/acc_bckg_FVcut.root',
-                        format    = 'hAcc',
-                        name      = 'acc_spectrum',
-                        label     = 'Accidentals|norm spectrum',
-                        normalize = slice(200,-1),
-                        xscale    = 1.e-3,
-                        ),
-                fastn_spectrum=NestedDict(
-                        bundle=dict(name='histogram_flat_v01'),
-                        name='fastn_spectrum',
-                        edges=edges,
-                        label='Fast neutron|norm spectrum',
-                        normalize=(0.7, 12.0),
-                        ),
-                li_spectrum=NestedDict(
-                        bundle    = dict(name='root_histograms_v03'),
-                        filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyli9spec_BCWmodel_v1_2400.root',
-                        format    = 'h_eVisAllSmeared',
-                        name      = 'li_spectrum',
-                        label     = '9Li spectrum|norm',
-                        normalize = True,
-                        ),
-                he_spectrum= NestedDict(
-                        bundle    = dict(name='root_histograms_v03'),
-                        filename  = 'data/data_juno/bkg/lihe/2014_lihe_ochoa/toyhe8spec_BCWmodel_v1_2400.root',
-                        format    = 'h_eVisAllSmeared',
-                        name      = 'he_spectrum',
-                        label     = '8He spectrum|norm',
-                        normalize = True,
-                        ),
-                alphan_spectrum = NestedDict(
-                        bundle    = dict(name='root_histograms_v03'),
-                        filename  = 'data/data_juno/bkg/alphan/2012_dayabay_alphan/P12B_alphan_2400.root',
-                        format    = 'AD1',
-                        name      = 'alphan_spectrum',
-                        label     = 'C(alpha,n) spectrum|(norm)',
-                        normalize = True,
-                        ),
-                lihe_fractions=NestedDict(
-                        bundle = dict(name='var_fractions_v02'),
-                        names = [ 'li', 'he' ],
-                        format = 'frac_{component}',
-                        fractions = uncertaindict(
-                            li = ( 0.95, 0.05, 'relative' )
-                            ),
-                        ),
+                bkg_spectra = NestedDict(
+                    bundle    = dict(name='root_histograms_v05'),
+                    filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_11.root',
+                    formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
+                    names      = ['acc_spectrum',                'lihe_spectrum',           'fastn_spectrum',         'alphan_spectrum',        'geonu_spectrum'],
+                    labels     = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
+                    normalize = True,
+                    ),
                 )
 
         if 'eres' in self.opts.energy_model:

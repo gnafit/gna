@@ -57,7 +57,7 @@ class cmd(basecmd):
     def init_variables(self):
         ns = self.namespace
 
-        self.bkg=OrderedDict([(k, NamespaceWrapper(ns[k])) for k in (k0+'_norm' for k0 in ('acc', 'lihe', 'fastn', 'alphan')) if k in ns])
+        self.bkg=OrderedDict([(k, NamespaceWrapper(ns[k])) for k in (k0+'_rate_norm' for k0 in ('acc', 'lihe', 'fastn', 'alphan', 'geonu')) if k in ns])
         self.reac=OrderedDict([(k, NamespaceWrapper(ns[k])) for k in (k0+'_norm' for k0 in ('reactor_active', 'snf')) if k in ns])
         self.reac['offeq']=NamespaceWrapper(ns('offeq_scale'))
 
@@ -97,8 +97,13 @@ class cmd(basecmd):
 
         assert self.observation().sum()==0.0
 
-        for p in self.bkg.values(): p.push(1.0)
+        for p in self.bkg.values(): p.pop()
         add('Bkg')
+
+        # Revert
+        self.reac['snf_norm'].pop()
+        self.reac['offeq'].pop()
+        self.reac['reactor_active_norm'].pop()
 
         data = [ (k,)+v for k,v in data.iteritems() ]
 
