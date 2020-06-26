@@ -13,6 +13,15 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
+            #
+            # Future spectra location
+            #
+            try:
+                return env.future['spectra'][path]
+            except KeyError:
+                pass
+
+            # To be deprecated spectra location
             nspath, name = path.split('/')
             try:
                 return env.ns(nspath).observables[name]

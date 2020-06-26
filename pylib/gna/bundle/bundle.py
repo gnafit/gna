@@ -12,6 +12,9 @@ from gna.packages import iterate_module_paths
 bundle_modules = None
 bundles = {}
 
+class BundleException(Exception):
+    pass
+
 def get_bundle(name):
     global bundle_modules, bundles
     if isinstance(name, tuple):
@@ -367,4 +370,7 @@ class TransformationBundle(object):
         ndim = nidx.ndim();
         if not dmin<=ndim<=dmax:
             raise self.exception('Ndim {} does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
+
+    def _exception(self, msg):
+        return BundleException('{}: {}'.format(type(self).__name__, msg))
 
