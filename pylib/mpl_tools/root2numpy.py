@@ -18,6 +18,9 @@ def get_buffer_hist1( h, flows=False ):
     if not flows: buf = buf[1:-1]
     return buf
 
+def get_buffers_hist1(h):
+    return get_bin_centers_axis(h.GetXaxis()), get_buffer_hist1(h, flows=False)
+
 def get_err_buffer_hist1( h, flows=False ):
     """Return TH1* histogram error buffer
     if flows=False, exclude underflow and overflow
