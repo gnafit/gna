@@ -38,33 +38,16 @@ Changes since previous implementation [juno_sensitivity_v02]:
 Implements:
     - Reactor antineutrino flux:
       * Spectra:
-        + ILL+Vogel (now default)
         + Huber+Mueller
         + Free
       * SNF contribution
       * Off-equilibrium corrections (Mueller)
     - Vacuum 3nu oscillations
     - Evis mode with 2d integration (similary to dybOscar)
-    - Final binning:
-      * 20 keV
-      * 10 keV (default)
-    - [optional] Birks-Cherenkov detector energy responce (Yaping)
-    - [optional] Detector energy resolution
-    - [optional] Multi-detector energy resolution (Yaping), concatenated
+    - LSNL
+    - Detector energy resolution
 
-Misc changes:
-    - Switch oscillation probability bundle from v03 to v04 (OscProb3 class)
-    - Switch to double angle parameters for theta12 and theta13
-    - Added concatenated subdetectors
-    - Uncomment uncertainties:
-      * energy per fission
-      * fission fractions
-    - [2020.04.24] Modify fluxes summation and integration sequence to introduce geo-neutrino spectra
-    - [2020.05.05] Add backgrounds
-    - [2020.05.11] Remove multieres summation mode
-    - [2020.05.11] Add SNF
-    - [2020.05.15] Remove multieres option. Keep the code (not working)
-    """
+"""
 
     detectorname = 'AD1'
 
@@ -83,16 +66,13 @@ Misc changes:
 
         # Backgrounds and geo-neutrino
         bkg=parser.add_argument_group('bkg', description='Background and geo-neutrino parameters')
-        bkg_choices = ['acc', 'lihe', 'fastn', 'alphan']
+        bkg_choices = ['acc', 'lihe', 'fastn', 'alphan', 'geonu']
         bkg.add_argument('-b', '--bkg', nargs='*', default=bkg_choices, choices=bkg_choices, help='Enable background group')
 
         # Binning
         binning=parser.add_argument_group('binning', description='Binning related options')
         binning.add_argument('--final-emin', type=float, help='Final binning Emin')
         binning.add_argument('--final-emax', type=float, help='Final binning Emax')
-
-        # reactor flux
-        parser.add_argument('--flux', choices=['huber-mueller', 'ill-vogel'], default='ill-vogel', help='Antineutrino flux')
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum'], default='vacuum', help='oscillation probability type')
@@ -129,7 +109,8 @@ Misc changes:
             ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
-            ('s', 'subdetector', self.subdetectors_names)
+            ('s', 'subdetector', self.subdetectors_names),
+            ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] ),
         ]
         self.nidx = NIndex.fromlist(self.nidx)
 
@@ -196,9 +177,8 @@ Misc changes:
                 #
                 # Energy model
                 #
-                'evis_edges_hist| evis_hist' if 'lsnl'      in energy_model else '',
+                'lsnl_edges| evis_hist, evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'if 'lsnl' in energy_model else '',
                 'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
-                'eres_matrix[s]| evis_hist'  if 'multieres' in energy_model else '',
                 #
                 # Reactor part
                 #
@@ -368,21 +348,10 @@ Misc changes:
                     # dm      = '23'
                     # ),
                 anuspec_hm = NestedDict(
-                        bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='huber-mueller'),
+                        bundle = dict(name='reactor_anu_spectra', version='v04'),
                         name = 'anuspec',
                         filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
                             'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
-                        free_params=False, # enable free spectral model
-                        varmode='log',
-                        varname='anue_weight_{index:02d}',
-                        ns_name='spectral_weights',
-                        edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
-                        ),
-                anuspec_ill = NestedDict(
-                        bundle = dict(name='reactor_anu_spectra', version='v04', inactive=self.opts.flux!='ill-vogel'),
-                        name = 'anuspec',
-                        filename = ['data/reactor_anu_spectra/ILL/ILL_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                            'data/reactor_anu_spectra/Vogel/Vogel_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
                         free_params=False, # enable free spectral model
                         varmode='log',
                         varname='anue_weight_{index:02d}',
@@ -442,39 +411,19 @@ Misc changes:
                         separate_uncertainty = 'thermal_power_scale'
                         ),
                 lsnl = NestedDict(
-                        bundle = dict( name='energy_nonlinearity_birks_cherenkov', version='v01', major=''),
-                        stopping_power='data/data_juno/energy_model/2019_birks_cherenkov_v01/stoppingpower.txt',
-                        annihilation_electrons=dict(
-                            file='data/data_juno/energy_model/2019_birks_cherenkov_v01/hgamma2e.root',
-                            histogram='hgamma2e_1KeV',
-                            scale=1.0/50000 # events simulated
-                            ),
-                        pars = uncertaindict(
-                            [
-                                ('birks.Kb0',               (1.0, 'fixed')),
-                                ('birks.Kb1',           (15.2e-3, 0.1776)),
-                                # ('birks.Kb2',           (0.0, 'fixed')),
-                                ("cherenkov.E_0",         (0.165, 'fixed')),
-                                ("cherenkov.p0",  ( -7.26624e+00, 'fixed')),
-                                ("cherenkov.p1",   ( 1.72463e+01, 'fixed')),
-                                ("cherenkov.p2",  ( -2.18044e+01, 'fixed')),
-                                ("cherenkov.p3",   ( 1.44731e+01, 'fixed')),
-                                ("cherenkov.p4",   ( 3.22121e-02, 'fixed')),
-                                ("Npescint",            (1341.38, 0.0059)),
-                                ("kC",                      (0.5, 0.4737)),
-                                ("normalizationEnergy",   (11.99, 'fixed'))
-                                ],
-                            mode='relative'
-                            ),
-                        integration_order = 2,
-                        correlations_pars = [ 'birks.Kb1', 'Npescint', 'kC' ],
-                        correlations = [ 1.0,   0.94, -0.97,
-                            0.94,  1.0,  -0.985,
-                            -0.97, -0.985, 1.0   ],
-                        fill_matrix=True,
-                        labels = dict(
-                            normalizationEnergy = 'Conservative normalization point at 12 MeV'
-                            ),
+                        bundle     = dict(name='energy_nonlinearity_db_root', version='v03', major='l'),
+                        names      = OrderedDict( [
+                            ('nominal', 'positronScintNL'),
+                            ('pull0', 'positronScintNLpull0'),
+                            ('pull1', 'positronScintNLpull1'),
+                            ('pull2', 'positronScintNLpull2'),
+                            ('pull3', 'positronScintNLpull3'),
+                            ]),
+                        filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_11.root',
+                        edges      = 'evis_edges',
+                        extrapolation_strategy = 'extrapolate',
+                        nonlin_range = (0.95, 12.),
+                        expose_matrix = True
                         ),
                 shape_uncertainty = NestedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
@@ -655,6 +604,7 @@ Misc changes:
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
         ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
 
+        futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
         futurens[(self.detectorname, 'fine')] = fine
         futurens[(self.detectorname, 'final')] = outputs.observation.AD1
         if 'lsnl' in self.opts.energy_model:
@@ -662,6 +612,10 @@ Misc changes:
 
         if 'eres' in self.opts.energy_model:
             futurens[(self.detectorname, 'eres')] = outputs.eres.AD1
+
+        k0 = ('extra',)
+        for k, v in self.context.outputs.items(nested=True):
+            futurens[k0+k]=v
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
