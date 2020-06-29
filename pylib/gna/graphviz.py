@@ -194,6 +194,7 @@ class TreeStyle(object):
                 'SumBroadcast':      '+',
                 'WeightedSum':       '+w',
                 'Product':           '*',
+                'ProductBC':         '*',
                 'Points':            'a',
                 'View':              'v',
                 'Histogram':         'h',
