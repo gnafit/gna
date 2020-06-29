@@ -373,8 +373,7 @@ Implements:
                         edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                         ),
                 offeq_correction = OrderedDict(
-                        bundle = dict(name='reactor_offeq_spectra',
-                            version='v03', major='ir'),
+                        bundle = dict(name='reactor_offeq_spectra', version='v03', major='ir'),
                         offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                         ),
                 fission_fractions = OrderedDict(
