@@ -234,19 +234,12 @@ Implements:
             ns[par].setFree()
 
     def init_configuration(self):
-        # edges    = np.arange(0.0, 12.001, 0.01) #FIXME
-        # edges_final = np.concatenate( (
-                                    # [0.7],
-                                    # np.arange(1, 6.0, 0.02),
-                                    # np.arange(6, 7.0, 0.1),
-                                    # [7.0, 7.5, 12.0]
-                                # )
-                            # )
-        edges    = np.arange(0.8, 12.001, 0.0112)
+        edges    = np.arange(0.0, 12.001, 0.01)
         edges_final = np.concatenate( (
-                                    np.arange(0.8, 6.0, 0.0224),
-                                    np.arange(6.008, 7.0, 0.1008),
-                                    [7.0048, 7.4976, 12.0]
+                                    [0.8],
+                                    np.arange(1, 6.0, 0.02),
+                                    np.arange(6, 7.0, 0.1),
+                                    [7.0, 7.5, 12.0]
                                 )
                             )
         if self.opts.final_emin is not None:
@@ -419,7 +412,7 @@ Implements:
                             ('pull2', 'positronScintNLpull2'),
                             ('pull3', 'positronScintNLpull3'),
                             ]),
-                        filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_11.root',
+                        filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
                         edges      = 'evis_edges',
                         extrapolation_strategy = 'extrapolate',
                         nonlin_range = (0.95, 12.),
@@ -446,7 +439,7 @@ Implements:
                 #
                 bkg_spectra = NestedDict(
                     bundle    = dict(name='root_histograms_v05'),
-                    filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_11.root',
+                    filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
                     formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
                     names      = ['acc_spectrum',                'lihe_spectrum',           'fastn_spectrum',         'alphan_spectrum',        'geonu_spectrum'],
                     labels     = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
