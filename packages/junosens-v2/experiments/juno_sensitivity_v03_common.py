@@ -673,6 +673,9 @@ Implements:
         lihe_num:
             expr: 'days_in_second*efflivetime*lihe_rate*lihe_rate_norm'
             label: Number of 9Li/8He (b.fit)
+        geonu_num:
+            expr: 'days_in_second*efflivetime*geonu_rate*geonu_rate_norm'
+            label: Number of Geo nu events (b.fit)
         #
         # Oscillation probability
         #
