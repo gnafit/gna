@@ -18,6 +18,7 @@ from collections import Iterable
 
 class parameters_v05(TransformationBundle):
     covmat, corrmat = None, None
+    skip = ['meta', 'uncertainty', 'uncertainty_mode']
     def __init__(self, *args, **kwargs):
         self._par_container = []
         TransformationBundle.__init__(self, *args, **kwargs)
@@ -27,11 +28,11 @@ class parameters_v05(TransformationBundle):
         if 'state' in self.cfg and not self.cfg.state in ('fixed', 'free'):
             raise ValueError('Invalid state: '+self.cfg.state)
 
-    @staticmethod
-    def _provides(cfg):
+    @classmethod
+    def _provides(cls, cfg):
         pars = cfg_parse(cfg.pars, verbose=False)
         names = list(pars.keys())
-        skips = list(cfg.get('skip', ()))+['meta']
+        skips = list(cfg.get('skip', ()))+cls.skip
         for skip in skips:
             try:
                 names.remove(skip)
@@ -39,29 +40,37 @@ class parameters_v05(TransformationBundle):
                 pass
         return names, names if cfg.get('objectize') else ()
 
-    def get_parameter_kwargs(self, parcfg, state, uncertainty_mode_common):
+    def get_parameter_kwargs(self, parcfg, state, uncertainty_common, uncertainty_mode_common):
         kwargs=dict()
+
         if isinstance(parcfg, Iterable):
             parcfg=list(parcfg)
-            if len(parcfg)==1:
-                kwargs['central'] = parcfg[0]
-                kwargs[state] = True
-            else:
-                if len(parcfg)==2:
-                    kwargs['central'], kwargs['sigma'] = parcfg
-                    uncertainty_mode = uncertainty_mode_common
-                elif len(parcfg)==3:
-                    kwargs['central'], err, uncertainty_mode = parcfg
-
-                if uncertainty_mode=='absolute':
-                    kwargs['sigma'] = err
-                elif uncertainty_mode=='relative':
-                    kwargs['relsigma'] = err
-                elif uncertainty_mode=='percent':
-                    kwargs['relsigma'] = err*0.01
         else:
-            kwargs['central'] = parcfg
-            kwargs[state] = True
+            parcfg=[parcfg]
+
+        uncertainty_mode = None
+        if len(parcfg)==1:
+            kwargs['central'] = parcfg[0]
+
+            if uncertainty_common is not None:
+                err = uncertainty_common
+                uncertainty_mode = uncertainty_mode_common
+            else:
+                kwargs[state] = True
+        else:
+            if len(parcfg)==2:
+                kwargs['central'], err = parcfg
+                uncertainty_mode = uncertainty_mode_common
+            else:
+                kwargs['central'], err, uncertainty_mode = parcfg[:3]
+
+        if uncertainty_mode is not None:
+            if uncertainty_mode=='absolute':
+                kwargs['sigma'] = err
+            elif uncertainty_mode=='relative':
+                kwargs['relsigma'] = err
+            elif uncertainty_mode=='percent':
+                kwargs['relsigma'] = err*0.01
 
         return kwargs
 
@@ -70,16 +79,17 @@ class parameters_v05(TransformationBundle):
         pars = cfg_parse(self.cfg.pars, verbose=True)
         labels = self.cfg.get('labels', pars.get('meta', {}).get('labels', {}))
         objectize = self.cfg.get('objectize')
-        skip = self.cfg.get('skip', ())
+        skip = list(self.cfg.get('skip', ()))+self.skip
 
 
         state = self.cfg.get('state', None)
-        uncertainty_mode_common = self.cfg.get('uncertainty_mode', pars.get('uncertainty_mode', 'absolute'))
+        uncertainty_common = pars.get('uncertainty', None)
+        uncertainty_mode_common = pars.get('uncertainty_mode', 'absolute')
         for name, parcfg in pars.items():
-            if name in skip or name=='meta':
+            if name in skip:
                 continue
 
-            kwargs=self.get_parameter_kwargs(parcfg, state=state, uncertainty_mode_common=uncertainty_mode_common)
+            kwargs=self.get_parameter_kwargs(parcfg, state=state, uncertainty_common=uncertainty_common, uncertainty_mode_common=uncertainty_mode_common)
             if name in labels:
                 kwargs['label'] = labels[name]
             par = self.reqparameter(name, None, **kwargs)

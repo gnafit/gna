@@ -23,7 +23,7 @@ from tools.dictwrapper import DictWrapper
 
 class parameters_v06(TransformationBundle):
     covmat, corrmat = None, None
-    skip = ['meta', 'uncertainty_mode']
+    skip = ['meta', 'uncertainty', 'uncertainty_mode']
     def __init__(self, *args, **kwargs):
         self._par_container = []
         TransformationBundle.__init__(self, *args, **kwargs)
@@ -52,7 +52,7 @@ class parameters_v06(TransformationBundle):
         else:
             return names, ()
 
-    def get_parameter_kwargs(self, pars, name, idx, state, uncertainty_mode_common):
+    def get_parameter_kwargs(self, pars, name, idx, state, uncertainty_common, uncertainty_mode_common):
         kwargs=dict()
         try:
             parcfg=pars[name, idx]
@@ -64,25 +64,32 @@ class parameters_v06(TransformationBundle):
 
         if isinstance(parcfg, Iterable):
             parcfg=list(parcfg)
-            if len(parcfg)==1:
-                kwargs['central'] = parcfg[0]
-                kwargs[state] = True
-            else:
-                if len(parcfg)==2:
-                    kwargs['central'], err = parcfg
-                    uncertainty_mode = uncertainty_mode_common
-                else:
-                    kwargs['central'], err, uncertainty_mode = parcfg[:3]
-
-                if uncertainty_mode=='absolute':
-                    kwargs['sigma'] = err
-                elif uncertainty_mode=='relative':
-                    kwargs['relsigma'] = err
-                elif uncertainty_mode=='percent':
-                    kwargs['relsigma'] = err*0.01
         else:
-            kwargs['central'] = parcfg
-            kwargs[state] = True
+            parcfg=[parcfg]
+
+        uncertainty_mode = None
+        if len(parcfg)==1:
+            kwargs['central'] = parcfg[0]
+
+            if uncertainty_common is not None:
+                err = uncertainty_common
+                uncertainty_mode = uncertainty_mode_common
+            else:
+                kwargs[state] = True
+        else:
+            if len(parcfg)==2:
+                kwargs['central'], err = parcfg
+                uncertainty_mode = uncertainty_mode_common
+            else:
+                kwargs['central'], err, uncertainty_mode = parcfg[:3]
+
+        if uncertainty_mode is not None:
+            if uncertainty_mode=='absolute':
+                kwargs['sigma'] = err
+            elif uncertainty_mode=='relative':
+                kwargs['relsigma'] = err
+            elif uncertainty_mode=='percent':
+                kwargs['relsigma'] = err*0.01
 
         return kwargs
 
@@ -127,14 +134,15 @@ class parameters_v06(TransformationBundle):
         skip = list(self.cfg.get('skip', ()))+self.skip
 
         state = self.cfg.get('state', None)
-        uncertainty_mode_common = self.cfg.get('uncertainty_mode', pars.get('uncertainty_mode', 'absolute'))
+        uncertainty_common = pars.get('uncertainty', None)
+        uncertainty_mode_common = pars.get('uncertainty_mode', 'absolute')
         for name in pars.keys():
             if name in skip:
                 continue
 
             for it_major in self.nidx_major:
                 major_values = it_major.current_values()
-                kwargspar=self.get_parameter_kwargs(pars, name, major_values, state=state, uncertainty_mode_common=uncertainty_mode_common)
+                kwargspar=self.get_parameter_kwargs(pars, name, major_values, state=state, uncertainty_common=uncertainty_common, uncertainty_mode_common=uncertainty_mode_common)
 
                 for it_minor in self.nidx_minor:
                     it=it_major+it_minor

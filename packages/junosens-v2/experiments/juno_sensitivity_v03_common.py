@@ -281,6 +281,11 @@ Implements:
                         pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/energy_per_fission.yaml',
                         separate_uncertainty = '{}_scale'
                         ),
+                thermal_power =  NestedDict(
+                        bundle = dict(name="parameters", version = "v06", names=dict(thermal_power='thermal_power_nominal')),
+                        pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/thermal_power.yaml',
+                        separate_uncertainty = '{}_scale'
+                        ),
                 # Backgrounds
                 bkg_rate = NestedDict(
                         bundle = dict(name="parameters", version = "v06"),
@@ -379,29 +384,6 @@ Implements:
                         parameter = "norm",
                         label = 'Reactor power/detection efficiency correlated normalization',
                         pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
-                        ),
-                thermal_power = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = "thermal_power_nominal",
-                        label = 'Thermal power of {reactor} in GWt',
-                        pars = uncertaindict([
-                            ('TS1',  4.6),
-                            ('TS2',  4.6),
-                            ('TS3',  4.6), # inactive
-                            ('TS4',  4.6), # inactive
-                            ('YJ1',  2.9),
-                            ('YJ2',  2.9),
-                            ('YJ3',  2.9),
-                            ('YJ4',  2.9),
-                            ('YJ5',  2.9),
-                            ('YJ6',  2.9),
-                            ('DYB', 17.4),
-                            ('HZ',  17.4), # corrected by factor
-                            ],
-                            uncertainty=0.8,
-                            mode='percent'
-                            ),
-                        separate_uncertainty = 'thermal_power_scale'
                         ),
                 lsnl = NestedDict(
                         bundle     = dict(name='energy_nonlinearity_db_root', version='v03', major='l'),

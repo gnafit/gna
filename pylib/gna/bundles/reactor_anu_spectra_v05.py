@@ -9,13 +9,12 @@ from gna.bundle import TransformationBundle
 from gna.configurator import NestedDict
 from scipy.interpolate import interp1d
 
-class reactor_anu_spectra_v04(TransformationBundle):
+class reactor_anu_spectra_v05(TransformationBundle):
     '''Antineutrino specta model v05
     based on: v04
 
     Changes:
     - add ROOT input
-
     '''
     short_names = dict(U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241')
     debug = False
