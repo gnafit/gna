@@ -199,11 +199,11 @@ Implements:
                 #
                 # Backgrounds
                 #
-                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]|    acc_spectrum()',
-                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d]|  fastn_spectrum()',
+                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]   | acc_spectrum()',
+                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d] | fastn_spectrum()',
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
-                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]|   lihe_spectrum()',
-                'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d]|  geonu_spectrum()',
+                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
+                'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
                 #
                 # IBD part
                 #
@@ -422,11 +422,19 @@ Implements:
                 bkg_spectra = NestedDict(
                     bundle    = dict(name='root_histograms_v05'),
                     filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
-                    formats    = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuHistogramAD'],
-                    names      = ['acc_spectrum',                'lihe_spectrum',           'fastn_spectrum',         'alphan_spectrum',        'geonu_spectrum'],
-                    labels     = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu combined|(norm spectrum)'],
+                    formats = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuTh232'                 , 'GeoNuU238'],
+                    names   = ['acc_spectrum',                'lihe_spectrum',           'fastn_spectrum',         'alphan_spectrum',        'geonu_Th232_spectrum'       , 'geonu_U238_spectrum'],
+                    labels  = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu Th232|(norm spectrum)', 'GeoNu U238|(norm spectrum)'],
                     normalize = True,
                     ),
+                geonu_fractions=NestedDict(
+                        bundle = dict(name='var_fractions_v02'),
+                        names = [ 'Th232', 'U238' ],
+                        format = 'frac_{component}',
+                        fractions = uncertaindict(
+                            Th232 = ( 0.23, 'fixed' )
+                            ),
+                        ),
                 )
 
         if 'eres' in self.opts.energy_model:
