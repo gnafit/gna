@@ -275,6 +275,20 @@ Implements:
                     skip = ('percent',),
                     state= 'fixed'
                     ),
+                # Detector and reactor
+                norm = NestedDict(
+                        bundle = dict(name="parameters", version = "v01"),
+                        parameter = "norm",
+                        label = 'Reactor power/detection efficiency correlated normalization',
+                        pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
+                        ),
+                baselines = NestedDict(
+                        bundle = dict(name='reactor_baselines', version='v02', major = 'rd'),
+                        reactors  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/reactor_baselines.yaml',
+                        reactors_key = 'reactor_baseline',
+                        detectors = dict(AD1=0.0),
+                        unit = 'km'
+                        ),
                 # Reactor
                 energy_per_fission =  NestedDict(
                         bundle = dict(name="parameters", version = "v06"),
@@ -372,18 +386,6 @@ Implements:
                 snf_correction = NestedDict(
                         bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
                         snf_average_spectra = './data/data-common/snf/2004.12-kopeikin/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
-                        ),
-                baselines = NestedDict(
-                        bundle = dict(name='reactor_baselines', version='v01', major = 'rd'),
-                        reactors  = 'data/juno_nominal/coordinates_reactors.py',
-                        detectors = 'data/juno_nominal/coordinates_det.py',
-                        unit = 'km'
-                        ),
-                norm = NestedDict(
-                        bundle = dict(name="parameters", version = "v01"),
-                        parameter = "norm",
-                        label = 'Reactor power/detection efficiency correlated normalization',
-                        pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
                         ),
                 lsnl = NestedDict(
                         bundle     = dict(name='energy_nonlinearity_db_root', version='v03', major='l'),
