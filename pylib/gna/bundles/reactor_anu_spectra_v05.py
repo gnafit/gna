@@ -8,13 +8,16 @@ from collections import OrderedDict
 from gna.bundle import TransformationBundle
 from gna.configurator import NestedDict
 from scipy.interpolate import interp1d
+from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 
 class reactor_anu_spectra_v05(TransformationBundle):
     '''Antineutrino specta model v05
     based on: v04
 
     Changes:
-    - add ROOT input
+    - add ROOT input:
+      * filename -> string
+      * objectnamefmt -> format string with '{isotope}' key
     '''
     short_names = dict(U5  = 'U235', U8  = 'U238', Pu9 = 'Pu239', Pu1 = 'Pu241')
     debug = False
@@ -109,7 +112,7 @@ class reactor_anu_spectra_v05(TransformationBundle):
         self.shared.reactor_anu_fcn = OrderedDict()
         fcns = self.shared.reactor_anu_fcn
         for name, (x, y) in self.spectra_raw.items():
-            f = interp1d( x, N.log(y), bounds_error=True )
+            f = interp1d( x, N.log(y), bounds_error=False, fill_value='extrapolate' )
             fcns[name] = lambda e: N.exp(f(e))
             model = N.exp(f(self.model_edges))
             self.spectra[name] = model
@@ -136,6 +139,9 @@ class reactor_anu_spectra_v05(TransformationBundle):
             pass
 
     def load_file(self, filenames, dtype, **kwargs):
+        if isinstance(filenames, str) and filenames.endswith('.root'):
+            return self.load_root(filenames, **kwargs)
+
         for fmt in filenames:
             fname = fmt.format(**kwargs)
             try:
@@ -149,3 +155,33 @@ class reactor_anu_spectra_v05(TransformationBundle):
                 return data
 
         raise KeyError('Failed to load file for '+str(kwargs))
+
+    def load_root(self, filename, isotope):
+        try:
+            objectnamefmt = self.cfg['objectnamefmt']
+        except KeyError:
+            raise Exception('Need to provide `objectnamefmt` format for reading a ROOT file')
+
+        objectname = objectnamefmt.format(isotope=isotope)
+
+        print('Read {}: {} [{}]'.format(filename, objectname, isotope))
+        with TFileContext(filename) as f:
+            obj = f.Get(objectname)
+            if not obj:
+                raise self._exception('Unable to read object')
+
+            return get_buffers_graph_or_hist1(obj)
+
+class TFileContext(object):
+    def __init__(self, filename, mode='read'):
+        self.filename = filename
+        self.mode = mode
+
+    def __enter__(self):
+        self.file = R.TFile(self.filename, self.mode)
+        if self.file.IsZombie():
+            raise Exception('Unable to read ({}) ROOT file: {}'.format(self.mode, self.filename))
+        return self.file
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.Close()

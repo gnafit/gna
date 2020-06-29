@@ -6,7 +6,7 @@ from scipy.interpolate import interp1d
 import numpy as N
 import gna.constructors as C
 from gna.converters import convert
-from mpl_tools.root2numpy import get_buffers_graph, get_buffers_hist1
+from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 from gna.env import env, namespace
 from gna.configurator import NestedDict
 from collections import OrderedDict
@@ -110,12 +110,7 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
                     self.set_output('lsnl', it, trans.Nrec)
 
     def get_buffers_auto(self, (k, obj)):
-        if isinstance(obj, R.TGraph):
-            return k, get_buffers_graph(obj)
-        if isinstance(obj, R.TH1) and obj.GetDimension()==1:
-            return k, get_buffers_hist1(obj)
-
-        raise self._exception('Unable to read buffers from: {}'.format(obj))
+        return k, get_buffers_graph_or_hist1(obj)
 
     def build(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )

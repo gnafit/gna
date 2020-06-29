@@ -346,10 +346,10 @@ Implements:
                     # dm      = '23'
                     # ),
                 anuspec_hm = NestedDict(
-                        bundle = dict(name='reactor_anu_spectra', version='v04'),
+                        bundle = dict(name='reactor_anu_spectra', version='v05'),
                         name = 'anuspec',
-                        filename = ['data/reactor_anu_spectra/Huber/Huber_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat',
-                            'data/reactor_anu_spectra/Mueller/Mueller_smooth_extrap_{isotope}_13MeV0.01MeVbin.dat'],
+                        filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        objectnamefmt = 'HuberMuellerFlux_{isotope}',
                         free_params=False, # enable free spectral model
                         varmode='log',
                         varname='anue_weight_{index:02d}',
