@@ -255,7 +255,7 @@ Implements:
                 #
                 # Numbers
                 #
-                numbers0 = NestedDict(
+                numbers0 = OrderedDict(
                     bundle = dict(name='parameters', version='v05'),
                     state='fixed',
                     labels=dict(
@@ -269,20 +269,20 @@ Implements:
                             conversion_factor = R.NeutrinoUnits.reactorPowerConversion, #taken from transformations/neutrino/ReactorNorm.cc
                             ),
                     ),
-                numbers = NestedDict(
+                numbers = OrderedDict(
                     bundle = dict(name='parameters', version='v06'),
                     pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/juno_input_numbers.py',
                     skip = ('percent',),
                     state= 'fixed'
                     ),
                 # Detector and reactor
-                norm = NestedDict(
+                norm = OrderedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = "norm",
                         label = 'Reactor power/detection efficiency correlated normalization',
                         pars = uncertain(1.0, (2**2+1**2)**0.5, 'percent')
                         ),
-                baselines = NestedDict(
+                baselines = OrderedDict(
                         bundle = dict(name='reactor_baselines', version='v02', major = 'rd'),
                         reactors  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/reactor_baselines.yaml',
                         reactors_key = 'reactor_baseline',
@@ -290,18 +290,18 @@ Implements:
                         unit = 'km'
                         ),
                 # Reactor
-                energy_per_fission =  NestedDict(
+                energy_per_fission =  OrderedDict(
                         bundle = dict(name="parameters", version = "v06"),
                         pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/energy_per_fission.yaml',
                         separate_uncertainty = '{}_scale'
                         ),
-                thermal_power =  NestedDict(
+                thermal_power =  OrderedDict(
                         bundle = dict(name="parameters", version = "v06", names=dict(thermal_power='thermal_power_nominal')),
                         pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/thermal_power.yaml',
                         separate_uncertainty = '{}_scale'
                         ),
                 # Backgrounds
-                bkg_rate = NestedDict(
+                bkg_rate = OrderedDict(
                         bundle = dict(name="parameters", version = "v06"),
                         pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/bkg_rates.yaml',
                         separate_uncertainty = '{}_norm'
@@ -309,7 +309,8 @@ Implements:
                 #
                 # Transformations
                 #
-                kinint2 = NestedDict(
+                # General
+                kinint2 = OrderedDict(
                     bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
                     variables = ('evis', 'ctheta'),
                     edges     = edges,
@@ -317,7 +318,7 @@ Implements:
                     xorders   = 4,
                     yorder    = 5,
                     ),
-                rebin = NestedDict(
+                rebin = OrderedDict(
                     bundle = dict(name='rebin', version='v04', major=''),
                     rounding = 5,
                     edges = edges_final,
@@ -325,7 +326,7 @@ Implements:
                         'rebin': 'Final histogram {detector}',
                         }
                     ),
-                rebin_bkg = NestedDict(
+                rebin_bkg = OrderedDict(
                     bundle = dict(name='rebin', version='v04', major=''),
                     rounding = 5,
                     edges = edges_final,
@@ -337,11 +338,12 @@ Implements:
                         'rebin_geonu': 'Geo-nu {autoindex}'
                         }
                     ),
-                ibd_xsec = NestedDict(
+                # Oscillations and detection
+                ibd_xsec = OrderedDict(
                         bundle = dict(name='xsec_ibd', version='v02'),
                         order = 1,
                         ),
-                oscprob = NestedDict(
+                oscprob = OrderedDict(
                         bundle = dict(name='oscprob', version='v05', major='rdc', inactive=self.opts.oscprob=='matter'),
                         parameters = dict(
                             DeltaMSq23    = 2.444e-03,
@@ -352,14 +354,14 @@ Implements:
                             # SinSq12 = 0.307,
                             )
                         ),
-                # oscprob_matter = NestedDict(
+                # oscprob_matter = OrderedDict(
                     # bundle = dict(name='oscprob_matter', version='v01', major='rd', inactive=self.opts.oscprob=='vacuum',
                                   # names=dict(oscprob='oscprob_matter')),
                     # density = 2.6, # g/cm3
                     # pdgyear = self.opts.pdgyear,
                     # dm      = '23'
                     # ),
-                anuspec_hm = NestedDict(
+                anuspec_hm = OrderedDict(
                         bundle = dict(name='reactor_anu_spectra', version='v05'),
                         name = 'anuspec',
                         filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
@@ -370,12 +372,12 @@ Implements:
                         ns_name='spectral_weights',
                         edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                         ),
-                offeq_correction = NestedDict(
+                offeq_correction = OrderedDict(
                         bundle = dict(name='reactor_offeq_spectra',
                             version='v03', major='ir'),
                         offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                         ),
-                fission_fractions = NestedDict(
+                fission_fractions = OrderedDict(
                         bundle = dict(name="parameters_yaml_v01", major = 'i'),
                         parameter = 'fission_fractions_nominal',
                         separate_uncertainty = "fission_fractions_scale",
@@ -383,11 +385,12 @@ Implements:
                         objectize=True,
                         data = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/fission_fractions.yaml'
                         ),
-                snf_correction = NestedDict(
-                        bundle = dict(name='reactor_snf_spectra', version='v04', major='r'),
-                        snf_average_spectra = './data/data-common/snf/2004.12-kopeikin/kopeikin_0412.044_spent_fuel_spectrum_smooth.dat',
+                snf_correction = OrderedDict(
+                        bundle = dict(name='reactor_snf_spectra', version='v05', major='r'),
+                        snf_average_spectra = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        objectname = 'SNF_FluxRatio'
                         ),
-                lsnl = NestedDict(
+                lsnl = OrderedDict(
                         bundle     = dict(name='energy_nonlinearity_db_root', version='v03', major='l'),
                         names      = OrderedDict( [
                             ('nominal', 'positronScintNL'),
@@ -402,17 +405,17 @@ Implements:
                         nonlin_range = (0.95, 12.),
                         expose_matrix = True
                         ),
-                shape_uncertainty = NestedDict(
+                shape_uncertainty = OrderedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
                         nbins = 200 # number of bins, the uncertainty is defined to
                         ),
-                snf_norm = NestedDict(
+                snf_norm = OrderedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = 'snf_norm',
                         label='SNF norm',
                         pars = uncertain(1.0, 'fixed'),
                         ),
-                reactor_active_norm = NestedDict(
+                reactor_active_norm = OrderedDict(
                         bundle = dict(name="parameters", version = "v01"),
                         parameter = 'reactor_active_norm',
                         label='Reactor nu (active norm)',
@@ -421,7 +424,7 @@ Implements:
                 #
                 # Backgrounds
                 #
-                bkg_spectra = NestedDict(
+                bkg_spectra = OrderedDict(
                     bundle    = dict(name='root_histograms_v05'),
                     filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
                     formats = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuTh232'                 , 'GeoNuU238'],
@@ -429,7 +432,7 @@ Implements:
                     labels  = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu Th232|(norm spectrum)', 'GeoNu U238|(norm spectrum)'],
                     normalize = True,
                     ),
-                geonu_fractions=NestedDict(
+                geonu_fractions=OrderedDict(
                         bundle = dict(name='var_fractions_v02'),
                         names = [ 'Th232', 'U238' ],
                         format = 'frac_{component}',
@@ -440,7 +443,7 @@ Implements:
                 )
 
         if 'eres' in self.opts.energy_model:
-            self.cfg.eres = NestedDict(
+            self.cfg.eres = OrderedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt(a^2 + b^2/E + c^2/E^2),
                     # a - non-uniformity
@@ -456,7 +459,7 @@ Implements:
                     expose_matrix = False
                     )
         elif 'multieres' in self.opts.energy_model:
-            self.cfg.subdetector_fraction = NestedDict(
+            self.cfg.subdetector_fraction = OrderedDict(
                     bundle = dict(name="parameters", version = "v03"),
                     parameter = "subdetector_fraction",
                     label = 'Subdetector fraction weight for {subdetector}',
@@ -465,7 +468,7 @@ Implements:
                         ),
                     covariance = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_cov.txt'
                     )
-            self.cfg.multieres = NestedDict(
+            self.cfg.multieres = OrderedDict(
                     bundle = dict(name='detector_multieres_stats', version='v01', major='s'),
                     # pars: sigma_e/e = sqrt(b^2/E),
                     parameter = 'eres',
@@ -502,7 +505,7 @@ Implements:
             with spec:
                 vararray = C.VarArray(names, labels='Spectrum shape norm')
 
-            self.cfg.shape_uncertainty = NestedDict(
+            self.cfg.shape_uncertainty = OrderedDict(
                     bundle = dict(name='predefined', version='v01'),
                     name   = 'shape_norm',
                     inputs = None,
@@ -683,7 +686,7 @@ Implements:
             expr: 'frac_U238*geonu_U238_spectrum'
             label: 'Geonu U238 total spectrum'
         geonu_spectrum:
-            expr: geonu_Th232_spectrum_tot + geonu_U238_spectrum_tot
+            expr: geonu_Th232_spectrum_tot+geonu_U238_spectrum_tot
             label: Total geo nu spectrum
         #
         # Oscillation probability
