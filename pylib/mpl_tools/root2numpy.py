@@ -19,7 +19,17 @@ def get_buffer_hist1( h, flows=False ):
     return buf
 
 def get_buffers_hist1(h):
+    """Get X/Y buffers of 1D histogram"""
     return get_bin_centers_axis(h.GetXaxis()), get_buffer_hist1(h, flows=False)
+
+def get_buffers_graph_or_hist1(obj):
+    """Get X/Y buffers of eighter 1D histogram or TGraph"""
+    if isinstance(obj, R.TGraph):
+        return get_buffers_graph(obj)
+    if isinstance(obj, R.TH1) and obj.GetDimension()==1:
+        return get_buffers_hist1(obj)
+
+    raise TypeError('The object is not TH1/TGraph: {!s}'.format(obj))
 
 def get_err_buffer_hist1( h, flows=False ):
     """Return TH1* histogram error buffer
