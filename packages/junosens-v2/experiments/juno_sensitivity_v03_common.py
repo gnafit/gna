@@ -676,6 +676,15 @@ Implements:
         geonu_num:
             expr: 'days_in_second*efflivetime*geonu_rate*geonu_rate_norm'
             label: Number of Geo nu events (b.fit)
+        geonu_Th232_spectrum_tot:
+            expr: 'frac_Th232*geonu_Th232_spectrum'
+            label: 'Geonu Th232 total spectrum'
+        geonu_U238_spectrum_tot:
+            expr: 'frac_U238*geonu_U238_spectrum'
+            label: 'Geonu U238 total spectrum'
+        geonu_spectrum:
+            expr: geonu_Th232_spectrum_tot + geonu_U238_spectrum_tot
+            label: Total geo nu spectrum
         #
         # Oscillation probability
         #
