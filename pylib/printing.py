@@ -41,7 +41,7 @@ def resetmarginflag(*args, **kwargs):
     global marginflag
 
     for arg in args+(kwargs.pop('sep', ''), kwargs.pop('end', '\n')):
-        if not isinstance(arg, basestring):
+        if not isinstance(arg, str):
             arg = str(arg)
         if '\n' in arg:
             marginflag=False
@@ -51,6 +51,3 @@ def printl(*args, **kwargs):
     printmargin(kwargs)
     print(*args, **kwargs)
     resetmarginflag(*args, **kwargs)
-
-
-

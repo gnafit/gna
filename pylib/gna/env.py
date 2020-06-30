@@ -214,7 +214,7 @@ class namespace(Mapping):
             return ns.__getitem__(head)
 
         v = self.storage.get(head, *args)
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             return env.nsview[v]
         return v
 
