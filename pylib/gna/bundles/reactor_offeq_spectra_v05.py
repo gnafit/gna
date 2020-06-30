@@ -46,6 +46,9 @@ class reactor_offeq_spectra_v05(TransformationBundle):
             assert len(self.offeq_raw_spectra) != 0, "No data loaded"
 
     def build(self):
+        unity_name = 'offequilibrium_unity'
+        self.reqparameter(unity_name, None, central=1, fixed=True, label="Unitary offequilibrium weight")
+
         for idx in self.nidx.iterate():
             if 'isotope' in idx.names()[0]:
                 iso, reac = idx.current_values()
@@ -89,11 +92,7 @@ class reactor_offeq_spectra_v05(TransformationBundle):
 
             par_name = "offeq_scale"
             self.reqparameter(par_name, idx, central=1., relsigma=0.3,
-                    labels="Offequilibrium norm for reactor {1} and iso "
-                    "{0}".format(iso, reac))
-            self.reqparameter("dummy_scale", idx, central=1,
-                    fixed=True, labels="Dummy weight for reactor {1} and iso "
-                    "{0} for offeq correction".format(iso, reac))
+                    label="Offequilibrium norm for reactor {1} and iso {0}".format(iso, reac))
 
             snap = C.Snapshot(passthrough.single(), labels='Snapshot of {} spectra in reac {}'.format(iso, reac))
 
@@ -104,8 +103,7 @@ class reactor_offeq_spectra_v05(TransformationBundle):
 
 
             outputs = [passthrough.single(), prod.single()]
-            weights = ['.'.join(("dummy_scale", idx.current_format())),
-                       '.'.join((par_name, idx.current_format()))]
+            weights = [unity_name, '.'.join((par_name, idx.current_format()))]
 
             with self.namespace:
                 final_sum = C.WeightedSum(weights, outputs, labels='Corrected to offequilibrium '
