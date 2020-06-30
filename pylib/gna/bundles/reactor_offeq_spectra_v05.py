@@ -7,6 +7,7 @@ import numpy as np
 from collections import OrderedDict
 from gna.bundle import *
 from gna.env import env
+from tools.data_load import read_object_auto
 
 class reactor_offeq_spectra_v05(TransformationBundle):
     def __init__(self, *args, **kwargs):
@@ -28,12 +29,15 @@ class reactor_offeq_spectra_v05(TransformationBundle):
     def _load_data(self):
         """Read raw input spectra"""
         data_template = self.cfg.offeq_data
+        objname_template = self.cfg.get('objectnamefmt', '')
         for isotope in self.nidx.get_subset('i'):
             iso_name, = isotope.current_values()
             datapath = data_template.format(isotope=iso_name)
+            objectname = objname_template.format(isotope=iso_name)
             try:
-                self.offeq_raw_spectra[iso_name] = np.loadtxt(datapath, unpack=True)
-            except IOError:
+                self.offeq_raw_spectra[iso_name] = \
+                        read_object_auto(datapath, name=objectname, verbose=True, suffix=' [{} offeq]'.format(iso_name))
+            except IOError, ValueError:
                 # U238 doesn't have offequilibrium correction
                 if iso_name == 'U238':
                     pass

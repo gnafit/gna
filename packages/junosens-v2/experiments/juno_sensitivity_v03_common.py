@@ -372,7 +372,8 @@ Implements:
                         ),
                 offeq_correction = OrderedDict(
                         bundle = dict(name='reactor_offeq_spectra', version='v05', major='ir'),
-                        offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
+                        offeq_data = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        objectnamefmt = 'NonEq_FluxRatio'
                         ),
                 fission_fractions = OrderedDict(
                         bundle = dict(name="parameters_yaml_v01", major = 'i'),
