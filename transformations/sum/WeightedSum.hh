@@ -10,7 +10,7 @@ namespace GNA {
   namespace GNAObjectTemplates {
     template<typename FloatType>
     class WeightedSumT: public GNASingleObjectT<FloatType,FloatType>,
-                       public TransformationBind<WeightedSumT<FloatType>, FloatType, FloatType> {
+                        public TransformationBind<WeightedSumT<FloatType>, FloatType, FloatType> {
 
     private:
       using BaseClass = GNAObjectT<FloatType,FloatType>;

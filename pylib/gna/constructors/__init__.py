@@ -107,6 +107,18 @@ def WeightedSum(weights, inputs=None, *args, **kwargs):
 
     return R.GNA.GNAObjectTemplates.WeightedSumT(context.current_precision())(weights, inputs, *args, **kwargs)
 
+"""Construct WeightedSumSq object from lists of weights and input names/outputs"""
+def WeightedSumSq(weights, inputs=None, *args, **kwargs):
+    weights = stdvector(weights)
+    if inputs is None:
+        inputs=weights
+    elif isinstance(inputs[0], str):
+        inputs = stdvector(inputs)
+    else:
+        inputs = OutputDescriptors(inputs)
+
+    return R.GNA.GNAObjectTemplates.WeightedSumSqT(context.current_precision())(weights, inputs, *args, **kwargs)
+
 """Construct WeightedSumP object from lists outputs"""
 def WeightedSumP(inputs, *args, **kwargs):
     outputs = OutputDescriptors(inputs)
