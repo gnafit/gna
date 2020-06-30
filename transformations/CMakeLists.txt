@@ -17,6 +17,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/Sum.cc
   transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
+  transformations/sum/WeightedSumSq.cc
   transformations/sum/WeightedSumP.cc
   # Ratios
   transformations/ratio/NormalizedConvolution.cc
@@ -147,6 +148,7 @@ set(TRANSFORMATION_HEADERS
   Sum.hh
   SumBroadcast.hh
   WeightedSum.hh
+  WeightedSumSq.hh
   WeightedSumP.hh
   # Ratios
   Convolution.hh
