@@ -138,9 +138,7 @@ Implements:
                 #
                 # Reactor
                 #
-                offeq_correction = '*offeq_correction[i,r](enu())',
                 shape_norm       = '*shape_norm()'                 if self.opts.spectrum_unc else '',
-                snf              = '+snf_in_reac',
                 #
                 # Energy model
                 #
@@ -212,7 +210,7 @@ Implements:
                       sum[r]|
                         (
                             baselineweight[r,d]*
-                            ( reactor_active_norm * (sum[i] ( power_livetime_factor*anuspec[i](){offeq_correction}) ) {snf} )*
+                            ( reactor_active_norm * (sum[i]| power_livetime_factor*offeq_correction[i,r](enu(), anuspec[i]()) ) + snf_in_reac )*
                             {oscprob}
                         )*
                         bracket(
@@ -373,7 +371,7 @@ Implements:
                         edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                         ),
                 offeq_correction = OrderedDict(
-                        bundle = dict(name='reactor_offeq_spectra', version='v03', major='ir'),
+                        bundle = dict(name='reactor_offeq_spectra', version='v05', major='ir'),
                         offeq_data = 'data/reactor_anu_spectra/Mueller/offeq/mueller_offequilibrium_corr_{isotope}.dat',
                         ),
                 fission_fractions = OrderedDict(
@@ -651,8 +649,9 @@ Implements:
           label: 'Reactor spectrum osc. {reactor}-\\>{detector}'
         anuspec_rd:
           expr:
-          - 'sum:i|anuspec_weighted'
-          - 'sum:i|anuspec_weighted_offeq'
+          - sum:i|anuspec_weighted
+          - sum:i|anuspec_weighted_offeq
+          - sum:i|anuspec_equilib_ri
           label: '{{Antineutrino spectrum|{reactor}}}'
         anuspec_rd_switch:
           expr: 'anuspec_rd*reactor_active_norm'
@@ -660,6 +659,14 @@ Implements:
         anuspec_rd_full:
           expr: 'anuspec_rd_switch+snf_in_reac'
           label: '{{Antineutrino spectrum+SNF|{reactor}}}'
+        anuspec_weighted:
+          expr: 'anuspec*power_livetime_factor'
+          label: '{{Antineutrino spectrum|{reactor}.{isotope}-\\>{detector}}}'
+        anuspec_weighted_offeq:
+          expr:
+          - anuspec*offeq_correction*power_livetime_factor
+          - offeq_correction*power_livetime_factor
+          label: '{{Antineutrino spectrum (+offeq)|{reactor}.{isotope}}}'
         #
         # Backgrounds
         #
@@ -719,6 +726,9 @@ Implements:
         observable_spectrum:
           expr: 'sum:r|observable_spectrum_reac'
           label: 'Observable spectrum at {detector}'
+        observation_ibd:
+          expr: norm*rebin
+          label: 'Observable spectrum at JUNO'
         #
         # Others
         #
@@ -754,12 +764,6 @@ Implements:
         power_livetime_scale:
           expr: 'eff*livetime*thermal_power_scale*thermal_power_nominal*conversion_factor*target_protons'
           label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}}}'
-        anuspec_weighted:
-          expr: 'anuspec*power_livetime_factor'
-          label: '{{ Antineutrino spectrum|{reactor}.{isotope}-\\>{detector} }}'
-        anuspec_weighted_offeq:
-          expr: 'anuspec*offeq_correction*power_livetime_factor'
-          label: '{{Antineutrino spectrum (+offeq)|{reactor}.{isotope}}}'
         countrate_rd:
           expr:
           - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
