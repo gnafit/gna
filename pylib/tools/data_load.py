@@ -6,7 +6,10 @@ from tools.root_helpers import TFileContext
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 import numpy as np
 
-def read_object_root(filename, name, **kwargs):
+def read_root(filename, name, **kwargs):
+    if not name:
+        raise ValueError('A name should be provided to read an object from a ROOT file')
+
     with TFileContext(filename) as f:
         o = f.Get( name )
         if not o:
@@ -20,13 +23,18 @@ def read_dat(filename, **kwargs):
 # def read_object_hdf5(filename, names, *args, **kwargs):
     # pass
 
-def read_dat(filename, **kwargs):
-    return np.load(filename, unpack=True)
+def read_npz(filename, name=None, **kwargs):
+    ret = np.load(filename)
+
+    if name:
+        return ret[name]
+
+    return ret
 
 readers = {
-        '.root' : read_object_root,
+        '.root' : read_root,
         # '.hdf5' : read_object_hdf5,
-        '.npz'  : read_object_npz,
+        '.npz'  : read_npz,
         '.dat'  : read_dat,
         '.txt'  : read_dat,
         }
@@ -34,6 +42,7 @@ readers = {
 def read_object_auto(filename, **kwargs):
     """Load an object from npz/hdf5/ROOT file"""
     verbose = kwargs.pop('verbose', False)
+    suffix = kwargs.pop('suffix', '')
     name = kwargs.get('name')
     if verbose:
         if name:
@@ -47,6 +56,7 @@ def read_object_auto(filename, **kwargs):
     try:
         return reader(filename, **kwargs)
     except:
-        raise Exception('Unable to read {}')
+        print('Unable to read {} ({})'.format(filename, str(kwargs)))
+        raise
 
 
