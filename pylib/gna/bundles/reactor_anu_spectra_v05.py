@@ -10,6 +10,7 @@ from gna.configurator import NestedDict
 from scipy.interpolate import interp1d
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 from tools.root_helpers import TFileContext
+from tools.data_load import read_object_auto
 
 class reactor_anu_spectra_v05(TransformationBundle):
     '''Antineutrino specta model v05
@@ -149,6 +150,7 @@ class reactor_anu_spectra_v05(TransformationBundle):
                 data = N.loadtxt(fname, dtype, unpack=True)
             except:
                 pass
+
             else:
                 if self.debug:
                     print( kwargs, fname )
@@ -164,12 +166,4 @@ class reactor_anu_spectra_v05(TransformationBundle):
             raise Exception('Need to provide `objectnamefmt` format for reading a ROOT file')
 
         objectname = objectnamefmt.format(isotope=isotope)
-
-        print('Read {}: {} [{}]'.format(filename, objectname, isotope))
-        with TFileContext(filename) as f:
-            obj = f.Get(objectname)
-            if not obj:
-                raise self._exception('Unable to read object')
-
-            return get_buffers_graph_or_hist1(obj)
-
+        return read_object_auto(filename, name=objectname, verbose=True, suffix=' [{}]'.format(isotope))

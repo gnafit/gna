@@ -9,6 +9,7 @@ from gna.bundle import *
 from gna.env import env
 from tools.root_helpers import TFileContext
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
+from tools.data_load import read_object_auto
 
 class reactor_snf_spectra_v05(TransformationBundle):
     """A bundle for spent nuclear fuel contribution v05
@@ -27,22 +28,7 @@ class reactor_snf_spectra_v05(TransformationBundle):
             return ('snf_scale',), ('snf_correction',)
 
     def _load_datum(self, filename):
-        if filename.endswith('.root'):
-            try:
-                objectname = self.cfg['objectname']
-            except KeyError:
-                raise self._exception('`objectname` should be specified to reed ROOT file')
-
-            print('Read {}: {} [SNF]'.format(filename, objectname))
-            with TFileContext(filename) as f:
-                obj = f.Get(objectname)
-                if not obj:
-                    raise self._exception('Unable to read {}'.format(objectname))
-
-                return get_buffers_graph_or_hist1(obj)
-
-        else:
-            return np.loadtxt(filename, unpack=True)
+        return read_object_auto(filename, name=self.cfg.get('objectname'), verbose=True, suffix=' [SNF]')
 
     def _load_data(self):
         """Read raw input spectra. Can be either average spectrum or individual
