@@ -1,0 +1,91 @@
+"""Analysis module (v01 WIP) combines multiple datasets for the analysis (fit)
+
+This module uses pargroup to specify covariance parameters.
+"""
+from __future__ import print_function
+from gna.ui import basecmd, append_typed, at_least
+import ROOT
+import numpy as np
+from itertools import chain
+from gna.dataset import Dataset
+from gna import constructors as C
+from gna.parameters.parameter_loader import get_parameters
+
+class cmd(basecmd):
+    def __init__(self, *args, **kwargs):
+        basecmd.__init__(self, *args, **kwargs)
+        self.dataset = None
+
+        if self.opts.observables:
+            if len(self.opts.observables)!=len(self.opts.datasets):
+                raise Exception("Number of observables should be the same as number of datasets or 0")
+
+    @classmethod
+    def initparser(cls, parser, env):
+        parser.add_argument('-d', '--datasets', nargs='+', required=True,
+                            type=env.parts.dataset,
+                            metavar='dataset', help='datasets to use')
+        parser.add_argument('-p', '--cov-parameters', metavar='pargroup', help='parameters for the covariance matrix')
+        parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')
+        parser.add_argument('-o', '--observables', nargs='+',
+                            metavar='observable', help='observables (model) to be fitted')
+        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data')
+
+    def __extract_obs(self, obses):
+        for obs in obses:
+            if '/' in obs:
+                yield self.env.get(obs)
+            else:
+                for param in get_parameters([obs], drop_fixed=True, drop_free=True):
+                    yield param
+
+    def run(self):
+        dataset = Dataset(bases=self.opts.datasets)
+
+        if self.opts.cov_parameters:
+            try:
+                cov_parameters = self.env.future['parameter_groups', self.opts.cov_parameters]
+            except KeyError:
+                raise Exception('Unable to get pargroup {}'.format(self.opts.cov_parameters))
+
+            cov_parameters = list(cov_parameters.values())
+
+        if self.opts.observables:
+            observables = list(self.__extract_obs(self.opts.observables))
+        else:
+            observables = None
+
+        if self.opts.cov_parameters:
+            print('Compute covariance matrix for {} parameters from {}'.format(len(cov_parameters), self.opts.cov_parameters))
+        blocks = dataset.makeblocks(observables, cov_parameters)
+
+        if self.opts.toymc:
+            if self.opts.toymc == 'covariance':
+                toymc = ROOT.CovarianceToyMC()
+                add = toymc.add
+            elif self.opts.toymc == 'poisson':
+                toymc = ROOT.PoissonToyMC()
+                add = lambda t, c: toymc.add(t)
+            elif self.opts.toymc == 'normal':
+                toymc = C.NormalToyMC()
+                add = toymc.add
+            elif self.opts.toymc == 'normalStats':
+                toymc = C.NormalStatsToyMC()
+                add = toymc.add
+            elif self.opts.toymc == 'asimov':
+                toymc = C.Snapshot()
+                add = lambda t, c: toymc.add_input(t)
+
+            for block in blocks:
+                add(block.theory, block.cov)
+
+            blocks = [ block._replace(data=toymc_out)
+                      for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.itervalues()) ]
+
+            self.env.parts.toymc[self.opts.name] = toymc
+            for toymc in toymc.transformations.values():
+                toymc.setLabel(self.opts.toymc+' ToyMC '+self.opts.name)
+        self.env.parts.analysis[self.opts.name] = blocks
+        self.env.parts.analysis_errors[self.opts.name] = dataset
+
+
