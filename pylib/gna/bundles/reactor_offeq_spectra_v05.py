@@ -18,7 +18,7 @@ class reactor_offeq_spectra_v05(TransformationBundle):
         - add ROOT input support
         """
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(2, 2, 'major')
+        self.check_nidx_dim(0, 2, 'major')
         self.offeq_raw_spectra = dict()
         self._load_data()
 
