@@ -163,7 +163,6 @@ function run(){
                  $offeq $snf $coarse $hubermueller \
                  $extra \
           -- ns $constrain $setdm \
-                --set juno.frac_li fixed \
           -- snapshot juno/AD1 juno/asimov_no \
           -- dataset  --name juno --asimov-data juno/AD1 juno/asimov_no \
           -- pargroup covpars juno -vv -m constrained $include $exclude \
@@ -219,12 +218,13 @@ function run(){
 
 function runall {
     it=0
-    pars="norm _norm fission_fractions_scale thermal_power_scale eper_fission_scale snf_scale offeq_scale SinSqDouble13"
-    for par in $pars;
+    pars="norm fission_fractions_scale thermal_power_scale eper_fission_scale snf_scale offeq_scale SinSqDouble13"
+    for par in "_norm frac_li" $pars;
     do
         it=$(($it+1))
-        run $(printf %03d $it) "include" include vacuum extrainfo="info.include $par" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf include=$par
-        run $(printf %03d $it) "exclude" exclude vacuum extrainfo="info.exclude $par" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf exclude=$par
+        run $(printf %03d $it) "include" include vacuum extrainfo="info.include \"$par\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf include="$par"
+        run $(printf %03d $it) "exclude" exclude vacuum extrainfo="info.exclude \"$par\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf exclude="$par"
+        break
     done
 }
 runall
