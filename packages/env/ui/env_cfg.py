@@ -50,8 +50,8 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('-v', '--verbose', action='count', help='make environment verbose on set')
-        parser.add_argument('-x', '--exclude', nargs='+', help='keys to exclude')
-        parser.add_argument('-i', '--include', nargs='+', help='keys to include (only)')
+        parser.add_argument('-x', '--exclude', nargs='+', default=[], help='keys to exclude')
+        parser.add_argument('-i', '--include', nargs='+', default=[], help='keys to include (only)')
 
     def init(self):
         if self.opts.verbose:
