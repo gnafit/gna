@@ -222,8 +222,8 @@ function runall {
     for par in "_norm frac_li" $pars;
     do
         it=$(($it+1))
-        run $(printf %03d $it) "include" include vacuum extrainfo="info.include \"$par\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf include="$par"
-        run $(printf %03d $it) "exclude" exclude vacuum extrainfo="info.exclude \"$par\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf exclude="$par"
+        run $(printf %03d $it) "include" include vacuum extrainfo="info.include \"[$(echo $par | sed 's/ /, /g')]\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf include="$par"
+        run $(printf %03d $it) "exclude" exclude vacuum extrainfo="info.exclude \"[$(echo $par | sed 's/ /, /g')]\"" energy="lsnl eres" bkg="acc lihe fastn alphan" offeq snf exclude="$par"
     done
 }
 runall
