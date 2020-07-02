@@ -23,7 +23,7 @@ class cmd(basecmd):
         filter1.add_argument('-m', '--modes', nargs='+', default=['free', 'constrained'], choices=choices, help='Parameters to take')
 
         filter1.add_argument('-x', '--exclude', nargs='*', default=[], help='parameters to exclude (pattern in fullname)')
-        filter1.add_argument('-i', '--include', nargs='*', default=[], help='parameters to include, exclusive (pattern in fullname)')
+        filter1.add_argument('-i', '--include', nargs='*', default=None, help='parameters to include, exclusive (pattern in fullname)')
 
     def init(self):
         if self.opts.verbose>1:
@@ -51,7 +51,7 @@ class cmd(basecmd):
                 return False
 
         include = self.opts.include
-        if not include:
+        if include is None:
             return True
 
         for incl in include:

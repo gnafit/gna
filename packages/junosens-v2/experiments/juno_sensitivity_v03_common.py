@@ -273,6 +273,12 @@ Implements:
                     skip = ('percent',),
                     state= 'fixed'
                     ),
+                bkg_shape_unc = OrderedDict(
+                    bundle = dict(name='parameters', version='v06'),
+                    pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/bkg_bin2bin.yaml',
+                    skip = ('percent',),
+                    state= 'fixed'
+                    ),
                 # Detector and reactor
                 norm = OrderedDict(
                         bundle = dict(name="parameters", version = "v01"),
