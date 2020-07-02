@@ -10,16 +10,30 @@ from gna.env import env
 from tools.data_load import read_object_auto
 
 class reactor_offeq_spectra_v05(TransformationBundle):
-    def __init__(self, *args, **kwargs):
-        """Reactor spectra offequilibrium correction
-        Applicable to ILL based 235U/239Pu/241Pu spectra (Huber, Schreckenbach)
+    """Reactor spectra offequilibrium correction
+    Applicable to ILL based 235U/239Pu/241Pu spectra (Huber, Schreckenbach)
 
-        Chages since v04:
-        - add ROOT input support
-        """
+    Indexing:
+      major - gets its own nuisance parameter
+      minor - gets the correction
+
+      major index may or may not contain the isotope index
+
+    Chages since v04:
+    - add ROOT input support
+    """
+    _unity_name = 'offequilibrium_unity'
+    _par_name = "offeq_scale"
+    def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 2, 'major')
         self.offeq_raw_spectra = dict()
+
+        try:
+            self.nidx_iso, self.nidx_noniso = self.nidx_major.split(self.cfg.get('isotope_index', 'i'))
+        except IndexError:
+            self.nidx_iso, self.nidx_noniso = self.nidx_major.split([])
+
         self._load_data()
 
     @staticmethod
@@ -30,8 +44,12 @@ class reactor_offeq_spectra_v05(TransformationBundle):
         """Read raw input spectra"""
         data_template = self.cfg.offeq_data
         objname_template = self.cfg.get('objectnamefmt', '')
-        for isotope in self.nidx.get_subset('i'):
-            iso_name, = isotope.current_values()
+        for isotope in self.nidx_iso:
+            if isotope.ndim():
+                iso_name, = isotope.current_values()
+            else:
+                iso_name = ''
+
             datapath = data_template.format(isotope=iso_name)
             objectname = objname_template.format(isotope=iso_name)
             try:
@@ -46,73 +64,81 @@ class reactor_offeq_spectra_v05(TransformationBundle):
             assert len(self.offeq_raw_spectra) != 0, "No data loaded"
 
     def build(self):
-        unity_name = 'offequilibrium_unity'
-        self.reqparameter(unity_name, None, central=1, fixed=True, label="Unitary offequilibrium weight")
+        for idx_iso in self.nidx_iso:
+            try:
+                iso, = idx_iso.current_values()
+            except ValueError:
+                iso = ''
+            name = idx_iso.current_format(name="offeq_correction")
 
-        for idx in self.nidx.iterate():
-            if 'isotope' in idx.names()[0]:
-                iso, reac = idx.current_values()
-            else:
-                reac, iso = idx.current_values()
-            name = "offeq_correction." + idx.current_format()
             try:
                 _offeq_energy, _offeq_spectra = map(C.Points, self.offeq_raw_spectra[iso])
                 _offeq_energy.points.setLabel("Original energies for offeq spectrum of {}".format(iso))
+                dummy = False
             except KeyError:
-            # U238 doesn't have offequilibrium correction so just pass 1.
+                # U238 doesn't have offequilibrium correction so just pass 1.
                 if iso != 'U238':
                     raise
-                passthrough = C.Identity(labels='Nominal {0} spectrum in {1} reactor'.format(iso, reac))
-                self.context.objects[name] = passthrough
-                dummy = C.Identity() #just to serve 1 input
-                self.set_input('offeq_correction', idx, dummy.single_input(), argument_number=0)
-                self.set_input('offeq_correction', idx, passthrough.single_input(), argument_number=1)
-                self.set_output("offeq_correction", idx, passthrough.single())
-                continue
+                dummy = True
 
-            offeq_spectra = C.InterpLinear(labels='Correction for {} spectra'.format(iso))
-            offeq_spectra.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
-            offeq_spectra.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
+            if not dummy:
+                offeq_spectra = C.InterpLinear(labels=idx_iso.current_format('Correction for {autoindex} spectra'))
+                offeq_spectra.set_overflow_strategy(R.GNA.Interpolation.Strategy.Constant)
+                offeq_spectra.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
 
-            insegment = offeq_spectra.transformations.front()
-            insegment.setLabel("Offequilibrium segments")
+                insegment = offeq_spectra.transformations.front()
+                insegment.setLabel("Offequilibrium segments")
 
-            interpolator_trans = offeq_spectra.transformations.back()
-            interpolator_trans.setLabel("Interpolated spectral correction for {}".format(iso))
+                interpolator_trans = offeq_spectra.transformations.back()
+                interpolator_trans.setLabel(idx_iso.current_format("Interpolated spectral correction for {autoindex}"))
 
-            passthrough = C.Identity(labels="Nominal {0} spectrum in {1} reactor".format(iso, reac))
-            _offeq_energy >> (insegment.edges, interpolator_trans.x)
-            _offeq_spectra >> interpolator_trans.y
+                _offeq_energy >> (insegment.edges, interpolator_trans.x)
+                _offeq_spectra >> interpolator_trans.y
 
-            # Enu
-            self.set_input('offeq_correction', idx, (insegment.points, interpolator_trans.newx),
-                            argument_number=0)
-            # Anue spectra
-            self.set_input('offeq_correction', idx, ( passthrough.single_input()), argument_number=1)
+            first = True
+            for idx_noniso in self.nidx_noniso:
+                idx_major = idx_iso + idx_noniso
 
-            par_name = "offeq_scale"
-            self.reqparameter(par_name, idx, central=1., relsigma=0.3,
-                    label="Offequilibrium norm for reactor {1} and iso {0}".format(iso, reac))
+                for idx_other in self.nidx_minor:
+                    idx = idx_major+idx_other
 
-            snap = C.Snapshot(passthrough.single(), labels='Snapshot of {} spectra in reac {}'.format(iso, reac))
+                    if dummy:
+                        dummy = C.Identity() #just to serve 1 input
+                        self.set_input('offeq_correction', idx, dummy.single_input(), argument_number=0)
+                        self.set_input('offeq_correction', idx, passthrough.single_input(), argument_number=1)
+                        self.set_output("offeq_correction", idx, passthrough.single())
+                        continue
 
-            prod = C.Product(labels='Product of initial {} spectra and '
-                             'offequilibrium corr in {} reactor'.format(iso, reac))
-            prod.multiply(interpolator_trans.single())
-            prod.multiply(snap.single())
+                    if first:
+                        # Enu
+                        self.set_input('offeq_correction', idx, (insegment.points, interpolator_trans.newx), argument_number=0)
+                    else:
+                        self.set_input('offeq_correction', idx, (), argument_number=0)
 
+                    passthrough = C.Identity(labels=idx.current_format('Nominal spectrum at {autoindex}'))
 
-            outputs = [passthrough.single(), prod.single()]
-            weights = [unity_name, '.'.join((par_name, idx.current_format()))]
+                    # Anue spectra
+                    self.set_input('offeq_correction', idx, (passthrough.single_input()), argument_number=1)
 
-            with self.namespace:
-                final_sum = C.WeightedSum(weights, outputs, labels='Corrected to offequilibrium '
-                            '{0} spectrum in {1} reactor'.format(iso, reac))
+                    snap = C.Snapshot(passthrough.single(), labels=idx.current_format('Snapshot {autoindex} spectra'))
 
+                    prod = C.Product(labels=idx.current_format('Initial {autoindex} spectrum x offequilibrium corr'))
+                    prod.multiply(interpolator_trans.single())
+                    prod.multiply(snap.single())
 
-            self.context.objects[name] = final_sum
-            self.set_output("offeq_correction", idx, final_sum.single())
+                    outputs = [passthrough.single(), prod.single()]
+                    weights = [self._unity_name, idx_major.current_format(name=self._par_name)]
 
+                    with self.namespace:
+                        label = idx.current_format('{{anue spectrum, offeq corrected|{autoindex}}}')
+                        final_sum = C.WeightedSum(weights, outputs, labels=label)
+
+                    self.context.objects[name] = final_sum
+                    self.set_output("offeq_correction", idx, final_sum.single())
 
     def define_variables(self):
-        pass
+        self.reqparameter(self._unity_name, None, central=1, fixed=True, label="Unitary offequilibrium weight")
+        relsigma = self.cfg['relsigma']
+        for idx in self.nidx_major:
+            self.reqparameter(self._par_name, idx, central=1., relsigma=relsigma, label="Offequilibrium norm for {autoindex}")
+
