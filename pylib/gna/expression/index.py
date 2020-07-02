@@ -363,7 +363,7 @@ class NIndex(object):
         master = self.masterof.get(short, None)
         if master is None:
             if exception:
-                raise Exception('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
+                raise IndexError('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
             else:
                 return None
 
