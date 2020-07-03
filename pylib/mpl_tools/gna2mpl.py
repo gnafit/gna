@@ -75,6 +75,14 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
         pointsx, pointsy=pointsx.T, pointsy.T
 
     Plotter = kwargs.pop('axis', P)
+    ravel = kwargs.pop('ravel', False)
+    if ravel:
+        pointsx = pointsx.ravel()
+        pointsy = pointsy.ravel()
+
+        asort = N.argsort(pointsx)
+        pointsx=pointsx[asort]
+        pointsy=pointsy[asort]
 
     return Plotter.plot(pointsx, pointsy, *args, **kwargs )
 

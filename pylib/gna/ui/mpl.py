@@ -126,7 +126,7 @@ class cmd(basecmd):
 
         if self.opts.scale:
             axis, scale = self.opts.scale
-            set_scale=getattr(ax, 'set_{axis}scale'.format(axis=axis))
+            set_scale=getattr(self.ax, 'set_{axis}scale'.format(axis=axis))
             set_scale(scale)
 
         if self.opts.xlim:
