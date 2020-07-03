@@ -202,6 +202,7 @@ Implements:
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
                 'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
                 'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
+                'bkg_shape_uncertainty = lihe_bin2bin*lihe + fastn_bin2bin*fastn + alphan_bin2bin*alphan',
                 #
                 # IBD part
                 #
@@ -276,7 +277,6 @@ Implements:
                 bkg_shape_unc = OrderedDict(
                     bundle = dict(name='parameters', version='v06'),
                     pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/bkg_bin2bin.yaml',
-                    skip = ('percent',),
                     state= 'fixed'
                     ),
                 # Detector and reactor
