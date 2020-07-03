@@ -81,6 +81,13 @@ def Sum(outputs=None, **kwargs):
 
     return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
+"""Construct SumSq object from list of SingleOutputs"""
+def SumSq(outputs=None, **kwargs):
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(**kwargs)
+
+    return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
+
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, **kwargs):
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
