@@ -59,7 +59,10 @@ class cmd(basecmd):
 
         self.bkg=OrderedDict([(k, NamespaceWrapper(ns[k])) for k in (k0+'_rate_norm' for k0 in ('acc', 'lihe', 'fastn', 'alphan', 'geonu')) if k in ns])
         self.reac=OrderedDict([(k, NamespaceWrapper(ns[k])) for k in (k0+'_norm' for k0 in ('reactor_active', 'snf')) if k in ns])
-        self.reac['offeq']=NamespaceWrapper(ns('offeq_scale'))
+        try:
+            self.reac['offeq']=NamespaceWrapper(ns['offeq_scale'])
+        except KeyError:
+            self.reac['offeq']=NamespaceWrapper(ns.get_proper_ns('offeq_scale')[0])
 
     def print_stats(self):
         data = OrderedDict()
@@ -83,7 +86,9 @@ class cmd(basecmd):
         add('Offequilibrium', data['Reactor active'][0] - self.observation().sum())
         self.reac['reactor_active_norm'].push(0.0)
 
-        assert self.observation().sum()==0.0
+        if self.observation().sum()!=0.0:
+            print('Error, nonzero sum', self.observation().sum())
+
         self.reac['snf_norm'].pop()
         add('SNF')
 
@@ -95,7 +100,8 @@ class cmd(basecmd):
             add(name)
             par.push(0.0)
 
-        assert self.observation().sum()==0.0
+        if self.observation().sum()!=0.0:
+            print('Error, nonzero sum', self.observation().sum())
 
         for p in self.bkg.values(): p.pop()
         add('Bkg')
