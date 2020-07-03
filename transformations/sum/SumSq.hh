@@ -15,7 +15,7 @@ namespace GNA {
      */
     template<typename FloatType>
     class SumSqT: public GNASingleObjectT<FloatType,FloatType>,
-               public TransformationBind<SumSqT<FloatType>, FloatType, FloatType> {
+                  public TransformationBind<SumSqT<FloatType>, FloatType, FloatType> {
     private:
       using BaseClass = GNAObjectT<FloatType,FloatType>;
     public:
