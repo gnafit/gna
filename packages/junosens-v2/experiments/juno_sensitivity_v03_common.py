@@ -202,7 +202,7 @@ Implements:
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
                 'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
                 'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
-                'bkg_shape_uncertainty = lihe_bin2bin*lihe + fastn_bin2bin*fastn + alphan_bin2bin*alphan',
+                'bkg_shape_uncertainty = sumsq_bkg(lihe_bin2bin*lihe, fastn_bin2bin*fastn, alphan_bin2bin*alphan)',
                 #
                 # IBD part
                 #
@@ -341,6 +341,11 @@ Implements:
                         'rebin_alphan': 'C(alpha,n)O {autoindex}',
                         'rebin_geonu': 'Geo-nu {autoindex}'
                         }
+                    ),
+                bkg_shape_uncertainty = OrderedDict(
+                    bundle = dict(name='trans_sumsq', version='v01', major=''),
+                    ninputs = 3,
+                    instances={'sumsq_bkg': 'Bkg shape uncertainty {autoindex}'}
                     ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(

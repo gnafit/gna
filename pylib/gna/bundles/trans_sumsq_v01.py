@@ -6,10 +6,8 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
 
-class trans_weightedsumsq_v01(TransformationBundle):
-    """Rebin bundle.
-    Defines multiple rebin transformations.
-    """
+class trans_sumsq_v01(TransformationBundle):
+    """SumSq bundle: defines SumSq object"""
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 0, 'major')
@@ -20,15 +18,19 @@ class trans_weightedsumsq_v01(TransformationBundle):
 
     def build(self):
         self.objects = []
+        ninputs = self.cfg['ninputs']
         for name, label in self.cfg.instances.items():
             if label is None:
-                label = 'WeightedSumSq {autoindex}'
+                label = 'SumSq {autoindex}'
 
             for it in self.nidx_minor.iterate():
-                rebin = C.Rebin(self.cfg.edges, self.cfg.rounding, labels=it.current_format(label))
-                self.objects.append(rebin)
+                sumsq = C.SumSq(labels=it.current_format(label))
+                self.objects.append(sumsq)
 
-                self.set_input( name, it, rebin.rebin.histin, argument_number=0)
-                self.set_output(name, it, rebin.rebin.histout)
+                for i in range(ninputs):
+                    inp = sumsq.add_input('input_{:02d}'.format(i))
+                    self.set_input(name, it, inp, argument_number=i)
+
+                self.set_output(name, it, sumsq.sumsq.sumsq)
 
 
