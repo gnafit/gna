@@ -150,13 +150,6 @@ class GNADot(object):
                 self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, sink, None, source))
 
 class TreeStyle(object):
-    markhead, marktail = True, True
-    # headfmt = '{index:d}: {label}'
-    headfmt = '{label}'
-    headfmt_noi = '{label}'
-    # tailfmt = '{index:d}: {label}'
-    tailfmt = '{label}'
-    tailfmt_noi = '{label}'
     entryfmt = '{label}'
 
     gpucolor = 'limegreen'
@@ -190,9 +183,11 @@ class TreeStyle(object):
 
         marks = {
                 'Sum':               '+',
+                'SumSq':             u'+²',
                 'MultiSum':          '+',
                 'SumBroadcast':      '+',
                 'WeightedSum':       '+w',
+                'WeightedSumSq':     '+²w²',
                 'Product':           '*',
                 'ProductBC':         '*',
                 'Points':            'a',
@@ -204,6 +199,7 @@ class TreeStyle(object):
                 'FillLike':          'c',
                 'HistSmearSparse':   '@',
                 'HistSmear':         '@',
+                'HistEdges':         '\|.\|.\|',
                 'MatrixProduct':     '@',
                 'Snapshot':          r'\|o\|',
                 'MatrixProductDVDt': '@@t',
@@ -319,28 +315,10 @@ class TreeStyle(object):
         return ret
 
     def head_label(self, i, obj):
-        attrs=dict(obj.attrs)
-        if not self.markhead:
-            return None
-        if isinstance(obj, basestring):
-            return obj
-
-        if i is None:
-            return self.headfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
-
-        return self.headfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
+        return '' #if i is None else str(i)
 
     def tail_label(self, i, obj):
-        attrs=dict(obj.attrs)
-        if not self.marktail:
-            return None
-        if isinstance(obj, basestring):
-            return obj
-
-        if i is None:
-            return self.tailfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
-
-        return self.tailfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
+        return '' #if i is None else str(i)
 
     def edge_attrs(self, isink, sink, isource=None, source=None):
         attrs = dict(layer='transformation')
@@ -348,7 +326,7 @@ class TreeStyle(object):
         if sink:
             taillabel=self.tail_label(isink, sink)
             if taillabel and source:
-                attrs['xlabel']=taillabel
+                attrs['taillabel']=taillabel
 
             sinkfeatures = self.get_features(sink.entry)
             if sinkfeatures.static:
