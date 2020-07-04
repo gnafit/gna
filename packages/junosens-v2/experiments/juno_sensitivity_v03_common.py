@@ -202,7 +202,7 @@ Implements:
                 'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
                 'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
                 'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
-                'bkg_shape_variance = bin_width_factor * bkgbin_widths(accidentals) * sumsq_bkg(lihe_bin2bin*lihe, fastn_bin2bin*fastn, alphan_bin2bin*alphan)',
+                'bkg_shape_variance = bin_width_factor * bkgbin_widths(accidentals) * sumsq_snapshot| sumsq_bkg| lihe_bin2bin*lihe, fastn_bin2bin*fastn, alphan_bin2bin*alphan',
                 #
                 # IBD part
                 #
@@ -352,6 +352,11 @@ Implements:
                     bundle = dict(name='trans_histedges', version='v01', major=''),
                     types = ('widths', ),
                     instances={'bkgbin': 'Bkg bins {autoindex}'}
+                    ),
+                variance = OrderedDict(
+                    bundle = dict(name='trans_snapshot', version='v01', major=''),
+                    instances={'sumsq_snapshot': 'Bkg shape variance snapshot, not corrected|{autoindex}',
+                               'observation_snapshot': 'Stat. errors (snapshot)'}
                     ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(
