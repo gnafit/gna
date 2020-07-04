@@ -18,7 +18,7 @@ from gna.bundle.bundle import *
 import numpy as N
 from gna import constructors as C
 from tools.cfg_load import cfg_parse
-from collections import Iterable
+from collections import Iterable, Mapping
 from tools.dictwrapper import DictWrapper
 
 class parameters_v06(TransformationBundle):
@@ -43,6 +43,10 @@ class parameters_v06(TransformationBundle):
                 names.remove(skip)
             except ValueError:
                 pass
+
+        extra = cfg.get('hooks', {}).keys()
+        names = names + list(extra)
+
         sepuncfmt=cfg.get('separate_uncertainty')
         if sepuncfmt:
             names.extend(map(sepuncfmt.format, names))
@@ -125,10 +129,22 @@ class parameters_v06(TransformationBundle):
 
         return sepuncfmt.format(name), kwargsscale
 
+    def load_cfg(self):
+        pars = cfg_parse(self.cfg.pars, verbose=True)
+        action = self.cfg.get('hooks')
+        if isinstance(action, (Mapping, NestedDict)):
+            for k, act in action.items():
+                v, l = act(pars)
+                pars[k]=v
+                if l:
+                    pars.setdefault('meta',{}).setdefault('labels', {})[k]=l
+
+        pars = DictWrapper(pars, split='.')
+        return pars
+
     def define_variables(self):
         self._par_container = []
-        pars0 = cfg_parse(self.cfg.pars, verbose=True)
-        pars = DictWrapper(pars0, split='.')
+        pars = self.load_cfg()
         labels = self.cfg.get('labels', pars.get(('meta', 'labels'), {}))
         objectize = self.cfg.get('objectize')
         skip = list(self.cfg.get('skip', ()))+self.skip

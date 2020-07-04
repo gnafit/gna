@@ -277,6 +277,7 @@ Implements:
                 bkg_shape_unc = OrderedDict(
                     bundle = dict(name='parameters', version='v06'),
                     pars = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/bkg_bin2bin.yaml',
+                    hooks = OrderedDict(bin_width_factor=lambda pars: (1.0/pars['bin_width'], '1/`bin width`')),
                     state= 'fixed'
                     ),
                 # Detector and reactor
