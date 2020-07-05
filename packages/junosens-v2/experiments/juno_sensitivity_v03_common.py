@@ -224,7 +224,7 @@ Implements:
                 # Total observation
                 #
                 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options),
-                'juno_unertainty = staterr(observation) + bkg_shape_variance'
+                'juno_variance = staterr2(observation) + bkg_shape_variance'
                 ]
 
     def parameters(self):
@@ -357,7 +357,7 @@ Implements:
                 variance = OrderedDict(
                     bundle = dict(name='trans_snapshot', version='v01', major=''),
                     instances={'sumsq_snapshot': 'Bkg shape variance snapshot, not corrected|{autoindex}',
-                               'staterr': 'Stat. errors (snapshot)'}
+                               'staterr2': 'Stat. errors (snapshot)'}
                     ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(
@@ -585,38 +585,30 @@ Implements:
             self.namespace.printparameters(labels=55, stats=self.stats, correlations=correlations)
 
     def register(self):
-        ns = self.namespace
         from gna.env import env
         futurens = env.future.child(('spectra', self.namespace.name))
 
         outputs = self.context.outputs
-        #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
-        ns.addobservable("Enu",    outputs.enu, export=False)
 
         if 'ibd_noeffects_bf' in outputs:
-            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.ibd_noeffects_bf.AD1)
             fine = outputs.ibd_noeffects_bf.AD1
         else:
-            ns.addobservable("{0}_noeffects".format(self.detectorname),    outputs.kinint2.AD1)
             fine = outputs.kinint2.AD1
 
         if 'lsnl' in self.opts.energy_model:
-            ns.addobservable("{0}_lsnl".format(self.detectorname),     outputs.lsnl.AD1)
             fine = outputs.lsnl.AD1
 
         if 'eres' in self.opts.energy_model:
-            ns.addobservable("{0}_eres".format(self.detectorname),     outputs.eres.AD1)
             fine = outputs.eres.AD1
 
         if 'multieres' in self.opts.energy_model:
-            sns = ns('{}_sub'.format(self.detectorname))
-            for i, out in enumerate(outputs.rebin.AD1.values()):
-                sns.addobservable("sub{:02d}".format(i), out)
-            ns.addobservable("{0}_eres".format(self.detectorname),     outputs.ibd.AD1)
             fine = outputs.ibd.AD1
 
-        ns.addobservable("{0}_fine".format(self.detectorname),         fine)
-        ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
+        futurens[('variance', self.detectorname, 'stat')]     = outputs.staterr2.AD1
+        futurens[('variance', self.detectorname, 'bkgshape')] = outputs.bkg_shape_variance.AD1
+        futurens[('variance', self.detectorname, 'full')]     = outputs.juno_variance.AD1
+        # Force calculation of the stat errors
+        outputs.juno_variance.AD1.data()
 
         futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
         futurens[(self.detectorname, 'fine')] = fine
