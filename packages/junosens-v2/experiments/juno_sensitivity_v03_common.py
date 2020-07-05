@@ -223,7 +223,8 @@ Implements:
                 #
                 # Total observation
                 #
-                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options)
+                'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options),
+                'juno_unertainty = staterr(observation) + bkg_shape_variance'
                 ]
 
     def parameters(self):
@@ -356,7 +357,7 @@ Implements:
                 variance = OrderedDict(
                     bundle = dict(name='trans_snapshot', version='v01', major=''),
                     instances={'sumsq_snapshot': 'Bkg shape variance snapshot, not corrected|{autoindex}',
-                               'observation_snapshot': 'Stat. errors (snapshot)'}
+                               'staterr': 'Stat. errors (snapshot)'}
                     ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(
