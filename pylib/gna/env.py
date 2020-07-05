@@ -325,7 +325,7 @@ class namespace(Mapping):
         try:
             return self.observables[head]
         except:
-            print('Invalid observable', head)
+            raise KeyError('Invalid observable: {}'.format(head))
 
     def addexpressions(self, obj, bindings=[]):
         for expr in obj.evaluables.itervalues():
