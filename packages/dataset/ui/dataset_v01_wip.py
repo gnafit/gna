@@ -26,14 +26,15 @@ class cmd(basecmd):
         pull = parser.add_mutually_exclusive_group()
         pull.add_argument('--pull', action='append', help='Parameters to be added as pull terms')
 
-        parser.add_argument('--asimov-data', nargs=2, action='append',
+        parser.add_argument('--theory-data', '--td', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
                             default=[])
-        # parser.add_argument('--asimov-poisson', nargs=2, action='append',
-                            # metavar=('THEORY', 'DATA'),
-                            # default=[])
+        parser.add_argument('--theory-data-variance', '--tdv', nargs=3, action='append',
+                            metavar=('THEORY', 'DATA', 'VARIANCE'),
+                            default=[])
+
         parser.add_argument('--error-type', choices=['pearson', 'neyman'],
-                            default='pearson', help='The type of statistical errors to be used')
+                            default='pearson', help='The type of statistical errors to be used with --td')
         parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
     def run(self):
@@ -46,36 +47,30 @@ class cmd(basecmd):
             self.load_pulls(dataset)
 
         self.snapshots = dict()
-        if self.opts.asimov_data:
-            for theory_path, data_path in self.opts.asimov_data:
-                try:
-                    theory, data = env.get(theory_path), env.get(data_path)
-                except KeyError:
-                    theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+        for theory_path, data_path in self.opts.theory_data:
+            theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+            data.data()
 
-                if self.opts.error_type == 'neyman':
-                    error=data.single()
-                elif self.opts.error_type == 'pearson':
-                    error=theory.single()
+            if self.opts.error_type == 'neyman':
+                error=data.single()
+            elif self.opts.error_type == 'pearson':
+                error=theory.single()
 
-                if not error.getTaintflag().frozen():
-                    snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
-                    snapshot.single().touch()
-                    error = snapshot
+            if not error.getTaintflag().frozen():
+                snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
+                snapshot.single().touch()
+                error = snapshot
 
-                dataset.assign(obs=theory, value=data, error=error.single())
+            dataset.assign(obs=theory, value=data, error=error.single())
 
-        # if self.opts.asimov_poisson:
-            # for theory_path, data_path in self.opts.asimov_poisson:
-                # data_poisson = np.random.poisson(env.get(data_path).data())
-                # if self.opts.error_type == 'neyman':
-                    # dataset.assign(env.get(theory_path),
-                                   # data_poisson,
-                                   # env.get(data_path))
-                # elif self.opts.error_type == 'pearson':
-                    # dataset.assign(env.get(theory_path),
-                                   # data_poisson,
-                                   # env.get(theory_path))
+        for theory_path, data_path, variance_path in self.opts.theory_data_variance:
+            theory   = env.future['spectra', theory_path]
+            data     = env.future['spectra', data_path]
+            variance = env.future['spectra', variance_path]
+            data.data()
+            variance.data()
+
+            dataset.assign(obs=theory, value=data, error=variance.single())
 
         self.env.parts.dataset[self.opts.name] = dataset
 

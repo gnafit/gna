@@ -367,7 +367,7 @@ Implements:
                 oscprob = OrderedDict(
                         bundle = dict(name='oscprob', version='v05', major='rdc', inactive=self.opts.oscprob=='matter'),
                         parameters = dict(
-                            DeltaMSq23    = 2.444e-03,
+                            DeltaMSq23    = 2.453e-03,
                             DeltaMSq12    = 7.53e-05,
                             SinSqDouble13 = (0.08529904, 0.00267792),
                             SinSqDouble12 = 0.851004,
