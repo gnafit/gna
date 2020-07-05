@@ -100,7 +100,7 @@ class oscprob_v05(TransformationBundle):
                 ns_pmns.reqparameter(name, central=central, free=True, label=label)
 
         ns_pmns.reqparameter('Alpha', type='discrete', default='normal', variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
-        ns_pmns.reqparameter('Delta', type='uniformangle', central=0.0, label='CP violation phase δ(CP)')
+        ns_pmns.reqparameter('Delta', type='uniformangle', central=0.0, fixed=True, label='CP violation phase δ(CP)')
 
         #
         # Define oscillation expressions to provide missing and conjucated oscillation parameters
