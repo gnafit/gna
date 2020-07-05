@@ -197,11 +197,11 @@ Implements:
                 #
                 # Backgrounds
                 #
-                'accidentals = days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]   | acc_spectrum()',
-                'fastn       = days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d] | fastn_spectrum()',
-                'alphan      = days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
-                'lihe        = days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
-                'geonu       = days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
+                'accidentals = bracket| days_in_second * efflivetime * acc_rate    * acc_rate_norm    * rebin_acc[d]   | acc_spectrum()',
+                'fastn       = bracket| days_in_second * efflivetime * fastn_rate  * fastn_rate_norm  * rebin_fastn[d] | fastn_spectrum()',
+                'alphan      = bracket| days_in_second * efflivetime * alphan_rate * alphan_rate_norm * rebin_alphan[d]| alphan_spectrum()',
+                'lihe        = bracket| days_in_second * efflivetime * lihe_rate   * lihe_rate_norm   * rebin_lihe[d]  | lihe_spectrum()',
+                'geonu       = bracket| days_in_second * efflivetime * geonu_rate  * geonu_rate_norm  * rebin_geonu[d] | frac_Th232 * geonu_Th232_spectrum() + frac_U238 * geonu_U238_spectrum()',
                 'bkg_shape_variance = bin_width_factor * bkgbin_widths(accidentals) * sumsq_snapshot| sumsq_bkg| lihe_bin2bin*lihe, fastn_bin2bin*fastn, alphan_bin2bin*alphan',
                 #
                 # IBD part
@@ -552,7 +552,11 @@ Implements:
         # The next step is needed to name all the intermediate variables.
         self.expression.guessname(self.lib, save=True)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose>2:
+            print('Expression tree:')
+            self.expression.dump_all(True)
+            print()
+        elif self.opts.verbose>1:
             print('Expression tree:')
             self.expression.tree.dump(True)
             print()
