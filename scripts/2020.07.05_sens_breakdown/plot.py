@@ -9,6 +9,7 @@ from mpl_tools.helpers import savefig
 changenames = {
         'lsnl_weight': 'LSNL',
         'rate_norm': 'Bkg rate',
+        'bkgshape': 'Bkg shape',
         'SinSqDouble13': r'$\sin^22\theta_{13}$',
         'juno.norm': 'Normalization',
         'eres': 'Energy resolution',
@@ -97,7 +98,7 @@ def main(opts):
             100.0*comb_sum[i], 100.0*comb_avg[i]
         ] )
     table = sorted(table, key=lambda a: a[5], reverse=True)
-    floatfmt = ('.2f', '.4f', '.2f', '.4f', '.2f', '.2f', '.2f')
+    floatfmt = ('.2f', '.5f', '.2f', '.5f', '.2f', '.2f', '.2f')
     t = tabulate(table, header, floatfmt=floatfmt)
     print(t)
 
