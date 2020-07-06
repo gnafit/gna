@@ -47,7 +47,7 @@ class DiscreteParameter(object):
     def getVariants(self):
         return tuple(self._variants)
 
-    def getLabel(self):
+    def label(self):
         return self._label
 
     def setLabel(self, label):

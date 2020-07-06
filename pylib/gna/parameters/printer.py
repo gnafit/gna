@@ -346,7 +346,7 @@ def DiscreteParameter____str__(self, labels=False):
         variants = str(self.getVariants()),
         color   = Fore.BLUE
         )
-    label = self.getLabel().decode('utf8')
+    label = self.label().decode('utf8')
 
     s= namefmt.format(**fmt)
     s+=valdfmt.format(**fmt)
