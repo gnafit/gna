@@ -53,7 +53,8 @@ def plot_pie(names, data, title):
     fig = plt.figure()
     ax = plt.subplot(111, title=title)
 
-    ax.pie(data, labels=names)
+    labels = [ '{}: {:.2f}%'.format(n, d*100) for n, d in zip(names, data) ]
+    ax.pie(data, labels=labels)
 
 def main(opts):
     fun_min = opts.input['fun_min']
@@ -87,7 +88,7 @@ def main(opts):
     plot_pie(names, comb_avg, 'Combine (avg)')
     savefig(opts.output, suffix='_comb_avg')
 
-    header = [ 'Name', 'None+syst', '%', 'Full-syst', '%', 'Combine (sum), %', 'Combine (avg), %' ]
+    header = [ 'Name', 'None+syst', '%', 'Full-syst', '%', 'Combine (sum), % ▼', 'Combine (avg), %' ]
     table = []
     for i in range(len(names)):
         table.append( [namestext.get(names[i],names[i]),
@@ -96,12 +97,13 @@ def main(opts):
             100.0*comb_sum[i], 100.0*comb_avg[i]
         ] )
     table = sorted(table, key=lambda a: a[5], reverse=True)
-    t = tabulate(table, header)
+    floatfmt = ('.2f', '.4f', '.2f', '.4f', '.2f', '.2f', '.2f')
+    t = tabulate(table, header, floatfmt=floatfmt)
     print(t)
 
     if opts.latex:
         with open(opts.latex, 'w') as f:
-            t = tabulate(table, header, tablefmt='latex_booktabs')
+            t = tabulate(table, header, floatfmt=floatfmt, tablefmt='latex_booktabs')
             f.write(t)
             print('Write output file:', opts.latex)
 

@@ -38,6 +38,7 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('exp', help='JUNO exp instance')
         parser.add_argument('-l', '--latex', action='store_true', help='Enable LaTeX format')
+        parser.add_argument('-o', '--output', nargs='+', default=[], help='output file')
 
     def init(self):
         try:
@@ -123,6 +124,19 @@ class cmd(basecmd):
         t = tabulate(data, headers, **options)
         print('JUNO stats')
         print(t)
+
+        tl = None
+        for out in self.opts.output:
+            with open(out, 'w') as f:
+                if out.endswith('.tex'):
+                    if tl is None:
+                        options['tablefmt']='latex_booktabs'
+                        tl = tabulate(data, headers, **options)
+                    f.write(tl)
+                else:
+                    f.write(t)
+                print('Write output file:', out)
+
 
 
 
