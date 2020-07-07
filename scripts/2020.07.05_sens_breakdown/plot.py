@@ -54,8 +54,10 @@ def plot_pie(names, data, title):
     fig = plt.figure()
     ax = plt.subplot(111, title=title)
 
+    explode = [ 0.1 if f>0.5 else 0.0 for f in data ]
+    pie_opts = dict(explode=explode, wedgeprops=dict(width=0.6, edgecolor='w'))
     labels = [ '{}: {:.2f}%'.format(n, d*100) for n, d in zip(names, data) ]
-    ax.pie(data, labels=labels)
+    ax.pie(data, labels=labels, **pie_opts)
 
 def main(opts):
     fun_min = opts.input['fun_min']
