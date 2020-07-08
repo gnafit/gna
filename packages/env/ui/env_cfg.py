@@ -15,9 +15,18 @@ class DictWrapperVerbose(DictWrapper):
         if parent:
             self._exclude=parent._exclude
             self._include=parent._include
+
+            path = parent._path
+            for k, v in parent._obj.items():
+                if v is dct:
+                    self._path = parent._path + (k,)
+                    break
+            else:
+                self._path=tuple()
         else:
             self._exclude=exclude
             self._include=include
+            self._path=tuple()
 
     def _skip(self, key):
         if any(excl in key for excl in self._exclude):
@@ -39,7 +48,7 @@ class DictWrapperVerbose(DictWrapper):
 
         DictWrapper.__setitem__(self, k, v)
 
-        key = list(self.iterkey(k))
+        key = self._path + tuple(self.iterkey(k))
         if self._skip(key):
             return
 
