@@ -89,15 +89,17 @@ class oscprob_v05(TransformationBundle):
         for name, label in labels.items():
             if name in pars:
                 central, sigma = pars[name], None
+                free = True
             else:
                 central, sigma = otherpars[name], None
+                free = False
             if isinstance(central, (tuple, list)):
                 central, sigma=central
 
             if sigma:
                 ns_pmns.reqparameter(name, central=central, sigma=sigma, label=label)
             else:
-                ns_pmns.reqparameter(name, central=central, free=True, label=label)
+                ns_pmns.reqparameter(name, central=central, free=free, fixed=not free, label=label)
 
         ns_pmns.reqparameter('Alpha', type='discrete', default='normal', variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
         ns_pmns.reqparameter('Delta', type='uniformangle', central=0.0, fixed=True, label='CP violation phase δ(CP)')
