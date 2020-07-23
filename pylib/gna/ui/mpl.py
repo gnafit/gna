@@ -151,7 +151,7 @@ class cmd(basecmd):
             self.fig.canvas.draw()
             axisname, ticks = self.opts.ticks_extra[0], list(map(float, self.opts.ticks_extra[1:]))
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
-            axis = getattr(ax, axisname+'axis')
+            axis = getattr(self.ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
 
         if self.opts.xlim:
