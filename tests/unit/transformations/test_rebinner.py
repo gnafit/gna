@@ -75,13 +75,13 @@ def test_rebinner(tmp_path):
     allure_attach_file(path)
     plt.close()
 
-def test_rebinner_exception(tmp_path):
-    edges   = N.array( [ 0.0, 0.1,  1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
-    edges_m = N.array( [      0.11, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
+# def test_rebinner_exception(tmp_path):
+    # edges   = N.array( [ 0.0, 0.1,  1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
+    # edges_m = N.array( [      0.11, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
 
-    ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
-    rebin = R.Rebin( edges_m.size, edges_m, 3 )
-    try:
-        ntrue >> rebin.rebin.histin
-    except Exception as e:
-        import IPython; IPython.embed()
+    # ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
+    # rebin = R.Rebin( edges_m.size, edges_m, 3 )
+    # try:
+        # ntrue >> rebin.rebin.histin
+    # except Exception as e:
+        # import IPython; IPython.embed()
