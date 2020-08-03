@@ -15,9 +15,8 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
   transformation_("rebin")
     .input("histin")
     .output("histout")
-    .types(TypesFunctions::ifHist<0>, [](Rebin *obj, TypesFunctionArgs& fargs){
-           fargs.rets[0]=DataType().hist().edges(obj->m_new_edges);
-           })
+    .types(TypesFunctions::ifHist<0>)
+    .types(&Rebin::calcMatrix)
     .func(&Rebin::calcSmear)
 #ifdef GNA_CUDA_SUPPORT
     .func("gpu", &Rebin::calcSmear_gpu, DataLocation::Device)
@@ -25,15 +24,11 @@ Rebin::Rebin(size_t n, double* edges, int rounding) : m_new_edges(n), m_round_sc
         fargs.ints[0] = DataType().points().shape((this->m_new_edges.size()-1) * fargs.args[0].size());
     })
 #endif
-
     ;
 }
 
 void Rebin::calcSmear(FunctionArgs& fargs) {
   auto& args=fargs.args;
-  if( !m_initialized ){
-      calcMatrix( args[0].type );
-  }
   fargs.rets[0].x = m_sparse_cache * args[0].vec;
 }
 
@@ -44,14 +39,21 @@ void Rebin::calcSmear_gpu(FunctionArgs& fargs) {
   auto& gpuargs = fargs.gpu;
   gpuargs->provideSignatureDevice();
   if( !m_initialized ){
-      calcMatrix( args[0].type );
       fargs.ints[0].arr = Eigen::MatrixXd(m_sparse_cache);
       copyH2D_NA(gpuargs->ints, fargs.ints[0].arr.data(), fargs.ints[0].x.size());
+      m_initialized=true;
   }
   curebin(gpuargs->args, gpuargs->ints,  gpuargs->rets, fargs.args[0].x.size(), fargs.rets[0].x.size());
 }
 #endif
-void Rebin::calcMatrix(const DataType& type) {
+
+void Rebin::calcMatrix(GNAObject::TypesFunctionArgs& fargs) {
+  fargs.rets[0].hist().edges(m_new_edges);
+  auto& type = fargs.args[0];
+  if(!type.defined()){
+    return;
+  }
+
   std::vector<double> edges(type.size()+1);
   std::transform( type.edges.begin(), type.edges.end(), edges.begin(), [this](double num){return this->round(num);} );
 
@@ -69,12 +71,12 @@ void Rebin::calcMatrix(const DataType& type) {
       ++iold;
       if(edge_old==edges.end()){
         dump(edges.size(), edges.data(), m_new_edges.size(), m_new_edges.data());
-        throw std::runtime_error("Rebin: bin edges are not consistent (outer)");
+        throw fargs.args.error(type, "Rebin: bin edges are not consistent (outer)");
       }
     }
     if(*edge_new!=*edge_old){
       dump(edges.size(), edges.data(), m_new_edges.size(), m_new_edges.data());
-      throw std::runtime_error("Rebin: bin edges are not consistent (inner)");
+      throw fargs.args.error(type, "Rebin: bin edges are not consistent (inner)");
     }
     ++edge_new;
   }
