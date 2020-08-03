@@ -174,10 +174,10 @@ def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
     ROOT.__gna_patched__ = True
-    ROOT.UserExceptions.update({
-        "KeyError": KeyError,
-        "IndexError": IndexError,
-    })
+
+    # Catch C++ exceptions
+    from gna.core.exceptions import load_user_exceptions
+    load_user_exceptions()
 
     ROOT.GNAObjectT
     provided_precisions = ROOT.GNA.provided_precisions()

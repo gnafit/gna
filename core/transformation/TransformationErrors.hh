@@ -6,6 +6,17 @@
 namespace TransformationTypes
 {
   /**
+   * @brief Binding exception
+   * @author Maxim Gonchar
+   * @date 2020
+   */
+  class BindError: public std::runtime_error {
+  public:
+    BindError(const std::string &message)
+      : std::runtime_error(message) { }
+  };
+
+  /**
    * @brief Base exception definition for Atypes and Rtypes classes.
    * @author Dmitry Taychenachev
    * @date 2015
