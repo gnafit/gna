@@ -3,10 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(GlobalNuAnalysis2 VERSION 0.0.0)
 set(LIBNAME GlobalNuAnalysis2)
 
-# Add ROOT path with FindROOT.cmake
-# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-set(CMAKE_PREFIX_PATH "$ENV{ROOTSYS}/share/root/cmake")
 
 include(compiler_selection)
 include(cuda_support)
@@ -129,7 +126,8 @@ target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${EIGEN3_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS}  -lPyROOT)
+#target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS})
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(${LIBNAME} PRIVATE fmt)
 
