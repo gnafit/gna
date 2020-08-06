@@ -9,10 +9,17 @@ import types
 import inspect
 
 try:
-    Template = ROOT.PyRootType
-else:
+    ROOT.PyRootType
+except AttributeError:
+    # ROOT >= 6.22
     import cppyy
     Template = cppyy._cpython_cppyy.Template
+    def istemplate(cls):
+        return isinstance(cls, Template)
+else:
+    # ROOT < 6.22
+    def istemplate(cls):
+        return not isinstance(cls, ROOT.PyRootType)
 
 ROOT.GNAObjectT
 provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
@@ -229,7 +236,9 @@ def setup(ROOT):
 
     GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
-        if isinstance(cls, Template):
+        if not inspect.isclass(cls):
+            return cls
+        if istemplate(cls):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
