@@ -131,7 +131,7 @@ class NestedDict(object):
             return sub.get( rest, *args, **kwargs )
 
         types=kwargs.pop('types', None)
-        if key is ():
+        if key==():
             obj = self
         else:
             obj=self.__storage__.get(key, *args, **kwargs)
@@ -148,7 +148,7 @@ class NestedDict(object):
         if rest:
             return self.__storage__.__getitem__(key).__getitem__( rest )
 
-        if key is ():
+        if key==():
             return self
 
         try:
