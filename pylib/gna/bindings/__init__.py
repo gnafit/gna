@@ -8,8 +8,14 @@ import itertools as it
 import types
 import inspect
 
+try:
+    Template = ROOT.PyRootType
+else:
+    import cppyy
+    Template = cppyy._cpython_cppyy.Template
+
 ROOT.GNAObjectT
-provided_precisions = list(ROOT.GNA.provided_precisions())
+provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
 
 def patchGNAclass(cls):
     if '__original_init__' in cls.__dict__:
@@ -176,22 +182,23 @@ def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
     ROOT.__gna_patched__ = True
-    ROOT.UserExceptions.update({
-        "KeyError": KeyError,
-        "IndexError": IndexError,
-    })
+    # ROOT.UserExceptions.update({
+        # "KeyError": KeyError,
+        # "IndexError": IndexError,
+    # })
 
     ROOT.GNAObjectT
-    provided_precisions = ROOT.GNA.provided_precisions()
 
     simpledicts=[]
     for ft in provided_precisions:
+        obj = ROOT.GNAObjectT(ft, ft)
+        descr = ROOT.TransformationDescriptorT(ft, ft)
         simpledicts += [
-            ROOT.GNAObjectT(ft, ft).Variables,
-            ROOT.GNAObjectT(ft, ft).Evaluables,
-            ROOT.GNAObjectT(ft, ft).Transformations,
-            ROOT.TransformationDescriptorT(ft, ft).Inputs,
-            ROOT.TransformationDescriptorT(ft, ft).Outputs,
+            obj.Variables,
+            obj.Evaluables,
+            obj.Transformations,
+            descr.Inputs,
+            descr.Outputs,
         ]
     simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
@@ -222,8 +229,7 @@ def setup(ROOT):
 
     GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
-        # If the object is template, try to patch its instance
-        if not isinstance(cls, ROOT.PyRootType):
+        if isinstance(cls, Template):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
@@ -235,7 +241,7 @@ def setup(ROOT):
     t = type(ROOT)
     origgetattr = t.__getattr__
     def patchclass(self, name):
-        cls = patchcls(origgetattr(self, name))
+        cls = patchcls(origgetattr(name))
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass

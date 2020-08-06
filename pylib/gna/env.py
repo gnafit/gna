@@ -7,7 +7,7 @@ from contextlib import contextmanager
 import ROOT
 from gna.config import cfg
 
-provided_precisions = list(ROOT.GNA.provided_precisions())
+provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
 expressionproviders = tuple(ROOT.GNA.GNAObjectTemplates.ExpressionsProviderT(p) for p in provided_precisions)
 
 env = None
