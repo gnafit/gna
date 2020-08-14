@@ -110,10 +110,8 @@ else(Boost_FOUND)
 endif(Boost_FOUND)
 
 find_package(GSL REQUIRED)
-find_package(ROOT REQUIRED)
+find_package(ROOT CONFIG REQUIRED)
 include(${ROOT_USE_FILE})
-link_directories(${ROOT_LIBRARY_DIR})
-
 
 add_library(${LIBNAME} SHARED ${SOURCES}  ${CONTRIB_SRC})
 ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" MODULE ${LIBNAME} OPTIONS -interpreteronly)
@@ -122,13 +120,10 @@ if(result)
     set_property(TARGET ${LIBNAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(${LIBNAME} SYSTEM PRIVATE ${EIGEN3_INCLUDE_DIR})
-target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS} -lPyROOT)
-#target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS})
+target_link_libraries(${LIBNAME} PRIVATE ROOT::Core ROOT::MathCore ${CUDA_ADD_LIBS})
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
+target_link_libraries(${LIBNAME} PRIVATE Eigen3::Eigen)
 target_link_libraries(${LIBNAME} PRIVATE fmt)
 
 if(GENERATE_PROFILE)
