@@ -8,21 +8,27 @@ import itertools as it
 import types
 import inspect
 
+def _get_root_version():
+    from subprocess import check_output
+    version = check_output(['root-config', '--version']).decode()
+    return version.rstrip('\n') # remove newline
+
+__root_version__ = _get_root_version()
+
+# breaking change in ROOT 6.22 >= due to new PyROOT
 try:
-    ROOT.PyRootType
-except AttributeError:
-    # ROOT >= 6.22
     import cppyy
     Template = cppyy._cpython_cppyy.Template
     def istemplate(cls):
         return isinstance(cls, Template)
-else:
-    # ROOT < 6.22
+except AttributeError:
+    # ROOT <= 6.22 or 6.22 with legacy PyROOT
     def istemplate(cls):
         return not isinstance(cls, ROOT.PyRootType)
 
+
 ROOT.GNAObjectT
-provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
+provided_precisions = [str(prec) for prec in ROOT.GNA.provided_precisions()]
 
 def patchGNAclass(cls):
     if '__original_init__' in cls.__dict__:
@@ -189,11 +195,6 @@ def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
     ROOT.__gna_patched__ = True
-    # ROOT.UserExceptions.update({
-        # "KeyError": KeyError,
-        # "IndexError": IndexError,
-    # })
-
     ROOT.GNAObjectT
 
     simpledicts=[]
@@ -250,7 +251,13 @@ def setup(ROOT):
     t = type(ROOT)
     origgetattr = t.__getattr__
     def patchclass(self, name):
-        cls = patchcls(origgetattr(name))
+        try:
+            # modern PyROOT
+            cls = patchcls(origgetattr(name))
+        except TypeError:
+            # legacy PyROOT
+            cls = patchcls(origgetattr(self, name))
+
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass
