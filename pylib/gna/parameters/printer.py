@@ -10,12 +10,12 @@ from gna.bindings import provided_precisions
 from itertools import chain, tee, cycle
 import itertools
 
-from gna.bindings import patchROOTClass
+from gna.bindings import patchROOTClass, __root_version__
 
 try:
     import sys
-    if not sys.stdout.isatty():
-        raise RuntimeError()
+    #  if not sys.stdout.isatty():
+        #  raise RuntimeError()
     from colorama import Fore, Style
 
     def colorize(string, color):
@@ -221,22 +221,26 @@ def Variable__str( self, labels=False ):
 def Variable_complex__str(self, labels=False, value=None):
     if value is None:
         value = self.values()
+
+    if __root_version__ >= "6.22":
+        rval  = value.real
+        ival  = value.imag
+    else:
+        rval  = value.real()
+        ival  = value.imag()
+
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN),
-            rval  = value.real(),
-            ival  = value.imag(),
+            rval  = rval,
+            ival  = ival,
             color = Fore.BLUE
             )
     label = self.label()
     if not labels or label=='value':
         label=''
 
-    s= namefmt.format(**fmt)
+    s = namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
-
-    # cnum = value.real() + value.imag()*1j
-    # angle = N.angle(cnum, deg=True)
-    # mag = N.absolute(cnum)
 
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
