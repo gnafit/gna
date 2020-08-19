@@ -39,7 +39,7 @@ public:
         m_offset = m_buffer - m_root;
     }
     arrayview(const arrayviewType& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
-    arrayview(const std::initializer_list<T>& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
+    arrayview(std::initializer_list<T> other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
 
     T& operator[](size_t i) noexcept { return m_buffer[i]; }
     const T& operator[](size_t i) const noexcept { return m_buffer[i]; }
