@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 import h5py
 import numpy as np
+import cppyy
 
 class PointTree(object):
     def __init__(self, env, container, mode='r'):
@@ -42,8 +43,8 @@ class PointTree(object):
     def params(self, params):
         self._params = []
         for param in params:
-            if isinstance(param, str):
-                self._params.append(self.env.pars[param])
+            if isinstance(param, (str, cppyy.gbl.std.string)):
+                self._params.append(self.env.pars[str(param)])
             else:
                 self._params.append(param)
         self.root.attrs["params"] = ['.'.join([p.ns.path, p.name()]) for p in params]
@@ -67,6 +68,8 @@ class PointTree(object):
     def path(self, values):
         if isinstance(values, str):
             return values
+        if isinstance(values, cppyy.gbl.std.string):
+            return str(values)
         return '/'.join([str(x) for x in values])
 
     def iter(self, depth=None):

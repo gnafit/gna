@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 from __future__ import absolute_import
+import numpy as np
 import ROOT
+import cppyy
 import gna.constructors as C
 from collections import defaultdict, namedtuple
-import numpy as np
 
 Block = namedtuple('Block', ('theory', 'data', 'cov'))
 
@@ -43,12 +44,20 @@ class Dataset(object):
         self.covariate(obs, obs, error)
 
     def _pointize(self, obj):
-        """Given object checks whether it is PyROOT type (perhaps better to
+        """Given object checks whether it is C++ type (perhaps better to
         refactor it) and if not make a Points out of it. Use case -- turning
         numpy array into points.
         """
-        if not isinstance(type(obj), ROOT.PyRootType):
+        try:
+            # check if we are in modern PyROOT
+            cppyy.typeid(obj)
+        except KeyError:
+            # not C++ object, trying convert to Points
             obj = C.Points(obj)
+        except AttributeError:
+            # we are in legacy PyROOT
+            if not isinstance(type(obj), ROOT.PyRootType):
+                obj = C.Points(obj)
         return obj
 
     def covariate(self, obs1, obs2, cov):

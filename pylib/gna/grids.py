@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 import argparse
-import numpy as np
 from collections import OrderedDict
 from itertools import product, islice, chain, repeat
+
+import numpy as np
+import ROOT
 
 class _AddGridActionBase(argparse.Action):
     def getcount(self, count):
@@ -54,6 +56,8 @@ class PointSet(object):
     def fromgrids(cls, opts):
         gridparams = OrderedDict()
         for par, gridtype, griddesc in opts.grids:
+            if not isinstance(par, ROOT.GaussianParameter("double")):
+                raise TypeError("{} is not independent parameter, nop possible to scan over it".format(par.name()))
             gridparams[par] = None
         params = list(gridparams.keys())
         return cls(opts, params, lambda: product(*cls.decomposed(opts)))

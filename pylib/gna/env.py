@@ -2,10 +2,11 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from collections import defaultdict, deque, Mapping, OrderedDict
-from . import parameters
 from contextlib import contextmanager
 import ROOT
+import cppyy
 from gna.config import cfg
+from . import parameters
 
 provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
 expressionproviders = tuple(ROOT.GNA.GNAObjectTemplates.ExpressionsProviderT(p) for p in provided_precisions)
@@ -199,7 +200,11 @@ class namespace(Mapping):
         if ns:
             return ns.__getitem__(head)
 
-        v = self.storage[head]
+        if isinstance(head, cppyy.gbl.std.string):
+            v = self.storage[str(head)]
+        else:
+            v = self.storage[head]
+
         if isinstance(v, str):
             return env.nsview[v]
         return v
