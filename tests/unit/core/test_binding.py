@@ -23,8 +23,8 @@ def test_single_01():
     dbg = R.DebugTransformation('debug')
 
     assert dbg.single()==dbg.transformations[0].outputs[0]
-    assert dbg.single_input()==dbg.transformations[0].inputs[0]
     assert dbg.transformations[0].single()==dbg.transformations[0].outputs[0]
+    assert dbg.single_input()==dbg.transformations[0].inputs[0]
     assert dbg.transformations[0].single_input()==dbg.transformations[0].inputs[0]
 
 def test_single_02():
