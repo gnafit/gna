@@ -62,6 +62,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         correlations = [ 'lsnl', 'subdetectors' ]
         parser.add_argument('--correlation',  nargs='*', default=correlations, choices=correlations, help='Enable correalations')
 
+        # Miscellaneous
+        parser.add_argument('--collapse', action='store_true', help='collapsed configuration' )
+
     def init(self):
         self.init_nidx()
         self.init_formula()
@@ -90,6 +93,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
             ('s', 'subdetector', self.subdetectors_names),
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] ),
         ]
+        if self.opts.collapse:
+            self.nidx[1][2] = self.nidx[1][2][:1]
+            self.nidx[2][2] = self.nidx[2][2][:1]
         self.nidx = NIndex.fromlist(self.nidx)
 
     def init_formula(self):
