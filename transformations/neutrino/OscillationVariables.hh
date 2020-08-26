@@ -30,6 +30,9 @@ namespace GNA {
       variable<FloatType> DeltaMSq12;
       variable<FloatType> DeltaMSq13;
       variable<FloatType> DeltaMSq23;
+      // Mass splitting 31 for given orderings
+      variable<FloatType> DeltaMSq13NO;
+      variable<FloatType> DeltaMSq13IO;
       // Neutrino mass ordering
       variable<FloatType> Alpha;
       // Sines (squared) of mixing agles
@@ -66,12 +69,19 @@ namespace GNA {
     protected:
       Fields fields() {
         return Fields()
+          // Mass splittings
           .add(&DeltaMSq12, "DeltaMSq12")
           .add(&DeltaMSq13, "DeltaMSq13")
           .add(&DeltaMSq23, "DeltaMSq23")
+          // Mass splitting 31 for given orderings
+          .add(&DeltaMSq13NO, "DeltaMSq13NO")
+          .add(&DeltaMSq13IO, "DeltaMSq13IO")
+          // Effective mass splittings
           .add(&DeltaMSqEE, "DeltaMSqEE")
           .add(&DeltaMSqMM, "DeltaMSqMM")
+          // NMO
           .add(&Alpha, "Alpha")
+          // Mixing angles
           .add(&SinSq12, "SinSq12")
           .add(&SinSq13, "SinSq13")
           .add(&SinSq23, "SinSq23")
@@ -91,6 +101,7 @@ namespace GNA {
           .add(&Theta12, "Theta12")
           .add(&Theta13, "Theta13")
           .add(&Theta23, "Theta23")
+          // CP violation
           .add(&Delta, "Delta")
           .add(&Phase, "Phase")
           .add(&PhaseC, "PhaseC")
@@ -124,6 +135,15 @@ namespace GNA {
                {&DeltaMSq13, &Alpha, &DeltaMSq12}, [&]() {
                  return DeltaMSq13.value() - Alpha.value()*DeltaMSq12.value();
                }, "|Δm²₂₃|=|Δm²₁₃|-α|Δm²₁₂|")
+          // 13 for fixed ordering
+          .add(&DeltaMSq13NO,
+               {&DeltaMSq23, &DeltaMSq12}, [&]() {
+                 return DeltaMSq23.value() + DeltaMSq12.value();
+               }, "|Δm²₁₃|(NO)=|Δm²₂₃|+|Δm²₁₂|")
+          .add(&DeltaMSq13IO,
+               {&DeltaMSq23, &DeltaMSq12}, [&]() {
+                 return DeltaMSq23.value() - DeltaMSq12.value();
+               }, "|Δm²₁₃|(IO)=|Δm²₂₃|-|Δm²₁₂|")
           // ee from 23
           .add(&DeltaMSqEE,
                {&DeltaMSq23, &Alpha, &CosSq12, &DeltaMSq12}, [&]() {
