@@ -253,7 +253,21 @@ class TransformationBundle(object):
 
         self._debug = self.bundlecfg.get('debug', self._debug)
 
+        self._namefunction = self._get_namefunction(self.bundlecfg)
+
         assert not kwargs, 'Unparsed kwargs: '+str(kwargs)
+
+    @classmethod
+    def _get_namefunction(cls, bundlecfg):
+        names = bundlecfg.get('names')
+        if not names:
+             return lambda s: s
+        elif isinstance(names, (dict, NestedDict)):
+            return lambda s: names.get(s, s)
+        elif callable(names):
+            return names
+
+        cls.exception('option "names" should be a dictionary or a function, not {}'.format(type(names).__name__))
 
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
@@ -281,8 +295,8 @@ class TransformationBundle(object):
     @classmethod
     def provides(cls, cfg):
         variables, objects = cls._provides(cfg)
-        names = cfg.bundle.get('names', {})
-        ret = tuple((names.get(a,a) for a in variables)), tuple((names.get(a,a) for a in objects))
+        namefcn = cls._get_namefunction(cfg['bundle'])
+        ret = tuple((namefcn(a) for a in variables)), tuple((namefcn(a) for a in objects))
 
         if cfg.bundle.get('debug', False):
             print('Bundle', cls.__name__, 'provides')
@@ -299,11 +313,12 @@ class TransformationBundle(object):
         """Defines the variables necessary for the computational chain. Should handle each namespace."""
         pass
 
-    def exception(self, message):
-        return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
+    @classmethod
+    def exception(cls, message):
+        return Exception("{bundle}: {message}".format(bundle=cls.__name__, message=message))
 
     def get_globalname(self, localname):
-        return self.bundlecfg['names'].get(localname, localname)
+        return self._namefunction(localname)
 
     def get_path(self, localname, nidx=None, argument_number=None, join=False, extra=None):
         name=self.get_globalname(localname)

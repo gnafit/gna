@@ -277,7 +277,7 @@ class NIndex(object):
     def __eq__(self, other):
         if not isinstance(other, NIndex):
             other = NIndex(*other)
-        return self.indices==other.indices
+        return dict(self.indices)==dict(other.indices) # make sure the order does not affect the result
 
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
@@ -353,7 +353,15 @@ class NIndex(object):
         else:
             return indexauto
 
-        return fmt.format( **dct )
+        while True:
+            try:
+                ret = fmt.format( **dct )
+            except KeyError as e:
+                dct[e.args[0]] = 'x'
+            else:
+                break
+
+        return ret
 
     def get_relevant_index(self, short, exception=True):
         idx = self.indices.get(short, None)
@@ -390,6 +398,8 @@ class NIndex(object):
         majors, minors, used=(), (), ()
 
         for short in indices:
+            if not short:
+                continue
             major=self.get_relevant_index(short)
             majors+=major,
             used+=short,

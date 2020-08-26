@@ -19,6 +19,7 @@ class reactor_baselines_v02(TransformationBundle):
     """Calcualte reactor baselines v02:
        Changes since v01:
        - enable yaml_input
+       - do not add 'AD' to the beginning of the detector name
         """
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
@@ -43,16 +44,6 @@ class reactor_baselines_v02(TransformationBundle):
 
         if 'detectors_key' in self.cfg:
             self.detectors = self.detectors[self.cfg['detectors_key']]
-
-        if any('AD' not in str(key) for key in self.detectors.keys()):
-            print('AD is not in detectors keys! Substituting')
-            new = {}
-            for key, value in self.detectors.items():
-                if 'AD' not in str(key):
-                    new['AD'+str(key)] = value
-                else:
-                    new[str(key)] = value
-            self.detectors = new
 
     def compute_distance(self, reactor, detector):
         '''Computes distance between pair of reactor and detector. Coordinates
