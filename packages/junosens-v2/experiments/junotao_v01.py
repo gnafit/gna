@@ -27,7 +27,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
 
 """
 
-    detectorname = 'AD1'
+    detectorname = 'juno'
 
     @classmethod
     def initparser(cls, parser, namespace):
@@ -162,6 +162,12 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 'lsnl_edges| evis_hist, evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'if 'lsnl' in energy_model else '',
                 'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
                 #
+                # Worst case spectral distortions
+                #
+                'pmns_wc[c]',
+                'baseline_wc',
+                'oscprob_wc_full = sum[c]| pmns_wc[c]*oscprob_wc[c](enu())',
+                #
                 # Reactor part
                 #
                 'numerator = global_norm * efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
@@ -276,7 +282,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         bundle = dict(name='reactor_baselines', version='v02', major = 'rd'),
                         reactors  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/reactor_baselines.yaml',
                         reactors_key = 'reactor_baseline',
-                        detectors = dict(AD1=0.0),
+                        detectors = dict(juno=0.0),
                         unit = 'km'
                         ),
                 # Reactor
@@ -366,6 +372,36 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                     # pdgyear = self.opts.pdgyear,
                     # dm      = '23'
                     # ),
+                #
+                # Worst case spectral distortion: oscillation probability
+                #
+                oscpars_wc = OrderedDict(
+                        bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc'}),
+                        fixed = True,
+                        parameters = dict(
+                            DeltaMSq23    = 2.453e-03,
+                            DeltaMSq12    = 7.53e-05,
+                            SinSqDouble13 = (0.08529904, 0.00267792),
+                            SinSqDouble12 = 0.851004,
+                            )
+                        ),
+                numbers_wc = OrderedDict(
+                    bundle = dict(name='parameters', version='v05'),
+                    state='free',
+                    labels=dict(
+                        baseline_wc = 'Baseline for worst case distortion, km',
+                        ),
+                    pars =  dict(
+                            baseline_wc = 52.45,
+                            ),
+                    ),
+                oscprob_wc = OrderedDict(
+                        bundle = dict(name='oscprob_ee', version='v01', major=('', '', 'c'),
+                                      names=lambda s: s+'_wc'),
+                        ),
+                #
+                #
+                #
                 anuspec_hm = OrderedDict(
                         bundle = dict(name='reactor_anu_spectra', version='v05'),
                         name = 'anuspec',
@@ -575,33 +611,33 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         outputs = self.context.outputs
 
         if 'ibd_noeffects_bf' in outputs:
-            fine = outputs.ibd_noeffects_bf.AD1
+            fine = outputs.ibd_noeffects_bf.juno
         else:
-            fine = outputs.kinint2.AD1
+            fine = outputs.kinint2.juno
 
         if 'lsnl' in self.opts.energy_model:
-            fine = outputs.lsnl.AD1
+            fine = outputs.lsnl.juno
 
         if 'eres' in self.opts.energy_model:
-            fine = outputs.eres.AD1
+            fine = outputs.eres.juno
 
         if 'multieres' in self.opts.energy_model:
-            fine = outputs.ibd.AD1
+            fine = outputs.ibd.juno
 
-        futurens[('variance', self.detectorname, 'stat')]     = outputs.staterr2.AD1
-        futurens[('variance', self.detectorname, 'bkgshape')] = outputs.bkg_shape_variance.AD1
-        futurens[('variance', self.detectorname, 'full')]     = outputs.juno_variance.AD1
+        futurens[('variance', self.detectorname, 'stat')]     = outputs.staterr2.juno
+        futurens[('variance', self.detectorname, 'bkgshape')] = outputs.bkg_shape_variance.juno
+        futurens[('variance', self.detectorname, 'full')]     = outputs.juno_variance.juno
         # Force calculation of the stat errors
-        outputs.juno_variance.AD1.data()
+        outputs.juno_variance.juno.data()
 
-        futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
+        futurens[(self.detectorname, 'initial')] = outputs.kinint2.juno
         futurens[(self.detectorname, 'fine')] = fine
-        futurens[(self.detectorname, 'final')] = outputs.observation.AD1
+        futurens[(self.detectorname, 'final')] = outputs.observation.juno
         if 'lsnl' in self.opts.energy_model:
-            futurens[(self.detectorname, 'lsnl')] = outputs.lsnl.AD1
+            futurens[(self.detectorname, 'lsnl')] = outputs.lsnl.juno
 
         if 'eres' in self.opts.energy_model:
-            futurens[(self.detectorname, 'eres')] = outputs.eres.AD1
+            futurens[(self.detectorname, 'eres')] = outputs.eres.juno
 
         k0 = ('extra',)
         for k, v in self.context.outputs.items(nested=True):
@@ -609,7 +645,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
-        out=self.context.outputs.rebin.AD1
+        out=self.context.outputs.rebin.juno
         walker = GraphWalker(out)
         report(out.data, fmt='Initial execution time: {total} s')
         report(out.data, 100, pre=lambda: walker.entry_do(taint), pre_dummy=lambda: walker.entry_do(taint_dummy))
