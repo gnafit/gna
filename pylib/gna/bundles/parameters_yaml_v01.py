@@ -143,7 +143,6 @@ class parameters_yaml_v01(TransformationBundle):
             i=dim-i-1
             mat = np.delete(mat, i, 0)
             mat = np.delete(mat, i, 1)
-            print(mat)
 
         return mat
 
