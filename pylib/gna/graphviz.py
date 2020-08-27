@@ -45,6 +45,8 @@ class GNADot(object):
         self.joints = kwargs.pop('joints', False)
         ns = kwargs.pop('namespace', None)
 
+        include_only=kwargs.pop('include_only')
+
         self.subgraphs = dict()
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
@@ -55,7 +57,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=ns)
+        self.walker = GraphWalker(transformation, namespace=ns, include_only=include_only)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
@@ -216,6 +218,7 @@ class TreeStyle(object):
                 'Jacobian':          u'J',
                 'Chi2':              u'χ²',
                 'CovariatedPrediction': 'V',
+                'Ratio':             u'÷'
                 }
         if objectname in marks:
             mark = marks.get(objectname)
