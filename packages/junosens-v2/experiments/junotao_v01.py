@@ -164,11 +164,12 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Worst case spectral distortions
                 #
-                'pmns_wc[c]',
+                'pmns_wc_no[c]',
+                'pmns_wc_io[c]',
                 'baseline_wc',
-                'Oscprob_wc_full_no = sum[c]| pmns_wc[c]*oscprob_wc_no[c](enu())',
-                'Oscprob_wc_full_io = sum[c]| pmns_wc[c]*oscprob_wc_io[c](enu())',
-                'Spectral_distortion = Oscprob_wc_full_io/Oscprob_wc_full_no',
+                'Oscprob_wc_full_no = sum[c]| pmns_wc_no[c]*oscprob_wc_no[c](enu())',
+                'Oscprob_wc_full_io = sum[c]| pmns_wc_io[c]*oscprob_wc_io[c](enu())',
+                'SpectralDistortion = Oscprob_wc_full_io/Oscprob_wc_full_no',
                 #
                 # Reactor part
                 #
@@ -202,9 +203,16 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                     kinint2(
                       sum[r]|
                         (
-                            baselineweight[r,d]*
-                            ( reactor_active_norm * (sum[i]| power_livetime_factor*offeq_correction[i,r](enu(), anuspec[i]()) ) + snf_in_reac )*
-                            {oscprob}
+                            baselineweight[r,d]
+                            * ( reactor_active_norm
+                                *( sum[i]| power_livetime_factor
+                                           * DistortSpectrum|
+                                               offeq_correction[i,r](enu(), anuspec[i]()),
+                                               SpectralDistortion
+                                )
+                                + snf_in_reac
+                            )
+                            * {oscprob}
                         )*
                         bracket(
                             ibd_xsec(enu(), ctheta())*
@@ -377,8 +385,18 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Worst case spectral distortion: oscillation probability
                 #
-                oscpars_wc = OrderedDict(
-                        bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc'}),
+                numbers_wc = OrderedDict(
+                    bundle = dict(name='parameters', version='v05'),
+                    state='fixed',
+                    labels=dict(
+                        baseline_wc = 'Baseline for worst case distortion, km',
+                        ),
+                    pars =  dict(
+                            baseline_wc = 52.552,
+                            ),
+                    ),
+                oscpars_wc_no = OrderedDict(
+                        bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc_no'}),
                         fixed = True,
                         parameters = dict(
                             DeltaMSq23    = 2.453e-03,
@@ -387,27 +405,33 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                             SinSqDouble12 = 0.851004,
                             )
                         ),
-                numbers_wc = OrderedDict(
-                    bundle = dict(name='parameters', version='v05'),
-                    state='free',
-                    labels=dict(
-                        baseline_wc = 'Baseline for worst case distortion, km',
+                oscpars_wc_io = OrderedDict(
+                        bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc_io'}),
+                        fixed = False,
+                        parameters = dict(
+                            DeltaMSq23    = 0.0024513465356996106,
+                            DeltaMSq12    = 7.531246053055422e-05,
+                            SinSqDouble13 = 0.06983548981387744,
+                            SinSqDouble12 = 0.8511950916781301,
+                            )
                         ),
-                    pars =  dict(
-                            baseline_wc = 52.45,
-                            ),
-                    ),
                 oscprob_wc_no = OrderedDict(
                         bundle = dict(name='oscprob_ee', version='v01', major=('', '', 'c'),
-                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc', 'oscprob': 'oscprob_wc_no'}),
+                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc_no', 'oscprob': 'oscprob_wc_no'}),
                         dmnames = ['DeltaMSq12', 'DeltaMSq13NO', 'DeltaMSq23'],
                         labelfmt = 'OP {component}|worst case NO'
                         ),
                 oscprob_wc_io = OrderedDict(
                         bundle = dict(name='oscprob_ee', version='v01', major=('', '', 'c'),
-                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc', 'oscprob': 'oscprob_wc_io'}),
+                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc_io', 'oscprob': 'oscprob_wc_io'}),
                         dmnames = ['DeltaMSq12', 'DeltaMSq13IO', 'DeltaMSq23'],
                         labelfmt = 'OP {component}|worst case IO'
+                        ),
+                condproduct = OrderedDict(
+                        bundle = dict(name='conditional_product', version='v01', major=(),
+                                      names={'condition': 'distorction_wc_on'}),
+                        instances = { 'DistortSpectrum': '{{Optionally distorted spectrum | worst case}}' },
+                        condlabel = 'Worst case distortion switch'
                         ),
                 #
                 #
@@ -717,6 +741,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
           expr:
           - anuspec*offeq_correction*power_livetime_factor
           - offeq_correction*power_livetime_factor
+          - DistortSpectrum*power_livetime_factor
           label: '{{Antineutrino spectrum (+offeq)|{reactor}.{isotope}}}'
         #
         # Backgrounds
