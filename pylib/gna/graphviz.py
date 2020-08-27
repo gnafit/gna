@@ -199,6 +199,7 @@ class TreeStyle(object):
                 'SumBroadcast':      '+',
                 'WeightedSum':       '+w',
                 'WeightedSumSq':     '+²w²',
+                'ConditionalProduct': '*?',
                 'Product':           '*',
                 'ProductBC':         '*',
                 'Points':            'a',
