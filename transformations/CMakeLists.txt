@@ -8,6 +8,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/ViewRear.cc
   transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
+  transformations/base/ConditionalProduct.cc
   transformations/base/Product.cc
   transformations/base/ProductBC.cc
   transformations/base/Snapshot.cc
@@ -140,6 +141,7 @@ set(TRANSFORMATION_HEADERS
   View.hh
   ViewRear.hh
   ViewHistBased.hh
+  ConditionalProduct.hh
   Product.hh
   ProductBC.hh
   Snapshot.hh

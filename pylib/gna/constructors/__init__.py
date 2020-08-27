@@ -150,6 +150,14 @@ def Product(outputs=None, **kwargs):
 
     return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
 
+"""Construct ConditionalProduct object from list of SingleOutputs"""
+def ConditionalProduct(nprod, condition, outputs=None, **kwargs):
+    args=(nprod, condition)
+    if outputs is not None:
+        args=args+(OutputDescriptors(outputs),)
+
+    return R.ConditionalProduct(*args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def ProductBC(outputs=None, **kwargs):
     if outputs is None:
