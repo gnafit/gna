@@ -409,10 +409,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc_io'}),
                         fixed = False,
                         parameters = dict(
-                            DeltaMSq23    = 0.0024513465356996106,
-                            DeltaMSq12    = 7.531246053055422e-05,
-                            SinSqDouble13 = 0.06983548981387744,
-                            SinSqDouble12 = 0.8511950916781301,
+                            DeltaMSq23    = 0.00256119128315,
+                            DeltaMSq12    = 7.52812362247e-05,
+                            SinSqDouble13 = 0.0807062597297,
+                            SinSqDouble12 = 0.851663394575,
                             )
                         ),
                 oscprob_wc_no = OrderedDict(
