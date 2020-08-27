@@ -166,7 +166,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 'pmns_wc[c]',
                 'baseline_wc',
-                'oscprob_wc_full = sum[c]| pmns_wc[c]*oscprob_wc[c](enu())',
+                'Oscprob_wc_full_no = sum[c]| pmns_wc[c]*oscprob_wc_no[c](enu())',
+                'Oscprob_wc_full_io = sum[c]| pmns_wc[c]*oscprob_wc_io[c](enu())',
+                'Spectral_distortion = Oscprob_wc_full_io/Oscprob_wc_full_no',
                 #
                 # Reactor part
                 #
@@ -395,9 +397,17 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                             baseline_wc = 52.45,
                             ),
                     ),
-                oscprob_wc = OrderedDict(
+                oscprob_wc_no = OrderedDict(
                         bundle = dict(name='oscprob_ee', version='v01', major=('', '', 'c'),
-                                      names=lambda s: s+'_wc'),
+                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc', 'oscprob': 'oscprob_wc_no'}),
+                        dmnames = ['DeltaMSq12', 'DeltaMSq13NO', 'DeltaMSq23'],
+                        labelfmt = 'OP {component}|worst case NO'
+                        ),
+                oscprob_wc_io = OrderedDict(
+                        bundle = dict(name='oscprob_ee', version='v01', major=('', '', 'c'),
+                                      names={'baseline': 'baseline_wc', 'pmns': 'pmns_wc', 'oscprob': 'oscprob_wc_io'}),
+                        dmnames = ['DeltaMSq12', 'DeltaMSq13IO', 'DeltaMSq23'],
+                        labelfmt = 'OP {component}|worst case IO'
                         ),
                 #
                 #
