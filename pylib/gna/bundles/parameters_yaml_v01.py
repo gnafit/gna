@@ -115,7 +115,7 @@ class parameters_yaml_v01(TransformationBundle):
                 self._checkmatrix(cormat, container, is_correlation=True)
                 cormat = self.filter_matrix(cormat, container)
 
-                if cormat:
+                if cormat is not None:
                     ch.covariate_pars(container, cormat)
         # elif 'covariance' in self.cfg:
             # self._load_covariance_matrix()
