@@ -35,6 +35,14 @@ class oscprob_ee_v01(TransformationBundle):
 
         pmns_name = self.get_globalname('pmns')
         baseline_name = self.get_globalname('baseline')
+
+        labelfmt = self.cfg.get('labelfmt', 'OP {component}:|{reactor}-\\>{detector}')
+
+        modecos=True
+        oscprobargs=[modecos]
+        if 'dmnames' in self.cfg:
+            oscprobargs.append(self.cfg['dmnames'])
+
         for it_source in self.idx_source:
             for it_detector in self.idx_detector:
                 it_dist = it_source+it_detector
@@ -45,7 +53,7 @@ class oscprob_ee_v01(TransformationBundle):
                 with self.namespace:
                     with self.namespace(pmns_name):
                         for it_minor in self.nidx_minor:
-                            oscprob = self.context.objects[(pmns_name,oscprobkey)] = C.OscProb3(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                            oscprob = self.context.objects[(pmns_name,oscprobkey)] = C.OscProb3(R.Neutrino.ae(), R.Neutrino.ae(), dist, *oscprobargs)
 
                             for it_component in self.idx_component:
                                 component, = it_component.current_values()
@@ -59,9 +67,9 @@ class oscprob_ee_v01(TransformationBundle):
 
                                     trans = oscprob.transformations[component]
                                     if self.nidx_minor:
-                                        trans.setLabel( it.current_format('OP {component}:|{reactor}-\\>{detector}|'+it_minor.current_format()) )
+                                        trans.setLabel(it.current_format(labelfmt+'|'+it_minor.current_format()))
                                     else:
-                                        trans.setLabel( it.current_format('OP {component}:|{reactor}-\\>{detector}') )
+                                        trans.setLabel(it.current_format(labelfmt))
                                     output = trans[component]
                                     input  = trans['Enu']
 
