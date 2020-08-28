@@ -393,7 +393,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         baseline_wc = 'Baseline for worst case distortion, km',
                         ),
                     pars =  dict(
-                            baseline_wc = 52.5301963195,
+                            baseline_wc = 52.5301918767,
                             ),
                     ),
                 oscpars_wc_no = OrderedDict(
@@ -410,10 +410,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc_io'}),
                         fixed = False,
                         parameters = dict(
-                            DeltaMSq23    = 0.00256153545679,
-                            DeltaMSq12    = 7.52799208818e-05,
-                            SinSqDouble13 = 0.0816229183296,
-                            SinSqDouble12 = 0.8516016884,
+                            DeltaMSq23    = 0.00256153884886  ,
+                            DeltaMSq12    = 7.52800519162e-05 ,
+                            SinSqDouble13 = 0.0816211422423   ,
+                            SinSqDouble12 = 0.851602205229    ,
                             )
                         ),
                 oscprob_wc_no = OrderedDict(
