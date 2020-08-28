@@ -13,6 +13,7 @@ class cmd(basecmd):
         parser.add_argument('args', nargs=REMAINDER, help="ignored arguments. First argument should not start with '-'")
 
     def init(self):
+        print()
         print('Comment:', end='', sep='')
         s= ' '.join(pipes.quote(arg) for arg in self.opts.args)
         nlines = s.count('\n')
