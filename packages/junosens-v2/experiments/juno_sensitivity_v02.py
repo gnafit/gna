@@ -64,7 +64,6 @@ Misc changes:
     def initparser(cls, parser, namespace):
         parser.add_argument( '--dot', help='write graphviz output' )
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-        parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')

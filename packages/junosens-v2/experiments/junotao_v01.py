@@ -33,7 +33,6 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
     def initparser(cls, parser, namespace):
         parser.add_argument( '--dot', help='write graphviz output' )
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-        parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
@@ -201,23 +200,25 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 '''ibd={eres} {lsnl}
                     kinint2(
-                      sum[r]|
-                        (
-                            baselineweight[r,d]
-                            * ( reactor_active_norm
-                                *( sum[i]| power_livetime_factor
-                                           * DistortSpectrum|
-                                               offeq_correction[i,r](enu(), anuspec[i]()),
-                                               SpectralDistortion
+                        DistortSpectrum|
+                            sum[r](
+                                (
+                                    baselineweight[r,d]
+                                    * ( reactor_active_norm
+                                        *( sum[i]| power_livetime_factor
+                                                   *
+                                                       offeq_correction[i,r](enu(), anuspec[i]())
+                                        )
+                                        + snf_in_reac
+                                    )
+                                    * {oscprob}
+                                )*
+                                bracket(
+                                    ibd_xsec(enu(), ctheta())*
+                                    jacobian(enu(), ee(), ctheta())
                                 )
-                                + snf_in_reac
-                            )
-                            * {oscprob}
-                        )*
-                        bracket(
-                            ibd_xsec(enu(), ctheta())*
-                            jacobian(enu(), ee(), ctheta())
-                        )
+                            ),
+                            SpectralDistortion
                     ) {shape_norm}
                 '''.format(**formula_options),
                 #
@@ -387,7 +388,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 numbers_wc = OrderedDict(
                     bundle = dict(name='parameters', version='v05'),
-                    state='fixed',
+                    state='free',
                     labels=dict(
                         baseline_wc = 'Baseline for worst case distortion, km',
                         ),
