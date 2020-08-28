@@ -7,6 +7,7 @@ from tools.dictwrapper import DictWrapper
 import yaml
 import numpy as np
 from collections import OrderedDict
+from packages.env.lib.cwd import update_namespace_cwd
 
 def ndarrayRepresenter(dumper, data):
     return dumper.represent_str(repr(data))
@@ -25,6 +26,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', required=True, help='Output fil ename')
 
     def init(self):
+        update_namespace_cwd(self.opts, 'output')
         storage = self.env.future
         data = DictWrapper({}, split='.')
         for path in self.opts.paths:

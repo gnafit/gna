@@ -1,20 +1,25 @@
 # encoding: utf-8
 
-"""Global environment configuration"""
+"""Save the command line to a shell file
+
+The command then may be repeated and should produce the same output
+"""
 
 from __future__ import print_function
 from gna.ui import basecmd
-from pprint import pprint
-from tools.dictwrapper import DictWrapper
+import pipes
+from packages.env.lib.cwd import update_namespace_cwd
+from sys import argv
 
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('output', nargs='?', help='filename to save cmd')
+        parser.add_argument('output', nargs='*', help='filename to save cmd')
         parser.add_argument('-v', '--verbose', action='store_true', help='print the command line')
+        parser.add_argument('-t', '--test', nargs='+', action='append', help='test arguments')
 
     def init(self):
-        from sys import argv
+        update_namespace_cwd(self.opts, 'output')
         self.level  = 0
         cmd = argv[0]
         opts = argv[1:]
@@ -31,9 +36,10 @@ class cmd(basecmd):
 
         header = '#!/usr/bin/bash\n\n'
         if self.opts.output:
-            with open(self.opts.output, 'w') as f:
-                f.writelines([header, self.out, ''])
-            print('Command line saved to:', self.opts.output)
+            for opath in self.opts.output:
+                with open(opath, 'w') as f:
+                    f.writelines([header, self.out, '\n'])
+                print('Command line saved to:', opath)
 
     def newline(self):
         self.out+=' \\\n'+self.level*'    '
@@ -45,4 +51,4 @@ class cmd(basecmd):
         if opt=='--':
             self.newline()
 
-        self.out+=opt+' '
+        self.out+=pipes.quote(opt)+' '
