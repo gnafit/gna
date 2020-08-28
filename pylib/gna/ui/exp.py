@@ -5,9 +5,9 @@ import argparse
 import os.path
 from pkgutil import iter_modules
 from gna.config import cfg
-import sys
 from collections import OrderedDict
 from gna.packages import iterate_module_paths
+from gna.dispatch import HelpDisplayed
 
 expmodules = OrderedDict([(name, loader) for loader, name, _ in iter_modules(cfg.experimentpaths)])
 expmodules.update([(name, loader) for loader, name, _ in iter_modules(iterate_module_paths('experiments'))])
@@ -39,7 +39,10 @@ class cmd(basecmd):
             print("UI exp list of experiments:")
             map(lambda l: print('   ', l), expmodules.keys())
 
-            sys.exit(0)
+            raise HelpDisplayed()
+
+        if self.opts.help:
+            self.init()
 
     def init(self):
         expmodule = expmodules[self.expname].find_module(self.expname).load_module(self.expname)
@@ -55,7 +58,8 @@ class cmd(basecmd):
         if self.opts.help:
             print('Experiment %s help'%self.expname)
             parser.print_help()
-            sys.exit(0)
+
+            raise HelpDisplayed()
 
         expopts = parser.parse_args(self.opts.expargs)
         with ns:
