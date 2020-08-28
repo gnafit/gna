@@ -388,7 +388,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 numbers_wc = OrderedDict(
                     bundle = dict(name='parameters', version='v05'),
-                    state='free',
+                    state='fixed',
                     labels=dict(
                         baseline_wc = 'Baseline for worst case distortion, km',
                         ),
@@ -408,7 +408,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         ),
                 oscpars_wc_io = OrderedDict(
                         bundle = dict(name='oscpars_ee', version='v01', names={'pmns': 'pmns_wc_io'}),
-                        fixed = False,
+                        fixed = True,
                         parameters = dict(
                             DeltaMSq23    = 0.00256153884886  ,
                             DeltaMSq12    = 7.52800519162e-05 ,
@@ -432,7 +432,8 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         bundle = dict(name='conditional_product', version='v01', major=(),
                                       names={'condition': 'distorction_wc_on'}),
                         instances = { 'DistortSpectrum': '{{Optionally distorted spectrum | worst case}}' },
-                        condlabel = 'Worst case distortion switch'
+                        condlabel = 'Worst case distortion switch',
+                        default   = 0
                         ),
                 #
                 #
