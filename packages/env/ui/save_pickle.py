@@ -6,6 +6,7 @@ from pprint import pprint
 from tools.dictwrapper import DictWrapper
 from collections import OrderedDict
 import pickle
+from packages.env.lib.cwd import update_namespace_cwd
 
 class cmd(basecmd):
     @classmethod
@@ -15,6 +16,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', required=True, help='Output fil ename')
 
     def init(self):
+        update_namespace_cwd(self.opts, 'output')
         storage = self.env.future
         data = DictWrapper(OrderedDict(), split='.')
         for path in self.opts.paths:
