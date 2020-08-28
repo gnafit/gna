@@ -7,6 +7,8 @@ from collections import Iterable
 _cwd = ''
 _prefix = ''
 
+_processed_paths = []
+
 def get_cwd():
     """Return CWD"""
     return _cwd
@@ -28,6 +30,18 @@ def set_prefix(prefix):
     global _prefix
     _prefix=prefix
 
+def storepaths(fcn):
+    global _processed_paths
+    def newfcn(path):
+        ret = fcn(path)
+        _processed_paths.append(ret)
+        return ret
+    return newfcn
+
+def get_processed_paths():
+    return _processed_paths
+
+@storepaths
 def get_path(path):
     """Return the path. Prepend with CWD and prefix
     NOTE: prefix is applied only if path does not contain /
