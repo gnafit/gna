@@ -5,6 +5,7 @@ from os import makedirs, access, W_OK
 from collections import Iterable
 
 _cwd = ''
+_prefix = ''
 
 def get_cwd():
     """Return CWD"""
@@ -18,8 +19,22 @@ def set_cwd(cwd):
     _cwd = cwd
     _make_cwd()
 
+def get_prefix():
+    """Get prefix"""
+    return _prefix
+
+def set_prefix(prefix):
+    """Set prefix"""
+    global _prefix
+    _prefix=prefix
+
 def get_path(path):
-    """Return the path. Prepend with CWD"""
+    """Return the path. Prepend with CWD and prefix
+    NOTE: prefix is applied only if path does not contain /
+    """
+    if _prefix and not '/' in path:
+        path = _prefix + path
+
     if not _cwd:
         return path
 
@@ -27,7 +42,7 @@ def get_path(path):
 
 def update_namespace_cwd(ns, keys):
     """Update Argparser namespace by prepending all the paths with CWD"""
-    if not _cwd:
+    if not _cwd and not _prefix:
         return
 
     if isinstance(keys, str):
@@ -40,9 +55,9 @@ def update_namespace_cwd(ns, keys):
             continue
 
         if isinstance(val, str):
-            ns.__dict__[key] = join(_cwd, val)
+            ns.__dict__[key] = get_path(val)
         elif isinstance(val, Iterable):
-            ns.__dict__[key] = map(lambda s: join(_cwd, s), val)
+            ns.__dict__[key] = map(get_path, val)
         else:
             raise Exception('Unexpected value {!s} type: {}. Should be string or list of strings.'.format(val, type(val).__name__))
 
