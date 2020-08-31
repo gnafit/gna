@@ -45,7 +45,7 @@ class GNADot(object):
         self.joints = kwargs.pop('joints', False)
         ns = kwargs.pop('namespace', None)
 
-        include_only=kwargs.pop('include_only')
+        include_only=kwargs.pop('include_only', None)
 
         self.subgraphs = dict()
 
