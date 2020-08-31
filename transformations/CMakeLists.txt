@@ -33,6 +33,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/FakeGSLFunction.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
+  transformations/detector/EnergyResolutionInput.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
@@ -226,6 +227,7 @@ set(TRANSFORMATION_HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyResolutionInput.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
   Cherenkov_Borexino.hh
