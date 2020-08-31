@@ -446,13 +446,13 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 #
                 anuspec_hm = OrderedDict(
-                        bundle = dict(name='reactor_anu_spectra', version='v05'),
+                        bundle = dict(name='reactor_anu_spectra', version='v06'),
                         name = 'anuspec',
                         filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
                         objectnamefmt = 'HuberMuellerFlux_{isotope}',
-                        free_params=False, # enable free spectral model
+                        spectral_parameters='fixed',
                         varmode='log',
-                        varname='anue_weight_{index:02d}',
+                        varname='anue_weight_{index:04d}',
                         ns_name='spectral_weights',
                         edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                         ),
