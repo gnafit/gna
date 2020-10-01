@@ -88,12 +88,13 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
+            ['rt', 'reactors_tao', ['TS1']],
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names),
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] ),
         ]
         if self.opts.collapse:
-            self.nidx[1][2] = self.nidx[1][2][:1]
+            self.nidx[1][2] = self.nidx[1][2][6:7]
             self.nidx[2][2] = self.nidx[2][2][:1]
         self.nidx = NIndex.fromlist(self.nidx)
 
@@ -226,7 +227,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 # Total observation
                 #
                 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options),
-                'juno_variance = staterr2(observation) + bkg_shape_variance'
+                'juno_variance = staterr2(observation) + bkg_shape_variance',
+                #
+                # TAO reactor part
+                #
                 ]
 
     def parameters(self):
@@ -443,7 +447,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         default   = 0
                         ),
                 #
-                #
+                # Reactor antineutrino spectrum
                 #
                 anuspec_hm = OrderedDict(
                         bundle = dict(name='reactor_anu_spectra', version='v06'),

@@ -7,6 +7,7 @@ from collections import OrderedDict
 from tools.classwrapper import ClassWrapper
 import gna.env
 from tabulate import tabulate
+from packages.env.lib.cwd import update_namespace_cwd
 
 class NamespaceWrapper(ClassWrapper):
     def __new__(cls, obj, *args, **kwargs):
@@ -41,6 +42,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', nargs='+', default=[], help='output file')
 
     def init(self):
+        update_namespace_cwd(self.opts, 'output')
         try:
             self.exp = self.env.parts.exp[self.opts.exp]
         except Exception:
@@ -49,7 +51,10 @@ class cmd(basecmd):
         self.namespace = self.exp.namespace
         self.context   = self.exp.context
         self.outputs   = self.exp.context.outputs
-        self.observation = self.outputs.observation.AD1
+        try:
+            self.observation = self.outputs.observation.juno
+        except KeyError:
+            self.observation = self.outputs.observation.AD1
 
         self.init_variables()
 
