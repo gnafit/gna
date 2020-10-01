@@ -448,7 +448,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 anuspec_hm = OrderedDict(
                         bundle = dict(name='reactor_anu_spectra', version='v06'),
                         name = 'anuspec',
-                        filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                         objectnamefmt = 'HuberMuellerFlux_{isotope}',
                         spectral_parameters='fixed',
                         varmode='log',
@@ -458,7 +458,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         ),
                 offeq_correction = OrderedDict(
                         bundle = dict(name='reactor_offeq_spectra', version='v05', major=''),
-                        offeq_data = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        offeq_data = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                         objectnamefmt = 'NonEq_FluxRatio',
                         relsigma = 0.3,
                         ),
@@ -472,7 +472,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         ),
                 snf_correction = OrderedDict(
                         bundle = dict(name='reactor_snf_spectra', version='v05', major='r'),
-                        snf_average_spectra = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        snf_average_spectra = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                         objectname = 'SNF_FluxRatio'
                         ),
                 lsnl = OrderedDict(
@@ -484,7 +484,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                             ('pull2', 'positronScintNLpull2'),
                             ('pull3', 'positronScintNLpull3'),
                             ]),
-                        filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                        filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                         edges      = 'evis_edges',
                         extrapolation_strategy = 'extrapolate',
                         nonlin_range = (0.95, 12.),
@@ -511,7 +511,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 bkg_spectra = OrderedDict(
                     bundle    = dict(name='root_histograms_v05'),
-                    filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_6_26.root',
+                    filename  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                     formats = ['AccBkgHistogramAD',           'Li9BkgHistogramAD',       'FnBkgHistogramAD',       'AlphaNBkgHistogramAD',   'GeoNuTh232'                 , 'GeoNuU238'],
                     names   = ['acc_spectrum',                'lihe_spectrum',           'fastn_spectrum',         'alphan_spectrum',        'geonu_Th232_spectrum'       , 'geonu_U238_spectrum'],
                     labels  = ['Accidentals|(norm spectrum)', '9Li/8He|(norm spectrum)', 'Fast n|(norm spectrum)', 'AlphaN|(norm spectrum)', 'GeoNu Th232|(norm spectrum)', 'GeoNu U238|(norm spectrum)'],
