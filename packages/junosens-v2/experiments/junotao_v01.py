@@ -23,7 +23,7 @@ Derived from:
     - [2020.08] juno_sensitivity_v03
 
 Changes since previous implementation [juno_sensitivity_v03_common]:
-
+    - [2020.10.01] Refactor formula in ordre to detach JUNO specific constants
 
 """
 
@@ -88,7 +88,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
             ('d', 'detector',    [self.detectorname]),
             ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
-            ['rt', 'reactors_tao', ['TS1']],
+            ('rt', 'reactors_tao', ['TS1']),
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
             ('s', 'subdetector', self.subdetectors_names),
             ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] ),
@@ -149,8 +149,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 'baseline_tao_m',
                 'baseline[d,r]',
                 'livetime=bracket(daq_years*seconds_in_year)',
+                'livetime_tao=bracket(daq_years_tao*seconds_in_year)',
                 'conversion_factor',
                 'efflivetime = bracket(eff * livetime)',
+                'efflivetime_tao = bracket(eff_tao * livetime_tao)',
                 # 'geonu_scale = eff * livetime[d] * conversion_factor * target_protons',
                 #
                 # Neutrino energy
@@ -174,9 +176,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Reactor part
                 #
-                'numerator = global_norm * efflivetime * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
+                'numerator = global_norm * duty_cycle * thermal_power_scale[r] * thermal_power_nominal[r] * '
                              'fission_fractions_scale[r,i] * fission_fractions_nominal[r,i]() * '
-                             'conversion_factor * target_protons',
+                             'conversion_factor',
                 'isotope_weight = energy_per_fission_scale[i] * energy_per_fission[i] * fission_fractions_scale[r,i]',
                 'energy_per_fission_avg = sum[i]| isotope_weight * fission_fractions_nominal[r,i]()',
                 'power_livetime_factor = numerator / energy_per_fission_avg',
@@ -187,7 +189,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 'energy_per_fission_avg_nominal = sum[i] | energy_per_fission[i] * fission_fractions_nominal[r,i]()',
                 'snf_plf_daily = conversion_factor * duty_cycle * thermal_power_nominal[r] * fission_fractions_nominal[r,i]() / energy_per_fission_avg_nominal',
                 'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i]()',
-                'snf_in_reac = snf_norm * efflivetime * target_protons * snf_correction(enu(), nominal_spec_per_reac)',
+                'snf_in_reac = snf_norm * snf_correction(enu(), nominal_spec_per_reac)',
                 #
                 # Backgrounds
                 #
@@ -200,19 +202,18 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # IBD part
                 #
+                '''anuspec_rd_full = reactor_active_norm
+                                        *( sum[i]| power_livetime_factor
+                                                   *offeq_correction[i,r](enu(), anuspec[i]())
+                                        )
+                                        + snf_in_reac''',
                 '''ibd={eres} {lsnl}
                     kinint2(
                         DistortSpectrum|
                             sum[r](
                                 (
-                                    baselineweight[r,d]
-                                    * ( reactor_active_norm
-                                        *( sum[i]| power_livetime_factor
-                                                   *
-                                                       offeq_correction[i,r](enu(), anuspec[i]())
-                                        )
-                                        + snf_in_reac
-                                    )
+                                    (baselineweight[r,d]*efflivetime*target_protons)
+                                    * anuspec_rd_full
                                     * {oscprob}
                                 )*
                                 bracket(
@@ -231,6 +232,11 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # TAO reactor part
                 #
+                'anuspec_rd_full_tao = select1[r,"TS1"]| anuspec_rd_full',
+                '''ibd_tao = DistortSpectrumTAO|
+                                sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao)),
+                                SpectralDistortion
+                             '''
                 ]
 
     def parameters(self):
@@ -293,6 +299,15 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                     skip = ('percent',),
                     state= 'fixed'
                     ),
+                baselines_tao = OrderedDict(
+                        bundle = dict(name='reactor_baselines', version='v03', major=('rt', ''), names=lambda s: s+'_tao'),
+                        reactors  = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/reactor_baselines_tao.yaml',
+                        reactors_key = 'reactor_baseline',
+                        detectors = {None: 0.0},
+                        unit    = 'm',
+                        label   = "Baseline between TAO and {reactor}, km",
+                        label_w = "1/(4πL²) for TAO and {reactor}, cm⁻²"
+                        ),
                 # Detector and reactor
                 norm = OrderedDict(
                         bundle = dict(name="parameters", version = "v01"),
@@ -442,7 +457,18 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 condproduct = OrderedDict(
                         bundle = dict(name='conditional_product', version='v01', major=(),
                                       names={'condition': 'distorction_wc_on'}),
-                        instances = { 'DistortSpectrum': '{{Optionally distorted spectrum | worst case}}' },
+                        instances = {
+                            'DistortSpectrum': '{{Optionally distorted spectrum | worst case}}',
+                            },
+                        condlabel = 'Worst case distortion switch',
+                        default   = 0
+                        ),
+                condproduct_tao = OrderedDict(
+                        bundle = dict(name='conditional_product', version='v01', major=(),
+                                      names={'condition': 'distorction_wc_on'}),
+                        instances = {
+                            'DistortSpectrumTAO': '{{Optionally distorted spectrum [TAO] | worst case}}',
+                            },
                         condlabel = 'Worst case distortion switch',
                         default   = 0
                         ),
@@ -718,9 +744,12 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         livetime_factor_snf:
             expr: 'efflivetime*snf_norm*target_protons'
             label: 'Livetime/mass factor for SNF, b.fit'
-        baselinewight_switch:
+        baselineweight_switch:
             expr: 'baselineweight*reactor_active_norm'
             label: 'Baselineweight (toggle) for {reactor}-\\>{detector}'
+        detector_reactor_factor:
+            expr: baselineweight*efflivetime*target_protons
+            label: 'Baselineweight*efflivetime*nprotons'
         energy_per_fission_fraction:
             expr: 'fission_fractions_nominal*isotope_weight'
             label: Fractional energy per fission
@@ -808,6 +837,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
           expr:
           - 'baselineweight_switch*reac_spectrum_oscillated'
           - 'baselineweight*reac_spectrum_oscillated'
+          - 'detector_reactor_factor*reac_spectrum_oscillated'
           label: '{reactor} spectrum at {detector}'
         observable_spectrum_reac:
           expr: 'ibd_xsec_rescaled*reac_spectrum_at_detector'
