@@ -80,18 +80,31 @@ class Operation(TCall,NestedTransformation):
 
         with nextlevel():
             printl_debug('def (operation)', str(self))
+
+            nitems = self.nindex_to_reduce.get_size() * len(self.objects)
             with nextlevel():
                 for freeidx in self.nindex.iterate():
-                    tobj, newout = self.new_tobject(freeidx)
-                    context.set_output(newout, self.name, freeidx)
-                    with nextlevel():
+                    if nitems>1:
+                        # In case there are multiple elements: produce sum/product/etc
+                        tobj, newout = self.new_tobject(freeidx)
+                        context.set_output(newout, self.name, freeidx)
+                        with nextlevel():
+                            for opidx in self.nindex_to_reduce.iterate():
+                                fullidx = freeidx+opidx
+                                for i, obj in enumerate(self.objects):
+                                    output = obj.get_output(fullidx, context)
+                                    inp  = tobj.add_input('%02d'%i)
+                                    context.set_input(inp, self.name, fullidx, clone=i)
+                                    output >> inp
+                    elif nitems==1:
+                        # In case there is only one element: pass it as is
                         for opidx in self.nindex_to_reduce.iterate():
                             fullidx = freeidx+opidx
-                            for i, obj in enumerate(self.objects):
-                                output = obj.get_output(fullidx, context)
-                                inp  = tobj.add_input('%02d'%i)
-                                context.set_input(inp, self.name, fullidx, clone=i)
-                                output >> inp
+                            output = self.objects[0].get_output(fullidx, context)
+                            context.set_output(output, self.name, freeidx)
+                            break
+                    else:
+                        raise Exception('Index is not iterable')
 
 class OSum(Operation):
     def __init__(self, *indices, **kwargs):
@@ -216,6 +229,83 @@ class Accumulate(IndexedContainer, Variable):
             self.arrsums.append(arrsum)
 
         self.bound = True
+
+class OSelect1(TCall):
+    """Substitute a single index with another"""
+    __metaclass__ = OperationMeta
+    call_lock=False
+    order_from=None
+    def __init__(self, index, value, **kwargs):
+        self.operation='select1'
+        index.set_current(value)
+        self._index_to_reduce = index
+        self._nindex_to_reduce=None
+        self._index_value = value
+        TCall.__init__(self, undefinedname)
+
+    def __str__(self):
+        return '{}{{{:s}}}'.format(Indexed.__str__(self), self._index_to_reduce.short)
+
+    def __call__(self, *args):
+        if self.call_lock:
+            raise Exception('May call Operation only once')
+        self.call_lock=True
+
+        self.set_objects(*args)
+        self.set_indices(*args, ignore=self._index_to_reduce.short)
+        self._nindex_to_reduce = NIndex(self._index_to_reduce, order=self.nindex.order)
+        return self
+
+    def guessname(self, lib={}, save=False):
+        for o in self.objects:
+            o.guessname(lib, save)
+
+        if self.name is not undefinedname:
+            if not self.label:
+                for cfg in lib.values():
+                    if cfg['name']!=self.name:
+                        continue
+                    newlabel = cfg.get('label', None)
+                    if newlabel:
+                        self.label=newlabel
+            return self.name
+
+        cname = TCall.guessname(self, lib=lib)
+        newname='{}:{}|{}'.format(self.operation, self._indices_to_replace[1].ident(), cname)
+
+        label=None
+
+        if newname in lib:
+            libentry = lib[newname]
+            newname = libentry['name']
+            label   = libentry.get('label', None)
+        else:
+            newname = '{}{}'.format(self.text_operator, cname)
+
+        if save:
+            self.name = newname
+            self.set_label(label)
+
+        return newname
+
+    @methodname
+    def require(self, context):
+        IndexedContainer.require(self, context)
+
+    @call_once
+    def bind(self, context):
+        printl_debug('bind (operation) {}:'.format(type(self).__name__), str(self) )
+
+        with nextlevel():
+            IndexedContainer.bind(self, context, connect=False)
+
+        with nextlevel():
+            printl_debug('def (operation)', str(self))
+            with nextlevel():
+                for freeidx in self.nindex.iterate():
+                    idxin = freeidx + self._nindex_to_reduce
+                    output = self.objects[0].get_output(idxin, context)
+                    context.set_output(output, self.name, freeidx)
 
 def bracket(obj):
     obj.expandable = False
