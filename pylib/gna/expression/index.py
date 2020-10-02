@@ -81,6 +81,11 @@ class Index(object):
             self.slave.current=self.group[self.current]
 
     def set_current(self, c):
+        if not c in self.variants:
+            raise Exception("Unable to set {} as index value of {}".format(c, self.name))
+        self._set_current(c)
+
+    def _set_current(self, c):
         self.current = c
         if self.slave:
             self.slave.current=self.group[self.current]
@@ -99,7 +104,7 @@ class Index(object):
 
         for var in variants:
             ret = Index(self)
-            ret.set_current(var)
+            ret._set_current(var)
             yield ret
 
     __iter__ = iterate
@@ -415,6 +420,8 @@ class NIndex(object):
         return self.make_inheritor(*majors), self.make_inheritor(*minors)
 
     def get_current(self, short):
+        if not short:
+            return None
         return self.indices[short].current
 
     def get_index_names(self):
