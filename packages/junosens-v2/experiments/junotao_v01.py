@@ -208,7 +208,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                                         )
                                         + snf_in_reac''',
                 '''ibd={eres} {lsnl}
-                    kinint2(
+                    kinint2_juno(
                         DistortSpectrum|
                             sum[r](
                                 (
@@ -233,9 +233,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 # TAO reactor part
                 #
                 'anuspec_rd_full_tao = select1[r,"TS1"]| anuspec_rd_full',
-                '''ibd_tao = DistortSpectrumTAO|
+                '''ibd_tao = kinint2_tao| DistortSpectrumTAO(
                                 sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao)),
                                 SpectralDistortion
+                                )
                              '''
                 ]
 
@@ -344,12 +345,16 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # General
                 kinint2 = OrderedDict(
-                    bundle    = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
+                    bundle    = dict(name='integral_2d1d', version='v04'),
                     variables = ('evis', 'ctheta'),
                     edges     = edges,
                     #  edges   = np.linspace(0.0, 12.001, 601),
                     xorders   = 4,
                     yorder    = 5,
+                    instances = {
+                        'kinint2_juno': 'JUNO integral',
+                        'kinint2_tao': {'label': 'TAO integral', 'noindex': True},
+                        }
                     ),
                 rebin = OrderedDict(
                     bundle = dict(name='rebin', version='v04', major=''),
@@ -686,7 +691,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         if 'ibd_noeffects_bf' in outputs:
             fine = outputs.ibd_noeffects_bf.juno
         else:
-            fine = outputs.kinint2.juno
+            fine = outputs.kinint2_juno.juno
 
         if 'lsnl' in self.opts.energy_model:
             fine = outputs.lsnl.juno
@@ -703,7 +708,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         # Force calculation of the stat errors
         outputs.juno_variance.juno.data()
 
-        futurens[(self.detectorname, 'initial')] = outputs.kinint2.juno
+        futurens[(self.detectorname, 'initial')] = outputs.kinint2_juno.juno
         futurens[(self.detectorname, 'fine')] = fine
         futurens[(self.detectorname, 'final')] = outputs.observation.juno
         if 'lsnl' in self.opts.energy_model:
@@ -860,10 +865,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
           - 'sum:c|eres_weighted'
           label: 'Observed IBD spectrum | {detector}'
         ibd_noeffects:
-          expr: 'kinint2'
+          expr: 'kinint2_juno'
           label: 'Observed IBD spectrum (no effects) | {detector}'
         ibd_noeffects_bf:
-          expr: 'kinint2*shape_norm'
+          expr: 'kinint2_juno*shape_norm'
           label: 'Observed IBD spectrum (best fit, no effects) | {detector}'
         fission_fractions:
           expr: 'fission_fractions[r,i]()'
@@ -900,7 +905,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
           expr: 'bkg+ibd'
           label: 'Observed spectrum | {detector}'
         iso_spectrum_w:
-          expr: 'kinint2*power_livetime_factor'
+          expr: 'kinint2_juno*power_livetime_factor'
         reac_spectrum:
           expr: 'sum:i|iso_spectrum_w'
         reac_spectrum_w:
