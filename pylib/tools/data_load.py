@@ -3,7 +3,7 @@
 from os.path import splitext
 import ROOT as R
 from tools.root_helpers import TFileContext
-from mpl_tools.root2numpy import get_buffers_graph_or_hist1
+from mpl_tools.root2numpy import get_buffers_auto
 import numpy as np
 
 def read_root(filename, name, **kwargs):
@@ -15,7 +15,7 @@ def read_root(filename, name, **kwargs):
         if not o:
             raise IOError("Can not read object `{}` from file `{}`"%(name, filename) )
 
-        return get_buffers_graph_or_hist1(o)
+        return get_buffers_auto(o)
 
 def read_dat(filename, **kwargs):
     return np.loadtxt(filename, unpack=True)
