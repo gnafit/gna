@@ -228,14 +228,17 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 'observation=norm*{ibd} {accidentals} {lihe} {alphan} {fastn} {geonu}'.format(**formula_options),
                 'juno_variance = staterr2(observation) + bkg_shape_variance',
                 #
-                # TAO reactor part
+                # TAO part
                 #
+                'eres_matrix_tao| evis_hist',
                 'anuspec_rd_full_tao = select1[r,"TS1"]| anuspec_rd_full',
-                '''ibd_tao = eleak_tao|
-                               kinint2_tao| DistortSpectrumTAO(
-                                 sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao * cross_section)),
-                                 SpectralDistortion
-                                )
+                '''ibd_tao = eres_tao|
+                               eleak_tao|
+                                 kinint2_tao|
+                                   DistortSpectrumTAO(
+                                     sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao * cross_section)),
+                                     SpectralDistortion
+                                   )
                              '''
                 ]
 
@@ -391,11 +394,16 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                                'staterr2': 'Stat. errors (snapshot)'}
                     ),
                 # TAO detector
-                eleak_tao = NestedDict(
+                eleak_tao = OrderedDict(
                     bundle     = dict(name='detector_energy_leakage_root', version='v01', names=lambda s: s+'_tao'),
                     filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
                     matrixname = 'TAO_response_matrix_25',
                     ),
+                eres_tao = OrderedDict(
+                        bundle = dict(name='detector_eres_inputsigma', version='v01', major='', names=lambda s: s+'_tao'),
+                        filename = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/files/tao_eres_sigma_fine_1200.dat',
+                        expose_matrix = True
+                        ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(
                         bundle = dict(name='xsec_ibd', version='v02'),
@@ -716,6 +724,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         futurens[('juno', 'initial')] = outputs.kinint2_juno.juno
         futurens[('tao', 'initial')]  = outputs.kinint2_tao
         futurens[('tao', 'edep')]     = outputs.eleak_tao
+        futurens[('tao', 'evis')]     = outputs.eres_tao
         futurens[('juno', 'fine')] = fine
         futurens[('juno', 'final')] = outputs.observation.juno
         if 'lsnl' in self.opts.energy_model:
