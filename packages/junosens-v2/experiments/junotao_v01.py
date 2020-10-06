@@ -727,6 +727,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         futurens[('tao', 'evis')]     = outputs.eres_tao
         futurens[('juno', 'fine')] = fine
         futurens[('juno', 'final')] = outputs.observation.juno
+
         if 'lsnl' in self.opts.energy_model:
             futurens[('juno', 'lsnl')] = outputs.lsnl.juno
 
