@@ -27,8 +27,6 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
 
 """
 
-    detectorname = 'juno'
-
     @classmethod
     def initparser(cls, parser, namespace):
         parser.add_argument( '--dot', help='write graphviz output' )
@@ -85,7 +83,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         self.reactors = ['YJ1', 'YJ2', 'YJ3', 'YJ4', 'YJ5', 'YJ6', 'TS1', 'TS2', 'DYB', 'HZ']
 
         self.nidx = [
-            ('d', 'detector',    [self.detectorname]),
+            ('d', 'detector',    ['juno']),
             ['r', 'reactor',     self.reactors],
             ['i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']],
             ('rt', 'reactors_tao', ['TS1']),
@@ -207,6 +205,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                                                    *offeq_correction[i,r](enu(), anuspec[i]())
                                         )
                                         + snf_in_reac''',
+                '''cross_section = bracket(
+                                    ibd_xsec(enu(), ctheta())*
+                                    jacobian(enu(), ee(), ctheta())
+                                )''',
                 '''ibd={eres} {lsnl}
                     kinint2_juno(
                         DistortSpectrum|
@@ -215,11 +217,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                                     (baselineweight[r,d]*efflivetime*target_protons)
                                     * anuspec_rd_full
                                     * {oscprob}
-                                )*
-                                bracket(
-                                    ibd_xsec(enu(), ctheta())*
-                                    jacobian(enu(), ee(), ctheta())
-                                )
+                                )*cross_section
                             ),
                             SpectralDistortion
                     ) {shape_norm}
@@ -233,9 +231,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 # TAO reactor part
                 #
                 'anuspec_rd_full_tao = select1[r,"TS1"]| anuspec_rd_full',
-                '''ibd_tao = kinint2_tao| DistortSpectrumTAO(
-                                sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao)),
-                                SpectralDistortion
+                '''ibd_tao = eleak_tao|
+                               kinint2_tao| DistortSpectrumTAO(
+                                 sum[rt]( bracket((baselineweight_tao[rt]*efflivetime_tao*target_protons_tao) * anuspec_rd_full_tao * cross_section)),
+                                 SpectralDistortion
                                 )
                              '''
                 ]
@@ -390,6 +389,12 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                     bundle = dict(name='trans_snapshot', version='v01', major=''),
                     instances={'sumsq_snapshot': 'Bkg shape variance snapshot, not corrected|{autoindex}',
                                'staterr2': 'Stat. errors (snapshot)'}
+                    ),
+                # TAO detector
+                eleak_tao = NestedDict(
+                    bundle     = dict(name='detector_energy_leakage_root', version='v01', names=lambda s: s+'_tao'),
+                    filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/JUNOInputs2020_8_14.root',
+                    matrixname = 'TAO_response_matrix_25',
                     ),
                 # Oscillations and detection
                 ibd_xsec = OrderedDict(
@@ -702,20 +707,22 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         if 'multieres' in self.opts.energy_model:
             fine = outputs.ibd.juno
 
-        futurens[('variance', self.detectorname, 'stat')]     = outputs.staterr2.juno
-        futurens[('variance', self.detectorname, 'bkgshape')] = outputs.bkg_shape_variance.juno
-        futurens[('variance', self.detectorname, 'full')]     = outputs.juno_variance.juno
+        futurens[('variance', 'juno', 'stat')]     = outputs.staterr2.juno
+        futurens[('variance', 'juno', 'bkgshape')] = outputs.bkg_shape_variance.juno
+        futurens[('variance', 'juno', 'full')]     = outputs.juno_variance.juno
         # Force calculation of the stat errors
         outputs.juno_variance.juno.data()
 
-        futurens[(self.detectorname, 'initial')] = outputs.kinint2_juno.juno
-        futurens[(self.detectorname, 'fine')] = fine
-        futurens[(self.detectorname, 'final')] = outputs.observation.juno
+        futurens[('juno', 'initial')] = outputs.kinint2_juno.juno
+        futurens[('tao', 'initial')]  = outputs.kinint2_tao
+        futurens[('tao', 'edep')]     = outputs.eleak_tao
+        futurens[('juno', 'fine')] = fine
+        futurens[('juno', 'final')] = outputs.observation.juno
         if 'lsnl' in self.opts.energy_model:
-            futurens[(self.detectorname, 'lsnl')] = outputs.lsnl.juno
+            futurens[('juno', 'lsnl')] = outputs.lsnl.juno
 
         if 'eres' in self.opts.energy_model:
-            futurens[(self.detectorname, 'eres')] = outputs.eres.juno
+            futurens[('juno', 'eres')] = outputs.eres.juno
 
         k0 = ('extra',)
         for k, v in self.context.outputs.items(nested=True):
