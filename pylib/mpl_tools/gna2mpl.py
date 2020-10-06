@@ -215,7 +215,7 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
 
     return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs )
 
-def get_2d_buffer(output, transpose=False, mask=None):
+def get_2d_buffer(output, transpose=False, mask=None, preprocess=None):
     if isinstance(output, N.ndarray):
         buf = output
     else:
@@ -226,6 +226,9 @@ def get_2d_buffer(output, transpose=False, mask=None):
 
     if transpose:
         buf = buf.T
+
+    if preprocess:
+        buf = preprocess(buf)
 
     return buf
 
@@ -348,10 +351,11 @@ def matshow(output, *args, **kwargs):
     ifNd(output, 2)
 
     mask = kwargs.pop( 'mask', None )
+    preprocess = kwargs.pop( 'preprocess', None )
     colorbar = kwargs.pop( 'colorbar', None )
     kwargs.setdefault( 'fignum', False )
 
-    buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask)
+    buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask, preprocess=preprocess)
 
     res = P.matshow(buf, **kwargs)
 
