@@ -49,6 +49,8 @@ class cmd(basecmd):
                 raise Exception('Unable to get pargroup {}'.format(self.opts.cov_parameters))
 
             cov_parameters = list(cov_parameters.values())
+        else:
+            cov_parameters = []
 
         if self.opts.observables:
             observables = list(self.__extract_obs(self.opts.observables))
