@@ -11,42 +11,19 @@ from collections import OrderedDict
 
 class exp(baseexp):
     """
-JUNO experiment implementation v03 (common) -> current
+JUNO experiment implementation v03a (binning)
 
-This version is using common inputs
+This is a clone of v03 used to study the binning effect, reported in #130
 
 Derived from:
     - [2019.12] Daya Bay model from dybOscar and GNA
     - [2019.12] juno_chengyp
     - [2020.04] juno_sensitivity_v01
     - [2020.06] juno_sensitivity_v02
+    - [2020.10] juno_sensitivity_v03_common
 
-Changes since previous implementation [juno_sensitivity_v02]:
-    - Switch to dm32 (usin scan minimizer)
-    - WIP: geo-neutrino
-    - Common inputs from
-      * Reactors
-        + Power, no TS3/TS4
-        + WIP: Power, HZ factor ((max(y-2,0) + max(y-3,0))/(y*2)) - not variable
-        + Duty cycle: 11/12
-      * DAQ
-        + 6 years
-        + # 8 years (6 times no TS3/4)
-      * Oscillation parameters:
-        + Now configured via the bundle, not physlib
-
-Implements:
-    - Reactor antineutrino flux:
-      * Spectra:
-        + Huber+Mueller
-        + Free
-      * SNF contribution
-      * Off-equilibrium corrections (Mueller)
-    - Vacuum 3nu oscillations
-    - Evis mode with 2d integration (similary to dybOscar)
-    - LSNL
-    - Detector energy resolution
-
+Changes since previous implementation [juno_sensitivity_v03_common]:
+    - configurable binning
 """
 
     detectorname = 'AD1'
@@ -72,6 +49,7 @@ Implements:
         binning=parser.add_argument_group('binning', description='Binning related options')
         binning.add_argument('--final-emin', type=float, help='Final binning Emin')
         binning.add_argument('--final-emax', type=float, help='Final binning Emax')
+        binning.add_argument('--fine-step', type=float, help='Fine binning step')
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum'], default='vacuum', help='oscillation probability type')
@@ -233,7 +211,7 @@ Implements:
             ns[par].setFree()
 
     def init_configuration(self):
-        edges    = np.arange(0.0, 12.001, 0.01)
+        edges    = np.arange(0.0, 12+1.e-8, self.opts.fine_step or 0.01)
         edges_final = np.concatenate( (
                                     [0.8],
                                     np.arange(1, 6.0, 0.02),
