@@ -22,82 +22,88 @@ def make_rebin_matrices_2d(shapein, ntogroup):
 
     return Kleft, Kright
 
-def check1d():
+def check1d(verbose):
     sizein=12
     ngroup=4
 
     K = make_rebin_matrix_1d(sizein, ngroup)
     print(timeit.timeit(lambda: make_rebin_matrix_1d(sizein, ngroup), number=100))
-    print(f'Size in: {sizein}')
-    print(f'N to group: {ngroup}')
-    print(f'Shape K: {K.shape}')
-    print(f'K: {K!s}')
-    print()
+    if verbose:
+        print(f'Size in: {sizein}')
+        print(f'N to group: {ngroup}')
+        print(f'Shape K: {K.shape}')
+        print(f'K: {K!s}')
+        print()
 
     arrin1  = np.ones((1,sizein), dtype='d')
-    print(f'Shape1 in: {arrin1.shape}')
 
     arrout1 = np.matmul(arrin1, K)
-    print(f'Shape1 out: {arrout1.shape}')
-    print(f'Arr1 in: {arrin1!s}')
-    print(f'Arr1 out: {arrout1!s}')
-    print()
 
     arrin2  = np.ones((3,sizein), dtype='d')
     arrin2[1]*=2
     arrin2[2]*=3
-    print(f'Shape2 in: {arrin2.shape}')
 
     arrout2 = np.matmul(arrin2, K)
-    print(f'Shape2 out: {arrout2.shape}')
-    print(f'Arr2 in: {arrin2!s}')
-    print(f'Arr2 out: {arrout2!s}')
-    print()
 
-def check2d():
+    if verbose:
+        print(f'Shape1 in: {arrin1.shape}')
+        print(f'Shape1 out: {arrout1.shape}')
+        print(f'Arr1 in: {arrin1!s}')
+        print(f'Arr1 out: {arrout1!s}')
+        print()
+        print(f'Shape2 in: {arrin2.shape}')
+        print(f'Shape2 out: {arrout2.shape}')
+        print(f'Arr2 in: {arrin2!s}')
+        print(f'Arr2 out: {arrout2!s}')
+        print()
+
+def check2d(verbose):
     shapein=(6, 4)
     ngroup=(3, 2)
 
     Kleft, Kright = make_rebin_matrices_2d(shapein, ngroup)
     print(timeit.timeit(lambda: make_rebin_matrices_2d(shapein, ngroup), number=100))
 
-    print(f'N to group: {ngroup}')
-    print(f'Shape K left: {Kleft.shape}')
-    print(f'Shape in: {shapein}')
-    print(f'Shape K right: {Kright.shape}')
-    print(f'K left: {Kleft}')
-    print(f'K right: {Kright}')
-    print()
+    if verbose:
+        print(f'N to group: {ngroup}')
+        print(f'Shape K left: {Kleft.shape}')
+        print(f'Shape in: {shapein}')
+        print(f'Shape K right: {Kright.shape}')
+        print(f'K left: {Kleft}')
+        print(f'K right: {Kright}')
+        print()
 
     arrin1  = np.arange(np.prod(shapein), dtype='d').reshape(shapein)
-    print(f'Shape1 in: {arrin1.shape}')
 
     arrout1 = np.matmul(np.matmul(Kleft, arrin1), Kright)
-    print(f'Shape1 out: {arrout1.shape}')
-    print(f'Arr1 in: \n{arrin1!s}')
-    print(f'Arr1 out: \n{arrout1!s}')
-    print()
 
     arrin2 = np.ones(shapein, dtype='d')
     arrin2[:3, :2] = 1.0
     arrin2[:3, 2:] = 2.0
     arrin2[3:, :2] = 3.0
     arrin2[3:, 2:] = 4.0
-    print(f'Shape2 in: {arrin2.shape}')
 
     arrout2 = np.matmul(np.matmul(Kleft, arrin2), Kright)
-    print(f'Shape2 out: {arrout2.shape}')
-    print(f'Arr2 in: \n{arrin2!s}')
-    print(f'Arr2 out: \n{arrout2!s}')
-    print()
+
+    if verbose:
+        print(f'Shape1 in: {arrin1.shape}')
+        print(f'Shape1 out: {arrout1.shape}')
+        print(f'Arr1 in: \n{arrin1!s}')
+        print(f'Arr1 out: \n{arrout1!s}')
+        print()
+        print(f'Shape2 in: {arrin2.shape}')
+        print(f'Shape2 out: {arrout2.shape}')
+        print(f'Arr2 in: \n{arrin2!s}')
+        print(f'Arr2 out: \n{arrout2!s}')
+        print()
 
 def main(args):
-    check1d()
-    check2d()
+    check1d(**args.__dict__)
+    check2d(**args.__dict__)
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    # parser.add_argument( 'input' )
+    parser.add_argument('-v', '--verbose', action='store_true', help='print data')
 
-    main( parser.parse_args() )
+    main(parser.parse_args())
