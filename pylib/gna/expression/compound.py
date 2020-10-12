@@ -9,6 +9,7 @@ class IndexedContainer(object):
     operator='.'
     text_operator='_period_'
     left, right = '', ''
+    prefix = ''
     def __init__(self, *objects):
         self.set_objects(*objects)
 
@@ -23,7 +24,7 @@ class IndexedContainer(object):
                 for sub in  o.walk(yieldself, self.operator.strip()):
                     yield sub
 
-    def set_operator(self, operator, left=None, right=None, text=None):
+    def set_operator(self, operator, left=None, right=None, text=None, prefix=None):
         self.operator=operator
         if left is not None:
             self.left = left
@@ -31,6 +32,8 @@ class IndexedContainer(object):
             self.right = right
         if text is not None:
             self.text_operator=text
+        if prefix is not None:
+            self.prefix = prefix
 
     def guessname(self, lib={}, save=False):
         for o in self.objects:
@@ -46,11 +49,11 @@ class IndexedContainer(object):
                         self.label=newlabel
             return self.name
 
-        newname = '{expr}'.format(
+        newname = '{prefix}{expr}'.format( prefix=self.prefix,
                     expr = self.operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
                     )
 
-        newnameu = '{expr}'.format(
+        newnameu = '{prefix}{expr}'.format( prefix=self.prefix,
                     expr = self.operator.strip().join(o.ident(lib=lib, save=save) for o in self.objects),
                      )
 
