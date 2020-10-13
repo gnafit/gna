@@ -29,6 +29,7 @@ def cmp(a, b):
         print(diff)
 
 def rescale_to_matrix_a(edges_from, edges_to, **kwargs):
+    """Use only modified edges"""
     roundto = kwargs.pop( 'roundto', None )
     if not roundto is None:
         edges_from = np.round( edges_from, roundto )
@@ -45,16 +46,18 @@ def rescale_to_matrix_a(edges_from, edges_to, **kwargs):
     for j, (i1, i2) in enumerate(zip(i1s, i2s)):
         if i2<0 or i1>=edges_from.size or edges_to[j]<-1.e100: continue
         for i in range( i1, i2+1 ):
+            if not (0<=i<mat.shape[0] and 0<=j<mat.shape[1]):
+                continue
             l1 = max( edges_to[j],   edges_from[i] )
             l2 = min( edges_to[j+1], edges_from[i+1] )
             w  = (l2-l1)/widths[j]
 
-            if 0<=i<mat.shape[0] and 0<=j<mat.shape[1]:
-                mat[i,j] = w
+            mat[i,j] = w
 
     return mat
 
 def rescale_to_matrix_b(edges_from, centers_to, **kwargs):
+    """Use only modified centers"""
     roundto = kwargs.pop( 'roundto', None )
     if not roundto is None:
         edges_from = np.round(edges_from, roundto)
@@ -77,25 +80,73 @@ def rescale_to_matrix_b(edges_from, centers_to, **kwargs):
     for j, (i1, i2) in enumerate(zip(i1s, i2s)):
         if i2<0 or i1>=edges_from.size or centers_to[j]<-1.e100: continue
         for i in range( i1, i2+1 ):
+            if not (0<=i<mat.shape[0] and 0<=j<mat.shape[1]):
+                continue
             l1 = max( edges_to_left[j],  edges_from[i] )
             l2 = min( edges_to_right[j], edges_from[i+1] )
             w  = (l2-l1)/widths[j]
 
-            if 0<=i<mat.shape[0] and 0<=j<mat.shape[1]:
-                mat[i,j] = w
+            mat[i,j] = w
 
     return mat
+
+def rescale_to_matrix_c(edges_from, edges_to, centers_to, **kwargs):
+    """Use both modified edges and centers to do asymmetric scaling"""
+    roundto = kwargs.pop( 'roundto', None )
+    if not roundto is None:
+        edges_from = np.round( edges_from, roundto )
+        edges_to   = np.round( edges_to,   roundto )
+    skipv = kwargs.pop( 'skip_values', [] )
+    assert not kwargs
+
+    idx = np.searchsorted( edges_from, edges_to, side='right' )-1
+    widths_left  = 2.0*(centers_to-edges_to[:-1])
+    widths_right = 2.0*(edges_to[1:]-centers_to)
+
+    mat = np.zeros( shape=(edges_from.shape[0]-1, edges_from.shape[0]-1) )
+    i1s = np.maximum( 0, idx[:-1] )
+    i2s = np.minimum( idx[1:], edges_from.size-2 )
+    for j, (i1, i2) in enumerate(zip(i1s, i2s)):
+        if i2<0 or i1>=edges_from.size or edges_to[j]<-1.e100: continue
+        for i in range( i1, i2+1 ):
+            if not (0<=i<mat.shape[0] and 0<=j<mat.shape[1]):
+                continue
+
+            l1 = max( edges_to[j],   edges_from[i] )
+            l2 = min( edges_to[j+1], edges_from[i+1] )
+
+            center = centers_to[j]
+            if l2<=center:
+                w = (l2-l1)/widths_left[j]
+            elif l1>=center:
+                w = (l2-l1)/widths_right[j]
+            else:
+                w = (center-l1)/widths_left[j]
+                w+= (l2-center)/widths_right[j]
+
+            mat[i,j] = w
+
+    return mat
+
 
 edges  = np.array( [ -1.0,   1.0, 2.0, 3.0,  4.0,  5.0,  6.0,  7.0  ] )
 factor = np.array( [ -2e100, 0.8, 0.9, 0.95, 1.05, 1.10, 1.15, 1.20 ] )
 centers = 0.5*(edges[1:] + edges[:-1])
 
-factor_fcn = interp1d(edges[1:], edges[1:]*factor[1:], kind='cubic', bounds_error=False, fill_value=factor[0])
-centers_m = factor_fcn(centers)
-edges_m = factor_fcn(edges)
+conversion_fcn_direct  = interp1d(edges[1:], edges[1:]*factor[1:], kind='cubic', bounds_error=False, fill_value=factor[0])
+conversion_fcn_inverse = interp1d(edges[1:]*factor[1:], edges[1:], kind='cubic', bounds_error=False, fill_value=factor[0])
+centers_m = conversion_fcn_direct(centers)
+edges_m = conversion_fcn_direct(edges)
+
+edges_back = conversion_fcn_inverse(edges)
+
+print('Edges before:', edges)
+print('Edges after:', edges_m)
+print('Edges back:', edges_back)
 
 matp_a = rescale_to_matrix_a( edges, edges_m, roundto=3 )
 matp_b = rescale_to_matrix_b( edges, centers_m, roundto=3 )
+matp_c = rescale_to_matrix_c( edges, edges_m, centers_m, roundto=3 )
 
 pedges_m = C.Points(edges_m)
 pcenters = C.Points(centers)
@@ -105,20 +156,24 @@ nlA = C.HistNonlinearity(True)
 nlA.set(ntrue.hist, pedges_m)
 nlA.add_input()
 
-nlB = C.HistNonlinearityB(True)
-nlB.set(ntrue.hist, pcenters)
-nlB.add_input()
+# nlB = C.HistNonlinearityB(True)
+# nlB.set(ntrue.hist, pcenters)
+# nlB.add_input()
 
 mat_a = nlA.matrix.FakeMatrix.data()
 # mat_b = nlB.matrix.FakeMatrix.data()
 
-print( 'Mat A' )
+print( 'Mat A and its sum' )
 print( mat_a )
 print( mat_a.sum( axis=0 ) )
 
-# print( 'Mat B' )
-# print( mat_b )
-# print( mat_b.sum( axis=0 ) )
+print( 'Mat B and its sum' )
+print( matp_b )
+print( matp_b.sum( axis=0 ) )
+
+print( 'Mat C and its sum' )
+print( matp_c )
+print( matp_c.sum( axis=0 ) )
 
 cmp(mat_a, matp_a)
 
@@ -211,11 +266,39 @@ def plot_matrix(mat, title, suffix):
 
     savefig(opts.output, suffix='norm_'+suffix)
 
+def plot_edges():
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='', ylabel='', title='')
+    ax.minorticks_on()
+    ax.grid()
+
+    ax.plot(edges[1:],      edges_m[1:], 'o-', label='direct')
+    ax.plot(edges_back[1:], edges[1:],   'o-', label='inverse')
+    ax.plot(edges[1:],      edges_back[1:], 'o-', label='inverse')
+
+    ax.legend()
+
+    fig = plt.figure()
+    ax = plt.subplot(111, xlabel='', ylabel='', title='')
+    ax.minorticks_on()
+    # ax.grid()
+
+    ax.vlines(edges[1:],      0.0, 1.0, linestyle='solid', label='Original')
+    ax.vlines(edges_m[1:],    1.0, 2.0, linestyle='solid', label='Modified')
+    ax.vlines(edges_back[1:], 2.0, 3.0, linestyle='solid', label='Modified')
+
+    ax.legend()
+
+
+
 plot_edges_a(edges, centers, edges_m, centers_m)
 plot_edges_b(edges, centers, edges_m, centers_m)
 
-plot_matrix(mat_a, 'A', 'a')
-plot_matrix(matp_b, 'B', 'b')
+plot_matrix(mat_a, 'A, edges', 'a')
+plot_matrix(matp_b, 'B, centers', 'b')
+plot_matrix(matp_c, 'C, edges+centers', 'c')
+
+plot_edges()
 
 if opts.show:
     plt.show()
