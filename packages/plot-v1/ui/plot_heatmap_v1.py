@@ -40,8 +40,11 @@ class cmd(basecmd):
         parser.add_argument('-p', '--plot', default=[], metavar=('DATA',), action=append_typed(observable))
         parser.add_argument('--plot-kwargs', type=yamlload,
                             help='All additional plotting options go here. They are applied for all plots')
-        parser.add_argument('--filter', '-f', choices=filters.keys(), help='filter the matrix')
         parser.add_argument('-l', '--log', action='store_true', help='use log scale')
+
+        filters = parser.add_mutually_exclusive_group()
+        filters.add_argument('--filter', '-f', choices=filters.keys(), help='filter the matrix')
+        filters.add_argument('--rebin', type=int, help='rebin the matrix N times')
 
     def run(self):
         plot_kwargs = self.opts.plot_kwargs if self.opts.plot_kwargs else {}
@@ -49,6 +52,8 @@ class cmd(basecmd):
         plot_kwargs.setdefault('colorbar', True)
         if self.opts.filter:
             plot_kwargs['preprocess'] = filters[self.opts.filter]
+        if self.opts.filter:
+            plot_kwargs['preprocess'] = make_rebinner(self.opts.filter)
         if self.opts.log:
             plot_kwargs['norm'] = colors.LogNorm()
 
