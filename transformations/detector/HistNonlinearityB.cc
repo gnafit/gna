@@ -13,6 +13,33 @@
 #define  DEBUG(...)
 #endif
 
+template <class F>
+class final_act
+{
+public:
+    explicit final_act(F f) noexcept
+      : f_(std::move(f)), invoke_(true) {}
+
+    final_act(final_act&& other) noexcept
+     : f_(std::move(other.f_)),
+       invoke_(other.invoke_)
+    {
+        other.invoke_ = false;
+    }
+
+    final_act(const final_act&) = delete;
+    final_act& operator=(const final_act&) = delete;
+
+    ~final_act() noexcept
+    {
+        if (invoke_) f_();
+    }
+
+private:
+    F f_;
+    bool invoke_;
+};
+
 HistNonlinearityB::HistNonlinearityB(bool propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
@@ -49,79 +76,158 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
 /**
  * @brief Calculate the conversion matrix
  * The algorithm:
- * -
+ * 1. Find first X' (modified) bin above or equal X[0] (original)
+ *
  */
 void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     auto& args=fargs.args;
 
-    size_t nbins = args[0].arr.size();                 // Number of bins
-    size_t nedges = nbins+1;                           // Number of bin edges
+    size_t nbins  = args[0].arr.size();                        // Number of bins
+    size_t nedges = nbins+1;                                   // Number of bin edges
 
     //
     // Iterators for the original edges and its projection
     //
-    auto* orig_left         = m_edges;                   // Current left edge, original
-    auto* orig_right        = orig_left + 1u;            // Current right edge, original
-    auto* orig_proj_left    = args[1].arr.data();        // Projection of a current left edge / modified left edge
-    auto* orig_proj_right   = orig_proj_left + 1u;       // Projection of a current right edge / modified right edge
+    auto* orig_left               = m_edges;                   // Current left edge, original
+    auto* orig_right              = orig_left + 1u;            // Current right edge, original
+    auto* orig_proj_left          = args[1].arr.data();        // Projection of a current left edge / modified left edge
+    auto* orig_proj_right         = orig_proj_left + 1u;       // Projection of a current right edge / modified right edge
 
-    auto  orig_width        = *orig_right - *orig_left;  // Current bin width, original
+    auto  orig_width              = *orig_right - *orig_left;  // Current bin width, original
 
-    auto  orig_lastedge_val = *(orig_left + nbins);      // Last original bin
-    auto* orig_end          = orig_left + nedges;        // End of the original edges
-    auto* orig_proj_end     = orig_proj_left + nedges;   // End of the projected edges
+    const auto  orig_lastedge_val = *(orig_left + nbins);      // Last original bin
+    const auto* orig_start        = orig_left;                 // Start of the original edges
+    const auto* orig_end          = orig_left + nedges;        // End of the original edges
+    //const auto* orig_proj_end     = orig_proj_left + nedges;   // End of the projected edges
 
     //
     // Iterators for the modified edges and its backward projection on the unmodified axis
     //
-    auto* mod_left          = orig_proj_left;            // Current left modified edge
-    auto* mod_right         = orig_proj_left + 1u;       // Current right modified edge
-    auto* mod_proj_left     = args[2].arr.data();        // Backward projection of a current modified left edge
-    auto* mod_proj_right    = mod_proj_left + 1u;        // Backward projection of a current modified right edge
+    auto* mod_left                = orig_proj_left;            // Current left modified edge
+    auto* mod_right               = orig_proj_left + 1u;       // Current right modified edge
+    auto* mod_proj_left           = args[2].arr.data();        // Backward projection of a current modified left edge
+    auto* mod_proj_right          = mod_proj_left + 1u;        // Backward projection of a current modified right edge
 
-    auto  mod_lastedge_val  = *(mod_left + nbins);       // Last modified bin edge
-    auto* mod_end           = mod_left + nedges;         // End of the modified edges
-    auto* mod_proj_end      = mod_proj_left + nedges;    // End of the backward projected modified edges
+    const auto  mod_lastedge_val  = *(mod_left + nbins);       // Last modified bin edge
+    const auto* mod_start         = mod_left;                  // Start of the modified edges
+    const auto* mod_end           = mod_left + nedges;         // End of the modified edges
+    //const auto* mod_proj_end      = mod_proj_left + nedges;    // End of the backward projected modified edges
+
+    //
+    // Lambda function to check range
+    //
+    auto check_range_orig = [&orig_right,
+                       &orig_proj_left,
+                       orig_end,
+                       mod_lastedge_val, this]() -> bool
+         {
+             if(orig_right==orig_end) return false; // No more bins to iterate
+             if(   *orig_proj_left >= mod_lastedge_val
+                || *orig_proj_left >= this->m_range_max ) return false; // Projected bins are out of range
+
+             return true; // Iteration successfull
+         };
+
+    auto check_range_mod = [mod_right,
+                      mod_proj_left,
+                      mod_end, orig_lastedge_val]() -> bool
+         {
+             if(mod_right==mod_end || mod_right==mod_end) return false; // No more bins to iterate
+             if(*mod_proj_left>=orig_lastedge_val) return false;        // Projected bins are out of range
+
+             return true; // Iteration successfull
+         };
 
     //
     // Lambda function to step the current original and the current modified bin
     //
     auto step_orig = [&orig_left, &orig_right,
-         &orig_proj_left, &orig_proj_right,
-         &orig_width,
-         orig_end, orig_proj_end,
-         mod_lastedge_val]() -> bool
+                      &orig_proj_left, &orig_proj_right,
+                      &orig_width,
+                      &check_range_orig]() -> bool
          {
              ++orig_left; ++orig_right;
-             if(orig_right==orig_end) return false; // No more bins to iterate
-
              ++orig_proj_left; ++orig_proj_right;
-             if(*orig_proj_left >= mod_lastedge_val) return false; // Projected bins are out of range
-
              orig_width = *orig_right - *orig_left;
 
-             return true; // Iteration successfull
+             return check_range_orig();
          };
 
     auto step_mod = [&mod_left, &mod_right,
-         &mod_proj_left, &mod_proj_right,
-         mod_end, mod_proj_end,
-         orig_lastedge_val]() -> bool
+                     &mod_proj_left, &mod_proj_right,
+                     &check_range_mod]() -> bool
          {
              ++mod_left; ++mod_right;
-             if(mod_right==mod_end) return false; // No more bins to iterate
-
              ++mod_proj_left; ++mod_proj_right;
-             if(*mod_proj_left >= orig_lastedge_val) return false; // Projected bins are out of range
 
-             return true; // Iteration successfull
+             return check_range_mod();
+         };
+
+    //auto sync_mod_right = [mod_left, &mod_right,
+                           //mod_start,
+                           //&mod_proj_left, &mod_proj_right,
+                           //&check_range_mod]() -> bool
+         //{
+             //mod_right = mod_left + 1u;
+
+             //mod_proj_left += mod_left-mod_start;
+             //mod_proj_right = mod_proj_left + 1u;
+
+             //return check_range_mod();
+         //};
+
+    auto sync_orig_left = [&orig_left, orig_right,
+                          orig_start,
+                          &orig_proj_left, &orig_proj_right,
+                          &check_range_orig]() -> bool
+         {
+             orig_left = orig_right - 1u;
+
+             orig_proj_left += orig_left-orig_start;
+             orig_proj_right = orig_proj_left + 1u;
+
+             return check_range_orig();
+         };
+
+    auto sync_mod_left = [&mod_left, mod_right,
+                          mod_start,
+                          &mod_proj_left, &mod_proj_right,
+                          &check_range_mod]() -> bool
+         {
+             mod_left = mod_right - 1u;
+
+             mod_proj_left += mod_left-mod_start;
+             mod_proj_right = mod_proj_left + 1u;
+
+             return check_range_mod();
          };
 
     //
     // Initialize sparse matrix
     //
-    m_sparse_cache.resize(bins, bins);
+    m_sparse_cache.resize(nbins, nbins);
     m_sparse_cache.setZero();
+
+    // Fill the matrix at exit
+    final_act _f([&fargs, this](){
+        if ( this->m_propagate_matrix )
+            fargs.rets[0].mat = this->m_sparse_cache;
+    });
+
+    // 1. Set the range
+    //     a. Find first right X' (modified) edge above orig_start (original)
+    mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
+    if(!sync_mod_left()) return;
+
+    //     b. Find first right X (original) edge above mod_proj_left (modified)
+    orig_right = std::upper_bound(orig_right, orig_end, *mod_left);
+    if(!sync_orig_left()) return;
+
+    // 2. Start the iteration
+    while(true){
+        if(!step_orig()) return;
+        if(!step_mod()) return;
+    }
 
     //DEBUG("n=%zu, matrix n=%zu\n", bins+1, bins);
 
@@ -221,8 +327,4 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     //DEBUG("cur_bin_center_mod is outside\n");
     //}
     //DEBUG("\n");
-
-    if ( m_propagate_matrix )
-        fargs.rets[0].mat = m_sparse_cache;
 }
-
