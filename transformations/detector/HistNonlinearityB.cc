@@ -88,6 +88,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     //
     // Iterators for the original edges and its projection
     //
+    size_t orig_idx               = 0u;                        // Current original bin index
     auto* orig_left               = m_edges;                   // Current left edge, original
     auto* orig_right              = orig_left + 1u;            // Current right edge, original
     auto* orig_proj_left          = args[1].arr.data();        // Projection of a current left edge / modified left edge
@@ -103,6 +104,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     //
     // Iterators for the modified edges and its backward projection on the unmodified axis
     //
+    size_t mod_idx                = 0u;                        // Current modified bin index
     auto* mod_left                = orig_proj_left;            // Current left modified edge
     auto* mod_right               = orig_proj_left + 1u;       // Current right modified edge
     auto* mod_proj_left           = args[2].arr.data();        // Backward projection of a current modified left edge
@@ -141,11 +143,12 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     //
     // Lambda function to step the current original and the current modified bin
     //
-    auto step_orig = [&orig_left, &orig_right,
+    auto step_orig = [&orig_idx, &orig_left, &orig_right,
                       &orig_proj_left, &orig_proj_right,
                       &orig_width,
                       &check_range_orig]() -> bool
          {
+             ++orig_idx;
              ++orig_left; ++orig_right;
              ++orig_proj_left; ++orig_proj_right;
              orig_width = *orig_right - *orig_left;
@@ -153,48 +156,38 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
              return check_range_orig();
          };
 
-    auto step_mod = [&mod_left, &mod_right,
+    auto step_mod = [&mod_idx, &mod_left, &mod_right,
                      &mod_proj_left, &mod_proj_right,
                      &check_range_mod]() -> bool
          {
+             ++mod_idx;
              ++mod_left; ++mod_right;
              ++mod_proj_left; ++mod_proj_right;
 
              return check_range_mod();
          };
 
-    //auto sync_mod_right = [mod_left, &mod_right,
-                           //mod_start,
-                           //&mod_proj_left, &mod_proj_right,
-                           //&check_range_mod]() -> bool
-         //{
-             //mod_right = mod_left + 1u;
-
-             //mod_proj_left += mod_left-mod_start;
-             //mod_proj_right = mod_proj_left + 1u;
-
-             //return check_range_mod();
-         //};
-
-    auto sync_orig_left = [&orig_left, orig_right,
+    auto sync_orig_left = [&orig_idx, &orig_left, orig_right,
                           orig_start,
                           &orig_proj_left, &orig_proj_right,
                           &check_range_orig]() -> bool
          {
              orig_left = orig_right - 1u;
+             orig_idx  = orig_left-orig_start;
 
-             orig_proj_left += orig_left-orig_start;
+             orig_proj_left += orig_idx;
              orig_proj_right = orig_proj_left + 1u;
 
              return check_range_orig();
          };
 
-    auto sync_mod_left = [&mod_left, mod_right,
+    auto sync_mod_left = [&mod_idx, &mod_left, mod_right,
                           mod_start,
                           &mod_proj_left, &mod_proj_right,
                           &check_range_mod]() -> bool
          {
              mod_left = mod_right - 1u;
+             mod_idx  = mod_left-mod_start;
 
              mod_proj_left += mod_left-mod_start;
              mod_proj_right = mod_proj_left + 1u;
@@ -224,7 +217,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     if(!sync_orig_left()) return;
 
     // 2. Start the iteration
-    while(true){
+    while(orig_idx<nbins || mod_idx<nbins){
         if(!step_orig()) return;
         if(!step_mod()) return;
     }
