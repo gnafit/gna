@@ -50,6 +50,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         binning.add_argument('--final-emin', type=float, help='Final binning Emin')
         binning.add_argument('--final-emax', type=float, help='Final binning Emax')
         binning.add_argument('--fine-step', type=float, help='Fine binning step')
+        binning.add_argument('--fine-step-final', type=float, help='Final fine binning step')
 
         # osc prob
         parser.add_argument('--oscprob', choices=['vacuum'], default='vacuum', help='oscillation probability type')
@@ -214,7 +215,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         edges    = np.arange(0.0, 12+1.e-8, self.opts.fine_step or 0.01)
         edges_final = np.concatenate( (
                                     [0.8],
-                                    np.arange(1, 6.0, 0.02),
+                                    np.arange(1, 6.0, self.opts.fine_step_final or 0.02),
                                     np.arange(6, 7.0, 0.1),
                                     [7.0, 7.5, 12.0]
                                 )
