@@ -92,6 +92,7 @@ set(TRANSFORMATION_SOURCES
   transformations/neutrino/OscProbPMNSVariables.cc
   transformations/neutrino/ReactorGroup.cc
   transformations/neutrino/ReactorNorm.cc
+  transformations/neutrino/ReactorSpectrumUncertainty.cc
   transformations/neutrino/Units.cc
   # Statistics
   transformations/stats/Chi2.cc
@@ -213,6 +214,7 @@ set(TRANSFORMATION_HEADERS
   IbdFirstOrder.hh
   ReactorNorm.hh
   ReactorGroup.hh
+  ReactorSpectrumUncertainty.hh
   IntegratorBase.hh
   Integrator21Base.hh
   Integrator2Base.hh
