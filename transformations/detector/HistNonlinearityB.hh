@@ -17,7 +17,7 @@ public:
 
   HistNonlinearityB(bool propagate_matrix=false);
 
-  void set(SingleOutput& bin_edges, SingleOutput& bin_centers_modified);
+  void set(SingleOutput& orig, SingleOutput& orig_proj, SingleOutput& mod_proj);
 
   void set_range( double min, double max ) { m_range_min=min; m_range_max=max; }
   double get_range_min() { return m_range_min; }
