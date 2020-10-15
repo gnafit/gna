@@ -7,7 +7,7 @@
 using std::min;
 using std::max;
 
-//#define DEBUG_ENLB
+#define DEBUG_ENLB
 
 HistNonlinearityB::HistNonlinearityB(bool propagate_matrix) :
 HistSmearSparse(propagate_matrix)
@@ -243,12 +243,20 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
 
     // 1. Set the range
     //     a. Find first right X' (modified) edge above orig_start (original)
+    DEBUG("Initial\n");
+    DEBUG_ITERATION();
     mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
     if(sync_mod_left()) return;
+
+    DEBUG("Update mod\n");
+    DEBUG_ITERATION();
 
     //     b. Find first right X (original) edge above mod_proj_left (modified)
     orig_right = std::upper_bound(orig_right, orig_end, *mod_left);
     if(sync_orig_left()) return;
+
+    DEBUG("Update orig\n");
+    DEBUG_ITERATION();
 
     DEBUG("Start iteration at %zu, %zu of %zu\n", orig_idx, mod_idx, nbins);
     // 2. Start the iteration
