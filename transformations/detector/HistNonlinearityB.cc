@@ -2,43 +2,12 @@
 #include "TypesFunctions.hh"
 #include <algorithm>
 #include <fmt/format.h>
+#include "final_act.hh"
+
+using std::min;
+using std::max;
 
 //#define DEBUG_ENLB
-
-#ifdef DEBUG_ENLB
-#define  DEBUG(...) do {                                      \
-    printf(__VA_ARGS__);                                      \
-} while (0);
-#else
-#define  DEBUG(...)
-#endif
-
-template <class F>
-class final_act
-{
-public:
-    explicit final_act(F f) noexcept
-      : f_(std::move(f)), invoke_(true) {}
-
-    final_act(final_act&& other) noexcept
-     : f_(std::move(other.f_)),
-       invoke_(other.invoke_)
-    {
-        other.invoke_ = false;
-    }
-
-    final_act(const final_act&) = delete;
-    final_act& operator=(const final_act&) = delete;
-
-    ~final_act() noexcept
-    {
-        if (invoke_) f_();
-    }
-
-private:
-    F f_;
-    bool invoke_;
-};
 
 HistNonlinearityB::HistNonlinearityB(bool propagate_matrix) :
 HistSmearSparse(propagate_matrix)
@@ -59,19 +28,80 @@ HistSmearSparse(propagate_matrix)
     set_open_input();
 }
 
-void HistNonlinearityB::set(SingleOutput& bin_edges, SingleOutput& bin_centers_modified){
+void HistNonlinearityB::set(SingleOutput& orig, SingleOutput& orig_proj, SingleOutput& mod_proj){
     if( m_initialized )
         throw std::runtime_error("HistNonlinearityB is already initialized");
     m_initialized = true;
 
     auto inputs = transformations.front().inputs;
-    bin_edges.single()          >> inputs[0];
-    bin_centers_modified.single() >> inputs[1];
+    orig.single()      >> inputs[0];
+    orig_proj.single() >> inputs[1];
+    mod_proj.single()  >> inputs[2];
 }
 
 void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
     m_edges = fargs.args[0].edges.data();
 }
+
+#ifdef DEBUG_ENLB
+#define  DEBUG(...) do {                                      \
+    printf(__VA_ARGS__);                                      \
+} while (0);
+#define DEBUG_ITERATION()                                     \
+        printf(                                               \
+              "orig %3zu %6.2f->%6.2f "                       \
+              "proj %6.2f->%6.2f "                            \
+              "mod %3zu %6.2f->%6.2f "                        \
+              "mod_proj %6.2f->%6.2f "                        \
+              "\n"                                            \
+              ,                                               \
+              orig_idx, *orig_left,      *orig_right,         \
+                        *orig_proj_left, *orig_proj_right,    \
+              mod_idx,  *mod_left,       *mod_right,          \
+                        *mod_proj_left,  *mod_proj_right      \
+              );
+
+#define DEBUG_STEP_ORIG()                                     \
+        printf(                                               \
+              "orig %3zu %6.2f->%6.2f "                       \
+              "proj %6.2f->%6.2f "                            \
+              "width %6.2f "                                  \
+              "to end %td "                                   \
+              "\n"                                            \
+              ,                                               \
+              orig_idx, *orig_left,      *orig_right,         \
+                        *orig_proj_left, *orig_proj_right,    \
+                         orig_width,                          \
+                         orig_end-orig_right                  \
+              );
+
+#define DEBUG_STEP_MOD()                                      \
+        printf(                                               \
+              "                                            "  \
+              "mod %3zu %6.2f->%6.2f "                        \
+              "mod_proj %6.2f->%6.2f "                        \
+              "to end %td "                                   \
+              "\n"                                            \
+              ,                                               \
+              mod_idx,  *mod_left,       *mod_right,          \
+                        *mod_proj_left,  *mod_proj_right,     \
+                         mod_end-mod_right                    \
+              );
+#define DEBUG_WEIGHT()                                        \
+        printf(                                               \
+              "current  %6.2f->%6.2f weight %6.2f "            \
+              "exit orig %i exit mod %i"                      \
+              "\n"                                            \
+              ,                                               \
+              left, right, weight, exit_orig, exit_mod        \
+              );
+#else
+#define  DEBUG(...)
+#define  DEBUG_ITERATION()
+#define  DEBUG_STEP_ORIG()
+#define  DEBUG_STEP_MOD()
+#define  DEBUG_WEIGHT()
+#endif
 
 /**
  * @brief Calculate the conversion matrix
@@ -119,25 +149,25 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     // Lambda function to check range
     //
     auto check_range_orig = [&orig_right,
-                       &orig_proj_left,
-                       orig_end,
-                       mod_lastedge_val, this]() -> bool
+                             &orig_proj_left,
+                             orig_end,
+                             mod_lastedge_val, this]() -> bool
          {
-             if(orig_right==orig_end) return false; // No more bins to iterate
+             if(orig_right==orig_end) return true; // Exit: no more bins to iterate
              if(   *orig_proj_left >= mod_lastedge_val
-                || *orig_proj_left >= this->m_range_max ) return false; // Projected bins are out of range
+                || *orig_proj_left >= this->m_range_max ) return true; // Exit: projected bins are out of range
 
-             return true; // Iteration successfull
+             return false; // Iteration successfull, no need to exit
          };
 
-    auto check_range_mod = [mod_right,
-                      mod_proj_left,
-                      mod_end, orig_lastedge_val]() -> bool
+    auto check_range_mod = [&mod_right,
+                            &mod_proj_left,
+                            mod_end, orig_lastedge_val]() -> bool
          {
-             if(mod_right==mod_end || mod_right==mod_end) return false; // No more bins to iterate
-             if(*mod_proj_left>=orig_lastedge_val) return false;        // Projected bins are out of range
+             if(mod_right==mod_end) return true; // Exit: no more bins to iterate
+             if(*mod_proj_left>=orig_lastedge_val) return true;        // Exit: projected bins are out of range
 
-             return true; // Iteration successfull
+             return false; // Iteration successfull, no need to exit
          };
 
     //
@@ -146,31 +176,35 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     auto step_orig = [&orig_idx, &orig_left, &orig_right,
                       &orig_proj_left, &orig_proj_right,
                       &orig_width,
-                      &check_range_orig]() -> bool
+                      &check_range_orig, orig_end]() -> bool
          {
              ++orig_idx;
              ++orig_left; ++orig_right;
              ++orig_proj_left; ++orig_proj_right;
              orig_width = *orig_right - *orig_left;
 
+             DEBUG_STEP_ORIG();
+
              return check_range_orig();
          };
 
     auto step_mod = [&mod_idx, &mod_left, &mod_right,
                      &mod_proj_left, &mod_proj_right,
-                     &check_range_mod]() -> bool
+                     &check_range_mod, mod_end]() -> bool
          {
              ++mod_idx;
              ++mod_left; ++mod_right;
              ++mod_proj_left; ++mod_proj_right;
 
+             DEBUG_STEP_MOD();
+
              return check_range_mod();
          };
 
-    auto sync_orig_left = [&orig_idx, &orig_left, orig_right,
-                          orig_start,
-                          &orig_proj_left, &orig_proj_right,
-                          &check_range_orig]() -> bool
+    auto sync_orig_left = [&orig_idx, &orig_left, &orig_right,
+                           orig_start,
+                           &orig_proj_left, &orig_proj_right,
+                           &check_range_orig]() -> bool
          {
              orig_left = orig_right - 1u;
              orig_idx  = orig_left-orig_start;
@@ -181,7 +215,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
              return check_range_orig();
          };
 
-    auto sync_mod_left = [&mod_idx, &mod_left, mod_right,
+    auto sync_mod_left = [&mod_idx, &mod_left, &mod_right,
                           mod_start,
                           &mod_proj_left, &mod_proj_right,
                           &check_range_mod]() -> bool
@@ -201,7 +235,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     m_sparse_cache.resize(nbins, nbins);
     m_sparse_cache.setZero();
 
-    // Fill the matrix at exit
+    // Fill the matrix at return
     final_act _f([&fargs, this](){
         if ( this->m_propagate_matrix )
             fargs.rets[0].mat = this->m_sparse_cache;
@@ -210,114 +244,60 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     // 1. Set the range
     //     a. Find first right X' (modified) edge above orig_start (original)
     mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
-    if(!sync_mod_left()) return;
+    if(sync_mod_left()) return;
 
     //     b. Find first right X (original) edge above mod_proj_left (modified)
     orig_right = std::upper_bound(orig_right, orig_end, *mod_left);
-    if(!sync_orig_left()) return;
+    if(sync_orig_left()) return;
 
+    DEBUG("Start iteration at %zu, %zu of %zu\n", orig_idx, mod_idx, nbins);
     // 2. Start the iteration
-    while(orig_idx<nbins || mod_idx<nbins){
-        if(!step_orig()) return;
-        if(!step_mod()) return;
+    while(orig_idx<nbins && mod_idx<nbins){
+        DEBUG_ITERATION();
+
+        //
+        // Determine the current interval
+        //
+        double left = max(*orig_left, *mod_proj_left);
+        double right;
+        bool need_step_orig{false}, need_step_mod{false};
+        bool exit_orig{false}, exit_mod{false};
+        if(*orig_right>*mod_proj_right){
+            right = *mod_proj_right;
+            need_step_orig = false;
+            need_step_mod  = true;
+        }
+        else{
+            right = *orig_right;
+            need_step_orig = true;
+            need_step_mod  = *orig_right==*mod_proj_right;
+        }
+
+        //
+        // Compute the weight
+        //
+        auto weight = (right-left)/orig_width;
+        m_sparse_cache.insert(mod_idx, orig_idx)=weight;
+
+        DEBUG_WEIGHT();
+
+        //
+        // Make next step and/or exit
+        //
+        bool made_step = false;
+        if(need_step_orig && !exit_orig) {
+            exit_orig=step_orig();
+            made_step=true;
+        }
+        if(need_step_mod  && !exit_mod) {
+            exit_mod=step_mod();
+            made_step=true;
+        }
+
+        if(exit_orig&&exit_mod) return;
+
+        if(!made_step){
+            throw std::runtime_error("HistNonlinearityB unable to make a step. Should not happen.");
+        }
     }
-
-    //DEBUG("n=%zu, matrix n=%zu\n", bins+1, bins);
-
-    //// Find the first bin center in the modified array that is above threshold
-    //auto* cur_bin_center_mod = std::upper_bound(centers_mod, end_mod, m_range_min);
-    //if(cur_bin_center_mod!=end_mod){
-    //// Found a bin center within range
-    //DEBUG("found cur_bin_center_mod %li: %g\n", std::distance(centers_mod, cur_bin_mod), *cur_bin_mod);
-
-    //// Current bin center index
-    //auto i_bin_mod = cur_bin_mod - centers_mod;
-    //// Full 'original' width corresponding to the current bin
-    //auto full_width = edges_orig[i_bin_mod+1] - edges_orig[i_bin_mod];
-    //auto half_width = 0.5*half_width;
-    //// Left and right modified edges
-    //auto left_edge_mod  = *cur_bin_mod-half_width;
-    //auto right_edge_mod = *cur_bin_mod+half_width;
-
-    //// Find current bin's left/right edge projection to the original range
-    //auto* left_proj_to_orig = std::lower_bound(edges_orig, end_orig, left_edge_mod);
-    //auto* right_proj_to_orig = std::lower_bound(edges_orig, end_orig, right_edge_mod);
-
-    //DEBUG("found cur_proj %li: %g -> %g\n", std::distance(edges_orig, cur_proj_to_orig), *cur_proj_to_orig, *(cur_proj_to_orig+1));
-    //if (cur_proj_to_orig!=edges_orig) {
-    //cur_proj_to_orig = std::prev(cur_proj_to_orig);
-    //DEBUG("update cur_proj %li %g -> %g\n", std::distance(edges_orig, cur_proj_to_orig), *cur_proj_to_orig, *(cur_proj_to_orig+1));
-    //}
-    //// Index of the oritinal bin containing the current modified left edge
-    //auto i_proj = cur_proj_to_orig - edges_orig;
-
-    //if ( cur_proj_to_orig<end_orig ){
-    //// The projection of the current center is below rightmost edge
-    //// and current bin is within range
-    //// Iterate bins
-    //#ifdef DEBUG_ENLB
-    //size_t iteration=0;
-    //#endif
-    //while( cur_bin_mod<end_mod && left_edge_mod<*end_orig && right_edge_mod<m_range_max ){
-    //auto* cur_edge{cur_bin_mod};
-    //#ifdef DEBUG_ENLB
-    //bool cur_mod{true};
-    //#endif
-    //if(*cur_edge < *edges_orig){
-    //cur_edge = edges_orig;
-    //#ifdef DEBUG_ENLB
-    //cur_mod=false;
-    //#endif
-    //}
-    //// Iterate inner bin edges
-    //while ( (cur_edge!=next_bin_mod) && (cur_proj_to_orig!=end_orig) ){
-    //auto* next_edge = std::min( next_bin_mod, std::next(cur_proj_to_orig), [](auto a, auto b){ return *a<*b; } );
-
-    //#ifdef DEBUG_ENLB
-    //bool next_mod = next_edge==next_bin_mod;
-    //#endif
-
-    //double weight = ( *next_edge - *cur_edge )/full_width;
-
-    //#ifdef DEBUG_ENLB
-    //if ( ((iteration++)%20)==0 ) {
-    //printf("\n%6s%14s%13s%15s%14s%8s %8s%8s%8s\n",
-    //"it",
-    //"curbin", "curproj", "curedge",
-    //"nextedge", "nextbin", "nextproj",
-    //"weight", "width");
-    //}
-    //printf("%6li"
-    //"%7lij%6.3g""%7lii%6.3g"
-    //"%7li%s%6.3g""%7li%s%6.3g"
-    //"%8.3g%1s%8.3g""%8.3f%8.3g %s\n",
-    //iteration,
-    //i_bin_mod, *cur_bin_mod, i_proj, *cur_proj_to_orig,
-    //std::distance(cur_mod?edges_mod:edges_orig, cur_edge), cur_mod?"j":"i", *cur_edge,
-    //std::distance(next_mod?edges_mod:edges_orig, next_edge), next_mod?"j":"i", *next_edge,
-    //*next_bin_mod, *next_bin_mod==*std::next(cur_proj_to_orig) ? "=":" ", *std::next(cur_proj_to_orig),
-    //weight, full_width, weight==0.0 ? "*" : "" );
-    //#endif
-    //m_sparse_cache.insert(i_proj, i_bin_mod) = weight;
-
-    //cur_edge = next_edge;
-    //std::advance(cur_proj_to_orig, 1); i_proj++;
-    //#ifdef DEBUG_ENLB
-    //cur_mod = next_mod;
-    //#endif
-    //}
-    //DEBUG("\n");
-
-    //if(*next_bin_mod!=*cur_proj_to_orig) {
-    //std::advance(cur_proj_to_orig, -1); i_proj--;
-    //}
-    //std::advance(cur_bin_mod, 1); i_bin_mod++;
-    //std::advance(next_bin_mod, 1);
-    //}
-    //}
-    //}     // cur_bin_center_mod!=end_mod
-    //else{ // cur_bin_center_mod==end_mod
-    //DEBUG("cur_bin_center_mod is outside\n");
-    //}
-    //DEBUG("\n");
 }
