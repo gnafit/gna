@@ -27,7 +27,7 @@ opts=parser.parse_args()
 #
 cfg = NestedDict(
     # Bundle name
-    bundle = dict(name='energy_nonlinearity_db_root', version='v02',
+    bundle = dict(name='energy_nonlinearity_db_root', version='v04',
         nidx=[('d', 'detector', ['D1']),
               ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'])
               ],
