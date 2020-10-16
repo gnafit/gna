@@ -105,9 +105,6 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
 
 /**
  * @brief Calculate the conversion matrix
- * The algorithm:
- * 1. Find first X' (modified) bin above or equal X[0] (original)
- *
  */
 void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     auto& args=fargs.args;
@@ -163,10 +160,12 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
 
     auto check_range_mod = [&mod_right,
                             &mod_proj_left,
-                            mod_end, orig_lastedge_val]() -> bool
+                            mod_end, orig_lastedge_val,
+                            this]() -> bool
          {
              if(mod_right==mod_end) return true; // Exit: no more bins to iterate
-             if(*mod_proj_left>=orig_lastedge_val) return true;        // Exit: projected bins are out of range
+             if(*mod_proj_left>=orig_lastedge_val) return true; // Exit: projected bins are out of range
+             if(*mod_right>=this->m_range_max) return true; // Exit: touched the range
 
              return false; // Iteration successfull, no need to exit
          };
@@ -230,6 +229,20 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
              return check_range_mod();
          };
 
+    auto sync_mod_right = [&mod_idx, &mod_left, &mod_right,
+                          mod_start,
+                          &mod_proj_left, &mod_proj_right,
+                          &check_range_mod]() -> bool
+         {
+             mod_right = mod_left + 1u;
+             mod_idx   = mod_left-mod_start;
+
+             mod_proj_left += mod_left-mod_start;
+             mod_proj_right = mod_proj_left + 1u;
+
+             return check_range_mod();
+         };
+
     auto sync_mod_proj_left = [&mod_idx, &mod_left, &mod_right,
                                mod_proj_start,
                                &mod_proj_left, &mod_proj_right,
@@ -260,7 +273,15 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     DEBUG("Initial\n");
     DEBUG_ITERATION();
 
-    //     a. Find first right X' (modified) edge above orig_start (original)
+    //     a. Find first left X' (modified) edge above m_range_min
+    if(*mod_left <= m_range_min){
+        DEBUG("Update mod (range)\n");
+        mod_left = std::upper_bound(mod_left, mod_end-1, m_range_min);
+        if(sync_mod_right()) return;
+        DEBUG_ITERATION();
+    }
+
+    //     b. Find first right X' (modified) edge above orig_start (original)
     if(*mod_right <= *orig_start){
         DEBUG("Update mod\n");
         mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
@@ -268,7 +289,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
         DEBUG_ITERATION();
     }
 
-    //     b. Find first right X (projected back) edge above orig_start (original)
+    //     c. Find first right X (projected back) edge above orig_start (original)
     if(*mod_proj_right <= *orig_start){
         DEBUG("Update mod_proj\n");
         mod_proj_right = std::upper_bound(mod_proj_right, mod_proj_end, *orig_start);
@@ -276,7 +297,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
         DEBUG_ITERATION();
     }
 
-    //     c. Find first right X (original) edge above mod_proj_left (modified)
+    //     d. Find first right X (original) edge above mod_proj_left (modified)
     if(*orig_right <= *mod_proj_left) {
         DEBUG("Update orig\n");
         orig_right = std::upper_bound(orig_right, orig_end, *mod_proj_left);
