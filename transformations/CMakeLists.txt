@@ -35,6 +35,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/EnergyResolution.cc
   transformations/detector/EnergyResolutionInput.cc
   transformations/detector/HistNonlinearity.cc
+  transformations/detector/HistNonlinearityB.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
   transformations/detector/Cherenkov_Borexino.cc
@@ -230,6 +231,7 @@ set(TRANSFORMATION_HEADERS
   EnergyResolutionInput.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
+  HistNonlinearityB.hh
   Cherenkov_Borexino.hh
   HistSmear.hh
   HistSmearSparse.hh

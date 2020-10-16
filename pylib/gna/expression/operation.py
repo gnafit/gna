@@ -223,9 +223,51 @@ class Accumulate(IndexedContainer, Variable):
 
             head, tail = varname.rsplit('.', 1)
             cns = ns(head)
-            arrsum = C.ArraySum(tail, out, ns=cns)
+
+            label = 'sum of {}'.format(obj.current_format(it))
+            arrsum = C.ArraySum(tail, out, ns=cns, labels=label)
             var = cns[tail].get()
-            var.setLabel('sum of {}'.format(obj.current_format(it)))
+            var.setLabel(label)
+            self.arrsums.append(arrsum)
+
+        self.bound = True
+
+class AccumulateTransformation(IndexedContainer, Transformation):
+    bound = False
+    def __init__(self, *args, **kwargs):
+        self.arrsums = []
+        if len(args)>1:
+            raise Exception('accumulate() supports only 1 argument')
+        if not isinstance(args[0], Transformation):
+            raise Exception('the only argument of accumulate() should be an object, not variable')
+
+        IndexedContainer.__init__(self, *args)
+        Transformation.__init__(self, undefinedname, *self.objects)
+        self.set_operator( ' ∫ ', text='Accumulate_', prefix='Accumulate_'  )
+
+    @call_once
+    def bind(self, context):
+        if self.bound:
+            return
+
+        import ROOT as R
+        IndexedContainer.bind(self, context, connect=False)
+        obj, = self.objects
+        ns = context.namespace()
+        from gna.env import ExpressionsEntry
+        from gna import constructors as C
+        for it in self.nindex.iterate():
+            out = obj.get_output(it, context)
+            varname = self.current_format(it)
+
+            head, tail = varname.rsplit('.', 1)
+            cns = ns(head)
+
+            label = 'sum of {}'.format(obj.current_format(it))
+            arrsum = C.ArraySum(out, ns=cns, labels=label)
+            output = arrsum.arrsum.sum
+            context.set_output(output, self.name, it)
+
             self.arrsums.append(arrsum)
 
         self.bound = True

@@ -8,16 +8,16 @@
 /**
  * @brief A class to smear the 1d histogram due to rescaling of the X axis
  *
- * HistNonlinearity(A) projects the modified bin edges on the original binning
+ * HistNonlinearityB projects the shifted bins on the original binning
  */
-class HistNonlinearity: public HistSmearSparse,
-                        public TransformationBind<HistNonlinearity> {
+class HistNonlinearityB: public HistSmearSparse,
+                        public TransformationBind<HistNonlinearityB> {
 public:
-  using TransformationBind<HistNonlinearity>::transformation_;
+  using TransformationBind<HistNonlinearityB>::transformation_;
 
-  HistNonlinearity(bool propagate_matrix=false);
+  HistNonlinearityB(bool propagate_matrix=false);
 
-  void set(SingleOutput& bin_edges, SingleOutput& bin_edges_modified);
+  void set(SingleOutput& orig, SingleOutput& orig_proj, SingleOutput& mod_proj);
 
   void set_range( double min, double max ) { m_range_min=min; m_range_max=max; }
   double get_range_min() { return m_range_min; }

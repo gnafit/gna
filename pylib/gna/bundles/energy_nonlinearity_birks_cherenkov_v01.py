@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
 # -*- coding: utf-8 -*-
@@ -232,4 +233,3 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             from gna.parameters import covariance_helpers as ch
             pars=[ns[par] for par in correlations_pars]
             ch.covariate_pars(pars, corrmatrix)
-

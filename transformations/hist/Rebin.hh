@@ -17,7 +17,7 @@ public:
 
 private:
   void dump(size_t oldn, double* oldedges, size_t newn, double* newedges) const;
-  void calcMatrix(const DataType& type);
+  void calcMatrix(TypesFunctionArgs& fargs);
   void calcSmear(FunctionArgs& fargs);
 #ifdef GNA_CUDA_SUPPORT
   void calcSmear_gpu(FunctionArgs& fargs);

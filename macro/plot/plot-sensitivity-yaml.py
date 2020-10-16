@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 
 """Read a set of yaml files with fit results and plot sensitivity to parameters"""
 
