@@ -7,7 +7,7 @@
 using std::min;
 using std::max;
 
-#define DEBUG_ENLB
+//#define DEBUG_ENLB
 
 HistNonlinearityB::HistNonlinearityB(bool propagate_matrix) :
 HistSmearSparse(propagate_matrix)
@@ -143,7 +143,8 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     const auto  mod_lastedge_val  = *(mod_left + nbins);       // Last modified bin edge
     const auto* mod_start         = mod_left;                  // Start of the modified edges
     const auto* mod_end           = mod_left + nedges;         // End of the modified edges
-    //const auto* mod_proj_end      = mod_proj_left + nedges;    // End of the backward projected modified edges
+    const auto* mod_proj_start    = mod_proj_left;             // End of the backward projected modified edges
+    const auto* mod_proj_end      = mod_proj_left + nedges;    // End of the backward projected modified edges
 
     //
     // Lambda function to check range
@@ -229,6 +230,20 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
              return check_range_mod();
          };
 
+    auto sync_mod_proj_left = [&mod_idx, &mod_left, &mod_right,
+                               mod_proj_start,
+                               &mod_proj_left, &mod_proj_right,
+                               &check_range_mod]() -> bool
+         {
+             mod_proj_left = mod_proj_right - 1u;
+             mod_idx       = mod_proj_left-mod_proj_start;
+
+             mod_left += mod_proj_left-mod_proj_start;
+             mod_right = mod_left + 1u;
+
+             return check_range_mod();
+         };
+
     //
     // Initialize sparse matrix
     //
@@ -242,21 +257,32 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     });
 
     // 1. Set the range
-    //     a. Find first right X' (modified) edge above orig_start (original)
     DEBUG("Initial\n");
     DEBUG_ITERATION();
-    mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
-    if(sync_mod_left()) return;
 
-    DEBUG("Update mod\n");
-    DEBUG_ITERATION();
+    //     a. Find first right X' (modified) edge above orig_start (original)
+    if(*mod_right <= *orig_start){
+        DEBUG("Update mod\n");
+        mod_right = std::upper_bound(mod_right, mod_end, *orig_start);
+        if(sync_mod_left()) return;
+        DEBUG_ITERATION();
+    }
 
-    //     b. Find first right X (original) edge above mod_proj_left (modified)
-    orig_right = std::upper_bound(orig_right, orig_end, *mod_proj_left);
-    if(sync_orig_left()) return;
+    //     b. Find first right X (projected back) edge above orig_start (original)
+    if(*mod_proj_right <= *orig_start){
+        DEBUG("Update mod_proj\n");
+        mod_proj_right = std::upper_bound(mod_proj_right, mod_proj_end, *orig_start);
+        if(sync_mod_proj_left()) return;
+        DEBUG_ITERATION();
+    }
 
-    DEBUG("Update orig\n");
-    DEBUG_ITERATION();
+    //     c. Find first right X (original) edge above mod_proj_left (modified)
+    if(*orig_right <= *mod_proj_left) {
+        DEBUG("Update orig\n");
+        orig_right = std::upper_bound(orig_right, orig_end, *mod_proj_left);
+        if(sync_orig_left()) return;
+        DEBUG_ITERATION();
+    }
 
     DEBUG("Start iteration at %zu, %zu of %zu\n", orig_idx, mod_idx, nbins);
     // 2. Start the iteration
