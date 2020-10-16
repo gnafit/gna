@@ -134,9 +134,9 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     //
     // Iterators for the modified edges and its backward projection on the unmodified axis
     //
-    size_t mod_idx                = 0u;                        // Current modified bin index
-    auto* mod_left                = orig_proj_left;            // Current left modified edge
-    auto* mod_right               = orig_proj_left + 1u;       // Current right modified edge
+    size_t mod_idx                = 0u;                        // Current modified bin index (same binning as original)
+    auto* mod_left                = orig_left;                 // Current left modified edge (same binning as original)
+    auto* mod_right               = orig_left + 1u;            // Current right modified edge
     auto* mod_proj_left           = args[2].arr.data();        // Backward projection of a current modified left edge
     auto* mod_proj_right          = mod_proj_left + 1u;        // Backward projection of a current modified right edge
 
@@ -252,7 +252,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
     DEBUG_ITERATION();
 
     //     b. Find first right X (original) edge above mod_proj_left (modified)
-    orig_right = std::upper_bound(orig_right, orig_end, *mod_left);
+    orig_right = std::upper_bound(orig_right, orig_end, *mod_proj_left);
     if(sync_orig_left()) return;
 
     DEBUG("Update orig\n");
