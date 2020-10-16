@@ -13,6 +13,7 @@ from scipy.interpolate import interp1d
 from argparse import ArgumentParser
 import gna.constructors as C
 from scipy.linalg import block_diag
+from os import path
 
 mpl.rc('markers', fillstyle='none')
 
@@ -22,6 +23,20 @@ parser.add_argument('-o', '--output', help='output file')
 parser.add_argument('-s', '--show', action='store_true', help='output file')
 parser.add_argument('--swap', action='store_true', help='swap direct and inverse')
 opts = parser.parse_args()
+
+def tuple_of_strings(tuple_or_str):
+    if isinstance(tuple_or_str, str):
+        return tuple_or_str,
+
+    return tuple_or_str
+
+def savedata(data, suffix):
+    if not opts.output: return
+
+    base, _ = path.splitext(opts.output)
+    fname = '_'.join((base,)+tuple_of_strings(suffix))+'.txt'
+    print('Save data file:', fname)
+    np.savetxt(fname, data)
 
 def make_rebin_matrix_1d(sizein, ntogroup):
     sizeout = sizein//ntogroup
@@ -187,6 +202,8 @@ Nbins = matrices.keys()
 for nbins, mat in matrices.items():
     plot_matrix(mat, xfine, fxfine)
 
+    savedata(mat, str(nbins))
+
     for nbins1 in Nbins:
         if nbins1==nbins:
             continue
@@ -198,7 +215,10 @@ for nbins, mat in matrices.items():
         rebinned = plot_matrix(mat, xfine, fxfine, reshapen=ratio)
         original = matrices[nbins1]
 
+        savedata(rebinned, (str(nbins1), str(nbins)))
+
         cmp_rebin(original, rebinned, 'Rebin {}->{}: '.format(nbins, nbins1))
 
 if opts.show:
     plt.show()
+
