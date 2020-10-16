@@ -84,15 +84,34 @@ def plot_matrix(mat, curve_x=None, curve_y=None, reshapen=None):
     ax.plot(curve_x, curve_y, '--', color='white')
     savefig(opts.output, suffix='{}_c'.format(suffix))
 
-def cmp(a, b):
-    good = np.allclose(a, b, rtol=0, atol=1e-15)
-    print( good and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+    return mat
+
+def cmp(a, b, what, atol=1e-15):
+    good = np.allclose(a, b, rtol=0, atol=atol)
     if not good:
         diff = a-b
-        print( 'diff' )
-        print( diff )
-        print()
+        print('Left:')
+        print(a)
+        print('Right:')
+        print(b)
+        print('Diff:', diff.shape)
         print(diff)
+    print(what, good and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
+
+def cmp_rebin(a, b, what): return cmp(a, b, what, 1.e-12)
+
+def check_projection(mat):
+    proj = mat.sum(axis=0)
+    i1, i2 = 0, -1
+    while proj[i1]==0.0: i1+=1 # truncate beginning zeros
+    while proj[i2]==0.0: i2-=1 # truncate ending zeros
+    i1 = i1+1 # remove partial values (i1), i2 is already offset
+
+    projt = proj[i1:i2]
+
+    assert np.allclose(projt, 1.0, rtol=0, atol=1.e-15)
+
+    return proj
 
 coeff_a = 13
 coeff_b = -24
@@ -135,11 +154,9 @@ for step in (1.0, 0.5, 0.1):
     matrices[nbins] = mat_b.copy()
 
     print( 'Mat B and its sum' )
-    print( mat_b )
-    matbsum = mat_b.sum( axis=0 )
-    print( matbsum )
-    # checkones = matbsum!=0.0
-    # assert np.allclose(matbsum[checkones][1:-1], 1, rtol=0, atol=1.e-16)
+    print(mat_b)
+    matbsum = check_projection(mat_b)
+    print(matbsum)
 
     ntrue.hist.hist.data()
     tflag1a = ntrue.hist.tainted()
@@ -178,7 +195,10 @@ for nbins, mat in matrices.items():
         if nbins%nbins1:
             continue
 
-        plot_matrix(mat, xfine, fxfine, reshapen=ratio)
+        rebinned = plot_matrix(mat, xfine, fxfine, reshapen=ratio)
+        original = matrices[nbins1]
+
+        cmp_rebin(original, rebinned, 'Rebin {}->{}: '.format(nbins, nbins1))
 
 if opts.show:
     plt.show()
