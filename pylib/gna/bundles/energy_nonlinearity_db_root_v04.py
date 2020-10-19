@@ -45,7 +45,7 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
         if 'par' in cfg:
             return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_interpolator', 'lsnl_edges')
         else:
-            return ('lsnl_weight',), ('lsnl', 'lsnl_component', 'lsnl_edges')
+            return ('lsnl_weight',), ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_interpolator', 'lsnl_edges')
 
     def build(self):
         self.objects=NestedDict()
@@ -154,6 +154,8 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
 
     def make_diff(self, graphs):
         names = self.cfg.names
+        if isinstance(names, (dict,NestedDict)):
+            names = list(names.keys())
         nom, others = names[0], names[1:]
 
         nominal = graphs[nom][1]
