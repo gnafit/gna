@@ -138,6 +138,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 ibd         = 'ibd'          if 'multieres' in energy_model else 'rebin(ibd)',
                 )
 
+        skiplsnl = 'lsnl' not in energy_model and ''
         self.formula = [
                 # Some common definitions
                 'baseline[d,r]',
@@ -153,7 +154,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Energy model
                 #
-                'lsnl_edges| evis_hist, evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'if 'lsnl' in energy_model else '',
+                skiplsnl or 'lsnl_coarse = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
+                skiplsnl or 'lsnl_interpolator| lsnl_x(), lsnl_coarse, evis_edges() ',
+                skiplsnl or 'lsnl_edges| evis_hist',
                 'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
                 #
                 # Reactor part
@@ -391,7 +394,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         objectname = 'SNF_FluxRatio'
                         ),
                 lsnl = OrderedDict(
-                        bundle     = dict(name='energy_nonlinearity_db_root', version='v03', major='l'),
+                        bundle = dict(name='energy_nonlinearity_db_root', version='v04', major='l',),
                         names      = OrderedDict( [
                             ('nominal', 'positronScintNL'),
                             ('pull0', 'positronScintNLpull0'),
@@ -400,10 +403,9 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                             ('pull3', 'positronScintNLpull3'),
                             ]),
                         filename   = 'data/data_juno/data-joint/2020-06-11-NMO-Analysis-Input/deprecated/JUNOInputs2020_6_26.root',
-                        edges      = 'evis_edges',
                         extrapolation_strategy = 'extrapolate',
                         nonlin_range = (0.95, 12.),
-                        expose_matrix = True
+                        expose_matrix = False
                         ),
                 shape_uncertainty = OrderedDict(
                         unc = uncertain(1.0, 1.0, 'percent'),
