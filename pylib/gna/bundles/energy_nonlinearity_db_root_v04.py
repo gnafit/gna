@@ -63,7 +63,7 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
             except:
                 raise Exception('Unable to get x,y for nonlinearity {}'.format(name))
 
-            Y = C.Points(y)
+            Y = C.Points(y*x)
 
             if i:
                 label=itl.current_format('NL correction {autoindex}')
@@ -82,8 +82,8 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
         #
         # Create direct and inverse interpolators
         #
-        interp_direct  = C.InterpLinear(labels=('NL InSeg direct'))
-        interp_inverse = C.InterpLinear(labels=('NL InSeg inverse'))
+        interp_direct  = C.InterpLinear(labels=('NL InSeg direct', 'NL interp direct'))
+        interp_inverse = C.InterpLinear(labels=('NL InSeg inverse', 'NL interp inverse'))
         self.objects['interp_direct']=interp_direct
         self.objects['interp_inverse']=interp_inverse
 
@@ -92,10 +92,11 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
         # x, y -> interp_direct  -> interp_direct(bin edges)
         # y, x -> interp_inverse -> interp_direct(bin edges)
         self.set_input('lsnl_interpolator', None, (interp_direct.insegment.edges, interp_direct.interp.x,     interp_inverse.interp.y),                                    argument_number=0)
-        self.set_input('lsnl_interpolator', None, (interp_direct.interp.y,                                    interp_inverse.insegment.edges, interp_direct.interp.x),     argument_number=1)
-        self.set_input('lsnl_interpolator', None, (interp_direct.insegment.points, interp_direct.interp.newx, interp_inverse.insegment.points, interp_direct.interp.newx), argument_number=2)
-        # interp_direct.interp.interp
-        # interp_inverse.interp.interp
+        self.set_input('lsnl_interpolator', None, (interp_direct.interp.y,                                    interp_inverse.insegment.edges, interp_inverse.interp.x),     argument_number=1)
+        self.set_input('lsnl_interpolator', None, (interp_direct.insegment.points, interp_direct.interp.newx, interp_inverse.insegment.points, interp_inverse.interp.newx), argument_number=2)
+
+        self.set_output('lsnl_direct', None, interp_direct.interp.interp)
+        self.set_output('lsnl_inverse', None, interp_inverse.interp.interp)
 
         expose_matrix = self.cfg.get('expose_matrix', False)
         with self.namespace:
@@ -146,9 +147,20 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
 
         graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
         self.check_same_x(graphs)
+        self.make_diff(graphs)
 
         tfile.Close()
         return graphs
+
+    def make_diff(self, graphs):
+        names = self.cfg.names
+        nom, others = names[0], names[1:]
+
+        nominal = graphs[nom][1]
+
+        for name in others:
+            y = graphs[name][1]
+            y-=nominal
 
     def check_same_x(self, graphs):
         xcommon = None
