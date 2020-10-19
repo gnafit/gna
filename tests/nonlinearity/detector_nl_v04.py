@@ -48,11 +48,11 @@ indices = [
 lib = dict()
 
 formulas = [
-        'evis_hist()',
         'evis_edges()',
         'lsnl_coarse = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
         'lsnl_interpolator| lsnl_x(), lsnl_coarse, evis_edges() '
-        # 'lsnl_edges| evis_hist(), evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
+        'lsnl_edges| hist()',
+        'lsnl| hist()',
         ]
 
 expr = Expression_v01(formulas, indices=indices)
@@ -63,7 +63,7 @@ expr = Expression_v01(formulas, indices=indices)
 cfg = NestedDict(
         edges = dict(
             bundle=dict(name='predefined_v01'),
-            name='evis_hist',
+            name='hist',
             inputs=None,
             outputs=hist.single(),
             ),

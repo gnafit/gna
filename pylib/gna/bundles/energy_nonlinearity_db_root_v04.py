@@ -21,10 +21,11 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
 
     Changes since v03:
     - Switched to HistNonlinearityB
+    - Does not support other major indices, apart from component
     """
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1, 2, 'major')
+        self.check_nidx_dim(1, 1, 'major')
 
         if len(self.cfg.bundle.major)==2:
             detector_name, component_name = self.cfg.bundle.major
@@ -47,7 +48,7 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
             return ('lsnl_weight',), ('lsnl', 'lsnl_component', 'lsnl_edges')
 
     def build(self):
-        self.objects={}
+        self.objects=NestedDict()
         data = self.load_data()
 
         # Correlated part of the energy nonlinearity factor
@@ -93,44 +94,25 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
         self.set_input('lsnl_interpolator', None, (interp_direct.insegment.edges, interp_direct.interp.x,     interp_inverse.interp.y),                                    argument_number=0)
         self.set_input('lsnl_interpolator', None, (interp_direct.interp.y,                                    interp_inverse.insegment.edges, interp_direct.interp.x),     argument_number=1)
         self.set_input('lsnl_interpolator', None, (interp_direct.insegment.points, interp_direct.interp.newx, interp_inverse.insegment.points, interp_direct.interp.newx), argument_number=2)
-
-        # import IPython; IPython.embed()
-        return
-
-        #
-        # Interpolate curves on the default binning
-        # (extrapolate as well)
-        #
-        self.newx_out = self.context.outputs[self.cfg.edges]
-        newx = self.newx_out.data()
-        newy = OrderedDict()
-        for name, xy in graphs.items():
-            f = self.interpolate( xy, newx )
-            newy[name]=f
-            self.storage[name] = f.copy()
-
-        #
-        # All curves but first are the corrections to the nominal
-        #
-        newy_values = newy.values()
-        for f in newy_values[1:]:
-            f-=newy_values[0]
+        # interp_direct.interp.interp
+        # interp_inverse.interp.interp
 
         expose_matrix = self.cfg.get('expose_matrix', False)
         with self.namespace:
             for i, itd in enumerate(self.detector_idx.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
                 """Construct the nonlinearity calss"""
-                nonlin = R.HistNonlinearity(expose_matrix, labels=itd.current_format('NL matrix {autoindex}'))
+                nonlin = R.HistNonlinearityB(expose_matrix, labels=itd.current_format('NL matrix {autoindex}'))
                 try:
                     nonlin.set_range(*self.cfg.nonlin_range)
                 except KeyError:
                     pass
 
-                self.context.objects[('nonlinearity',)+itd.current_values()] = nonlin
+                self.objects[('nonlinearity',)+itd.current_values()] = nonlin
 
-                self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,         argument_number=0)
-                self.set_input('lsnl_edges', itd, nonlin.matrix.EdgesModified, argument_number=1)
+                self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,              argument_number=0)
+                interp_direct.interp.interp  >> nonlin.matrix.EdgesModified
+                interp_inverse.interp.interp >> nonlin.matrix.BackwardProjection
                 self.set_output('lsnl_matrix', itd, nonlin.matrix.FakeMatrix)
 
                 trans = nonlin.smear
