@@ -13,7 +13,8 @@ from gna.env import env
 import gna.constructors as C
 import numpy as N
 from gna.configurator import NestedDict, uncertain
-from physlib import percent
+from gna.expression.expression_v01 import *
+from gna.graphviz import savegraph
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -21,29 +22,6 @@ parser.add_argument( '-o', '--output', help='output file' )
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 opts=parser.parse_args()
-
-#
-# Configure
-#
-cfg = NestedDict(
-    # Bundle name
-    bundle = dict(name='energy_nonlinearity_db_root', version='v04',
-        nidx=[('d', 'detector', ['D1']),
-              ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'])
-              ],
-        major='dl',
-        ),
-    # file to read
-    filename = 'data/data_dayabay/tmp/detector_nl_consModel_450itr.root',
-    # TGraph names. First curve will be used as nominal
-    names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
-        # The uncorrelated energy scale uncertainty type (absolute/relative)
-    par = uncertain(1.0, 0.2, 'percent'),
-    parname = 'escale',
-    extrapolation_strategy = 'extrapolate',
-    nonlin_range = (0.5, 12.),
-    edges = 'evis_edges',
-    )
 
 #
 # Make input histogram
@@ -56,13 +34,79 @@ def singularities( values, edges ):
 
 nbins = 240
 edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
-points = C.Points(edges)
+points = C.Points(edges, labels='Bin edges')
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
-hist = C.Histogram(edges, phist)
+hist = C.Histogram(edges, phist, labels='Bin edges (hist)')
 
 #
-# Initialize bundle
+# Initialize expression
 #
+indices = [
+        ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'])
+    ]
+
+lib = dict()
+
+formulas = [
+        'evis_hist()',
+        'evis_edges()',
+        'lsnl_coarse = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
+        'lsnl_interpolator| lsnl_x(), lsnl_coarse, evis_edges() '
+        # 'lsnl_edges| evis_hist(), evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
+        ]
+
+expr = Expression_v01(formulas, indices=indices)
+
+#
+# Configuration
+#
+cfg = NestedDict(
+        edges = dict(
+            bundle=dict(name='predefined_v01'),
+            name='evis_hist',
+            inputs=None,
+            outputs=hist.single(),
+            ),
+        edges1 = dict(
+            bundle=dict(name='predefined_v01'),
+            name='evis_edges',
+            inputs=None,
+            outputs=points.single(),
+            ),
+        nonlin = dict(
+            bundle = dict(name='energy_nonlinearity_db_root', version='v04',
+                major='l',
+                ),
+            # file to read
+            filename = 'data/data_dayabay/tmp/detector_nl_consModel_450itr.root',
+            # TGraph names. First curve will be used as nominal
+            names = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
+                # The uncorrelated energy scale uncertainty type (absolute/relative)
+            par = uncertain(1.0, 0.2, 'percent'),
+            parname = 'escale',
+            extrapolation_strategy = 'extrapolate',
+            nonlin_range = (0.5, 12.),
+            )
+    )
+
+#
+# Initialize bundles
+#
+expr.parse()
+expr.guessname(lib, save=True)
+expr.tree.dump()
+context = ExpressionContext_v01(cfg, ns=env.globalns)
+expr.build(context)
+
+print(context.outputs)
+
+savegraph(context.outputs.evis_edges, opts.dot)
+
+import IPython; IPython.embed()
+
+import sys
+sys.exit()
+
 b, = execute_bundles(cfg=cfg)
 pars = [ p for k, p in b.common_namespace.items() if k.startswith('weight') ]
 escale = b.common_namespace['escale']

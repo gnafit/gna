@@ -160,7 +160,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Energy model
                 #
-                'lsnl_edges| evis_hist, evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'if 'lsnl' in energy_model else '',
+                'lsnl_edges| evis_hist, evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()' if 'lsnl' in energy_model else '',
                 'eres_matrix| evis_hist'     if 'eres'      in energy_model else '',
                 #
                 # Worst case spectral distortions

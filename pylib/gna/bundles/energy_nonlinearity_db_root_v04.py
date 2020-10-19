@@ -42,11 +42,61 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
     @staticmethod
     def _provides(cfg):
         if 'par' in cfg:
-            return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_component', 'lsnl_edges')
+            return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_interpolator', 'lsnl_edges')
         else:
             return ('lsnl_weight',), ('lsnl', 'lsnl_component', 'lsnl_edges')
 
-    def build_graphs( self, graphs ):
+    def build(self):
+        self.objects={}
+        data = self.load_data()
+
+        # Correlated part of the energy nonlinearity factor
+        # a weighted sum of input curves
+        for i, itl in enumerate(self.component_idx.iterate()):
+            name, = itl.current_values()
+            if not name in data:
+                raise self._exception('The nonlinearity curve {} is not provided'.format(name))
+
+            try:
+                x, y = data[name]
+            except:
+                raise Exception('Unable to get x,y for nonlinearity {}'.format(name))
+
+            Y = C.Points(y)
+
+            if i:
+                label=itl.current_format('NL correction {autoindex}')
+            else:
+                label=itl.current_format('NL nominal ({autoindex})')
+
+                X = C.Points(x)
+                X.points.setLabel(label+' X')
+                self.set_output('lsnl_x', None, X.single())
+                self.objects[('curves', name, 'X')] = X
+
+            Y.points.setLabel(label+' Y')
+            self.set_output('lsnl_component_y', itl, Y.single())
+            self.objects[('curves', name, 'Y')] = Y
+
+        #
+        # Create direct and inverse interpolators
+        #
+        interp_direct  = C.InterpLinear(labels=('NL InSeg direct'))
+        interp_inverse = C.InterpLinear(labels=('NL InSeg inverse'))
+        self.objects['interp_direct']=interp_direct
+        self.objects['interp_inverse']=interp_inverse
+
+        #
+        # Interp_interpolator(xcoarse, ycoarse, newx)
+        # x, y -> interp_direct  -> interp_direct(bin edges)
+        # y, x -> interp_inverse -> interp_direct(bin edges)
+        self.set_input('lsnl_interpolator', None, (interp_direct.insegment.edges, interp_direct.interp.x,     interp_inverse.interp.y),                                    argument_number=0)
+        self.set_input('lsnl_interpolator', None, (interp_direct.interp.y,                                    interp_inverse.insegment.edges, interp_direct.interp.x),     argument_number=1)
+        self.set_input('lsnl_interpolator', None, (interp_direct.insegment.points, interp_direct.interp.newx, interp_inverse.insegment.points, interp_direct.interp.newx), argument_number=2)
+
+        # import IPython; IPython.embed()
+        return
+
         #
         # Interpolate curves on the default binning
         # (extrapolate as well)
@@ -65,22 +115,6 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
         newy_values = newy.values()
         for f in newy_values[1:]:
             f-=newy_values[0]
-
-        # Correlated part of the energy nonlinearity factor
-        # a weighted sum of input curves
-        for i, itl in enumerate(self.component_idx.iterate()):
-            name, = itl.current_values()
-            if not name in newy:
-                raise self._exception('The nonlinearity curve {} is not provided'.format(name))
-            y = newy[name]
-            pts = C.Points( y, ns=self.namespace )
-            if i:
-                label=itl.current_format('NL correction {autoindex}')
-            else:
-                label=itl.current_format('NL nominal ({autoindex})')
-            pts.points.setLabel(label)
-            self.set_output('lsnl_component', itl, pts.single())
-            self.context.objects[('curves', name)] = pts
 
         expose_matrix = self.cfg.get('expose_matrix', False)
         with self.namespace:
@@ -113,7 +147,7 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
     def get_buffers_auto(self, (k, obj)):
         return k, get_buffers_graph_or_hist1(obj)
 
-    def build(self):
+    def load_data(self):
         tfile = R.TFile( self.cfg.filename, 'READ' )
         if tfile.IsZombie():
             raise IOError( 'Can not read ROOT file: '+self.cfg.filename )
@@ -129,11 +163,20 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
             raise IOError( 'Some objects were not read from file: '+self.cfg.filename )
 
         graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
-
-        ret = self.build_graphs( graphs )
+        self.check_same_x(graphs)
 
         tfile.Close()
-        return ret
+        return graphs
+
+    def check_same_x(self, graphs):
+        xcommon = None
+        for name, (x, y) in graphs.items():
+            if xcommon is None:
+                xcommon = x
+                continue
+
+            if not N.allclose(xcommon, x, rtol=0, atol=1.e-16):
+                raise self.exception('Nonlinearity curves X should be the same')
 
     def define_variables(self):
         par=None
