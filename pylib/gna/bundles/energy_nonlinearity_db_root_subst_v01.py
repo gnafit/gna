@@ -3,7 +3,7 @@
 from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
-import numpy as N
+import numpy as np
 import gna.constructors as C
 from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
@@ -52,7 +52,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
 
     def build(self):
         self.objects=NestedDict()
-        data = self.load_data()
+        data, gradients = self.load_data()
 
         # Correlated part of the energy nonlinearity factor
         # a weighted sum of input curves
@@ -66,7 +66,8 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             except:
                 raise Exception('Unable to get x,y for nonlinearity {}'.format(name))
 
-            Y = C.Points(y*x)
+            Y = C.Points(y)
+            Grad = C.Points(gradients[name])
 
             if i:
                 label=itl.current_format('NL correction {autoindex}')
@@ -79,8 +80,11 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
                 self.objects[('curves', name, 'X')] = X
 
             Y.points.setLabel(label+' Y')
+            Grad.points.setLabel(label+' gradient')
             self.set_output('lsnl_component_y', itl, Y.single())
+            self.set_output('lsnl_gradient_y', itl, Grad.single())
             self.objects[('curves', name, 'Y')] = Y
+            self.objects[('curves', name, 'Grad')] = Grad
 
         #
         # Create direct and inverse interpolators
@@ -113,33 +117,33 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         self.set_output('lsnl_evis',    None, interp_evis.interp.interp)
 
         expose_matrix = self.cfg.get('expose_matrix', False)
-        with self.namespace:
-            for i, itd in enumerate(self.detector_idx.iterate()):
-                """Finally, original bin edges multiplied by the correction factor"""
-                """Construct the nonlinearity calss"""
+        for i, itd in enumerate(self.detector_idx.iterate()):
+            """Finally, original bin edges multiplied by the correction factor"""
+            """Construct the nonlinearity calss"""
+            with self.namespace:
                 nonlin = R.HistNonlinearityB(expose_matrix, labels=itd.current_format('NL matrix {autoindex}'))
-                try:
-                    nonlin.set_range(*self.cfg.nonlin_range)
-                except KeyError:
-                    pass
+            try:
+                nonlin.set_range(*self.cfg.nonlin_range)
+            except KeyError:
+                pass
 
-                self.objects[('nonlinearity',)+itd.current_values()] = nonlin
+            self.objects[('nonlinearity',)+itd.current_values()] = nonlin
 
-                self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,              argument_number=0)
-                interp_direct.interp.interp  >> nonlin.matrix.EdgesModified
-                interp_inverse.interp.interp >> nonlin.matrix.BackwardProjection
-                self.set_output('lsnl_matrix', itd, nonlin.matrix.FakeMatrix)
+            self.set_input('lsnl_edges', itd, nonlin.matrix.Edges,              argument_number=0)
+            interp_direct.interp.interp  >> nonlin.matrix.EdgesModified
+            interp_inverse.interp.interp >> nonlin.matrix.BackwardProjection
+            self.set_output('lsnl_matrix', itd, nonlin.matrix.FakeMatrix)
 
-                trans = nonlin.smear
-                for j, itother in enumerate(self.nidx_minor.iterate()):
-                    it = itd+itother
-                    if j:
-                        trans = nonlin.add_transformation()
-                        nonlin.add_input()
-                    trans.setLabel(it.current_format('NL {autoindex}'))
+            trans = nonlin.smear
+            for j, itother in enumerate(self.nidx_minor.iterate()):
+                it = itd+itother
+                if j:
+                    trans = nonlin.add_transformation()
+                    nonlin.add_input()
+                trans.setLabel(it.current_format('NL {autoindex}'))
 
-                    self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
-                    self.set_output('lsnl', it, trans.Nrec)
+                self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
+                self.set_output('lsnl', it, trans.Nrec)
 
     def get_buffers_auto(self, (k, obj)):
         return k, get_buffers_graph_or_hist1(obj)
@@ -159,12 +163,17 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         if not all( graphs.values() ):
             raise IOError( 'Some objects were not read from file: '+self.cfg.filename )
 
+        def mult((x, y)): y*=x
+        def grad((k, (x,y))): return k, np.gradient(y, x[1]-x[0])
+
         graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
         self.check_same_x(graphs)
         self.make_diff(graphs)
+        map(mult, graphs.values())
+        gradients = OrderedDict(map(grad, graphs.items()))
 
         tfile.Close()
-        return graphs
+        return graphs, gradients
 
     def make_diff(self, graphs):
         names = self.cfg.names
@@ -185,8 +194,11 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
                 xcommon = x
                 continue
 
-            if not N.allclose(xcommon, x, rtol=0, atol=1.e-16):
+            if not np.allclose(xcommon, x, rtol=0, atol=1.e-16):
                 raise self.exception('Nonlinearity curves X should be the same')
+
+        widths = xcommon[1:]-xcommon[:-1]
+        assert np.allclose(widths, widths[0], rtol=0, atol=1.e-15), "LSNL steps should be similar"
 
     def define_variables(self):
         par=None
