@@ -141,17 +141,23 @@ def plot_projections(update=False, relative=False, label=''):
     direct = context.outputs['lsnl_direct'].data().copy()
     inverse = context.outputs['lsnl_inverse'].data().copy()
 
+    evis = context.outputs['lsnl_evis'].data().copy()
+    eq   = context.outputs['energy'].data().copy()
+
     if relative:
         direct/=edges
         direct[N.isnan(direct)]=0.0
 
         edges1 = edges/inverse
         edges1[N.isnan(edges1)]=0.0
+
+        eq/=evis
     else:
         edges1=edges
 
-    ax.plot(edges, direct, '-.', label='Direct'+label, alpha=0.7)
-    ax.plot(inverse, edges1, ':', label='Inverse'+label, alpha=0.7)
+    ax.plot(edges, direct, '-.',   label='Direct'+label, alpha=0.5)
+    ax.plot(inverse, edges1, ':',  label='Inverse'+label, alpha=0.5)
+    ax.plot(evis, eq, '-.', label='Inverse, integration points'+label, alpha=0.5)
 
     ax.legend()
 
@@ -171,9 +177,13 @@ def plotgradient(update=False):
     grad = context.outputs['lsnl_gradient'].data().copy()
     edges1 = context.outputs['lsnl_x'].data().copy()
 
-    ax.plot(edges1, grad, '-.', label='Gradient')
+    evis = context.outputs['lsnl_evis'].data().copy()
+    deqdevis = context.outputs['lsnl_interpolator_grad'].data().copy()
 
-    # ax.legend()
+    ax.plot(edges1, grad, '-.', label='Gradient')
+    ax.plot(evis, deqdevis, ':', label='Gradient interpolated')
+
+    ax.legend()
 
 def plotmat():
     fig = plt.figure()

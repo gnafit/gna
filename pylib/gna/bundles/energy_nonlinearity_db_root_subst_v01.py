@@ -140,6 +140,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         self.set_output('lsnl_direct',  None, interp_direct.interp.interp)
         self.set_output('lsnl_inverse', None, interp_inverse.interp.interp)
         self.set_output('lsnl_evis',    None, interp_evis.interp.interp)
+        self.set_output('lsnl_interpolator_grad', None, interp_deq_devis.interp.interp)
 
         interp_evis.interp.interp >> (interp_deq_devis.insegment.points, interp_deq_devis.interp.newx)
 
