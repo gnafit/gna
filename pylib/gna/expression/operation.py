@@ -280,7 +280,7 @@ class OSelect1(TCall):
     def __init__(self, index, value, **kwargs):
         self.operation='select1'
         index.set_current(value)
-        self._index_to_reduce = index
+        self._index_to_reduce = Index(index)
         self._nindex_to_reduce=None
         self._index_value = value
         TCall.__init__(self, undefinedname)
