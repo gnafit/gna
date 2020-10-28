@@ -124,7 +124,8 @@ env.globalns.printparameters(labels=True)
 def plot_projections(update=False, relative=False, label=''):
     newfigure = not update
     if newfigure:
-        fig = plt.figure()
+        fig = plt.figure('proj')
+        fig.clf()
         ax  = plt.subplot(111, xlabel='E', ylabel='E\'', title='')
         ax.minorticks_on()
         ax.grid()
@@ -136,7 +137,8 @@ def plot_projections(update=False, relative=False, label=''):
         else:
             ax.plot([edges[0], edges[-1]], [edges[0], edges[-1]], '--', linewidth=0.5)
     else:
-        ax=plt.gca()
+        fig = plt.figure('proj')
+        ax=fig.gca()
 
     direct = context.outputs['lsnl_direct'].data().copy()
     inverse = context.outputs['lsnl_inverse'].data().copy()
@@ -161,18 +163,23 @@ def plot_projections(update=False, relative=False, label=''):
 
     ax.legend()
 
+    return ax
+
 def plotgradient(update=False):
     newfigure = not update
     if newfigure:
-        fig = plt.figure()
+        fig = plt.figure('gradient')
+        fig.clf()
         ax  = plt.subplot(111, xlabel='E', ylabel='dE\'/dE', title='Gradient')
         ax.minorticks_on()
         ax.grid()
         ax.set_xlim(0.5, edges[-1])
+        ax.set_ylim(0.7, 1.1)
 
         # ax.plot([edges[0], edges[-1]], [edges[0], edges[-1]], '--', linewidth=0.5)
     else:
-        ax=plt.gca()
+        fig = plt.figure('gradient')
+        ax=fig.gca()
 
     grad = context.outputs['lsnl_gradient'].data().copy()
     edges1 = context.outputs['lsnl_x'].data().copy()
@@ -184,6 +191,8 @@ def plotgradient(update=False):
     ax.plot(evis, deqdevis, ':', label='Gradient interpolated')
 
     ax.legend()
+
+    return ax
 
 def plotmat():
     fig = plt.figure()
@@ -262,14 +271,20 @@ savefig(opts.output, suffix='_hist')
 pars = env.globalns('lsnl_weight').items()
 
 plot_projections(relative=True)
+plotgradient()
 for name, par in pars:
     if name=='nominal': continue
     par.set(1.0)
 
-    plot_projections(update=True, label=' '+name, relative='True')
+    axp=plot_projections(update=True, label=' '+name, relative='True')
+    axg=plotgradient(update=True)
 
     par.set(0.0)
+
+plt.sca(axp)
 savefig(opts.output, suffix='_curves_rel')
+plt.sca(axg)
+savefig(opts.output, suffix='_gradients')
 
 checktaint()
 

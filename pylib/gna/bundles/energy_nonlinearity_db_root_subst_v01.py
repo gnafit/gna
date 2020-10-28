@@ -197,6 +197,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
         self.check_same_x(graphs)
         self.make_diff(graphs)
+        graphs = self.supersample(graphs)
         map(mult, graphs.values())
         gradients = OrderedDict(map(grad, graphs.items()))
 
@@ -214,6 +215,12 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         for name in others:
             y = graphs[name][1]
             y-=nominal
+
+    def supersample(self, graphs):
+        newgraphs = OrderedDict()
+
+        x = graphs.values()[0][1]
+        return graphs
 
     def check_same_x(self, graphs):
         xcommon = None
