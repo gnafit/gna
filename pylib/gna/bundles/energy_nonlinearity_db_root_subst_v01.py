@@ -16,8 +16,8 @@ from collections import Iterable, Mapping
 class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
     """Detector energy nonlinearity parametrized via few curves (Daya Bay approach)
 
-    The bundle provides the inverse energy scale converion Evisible(Equenched)
-    defined by inverting and interpolating the Equenching(Evisible) curve.
+    The bundle provides the inverse energy scale converion Evisible(Eqed)
+    defined by inverting and interpolating the Eqing(Evisible) curve.
     Evisible is the total positron energy + electron mass: Evis=Ee+me.
 
     This plugin also keeps the HistNonlinearityB instance as well.
@@ -43,7 +43,10 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        transs = ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_interpolator', 'lsnl_edges')
+        transs = ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_component_grad',
+                  'lsnl_interpolator',
+                  'lsnl_interpolator_grad',
+                  'lsnl_edges')
         pars   = ('lsnl_weight',)
         if 'par' in cfg:
             return ('escale',)+pars, transs
@@ -82,7 +85,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             Y.points.setLabel(label+' Y')
             Grad.points.setLabel(label+' gradient')
             self.set_output('lsnl_component_y', itl, Y.single())
-            self.set_output('lsnl_gradient_y', itl, Grad.single())
+            self.set_output('lsnl_component_grad', itl, Grad.single())
             self.objects[('curves', name, 'Y')] = Y
             self.objects[('curves', name, 'Grad')] = Grad
 
@@ -94,27 +97,51 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         self.objects['interp_direct']=interp_direct
         self.objects['interp_inverse']=interp_inverse
 
-        interp_evis = C.InterpLinear(labels=('NL InSeg Evis(Equench)', 'Evis(Equench)'))
+        interp_evis = C.InterpLinear(labels=('NL InSeg Evis(Eq)', 'Evis(Eq)'))
         self.objects['interp_evis']=interp_evis
 
-        #
-        # Interp_interpolator(xcoarse, ycoarse, newx_edges, newx_points)
+        interp_deq_devis = C.InterpLinear(labels=('NL InSeg dEq/dEvis)', 'dEq/dEvis'))
+        self.objects['interp_deq_devis']=interp_deq_devis
+
+        # Interp_interpolators
         # interp_evis acts similarly to interp_invers, but expects different interpolation points
-        # x, y -> interp_direct  -> interp_direct(bin edges)
-        # y, x -> interp_inverse -> interp_direct(bin edges)
-        # y, x -> interp_evis    -> interp_evis(integration points)
-        arg0=(interp_direct.insegment.edges, interp_direct.interp.x,     interp_inverse.interp.y                                    , interp_evis.interp.y)
-        arg1=(interp_direct.interp.y,                                    interp_inverse.insegment.edges, interp_inverse.interp.x    , interp_evis.insegment.edges, interp_evis.interp.x)
-        arg2=(interp_direct.insegment.points, interp_direct.interp.newx, interp_inverse.insegment.points, interp_inverse.interp.newx)
-        arg3=(interp_evis.insegment.points, interp_evis.interp.newx)
+        #
+        # x, y     -> interp_direct  : interp_direct(bin edges)
+        # y, x     -> interp_inverse : interp_direct(bin edges)
+        # y, x     -> interp_evis    : interp_evis(integration points of Eq)
+        # x, dy/dx -> interp_grad    : interp_grad(Evis(integration points of Eq))
+        #
+        # Arguments: Evis, Eq, E edges, E integration points
+        # Distribution:
+        #   Interpolator     Xorig   Yorig      Xnew
+        #   interp_direct    Evis    Eq         E edges
+        #   interp_inverse   Eq      Evis       E edges
+        #   interp_evis      Eq      Evis       E integration points
+        #   interp_grad      Evis    dEq/dEvis  interp_evis: Evis(Eq=E integration points)
+        #
+        arg0=     (interp_direct.insegment.edges, interp_direct.interp.x)
+        arg0=arg0+(interp_inverse.interp.y,)
+        arg0=arg0+(interp_evis.interp.y,)
+        arg0=arg0+(interp_deq_devis.insegment.edges, interp_deq_devis.interp.x)
+        arg1=     (interp_direct.interp.y,)
+        arg1=arg1+(interp_inverse.insegment.edges, interp_inverse.interp.x)
+        arg1=arg1+(interp_evis.insegment.edges, interp_evis.interp.x)
+        arg2=     (interp_direct.insegment.points, interp_direct.interp.newx)
+        arg2=arg2+(interp_inverse.insegment.points, interp_inverse.interp.newx)
+        arg3=     (interp_evis.insegment.points, interp_evis.interp.newx)
         self.set_input('lsnl_interpolator', None, arg0, argument_number=0)
         self.set_input('lsnl_interpolator', None, arg1, argument_number=1)
         self.set_input('lsnl_interpolator', None, arg2, argument_number=2)
         self.set_input('lsnl_interpolator', None, arg3, argument_number=3)
 
+        arg0=interp_deq_devis.interp.y
+        self.set_input('lsnl_interpolator_grad', None, arg0, argument_number=0)
+
         self.set_output('lsnl_direct',  None, interp_direct.interp.interp)
         self.set_output('lsnl_inverse', None, interp_inverse.interp.interp)
         self.set_output('lsnl_evis',    None, interp_evis.interp.interp)
+
+        interp_evis.interp.interp >> (interp_deq_devis.insegment.points, interp_deq_devis.interp.newx)
 
         expose_matrix = self.cfg.get('expose_matrix', False)
         for i, itd in enumerate(self.detector_idx.iterate()):

@@ -49,7 +49,9 @@ lib = dict()
 
 formulas = [
         'evis_edges()',
-        'lsnl_coarse = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
+        'lsnl_coarse   = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
+        'lsnl_gradient = sum[l]| lsnl_weight[l] * lsnl_component_grad[l]()',
+        'lsnl_interpolator_grad| lsnl_gradient',
         'lsnl_interpolator| lsnl_x(), lsnl_coarse, evis_edges(), energy()',
         'lsnl_edges| hist()',
         'lsnl| hist()',
@@ -153,6 +155,26 @@ def plot_projections(update=False, relative=False, label=''):
 
     ax.legend()
 
+def plotgradient(update=False):
+    newfigure = not update
+    if newfigure:
+        fig = plt.figure()
+        ax  = plt.subplot(111, xlabel='E', ylabel='dE\'/dE', title='Gradient')
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlim(0.5, edges[-1])
+
+        # ax.plot([edges[0], edges[-1]], [edges[0], edges[-1]], '--', linewidth=0.5)
+    else:
+        ax=plt.gca()
+
+    grad = context.outputs['lsnl_gradient'].data().copy()
+    edges1 = context.outputs['lsnl_x'].data().copy()
+
+    ax.plot(edges1, grad, '-.', label='Gradient')
+
+    # ax.legend()
+
 def plotmat():
     fig = plt.figure()
     ax = plt.subplot(111, xlabel='', ylabel='', title='')
@@ -217,6 +239,9 @@ savefig(opts.output, suffix='_projections')
 plot_projections(relative=True)
 savefig(opts.output, suffix='_projections_rel')
 
+plotgradient()
+savefig(opts.output, suffix='_grad')
+
 plotmat()
 savefig(opts.output, suffix='_matrix')
 
@@ -241,68 +266,4 @@ checktaint()
 if opts.show:
     plt.show()
 
-
-    # lines = ax.plot( edges, corr_lsnl.sum.sum.data(), '-', label=name )
-    # stride = 5
-    # ax.plot( b.storage.edges[::stride], b.storage[name][::stride], 'o', markerfacecolor='none', color=lines[0].get_color() )
-
-# for par in pars[1:]:
-    # par.set(0.0)
-
-# escale.set(1.1)
-# ax.plot( edges, corr.sum.sum.data(), '--', label='escale=1.1' )
-# escale.set(1.0)
-
-# ax.legend( loc='lower right' )
-
-# savefig(opts.output, suffix='_escale')
-
-# #
-# # Test bundle
-# #
-# smear.Ntrue( hist.hist )
-
-# #
-# # Plot hists
-# #
-# fig = plt.figure()
-# ax = plt.subplot( 111 )
-# ax.minorticks_on()
-# ax.grid()
-# ax.set_xlabel( '' )
-# ax.set_ylabel( '' )
-# ax.set_title( 'Non-linearity effect' )
-
-# smeared = smear.Nrec.data().copy()
-# print( 'Sum check for {} (diff): {}'.format( 1.0, phist.sum()-smeared.sum() ) )
-
-# plot_hist( edges, phist, label='original' )
-# lines = plot_hist( edges, smeared, label='smeared: nominal' )
-
-# ax.legend( loc='upper right' )
-# savefig(args.output)
-
-# #
-# # Plot matrix
-# #
-# fig = plt.figure()
-# ax1 = plt.subplot( 111 )
-# ax1.minorticks_on()
-# ax1.grid()
-# ax1.set_xlabel( 'Source bins' )
-# ax1.set_ylabel( 'Target bins' )
-# ax1.set_title( 'Daya Bay LSNL matrix' )
-# mat = convert(nonlin.getDenseMatrix(), 'matrix')
-# print( 'Col sum', mat.sum(axis=0) )
-
-# mat = N.ma.array( mat, mask= mat==0.0 )
-# c = ax1.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
-# add_colorbar( c )
-
-# newe = b.objects.edges_mod.values()[0].product.data()
-# ax1.plot( edges, newe, '--', color='white', linewidth=0.3 )
-
-# savefig( opts.output, suffix='_matrix', dpi=300 )
-
-# savefig( args.output, suffix='_mat' )
 
