@@ -26,6 +26,7 @@ set(TRANSFORMATION_SOURCES
   transformations/ratio/Convolution.cc
   transformations/ratio/PolyRatio.cc
   transformations/ratio/Ratio.cc
+  transformations/ratio/RatioBC.cc
   # Calculus
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -162,6 +163,7 @@ set(TRANSFORMATION_HEADERS
   NormalizedConvolution.hh
   PolyRatio.hh
   Ratio.hh
+  RatioBC.hh
   # Calculus
   Derivative.hh
   Jacobian.hh

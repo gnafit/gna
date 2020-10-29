@@ -249,7 +249,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
                 raise self.exception('Nonlinearity curves X should be the same')
 
         widths = xcommon[1:]-xcommon[:-1]
-        assert np.allclose(widths, widths[0], rtol=0, atol=1.e-15), "LSNL steps should be similar"
+        assert np.allclose(widths, widths[0], rtol=0, atol=1.e-14), "LSNL steps should be similar"
 
     def define_variables(self):
         par=None

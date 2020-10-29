@@ -100,6 +100,8 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         #
         # Optional formula parts
         #
+        keeplsnl = 'lsnl' in energy_model
+        keeperes = 'eres' in energy_model
         formula_options = dict(
                 #
                 # Oscillation probability
@@ -120,10 +122,10 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Energy model
                 #
-                lsnl = 'lsnl|'                                                if 'lsnl' in energy_model else '',
-                eres = 'eres|'                                                if 'eres' in energy_model else
-                       'concat[s]| rebin| subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model else
-                       '',
+                lsnl = "", #keeplsnl and 'lsnl|' or '',
+                eres = keeperes and 'eres|' or '',
+                       # 'concat[s]| rebin| subdetector_fraction[s] * eres[s]|' if 'multieres' in energy_model else
+                lsnl_jacobian = keeplsnl and '//lsnl_interpolator_grad()' or '',
                 #
                 # Backgrounds
                 #
@@ -138,8 +140,6 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 ibd         = 'ibd'          if 'multieres' in energy_model else 'rebin(ibd)',
                 )
 
-        skiplsnl = 'lsnl' not in energy_model and ''
-        skiperes = 'eres' not in energy_model and ''
         self.formula = [
                 # Some common definitions
                 'baseline[d,r]',
@@ -163,8 +163,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                 #
                 # Neutrino energy
                 #
-                # 'enu| ee(evis()), ctheta()',
-                'enu| ee(lsnl_evis()), ctheta()',
+                keeplsnl and 'enu| ee(lsnl_evis()), ctheta()' or 'enu| ee(evis()), ctheta()' ,
                 #
                 # Reactor part
                 #
@@ -205,8 +204,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         bracket(
                             ibd_xsec(enu(), ctheta())*
                             jacobian(enu(), ee(), ctheta())
-                        )
-                        /lsnl_interpolator_grad()
+                        ){lsnl_jacobian}
                     ) {shape_norm}
                 '''.format(**formula_options),
                 #
@@ -402,7 +400,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         objectname = 'SNF_FluxRatio'
                         ),
                 lsnl = OrderedDict(
-                        bundle = dict(name='energy_nonlinearity_db_root', version='v04', major='l',),
+                        bundle = dict(name='energy_nonlinearity_db_root_subst', version='v01', major='l',),
                         names      = OrderedDict( [
                             ('nominal', 'positronScintNL'),
                             ('pull0', 'positronScintNLpull0'),
@@ -452,23 +450,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                         ),
                 )
 
-        if 'eres' in self.opts.energy_model:
-            self.cfg.eres = OrderedDict(
-                    bundle = dict(name='detector_eres_normal', version='v01', major=''),
-                    # pars: sigma_e/e = sqrt(a^2 + b^2/E + c^2/E^2),
-                    # a - non-uniformity
-                    # b - statistical term
-                    # c - noise
-                    parameter = 'eres',
-                    pars = uncertaindict([
-                        ('a_nonuniform', (0.0082, 0.0001)),
-                        ('b_stat',       (0.0261, 0.0002)),
-                        ('c_noise',      (0.0123, 0.0004))
-                        ],
-                        mode='absolute'),
-                    expose_matrix = False
-                    )
-        elif 'multieres' in self.opts.energy_model:
+        if 'multieres' in self.opts.energy_model:
             self.cfg.subdetector_fraction = OrderedDict(
                     bundle = dict(name="parameters", version = "v03"),
                     parameter = "subdetector_fraction",
@@ -485,6 +467,22 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
                     relsigma = self.opts.eres_b_relsigma,
                     nph = 'data/data_juno/energy_resolution/2019_subdetector_eres_n200_proper/subdetector5_nph.txt',
                     rescale_nph = self.opts.eres_npe,
+                    expose_matrix = False
+                    )
+        else:
+            self.cfg.eres = OrderedDict(
+                    bundle = dict(name='detector_eres_normal', version='v01', major=''),
+                    # pars: sigma_e/e = sqrt(a^2 + b^2/E + c^2/E^2),
+                    # a - non-uniformity
+                    # b - statistical term
+                    # c - noise
+                    parameter = 'eres',
+                    pars = uncertaindict([
+                        ('a_nonuniform', (0.0082, 0.0001)),
+                        ('b_stat',       (0.0261, 0.0002)),
+                        ('c_noise',      (0.0123, 0.0004))
+                        ],
+                        mode='absolute'),
                     expose_matrix = False
                     )
 
@@ -584,7 +582,7 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
             fine = outputs.kinint2.AD1
 
         if 'lsnl' in self.opts.energy_model:
-            fine = outputs.lsnl.AD1
+            fine = outputs.kinint2.AD1
 
         if 'eres' in self.opts.energy_model:
             fine = outputs.eres.AD1
@@ -598,11 +596,12 @@ Changes since previous implementation [juno_sensitivity_v03_common]:
         # Force calculation of the stat errors
         outputs.juno_variance.AD1.data()
 
-        futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
+        # futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
         futurens[(self.detectorname, 'fine')] = fine
         futurens[(self.detectorname, 'final')] = outputs.observation.AD1
+
         if 'lsnl' in self.opts.energy_model:
-            futurens[(self.detectorname, 'lsnl')] = outputs.lsnl.AD1
+            futurens[(self.detectorname, 'lsnl')] = outputs.kinint2.AD1
 
         if 'eres' in self.opts.energy_model:
             futurens[(self.detectorname, 'eres')] = outputs.eres.AD1
