@@ -219,10 +219,24 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             y-=nominal
 
     def supersample(self, graphs):
+        times = self.cfg.get('supersample')
+        if not times or times==1:
+            return graphs
+        assert isinstance(times, int)
+
         newgraphs = OrderedDict()
 
-        x = graphs.values()[0][1]
-        return graphs
+        x = graphs.values()[0][0]
+        nbins = len(x)-1
+        newnbins = nbins*times
+        newx = np.linspace(x[0], x[-1], newnbins+1)
+
+        for name, (x,y) in graphs.items():
+            fcn = interp1d(x, y, kind='cubic', bounds_error=False, fill_value='extrapolate')
+            newy = fcn(newx)
+            newgraphs[name] = (newx, newy)
+
+        return newgraphs
 
     def check_same_x(self, graphs):
         xcommon = None

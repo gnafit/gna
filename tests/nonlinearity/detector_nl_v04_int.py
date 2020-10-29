@@ -15,6 +15,7 @@ import numpy as np
 from gna.configurator import NestedDict, uncertain
 from gna.expression.expression_v01 import *
 from gna.graphviz import savegraph
+import scipy
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -22,6 +23,7 @@ parser.add_argument( '-o', '--output', help='output file' )
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '-f', '--flat', action='store_true', help='use flat spectrum' )
+parser.add_argument( '--supersample', '--ss', type=int, help='supersample N times', metavar='N' )
 opts=parser.parse_args()
 
 #
@@ -36,13 +38,14 @@ def singularities( values, edges ):
 emin, emax = 0.0, 10.0
 nbins = 2000
 edges = np.linspace(emin, emax, nbins+1, dtype='d')
+binwidth = edges[1] - edges[0]
 points = C.Points(edges, labels='Bin edges')
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 if opts.flat:
-    phist[int((1.0-emin)/(emax-emin)):] = 1.0
+    phist[int(nbins*(1.0-emin)/(emax-emin)):] = 1.0
 hist = C.Histogram(edges, phist, labels='Input hist')
 
-phist_f = C.Points(np.hstack((phist, [0.0])))
+phist_f = C.Points(np.hstack((phist/binwidth, [0.0])))
 fcn_evis = C.InterpConst(labels=('InSegment (fcn_evis)', 'Interp fcn_evis'))
 fcn_evis.setXY(points.points.points, phist_f.points.points)
 fcn_eq = C.InterpConst(labels=('InSegment (fcn_eq)', 'Interp fcn_eq'))
@@ -67,7 +70,7 @@ formulas = [
         'hist_evis = integral_evis| fcn_evis| energy()',
         'lsnl_edges| hist_evis',
         'lsnl| hist_evis',
-        'hist_eq = integral_eq| fcn_eq(lsnl_evis())',
+        'hist_eq = integral_eq| fcn_eq(lsnl_evis())/lsnl_interpolator_grad()',
         ]
 
 expr = Expression_v01(formulas, indices=indices)
@@ -114,12 +117,13 @@ cfg = NestedDict(
             extrapolation_strategy = 'extrapolate',
             nonlin_range = (0.5, 12.),
             expose_matrix = True,
+            supersample=opts.supersample
             ),
         integrator = dict(
             bundle=dict(name='integral_1d', version='v03'),
             variable='energy',
             edges    = edges,
-            orders   = 5,
+            orders   = 3,
             instances = {
                 'integral_eq': 'Quenched energy integral',
                 'integral_evis': 'Visible energy integral',
@@ -280,6 +284,8 @@ def plothist():
     lsnl.plot_hist(linestyle='--',    alpha=0.5, label='Smeared')
     hist_eq.plot_hist(linestyle='-.', alpha=0.5, label='Variable substitution')
 
+    print('Modified:', lsnl.data)
+    print('Substitution:', hist_eq.data())
     print('Original histogram:', hist_evis.data().sum())
     print('Modified histogram:', lsnl.data().sum())
     print('Subsitution histogram:', hist_eq.data().sum())
