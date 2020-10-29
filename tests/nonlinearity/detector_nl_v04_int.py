@@ -21,6 +21,7 @@ parser = ArgumentParser()
 parser.add_argument( '-o', '--output', help='output file' )
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
+parser.add_argument( '-f', '--flat', action='store_true', help='use flat spectrum' )
 opts=parser.parse_args()
 
 #
@@ -32,15 +33,22 @@ def singularities( values, edges ):
     phist[indices] = 1.0
     return phist
 
-nbins = 240
-edges = np.linspace(0.0, 12.0, nbins+1, dtype='d')
+emin, emax = 0.0, 10.0
+nbins = 2000
+edges = np.linspace(emin, emax, nbins+1, dtype='d')
 points = C.Points(edges, labels='Bin edges')
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
+if opts.flat:
+    phist[int((1.0-emin)/(emax-emin)):] = 1.0
 hist = C.Histogram(edges, phist, labels='Input hist')
 
 phist_f = C.Points(np.hstack((phist, [0.0])))
-fcn = C.InterpConst(labels=('InSegment (fcn)', 'Interp fcn'))
-fcn.setXY(points.points.points, phist_f.points.points)
+fcn_evis = C.InterpConst(labels=('InSegment (fcn_evis)', 'Interp fcn_evis'))
+fcn_evis.setXY(points.points.points, phist_f.points.points)
+fcn_eq = C.InterpConst(labels=('InSegment (fcn_eq)', 'Interp fcn_eq'))
+fcn_eq.setXY(points.points.points, phist_f.points.points)
+fcn_evis.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
+fcn_eq.set_underflow_strategy(R.GNA.Interpolation.Strategy.Constant)
 
 #
 # Initialize expression
@@ -52,13 +60,14 @@ indices = [
 lib = dict()
 
 formulas = [
-        'hist = integral| fcn| energy()',
         'lsnl_coarse   = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
         'lsnl_gradient = sum[l]| lsnl_weight[l] * lsnl_component_grad[l]()',
         'lsnl_interpolator_grad| lsnl_gradient',
         'lsnl_interpolator| lsnl_x(), lsnl_coarse, energy_edges(), energy()',
-        'lsnl_edges| hist',
-        'lsnl| hist',
+        'hist_evis = integral_evis| fcn_evis| energy()',
+        'lsnl_edges| hist_evis',
+        'lsnl| hist_evis',
+        'hist_eq = integral_eq| fcn_eq(lsnl_evis())',
         ]
 
 expr = Expression_v01(formulas, indices=indices)
@@ -79,11 +88,17 @@ cfg = NestedDict(
             inputs=None,
             outputs=hist.single(),
             ),
-        fcn = dict(
+        fcn_evis = dict(
             bundle=dict(name='predefined_v01'),
-            name='fcn',
-            inputs=((fcn.interp.newx, fcn.insegment.points),),
-            outputs=fcn.interp.interp,
+            name='fcn_evis',
+            inputs=((fcn_evis.interp.newx, fcn_evis.insegment.points),),
+            outputs=fcn_evis.interp.interp,
+            ),
+        fcn_eq = dict(
+            bundle=dict(name='predefined_v01'),
+            name='fcn_eq',
+            inputs=((fcn_eq.interp.newx, fcn_eq.insegment.points),),
+            outputs=fcn_eq.interp.interp,
             ),
         nonlin = dict(
             bundle = dict(name='energy_nonlinearity_db_root_subst', version='v01',
@@ -101,10 +116,14 @@ cfg = NestedDict(
             expose_matrix = True,
             ),
         integrator = dict(
-            bundle=dict(name='integral_1d', version='v02'),
+            bundle=dict(name='integral_1d', version='v03'),
             variable='energy',
-            edges    = np.linspace(0.0, 12.0, 241, dtype='d'),
+            edges    = edges,
             orders   = 5,
+            instances = {
+                'integral_eq': 'Quenched energy integral',
+                'integral_evis': 'Visible energy integral',
+                }
             )
     )
 
@@ -244,11 +263,30 @@ def plothist():
     ax.minorticks_on()
     ax.grid()
 
-    lsnl = context.outputs['lsnl']
-    hist = context.outputs['integral']
+    hist_evis = context.outputs['integral_evis']
+    lsnl      = context.outputs['lsnl']
+    hist_eq   = context.outputs['integral_eq']
+    hmax = hist_evis.data().max()
 
-    hist.plot_hist(label='Original')
-    lsnl.plot_hist(label='Smeared')
+    energy    = context.outputs['energy'].data().copy()
+    fcn_evis  = context.outputs['fcn_evis'].data().copy()
+    fcn_evis[fcn_evis>0] = hmax
+
+    energy1   = context.outputs['lsnl_evis'].data().copy()
+    fcn_eq  = context.outputs['fcn_eq'].data().copy()
+    fcn_eq*=hmax/fcn_eq.max()
+
+    hist_evis.plot_hist(label='Original')
+    lsnl.plot_hist(linestyle='--',    alpha=0.5, label='Smeared')
+    hist_eq.plot_hist(linestyle='-.', alpha=0.5, label='Variable substitution')
+
+    print('Original histogram:', hist_evis.data().sum())
+    print('Modified histogram:', lsnl.data().sum())
+    print('Subsitution histogram:', hist_eq.data().sum())
+
+    ax.plot(energy, fcn_evis, '.', color='black', markersize=1.5, label='Evis integration points (not to scale)')
+    # ax.plot(energy1, fcn_eq, '.', color='red', markersize=1.5, label='Eq integration points (not to scale)')
+    ax.plot(energy, fcn_eq, '.', color='red', markersize=1.5, label='Eq integration points (not to scale)')
 
     ax.legend()
 
@@ -289,7 +327,7 @@ savefig(opts.output, suffix='_curves_rel')
 plt.sca(axg)
 savefig(opts.output, suffix='_gradients')
 
-checktaint()
+# checktaint()
 
 if opts.show:
     plt.show()

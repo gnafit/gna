@@ -46,7 +46,9 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         transs = ('lsnl', 'lsnl_x', 'lsnl_component_y', 'lsnl_component_grad',
                   'lsnl_interpolator',
                   'lsnl_interpolator_grad',
-                  'lsnl_edges')
+                  'lsnl_edges',
+                  'lsnl_evis',
+                  )
         pars   = ('lsnl_weight',)
         if 'par' in cfg:
             return ('escale',)+pars, transs
