@@ -11,7 +11,7 @@ from mpl_tools.helpers import add_colorbar, plot_hist, savefig
 from gna.bindings import common
 from gna.env import env
 import gna.constructors as C
-import numpy as N
+import numpy as np
 from gna.configurator import NestedDict, uncertain
 from gna.expression.expression_v01 import *
 from gna.graphviz import savegraph
@@ -27,16 +27,20 @@ opts=parser.parse_args()
 # Make input histogram
 #
 def singularities( values, edges ):
-    indices = N.digitize( values, edges )-1
-    phist = N.zeros( edges.size-1 )
+    indices = np.digitize( values, edges )-1
+    phist = np.zeros( edges.size-1 )
     phist[indices] = 1.0
     return phist
 
 nbins = 240
-edges = N.linspace(0.0, 12.0, nbins+1, dtype='d')
+edges = np.linspace(0.0, 12.0, nbins+1, dtype='d')
 points = C.Points(edges, labels='Bin edges')
 phist = singularities( [ 1.225, 2.225, 4.025, 7.025, 9.025 ], edges )
 hist = C.Histogram(edges, phist, labels='Input hist')
+
+phist_f = C.Points(np.hstack((phist, [0.0])))
+fcn = C.InterpConst(labels=('InSegment (fcn)', 'Interp fcn'))
+fcn.setXY(points.points.points, phist_f.points.points)
 
 #
 # Initialize expression
@@ -48,14 +52,13 @@ indices = [
 lib = dict()
 
 formulas = [
-        'evis_edges()',
+        'hist = integral| fcn| energy()',
         'lsnl_coarse   = sum[l]| lsnl_weight[l] * lsnl_component_y[l]()',
         'lsnl_gradient = sum[l]| lsnl_weight[l] * lsnl_component_grad[l]()',
         'lsnl_interpolator_grad| lsnl_gradient',
-        'lsnl_interpolator| lsnl_x(), lsnl_coarse, evis_edges(), energy()',
-        'lsnl_edges| hist()',
-        'lsnl| hist()',
-        'integral()'
+        'lsnl_interpolator| lsnl_x(), lsnl_coarse, energy_edges(), energy()',
+        'lsnl_edges| hist',
+        'lsnl| hist',
         ]
 
 expr = Expression_v01(formulas, indices=indices)
@@ -76,11 +79,11 @@ cfg = NestedDict(
             inputs=None,
             outputs=hist.single(),
             ),
-        edges1 = dict(
+        fcn = dict(
             bundle=dict(name='predefined_v01'),
-            name='evis_edges',
-            inputs=None,
-            outputs=points.single(),
+            name='fcn',
+            inputs=((fcn.interp.newx, fcn.insegment.points),),
+            outputs=fcn.interp.interp,
             ),
         nonlin = dict(
             bundle = dict(name='energy_nonlinearity_db_root_subst', version='v01',
@@ -100,7 +103,7 @@ cfg = NestedDict(
         integrator = dict(
             bundle=dict(name='integral_1d', version='v02'),
             variable='energy',
-            edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
+            edges    = np.linspace(0.0, 12.0, 241, dtype='d'),
             orders   = 5,
             )
     )
@@ -115,7 +118,7 @@ context = ExpressionContext_v01(cfg, ns=env.globalns)
 expr.build(context)
 
 print(context.outputs)
-savegraph(context.outputs.evis_edges, opts.dot)
+savegraph(context.outputs.energy_edges, opts.dot)
 env.globalns.printparameters(labels=True)
 
 #
@@ -148,10 +151,10 @@ def plot_projections(update=False, relative=False, label=''):
 
     if relative:
         direct/=edges
-        direct[N.isnan(direct)]=0.0
+        direct[np.isnan(direct)]=0.0
 
         edges1 = edges/inverse
-        edges1[N.isnan(edges1)]=0.0
+        edges1[np.isnan(edges1)]=0.0
 
         eq/=evis
     else:
@@ -216,7 +219,7 @@ def plotmat():
 def checktaint():
     lsnl = context.outputs['lsnl']
     mat = context.outputs['lsnl_matrix']
-    edges = context.outputs['evis_edges']
+    edges = context.outputs['energy_edges']
     direct = context.outputs['lsnl_direct']
     inverse = context.outputs['lsnl_inverse']
 
@@ -242,7 +245,7 @@ def plothist():
     ax.grid()
 
     lsnl = context.outputs['lsnl']
-    hist = context.outputs['hist']
+    hist = context.outputs['integral']
 
     hist.plot_hist(label='Original')
     lsnl.plot_hist(label='Smeared')
