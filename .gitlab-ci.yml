@@ -8,7 +8,6 @@ build:
     stage: build
 
     script:
-    - source /soft/root-6.20.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
     - cmake ..
