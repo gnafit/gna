@@ -14,7 +14,7 @@ from load import ROOT as R
 from gna import constructors as C
 
 @pytest.mark.parametrize('strategy', [R.GNA.Interpolation.Strategy.Extrapolate, R.GNA.Interpolation.Strategy.Constant])
-@pytest.mark.parametrize('interpolator', [R.InterpLinear, R.InterpExpo, R.InterpLog, R.InterpLogx])
+@pytest.mark.parametrize('interpolator', [R.InterpLinear, R.InterpExpo, R.InterpLog, R.InterpLogx, R.InterpConst])
 def test_interpolators(interpolator, strategy, tmp_path):
     '''Test various interpolators'''
 

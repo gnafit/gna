@@ -64,6 +64,7 @@ set(TRANSFORMATION_SOURCES
   transformations/interpolation/InSegment.cc
   transformations/interpolation/SegmentWise.cc
   transformations/interpolation/InterpBase.cc
+  transformations/interpolation/InterpConst.cc
   transformations/interpolation/InterpLinear.cc
   transformations/interpolation/InterpExpo.cc
   transformations/interpolation/InterpLog.cc
@@ -167,6 +168,7 @@ set(TRANSFORMATION_HEADERS
   InSegment.hh
   SegmentWise.hh
   InterpExpo.hh
+  InterpConst.hh
   InterpLinear.hh
   InterpLog.hh
   InterpLogx.hh
