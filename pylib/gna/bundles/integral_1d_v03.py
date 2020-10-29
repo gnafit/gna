@@ -52,14 +52,21 @@ class integral_1d_v03(TransformationBundle):
             raise self.exception('Invalid orders definition: {!r}'.format(self.cfg.orders))
 
     def build(self):
+        integrator = self.cfg.get('integrator', 'gl')
+        integrators = { 'gl': R.IntegratorGL, 'rect': R.IntegratorRect }
+        try:
+            Integrator = integrators[integrator]
+        except KeyError:
+            raise self.exception('Invalid integrator {}'.format(integrator))
+
         if self.orders.size>1:
             if self.orders.size+1 != self.edges.size:
                 raise self.exception('Incompartible edges and orders definition:\n    {!r}\n    {!r}'.format(self.edges, self.orders))
             # In case orders is an array, pass it as an array
-            self.integrator = R.IntegratorGL(self.edges.size-1, self.orders, self.edges)
+            self.integrator = Integrator(self.edges.size-1, self.orders, self.edges)
         else:
             # Or pass it as an integer
-            self.integrator = R.IntegratorGL(self.edges.size-1, int(self.orders[0]), self.edges)
+            self.integrator = Integrator(self.edges.size-1, int(self.orders[0]), self.edges)
 
         self.integrator.points.x.setLabel(self.cfg.variable)
         self.integrator.points.xedges.setLabel('%s edges'%self.cfg.variable)

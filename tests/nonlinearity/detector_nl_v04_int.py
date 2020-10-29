@@ -23,6 +23,7 @@ parser.add_argument( '-o', '--output', help='output file' )
 parser.add_argument( '--dot', help='write graphviz output' )
 parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '-f', '--flat', action='store_true', help='use flat spectrum' )
+parser.add_argument( '-r', '--rect', action='store_true', help='use rectangular integrator' )
 parser.add_argument( '--supersample', '--ss', type=int, help='supersample N times', metavar='N' )
 opts=parser.parse_args()
 
@@ -123,7 +124,8 @@ cfg = NestedDict(
             bundle=dict(name='integral_1d', version='v03'),
             variable='energy',
             edges    = edges,
-            orders   = 3,
+            orders   = 100,
+            integrator = opts.rect and 'rect' or 'gl',
             instances = {
                 'integral_eq': 'Quenched energy integral',
                 'integral_evis': 'Visible energy integral',
@@ -183,9 +185,9 @@ def plot_projections(update=False, relative=False, label=''):
     else:
         edges1=edges
 
-    ax.plot(edges, direct, '-.',   label='Direct'+label, alpha=0.5)
-    ax.plot(inverse, edges1, ':',  label='Inverse'+label, alpha=0.5)
-    ax.plot(evis, eq, '-.', label='Inverse, integration points'+label, alpha=0.5)
+    c = ax.plot(edges, direct, '-.',   label='Direct'+label, alpha=0.5)[0].get_color()
+    ax.plot(inverse, edges1, ':',  label='Inverse'+label, alpha=0.5, color=c)
+    ax.plot(evis, eq, '-.', label='Inverse, integration points'+label, alpha=0.5, color=c)
 
     ax.legend()
 
@@ -213,8 +215,8 @@ def plotgradient(update=False):
     evis = context.outputs['lsnl_evis'].data().copy()
     deqdevis = context.outputs['lsnl_interpolator_grad'].data().copy()
 
-    ax.plot(edges1, grad, '-.', label='Gradient')
-    ax.plot(evis, deqdevis, ':', label='Gradient interpolated')
+    c=ax.plot(edges1, grad, '-.', label='Gradient')[0].get_color()
+    ax.plot(evis, deqdevis, ':', label='Gradient interpolated', color=c)
 
     ax.legend()
 
