@@ -47,6 +47,10 @@ void Integrator2GL::sample(FunctionArgs& fargs){
   rets[5].mat = y.vec.transpose().replicate(m_xweights.size(), 1);
   rets[6].x = 0.0;
   rets[7].x = 0.0;
+  auto xnpoints=m_xedges.size()-1;
+  auto ynpoints=m_yedges.size()-1;
+  rets[8].x = 0.5*(m_xedges.tail(xnpoints)+m_xedges.head(xnpoints));
+  rets[9].x = 0.5*(m_yedges.tail(ynpoints)+m_yedges.head(ynpoints));
   rets.untaint();
   rets.freeze();
 }
