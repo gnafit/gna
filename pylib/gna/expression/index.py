@@ -282,7 +282,7 @@ class NIndex(object):
     def __eq__(self, other):
         if not isinstance(other, NIndex):
             other = NIndex(*other)
-        return self.indices==other.indices
+        return dict(self.indices)==dict(other.indices) # make sure the order does not affect the result
 
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
