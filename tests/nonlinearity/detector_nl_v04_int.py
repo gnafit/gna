@@ -25,6 +25,8 @@ parser.add_argument( '-s', '--show', action='store_true', help='show the figure'
 parser.add_argument( '-f', '--flat', action='store_true', help='use flat spectrum' )
 parser.add_argument( '-r', '--rect', action='store_true', help='use rectangular integrator' )
 parser.add_argument( '--supersample', '--ss', type=int, help='supersample N times', metavar='N' )
+parser.add_argument('-x', '--xlim', nargs=2, type=float)
+parser.add_argument('-y', '--ylim', nargs=2, type=float)
 opts=parser.parse_args()
 
 #
@@ -161,7 +163,7 @@ def plot_projections(update=False, relative=False, label=''):
 
         if relative:
             ax.axhline(1.0, linestyle='dashed', linewidth=0.5)
-            ax.set_ylim(0.8, 1.2)
+            ax.set_ylim(0.9,  1.15)
         else:
             ax.plot([edges[0], edges[-1]], [edges[0], edges[-1]], '--', linewidth=0.5)
     else:
@@ -189,7 +191,7 @@ def plot_projections(update=False, relative=False, label=''):
     ax.plot(inverse, edges1, ':',  label='Inverse'+label, alpha=0.5, color=c)
     ax.plot(evis, eq, '-.', label='Inverse, integration points'+label, alpha=0.5, color=c)
 
-    ax.legend()
+    ax.legend(ncol=2)
 
     return ax
 
@@ -202,7 +204,7 @@ def plotgradient(update=False):
         ax.minorticks_on()
         ax.grid()
         ax.set_xlim(0.5, edges[-1])
-        ax.set_ylim(0.7, 1.1)
+        ax.set_ylim(1.0, 1.08)
 
         # ax.plot([edges[0], edges[-1]], [edges[0], edges[-1]], '--', linewidth=0.5)
     else:
@@ -265,9 +267,12 @@ def checktaint():
 
 def plothist():
     fig = plt.figure()
-    ax = plt.subplot(111, xlabel='', ylabel='', title='')
+    ax = plt.subplot(111, xlabel='E', ylabel='Entries', title='')
     ax.minorticks_on()
     ax.grid()
+
+    if opts.xlim: ax.set_xlim(*opts.xlim)
+    if opts.ylim: ax.set_ylim(*opts.ylim)
 
     hist_evis = context.outputs['integral_evis']
     lsnl      = context.outputs['lsnl']
@@ -292,9 +297,9 @@ def plothist():
     print('Modified histogram:', lsnl.data().sum())
     print('Subsitution histogram:', hist_eq.data().sum())
 
-    ax.plot(energy, fcn_evis, '.', color='black', markersize=1.5, label='Evis integration points (not to scale)')
+    # ax.plot(energy, fcn_evis, '.', color='black', markersize=1.5, label='Evis integration points (not to scale)')
     # ax.plot(energy1, fcn_eq, '.', color='red', markersize=1.5, label='Eq integration points (not to scale)')
-    ax.plot(energy, fcn_eq, '.', color='red', markersize=1.5, label='Eq integration points (not to scale)')
+    # ax.plot(energy, fcn_eq, '.', color='red', markersize=1.5, label='Eq integration points (not to scale)')
 
     ax.legend()
 
