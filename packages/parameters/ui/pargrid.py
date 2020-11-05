@@ -1,6 +1,5 @@
 """Specify a grid for the parameters"""
 
-from __future__ import print_function
 import ROOT
 from gna.ui import basecmd
 from packages.parameters.lib.parameter_loader import get_parameters

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.expression import *
 
 eperfission = Transformation('eperf', 'i', 'r')

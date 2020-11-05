@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 
 """configurator class allows to load any python file by its filename
 and store the contents in a namespace
 namespace elements are accessible throught both key access or member acess"""
 
-from __future__ import print_function
-from __future__ import absolute_import
 import runpy
 from os import path
 from collections import OrderedDict

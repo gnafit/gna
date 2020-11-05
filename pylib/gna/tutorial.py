@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from sys import argv
 from os import environ, path, makedirs
 from mpl_tools.helpers import savefig

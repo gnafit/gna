@@ -1,8 +1,6 @@
-# encoding: utf-8
 
 """Print parameters"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from tools.dictwrapper import DictWrapper, DictWrapperVisitor
 from collections import OrderedDict

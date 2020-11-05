@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

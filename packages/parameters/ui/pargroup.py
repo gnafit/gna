@@ -1,6 +1,5 @@
 """A group of paraeters UI: select a set of parameters and store"""
 
-from __future__ import print_function
 import ROOT
 from gna.ui import basecmd
 from packages.parameters.lib.parameter_loader import get_parameters

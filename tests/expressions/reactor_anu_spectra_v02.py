@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """4 antineutrino spectra for 4 fissile isotopes in the reactor
 
@@ -10,7 +9,6 @@
      xdot output/anuspectra_v02.dot
  """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.expression import *
 import numpy as N

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Oscillation parameters for Pee bundle v01.
 
@@ -7,7 +6,6 @@ Based on oscprob_v05:
     - add 'fixed' option
 """
 
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 from gna.bundle import TransformationBundle

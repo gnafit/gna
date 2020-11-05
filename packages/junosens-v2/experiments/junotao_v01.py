@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna import constructors as C

@@ -1,11 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Define converters to convert between Python (numpy) and C++ (std::vecotr, Eigen, etc) types
 Implements individual converters along with generic 'convert' function."""
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 from collections import defaultdict

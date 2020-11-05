@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 # reimplementation of integral_2d1d_v01 for up to date bundles
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v02 bundle
 
@@ -7,8 +6,6 @@ New features include:
     - Correlations may be loaded from the file
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N

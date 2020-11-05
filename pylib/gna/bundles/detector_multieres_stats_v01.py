@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 
 """Detector energy resolution
 
 implements 1-parameter energy resolution for a detector with multiple zones
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # Here we might collect some useful common things
-from __future__ import print_function
-from __future__ import absolute_import
 from math import  pow, sqrt
 
 #  TODO: how to correctly include hierarchy dependent \Delta m^2_{32} update?

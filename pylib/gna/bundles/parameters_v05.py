@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v05 bundle
 Implements a set of unrelated parameters.
@@ -8,7 +7,6 @@ Unlike v04, does not depend on uncertaindict
 Based on: parameters_v04
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N

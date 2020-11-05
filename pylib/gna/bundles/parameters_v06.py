@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v06 bundle
 Implements a set of parameters, defined via
@@ -12,7 +11,6 @@ Implements:
 - Separate uncertainty
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N

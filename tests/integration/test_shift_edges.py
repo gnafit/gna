@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check different ways of shifting bin edges
 """
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as np

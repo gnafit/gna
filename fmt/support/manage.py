@@ -7,7 +7,6 @@ Usage:
   manage.py site
 """
 
-from __future__ import print_function
 import datetime, docopt, errno, fileinput, json, os
 import re, requests, shutil, sys, tempfile
 from contextlib import contextmanager

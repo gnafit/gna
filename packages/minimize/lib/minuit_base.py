@@ -1,4 +1,3 @@
-from __future__ import print_function
 import ROOT
 import numpy as np
 from packages.minimize.lib.base import MinimizerBase, FitResult

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from gna.ui import basecmd
 import argparse
 import numpy as np

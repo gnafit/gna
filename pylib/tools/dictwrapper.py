@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 from tools.classwrapper import ClassWrapper
 from collections import OrderedDict, Iterable, MutableMapping
 import inspect

@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 """Save outputs as dictionaries with numbers and meta"""
 
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
 from matplotlib import pyplot as plt

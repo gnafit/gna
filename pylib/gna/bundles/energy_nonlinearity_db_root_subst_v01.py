@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as np

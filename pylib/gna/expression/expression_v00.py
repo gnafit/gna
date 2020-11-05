@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *

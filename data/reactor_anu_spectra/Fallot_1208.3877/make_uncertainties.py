@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function
 from numpy import *
 
 # What I told to Double Chooz as regards U8 spectrum which should be the most

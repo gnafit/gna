@@ -1,4 +1,3 @@
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace

@@ -1,6 +1,5 @@
 """Print given path within env"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from tools.dictwrapper import DictWrapper, DictWrapperVisitor
 import yaml

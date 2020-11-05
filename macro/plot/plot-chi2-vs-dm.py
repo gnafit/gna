@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 """Read a set of yaml files with fit results and plot sensitivity to neutrino mass hierachy (NMO)
 
@@ -7,7 +6,6 @@ It expects the fit data: the model (IO) fit against asimov prediction of model w
 
 """
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 from yaml import load, BaseLoader as Loader
 from mpl_tools.helpers import savefig

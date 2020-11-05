@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 #  from gna.expression import *
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.bundle import execute_bundles

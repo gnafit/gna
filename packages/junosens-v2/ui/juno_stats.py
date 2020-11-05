@@ -1,7 +1,6 @@
 """ Print JUNO related stats and plot default figures, latex friendly.
     Tweaked for juno_sensitivity_v02
 """
-from __future__ import print_function
 from gna.ui import basecmd
 from collections import OrderedDict
 from tools.classwrapper import ClassWrapper

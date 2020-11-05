@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 from gna.bundle.bundle import *
 from gna import constructors as C

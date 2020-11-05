@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.env import env
 import pygraphviz as G
 import ROOT as R

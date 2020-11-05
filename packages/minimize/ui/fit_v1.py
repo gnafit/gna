@@ -1,6 +1,5 @@
 """Simple fit module. Makes the minimizer fit the model."""
 
-from __future__ import print_function
 from gna.ui import basecmd, set_typed
 import pickle
 from pprint import pprint

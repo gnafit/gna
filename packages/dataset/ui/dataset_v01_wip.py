@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Dataset initialization (v01 WIP). Configures the dataset for a single experiment.
 Dataset defines:
     - Observable (model) to be used as fitted function
@@ -6,7 +5,6 @@ Dataset defines:
     - Statistical uncertainty (Person/Neyman) [theory/observation]
     - Nuisance parameters
     """
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np

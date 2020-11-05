@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
 import ROOT
 from gna.env import env
 import numpy as np

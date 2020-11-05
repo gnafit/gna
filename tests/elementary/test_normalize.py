@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """Check the Normalize transformation"""
 
-from __future__ import print_function
 import sys
 from matplotlib import pyplot as P
 import numpy as N

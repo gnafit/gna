@@ -1,6 +1,5 @@
 """Save the outputs as ROOT objects: TH1D, TH2D, TGraph"""
 
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
 from matplotlib import pyplot as plt

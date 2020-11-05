@@ -2,7 +2,6 @@
 
 This module uses pargroup to specify covariance parameters.
 """
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np

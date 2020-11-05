@@ -1,8 +1,6 @@
-# encoding: utf-8
 
 """Set GNA CWD"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from packages.env.lib.cwd import set_cwd, set_prefix, get_processed_paths
 

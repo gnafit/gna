@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """Given an observable make it's snapshot via Snapshot transformation"""
 
-from __future__ import print_function
-from __future__ import absolute_import
 from gna.ui import basecmd
 import argparse
 import os.path

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as np
 from gna.converters import array_to_stdvector_size_t

@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
 # Reimplementation of integral_2d1d_v01 for up to date bundles
 # Reimplementation of integral_2d1d_v02 with Integrator21GL instead of legacy GaussLegendre
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

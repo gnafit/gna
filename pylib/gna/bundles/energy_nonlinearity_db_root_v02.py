@@ -1,6 +1,5 @@
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
-from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N

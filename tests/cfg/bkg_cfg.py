@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.configurator import NestedDict, uncertain, uncertaindict
 from collections import OrderedDict
 from physlib import percent

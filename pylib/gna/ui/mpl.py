@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
 
 u"""Change global parameters of the matplotlib"""
 
-from __future__ import absolute_import
-from __future__ import print_function
 from gna.ui import basecmd
 import ROOT
 import numpy as np

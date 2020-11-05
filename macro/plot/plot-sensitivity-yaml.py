@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Read a set of yaml files with fit results and plot sensitivity to parameters"""
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 from yaml import load, FullLoader
 from mpl_tools.helpers import savefig

@@ -1,11 +1,9 @@
-# encoding: utf-8
 
 """Save the command line to a shell file
 
 The command then may be repeated and should produce the same output
 """
 
-from __future__ import print_function
 from gna.ui import basecmd
 import pipes
 from packages.env.lib.cwd import update_namespace_cwd

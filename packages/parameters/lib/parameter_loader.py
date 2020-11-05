@@ -1,4 +1,3 @@
-from __future__ import print_function
 from gna.env import env
 from gna.config import cfg
 import ROOT

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 """Implements simple N-dimensional scanning with optional minimization for each point"""
 
-from __future__ import print_function
 from gna.ui import basecmd, set_typed, append_typed
 from tools.argparse_utils import AppendSubparser
 import ROOT

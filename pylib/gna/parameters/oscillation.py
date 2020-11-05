@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 import ROOT
 from gna.env import env
 from physlib import pdg
@@ -25,11 +23,7 @@ def reqparameters(ns, **kwargs):
                       sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
 
     ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
-<<<<<<< HEAD
                      sigma=curpdg['sinSqtheta13_e'], limits=(0, 1), label='Reactor mixing angle sin²θ₁₃ ')
-=======
-                     sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃')
->>>>>>> master
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
                      variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')

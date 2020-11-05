@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 #
 # Make sure python libs are loaded before ROOT
 # it seems that recent ROOT versions do have precompiled scipy
 # which may be in conflict with system scipy version (something with QHUL library)
 #
-from __future__ import absolute_import
 import numpy
 import matplotlib
 import scipy.stats

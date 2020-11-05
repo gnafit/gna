@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least, qualified
 import ROOT
 import argparse

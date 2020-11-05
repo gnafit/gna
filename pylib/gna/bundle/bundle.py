@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
 """Oscillation probability (matter) bundle v01. Based on vacuum oscillation bundle oscprob_v04.
 
 Changes since origin:
     - Switch from OscProb3 oscillation probability class to OscProbMatter
 """
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

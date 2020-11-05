@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Oscillation probability bundle v04. Updates since v03:
     - Switch from OscProbmPMNS to OscProb3 oscillation probability class
 
@@ -6,10 +5,7 @@ Miscellaneous:
     - Correct behavior for minor indices
     - Properly define the namespace name
 """
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

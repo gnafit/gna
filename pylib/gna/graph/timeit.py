@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import absolute_import
 import time
 
 def timeit(fcn, n=1, dummy=None, pre=None, pre_dummy=None):

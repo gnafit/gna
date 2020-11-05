@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 import ROOT as R
 from gna.bindings import patchROOTClass
 import numpy as N

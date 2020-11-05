@@ -1,7 +1,5 @@
-# encoding: utf-8
 """Switch neutrino mass ordering while keeping particular mass splitting the same"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from load import ROOT as R
 import numpy as np

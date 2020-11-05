@@ -1,6 +1,5 @@
 """Save given path within env to the pickle file"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper

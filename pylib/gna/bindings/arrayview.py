@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from gna.bindings import patchROOTTemplate, ROOT as R
 import numpy as N
 
