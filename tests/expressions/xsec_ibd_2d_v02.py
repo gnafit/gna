@@ -46,7 +46,7 @@ formulas =[
         # in first rformulasession we feed 'evis()' to 'ee() and then to enu()'
         'enu| ee(evis()), ctheta()',
         'jacobian(enu(), ee(), ctheta())',
-        'kinint2| ibd_xsec(enu(), ctheta()) * jacobian()'
+        'project| kinint2| ibd_xsec(enu(), ctheta()) * jacobian()',
         ]
 
 expr = Expression_v01(formulas, indices)
@@ -79,7 +79,16 @@ cfg = NestedDict(
         ibd_xsec = NestedDict(
             bundle = dict(name='xsec_ibd', version='v02'),
             order = 1,
-            )
+            ),
+        project = NestedDict(
+            bundle = dict(name='simple', version='v01', major=''),
+            name = 'project',
+            actions = dict(
+                object =lambda: R.SumAxis(0),
+                input  =lambda obj: (obj.add_transformation(), obj.add_input())[1],
+                output =lambda obj: obj.transformations.back().outputs[0],
+                )
+            ),
         )
 #
 # Initialize bundles
