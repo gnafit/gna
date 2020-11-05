@@ -58,6 +58,7 @@ set(TRANSFORMATION_SOURCES
   transformations/integrator/IntegratorGL.cc
   transformations/integrator/Integrator21GL.cc
   transformations/integrator/Integrator2GL.cc
+  transformations/integrator/Integrator2Rect.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
   # Interpolation
@@ -219,6 +220,7 @@ set(TRANSFORMATION_HEADERS
   IntegratorBase.hh
   Integrator21Base.hh
   Integrator2Base.hh
+  Integrator2Rect.hh
   IntegratorRect.hh
   IntegratorTrap.hh
   GSLSamplerGL.hh
