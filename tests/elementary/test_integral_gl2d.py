@@ -33,7 +33,7 @@ parser.add_argument( '-x', '--xbins', type=float, nargs=3, default=[ 0.0, 7.001,
 parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 8.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '--ab', type=float, nargs=2, default=(1.0, 2.0), help='function parameters' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
-parser.add_argument( '-M', '--mode', default='gl2', choices=['gl2', 'gl21'], help='integration mode' )
+parser.add_argument( '-M', '--mode', default='gl2', choices=['gl2', 'rect_left', 'rect', 'rect_right', 'gl21'], help='integration mode' )
 # parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
 parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
 parser.add_argument( '--dot', help='write graphviz output' )
@@ -44,28 +44,37 @@ opts = parser.parse_args()
 xedges = N.arange(*opts.xbins, dtype='d')
 yedges = N.arange(*opts.ybins, dtype='d')
 
-# create 2d integrator (sample points) for given edges and integration order
-integrators = dict(gl2=R.Integrator2GL, gl21=R.Integrator21GL)
-Integrator = integrators[opts.mode]
-
+# create 2d integrator (sample points) for given edges and integration order 
 mode21= opts.mode=='gl21'
+
+integrators = dict(gl2=R.Integrator2GL, rect=R.Integrator2Rect, gl21=R.Integrator21GL)
+#Integrator = integrators[opts.mode]
+Integrator = integrators[ opts.mode.split('_', 1)[0] ]
+if '_' in opts.mode:
+    iopts = opts.mode.rsplit('_', 1)[-1],
+elif mode21:
+    iopts = (3, 0.0, 1.0)
+else:
+    iopts = tuple()
+
+
 
 if not mode21:
     if opts.input_edges:
         edges_in = Histogram2d(xedges, yedges, xedges[:-1,None]*yedges[:-1])
-        integrator = Integrator(xedges.size-1, opts.orders[0], yedges.size-1, opts.orders[1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], yedges.size-1, opts.orders[1], *iopts)
         integrator.points.edges(edges_in)
     else:
-        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, yedges.size-1, opts.orders[1], yedges)
+        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, yedges.size-1, opts.orders[1], yedges, *iopts)
 else:
     if yedges.size!=2:
         raise Exception('In GL21 mode there should be only one bin over second axis')
     if opts.input_edges:
         xedges_in = Histogram(xedges, xedges[:-1])
-        integrator = Integrator(xedges.size-1, opts.orders[0], None, opts.orders[1], yedges[0], yedges[1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], None, opts.orders[1], yedges[0], yedges[1], *iopts)
         integrator.points.xedges(xedges_in)
     else:
-        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, opts.orders[1], yedges[0], yedges[1])
+        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, opts.orders[1], yedges[0], yedges[1], *iopts)
 
 integrator.points.setLabel('Integrator inputs')
 integrator.points.y.setLabel('X (points)')
