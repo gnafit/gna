@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
 import yaml
@@ -21,6 +20,7 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
     return yaml.load(stream, OrderedLoader)
 
 def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
+    """Dump OrderedDict"""
     class OrderedDumper(Dumper):
         pass
     def _dict_representer(dumper, data):
@@ -31,14 +31,26 @@ def ordered_dump(data, stream=None, Dumper=yaml.Dumper, **kwds):
     return yaml.dump(data, stream, OrderedDumper, **kwds)
 
 def yaml_load(string):
+    """Parse multiple strings as yaml data. Multiple dictionaries are combined togather."""
     if isinstance(string, str):
-        return yaml.load(s, Loader=yaml.Loader)
+        return ordered_load(string)
 
     if not isinstance(string, Iterable):
         raise TypeError('Invalid yaml_load argument type')
 
     ret = dict()
     for s in string:
-        d=yaml.load(s, Loader=yaml.Loader)
+        d=ordered_load(s, Loader=yaml.Loader)
         ret.update(d)
     return ret
+
+def yaml_load_file(filename):
+    """Load python dictionary from *.py file"""
+    try:
+        with open(filename, 'r') as stream:
+            data = ordered_load(stream)
+    except:
+        raise Exception('Unable to load input data file: '+filename)
+
+    return data
+

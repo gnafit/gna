@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Minimizer-scan module: hybrid scan/quasi newton minimizer
 
 Minimizes a set of parameters simply scanning them, all others are minimized vie regular minimizer at each point

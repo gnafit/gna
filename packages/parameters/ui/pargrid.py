@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Specify a grid for the parameters"""
 
 from __future__ import print_function
@@ -79,3 +78,4 @@ def gridaction(gridtype, env):
             par = env.pars[param]
             namespace.grids.append((param, par, grid))
     return GridAction
+

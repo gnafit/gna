@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
 from __future__ import print_function
-from __future__ import absolute_import
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -31,7 +29,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return ('escale', 'lsnl_weight', '__lsnl_dummy'), ('lsnl', 'lsnl_component', 'lsnl_edges')
+        return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_component', 'lsnl_edges')
 
     def build_graphs( self, graphs ):
         #
@@ -99,6 +97,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         tfile = R.TFile( self.cfg.filename, 'READ' )
         if tfile.IsZombie():
             raise IOError( 'Can not read ROOT file: '+self.cfg.filename )
+
         graphs = [ tfile.Get( name ) for name in self.cfg.names ]
         if not all( graphs ):
             raise IOError( 'Some objects were not read from file: '+filename )
@@ -123,13 +122,9 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
 
         for it in self.detector_idx.iterate():
             self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
-        for idx_pair in self.nidx.iterate():
-            self.reqparameter('__lsnl_dummy', idx_pair, central=0.0, fixed=True,
-                    label='Just ignore it, dirty fix for problem with expressions')
 
-
-    def interpolate(self, xxx_todo_changeme, edges):
-        (x, y) = xxx_todo_changeme
+    def interpolate(self, todo_good_name, edges):
+        x, y = todo_good_name
         fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
         fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
         res = fcn( edges )

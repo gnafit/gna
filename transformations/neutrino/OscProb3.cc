@@ -1,5 +1,6 @@
 #include "OscProb3.hh"
 #include "TypeClasses.hh"
+#include <stdexcept>
 using namespace TypeClasses;
 
 #ifdef GNA_CUDA_SUPPORT
@@ -12,7 +13,7 @@ using NeutrinoUnits::oscprobArgumentFactor;
 namespace GNA {
     namespace GNAObjectTemplates {
         template<typename FloatType>
-        OscProb3T<FloatType>::OscProb3T(Neutrino from, Neutrino to, std::string l_name, bool modecos)
+        OscProb3T<FloatType>::OscProb3T(Neutrino from, Neutrino to, std::string l_name, bool modecos, std::vector<std::string> dmnames)
         : m_modecos(modecos), m_dm(3)
         {
             if (from.kind != to.kind) {
@@ -22,9 +23,16 @@ namespace GNA {
             m_beta = to.flavor;
             m_lepton_charge = from.leptonCharge();
 
-            const char* dmnames[]  = { "DeltaMSq12", "DeltaMSq13", "DeltaMSq23" };
-            for (int i = 0; i < 3; ++i) {
-                variable_(&m_dm[i], dmnames[i]);
+            switch(dmnames.size()){
+                case 0u:
+                    dmnames={"DeltaMSq12", "DeltaMSq13", "DeltaMSq23"};
+                case 3u:
+                    for (int i = 0; i < 3; ++i) {
+                        variable_(&m_dm[i], dmnames.at(i));
+                    }
+                    break;
+                default:
+                    throw std::runtime_error("OscProb3: expects 3 mass splitting names");
             }
             variable_(&m_L, l_name);
 

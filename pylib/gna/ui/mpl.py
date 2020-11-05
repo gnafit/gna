@@ -127,7 +127,7 @@ class cmd(basecmd):
 
         if self.opts.scale:
             axis, scale = self.opts.scale
-            set_scale=getattr(ax, 'set_{axis}scale'.format(axis=axis))
+            set_scale=getattr(self.ax, 'set_{axis}scale'.format(axis=axis))
             set_scale(scale)
 
         if self.opts.xlim:
@@ -152,7 +152,7 @@ class cmd(basecmd):
             self.fig.canvas.draw()
             axisname, ticks = self.opts.ticks_extra[0], [float(_) for _ in self.opts.ticks_extra[1:]]
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
-            axis = getattr(ax, axisname+'axis')
+            axis = getattr(self.ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
 
         if self.opts.xlim:

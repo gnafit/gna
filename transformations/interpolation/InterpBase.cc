@@ -130,7 +130,7 @@ void InterpBase::do_interpolate(FunctionArgs& fargs){
                 break;
             case (Strategy::Extrapolate):
                 idx = 0u;
-                *result = interpolation_formula(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
+                *result = interpolation_formula_below(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
                 break;
         }
       }
@@ -141,7 +141,7 @@ void InterpBase::do_interpolate(FunctionArgs& fargs){
                 break;
             case (Strategy::Extrapolate):
                 idx = nseg-1u;
-                *result = interpolation_formula(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
+                *result = interpolation_formula_above(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
                 break;
         }
       } else {                                                              /// interpolation in definition range

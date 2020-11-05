@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from __future__ import absolute_import
 import itertools as I
 from collections import OrderedDict
 from gna.expression.printl import *
@@ -67,7 +66,7 @@ class Index(object):
         short = slave['short']
         name = slave['name']
         map = slave['map']
-        if isinstance(map, (list, tuple)):
+        if isinstance(map, (list,tuple)):
             map=OrderedDict(map)
         variants = list(map.keys())
 
@@ -82,6 +81,11 @@ class Index(object):
             self.slave.current=self.group[self.current]
 
     def set_current(self, c):
+        if not c in self.variants:
+            raise Exception("Unable to set {} as index value of {}".format(c, self.name))
+        self._set_current(c)
+
+    def _set_current(self, c):
         self.current = c
         if self.slave:
             self.slave.current=self.group[self.current]
@@ -100,7 +104,7 @@ class Index(object):
 
         for var in variants:
             ret = Index(self)
-            ret.set_current(var)
+            ret._set_current(var)
             yield ret
 
     __iter__ = iterate
@@ -278,7 +282,7 @@ class NIndex(object):
     def __eq__(self, other):
         if not isinstance(other, NIndex):
             other = NIndex(*other)
-        return self.indices==other.indices
+        return dict(self.indices)==dict(other.indices) # make sure the order does not affect the result
 
     def ident(self, **kwargs):
         return '_'.join(self.indices.keys())
@@ -354,7 +358,15 @@ class NIndex(object):
         else:
             return indexauto
 
-        return fmt.format( **dct )
+        while True:
+            try:
+                ret = fmt.format( **dct )
+            except KeyError as e:
+                dct[e.args[0]] = 'x'
+            else:
+                break
+
+        return ret
 
     def get_relevant_index(self, short, exception=True):
         idx = self.indices.get(short, None)
@@ -391,6 +403,8 @@ class NIndex(object):
         majors, minors, used=(), (), ()
 
         for short in indices:
+            if not short:
+                continue
             major=self.get_relevant_index(short)
             majors+=major,
             used+=short,
@@ -406,6 +420,8 @@ class NIndex(object):
         return self.make_inheritor(*majors), self.make_inheritor(*minors)
 
     def get_current(self, short):
+        if not short:
+            return None
         return self.indices[short].current
 
     def get_index_names(self):
@@ -435,3 +451,4 @@ class NameUndefined():
         return self.__str__()+other
 
 undefinedname = NameUndefined()
+

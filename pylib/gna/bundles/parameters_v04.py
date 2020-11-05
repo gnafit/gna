@@ -34,7 +34,7 @@ class parameters_v04(TransformationBundle):
         objectize = self.cfg.get('objectize')
 
         for name, parcfg in pars.items():
-            label = labels.get(name)
+            label = labels.get(name, '')
             par = self.reqparameter(name, None, cfg=parcfg, label=label)
 
             if objectize:

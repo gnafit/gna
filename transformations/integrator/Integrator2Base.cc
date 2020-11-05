@@ -99,14 +99,16 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
 
 void Integrator2Base::init_sampler() {
   auto trans=transformation_("points")
-      .output("x")
-      .output("y")
-      .output("xedges")
-      .output("yedges")
-      .output("xmesh")
-      .output("ymesh")
-      .output("xhist")
-      .output("yhist")
+      .output("x")         // 0
+      .output("y")         // 1
+      .output("xedges")    // 2
+      .output("yedges")    // 3
+      .output("xmesh")     // 4
+      .output("ymesh")     // 5
+      .output("xhist")     // 6
+      .output("yhist")     // 7
+      .output("xcenters")  // 8
+      .output("ycenters")  // 9
       .types(&Integrator2Base::check_sampler)
       .func(&Integrator2Base::sample)
       ;
@@ -143,6 +145,9 @@ void Integrator2Base::check_sampler(TypesFunctionArgs& fargs){
 
   rets[6].hist().edges(m_xedges.size(), m_xedges.data());
   rets[7].hist().edges(m_yedges.size(), m_yedges.data());
+
+  rets[8] = DataType().points().shape(m_xedges.size()-1);
+  rets[9] = DataType().points().shape(m_yedges.size()-1);
 }
 
 void Integrator2Base::dump(){

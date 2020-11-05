@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from argparse import Action, _copy, _ensure_value, ArgumentParser
 

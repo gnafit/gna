@@ -15,6 +15,15 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
+            #
+            # Future spectra location
+            #
+            try:
+                return env.future['spectra'][path]
+            except KeyError:
+                pass
+
+            # To be deprecated spectra location
             nspath, name = path.split('/')
             try:
                 return env.ns(nspath).observables[name]
@@ -33,12 +42,16 @@ class cmd(basecmd):
         parser.add_argument('-n', '--namespace', '--ns', default=cls.undefined, nargs='?', help='use <namespace> to read parameters', metavar='namespace')
         parser.add_argument('--option', nargs=2, action='append', dest='options', default=[], help='AGraph kwargs key value pair')
 
+        parser.add_argument_group(title='filters', description='Options to filter nodes')
+        parser.add_argument('-i', '--include-only', '--include', nargs='+', help='Pattersn to be included (exclusive)')
+
     def init(self):
         head = self.opts.plot[0]
 
         kwargs = dict(self.opts.options, joints=self.opts.joints)
         kwargs.setdefault('rankdir', 'LR')
         kwargs['subgraph']=self.opts.subgraph
+        kwargs['include_only']=self.opts.include_only
         if self.opts.splines:
             kwargs['splines']=self.opts.splines
 

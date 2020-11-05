@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Save the outputs as ROOT objects: TH1D, TH2D, TGraph"""
 
 from __future__ import print_function

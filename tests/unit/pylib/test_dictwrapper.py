@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 from tools.dictwrapper import DictWrapper, DictWrapperVisitorDemostrator
 import pytest
 from collections import OrderedDict
@@ -285,3 +283,5 @@ def test_dictwrapper_09_walk():
     assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=False)] == [(('e',), 4)]
     assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=True)] == [(('f','g', 'h'), 5)]
     assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=False)] == [(('h',), 5)]
+
+

@@ -52,7 +52,9 @@ public:
   void do_interpolate(FunctionArgs& fargs);                                                                    ///< Do the interpolation.
 private:
 
-  virtual double interpolation_formula(double x, double y, double k, double point) const noexcept = 0;                      ///< Abstract interface for initializing expression used for interploation. Must be provided by the derived class.
+  virtual double interpolation_formula(double x, double y, double k, double point) const noexcept = 0;        ///< Abstract interface for initializing expression used for interploation. Must be provided by the derived class.
+  virtual double interpolation_formula_below(double x, double y, double k, double point) const noexcept = 0;  ///< Abstract interface for initializing expression used for interploation. Must be provided by the derived class.
+  virtual double interpolation_formula_above(double x, double y, double k, double point) const noexcept = 0;  ///< Abstract interface for initializing expression used for interploation. Must be provided by the derived class.
   virtual Eigen::ArrayXd compute_weights(const Eigen::ArrayXd& xs, const Eigen::ArrayXd& ys, const Eigen::ArrayXd& widths, size_t nseg) const noexcept = 0;      ///< Abstract interface for computing the weights for Interpolation formula. Must be provided by the derived class.
   GNA::Interpolation::Strategy m_underflow_strategy{GNA::Interpolation::Strategy::Extrapolate};                                                                 ///< Strategy to use for underflow points.
   GNA::Interpolation::Strategy m_overflow_strategy{GNA::Interpolation::Strategy::Extrapolate};                                                                  ///< Strategy to use for overflow points.

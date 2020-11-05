@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from __future__ import print_function
 from load import ROOT as R
 import numpy as N
@@ -52,7 +50,7 @@ class root_histograms_v05(TransformationBundle):
                 if not h:
                     raise Exception('Can not read {hist} from {file}'.format(hist=hname, file=file.GetName()))
 
-                print( '  read{}: {}'.format(' '+subst, hname), end=' ' )
+                print( '  read{}: {}'.format(' '+subst if subst else '', hname), end=' ' )
 
                 edges = get_bin_edges_axis( h.GetXaxis() )
                 data  = get_buffer_hist1( h )

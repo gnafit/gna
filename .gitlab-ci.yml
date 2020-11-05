@@ -8,10 +8,9 @@ build:
     stage: build
 
     script:
-    - source /soft/root-6.20.04/build/bin/thisroot.sh
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -DCMAKE_CXX_STANDARD=17 ..
     - cmake --build . -- -j$(nproc --all)
     - cd ..
     - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH

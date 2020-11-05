@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 from gna.exp import baseexp
@@ -64,7 +63,6 @@ Misc changes:
     def initparser(cls, parser, namespace):
         parser.add_argument( '--dot', help='write graphviz output' )
         parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
-        parser.add_argument( '-o', '--output', help='output figure name' )
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
@@ -369,6 +367,7 @@ Misc changes:
                     varmode='log',
                     varname='anue_weight_{index:02d}',
                     ns_name='spectral_weights',
+                    debug = True,
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 anuspec_ill = NestedDict(
@@ -380,6 +379,7 @@ Misc changes:
                     varmode='log',
                     varname='anue_weight_{index:02d}',
                     ns_name='spectral_weights',
+                    debug = True,
                     edges = np.concatenate( ( np.arange( 1.8, 8.7, 0.025 ), [ 12.3 ] ) ),
                     ),
                 offeq_correction = NestedDict(
@@ -766,6 +766,9 @@ Misc changes:
 
     def register(self):
         ns = self.namespace
+        from gna.env import env
+        futurens = env.future.child(('spectra', self.namespace.name))
+
         outputs = self.context.outputs
         #  ns.addobservable("{0}_unoscillated".format(self.detectorname), outputs, export=False)
         ns.addobservable("Enu",    outputs.enu, export=False)
@@ -794,6 +797,19 @@ Misc changes:
 
         ns.addobservable("{0}_fine".format(self.detectorname),         fine)
         ns.addobservable("{0}".format(self.detectorname),              outputs.observation.AD1)
+
+        futurens[(self.detectorname, 'initial')] = outputs.kinint2.AD1
+        futurens[(self.detectorname, 'fine')] = fine
+        futurens[(self.detectorname, 'final')] = outputs.observation.AD1
+        if 'lsnl' in self.opts.energy_model:
+            futurens[(self.detectorname, 'lsnl')] = outputs.lsnl.AD1
+
+        if 'eres' in self.opts.energy_model:
+            futurens[(self.detectorname, 'eres')] = outputs.eres.AD1
+
+        k0 = ('extra',)
+        for k, v in self.context.outputs.items(nested=True):
+            futurens[k0+k]=v
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy

@@ -22,6 +22,8 @@ class DictWrapper(ClassWrapper):
 
     def __init__(self, dic, split=None, parent=None, *args, **kwargs):
         if isinstance(dic, DictWrapper):
+            if split is None:
+                split = dic._split
             dic = dic._obj
         self._split = split
         self._type = type(dic)

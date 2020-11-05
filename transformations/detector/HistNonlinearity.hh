@@ -5,6 +5,11 @@
 #include "HistSmearSparse.hh"
 #include "Eigen/Sparse"
 
+/**
+ * @brief A class to smear the 1d histogram due to rescaling of the X axis
+ *
+ * HistNonlinearity(A) projects the modified bin edges on the original binning
+ */
 class HistNonlinearity: public HistSmearSparse,
                         public TransformationBind<HistNonlinearity> {
 public:

@@ -59,6 +59,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', help='dump variables to the yaml file')
 
         parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
+        parser.add_argument('--label-length', type=int, default=True, help='label length')
 
     def init(self):
         if self.opts.name:
@@ -140,7 +141,7 @@ class cmd(basecmd):
 
         try:
             if self.opts.print is not undefined:
-                namespace(self.opts.print or '').printparameters(labels=True)
+                namespace(self.opts.print or '').printparameters(labels=self.opts.label_length)
         except Exception as e:
             print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))
 

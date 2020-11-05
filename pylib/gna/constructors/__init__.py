@@ -82,6 +82,13 @@ def Sum(outputs=None, **kwargs):
 
     return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
+"""Construct SumSq object from list of SingleOutputs"""
+def SumSq(outputs=None, **kwargs):
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(**kwargs)
+
+    return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
+
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, **kwargs):
     cls = R.GNA.GNAObjectTemplates.MultiSumT(context.current_precision())
@@ -144,6 +151,14 @@ def Product(outputs=None, **kwargs):
 
     return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
 
+"""Construct ConditionalProduct object from list of SingleOutputs"""
+def ConditionalProduct(nprod, condition, outputs=None, **kwargs):
+    args=(nprod, condition)
+    if outputs is not None:
+        args=args+(OutputDescriptors(outputs),)
+
+    return R.ConditionalProduct(*args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def ProductBC(outputs=None, **kwargs):
     if outputs is None:
@@ -164,6 +179,26 @@ def Bins(array, *args, **kwargs):
     if len(a.shape)!=1:
         raise Exception( 'Edges should be 1d array' )
     return R.Bins( a, a.size-1, *args, **kwargs )
+
+def OscProb3(*args):
+    """OscProb3 wrapper
+
+    Aguments:
+       Neutrino from,
+       Neutrino to,
+       std::string l_name="L",
+       bool modecos=true,
+       std::vector<std::string> dmnames={}
+    """
+    if len(args)>=5:
+        args = list(args)
+        args[4] = stdvector(args[4])
+
+    return R.GNA.GNAObjectTemplates.OscProb3T(context.current_precision())(*args)
+
+#
+# Construct integrators
+#
 
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):

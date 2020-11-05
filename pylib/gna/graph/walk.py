@@ -12,6 +12,8 @@ VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_en
 
 class GraphWalker(object):
     def __init__(self, *args, **kwargs):
+        self._include_only=kwargs.pop('include_only', None)
+
         self._entry_points = []
         for arg in args:
             if isinstance(arg, (list, tuple)):
@@ -21,9 +23,11 @@ class GraphWalker(object):
 
         self._build_cache()
 
-        ns = kwargs.get('namespace', None)
+        ns = kwargs.pop('namespace', None)
         if ns:
             self.set_parameters(ns)
+
+        assert not kwargs, 'kwargs contains unparsed arguments: {!s}'.format(kwargs)
 
     def _add_entry_point(self, arg):
         if isinstance(arg, (types.GeneratorType)):
@@ -51,32 +55,28 @@ class GraphWalker(object):
 
         self._entry_points.append(entry)
 
-    def _propagate_forward(self, entry, queue):
+    def _propagate_forward(self, entry, queue, skip):
         for sink in entry.sinks:
             for source in sink.sources:
-                other = source.entry
-                if other in queue or other in self.cache_entries:
-                    continue
+                self._add_to_queue(queue, source.entry)
 
-                queue.append(other)
+            if skip:
+                continue
 
             if sink.sources.size()==0:
                 self.cache_sinks_open.append(sink)
 
-    def _propagate_backward(self, entry, queue):
+    def _propagate_backward(self, entry, queue, skip):
         for source in entry.sources:
             sink = source.sink
 
             if sink:
-                other=sink.entry
-                if other in queue or other in self.cache_entries:
-                    continue
-
-                queue.append(other)
-            else:
+                self._add_to_queue(queue, sink.entry)
+            elif not skip:
                 self.cache_sources_open.append(source)
 
     def _build_cache(self):
+        self.skipped_entries=[]
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
@@ -85,16 +85,42 @@ class GraphWalker(object):
         self.cache_sources_open=[]
         self.cache_sinks_open=[]
 
-        queue=deque(self._entry_points)
+        queue=self._add_to_queue(deque(), *self._entry_points)
         while queue:
             entry = queue.popleft()
 
-            self.cache_entries.append(entry)
-            self.cache_sources.extend((inp for inp in entry.sources if not inp in self.cache_sources))
-            self.cache_sinks.extend(  (inp for inp in entry.sinks   if not inp in self.cache_sinks))
+            skip = self._if_skip_entry(entry)
+            if skip:
+                self.skipped_entries.append(entry)
+            else:
+                self.cache_entries.append(entry)
+                self.cache_sources.extend((inp for inp in entry.sources if not inp in self.cache_sources))
+                self.cache_sinks.extend(  (inp for inp in entry.sinks   if not inp in self.cache_sinks))
 
-            self._propagate_forward(entry, queue)
-            self._propagate_backward(entry, queue)
+            self._propagate_forward(entry, queue, skip)
+            self._propagate_backward(entry, queue, skip)
+
+    def _add_to_queue(self, queue, *entries):
+        for entry in entries:
+            if entry in queue or entry in self.cache_entries or entry in self.skipped_entries:
+                continue
+
+            queue.append(entry)
+
+        return queue
+
+    def _if_skip_entry(self, entry):
+        if not self._include_only:
+            return False
+
+        label=entry.attrs['_label']
+
+        for p in self._include_only:
+            if p in label:
+                return False
+
+        return True
+
 
     def set_parameters(self, ns):
         from gna import env

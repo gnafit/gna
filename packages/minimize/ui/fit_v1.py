@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Simple fit module. Makes the minimizer fit the model."""
 
 from __future__ import print_function

@@ -49,8 +49,12 @@ class detector_iav_db_root_v03(TransformationBundle):
             self.context.objects[itdet.current_values(name='renormdiag')] = renormdiag
 
     def build(self):
-        from file_reader import read_object_auto
-        self.iavmatrix = read_object_auto( self.cfg.filename, self.cfg.matrixname, convertto='array' )
+        from tools.data_load import read_object_auto
+        res = read_object_auto(self.cfg.filename, name=self.cfg.matrixname, convertto='array')
+        if isinstance(res, tuple):
+            self.iavmatrix = res[-1]
+        else:
+            self.iavmatrix = res
 
         return self.build_mat()
 

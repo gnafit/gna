@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from __future__ import absolute_import
 from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules
@@ -12,6 +11,9 @@ from gna.packages import iterate_module_paths
 
 bundle_modules = None
 bundles = {}
+
+class BundleException(Exception):
+    pass
 
 def get_bundle(name):
     global bundle_modules, bundles
@@ -126,7 +128,7 @@ class TransformationBundleLegacy(object):
 
         self.common_namespace = kwargs.pop( 'common_namespace', self.shared.get('common_namespace', env.globalns) )
         namespaces=kwargs.pop('namespaces', self.shared.get('namespaces', None)) or [self.common_namespace]
-        self.namespaces = [ self.common_namespace(ns) if isinstance(ns, str) else ns for ns in namespaces ]
+        self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
 
         self.shared.setdefault('namespaces', self.namespaces)
         self.shared.setdefault('common_namespace', self.common_namespace)
@@ -153,14 +155,14 @@ class TransformationBundleLegacy(object):
         except Exception as e:
             print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
             import sys
-            raise e.with_traceback(sys.exc_info()[2])
+            raise e, None, sys.exc_info()[2]
 
         try:
             self.build()
         except Exception as e:
             print( 'Failed to build the bundle %s'%(type(self).__name__) )
             import sys
-            raise e.with_traceback(sys.exc_info()[2])
+            raise e, None, sys.exc_info()[2]
 
     def build(self):
         """Builds the computational chain. Should handle each namespace in namespaces."""
@@ -226,7 +228,7 @@ class TransformationBundle(object):
 
         # Init multidimensional index
         self.nidx=self.bundlecfg.get('nidx', [])
-        if isinstance(self.nidx, (tuple, list)):
+        if isinstance(self.nidx, (tuple,list)):
             self.nidx=NIndex(fromlist=self.nidx)
         assert isinstance(self.nidx, NIndex)
 
@@ -251,7 +253,21 @@ class TransformationBundle(object):
 
         self._debug = self.bundlecfg.get('debug', self._debug)
 
+        self._namefunction = self._get_namefunction(self.bundlecfg)
+
         assert not kwargs, 'Unparsed kwargs: '+str(kwargs)
+
+    @classmethod
+    def _get_namefunction(cls, bundlecfg):
+        names = bundlecfg.get('names')
+        if not names:
+             return lambda s: s
+        elif isinstance(names, (dict, NestedDict)):
+            return lambda s: names.get(s, s)
+        elif callable(names):
+            return names
+
+        cls.exception('option "names" should be a dictionary or a function, not {}'.format(type(names).__name__))
 
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
@@ -260,14 +276,14 @@ class TransformationBundle(object):
         except Exception as e:
             print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
             import sys
-            raise e.with_traceback(sys.exc_info()[2])
+            raise e, None, sys.exc_info()[2]
 
         try:
             self.build()
         except Exception as e:
             print( 'Failed to build the bundle %s'%(type(self).__name__) )
             import sys
-            raise e.with_traceback(sys.exc_info()[2])
+            raise e, None, sys.exc_info()[2]
 
     @staticmethod
     def _provides(cfg):
@@ -279,8 +295,8 @@ class TransformationBundle(object):
     @classmethod
     def provides(cls, cfg):
         variables, objects = cls._provides(cfg)
-        names = cfg.bundle.get('names', {})
-        ret = tuple((names.get(a, a) for a in variables)), tuple((names.get(a, a) for a in objects))
+        namefcn = cls._get_namefunction(cfg['bundle'])
+        ret = tuple((namefcn(a) for a in variables)), tuple((namefcn(a) for a in objects))
 
         if cfg.bundle.get('debug', False):
             print('Bundle', cls.__name__, 'provides')
@@ -297,11 +313,12 @@ class TransformationBundle(object):
         """Defines the variables necessary for the computational chain. Should handle each namespace."""
         pass
 
-    def exception(self, message):
-        return Exception("{bundle}: {message}".format(bundle=type(self).__name__, message=message))
+    @classmethod
+    def exception(cls, message):
+        return Exception("{bundle}: {message}".format(bundle=cls.__name__, message=message))
 
     def get_globalname(self, localname):
-        return self.bundlecfg['names'].get(localname, localname)
+        return self._namefunction(localname)
 
     def get_path(self, localname, nidx=None, argument_number=None, join=False, extra=None):
         name=self.get_globalname(localname)
@@ -314,7 +331,7 @@ class TransformationBundle(object):
         if extra:
             if isinstance(extra, str):
                 path+=extra,
-            elif isinstance(extra, (list, tuple)):
+            elif isinstance(extra, (list,tuple)):
                 path+=tuple(extra)
             else:
                 raise Exception('Unsupported extra field: '+str(extra))
@@ -368,3 +385,7 @@ class TransformationBundle(object):
         ndim = nidx.ndim();
         if not dmin<=ndim<=dmax:
             raise self.exception('Ndim {} does not satisfy requirement: {}<=ndim<={}'.format(ndim, dmin, dmax))
+
+    def _exception(self, msg):
+        return BundleException('{}: {}'.format(type(self).__name__, msg))
+

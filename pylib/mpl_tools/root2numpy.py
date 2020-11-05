@@ -19,6 +19,36 @@ def get_buffer_hist1( h, flows=False ):
     if not flows: buf = buf[1:-1]
     return buf
 
+def get_buffers_hist1(h):
+    """Get X/Y buffers of 1D histogram"""
+    return get_bin_centers_axis(h.GetXaxis()), get_buffer_hist1(h, flows=False)
+
+def get_buffers_hist2(h):
+    """Get X/Y buffers of 1D histogram"""
+    return get_bin_centers_axis(h.GetXaxis()), get_bin_centers_axis(h.GetYaxis()), get_buffer_hist2(h, flows=False)
+
+def get_buffers_graph_or_hist1(obj):
+    """Get X/Y buffers of eighter 1D histogram or TGraph"""
+    if isinstance(obj, R.TGraph):
+        return get_buffers_graph(obj)
+    if isinstance(obj, R.TH1) and obj.GetDimension()==1:
+        return get_buffers_hist1(obj)
+
+    raise TypeError('The object is not TH1/TGraph: {!s}'.format(obj))
+
+def get_buffers_auto(obj):
+    """Get X/Y buffers of eighter 1D histogram or TGraph"""
+    if isinstance(obj, R.TGraph):
+        return get_buffers_graph(obj)
+    if isinstance(obj, R.TH1) and obj.GetDimension()==1:
+        return get_buffers_hist1(obj)
+    if isinstance(obj, R.TH2) and obj.GetDimension()==2:
+        return get_buffers_hist2(obj)
+    if isinstance(obj, (R.TMatrixD, R.TMatrixF)):
+        return get_buffer_matrix(obj)
+
+    raise TypeError('The object is not TH1/TH2/TGraph/TMatrixD/TMatrixF: {!s}'.format(obj))
+
 def get_err_buffer_hist1( h, flows=False ):
     """Return TH1* histogram error buffer
     if flows=False, exclude underflow and overflow

@@ -136,6 +136,8 @@ class reactor_anu_spectra_v04(TransformationBundle):
             fname = fmt.format(**kwargs)
             try:
                 data = N.loadtxt(fname, dtype, unpack=True)
+                if self.cfg.get('debug', False):
+                    print('Load spectrum from {}: {!s}'.format(fname, kwargs))
             except:
                 pass
             else:
