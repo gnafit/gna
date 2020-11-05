@@ -70,3 +70,4 @@ class exp(baseexp):
             self.namespace.addobservable(name, obs.hist)
 
         roo_file.Close()
+

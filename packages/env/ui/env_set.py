@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Print given path within env"""
 
 from __future__ import print_function

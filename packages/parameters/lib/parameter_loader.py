@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import print_function
 from gna.env import env
 from gna.config import cfg
@@ -72,3 +71,4 @@ def get_uncertainties(parlist):
         return sigmas, centrals, covariance
 
     return sigmas, centrals, correlations
+

@@ -358,7 +358,15 @@ class NIndex(object):
         else:
             return indexauto
 
-        return fmt.format( **dct )
+        while True:
+            try:
+                ret = fmt.format( **dct )
+            except KeyError as e:
+                dct[e.args[0]] = 'x'
+            else:
+                break
+
+        return ret
 
     def get_relevant_index(self, short, exception=True):
         idx = self.indices.get(short, None)
@@ -368,7 +376,7 @@ class NIndex(object):
         master = self.masterof.get(short, None)
         if master is None:
             if exception:
-                raise Exception('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
+                raise IndexError('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
             else:
                 return None
 
@@ -395,6 +403,8 @@ class NIndex(object):
         majors, minors, used=(), (), ()
 
         for short in indices:
+            if not short:
+                continue
             major=self.get_relevant_index(short)
             majors+=major,
             used+=short,

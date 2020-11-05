@@ -18,7 +18,6 @@ public:
 
 private:
   void calcMatrix(FunctionArgs& fargs);
-  void calcSmear(FunctionArgs& fargs);
   void getEdges(TypesFunctionArgs& fargs);
 
   variable<double> m_a, m_b, m_c;

@@ -15,8 +15,8 @@ class cmd(basecmd):
         basecmd.__init__(self, *args, **kwargs)
 
         if self.opts.plot_type:
-            if self.opts.vs and self.opts.plot_type!='plot':
-                print('\033[35mWarning! plot-type option was reset to "plot"')
+            if self.opts.vs and self.opts.plot_type not in ('plot', 'ravelplot'):
+                print('\033[35mWarning! plot-type option was reset to "plot"\033[0m')
                 self.opts.plot_type='plot'
         elif self.opts.vs:
             self.opts.plot_type='plot'
@@ -26,6 +26,15 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         def observable(path):
+            #
+            # Future spectra location
+            #
+            try:
+                return env.future['spectra'][path]
+            except KeyError:
+                pass
+
+            # To be deprecated spectra location
             try:
                 return env.ns('').getobservable(path)
             except KeyError:
@@ -42,7 +51,7 @@ class cmd(basecmd):
         what.add_argument('-p', '--plot', default=[], metavar=('DATA',), action=append_typed(observable))
 
         parser.add_argument('--vs', metavar='X points', type=observable, help='Points over X axis to plot vs')
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot'], metavar='PLOT_TYPE',
+        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot', 'ravelplot'], metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')
         parser.add_argument('-l', '--legend', action='append', default=[],
@@ -78,6 +87,8 @@ class cmd(basecmd):
                 output.plot_errorbar(yerr='stat', label=legend, **plot_kwargs)
             elif self.opts.plot_type=='plot':
                 output.plot_vs(self.opts.vs, label=legend, **plot_kwargs)
+            elif self.opts.plot_type=='ravelplot':
+                output.plot_vs(self.opts.vs, label=legend, ravel=True, **plot_kwargs)
             else:
                 output.plot_hist_centers(label=legend, **plot_kwargs)
 

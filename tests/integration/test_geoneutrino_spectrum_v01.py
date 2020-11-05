@@ -57,3 +57,4 @@ def test_geoneutrino_spectrum_v01(tmp_path):
     savegraph(Enu, os.path.join(str(tmp_path), '_graph.png'))
 
     ns.printparameters(labels=True)
+

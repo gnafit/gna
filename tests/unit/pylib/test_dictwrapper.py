@@ -271,3 +271,18 @@ def test_dictwrapper_09_dictcopy():
         assert type(v._obj) is type(dw[k]._obj)
     assert i==2
 
+def test_dictwrapper_09_walk():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dw = DictWrapper(dct)
+
+    keys0 = [ ('a',), ('b', ), ('c',), ('d', 'e'), ('f', 'g', 'h') ]
+    keys = [k for k, v in dw.walkitems()]
+    assert keys==keys0
+
+    assert [(k,v) for k, v in dw.walkitems('a')] == [(('a',), 1)]
+    assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=True)] == [(('d','e'), 4)]
+    assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=False)] == [(('e',), 4)]
+    assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=True)] == [(('f','g', 'h'), 5)]
+    assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=False)] == [(('h',), 5)]
+
+

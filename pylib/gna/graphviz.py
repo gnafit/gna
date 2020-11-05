@@ -45,6 +45,8 @@ class GNADot(object):
         self.joints = kwargs.pop('joints', False)
         ns = kwargs.pop('namespace', None)
 
+        include_only=kwargs.pop('include_only', None)
+
         self.subgraphs = dict()
 
         self.graph=G.AGraph(directed=True, strict=False, layers=self.layers,**kwargs)
@@ -55,7 +57,7 @@ class GNADot(object):
         self._entry_uids = OrderedDict()
 
         from gna.graph.walk import GraphWalker
-        self.walker = GraphWalker(transformation, namespace=ns)
+        self.walker = GraphWalker(transformation, namespace=ns, include_only=include_only)
         self.style=TreeStyle(self.walker)
 
         self.walker.entry_do(self._action_entry)
@@ -125,6 +127,13 @@ class GNADot(object):
         self.graph.add_node( sourceuid, shape='point', label='in' )
         self.graph.add_edge( sourceuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, source) )
 
+    def _get_source_idx(self, source):
+        for i, s1 in enumerate(source.entry.sources):
+            if s1==source:
+                return i
+
+        return -1
+
     def _action_sink(self, sink, i=0, nsinks=0, graph=None):
         graph = graph or self.graph
         if sink.sources.size()==0:
@@ -137,26 +146,21 @@ class GNADot(object):
             sinkuid = self.entry_uid(sink.entry)
             sametail=str(i) if nsinks<5 else None
             for j, source in enumerate(sink.sources):
-                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=sametail, **self.style.edge_attrs(i, sink, None, source))
+                isource = self._get_source_idx(source)
+                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=sametail, **self.style.edge_attrs(i, sink, isource, source))
         else:
             """In case there is more than one connections, merge them"""
             jointuid = self.entry_uid(sink, 'joint')
-            joint = graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=self.style.tail_label(None, sink) )
+            joint = graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=sink.name)
 
             sstyle=self.style.edge_attrs(i, sink, None, None)
             sstyle['arrowhead']='none'
-            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
+            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle)
             for j, source in enumerate(sink.sources):
-                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(i, sink, None, source))
+                isource = self._get_source_idx(source)
+                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(None, sink, isource, source))
 
 class TreeStyle(object):
-    markhead, marktail = True, True
-    # headfmt = '{index:d}: {label}'
-    headfmt = '{label}'
-    headfmt_noi = '{label}'
-    # tailfmt = '{index:d}: {label}'
-    tailfmt = '{label}'
-    tailfmt_noi = '{label}'
     entryfmt = '{label}'
 
     gpucolor = 'limegreen'
@@ -190,10 +194,14 @@ class TreeStyle(object):
 
         marks = {
                 'Sum':               '+',
+                'SumSq':             u'+²',
                 'MultiSum':          '+',
                 'SumBroadcast':      '+',
                 'WeightedSum':       '+w',
+                'WeightedSumSq':     '+²w²',
+                'ConditionalProduct': '*?',
                 'Product':           '*',
+                'ProductBC':         '*',
                 'Points':            'a',
                 'View':              'v',
                 'Histogram':         'h',
@@ -203,10 +211,15 @@ class TreeStyle(object):
                 'FillLike':          'c',
                 'HistSmearSparse':   '@',
                 'HistSmear':         '@',
+                'HistEdges':         '\|.\|.\|',
                 'MatrixProduct':     '@',
                 'Snapshot':          r'\|o\|',
                 'MatrixProductDVDt': '@@t',
-                'InSegment':         u'∈'
+                'InSegment':         u'∈',
+                'Jacobian':          u'J',
+                'Chi2':              u'χ²',
+                'CovariatedPrediction': 'V',
+                'Ratio':             u'÷'
                 }
         if objectname in marks:
             mark = marks.get(objectname)
@@ -221,6 +234,13 @@ class TreeStyle(object):
         if objectname in ('WeightedSum'):
             npars=entry.sources.size()
 
+        if objectname=='CovariatedPrediction':
+            if entry.name=='cov':
+                mark = 'L'
+            elif entry.name=='cov':
+                mark = 'V'
+            else:
+                mark = '..'
 
         if objectname.startswith('Integrator'):
             if entry.name == 'points':
@@ -318,36 +338,17 @@ class TreeStyle(object):
         return ret
 
     def head_label(self, i, obj):
-        attrs=dict(obj.attrs)
-        if not self.markhead:
-            return None
-        if isinstance(obj, basestring):
-            return obj
-
-        if i is None:
-            return self.headfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
-
-        return self.headfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
+        return '' if i is None else str(i)
 
     def tail_label(self, i, obj):
-        attrs=dict(obj.attrs)
-        if not self.marktail:
-            return None
-        if isinstance(obj, basestring):
-            return obj
-
-        if i is None:
-            return self.tailfmt_noi.format(name=obj.name, label=attrs.get('_label', ''))
-
-        return self.tailfmt.format(index=i, name=obj.name, label=attrs.get('_label', ''))
+        return '' if i is None else str(i)
 
     def edge_attrs(self, isink, sink, isource=None, source=None):
         attrs = dict(layer='transformation')
         style=()
         if sink:
-            taillabel=self.tail_label(isink, sink)
-            if taillabel and source:
-                attrs['xlabel']=taillabel
+            tailabel=self.tail_label(isink, sink)
+            attrs['taillabel']=tailabel
 
             sinkfeatures = self.get_features(sink.entry)
             if sinkfeatures.static:

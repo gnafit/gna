@@ -52,7 +52,11 @@ class cmd(basecmd):
         self.snapshots = dict()
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
-                theory, data = env.get(theory_path), env.get(data_path)
+                try:
+                    theory, data = env.get(theory_path), env.get(data_path)
+                except KeyError:
+                    theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+
                 if self.opts.error_type == 'neyman':
                     error=data.single()
                 elif self.opts.error_type == 'pearson':
@@ -114,3 +118,4 @@ class cmd(basecmd):
 
         ns = self.env.globalns('pull')
         ns.addobservable(self.opts.name, self.pull_vararray.single())
+        self.env.future['pull', self.opts.name] = self.pull_vararray.single()

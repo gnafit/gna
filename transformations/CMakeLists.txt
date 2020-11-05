@@ -8,6 +8,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/ViewRear.cc
   transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
+  transformations/base/ConditionalProduct.cc
   transformations/base/Product.cc
   transformations/base/ProductBC.cc
   transformations/base/Snapshot.cc
@@ -15,6 +16,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/MultiSum.cc
   transformations/sum/PartialSum.cc
   transformations/sum/Sum.cc
+  transformations/sum/SumSq.cc
   transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
   transformations/sum/WeightedSumSq.cc
@@ -24,6 +26,7 @@ set(TRANSFORMATION_SOURCES
   transformations/ratio/Convolution.cc
   transformations/ratio/PolyRatio.cc
   transformations/ratio/Ratio.cc
+  transformations/ratio/RatioBC.cc
   # Calculus
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
@@ -31,6 +34,7 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/FakeGSLFunction.cc
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
+  transformations/detector/EnergyResolutionInput.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistNonlinearityB.cc
   transformations/detector/HistSmear.cc
@@ -142,6 +146,7 @@ set(TRANSFORMATION_HEADERS
   View.hh
   ViewRear.hh
   ViewHistBased.hh
+  ConditionalProduct.hh
   Product.hh
   ProductBC.hh
   Snapshot.hh
@@ -149,6 +154,7 @@ set(TRANSFORMATION_HEADERS
   PartialSum.hh
   MultiSum.hh
   Sum.hh
+  SumSq.hh
   SumBroadcast.hh
   WeightedSum.hh
   WeightedSumSq.hh
@@ -158,6 +164,7 @@ set(TRANSFORMATION_HEADERS
   NormalizedConvolution.hh
   PolyRatio.hh
   Ratio.hh
+  RatioBC.hh
   # Calculus
   Derivative.hh
   Jacobian.hh
@@ -227,6 +234,7 @@ set(TRANSFORMATION_HEADERS
   GaussLegendre.hh
   GaussLegendre2d.hh
   EnergyResolution.hh
+  EnergyResolutionInput.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
   HistNonlinearityB.hh

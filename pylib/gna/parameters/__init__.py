@@ -47,7 +47,7 @@ class DiscreteParameter(object):
     def getVariants(self):
         return tuple(self._variants)
 
-    def getLabel(self):
+    def label(self):
         return self._label
 
     def setLabel(self, label):
@@ -203,7 +203,10 @@ def makeparameter(ns, name, cfg=None, **kwargs):
     param.ns = ns
 
     if 'label' in kwargs:
-        param.setLabel(kwargs['label'])
+        label = kwargs['label']
+        if not isinstance(label, str):
+            label = label.encode('utf8')
+        param.setLabel(label)
     if debug:
         print()
     param.setNamespace(ns.path)

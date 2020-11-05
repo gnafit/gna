@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import ROOT
 from packages.minimize.lib.minuit_base import MinuitBase
 

@@ -47,6 +47,7 @@ class IndexedContainer(object):
                     newlabel = cfg.get('label', None)
                     if newlabel:
                         self.label=newlabel
+                    self.expandable = cfg.get('expand', self.expandable)
             return self.name
 
         newname = '{prefix}{expr}'.format( prefix=self.prefix,
@@ -61,17 +62,13 @@ class IndexedContainer(object):
         for nn in tuple(variants):
             variants.append(nn+':'+self.nindex.ident())
 
-        guessed = False
         label = None
         for var in variants:
             if var in lib:
                 libentry = lib[var]
-                guessed = libentry['name']
+                newname = libentry['name']
                 label   = libentry.get('label', None)
                 break
-
-        if guessed:
-            newname = guessed
         else:
             newname = '{expr}'.format(
                         expr = self.text_operator.strip().join(sorted(o.ident(lib=lib, save=save) for o in self.objects)),
@@ -308,6 +305,7 @@ class TProduct(NestedTransformation, IndexedContainer, Transformation):
 
 class TRatio(NestedTransformation, IndexedContainer, Transformation):
     def __init__(self, name, *objects, **kwargs):
+        bc = kwargs.pop('broadcast', False)
         if len(objects)!=2:
             raise Exception('Expect two objects for TRatio')
 
@@ -323,7 +321,7 @@ class TRatio(NestedTransformation, IndexedContainer, Transformation):
 
         self.set_operator( ' / ', '( ', ' )', text='_over_'  )
         import ROOT as R
-        self.set_tinit( R.Ratio )
+        self.set_tinit(bc and R.RatioBC or R.Ratio)
 
     def add_input(self, tobj, idx):
         if not idx in [0, 1]:

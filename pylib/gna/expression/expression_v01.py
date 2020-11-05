@@ -34,7 +34,7 @@ class VTContainer_v01(OrderedDict):
         return value
 
 class Expression_v01(object):
-    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, Accumulate=AccumulateTransformation, bracket=bracket, expand=expand, inverse=OInverse, select1=OSelect1 )
+    operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket, expand=expand, inverse=OInverse, select1=OSelect1 )
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
         if isinstance(expression, basestring):
@@ -95,6 +95,10 @@ class Expression_v01(object):
                 lib[expr] = v
         for tree in self.trees:
             tree.guessname(lib, *args, **kwargs)
+
+    def dump_all(self, yieldself):
+        for tree in self.trees:
+            tree.dump(yieldself)
 
     def __str__(self):
         return self.expressions_raw
