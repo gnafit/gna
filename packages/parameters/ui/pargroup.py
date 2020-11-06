@@ -44,7 +44,8 @@ class cmd(basecmd):
         if self.opts.verbose>1:
             print(list(self.loaded_parameters.keys()))
 
-    def _keep_parameter(self, (name, par)):
+    def _keep_parameter(self, namepar):
+        name, par = namepar
         for excl in self.opts.exclude:
             if excl in name:
                 return False

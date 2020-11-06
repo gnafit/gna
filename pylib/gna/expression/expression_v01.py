@@ -94,6 +94,10 @@ class Expression_v01(object):
         for tree in self.trees:
             tree.guessname(lib, *args, **kwargs)
 
+    def dump_all(self, yieldself):
+        for tree in self.trees:
+            tree.dump(yieldself)
+
     def __str__(self):
         return self.expressions_raw
 

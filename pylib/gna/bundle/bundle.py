@@ -153,14 +153,14 @@ class TransformationBundleLegacy(object):
         except Exception as e:
             print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
             import sys
-            raise e, None, sys.exc_info()[2]
+            raise e.with_traceback(sys.exc_info()[2])
 
         try:
             self.build()
         except Exception as e:
             print( 'Failed to build the bundle %s'%(type(self).__name__) )
             import sys
-            raise e, None, sys.exc_info()[2]
+            raise e.with_traceback(sys.exc_info()[2])
 
     def build(self):
         """Builds the computational chain. Should handle each namespace in namespaces."""
@@ -274,14 +274,14 @@ class TransformationBundle(object):
         except Exception as e:
             print( 'Failed to define variables for bundle %s'%(type(self).__name__) )
             import sys
-            raise e, None, sys.exc_info()[2]
+            raise e.with_traceback(sys.exc_info()[2])
 
         try:
             self.build()
         except Exception as e:
             print( 'Failed to build the bundle %s'%(type(self).__name__) )
             import sys
-            raise e, None, sys.exc_info()[2]
+            raise e.with_traceback(sys.exc_info()[2])
 
     @staticmethod
     def _provides(cfg):

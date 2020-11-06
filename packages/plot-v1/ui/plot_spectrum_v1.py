@@ -74,7 +74,7 @@ class cmd(basecmd):
         self.edges_storage = [np.array(obs.datatype().hist().edges()) for obs in self.opts.plot]
 
         while len(self.data_storage) > len(self.legends):
-            print "Amount of data and amount of data doesn't match. Perhaps it is not what you want. Filling legend with empty strings"
+            print("Amount of data and amount of legends doesn't match. Perhaps it is not what you want. Filling legend with empty strings")
             self.legends.append('')
 
         for output, legend in zip(self.opts.plot, self.legends):
