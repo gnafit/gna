@@ -4,7 +4,6 @@ from gna.unittest import *
 from load import ROOT as R
 import numpy as N
 import gna.bindings.arrayview
-from gna.bindings import __root_version__
 from gna import context
 
 @floatcopy(globals())
@@ -86,12 +85,8 @@ def test_arrayview_complex():
     a1[0]=2
     a1[1]=3
     c1 = a1.complex()
-    if __root_version__ >= '6.22/00':
-        assert c1.real == 2.0
-        assert c1.imag == 3.0
-    else:
-        assert c1.real() == 2.0
-        assert c1.imag() == 3.0
+    assert c1.real == 2.0
+    assert c1.imag == 3.0
 
 if __name__ == "__main__":
     run_unittests(globals())

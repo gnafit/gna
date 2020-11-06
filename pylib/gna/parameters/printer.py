@@ -7,7 +7,7 @@ from gna.bindings import provided_precisions
 from itertools import chain, tee, cycle
 import itertools
 
-from gna.bindings import patchROOTClass, __root_version__
+from gna.bindings import patchROOTClass
 
 try:
     import sys
@@ -231,12 +231,8 @@ def Variable_complex__str(self, labels=False, value=None):
     if value is None:
         value = self.values()
 
-    if __root_version__ >= "6.22":
-        rval  = value.real
-        ival  = value.imag
-    else:
-        rval  = value.real()
-        ival  = value.imag()
+    rval = value.real
+    ival = value.imag
 
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN),

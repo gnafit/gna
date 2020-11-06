@@ -1,16 +1,8 @@
-
 import numpy as np
 import ROOT
 import itertools as it
 import types
 import inspect
-
-def _get_root_version():
-    from subprocess import check_output
-    version = check_output(['root-config', '--version']).decode()
-    return version.rstrip('\n') # remove newline
-
-__root_version__ = _get_root_version()
 
 # breaking change in ROOT 6.22 >= due to new PyROOT
 try:
@@ -25,7 +17,7 @@ except AttributeError:
 
 
 ROOT.GNAObjectT
-provided_precisions = list(ROOT.GNA.provided_precisions())
+provided_precisions = [str(prec) for prec in ROOT.GNA.provided_precisions()]
 
 def patchGNAclass(cls):
     if '__original_init__' in cls.__dict__:
@@ -72,7 +64,7 @@ class GNAObjectTemplates(object):
 
     @staticmethod
     def patchGNATemplate(template):
-        if not isinstance(template, types.InstanceType):
+        if inspect.isclass(template):
             return
 
         for pp in provided_precisions:
@@ -192,13 +184,7 @@ def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
     ROOT.__gna_patched__ = True
-
-    # Catch C++ exceptions
-    from gna.core.exceptions import load_user_exceptions
-    load_user_exceptions()
-
     ROOT.GNAObjectT
-    provided_precisions = ROOT.GNA.provided_precisions()
 
     simpledicts=[]
     for ft in provided_precisions:
@@ -217,9 +203,9 @@ def setup(ROOT):
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
     for ft in provided_precisions:
-        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
-        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
-        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft, ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft, ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft, ft))
 
     patchStatistic(ROOT.Statistic)
 
@@ -292,12 +278,12 @@ def patchROOTClass(classes=None, methods=None):
         return classes
 
     # Used as function returning decorator
-    if not isinstance(classes, (list,tuple)):
+    if not isinstance(classes, (list, tuple)):
         classes = (classes,)
 
     classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
 
-    if methods is not None and not isinstance(methods, (list,tuple)):
+    if methods is not None and not isinstance(methods, (list, tuple)):
         methods = (methods,)
 
     def decorator(function):
