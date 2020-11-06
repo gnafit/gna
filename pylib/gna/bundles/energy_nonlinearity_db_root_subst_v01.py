@@ -195,6 +195,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         def mult(xy):
             x, y = xy
             y*=x
+
         def grad(kxy):
             k, (x, y) = kxy
             return k, np.gradient(y, x[1]-x[0])
@@ -203,7 +204,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         self.check_same_x(graphs)
         self.make_diff(graphs)
         graphs = self.supersample(graphs)
-        map(mult, graphs.values())
+        list(map(mult, graphs.values()))
         gradients = OrderedDict(map(grad, graphs.items()))
 
         tfile.Close()
