@@ -181,7 +181,7 @@ class NMOSensPlotter(object):
 
     def load_data(self):
         # Labels
-        self.info = [data.label.decode('utf-8') for data in self.opts.files]
+        self.info = [data.label for data in self.opts.files]
         self.skip  = np.array([int(data.__dict__.get('skip', 0)) for data in self.opts.files])
         self.trans = np.array([int(data.__dict__.get('transient', 0)) for data in self.opts.files])
         if self.skip[0] or self.trans[0]:

@@ -88,7 +88,7 @@ class DictWrapperParsPrinter(DictWrapperVisitor):
         if corr: marks.append('correlated')
         if biased: marks.append('modified')
         entry['marks'] = ', '.join(marks)
-        entry['label'] = par.label().decode('utf8')
+        entry['label'] = par.label()
 
         return entry
 
@@ -105,7 +105,7 @@ class DictWrapperParsPrinter(DictWrapperVisitor):
         if biased: marks.append('modified')
 
         entry['marks'] = ', '.join(marks)
-        entry['label'] = par.label().decode('utf8')
+        entry['label'] = par.label()
 
         return entry
 
@@ -127,7 +127,7 @@ class DictWrapperParsPrinter(DictWrapperVisitor):
         marks = []
         if biased: marks.append('modified')
         entry['marks'] = ', '.join(marks)
-        entry['label'] = par.label().decode('utf8')
+        entry['label'] = par.label()
 
         return entry
 

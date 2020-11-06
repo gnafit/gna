@@ -211,7 +211,7 @@ def Variable__str( self, labels=False ):
             val     = self.value(),
             color = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -244,7 +244,7 @@ def Variable_complex__str(self, labels=False, value=None):
             ival  = ival,
             color = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -268,7 +268,7 @@ def UniformAngleParameter__str( self, labels=False  ):
             npi     = self.value()/N.pi,
             color   = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -303,7 +303,7 @@ def GaussianParameter__str( self, labels=False  ):
             )
     correlated = self.isCorrelated()
     limits  = self.limits()
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -349,7 +349,7 @@ def DiscreteParameter____str__(self, labels=False):
         variants = str(self.getVariants()),
         color   = Fore.BLUE
         )
-    label = self.label().decode('utf8')
+    label = self.label()
 
     s= namefmt.format(**fmt)
     s+=valdfmt.format(**fmt)
