@@ -56,7 +56,7 @@ class DictWrapperVerbose(DictWrapper):
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-v', '--verbose', action='count', help='make environment verbose on set')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='make environment verbose on set')
         parser.add_argument('-x', '--exclude', nargs='+', default=[], help='keys to exclude')
         parser.add_argument('-i', '--include', nargs='+', default=[], help='keys to include (only)')
 

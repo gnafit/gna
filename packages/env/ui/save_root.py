@@ -11,7 +11,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('paths', nargs='+', help='paths to save')
-        parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
         parser.add_argument('-o', '--output', required=True, help='Output fil ename')
 
     def init(self):

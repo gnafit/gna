@@ -136,9 +136,9 @@ class Minuit(ROOT.TMinuitMinimizer):
 
     def evalstatistic(self):
         wall = time.time()
-        clock = time.clock()
+        clock = time.perf_counter()
         value = self._statistic()
-        clock = time.clock() - clock
+        clock = time.perf_counter() - clock
         wall = time.time() - wall
 
         x = [par.value() for par in self.pars]
@@ -176,9 +176,9 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.pushpars()
 
         wall = time.time()
-        clock = time.clock()
+        clock = time.perf_counter()
         self.Minimize()
-        clock = time.clock() - clock
+        clock = time.perf_counter() - clock
         wall = time.time() - wall
 
         self.poppars()

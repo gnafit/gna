@@ -20,7 +20,7 @@ class exp(baseexp):
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
         parser.add_argument('-m', '--mode', default='simple', choices=['simple', 'dyboscar', 'mid'], help='Set the topology')
         parser.add_argument('--no-osc', action='store_true', help='Produce nooscillated prediction without detector related effects')
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--ihep-config', action='store_true', help="Use IHEP p15a average livetimes and efficiencies")
         parser.add_argument('--with-dyboscar-input', action='store_true', help="Use dybOscar unoscillated prediction for P15A dataset, for checking detector effects")

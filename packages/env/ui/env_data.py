@@ -65,7 +65,7 @@ class cmd(basecmd):
         parser.add_argument('-t', '--root-target', default=(), help='root namespace to copy to')
         parser.add_argument('-c', '--copy', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
         parser.add_argument('-g', '--copy-graph', nargs='+', action='append', default=[], help='Data to read (x,y) and address to write', metavar=('x', 'y'))
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity')
 
     def run(self):
         source = self.env.future.child(self.opts.root_source)

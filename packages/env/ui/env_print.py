@@ -56,7 +56,7 @@ class cmd(basecmd):
         parser.add_argument('paths', nargs='*', default=((),), help='paths to print')
         parser.add_argument('-l', '--valuelen', type=int, help='value length')
         parser.add_argument('-k', '--keylen', type=int, help='key length')
-        # parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
+        # parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
 
     def init(self):
         storage = self.env.future

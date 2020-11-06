@@ -71,7 +71,7 @@ def update_namespace_cwd(ns, keys):
         if isinstance(val, str):
             ns.__dict__[key] = get_path(val)
         elif isinstance(val, Iterable):
-            ns.__dict__[key] = map(get_path, val)
+            ns.__dict__[key] = list(map(get_path, val))
         else:
             raise Exception('Unexpected value {!s} type: {}. Should be string or list of strings.'.format(val, type(val).__name__))
 

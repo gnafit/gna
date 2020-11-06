@@ -59,7 +59,7 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
         #
         # All curves but first are the corrections to the nominal
         #
-        newy_values = newy.values()
+        newy_values = list(newy.values())
         for f in newy_values[1:]:
             f-=newy_values[0]
 
@@ -107,7 +107,8 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
                     self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
                     self.set_output('lsnl', it, trans.Nrec)
 
-    def get_buffers_auto(self, (k, obj)):
+    def get_buffers_auto(self, kobj):
+        k, obj = kobj
         return k, get_buffers_graph_or_hist1(obj)
 
     def build(self):
@@ -148,7 +149,8 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
             for it in self.detector_idx.iterate():
                 self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
-    def interpolate(self, (x, y), edges):
+    def interpolate(self, xy, edges):
+        x, y = xy
         fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
         fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
         res = fcn( edges )

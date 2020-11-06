@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -125,7 +124,8 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
                     self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
                     self.set_output('lsnl', it, trans.Nrec)
 
-    def get_buffers_auto(self, (k, obj)):
+    def get_buffers_auto(self, kobj):
+        k, obj=kobj
         return k, get_buffers_graph_or_hist1(obj)
 
     def load_data(self):
@@ -188,7 +188,8 @@ class energy_nonlinearity_db_root_v04(TransformationBundle):
             for it in self.detector_idx.iterate():
                 self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
-    def interpolate(self, (x, y), edges):
+    def interpolate(self, xy, edges):
+        x, y = xy
         fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
         fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
         res = fcn( edges )

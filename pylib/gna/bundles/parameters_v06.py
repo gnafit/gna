@@ -47,7 +47,7 @@ class parameters_v06(TransformationBundle):
 
         sepuncfmt=cfg.get('separate_uncertainty')
         if sepuncfmt:
-            names.extend(map(sepuncfmt.format, names))
+            names.extend(tuple(map(sepuncfmt.format, names)))
 
         if cfg.get('objectize'):
             return names, names

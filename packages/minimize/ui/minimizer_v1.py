@@ -16,7 +16,7 @@ class cmd(basecmd):
         parser.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit2',
                                     help='Minimizer type {%(choices)s}', metavar='minimizer')
 
-        parser.add_argument('-v', '--verbose', action='count', help='increase verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='increase verbosity level')
 
     def init(self):
         self.statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())

@@ -21,7 +21,7 @@ class exp(baseexp):
     def initparser(cls, parser, namespace):
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--no-snf', action='store_true', help='Disable SNF')
         parser.add_argument('--lihe-fractions', default='no', choices=['no', 'common', 'independent'],

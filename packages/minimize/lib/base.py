@@ -13,11 +13,11 @@ class FitResult(object):
 
     def __enter__(self):
         self._wall  = time.time()
-        self._clock = time.clock()
+        self._clock = time.perf_counter()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self._clock = time.clock() - self._clock
+        self._clock = time.perf_counter() - self._clock
         self._wall  = time.time()  - self._wall
 
     def set(self, x, errors, fun, success, message, minimizer, nfev, **kwargs):

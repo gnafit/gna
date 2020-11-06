@@ -18,7 +18,7 @@ class cmd(basecmd):
     _fig = None
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-v', '--verbose', action='count',default=0, help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
 
         mpl = parser.add_argument_group(title='matplotlib', description='General matplotlib parameters')
 

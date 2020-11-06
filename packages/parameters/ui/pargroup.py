@@ -15,7 +15,7 @@ class cmd(basecmd):
         parser.add_argument('-n', '--name', dest='name', help='Parameters group name')
         parser.add_argument('-p', '--pars', dest='pars', nargs='*', help='Parameters to store')
 
-        parser.add_argument('-v', '--verbose', action='count', help='verbose mode')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbose mode')
 
         filter1 = parser.add_argument_group(title='Filter', description='Arguments to filter the list of parameters')
         choices = ['free', 'constrained', 'fixed']

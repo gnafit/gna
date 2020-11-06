@@ -35,7 +35,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')

@@ -45,7 +45,7 @@ class cmd(basecmd):
                             action=append_typed(env.parts.minimizer))
         parser.add_argument('--toymc', action=set_typed(env.parts.toymc))
         parser.add_argument('--toymc-type', choices=['static', 'grid'])
-        parser.add_argument('-v', '--verbose', action='count')
+        parser.add_argument('-v', '--verbose', action='count', default=0)
         parser.add_argument('--segments', nargs=2, action=SegmentValidation, type=int,
                 metavar=('NSEGMENTS', 'CURRENT_SEGMENT'),
                 help='Split the grid over which scan is performed into '
