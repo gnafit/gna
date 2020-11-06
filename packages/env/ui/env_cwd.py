@@ -23,6 +23,6 @@ class cmd(basecmd):
     def run(self):
         if self.opts.print:
             print('List of saved files:')
-            map(lambda s: print('    -', s), get_processed_paths())
+            tuple(map(lambda s: print('    -', s), get_processed_paths()))
 
 
