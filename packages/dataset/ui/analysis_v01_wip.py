@@ -81,7 +81,7 @@ class cmd(basecmd):
                 add(block.theory, block.cov)
 
             blocks = [ block._replace(data=toymc_out)
-                      for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.itervalues()) ]
+                      for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.values()) ]
 
             self.env.parts.toymc[self.opts.name] = toymc
             for toymc in toymc.transformations.values():

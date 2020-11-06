@@ -28,7 +28,7 @@ e = 0.5*( e[1:]+e[:-1] )
 header = '''Uncertainties for %s Fallot's spectrum from arXiv:1208.3877
 Bin center [MeV], total relative uncertainty'''
 
-for iso, unc_limits in uncertainties.iteritems():
+for iso, unc_limits in uncertainties.items():
     unc = zeros( len(e), dtype='d' )
     for lim in reversed( sorted( unc_limits.keys() ) ):
         unc[ e<lim ] = unc_limits[lim]

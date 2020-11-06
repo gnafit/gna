@@ -74,24 +74,18 @@ class GNAObjectTemplates(object):
 GNAObjectTemplates=GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
-    def itervalues(self):
+    def values(self):
         for i in range(self.size()):
             yield self.at(i)
 
-    def values(self):
-        return list(itervalues(self))
-
-    def iterkeys(self):
+    def keys(self):
         for i in range(self.size()):
             yield self.at(i).name()
 
     def __contains__(self, key):
         return key in keys(self)
 
-    def keys(self):
-        return list(iterkeys(self))
-
-    def iteritems(self):
+    def items(self):
         for i in range(self.size()):
             yield self.at(i).name(), self.at(i)
 
@@ -116,11 +110,8 @@ def patchSimpleDict(cls):
     def __dir__(self):
         return dir(cls) + list(self.keys())
 
-    cls.itervalues = itervalues
     cls.values = values
-    cls.iterkeys = iterkeys
     cls.keys = keys
-    cls.iteritems = iteritems
     cls.__contains__ = __contains__
     cls.__len__ = __len__
     cls.__iter__ = __iter__

@@ -66,7 +66,7 @@ class PointSet(object):
             msg = 'grids specified with point tree'
             raise Exception(msg)
         params = tree.params
-        return cls(opts, params, tree.itervalues)
+        return cls(opts, params, tree.values)
 
     @classmethod
     def addargs(cls, parser, env):
