@@ -3,6 +3,26 @@ import numpy as np
 import ROOT
 import itertools as it
 import types
+import inspect
+
+def _get_root_version():
+    from subprocess import check_output
+    version = check_output(['root-config', '--version']).decode()
+    return version.rstrip('\n') # remove newline
+
+__root_version__ = _get_root_version()
+
+# breaking change in ROOT 6.22 >= due to new PyROOT
+try:
+    import cppyy
+    Template = cppyy._cpython_cppyy.Template
+    def istemplate(cls):
+        return isinstance(cls, Template)
+except AttributeError:
+    # ROOT <= 6.22 or 6.22 with legacy PyROOT
+    def istemplate(cls):
+        return not isinstance(cls, ROOT.PyRootType)
+
 
 ROOT.GNAObjectT
 provided_precisions = list(ROOT.GNA.provided_precisions())
@@ -87,7 +107,7 @@ def patchSimpleDict(cls):
         return self.size()
 
     def __iter__(self):
-        return self.iterkeys()
+        return iter(self.keys())
 
     def __getattr__(self, attr):
         if attr in self:
@@ -102,7 +122,7 @@ def patchSimpleDict(cls):
             return default
 
     def __dir__(self):
-        return dir(cls) + self.keys()
+        return dir(cls) + list(self.keys())
 
     cls.itervalues = itervalues
     cls.values = values
@@ -182,12 +202,14 @@ def setup(ROOT):
 
     simpledicts=[]
     for ft in provided_precisions:
+        obj = ROOT.GNAObjectT(ft, ft)
+        descr = ROOT.TransformationDescriptorT(ft, ft)
         simpledicts += [
-            ROOT.GNAObjectT(ft,ft).Variables,
-            ROOT.GNAObjectT(ft,ft).Evaluables,
-            ROOT.GNAObjectT(ft,ft).Transformations,
-            ROOT.TransformationDescriptorT(ft,ft).Inputs,
-            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+            obj.Variables,
+            obj.Evaluables,
+            obj.Transformations,
+            descr.Inputs,
+            descr.Outputs,
         ]
     simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
@@ -218,8 +240,9 @@ def setup(ROOT):
 
     GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
-        # If the object is template, try to patch its instance
-        if not isinstance(cls, ROOT.PyRootType):
+        if not inspect.isclass(cls):
+            return cls
+        if istemplate(cls):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
@@ -231,7 +254,13 @@ def setup(ROOT):
     t = type(ROOT)
     origgetattr = t.__getattr__
     def patchclass(self, name):
-        cls = patchcls(origgetattr(self, name))
+        try:
+            # modern PyROOT
+            cls = patchcls(origgetattr(name))
+        except TypeError:
+            # legacy PyROOT
+            cls = patchcls(origgetattr(self, name))
+
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass
