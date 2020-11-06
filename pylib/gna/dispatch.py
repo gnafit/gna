@@ -114,8 +114,8 @@ def run():
 
         cmdtriples.append((loadcmdclass(modules, name), group))
 
+    exit=False
     for (cmdcls, parser), args in cmdtriples:
-        exit=False
         if '-h' in args or '--help' in args:
             if 'add_help=True' in repr(parser):
                 parser.print_help()
