@@ -44,9 +44,9 @@ class integral_2d1d_v05(TransformationBundle):
             raise self.exception('Invalid integrator mode')
         else:
             if '_' in self.cfg.mode:
-                iopts = opts.mode.rsplit('_', 1)[-1],
+                self.iopts = self.cfg.mode.rsplit('_', 1)[-1],
             else:
-                iopts = tuple()
+                self.iopts = tuple()
             self.mode = self.cfg.mode
 
         if self.cfg.mode != 'GL':
@@ -62,13 +62,13 @@ class integral_2d1d_v05(TransformationBundle):
             if self.mode == 'GL':
                 self.integrator = R.Integrator21GL(self.edges.size-1, self.xorders, self.edges, self.cfg.yorder, -1.0, 1.0)
             else:
-                self.integrator = R.Integrator2Rect(self.edges.size-1, self.xorders, self.edges, self.yedges.size-1, self.cfg.yorder, self.yedges, *iopts)
+                self.integrator = R.Integrator2Rect(self.edges.size-1, self.xorders, self.edges, self.yedges.size-1, self.cfg.yorder, self.yedges, *self.iopts)
         else:
             if self.mode == 'GL':
                 self.integrator = R.Integrator21GL(self.edges.size-1, int(self.xorders[0]), self.edges, self.cfg.yorder, -1.0, 1.0)
                 self.integrator.points.setLabel('GL sampler (2d)')
             else:
-                self.integrator = R.Integrator2Rect(self.edges.size-1, int(self.xorders[0]), self.edges, self.yedges.size-1, self.cfg.yorder, self.yedges, *iopts)
+                self.integrator = R.Integrator2Rect(self.edges.size-1, int(self.xorders[0]), self.edges, self.yedges.size-1, self.cfg.yorder, self.yedges, *self.iopts)
                 self.integrator.points.setLabel('Rectangular sampler (2d)')
 
         self.integrator.points.x.setLabel(self.cfg.variables[0])
