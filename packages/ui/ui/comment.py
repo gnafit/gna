@@ -1,4 +1,3 @@
-
 """Commenting UI. Arguments are ignored."""
 
 from gna.ui import basecmd
