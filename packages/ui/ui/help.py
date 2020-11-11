@@ -1,14 +1,13 @@
-"""Print help on a command
-
-Similar to the "--help" UI option, but is not executed immediately.
-"""
-
 from gna.ui import basecmd
 from argparse import REMAINDER
 from gna.dispatch import getmodules, loadcmdclass
 import textwrap
 
-class cmd(basecmd):
+class help(basecmd):
+    """Print help on a command
+
+    Similar to the "--help" UI option, but is not executed immediately.
+    """
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('command', help='command to print help on')

@@ -40,7 +40,9 @@ def loadmodule(modules, name):
 
 def loadcmdclass(modules, name):
     module=loadmodule(modules, name)
-    cls = getattr(module, 'cmd')
+    cls = getattr(module, name, None)
+    if not cls:
+        cls = getattr(module, 'cmd')
 
     if not cls.__doc__ and module.__doc__:
         cls.__doc__=module.__doc__
