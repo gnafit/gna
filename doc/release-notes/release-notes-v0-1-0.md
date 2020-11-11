@@ -22,16 +22,24 @@ New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Exampl
 cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dgnuinstall:bool=ON -Dminuit2:bool=ON
 ```
 
-## Modularity
+## Modularity and package organization
 
-### Introduction
+GNA now provides a convenient way to manage closely related or user generated GNA parts as packages. Currently the package may contain:
 
-## Storage update
+* UI modules 
+* Bundles
+* Experiments
+* Python libraries
 
-## Package organization update
+The packages may be stored in a sub folders of:
 
 * Default search path `package/`
-* Environment variable `$GNAPATH`
+* Directories, listed in environment variable `$GNAPATH`
+
+For each subdirectory of `package/` or `$GNAPATH/` may contain folders `ui/`, `bundles/`, `experiments/` and `lib/` to search for the items respectively.
+While UI modules, bundles and experiments are searched automatically in paths `package/*/ui`, `package/*/bundles` and `package/*/experiments` (as well as in paths from `$GNAPATH`), the libraries should be imported by their full module path.
+
+## Storage update
 
 ### Introduction
 
@@ -41,7 +49,7 @@ The storage of variables, observables, etc. in env will be organized via nested 
 
 At the current stage we introduce `env.future` storage point, which may be accessed from anywhere and will override observables in the next release.
 
-### Easy nested dictionaries with `DictWrapper` 
+### Easy nested dictionaries with `DictWrapper`
 
 ### Future storage `env.future`
 
