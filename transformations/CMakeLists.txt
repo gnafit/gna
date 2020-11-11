@@ -16,6 +16,7 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/MultiSum.cc
   transformations/sum/PartialSum.cc
   transformations/sum/Sum.cc
+  transformations/sum/SumAxis.cc
   transformations/sum/SumSq.cc
   transformations/sum/SumBroadcast.cc
   transformations/sum/WeightedSum.cc
@@ -155,6 +156,7 @@ set(TRANSFORMATION_HEADERS
   MultiSum.hh
   Sum.hh
   SumSq.hh
+  SumAxis.hh
   SumBroadcast.hh
   WeightedSum.hh
   WeightedSumSq.hh
