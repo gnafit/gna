@@ -22,7 +22,9 @@ New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Exampl
 cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dgnuinstall:bool=ON -Dminuit2:bool=ON
 ```
 
-## Modularity and package organization
+## Help, modularity and package organization
+
+### Modularity
 
 GNA now provides a convenient way to manage closely related or user generated GNA parts as packages. Currently the package may contain:
 
@@ -39,19 +41,33 @@ The packages may be stored in a sub folders of:
 For each subdirectory of `package/` or `$GNAPATH/` may contain folders `ui/`, `bundles/`, `experiments/` and `lib/` to search for the items respectively.
 While UI modules, bundles and experiments are searched automatically in paths `package/*/ui`, `package/*/bundles` and `package/*/experiments` (as well as in paths from `$GNAPATH`), the libraries should be imported by their full module path.
 
+### Help
+
+The help on modules is now better accessible:
+* GNA now is able to determine if a `--help` key was used and prints the help without executing
+    the other modules, which makes the waiting time much smaller.
+* A new UI module `help` was introduced in order to print help on arguments and give some usage
+    examples.
+
 ## Storage update
 
 ### Introduction
 
-With this release we start migrating to the new internal storage format. It is intended to be as simple and consistent as possible: a set of nested dictionaries. In order to make the handling easier we introduce a special wrapper `DictWrapper`. Its purpose is only to wrap a set of nested python dictionaries while keeping the storage intact.
+With this release we start migrating to the new internal storage format. It is intended to be as
+simple and consistent as possible: a set of nested dictionaries. In order to make the handling
+easier we introduce a special wrapper `DictWrapper`. Its purpose is only to wrap a set of nested
+python dictionaries while keeping the storage intact.
 
-The storage of variables, observables, etc. in env will be organized via nested dictionaries. `NestedDict` class, often used in bundles will be also replaced with `DictWrapper`.
+The storage of variables, observables, etc. in env will be organized via nested dictionaries.
+`NestedDict` class, often used in bundles will be also replaced with `DictWrapper`.
 
-At the current stage we introduce `env.future` storage point, which may be accessed from anywhere and will override observables in the next release.
+At the current stage we introduce `env.future` storage point, which may be accessed from anywhere
+and will override observables in the next release.
 
 ### Easy nested dictionaries with `DictWrapper`
 
-The `DictWrapper` is a wrapper class for dictionaries. Its main function is to handle multi-component case, provided as tuples. For example:
+The `DictWrapper` is a wrapper class for dictionaries. Its main function is to handle
+multi-component case, provided as tuples. For example:
 ```python
 d = {'parent': {'child': 1}}
 dw = DictWrapper(d)
@@ -82,8 +98,8 @@ dictionaries.
 
 ### Future storage `env.future`
 
-`env.future` is an instance of `DictWrapper` with split key set to `'.'` (dot). All new UIs are expected to utilize `env.future` for the storage.
-At some point `env.future` will replace `env`.
+`env.future` is an instance of `DictWrapper` with split key set to `'.'` (dot). All new UIs are
+expected to utilize `env.future` for the storage. At some point `env.future` will replace `env`.
 
 The following UI modules work with `env.future`:
 * Dataset organization
@@ -100,9 +116,11 @@ The following UI modules work with `env.future`:
     + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
     + `save-yaml`: saves a subtree of `env.future` to a yaml file.
 * Parameters and fitting
-    + `pargroup`: selects parameters from `env` and combines them in a group. Stores the group in `env.future['parameter_grous']`.
+    + `pargroup`: selects parameters from `env` and combines them in a group. Stores the group in
+      `env.future['parameter_grous']`.
     + `pargrid`: creates a grid for a scanning minimizer. Stores the group in `env.future['pargrid']`.
-    + `minimizer-v1`: uses parameter groups from `env.future['parameter_grous']`, stores minimizer in `env.future['minimizer']`.
+    + `minimizer-v1`: uses parameter groups from `env.future['parameter_grous']`, stores minimizer
+       in `env.future['minimizer']`.
     + `minimizer-scan`: uses parameter groups from `env.future['parameter_grous']` and
       `env.future['pargrid']`, stores minimizer in `env.future['minimizer']`.
     + `fit-v1`: use minimizer from `env.future['minimizer']` and stores result in
@@ -113,6 +131,22 @@ The following UI modules work with `env.future`:
     + `plot-spectrum-v1`
 
 ### Common output folders
+
+It is often needed to output a set of output files with figures, data, etc. GNA now may handle a
+common folder:
+* Common folder is created if not available.
+* The outputs are stored in the path relative to the common folder. There is no need to specify it
+    in all the UI commands.
+
+The following UI commands respect the common folder:
+* `env`:
+    + `env-cwd`: controls the common output folder.
+    + `save-pickle`: saves a subtree of `env.future` to a pickle file.
+    + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
+    + `save-yaml`: saves a subtree of `env.future` to a yaml file.
+* `plot-v1`, the output figures are stored in a common folder:
+    + `graphviz_v1`
+    + `mpl_v1`
 
 ## New packages and modules
 
@@ -141,19 +175,17 @@ packages as well.
     + `save-pickle`: saves a subtree of `env.future` to a pickle file.
     + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
     + `save-yaml`: saves a subtree of `env.future` to a yaml file.
-* `parameters`
+* `parameters`: tools to work with parameter groups.
     + `pargroup`: selects parameters from `env` and combines them in a group.
-    + `pargrid`: creates a grid for a scanning minimizer. 
-* `minimize`
-    + `minimizer-scan`: provides a hybrid minimizer, which does a scan over a set of parameters and 
+    + `pargrid`: creates a grid for a scanning minimizer.
+* `minimize`: minimization and fitting.
+    + `minimizer-scan`: provides a hybrid minimizer, which does a scan over a set of parameters and
        minimization over another set of parameters.
-* `ui`
+* `ui`: UI helping tools.
     + `cmd-save`: saves the whole command to a shell file.
     + `comment`: does nothing essentially. Needed just to keep some text as a comment.
     + `help`: prints a help for an UI command and some usage example.
-
-New plotting packages:
-* 'plot-v1'
+* 'plot-v1':
     + `mpl-v1`: common commands to work with figures separated to a common UI module.
     + `plot-heatmap-v1`: plots a 2d heatmap.
 
