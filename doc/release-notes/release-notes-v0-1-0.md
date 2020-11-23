@@ -43,9 +43,9 @@ While UI modules, bundles and experiments are searched automatically in paths `p
 
 ### Introduction
 
-With this release we start migrating to the new internal storage format. It is indended to be as simple and consistent as possible: a set of nested dictionaries. In order to make the handling easier we introduce a special wrapper `DictWrapper`. Its purpose is only to wrap a set of nested python dictionaries while keeping the storage intact.
+With this release we start migrating to the new internal storage format. It is intended to be as simple and consistent as possible: a set of nested dictionaries. In order to make the handling easier we introduce a special wrapper `DictWrapper`. Its purpose is only to wrap a set of nested python dictionaries while keeping the storage intact.
 
-The storage of variables, observables, etc. in env will be organized via nested dictionaries. `NestedDict` class, oftenly used in bundles will be also replaced with `DictWrapper`.
+The storage of variables, observables, etc. in env will be organized via nested dictionaries. `NestedDict` class, often used in bundles will be also replaced with `DictWrapper`.
 
 At the current stage we introduce `env.future` storage point, which may be accessed from anywhere and will override observables in the next release.
 
@@ -82,32 +82,32 @@ dictionaries.
 
 ### Future storage `env.future`
 
-`env.future` is an instance of `DictWrapper` with split key set to '.'. All new UIs are expected to utilize `env.future` for the storage.
+`env.future` is an instance of `DictWrapper` with split key set to `'.'` (dot). All new UIs are expected to utilize `env.future` for the storage.
 At some point `env.future` will replace `env`.
 
 The following UI modules work with `env.future`:
 * Dataset organization
-    + `dataset-v01-wip`: stores observables in 'spectra' and nuiscance terms in 'pull'.
+    + `dataset-v01-wip`: stores observables in 'spectra' and nuisance terms in 'pull'.
     + `analysis-v01-wip`: reads 'parameter_groups' for the parameters to build the covariance matrix.
 * New UI to facilitate access to `evn`
     + `env-cfg`: controls the `env.future` representation and enables logging.
+    + `env-data`: provides multiple function to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
-    + `env-data`: provides multiple function to copy `env.future` elements.
     + `env-print`: prints the details of the path in `env.future`.
     + `env-set`: writes arbitrary information into path of `env.future`.
 * I/O
-    + `save-pickle`: saves subtree of `env.future` to a pickle file.
-    + `save-root`: saves ROOT objeects from a subtree of `env.future` to a ROOT file.
-    + `save-yaml`: saves subtree of `env.future` to a yaml file.
+    + `save-pickle`: saves a subtree of `env.future` to a pickle file.
+    + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
+    + `save-yaml`: saves a subtree of `env.future` to a yaml file.
 * Parameters and fitting
     + `pargroup`: selects parameters from `env` and combines them in a group. Stores the group in `env.future['parameter_grous']`.
-    + `pargrid`: creates a grid for scanning minimizer. Stores the group in `env.future['pargrid']`.
+    + `pargrid`: creates a grid for a scanning minimizer. Stores the group in `env.future['pargrid']`.
     + `minimizer-v1`: uses parameter groups from `env.future['parameter_grous']`, stores minimizer in `env.future['minimizer']`.
     + `minimizer-scan`: uses parameter groups from `env.future['parameter_grous']` and
       `env.future['pargrid']`, stores minimizer in `env.future['minimizer']`.
     + `fit-v1`: use minimizer from `env.future['minimizer']` and stores result in
         `env.future['fitresult']` and `env.future['fitresults']`.
-* Plotting. All the utilites read inputs from `env.future['spectra']`:
+* Plotting. All the utilities read inputs from `env.future['spectra']`:
     + `graphviz-v1`
     + `plot-heatmap-v1`
     + `plot-spectrum-v1`
@@ -133,34 +133,37 @@ packages as well.
 * `env`: env and I/O tools
     + `env-cfg`: controls the `env.future` representation and enables logging.
     + `env-cwd`: controls the common output folder. See [Common output folders](#common-output-folders).
-    + `env-data`:
+    + `env-data`: provides multiple function to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
-    + `env-pars-latex`
-    + `env-print`
-    + `env-set`
-    + `save-pickle`
-    + `save-root`
-    + `save-yaml`
+    + `env-pars-latex`: print parameters to a latex table.
+    + `env-print`: prints the details of the path in `env.future`.
+    + `env-set`: writes arbitrary information into path of `env.future`.
+    + `save-pickle`: saves a subtree of `env.future` to a pickle file.
+    + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
+    + `save-yaml`: saves a subtree of `env.future` to a yaml file.
 * `parameters`
-    + `pargrid`
-    + `pargroup`
+    + `pargroup`: selects parameters from `env` and combines them in a group.
+    + `pargrid`: creates a grid for a scanning minimizer. 
 * `minimize`
-    + `minimizer-scan`
-    + `minimizer-v1`
+    + `minimizer-scan`: provides a hybrid minimizer, which does a scan over a set of parameters and 
+       minimization over another set of parameters.
 * `ui`
-    + `cmd-save`
-    + `comment`
-    + `help`:
+    + `cmd-save`: saves the whole command to a shell file.
+    + `comment`: does nothing essentially. Needed just to keep some text as a comment.
+    + `help`: prints a help for an UI command and some usage example.
 
 New plotting packages:
-* `mpl-v1`
-* `plot-heatmap-v1`
+* 'plot-v1'
+    + `mpl-v1`: common commands to work with figures separated to a common UI module.
+    + `plot-heatmap-v1`: plots a 2d heatmap.
 
 The following UI modules are a newer version of old ones and utilize `env.future` for the storage:
 * `dataset`
     + `dataset-v01-wip`
     + `analysis-v01-wip`
-* `minimize`/`fit-v1`
+* `minimize`
+    + `fit-v1`
+    + `minimizer-v1`:
 * `plot-v1`
     + `graphviz-v1`
     + `plot-spectrum-v1`
