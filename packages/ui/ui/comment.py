@@ -1,4 +1,4 @@
-"""Commenting UI. Arguments are ignored."""
+"""Commenting UI. All the arguments are ignored and needed only for annotation."""
 
 from gna.ui import basecmd
 from argparse import REMAINDER
@@ -20,3 +20,14 @@ class cmd(basecmd):
             print(end=' ')
 
         print(s)
+
+    __tldr__ = {
+            "" : """\
+                This module may be used to insert comments into the commandline.
+
+                \033[32mThe command will print the arguments upon execution and does nothing more.
+                \033[31m./gna \\
+                        -- comment Initialize a gaussian peak with default configuration and 50 bins \\
+                        -- gaussianpeak --name peak_MC --nbins 50\033[0m
+            """,
+            }

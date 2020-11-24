@@ -28,7 +28,7 @@ class help(basecmd):
             return
 
         print("\033[32mUI module '{}' docstring:\033[0m\n".format(name))
-        print(cls.__doc__)
+        print(textwrap.dedent(cls.__doc__))
         print()
 
         tldr = getattr(cls, '__tldr__', None)
@@ -48,15 +48,15 @@ class help(basecmd):
 
     __tldr__ = {
             "" : """\
-                Retrieve the description and examples of the comment/help UI commands with:
-                  ./gna -- help comment
-                  ./gna -- help help
+                \033[32mRetrieve the description and examples of the comment/help UI commands with:
+                  \033[31m./gna -- help comment
+                  ./gna -- help help\033[0m
 
-                If an UI command provides extra tldr for a longer substring, it will be printed. Try:
-                  ./gna -- help help help
+                \fggreenIf an UI command provides extra tldr for a longer substring, it will be printed. Try:
+                  \033[31m./gna -- help help help\033[0m
             """,
-            "help" : """This is an example tldr, printed for 'help help' version:
-                  ./gna -- help help help
+            "help" : """\033[32mThis is an example tldr, printed for 'help help' version:
+                  \033[31m./gna -- help help help\033[0m
             """
             }
 

@@ -41,6 +41,13 @@ The packages may be stored in a sub folders of:
 For each subdirectory of `package/` or `$GNAPATH/` may contain folders `ui/`, `bundles/`, `experiments/` and `lib/` to search for the items respectively.
 While UI modules, bundles and experiments are searched automatically in paths `package/*/ui`, `package/*/bundles` and `package/*/experiments` (as well as in paths from `$GNAPATH`), the libraries should be imported by their full module path.
 
+### Deprecation of the `configuration/` and `thirdparty/`
+
+The configuration via `configuration/` is deprecated. All the paths are now
+controlled via `$GNAPATH` variable.
+
+The usage of the `thirdparty/` subfolder to organize packages is also deprecatd.
+
 ### Help
 
 The help on modules is now better accessible:
@@ -201,16 +208,102 @@ The following UI modules are a newer version of old ones and utilize `env.future
     + `plot-spectrum-v1`
 
 Other packages:
-* nmo-set: properly switch NMO under assumption on which mass splitting should be the same.
+* `nmo-set`: properly switch NMO under assumption on which mass splitting should be the same.
+
+## Detailed description of the new and updated modules
+
+All of the UI modules, described below do have annotated arguments and description provided. The
+information may be retrieved via one of the following commands:
+```sh
+./gna -- <modulename> --help
+```
+```sh
+./gna -- help <modulename>
+```
+```sh
+./gna -- help <modulename> <subcommand>
+```
+
+The information, provided via the `help` module at least repeats the information givein in the
+release notes, or, sometimes extends it.
+
+### UI
+
+We start from the `ui` package, containing some tools to help with usage. They will be useful for
+all the following commands.
+
+#### help
+
+Each UI module recognizes a `--help` option, which prints the module description and available
+arguments. The `help` UI module prints the module description and some usage examples. The idea is
+imilar to the [tldr](https://tldr.sh).
+
+The following command will print the usage example for the `comment` UI.
+```sh
+./gna -- help comment
+```
+```sh
+./gna -- help cmd-save
+```
+
+Some commands may provide specific examples, which may be retrieved by more detailed argument:
+
+**TBD**
+
+#### comment
+
+Commenting UI. All the arguments are ignored and needed only for annotation.
+
+This module may be used to insert comments into the commandline.
+
+The command will print the arguments upon execution and does nothing more.
+```sh
+./gna \
+        -- comment Initialize a gaussian peak with default configuration and 50 bins \
+        -- gaussianpeak --name peak_MC --nbins 50
+```
+
+#### cmd-save
+
+Saves the command line to a file. The command then may be repeated and should produce the same output.
+The main argument is the output file name to save the command.
+
+Save the whole command to the file 'command.sh':
+```sh
+./gna \
+    -- comment Initialize a gaussian peak with default configuration and 50 bins \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- cmd-save command.sh
+```
+
+### env: working with environment
+
+#### env-cfg: controls the `env.future` representation and enables logging.
+#### env-cwd: controls the common output folder. See [Common output folders](#common-output-folders).
+#### env-data: provides multiple function to recursively copy `env.future` elements.
+#### env-data-root: copies and converts arrays to ROOT types (TH1/TGraph).
+#### env-pars-latex: print parameters to a latex table.
+#### env-print: prints the details of the path in `env.future`.
+#### env-set: writes arbitrary information into path of `env.future`.
 
 ### I/O with yaml/pickle/ROOT
 
-### Package `env`
+#### save-pickle: saves a subtree of `env.future` to a pickle file.
+#### save-root: saves ROOT objects from a subtree of `env.future` to a ROOT file.
+#### save-yaml: saves a subtree of `env.future` to a yaml file.
 
 ### Package `parameters`
+#### pargroup: selects parameters from `env` and combines them in a group.
+#### pargrid: creates a grid for a scanning minimizer.
 
 ### Package `minimize`
+#### minimizer-v1
+#### minimizer-scan: provides a hybrid minimizer, which does a scan over a set of parameters and
+#### fit-v1
 
-## Other issues
+### Plotting updates
+#### mpl-v1: common commands to work with figures separated to a common UI module.
+#### plot-heatmap-v1: plots a 2d heatmap.
+#### graphviz-v1
+#### plot-spectrum-v1
 
-### Deprecate `configuration/`
