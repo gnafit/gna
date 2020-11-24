@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Analysis module combines multiple datasets for the analysis (fit)"""
 
 

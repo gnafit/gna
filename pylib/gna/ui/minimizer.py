@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Minimizer module: initializes minimizer for a given statistic and set of parameters"""
 
 

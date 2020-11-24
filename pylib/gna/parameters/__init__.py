@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 
 from gna.configurator import uncertain

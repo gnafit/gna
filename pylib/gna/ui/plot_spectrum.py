@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Plot 1d ovservables"""
 
 from gna.ui import basecmd, append_typed, qualified

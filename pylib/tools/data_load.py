@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from os.path import splitext
 import ROOT as R
@@ -58,5 +57,3 @@ def read_object_auto(filename, **kwargs):
     except:
         print('Unable to read {} ({})'.format(filename, str(kwargs)))
         raise
-
-

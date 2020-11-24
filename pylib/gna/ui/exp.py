@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Load experement definition, that provides observables and parameters"""
 
 
