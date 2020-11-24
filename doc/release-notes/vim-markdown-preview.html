@@ -1,0 +1,74 @@
+<h1>Release notes for GNA v0.1.0</h1>
+
+<p>This is a first tagged version of GNA. The major updates include:</p>
+
+<p>[[<em>TOC</em>]]</p>
+
+<h2>Stack update</h2>
+
+<h3>C++17 support</h3>
+
+<p>GNA is now using some C++17 features and is compiled with C++17 support and requires <code>gcc&gt;=7.0</code> or <code>clang&gt;=4.0</code>. The ROOT should be compiled with C++17 support as well.</p>
+
+<h3>Python3 migration</h3>
+
+<p>GNA now fully supports Python3. While, the performance is tested on sum fits, some shortcomings may be occasionally observed. The Update requires ROOT>=6.22 compiled with Python3 support.</p>
+
+<h3>Summary</h3>
+
+<p>New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Example ROOT configuration reads as follows:</p>
+
+<p><code>sh
+cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dgnuinstall:bool=ON -Dminuit2:bool=ON
+</code></p>
+
+<h2>Modularity and package organization</h2>
+
+<p>GNA now provides a convenient way to manage closely related or user generated GNA parts as packages. Currently the package may contain:</p>
+
+<ul>
+<li>UI modules</li>
+<li>Bundles</li>
+<li>Experiments</li>
+<li>Python libraries</li>
+</ul>
+
+
+<p>The packages may be stored in a sub folders of:</p>
+
+<ul>
+<li>Default search path <code>package/</code></li>
+<li>Directories, listed in environment variable <code>$GNAPATH</code></li>
+</ul>
+
+
+<p>For each subdirectory of <code>package/</code> or <code>$GNAPATH/</code> may contain folders <code>ui/</code>, <code>bundles/</code>, <code>experiments/</code> and <code>lib/</code> to search for the items respectively.
+While UI modules, bundles and experiments are searched automatically in paths <code>package/*/ui</code>, <code>package/*/bundles</code> and <code>package/*/experiments</code> (as well as in paths from <code>$GNAPATH</code>), the libraries should be imported by their full module path.</p>
+
+<h2>Storage update</h2>
+
+<h3>Introduction</h3>
+
+<p>With this release we start migrating to the new internal storage format. It is indended to be as simple and consistent as possible: a set of nested dictionaries. In order to make the handling easier we introduce a special wrapper <code>DictWrapper</code>. Its purpose is only to wrap a set of nested python dictionaries while keeping the storage intact.</p>
+
+<p>The storage of variables, observables, etc. in env will be organized via nested dictionaries. <code>NestedDict</code> class, oftenly used in bundles will be also replaced with <code>DictWrapper</code>.</p>
+
+<p>At the current stage we introduce <code>env.future</code> storage point, which may be accessed from anywhere and will override observables in the next release.</p>
+
+<h3>Easy nested dictionaries with <code>DictWrapper</code></h3>
+
+<h3>Future storage <code>env.future</code></h3>
+
+<h2>New packages</h2>
+
+<h3>I/O with yaml/pickle/ROOT</h3>
+
+<h3>Package <code>env</code></h3>
+
+<h3>Package <code>parameters</code></h3>
+
+<h3>Package <code>minimize</code></h3>
+
+<h2>Other issues</h2>
+
+<h3>Deprecate <code>configuration/</code></h3>

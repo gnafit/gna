@@ -1,5 +1,4 @@
-
-"""Global environment configuration"""
+"""Global environment configuration UI. Enables verbosity for the debuggin purposes."""
 
 from gna.ui import basecmd
 from pprint import pprint
@@ -63,3 +62,26 @@ class cmd(basecmd):
     def init(self):
         if self.opts.verbose:
             self.env.future = DictWrapperVerbose(self.env.future, include=self.opts.include, exclude=self.opts.exclude)
+
+    __tldr__ = {
+            "" : """\
+                All assignments and changes of the environment will be prited to stdout.
+
+                \033[32mEnable verbosity:
+                \033[31m./gna \\
+                    -- env-cfg -v \\
+                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+
+                The output may be filtered with `-x` and `-i` keys. Both support multiple arguments.
+
+                \033[32mThe `-x` option excludes matching keys:
+                \033[31m./gna \\
+                    -- env-cfg -v -x fcn \\
+                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+
+                \033[32mThe `-i` option includes matching keys exclusively:
+                \033[31m./gna \\
+                    -- env-cfg -v -i spectrum \\
+                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+            """,
+            }

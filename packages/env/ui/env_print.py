@@ -1,4 +1,4 @@
-"""Print given path within env"""
+"""Print a given subtree within env."""
 
 from gna.ui import basecmd
 from tools.dictwrapper import DictWrapper, DictWrapperVisitor
@@ -67,3 +67,17 @@ class cmd(basecmd):
             except KeyError:
                 raise Exception('Unable to read data path: {}'.format(path))
             data.visit(printer)
+
+    __tldr__ = {
+            "" : """\
+                The arguments are paths wihin env to be printed. Paths may contains '.' which will be interpreted as a separator.
+                It recursively prints key, type of the value and the value.
+
+                \033[32mPrint the contents of the subtree 'spectra':
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- env-print spectra\033[0m
+
+                The widths of the key and value columns may be set via `-k` and `-l` options respectively.
+            """,
+            }
