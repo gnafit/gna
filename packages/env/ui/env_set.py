@@ -42,20 +42,17 @@ class cmd(basecmd):
                 \033[32mWrite two key-value pairs to the 'test':
                 \033[31m./gna \\
                     -- env-set -r test '{key1: string, key2: 1.0}' \\
-                    -- env-print test
-                \033[0m
+                    -- env-print test\033[0m
                 The first value, assigned by the key 'key1' is a string 'string', the second value is a float 1.
 
                 \033[32mThe '-y' argument may be used to write a key-value pair:
                 \033[31m./gna \\
                     -- env-set -r test -y sub '{key1: string, key2: 1.0}' \\
-                    -- env-print test
-                \033[0m
+                    -- env-print test\033[0m
                 The command does the same, but writes the key-value pairs into a nested dictionary under the key 'sub'.
 
                 \033[32mThe '-a' argument simply writes a key-value pair, where value is a string:
                 \033[31m./gna \\
                     -- env-set -r test -a key1 string \\
-                    -- env-print test
-                \033[0m
+                    -- env-print test\033[0m
             """

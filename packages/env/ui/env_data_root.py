@@ -1,4 +1,4 @@
-"""Save the outputs as ROOT objects: TH1D, TH2D, TGraph"""
+"""Recursively saves the outputs as ROOT objects: TH1D, TH2D, TGraph."""
 
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
@@ -140,3 +140,26 @@ class cmd(basecmd):
 
 def list_get(lst, idx, default):
     return lst[idx] if idx<len(lst) else default
+
+cmd.__tldr__ = """\
+            The module recursively copies all the outputs from the source location to the target location.
+            The outputs are converted to the ROOT objects. The produced data may then be saved with `save-root` module.
+
+            The overall idea is similar to the `env-data` module. Only TH1D, TH2D, TGraph are supported.
+            While histograms are written automatically for writing graphs the user need to use '-g' argument.
+
+            \033[32mWrite the data from all the outputs from the 'spectra' to 'output':
+            \033[31m./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data-root -c spectra.peak output -vv \\
+                -- env-print -l 40\033[0m
+            The last command prints the data to stdout. The value width is limited to 40 symbols.
+
+            A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+
+            \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+            \033[31m./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
+                -- env-print -l 40\033[0m
+        """

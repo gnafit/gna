@@ -225,7 +225,8 @@ information may be retrieved via one of the following commands:
 ```
 
 The information, provided via the `help` module at least repeats the information givein in the
-release notes, or, sometimes extends it.
+release notes, or, sometimes extends it. While the release notes may be short-spoken the help and
+examples will be further extended with GNA development.
 
 ### UI
 
@@ -259,8 +260,8 @@ This module may be used to insert comments into the commandline.
 The command will print the arguments upon execution and does nothing more.
 ```sh
 ./gna \
-        -- comment Initialize a gaussian peak with default configuration and 50 bins \
-        -- gaussianpeak --name peak_MC --nbins 50
+    -- comment Initialize a gaussian peak with default configuration and 50 bins \
+    -- gaussianpeak --name peak_MC --nbins 50
 ```
 
 #### cmd-save
@@ -362,19 +363,91 @@ The '-a' argument simply writes a key-value pair, where value is a string:
     -- env-print test
 ```
 
-### I/O with yaml/pickle/ROOT
+### Converting the results
 
-#### env-data: provides multiple function to recursively copy env.future elements.
+The data of the GNA graph is located in the outputs.
 
-#### env-data-root: copies and converts arrays to ROOT types (TH1/TGraph).
+#### env-data
 
-#### env-cwd: controls the common output folder. See [Common output folders](#common-output-folders).
+Recursively saves outputs as dictionaries with numbers and meta.
 
-#### save-pickle: saves a subtree of env.future to a pickle file.
+The module recursively copies all the outputs from the source location to the target location.
+The outputs are converted to the dictionaries. Arrays, shapes, bin edges and object type are saved.
+The produced data may then be saved with `save-yaml` and `save-pickle` modules.
+
+Write the data from all the outputs from the 'spectra' to 'output':
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data -c spectra.peak output -vv \
+    -- env-print -l 40
+```
+
+The last command prints the data to stdout. The value width is limited to 40 symbols.
+
+A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+There is also a special argument '-g' to combine graphs by reading X and Y arrays from different outputs.
+
+Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data -s spectra.peak -g fcn.x fcn.y output.fcn_graph \
+    -- env-print -l 40
+```
+
+Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
+'-c' and '-g' arguments. The dictionaries will be used to update the target paths.
+
+Provide extra information:
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data -c spectra.peak output '{note: extra information}' -vv \
+    -- env-print -l 40
+```
+
+#### env-data-root
+
+Recursively saves the outputs as ROOT objects: TH1D, TH2D, TGraph.
+
+The module recursively copies all the outputs from the source location to the target location.
+The outputs are converted to the ROOT objects. The produced data may then be saved with `save-root` module.
+
+The overall idea is similar to the `env-data` module. Only TH1D, TH2D, TGraph are supported.
+While histograms are written automatically for writing graphs the user need to use '-g' argument.
+
+Write the data from all the outputs from the 'spectra' to 'output':
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data-root -c spectra.peak output -vv \
+    -- env-print -l 40
+```
+
+The last command prints the data to stdout. The value width is limited to 40 symbols.
+
+A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+
+Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \
+    -- env-print -l 40
+```
+
+### I/O with yaml, pickle and ROOT
+
+The data, written to `env.future` may be saved to output files: human readable YAML, binary pickle
+and binary ROOT. The examples will use the commands from [Converting the results](#converting-the-results)
+in order to prepare the data.
+
+#### save-yaml
+
+#### save-pickle
 
 #### save-root: saves ROOT objects from a subtree of env.future to a ROOT file.
-
-#### save-yaml: saves a subtree of env.future to a yaml file.
 
 ### Working with parameters
 
@@ -393,6 +466,8 @@ The '-a' argument simply writes a key-value pair, where value is a string:
 #### fit-v1
 
 ### Plotting updates
+
+#### env-cwd: controls the common output folder. See [Common output folders](#common-output-folders).
 
 #### mpl-v1: common commands to work with figures separated to a common UI module.
 

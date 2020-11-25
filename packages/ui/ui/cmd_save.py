@@ -50,16 +50,15 @@ class cmd(basecmd):
 
         self.out+=pipes.quote(opt)+' '
 
-    __tldr__ = {
-            "" : """\
-                The main argument is the output file name to save the command.
+    __tldr__ = """\
+               The main argument is the output file name to save the command.
 
-                \033[32mSave the whole command to the file 'command.sh':
-                \033[31m./gna \\
-                    -- comment Initialize a gaussian peak with default configuration and 50 bins \\
-                    -- gaussianpeak --name peak_MC --nbins 50 \\
-                    -- cmd-save command.sh\033[0m
+               \033[32mSave the whole command to the file 'command.sh':
+               \033[31m./gna \\
+                   -- comment Initialize a gaussian peak with default configuration and 50 bins \\
+                   -- gaussianpeak --name peak_MC --nbins 50 \\
+                   -- cmd-save command.sh\033[0m
 
-                In the verbose mode it also prints the command to the stdout.
-            """,
-            }
+               In the verbose mode it also prints the command to the stdout.
+               """
+

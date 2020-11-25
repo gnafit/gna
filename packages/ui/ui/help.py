@@ -45,21 +45,6 @@ class help(basecmd):
 
                 print_tldr(name, trystr, tldr.get(trystr))
 
-
-    __tldr__ = {
-            "" : """\
-                \033[32mRetrieve the description and examples of the comment/help UI commands with:
-                  \033[31m./gna -- help comment
-                  ./gna -- help help\033[0m
-
-                \fggreenIf an UI command provides extra tldr for a longer substring, it will be printed. Try:
-                  \033[31m./gna -- help help help\033[0m
-            """,
-            "help" : """\033[32mThis is an example tldr, printed for 'help help' version:
-                  \033[31m./gna -- help help help\033[0m
-            """
-            }
-
 def print_tldr(command, arg, tldr):
     if not tldr:
         return
@@ -67,3 +52,18 @@ def print_tldr(command, arg, tldr):
     print('\033[32mTLDR\033[0m for {} {}\n'.format(command, arg))
     print(tldr)
     print()
+
+help.__tldr__ = {
+            "" : """\
+                 \033[32mRetrieve the description and examples of the comment/help UI commands with:
+                 \033[31m./gna -- help comment
+                 ./gna -- help help\033[0m
+
+                 \fggreenIf an UI command provides extra tldr for a longer substring, it will be printed. Try:
+                 \033[31m./gna -- help help help\033[0m
+                 """,
+            "help" : """\
+                     \033[32mThis is an example tldr, printed for 'help help' version:
+                     \033[31m./gna -- help help help\033[0m
+                     """
+            }
