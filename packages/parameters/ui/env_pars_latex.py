@@ -1,5 +1,4 @@
-
-"""Print parameters"""
+"""Recursively prints parameters as a latex table."""
 
 from gna.ui import basecmd
 from tools.dictwrapper import DictWrapper, DictWrapperVisitor
@@ -10,7 +9,7 @@ from tabulate import tabulate
 
 class DictWrapperParsPrinter(DictWrapperVisitor):
     _header = [ 'Key', 'Central', 'Sigma', 'Sigma, %', 'Comments', 'Label']
-    def __init__(self, title, valuelen=None, keylen=None):
+    def __init__(self, title):
         self._title = title
         self._data = []
 
@@ -38,7 +37,7 @@ class DictWrapperParsPrinter(DictWrapperVisitor):
                 print(t)
             else:
                 with open(out, 'w') as f:
-                    f.write(t.encode('utf8'))
+                    f.write(t)
                 print('Write output file:', out)
 
     def enterdict(self, k, d):
@@ -138,9 +137,6 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('paths', nargs='*', default=((),), help='paths to print')
-        parser.add_argument('-l', '--valuelen', type=int, help='value length')
-        parser.add_argument('-k', '--keylen', type=int, help='key length')
-        # parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
         parser.add_argument('-o', '--output', nargs='+', default=['-'], help='latex file to write, `-` for stdout')
 
     def init(self):
@@ -155,3 +151,16 @@ class cmd(basecmd):
             ns = self.env.globalns(path)
             for name, par in ns.walknames():
                 self.storage[name]=par
+
+    __tldr__ = """\
+                The module enables the user to create a latex table for parameters.
+                It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
+                and a latex table to the file, provided after an '-o' option.
+
+                \033[32mPrint the parameters to the file 'output.tex':
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak \\
+                    -- env-pars-latex peak -o output.tex\033[0m
+
+                The module uses python module [tabulate](https://github.com/astanin/python-tabulate) for printing.
+               """

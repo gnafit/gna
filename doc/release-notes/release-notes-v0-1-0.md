@@ -179,13 +179,13 @@ packages as well.
     + `env-cwd`: controls the common output folder. See [Common output folders](#common-output-folders).
     + `env-data`: provides multiple function to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
-    + `env-pars-latex`: print parameters to a latex table.
     + `env-print`: prints the details of the path in `env.future`.
     + `env-set`: writes arbitrary information into path of `env.future`.
     + `save-pickle`: saves a subtree of `env.future` to a pickle file.
     + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
     + `save-yaml`: saves a subtree of `env.future` to a yaml file.
 * `parameters`: tools to work with parameter groups.
+    + `env-pars-latex`: print parameters to a latex table.
     + `pargroup`: selects parameters from `env` and combines them in a group.
     + `pargrid`: creates a grid for a scanning minimizer.
 * `minimize`: minimization and fitting.
@@ -486,7 +486,7 @@ Write the data, collected in the 'output' to the file 'output.pkl'
     -- save-pickle output -o output.pkl
 ```
 
-#### save-root: saves ROOT objects from a subtree of env.future to a ROOT file.
+#### save-root
 
 Saves a subtree of the env to a binary ROOT file.
 
@@ -508,6 +508,21 @@ Write the data, collected in the 'output' to the file 'output.root'
 ### Working with parameters
 
 #### env-pars-latex: print parameters to a latex table.
+
+Recursively prints parameters as a latex table.
+
+The module enables the user to create a latex table for parameters.
+It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
+and a latex table to the file, provided after an '-o' option.
+
+Print the parameters to the file 'output.tex':
+```sh
+./gna \
+    -- gaussianpeak --name peak \
+    -- env-pars-latex peak -o output.tex
+```
+
+The module uses python module [tabulate](https://github.com/astanin/python-tabulate) for printing.
 
 #### pargroup: selects parameters from env and combines them in a group.
 
