@@ -127,11 +127,11 @@ The following UI modules work with `env.future`:
     + `save-yaml`: saves a subtree of `env.future` to a yaml file.
 * Parameters and fitting
     + `pargroup`: selects parameters from `env` and combines them in a group. Stores the group in
-      `env.future['parameter_grous']`.
+      `env.future['parameter_groups']`.
     + `pargrid`: creates a grid for a scanning minimizer. Stores the group in `env.future['pargrid']`.
-    + `minimizer-v1`: uses parameter groups from `env.future['parameter_grous']`, stores minimizer
+    + `minimizer-v1`: uses parameter groups from `env.future['parameter_groups']`, stores minimizer
        in `env.future['minimizer']`.
-    + `minimizer-scan`: uses parameter groups from `env.future['parameter_grous']` and
+    + `minimizer-scan`: uses parameter groups from `env.future['parameter_groups']` and
       `env.future['pargrid']`, stores minimizer in `env.future['minimizer']`.
     + `fit-v1`: use minimizer from `env.future['minimizer']` and stores result in
         `env.future['fitresult']` and `env.future['fitresults']`.
@@ -718,6 +718,8 @@ The minimizer arguments are: `minimizer name` `statistics` `minpars`. Where:
 * `statistics` is the name of a function to minimizer, which should be created beforehand.
 * `minpars` is the name of a parameter group, created by `pargroup`.
 
+The minimizer is stored in `env.future['minimizer']` under its name.
+
 Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
 ```sh
 ./gna \
@@ -771,6 +773,60 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
 ```
 
 #### Module minimizer-scan
+
+Initializes a hybrid minimizer which does a raster scan over a part of the variables.
+
+The hybrid minimizer minimizes a set of parameters simply by scanning them, all the other parameters
+are minimized via regular minimizer at each point.
+After the best fit is found, the minimizer performs a minimization over all the parameters.
+The structure is similar with the `minimizer-v1`.
+
+The module creates a minimizer instance which then may be used for a fit with `fit-v1` module or elsewhere.
+The minimizer arguments are: `minimizer name` `statistics` `minpars` and `gridpars`. Where:
+* `minimizer name` is a name of new minimizer.
+* `statistics` is the name of a function to minimizer, which should be created beforehand.
+* `minpars` is the name of a parameter group, created by `pargroup`.
+* `gridpars` is the name of a parameter group, created by `pargrid`.
+  It is important to note, that the grid parameters should also be included in the `minpars` group.
+
+The minimizer is stored in `env.future['minimizer']` under its name.
+
+Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars',
+but do a raster scan over 'E0' (linear) and 'Width' (log):
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v1 peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v1 analysis --datasets peak \
+    -- stats stats --chi2 analysis \
+    -- pargroup minpars peak_f -vv \
+    -- pargrid  scangrid --linspace  peak_f.E0    0.5 4.5 10 \
+                         --geomspace peak_f.Width 0.3 0.6 5 -v \
+    -- minimizer-scan min stats minpars scangrid -vv \
+    -- fit-v1 min -p --push \
+    -- env-print fitresult.min
+```
+The `env-print` will print the status of the minimization, performed by the `fit-v1`.
+The intermediate results are saved in 'fitresults'.
+
+By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
+`scipy` or `minuit` (TMinuit).
+
+
+The module is based on `minimizer` and completely supersedes it.
+
+See also: `minimizer-v1`, `fit-v1`, `stats`, `pargroup`.
 
 #### Module fit-v1
 

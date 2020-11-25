@@ -36,6 +36,8 @@ class cmd(basecmd):
                 * `statistics` is the name of a function to minimizer, which should be created beforehand.
                 * `minpars` is the name of a parameter group, created by `pargroup`.
 
+                The minimizer is stored in `env.future['minimizer']` under its name.
+
                 \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
                 ```sh
                 ./gna \\
