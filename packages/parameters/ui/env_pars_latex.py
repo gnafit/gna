@@ -155,7 +155,7 @@ class cmd(basecmd):
     __tldr__ = """\
                 The module enables the user to create a latex table for parameters.
                 It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
-                and a latex table to the file, provided after an '-o' option.
+                and a latex table to the file, provided after an `-o` option.
 
                 \033[32mPrint the parameters to the file 'output.tex':
                 ```sh

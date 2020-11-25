@@ -79,7 +79,7 @@ class cmd(basecmd):
                     -- pargroup minpars peak -vv
                 ```
 
-                The '-m' option may be used with few arguments describing the parameter mode. The choices include:
+                The `-m` option may be used with few arguments describing the parameter mode. The choices include:
                 free, constrained and fixed.
 
                 \033[32mSelect only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
@@ -94,8 +94,8 @@ class cmd(basecmd):
                     -- pargroup minpars peak -m fixed -vv
                 ```
 
-                The parameters may be filtered with '-x' and '-i' flags. The option '-x' will exclude parameters,
-                full names of which contain one of the string passed as arguments. The option '-i' will include
+                The parameters may be filtered with `-x` and `-i` flags. The option `-x` will exclude parameters,
+                full names of which contain one of the string passed as arguments. The option `-i` will include
                 only matching parameters.
 
                 See also: `minimizer-v1`, `minimizer-scan`

@@ -101,7 +101,7 @@ class cmd(basecmd):
                 Creates a named analysis, i.e. a triplet of theory, data and covariance matrix. The covariance matrix
                 may be diagonal and contain only statistical uncertainties or contain a systematic part as well.
 
-                The `analysis-v1` required a name and a few of datasets after '-d' option.
+                The `analysis-v1` required a name and a few of datasets after `-d` option.
 
                 \033[32mInitialize an analysis 'analysis' with a dataset 'peak':
                 ```sh

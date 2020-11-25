@@ -56,8 +56,8 @@ The help on modules is now better accessible:
 * A new UI module `help` was introduced in order to print help on arguments and give some usage
     examples.
 
-Note also, that most of the UI commands support verbosity flag '-v'. Sometimes passing multiple v's
-as '-vv' or '-vvv' increases the verbosity.
+Note also, that most of the UI commands support verbosity flag `-v`. Sometimes passing multiple v's
+as `-vv` or `-vvv` increases the verbosity.
 
 ## Storage update
 
@@ -231,7 +231,7 @@ The information, provided via the `help` module at least repeats the information
 release notes, or, sometimes extends it. While the release notes may be short-spoken the help and
 examples will be further extended with GNA development.
 
-In the following examples we often use the option '-vv' to increase verbosity, In practical usage it
+In the following examples we often use the option `-vv` to increase verbosity, In practical usage it
 may be safely omitted.
 
 ### Package UI
@@ -344,7 +344,7 @@ The module provides three ways to input data:
 2. Write a string to an address within env.
 3. Write parsed YAML to an address within env.
 
-Optional argument '-r' may be used to set root address.
+Optional argument `-r` may be used to set root address.
 
 Write two key-value pairs to the 'test':
 ```sh
@@ -354,7 +354,7 @@ Write two key-value pairs to the 'test':
 ```
 The first value, assigned by the key 'key1' is a string 'string', the second value is a float 1.
 
-The '-y' argument may be used to write a key-value pair:
+The `-y` argument may be used to write a key-value pair:
 ```sh
 ./gna \
     -- env-set -r test -y sub '{key1: string, key2: 1.0}' \
@@ -362,7 +362,7 @@ The '-y' argument may be used to write a key-value pair:
 ```
 The command does the same, but writes the key-value pairs into a nested dictionary under the key 'sub'.
 
-The '-a' argument simply writes a key-value pair, where value is a string:
+The `-a` argument simply writes a key-value pair, where value is a string:
 ```sh
 ./gna \
     -- env-set -r test -a key1 string \
@@ -391,8 +391,8 @@ Write the data from all the outputs from the 'spectra' to 'output':
 
 The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-A common root for source and target paths may be set independently via '-s' and '-t' arguments.
-There is also a special argument '-g' to combine graphs by reading X and Y arrays from different outputs.
+A common root for source and target paths may be set independently via `-s` and `-t` arguments.
+There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
 
 Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
 ```sh
@@ -403,7 +403,7 @@ Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
 ```
 
 Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
-'-c' and '-g' arguments. The dictionaries will be used to update the target paths.
+`-c` and `-g` arguments. The dictionaries will be used to update the target paths.
 
 Provide extra information:
 ```sh
@@ -421,7 +421,7 @@ The module recursively copies all the outputs from the source location to the ta
 The outputs are converted to the ROOT objects. The produced data may then be saved with `save-root` module.
 
 The overall idea is similar to the `env-data` module. Only TH1D, TH2D, TGraph are supported.
-While histograms are written automatically for writing graphs the user need to use '-g' argument.
+While histograms are written automatically for writing graphs the user need to use `-g` argument.
 
 Write the data from all the outputs from the 'spectra' to 'output':
 ```sh
@@ -433,7 +433,7 @@ Write the data from all the outputs from the 'spectra' to 'output':
 
 The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+A common root for source and target paths may be set independently via `-s` and `-t` arguments.
 
 Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
 ```sh
@@ -453,7 +453,7 @@ in order to prepare the data.
 
 Saves a subtree of the env to a readable YAML file.
 
-The module saves the paths provided as arguments to an output YAML file, provided after '-o' option.
+The module saves the paths provided as arguments to an output YAML file, provided after `-o` option.
 If the outputs should be saved, the data should be converted via `env-data` module.
 The YAML is human readable and fits to the purposes of saving a small data samples,
 such as fit results or small histograms or graphs.
@@ -474,7 +474,7 @@ In this example we have reduced the number of bins in order to improve readabili
 
 Saves a subtree of the env to a binary pickle file.
 
-The module saves the paths provided as arguments to an output pickle file, provided after '-o' option.
+The module saves the paths provided as arguments to an output pickle file, provided after `-o` option.
 If the outputs should be saved, the data should be converted via `env-data` module.
 The pickle is a binary readable and works fast. It should be preferred over `save-yaml` for the large data.
 
@@ -493,7 +493,7 @@ Write the data, collected in the 'output' to the file 'output.pkl'
 
 Saves a subtree of the env to a binary ROOT file.
 
-The module saves the paths provided as arguments to an output ROOT file, provided after '-o' option.
+The module saves the paths provided as arguments to an output ROOT file, provided after `-o` option.
 The outputs that should be saved should be converted via `env-data-root` module.
 
 The module is similar to the modules `save-yaml` and `save-pickle`.
@@ -516,7 +516,7 @@ Recursively prints parameters as a latex table.
 
 The module enables the user to create a latex table for parameters.
 It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
-and a latex table to the file, provided after an '-o' option.
+and a latex table to the file, provided after an `-o` option.
 
 Print the parameters to the file 'output.tex':
 ```sh
@@ -548,7 +548,7 @@ Select not fixed parameters from the namespace 'peak' and store as 'minpars':
     -- pargroup minpars peak -vv
 ```
 
-The '-m' option may be used with few arguments describing the parameter mode. The choices include:
+The `-m` option may be used with few arguments describing the parameter mode. The choices include:
 free, constrained and fixed.
 
 Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
@@ -562,8 +562,8 @@ Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
     -- pargroup minpars peak -m fixed -vv
 ```
 
-The parameters may be filtered with '-x' and '-i' flags. The option '-x' will exclude parameters,
-full names of which contain one of the string passed as arguments. The option '-i' will include
+The parameters may be filtered with `-x` and `-i` flags. The option `-x` will exclude parameters,
+full names of which contain one of the string passed as arguments. The option `-i` will include
 only matching parameters.
 
 See also: `minimizer-v1`, `minimizer-scan`
@@ -699,7 +699,7 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
 ```
 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
 
-By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with '-t' option to
+By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
 `scipy` or `minuit` (TMinuit).
 
 Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:

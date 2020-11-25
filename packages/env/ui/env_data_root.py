@@ -146,7 +146,7 @@ cmd.__tldr__ = """\
             The outputs are converted to the ROOT objects. The produced data may then be saved with `save-root` module.
 
             The overall idea is similar to the `env-data` module. Only TH1D, TH2D, TGraph are supported.
-            While histograms are written automatically for writing graphs the user need to use '-g' argument.
+            While histograms are written automatically for writing graphs the user need to use `-g` argument.
 
             \033[32mWrite the data from all the outputs from the 'spectra' to 'output':
             ```sh
@@ -157,7 +157,7 @@ cmd.__tldr__ = """\
             ```
             The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-            A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+            A common root for source and target paths may be set independently via `-s` and `-t` arguments.
 
             \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
             ```sh

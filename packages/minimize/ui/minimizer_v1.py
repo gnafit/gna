@@ -61,7 +61,7 @@ class cmd(basecmd):
                 ```
                 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
 
-                By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with '-t' option to
+                By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
                 `scipy` or `minuit` (TMinuit).
 
                 \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:

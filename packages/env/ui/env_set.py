@@ -37,7 +37,7 @@ class cmd(basecmd):
                 2. Write a string to an address within env.
                 3. Write parsed YAML to an address within env.
 
-                Optional argument '-r' may be used to set root address.
+                Optional argument `-r` may be used to set root address.
 
                 \033[32mWrite two key-value pairs to the 'test':
                 ```sh
@@ -47,7 +47,7 @@ class cmd(basecmd):
                 ```
                 The first value, assigned by the key 'key1' is a string 'string', the second value is a float 1.
 
-                \033[32mThe '-y' argument may be used to write a key-value pair:
+                \033[32mThe `-y` argument may be used to write a key-value pair:
                 ```sh
                 ./gna \\
                     -- env-set -r test -y sub '{key1: string, key2: 1.0}' \\
@@ -55,7 +55,7 @@ class cmd(basecmd):
                 ```
                 The command does the same, but writes the key-value pairs into a nested dictionary under the key 'sub'.
 
-                \033[32mThe '-a' argument simply writes a key-value pair, where value is a string:
+                \033[32mThe `-a` argument simply writes a key-value pair, where value is a string:
                 ```sh
                 ./gna \\
                     -- env-set -r test -a key1 string \\

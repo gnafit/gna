@@ -129,8 +129,8 @@ cmd.__tldr__ = """\
             ```
             The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-            A common root for source and target paths may be set independently via '-s' and '-t' arguments.
-            There is also a special argument '-g' to combine graphs by reading X and Y arrays from different outputs.
+            A common root for source and target paths may be set independently via `-s` and `-t` arguments.
+            There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
 
             \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
             ```sh
@@ -141,7 +141,7 @@ cmd.__tldr__ = """\
             ```
 
             Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
-            '-c' and '-g' arguments. The dictionaries will be used to update the target paths.
+            `-c` and `-g` arguments. The dictionaries will be used to update the target paths.
 
             \033[32mProvide extra information:
             ```sh

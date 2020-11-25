@@ -31,7 +31,7 @@ class cmd(basecmd):
             print('Save output file:', self.opts.output)
 
     __tldr__ = """\
-            The module saves the paths provided as arguments to an output pickle file, provided after '-o' option.
+            The module saves the paths provided as arguments to an output pickle file, provided after `-o` option.
             If the outputs should be saved, the data should be converted via `env-data` module.
             The pickle is a binary readable and works fast. It should be preferred over `save-yaml` for the large data.
 

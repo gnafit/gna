@@ -41,7 +41,7 @@ class cmd(basecmd):
             print('Save output file:', self.opts.output)
 
     __tldr__ = """\
-            The module saves the paths provided as arguments to an output YAML file, provided after '-o' option.
+            The module saves the paths provided as arguments to an output YAML file, provided after `-o` option.
             If the outputs should be saved, the data should be converted via `env-data` module.
             The YAML is human readable and fits to the purposes of saving a small data samples,
             such as fit results or small histograms or graphs.

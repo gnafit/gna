@@ -57,7 +57,7 @@ def saveobjects(odir, obj, verbose):
     print('Unable to save the object to ROOT file, skip:', type(obj))
 
 cmd.__tldr__ = """\
-               The module saves the paths provided as arguments to an output ROOT file, provided after '-o' option.
+               The module saves the paths provided as arguments to an output ROOT file, provided after `-o` option.
                The outputs that should be saved should be converted via `env-data-root` module.
 
                The module is similar to the modules `save-yaml` and `save-pickle`.
