@@ -584,6 +584,7 @@ Generate a linear grid for the parameter 'E0':
 ```
 
 The possible options include:
+
 | Option        | Arguments                      | NumPy analogue | Includes end point |
 |:--------------|:-------------------------------|:---------------|:-------------------|
 | `--range`     | `start` `stop` `step`          | arange         | ✘                  |
