@@ -121,29 +121,35 @@ cmd.__tldr__ = """\
             The produced data may then be saved with `save-yaml` and `save-pickle` modules.
 
             \033[32mWrite the data from all the outputs from the 'spectra' to 'output':
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data -c spectra.peak output -vv \\
-                -- env-print -l 40\033[0m
+                -- env-print -l 40
+            ```
             The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-            A common root for source and target paths may be set independently via '-s' and '-t' arguments.
-            There is also a special argument '-g' to combine graphs by reading X and Y arrays from different outputs.
+            A common root for source and target paths may be set independently via `-s` and `-t` arguments.
+            There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
 
             \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
-                -- env-print -l 40\033[0m
+                -- env-print -l 40
+            ```
 
             Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
-            '-c' and '-g' arguments. The dictionaries will be used to update the target paths.
+            `-c` and `-g` arguments. The dictionaries will be used to update the target paths.
 
             \033[32mProvide extra information:
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data -c spectra.peak output '{note: extra information}' -vv \\
-                -- env-print -l 40\033[0m
+                -- env-print -l 40
+            ```
 
             See also: `env-data-root`, `save-yaml`, `save-pickle`, `save-root`.
         """

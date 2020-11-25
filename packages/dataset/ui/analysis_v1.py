@@ -1,7 +1,4 @@
-"""Analysis module (v1) combines multiple datasets for the analysis (fit)
-
-This module uses pargroup to specify covariance parameters.
-"""
+"""Analysis module (v1) combines multiple datasets for the analysis (fit). May provide a covariance matrix based on par group."""
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -21,14 +18,18 @@ class cmd(basecmd):
 
     @classmethod
     def initparser(cls, parser, env):
+        name = parser.add_mutually_exclusive_group(required=True)
+        name.add_argument('name', nargs='?', help='Dataset name', metavar='dataset')
+        name.add_argument('-n', '--name', dest='name', help='analysis name', metavar='analysis')
+
         parser.add_argument('-d', '--datasets', nargs='+', required=True,
                             type=env.parts.dataset,
                             metavar='dataset', help='datasets to use')
         parser.add_argument('-p', '--cov-parameters', metavar='pargroup', help='parameters for the covariance matrix')
-        parser.add_argument('-n', '--name', required=True, help='analysis name', metavar='name')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
         parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data')
+        parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
     def __extract_obs(self, obses):
         for obs in obses:
@@ -56,8 +57,14 @@ class cmd(basecmd):
         else:
             observables = None
 
-        if self.opts.cov_parameters:
-            print('Compute covariance matrix for {} parameters from {}'.format(len(cov_parameters), self.opts.cov_parameters))
+        if self.opts.verbose:
+            names = ', '.join((d.desc for d in self.opts.datasets))
+            print("Analysis '{}' with: {}".format(self.opts.name, names), end='')
+            if self.opts.cov_parameters:
+                print(' and {} parameters from {}'.format(len(cov_parameters), self.opts.cov_parameters))
+            else:
+                print()
+
         blocks = dataset.makeblocks(observables, cov_parameters)
 
         if self.opts.toymc:
@@ -86,7 +93,52 @@ class cmd(basecmd):
             self.env.parts.toymc[self.opts.name] = toymc
             for toymc in toymc.transformations.values():
                 toymc.setLabel(self.opts.toymc+' ToyMC '+self.opts.name)
+
         self.env.parts.analysis[self.opts.name] = blocks
         self.env.parts.analysis_errors[self.opts.name] = dataset
 
+    __tldr__ =  """\
+                Creates a named analysis, i.e. a triplet of theory, data and covariance matrix. The covariance matrix
+                may be diagonal and contain only statistical uncertainties or contain a systematic part as well.
 
+                The `analysis-v1` required a name and a few of datasets after `-d` option.
+
+                \033[32mInitialize an analysis 'analysis' with a dataset 'peak':
+                ```sh
+                ./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- gaussianpeak --name peak_f  --nbins 50 \\
+                    -- ns --name peak_MC --print \\
+                          --set E0             values=2    fixed \\
+                          --set Width          values=0.5  fixed \\
+                          --set Mu             values=2000 fixed \\
+                          --set BackgroundRate values=1000 fixed \\
+                    -- ns --name peak_f --print \\
+                          --set E0             values=2.5  relsigma=0.2 \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 relsigma=0.25 \\
+                    -- dataset-v1  --name peak --theory-data peak_f.spectrum peak_MC.spectrum -v \\
+                    -- analysis-v1 --name analysis --datasets peak -v
+                ```
+
+                \033[32mInitialize an analysis 'analysis' with a dataset 'peak' and covariance matrix based on constrained parameters:
+                ```sh
+                ./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- gaussianpeak --name peak_f  --nbins 50 \\
+                    -- ns --name peak_MC --print \\
+                          --set E0             values=2    fixed \\
+                          --set Width          values=0.5  fixed \\
+                          --set Mu             values=2000 fixed \\
+                          --set BackgroundRate values=1000 fixed \\
+                    -- ns --name peak_f --print \\
+                          --set E0             values=2.5  relsigma=0.2 \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 relsigma=0.25 \\
+                    -- dataset-v1 peak --theory-data peak_f.spectrum peak_MC.spectrum -v \\
+                    -- pargroup covpars peak_f -m constrained \\
+                    -- analysis-v1  analysis --datasets peak -p covpars -v
+                ```
+                """

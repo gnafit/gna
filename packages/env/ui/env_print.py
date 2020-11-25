@@ -74,9 +74,11 @@ class cmd(basecmd):
                 It recursively prints key, type of the value and the value.
 
                 \033[32mPrint the contents of the subtree 'spectra':
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
-                    -- env-print spectra\033[0m
+                    -- env-print spectra
+                ```
 
                 The widths of the key and value columns may be set via `-k` and `-l` options respectively.
 

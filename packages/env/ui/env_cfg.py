@@ -68,21 +68,27 @@ class cmd(basecmd):
                 All assignments and changes of the environment will be printed to stdout.
 
                 \033[32mEnable verbosity:
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- env-cfg -v \\
-                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
 
                 The output may be filtered with `-x` and `-i` keys. Both support multiple arguments.
 
                 \033[32mThe `-x` option excludes matching keys:
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- env-cfg -v -x fcn \\
-                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
 
                 \033[32mThe `-i` option includes matching keys exclusively:
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- env-cfg -v -i spectrum \\
-                    -- gaussianpeak --name peak_MC --nbins 50\033[0m
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
 
                 See also: `env-print`, `env-set`.
             """,

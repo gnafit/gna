@@ -1,4 +1,5 @@
 """Dataset initialization (v1). Configures the dataset for an experiment."""
+
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -13,7 +14,9 @@ class cmd(basecmd):
 
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('--name', required=True, help='Dataset name', metavar='dataset')
+        name = parser.add_mutually_exclusive_group(required=True)
+        name.add_argument('name', nargs='?', help='Dataset name', metavar='dataset')
+        name.add_argument('-n', '--name', dest='name', help='Dataset name', metavar='dataset')
 
         pull = parser.add_mutually_exclusive_group()
         pull.add_argument('--pull', action='append', help='Parameters to be added as pull terms')
@@ -30,10 +33,10 @@ class cmd(basecmd):
         parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
     def run(self):
-        dataset = Dataset(desc=None)
+        dataset = Dataset(desc=self.opts.name)
         verbose = self.opts.verbose
         if self.opts.verbose:
-            print("Initialize dataset '{}' with:".format(self.opts.name))
+            print("Dataset '{}' with:".format(self.opts.name))
 
         if self.opts.pull:
             self.load_pulls(dataset)
@@ -67,7 +70,6 @@ class cmd(basecmd):
             variance.data()
 
             if self.opts.verbose:
-                print("Initialize dataset '{}' with:".format(self.opts.name))
                 print('   theory:  ', str(theory))
                 print('   data:    ', str(data))
                 print('   variance:', str(variance))
@@ -129,7 +131,8 @@ class cmd(basecmd):
                 By default a theory, fixed at the moment of dataset initialization is used for the stat errors (Pearson's case).
 
                 \033[32mInitialize a dataset 'peak' with a pair of Theory/Data:
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
                     -- gaussianpeak --name peak_f  --nbins 50 \\
                     -- ns --name peak_MC --print \\
@@ -142,12 +145,14 @@ class cmd(basecmd):
                           --set Width          values=0.3  relsigma=0.2 \\
                           --set Mu             values=1500 relsigma=0.25 \\
                           --set BackgroundRate values=1100 relsigma=0.25 \\
-                    -- dataset-v1 --name peak --theory-data peak_f.spectrum peak_MC.spectrum -v\033[0m
+                    -- dataset-v1 --name peak --theory-data peak_f.spectrum peak_MC.spectrum -v
+                ```
 
                 When a dataset is initialized from a nuisance terms it reads only constrained parameters from the namespace.
 
                 \033[32mInitialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
                     -- gaussianpeak --name peak_f  --nbins 50 \\
                     -- ns --name peak_MC --print \\
@@ -160,5 +165,6 @@ class cmd(basecmd):
                           --set Width          values=0.3  relsigma=0.2 \\
                           --set Mu             values=1500 relsigma=0.25 \\
                           --set BackgroundRate values=1100 relsigma=0.25 \\
-                    -- dataset-v1 --name nuisance --pull peak_f -v\033[0m
-              """
+                    -- dataset-v1 --name nuisance --pull peak_f -v
+                ```
+                """

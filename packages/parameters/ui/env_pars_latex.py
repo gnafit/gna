@@ -155,12 +155,14 @@ class cmd(basecmd):
     __tldr__ = """\
                 The module enables the user to create a latex table for parameters.
                 It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
-                and a latex table to the file, provided after an '-o' option.
+                and a latex table to the file, provided after an `-o` option.
 
                 \033[32mPrint the parameters to the file 'output.tex':
-                \033[31m./gna \\
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak \\
-                    -- env-pars-latex peak -o output.tex\033[0m
+                    -- env-pars-latex peak -o output.tex
+                ```
 
                 The module uses python module [tabulate](https://github.com/astanin/python-tabulate) for printing.
                """
