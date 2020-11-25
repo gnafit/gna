@@ -1,4 +1,4 @@
-"""A group of paraeters UI: select a set of parameters and store"""
+"""Select a group of parameters for the minimization and other purposes."""
 
 import ROOT
 from gna.ui import basecmd
@@ -60,5 +60,38 @@ class cmd(basecmd):
 
         return False
 
+    __tldr__ = """\
+                The module recursively selects parameters based on their status (free, constrained, fixed)
+                and inclusion/exclusion mask.
+                The list is stored in `env.future` and may be used by minimizers.
+                By default the module selects all the not fixed parameters: free and constrained.
 
+                \033[32mSelect not fixed parameters from the namespace 'peak' and store as 'minpars':
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak \\
+                    -- ns --name peak --print \\
+                          --set E0             values=2.5  free \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 fixed \\
+                    -- pargroup minpars peak -vv\033[0m
 
+                The '-m' option may be used with few arguments describing the parameter mode. The choices include:
+                free, constrained and fixed.
+
+                \033[32mSelect only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak \\
+                    -- ns --name peak --print \\
+                          --set E0             values=2.5  free \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 fixed \\
+                    -- pargroup minpars peak -m fixed -vv\033[0m
+
+                The parameters may be filtered with '-x' and '-i' flags. The option '-x' will exclude parameters,
+                full names of which contain one of the string passed as arguments. The option '-i' will include
+                only matching parameters.
+
+                See also: `minimizer-v1`, `minimizer-scan`
+               """

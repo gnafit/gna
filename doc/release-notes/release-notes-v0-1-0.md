@@ -231,6 +231,9 @@ The information, provided via the `help` module at least repeats the information
 release notes, or, sometimes extends it. While the release notes may be short-spoken the help and
 examples will be further extended with GNA development.
 
+In the following examples we often use the option '-vv' to increase verbosity, In practical usage it
+may be safely omitted.
+
 ### UI
 
 We start from the `ui` package, containing some tools to help with usage. They will be useful for
@@ -280,13 +283,13 @@ Save the whole command to the file 'command.sh':
     -- cmd-save command.sh
 ```
 
-### env: working with the environment
+### env
 
 The following UI modules are dedicated to working to the future implementation of the environment,
 currently located in the `env.future`. We will start with three UI modules `env-cfg`, `env-set` and
 `env-print`.
 
-#### env-cfg: controls the representation of the env.future and enables logging.
+#### env-cfg
 
 Global environment configuration UI. Enables verbosity for the debugging purposes.
 
@@ -315,7 +318,7 @@ The `-i` option includes matching keys exclusively:
     -- gaussianpeak --name peak_MC --nbins 50
 ```
 
-#### env-print: prints the details of the path in env.future.
+#### env-print
 
 Unlike verbose `env-cfg`, `env-print` UI recursively prints a chosen subtree of the env.
 
@@ -331,7 +334,7 @@ Print the contents of the subtree 'spectra':
 
 The widths of the key and value columns may be set via `-k` and `-l` options respectively.
 
-#### env-set: writes arbitrary information into path of env.future.
+#### env-set
 
 Assigns any data within env. Needed to provide an extra information to be saved with `save-yaml` and
 `save-pickle`.
@@ -507,7 +510,7 @@ Write the data, collected in the 'output' to the file 'output.root'
 
 ### Working with parameters
 
-#### env-pars-latex: print parameters to a latex table.
+#### env-pars-latex
 
 Recursively prints parameters as a latex table.
 
@@ -524,25 +527,96 @@ Print the parameters to the file 'output.tex':
 
 The module uses python module [tabulate](https://github.com/astanin/python-tabulate) for printing.
 
-#### pargroup: selects parameters from env and combines them in a group.
+#### pargroup
 
-#### pargrid: creates a grid for a scanning minimizer.
+Select a group of parameters for the minimization and other purposes.
+
+The module recursively selects parameters based on their status (free, constrained, fixed)
+and inclusion/exclusion mask.
+The list is stored in `env.future` and may be used by minimizers.
+By default the module selects all the not fixed parameters: free and constrained.
+
+Select not fixed parameters from the namespace 'peak' and store as 'minpars':
+```sh
+./gna \
+    -- gaussianpeak --name peak \
+    -- ns --name peak --print \
+          --set E0             values=2.5  free \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 fixed \
+    -- pargroup minpars peak -vv
+```
+
+The '-m' option may be used with few arguments describing the parameter mode. The choices include:
+free, constrained and fixed.
+
+Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
+```sh
+./gna \
+    -- gaussianpeak --name peak \
+    -- ns --name peak --print \
+          --set E0             values=2.5  free \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \ --set BackgroundRate values=1100 fixed \
+    -- pargroup minpars peak -m fixed -vv
+```
+
+The parameters may be filtered with '-x' and '-i' flags. The option '-x' will exclude parameters,
+full names of which contain one of the string passed as arguments. The option '-i' will include
+only matching parameters.
+
+See also: `minimizer-v1`, `minimizer-scan`
+
+#### pargrid
+
+Specify a grid for a few parameters to be used with scanning minimizer.
+
+The module provides tools for creating grids to scan over parameters.
+It supports `range`, `linspace`, `logspace` and `geomspace` which are similar to their analogues from `numpy`.
+It also supports a list of values passed from the command line.
+
+Generate a linear grid for the parameter 'E0':
+```sh
+./gna -- \
+    -- gaussianpeak --name peak \
+    -- pargrid scangrid --linspace peak.E0 0.5 4.5 10 -vv
+```
+
+The possible options include:
+| Option        | Arguments                      | NumPy analogue | Includes end point |
+|:--------------|:-------------------------------|:---------------|:-------------------|
+| `--range`     | `start` `stop` `step`          | arange         | ✘                  |
+| `--linspace`  | `start` `stop` `n`             | linspace       | ✔                  |
+| `--geomspace` | `start` `stop` `n`             | geomspace      | ✔                  |
+| `--logspace`  | `start_power` `stop_power` `n` | logspace       | ✔                  |
+| `--list`      | space separated values         | array          | ✔                  |
+
+Provide a list of grid values from a command line:
+```sh
+./gna -- \
+    -- gaussianpeak --name peak \
+    -- pargrid scangrid --linspace peak.E0 1 2 8 -vv
+```
 
 ### Package minimize
 
+The package `minimize` contains modifications of the already existing `minimizer` and `fit` UI
+modules.
+
 #### minimizer-v1
 
-#### minimizer-scan: provides a hybrid minimizer, which does a scan over a set of parameters and
+#### minimizer-scan
 
 #### fit-v1
 
 ### Plotting updates
 
-#### env-cwd: controls the common output folder. See [Common output folders](#common-output-folders).
+#### env-cwd
 
-#### mpl-v1: common commands to work with figures separated to a common UI module.
+#### mpl-v1
 
-#### plot-heatmap-v1: plots a 2d heatmap.
+#### plot-heatmap-v1
 
 #### graphviz-v1
 
