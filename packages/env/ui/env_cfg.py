@@ -1,4 +1,4 @@
-"""Global environment configuration UI. Enables verbosity for the debuggin purposes."""
+"""Global environment configuration UI. Enables verbosity for the debugging purposes."""
 
 from gna.ui import basecmd
 from pprint import pprint
@@ -65,7 +65,7 @@ class cmd(basecmd):
 
     __tldr__ = {
             "" : """\
-                All assignments and changes of the environment will be prited to stdout.
+                All assignments and changes of the environment will be printed to stdout.
 
                 \033[32mEnable verbosity:
                 \033[31m./gna \\
@@ -83,5 +83,7 @@ class cmd(basecmd):
                 \033[31m./gna \\
                     -- env-cfg -v -i spectrum \\
                     -- gaussianpeak --name peak_MC --nbins 50\033[0m
+
+                See also: `env-print`, `env-set`.
             """,
             }

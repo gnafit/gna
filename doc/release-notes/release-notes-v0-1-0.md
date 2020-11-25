@@ -46,7 +46,7 @@ While UI modules, bundles and experiments are searched automatically in paths `p
 The configuration via `configuration/` is deprecated. All the paths are now
 controlled via `$GNAPATH` variable.
 
-The usage of the `thirdparty/` subfolder to organize packages is also deprecatd.
+The usage of the `thirdparty/` subfolder to organize packages is also deprecated.
 
 ### Help
 
@@ -55,6 +55,9 @@ The help on modules is now better accessible:
     the other modules, which makes the waiting time much smaller.
 * A new UI module `help` was introduced in order to print help on arguments and give some usage
     examples.
+
+Note also, that most of the UI commands support verbosity flag '-v'. Sometimes passing multiple v's
+as '-vv' or '-vvv' increases the verbosity.
 
 ## Storage update
 
@@ -224,7 +227,7 @@ information may be retrieved via one of the following commands:
 ./gna -- help <modulename> <subcommand>
 ```
 
-The information, provided via the `help` module at least repeats the information givein in the
+The information, provided via the `help` module at least repeats the information given in the
 release notes, or, sometimes extends it. While the release notes may be short-spoken the help and
 examples will be further extended with GNA development.
 
@@ -237,7 +240,7 @@ all the following commands.
 
 Each UI module recognizes a `--help` option, which prints the module description and available
 arguments. The `help` UI module prints the module description and some usage examples. The idea is
-imilar to the [tldr](https://tldr.sh).
+similar to the [tldr](https://tldr.sh).
 
 The following command will print the usage example for the `comment` UI.
 ```sh
@@ -285,9 +288,9 @@ currently located in the `env.future`. We will start with three UI modules `env-
 
 #### env-cfg: controls the representation of the env.future and enables logging.
 
-Global environment configuration UI. Enables verbosity for the debuggin purposes.
+Global environment configuration UI. Enables verbosity for the debugging purposes.
 
-All assignments and changes of the environment will be prited to stdout.
+All assignments and changes of the environment will be printed to stdout.
 
 Enable verbosity:
 ```sh
@@ -316,7 +319,7 @@ The `-i` option includes matching keys exclusively:
 
 Unlike verbose `env-cfg`, `env-print` UI recursively prints a chosen subtree of the env.
 
-The arguments are paths wihin env to be printed. Paths may contains '.' which will be interpreted as a separator.
+The arguments are paths within env to be printed. Paths may contains '.' which will be interpreted as a separator.
 It recursively prints key, type of the value and the value.
 
 Print the contents of the subtree 'spectra':
@@ -445,17 +448,70 @@ in order to prepare the data.
 
 #### save-yaml
 
+Saves a subtree of the env to a readable YAML file.
+
+The module saves the paths provided as arguments to an output YAML file, provided after '-o' option.
+If the outputs should be saved, the data should be converted via `env-data` module.
+The YAML is human readable and fits to the purposes of saving a small data samples,
+such as fit results or small histograms or graphs.
+
+The module is similar to the modules `save-pickle` and `save-root`.
+
+Write the data, collected in the 'output' to the file 'output.yaml'
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 5 \
+    -- env-data -c spectra.peak.spectrum output '{note: extra information}' -vv \
+    -- env-print -l 40 \
+    -- save-yaml output -o output.yaml
+```
+In this example we have reduced the number of bins in order to improve readability of the 'output.yaml'.
+
 #### save-pickle
+
+Saves a subtree of the env to a binary pickle file.
+
+The module saves the paths provided as arguments to an output pickle file, provided after '-o' option.
+If the outputs should be saved, the data should be converted via `env-data` module.
+The pickle is a binary readable and works fast. It should be preferred over `save-yaml` for the large data.
+
+The module is similar to the modules `save-yaml` and `save-root`.
+
+Write the data, collected in the 'output' to the file 'output.pkl'
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data -c spectra output '{note: extra information}' -vv \
+    -- env-print -l 40 \
+    -- save-pickle output -o output.pkl
+```
 
 #### save-root: saves ROOT objects from a subtree of env.future to a ROOT file.
 
+Saves a subtree of the env to a binary ROOT file.
+
+The module saves the paths provided as arguments to an output ROOT file, provided after '-o' option.
+The outputs that should be saved should be converted via `env-data-root` module.
+
+The module is similar to the modules `save-yaml` and `save-pickle`.
+
+Write the data, collected in the 'output' to the file 'output.root'
+```sh
+./gna \
+    -- gaussianpeak --name peak --nbins 50 \
+    -- env-data-root -c spectra output \
+    -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \
+    -- env-print -l 40 \
+    -- save-root output -o output.root
+```
+
 ### Working with parameters
+
+#### env-pars-latex: print parameters to a latex table.
 
 #### pargroup: selects parameters from env and combines them in a group.
 
 #### pargrid: creates a grid for a scanning minimizer.
-
-#### env-pars-latex: print parameters to a latex table.
 
 ### Package minimize
 

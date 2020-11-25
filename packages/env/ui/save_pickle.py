@@ -1,4 +1,4 @@
-"""Save given path within env to the pickle file"""
+"""Saves a subtree of the env to a binary pickle file."""
 
 from gna.ui import basecmd
 from pprint import pprint
@@ -29,3 +29,20 @@ class cmd(basecmd):
 
         if self.opts.verbose:
             print('Save output file:', self.opts.output)
+
+    __tldr__ = """\
+            The module saves the paths provided as arguments to an output pickle file, provided after '-o' option.
+            If the outputs should be saved, the data should be converted via `env-data` module.
+            The pickle is a binary readable and works fast. It should be preferred over `save-yaml` for the large data.
+
+            The module is similar to the modules `save-yaml` and `save-root`.
+
+            \033[32mWrite the data, collected in the 'output' to the file 'output.pkl'
+            \033[31m./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data -c spectra output '{note: extra information}' -vv \\
+                -- env-print -l 40 \\
+                -- save-pickle output -o output.pkl\033[0m
+
+            See also: `env-data`, `save-yaml`, `save-root`.
+        """

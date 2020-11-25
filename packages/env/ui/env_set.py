@@ -55,4 +55,6 @@ class cmd(basecmd):
                 \033[31m./gna \\
                     -- env-set -r test -a key1 string \\
                     -- env-print test\033[0m
+
+                See also: `env-print`, `env-cfg`.
             """

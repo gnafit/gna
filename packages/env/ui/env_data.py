@@ -144,4 +144,6 @@ cmd.__tldr__ = """\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data -c spectra.peak output '{note: extra information}' -vv \\
                 -- env-print -l 40\033[0m
+
+            See also: `env-data-root`, `save-yaml`, `save-pickle`, `save-root`.
         """

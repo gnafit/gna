@@ -70,7 +70,7 @@ class cmd(basecmd):
 
     __tldr__ = {
             "" : """\
-                The arguments are paths wihin env to be printed. Paths may contains '.' which will be interpreted as a separator.
+                The arguments are paths within env to be printed. Paths may contains '.' which will be interpreted as a separator.
                 It recursively prints key, type of the value and the value.
 
                 \033[32mPrint the contents of the subtree 'spectra':
@@ -79,5 +79,7 @@ class cmd(basecmd):
                     -- env-print spectra\033[0m
 
                 The widths of the key and value columns may be set via `-k` and `-l` options respectively.
+
+                See also: `env-cfg`, `env-set`.
             """,
             }
