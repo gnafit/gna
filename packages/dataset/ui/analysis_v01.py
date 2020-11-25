@@ -1,4 +1,4 @@
-"""Analysis module (v01 WIP) combines multiple datasets for the analysis (fit)
+"""Analysis module (v01) combines multiple datasets for the analysis (fit)
 
 This module uses pargroup to specify covariance parameters.
 """

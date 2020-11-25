@@ -1,4 +1,4 @@
-"""Dataset initialization (v01 WIP). Configures the dataset for a single experiment.
+"""Dataset initialization (v01). Configures the dataset for a single experiment.
 Dataset defines:
     - Observable (model) to be used as fitted function
     - Observable (data) to be fitted to

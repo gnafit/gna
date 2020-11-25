@@ -234,12 +234,12 @@ examples will be further extended with GNA development.
 In the following examples we often use the option '-vv' to increase verbosity, In practical usage it
 may be safely omitted.
 
-### UI
+### Package UI
 
 We start from the `ui` package, containing some tools to help with usage. They will be useful for
 all the following commands.
 
-#### help
+#### Module help
 
 Each UI module recognizes a `--help` option, which prints the module description and available
 arguments. The `help` UI module prints the module description and some usage examples. The idea is
@@ -257,7 +257,7 @@ Some commands may provide specific examples, which may be retrieved by more deta
 
 **TBD**
 
-#### comment
+#### Module comment
 
 Commenting UI. All the arguments are ignored and needed only for annotation.
 
@@ -270,7 +270,7 @@ The command will print the arguments upon execution and does nothing more.
     -- gaussianpeak --name peak_MC --nbins 50
 ```
 
-#### cmd-save
+#### Module cmd-save
 
 Saves the command line to a file. The command then may be repeated and should produce the same output.
 The main argument is the output file name to save the command.
@@ -283,13 +283,13 @@ Save the whole command to the file 'command.sh':
     -- cmd-save command.sh
 ```
 
-### env
+### Package env
 
 The following UI modules are dedicated to working to the future implementation of the environment,
 currently located in the `env.future`. We will start with three UI modules `env-cfg`, `env-set` and
 `env-print`.
 
-#### env-cfg
+#### Module env-cfg
 
 Global environment configuration UI. Enables verbosity for the debugging purposes.
 
@@ -318,7 +318,7 @@ The `-i` option includes matching keys exclusively:
     -- gaussianpeak --name peak_MC --nbins 50
 ```
 
-#### env-print
+#### Module env-print
 
 Unlike verbose `env-cfg`, `env-print` UI recursively prints a chosen subtree of the env.
 
@@ -334,7 +334,7 @@ Print the contents of the subtree 'spectra':
 
 The widths of the key and value columns may be set via `-k` and `-l` options respectively.
 
-#### env-set
+#### Module env-set
 
 Assigns any data within env. Needed to provide an extra information to be saved with `save-yaml` and
 `save-pickle`.
@@ -373,7 +373,7 @@ The '-a' argument simply writes a key-value pair, where value is a string:
 
 The data of the GNA graph is located in the outputs.
 
-#### env-data
+#### Module env-data
 
 Recursively saves outputs as dictionaries with numbers and meta.
 
@@ -413,7 +413,7 @@ Provide extra information:
     -- env-print -l 40
 ```
 
-#### env-data-root
+#### Module env-data-root
 
 Recursively saves the outputs as ROOT objects: TH1D, TH2D, TGraph.
 
@@ -449,7 +449,7 @@ The data, written to `env.future` may be saved to output files: human readable Y
 and binary ROOT. The examples will use the commands from [Converting the results](#converting-the-results)
 in order to prepare the data.
 
-#### save-yaml
+#### Module save-yaml
 
 Saves a subtree of the env to a readable YAML file.
 
@@ -470,7 +470,7 @@ Write the data, collected in the 'output' to the file 'output.yaml'
 ```
 In this example we have reduced the number of bins in order to improve readability of the 'output.yaml'.
 
-#### save-pickle
+#### Module save-pickle
 
 Saves a subtree of the env to a binary pickle file.
 
@@ -489,7 +489,7 @@ Write the data, collected in the 'output' to the file 'output.pkl'
     -- save-pickle output -o output.pkl
 ```
 
-#### save-root
+#### Module save-root
 
 Saves a subtree of the env to a binary ROOT file.
 
@@ -508,9 +508,9 @@ Write the data, collected in the 'output' to the file 'output.root'
     -- save-root output -o output.root
 ```
 
-### Working with parameters
+### Package parameters
 
-#### env-pars-latex
+#### Module env-pars-latex
 
 Recursively prints parameters as a latex table.
 
@@ -527,7 +527,7 @@ Print the parameters to the file 'output.tex':
 
 The module uses python module [tabulate](https://github.com/astanin/python-tabulate) for printing.
 
-#### pargroup
+#### Module pargroup
 
 Select a group of parameters for the minimization and other purposes.
 
@@ -568,7 +568,7 @@ only matching parameters.
 
 See also: `minimizer-v1`, `minimizer-scan`
 
-#### pargrid
+#### Module pargrid
 
 Specify a grid for a few parameters to be used with scanning minimizer.
 
@@ -598,27 +598,94 @@ Provide a list of grid values from a command line:
     -- gaussianpeak --name peak \
     -- pargrid scangrid --linspace peak.E0 1 2 8 -vv
 ```
+### Package dataset
+
+The `dataset` package includes WIP
+
+#### Module dataset-v01
+
+#### Module analysis-v01
 
 ### Package minimize
 
 The package `minimize` contains modifications of the already existing `minimizer` and `fit` UI
 modules.
 
-#### minimizer-v1
+#### Module minimizer-v1
 
-#### minimizer-scan
+Initializes a minimizer for a given statistic and set of parameters.
 
-#### fit-v1
+The module creates a minimizer instance which then may be used for a fit with `fit-v1` module or elsewhere.
+The minimizer arguments are: `minimizer name` `statistics` `minpars`. Where:
+* `minimizer name` is a name of new minimizer.
+* `statistics` is the name of a function to minimizer, which should be created beforehand.
+* `minpars` is the name of a parameter group, created by `pargroup`.
+
+Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v01 --name analysis --datasets peak \
+    -- stats stats --chi2 analysis \
+    -- pargroup minpars peak_f -vv \
+    -- minimizer-v1 min stats minpars -vv \
+    -- fit-v1 min \
+    -- env-print fitresult.min
+```
+The `env-print` will print the status of the minimization, performed by the `fit-v1`.
+
+By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with '-t' option to
+`scipy` or `minuit` (TMinuit).
+
+Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v01 --name analysis --datasets peak \
+    -- stats stats --chi2 analysis \
+    -- pargroup minpars peak_f -vv \
+    -- minimizer-v1 min stats minpars -vv \
+    -- fit-v1 min \
+    -- env-print fitresult.min
+```
+
+#### Module minimizer-scan
+
+#### Module fit-v1
 
 ### Plotting updates
 
-#### env-cwd
+#### Module env-cwd
 
-#### mpl-v1
+#### Module mpl-v1
 
-#### plot-heatmap-v1
+#### Module plot-heatmap-v1
 
-#### graphviz-v1
+#### Module graphviz-v1
 
-#### plot-spectrum-v1
+#### Module plot-spectrum-v1
 
