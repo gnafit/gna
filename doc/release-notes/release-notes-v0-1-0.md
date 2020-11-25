@@ -113,8 +113,8 @@ expected to utilize `env.future` for the storage. At some point `env.future` wil
 
 The following UI modules work with `env.future`:
 * Dataset organization
-    + `dataset-v01-wip`: stores observables in 'spectra' and nuisance terms in 'pull'.
-    + `analysis-v01-wip`: reads 'parameter_groups' for the parameters to build the covariance matrix.
+    + `dataset-v1`: stores observables in 'spectra' and nuisance terms in 'pull'.
+    + `analysis-v1`: reads 'parameter_groups' for the parameters to build the covariance matrix.
 * New UI to facilitate access to `evn`
     + `env-cfg`: controls the `env.future` representation and enables logging.
     + `env-data`: provides multiple function to recursively copy `env.future` elements.
@@ -201,8 +201,8 @@ packages as well.
 
 The following UI modules are a newer version of old ones and utilize `env.future` for the storage:
 * `dataset`
-    + `dataset-v01-wip`
-    + `analysis-v01-wip`
+    + `dataset-v1`
+    + `analysis-v1`
 * `minimize`
     + `fit-v1`
     + `minimizer-v1`:
@@ -600,11 +600,63 @@ Provide a list of grid values from a command line:
 ```
 ### Package dataset
 
-The `dataset` package includes WIP
+The `dataset` package includes the updates of the UI modules `dataset` and `analysis` used for the
+initialization of the minimization functions and statistics.
 
-#### Module dataset-v01
+#### Module dataset-v1
 
-#### Module analysis-v01
+Dataset initialization (v1). Configures the dataset for an experiment.
+
+Dataset defines:
+- A pair of theory-data:
+    * Observable (model) to be used as fitted function
+    * Observable (data) to be fitted to
+- Statistical uncertainties (Person/Neyman) [theory/observation]
+- Or nuisance parameters
+
+The dataset is added to the `env.future['spectra']`.
+
+By default a theory, fixed at the moment of dataset initialization is used for the stat errors (Pearson's case).
+
+Initialize a dataset 'peak' with a pair of Theory/Data:
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v1 --name peak --theory-data peak_f.spectrum peak_MC.spectrum -v
+```
+
+When a dataset is initialized from a nuisance terms it reads only constrained parameters from the namespace.
+
+Initialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v1 --name nuisance --pull peak_f -v
+```
+
+#### Module analysis-v1
 
 ### Package minimize
 
@@ -636,8 +688,8 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
           --set Width          values=0.3  relsigma=0.2 \
           --set Mu             values=1500 relsigma=0.25 \
           --set BackgroundRate values=1100 relsigma=0.25 \
-    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
-    -- analysis-v01 --name analysis --datasets peak \
+    -- dataset-v1  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v1 --name analysis --datasets peak \
     -- stats stats --chi2 analysis \
     -- pargroup minpars peak_f -vv \
     -- minimizer-v1 min stats minpars -vv \
@@ -664,8 +716,8 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
           --set Width          values=0.3  relsigma=0.2 \
           --set Mu             values=1500 relsigma=0.25 \
           --set BackgroundRate values=1100 relsigma=0.25 \
-    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
-    -- analysis-v01 --name analysis --datasets peak \
+    -- dataset-v1  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v1 --name analysis --datasets peak \
     -- stats stats --chi2 analysis \
     -- pargroup minpars peak_f -vv \
     -- minimizer-v1 min stats minpars -vv \

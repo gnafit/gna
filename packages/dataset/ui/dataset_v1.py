@@ -1,10 +1,4 @@
-"""Dataset initialization (v01). Configures the dataset for a single experiment.
-Dataset defines:
-    - Observable (model) to be used as fitted function
-    - Observable (data) to be fitted to
-    - Statistical uncertainty (Person/Neyman) [theory/observation]
-    - Nuisance parameters
-    """
+"""Dataset initialization (v1). Configures the dataset for an experiment."""
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -38,8 +32,8 @@ class cmd(basecmd):
     def run(self):
         dataset = Dataset(desc=None)
         verbose = self.opts.verbose
-        if verbose:
-            print('Adding pull parameters to dataset', self.opts.name)
+        if self.opts.verbose:
+            print("Initialize dataset '{}' with:".format(self.opts.name))
 
         if self.opts.pull:
             self.load_pulls(dataset)
@@ -48,6 +42,10 @@ class cmd(basecmd):
         for theory_path, data_path in self.opts.theory_data:
             theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
             data.data()
+
+            if self.opts.verbose:
+                print('   theory: ', str(theory))
+                print('   data:   ', str(data))
 
             if self.opts.error_type == 'neyman':
                 error=data.single()
@@ -68,6 +66,12 @@ class cmd(basecmd):
             data.data()
             variance.data()
 
+            if self.opts.verbose:
+                print("Initialize dataset '{}' with:".format(self.opts.name))
+                print('   theory:  ', str(theory))
+                print('   data:    ', str(data))
+                print('   variance:', str(variance))
+
             dataset.assign(obs=theory, value=data, error=variance.single())
 
         self.env.parts.dataset[self.opts.name] = dataset
@@ -82,6 +86,8 @@ class cmd(basecmd):
         variables = [par.getVariable() for par in pull_pars]
         sigmas, centrals, covariance = get_uncertainties(pull_pars)
         npars = len(pull_pars)
+
+        print('   nuisance: {} parameters'.format(npars))
 
         from gna.constructors import VarArray, Points
         # Create an array, representing pull parameter values
@@ -108,3 +114,51 @@ class cmd(basecmd):
         ns = self.env.globalns('pull')
         ns.addobservable(self.opts.name, self.pull_vararray.single())
         self.env.future['pull', self.opts.name] = self.pull_vararray.single()
+
+
+    __tldr__= """\
+                Dataset defines:
+                - A pair of theory-data:
+                    * Observable (model) to be used as fitted function
+                    * Observable (data) to be fitted to
+                - Statistical uncertainties (Person/Neyman) [theory/observation]
+                - Or nuisance parameters
+
+                The dataset is added to the `env.future['spectra']`.
+
+                By default a theory, fixed at the moment of dataset initialization is used for the stat errors (Pearson's case).
+
+                \033[32mInitialize a dataset 'peak' with a pair of Theory/Data:
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- gaussianpeak --name peak_f  --nbins 50 \\
+                    -- ns --name peak_MC --print \\
+                          --set E0             values=2    fixed \\
+                          --set Width          values=0.5  fixed \\
+                          --set Mu             values=2000 fixed \\
+                          --set BackgroundRate values=1000 fixed \\
+                    -- ns --name peak_f --print \\
+                          --set E0             values=2.5  relsigma=0.2 \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 relsigma=0.25 \\
+                    -- dataset-v1 --name peak --theory-data peak_f.spectrum peak_MC.spectrum -v\033[0m
+
+                When a dataset is initialized from a nuisance terms it reads only constrained parameters from the namespace.
+
+                \033[32mInitialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
+                \033[31m./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- gaussianpeak --name peak_f  --nbins 50 \\
+                    -- ns --name peak_MC --print \\
+                          --set E0             values=2    fixed \\
+                          --set Width          values=0.5  fixed \\
+                          --set Mu             values=2000 fixed \\
+                          --set BackgroundRate values=1000 fixed \\
+                    -- ns --name peak_f --print \\
+                          --set E0             values=2.5  relsigma=0.2 \\
+                          --set Width          values=0.3  relsigma=0.2 \\
+                          --set Mu             values=1500 relsigma=0.25 \\
+                          --set BackgroundRate values=1100 relsigma=0.25 \\
+                    -- dataset-v1 --name nuisance --pull peak_f -v\033[0m
+              """

@@ -50,8 +50,8 @@ class cmd(basecmd):
                           --set Width          values=0.3  relsigma=0.2 \\
                           --set Mu             values=1500 relsigma=0.25 \\
                           --set BackgroundRate values=1100 relsigma=0.25 \\
-                    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \\
-                    -- analysis-v01 --name analysis --datasets peak \\
+                    -- dataset-v1  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \\
+                    -- analysis-v1 --name analysis --datasets peak \\
                     -- stats stats --chi2 analysis \\
                     -- pargroup minpars peak_f -vv \\
                     -- minimizer-v1 min stats minpars -vv \\
@@ -76,8 +76,8 @@ class cmd(basecmd):
                           --set Width          values=0.3  relsigma=0.2 \\
                           --set Mu             values=1500 relsigma=0.25 \\
                           --set BackgroundRate values=1100 relsigma=0.25 \\
-                    -- dataset-v01  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \\
-                    -- analysis-v01 --name analysis --datasets peak \\
+                    -- dataset-v1  --name peak --theory-data peak_f.spectrum peak_MC.spectrum \\
+                    -- analysis-v1 --name analysis --datasets peak \\
                     -- stats stats --chi2 analysis \\
                     -- pargroup minpars peak_f -vv \\
                     -- minimizer-v1 min stats minpars -vv \\
@@ -86,5 +86,5 @@ class cmd(basecmd):
 
                 The module is based on `minimizer` and completely supersedes it.
 
-                See also: `minimizer-scan`, `fit-v1`, `pargroup`.
+                See also: `minimizer-scan`, `fit-v1`, `stats`, `pargroup`.
                 """
