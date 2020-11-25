@@ -149,19 +149,23 @@ cmd.__tldr__ = """\
             While histograms are written automatically for writing graphs the user need to use '-g' argument.
 
             \033[32mWrite the data from all the outputs from the 'spectra' to 'output':
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data-root -c spectra.peak output -vv \\
-                -- env-print -l 40\033[0m
+                -- env-print -l 40
+            ```
             The last command prints the data to stdout. The value width is limited to 40 symbols.
 
             A common root for source and target paths may be set independently via '-s' and '-t' arguments.
 
             \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
                 -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
-                -- env-print -l 40\033[0m
+                -- env-print -l 40
+            ```
 
             See also: `env-data`, `save-yaml`, `save-pickle`, `save-root`.
         """

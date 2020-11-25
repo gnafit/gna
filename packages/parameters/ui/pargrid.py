@@ -101,9 +101,11 @@ cmd.__tldr__ = """\
                 It also supports a list of values passed from the command line.
 
                 \033[32mGenerate a linear grid for the parameter 'E0':
-                \033[31m./gna -- \\ 
+                ```sh
+                ./gna -- \\ 
                     -- gaussianpeak --name peak \\ 
-                    -- pargrid scangrid --linspace peak.E0 0.5 4.5 10 -vv\033[0m
+                    -- pargrid scangrid --linspace peak.E0 0.5 4.5 10 -vv
+                ```
 
                 The possible options include:
                 | Option        | Arguments                      | NumPy analogue | Includes end point |
@@ -115,9 +117,11 @@ cmd.__tldr__ = """\
                 | `--list`      | space separated values         | array          | ✔                  |
 
                 \033[32mProvide a list of grid values from a command line:
-                \033[31m./gna -- \\ 
+                ```sh
+                ./gna -- \\ 
                     -- gaussianpeak --name peak \\ 
-                    -- pargrid scangrid --linspace peak.E0 1 2 8 -vv\033[0m
+                    -- pargrid scangrid --linspace peak.E0 1 2 8 -vv
+                ```
 
                 See also: `minimizer-scan`.
              """

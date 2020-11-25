@@ -49,11 +49,13 @@ class cmd(basecmd):
             The module is similar to the modules `save-pickle` and `save-root`.
 
             \033[32mWrite the data, collected in the 'output' to the file 'output.yaml'
-            \033[31m./gna \\
+            ```sh
+            ./gna \\
                 -- gaussianpeak --name peak --nbins 5 \\
                 -- env-data -c spectra.peak.spectrum output '{note: extra information}' -vv \\
                 -- env-print -l 40 \\
-                -- save-yaml output -o output.yaml\033[0m
+                -- save-yaml output -o output.yaml
+            ```
             In this example we have reduced the number of bins in order to improve readability of the 'output.yaml'.
 
             See also: `env-data`, `save-pickle`, `save-root`.

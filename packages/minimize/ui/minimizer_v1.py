@@ -36,8 +36,9 @@ class cmd(basecmd):
                 * `statistics` is the name of a function to minimizer, which should be created beforehand.
                 * `minpars` is the name of a parameter group, created by `pargroup`.
 
-                \033[31mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
-                \033[31m./gna \\
+                \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
                     -- gaussianpeak --name peak_f  --nbins 50 \\
                     -- ns --name peak_MC --print \\
@@ -56,14 +57,16 @@ class cmd(basecmd):
                     -- pargroup minpars peak_f -vv \\
                     -- minimizer-v1 min stats minpars -vv \\
                     -- fit-v1 min \\
-                    -- env-print fitresult.min\033[0m
+                    -- env-print fitresult.min
+                ```
                 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
 
                 By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with '-t' option to
                 `scipy` or `minuit` (TMinuit).
 
-                \033[31mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
-                \033[31m./gna \\
+                \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
+                ```sh
+                ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
                     -- gaussianpeak --name peak_f  --nbins 50 \\
                     -- ns --name peak_MC --print \\
@@ -82,7 +85,8 @@ class cmd(basecmd):
                     -- pargroup minpars peak_f -vv \\
                     -- minimizer-v1 min stats minpars -vv \\
                     -- fit-v1 min \\
-                    -- env-print fitresult.min\033[0m
+                    -- env-print fitresult.min
+                ```
 
                 The module is based on `minimizer` and completely supersedes it.
 

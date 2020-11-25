@@ -63,12 +63,14 @@ cmd.__tldr__ = """\
                The module is similar to the modules `save-yaml` and `save-pickle`.
 
                \033[32mWrite the data, collected in the 'output' to the file 'output.root'
-               \033[31m./gna \\
+               ```sh
+               ./gna \\
                    -- gaussianpeak --name peak --nbins 50 \\
                    -- env-data-root -c spectra output \\
                    -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
                    -- env-print -l 40 \\
-                   -- save-root output -o output.root\033[0m
+                   -- save-root output -o output.root
+               ```
 
                See also: `env-data-root`, `save-yaml`, `save-pickle`.
                """
