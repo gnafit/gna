@@ -117,7 +117,7 @@ The following UI modules work with `env.future`:
     + `analysis-v1`: reads 'parameter_groups' for the parameters to build the covariance matrix.
 * New UI to facilitate access to `evn`
     + `env-cfg`: controls the `env.future` representation and enables logging.
-    + `env-data`: provides multiple function to recursively copy `env.future` elements.
+    + `env-data`: provides multiple functions to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
     + `env-print`: prints the details of the path in `env.future`.
     + `env-set`: writes arbitrary information into path of `env.future`.
@@ -177,7 +177,7 @@ packages as well.
 * `env`: env and I/O tools
     + `env-cfg`: controls the `env.future` representation and enables logging.
     + `env-cwd`: controls the common output folder. See [Common output folders](#common-output-folders).
-    + `env-data`: provides multiple function to recursively copy `env.future` elements.
+    + `env-data`: provides multiple functions to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
     + `env-print`: prints the details of the path in `env.future`.
     + `env-set`: writes arbitrary information into path of `env.future`.
@@ -231,7 +231,7 @@ The information, provided via the `help` module at least repeats the information
 release notes, or, sometimes extends it. While the release notes may be short-spoken the help and
 examples will be further extended with GNA development.
 
-In the following examples we often use the option '-vv' to increase verbosity, In practical usage it
+In the following examples we often use the option `-vv` to increase verbosity, In practical usage it
 may be safely omitted.
 
 ### Package UI
@@ -285,7 +285,7 @@ Save the whole command to the file 'command.sh':
 
 ### Package env
 
-The following UI modules are dedicated to working to the future implementation of the environment,
+The following UI modules are dedicated to work with the future implementation of the environment,
 currently located in the `env.future`. We will start with three UI modules `env-cfg`, `env-set` and
 `env-print`.
 
@@ -322,7 +322,7 @@ The `-i` option includes matching keys exclusively:
 
 Unlike verbose `env-cfg`, `env-print` UI recursively prints a chosen subtree of the env.
 
-The arguments are paths within env to be printed. Paths may contains '.' which will be interpreted as a separator.
+The arguments are paths within env to be printed. Paths may contains `'.'` which will be interpreted as a separator.
 It recursively prints key, type of the value and the value.
 
 Print the contents of the subtree 'spectra':
@@ -344,7 +344,7 @@ The module provides three ways to input data:
 2. Write a string to an address within env.
 3. Write parsed YAML to an address within env.
 
-Optional argument '-r' may be used to set root address.
+Optional argument `-r` may be used to set root address.
 
 Write two key-value pairs to the 'test':
 ```sh
@@ -391,10 +391,10 @@ Write the data from all the outputs from the 'spectra' to 'output':
 
 The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-A common root for source and target paths may be set independently via '-s' and '-t' arguments.
-There is also a special argument '-g' to combine graphs by reading X and Y arrays from different outputs.
+A common root for source and target paths may be set independently via `-s` and `-t` arguments.
+There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
 
-Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+Store a graph read from `fcn.x` and `fcn.y` as `output.fcn_graph`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 50 \
@@ -403,7 +403,7 @@ Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
 ```
 
 Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
-'-c' and '-g' arguments. The dictionaries will be used to update the target paths.
+`-c` and `-g` arguments. The dictionaries will be used to update the target paths.
 
 Provide extra information:
 ```sh
@@ -421,9 +421,9 @@ The module recursively copies all the outputs from the source location to the ta
 The outputs are converted to the ROOT objects. The produced data may then be saved with `save-root` module.
 
 The overall idea is similar to the `env-data` module. Only TH1D, TH2D, TGraph are supported.
-While histograms are written automatically for writing graphs the user need to use '-g' argument.
+While histograms are written automatically for writing graphs the user need to use `-g` argument.
 
-Write the data from all the outputs from the 'spectra' to 'output':
+Write the data from all the outputs from the `spectra` to `output`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 50 \
@@ -433,9 +433,9 @@ Write the data from all the outputs from the 'spectra' to 'output':
 
 The last command prints the data to stdout. The value width is limited to 40 symbols.
 
-A common root for source and target paths may be set independently via '-s' and '-t' arguments.
+A common root for source and target paths may be set independently via `-s` and `-t` arguments.
 
-Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+Store a graph read from `fcn.x` and `fcn.y` as `output.fcn_graph`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 50 \
@@ -453,14 +453,14 @@ in order to prepare the data.
 
 Saves a subtree of the env to a readable YAML file.
 
-The module saves the paths provided as arguments to an output YAML file, provided after '-o' option.
+The module saves the paths provided as arguments to an output YAML file, provided after `-o` option.
 If the outputs should be saved, the data should be converted via `env-data` module.
 The YAML is human readable and fits to the purposes of saving a small data samples,
 such as fit results or small histograms or graphs.
 
 The module is similar to the modules `save-pickle` and `save-root`.
 
-Write the data, collected in the 'output' to the file 'output.yaml'
+Write the data, collected in the `output` to the file `output.yaml`
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 5 \
@@ -468,19 +468,19 @@ Write the data, collected in the 'output' to the file 'output.yaml'
     -- env-print -l 40 \
     -- save-yaml output -o output.yaml
 ```
-In this example we have reduced the number of bins in order to improve readability of the 'output.yaml'.
+In this example we have reduced the number of bins in order to improve readability of the `output.yaml`.
 
 #### Module save-pickle
 
 Saves a subtree of the env to a binary pickle file.
 
-The module saves the paths provided as arguments to an output pickle file, provided after '-o' option.
+The module saves the paths provided as arguments to an output pickle file, provided after `-o` option.
 If the outputs should be saved, the data should be converted via `env-data` module.
 The pickle is a binary readable and works fast. It should be preferred over `save-yaml` for the large data.
 
 The module is similar to the modules `save-yaml` and `save-root`.
 
-Write the data, collected in the 'output' to the file 'output.pkl'
+Write the data, collected in the `output` to the file `output.pkl`
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 50 \
@@ -493,12 +493,12 @@ Write the data, collected in the 'output' to the file 'output.pkl'
 
 Saves a subtree of the env to a binary ROOT file.
 
-The module saves the paths provided as arguments to an output ROOT file, provided after '-o' option.
+The module saves the paths provided as arguments to an output ROOT file, provided after `-o` option.
 The outputs that should be saved should be converted via `env-data-root` module.
 
 The module is similar to the modules `save-yaml` and `save-pickle`.
 
-Write the data, collected in the 'output' to the file 'output.root'
+Write the data, collected in the `output` to the file `output.root`
 ```sh
 ./gna \
     -- gaussianpeak --name peak --nbins 50 \
@@ -516,9 +516,9 @@ Recursively prints parameters as a latex table.
 
 The module enables the user to create a latex table for parameters.
 It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
-and a latex table to the file, provided after an '-o' option.
+and a latex table to the file, provided after an `-o` option.
 
-Print the parameters to the file 'output.tex':
+Print the parameters to the file `output.tex`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak \
@@ -536,7 +536,7 @@ and inclusion/exclusion mask.
 The list is stored in `env.future` and may be used by minimizers.
 By default the module selects all the not fixed parameters: free and constrained.
 
-Select not fixed parameters from the namespace 'peak' and store as 'minpars':
+Select not fixed parameters from the namespace `peak` and store as `minpars`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak \
@@ -548,10 +548,10 @@ Select not fixed parameters from the namespace 'peak' and store as 'minpars':
     -- pargroup minpars peak -vv
 ```
 
-The '-m' option may be used with few arguments describing the parameter mode. The choices include:
+The `-m` option may be used with few arguments describing the parameter mode. The choices include:
 free, constrained and fixed.
 
-Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
+Select only _fixed_ parameters from the namespace `peak` and store as `minpars`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak \
@@ -562,8 +562,8 @@ Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
     -- pargroup minpars peak -m fixed -vv
 ```
 
-The parameters may be filtered with '-x' and '-i' flags. The option '-x' will exclude parameters,
-full names of which contain one of the string passed as arguments. The option '-i' will include
+The parameters may be filtered with `-x` and `-i` flags. The option `-x` will exclude parameters,
+full names of which contain one of the string passed as arguments. The option `-i` will include
 only matching parameters.
 
 See also: `minimizer-v1`, `minimizer-scan`
@@ -576,7 +576,7 @@ The module provides tools for creating grids to scan over parameters.
 It supports `range`, `linspace`, `logspace` and `geomspace` which are similar to their analogues from `numpy`.
 It also supports a list of values passed from the command line.
 
-Generate a linear grid for the parameter 'E0':
+Generate a linear grid for the parameter `E0`:
 ```sh
 ./gna -- \
     -- gaussianpeak --name peak \
@@ -619,7 +619,7 @@ The dataset is added to the `env.future['spectra']`.
 
 By default a theory, fixed at the moment of dataset initialization is used for the stat errors (Pearson's case).
 
-Initialize a dataset 'peak' with a pair of Theory/Data:
+Initialize a dataset `peak` with a pair of Theory/Data:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
@@ -639,7 +639,7 @@ Initialize a dataset 'peak' with a pair of Theory/Data:
 
 When a dataset is initialized from a nuisance terms it reads only constrained parameters from the namespace.
 
-Initialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
+Initialize a dataset `nuisance` with a constrained parameters of `peak_f`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
@@ -674,7 +674,7 @@ The minimizer arguments are: `minimizer name` `statistics` `minpars`. Where:
 * `statistics` is the name of a function to minimizer, which should be created beforehand.
 * `minpars` is the name of a parameter group, created by `pargroup`.
 
-Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
+Create a minimizer and do a fit of a function `stats` and a group of parameters `minpars`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
@@ -699,10 +699,10 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
 ```
 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
 
-By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with '-t' option to
+By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
 `scipy` or `minuit` (TMinuit).
 
-Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
+Create a minimizer and do a fit of a function `stats` and a group of parameters `minpars` using a `scipy` minimizer:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
@@ -741,4 +741,3 @@ Create a minimizer and do a fit of a function 'stats' and a group of parameters 
 #### Module graphviz-v1
 
 #### Module plot-spectrum-v1
-
