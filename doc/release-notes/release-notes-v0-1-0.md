@@ -316,7 +316,7 @@ The following UI commands acknowledge cwd:
 - plotting:
     * `graphviz_v1`
     * `mpl_v1`
-    * 
+
 ### Package env
 
 The following UI modules are dedicated to work with the future implementation of the environment,
@@ -693,6 +693,8 @@ Initialize a dataset `nuisance` with a constrained parameters of `peak_f`:
 
 #### Module analysis-v1
 
+Analysis module (v1) combines multiple datasets for the analysis (fit). May provide a covariance matrix based on par group.
+
 Creates a named analysis, i.e. a triplet of theory, data and covariance matrix. The covariance matrix
 may be diagonal and contain only statistical uncertainties or contain a systematic part as well.
 
@@ -907,8 +909,9 @@ the figure or axes were moved to a distinct module `mpl-v1`.
 
 #### Module mpl-v1
 
+#### Module plot-spectrum-v1
+
 #### Module plot-heatmap-v1
 
 #### Module graphviz-v1
 
-#### Module plot-spectrum-v1

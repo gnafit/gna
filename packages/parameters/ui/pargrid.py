@@ -102,8 +102,8 @@ cmd.__tldr__ = """\
 
                 Generate a linear grid for the parameter 'E0':
                 ```sh
-                ./gna -- \\ 
-                    -- gaussianpeak --name peak \\ 
+                ./gna -- \\
+                    -- gaussianpeak --name peak \\
                     -- pargrid scangrid --linspace peak.E0 0.5 4.5 10 -vv
                 ```
 
@@ -118,8 +118,8 @@ cmd.__tldr__ = """\
 
                 Provide a list of grid values from a command line:
                 ```sh
-                ./gna -- \\ 
-                    -- gaussianpeak --name peak \\ 
+                ./gna -- \\
+                    -- gaussianpeak --name peak \\
                     -- pargrid scangrid --linspace peak.E0 1 2 8 -vv
                 ```
 
