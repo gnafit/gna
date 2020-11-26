@@ -152,11 +152,13 @@ It is often needed to output a set of output files with figures, data, etc. GNA 
 common folder:
 * Common folder is created if not available.
 * The outputs are stored in the path relative to the common folder. There is no need to specify it
-    in all the UI commands.
+  in all the UI commands.
+See [env-cwd](#module-env-cwd) for more details.
 
 The following UI commands respect the common folder:
-* `env`:
+* `ui`:
     + `env-cwd`: controls the common output folder.
+* `env`:
     + `save-pickle`: saves a subtree of `env.future` to a pickle file.
     + `save-root`: saves ROOT objects from a subtree of `env.future` to a ROOT file.
     + `save-yaml`: saves a subtree of `env.future` to a yaml file.
@@ -182,7 +184,6 @@ packages as well.
 ### New UI modules
 * `env`: env and I/O tools
     + `env-cfg`: controls the `env.future` representation and enables logging.
-    + `env-cwd`: controls the common output folder. See [Common output folders](#common-output-folders).
     + `env-data`: provides multiple functions to recursively copy `env.future` elements.
     + `env-data-root`: copies and converts arrays to ROOT types (TH1/TGraph).
     + `env-print`: prints the details of the path in `env.future`.
@@ -198,6 +199,7 @@ packages as well.
     + `minimizer-scan`: provides a hybrid minimizer, which does a scan over a set of parameters and
        minimization over another set of parameters.
 * `ui`: UI helping tools.
+    + `env-cwd`: controls the common output folder. See [Common output folders](#common-output-folders).
     + `cmd-save`: saves the whole command to a shell file.
     + `comment`: does nothing essentially. Needed just to keep some text as a comment.
     + `help`: prints a help for an UI command and some usage example.
@@ -285,6 +287,36 @@ Save the whole command to the file 'command.sh':
     -- cmd-save command.sh
 ```
 
+#### Module env-cwd
+
+Set GNA working directory.
+
+The module sets the working directory. It also checks that directory exists and is writable.
+If the directory is missing it is created with all the intermediate folders.
+
+Set the current working directory to 'output/test-cwd':
+./gna -- env-cwd output/test-cwd
+From this moment all the output files will be saved to 'output/test-cwd'.
+
+An arbitrary prefix may be prepended to the filenames with '-p' option:
+./gna -- env-cwd output/test-cwd -p prefix-
+
+At the end of the execution, the list of processed paths may be printed to stdout with '-d':
+./gna                     -- env-cwd output/test-cwd -p prefix-                      -- cmd-save cmd.sh                      -- env-cwd
+-d
+The `cmd-save` will save the command to the 'output/test-cwd/prefix-cmd.sh' file.
+The saved files will be printed to stdout.
+
+The following UI commands acknowledge cwd:
+- I/O
+    * `cmd_save`
+    * `save_pickle`
+    * `save_root`
+    * `save_yaml`
+- plotting:
+    * `graphviz_v1`
+    * `mpl_v1`
+    * 
 ### Package env
 
 The following UI modules are dedicated to work with the future implementation of the environment,
@@ -870,7 +902,8 @@ See also: `minimizer-v1`, `minimizer-scan`.
 
 ### Plotting updates
 
-#### Module env-cwd
+The major change of the plotting procedure is that all the options related to the modification of
+the figure or axes were moved to a distinct module `mpl-v1`.
 
 #### Module mpl-v1
 
