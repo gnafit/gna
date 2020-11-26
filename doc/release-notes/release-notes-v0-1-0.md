@@ -259,10 +259,6 @@ The following command will print the usage example for the `comment` UI.
 ./gna -- help cmd-save
 ```
 
-Some commands may provide specific examples, which may be retrieved by more detailed argument:
-
-**TBD**
-
 #### Module comment
 
 Commenting UI. All the arguments are ignored and needed only for annotation.
@@ -834,6 +830,43 @@ The module is based on `minimizer` and completely supersedes it.
 See also: `minimizer-v1`, `fit-v1`, `stats`, `pargroup`.
 
 #### Module fit-v1
+
+Perform a fit using a predefined minimizer.
+
+The module initializes a fit process with a minimizer, provided by `minimizer-v1`, `minimizer-scan` or others.
+The fit result is saved to the `env.future['fitresult']` as a dictionary.
+
+Perform a fit using a minimizer 'min':
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- dataset-v1  peak --theory-data peak_f.spectrum peak_MC.spectrum \
+    -- analysis-v1 analysis --datasets peak \
+    -- stats stats --chi2 analysis \
+    -- pargroup minpars peak_f -vv \
+    -- minimizer-v1 min stats minpars -vv \
+    -- fit-v1 min \
+    -- env-print fitresult.min
+```
+
+By default the parameters are set to initial after the minimization is done.
+It is possible to set the best fit parameters with option `-s` or with option `-p`.
+The latter option pushed the current values to the stack so they can be recovered in the future.
+
+The result of the fit may be saved with `save-pickle` or `save-yaml`.
+
+See also: `minimizer-v1`, `minimizer-scan`.
 
 ### Plotting updates
 

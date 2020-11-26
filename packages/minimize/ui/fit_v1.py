@@ -74,5 +74,7 @@ class cmd(basecmd):
                 It is possible to set the best fit parameters with option `-s` or with option `-p`.
                 The latter option pushed the current values to the stack so they can be recovered in the future.
 
+                The result of the fit may be saved with `save-pickle` or `save-yaml`.
+
                 See also: `minimizer-v1`, `minimizer-scan`.
                 """
