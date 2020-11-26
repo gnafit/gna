@@ -19,13 +19,14 @@ GNA now fully supports Python3. While, the performance is tested on sum fits, so
 New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Example ROOT configuration reads as follows:
 
 ```sh
-cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dminuit2=ON
+cmake .. -DCMAKE_CXX_STANDARD=17  -Dminuit2=ON
 ```
+Additional information and tips for building ROOT from source can be found in [the dedicated section of ROOT docs](https://root.cern/install/build_from_source)
 
 ## Regressions
 
 The `minimizer-scan` usage is causing segmentation fault (#138) when used with ROOT minimizers. A
-temporary workaround is added to avoid garbage collecting of ROOT minimizer. A warning message is
+temporary workaround is added to avoid ROOT minimizers being garbage collected by Python. A warning message is
 printed.
 
 ## Help, modularity and package organization
@@ -297,15 +298,20 @@ The module sets the working directory. It also checks that directory exists and 
 If the directory is missing it is created with all the intermediate folders.
 
 Set the current working directory to 'output/test-cwd':
+```sh
 ./gna -- env-cwd output/test-cwd
+```
 From this moment all the output files will be saved to 'output/test-cwd'.
 
 An arbitrary prefix may be prepended to the filenames with `-p` option:
+```sh
 ./gna -- env-cwd output/test-cwd -p prefix-
+```
 
 At the end of the execution, the list of processed paths may be printed to stdout with `-d`:
-./gna                     -- env-cwd output/test-cwd -p prefix-                      -- cmd-save cmd.sh                      -- env-cwd
--d
+```sh
+./gna -- env-cwd output/test-cwd -p prefix- -- cmd-save cmd.sh -- env-cwd -d
+```
 The `cmd-save` will save the command to the 'output/test-cwd/prefix-cmd.sh' file.
 The saved files will be printed to stdout.
 
@@ -753,7 +759,7 @@ Initializes a minimizer for a given statistic and set of parameters.
 The module creates a minimizer instance which then may be used for a fit with `fit-v1` module or elsewhere.
 The minimizer arguments are: `minimizer name` `statistics` `minpars`. Where:
 * `minimizer name` is a name of new minimizer.
-* `statistics` is the name of a function to minimizer, which should be created beforehand.
+* `statistics` is the name of a function to minimize, which should be created beforehand.
 * `minpars` is the name of a parameter group, created by `pargroup`.
 
 The minimizer is stored in `env.future['minimizer']` under its name.
@@ -821,7 +827,7 @@ The structure is similar with the `minimizer-v1`.
 The module creates a minimizer instance which then may be used for a fit with `fit-v1` module or elsewhere.
 The minimizer arguments are: `minimizer name` `statistics` `minpars` and `gridpars`. Where:
 * `minimizer name` is a name of new minimizer.
-* `statistics` is the name of a function to minimizer, which should be created beforehand.
+* `statistics` is the name of a function to minimize, which should be created beforehand.
 * `minpars` is the name of a parameter group, created by `pargroup`.
 * `gridpars` is the name of a parameter group, created by `pargrid`.
   It is important to note, that the grid parameters should also be included in the `minpars` group.
@@ -988,9 +994,9 @@ The default way is to provide an observable after the `-p` option.
 The option may be used multiple times to plot multiple plots. The labels are provided after `-l` options.
 
 The plot representation may be controlled by the `--plot-type` option, which may have values of:
-'bin_center', 'bar', 'hist', 'errorbar', 'plot'.
+`bin_center`, `bar`, `hist`, `errorbar`, `plot`.
 
-Plot two histograms, 'peak_MC' with error bars and 'peak_f' with lines:
+Plot two histograms, `peak_MC` with error bars and `peak_f` with lines:
 ```sh
 ./gna \
       -- gaussianpeak --name peak_MC --nbins 50 \
@@ -1045,8 +1051,8 @@ Plot a lower triangular matrix L — the Cholesky decomposition of the covarianc
 -- plot-heatmap-v1 analysis.peak.0.L -f tril \
 -- mpl-v1 --xlabel columns --ylabel rows -t 'Cholesky decomposition, L' -s
 ```
-Here the filter 'tril' provided via `-f` ensures that only the lower triangular is plotted since
-it is not guaranteed that the upper matrix is reset to zero.
+Here the filter `tril` provided via `-f` ensures that only the lower triangular is plotted since
+it is not guaranteed that the upper matrix is set to zero.
 
 For more details on decorations and saving see `mpl-v1`.
 
@@ -1059,7 +1065,7 @@ It is able to save it to an image file, pdf or png.
 
 The module requires a reference to the output and a name of the output file, provided after an option `-o`.
 
-Save the graph for the minimization setup to the file 'output/graphviz-example.pdf':
+Save the graph for the minimization setup to the file `output/graphviz-example.pdf`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
@@ -1081,12 +1087,12 @@ Save the graph for the minimization setup to the file 'output/graphviz-example.p
     -- stats stats --chi2 analysis \
     -- graphviz peak_f.spectrum -o output/graphviz-example.pdf
 ```
-In case an extension '.dot' is used the graph will be saved to a readable DOT file.
+In case an extension `.dot` is used the graph will be saved to a readable DOT file.
 
 The variables may be added to the plot by providing an option `--ns`, which may optionally be followed
 by a namespace name to limit the number of processed parameters.
 
-Save the graph for the minimization setup and parameters to the file 'output/graphviz-parameters-example.pdf':
+Save the graph for the minimization setup and parameters to the file `output/graphviz-parameters-example.pdf`:
 ```sh
 ./gna \
     -- gaussianpeak --name peak_MC --nbins 50 \
