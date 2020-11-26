@@ -8,3 +8,6 @@ class Minuit2(TMinuit2, MinuitBase):
     def __init__(self, statistic, minpars, **kwargs):
         TMinuit2.__init__(self)
         MinuitBase.__init__(self, statistic, minpars, **kwargs)
+
+        print("\033[35mWarning! Disowning the C++ minimizer class to avoid segfault. Issue #138 of !67.\033[0m")
+        ROOT.SetOwnership(self, False)

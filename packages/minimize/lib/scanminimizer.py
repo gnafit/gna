@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from scipy.optimize import minimize
 from packages.minimize.lib.base import MinimizerBase, FitResult
 import ROOT
 import numpy as np
@@ -112,6 +111,8 @@ class ParsGrid(object):
         self.checkpars()
 
     def checkpars(self):
+        if not self._gridpars:
+            return
         for key, grid in self._gridpars.walkdicts():
             try:
                 # Replace parameter with minimizer parameter specification
