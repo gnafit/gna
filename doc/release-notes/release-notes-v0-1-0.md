@@ -19,7 +19,7 @@ GNA now fully supports Python3. While, the performance is tested on sum fits, so
 New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Example ROOT configuration reads as follows:
 
 ```sh
-cmake .. -DCMAKE_CXX_STANDARD=17  -Dminuit2=ON
+cmake -DCMAKE_CXX_STANDARD=17  -Dminuit2=ON -Dpython_version=3 ..
 ```
 Additional information and tips for building ROOT from source can be found in [the dedicated section of ROOT docs](https://root.cern/install/build_from_source)
 
