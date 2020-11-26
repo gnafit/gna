@@ -1,4 +1,4 @@
-"""Analysis module combines multiple datasets for the analysis (fit)"""
+"""Analysis module combines multiple datasets for the analysis (fit)."""
 
 
 from gna.ui import basecmd, append_typed, at_least

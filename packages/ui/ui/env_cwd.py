@@ -34,12 +34,12 @@ class cmd(basecmd):
                 ```
                 From this moment all the output files will be saved to 'output/test-cwd'.
 
-                An arbitrary prefix may be prepended to the filenames with '-p' option:
+                An arbitrary prefix may be prepended to the filenames with `-p` option:
                 ```sh
                 ./gna -- env-cwd output/test-cwd -p prefix-
                 ```
 
-                At the end of the execution, the list of processed paths may be printed to stdout with '-d':
+                At the end of the execution, the list of processed paths may be printed to stdout with `-d`:
                 ```sh
                 ./gna \
                     -- env-cwd output/test-cwd -p prefix-  \

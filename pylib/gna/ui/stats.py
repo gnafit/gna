@@ -1,4 +1,3 @@
-
 """Build test statistic based on arbitrary sum of χ² and logPoisson functions"""
 
 

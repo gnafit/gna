@@ -1,4 +1,5 @@
 """Analysis module (v1) combines multiple datasets for the analysis (fit). May provide a covariance matrix based on par group."""
+
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np

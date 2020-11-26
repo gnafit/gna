@@ -1,4 +1,4 @@
-"""Plot 1d ovservables"""
+"""Plot 1-dimensional ovservables."""
 
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
@@ -50,7 +50,7 @@ class cmd(basecmd):
         what.add_argument('-p', '--plot', default=[], metavar=('DATA',), action=append_typed(observable))
 
         parser.add_argument('--vs', metavar='X points', type=observable, help='Points over X axis to plot vs')
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot', 'ravelplot'], metavar='PLOT_TYPE',
+        parser.add_argument('--plot-type', choices=['bin_center', 'bar', 'hist', 'errorbar', 'plot', 'ravelplot'], metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')
         parser.add_argument('-l', '--legend', action='append', default=[],
@@ -110,8 +110,15 @@ def list_get(lst, idx, default):
     return lst[idx] if idx<len(lst) else default
 
 cmd.__tldr__ =  """\
-                The module plot 1 dimensional observables with matplotlib: plots, histograms and error bars.
+                The module plots 1 dimensional observables with matplotlib: plots, histograms and error bars.
 
+                The default way is to provide an observable after the `-p` option.
+                The option may be used multiple times to plot multiple plots. The labels are provided after `-l` options.
+
+                The plot representation may be controlled by the `--plot-type` option, which may have values of:
+                'bin_center', 'bar', 'hist', 'errorbar', 'plot'.
+
+                Plot two histograms, 'peak_MC' with error bars and 'peak_f' with lines:
                 ```sh
                 ./gna \\
                       -- gaussianpeak --name peak_MC --nbins 50 \\
@@ -132,6 +139,8 @@ cmd.__tldr__ =  """\
                 ```
 
                 For more details on decorations and saving see `mpl-v1`.
+
+                The module is based on `plot-spectrum` with significant part of the options moved to `mpl-v1`.
 
                 See also: `mpl-v1`, `plot-heatmap-v1`.
                 """

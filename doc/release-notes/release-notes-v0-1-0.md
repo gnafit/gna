@@ -166,6 +166,8 @@ The following UI commands respect the common folder:
     + `graphviz_v1`
     + `mpl_v1`
 
+Some of the modules still using the old `env.parts` mechanism.
+
 ## New packages and modules
 
 New UI modules and other tools are organized in packages. Some older modules are moved to the
@@ -298,10 +300,10 @@ Set the current working directory to 'output/test-cwd':
 ./gna -- env-cwd output/test-cwd
 From this moment all the output files will be saved to 'output/test-cwd'.
 
-An arbitrary prefix may be prepended to the filenames with '-p' option:
+An arbitrary prefix may be prepended to the filenames with `-p` option:
 ./gna -- env-cwd output/test-cwd -p prefix-
 
-At the end of the execution, the list of processed paths may be printed to stdout with '-d':
+At the end of the execution, the list of processed paths may be printed to stdout with `-d`:
 ./gna                     -- env-cwd output/test-cwd -p prefix-                      -- cmd-save cmd.sh                      -- env-cwd
 -d
 The `cmd-save` will save the command to the 'output/test-cwd/prefix-cmd.sh' file.
@@ -976,10 +978,105 @@ An example of plotting, that uses the above mentioned options:
       -- mpl-v1 -o figure.pdf -s
 ```
 
-
 #### Module plot-spectrum-v1
+
+Plot 1-dimensional ovservables.
+
+The module plots 1 dimensional observables with matplotlib: plots, histograms and error bars.
+
+The default way is to provide an observable after the `-p` option.
+The option may be used multiple times to plot multiple plots. The labels are provided after `-l` options.
+
+The plot representation may be controlled by the `--plot-type` option, which may have values of:
+'bin_center', 'bar', 'hist', 'errorbar', 'plot'.
+
+Plot two histograms, 'peak_MC' with error bars and 'peak_f' with lines:
+```sh
+./gna \
+      -- gaussianpeak --name peak_MC --nbins 50 \
+      -- gaussianpeak --name peak_f  --nbins 50 \
+      -- ns --name peak_MC --print \
+            --set E0             values=2    fixed \
+            --set Width          values=0.5  fixed \
+            --set Mu             values=2000 fixed \
+            --set BackgroundRate values=1000 fixed \
+      -- ns --name peak_f --print \
+            --set E0             values=2.5  relsigma=0.2 \
+            --set Width          values=0.3  relsigma=0.2 \
+            --set Mu             values=1500 relsigma=0.25 \
+            --set BackgroundRate values=1100 relsigma=0.25 \
+      -- plot-spectrum-v1 -p peak_MC.spectrum -l 'Monte-Carlo' --plot-type errorbar \
+      -- plot-spectrum-v1 -p peak_f.spectrum -l 'Model (initial)' --plot-type hist \
+      -- mpl --xlabel 'Energy, MeV' --ylabel entries -t 'Example plot' --grid -s
+```
+
+For more details on decorations and saving see `mpl-v1`.
+
+The module is based on `plot-spectrum` with significant part of the options moved to `mpl-v1`.
+
+See also: `mpl-v1`, `plot-heatmap-v1`.
 
 #### Module plot-heatmap-v1
 
 #### Module graphviz-v1
 
+Plot a graph following all the connections starting from a given output.
+
+The modules creates a [graphviz](https://graphviz.org) representation of a GNA graph.
+It is able to save it to an image file, pdf or png.
+
+The module requires a reference to the output and a name of the output file, provided after an option `-o`.
+
+Save the graph for the minimization setup to the file 'output/graphviz-example.pdf':
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- pargroup minpars peak_f -vv -m free \
+    -- pargroup covpars peak_f -vv -m constrained \
+    -- dataset-v1  peak --theory-data peak_f.spectrum peak_MC.spectrum -vv \
+    -- analysis-v1 analysis --datasets peak -p covpars -v \
+    -- stats stats --chi2 analysis \
+    -- graphviz peak_f.spectrum -o output/graphviz-example.pdf
+```
+In case an extension '.dot' is used the graph will be saved to a readable DOT file.
+
+The variables may be added to the plot by providing an option `--ns`, which may optionally be followed
+by a namespace name to limit the number of processed parameters.
+
+Save the graph for the minimization setup and parameters to the file 'output/graphviz-parameters-example.pdf':
+```sh
+./gna \
+    -- gaussianpeak --name peak_MC --nbins 50 \
+    -- gaussianpeak --name peak_f  --nbins 50 \
+    -- ns --name peak_MC --print \
+          --set E0             values=2    fixed \
+          --set Width          values=0.5  fixed \
+          --set Mu             values=2000 fixed \
+          --set BackgroundRate values=1000 fixed \
+    -- ns --name peak_f --print \
+          --set E0             values=2.5  relsigma=0.2 \
+          --set Width          values=0.3  relsigma=0.2 \
+          --set Mu             values=1500 relsigma=0.25 \
+          --set BackgroundRate values=1100 relsigma=0.25 \
+    -- pargroup minpars peak_f -vv -m free \
+    -- pargroup covpars peak_f -vv -m constrained \
+    -- dataset-v1  peak --theory-data peak_f.spectrum peak_MC.spectrum -vv \
+    -- analysis-v1 analysis --datasets peak -p covpars -v \
+    -- stats stats --chi2 analysis \
+    -- graphviz peak_f.spectrum -o output/graphviz-parameters-example.pdf --ns
+```
+
+The module respects the CWD, which is set by `env-cwd`.
+
+Requires: [pygraphviz](https://pygraphviz.github.io).
