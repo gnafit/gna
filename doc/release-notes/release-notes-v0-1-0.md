@@ -8,7 +8,7 @@ This is a first tagged version of GNA. The major updates include:
 
 ### C++17 support
 
-GNA is now using some C++17 features and is compiled with C++17 support and requires `gcc>=7.0` or `clang>=4.0`. The ROOT should be compiled with C++17 support as well.
+GNA is now using some C++17 features and is compiled with C++17 support and requires `gcc>=7.0` or `clang>=5.0`. The ROOT should be compiled with C++17 support as well.
 
 ### Python3 migration
 
@@ -19,8 +19,14 @@ GNA now fully supports Python3. While, the performance is tested on sum fits, so
 New version requires ROOT>=6.22, compiled with Python3 and C++17 support. Example ROOT configuration reads as follows:
 
 ```sh
-cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dgnuinstall:bool=ON -Dminuit2:bool=ON
+cmake ../root-6.22.02 -D CMAKE_CXX_STANDARD=17 -DCMAKE_INSTALL_PREFIX=/data/work/soft/root-6.18.04_install_p2_gcc17 -Dminuit2=ON
 ```
+
+## Regressions
+
+The `minimizer-scan` usage is causing segmentation fault (#138) when used with ROOT minimizers. A
+temporary workaround is added to avoid garbage collecting of ROOT minimizer. A warning message is
+printed.
 
 ## Help, modularity and package organization
 
@@ -744,7 +750,7 @@ Create a minimizer and do a fit of a function `stats` and a group of parameters 
 ```
 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
 
-By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
+By default `TMinuit2` minimizer from ROOT is used. The minimizer may be changed with `-t` option to
 `scipy` or `minuit` (TMinuit).
 
 Create a minimizer and do a fit of a function `stats` and a group of parameters `minpars` using a `scipy` minimizer:

@@ -8,6 +8,9 @@ class MinuitBase(MinimizerBase):
     def __init__(self, statistic, minpars, **kwargs):
         MinimizerBase.__init__(self, statistic, minpars, **kwargs)
 
+        print("\033[35mWarning! Disowning the C++ minimizer class to avoid segfault. Issue #138 of !67.\033[0m")
+        ROOT.SetOwnership(self, False)
+
     @property
     def tolerance(self):
         return self.Tolerance()

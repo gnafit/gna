@@ -67,7 +67,7 @@ class cmd(basecmd):
                 The list is stored in `env.future` and may be used by minimizers.
                 By default the module selects all the not fixed parameters: free and constrained.
 
-                \033[32mSelect not fixed parameters from the namespace 'peak' and store as 'minpars':
+                Select not fixed parameters from the namespace 'peak' and store as 'minpars':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak \\
@@ -82,7 +82,7 @@ class cmd(basecmd):
                 The `-m` option may be used with few arguments describing the parameter mode. The choices include:
                 free, constrained and fixed.
 
-                \033[32mSelect only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
+                Select only _fixed_ parameters from the namespace 'peak' and store as 'minpars':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak \\

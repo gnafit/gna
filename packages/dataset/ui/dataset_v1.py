@@ -130,7 +130,7 @@ class cmd(basecmd):
 
                 By default a theory, fixed at the moment of dataset initialization is used for the stat errors (Pearson's case).
 
-                \033[32mInitialize a dataset 'peak' with a pair of Theory/Data:
+                Initialize a dataset 'peak' with a pair of Theory/Data:
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
@@ -150,7 +150,7 @@ class cmd(basecmd):
 
                 When a dataset is initialized from a nuisance terms it reads only constrained parameters from the namespace.
 
-                \033[32mInitialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
+                Initialize a dataset 'nuisance' with a constrained parameters of 'peak_f':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\

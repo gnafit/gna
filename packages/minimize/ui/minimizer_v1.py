@@ -38,7 +38,7 @@ class cmd(basecmd):
 
                 The minimizer is stored in `env.future['minimizer']` under its name.
 
-                \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
+                Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
@@ -66,7 +66,7 @@ class cmd(basecmd):
                 By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
                 `scipy` or `minuit` (TMinuit).
 
-                \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
+                Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars' using a `scipy` minimizer:
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\

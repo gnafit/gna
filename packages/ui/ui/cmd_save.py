@@ -53,7 +53,7 @@ class cmd(basecmd):
     __tldr__ = """\
                The main argument is the output file name to save the command.
 
-               \033[32mSave the whole command to the file 'command.sh':
+               Save the whole command to the file 'command.sh':
                ```sh
                ./gna \\
                    -- comment Initialize a gaussian peak with default configuration and 50 bins \\

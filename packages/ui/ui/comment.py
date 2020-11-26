@@ -25,7 +25,7 @@ class cmd(basecmd):
             "" : """\
                 This module may be used to insert comments into the commandline.
 
-                \033[32mThe command will print the arguments upon execution and does nothing more.
+                The command will print the arguments upon execution and does nothing more.
                 ```sh
                 ./gna \\
                     -- comment Initialize a gaussian peak with default configuration and 50 bins \\

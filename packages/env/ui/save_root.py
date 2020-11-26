@@ -62,7 +62,7 @@ cmd.__tldr__ = """\
 
                The module is similar to the modules `save-yaml` and `save-pickle`.
 
-               \033[32mWrite the data, collected in the 'output' to the file 'output.root'
+               Write the data, collected in the 'output' to the file 'output.root':
                ```sh
                ./gna \\
                    -- gaussianpeak --name peak --nbins 50 \\

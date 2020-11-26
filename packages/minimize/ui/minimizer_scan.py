@@ -49,8 +49,7 @@ class cmd(basecmd):
 
                 The minimizer is stored in `env.future['minimizer']` under its name.
 
-                \033[32mCreate a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars',
-                but do a raster scan over E0 (linear) and Width (log):
+                Create a minimizer and do a fit of a function 'stats' and a group of parameters 'minpars', but do a raster scan over E0 (linear) and Width (log):
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
@@ -78,10 +77,8 @@ class cmd(basecmd):
                 The `env-print` will print the status of the minimization, performed by the `fit-v1`.
                 The intermediate results are saved in 'fitresults'.
 
-                By default `TMinuit2` minimizer is used from ROOT. The minimizer may be changed with `-t` option to
+                By default `TMinuit2` minimizer from ROOT is used. The minimizer may be changed with `-t` option to
                 `scipy` or `minuit` (TMinuit).
-
-                ```
 
                 The module is based on `minimizer` and completely supersedes it.
 

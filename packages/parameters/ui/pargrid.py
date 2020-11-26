@@ -100,7 +100,7 @@ cmd.__tldr__ = """\
                 It supports `range`, `linspace`, `logspace` and `geomspace` which are similar to their analogues from `numpy`.
                 It also supports a list of values passed from the command line.
 
-                \033[32mGenerate a linear grid for the parameter 'E0':
+                Generate a linear grid for the parameter 'E0':
                 ```sh
                 ./gna -- \\ 
                     -- gaussianpeak --name peak \\ 
@@ -116,7 +116,7 @@ cmd.__tldr__ = """\
                 | `--logspace`  | `start_power` `stop_power` `n` | logspace       | ✔                  |
                 | `--list`      | space separated values         | array          | ✔                  |
 
-                \033[32mProvide a list of grid values from a command line:
+                Provide a list of grid values from a command line:
                 ```sh
                 ./gna -- \\ 
                     -- gaussianpeak --name peak \\ 

@@ -46,12 +46,14 @@ class help(basecmd):
 
                 print_tldr(name, trystr, tldr.get(trystr))
 
+regex_codeblock_header = re.compile('((\n|^).*\n```[a-zA-Z]+\n)')
 regex_codeblock_start = re.compile('\n```[a-zA-Z]+\n')
 regex_codeblock_end = re.compile('\n```\n')
 def print_tldr(command, arg, tldr):
     if not tldr:
         return
     tldr = textwrap.dedent(tldr)
+    tldr = regex_codeblock_header.sub('\033[32m\\1', tldr)
     tldr = regex_codeblock_start.sub('\n\033[31m', tldr)
     tldr = regex_codeblock_end.sub('\033[0m\n', tldr)
 
@@ -61,19 +63,19 @@ def print_tldr(command, arg, tldr):
 
 help.__tldr__ = {
             "" : """\
-                 \033[32mRetrieve the description and examples of the comment/help UI commands with:
+                 Retrieve the description and examples of the comment/help UI commands with:
                  ```sh
                  ./gna -- help comment
                  ./gna -- help help
                  ```
 
-                 \033[32mIf an UI command provides extra tldr for a longer substring, it will be printed. Try:
+                 If an UI command provides extra tldr for a longer substring, it will be printed. Try:
                  ```sh
                  ./gna -- help help help
                  ```
                  """,
             "help" : """\
-                     \033[32mThis is an example tldr, printed for 'help help' version:
+                     This is an example tldr, printed for 'help help' version:
                      ```sh
                      ./gna -- help help help
                      ```

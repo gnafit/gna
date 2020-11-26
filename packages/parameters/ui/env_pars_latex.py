@@ -157,7 +157,7 @@ class cmd(basecmd):
                 It accepts multiple paths with `env` (not `env.future`) and prints a text table to the stdout
                 and a latex table to the file, provided after an `-o` option.
 
-                \033[32mPrint the parameters to the file 'output.tex':
+                Print the parameters to the file 'output.tex':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak \\

@@ -120,7 +120,7 @@ cmd.__tldr__ = """\
             The outputs are converted to the dictionaries. Arrays, shapes, bin edges and object type are saved.
             The produced data may then be saved with `save-yaml` and `save-pickle` modules.
 
-            \033[32mWrite the data from all the outputs from the 'spectra' to 'output':
+            Write the data from all the outputs from the 'spectra' to 'output':
             ```sh
             ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
@@ -132,7 +132,7 @@ cmd.__tldr__ = """\
             A common root for source and target paths may be set independently via `-s` and `-t` arguments.
             There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
 
-            \033[32mStore a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+            Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
             ```sh
             ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\
@@ -143,7 +143,7 @@ cmd.__tldr__ = """\
             Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
             `-c` and `-g` arguments. The dictionaries will be used to update the target paths.
 
-            \033[32mProvide extra information:
+            Provide extra information:
             ```sh
             ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\

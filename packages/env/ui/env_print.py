@@ -73,7 +73,7 @@ class cmd(basecmd):
                 The arguments are paths within env to be printed. Paths may contains '.' which will be interpreted as a separator.
                 It recursively prints key, type of the value and the value.
 
-                \033[32mPrint the contents of the subtree 'spectra':
+                Print the contents of the subtree 'spectra':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\

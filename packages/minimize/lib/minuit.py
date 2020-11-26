@@ -10,6 +10,3 @@ class Minuit(TMinuit, MinuitBase):
         MinuitBase.__init__(self, statistic, minpars, **kwargs)
 
         ROOT.TMinuitMinimizer.UseStaticMinuit(False)
-
-        print("\033[35mWarning! Disowning the C++ minimizer class to avoid segfault. Issue #138")
-        ROOT.SetOwnership(self, False)

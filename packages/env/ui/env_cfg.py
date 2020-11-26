@@ -67,7 +67,7 @@ class cmd(basecmd):
             "" : """\
                 All assignments and changes of the environment will be printed to stdout.
 
-                \033[32mEnable verbosity:
+                Enable verbosity:
                 ```sh
                 ./gna \\
                     -- env-cfg -v \\
@@ -76,14 +76,14 @@ class cmd(basecmd):
 
                 The output may be filtered with `-x` and `-i` keys. Both support multiple arguments.
 
-                \033[32mThe `-x` option excludes matching keys:
+                The `-x` option excludes matching keys:
                 ```sh
                 ./gna \\
                     -- env-cfg -v -x fcn \\
                     -- gaussianpeak --name peak_MC --nbins 50
                 ```
 
-                \033[32mThe `-i` option includes matching keys exclusively:
+                The `-i` option includes matching keys exclusively:
                 ```sh
                 ./gna \\
                     -- env-cfg -v -i spectrum \\

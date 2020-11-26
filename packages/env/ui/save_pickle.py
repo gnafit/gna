@@ -37,7 +37,7 @@ class cmd(basecmd):
 
             The module is similar to the modules `save-yaml` and `save-root`.
 
-            \033[32mWrite the data, collected in the 'output' to the file 'output.pkl'
+            Write the data, collected in the 'output' to the file 'output.pkl':
             ```sh
             ./gna \\
                 -- gaussianpeak --name peak --nbins 50 \\

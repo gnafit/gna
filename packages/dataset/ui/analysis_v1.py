@@ -103,7 +103,7 @@ class cmd(basecmd):
 
                 The `analysis-v1` required a name and a few of datasets after `-d` option.
 
-                \033[32mInitialize an analysis 'analysis' with a dataset 'peak':
+                Initialize an analysis 'analysis' with a dataset 'peak':
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
@@ -122,7 +122,7 @@ class cmd(basecmd):
                     -- analysis-v1 --name analysis --datasets peak -v
                 ```
 
-                \033[32mInitialize an analysis 'analysis' with a dataset 'peak' and covariance matrix based on constrained parameters:
+                Initialize an analysis 'analysis' with a dataset 'peak' and covariance matrix based on constrained parameters:
                 ```sh
                 ./gna \\
                     -- gaussianpeak --name peak_MC --nbins 50 \\
