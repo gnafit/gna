@@ -41,7 +41,7 @@ class cmd(basecmd):
                     yield param
 
     def run(self):
-        dataset = Dataset(bases=self.opts.datasets)
+        dataset = Dataset(bases=self.opts.datasets, desc=self.opts.name)
 
         if self.opts.cov_parameters:
             try:
@@ -97,6 +97,11 @@ class cmd(basecmd):
 
         self.env.parts.analysis[self.opts.name] = blocks
         self.env.parts.analysis_errors[self.opts.name] = dataset
+
+        storage = self.env.future.child(('analysis', self.opts.name))
+        for i, block in enumerate(blocks):
+            i = str(i)
+            storage[i] = dict(theory=block.theory, data=block.data, L=block.cov.single())
 
     __tldr__ =  """\
                 Creates a named analysis, i.e. a triplet of theory, data and covariance matrix. The covariance matrix
