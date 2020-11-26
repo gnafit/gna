@@ -49,7 +49,7 @@ class cmd(basecmd):
                 The `cmd-save` will save the command to the 'output/test-cwd/prefix-cmd.sh' file.
                 The saved files will be printed to stdout.
 
-                The following UI commands acknowledge cwd:
+                The following UI commands respect the CWD:
                 - I/O
                     * `cmd_save`
                     * `save_pickle`

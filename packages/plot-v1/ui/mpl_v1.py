@@ -1,6 +1,4 @@
-# encoding: utf-8
-
-u"""Change global parameters of the matplotlib"""
+"""Change global parameters of the matplotlib, decorate figures and save images."""
 
 from gna.ui import basecmd
 import ROOT
@@ -170,3 +168,71 @@ class cmd(basecmd):
             self.fig.canvas.draw()
             self.ax.set_ylim(*self.opts.ylim)
 
+    __tldr__ =  """\
+                The module implements most of the interactions with matplotlib, excluding the plotting itself.
+                When `mpl-v1` is used to produce the output files the CWD from `env-cwd` is respected.
+
+                As the module contains a lot of options, please refer to the `gna -- mpl-v1 --help` for the reference.
+
+                Add labels and the title:
+                ```sh
+                ./gna -- ... \\
+                      -- mpl-v1 --xlabel 'Energy, MeV' --ylabel Entries -t 'The distribution'
+                ```
+
+                Save a figure to the 'output.pdf' and then show it:
+                ```sh
+                ./gna -- ... \\
+                      -- mpl-v1 -o output.pdf -s \\
+                ```
+
+                Create a new figure:
+                ```sh
+                ./gna -- mpl-v1 -f \\
+                      -- ...
+                ```
+
+                Create a new figure of a specific size:
+                ```sh
+                ./gna -- mpl-v1 -f '{figsize: [14, 4]}' \\
+                      -- ...
+                ```
+
+                Enable latex rendering:
+                ```sh
+                ./gna -- mpl-v1 -l \\
+                      -- ...
+                ```
+
+                `mpl-v1` enables the user to tweak RC parameters by providing YAML dictionaries with options.
+
+                Tweak matplotlib RC parameters to make all the lines of double width and setup power limits for the tick formatter:
+                ```sh
+                ./gna -- mpl-v1 -r 'lines.linewidth: 2.0' 'axes.formatter.limits: [-2, 2]' \\
+                      -- ...
+                ```
+
+                An example of plotting, that uses the above mentioned options:
+                ```sh
+                ./gna \\
+                      -- env-cwd output/test-cwd \\
+                      -- gaussianpeak --name peak_MC --nbins 50 \\
+                      -- gaussianpeak --name peak_f  --nbins 50 \\
+                      -- ns --name peak_MC --print \\
+                            --set E0             values=2    fixed \\
+                            --set Width          values=0.5  fixed \\
+                            --set Mu             values=2000 fixed \\
+                            --set BackgroundRate values=1000 fixed \\
+                      -- ns --name peak_f --print \\
+                            --set E0             values=2.5  relsigma=0.2 \\
+                            --set Width          values=0.3  relsigma=0.2 \\
+                            --set Mu             values=1500 relsigma=0.25 \\
+                            --set BackgroundRate values=1100 relsigma=0.25 \\
+                      -- plot-spectrum-v1 -p peak_MC.spectrum -l 'Monte-Carlo' --plot-type errorbar \\
+                      -- plot-spectrum-v1 -p peak_f.spectrum -l 'Model (initial)' --plot-type hist \\
+                      -- mpl-v1 --xlabel 'Energy, MeV' --ylabel entries -t 'Example plot' --grid \\
+                      -- mpl-v1 -o figure.pdf -s
+                ```
+
+                See also: `plot-spectrum-v1`, `plot-heatmap-v1`, `env-cwd`.
+                """
