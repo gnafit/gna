@@ -269,9 +269,8 @@ class AccumulateTransformation(IndexedContainer, Transformation):
 
         self.bound = True
 
-class OSelect1(TCall):
+class OSelect1(TCall, metaclass=OperationMeta):
     """Substitute a single index with another"""
-    __metaclass__ = OperationMeta
     call_lock=False
     order_from=None
     def __init__(self, index, value, **kwargs):
