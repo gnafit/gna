@@ -2,7 +2,7 @@
 
 [![Docs status](https://git.jinr.ru/gna/gna/badges/master/pipeline.svg)](https://git.jinr.ru/gna/gna/commits/master)
 
-Current version is 0.1.0, see the [release notes](doc/release-notes/release-notes-v0-1-0.md)
+Current version is 0.1.0, see the [release notes](doc/release-notes/release-notes-v0-1-0.md).
 
 Global Neutrino Analysis (GNA) project aims at providing the following tools for
 the needs of the data analysis related to the neutrino physics:
