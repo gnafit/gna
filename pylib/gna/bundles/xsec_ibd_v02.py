@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -132,4 +130,3 @@ class xsec_ibd_v02(TransformationBundle):
             # in common namespace
             from gna.parameters import ibd
             ibd.reqparameters(self.namespace('ibd'), self.cfg.get('pdg_year', None))
-

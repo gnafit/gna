@@ -1,4 +1,3 @@
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 from gna.env import env, PartNotFoundError
 import pygraphviz as G
@@ -74,4 +73,3 @@ class cmd(basecmd):
         if self.opts.stderr:
             import sys
             graph.write( sys.stderr )
-

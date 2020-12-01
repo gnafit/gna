@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 """Implements simple N-dimensional scanning with optional minimization for each point"""
 
-from __future__ import print_function
 from gna.ui import basecmd, set_typed, append_typed
 from tools.argparse_utils import AppendSubparser
 import ROOT
@@ -53,7 +51,7 @@ class scancmd(basecmd):
         parser.add_argument( '-v', '--var', nargs='+', action=varparser,
                              help='variables specification, use +h/++help for syntax', dest='variables' )
         parser.add_argument( '-f', '--folder', default='scanXd', help='folder to store the data' )
-        parser.add_argument( '-V', '--verbose', action='count', help='verbose' )
+        parser.add_argument( '-V', '--verbose', action='count', default=0, help='verbose' )
         parser.add_argument( '-s', '--scan', action='store_true', help='do scan' )
 
         group = parser.add_mutually_exclusive_group()
@@ -252,7 +250,7 @@ class cmd(scancmd):
         array   = np.zeros( shape=shape, dtype='d' )
         array_s = np.zeros( shape=shape, dtype='i' )
 
-        clock_start = time.clock()
+        clock_start = time.perf_counter()
         idx_done, idx_total = 0, array.size
         print( 'Start scanXd for parameters (%i points):'%array.size, [par.qualifiedName() for par in pars] )
         status = True
@@ -270,7 +268,7 @@ class cmd(scancmd):
             if self.opts.verbose:
                 print( '%3i [%i]:'%(idx_done, status), [c[i] for c,i in zip(centers,idx)], '->', array[idx] )
 
-            time_elapsed = time.clock() - clock_start
+            time_elapsed = time.perf_counter() - clock_start
             if self.opts.verbose>1:
                 pprint(self.result.__dict__)
 

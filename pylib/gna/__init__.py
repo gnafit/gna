@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os.path
 
 from load import ROOT as R

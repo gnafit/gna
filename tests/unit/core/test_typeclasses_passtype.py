@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -18,12 +17,14 @@ def test_typeclass_passtype():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    k = list(map(obj.add_input, outputs))
     for i in range(5):
         obj.add_output()
 
     dt1 = R.TypeClasses.PassTypeT(context.current_precision())((0,), (0,1))
     dt2 = R.TypeClasses.PassTypeT(context.current_precision())((1,), (2,-1))
+    R.SetOwnership(dt1, False)
+    R.SetOwnership(dt2, False)
     dt1.dump(); print()
     dt2.dump(); print()
     obj.add_typeclass(dt1)
@@ -52,12 +53,14 @@ def test_typeclass_passeach():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    j = list(map(obj.add_input, outputs))
     for i in range(5):
         obj.add_output()
 
     dt1 = R.TypeClasses.PassTypeT(context.current_precision())((2,), (0,1))
     dt2 = R.TypeClasses.PassEachTypeT(context.current_precision())((0,-1), (2,-1))
+    R.SetOwnership(dt1, False)
+    R.SetOwnership(dt2, False)
     dt1.dump(); print()
     dt2.dump(); print()
     obj.add_typeclass(dt1)
@@ -87,12 +90,13 @@ def test_typeclass_passeach_02():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
-    map(obj.add_input, outputs)
+    i = list(map(obj.add_input, outputs))
+    i1 = list(map(obj.add_input, outputs))
     for i in range(3):
         obj.add_output()
 
     dt1 = R.TypeClasses.PassEachTypeT(context.current_precision())((0,-1,2), (0,-1))
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     res = obj.process_types();
@@ -110,4 +114,3 @@ def test_typeclass_passeach_02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

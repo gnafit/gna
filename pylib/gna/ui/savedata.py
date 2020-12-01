@@ -55,4 +55,4 @@ class cmd(basecmd):
         except:
             raise Exception('Unable to write data to: '+self.opts.output)
 
-        print('Dump data to: '+self.opts.output)
+        print(('Dump data to: '+self.opts.output))

@@ -1,7 +1,6 @@
 """ Print JUNO related stats and plot default figures, latex friendly.
     Tweaked for juno_sensitivity_v02
 """
-from __future__ import print_function
 from gna.ui import basecmd
 from collections import OrderedDict
 from tools.classwrapper import ClassWrapper
@@ -100,7 +99,7 @@ class cmd(basecmd):
 
         self.reac['snf_norm'].push(0.0)
 
-        for name, par in self.bkg.iteritems():
+        for name, par in self.bkg.items():
             par.pop()
             name = name.split('_')[0].capitalize()
             add(name)
@@ -117,7 +116,7 @@ class cmd(basecmd):
         self.reac['offeq'].pop()
         self.reac['reactor_active_norm'].pop()
 
-        data = [ (k,)+v for k,v in data.iteritems() ]
+        data = [ (k,)+v for k,v in data.items() ]
 
         headers=['Name', 'total events', 'N/reactor active, %']
         options=dict(

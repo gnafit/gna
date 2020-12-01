@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 from gna import constructors as C
@@ -49,7 +47,7 @@ class parameters_v01(TransformationBundle):
                     import gna.constructors as C
                     with self.namespace:
                         var_array = C.VarArray([par.qualifiedName()],
-                                               labels=par.qualifiedName().split('.',1)[1])
+                                               labels=par.qualifiedName().split('.', 1)[1])
                     output = var_array.vararray.points
 
                     self.set_output(parname, it,  output)
@@ -58,4 +56,3 @@ class parameters_v01(TransformationBundle):
 
     def build(self):
         pass
-

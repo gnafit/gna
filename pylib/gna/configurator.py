@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 
 """configurator class allows to load any python file by its filename
 and store the contents in a namespace
 namespace elements are accessible throught both key access or member acess"""
 
-from __future__ import print_function
 import runpy
 from os import path
 from collections import OrderedDict
@@ -24,7 +22,7 @@ def set_option(nd, option, value):
 
 def process_key(key):
     listkey = None
-    if isinstance( key, basestring ):
+    if isinstance( key, str ):
         if '.' in key:
             listkey = tuple(key.split('.'))
     elif isinstance( key, (list, tuple) ):
@@ -48,7 +46,7 @@ class NestedDict(object):
         meta[self] = dict()
 
         if iterable:
-            if type(iterable) is dict:
+            if isinstance(iterable, dict):
                 iterable = sorted(iterable.items())
             self.__import__(OrderedDict(iterable))
 
@@ -73,7 +71,7 @@ class NestedDict(object):
                 res+='{margin}{key:{width}} : '.format(margin=margin, key=k, width=width)
             if isinstance( v, NestedDict ):
                 res+=v.__str__(margin, nested)
-            elif isinstance( v, basestring ):
+            elif isinstance( v, str ):
                 res+=repr(v)
             else:
                 res+=str(v)
@@ -130,7 +128,7 @@ class NestedDict(object):
             return sub.get( rest, *args, **kwargs )
 
         types=kwargs.pop('types', None)
-        if key is ():
+        if key==():
             obj = self
         else:
             obj=self.__storage__.get(key, *args, **kwargs)
@@ -147,7 +145,7 @@ class NestedDict(object):
         if rest:
             return self.__storage__.__getitem__(key).__getitem__( rest )
 
-        if key is ():
+        if key==():
             return self
 
         try:
@@ -251,7 +249,7 @@ class NestedDict(object):
                     return cfg.__call__( rest )
                 return self.__storage__.get(key).__call__(rest)
 
-        if isinstance( key, basestring ):
+        if isinstance( key, str ):
             if '.' in key:
                 return self.__call__(key.split('.'))
 
@@ -270,11 +268,16 @@ class NestedDict(object):
     def __load__(self, filename, subst=[]):
         if subst:
             if subst=='default':
-                subst = dict( key='location', values=['config', 'config_local'] )
+                dirname = path.dirname(__file__)
+                tokens = dirname.split('/')
+                gna_basedir = '/'.join(tokens[:-2])
+                default_confs = [gna_basedir+'/config', gna_basedir+'/config_local']
+
+                subst = dict( key='location', values=default_confs )
 
             if type(subst) in [ list, tuple ]:
                 filenames = [ filename.format( s ) for s in subst ]
-            elif type(subst) is dict:
+            elif isinstance(subst, dict):
                 filenames = [ filename.format( **{ subst['key']: v } ) for v in subst['values'] ]
             else:
                 raise Exception( "Unsupported 'subst' type "+type(subst).__name__.__repr__() )
@@ -305,7 +308,7 @@ class NestedDict(object):
 
     def __import__(self, dic):
         for k, v in dic.items():
-            if isinstance(k, basestring) and k.startswith('__'):
+            if isinstance(k, str) and k.startswith('__'):
                 continue
             if meta[self].get('verbose', False):
                 if k in self:
@@ -436,4 +439,3 @@ def uncertaindict(*args, **kwargs):
 init_globals['load'] = configurator
 init_globals['uncertain'] = uncertain
 init_globals['uncertaindict'] = uncertaindict
-

@@ -1,4 +1,3 @@
-# encoding: utf-8
 #
 """Build test statistic based on χ² function"""
 

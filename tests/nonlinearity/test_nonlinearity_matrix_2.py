@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import load
 from matplotlib import pyplot as plt
 import matplotlib as mpl

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.labelfmt import formatter as L
 from gna.labelfmt import reg_dictionary
 from gna import labelfmt

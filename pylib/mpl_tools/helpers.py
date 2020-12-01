@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function
 from matplotlib import pyplot as P
 import numpy as N
 
@@ -90,7 +88,7 @@ def add_colorbar( colormapable, **kwargs ):
     cbar = P.gcf().colorbar( colormapable, cax=cax, **kwargs )
 
     if minorticks:
-        if type(minorticks) is str:
+        if isinstance(minorticks, str):
             if minorticks=='linear':
                 pass
             elif minorticks=='log':
@@ -127,7 +125,7 @@ def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
     close = kwargs.pop('close', False)
     if name:
-        if type(name)==list:
+        if isinstance(name, list):
             for n in name:
                 savefig( n, *args, **kwargs.copy() )
         else:
@@ -146,7 +144,7 @@ def savefig(name, *args, **kwargs):
             print( 'Save figure', name )
 
             if addext:
-                if not type( addext )==list:
+                if not isinstance(addext, list):
                     addext = [ addext ]
                 from os import path
                 basename, extname = path.splitext( name )

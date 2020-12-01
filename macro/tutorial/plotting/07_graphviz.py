@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 from gna.tutorial import tutorial_image_name, savegraph
 from load import ROOT as R
 import gna.constructors as C

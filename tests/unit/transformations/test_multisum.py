@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.unittest import *
 import numpy as np
 from gna import constructors as C

@@ -1,4 +1,3 @@
-# encoding: utf-8
 
 u"""Change global parameters of the matplotlib"""
 
@@ -19,7 +18,7 @@ class cmd(basecmd):
     _fig = None
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
 
         mpl = parser.add_argument_group(title='matplotlib', description='General matplotlib parameters')
 
@@ -86,7 +85,6 @@ class cmd(basecmd):
             if self.opts.verbose:
                 print('Matplotlib with latex')
             mpl.rcParams['text.usetex'] = True
-            mpl.rcParams['text.latex.unicode'] = True
             mpl.rcParams['font.size'] = 13
 
         if self.opts.verbose>1 and self.opts.rcparam:
@@ -149,7 +147,7 @@ class cmd(basecmd):
 
         if len(self.opts.ticks_extra)>1:
             self.fig.canvas.draw()
-            axisname, ticks = self.opts.ticks_extra[0], list(map(float, self.opts.ticks_extra[1:]))
+            axisname, ticks = self.opts.ticks_extra[0], [float(_) for _ in self.opts.ticks_extra[1:]]
             assert axisname in ('x', 'y'), "Unsupported axis '%s', should be 'x' or 'y'"%axisname
             axis = getattr(self.ax, axisname+'axis')
             axis.set_ticks(axis.get_ticklocs().tolist()+ticks)
@@ -159,6 +157,6 @@ class cmd(basecmd):
             self.ax.set_xlim(*self.opts.xlim)
 
         if self.opts.ylim:
+            ax.set_ylim(*self.opts.ylim)
             self.fig.canvas.draw()
             self.ax.set_ylim(*self.opts.ylim)
-

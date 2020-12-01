@@ -1,8 +1,5 @@
-# encoding: utf-8
+"""Print a given subtree within env."""
 
-"""Print given path within env"""
-
-from __future__ import print_function
 from gna.ui import basecmd
 from tools.dictwrapper import DictWrapper, DictWrapperVisitor
 import yaml
@@ -59,7 +56,7 @@ class cmd(basecmd):
         parser.add_argument('paths', nargs='*', default=((),), help='paths to print')
         parser.add_argument('-l', '--valuelen', type=int, help='value length')
         parser.add_argument('-k', '--keylen', type=int, help='key length')
-        # parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
+        # parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
 
     def init(self):
         storage = self.env.future
@@ -70,3 +67,21 @@ class cmd(basecmd):
             except KeyError:
                 raise Exception('Unable to read data path: {}'.format(path))
             data.visit(printer)
+
+    __tldr__ = {
+            "" : """\
+                The arguments are paths within env to be printed. Paths may contains '.' which will be interpreted as a separator.
+                It recursively prints key, type of the value and the value.
+
+                Print the contents of the subtree 'spectra':
+                ```sh
+                ./gna \\
+                    -- gaussianpeak --name peak_MC --nbins 50 \\
+                    -- env-print spectra
+                ```
+
+                The widths of the key and value columns may be set via `-k` and `-l` options respectively.
+
+                See also: `env-cfg`, `env-set`.
+            """,
+            }

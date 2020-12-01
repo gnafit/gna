@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT
 import numpy as N
 from gna.parameters import DiscreteParameter
@@ -13,8 +11,8 @@ from gna.bindings import patchROOTClass
 
 try:
     import sys
-    if not sys.stdout.isatty():
-        raise RuntimeError()
+    #  if not sys.stdout.isatty():
+        #  raise RuntimeError()
     from colorama import Fore, Style
 
     def colorize(string, color):
@@ -66,7 +64,8 @@ sepstr=u'{} │ '.format(Style.RESET_ALL)
 
 fixedstr=u'[fixed]'
 fixedstr_len = (centralsigma_len+relsigma_len-1-len(fixedstr))
-fixedstr = (fixedstr_len/2)*' ' + fixedstr + (fixedstr_len/2)*" "
+fixed_half_width = int(fixedstr_len/2)
+fixedstr = fixed_half_width*' ' + fixedstr + fixed_half_width*" "
 
 freestr =u' [free]'
 
@@ -146,7 +145,7 @@ def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=N
         top_level = False
 
     header = False
-    for name, var in ns.iteritems():
+    for name, var in ns.items():
         if isinstance( ns.storage[name], str ):
             print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
             continue
@@ -166,7 +165,7 @@ def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=N
         print(var.__str__(labels=labels))
         varstats(var, stats)
     if recursive:
-        for sns in ns.namespaces.itervalues():
+        for sns in ns.namespaces.values():
             print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats)
 
     if correlations and top_level:
@@ -212,7 +211,7 @@ def Variable__str( self, labels=False ):
             val     = self.value(),
             color = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -231,22 +230,22 @@ def Variable__str( self, labels=False ):
 def Variable_complex__str(self, labels=False, value=None):
     if value is None:
         value = self.values()
+
+    rval = value.real
+    ival = value.imag
+
     fmt = dict(
             name  = colorize(self.name(), Fore.CYAN),
-            rval  = value.real(),
-            ival  = value.imag(),
+            rval  = rval,
+            ival  = ival,
             color = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
-    s= namefmt.format(**fmt)
+    s = namefmt.format(**fmt)
     s+=cvalfmt.format(**fmt)
-
-    # cnum = value.real() + value.imag()*1j
-    # angle = N.angle(cnum, deg=True)
-    # mag = N.absolute(cnum)
 
     if labels:
          s+=sepstr+centralrel_empty[:-central_len-2]+sepstr
@@ -265,7 +264,7 @@ def UniformAngleParameter__str( self, labels=False  ):
             npi     = self.value()/N.pi,
             color   = Fore.BLUE
             )
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -300,7 +299,7 @@ def GaussianParameter__str( self, labels=False  ):
             )
     correlated = self.isCorrelated()
     limits  = self.limits()
-    label = self.label().decode('utf8')
+    label = self.label()
     if not labels or label=='value':
         label=u''
 
@@ -326,8 +325,8 @@ def GaussianParameter__str( self, labels=False  ):
 
         if limits.size():
             s+=sepstr
-            for (a,b) in limits:
-                s+=limitsfmt.format(a,b)
+            for (a, b) in limits:
+                s+=limitsfmt.format(a, b)
 
     if labels:
         s+=sepstr
@@ -346,7 +345,7 @@ def DiscreteParameter____str__(self, labels=False):
         variants = str(self.getVariants()),
         color   = Fore.BLUE
         )
-    label = self.label().decode('utf8')
+    label = self.label()
 
     s= namefmt.format(**fmt)
     s+=valdfmt.format(**fmt)
@@ -360,4 +359,3 @@ def DiscreteParameter____str__(self, labels=False):
 
     return s
 DiscreteParameter.__str__ = DiscreteParameter____str__
-

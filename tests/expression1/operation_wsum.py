@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.expression.expression_v01 import Expression_v01 as Expression, ExpressionContext_v01 as ExpressionContext
 from gna.bundle import execute_bundles
 from load import ROOT as R

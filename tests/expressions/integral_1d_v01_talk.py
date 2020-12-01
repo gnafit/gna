@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
 from gna.configurator import uncertaindict
 from gna.bundle import execute_bundles

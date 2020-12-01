@@ -13,10 +13,13 @@ if not environ.get('DISPLAY'):
 
 import ROOT
 
-ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
-ROOT.gDirectory.AddDirectory( False )
-ROOT.TH1.AddDirectory( False )
+# Let GNA parse the command line options
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+ROOT.PyConfig.Shutdown = False
+ROOT.SetMemoryPolicy(ROOT.kMemoryStrict)
+# Disable automatic addition of the objects to directories
+ROOT.gDirectory.AddDirectory(False)
+ROOT.TH1.AddDirectory(False)
 
 ROOT.gSystem.Load('libGlobalNuAnalysis2')
 

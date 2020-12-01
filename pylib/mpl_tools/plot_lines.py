@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 import numpy
@@ -23,11 +22,11 @@ def plot_lines(text, *args, **kwargs):
     sep     = kwargs.pop('separator', u'\n')
     if not isinstance(text, str):
         linefmt = kwargs.pop('linefmt', u'{}')
-        if type(linefmt) is str or type(linefmt) is unicode:
+        if isinstance(linefmt, str):
             fmt = linefmt
             linefmt = lambda *a: fmt.format(*a)
         lines = []
-        lst = [linefmt(*line) if isinstance(line, (list,tuple)) else linefmt(line) for line in text]
+        lst = [linefmt(*line) if isinstance(line, (list, tuple)) else linefmt(line) for line in text]
         text = sep.join(lst)
 
     header, footer = kwargs.pop('header', None), kwargs.pop('footer', None)
@@ -43,7 +42,7 @@ def plot_lines(text, *args, **kwargs):
     if outside:
         loc='upper left'
         kwargs.setdefault('borderpad', 0.0)
-    if type(loc)==str:
+    if isinstance(loc, str):
         loc = location_numbers[loc]
     if not loc:
         loc = 1
@@ -59,4 +58,3 @@ def plot_lines(text, *args, **kwargs):
 
     ax.add_artist(at)
     return at
-

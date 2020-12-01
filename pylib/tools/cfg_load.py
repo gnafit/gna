@@ -7,15 +7,15 @@ def cfg_load(filename, verbose=False):
         print('Loading dictionary from:', filename)
 
     if filename.endswith('.yaml'):
-	return yaml_load_file(filename)
+        return yaml_load_file(filename)
     elif filename.endswith('.py'):
-	return pydict_load(filename)
+        return pydict_load(filename)
 
     raise ValueError('Invalid configuration file type: '+filename)
 
 def cfg_parse(filename_or_dict, verbose=False):
     """Load *.yaml or *.py file as dictionary. If the argument is dictionary - return it."""
     if isinstance(filename_or_dict, str):
-	return cfg_load(filename_or_dict)
+        return cfg_load(filename_or_dict)
 
     return filename_or_dict

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as np
 import gna.constructors as C
@@ -79,7 +77,7 @@ class reactor_baselines_v01(TransformationBundle):
                 reactor, detector = self.reactors[cur_reactor], self.detectors[cur_det]
             except KeyError as e:
                 msg = "Detector {det} or reactor {reac} are missing in the configuration"
-                raise KeyError, msg.format(det=cur_det, reac=cur_reactor)
+                raise KeyError(msg.format(det=cur_det, reac=cur_reactor))
 
             distance = self.compute_distance(reactor=reactor, detector=detector)
             const = 0.25/np.pi*1.e-10 # Convert 1/km2 to 1/cm2
@@ -90,4 +88,3 @@ class reactor_baselines_v01(TransformationBundle):
 
                 self.reqparameter('baselineweight', it, central=const/distance**2, fixed=True,
                                   label="1/(4πL²) for {} and {}, cm⁻²".format(cur_det, cur_reactor))
-

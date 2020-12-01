@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import itertools as I
 from collections import OrderedDict
 from gna.expression.printl import *
@@ -219,10 +217,10 @@ class NIndex(object):
         else:
             neworder = None
             if isinstance(other, NIndex):
-                others = other.indices.values()
+                others = list(other.indices.values())
                 neworder=other.order
             elif isinstance(other, Indexed):
-                others = other.nindex.indices.values()
+                others = list(other.nindex.indices.values())
                 neworder=other.nindex.order
             else:
                 raise Exception( 'Unsupported index type '+type(other).__name__ )
@@ -253,7 +251,7 @@ class NIndex(object):
         return NIndex(*args, **kwargs)
 
     def __sub__(self, other):
-        return self.make_inheritor(self, ignore=other.indices.keys())
+        return self.make_inheritor(self, ignore=list(other.indices.keys()))
 
     def arrange(self, order, name_position=0):
         if order:
@@ -376,7 +374,7 @@ class NIndex(object):
         master = self.masterof.get(short, None)
         if master is None:
             if exception:
-                raise IndexError('Can not find relevant index for {} in {}'.format(short, self.indices.keys()))
+                raise Exception('Can not find relevant index for {} in {}'.format(short, list(self.indices.keys())))
             else:
                 return None
 
@@ -411,7 +409,7 @@ class NIndex(object):
             if major.master:
                 used+=major.master.short,
 
-        for short, idx in self.indices.iteritems():
+        for short, idx in self.indices.items():
             if short in used:
                 continue
 

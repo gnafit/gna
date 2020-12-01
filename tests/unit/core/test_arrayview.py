@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.unittest import *
 from load import ROOT as R
 import numpy as N
@@ -26,8 +24,11 @@ def test_arrayview_constructor_view():
 @floatcopy(globals())
 def test_arrayview_constructor():
     size=5
+    import ctypes
+    san_size = ctypes.c_int(5)
     a = N.arange(size, dtype=context.current_precision_short())
-    view = R.arrayview(context.current_precision())(size)
+    print("in failing test! Precision is {}".format(context.current_precision()))
+    view = R.arrayview[context.current_precision()](size)
 
     assert view.size()==size
     assert view.isOwner()
@@ -84,9 +85,8 @@ def test_arrayview_complex():
     a1[0]=2
     a1[1]=3
     c1 = a1.complex()
-    assert c1.real()==2.0
-    assert c1.imag()==3.0
+    assert c1.real == 2.0
+    assert c1.imag == 3.0
 
 if __name__ == "__main__":
     run_unittests(globals())
-

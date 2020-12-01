@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
@@ -15,15 +13,18 @@ import ROOT as R
 seconds_per_day = 60.*60.*24.
 percent = 0.01
 nominal_mass = 20000.
+snf_energy_per_decay = 1./(0.563*202.36 + 0.079*205.99 + 0.301*211.12 + 0.057*214.26)
+
+
 class exp(baseexp):
     @classmethod
     def initparser(cls, parser, namespace):
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal', 'small'], help='Set the indices coverage')
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--no-snf', action='store_true', help='Disable SNF')
-        parser.add_argument('--lihe-fractions', default='no', choices=['no','common', 'independent'],
+        parser.add_argument('--lihe-fractions', default='no', choices=['no', 'common', 'independent'],
                             help='Split the data over two time windows after muon veto to '
                             'allow suppression of Li/He background')
 
@@ -35,7 +36,10 @@ class exp(baseexp):
         self.define_labels()
         self.init_configuration()
         self.build()
-        self.register()
+        try:
+            self.register()
+        except:
+            pass
 
         if self.opts.stats:
             self.print_stats()
@@ -93,8 +97,8 @@ class exp(baseexp):
 
     def init_configuration(self):
         self.cfg = NestedDict(
-            kinint2 = NestedDict(
-                bundle   = dict(name='integral_2d1d', version='v03', names=dict(integral='kinint2')),
+            integral = NestedDict(
+                bundle   = dict(name='integral_2d1d', version='v03'),
                 variables = ('evis', 'ctheta'),
                 edges    = N.linspace(0.0, 12.0, 241, dtype='d'),
                 xorders   = 4,
@@ -185,6 +189,13 @@ class exp(baseexp):
                         mode = 'fixed',
                         ),
                     ),
+            snf_denom = NestedDict(
+                    bundle = dict(name="parameters", version = "v01"),
+                    parameter = 'snf_denom',
+                    objectize=True,
+                    label='SNF inverse weight for average energy release per decay',
+                    pars = uncertain(snf_energy_per_decay, 'fixed'),
+                    ),
             snf_correction = NestedDict(
                 bundle = dict(name='reactor_snf_spectra',
                               version='v04', major='r'),
@@ -239,21 +250,13 @@ class exp(baseexp):
                     filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
                     matrixname = 'iav_matrix',
                     ),
-            dyboscar_iav = NestedDict(
-                    bundle     = dict(name='detector_iav_db_root_v03', major='d'),
-                    names = dict(matrixname = 'iav_matrix'),
-                    parname    = 'OffdiagScale_dyb',
-                    scale      = uncertain(1.0, 4, 'percent'),
-                    ndiag      = 1,
-                    filename   = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
-                    ),
             eres = NestedDict(
                     bundle = dict(name='detector_eres_normal', version='v01', major=''),
                     # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                     pars = uncertaindict(
-                        [('a', 0.016) ,
-                         ('b', 0.081) ,
+                        [('a', 0.016),
+                         ('b', 0.081),
                          ('c', 0.026)],
                         #  [('a', 0.014764) ,
                          #  ('b', 0.0869) ,
@@ -263,7 +266,7 @@ class exp(baseexp):
                         ),
                     expose_matrix = True
                     ),
-            lsnl = NestedDict( #TODO: evis_edges
+            lsnl = NestedDict(
                     bundle     = dict(name='energy_nonlinearity_db_root', version='v02', major='dl'),
                     names      = [ 'nominal', 'pull0', 'pull1', 'pull2', 'pull3' ],
                     filename   = 'data/dayabay/tmp/detector_nl_consModel_450itr.root',
@@ -333,7 +336,7 @@ class exp(baseexp):
                         ),
                     ),
             bkg_spectrum_fastn=NestedDict(
-                    bundle=dict(name='dayabay_fastn_power_v01'),
+                    bundle=dict(name='dayabay_fastn_power', version='v02', major='s'),
                     parameter='fastn_shape',
                     name='bkg_spectrum_fastn',
                     normalize=(0.7, 12.0),
@@ -446,7 +449,8 @@ class exp(baseexp):
 
     def build(self):
         # Initialize the expression and indices
-        self.expression = Expression_v01(list(chain.from_iterable(self.formula.values())), self.nidx)
+        l = list(chain.from_iterable(self.formula.values()))
+        self.expression = Expression_v01(l, self.nidx)
 
         # Dump the information
         if self.opts.verbose:
@@ -459,7 +463,7 @@ class exp(baseexp):
         lib = self.libs
         self.expression.guessname(lib, save=True)
 
-        if self.opts.verbose>1:
+        if self.opts.verbose and self.opts.verbose>1:
             print('Expression tree:')
             self.expression.tree.dump(True)
             print()
@@ -469,7 +473,7 @@ class exp(baseexp):
         self.expression.build(self.context)
         self.correlate_escale_and_eff()
 
-        if self.opts.verbose>1:
+        if self.opts.verbose and self.opts.verbose>1:
             width = 40
             print('Outputs:')
             print(self.context.outputs.__str__(nested=True, width=width))
@@ -541,7 +545,8 @@ class exp(baseexp):
                 ns.addobservable('oscprob.{0}.{1}'.format(ad, reac), outputs.osc_prob_rd[ad][reac])
 
             else:
-                ns.addobservable("reactor_pred.{0}".format(ad), outputs.kinint2[ad], export=False)
+                ns.addobservable("reactor_pred.{0}".format(ad),
+                        outputs.integral[ad], export=False)
 
             ns.addobservable("iav_matrix.{0}".format(ad), outputs.iavmatrix[ad])
             ns.addobservable("iav.{0}".format(ad), outputs.iav[ad])
@@ -568,15 +573,19 @@ class exp(baseexp):
             # Basic building blocks
             'baseline[d,r]',
             'enu| ee(evis()), ctheta()',
-            'ff = bracket(fission_fraction_corr[i,r] * fission_fractions[i,r]())',
-            'denom = sum[i] | eper_fission[i]*ff',
+            'fissions = fission_fractions[i,r]()',
+            'eper_ff_var = eper_fission[i]*fission_fraction_corr[i,r]',
+            'ff = fission_fraction_corr * fissions',
+            'denom = sum[i] |eper_ff_var*fissions',
+            #  'inv_denom = inverse()| denom',
             'nprotons_ad = nprotons_nominal*nprotons_corr[d]',
             'anuspec[i](enu())',
         ]
         self.formula['livetime'] = [
             'efflivetime=accumulate("efflivetime", efflivetime_daily[d]())',
             'livetime=accumulate("livetime", livetime_daily[d]())',
-            'power_livetime_factor_daily = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff / denom',
+            'numenator = efflivetime_daily[d]()*nominal_thermal_power[r]*thermal_power[r]()*ff ',
+            'power_livetime_factor_daily = numenator / denom',
             'power_livetime_factor=accumulate("power_livetime_factor", power_livetime_factor_daily)',
             ]
 
@@ -584,17 +593,11 @@ class exp(baseexp):
             pass
         else:
             self.formula['snf'] = [
-                    'snf_denom = sum[i]| eper_fission[i]*snf_fission_fractions[i]()',
-                    'snf_plf_daily = nominal_thermal_power[r]*snf_fission_fractions[i]() / snf_denom',
+                    'snf_plf_daily = nominal_thermal_power[r]*snf_fission_fractions[i]() * snf_denom',
                     'nominal_spec_per_reac =  sum[i]| snf_plf_daily*anuspec[i](enu())',
                     'snf_in_reac = snf_correction(enu(), nominal_spec_per_reac)',
                     ]
 
-        # Detector effects initialization
-        self.formula['det_effects_base'] = [
-            'eres_matrix| evis_hist()',
-            'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
-            ]
 
         # Bkg
         self.formula['bkg'] = [
@@ -635,8 +638,15 @@ class exp(baseexp):
             '''unoscillated_reactor_flux_in_det = conversion_factor*nprotons_ad*baselineweight[r,d]*anue_rd
             ''',
             '''oscillated_spectra_d = sum[r]| osc_prob_rd*unoscillated_reactor_flux_in_det''',
-            '''oscillated_spectra_in_det = kinint2| norm_bf* oscillated_spectra_d''',
+            '''oscillated_spectra_in_det = integral| norm_bf* oscillated_spectra_d''',
         ]
+
+        # Detector effects initialization
+        self.formula['det_effects_base'] = [
+            'eres_matrix| evis_hist()',
+            '__lsnl_dummy[d,l]',
+            'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
+            ]
 
         self.formula['prediction'] = ['''ibd =
                           eres[d]|
@@ -662,12 +672,12 @@ class exp(baseexp):
 
     def define_labels(self):
         self.libs =  OrderedDict(
-                        dyboscar_iav = dict(expr=('dyboscar_iav', 'dyboscar_iav[d]| raw_spectra_dyboscar[d]()'), label='IAV for dyboscar pred'),
+                      eper_ff_var  = dict(expr='eper_fission[i]*fission_fraction_corr[i,r]',label='Product of energy per fission to fission fraction'),
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),
                         unoscillated_spectra_d = dict(expr=('unoscillated_spectra_d', 'sum[r]| unoscillated_reactor_flux_in_det'),
                                                            label='Unoscillated flux in {detector}, not integrated'),
-                        iav = dict(expr=('iav[d]| unoscillated_spectra_in_det', 'iav[d]| oscillated_spectra_in_det', 'iav[d]| kinint2'),
+                        iav = dict(expr=('iav[d]| unoscillated_spectra_in_det', 'iav[d]| oscillated_spectra_in_det', 'iav[d]| integral'),
                                    label='Anue spectra in {detector after IAV}'),
                         anue_rd = dict(expr='anue_rd',
                                        label='Anue in {detector} from {reactor}'),
@@ -675,13 +685,13 @@ class exp(baseexp):
                                            label='Oscillation probability from {reactor} to {detector}'),
                         osc_rate = dict(expr='anue_rd*osc_prob_rd',
                                         label='Oscillated spectra from {reactor} in {detector}'),
-                        osc_pred_det = dict(expr='kinint2| sum[r]| baselineweight*conversion_factor*nprotons_nominal*osc_rate',
+                        osc_pred_det = dict(expr='integral| sum[r]| baselineweight*conversion_factor*nprotons_nominal*osc_rate',
                                             label='Oscillated prediction in {detector}'),
                         ibd_cross_section = dict(expr='ibd_xsec*jacobian',
                                                  label='IBD cross section in first order'),
                         osccomp_spectra_in_det = dict(expr='osccomp_spectra_in_det',
                                                             label='Integrated reactor spectra * by osc comp+PMNS weight {component} in {detector}'),
-                        oscillated_spectra_in_det = dict(expr='kinint2| oscillated_spectra_d',
+                        oscillated_spectra_in_det = dict(expr='integral| oscillated_spectra_d',
                                                         label='Oscillated reactor spectra in {detector}'),
                         unoscillated_reactor_flux_in_det = dict(expr='unoscillated_reactor_flux_in_det',
                                                              label='Unoscillated spectra in {detector}'),
@@ -689,8 +699,8 @@ class exp(baseexp):
                                                              #  label='Unoscillated spectra in {detector}'),
                         rate_in_detector        = dict(expr='rate_in_detector',
                                                        label='Rate in {detector}' ),
-                        denom                   = dict(expr='denom',
-                                                       label='Denominator of reactor norm for {reactor}'),
+                        #  denom                   = dict(expr='denom',
+                                                       #  label='Denominator of reactor norm'),
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
                                                        label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
                         anue_produced_total     = dict(expr='sum:i|anue_produced_iso',

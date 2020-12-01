@@ -24,4 +24,3 @@ def Points(array, *args, **kwargs):
         raise Exception( 'Can convert only 1- and 2- dimensional arrays' )
     s = array_to_stdvector_size_t( array.shape )
     return R.GNA.GNAObjectTemplates.PointsT(context.current_precision())(array.ravel(order='F'), s, *args, **kwargs)
-

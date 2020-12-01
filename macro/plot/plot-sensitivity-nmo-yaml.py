@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 """Read a set of yaml files with fit results and plot sensitivity to neutrino mass hierachy (NMO)
 
@@ -7,7 +6,6 @@ It expects the fit data: the model (IO) fit against asimov prediction of model w
 
 """
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 from yaml import load, Loader
 from mpl_tools.helpers import savefig
@@ -183,7 +181,7 @@ class NMOSensPlotter(object):
 
     def load_data(self):
         # Labels
-        self.info = [data.label.decode('utf-8') for data in self.opts.files]
+        self.info = [data.label for data in self.opts.files]
         self.skip  = np.array([int(data.__dict__.get('skip', 0)) for data in self.opts.files])
         self.trans = np.array([int(data.__dict__.get('transient', 0)) for data in self.opts.files])
         if self.skip[0] or self.trans[0]:

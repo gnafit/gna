@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.env import env
 import pygraphviz as G
 import ROOT as R
 from collections import OrderedDict
-from configurator import NestedDict
+from gna.configurator import NestedDict
 
 import re
 pattern = re.compile('^.*::([^:<]+)(T<[^>]*>)*$')
@@ -155,7 +153,7 @@ class GNADot(object):
 
             sstyle=self.style.edge_attrs(i, sink, None, None)
             sstyle['arrowhead']='none'
-            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle)
+            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
             for j, source in enumerate(sink.sources):
                 isource = self._get_source_idx(source)
                 self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(None, sink, isource, source))

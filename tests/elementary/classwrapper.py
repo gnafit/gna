@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 from tools.classwrapper import ClassWrapper
 from gna.env import env
 import gna.env

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as np
@@ -108,7 +106,7 @@ def test_energyresolution_v01(tmp_path):
 
             ax.legend()
 
-            path = os.path.join(str(tmp_path), 'eres_test_{:02d}'.format(i))
+            path = os.path.join(str(tmp_path), 'eres_test_{:02d}.png'.format(i))
             savefig(path, density=300)
             allure_attach_file(path)
 
@@ -124,7 +122,7 @@ def test_energyresolution_v01(tmp_path):
     y = fcn( x )
 
     ax.plot( x, y*100. )
-    path = os.path.join(str(tmp_path), 'eres_sigma')
+    path = os.path.join(str(tmp_path), 'eres_sigma.png')
     savefig(path, density=300)
     allure_attach_file(path)
     plt.close()
@@ -142,7 +140,7 @@ def test_energyresolution_v01(tmp_path):
     c = ax.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
     add_colorbar( c )
 
-    path = os.path.join(str(tmp_path), 'eres_matc')
+    path = os.path.join(str(tmp_path), 'eres_matc.png')
     savefig(path, density=300)
     allure_attach_file(path)
     plt.close()
@@ -157,7 +155,7 @@ def test_energyresolution_v01(tmp_path):
 
     eres.matrix.FakeMatrix.plot_matshow(colorbar=True, mask=0.0, extent=[edges[0], edges[-1], edges[-1], edges[0]])
 
-    path = os.path.join(str(tmp_path), 'eres_mat')
+    path = os.path.join(str(tmp_path), 'eres_mat.png')
     savefig(path, density=300)
     allure_attach_file(path)
     plt.close()

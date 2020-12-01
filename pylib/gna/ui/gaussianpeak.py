@@ -1,6 +1,5 @@
 """Example model: gaussian peak with flat background"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from gna.env import env
 import ROOT

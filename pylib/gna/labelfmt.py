@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import string
 from collections import OrderedDict
 import itertools as I
@@ -10,7 +8,7 @@ cfg = configurator( '{location}/gna/labels.py', subst='default', debug=False )
 
 class LFormatter(string.Formatter):
     def get_value( self, key, args, kwargs ):
-        if isinstance( key, (int, long) ):
+        if isinstance( key, (int) ):
             return args[key]
 
         res = dictionaries.get(key, kwargs)
@@ -65,7 +63,7 @@ class ndict(object):
             self.dicts.update( dicts )
 
     def get(self, k, kwargs):
-        for i, d in enumerate(I.chain((kwargs,), reversed(self.dicts.values()))):
+        for i, d in enumerate(I.chain((kwargs,), reversed(list(self.dicts.values())))):
             if not d:
                 continue
             # print( i, k )
@@ -94,6 +92,3 @@ def load_dictionaries( path ):
         reg_dictionary( filename[:-2], cfg.dictionary )
 
 load_dictionaries( './config/dictionaries' )
-
-
-

@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check Points class
 
 and test the matrix memory ordering"""
 
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as N

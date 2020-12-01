@@ -1,4 +1,4 @@
-"""Plot 1d ovservables"""
+"""Plot 1-dimensional ovservables."""
 
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
@@ -50,7 +50,7 @@ class cmd(basecmd):
         what.add_argument('-p', '--plot', default=[], metavar=('DATA',), action=append_typed(observable))
 
         parser.add_argument('--vs', metavar='X points', type=observable, help='Points over X axis to plot vs')
-        parser.add_argument('--plot-type', choices=['histo', 'bin_center', 'bar', 'hist', 'errorbar', 'plot', 'ravelplot'], metavar='PLOT_TYPE',
+        parser.add_argument('--plot-type', choices=['bin_center', 'bar', 'hist', 'errorbar', 'plot', 'ravelplot'], metavar='PLOT_TYPE',
                             help='Select plot type')
         parser.add_argument('--scale', action='store_true', help='scale histogram by bin width')
         parser.add_argument('-l', '--legend', action='append', default=[],
@@ -74,7 +74,7 @@ class cmd(basecmd):
         self.edges_storage = [np.array(obs.datatype().hist().edges()) for obs in self.opts.plot]
 
         while len(self.data_storage) > len(self.legends):
-            print "Amount of data and amount of data doesn't match. Perhaps it is not what you want. Filling legend with empty strings"
+            print("Amount of data and amount of legends doesn't match. Perhaps it is not what you want. Filling legend with empty strings")
             self.legends.append('')
 
         for output, legend in zip(self.opts.plot, self.legends):
@@ -108,3 +108,39 @@ class cmd(basecmd):
 
 def list_get(lst, idx, default):
     return lst[idx] if idx<len(lst) else default
+
+cmd.__tldr__ =  """\
+                The module plots 1 dimensional observables with matplotlib: plots, histograms and error bars.
+
+                The default way is to provide an observable after the `-p` option.
+                The option may be used multiple times to plot multiple plots. The labels are provided after `-l` options.
+
+                The plot representation may be controlled by the `--plot-type` option, which may have values of:
+                'bin_center', 'bar', 'hist', 'errorbar', 'plot'.
+
+                Plot two histograms, 'peak_MC' with error bars and 'peak_f' with lines:
+                ```sh
+                ./gna \\
+                      -- gaussianpeak --name peak_MC --nbins 50 \\
+                      -- gaussianpeak --name peak_f  --nbins 50 \\
+                      -- ns --name peak_MC --print \\
+                            --set E0             values=2    fixed \\
+                            --set Width          values=0.5  fixed \\
+                            --set Mu             values=2000 fixed \\
+                            --set BackgroundRate values=1000 fixed \\
+                      -- ns --name peak_f --print \\
+                            --set E0             values=2.5  relsigma=0.2 \\
+                            --set Width          values=0.3  relsigma=0.2 \\
+                            --set Mu             values=1500 relsigma=0.25 \\
+                            --set BackgroundRate values=1100 relsigma=0.25 \\
+                      -- plot-spectrum-v1 -p peak_MC.spectrum -l 'Monte-Carlo' --plot-type errorbar \\
+                      -- plot-spectrum-v1 -p peak_f.spectrum -l 'Model (initial)' --plot-type hist \\
+                      -- mpl --xlabel 'Energy, MeV' --ylabel entries -t 'Example plot' --grid -s
+                ```
+
+                For more details on decorations and saving see `mpl-v1`.
+
+                The module is based on `plot-spectrum` with significant part of the options moved to `mpl-v1`.
+
+                See also: `mpl-v1`, `plot-heatmap-v1`.
+                """

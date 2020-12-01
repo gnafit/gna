@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.bundle.bundle import TransformationBundle
 
 class parameters_ex01(TransformationBundle):

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.expression.compound import *
 
 class OperationMeta(type):
@@ -10,8 +8,7 @@ class OperationMeta(type):
             args = args,
         return cls(*args)
 
-class Operation(TCall,NestedTransformation):
-    __metaclass__ = OperationMeta
+class Operation(TCall, NestedTransformation, metaclass=OperationMeta):
     call_lock=False
     order_from=None
     def __init__(self, operation, *indices, **kwargs):
@@ -29,7 +26,7 @@ class Operation(TCall,NestedTransformation):
         self.call_lock=True
 
         self.set_objects(*args)
-        self.set_indices(*args, ignore=self.nindex_to_reduce.indices.keys())
+        self.set_indices(*args, ignore=list(self.nindex_to_reduce.indices.keys()))
         return self
 
     def guessname(self, lib={}, save=False):
@@ -272,9 +269,8 @@ class AccumulateTransformation(IndexedContainer, Transformation):
 
         self.bound = True
 
-class OSelect1(TCall):
+class OSelect1(TCall, metaclass=OperationMeta):
     """Substitute a single index with another"""
-    __metaclass__ = OperationMeta
     call_lock=False
     order_from=None
     def __init__(self, index, value, **kwargs):

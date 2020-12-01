@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Define user constructors for C++ classes to simplify calling from python"""
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 
@@ -12,9 +10,9 @@ from gna.converters import list_to_stdvector as stdvector
 from gna import context
 
 # Import constructors, defined in the submodules
-from Points import Points
-from Histogram import Histogram
-from Histogram import Histogram2d
+from .Points import Points
+from .Histogram import Histogram
+from .Histogram import Histogram2d
 
 def OutputDescriptors(outputs):
     descriptors=[]
@@ -32,7 +30,7 @@ def OutputDescriptors(outputs):
             raise Exception('Expect OutputHandle or SingleOutput object')
         descriptors.append(append)
 
-    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(),context.current_precision()))
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(), context.current_precision()))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -257,4 +255,3 @@ Parameter             = _wrap_parameter('Parameter')
 GaussianParameter     = _wrap_parameter('GaussianParameter')
 UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
 ParameterWrapper      = _wrap_parameter('ParameterWrapper')
-

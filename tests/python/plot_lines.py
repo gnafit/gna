@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 from mpl_tools.plot_lines import plot_lines
 

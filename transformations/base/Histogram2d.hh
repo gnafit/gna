@@ -4,10 +4,10 @@
 #include "GNAObject.hh"
 
 /**
- * @brief Transformation object holding a static 1-dimensional histogram.
+ * @brief Transformation object holding a static 2-dimensional histogram.
  *
  * Outputs:
- *   - `hist.hist` - 1-dimensional histogram with fixed data.
+ *   - `hist.hist` - 2-dimensional histogram with fixed data.
  *
  * @author Dmitry Taychenachev
  * @date 2015
@@ -16,20 +16,14 @@ class Histogram2d: public GNASingleObject,
                    public TransformationBind<Histogram2d> {
 public:
   /**
-   * @brief Construct 1d histogram from two arrays: edges and data
+   * @brief Construct 2d histogram from two arrays: edges and data
    * @param xbins - number of X bins in a histogram.
    * @param xedges - pointer to an array with nbins+1 edges.
    * @param ybins - number of Y bins in a histogram.
    * @param yedges - pointer to an array with nbins+1 edges.
    * @param data - pointer to an array with data points of shape Xbins x Ybins (column-major).
    */
-  Histogram2d(size_t xbins, const double *xedges, size_t ybins, const double *yedges, const double *data) :
-    m_xedges(xedges, xedges+xbins+1),
-    m_yedges(yedges, yedges+ybins+1),
-    m_data(Eigen::Map<const Eigen::ArrayXXd>(data, xbins, ybins))
-  {
-    init();
-  }
+  Histogram2d(size_t xbins, const double *xedges, size_t ybins, const double *yedges, const double *data);
 
   /**
    * @brief Return the vector with histogram X edges.
@@ -65,12 +59,13 @@ protected:
       .output("hist")                                            /// Add an output hist.
       .types([](Histogram2d *obj, TypesFunctionArgs& fargs) {    /// Define the TypesFunction:
           fargs.rets[0] = DataType().hist().edges(obj->xedges(), obj->yedges()); ///   - assign the data shape and bin edges for the first output (hist).
-          fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data).
+          /* fargs.rets[0].preallocated(obj->m_data.data());        ///   - tell the DataType that the buffer is preallocated (m_data). */
         })
-      .func([](FunctionArgs& fargs) {})                          /// Assign empty Function.
+      .func([](Histogram2d* obj, FunctionArgs& fargs) {
+              fargs.rets[0].arr2d = obj->m_data;})
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_xedges;                                  ///< Vector with X bin edges.
   std::vector<double> m_yedges;                                  ///< Vector with Y bin edges.
-  Eigen::ArrayXXd m_data;                                        ///< The array holding the raw 1d data buffer.
+  Eigen::ArrayXXd m_data;                                 ///< Array with raw bin content.
 };

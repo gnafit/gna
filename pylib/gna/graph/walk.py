@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import ROOT as R
 from collections import deque, namedtuple, OrderedDict
 import numpy as N
@@ -15,7 +13,7 @@ class GraphWalker(object):
 
         self._entry_points = []
         for arg in args:
-            if isinstance(arg, (list,tuple)):
+            if isinstance(arg, (list, tuple)):
                 for subarg in arg:
                     self._add_entry_point(subarg)
             self._add_entry_point(arg)
@@ -40,13 +38,13 @@ class GraphWalker(object):
                 Handle = R.TransformationTypes.HandleT(precision, precision)
                 SingleOutput = R.SingleOutputT(precision)
                 if isinstance(t, OutputHandle):
-                    entry = R.OpenOutputHandleT(precision,precision)(t).getEntry()
+                    entry = R.OpenOutputHandleT(precision, precision)(t).getEntry()
                     break
                 elif isinstance(t, Handle):
-                    entry = R.OpenHandleT(precision,precision)(t).getEntry()
+                    entry = R.OpenHandleT(precision, precision)(t).getEntry()
                     break
                 elif isinstance(t, SingleOutput):
-                    entry = R.OpenOutputHandleT(precision,precision)(t.single()).getEntry()
+                    entry = R.OpenOutputHandleT(precision, precision)(t.single()).getEntry()
                     break
             else:
                 # raise TypeError('GNADot argument should be of type TransformationDescriptor/TransformationTypes::Handle/TransformationTypes::OutputHandle, got '+type(t).__name__)
@@ -188,7 +186,7 @@ class GraphWalker(object):
         return self._list_do(self.cache_sources, *args)
 
     def variable_do(self, *args):
-        return self._list_do(self.cache_variables.values(), *args)
+        return self._list_do(list(self.cache_variables.values()), *args)
 
     def source_open_do(self, *args):
         return self._list_do(self.cache_sources_open, *args)

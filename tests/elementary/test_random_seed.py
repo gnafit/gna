@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Test random seed"""
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.converters import convert

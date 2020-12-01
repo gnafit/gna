@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as np
@@ -175,7 +173,8 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
                 self.set_input('lsnl', it, trans.Ntrue, argument_number=0)
                 self.set_output('lsnl', it, trans.Nrec)
 
-    def get_buffers_auto(self, (k, obj)):
+    def get_buffers_auto(self, kobj):
+        k, obj = kobj
         return k, get_buffers_graph_or_hist1(obj)
 
     def load_data(self):
@@ -193,14 +192,19 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
         if not all( graphs.values() ):
             raise IOError( 'Some objects were not read from file: '+self.cfg.filename )
 
-        def mult((x, y)): y*=x
-        def grad((k, (x,y))): return k, np.gradient(y, x[1]-x[0])
+        def mult(xy):
+            x, y = xy
+            y*=x
+
+        def grad(kxy):
+            k, (x, y) = kxy
+            return k, np.gradient(y, x[1]-x[0])
 
         graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
         self.check_same_x(graphs)
         self.make_diff(graphs)
         graphs = self.supersample(graphs)
-        map(mult, graphs.values())
+        list(map(mult, graphs.values()))
         gradients = OrderedDict(map(grad, graphs.items()))
 
         tfile.Close()
@@ -267,7 +271,8 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             for it in self.detector_idx.iterate():
                 self.reqparameter('escale', it, cfg=self.cfg.par, label='Uncorrelated energy scale for {autoindex}' )
 
-    def interpolate(self, (x, y), edges):
+    def interpolate(self, xy, edges):
+        x, y = xy
         fill_ = self.cfg.get('extrapolation_strategy', 'extrapolate')
         fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value=fill_ )
         res = fcn( edges )

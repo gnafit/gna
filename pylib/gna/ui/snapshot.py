@@ -1,6 +1,5 @@
 """Given an observable make it's snapshot via Snapshot transformation"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 import argparse
 import os.path
@@ -40,4 +39,3 @@ class cmd(basecmd):
         self.env.future['spectra', self.opts.name_out] = self.snapshot.single()
 
         self.env.parts.snapshot[self.opts.name_out] = self.snapshot
-

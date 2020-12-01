@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v02 bundle
 
@@ -7,7 +6,6 @@ New features include:
     - Correlations may be loaded from the file
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N
@@ -94,4 +92,3 @@ class parameters_v02(TransformationBundle):
 
         from gna.parameters import covariance_helpers as ch
         ch.covariate_pars(self._par_container, mat)
-

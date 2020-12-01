@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check the Exp transformation"""
 
-from __future__ import print_function
 import numpy as N
 from load import ROOT as R
 from gna.constructors import Points

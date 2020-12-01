@@ -1,4 +1,3 @@
-from __future__ import print_function
 from gna.bindings import patchROOTClass, DataType, provided_precisions, ROOT
 
 variable  = ROOT.variable('void')

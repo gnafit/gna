@@ -1,4 +1,3 @@
-from __future__ import print_function
 from tools.dictwrapper import DictWrapper, DictWrapperVisitorDemostrator
 import pytest
 from collections import OrderedDict
@@ -26,7 +25,6 @@ def test_dictwrapper_03():
     assert dw.get('d.e')==None
 
     assert tuple(dw.keys())==('a','b','c')
-    assert tuple(dw.iterkeys())==('a','b','c')
 
 @pytest.mark.parametrize('split', [None, '.'])
 def test_dictwrapper_03(split):

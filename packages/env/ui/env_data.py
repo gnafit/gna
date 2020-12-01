@@ -1,6 +1,5 @@
-"""Save outputs as dictionaries with numbers and meta"""
+"""Recursively saves outputs as dictionaries with numbers and meta."""
 
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, qualified
 import matplotlib
 from matplotlib import pyplot as plt
@@ -66,7 +65,7 @@ class cmd(basecmd):
         parser.add_argument('-t', '--root-target', default=(), help='root namespace to copy to')
         parser.add_argument('-c', '--copy', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
         parser.add_argument('-g', '--copy-graph', nargs='+', action='append', default=[], help='Data to read (x,y) and address to write', metavar=('x', 'y'))
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity')
 
     def run(self):
         source = self.env.future.child(self.opts.root_source)
@@ -115,3 +114,42 @@ class cmd(basecmd):
 
 def list_get(lst, idx, default):
     return lst[idx] if idx<len(lst) else default
+
+cmd.__tldr__ = """\
+            The module recursively copies all the outputs from the source location to the target location.
+            The outputs are converted to the dictionaries. Arrays, shapes, bin edges and object type are saved.
+            The produced data may then be saved with `save-yaml` and `save-pickle` modules.
+
+            Write the data from all the outputs from the 'spectra' to 'output':
+            ```sh
+            ./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data -c spectra.peak output -vv \\
+                -- env-print -l 40
+            ```
+            The last command prints the data to stdout. The value width is limited to 40 symbols.
+
+            A common root for source and target paths may be set independently via `-s` and `-t` arguments.
+            There is also a special argument `-g` to combine graphs by reading X and Y arrays from different outputs.
+
+            Store a graph read from 'fcn.x' and 'fcn.y' as 'output.fcn_graph':
+            ```sh
+            ./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
+                -- env-print -l 40
+            ```
+
+            Extra information may be saved with data. It should be provided as one ore more YAML dictionaries of the
+            `-c` and `-g` arguments. The dictionaries will be used to update the target paths.
+
+            Provide extra information:
+            ```sh
+            ./gna \\
+                -- gaussianpeak --name peak --nbins 50 \\
+                -- env-data -c spectra.peak output '{note: extra information}' -vv \\
+                -- env-print -l 40
+            ```
+
+            See also: `env-data-root`, `save-yaml`, `save-pickle`, `save-root`.
+        """

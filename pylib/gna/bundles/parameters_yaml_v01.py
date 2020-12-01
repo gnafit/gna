@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters_yaml v01 bundle
 Based on: parameters_v03
@@ -8,7 +7,6 @@ New features include:
     - [v01] read data from yaml file
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as np

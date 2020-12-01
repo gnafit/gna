@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function
 from scipy.optimize import minimize
 from packages.minimize.lib.base import MinimizerBase, FitResult
 import ROOT
@@ -76,5 +74,3 @@ class SciPyMinimizer(MinimizerBase):
         self.patchresult()
 
         return self.result
-
-

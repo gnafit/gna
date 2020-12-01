@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 r"""Computes the integral:
     \int_{-1}^{+1} d\cos\theta \int_{E_i}^{E_j} dE \sigma(E_\nu(E, \cos\theta)) dE_\nu(E, \cos \theta)/dE
@@ -17,7 +16,6 @@ r"""Computes the integral:
 #   - Or just plot it (needs dot from graphviz):
 #      dot -O -Tpdf -v output/xsec.dot
 
-from __future__ import print_function
 #
 # Initialize argument parser
 #

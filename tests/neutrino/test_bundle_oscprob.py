@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
-from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
 from gna.bundle import execute_bundles

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
@@ -41,7 +38,7 @@ class root_histograms_v05(TransformationBundle):
         normalize=self.cfg.get('normalize', False)
         xscale = self.cfg.get('xscale', None)
         yscale = self.cfg.get('yscale', None)
-        for name, format, labelfmt in I.izip_longest(self.cfg.names, self.cfg.formats, self.cfg.get('labels', [])):
+        for name, format, labelfmt in I.zip_longest(self.cfg.names, self.cfg.formats, self.cfg.get('labels', [])):
             for it in self.nidx.iterate():
                 if it.ndim()>0:
                     subst, = it.current_values()

@@ -1,8 +1,5 @@
-# encoding: utf-8
+"""Global environment configuration UI. Enables verbosity for the debugging purposes."""
 
-"""Global environment configuration"""
-
-from __future__ import print_function
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
@@ -58,10 +55,41 @@ class DictWrapperVerbose(DictWrapper):
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
-        parser.add_argument('-v', '--verbose', action='count', help='make environment verbose on set')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='make environment verbose on set')
         parser.add_argument('-x', '--exclude', nargs='+', default=[], help='keys to exclude')
         parser.add_argument('-i', '--include', nargs='+', default=[], help='keys to include (only)')
 
     def init(self):
         if self.opts.verbose:
             self.env.future = DictWrapperVerbose(self.env.future, include=self.opts.include, exclude=self.opts.exclude)
+
+    __tldr__ = {
+            "" : """\
+                All assignments and changes of the environment will be printed to stdout.
+
+                Enable verbosity:
+                ```sh
+                ./gna \\
+                    -- env-cfg -v \\
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
+
+                The output may be filtered with `-x` and `-i` keys. Both support multiple arguments.
+
+                The `-x` option excludes matching keys:
+                ```sh
+                ./gna \\
+                    -- env-cfg -v -x fcn \\
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
+
+                The `-i` option includes matching keys exclusively:
+                ```sh
+                ./gna \\
+                    -- env-cfg -v -i spectrum \\
+                    -- gaussianpeak --name peak_MC --nbins 50
+                ```
+
+                See also: `env-print`, `env-set`.
+            """,
+            }

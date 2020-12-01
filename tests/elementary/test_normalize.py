@@ -1,9 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """Check the Normalize transformation"""
 
-from __future__ import print_function
 import sys
 from matplotlib import pyplot as P
 import numpy as N
@@ -86,6 +84,3 @@ if __name__ == "__main__":
     test_norm7()
     if "pytest" not in sys.modules:
         P.show()
-
-
-

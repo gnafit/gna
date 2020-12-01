@@ -30,4 +30,4 @@ class cmd(basecmd):
 
         blocks = dataset.makeblocks(observables, parameters)
         self.env.parts.prediction[name] = blocks
-        print blocks
+        print(blocks)

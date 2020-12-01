@@ -1,6 +1,5 @@
-"""Save given path within env to the ROOT file"""
+"""Saves a subtree of the env to a binary ROOT file."""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
@@ -12,7 +11,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('paths', nargs='+', help='paths to save')
-        parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
         parser.add_argument('-o', '--output', required=True, help='Output fil ename')
 
     def init(self):
@@ -56,3 +55,22 @@ def saveobjects(odir, obj, verbose):
         return
 
     print('Unable to save the object to ROOT file, skip:', type(obj))
+
+cmd.__tldr__ = """\
+               The module saves the paths provided as arguments to an output ROOT file, provided after `-o` option.
+               The outputs that should be saved should be converted via `env-data-root` module.
+
+               The module is similar to the modules `save-yaml` and `save-pickle`.
+
+               Write the data, collected in the 'output' to the file 'output.root':
+               ```sh
+               ./gna \\
+                   -- gaussianpeak --name peak --nbins 50 \\
+                   -- env-data-root -c spectra output \\
+                   -- env-data-root -s spectra.peak -g fcn.x fcn.y output.fcn_graph \\
+                   -- env-print -l 40 \\
+                   -- save-root output -o output.root
+               ```
+
+               See also: `env-data-root`, `save-yaml`, `save-pickle`.
+               """

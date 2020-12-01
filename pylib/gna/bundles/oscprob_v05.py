@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Oscillation probability bundle v05.
 
@@ -6,7 +5,6 @@ Updates since v04:
     - Internal parameters configurations, not dependent to the global gna.parameters.oscillation
 """
 
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 from gna.bundle import TransformationBundle

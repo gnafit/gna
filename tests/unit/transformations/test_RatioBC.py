@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check the Ratio transformation"""
 
-from __future__ import print_function
 from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R

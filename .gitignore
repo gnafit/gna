@@ -14,6 +14,8 @@ config_local
 .local/
 .direnv/
 .envrc
+.pre-commit-config.yaml
+.rootsetup
 .fish_functions
 matplotlibrc
 

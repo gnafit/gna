@@ -1,4 +1,3 @@
-from __future__ import print_function
 from tools.classwrapper import ClassWrapper
 from collections import OrderedDict, Iterable, MutableMapping
 import inspect
@@ -74,7 +73,7 @@ class DictWrapper(ClassWrapper):
             return None, None
 
     def get(self, key, *args, **kwargs):
-        if key is ():
+        if key==():
             return self
         key, rest=self.splitkey(key)
 
@@ -89,7 +88,7 @@ class DictWrapper(ClassWrapper):
         return sub.get(rest, *args, **kwargs)
 
     def __getitem__(self, key):
-        if key is ():
+        if key==():
             return self
         key, rest=self.splitkey(key)
 
@@ -103,7 +102,7 @@ class DictWrapper(ClassWrapper):
         return sub[rest]
 
     def __delitem__(self, key):
-        if key is ():
+        if key==():
             raise Exception('May not delete itself')
         key, rest=self.splitkey(key)
 
@@ -149,7 +148,7 @@ class DictWrapper(ClassWrapper):
     __setitem__= set
 
     def __contains__(self, key):
-        if key is ():
+        if key==():
             return True
         key, rest=self.splitkey(key)
 

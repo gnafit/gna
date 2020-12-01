@@ -1,4 +1,3 @@
-# coding: utf-8
 
 import ROOT
 import numpy as np
@@ -34,7 +33,7 @@ geo_flux_files = {
 }
 
 geo_flux_normalizations = {
-    'U238' : (2.7e3/5, 0.3),
+    'U238': (2.7e3/5, 0.3),
     'Th232': (0.8e3/5, 0.3),
 }
 
@@ -49,7 +48,7 @@ class Reactor(object):
         self.power_rate = power_rate
 
         self.fission_fractions = {isoname: frac
-                                  for isoname, frac in fission_fractions.iteritems()}
+                                  for isoname, frac in fission_fractions.items()}
 
     def assign(self, ns):
         self.ns = ns("reactors")(self.name)
@@ -161,7 +160,7 @@ class ReactorExperimentModel(baseexp):
             #  }[name]
         parser.add_argument('--name', required=True)
         parser.add_argument('--ibd', choices=['zero', 'first'], default='zero')
-        parser.add_argument('--backgrounds',choices=['geo'], action='append',
+        parser.add_argument('--backgrounds', choices=['geo'], action='append',
                             default=[], help='Choose backgrounds you want to add')
         parser.add_argument('--oscprob', choices=self.oscprob_classes.keys(),
                             default='standard')
@@ -230,7 +229,7 @@ class ReactorExperimentModel(baseexp):
         #  pass
         for bkg in background_list:
             if bkg == 'geo':
-                for iso_name in geo_flux_files.iterkeys():
+                for iso_name in geo_flux_files.keys():
                     geo_isotope = GeoNeutrinoIsotope(iso_name)
                     self._isotopes["geo_"+iso_name].append(geo_isotope)
                     self._Enu_inputs[detector].add(geo_isotope.spectrum.f.inputs.x)
@@ -317,13 +316,13 @@ class ReactorExperimentModel(baseexp):
             pr.points.setLabel('power: | '+reactor.name)
             norm.isotopes.power_rate(pr)
             norm.isotopes.setLabel('norm: | {} to {}'.format(reactor.name, detector.name))
-            for isoname, frac in reactor.fission_fractions.iteritems():
+            for isoname, frac in reactor.fission_fractions.items():
                 ff=C.Points(frac)
                 ff.points.setLabel('fission frac: | {} at {}'.format(isoname, reactor.name))
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](ff)
         elif normtype == 'manual':
             norm = ROOT.ReactorNormAbsolute(vec(reactor.fission_fractions.keys()))
-            for isoname, frac in reactor.fission_fractions.iteritems():
+            for isoname, frac in reactor.fission_fractions.items():
                 norm.isotopes['fission_fraction_{0}'.format(isoname)](frac)
         return norm
 
@@ -380,9 +379,9 @@ class ReactorExperimentModel(baseexp):
                     opsum.sum.setLabel('osc flux | {} at {}'.format('comp0', detector.name))
                     self.oscprobs_comps[(detector, rgroup)][(weightscls, 'comp0')] = ones
                     compnames.remove('comp0')
-                for osccomps in oscprob.transformations.itervalues():
+                for osccomps in oscprob.transformations.values():
                     osccomps.setLabel('oscprob {} | {}-\\>{}'.format(osccomps.label(), rgroup.name, detector.name))
-                    for compname, osccomp in osccomps.outputs.iteritems():
+                    for compname, osccomp in osccomps.outputs.items():
                         if compname not in compnames:
                             continue
                         product = ROOT.Product()
@@ -454,8 +453,8 @@ class ReactorExperimentModel(baseexp):
             inp.connect(ibd.Enu.Enu)
 
         for detector in self.detectors:
-            for resname, comps in detector.components.iteritems():
-                for compid, comp in comps.iteritems():
+            for resname, comps in detector.components.items():
+                for compid, comp in comps.items():
                     res = None
                     if resname == 'rate':
                         res = ROOT.Product()
@@ -473,7 +472,7 @@ class ReactorExperimentModel(baseexp):
             if self.opts.backgrounds:
                 bkg_summary = ROOT.Sum()
                 bkg_summary.sum.setLabel('bkg: | '+detector.name)
-                for bkg_name, bkg in detector.intermediates_bkg.iteritems():
+                for bkg_name, bkg in detector.intermediates_bkg.items():
                     prod = ROOT.Product()
                     prod.product.setLabel('bkg: | '+detector.name)
                     prod.multiply(bkg)
@@ -517,7 +516,7 @@ class ReactorExperimentModel(baseexp):
 
     def _sumcomponents(self, components, name):
         oscprobs = {}
-        for oscprobcls, compname in components.iterkeys():
+        for oscprobcls, compname in components.keys():
             if oscprobcls in oscprobs:
                 continue
             with self.ns("oscillation"):
@@ -525,7 +524,7 @@ class ReactorExperimentModel(baseexp):
                                      freevars=['L'])
             oscprobs[oscprobcls] = oscprob
 
-        for compid, comp in components.iteritems():
+        for compid, comp in components.items():
             ps = oscprobs[compid[0]].probsum
             ps.setLabel('osc prob: | '+name)
             ps[compid[1]](comp)
@@ -565,7 +564,7 @@ class ReactorExperimentModel(baseexp):
 
             if self.opts.with_C14:
                 with self.ns('ibd'), detector.ns:
-                    detector.c14 = ROOT.C14Spectrum(8,5)
+                    detector.c14 = ROOT.C14Spectrum(8, 5)
                     detector.c14.smear.inputs(inter_sum)
                     finalsum = detector.c14.smear
 
@@ -596,10 +595,10 @@ class ReactorExperimentModel(baseexp):
         for name in detector.intermediates:
             det_ns.addobservable(name, detector.intermediates[name], export=False)
 
-        for name, bkg in detector.back_hists.iteritems():
+        for name, bkg in detector.back_hists.items():
             det_ns.addobservable("bkg_{}".format(name), bkg, export=False)
 
-        for pair, comps in self.oscprobs_comps.iteritems():
+        for pair, comps in self.oscprobs_comps.items():
             pair_ns = det_ns(pair[1].name)
             pair_ns.addobservable('oscprob', self._sumcomponents(comps, detector.name), export=False)
 
@@ -609,10 +608,9 @@ class ReactorExperimentModel(baseexp):
         gna.parameters.ibd.reqparameters(ns("ibd"))
         gna.parameters.oscillation.reqparameters(ns("oscillation"))
 
-        for isoname, (central, sigma) in eperfission.iteritems():
+        for isoname, (central, sigma) in eperfission.items():
             isons = ns("isotopes")(isoname)
             isons.reqparameter("EnergyPerFission", central=central, sigma=sigma)
-        for geo_isoname, (central, relsigma) in geo_flux_normalizations.iteritems():
+        for geo_isoname, (central, relsigma) in geo_flux_normalizations.items():
             geo_isons = ns("geo_isotopes")(geo_isoname)
             geo_isons.reqparameter("FluxNorm", central=central, relsigma=sigma)
-

@@ -1,5 +1,6 @@
 """Load experement definition, that provides observables and parameters"""
-from __future__ import print_function
+
+
 from gna.ui import basecmd
 import argparse
 import os.path
@@ -17,7 +18,7 @@ class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         group = parser.add_mutually_exclusive_group()
-        group.add_argument('experiment', nargs='?', choices=expmodules.keys(), metavar='exp', help='experiment to load')
+        group.add_argument('experiment', nargs='?', choices=list(expmodules.keys()), metavar='exp', help='experiment to load')
         group.add_argument('-e', '--exp', nargs='*', default=(), help='experiment to load')
         group.add_argument('-L', '--list-experiments', action='store_true', help='list available experiments')
         parser.add_argument('expargs', nargs=argparse.REMAINDER, help='arguments to pass to the experiment')
@@ -37,7 +38,7 @@ class cmd(basecmd):
         if not self.expname or self.opts.list_experiments:
             print("Search paths: ", ', '.join(cfg.experimentpaths))
             print("UI exp list of experiments:")
-            map(lambda l: print('   ', l), expmodules.keys())
+            list([print('   ', l) for l in list(expmodules.keys())])
 
             raise HelpDisplayed()
 

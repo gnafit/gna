@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Test script for the detector_nl bundle with two detectors"""
 
-from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
 from matplotlib import pyplot as P

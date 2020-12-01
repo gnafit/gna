@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
@@ -66,4 +63,3 @@ class geoneutrino_spectrum_v01(TransformationBundle):
     def define_variables(self):
         for iso in self.isotopes:
             self.reqparameter('geonu_norm_%s'%iso, None, central=1.0, free=True, label='%s normalization factor'%iso)
-

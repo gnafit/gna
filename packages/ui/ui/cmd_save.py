@@ -1,11 +1,9 @@
-# encoding: utf-8
+"""
+Saves the command line to a file.
 
-"""Save the command line to a shell file
-
-The command then may be repeated and should produce the same output
+The command then may be repeated and should produce the same output.
 """
 
-from __future__ import print_function
 from gna.ui import basecmd
 import pipes
 from packages.env.lib.cwd import update_namespace_cwd
@@ -51,3 +49,18 @@ class cmd(basecmd):
             self.newline()
 
         self.out+=pipes.quote(opt)+' '
+
+    __tldr__ = """\
+               The main argument is the output file name to save the command.
+
+               Save the whole command to the file 'command.sh':
+               ```sh
+               ./gna \\
+                   -- comment Initialize a gaussian peak with default configuration and 50 bins \\
+                   -- gaussianpeak --name peak_MC --nbins 50 \\
+                   -- cmd-save command.sh
+               ```
+
+               In the verbose mode it also prints the command to the stdout.
+               """
+

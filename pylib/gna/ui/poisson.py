@@ -17,5 +17,3 @@ class cmd(basecmd):
             poisson.add(block.theory, block.data)
 
         self.env.parts.statistic[self.opts.name] = poisson
-
-

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check Points class (constructed from ROOT objects)"""
 
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as np
@@ -52,7 +50,7 @@ def test_histogram_v01_1d(tmp_path):
     assert np.all(edges==edges_dt)
 
 def test_histogram_v02_2d(tmp_path):
-    edgesx = np.logspace(0, 3, 6.0, base=2.0)
+    edgesx = np.logspace(0, 3, 6, base=2)
     edgesy = np.linspace(0, 10, 20)
     data  = np.arange(1.0, (edgesx.size-1)*(edgesy.size-1)+1, dtype='d').reshape(edgesx.size-1, edgesy.size-1)
 
@@ -109,4 +107,3 @@ def test_histogram_v02_2d(tmp_path):
 
 if __name__ == "__main__":
     run_unittests(globals())
-

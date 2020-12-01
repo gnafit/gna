@@ -1,4 +1,4 @@
-import minuit
+from . import minuit
 
 minimizers = {
     'minuit': minuit.Minuit

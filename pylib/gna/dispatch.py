@@ -1,4 +1,3 @@
-from __future__ import print_function
 import argparse
 import sys
 import os.path
@@ -41,11 +40,16 @@ def loadmodule(modules, name):
 
 def loadcmdclass(modules, name):
     module=loadmodule(modules, name)
-    cls = getattr(module, 'cmd')
+    cls = getattr(module, name, None)
+    if not cls:
+        cls = getattr(module, 'cmd')
+
+    if not cls.__doc__ and module.__doc__:
+        cls.__doc__=module.__doc__
 
     parserkwargs0 = getattr(cls, 'parserkwargs', {})
     parserkwargs = dict(dict(prog='gna -- {}'.format(name),
-        description=cls.__doc__ or module.__doc__,
+        description=cls.__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter),
         **parserkwargs0)
     parser = argparse.ArgumentParser(**parserkwargs)
@@ -62,7 +66,7 @@ def listmodules(modules, printdoc=False):
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
     wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
-    modnames = modules.keys()
+    modnames = list(modules.keys())
     for modname in modnames:
         modname_print = modname.replace('_', '-')
         try:

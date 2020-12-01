@@ -1,6 +1,5 @@
-"""Save given path within env to the yaml file"""
+"""Saves a subtree of the env to a readable YAML file."""
 
-from __future__ import print_function
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
@@ -40,3 +39,24 @@ class cmd(basecmd):
 
         if self.opts.verbose:
             print('Save output file:', self.opts.output)
+
+    __tldr__ = """\
+            The module saves the paths provided as arguments to an output YAML file, provided after `-o` option.
+            If the outputs should be saved, the data should be converted via `env-data` module.
+            The YAML is human readable and fits to the purposes of saving a small data samples,
+            such as fit results or small histograms or graphs.
+
+            The module is similar to the modules `save-pickle` and `save-root`.
+
+            Write the data, collected in the 'output' to the file 'output.yaml':
+            ```sh
+            ./gna \\
+                -- gaussianpeak --name peak --nbins 5 \\
+                -- env-data -c spectra.peak.spectrum output '{note: extra information}' -vv \\
+                -- env-print -l 40 \\
+                -- save-yaml output -o output.yaml
+            ```
+            In this example we have reduced the number of bins in order to improve readability of the 'output.yaml'.
+
+            See also: `env-data`, `save-pickle`, `save-root`.
+        """

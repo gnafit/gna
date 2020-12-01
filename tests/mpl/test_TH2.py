@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 import ROOT as R
 from matplotlib import pyplot as P
 from mpl_tools import bindings

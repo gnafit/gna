@@ -11,4 +11,4 @@ class cmd(basecmd):
         parser.add_argument("args", nargs=argparse.REMAINDER)
 
     def run(self):
-        exec self.opts.script.read()
+        exec(self.opts.script.read())

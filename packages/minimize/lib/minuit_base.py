@@ -1,4 +1,3 @@
-from __future__ import print_function
 import ROOT
 import numpy as np
 from packages.minimize.lib.base import MinimizerBase, FitResult
@@ -8,6 +7,9 @@ class MinuitBase(MinimizerBase):
     _label = 'TMinuit?'
     def __init__(self, statistic, minpars, **kwargs):
         MinimizerBase.__init__(self, statistic, minpars, **kwargs)
+
+        print("\033[35mWarning! Disowning the C++ minimizer class to avoid segfault. Issue #138 of !67.\033[0m")
+        ROOT.SetOwnership(self, False)
 
     @property
     def tolerance(self):

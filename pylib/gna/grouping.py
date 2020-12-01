@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from collections import OrderedDict
 from itertools import chain
 
@@ -130,7 +128,7 @@ class Categories(object):
         return res
 
     def format(self, item, fmt, **kwargs):
-        if isinstance(fmt, basestring):
+        if isinstance(fmt, str):
             kwargs = OrderedDict([('self', item)]+list(self.itemdict(item).items())+list(kwargs.items()))
             return fmt.format(**kwargs)
 
@@ -219,4 +217,3 @@ class CatDict(OrderedDict):
                 return self[group], True, group
 
         raise KeyError(key)
-

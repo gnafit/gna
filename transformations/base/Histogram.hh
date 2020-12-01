@@ -1,6 +1,8 @@
 #pragma once
 
+#include <Eigen/Dense>
 #include <vector>
+#include "Data.hh"
 #include "GNAObject.hh"
 
 /**
@@ -21,16 +23,7 @@ public:
    * @param edegs - pointer to an array with nbins+1 edges.
    * @param edegs - pointer to an array with nbins data points.
    */
-  Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false)
-    : m_edges(edges, edges+nbins+1), m_data(Eigen::Map<const Eigen::ArrayXd>(data, nbins))
-  {
-    if( fcn_copy ){
-      init_copy();
-    }
-    else {
-      init();
-    }
-  }
+  Histogram(size_t nbins, const double *edges, const double *data, bool fcn_copy=false);
 
   /**
    * @brief Return the vector with histogram edges.
@@ -86,5 +79,5 @@ protected:
       .finalize();                                               /// Tell the initializer that there are no more configuration and it may initialize the types.
   }
   std::vector<double> m_edges;                                   ///< Vector with bin edges.
-  Eigen::ArrayXd m_data;                                         ///< The array holding the raw 1d data buffer.
+  Eigen::ArrayXd m_data;                                         ///< Array with raw bin content
 };

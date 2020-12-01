@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Define converters to convert between Python (numpy) and C++ (std::vecotr, Eigen, etc) types
 Implements individual converters along with generic 'convert' function."""
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from collections import defaultdict
@@ -50,7 +48,7 @@ def convert(obj, totype, debug=False, **kwargs):
         res = title
         if converter:
             res+= ' '+converter.__name__
-        typestr = type(totype) is str and totype or totype.__name__
+        typestr = isinstance(totype, str) and totype or totype.__name__
         res+=" to convert '{0}' ({1}) to '{2}'".format(
                       type(obj).__name__,
                       ', '.join([base.__name__ for base in bases]),
@@ -285,5 +283,3 @@ def array_to_tmatrixd( arr, **kwargs ):
     else:
         raise Exception( 'Do not know how to convert %s to TMatrix'%( str(arr.dtype) ) )
     return cls( arr.shape[0], arr.shape[1], arr.ravel() )
-
-

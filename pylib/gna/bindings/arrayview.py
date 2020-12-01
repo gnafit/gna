@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from gna.bindings import patchROOTTemplate, ROOT as R
 import numpy as N
@@ -13,4 +12,3 @@ def arrayview__view(self):
 def arrayviewAllocator__viewall(self):
     buf = self.data()
     return N.frombuffer(buf, count=self.maxSize(), dtype=buf.typecode)
-

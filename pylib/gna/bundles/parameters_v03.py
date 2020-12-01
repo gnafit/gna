@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v03 bundle
 Based on: parameters_v02
@@ -9,7 +8,6 @@ New features include:
     - [v03] Covariance matrix may be loaded from the file
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N

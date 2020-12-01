@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -11,7 +9,7 @@ class detector_iav_db_root_v03(TransformationBundle):
     iavmatrix=None
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1,1, 'major')
+        self.check_nidx_dim(1, 1, 'major')
 
     @staticmethod
     def _provides(cfg):
@@ -65,4 +63,3 @@ class detector_iav_db_root_v03(TransformationBundle):
 
         for it in self.nidx_major:
             self.reqparameter(self.cfg.parname, it, cfg=self.cfg.scale, label='IAV offdiagonal contribution scale at {autoindex}')
-

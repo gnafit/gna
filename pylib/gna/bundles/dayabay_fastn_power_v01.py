@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
@@ -14,7 +12,7 @@ from gna.bundle import TransformationBundle
 class dayabay_fastn_power_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(1,1)
+        self.check_nidx_dim(1, 1)
 
     @staticmethod
     def _provides(cfg):
@@ -40,7 +38,7 @@ class dayabay_fastn_power_v01(TransformationBundle):
             hist.hist.f(fcn.selfpower_inv.result)
             hist.hist.setLabel(it.current_format('Fast neutron hist {site}'))
 
-            normalize = R.Normalize(imin, imax-imin)
+            normalize = R.Normalize(int(imin), int(imax-imin))
             normalize.normalize.inp( hist.hist.hist )
             normalize.normalize.setLabel(it.current_format('Fast neutron hist {site} (norm)'))
 
