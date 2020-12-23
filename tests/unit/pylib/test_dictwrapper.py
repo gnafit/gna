@@ -283,4 +283,23 @@ def test_dictwrapper_09_walk():
     assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=True)] == [(('f','g', 'h'), 5)]
     assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=False)] == [(('h',), 5)]
 
+def test_dictwrapper_10_iterkey():
+    d = dict(a=1, b=2, c=3)
+    dw = DictWrapper(d)
+
+    assert ['a']==list(dw.iterkey('a'))
+    assert ['a.b']==list(dw.iterkey('a.b'))
+    assert ['a', 'b']==list(dw.iterkey(('a', 'b')))
+    assert [1]==list(dw.iterkey(1))
+    assert [1.0]==list(dw.iterkey(1.0))
+
+def test_dictwrapper_11_iterkey():
+    d = dict(a=1, b=2, c=3)
+    dw = DictWrapper(d,  split='.')
+
+    assert ['a']==list(dw.iterkey('a'))
+    assert ['a', 'b']==list(dw.iterkey('a.b'))
+    assert ['a', 'b']==list(dw.iterkey(('a', 'b')))
+    assert [1]==list(dw.iterkey(1))
+    assert [1.0]==list(dw.iterkey(1.0))
 

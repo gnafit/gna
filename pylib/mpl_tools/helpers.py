@@ -124,6 +124,7 @@ def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
 def savefig(name, *args, **kwargs):
     """Save fig and print output filename"""
     close = kwargs.pop('close', False)
+    separator = kwargs.pop('sep', False)
     if name:
         if isinstance(name, list):
             for n in name:

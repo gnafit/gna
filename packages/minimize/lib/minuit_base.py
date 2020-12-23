@@ -24,8 +24,10 @@ class MinuitBase(MinimizerBase):
         return self._label
 
     def setuppars(self):
-        if not self.parspecs.modified:
-            return
+#         Comment out for good working of minimizer-v1
+#         Issue #148(https://git.jinr.ru/gna/gna/-/issues/148)
+#         if not self.parspecs.modified:
+#             return
 
         self.update_minimizable()
 
@@ -62,12 +64,13 @@ class MinuitBase(MinimizerBase):
         self.setuppars()
         with self.parspecs:
             with FitResult() as fr:
-                self.Minimize()
+                success=self.Minimize()
 
             argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
             errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
+            status = self.Status()
             fr.set(x=argmin, errors=errors, fun=self.MinValue(),
-                   success=not self.Status(), message='',
+                   success=success, message='{} ({})'.format(StatusCodes.get(status, StatusCodes['unknown']), status),
                    minimizer=self.label, nfev=int(self.NCalls())
                     )
             self._result = fr.result
@@ -111,3 +114,14 @@ class MinuitBase(MinimizerBase):
 
         print( ':', low[0], up[0] )
         return [ low[0], up[0] ]
+
+StatusCodes = {
+        0: 'Minimization converged',
+        1: 'Covar was made pos def',
+        2: 'Hesse is not valid',
+        3: 'Edm is above max',
+        4: 'Reached call limit',
+        5: 'Covar is not pos def',
+        6: "unknown failure",
+        'unknown': 'Unknown status code'
+}

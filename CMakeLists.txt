@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(GlobalNuAnalysis2 VERSION 0.0.0)
+include(cmake/ccache_support.cmake)
+
+project(GlobalNuAnalysis2 LANGUAGES C CXX VERSION 0.1.1)
 set(LIBNAME GlobalNuAnalysis2)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")

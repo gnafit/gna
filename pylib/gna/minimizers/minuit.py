@@ -5,11 +5,11 @@ import time
 from . import spec
 from collections import OrderedDict
 
+ROOT.TMinuitMinimizer.UseStaticMinuit(False)
 class Minuit(ROOT.TMinuitMinimizer):
     def __init__(self, statistic, pars=[]):
         super(Minuit, self).__init__()
 
-        ROOT.TMinuitMinimizer.UseStaticMinuit(False)
 
         self.statistic = statistic
 
@@ -181,8 +181,6 @@ class Minuit(ROOT.TMinuitMinimizer):
         clock = time.perf_counter() - clock
         wall = time.time() - wall
 
-        self.poppars()
-
         argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
         errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
 
@@ -201,6 +199,8 @@ class Minuit(ROOT.TMinuitMinimizer):
 
         if profile_errors:
             self.profile_errors(profile_errors, self.result)
+
+        self.poppars()
 
         return self.result
 

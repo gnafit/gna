@@ -644,7 +644,6 @@ class exp(baseexp):
         # Detector effects initialization
         self.formula['det_effects_base'] = [
             'eres_matrix| evis_hist()',
-            '__lsnl_dummy[d,l]',
             'lsnl_edges| evis_hist(), escale[d]*evis_edges()*sum[l]| lsnl_weight[l] * lsnl_component[l]()'
             ]
 

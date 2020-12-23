@@ -59,6 +59,7 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 
     returns pyplot.plot() result
     """
+    fcn = kwargs.pop('fcn', None)
     if isinstance(outputx, (N.ndarray, list)):
         pointsx=outputx
     else:
@@ -81,6 +82,9 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
         asort = N.argsort(pointsx)
         pointsx=pointsx[asort]
         pointsy=pointsy[asort]
+
+    if fcn:
+        pointsx, pointsy = fcn(pointsx, pointsy)
 
     return Plotter.plot(pointsx, pointsy, *args, **kwargs )
 

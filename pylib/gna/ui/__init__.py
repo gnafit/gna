@@ -114,3 +114,6 @@ class basecmd(object):
 
     def run(self):
         pass
+
+    def _exception(self, msg, name=''):
+        return Exception('{}: {}'.format(name or type(self).__name__, msg))
