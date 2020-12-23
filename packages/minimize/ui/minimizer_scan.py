@@ -6,7 +6,7 @@ from packages.minimize.lib import minimizers
 from packages.minimize.lib.minpars import MinPars
 from packages.minimize.lib.scanminimizer import ScanMinimizer
 
-class cmd(basecmd):
+class minimizer_scan(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('name', help='Minimizer name')
@@ -18,14 +18,24 @@ class cmd(basecmd):
         parser.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit2',
                                     help='Minimizer type {%(choices)s}', metavar='minimizer')
 
+        parser.add_argument('-s', '--strict', action='store_true', help='raise exception if some parameters are skipped')
         parser.add_argument('-v', '--verbose', action='count', default=0, help='increase verbosity level')
 
     def init(self):
         self.statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())
         self.minpars = self.env.future['parameter_groups'][self.opts.pargroup]
-        self.minpars = MinPars(self.minpars)
+        self.minpars = MinPars(self.minpars, check=self.opts.statistic)
         self.gridpars = self.env.future['pargrid'][self.opts.pargrid]
+
+        if self.minpars._skippars:
+            print('Minimizer {}: skip {} parameters not affecting the function'.format(self.opts.name, len(self.minpars._skippars)))
+
+            if self.opts.strict:
+                raise self._exception('Some parameters are skipped')
+
         if self.opts.verbose>1:
+            if self.minpars._skippars:
+                print('Skip {} parameters:'.format(len(self.minpars._skippars)), [p.qualifiedName() for p in self.minpars._skippars])
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
         minimizerclass = minimizers[self.opts.type]

@@ -135,17 +135,17 @@ protected:
           return Sin12.value()*Cos13.value();
         })
       .add(&V[0][2], {&Sin13, &Phase}, [&]() {
-          return Sin13.value()*Phase.value();
+          return Sin13.value()*Phase.complex();
         })
       .add(&V[1][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
             -Sin12.value()*Cos23.value()
-            -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
+            -Cos12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
         })
       .add(&V[1][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
              Cos12.value()*Cos23.value()
-            -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.value();
+            -Sin12.value()*Sin23.value()*Sin13.value()*PhaseC.complex();
         })
       .add(&V[1][2], {&Cos13, &Sin23}, [&]() {
           return Sin23.value()*Cos13.value();
@@ -153,12 +153,12 @@ protected:
       .add(&V[2][0], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
             Sin12.value()*Sin23.value()
-            -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
+            -Cos12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
         })
       .add(&V[2][1], {&Sin12, &Cos12, &Sin13, &Sin23, &Cos23, &PhaseC}, [&]() {
           return
             -Cos12.value()*Sin23.value()
-            -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.value();
+            -Sin12.value()*Cos23.value()*Sin13.value()*PhaseC.complex();
         })
       .add(&V[2][2], {&Cos13, &Cos23}, [&]() {
           return Cos23.value()*Cos13.value();

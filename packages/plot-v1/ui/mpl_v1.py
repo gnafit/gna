@@ -68,6 +68,7 @@ class cmd(basecmd):
         if self._fig is None:
             from matplotlib import pyplot as plt
             self._fig = plt.gcf()
+            self._ax = None
         return self._fig
 
     def configure_mpl(self):
@@ -104,6 +105,7 @@ class cmd(basecmd):
             if not self.opts.figure:
                 self.opts.figure={}
             plt.figure(**self.opts.figure)
+            self._ax = None
 
     def configure_figure1(self):
         from matplotlib import pyplot as plt
@@ -138,7 +140,7 @@ class cmd(basecmd):
         if self.opts.powerlimits:
             axis, pmin, pmax = self.opts.powerlimits
             fmt=getattr(self.ax, '{axis}axis'.format(axis=axis)).get_major_formatter()
-            fmt.set_powerlimits(map(float, (pmin, pmax)))
+            fmt.set_powerlimits(tuple(map(float, (pmin, pmax))))
             fmt.useMathText=True
 
         if self.opts.grid:

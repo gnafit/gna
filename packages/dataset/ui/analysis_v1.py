@@ -8,10 +8,11 @@ from gna.dataset import Dataset
 from gna import constructors as C
 from gna.parameters.parameter_loader import get_parameters
 
-class cmd(basecmd):
+class analysis_v1(basecmd):
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
         self.dataset = None
+        self.opts.name = self.opts.name1 or self.opts.name
 
         if self.opts.observables:
             if len(self.opts.observables)!=len(self.opts.datasets):
@@ -21,16 +22,17 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         name = parser.add_mutually_exclusive_group(required=True)
         name.add_argument('name', nargs='?', help='Dataset name', metavar='dataset')
-        name.add_argument('-n', '--name', dest='name', help='analysis name', metavar='analysis')
+        name.add_argument('-n', '--name', dest='name1', help='analysis name', metavar='analysis')
 
         parser.add_argument('-d', '--datasets', nargs='+', required=True,
                             type=env.parts.dataset,
                             metavar='dataset', help='datasets to use')
         parser.add_argument('-p', '--cov-parameters', metavar='pargroup', help='parameters for the covariance matrix')
+        parser.add_argument('--cov-strict', action='store_true', help='raise exception in case there are skept parameters')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
         parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data')
-        parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
+        parser.add_argument('-v', '--verbose', action='count', help='verbose mode')
 
     def __extract_obs(self, obses):
         for obs in obses:
@@ -49,7 +51,14 @@ class cmd(basecmd):
             except KeyError:
                 raise Exception('Unable to get pargroup {}'.format(self.opts.cov_parameters))
 
-            cov_parameters = list(cov_parameters.values())
+            cov_parameters_all = list(cov_parameters.values())
+            cov_parameters, skip_parameters = partition(lambda par: par_influences(par, dataset.data.keys()), cov_parameters_all)
+            if skip_parameters:
+                print('Skip {} cov parameters as they do not affect the model'.format(len(skip_parameters)))
+                if self.opts.verbose>1:
+                    print(' ', [p.qualifiedName() for p in skip_parameters])
+                if self.opts.cov_strict:
+                    raise self._exception('Some parameters do not affect the model.')
         else:
             cov_parameters = []
 
@@ -103,7 +112,23 @@ class cmd(basecmd):
             i = str(i)
             storage[i] = dict(theory=block.theory, data=block.data, L=block.cov.single())
 
-    __tldr__ =  """\
+def par_influences(parameter, observables):
+    for observable in observables:
+        if parameter.influences(observable):
+            return True
+    return False
+
+def partition(pred, iterable):
+    trues = []
+    falses = []
+    for item in iterable:
+        if pred(item):
+            trues.append(item)
+        else:
+            falses.append(item)
+    return trues, falses
+
+analysis_v1.__tldr__ =  """\
                 Creates a named analysis, i.e. a triplet of theory, data and covariance matrix. The covariance matrix
                 may be diagonal and contain only statistical uncertainties or contain a systematic part as well.
 

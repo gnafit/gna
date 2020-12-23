@@ -11,12 +11,15 @@ from gna import constructors as C
 
 class cmd(basecmd):
     pull_vararray, pull_centrals, pull_sigmas2, pull_covariance = None, None, None, None
+    def __init__(self, *args, **kwargs):
+        basecmd.__init__(self, *args, **kwargs)
+        self.opts.name = self.opts.name1 or self.opts.name
 
     @classmethod
     def initparser(cls, parser, env):
         name = parser.add_mutually_exclusive_group(required=True)
         name.add_argument('name', nargs='?', help='Dataset name', metavar='dataset')
-        name.add_argument('-n', '--name', dest='name', help='Dataset name', metavar='dataset')
+        name.add_argument('-n', '--name', dest='name1', help='dataset name', metavar='dataset')
 
         pull = parser.add_mutually_exclusive_group()
         pull.add_argument('--pull', action='append', help='Parameters to be added as pull terms')

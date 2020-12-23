@@ -38,7 +38,7 @@ class reactor_anu_spectra_v06(TransformationBundle):
 
     @staticmethod
     def _provides(cfg):
-        return (), (cfg.name,)
+        return (), tuple(cfg.name+s for s in ('', '_enu', '_scale'))
 
     def build(self):
         model_edges_t = C.Points( self.model_edges, ns=self.namespace )
@@ -57,6 +57,8 @@ class reactor_anu_spectra_v06(TransformationBundle):
             else:
                 tmp.vararray.setLabel('n_i')
                 self.free_weights = tmp
+
+            self.set_output(self.cfg.name+'_scale', None, self.free_weights.single())
 
         self.interp_expo = interp_expo = R.InterpExpo(ns=self.reac_ns)
         sampler = interp_expo.transformations.front()
@@ -97,6 +99,8 @@ class reactor_anu_spectra_v06(TransformationBundle):
             self.set_output(self.cfg.name, it, interp_output)
 
             self.context.objects[('spectrum', isotope)] = spectrum_t
+
+        self.set_output(self.cfg.name+'_enu', None, model_edges_t.single())
 
     def load_data(self):
         """Read raw input spectra"""

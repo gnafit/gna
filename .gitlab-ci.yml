@@ -19,10 +19,9 @@ build:
     artifacts:
         paths:
             - test_results
-
     only:
-    - master
-    - feature-datatype
+        - master
+        - merge_requests
 
 allure:
     stage: allure

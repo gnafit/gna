@@ -64,6 +64,8 @@ class DictWrapper(ClassWrapper):
             for sk in key:
                 for ssk in self.iterkey(sk):
                         yield ssk
+        else:
+            yield key
 
     def splitkey(self, key):
         it = self.iterkey(key)
