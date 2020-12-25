@@ -67,10 +67,10 @@ void Integrator2Base::check_base(TypesFunctionArgs& fargs){
                                );
     }
 
-    if((m_xorders<1).any() || (m_yorders<1).any()){
+    if((m_xorders<0).any() || (m_yorders<0).any()){
         std::cerr<<"X orders: "<<m_xorders<<std::endl;
         std::cerr<<"Y orders: "<<m_yorders<<std::endl;
-        throw std::runtime_error("All integration orders should be >=1");
+        throw std::runtime_error("All integration orders should be >=0");
     }
 }
 
@@ -89,7 +89,12 @@ void Integrator2Base::integrate(FunctionArgs& fargs){
           size_t y_offset=0;
           for (size_t iy = 0; iy < static_cast<size_t>(m_yorders.size()); ++iy) {
               size_t ny = m_yorders[iy];
-              ret(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
+              if(nx>0 && ny>0){
+                  ret(ix, iy) = prod.block(x_offset, y_offset, nx, ny).sum();
+              }
+              else{
+                  ret(ix, iy) = 0.0;
+              }
               y_offset+=ny;
           }
           x_offset+=nx;

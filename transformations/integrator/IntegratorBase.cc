@@ -65,13 +65,13 @@ void IntegratorBase::check_base(TypesFunctionArgs& fargs){
         throw fargs.args.error(fargs.args[0], "inconsistent function size");
     }
 
-    if((m_orders<(1+m_shared_edge)).any()){
+    if((m_orders<(2*int(m_shared_edge))).any()){
         std::cerr<<m_orders<<std::endl;
         if(m_shared_edge){
           throw std::runtime_error("All integration orders should be >=2");
         }
         else{
-          throw std::runtime_error("All integration orders should be >=1");
+          throw std::runtime_error("All integration orders should be >=0");
         }
     }
 }
@@ -86,13 +86,18 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
         auto* data = prod.data();
         auto* order = m_orders.data();
         for (int i = 0; i < m_orders.size(); ++i) {
-            auto* data_next=std::next(data, *order);
-            *ret = std::accumulate(data, data_next, 0.0);
-            if(m_shared_edge){
-                data=prev(data_next);
+            if(*order){
+                auto* data_next=std::next(data, *order);
+                *ret = std::accumulate(data, data_next, 0.0);
+                if(m_shared_edge){
+                    data=prev(data_next);
+                }
+                else{
+                    data=data_next;
+                }
             }
             else{
-                data=data_next;
+                *ret = 0.0;
             }
             advance(order,1);
             advance(ret,1);
