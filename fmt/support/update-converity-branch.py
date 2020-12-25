@@ -3,7 +3,6 @@
 # It is not done automatically because Coverity Scan limits
 # the number of submissions per day.
 
-from __future__ import print_function
 import shutil, tempfile
 from subprocess import check_output, STDOUT
 

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from collections import OrderedDict
 
@@ -153,4 +151,3 @@ class set_context(object):
     def __exit__(self, *args, **kwargs):
         for cntx in reversed(self.chain):
             cntx.__exit__(*args, **kwargs)
-

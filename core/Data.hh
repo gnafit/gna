@@ -135,6 +135,10 @@ struct DataType {
   void preallocated(int *buf)    { buffer = static_cast<void*>(buf); }
   void preallocated(size_t *buf) { buffer = static_cast<void*>(buf); }
 
+  bool point_same(const DataType& other) {
+      return this->buffer == other.buffer;
+  };
+
   DataKind kind = DataKind::Undefined;                         ///< DataKind: points (array) or histogram?
   std::vector<size_t> shape;                                   ///< Data dimensions.
 

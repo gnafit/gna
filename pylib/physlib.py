@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
 # Here we might collect some useful common things
 from math import  pow, sqrt
@@ -178,6 +177,3 @@ addDoubleTheta(2018, 'sinSqtheta12')
 
 pc = PhysicsConstants()
 percent = 0.01
-
-
-

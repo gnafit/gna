@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -125,7 +123,8 @@ class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
             par.setLabel( 'Uncorrelated energy scale for '+it.current_format('{autoindex}') )
             self.pars[it.current_values()]=parname
 
-def interpolate( (x, y), edges):
+def interpolate( xy, edges):
+    x, y = xy
     fcn = interp1d( x, y, kind='linear', bounds_error=False, fill_value='extrapolate' )
     res = fcn( edges )
     return res

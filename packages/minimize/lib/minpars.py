@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 import ROOT
 import numpy as np
 from collections import OrderedDict
@@ -23,8 +21,15 @@ class MinPar(object):
     def setup(self, **kwargs):
         self.name  = self._par.qualifiedName()
         self.fixed = kwargs.pop('fixed', self._par.isFixed())
-        self.vmin = kwargs.pop('vmin', None)
-        self.vmax = kwargs.pop('vmax', None)
+        limits = self._par.limits()
+        if len(limits) == 1:
+            left, right = limits[0]
+        elif len(limits) > 1:
+            raise Exception("More borders than needed")
+        else:
+            left, right = None, None
+        self.vmin = kwargs.pop('vmin', left)
+        self.vmax = kwargs.pop('vmax', right)
         self.constrained = kwargs.pop('constrained', False)
         self.scanvalues = kwargs.pop('scanvalues', None)
 
@@ -113,14 +118,18 @@ class MinPar(object):
         # No need to modify the base as it does not affect the minimization behaviour (it is just a flag)
 
 class MinPars(object):
-    def __init__(self, pars):
+    def __init__(self, pars, check):
         self._specs=OrderedDict()
         self._parmap=OrderedDict()
         self._modified=True
         self._resized=True
 
+        self._skippars=[]
         for k, v in pars.items():
-            self.addpar(v)
+            if v.influences(check):
+                self.addpar(v)
+            else:
+                self._skippars.append(v)
 
     def __str__(self):
         return str(self._specs)
@@ -221,3 +230,19 @@ class MinPars(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.poppars()
+
+def par_influences(parameter, observables):
+    for observable in observables:
+        if parameter.influences(observable):
+            return True
+    return False
+
+def partition(pred, iterable):
+    trues = []
+    falses = []
+    for item in iterable:
+        if pred(item):
+            trues.append(item)
+        else:
+            falses.append(item)
+    return trues, falses

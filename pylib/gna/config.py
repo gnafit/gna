@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """GNA configuration library
 the global configuration is read from './config' folder

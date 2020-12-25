@@ -15,7 +15,7 @@ private:
 public:
     arrayview(T* ptr, size_t size) : m_buffer(ptr), m_size(size) { }
 
-    arrayview(size_t size) : m_size(size) {
+    arrayview(int size) : m_size(size) {
         if(!size){
             return;
         }
@@ -31,7 +31,7 @@ public:
         }
     }
     arrayview(const arrayviewType& other) : arrayview(other.size()) { *this = other; }
-    arrayview(const std::initializer_list<T>& other) : arrayview(other.size()) { *this = other; }
+    arrayview(std::initializer_list<T> other) : arrayview(other.size()) { *this = other; }
     arrayview(const std::complex<T>& other) : arrayview(2) { this->complex() = other; }
 
     arrayview(size_t size, allocatorType* allocator) : m_buffer(allocator->allocate(size)), m_size(size) {
@@ -39,7 +39,7 @@ public:
         m_offset = m_buffer - m_root;
     }
     arrayview(const arrayviewType& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
-    arrayview(const std::initializer_list<T>& other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
+    arrayview(std::initializer_list<T> other, allocatorType* allocator) : arrayview(other.size(), allocator) { *this = other; }
 
     T& operator[](size_t i) noexcept { return m_buffer[i]; }
     const T& operator[](size_t i) const noexcept { return m_buffer[i]; }
@@ -52,15 +52,15 @@ public:
 
     arrayview<T>& operator=(const arrayview<T>& other){ copyfrom(other); return *this; }
     arrayview<T>& operator=(const std::vector<T>& other){ copyfrom(other); return *this; }
-    arrayview<T>& operator=(const std::initializer_list<T>& other){ copyfrom(other); return *this; }
+    arrayview<T>& operator=(std::initializer_list<T> other){ copyfrom(other); return *this; }
 
     bool operator==(const arrayview<T>& other) const noexcept { return equal(other); }
     bool operator==(const std::vector<T>& other) const noexcept { return equal(other); }
-    bool operator==(const std::initializer_list<T>& other) const noexcept { return equal(other); }
+    bool operator==(std::initializer_list<T> other) const noexcept { return equal(other); }
 
     bool operator!=(const arrayview<T>& other) const noexcept { return notequal(other); }
     bool operator!=(const std::vector<T>& other) const noexcept { return notequal(other); }
-    bool operator!=(const std::initializer_list<T>& other) const noexcept { return notequal(other); }
+    bool operator!=(std::initializer_list<T> other) const noexcept { return notequal(other); }
 
     template<class Other>
         bool equal(const Other& other) const noexcept {
@@ -100,4 +100,3 @@ private:
     const T*           m_root{nullptr};
     size_t             m_offset{0u};
 };
-

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 def balanced_pair(s, start=0):
     level = 0
@@ -17,7 +16,7 @@ def balanced_pair(s, start=0):
     return start+i
 
 def open_fcn( s ):
-    s = s.replace('\n','')
+    s = s.replace('\n', '')
     while '|' in s:
         start = s.index('|')
         end = balanced_pair( s, start )
@@ -26,4 +25,3 @@ def open_fcn( s ):
         s=''.join( [ pre, '(', mid, ')', post ] )
 
     return s
-

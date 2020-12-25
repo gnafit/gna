@@ -1,13 +1,23 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
-
 import numpy as np
 import ROOT
 import itertools as it
 import types
+import inspect
+
+# breaking change in ROOT 6.22 >= due to new PyROOT
+try:
+    import cppyy
+    Template = cppyy._cpython_cppyy.Template
+    def istemplate(cls):
+        return isinstance(cls, Template)
+except AttributeError:
+    # ROOT <= 6.22 or 6.22 with legacy PyROOT
+    def istemplate(cls):
+        return not isinstance(cls, ROOT.PyRootType)
+
 
 ROOT.GNAObjectT
-provided_precisions = list(ROOT.GNA.provided_precisions())
+provided_precisions = [str(prec) for prec in ROOT.GNA.provided_precisions()]
 
 def patchGNAclass(cls):
     if '__original_init__' in cls.__dict__:
@@ -54,7 +64,7 @@ class GNAObjectTemplates(object):
 
     @staticmethod
     def patchGNATemplate(template):
-        if not isinstance(template, types.InstanceType):
+        if inspect.isclass(template):
             return
 
         for pp in provided_precisions:
@@ -64,24 +74,18 @@ class GNAObjectTemplates(object):
 GNAObjectTemplates=GNAObjectTemplates(ROOT.GNA, 'GNAObjectTemplates')
 
 def patchSimpleDict(cls):
-    def itervalues(self):
+    def values(self):
         for i in range(self.size()):
             yield self.at(i)
 
-    def values(self):
-        return list(itervalues(self))
-
-    def iterkeys(self):
+    def keys(self):
         for i in range(self.size()):
             yield self.at(i).name()
 
     def __contains__(self, key):
         return key in keys(self)
 
-    def keys(self):
-        return list(iterkeys(self))
-
-    def iteritems(self):
+    def items(self):
         for i in range(self.size()):
             yield self.at(i).name(), self.at(i)
 
@@ -89,7 +93,7 @@ def patchSimpleDict(cls):
         return self.size()
 
     def __iter__(self):
-        return self.iterkeys()
+        return iter(self.keys())
 
     def __getattr__(self, attr):
         if attr in self:
@@ -104,13 +108,10 @@ def patchSimpleDict(cls):
             return default
 
     def __dir__(self):
-        return dir(cls) + self.keys()
+        return dir(cls) + list(self.keys())
 
-    cls.itervalues = itervalues
     cls.values = values
-    cls.iterkeys = iterkeys
     cls.keys = keys
-    cls.iteritems = iteritems
     cls.__contains__ = __contains__
     cls.__len__ = __len__
     cls.__iter__ = __iter__
@@ -174,22 +175,18 @@ def setup(ROOT):
     if hasattr( ROOT, '__gna_patched__' ) and ROOT.__gna_patched__:
         return
     ROOT.__gna_patched__ = True
-
-    # Catch C++ exceptions
-    from gna.core.exceptions import load_user_exceptions
-    load_user_exceptions()
-
     ROOT.GNAObjectT
-    provided_precisions = ROOT.GNA.provided_precisions()
 
     simpledicts=[]
     for ft in provided_precisions:
+        obj = ROOT.GNAObjectT(ft, ft)
+        descr = ROOT.TransformationDescriptorT(ft, ft)
         simpledicts += [
-            ROOT.GNAObjectT(ft,ft).Variables,
-            ROOT.GNAObjectT(ft,ft).Evaluables,
-            ROOT.GNAObjectT(ft,ft).Transformations,
-            ROOT.TransformationDescriptorT(ft,ft).Inputs,
-            ROOT.TransformationDescriptorT(ft,ft).Outputs,
+            obj.Variables,
+            obj.Evaluables,
+            obj.Transformations,
+            descr.Inputs,
+            descr.Outputs,
         ]
     simpledicts+=[ROOT.EvaluableDescriptor.Sources]
     for cls in simpledicts:
@@ -197,9 +194,9 @@ def setup(ROOT):
 
     patchVariableDescriptor(ROOT.VariableDescriptor)
     for ft in provided_precisions:
-        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft,ft))
-        patchDescriptor(ROOT.InputDescriptorT(ft,ft))
-        patchDescriptor(ROOT.OutputDescriptorT(ft,ft))
+        patchTransformationDescriptor(ROOT.TransformationDescriptorT(ft, ft))
+        patchDescriptor(ROOT.InputDescriptorT(ft, ft))
+        patchDescriptor(ROOT.OutputDescriptorT(ft, ft))
 
     patchStatistic(ROOT.Statistic)
 
@@ -220,8 +217,9 @@ def setup(ROOT):
 
     GNAObjectBase = ROOT.GNAObjectT('void', 'void')
     def patchcls(cls):
-        # If the object is template, try to patch its instance
-        if not isinstance(cls, ROOT.PyRootType):
+        if not inspect.isclass(cls):
+            return cls
+        if istemplate(cls):
             return cls
         if cls.__name__.endswith('_meta') or cls.__name__ in ignored_classes:
             return cls
@@ -233,7 +231,13 @@ def setup(ROOT):
     t = type(ROOT)
     origgetattr = t.__getattr__
     def patchclass(self, name):
-        cls = patchcls(origgetattr(self, name))
+        try:
+            # modern PyROOT
+            cls = patchcls(origgetattr(name))
+        except TypeError:
+            # legacy PyROOT
+            cls = patchcls(origgetattr(self, name))
+
         self.__dict__[name] = cls
         return cls
     t.__getattr__ = patchclass
@@ -265,12 +269,12 @@ def patchROOTClass(classes=None, methods=None):
         return classes
 
     # Used as function returning decorator
-    if not isinstance(classes, (list,tuple)):
+    if not isinstance(classes, (list, tuple)):
         classes = (classes,)
 
     classes = [getattr(ROOT, o) if isinstance(o, str) else o for o in classes]
 
-    if methods is not None and not isinstance(methods, (list,tuple)):
+    if methods is not None and not isinstance(methods, (list, tuple)):
         methods = (methods,)
 
     def decorator(function):

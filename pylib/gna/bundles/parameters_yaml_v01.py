@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters_yaml v01 bundle
 Based on: parameters_v03
@@ -8,10 +7,9 @@ New features include:
     - [v01] read data from yaml file
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
-import numpy as N
+import numpy as np
 from gna import constructors as C
 import yaml
 
@@ -43,7 +41,7 @@ class parameters_yaml_v01(TransformationBundle):
 
         for field in ('values', 'uncertainties', 'correlations'): #, 'covariance'
             if field in data:
-                data[field] = N.asanyarray(data[field])
+                data[field] = np.asanyarray(data[field])
 
         if 'correlations' in data:
             if self.cfg.get('verbose', 0)>1:
@@ -111,48 +109,74 @@ class parameters_yaml_v01(TransformationBundle):
             self._par_container.append(container)
 
             if 'correlations' in self.data:
-                self._checkmatrix(self.data['correlations'], container, is_correlation=True)
-                ch.covariate_pars(container, self.data['correlations'])
+                cormat = self.data['correlations']
+                self._checkmatrix(cormat, container, is_correlation=True)
+                cormat = self.filter_matrix(cormat, container)
+
+                if cormat is not None:
+                    ch.covariate_pars(container, cormat)
         # elif 'covariance' in self.cfg:
             # self._load_covariance_matrix()
 
     def build(self):
         pass
 
-    def _load_covariance_matrix(self):
-        filename = self.cfg.get('covariance', None)
-        assert filename
+    def filter_matrix(self, mat, par_container):
+        npars = len(par_container)
+        if npars==1:
+            # No correlations possible
+            return None
 
-        covmat = N.loadtxt(filename)
-        if self.cfg.get('verbose', 0)>1:
-            print('Load covariance matrix from %s:'%filename)
-            print(covmat)
+        dim   = mat.shape[0]
+        if npars==dim:
+            # no reduction needed
+            return mat
 
-        sigma_inv=N.diag(covmat.diagonal()**-0.5)
-        corrmat = N.matmul(N.matmul(sigma_inv, covmat), sigma_inv)
+        # Remove unnecessary rows and columns from the matrix
+        names = [par.name() for par in par_container]
+        for i, name in enumerate(reversed(self.data['names'])):
+            if name in names:
+                continue
 
-        if self.cfg.get('verbose', 0)>1:
-            print('Compute correlation matrix from:')
-            print(corrmat)
+            i=dim-i-1
+            mat = np.delete(mat, i, 0)
+            mat = np.delete(mat, i, 1)
 
-        self._checkmatrix(covmat, is_correlation=False)
+        return mat
 
-        self.covmat = covmat
-        self.corrmat = corrmat
+    # def _load_covariance_matrix(self):
+        # filename = self.cfg.get('covariance', None)
+        # assert filename
 
-        for par, sigma2 in zip(self._par_container, covmat.diagonal()):
-            par.setSigma(sigma2**0.5)
+        # covmat = np.loadtxt(filename)
+        # if self.cfg.get('verbose', 0)>1:
+            # print('Load covariance matrix from %s:'%filename)
+            # print(covmat)
 
-        from gna.parameters import covariance_helpers as ch
-        ch.covariate_pars(self._par_container, corrmat)
+        # sigma_inv=np.diag(covmat.diagonal()**-0.5)
+        # corrmat = np.matmul(np.matmul(sigma_inv, covmat), sigma_inv)
 
+        # if self.cfg.get('verbose', 0)>1:
+            # print('Compute correlation matrix from:')
+            # print(corrmat)
+
+        # self._checkmatrix(covmat, is_correlation=False)
+
+        # self.covmat = covmat
+        # self.corrmat = corrmat
+
+        # for par, sigma2 in zip(self._par_container, covmat.diagonal()):
+            # par.setSigma(sigma2**0.5)
+
+        # from gna.parameters import covariance_helpers as ch
+        # ch.covariate_pars(self._par_container, corrmat)
 
     def _checkmatrix(self, mat, par_container, is_correlation):
         if mat.shape[0]!=mat.shape[1]:
             raise Exception('Non square matrix provided:', mat.shape[0], mat.shape[1])
 
-        if len(par_container)!=mat.shape[0]:
-            raise Exception('Unable to set correlation to %i parameters with %ix%i matrix'%(len(pars, mat.shape[0], mat.shape[1])))
+        if len(par_container)>mat.shape[0]:
+            raise Exception('Unable to set correlation to %i parameters with %ix%i matrix'%(len(par_container, mat.shape[0], mat.shape[1])))
 
         mmin, mmax = mat.min(), mat.max()
         if mmin<-1-1.e-12 or mmax>1.0+1.e-12:

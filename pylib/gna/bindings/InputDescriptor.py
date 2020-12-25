@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.bindings import patchROOTClass, DataType, provided_precisions, OutputDescriptor
 import ROOT as R
 from printing import printl, nextlevel
 
-classes = [R.InputDescriptorT(ft,ft) for ft in provided_precisions]
+classes = [R.InputDescriptorT(ft, ft) for ft in provided_precisions]
 
 @patchROOTClass(classes, '__str__')
 def InputDescriptor____str__(self, **kwargs):
@@ -24,5 +22,5 @@ for ft in provided_precisions:
 
 @patchROOTClass(classes, '__gt__')
 @patchROOTClass(classes, '__lt__')
-def InputDescriptor______cmp__(a,b):
+def InputDescriptor______cmp__(a, b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

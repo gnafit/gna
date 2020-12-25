@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function
 import ROOT as R
 import numpy as N
-import root2numpy as R2N
+from . import root2numpy as R2N
 from mpl_tools import helpers
 from matplotlib import pyplot as P
 
@@ -189,7 +187,7 @@ def imshow_hist2( h, *args, **kwargs ):
     res = P.imshow( buf, *args, extent=extent, **kwargs )
     if colorbar:
         cbar = helpers.add_colorbar( res )
-        return res,cbar
+        return res, cbar
 
     return res
 
@@ -239,7 +237,7 @@ def matshow_matrix( self, *args, **kwargs ):
     res = P.matshow(buf, **kwargs)
     if colorbar:
         cbar = helpers.add_colorbar( res )
-        return res,cbar
+        return res, cbar
 
     return res
 
@@ -252,7 +250,7 @@ def imshow_matrix( self, *args, **kwargs ):
     res = P.imshow( buf )
     if colorbar:
         cbar = helpers.add_colorbar( res )
-        return res,cbar
+        return res, cbar
 
     return res
 
@@ -275,4 +273,3 @@ def bind():
     setattr( R.TGraphAsymmErrors, 'errorbar', errorbar_graph_asymm )
 
     setattr( R.TSpline, 'plot', spline_plot )
-

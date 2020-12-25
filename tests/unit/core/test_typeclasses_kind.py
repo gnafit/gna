@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -13,12 +12,14 @@ def test_typeclass_kind_v01():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
+    R.SetOwnership(dt_points, False)
     dt_points.dump(); print()
 
     dt_hist = R.TypeClasses.CheckKindT(context.current_precision())(2)
+    R.SetOwnership(dt_hist, False)
     dt_hist.dump(); print()
 
     obj.add_typeclass(dt_hist)
@@ -35,12 +36,14 @@ def test_typeclass_kind_v02():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt_points = R.TypeClasses.CheckKindT(context.current_precision())(1)
+    R.SetOwnership(dt_points, False)
     dt_points.dump(); print()
 
     dt_hist = R.TypeClasses.CheckKindT(context.current_precision())(2)
+    R.SetOwnership(dt_hist, False)
     dt_hist.dump(); print()
 
     obj.add_typeclass(dt_points)
@@ -54,4 +57,3 @@ def test_typeclass_kind_v02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

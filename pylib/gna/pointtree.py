@@ -1,10 +1,11 @@
 import h5py
 import numpy as np
+import cppyy
 
 class PointTree(object):
     def __init__(self, env, container, mode='r'):
         self.env = env
-        if isinstance(container, basestring):
+        if isinstance(container, str):
             self.root = h5py.File(container, mode)
         else:
             self.root = container
@@ -40,8 +41,8 @@ class PointTree(object):
     def params(self, params):
         self._params = []
         for param in params:
-            if isinstance(param, basestring):
-                self._params.append(self.env.pars[param])
+            if isinstance(param, (str, cppyy.gbl.std.string)):
+                self._params.append(self.env.pars[str(param)])
             else:
                 self._params.append(param)
         self.root.attrs["params"] = ['.'.join([p.ns.path, p.name()]) for p in params]
@@ -54,17 +55,19 @@ class PointTree(object):
             return self.root.create_group(path)
 
     def values(self, node):
-        if isinstance(node, basestring):
+        if isinstance(node, str):
             path = node
         elif isinstance(node, h5py.Group):
             path = node.name
         else:
             raise Exception("unknown pointtree node: `%s'" % repr(node))
-        return [p.cast(str(x)) for p, x in zip(self._params, filter(None, path.rsplit('/')))]
+        return [p.cast(str(x)) for p, x in zip(self._params, [_f for _f in path.rsplit('/') if _f])]
 
     def path(self, values):
         if isinstance(values, str):
             return values
+        if isinstance(values, cppyy.gbl.std.string):
+            return str(values)
         return '/'.join([str(x) for x in values])
 
     def iter(self, depth=None):
@@ -80,20 +83,20 @@ class PointTree(object):
 
         while True:
             try:
-                yield groups[-1][its[-1].next()]
+                yield groups[-1][next(its[-1])]
             except StopIteration:
                 if len(its) == 1:
                     break
-                for i in reversed(range(len(its)-1)):
+                for i in reversed(list(range(len(its)-1))):
                     try:
-                        groups[i+1] = groups[i][its[i].next()]
+                        groups[i+1] = groups[i][next(its[i])]
                     except StopIteration:
                         if i == 0:
                             raise StopIteration()
                         continue
                     for j in range(i+1, len(its)-1):
                         its[j] = iter(groups[j])
-                        groups[j+1] = groups[j][its[j].next()]
+                        groups[j+1] = groups[j][next(its[j])]
                     its[-1] = iter(groups[-1])
 
     def iterall(self, depth=None):

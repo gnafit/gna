@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(GlobalNuAnalysis2)
+include(cmake/ccache_support.cmake)
+
+project(GlobalNuAnalysis2 LANGUAGES C CXX VERSION 0.1.1)
 set(LIBNAME GlobalNuAnalysis2)
 
-# Add ROOT path with FindROOT.cmake
-# Older versions of root has it in etc/cmake, while the newer versions (~6.18) has another path
-list(APPEND CMAKE_MODULE_PATH "$ENV{ROOTSYS}/etc/cmake" "$ENV{ROOTSYS}/builtins/davix/DAVIX-prefix/src/DAVIX/cmake/modules")
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(compiler_selection)
 include(cuda_support)
 
@@ -104,7 +103,6 @@ include(debug_opts)
 add_subdirectory(fmt)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 find_package(Boost 1.40.0 REQUIRED)
 if(Boost_FOUND)
@@ -112,26 +110,22 @@ if(Boost_FOUND)
 else(Boost_FOUND)
     message(FATAL_ERROR "Boost >= 1.40.0 not found")
 endif(Boost_FOUND)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories(SYSTEM "fmt")
 
 find_package(GSL REQUIRED)
-find_package(ROOT REQUIRED)
-# include(${ROOT_USE_FILE})
-link_directories(${ROOT_LIBRARY_DIR})
+find_package(ROOT CONFIG REQUIRED)
+include(${ROOT_USE_FILE})
 
-ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" OPTIONS -interpreteronly)
-
-add_library(${LIBNAME} SHARED ${SOURCES} Dict.cxx ${CONTRIB_SRC})
+add_library(${LIBNAME} SHARED ${SOURCES}  ${CONTRIB_SRC})
+ROOT_GENERATE_DICTIONARY(Dict "${HEADERS}" MODULE ${LIBNAME} OPTIONS -interpreteronly)
 
 if(result)
     set_property(TARGET ${LIBNAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-target_include_directories(${LIBNAME} SYSTEM PRIVATE ${ROOT_INCLUDE_DIR})
 target_include_directories(${LIBNAME} SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(${LIBNAME} PRIVATE  ${ROOT_LIBRARIES} ${CUDA_ADD_LIBS}  -lPyROOT)
+target_link_libraries(${LIBNAME} PRIVATE ROOT::Core ROOT::MathCore ${CUDA_ADD_LIBS})
 target_link_libraries(${LIBNAME} PRIVATE GSL::gsl GSL::gslcblas)
+target_link_libraries(${LIBNAME} PRIVATE Eigen3::Eigen)
 target_link_libraries(${LIBNAME} PRIVATE fmt)
 
 if(GENERATE_PROFILE)

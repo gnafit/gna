@@ -1,3 +1,5 @@
+'''Jacviz v1.0. TODO: full parameter names in plots'''
+
 from gna.ui import basecmd
 from gna import constructors as C
 import os
@@ -10,8 +12,8 @@ from gna.parameters.parameter_loader import get_parameters
 
 class cmd(basecmd):
     """
-Jacviz -- module to build and visualize jacobian matrix, 
-systematic/statistical errors covariation and correlation matrices 
+Jacviz -- module to build and visualize jacobian matrix,
+systematic/statistical errors covariation and correlation matrices
 for chosen groups of parameters of the model
 
 Simple example of using:
@@ -19,7 +21,7 @@ Simple example of using:
 	  -- jacviz --ns H0 -params \           -- calling jacviz module
 	  --groups bkg_rate_fastn bkg_rate_amc bkg_rate_alphan bkg_rate_lihe \  -- the first group of parameters
 	  --groups eres lsnl_weight escale frac_li OffdiagScale \               -- the second group of parameters
-	  --groups fission_fraction_corr eper_fission \                         
+	  --groups fission_fraction_corr eper_fission \
           nominal_thermal_power fastn_shape acc_norm effunc_uncorr pmns \       -- the third group of parameters
 	  --gnames bkg_unc energy_scale reactor_unc \                           -- custom names of chosen groups
 	  --out-fig tmp/dyb/jacviz/dyb.pdf --out-hdf5 tmp/dyb/jacviz/dyb.hdf5   -- save output data and plots
@@ -52,7 +54,7 @@ Simple example of using:
             branch = branch.setdefault(parts[-2], [])
             branch.append(parts[-1])
         return res_dict
- 
+
     def make_jac(self, prediction, cov_pars, gname):
         jac = C.Jacobian()
         par_covs = C.ParCovMatrix()
@@ -97,7 +99,7 @@ Simple example of using:
     def initparser(cls, parser, env):
         parser.add_argument('-n', '--ns', help='Namespece of inited model')
         parser.add_argument('-p', '--params', action='store_true', help='Print parameters in table')
-        parser.add_argument('-g', '--groups', nargs='*', action='append', 
+        parser.add_argument('-g', '--groups', nargs='*', action='append',
                 help='Namespace of parameters for jacobian')
         parser.add_argument('--gnames', nargs='*', help='Names of groups of parameters')
         parser.add_argument('--out-hdf5', help='path/to/output.hdf5')
@@ -110,7 +112,7 @@ Simple example of using:
         if self.opts.gnames:
             gnames = self.opts.gnames
             if len(gnames) != len(groups):
-                raise "Length of groups and name of groups don\'t equal"
+                raise ValueError("Length of groups and name of groups don\'t equal")
         else:
             gnames = [group[0] for group in groups]
         self.DataSaver(gnames)
@@ -140,16 +142,16 @@ Simple example of using:
                         grid.append(obs[1].data().shape[0])
                         print(obs[0]+' added')
         name = splited[0]
-	covmat = C.Covmat()
-	covmat.cov.stat.connect(prediction)
+        covmat = C.Covmat()
+        covmat.cov.stat.connect(prediction)
         covmat.cov.setLabel('Covmat')
         self.data['prediction'] = prediction.data().copy()
-        names_of_parameters = {group: [] for group in gnames}
+#        names_of_parameters = {group: [] for group in gnames}
         for group, gname in zip(groups, gnames):
             cov_pars = get_parameters([name+'.'+g for g in group], drop_fixed=True, drop_free=True)
             cov_names = [x.qualifiedName()[len(name)+1:] for x  in cov_pars]
             jac, par_covs = self.make_jac(prediction, cov_pars, gname)
-            names_of_parameters[gname] = self.PathToDict(cov_pars)
+#            names_of_parameters[gname] = self.PathToDict(cov_pars)
 
             product = np.matmul(jac.data().copy(), par_covs.data().copy())
             product = np.matmul(product.copy(), jac.data().copy().T)
@@ -167,7 +169,7 @@ Simple example of using:
             for gname in gnames:
                 if any(self.data[gname]) is None:
                     raise "None {} for {}".format(self.data_names[key], gname)
-        print(names_of_parameters)
+#        print(names_of_parameters)
 
         if self.opts.out_hdf5:
             path = self.opts.out_hdf5
@@ -212,7 +214,7 @@ Simple example of using:
                         for i in range(1, len(grid)):
                             lvl = i * grid[i] -.5
                             ax.plot([0, data.shape[0]], [lvl, lvl], color='white', alpha=0.5)
-                            ax.plot([lvl, lvl], [0, data.shape[1]], color='white', alpha=0.5) 
+                            ax.plot([lvl, lvl], [0, data.shape[1]], color='white', alpha=0.5)
                     elif key is 'jac':
                         for i in range(1, len(grid)):
                             lvl = i * grid[i]
@@ -232,6 +234,3 @@ Simple example of using:
                     fig.clf()
                     fig.clear()
                     plt.close()
-
-
-

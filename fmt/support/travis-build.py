@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # Build the project on Travis CI.
 
-from __future__ import print_function
 import errno, os, re, shutil, sys, tempfile, urllib
 from subprocess import call, check_call, check_output, Popen, PIPE, STDOUT
 

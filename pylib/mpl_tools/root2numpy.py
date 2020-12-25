@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function, division
 import ROOT as R
 import numpy as N
 
@@ -14,9 +12,39 @@ def get_buffer_hist1( h, flows=False ):
     if flows=False, exclude underflow and overflow
     """
     buf = h.GetArray()
-    buf = N.frombuffer(buf , N.dtype( buf.typecode ), h.GetNbinsX()+2 )
+    buf = N.frombuffer(buf, N.dtype( buf.typecode ), h.GetNbinsX()+2 )
     if not flows: buf = buf[1:-1]
     return buf
+
+def get_buffers_hist1(h):
+    """Get X/Y buffers of 1D histogram"""
+    return get_bin_centers_axis(h.GetXaxis()), get_buffer_hist1(h, flows=False)
+
+def get_buffers_hist2(h):
+    """Get X/Y buffers of 1D histogram"""
+    return get_bin_centers_axis(h.GetXaxis()), get_bin_centers_axis(h.GetYaxis()), get_buffer_hist2(h, flows=False)
+
+def get_buffers_graph_or_hist1(obj):
+    """Get X/Y buffers of eighter 1D histogram or TGraph"""
+    if isinstance(obj, R.TGraph):
+        return get_buffers_graph(obj)
+    if isinstance(obj, R.TH1) and obj.GetDimension()==1:
+        return get_buffers_hist1(obj)
+
+    raise TypeError('The object is not TH1/TGraph: {!s}'.format(obj))
+
+def get_buffers_auto(obj):
+    """Get X/Y buffers of eighter 1D histogram or TGraph"""
+    if isinstance(obj, R.TGraph):
+        return get_buffers_graph(obj)
+    if isinstance(obj, R.TH1) and obj.GetDimension()==1:
+        return get_buffers_hist1(obj)
+    if isinstance(obj, R.TH2) and obj.GetDimension()==2:
+        return get_buffers_hist2(obj)
+    if isinstance(obj, (R.TMatrixD, R.TMatrixF)):
+        return get_buffer_matrix(obj)
+
+    raise TypeError('The object is not TH1/TH2/TGraph/TMatrixD/TMatrixF: {!s}'.format(obj))
 
 def get_err_buffer_hist1( h, flows=False ):
     """Return TH1* histogram error buffer
@@ -39,7 +67,7 @@ def get_buffer_hist2( h, **kwargs ):
     buf = h.GetArray()
     res = N.frombuffer( buf, N.dtype( buf.typecode ), (nx+2)*(ny+2) ).reshape( ( ny+2, nx+2 ) )
     if not kwargs.pop( 'flows', False ):
-        res = res[1:ny+1,1:nx+1]
+        res = res[1:ny+1, 1:nx+1]
 
     if kwargs.pop( 'asmatrix', False ):
         res = numpy.matrix( res )
@@ -63,7 +91,7 @@ def get_err_buffer_hist2( h, **kwargs ):
     res = N.frombuffer( buf, N.dtype( buf.typecode ), (nx+2)*(ny+2) ).reshape( ( ny+2, nx+2 ) )
 
     if not kwargs.pop( 'flows', False ):
-        res = res[1:ny+1,1:nx+1]
+        res = res[1:ny+1, 1:nx+1]
 
     return res
 
@@ -84,7 +112,7 @@ def get_bin_edges_axis( ax, type=False, rep=None ):
     if rep and rep>1:
         res = [ lims ]
         delta = -lims[0]
-        for i in xrange( rep-1 ):
+        for i in range( rep-1 ):
             res.append( res[-1][-1] + lims[1:] + delta )
         lims = N.concatenate( res )
 
@@ -114,10 +142,8 @@ def get_buffers_graph( g ):
     """Get TGraph x and y buffers"""
     npoints = g.GetN()
     if npoints:
-        # return N.frombuffer(g.GetX(), dtype=N.double, count=npoints), \
-               # N.frombuffer(g.GetY(), dtype=N.double, count=npoints)
-        return N.array(g.GetX(), dtype=N.double), \
-               N.array(g.GetY(), dtype=N.double)
+        return (N.frombuffer(g.GetX(), dtype=N.double, count=npoints),
+               N.frombuffer(g.GetY(), dtype=N.double, count=npoints))
 
     return None, None
 
@@ -125,10 +151,10 @@ def get_err_buffers_graph( g ):
     """Get TGraphErrors x and y error buffers"""
     npoints = g.GetN()
     if npoints:
-        # return N.frombuffer(g.GetEX(), dtype=N.double, count=npoints), \
-               # N.frombuffer(g.GetEY(), dtype=N.double, count=npoints)
-        return N.array(g.GetEX(), dtype=N.double), \
-               N.array(g.GetEY(), dtype=N.double)
+        return N.frombuffer(g.GetEX(), dtype=N.double, count=npoints), \
+               N.frombuffer(g.GetEY(), dtype=N.double, count=npoints)
+        #  return N.array(g.GetEX(), dtype=N.double), \
+               #  N.array(g.GetEY(), dtype=N.double)
 
     return None, None
 

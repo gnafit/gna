@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -30,5 +28,3 @@ class rebin_v04(TransformationBundle):
 
                 self.set_input( name, it, rebin.rebin.histin, argument_number=0)
                 self.set_output(name, it, rebin.rebin.histout)
-
-

@@ -1,4 +1,3 @@
-from __future__ import print_function
 from tools.classwrapper import ClassWrapper
 from collections import OrderedDict, Iterable, MutableMapping
 import inspect
@@ -21,6 +20,8 @@ class DictWrapper(ClassWrapper):
 
     def __init__(self, dic, split=None, parent=None, *args, **kwargs):
         if isinstance(dic, DictWrapper):
+            if split is None:
+                split = dic._split
             dic = dic._obj
         self._split = split
         self._type = type(dic)
@@ -63,6 +64,8 @@ class DictWrapper(ClassWrapper):
             for sk in key:
                 for ssk in self.iterkey(sk):
                         yield ssk
+        else:
+            yield key
 
     def splitkey(self, key):
         it = self.iterkey(key)
@@ -72,7 +75,7 @@ class DictWrapper(ClassWrapper):
             return None, None
 
     def get(self, key, *args, **kwargs):
-        if key is ():
+        if key==():
             return self
         key, rest=self.splitkey(key)
 
@@ -87,7 +90,7 @@ class DictWrapper(ClassWrapper):
         return sub.get(rest, *args, **kwargs)
 
     def __getitem__(self, key):
-        if key is ():
+        if key==():
             return self
         key, rest=self.splitkey(key)
 
@@ -101,7 +104,7 @@ class DictWrapper(ClassWrapper):
         return sub[rest]
 
     def __delitem__(self, key):
-        if key is ():
+        if key==():
             raise Exception('May not delete itself')
         key, rest=self.splitkey(key)
 
@@ -147,7 +150,7 @@ class DictWrapper(ClassWrapper):
     __setitem__= set
 
     def __contains__(self, key):
-        if key is ():
+        if key==():
             return True
         key, rest=self.splitkey(key)
 
@@ -177,14 +180,23 @@ class DictWrapper(ClassWrapper):
 
         return new
 
-    def walkitems(self):
-        for k, v in self.items():
+    def walkitems(self, startfromkey=(), appendstartkey=False):
+        v0 = self[startfromkey]
+        k0 = tuple(self.iterkey(startfromkey))
+        if not isinstance(v0, self._wrapper_class):
+            yield k0, v0
+            return
+
+        if not appendstartkey:
+            k0 = ()
+
+        for k, v in v0.items():
             k = k,
             if isinstance(v, self._wrapper_class):
                 for k1, v1 in v.walkitems():
-                    yield k+k1, v1
+                    yield k0+k+k1, v1
             else:
-                yield k, v
+                yield k0+k, v
 
     def walkdicts(self):
         yieldself= True
@@ -197,12 +209,12 @@ class DictWrapper(ClassWrapper):
         if yieldself:
             yield (), self
 
-    def walkkeys(self):
-        for k, v in self.walkitems():
+    def walkkeys(self, startfromkey=()):
+        for k, v in self.walkitems(startfromkey):
             yield k
 
-    def walkvalues(self):
-        for k, v in self.walkitems():
+    def walkvalues(self, startfromkey=()):
+        for k, v in self.walkitems(startfromkey):
             yield v
 
     def visit(self, visitor, parentkey=()):

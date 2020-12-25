@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
 from tutorial import tutorial_image_name, savegraph
 import load
 from gna.env import env

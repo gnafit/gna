@@ -1,4 +1,3 @@
-from __future__ import print_function
 from tools.dictwrapper import DictWrapper, DictWrapperVisitorDemostrator
 import pytest
 from collections import OrderedDict
@@ -26,7 +25,6 @@ def test_dictwrapper_03():
     assert dw.get('d.e')==None
 
     assert tuple(dw.keys())==('a','b','c')
-    assert tuple(dw.iterkeys())==('a','b','c')
 
 @pytest.mark.parametrize('split', [None, '.'])
 def test_dictwrapper_03(split):
@@ -270,4 +268,38 @@ def test_dictwrapper_09_dictcopy():
         assert v._obj is not dw[k]._obj
         assert type(v._obj) is type(dw[k]._obj)
     assert i==2
+
+def test_dictwrapper_09_walk():
+    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dw = DictWrapper(dct)
+
+    keys0 = [ ('a',), ('b', ), ('c',), ('d', 'e'), ('f', 'g', 'h') ]
+    keys = [k for k, v in dw.walkitems()]
+    assert keys==keys0
+
+    assert [(k,v) for k, v in dw.walkitems('a')] == [(('a',), 1)]
+    assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=True)] == [(('d','e'), 4)]
+    assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=False)] == [(('e',), 4)]
+    assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=True)] == [(('f','g', 'h'), 5)]
+    assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=False)] == [(('h',), 5)]
+
+def test_dictwrapper_10_iterkey():
+    d = dict(a=1, b=2, c=3)
+    dw = DictWrapper(d)
+
+    assert ['a']==list(dw.iterkey('a'))
+    assert ['a.b']==list(dw.iterkey('a.b'))
+    assert ['a', 'b']==list(dw.iterkey(('a', 'b')))
+    assert [1]==list(dw.iterkey(1))
+    assert [1.0]==list(dw.iterkey(1.0))
+
+def test_dictwrapper_11_iterkey():
+    d = dict(a=1, b=2, c=3)
+    dw = DictWrapper(d,  split='.')
+
+    assert ['a']==list(dw.iterkey('a'))
+    assert ['a', 'b']==list(dw.iterkey('a.b'))
+    assert ['a', 'b']==list(dw.iterkey(('a', 'b')))
+    assert [1]==list(dw.iterkey(1))
+    assert [1.0]==list(dw.iterkey(1.0))
 

@@ -1,4 +1,3 @@
-from __future__ import print_function
 import os
 
 def iterate_module_paths(name):

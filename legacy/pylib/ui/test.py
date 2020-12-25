@@ -27,7 +27,7 @@ class cmd(basecmd):
     def setupreactor(self):
         env.defparameter('NominalThermalPower', central=2.0, sigma=0.01)
 
-        for isoname in spectra.iteritems():
+        for isoname in spectra.items():
             env.defparameter("weight_{0}".format(isoname), central=weight, sigma=0)
 
     def run(self):
@@ -76,7 +76,7 @@ class cmd(basecmd):
         ibd.jacobian.Ee(integrator.points.x)
         ibd.jacobian.ctheta(integrator.points.y)
         spectrum = ROOT.WeightedSum(vec([a+'_weight' for a in spectra.keys()]), vec(spectra.keys()))
-        for isoname, (fname, weight) in spectra.iteritems():
+        for isoname, (fname, weight) in spectra.items():
             isotope = loadspectrum(fname)
             isotope.f.inputs(ibd.Enu)
             spectrum.sum[isoname](isotope.f)

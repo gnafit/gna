@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Define user constructors for C++ classes to simplify calling from python"""
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 
@@ -12,9 +10,9 @@ from gna.converters import list_to_stdvector as stdvector
 from gna import context
 
 # Import constructors, defined in the submodules
-from Points import Points
-from Histogram import Histogram
-from Histogram import Histogram2d
+from .Points import Points
+from .Histogram import Histogram
+from .Histogram import Histogram2d
 
 def OutputDescriptors(outputs):
     descriptors=[]
@@ -32,7 +30,7 @@ def OutputDescriptors(outputs):
             raise Exception('Expect OutputHandle or SingleOutput object')
         descriptors.append(append)
 
-    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(),context.current_precision()))
+    return stdvector(descriptors, 'OutputDescriptorT<%s,%s>'%(context.current_precision(), context.current_precision()))
 
 def wrap_constructor1(obj, dtype='d'):
     """Define a constructor for an object with signature Obje(size_t n, double*) with single array input"""
@@ -80,6 +78,13 @@ def Sum(outputs=None, **kwargs):
         return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(**kwargs)
 
     return R.GNA.GNAObjectTemplates.SumT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
+
+"""Construct SumSq object from list of SingleOutputs"""
+def SumSq(outputs=None, **kwargs):
+    if outputs is None:
+        return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(**kwargs)
+
+    return R.GNA.GNAObjectTemplates.SumSqT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Sum object from list of SingleOutputs"""
 def MultiSum(outputs=None, **kwargs):
@@ -143,6 +148,14 @@ def Product(outputs=None, **kwargs):
 
     return R.GNA.GNAObjectTemplates.ProductT(context.current_precision())(*args, **kwargs)
 
+"""Construct ConditionalProduct object from list of SingleOutputs"""
+def ConditionalProduct(nprod, condition, outputs=None, **kwargs):
+    args=(nprod, condition)
+    if outputs is not None:
+        args=args+(OutputDescriptors(outputs),)
+
+    return R.ConditionalProduct(*args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def ProductBC(outputs=None, **kwargs):
     if outputs is None:
@@ -163,6 +176,26 @@ def Bins(array, *args, **kwargs):
     if len(a.shape)!=1:
         raise Exception( 'Edges should be 1d array' )
     return R.Bins( a, a.size-1, *args, **kwargs )
+
+def OscProb3(*args):
+    """OscProb3 wrapper
+
+    Aguments:
+       Neutrino from,
+       Neutrino to,
+       std::string l_name="L",
+       bool modecos=true,
+       std::vector<std::string> dmnames={}
+    """
+    if len(args)>=5:
+        args = list(args)
+        args[4] = stdvector(args[4])
+
+    return R.GNA.GNAObjectTemplates.OscProb3T(context.current_precision())(*args)
+
+#
+# Construct integrators
+#
 
 def _wrap_integrator_1d(classname):
     def newfcn(edges, orders, *args, **kwargs):
@@ -222,4 +255,3 @@ Parameter             = _wrap_parameter('Parameter')
 GaussianParameter     = _wrap_parameter('GaussianParameter')
 UniformAngleParameter = _wrap_parameter('UniformAngleParameter')
 ParameterWrapper      = _wrap_parameter('ParameterWrapper')
-

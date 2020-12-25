@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check VarProduct transformation"""
-from __future__ import print_function
 from load import ROOT as R
 from gna.env import env
 from gna.parameters.printer import print_parameters

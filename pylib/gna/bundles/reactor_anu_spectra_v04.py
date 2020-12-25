@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 import numpy as N
@@ -135,6 +133,8 @@ class reactor_anu_spectra_v04(TransformationBundle):
             fname = fmt.format(**kwargs)
             try:
                 data = N.loadtxt(fname, dtype, unpack=True)
+                if self.cfg.get('debug', False):
+                    print('Load spectrum from {}: {!s}'.format(fname, kwargs))
             except:
                 pass
             else:

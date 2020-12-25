@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
@@ -43,7 +41,7 @@ class reactor_offeq_spectra_v04(TransformationBundle):
                 reac, iso = idx.current_values()
             name = "offeq_correction." + idx.current_format()
             try:
-                _offeq_energy, _offeq_spectra = map(C.Points, self.offeq_raw_spectra[iso])
+                _offeq_energy, _offeq_spectra = list(map(C.Points, self.offeq_raw_spectra[iso]))
                 _offeq_energy.points.setLabel("Original energies for offeq spectrum of {}".format(iso))
             except KeyError:
             # U238 doesn't have offequilibrium correction so just pass 1.

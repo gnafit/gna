@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
@@ -37,7 +35,7 @@ class Expression_v01(object):
     operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, Accumulate=AccumulateTransformation, bracket=bracket, expand=expand, inverse=OInverse, select1=OSelect1 )
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
-        if isinstance(expression, basestring):
+        if isinstance(expression, str):
             self.expressions_raw = [expression]
         elif isinstance(expression, (tuple, list)):
             self.expressions_raw = list(expression)
@@ -54,7 +52,7 @@ class Expression_v01(object):
         self.set_operations()
 
     def set_operations(self):
-        for name, op in self.operations.iteritems():
+        for name, op in self.operations.items():
             self.globals[name]=op
 
     def parse(self):
@@ -95,6 +93,10 @@ class Expression_v01(object):
                 lib[expr] = v
         for tree in self.trees:
             tree.guessname(lib, *args, **kwargs)
+
+    def dump_all(self, yieldself):
+        for tree in self.trees:
+            tree.dump(yieldself)
 
     def __str__(self):
         return self.expressions_raw
@@ -143,11 +145,10 @@ class ItemProvider(object):
         variables, objects = self.bundleclass.provides(self.cfg)
         self.items = variables+objects
 
-    def register_in(self, dct):
+    def register_in(self):
         if self.cfg.bundle.get('inactive', False):
-            return
-        for key in self.items:
-            dct[key] = self
+            return dict()
+        return {key: self for key in self.items}
 
     def build(self, **kwargs):
         if self.bundle:
@@ -188,7 +189,7 @@ class ExpressionContext_v01(object):
             if not 'bundle' in cfg:
                 continue
             provider = ItemProvider(cfg, name)
-            provider.register_in(self.providers)
+            self.providers.update(provider.register_in())
 
         self.required_bundles = OrderedDict()
 
@@ -275,7 +276,7 @@ class ExpressionContext_v01(object):
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 
         if isinstance(ret, NestedDict):
-            raise Exception('Incomplete index ({!s}) provided (probably). Need at least resolve {!s}'.format(nidx, res.keys()))
+            raise Exception('Incomplete index ({!s}) provided (probably). Need at least resolve {!s}'.format(nidx, list(res.keys())))
 
         return ret
 
@@ -296,4 +297,3 @@ class ExpressionContext_v01(object):
             # input  = self.get_input( sink, nidx )
 
         # input( output )
-

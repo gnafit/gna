@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -62,9 +60,9 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
             eff         = C.Points(data['eff'],      labels=it.current_format('Efficiency (mu*mult)\n{autoindex}'))
             efflivetime = C.Product([livetime, eff],  labels=it.current_format('Livetime (eff)\n{autoindex}'))
 
-            self.context.objects[('livetime',ad)] = livetime
-            self.context.objects[('eff',ad)] = eff
-            self.context.objects[('efflivetime',ad)] = efflivetime
+            self.context.objects[('livetime', ad)] = livetime
+            self.context.objects[('eff', ad)] = eff
+            self.context.objects[('efflivetime', ad)] = efflivetime
 
             self.set_output('eff_daily',           it, eff.single())
             self.set_output('livetime_daily',      it, livetime.single())
@@ -73,4 +71,3 @@ class dayabay_livetime_hdf_v02(TransformationBundle):
         ndays_daq = (data_lt>0.0).sum()
         daq.reqparameter('ndays_daq', central=ndays_daq, fixed=True, sigma=0.01,
                           label='Total number of DAQ days (exclude no DAQ)' )
-

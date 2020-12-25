@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.expression.indexed import *
 
 def call_once(method):
@@ -58,6 +56,14 @@ class Transformation(Indexed):
         return '{}()'.format(Indexed.__str__(self))
 
     def __div__(self, other):
+        from gna.expression.compound import TRatio
+        return TRatio(undefinedname, self, other)
+
+    def __floordiv__(self, other):
+        from gna.expression.compound import TRatio
+        return TRatio(undefinedname, self, other, broadcast=True)
+
+    def __truediv__(self, other):
         from gna.expression.compound import TRatio
         return TRatio(undefinedname, self, other)
 

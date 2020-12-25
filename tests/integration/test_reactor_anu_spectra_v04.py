@@ -1,7 +1,5 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
-from __future__ import print_function
 import numpy as np
 from matplotlib import pyplot as plt
 import os

@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
 # reimplementation of ../bundles_legacy/detector_nonlinearity_db_root_v02
 
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -50,7 +46,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         #
         # All curves but first are the corrections to the nominal
         #
-        newy_values = newy.values()
+        newy_values = list(newy.values())
         for f in newy_values[1:]:
             f-=newy_values[0]
 

@@ -25,11 +25,11 @@ class cmd(basecmd):
             covmat.cov.stat.connect(diag)
             covmat.cholesky.cov(covmat.cov)
             self.env.parts.covmat[name] = covmat
-            print 'Covmat', name, 'from', diag
+            print('Covmat', name, 'from', diag)
 
 
         for covmat in self.opts.fix:
             covmat.setFixed(True)
 
         for covmat in getattr(self.opts, 'print'):
-            print covmat.data()
+            print(covmat.data())

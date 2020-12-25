@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 R.GNAObject
 from gna.bundle import execute_bundles
@@ -38,7 +36,7 @@ cfg = NestedDict(
     # Number of diagonals to treat as diagonal. All other elements are considered as off-diagonal.
     ndiag = 1,
     # File name to read
-    filename = 'data/dayabay/tmp/detector_iavMatrix_P14A_LS.root',
+    filename = 'data/data_dayabay/tmp/detector_iavMatrix_P14A_LS.root',
     # Matrix name
     matrixname = 'iav_matrix'
     )

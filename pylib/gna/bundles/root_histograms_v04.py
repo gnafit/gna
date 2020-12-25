@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
@@ -77,6 +75,6 @@ class root_histograms_v04(TransformationBundle):
             hist=Histogram(edges, data, labels=it.current_format(fmt, name=self.cfg.name))
             self.set_output(self.cfg.name, it, hist.single())
 
-            self.context.objects[('hist',subst)]    = hist
+            self.context.objects[('hist', subst)]    = hist
 
         file.Close()

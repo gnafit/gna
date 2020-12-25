@@ -52,46 +52,22 @@ double OscProbPMNSBase::DeltaMSq<2,3>() const { return m_param->DeltaMSq23; }
 template <int I, int J>
 double OscProbPMNSBase::weight() const {
   return std::real(
-    m_pmns->V[m_alpha][I-1].value()*
-    m_pmns->V[m_beta][J-1].value()*
-    std::conj(m_pmns->V[m_alpha][J-1].value())*
-    std::conj(m_pmns->V[m_beta][I-1].value())
+    m_pmns->V[m_alpha][I-1].complex()*
+    m_pmns->V[m_beta][J-1].complex()*
+    std::conj(m_pmns->V[m_alpha][J-1].complex())*
+    std::conj(m_pmns->V[m_beta][I-1].complex())
     );
 }
 
 double OscProbPMNSBase::weightCP() const {
   return m_lepton_charge*std::imag(
-    m_pmns->V[m_alpha][0].value()*
-    m_pmns->V[m_beta][1].value()*
-    std::conj(m_pmns->V[m_alpha][1].value())*
-    std::conj(m_pmns->V[m_beta][0].value())
+    m_pmns->V[m_alpha][0].complex()*
+    m_pmns->V[m_beta][1].complex()*
+    std::conj(m_pmns->V[m_alpha][1].complex())*
+    std::conj(m_pmns->V[m_beta][0].complex())
     );
 }
 
-//OscProbPMNS::OscProbPMNSWeights(Neutrino from, Neutrino to)
-  //: OscProbPMNSBase(from, to)
-//{
-  //std::vector<changeable> deps;
-  //deps.reserve(4+static_cast<int);
-
-    //.input("weight12")
-    //.input("weight13")
-    //.input("weight23")
-    //.input("weight0")
-
-  //for (size_t i = 0; i < varnames.size(); ++i) {
-    //variable_(&m_vars[i], varnames[i]);
-    //deps.push_back(m_vars[i]);
-  //}
-  //m_sum = evaluable_<double>(sumname, [this]() {
-      //double res = m_vars[0];
-      //for (size_t i = 1; i < m_vars.size(); ++i) {
-          //res+=m_vars[i];
-      //}
-      //return res;
-    //}, deps);
-
-//}
 
 OscProbAveraged::OscProbAveraged(Neutrino from, Neutrino to):
     OscProbPMNSBase(from, to)
@@ -124,7 +100,6 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,2>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      //std::cout << fargs.ints[0].size() << std::endl;
     })
 #endif
   ;
@@ -138,7 +113,6 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<1,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      //std::cout << fargs.ints[0].size() << std::endl;
     })
 #endif
   ;
@@ -152,7 +126,6 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
     .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponent<2,3>, DataLocation::Device)
     .storage("gpu", [](StorageTypesFunctionArgs& fargs){
       fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-      //std::cout << fargs.ints[0].size() << std::endl;
     })
 #endif
   ;
@@ -168,7 +141,6 @@ GNA::GNAObjectTemplates::OscProbPMNST<FloatType>::OscProbPMNST(Neutrino from, Ne
       .func("gpu", &OscProbPMNST<FloatType>::gpuCalcComponentCP, DataLocation::Device)
       .storage("gpu", [](StorageTypesFunctionArgs& fargs){
         fargs.ints[0] = DataType().points().shape(fargs.args[0].size());
-        //std::cout << fargs.ints[0].size() << std::endl;
       })
 #endif
       ;
@@ -356,4 +328,3 @@ template class GNA::GNAObjectTemplates::OscProbPMNST<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
   //template class GNA::GNAObjectTemplates::OscProbPMNST<float>;
 #endif
-

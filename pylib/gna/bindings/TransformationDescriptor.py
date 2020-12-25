@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
+
 from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
 
-classes = [R.TransformationDescriptorT(ft,ft) for ft in provided_precisions]
+classes = [R.TransformationDescriptorT(ft, ft) for ft in provided_precisions]
 
 @patchROOTClass(classes, '__str__')
 def TransformationDescriptor____str__(self):
@@ -15,10 +15,10 @@ def TransformationDescriptor____str__(self):
 def TransformationDescriptor__print(self, **kwargs):
     printl(str(self))
     with nextlevel():
-        for i, inp in enumerate(self.inputs.itervalues()):
+        for i, inp in enumerate(self.inputs.values()):
             printl('{:2d}'.format(i), end=' ')
             inp.print(**kwargs)
-        for i, o in enumerate(self.outputs.itervalues()):
+        for i, o in enumerate(self.outputs.values()):
             printl('{:2d}'.format(i), end=' ')
             o.print(**kwargs)
 
@@ -55,5 +55,5 @@ def TransformationDescriptor______lshift__(self, output):
 
 @patchROOTClass(classes, '__gt__')
 @patchROOTClass(classes, '__lt__')
-def TransformationDescriptor______cmp__(a,b):
+def TransformationDescriptor______cmp__(a, b):
     raise Exception('Someone tried to use >/< operators. Perhaps you have meant >>/<< instead?')

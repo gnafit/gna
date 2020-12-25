@@ -1,0 +1,3 @@
+full = 100*percent
+half = 50*percent
+string = 'abc'

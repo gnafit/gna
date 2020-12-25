@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
@@ -37,7 +35,7 @@ class Expression(object):
     operations = dict(sum=OSum, prod=OProd, concat=OConcat, accumulate=Accumulate, bracket=bracket)
     tree = None
     def __init__(self, expression, indices=[], **kwargs):
-        if isinstance(expression, basestring):
+        if isinstance(expression, str):
             self.expressions_raw = [expression]
         elif isinstance(expression, (tuple, list)):
             self.expressions_raw = list(expression)
@@ -54,7 +52,7 @@ class Expression(object):
         self.set_operations()
 
     def set_operations(self):
-        for name, op in self.operations.iteritems():
+        for name, op in self.operations.items():
             self.globals[name]=op
 
     def parse(self):
@@ -267,4 +265,3 @@ class ExpressionContext(object):
             # input  = self.get_input( sink, nidx )
 
         # input( output )
-

@@ -1,9 +1,7 @@
 Broken, use expressions, overridden by v02
 
 !/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.configurator import NestedDict, uncertain, uncertaindict

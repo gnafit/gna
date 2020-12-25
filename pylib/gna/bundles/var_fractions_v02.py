@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
@@ -13,7 +11,7 @@ from gna.bundle import TransformationBundle
 class var_fractions_v02(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
-        self.check_nidx_dim(0,0)
+        self.check_nidx_dim(0, 0)
 
     @staticmethod
     def _provides(cfg):
@@ -21,7 +19,7 @@ class var_fractions_v02(TransformationBundle):
 
     def define_variables(self):
         names_all = set(self.cfg.names)
-        names_unc = self.cfg.fractions.keys()
+        names_unc = list(self.cfg.fractions.keys())
         names_eval = names_all-set(names_unc)
         if len(names_eval)!=1:
             raise self.exception('User should provide N-1 fractions, the last one is not independent\n'

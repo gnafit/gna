@@ -21,7 +21,7 @@ namespace GNA {
                 using typename BaseClass::StorageTypesFunctionArgs;
                 using BaseClass::variable_;
 
-                OscProb3T(Neutrino from, Neutrino to, std::string l_name="L", bool modecos=true);
+                OscProb3T(Neutrino from, Neutrino to, std::string l_name="L", bool modecos=true, std::vector<std::string> dmnames={});
 
                 template<int I>
                 void calcComponent_modecos(FunctionArgs& fargs);

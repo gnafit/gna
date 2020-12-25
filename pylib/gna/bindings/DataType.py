@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 import ROOT as R
 from gna.bindings import patchROOTClass

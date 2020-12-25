@@ -14,10 +14,10 @@ chi2map_nh = h5py.File('/tmp/out_nh.hdf5', 'r')
 fig, ax = plt.subplots()
 ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 
-points_nh = np.fromiter(chi2map_nh.iterkeys(), dtype=np.float64) * 1000
-chi2_nh = np.fromiter((chi2map_nh[key].get('datafit').value for key in chi2map_nh.iterkeys()), dtype=np.float64)
+points_nh = np.fromiter(chi2map_nh.keys(), dtype=np.float64) * 1000
+chi2_nh = np.fromiter((chi2map_nh[key].get('datafit').value for key in chi2map_nh.keys()), dtype=np.float64)
 points_ih = np.fromiter(chi2map_ih.keys(), dtype=np.float64) * 1000
-chi2_ih = np.fromiter((chi2map_ih[key].get('datafit').value for key in chi2map_ih.iterkeys()), dtype=np.float64)
+chi2_ih = np.fromiter((chi2map_ih[key].get('datafit').value for key in chi2map_ih.keys()), dtype=np.float64)
 
 min_chi2_nh, min_chi2_ih = np.min(chi2_nh), np.min(chi2_ih)
 if min_chi2_nh > min_chi2_ih:

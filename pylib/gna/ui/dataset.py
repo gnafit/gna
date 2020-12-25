@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Dataset initialization. Configures the dataset for a single experiment.
 Dataset defines:
     - Observable (model) to be used as fitted function
@@ -6,7 +5,6 @@ Dataset defines:
     - Statistical uncertainty (Person/Neyman) [theory/observation]
     - Nuisance parameters
     """
-from __future__ import print_function
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -52,7 +50,11 @@ class cmd(basecmd):
         self.snapshots = dict()
         if self.opts.asimov_data:
             for theory_path, data_path in self.opts.asimov_data:
-                theory, data = env.get(theory_path), env.get(data_path)
+                try:
+                    theory, data = env.get(theory_path), env.get(data_path)
+                except KeyError:
+                    theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+
                 if self.opts.error_type == 'neyman':
                     error=data.single()
                 elif self.opts.error_type == 'pearson':
@@ -114,3 +116,4 @@ class cmd(basecmd):
 
         ns = self.env.globalns('pull')
         ns.addobservable(self.opts.name, self.pull_vararray.single())
+        self.env.future['pull', self.opts.name] = self.pull_vararray.single()

@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna import constructors as C
@@ -37,7 +35,7 @@ The model is succeeded by juno_sensitivity_v01 model.
         parser.add_argument('-p', '--print', action='append', choices=['outputs', 'inputs'], default=[], help='things to print')
         parser.add_argument('-e', '--embed', action='store_true', help='embed')
         parser.add_argument('-c', '--composition', default='complete', choices=['complete', 'minimal'], help='Set the indices coverage')
-        parser.add_argument('-v', '--verbose', action='count', help='verbosity level')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity level')
         parser.add_argument('--stats', action='store_true', help='print stats')
         parser.add_argument('--energy-model', nargs='*', choices=['lsnl', 'eres', 'multieres'], default=['lsnl', 'eres'], help='Energy model components')
         parser.add_argument('--free', choices=['minimal', 'osc'], default='minimal', help='free oscillation parameterse')
@@ -178,7 +176,7 @@ The model is succeeded by juno_sensitivity_v01 model.
                 rebin_yb = NestedDict(
                         bundle = dict(name='rebin', version='v03', major='', inactive=not mode_yb),
                         rounding = 3,
-                        edges = np.linspace(1.8, 8.0, 201) ,
+                        edges = np.linspace(1.8, 8.0, 201),
                         name = 'rebin',
                         label = 'Final histogram {detector}'
                         ),
@@ -359,8 +357,8 @@ The model is succeeded by juno_sensitivity_v01 model.
                         # pars: sigma_e/e = sqrt( a^2 + b^2/E + c^2/E^2 ),
                         parameter = 'eres',
                         pars = uncertaindict([
-                            ('a', (0.000, 'fixed')) ,
-                            ('b', (0.03, 'fixed')) ,
+                            ('a', (0.000, 'fixed')),
+                            ('b', (0.03, 'fixed')),
                             ('c', (0.000, 'fixed'))
                             ]),
                         expose_matrix = False

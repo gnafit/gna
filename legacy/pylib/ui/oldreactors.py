@@ -16,16 +16,16 @@ class Data2Theory(object):
         self.error = error
         self.corr_exp = corr_exp
         self.corr_theory = corr_theory
-        #print self.name, 'created'    
+        #print self.name, 'created'
     #end def __init__
 #
 
 data2theory = []
 
-data2theory.append( Data2Theory('ILL',  {'U235': 0.620, 'Pu239': 0.274, 'U238': 0.074, 'Pu241': 0.042}, 
+data2theory.append( Data2Theory('ILL',  {'U235': 0.620, 'Pu239': 0.274, 'U238': 0.074, 'Pu241': 0.042},
                                 8.76, 0.797, 9.0, {'ILL':9.0, 'Gosgen-I':4.8, 'Gosgen-II':4.8, 'Gosgen-III':4.8}, 0) )
 
-data2theory.append( Data2Theory('Gosgen-I',  {'U235': 0.620, 'Pu239': 0.274, 'U238': 0.074, 'Pu241': 0.042}, 
+data2theory.append( Data2Theory('Gosgen-I',  {'U235': 0.620, 'Pu239': 0.274, 'U238': 0.074, 'Pu241': 0.042},
                                 37.9, 0.960, 5.36, {'Gosgen-I':5.36, 'Gosgen-II':4.8, 'Gosgen-III':4.8, 'ILL':4.8}, 0) )
 
 data2theory.append( Data2Theory('Gosgen-II', {'U235': 0.584, 'Pu239': 0.298, 'U238': 0.068, 'Pu241': 0.050},
@@ -35,25 +35,25 @@ data2theory.append( Data2Theory('Gosgen-III', {'U235': 0.543, 'Pu239': 0.329, 'U
                                 64.7, 0.919, 6.80, {'Gosgen-I':4.8, 'Gosgen-II':4.8, 'Gosgen-III':6.80, 'ILL':4.8}, 0) )
 
 data2theory.append( Data2Theory('Krasnoyarsk-I', {'U235': 1.0, 'Pu239': 0.0, 'U238': 0.0, 'Pu241': 0.0},
-                                32.8, 0.930, 6.00, {'Krasnoyarsk-I':6.0, 'Krasnoyarsk-II':4.84, 'Krasnoyarsk-III':4.84, 
+                                32.8, 0.930, 6.00, {'Krasnoyarsk-I':6.0, 'Krasnoyarsk-II':4.84, 'Krasnoyarsk-III':4.84,
                                                     'Krasnoyarsk-IV':4.84}, 0) )
 
 data2theory.append( Data2Theory('Krasnoyarsk-II', {'U235': 1.0, 'Pu239': 0.0, 'U238': 0.0, 'Pu241': 0.0},
-                                92.3, 0.947, 20.40, {'Krasnoyarsk-I':4.76, 'Krasnoyarsk-II':20.4, 'Krasnoyarsk-III':4.76, 
+                                92.3, 0.947, 20.40, {'Krasnoyarsk-I':4.76, 'Krasnoyarsk-II':20.4, 'Krasnoyarsk-III':4.76,
                                                     'Krasnoyarsk-IV':4.76}, 0) )
 
 data2theory.append( Data2Theory('Krasnoyarsk-III', {'U235': 1.0, 'Pu239': 0.0, 'U238': 0.0, 'Pu241': 0.0},
-                                57.0, 0.941, 4.15, {'Krasnoyarsk-I':3.4, 'Krasnoyarsk-II':3.4, 'Krasnoyarsk-III':4.4, 
+                                57.0, 0.941, 4.15, {'Krasnoyarsk-I':3.4, 'Krasnoyarsk-II':3.4, 'Krasnoyarsk-III':4.4,
                                                     'Krasnoyarsk-IV':3.4}, 0) )
 
 data2theory.append( Data2Theory('Krasnoyarsk-IV', {'U235': 1.0, 'Pu239': 0.0, 'U238': 0.0, 'Pu241': 0.0},
-                                231.4, 1.093, 17.75, {'Krasnoyarsk-I':3.4, 'Krasnoyarsk-II':3.4, 'Krasnoyarsk-III':3.4, 
+                                231.4, 1.093, 17.75, {'Krasnoyarsk-I':3.4, 'Krasnoyarsk-II':3.4, 'Krasnoyarsk-III':3.4,
                                                     'Krasnoyarsk-IV':17.75}, 0) )
 
 data2theory.append( Data2Theory('Rovno88-1I', {'U235': 0.607, 'Pu239': 0.277, 'U238': 0.074, 'Pu241': 0.042},
                                 18.0, 0.911, 6.39, {'Rovno88-1I':6.39, 'Rovno88-2I':2.2,'Rovno88-1S':2.2,
                                                     'Rovno88-2S':2.2,'Rovno88-3S':2.2}, 0) )
-                                
+
 data2theory.append( Data2Theory('Rovno88-2I', {'U235': 0.603, 'Pu239': 0.276, 'U238': 0.076, 'Pu241': 0.045},
                                 17.96, 0.942, 6.39, {'Rovno88-1I':2.2, 'Rovno88-2I':6.39,'Rovno88-1S':2.2,
                                                     'Rovno88-2S':2.2,'Rovno88-3S':2.2}, 0) )
@@ -129,7 +129,7 @@ class cmd(basecmd):
             reactors = [Reactor(
                         name='reactor',
                         location=expdata.L/1e3,
-                        fission_fractions={isoname: [frac] for isoname, frac in expdata.fission.iteritems()})]
+                        fission_fractions={isoname: [frac] for isoname, frac in expdata.fission.items()})]
             detectors = [Detector(name='AD1', location=0)]
 
             expns.defparameter("Norm", central=1, sigma=0)
@@ -139,9 +139,9 @@ class cmd(basecmd):
             observables[expdata] = expns.observables['AD1']
 
         covariated = set()
-        for expdata1, obs1 in observables.iteritems():
+        for expdata1, obs1 in observables.items():
             dataset.assign(observables[expdata1], [expdata1.value], [expdata1.value*expdata1.error/1e2])
-            for corrname, corrcoeff in expdata1.corr_exp.iteritems():
+            for corrname, corrcoeff in expdata1.corr_exp.items():
                 expdata2 = next(x for x in data2theory if x.name == corrname)
                 obs2 = observables[expdata2]
                 if obs1 == obs2 or covariated & {(obs1, obs2), (obs2, obs1)}:

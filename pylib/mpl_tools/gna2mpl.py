@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# encoding: utf-8
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
-import root2numpy as R2N
+from . import root2numpy as R2N
 from mpl_tools import helpers
 from matplotlib import pyplot as P
 from gna.bindings import DataType, provided_precisions
@@ -61,6 +59,7 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
 
     returns pyplot.plot() result
     """
+    fcn = kwargs.pop('fcn', None)
     if isinstance(outputx, (N.ndarray, list)):
         pointsx=outputx
     else:
@@ -75,6 +74,17 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
         pointsx, pointsy=pointsx.T, pointsy.T
 
     Plotter = kwargs.pop('axis', P)
+    ravel = kwargs.pop('ravel', False)
+    if ravel:
+        pointsx = pointsx.ravel()
+        pointsy = pointsy.ravel()
+
+        asort = N.argsort(pointsx)
+        pointsx=pointsx[asort]
+        pointsy=pointsy[asort]
+
+    if fcn:
+        pointsx, pointsy = fcn(pointsx, pointsy)
 
     return Plotter.plot(pointsx, pointsy, *args, **kwargs )
 
@@ -98,7 +108,7 @@ def get_1d_data(output, scale=None):
         pass
     elif scale=='width':
         buf/=width
-    elif isinstance(scale, (float,int)):
+    elif isinstance(scale, (float, int)):
         buf*=float(scale)
     else:
         raise Exception('Unsupported scale:', scale)
@@ -116,7 +126,7 @@ def plot_hist(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    scale = kwargs.pop('scale',None)
+    scale = kwargs.pop('scale', None)
     height, lims, _ = get_1d_data(output, scale=scale)
 
     diff=kwargs.pop('diff', None)
@@ -156,7 +166,7 @@ def plot_hist_centers(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale',None))
+    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale', None))
     centers = (lims[1:] + lims[:-1])*0.5
 
     Plotter = kwargs.pop('axis', P)
@@ -179,7 +189,7 @@ def bar_hist( output, *args, **kwargs ):
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
 
-    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale',None))
+    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale', None))
     left  = lims[:-1]
 
     if divide:
@@ -207,7 +217,7 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
 
     return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs )
 
-def get_2d_buffer(output, transpose=False, mask=None):
+def get_2d_buffer(output, transpose=False, mask=None, preprocess=None):
     if isinstance(output, N.ndarray):
         buf = output
     else:
@@ -218,6 +228,9 @@ def get_2d_buffer(output, transpose=False, mask=None):
 
     if transpose:
         buf = buf.T
+
+    if preprocess:
+        buf = preprocess(buf)
 
     return buf
 
@@ -340,10 +353,11 @@ def matshow(output, *args, **kwargs):
     ifNd(output, 2)
 
     mask = kwargs.pop( 'mask', None )
+    preprocess = kwargs.pop( 'preprocess', None )
     colorbar = kwargs.pop( 'colorbar', None )
     kwargs.setdefault( 'fignum', False )
 
-    buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask)
+    buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask, preprocess=preprocess)
 
     res = P.matshow(buf, **kwargs)
 
@@ -400,7 +414,7 @@ def wireframe(output, *args, **kwargs):
         kwargs['ccount']=Z.shape[1]
         kwargs['shade']=False
         res = ax.plot_surface(X, Y, Z, **kwargs)
-        res.set_facecolor((0,0,0,0))
+        res.set_facecolor((0, 0, 0, 0))
 
         return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 
@@ -424,7 +438,7 @@ def wireframe_points_vs(output, xmesh, ymesh, *args, **kwargs):
         kwargs['ccount']=Z.shape[1]
         kwargs['shade']=False
         res = ax.plot_surface(X, Y, Z, **kwargs)
-        res.set_facecolor((0,0,0,0))
+        res.set_facecolor((0, 0, 0, 0))
 
         return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 

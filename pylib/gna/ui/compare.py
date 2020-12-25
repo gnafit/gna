@@ -1,4 +1,3 @@
-from __future__ import print_function
 from gna.ui import basecmd
 import numpy as np
 import argparse
@@ -23,12 +22,12 @@ class cmd(basecmd):
         parser.add_argument('--ns', help='namespace')
         parser.add_argument('--output', help='Path where to save pics')
         parser.add_argument('-e', '--embed', action='store_true')
-        parser.add_argument('-s','--show', action='store_true', help='Show pics')
+        parser.add_argument('-s', '--show', action='store_true', help='Show pics')
         parser.add_argument('-x', '--xaxis', type=lambda x: env.get(x), help='Observable to use as x axis' )
 
     def __init__(self, *args, **kwargs):
         basecmd.__init__(self, *args, **kwargs)
-        self.observables = defaultdict(lambda: defaultdict(lambda: defaultdict())) 
+        self.observables = defaultdict(lambda: defaultdict(lambda: defaultdict()))
         if self.opts.mapping:
             self.load_mapping()
 
@@ -42,7 +41,7 @@ class cmd(basecmd):
     def make_plots(self):
         for title, obses in self.observables.items():
             if self.opts.output:
-                pp = PdfPages(str(abspath( join(self.opts.output,title) ) + '.pdf'))
+                pp = PdfPages(str(abspath( join(self.opts.output, title) ) + '.pdf'))
 
             #  import IPython; IPython.embed()
             for obs_name, obs_pair in obses.items():
@@ -52,7 +51,7 @@ class cmd(basecmd):
 
                 for exp, obs in obs_pair.items():
                     if self.opts.xaxis:
-                        ax.plot(self.opts.xaxis.data(), obs, label=' '.join((obs_name,exp)))
+                        ax.plot(self.opts.xaxis.data(), obs, label=' '.join((obs_name, exp)))
                     else:
                         ax.plot(obs, label=label)
 

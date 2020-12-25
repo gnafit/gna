@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import numpy as np
 from load import ROOT
@@ -54,4 +53,3 @@ if args.show:
     bin_centers = (edges[1:] + edges[:-1])/2
     mplh.plot_hist(edges, snf.data())
     plt.show()
-

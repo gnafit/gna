@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as P
 import numpy as N
@@ -14,7 +12,7 @@ from gna.converters import convert
 from argparse import ArgumentParser
 import gna.constructors as C
 
-def rescale_to_matrix( edges_from, edges_to, **kwargs ):
+def rescale_to_matrix_a(edges_from, edges_to, **kwargs):
     roundto = kwargs.pop( 'roundto', None )
     if not roundto is None:
         edges_from = N.round( edges_from, roundto )
@@ -38,9 +36,36 @@ def rescale_to_matrix( edges_from, edges_to, **kwargs ):
 
     return mat
 
+def rescale_to_matrix_b(edges_from, centers_to, **kwargs):
+    roundto = kwargs.pop( 'roundto', None )
+    if not roundto is None:
+        edges_from = N.round(edges_from, roundto)
+        centers_to = N.round(centers_to,   roundto)
+
+    width_from = edges_from[1:]-edges_from[:-1]
+
+    skipv = kwargs.pop( 'skip_values', [] )
+    assert not kwargs
+
+    idx = N.searchsorted(edges_from, centers_to, side='right')-1
+    dx = edges_to[1:]-edges_to[:-1]
+
+    mat = N.zeros( shape=(edges_from.shape[0]-1, edges_from.shape[0]-1) )
+    i1s = N.maximum( 0, idx[:-1] )
+    i2s = N.minimum( idx[1:], edges_from.size-2 )
+    for j, (i1, i2) in enumerate(zip(i1s, i2s)):
+        if i2<0 or i1>=edges_from.size or edges_to[j]<-1.e100: continue
+        for i in range( i1, i2+1 ):
+            l1 = max( edges_to[j],   edges_from[i] )
+            l2 = min( edges_to[j+1], edges_from[i+1] )
+            w  = (l2-l1)/dx[j]
+            mat[i,j] = w
+
+    return mat
+
 edges   = N.array( [   -1.0,  0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 ] )
 edges_m = N.array( [ -2e100, -0.9, 0.5, 1.2, 1.8, 4.0, 5.0, 6.2, 7.5 ] )
-matp = rescale_to_matrix( edges, edges_m, roundto=3 )
+matp = rescale_to_matrix_a( edges, edges_m, roundto=3 )
 
 pedges_m = C.Points( edges_m )
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check the 1d integrator (Gauss-Legendre) transformation
 
@@ -14,7 +13,6 @@ Usage:
         xdot output/integrator.dot
 """
 
-from __future__ import print_function
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_bar
 import numpy as N

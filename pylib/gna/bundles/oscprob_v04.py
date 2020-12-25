@@ -5,9 +5,7 @@ Miscellaneous:
     - Correct behavior for minor indices
     - Properly define the namespace name
 """
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -47,7 +45,7 @@ class oscprob_v04(TransformationBundle):
                 with self.namespace:
                     with self.namespace(pmns_name):
                         for it_minor in self.nidx_minor:
-                            oscprob = self.context.objects[(pmns_name,oscprobkey)] = C.OscProb3(R.Neutrino.ae(), R.Neutrino.ae(), dist)
+                            oscprob = self.context.objects[(pmns_name, oscprobkey)] = C.OscProb3(R.Neutrino.ae(), R.Neutrino.ae(), dist)
 
                             for it_component in self.idx_component:
                                 component, = it_component.current_values()
@@ -91,4 +89,3 @@ class oscprob_v04(TransformationBundle):
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
-

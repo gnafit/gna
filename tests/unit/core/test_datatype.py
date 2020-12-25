@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from gna.unittest import *
 from load import ROOT as R
 import numpy as N
@@ -17,12 +15,12 @@ def test_datatype_preallocated_v01():
 
     dt1 = R.DataType(dt)
     assert dt==dt1
-    assert dt.buffer==dt1.buffer
+    assert dt.point_same(dt1)
     assert not dt.requiresReallocation(dt1)
 
     data=R.Data('double')(dt)
     assert data.type==dt
-    assert data.type.buffer==dt.buffer
+    assert data.type.point_same(dt)
     assert not dt.requiresReallocation(data.type)
 
     ptr1 = N.frombuffer(data.buffer, count=1, dtype=data.buffer.typecode).ctypes.data
@@ -44,4 +42,3 @@ def test_datatype_preallocated_v02():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

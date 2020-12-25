@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
+
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C
@@ -13,15 +12,17 @@ def test_typeclass_ndim_v01():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckNdimT(context.current_precision())(1)
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(2)
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -33,15 +34,17 @@ def test_typeclass_ndim_v02():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckNdimT(context.current_precision())(2)
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(1)
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     print('Exception expected: ',end='')
@@ -53,15 +56,17 @@ def test_typeclass_ndim_v03():
     outputs = [p.single() for p in objects]
 
     obj = C.DummyType()
-    map(obj.add_input, outputs)
+    list(map(obj.add_input, outputs))
 
     dt = R.TypeClasses.CheckNdimT(context.current_precision())(1, (0,1))
+    R.SetOwnership(dt, False)
     dt.dump(); print()
     obj.add_typeclass(dt)
     res = obj.process_types();
     assert res
 
     dt1 = R.TypeClasses.CheckNdimT(context.current_precision())(2, (-2,-1))
+    R.SetOwnership(dt1, False)
     dt1.dump(); print()
     obj.add_typeclass(dt1)
     res = obj.process_types();
@@ -69,4 +74,3 @@ def test_typeclass_ndim_v03():
 
 if __name__ == "__main__":
     run_unittests(globals())
-

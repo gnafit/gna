@@ -4,13 +4,13 @@
 #include <algorithm>
 #include <stdexcept>
 
-class SimpleDictBase {
+struct SimpleDictBase {
 public:
   virtual ~SimpleDictBase() = default;
 };
 
 template <typename T, typename Container>
-class SimpleDict: public SimpleDictBase {
+struct SimpleDict: public SimpleDictBase {
 public:
   SimpleDict(Container &container): m_container(&container) { }
 

@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """Check PointsToHist adapter class
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as N

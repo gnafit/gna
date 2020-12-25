@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 from load import ROOT
 from gna.env import env
 from gna.parameters.parameter_loader import get_parameters

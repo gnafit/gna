@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import division
 from matplotlib import pyplot as plt
 import numpy as np
 from load import ROOT as R

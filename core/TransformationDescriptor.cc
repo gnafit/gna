@@ -29,7 +29,7 @@ OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloat
   if (this->size() > 1) {
     throw std::runtime_error("too much outputs for one input");
   } else if (this->size() < 1) {
-    throw std::runtime_error("no outputs");
+   throw std::runtime_error("no outputs");
   }
   return this->at(0);
 }
@@ -45,20 +45,20 @@ OutputHandleT<SinkFloatType> TransformationDescriptorT<SourceFloatType,SinkFloat
   return outputs.single();
 }
 
-template<typename SourceFloatType, typename SinkFloatType>
-void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outputs) const {
-  ::connect<SourceFloatType,SinkFloatType>(*this, outputs);
-}
-
-template<typename SourceFloatType, typename SinkFloatType>
-void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType> &other) const {
-  ::connect<SourceFloatType,SinkFloatType>(*this, other.outputs);
-}
-
-template<typename SourceFloatType, typename SinkFloatType>
-void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(GNASingleObjectT<SourceFloatType,SinkFloatType> &obj) const {
-  ::connect<SourceFloatType,SinkFloatType>(*this, obj[0].outputs);
-}
+/* template<typename SourceFloatType, typename SinkFloatType>
+ * void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType>::Outputs &outputs) const {
+ *   ::connect<SourceFloatType,SinkFloatType>(*this, outputs);
+ * }
+ *
+ * template<typename SourceFloatType, typename SinkFloatType>
+ * void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(const TransformationDescriptorT<SourceFloatType,SinkFloatType> &other) const {
+ *   ::connect<SourceFloatType,SinkFloatType>(*this, other.outputs);
+ * }
+ *
+ * template<typename SourceFloatType, typename SinkFloatType>
+ * void TransformationDescriptorT<SourceFloatType,SinkFloatType>::Inputs::operator()(GNASingleObjectT<SourceFloatType,SinkFloatType> &obj) const {
+ *   ::connect<SourceFloatType,SinkFloatType>(*this, obj[0].outputs);
+ * } */
 
 template<typename SourceFloatType, typename SinkFloatType>
 void InputDescriptorT<SourceFloatType,SinkFloatType>::connect(GNASingleObjectT<SourceFloatType,SinkFloatType> &obj) const {

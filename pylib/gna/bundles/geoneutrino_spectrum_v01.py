@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np

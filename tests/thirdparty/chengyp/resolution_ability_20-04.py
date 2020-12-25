@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 from gna import constructors as C
@@ -22,7 +20,7 @@ def merge_extrema(x_min, x_max, y_min, y_max):
     x_ext = N.zeros(x_min.size+x_max.size)
     y_ext = x_ext.copy()
     counter = 0
-    for i, (a, b, ya, yb) in enumerate(I.izip_longest(x_min, x_max, y_min, y_max)):
+    for i, (a, b, ya, yb) in enumerate(I.zip_longest(x_min, x_max, y_min, y_max)):
         if b>a:
             if a is not None:
                 x_ext[counter], y_ext[counter] = a, ya

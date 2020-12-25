@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 import ROOT
 from argparse import Namespace
 import numpy as np
 import time
-import spec
+from . import spec
 from collections import OrderedDict
 
+ROOT.TMinuitMinimizer.UseStaticMinuit(False)
 class Minuit(ROOT.TMinuitMinimizer):
     def __init__(self, statistic, pars=[]):
         super(Minuit, self).__init__()
 
-        ROOT.TMinuitMinimizer.UseStaticMinuit(False)
 
         self.statistic = statistic
 
@@ -138,9 +136,9 @@ class Minuit(ROOT.TMinuitMinimizer):
 
     def evalstatistic(self):
         wall = time.time()
-        clock = time.clock()
+        clock = time.perf_counter()
         value = self._statistic()
-        clock = time.clock() - clock
+        clock = time.perf_counter() - clock
         wall = time.time() - wall
 
         x = [par.value() for par in self.pars]
@@ -178,12 +176,10 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.pushpars()
 
         wall = time.time()
-        clock = time.clock()
+        clock = time.perf_counter()
         self.Minimize()
-        clock = time.clock() - clock
+        clock = time.perf_counter() - clock
         wall = time.time() - wall
-
-        self.poppars()
 
         argmin = np.frombuffer(self.X(), dtype=float, count=self.NDim())
         errors = np.frombuffer(self.Errors(), dtype=float, count=self.NDim())
@@ -203,6 +199,8 @@ class Minuit(ROOT.TMinuitMinimizer):
 
         if profile_errors:
             self.profile_errors(profile_errors, self.result)
+
+        self.poppars()
 
         return self.result
 

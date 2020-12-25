@@ -33,7 +33,7 @@ def append_typed(*types, **kwargs):
             def gettyped(f, v):
                 try:
                     return f(v)
-                except PartNotFoundError, e:
+                except PartNotFoundError as e:
                     msg = "no {0} named {1!r}"
                     raise argparse.ArgumentError(self, msg.format(e.parttype, e.partname))
 
@@ -54,7 +54,7 @@ def append_typed(*types, **kwargs):
                     if len(rest) < f.count:
                         msg = 'expected at least {0} arguments'
                         raise argparse.ArgumentError(self, msg.format(i+f.count))
-                    funcs.append(lambda x: map(f.f, x))
+                    funcs.append(lambda x: list(map(f.f, x)))
                     newvalues.append(rest)
                     break
                 elif isinstance(f, qualified):
@@ -94,7 +94,7 @@ def set_typed(parttype):
         def __call__(self, parser, namespace, values, option_string=None):
             try:
                 setattr(namespace, self.dest, parttype(values))
-            except PartNotFoundError, e:
+            except PartNotFoundError as e:
                 msg = "no {0} named {1!r}"
                 raise argparse.ArgumentError(self, msg.format(e.parttype, values))
 
@@ -114,3 +114,6 @@ class basecmd(object):
 
     def run(self):
         pass
+
+    def _exception(self, msg, name=''):
+        return Exception('{}: {}'.format(name or type(self).__name__, msg))

@@ -1,7 +1,5 @@
 # reimplementation of integral_2d1d_v01 for up to date bundles
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -64,4 +62,3 @@ class integral_2d1d_v02(TransformationBundle):
 
     def define_variables(self):
         pass
-

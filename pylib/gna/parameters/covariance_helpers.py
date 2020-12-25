@@ -3,7 +3,7 @@ from gna.env import env
 import numpy as np
 import itertools
 from gna.config import cfg
-from parameter_loader import get_parameters
+from .parameter_loader import get_parameters
 
 def __keep_relative(**kwargs):
     cov_mat = kwargs.pop('cov_mat')
@@ -39,7 +39,7 @@ class CovarianceHandler(object):
             self.covariance_obj = cfg['covariances'][covariance_name]
         except KeyError as e:
             info = 'Covariance {0} is absent in configuration. ' + 'Check the contents of {1} to see whether it is present'
-            raise KeyError, info.format(covariance_name, str(cfg['covariance_path']))
+            raise KeyError(info.format(covariance_name, str(cfg['covariance_path'])))
 
         self.cov_store = cfg['covariances'][covariance_name]
         self.passed_pars = pars
@@ -86,7 +86,7 @@ def covariate_pars(pars, cov_mat, mode='relative', policy='keep', uncorr_uncs=No
 
     is_covmat(pars, cov_matrix)
 
-    for first, second in itertools.combinations_with_replacement(range(len(pars)), 2):
+    for first, second in itertools.combinations_with_replacement(list(range(len(pars))), 2):
         covariance = cov_matrix[first, second]
         pars[first].setCovariance(pars[second], covariance)
 

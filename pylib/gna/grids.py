@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import argparse
-import numpy as np
 from collections import OrderedDict
 from itertools import product, islice, chain, repeat
+
+import numpy as np
+import ROOT
 
 class _AddGridActionBase(argparse.Action):
     def getcount(self, count):
@@ -53,6 +54,8 @@ class PointSet(object):
     def fromgrids(cls, opts):
         gridparams = OrderedDict()
         for par, gridtype, griddesc in opts.grids:
+            if not isinstance(par, ROOT.GaussianParameter("double")):
+                raise TypeError("{} is not independent parameter, nop possible to scan over it".format(par.name()))
             gridparams[par] = None
         params = list(gridparams.keys())
         return cls(opts, params, lambda: product(*cls.decomposed(opts)))
@@ -63,7 +66,7 @@ class PointSet(object):
             msg = 'grids specified with point tree'
             raise Exception(msg)
         params = tree.params
-        return cls(opts, params, tree.itervalues)
+        return cls(opts, params, tree.values)
 
     @classmethod
     def addargs(cls, parser, env):
@@ -111,7 +114,7 @@ class PointSet(object):
         if self.opts.pointspaths:
             for path in self.opts.pointspaths:
                 path = path.strip('/')
-                yield path, [p.cast(x) for p, x in zip(self.params, filter(None, path.rsplit('/')))]
+                yield path, [p.cast(x) for p, x in zip(self.params, [_f for _f in path.rsplit('/') if _f])]
             return
         if self.opts.pointsrange:
             assert(len(self.opts.pointsrange) <= 3)

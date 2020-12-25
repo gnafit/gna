@@ -1,4 +1,3 @@
-from __future__ import print_function
 import argparse
 import sys
 import os.path
@@ -8,6 +7,9 @@ import gna.ui
 from gna.config import cfg
 from gna.packages import iterate_module_paths
 from collections import OrderedDict
+
+class HelpDisplayed(Exception):
+    pass
 
 class LazyNamespace(argparse.Namespace):
     def __getattribute__(self, name):
@@ -36,20 +38,24 @@ def loadmodule(modules, name):
     loader = modules[name]
     return loader.find_module(name).load_module(name)
 
-def loadcmdclass(modules, name, args):
+def loadcmdclass(modules, name):
     module=loadmodule(modules, name)
-    cls = getattr(module, 'cmd')
+    cls = getattr(module, name, None)
+    if not cls:
+        cls = getattr(module, 'cmd')
+
+    if not cls.__doc__ and module.__doc__:
+        cls.__doc__=module.__doc__
 
     parserkwargs0 = getattr(cls, 'parserkwargs', {})
     parserkwargs = dict(dict(prog='gna -- {}'.format(name),
-        description=cls.__doc__ or module.__doc__,
+        description=cls.__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter),
         **parserkwargs0)
     parser = argparse.ArgumentParser(**parserkwargs)
     cls.initparser(parser, env)
-    opts = parser.parse_args(args, namespace=LazyNamespace())
 
-    return cls, opts
+    return cls, parser
 
 def listmodules(modules, printdoc=False):
     print('Listing available modules. Module search paths:', ', '.join(cfg.pkgpaths))
@@ -60,7 +66,7 @@ def listmodules(modules, printdoc=False):
     eoffset = '!'+offset[1:]
     docoffset = ' '*(offsetlen+namelen+6)
     wrp = TextWrapper(initial_indent=docoffset, subsequent_indent=docoffset)
-    modnames = modules.keys()
+    modnames = list(modules.keys())
     for modname in modnames:
         modname_print = modname.replace('_', '-')
         try:
@@ -87,7 +93,14 @@ def listmodules(modules, printdoc=False):
 
 
 def run():
+    """Execute command line in 3 steps:
+        - Collect relevant classes, parsers and options
+        - Test if any option has a help option: print help
+        - Execute classes
+    """
     modules = getmodules()
+
+    cmdtriples = []
     for group in arggroups(sys.argv):
         if not group:
             continue
@@ -103,7 +116,31 @@ def run():
         if name not in modules:
             msg = 'unknown module %s' % name
             raise Exception(msg)
-        cmdcls, cmdopts = loadcmdclass(modules, name, group)
-        obj = cmdcls(env, cmdopts)
+
+        cmdtriples.append((loadcmdclass(modules, name), group))
+
+    exit=False
+    for (cmdcls, parser), args in cmdtriples:
+        if '-h' in args or '--help' in args:
+            if 'add_help=True' in repr(parser):
+                parser.print_help()
+            else:
+                try:
+                    opts = parser.parse_args(args, namespace=LazyNamespace())
+                    obj = cmdcls(env, opts)
+                except HelpDisplayed:
+                    pass
+                except:
+                    print('Unable to print help item , sorry')
+
+            print()
+            exit=True
+
+    if exit:
+        sys.exit(0)
+
+    for (cmdcls, parser), args in cmdtriples:
+        opts = parser.parse_args(args, namespace=LazyNamespace())
+        obj = cmdcls(env, opts)
         obj.init()
         obj.run()

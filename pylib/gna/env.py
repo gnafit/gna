@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function
 from collections import defaultdict, deque, Mapping, OrderedDict
-import parameters
 from contextlib import contextmanager
 import ROOT
+import cppyy
 from gna.config import cfg
+from . import parameters
 
-provided_precisions = list(ROOT.GNA.provided_precisions())
+provided_precisions = list(map(str, ROOT.GNA.provided_precisions()))
 expressionproviders = tuple(ROOT.GNA.GNAObjectTemplates.ExpressionsProviderT(p) for p in provided_precisions)
 
 env = None
@@ -32,10 +31,10 @@ class ExpressionWithBindings(object):
 
     def resolvepath(self, seen, known):
         allpath = []
-        for src in self.expr.sources.itervalues():
+        for src in self.expr.sources.values():
             depname = src.name()
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
-            if isinstance(dep, basestring):
+            if isinstance(dep, str):
                 if dep in known:
                     continue
                 try:
@@ -53,13 +52,13 @@ class ExpressionWithBindings(object):
         return allpath
 
     def get(self):
-        for src in self.expr.sources.itervalues():
+        for src in self.expr.sources.values():
             depname = src.name()
             v = self.obj.variables[depname]
             if not v.isFree():
                 continue
             dep = next((bs[depname] for bs in self.bindings if depname in bs), depname)
-            if isinstance(dep, basestring):
+            if isinstance(dep, str):
                 dep = env.nsview[dep]
             v.bind(dep.getVariable())
         return self.ns.addevaluable(self.expr.name(), self.expr.get())
@@ -83,7 +82,7 @@ class ExpressionsEntry(object):
         path = self.resolvepath({self}, OrderedDict())
         if not path:
             names = [expr.expr.name() for expr in self.exprs]
-            reqs = [var.name() for expr in self.exprs for var in expr.expr.sources.values()]
+            reqs = [var.name() for expr in self.exprs for var in list(expr.expr.sources.values())]
             raise KeyError('Unable to provide required variables for {!s}. Something is missing from: {!s}'.format(names, reqs))
         for expr in path:
             v = expr.get()
@@ -139,7 +138,7 @@ class namespace(Mapping):
     def pathto(self, name):
         return '.'.join((self.path, name)) if self.path else name
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def __repr__(self):
@@ -155,11 +154,11 @@ class namespace(Mapping):
         if not nsname:
             return self
 
-        if isinstance(nsname, basestring):
+        if isinstance(nsname, str):
             if nsname=='':
                 return self
             parts = nsname.split('.')
-        elif isinstance(nsname, (list,tuple)):
+        elif isinstance(nsname, (list, tuple)):
             parts = nsname
         if not parts:
             return self
@@ -198,8 +197,26 @@ class namespace(Mapping):
         if ns:
             return ns.__getitem__(head)
 
-        v = self.storage[head]
-        if isinstance(v, basestring):
+        if isinstance(head, cppyy.gbl.std.string):
+            v = self.storage[str(head)]
+        else:
+            v = self.storage[head]
+
+        if isinstance(v, str):
+            return env.nsview[v]
+        return v
+
+    def get(self, name, *args):
+        if not name:
+            return self
+
+        ns, head = self.get_proper_ns(name)
+
+        if ns:
+            return ns.__getitem__(head)
+
+        v = self.storage.get(head, *args)
+        if isinstance(v, str):
             return env.nsview[v]
         return v
 
@@ -225,7 +242,7 @@ class namespace(Mapping):
         self.storage[head] = value
 
     def __iter__(self):
-        return self.storage.iterkeys()
+        return iter(self.storage.keys())
 
     def __len__(self):
         return len(self.storage)
@@ -326,10 +343,10 @@ class namespace(Mapping):
         try:
             return self.observables[head]
         except:
-            print('Invalid observable', head)
+            raise KeyError('Invalid observable: {}'.format(head))
 
     def addexpressions(self, obj, bindings=[]):
-        for expr in obj.evaluables.itervalues():
+        for expr in obj.evaluables.values():
             if cfg.debug_bindings:
                 print(self.path, obj, expr.name())
             name = expr.name()
@@ -347,20 +364,20 @@ class namespace(Mapping):
 
     def walknstree(self):
         yield self
-        for name, subns in self.namespaces.iteritems():
+        for name, subns in self.namespaces.items():
             for x in subns.walknstree():
                 yield x
 
     def walkobservables(self, internal=False):
         for ns in self.walknstree():
-            for name, val in ns.observables.iteritems():
+            for name, val in ns.observables.items():
                 if not internal and 'internal' in ns.observables_tags.get(name, OrderedDict()):
                     continue
                 yield '{}/{}'.format(ns.path, name), val
 
     def walknames(self):
         for ns in self.walknstree():
-            for name, val in ns.storage.iteritems():
+            for name, val in ns.storage.items():
                 yield '{}.{}'.format(ns.path, name), val
 
     def ref(self, name):
@@ -381,20 +398,20 @@ class namespace(Mapping):
         print_parameters(self, **kwargs)
 
     def materializeexpressions(self, recursive=False):
-        for v in self.itervalues():
+        for v in self.values():
             if not isinstance(v, ExpressionsEntry):
                 continue
             v.materialize()
 
         if recursive:
-            for ns in self.namespaces.values():
+            for ns in list(self.namespaces.values()):
                 ns.materializeexpressions(True)
 
     def get_obs(self, *names):
         import fnmatch as fn
         obses = []
         for name in names:
-            matched = fn.filter(self.observables.keys(), name)
+            matched = fn.filter(list(self.observables.keys()), name)
             obses.extend(matched)
         return obses
 
@@ -437,7 +454,7 @@ class parametersview(object):
     @contextmanager
     def update(self, newvalues={}):
         params=[]
-        for p, v in newvalues.iteritems():
+        for p, v in newvalues.items():
             if isinstance(p, str):
                 p = self[p]
             p.push(v)
@@ -454,7 +471,7 @@ class parametersview(object):
                 p = self[p]
             oldvalues[p] = p.value()
         yield
-        for p, v in oldvalues.iteritems():
+        for p, v in oldvalues.items():
             p.set(v)
 
 class PartNotFoundError(Exception):
@@ -525,7 +542,7 @@ class _environment(object):
             return obj
         freevars = kwargs.pop('freevars', [])
 
-        for v in obj.variables.itervalues():
+        for v in obj.variables.values():
             if v.name() in freevars:
                 continue
             if not v.isFree():
@@ -534,7 +551,7 @@ class _environment(object):
                 continue
             vname = v.name()
             param = next((bs[vname] for bs in bindings if vname in bs), vname)
-            if isinstance(param, basestring):
+            if isinstance(param, str):
                 param = self.nsview[param]
             if isinstance(param, ExpressionsEntry):
                 param = param.get()

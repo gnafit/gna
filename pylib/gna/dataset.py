@@ -1,8 +1,8 @@
-from __future__ import print_function
+import numpy as np
 import ROOT
+import cppyy
 import gna.constructors as C
 from collections import defaultdict, namedtuple
-import numpy as np
 
 Block = namedtuple('Block', ('theory', 'data', 'cov'))
 
@@ -25,7 +25,7 @@ class Dataset(object):
 
         # Check for covariations between different dataset, i.e. for presense
         #  for covariated pull terms
-        underlaying_params = [(key, base.data.values()[0]) for base in bases for key in base.data.keys()
+        underlaying_params = [(key, list(base.data.values())[0]) for base in bases for key in list(base.data.keys())
                               if isinstance(key, ROOT.Parameter('double'))
                                  and not key.isFixed() and key.isCorrelated()]
         for (par_1, base_1), (par_2, base_2) in combinations(underlaying_params, 2):
@@ -41,12 +41,20 @@ class Dataset(object):
         self.covariate(obs, obs, error)
 
     def _pointize(self, obj):
-        """Given object checks whether it is PyROOT type (perhaps better to
+        """Given object checks whether it is C++ type (perhaps better to
         refactor it) and if not make a Points out of it. Use case -- turning
         numpy array into points.
         """
-        if not isinstance(type(obj), ROOT.PyRootType):
+        try:
+            # check if we are in modern PyROOT
+            cppyy.typeid(obj)
+        except KeyError:
+            # not C++ object, trying convert to Points
             obj = C.Points(obj)
+        except AttributeError:
+            # we are in legacy PyROOT
+            if not isinstance(type(obj), ROOT.PyRootType):
+                obj = C.Points(obj)
         return obj
 
     def covariate(self, obs1, obs2, cov):
@@ -72,7 +80,7 @@ class Dataset(object):
         If observables are not provided: use ones stored in data
         """
         if observables is None:
-            observables = self.data.keys()
+            observables = list(self.data.keys())
 
         to_process = list(observables)
         groups = [[]]
@@ -111,7 +119,7 @@ class Dataset(object):
         self.covariance and than adds it computes derivatives of observable
         with respect to all covparameters and put it into prediction
         """
-        for covkey, covs in self.covariance.iteritems():
+        for covkey, covs in self.covariance.items():
             if len(covkey & observables) != len(covkey):
                 continue
             if len(covkey) == 1:

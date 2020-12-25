@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Parameters v04 bundle
 Implements a set of unrelated parameters.
@@ -8,7 +7,6 @@ This version supports no indexes and not correlations.
 Based on: parameters_v03
 """
 
-from __future__ import print_function
 from load import ROOT as R
 from gna.bundle.bundle import *
 import numpy as N
@@ -34,7 +32,7 @@ class parameters_v04(TransformationBundle):
         objectize = self.cfg.get('objectize')
 
         for name, parcfg in pars.items():
-            label = labels.get(name)
+            label = labels.get(name, '')
             par = self.reqparameter(name, None, cfg=parcfg, label=label)
 
             if objectize:

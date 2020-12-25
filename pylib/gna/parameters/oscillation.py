@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import ROOT
 from gna.env import env
@@ -18,19 +17,19 @@ def reqparameters(ns, **kwargs):
     pdg_year = kwargs.get('pdg_year', 2016)
     curpdg = pdg[pdg_year]
     ns.reqparameter('SinSq12', central=curpdg['sinSqtheta12'],
-                     sigma=curpdg['sinSqtheta12_e'], limits=(0,1), label='Solar mixing angle sin²θ₁₂')
+                     sigma=curpdg['sinSqtheta12_e'], limits=(0, 1), label='Solar mixing angle sin²θ₁₂')
 
-    ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
+    ns.reqparameter('DeltaMSq12', central=curpdg['dmSq21'],
                       sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
 
     ns.reqparameter('SinSq13', central=curpdg['sinSqtheta13'],
-                     sigma=curpdg['sinSqtheta13_e'], limits=(0,1), label='Reactor mixing angle sin²θ₁₃ ')
+                     sigma=curpdg['sinSqtheta13_e'], limits=(0, 1), label='Reactor mixing angle sin²θ₁₃ ')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
                      variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
-                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
+                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0, 1), label='Atmospheric mixing angle sin²θ₂₃')
 
     #  ns.reqparameter('DeltaMSq23', central=curpdg['dmSq32_normal'],
                      #  sigma=curpdg['dmSq32_normal_e'], limits=(0, 0.1))
@@ -66,19 +65,19 @@ def reqparameters_reactor(ns, dm, **kwargs):
         raise Exception('Invalid Δm² definition: '+str(dm))
 
     ns.reqparameter('SinSqDouble13', central=curpdg['sinSq2theta13'],
-                     sigma=curpdg['sinSq2theta13_e'], limits=(0,1), label='Reactor mixing angle sin²2θ₁₃ ')
+                     sigma=curpdg['sinSq2theta13_e'], limits=(0, 1), label='Reactor mixing angle sin²2θ₁₃ ')
 
-    ns.reqparameter('DeltaMSq12',central=curpdg['dmSq21'],
+    ns.reqparameter('DeltaMSq12', central=curpdg['dmSq21'],
                       sigma=curpdg['dmSq21_e'], limits=(0, 0.1), label='Solar mass splitting |Δm²₂₁|')
 
     ns.reqparameter('SinSqDouble12', central=curpdg['sinSq2theta12'],
-                     sigma=curpdg['sinSq2theta12_e'], limits=(0,1), label='Solar mixing angle sin²2θ₁₂')
+                     sigma=curpdg['sinSq2theta12_e'], limits=(0, 1), label='Solar mixing angle sin²2θ₁₂')
 
     ns.reqparameter('Alpha', type='discrete', default='normal',
                      variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
 
     ns.reqparameter('SinSq23', central=curpdg['sinSqtheta23_normal'],
-                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0,1), label='Atmospheric mixing angle sin²θ₂₃')
+                      sigma=curpdg['sinSqtheta23_normal_e'], limits=(0, 1), label='Atmospheric mixing angle sin²θ₂₃')
 
     ns.reqparameter('Delta', type='uniformangle', central=0.0, label='CP violation phase δ(CP)')
     ns.reqparameter("SigmaDecohRel", central=1.e-5, sigma=1e-5, label='Relative momentum spread (decoherence)')

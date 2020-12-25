@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 #
 electron_charge = 1.602176462e-19
@@ -13,4 +12,3 @@ reactor_anu_conversion_unit = 'GW to MeV/s'
 
 # per m^2
 proton_density_factor = 10**28
-

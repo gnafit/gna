@@ -1,4 +1,4 @@
-from __future__ import print_function
+
 import inspect
 
 class ClassWrapper(object):
@@ -79,4 +79,3 @@ class ClassWrapper(object):
                 yield self._wrap(i)
 
         return wrapped
-

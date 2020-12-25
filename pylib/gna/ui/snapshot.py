@@ -1,6 +1,5 @@
 """Given an observable make it's snapshot via Snapshot transformation"""
 
-from __future__ import print_function
 from gna.ui import basecmd
 import argparse
 import os.path
@@ -23,7 +22,10 @@ class cmd(basecmd):
 
     def init(self):
         self.ns = self.env.globalns(self.opts.ns)
-        output = self.ns.getobservable(self.opts.name_in)
+        try:
+            output = self.ns.getobservable(self.opts.name_in)
+        except KeyError:
+            output = self.env.future['spectra', self.opts.name_in]
 
         if not output:
             raise Exception('Invalid or missing output: {}'.format(self.opts.name_in))
@@ -34,6 +36,6 @@ class cmd(basecmd):
             trans.setLabel(self.opts.label)
         trans.touch()
         self.ns.addobservable(self.opts.name_out, self.snapshot.single(), export=not self.opts.hidden)
+        self.env.future['spectra', self.opts.name_out] = self.snapshot.single()
 
         self.env.parts.snapshot[self.opts.name_out] = self.snapshot
-

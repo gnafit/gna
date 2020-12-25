@@ -23,11 +23,11 @@ public:
 
   using SourcesContainer = TransformationTypes::SourcesContainerT<SourceFloatType>;
   using InputsBase = SimpleDict<InputDescriptorT<SourceFloatType,SinkFloatType>, SourcesContainer>;
-  class Inputs;
+  struct Inputs;
 
   using SinksContainer = TransformationTypes::SinksContainerT<SinkFloatType>;
   using OutputsBase = SimpleDict<OutputDescriptorT<SourceFloatType,SinkFloatType>, SinksContainer>;
-  class Outputs;
+  struct Outputs;
 
   using OutputHandle = TransformationTypes::OutputHandleT<SinkFloatType>;
 
@@ -35,16 +35,16 @@ public:
 
   using BaseClass::m_entry;
 
-  class Inputs: public InputsBase {
+  struct Inputs: public InputsBase {
   public:
     Inputs(SourcesContainer &container)
       : InputsBase(container) { }
-    void operator()(const Outputs &other) const;
-    void operator()(const TransformationDescriptorType &other) const;
-    void operator()(GNASingleObjectType &obj) const;
+    /* void operator()(const Outputs &other) const;
+     * void operator()(const TransformationDescriptorType &other) const;
+     * void operator()(GNASingleObjectType &obj) const;   */
   };
 
-  class Outputs: public OutputsBase,
+  struct Outputs: public OutputsBase,
                  public SingleOutputT<SinkFloatType> {
   public:
     Outputs(SinksContainer &container)
@@ -58,7 +58,7 @@ public:
     : TransformationTypes::HandleT<SourceFloatType,SinkFloatType>(other),
       inputs(m_entry->sources),
       outputs(m_entry->sinks)
-    { }
+ { }
   TransformationDescriptorT(const TransformationDescriptorType &other)
     : TransformationDescriptorT(BaseClass(other))
     { }
@@ -158,4 +158,3 @@ const OutputDescriptorT<SourceFloatType,SinkFloatType> InputDescriptorT<SourceFl
 using TransformationDescriptor = TransformationDescriptorT<double,double>;
 using OutputDescriptor = OutputDescriptorT<double,double>;
 using InputDescriptor = InputDescriptorT<double,double>;
-

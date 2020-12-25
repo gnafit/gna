@@ -2,7 +2,8 @@
 Manage parameters and namespaces
 """
 
-from __future__ import print_function
+
+
 from gna.ui import basecmd
 from importlib import import_module
 from gna.config import cfg
@@ -57,6 +58,7 @@ class cmd(basecmd):
         parser.add_argument('-o', '--output', help='dump variables to the yaml file')
 
         parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
+        parser.add_argument('--label-length', type=int, default=True, help='label length')
 
     def init(self):
         if self.opts.name:
@@ -85,7 +87,7 @@ class cmd(basecmd):
         for parset in self.opts.set:
             name, opts = parset[0], list_to_dict(parset[1:])
             par = namespace[name]
-            for k, v in opts.iteritems():
+            for k, v in opts.items():
                 if k=='value':
                     par.set(par.cast(v))
                 elif k=='values':
@@ -111,7 +113,7 @@ class cmd(basecmd):
                         v=par.cast(v)
                         par.push(v)
                 else:
-                    raise Exception('Unknown parameter option: {}={}'.format(k,v))
+                    raise Exception('Unknown parameter option: {}={}'.format(k, v))
 
         for name, sigma in self.opts.sigma:
             p = namespace[name]
@@ -138,7 +140,7 @@ class cmd(basecmd):
 
         try:
             if self.opts.print is not undefined:
-                namespace(self.opts.print or '').printparameters(labels=True)
+                namespace(self.opts.print or '').printparameters(labels=self.opts.label_length)
         except Exception as e:
             print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))
 
@@ -185,4 +187,3 @@ class cmd(basecmd):
         from tools.yaml import ordered_dump
         print('Write variables to:', self.opts.output)
         ordered_dump(data, open(self.opts.output, 'w'))
-
