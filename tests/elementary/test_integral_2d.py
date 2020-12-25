@@ -23,17 +23,25 @@ from argparse import ArgumentParser
 from gna.parameters.printer import print_parameters
 from mpl_tools import bindings
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_tools.helpers import savefig, plot_hist
+
+choices = [
+        'gl2',
+        'rect2_left', 'rect2', 'rect2_right'
+        ]
 
 """Parse arguments"""
 parser = ArgumentParser()
+parser.add_argument( '--output', help='figure name to save' )
 parser.add_argument( '-o', '--orders', type=int, nargs=2, default=(5,6), help='integration order' )
 parser.add_argument( '-x', '--xbins', type=float, nargs=3, default=[ 0.0, 7.001, 1.0 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 8.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '--ab', type=float, nargs=2, default=(1.0, 2.0), help='function parameters' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
-parser.add_argument( '-M', '--mode', default='gl2', choices=['gl2', 'rect_left', 'rect', 'rect_right', 'gl21'], help='integration mode' )
+parser.add_argument( '-M', '--mode', default='gl2', choices=choices, help='integration mode' )
 # parser.add_argument( '-l', '--legend', default='upper right', help='legend location' )
 parser.add_argument( '-d', '--dump', action='store_true', help='dump integrator' )
+parser.add_argument( '-s', '--show', action='store_true', help='show the figure' )
 parser.add_argument( '--dot', help='write graphviz output' )
 opts = parser.parse_args()
 
@@ -42,18 +50,20 @@ opts = parser.parse_args()
 xedges = N.arange(*opts.xbins, dtype='d')
 yedges = N.arange(*opts.ybins, dtype='d')
 
-# create 2d integrator (sample points) for given edges and integration order 
-mode21= opts.mode=='gl21'
+# create 2d integrator (sample points) for given edges and integration order
+mode21 = '21' in opts.mode
 
-integrators = dict(gl2=R.Integrator2GL, rect=R.Integrator2Rect, gl21=R.Integrator21GL)
-#Integrator = integrators[opts.mode]
+integrators = dict(
+        gl2=R.Integrator2GL,
+        rect2=R.Integrator2Rect,
+        gl21=R.Integrator21GL,
+        rect21=R.Integrator21Rect
+        )
 Integrator = integrators[ opts.mode.split('_', 1)[0] ]
 if '_' in opts.mode:
     iopts = opts.mode.rsplit('_', 1)[-1],
-elif mode21:
-    iopts = (3, 0.0, 1.0)
 else:
-    iopts = tuple()
+    iopts = ()
 
 
 
@@ -201,6 +211,8 @@ ax.plot_wireframe(xmesh, ymesh, fcn_values)
 # add legend
 # ax.legend(loc=opts.legend)
 
+savefig(opts.output)
+
 # # Our function of interest is a guassian and should give 1 when integrated
 # # Test it by summing the histogram bins
 # diff = hist.sum()-integral
@@ -223,4 +235,5 @@ if opts.dot:
         print( '\033[31mFailed to plot dot\033[0m' )
         raise
 
-P.show()
+if opts.show:
+    P.show()

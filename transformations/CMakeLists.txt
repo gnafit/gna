@@ -239,6 +239,7 @@ set(TRANSFORMATION_HEADERS
   SamplerRect.hh
   Integrator21Base.hh
   Integrator21GL.hh
+  Integrator21Rect.hh
   Integrator2Base.hh
   Integrator2GL.hh
   Integrator2Rect.hh

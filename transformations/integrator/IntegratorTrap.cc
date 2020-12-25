@@ -18,7 +18,7 @@ IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : Integra
   init_sampler();
 }
 
-IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges, true)
+IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges, false)
 {
   init_sampler();
 }
@@ -49,12 +49,19 @@ void IntegratorTrap::sample(FunctionArgs& fargs) {
     if(n>2) {
       m_weights.segment(offset+1, n-2)=swidth;
     }
-
-    offset+=n-1;
+    if(shared_edge()){
+      offset+=n-1;
+    }
+    else{
+      offset+=n;
+      m_weights[offset-1]=swidth*0.5;
+    }
     advance(edge_a, 1);
     advance(edge_b, 1);
   }
-  m_weights.tail(1)=samplewidths.tail(1)*0.5;
+  if(shared_edge()){
+    m_weights.tail(1)=samplewidths.tail(1)*0.5;
+  }
   rets.untaint();
   rets.freeze();
 }

@@ -33,6 +33,8 @@ protected:
   void init_sampler();
   void check_sampler(TypesFunctionArgs& fargs);
 
+  size_t shared_edge() { return m_shared_edge; }
+
 private:
   void init_base(double* edges);
   void check_base(TypesFunctionArgs&);
