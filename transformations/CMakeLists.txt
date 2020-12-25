@@ -57,13 +57,14 @@ set(TRANSFORMATION_SOURCES
   transformations/hist/RebinN.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
-  transformations/integrator/IntegratorBase.cc
   transformations/integrator/Integrator21Base.cc
-  transformations/integrator/Integrator2Base.cc
-  transformations/integrator/IntegratorGL.cc
   transformations/integrator/Integrator21GL.cc
+  transformations/integrator/Integrator21Rect.cc
+  transformations/integrator/Integrator2Base.cc
   transformations/integrator/Integrator2GL.cc
   transformations/integrator/Integrator2Rect.cc
+  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/IntegratorGL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
   # Interpolation
@@ -178,12 +179,16 @@ set(TRANSFORMATION_HEADERS
   HistEdgesLinear.hh
   InSegment.hh
   SegmentWise.hh
-  InterpExpo.hh
+  # Interpolation
+  FixedPointScale.hh
+  InterpBase.hh
   InterpConst.hh
+  InterpExpo.hh
   InterpLinear.hh
   InterpLog.hh
   InterpLogx.hh
-  FixedPointScale.hh
+  InterpStrategy.hh
+  # 
   Covmat.hh
   Cholesky.hh
   Chi2.hh
@@ -228,15 +233,18 @@ set(TRANSFORMATION_HEADERS
   ReactorNorm.hh
   ReactorGroup.hh
   ReactorSpectrumUncertainty.hh
-  IntegratorBase.hh
+  # Integrators
+  GSLSamplerGL.hh
   Integrator21Base.hh
+  Integrator21GL.hh
   Integrator2Base.hh
+  Integrator2GL.hh
   Integrator2Rect.hh
+  IntegratorBase.hh
+  IntegratorGL.hh
   IntegratorRect.hh
   IntegratorTrap.hh
-  GSLSamplerGL.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
+  # Detector effects and misc
   EnergyResolution.hh
   EnergyResolutionInput.hh
   EnergyResolutionC.hh
@@ -259,12 +267,9 @@ set(TRANSFORMATION_HEADERS
   Identity.hh
   TrialMultiFunc.hh
   # Legacy
-  IntegratorGL.hh
-  Integrator21GL.hh
-  Integrator2GL.hh
   InterpExpoSorted.hh
   LinearInterpolator.hh
-  InterpStrategy.hh
-  InterpBase.hh
+  GaussLegendre.hh
+  GaussLegendre2d.hh
   PARENT_SCOPE
 )
