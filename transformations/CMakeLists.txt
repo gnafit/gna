@@ -57,6 +57,7 @@ set(TRANSFORMATION_SOURCES
   transformations/hist/RebinN.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
+  transformations/integrator/SamplerRect.cc
   transformations/integrator/Integrator21Base.cc
   transformations/integrator/Integrator21GL.cc
   transformations/integrator/Integrator21Rect.cc
@@ -235,6 +236,7 @@ set(TRANSFORMATION_HEADERS
   ReactorSpectrumUncertainty.hh
   # Integrators
   GSLSamplerGL.hh
+  SamplerRect.hh
   Integrator21Base.hh
   Integrator21GL.hh
   Integrator2Base.hh

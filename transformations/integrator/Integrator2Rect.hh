@@ -15,9 +15,6 @@ public:
   void sample(FunctionArgs& fargs) final;
 
 protected:
-  void init(const std::string& mode);
-  void calcWeights(int rect_offset, size_t nbins, int* order, double* edges, double* abscissa, double* weight);
-
   std::string m_mode;
   int m_rect_offset{0};
 };
