@@ -9,7 +9,7 @@ import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
 
-class integral_2d1d_v03(TransformationBundle):
+class integral_2d1d_v04(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__( self, *args, **kwargs )
         self.check_cfg()
