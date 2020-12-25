@@ -13,6 +13,9 @@ int SamplerRect::offset(std::string mode){
 }
 
 void SamplerRect::fill(int offset, size_t order, double a, double b, double* abscissa, double* weight){
+    if(!order){
+        return;
+    }
     auto binwidth=b-a;
     auto samplewidth=binwidth/order;
 
@@ -38,8 +41,6 @@ void SamplerRect::fill(int offset, size_t order, double a, double b, double* abs
     }
 
     switch(order){
-        case 0:
-            break;
         case 1:
             *abscissa=low;
             *weight=binwidth;

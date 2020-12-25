@@ -10,6 +10,9 @@ GSLSamplerGL::~GSLSamplerGL(){
 }
 
 void GSLSamplerGL::fill(size_t n, double a, double b, double* x, double* w){
+  if(!n){
+    return;
+  }
   auto* table=get_table(n);
   for (size_t j = 0; j<n; ++j) {
     gsl_integration_glfixed_point(a, b, j, x, w, table);
