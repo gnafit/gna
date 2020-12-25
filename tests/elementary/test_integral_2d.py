@@ -13,9 +13,9 @@ Usage:
         xdot output/integrator.dot
 """
 
-from matplotlib import pyplot as P
+from matplotlib import pyplot as plt
 from mpl_tools.helpers import plot_bar
-import numpy as N
+import numpy as np
 from load import ROOT as R
 from gna.constructors import Points, Histogram, Histogram2d, stdvector
 from gna.env import env
@@ -33,9 +33,12 @@ choices = [
 """Parse arguments"""
 parser = ArgumentParser()
 parser.add_argument( '--output', help='figure name to save' )
+
 parser.add_argument( '-o', '--orders', type=int, nargs=2, default=(5,6), help='integration order' )
+parser.add_argument( '--reset-orders', '--ro', nargs=3, type=int, action='append', default=[], help='change particular orders', metavar=('axis', 'index', 'order') )
+
 parser.add_argument( '-x', '--xbins', type=float, nargs=3, default=[ 0.0, 7.001, 1.0 ], help='Bins: arange arguments (min, max, step)' )
-parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 8.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
+parser.add_argument( '-y', '--ybins', type=float, nargs=3, default=[ 1.0, 11.001, 2.0 ], help='Bins: arange arguments (min, max, step)' )
 parser.add_argument( '--ab', type=float, nargs=2, default=(1.0, 2.0), help='function parameters' )
 parser.add_argument( '--input-edges', action='store_true', help='pass edges as input' )
 parser.add_argument( '-M', '--mode', default='gl2', choices=choices, help='integration mode' )
@@ -47,8 +50,8 @@ opts = parser.parse_args()
 
 """Initialize the integrator"""
 # create array with bin edges
-xedges = N.arange(*opts.xbins, dtype='d')
-yedges = N.arange(*opts.ybins, dtype='d')
+xedges = np.arange(*opts.xbins, dtype='d')
+yedges = np.arange(*opts.ybins, dtype='d')
 
 # create 2d integrator (sample points) for given edges and integration order
 mode21 = '21' in opts.mode
@@ -65,24 +68,31 @@ if '_' in opts.mode:
 else:
     iopts = ()
 
+orders = opts.orders
+if opts.reset_orders:
+    orders = np.full(xedges.size-1, orders[0], dtype='i'), np.full(yedges.size-1, orders[1], dtype='i')
+    for ax, idx, neworder in opts.reset_orders:
+        orders[ax][idx]=neworder
 
+print(f'Orders X: {orders[0]}')
+print(f'Orders Y: {orders[1]}')
 
 if not mode21:
     if opts.input_edges:
         edges_in = Histogram2d(xedges, yedges, xedges[:-1,None]*yedges[:-1])
-        integrator = Integrator(xedges.size-1, opts.orders[0], yedges.size-1, opts.orders[1], *iopts)
+        integrator = Integrator(xedges.size-1, orders[0], yedges.size-1, orders[1], *iopts)
         integrator.points.edges(edges_in)
     else:
-        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, yedges.size-1, opts.orders[1], yedges, *iopts)
+        integrator = Integrator(xedges.size-1, orders[0], xedges, yedges.size-1, orders[1], yedges, *iopts)
 else:
     if yedges.size!=2:
         raise Exception('In GL21 mode there should be only one bin over second axis')
     if opts.input_edges:
         xedges_in = Histogram(xedges, xedges[:-1])
-        integrator = Integrator(xedges.size-1, opts.orders[0], None, opts.orders[1], yedges[0], yedges[1], *iopts)
+        integrator = Integrator(xedges.size-1, orders[0], None, orders[1], yedges[0], yedges[1], *iopts)
         integrator.points.xedges(xedges_in)
     else:
-        integrator = Integrator(xedges.size-1, opts.orders[0], xedges, opts.orders[1], yedges[0], yedges[1], *iopts)
+        integrator = Integrator(xedges.size-1, orders[0], xedges, orders[1], yedges[0], yedges[1], *iopts)
 
 integrator.points.setLabel('Integrator inputs')
 integrator.points.y.setLabel('X (points)')
@@ -94,6 +104,8 @@ integrator.hist.setLabel('Integrator (histogram)')
 
 xedges = integrator.points.xedges.data()
 xwidths = xedges[1:]-xedges[:-1]
+ywidths = yedges[1:]-yedges[:-1]
+areas = xwidths[:,None]*ywidths
 
 xmesh = integrator.points.xmesh.data()
 ymesh = integrator.points.ymesh.data()
@@ -101,15 +113,15 @@ ymesh = integrator.points.ymesh.data()
 """Make function"""
 a, b = opts.ab
 def fcn(x, y):
-    return N.sin(a*x+b*y)
+    return np.sin(a*x+b*y)
 
 def fcn_int(x1, x2, y1, y2):
     weight = -1.0/(a*b)
 
-    s1 = N.sin( a*x2 + b*y2 )
-    s2 = N.sin( a*x1 + b*y1 )
-    s3 = N.sin( a*x2 + b*y1 )
-    s4 = N.sin( a*x1 + b*y2 )
+    s1 = np.sin( a*x2 + b*y2 )
+    s2 = np.sin( a*x1 + b*y1 )
+    s3 = np.sin( a*x2 + b*y1 )
+    s4 = np.sin( a*x1 + b*y2 )
 
     return weight*(s1+s2-s3-s4)
 
@@ -126,7 +138,7 @@ def fcn_int(x1, x2, y1, y2):
     # return a*(x2-x1)*(y2-y1)
 
 def integr(x, y):
-    x, y = N.meshgrid(x, y, indexing='ij')
+    x, y = np.meshgrid(x, y, indexing='ij')
     x1 = x[:-1,:-1]
     x2 = x[1: ,1:]
     y1 = y[:-1,:-1]
@@ -171,9 +183,9 @@ print('Numeric integrals')
 print( hist )
 
 if mode21:
-    OK = N.allclose(integrals.T[0], hist)
+    OK = np.allclose(integrals.T[0], hist)
 else:
-    OK = N.allclose(integrals, hist)
+    OK = np.allclose(integrals, hist)
 print(OK and '\033[32mIntegration is OK\033[0m' or '\033[31mIntegration failed\033[0m')
 
 if opts.dump:
@@ -181,19 +193,34 @@ if opts.dump:
     # print('Abscissas:', integrator.points.x.data())
     # print('Widths:', widths)
 
-"""Plot data"""
-fig = P.figure()
-ax = P.subplot( 111, projection='3d' )
+#
+# Plot data
+#
+fig = plt.figure()
+ax = plt.subplot(111, xlabel='', ylabel='', title='Integral')
+ax.minorticks_on()
+ax.set_xlim(xedges[0]-xwidths[0]*0.5, xedges[-1]+xwidths[-1]*0.5)
+ax.set_ylim(yedges[0]-ywidths[0]*0.5, yedges[-1]+ywidths[-1]*0.5)
+
+hist_output.plot_pcolorfast(colorbar=True, mask=0.0)
+ax.plot(xmesh.ravel(), ymesh.ravel(), 'o', color='red', markerfacecolor='none', markersize=1.0)
+
+savefig(opts.output, suffix='_2d')
+
+fig = plt.figure()
+ax = plt.subplot(111, xlabel='', ylabel='', title='Integral (scaled by area)', projection='3d' )
 ax.minorticks_on()
 ax.grid()
-ax.set_xlabel( '' )
-ax.set_ylabel( '' )
-ax.set_title( '' )
+
+hist/=areas
+hist_output.plot_bar3d(alpha=0.4, color='red')
 ax.plot_wireframe(xmesh, ymesh, fcn_values)
 
+savefig(opts.output, suffix='_3d')
+
 # # init figure
-# fig = P.figure()
-# ax = P.subplot( 111 )
+# fig = plt.figure()
+# ax = plt.subplot( 111 )
 # ax.minorticks_on()
 # ax.grid()
 # ax.set_xlabel( 'x' )
@@ -211,8 +238,6 @@ ax.plot_wireframe(xmesh, ymesh, fcn_values)
 # add legend
 # ax.legend(loc=opts.legend)
 
-savefig(opts.output)
-
 # # Our function of interest is a guassian and should give 1 when integrated
 # # Test it by summing the histogram bins
 # diff = hist.sum()-integral
@@ -221,9 +246,9 @@ savefig(opts.output)
 # print('Diff (Integral - %g):'%integral, diff)
 # # print('Integrals (analytic)', integrals)
 # # print('Integrals (calc)', hist)
-# adiff = N.fabs(integrals-hist).sum()
+# adiff = np.fabs(integrals-hist).sum()
 # print('Diffs (abssum):', adiff)
-# print( N.fabs(diff)<1.e-8 and adiff<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
+# print( np.fabs(diff)<1.e-8 and adiff<1.e-8 and '\033[32mIntegration is OK!' or '\033[31mIntegration FAILED!', '\033[0m' )
 
 if opts.dot:
     try:
@@ -236,4 +261,4 @@ if opts.dot:
         raise
 
 if opts.show:
-    P.show()
+    plt.show()
