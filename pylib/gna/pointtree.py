@@ -92,7 +92,7 @@ class PointTree(object):
                         groups[i+1] = groups[i][next(its[i])]
                     except StopIteration:
                         if i == 0:
-                            raise StopIteration()
+                            return
                         continue
                     for j in range(i+1, len(its)-1):
                         its[j] = iter(groups[j])
