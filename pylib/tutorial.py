@@ -18,9 +18,11 @@ def tutorial_image_name(ext, suffix=''):
     marker = 'macro/tutorial/'
 
     start = scriptpath.find(marker)
-    assert start>=0
-    end = start+len(marker)
-    scriptpath_sub = scriptpath[end:]
+    if start>=0:
+        end = start+len(marker)
+        scriptpath_sub = scriptpath[end:]
+    else:
+        scriptpath_sub = scriptpath
 
     scriptpath_path, scriptpath_base = path.split(scriptpath_sub)
     base, _ = path.splitext(scriptpath_base)
