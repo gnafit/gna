@@ -22,7 +22,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
-plt.ticklabel_format(style='sci', axis='y', scilimits=(2,2))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(-2,2), useMathText=True)
 
 hist.hist.hist.plot_hist(label='histogram 1')
 
@@ -34,7 +34,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
-plt.ticklabel_format(style='sci', axis='y', scilimits=(2,2))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(-2,2), useMathText=True)
 
 hist.hist.hist.plot_bar(label='histogram 1 (bar)', alpha=0.6)
 
