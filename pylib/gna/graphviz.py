@@ -138,25 +138,28 @@ class GNADot(object):
             """In case sink is not connected, draw empty output"""
             sinkuid=self.entry_uid(sink, 'sink')
             graph.add_node( sinkuid, shape='point', label='out' )
-            graph.add_edge( self.entry_uid(sink.entry), sinkuid, **self.style.edge_attrs(i, sink) )
+            graph.add_edge( self.entry_uid(sink.entry), sinkuid,
+                            **self.style.edge_attrs(i, sink, nsinks=nsinks) )
         elif sink.sources.size()==1 or not self.joints:
             """In case there is only one connection draw it as is"""
             sinkuid = self.entry_uid(sink.entry)
             sametail=str(i) if nsinks<5 else None
             for j, source in enumerate(sink.sources):
                 isource = self._get_source_idx(source)
-                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=sametail, **self.style.edge_attrs(i, sink, isource, source))
+                self.graph.add_edge( sinkuid, self.entry_uid(source.entry), sametail=sametail,
+                                     **self.style.edge_attrs(i, sink, isource, source, icopy=j, nsinks=nsinks))
         else:
             """In case there is more than one connections, merge them"""
             jointuid = self.entry_uid(sink, 'joint')
             joint = graph.add_node( jointuid, shape='none', width=0, height=0, penwidth=0, label='', xlabel=sink.name)
 
-            sstyle=self.style.edge_attrs(i, sink, None, None)
+            sstyle=self.style.edge_attrs(i, sink, None, None, nsinks=nsinks)
             sstyle['arrowhead']='none'
             self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
             for j, source in enumerate(sink.sources):
                 isource = self._get_source_idx(source)
-                self.graph.add_edge( jointuid, self.entry_uid(source.entry), **self.style.edge_attrs(None, sink, isource, source))
+                self.graph.add_edge( jointuid, self.entry_uid(source.entry),
+                                     **self.style.edge_attrs(None, sink, isource, source))
 
 class TreeStyle(object):
     entryfmt = '{label}'
@@ -335,17 +338,29 @@ class TreeStyle(object):
         ret['style'] = ','.join(styles)
         return ret
 
-    def head_label(self, i, obj):
-        return '' if i is None else str(i)
+    def head_label(self, isource, source):
+        if isource is None:
+            return ''
+        nsources = source.entry.sources.size()
+        if nsources<2:
+            return ''
+        return str(isource)
 
-    def tail_label(self, i, obj):
-        return '' if i is None else str(i)
+    def tail_label(self, isink, sink, isource, icopy, nsinks):
+        if isink is None or not nsinks or nsinks<2:
+            return ''
+        if isource is not None and isource>0:
+            return ''
+        if icopy:
+            return ''
 
-    def edge_attrs(self, isink, sink, isource=None, source=None):
+        return str(isink)
+
+    def edge_attrs(self, isink, sink, isource=None, source=None, icopy=0, nsinks=None):
         attrs = dict(layer='transformation')
         style=()
         if sink:
-            tailabel=self.tail_label(isink, sink)
+            tailabel=self.tail_label(isink, sink, isource, icopy=icopy, nsinks=nsinks)
             attrs['taillabel']=tailabel
 
             sinkfeatures = self.get_features(sink.entry)
