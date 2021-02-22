@@ -19,7 +19,7 @@ instance is created with ``numpy`` array passed as input:
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 7,10
+    :emphasize-lines: 3,5,8
     :caption: :download:`01_points.py <../../../macro/tutorial/basic/01_points.py>`
 
 The code produces the following output:
@@ -44,19 +44,19 @@ The code produces the following output:
 Let us now follow the code in more details. We prepare 2-dimensional array on a side of python:
 
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
-    :lines: 8
+    :lines: 6
 
 In order to use this data in the computational chain a transformation should be provided. The :ref:`Points`
 transformation is used for arrays. We use ``Points`` constructor from ``constructors`` module in order to initialize it
 from the numpy array [#]_.
 
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
-    :lines: 10
+    :lines: 8
 
 Here ``parray`` is ``GNAObject``. We now may print the information about its transformations, inputs and outputs:
 
 .. literalinclude:: ../../../macro/tutorial/basic/01_points.py
-    :lines: 13
+    :lines: 11
 
 .. code-block:: text
     :linenos:
@@ -175,13 +175,13 @@ The :ref:`Histogram` transformation stores a 1-dimensional histogrammed data. It
 .. literalinclude:: ../../../macro/tutorial/basic/02_hist.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 12,13,21
+    :emphasize-lines: 10,11,19
     :caption: :download:`02_hist.py <../../../macro/tutorial/basic/02_hist.py>`
 
 The work flow for a histogram is very similar to the one of the array. The object has a single transformation `hist`
 with a single output `hist`.
 
-The main difference is that ``DataType`` of the histogram now has histogram edges defined. On the line 21
+The main difference is that ``DataType`` of the histogram now has histogram edges defined. On the line 19
 `datatype.edges` C++ vector is accessed and converted to to the python list.
 
 The code produces the following output:
@@ -209,11 +209,11 @@ datatype has two sets of bin edges.
 .. literalinclude:: ../../../macro/tutorial/basic/03_hist2d.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 14,15,23,24
+    :emphasize-lines: 12,13,21,22
     :caption: :download:`03_hist2d.py <../../../macro/tutorial/basic/03_hist2d.py>`
 
 And again the general work flow is very similar. When it comes to the multiple axes their bin edges may be accessed via
-``edgesNd`` member of the ``DataType`` by axis index: see lines 23 and 24.
+``edgesNd`` member of the ``DataType`` by axis index: see lines 21 and 22.
 
 The code produces the following output:
 

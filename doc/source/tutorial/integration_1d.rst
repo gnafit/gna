@@ -21,8 +21,8 @@ The example script is below. We will use the Gauss-Legendre quadrature rule with
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
     :linenos:
-    :lines: 4-
-    :emphasize-lines: 29-30,33-34,38
+    :lines: 4-104,110
+    :emphasize-lines: 28-29,32-33,37
     :caption: :download:`01_integral1d.py <../../../macro/tutorial/complex/01_integral1d.py>`
 
 Before going into details let us first look at the graph that follows the procedure described in
@@ -42,7 +42,7 @@ We now skip the definition of the parameters as it was done in previous examples
 integrator.
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
-    :lines: 27-29,32-33
+    :lines: 26-28,31-32
 
 Here we define the 31 edges in a range :math:`(-\pi,\pi)` for 30 bins and choose the integration orders (3). The orders
 may be specified for each bin in separate, in this case the `orders` variable should contain a numpy array of size 30
@@ -53,14 +53,14 @@ In the last line we get the output with integration points.
 The function :eq:`integral_1d_function` is defined as follows:
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
-    :lines: 36-39
+    :lines: 35-38
 
 We create multiplication by :math:`k` as ``WeightedSum`` with one item: integration points (:math:`x`) weighted by
 :math:`k`. Then we create :math:`\sin` and :math:`\cos` and sum them in another instance of ``WeightedSum``. The last
 step is to pass the output of the function to the integrator:
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
-    :lines: 41
+    :lines: 40
 
 That is it. The integration chain is ready. This chain will react to the change of the variables. Moreover, if, for
 example, only the value of :math:`a` is changed, the branch with :math:`cos(kx)` will not be executed since it has the
@@ -85,7 +85,7 @@ In order to cross check the integrator let us also implement the analytical solu
 :eq:`integral_1d_int`.
 
 .. literalinclude:: ../../../macro/tutorial/complex/01_integral1d.py
-    :lines: 63-65
+    :lines: 62-64
 
 Here we obtain the values of the parameters, compute the antiderivative for each bin edge and then compute the
 integrals as differences. The result our the computations is shown on the figure below.

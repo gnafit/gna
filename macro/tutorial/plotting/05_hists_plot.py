@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gna.tutorial import tutorial_image_name, savefig
+from tutorial import tutorial_image_name, savefig
 import gna.constructors as C
 import numpy as np
 from gna.bindings import common
@@ -14,7 +14,7 @@ narray2 = np.flip(narray1)
 narray3 = narray1[-1]*np.exp(-0.5*(5.0-edges[:-1])**2/1.0)/(2*np.pi)**0.5
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist1 = C.Histogram(edges, narray1)
 hist2 = C.Histogram(edges, narray2)
 hist3 = C.Histogram(edges, narray3)

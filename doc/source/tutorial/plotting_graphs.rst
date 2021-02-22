@@ -10,7 +10,7 @@ usage example in the following macro:
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 13-18,39-41
+    :emphasize-lines: 12-17,38-40
     :caption: :download:`07_graphviz.py <../../../macro/tutorial/plotting/07_graphviz.py>`
 
 Here we are using an example, similar to the one in the :ref:`Sum tutorial <tutorial_sum>`. It implements the following
@@ -33,23 +33,23 @@ and, optionally, edges (inputs and outputs). This is done by the method ``setLab
 to each :math:`P_k`:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 16-17
+    :lines: 15-16
 
 The label may contain multiple lines. Here we used python format_ function (see `pyformat.info`_ for tutorial). Then we
 add labels for the sum, product and scale:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 18-20
+    :lines: 17-19
 
 Finally, we add label for the output:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 21
+    :lines: 20
 
 Now, there is enough information to plot the graph with ``savegraph(transformation, filename)`` function:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 42-44
+    :lines: 41-43
 
 The first argument is transformation, output or list of transformations and outputs. The file format is either `.dot`,
 or an image format (`.png`, `.pdf`). 

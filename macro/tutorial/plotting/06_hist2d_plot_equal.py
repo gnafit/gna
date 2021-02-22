@@ -17,7 +17,7 @@ X, Y = np.meshgrid(cx, cy, indexing='ij')
 narray = np.exp(-0.5*(X-15.0)**2/10.0**2 - 0.5*(Y-30.0)**2/3.0**2)
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
 fig = plt.figure()

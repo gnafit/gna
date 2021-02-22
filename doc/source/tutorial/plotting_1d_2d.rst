@@ -14,11 +14,11 @@ The method works the same way for both arrays and histograms.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/01_points_plot.py
     :linenos:
-    :lines: 3-31,35
-    :emphasize-lines: 26,27
+    :lines: 4-31,34
+    :emphasize-lines: 24,25
     :caption: :download:`01_points_plot.py <../../../macro/tutorial/plotting/01_points_plot.py>`
 
-When 1d array is passed (line 25) it is plotted as is while for 2d array (line 6) each column is plotted in separate.
+When 1d array is passed (line 24) it is plotted as is while for 2d array (line 25) each column is plotted in separate.
 The latter produces the blue line on the following figure while the former produces orange, green and red lines.
 
 .. figure:: ../../img/tutorial/plotting/01_points_plot.png
@@ -42,14 +42,14 @@ The twin method ``output_x.vs_plot(output_y, ...)`` may be used in case reversed
 
 .. literalinclude:: ../../../macro/tutorial/plotting/02_points_plot_vs.py
     :linenos:
-    :lines: 4-28,32
-    :emphasize-lines: 23
+    :lines: 4-27,30
+    :emphasize-lines: 21
     :caption: :download:`02_points_plot_vs.py <../../../macro/tutorial/plotting/02_points_plot_vs.py>`
 
 .. figure:: ../../img/tutorial/plotting/02_points_plot_vs.png
     :align: center
 
-    An example ``output_x.plot_vs(output_y)`` method for outputs.
+    An example ``output_y.plot_vs(output_x)`` method for outputs.
 
 .. table:: Keyword options
 
@@ -71,13 +71,13 @@ There are two options to plot 1d histograms provided. First one ``plot_hist()`` 
 passing data to `pyplot.bar() <https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.bar>`_. See the example
 below.
 
-The ``plot_hist()`` has an extra option ``zero_level``, which is by default 0. The options set the ground level for the
-histogram that affects how the edges of first and last bins are plotted: they are drawn till the ``zero_level``.
+The ``plot_hist()`` has an extra option ``zero_value``, which is by default 0. The options set the ground value for the
+histogram that affects how the edges of first and last bins are plotted: they are drawn till the ``zero_value``.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/04_hist_plot.py
     :linenos:
-    :lines: 4-44,49
-    :emphasize-lines: 26,38
+    :lines: 4-42,47
+    :emphasize-lines: 24,36
     :caption: :download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
 
 .. figure:: ../../img/tutorial/plotting/04_hist_plot.png
@@ -88,11 +88,11 @@ histogram that affects how the edges of first and last bins are plotted: they ar
 .. table:: Keyword options for ``plot_hist()``
 
     +------------------+---------------------------------------+
-    | `zero_level=0.0` | set the ground level of the histogram |
+    | `zero_value=0.0` | set the ground value of the histogram |
     +------------------+---------------------------------------+
 
 Histograms may be plotted with `errorbar()` method. See the file
-:download:`04_hist_plot.py <../../../macro/tutorial/plotting/04_hist_plot.py>`
+:download:`04_hist_plot_errorbar.py <../../../macro/tutorial/plotting/04_hist_plot_errorbar.py>`
 for example.
 
 .. figure:: ../../img/tutorial/plotting/04_hist_plot_errorbar.png
@@ -112,8 +112,8 @@ Multiple `plot_hist()` are plotted as regular plots.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
    :linenos:
-   :lines: 4-37,72
-   :emphasize-lines: 30-32
+   :lines: 4-35,69,70
+   :emphasize-lines: 28-30
    :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
 .. figure:: ../../img/tutorial/plotting/05_hists_plot_hist.png
@@ -130,7 +130,7 @@ First one is to modify the histograms' transparency by setting ``alpha`` option 
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
-    :lines: 40-53,72
+    :lines: 38-51,69,70
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 
@@ -149,7 +149,7 @@ right side. It is possible to plot overlapping histograms without bins actually 
 
 .. literalinclude:: ../../../macro/tutorial/plotting/05_hists_plot.py
     :linenos:
-    :lines: 56-69,72
+    :lines: 54-67,69,70
     :emphasize-lines: 10-12
     :caption: :download:`05_hists_plot.py <../../../macro/tutorial/plotting/05_hists_plot.py>`
 

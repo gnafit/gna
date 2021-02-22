@@ -23,7 +23,7 @@ s2.single_input().connect(s1.single())
 
 s3 = C.Sum()
 s3.add_input('first')
-# Even more simpler way
+# Even simpler way
 s2.sum.sum >> s3.sum.first
 
 s4 = C.Sum()
@@ -33,12 +33,12 @@ s4.sum.first << s3.sum.sum
 
 s5 = C.Sum()
 s5.add_input('first')
-# Even more simpler way
+# Even simpler way
 s4.sum >> s5.sum
 
 s5 = C.Sum()
 s5.add_input('first')
-# Even more simpler way
+# Even simpler way
 s4 >> s5
 
 s6 = C.Sum()

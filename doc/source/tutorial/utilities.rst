@@ -19,7 +19,7 @@ The code produces the following output:
 .. code-block:: text
     :linenos:
 
-    <ROOT.vector<string> object at 0x55b4546e8be0>, ['str1', 'str2', 'str3']
+    { "str1", "str2", "str3" } ['str1', 'str2', 'str3']
 
 GNA introduces convenience pythonic methods for its types that may be loaded as follows:
 

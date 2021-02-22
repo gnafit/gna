@@ -13,7 +13,7 @@ Let us look at the following example:
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
     :linenos:
-    :lines: 4-
+    :lines: 4-17
     :caption: :download:`01_variables.py <../../../macro/tutorial/variables/01_variables.py>`
 
 The parameters are created within namespaces via method ``defparameter(name,...)``. The main namespace is
@@ -21,12 +21,12 @@ The parameters are created within namespaces via method ``defparameter(name,...)
 optional argument `label` defines text, which will be printed in the parameter listing:
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 12
+    :lines: 10
 
 Instead of `sigma` one may use keyword `relsigma` in order to provide the relative uncertainty:
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 13
+    :lines: 11
 
 In case the minimization with nuisance parameters is requested the uncertainty value is used to setup the nuisance term
 for the parameters.
@@ -34,27 +34,27 @@ for the parameters.
 The parameter may be fixed. In this case it will not be passed to the minimizer or derivative calculation.
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 14
+    :lines: 12
 
 The parameter may be set free. In this case the nuisance parameter *is not* added to the likelihood function and the
 parameter value will be fitted without constraints.
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 15
+    :lines: 13
 
 In addition to the ``defparameter(name,...)`` another method ``reqparameter(name,...)`` is defined. The latter one does
 not create a new parameter in case the parameter with the same name is already defined. Using ``reqparameter`` in the code
 enables the possibility to predefine the parameter before the code is executed. Thus the line
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 16
+    :lines: 14
 
 will do nothing since the parameter `par_free` already exists.
 
 Finally the parameter listing may be printed to the terminal:
 
 .. literalinclude:: ../../../macro/tutorial/variables/01_variables.py
-    :lines: 19
+    :lines: 17
 
 The command produces the following (colored) output:
 
@@ -80,9 +80,7 @@ The printout contains the following columns:
         - *Current* value of the angle in number of :math:`\pi`.
         - A flag `[free]` in case parameter is free.
     8. Symbol **|**.
-    9. *(optional)* Parameter limits.
-    10. Symbol **|**.
-    11. *(optional)* Parameter description.
+    9. *(optional)* Parameter description.
 
 Labels are printed only in case `labels=True` argument is specified.
 
@@ -99,30 +97,30 @@ limit). A nested namespace may be created by calling a namespace and passing new
 .. literalinclude:: ../../../macro/tutorial/variables/02_nested_variables.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 12,19
+    :emphasize-lines: 10,17
     :caption: :download:`02_nested_variables.py <../../../macro/tutorial/variables/02_nested_variables.py>`
 
 Here the nested namespace `eff` is created via call:
 
 .. literalinclude:: ../../../macro/tutorial/variables/02_nested_variables.py
-    :lines: 15
+    :lines: 13
 
 The variable `effns` is then used just like `env.globalns` to create new variables:
 
 .. literalinclude:: ../../../macro/tutorial/variables/02_nested_variables.py
-    :lines: 18-19
+    :lines: 16-17
 
 There is no need to refer to the nested namespace directly. Alternatively the namespace name(s) may be added in front of
 variable name with `.` (period) used to split names:
 
 .. literalinclude:: ../../../macro/tutorial/variables/02_nested_variables.py
-    :lines: 22
+    :lines: 20
 
 Here `eff.eff3` means variable `eff3` in namespace `eff`. The following lines are used to demonstrate the ability to
 create the deeper set of the parameters:
 
 .. literalinclude:: ../../../macro/tutorial/variables/02_nested_variables.py
-    :lines: 25-26
+    :lines: 23-24
 
 The example produces the following output:
 
@@ -149,14 +147,14 @@ and normal parameters.
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 11,20,21,26,32,33
+    :emphasize-lines: 9,18,19,24,30,31
     :caption: :download:`03_angle_getset.py <../../../macro/tutorial/variables/03_angle_getset.py>`
 
 The uniform angle parameter may be defined by the ``defparameter()``/``reqparameter()`` methods by passing
 `type='uniformangle'` option:
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 14
+    :lines: 12
 
 The main feature of uniform angle is that its value is converted to the limits of :math:`(-\pi,\pi)`. This enables
 proper minimization with periodicity taken into account.
@@ -172,17 +170,17 @@ In the example we have defined two parameters:
 The parameter instances may be obtained by assigning the result of the ``defparameter()``/``reqparameter()`` call
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 13
+    :lines: 11
 
 or requested by the namespace field access:
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 16
+    :lines: 14
 
 Then the ``set(value)`` method may be used to change the current value of the parameter:
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 23-24
+    :lines: 21-22
 
 This result may be printed to the terminal:
 
@@ -199,7 +197,7 @@ way, in other words the use may set the number of sigmas the value deviates from
 command:
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 29
+    :lines: 27
 
 Setting the deviation by :math:`1\sigma` produces the following result.
 
@@ -210,7 +208,7 @@ Setting the deviation by :math:`1\sigma` produces the following result.
 Finally, the values of the variables may be read back by the ``value()`` method:
 
 .. literalinclude:: ../../../macro/tutorial/variables/03_angle_getset.py
-    :lines: 35-38
+    :lines: 33-36
 
 Here is the output of the code:
 

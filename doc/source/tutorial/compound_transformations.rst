@@ -16,19 +16,19 @@ The :ref:`Sum` transformation is used to do elementwise sum of the arrays and hi
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
     :linenos:
-    :lines: 4-
-    :emphasize-lines: 10, 14
+    :lines: 4-27
+    :emphasize-lines: 8, 12
     :caption: :download:`01_compound_sum.py <../../../macro/tutorial/compound/01_compound_sum.py>`
 
 The ``Sum`` object is created without arguments:
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
-    :lines: 13
+    :lines: 11
 
 It may have any number of inputs. Each input is binded with method ``add(output)``, as it is done in:
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
-    :lines: 17
+    :lines: 15
 
 The printout of the ``Sum`` instance now contains list of all bound inputs:
 
@@ -89,7 +89,7 @@ The outputs should be of the same type and shape. The code produces the followin
 Ways to construct Sum and add inputs
 """"""""""""""""""""""""""""""""""""
 
-There several ways to add inputs to the ``Sum`` instance:
+There are several ways to add inputs to the ``Sum`` instance:
 
     #. Construct ``Sum`` passing list of outputs as an argument.
     #. Construct empty ``Sum`` and add each output manually via ``add()`` method.
@@ -98,41 +98,41 @@ There several ways to add inputs to the ``Sum`` instance:
 The second method was shown in the example above:
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
-    :lines: 17
+    :lines: 15
 
 All of the methods in comparison are presented in the following example:
 
 .. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
     :linenos:
-    :lines: 4-
-    :emphasize-lines: 10, 16, 18, 19
+    :lines: 4-44
+    :emphasize-lines: 8, 10, 16, 17
     :caption: :download:`02_sum_variants.py <../../../macro/tutorial/compound/02_sum_variants.py>`
 
-First method is shown on line 10: the ``Sum`` constructor from ``constructors`` module may have a list of outputs as an
+First method is shown on line 8: the ``Sum`` constructor from ``constructors`` module may have a list of outputs as an
 argument.
 
 .. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
-    :lines: 13
+    :lines: 11
 
-The second method, the one shown in the previous example, is represented by lines 11 and 16:
-
-.. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
-    :lines: 14, 17-19
-
-The third method is very close to the second one. It is represented by lines 12, 18 and 19:
+The second method, the one shown in the previous example, is represented by lines 9 and 14:
 
 .. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
-    :lines: 15, 17-18, 21-22
+    :lines: 12, 15-17
+
+The third method is very close to the second one. It is represented by lines 10, 16 and 17:
+
+.. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
+    :lines: 13, 15-16, 19-20
 
 The binding is done in two steps. At first we create a named input:
 
 .. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
-    :lines: 21
+    :lines: 19
 
 The input then  is connected via call:
 
 .. literalinclude:: ../../../macro/tutorial/compound/02_sum_variants.py
-    :lines: 22
+    :lines: 20
 
 The example script prints the inputs and outputs for each case:
 
@@ -190,7 +190,7 @@ Product
 
 The ``Product`` transformation is very similar to the ``Sum``. The example, one to one similar to the example from the
 previous section may be found below. The main differences are that there is a method ``multiply(output)`` for binding
-outputs. The object defines transformation `product` with output, named `prodcut`.
+outputs. The object defines transformation `product` with output, named `product`.
 
 .. literalinclude:: ../../../macro/tutorial/compound/03_product_variants.py
     :linenos:
@@ -254,26 +254,26 @@ Now let us review the python syntax used to bind transformations together. Let u
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 4-9
+    :lines: 4-7
     :caption: :download:`04_syntax.py <../../../macro/tutorial/compound/04_syntax.py>`
 
 By default points is an object with one transformation and one output, which may be accessed as follows:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 11-13
+    :lines: 9-11
 
 The method ``single()`` may be used to return the single output of a single object:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 14
+    :lines: 12
 
 Which is equivalent to:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 13
+    :lines: 11
 
 Transformation also has a method ``single()`` which returns the single output of a transformation. Both methods raise an
 exception if single output can not be returned or the output is not single.
@@ -282,13 +282,13 @@ The default way to connect the output to the input is to use ``input.connect(out
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 16-19
+    :lines: 14-17
 
 `Single` notation may also be used in a similar way:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 21-24
+    :lines: 19-22
 
 Here the method ``single_input()`` returns a single input of a single transformation.
 
@@ -296,25 +296,25 @@ There exist robust operators ``>>`` and ``<<`` that may be used to connect outpu
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 26-29
+    :lines: 24-27
 
 or as ``input<<output``:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 31-34
+    :lines: 29-32
 
 Operators ``<<`` and ``>>`` may take care in cases when there is a single input/output in the transformation:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 36-39
+    :lines: 34-37
 
 or when there is a single transformation in the object:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 41-44
+    :lines: 39-42
 
 The short version may go either on the left hand side, rite hand side or both sides of the expression.
 
@@ -322,20 +322,20 @@ More then one inputs may be passed. In this case the output is connected to each
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 46-50
+    :lines: 44-48
 
 or like this:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 52-56
+    :lines: 50-54
 
 In the above example we created a chain that passes as single value transformation to transformation. In the last two
 examples we have doubled the value twice. Therefore the output should contain the value four times larger:
 
 .. literalinclude:: ../../../macro/tutorial/compound/04_syntax.py
     :linenos:
-    :lines: 57-
+    :lines: 56-59
 
 Which is confirmed by the output:
 

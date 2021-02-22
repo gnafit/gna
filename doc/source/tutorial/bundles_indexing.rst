@@ -19,18 +19,18 @@ Let us start from the simplest possible example of empty index:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 4-18
+    :lines: 3-16
     :caption: :download:`01_indexing.py <../../../macro/tutorial/bundles/01_indexing.py>`
 
 The index is created by instantiating an ``NIndex`` class:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
-    :lines: 10
+    :lines: 8
 
 The ``NIndex`` instance is ready for iteration:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
-    :lines: 13-18
+    :lines: 11-15
 
 A copy of ``NIndex`` is returned on each iteration with `current values` set. A `current_values()` method returns a
 tuple with all current index values, which is empty in our case. A `current_format()` method formats a string using the
@@ -49,11 +49,11 @@ The following output is produced. As one may see, empty index still produces a s
 1d case
 '''''''
 
-Now let us create an 1d index: Do do this we add a definition of one of the indices:
+Now let us create an 1d index: to do this we add a definition of one of the indices:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 23-25
+    :lines: 21-23
 
 Typical definition contains three items: short name, long name and a list with values. Short name will be used for
 reference. Long name is used for string formatting.
@@ -62,7 +62,7 @@ When iterated,
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 27-29
+    :lines: 25-27
 
 the resulting index will contain the value from the list on each iteration:
 
@@ -76,7 +76,7 @@ The `current_format()` returns a single string for each iteration.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 34-36
+    :lines: 32-34
 
 For 1d case the string will be equal to each of the values:
 
@@ -91,7 +91,7 @@ separator:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 39-41
+    :lines: 37-39
 
 .. code-block:: text
 
@@ -107,13 +107,13 @@ In order to make 2d multi index just add another index specification:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 47-50
+    :lines: 45-48
 
 The iteration of the 2d index
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 53-57
+    :lines: 51-55
 
 will produce all possible pairs of the values of `i` and `j` indices:
 
@@ -161,7 +161,7 @@ after the clone index:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 64-69
+    :lines: 62-67
 
 When the string `name` is passed instead of index definition, the position of the `name` will be used to position the
 actual name.
@@ -212,14 +212,14 @@ Let us now look at 4d case.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 81-87
+    :lines: 79-85
 
 It is often needed to iterate only a part of the indices of a multidimensional index. This may be achieved by
 `split(short_names)` method:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 89
+    :lines: 87
 
 It produces a pair of ``NIndex`` instances. First one contains the indices from the list of short names, passed as
 argument. In this case it contains `s` and `d`. The second ``NIndex`` contains all the other indices: `z` and `e` in
@@ -229,7 +229,7 @@ These two instances may be iterated independently:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 90-96
+    :lines: 88-94
 
 This kind of iteration is useful, for example, in the cases, when variables depend only on a part of the indices.
 
@@ -237,14 +237,14 @@ The partially iterated indices may be combined together:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 98-99
+    :lines: 96-97
 
 The `current_format()` method has an optional argument: python format specification. In this case the string will be
 formatted using the values of the current indices, which may be referenced by both short and long names:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 100
+    :lines: 98
 
 The format string may reference any other positional and keyword arguments which should be passed to the
 `current_format()` as well.
@@ -301,7 +301,7 @@ To work with dependant indices we need to tell the `master` index how its values
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 108-113
+    :lines: 106-111
 
 In our case for `e` index we have provided a dictionary with short and long names of the slave index, as well as the
 list of pairs `slave index` and `master indices`. In our example group `g1` contains elements `e1` and `e2`, the group
@@ -311,7 +311,7 @@ Now let us look how this work. Let us split the multidimensional index in two:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 116-117
+    :lines: 114-115
 
 The first group contains indices `d` and `g`, while the second contains the index `s`. Index `e` is not used since
 `g` was required. We have also requested multi-index with `e` index for later use. The iteration over `nidx_major` and
@@ -346,13 +346,13 @@ Now let us combine `nidx_major` with `nidx_e`. The former one contains index `g`
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 129
+    :lines: 127
 
 The result will contain only index `e`, but the relevant `g` value may be obtained by specifying the format string:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 137
+    :lines: 135
 
 Here is the output:
 
@@ -407,6 +407,6 @@ The complete code for this example may be found below:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/01_indexing.py
     :linenos:
-    :lines: 4-
+    :lines: 3-
     :caption: :download:`01_indexing.py <../../../macro/tutorial/bundles/01_indexing.py>`
 

@@ -50,7 +50,7 @@ print()
 
 # Label transformations
 hist.hist.setLabel('Input histogram\n(bins definition)')
-integrator.points.setLabel('Sampler\n(Gauss-Legendre)')
+integrator.points.setLabel('Sampler\n(trapezoidal)')
 integrator.hist.setLabel('Integrator\n(convolution)')
 cos_arg.sum.setLabel('kx')
 sin_t.sin.setLabel('sin(x)')
@@ -81,7 +81,7 @@ integrator.hist.hist.plot_bar(label='integral: numerical', divide=2, shift=0, al
 ax.bar(bar_left, integral_a, bar_width, label='integral: analytical', align='edge', alpha=0.6)
 
 # Freeze axis limits and draw bin edges
-ax.autoscale(enable=False, axis='y')
+ax.autoscale(enable=True, axis='y')
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 
@@ -99,7 +99,7 @@ ax.minorticks_on()
 # ax.grid()
 ax.set_ylabel( 'f(x)' )
 ax.set_title(r'$a\,\sin(x)+b\,\sin(kx)$')
-ax.autoscale(enable=False, axis='y')
+ax.autoscale(enable=True, axis='y')
 ax.set_ylim(ymin, ymax)
 ax.axhline(0.0, linestyle='--', color='black', linewidth=1.0, alpha=0.5)
 
