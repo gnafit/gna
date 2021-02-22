@@ -9,8 +9,8 @@ points_list = [ C.Points(np.arange(i, i+n).reshape(n1, n2)) for i in range(5) ]
 
 # Create product instances
 tproduct_constructor = C.Product([p.points.points for p in points_list])
-tproduct_multiply = R.Product()
-tproduct_add_input = R.Product()
+tproduct_multiply = C.Product()
+tproduct_add_input = C.Product()
 
 for i, p in enumerate(points_list):
     out = p.points.points
