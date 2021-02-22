@@ -184,7 +184,10 @@ class DictWrapper(ClassWrapper):
         v0 = self[startfromkey]
         k0 = tuple(self.iterkey(startfromkey))
         if not isinstance(v0, self._wrapper_class):
-            yield k0, v0
+            if appendstartkey:
+                yield k0, v0
+            else:
+                yield (), v0
             return
 
         if not appendstartkey:
