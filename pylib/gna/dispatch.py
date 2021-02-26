@@ -72,7 +72,7 @@ def listmodules(modules, printdoc=False):
         try:
             module=loadmodule(modules, modname)
         except Exception as e:
-            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.message, namelen=namelen))
+            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.msg, namelen=namelen))
         else:
             pyname = module.__file__
             if module.__file__.endswith('.pyc'):
