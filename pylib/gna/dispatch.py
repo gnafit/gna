@@ -149,7 +149,7 @@ def run():
         try:
             obj = cmdcls(env, opts)
         except HelpDisplayed:
-            pass
+            break
         except:
             print(f'An exception occured during instantiation ({cmdcls.__cmd__})')
             raise
@@ -157,7 +157,7 @@ def run():
         try:
             obj.init()
         except HelpDisplayed:
-            pass
+            break
         except:
             print(f'An exception occured during init ({cmdcls.__cmd__})')
             raise
@@ -165,7 +165,7 @@ def run():
         try:
             obj.run()
         except HelpDisplayed:
-            pass
+            break
         except:
             print(f'An exception occured during run ({cmdcls.__cmd__})')
             raise
