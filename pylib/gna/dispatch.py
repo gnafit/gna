@@ -132,7 +132,7 @@ def run():
                 except HelpDisplayed:
                     pass
                 except:
-                    print('Unable to print help item , sorry')
+                    print('Unable to print help item, sorry')
 
             print()
             exit=True
@@ -148,18 +148,24 @@ def run():
             raise
         try:
             obj = cmdcls(env, opts)
+        except HelpDisplayed:
+            pass
         except:
             print(f'An exception occured during instantiation ({cmdcls.__cmd__})')
             raise
 
         try:
             obj.init()
+        except HelpDisplayed:
+            pass
         except:
             print(f'An exception occured during init ({cmdcls.__cmd__})')
             raise
 
         try:
             obj.run()
+        except HelpDisplayed:
+            pass
         except:
             print(f'An exception occured during run ({cmdcls.__cmd__})')
             raise
