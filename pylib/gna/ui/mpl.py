@@ -157,6 +157,5 @@ class cmd(basecmd):
             self.ax.set_xlim(*self.opts.xlim)
 
         if self.opts.ylim:
-            ax.set_ylim(*self.opts.ylim)
             self.fig.canvas.draw()
             self.ax.set_ylim(*self.opts.ylim)

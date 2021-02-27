@@ -26,11 +26,11 @@ transformation. The corresponding graph may be found below.
 .. figure:: ../../img/tutorial/plotting/07_graphviz.png
     :align: center
 
-    Example computational graph representing :math:`R_{ij} = S_{ij} \sum\limits_{k=1}^5 P_k`.
+    Example computational graph representing :math:`R_{ij} = S_{ij} \sum\limits_{k=1}^5 P_{ij}^k`.
 
 Let us now look at how the graph is done. First of all proper labels should be introduced for nodes (transformations)
 and, optionally, edges (inputs and outputs). This is done by the method ``setLabel(label)``. First of all it is applied
-to each :math:`P_k`:
+to each :math:`P_{ij}^k`:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
     :lines: 15-16

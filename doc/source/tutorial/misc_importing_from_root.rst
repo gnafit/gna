@@ -10,13 +10,13 @@ Importing data from ROOT files is easy: `Points` and `Histogram`/`Histogram2d` o
 Here we will discuss only main functions and points. Firstly let us create `TH1D`, `TH2D` and `TMatrixD`.
 
 .. literalinclude:: ../../../macro/tutorial/misc/misc_importing_from_root.py
-    :lines: 13-15
+    :lines: 11-13
 
 Then, after ROOT objects are filled, or just read from the ROOT file, the GNA objects may be created with their regular
 constructors:
 
 .. literalinclude:: ../../../macro/tutorial/misc/misc_importing_from_root.py
-    :lines: 33-35,38-39
+    :lines: 31-33,36-37
 
 The single precision versions `TH1F`, `TH2F` and `TMatrixF` are valid as well.
 
