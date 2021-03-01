@@ -24,10 +24,12 @@
             --set BackgroundRate value=2000 \
       -- minimizer min minuit stats_chi2 peak_f \
       -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' -s \
+      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' \
+      -- mpl-v1 --xlabel 'Energy, MeV' --ylabel entries --grid -s \
       -- fit min -s -p -o output/fit_01.yaml \
       -- ns --print peak_f \
-      -- spectrum --new-figure -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Best fit model' -o output/fit_01.pdf -s
+      -- mpl --figure \
+      -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
+      -- spectrum -p peak_f/spectrum -l 'Best fit model' \
+      -- mpl --xlabel 'Energy, MeV' --ylabel entries --grid \
+                -o output/fit_01.pdf -s

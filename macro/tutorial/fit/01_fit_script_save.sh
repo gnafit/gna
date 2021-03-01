@@ -32,11 +32,13 @@ OUT=$OUTPUT/01_fit_models.out
             --set BackgroundRate value=2000 \
       -- minimizer min minuit stats_chi2 peak_f \
       -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' -o $FIG1 \
+      -- spectrum  -p peak_f/spectrum -l 'Model (initial)' \
+      -- mpl-v1 --xlabel 'Energy, MeV' --ylabel entries --grid -o $FIG1 \
       -- fit min -s -p -o $YAML \
       -- ns --print peak_f \
-      -- spectrum --new-figure -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
-                  --xlabel 'Energy, MeV' large --ylabel entries large --grid \
-      -- spectrum  -p peak_f/spectrum -l 'Best fit model' -o $FIG2 \
+      -- mpl --figure \
+      -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
+      -- spectrum -p peak_f/spectrum -l 'Best fit model' \
+      -- mpl --xlabel 'Energy, MeV' --ylabel entries --grid \
+                -o output/fit_01.pdf -o $FIG2 \
       > $OUT

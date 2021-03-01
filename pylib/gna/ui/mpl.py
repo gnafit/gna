@@ -11,9 +11,9 @@ import pprint
 def yaml_load(s):
     return yaml.load(s, Loader=yaml.Loader) or {}
 
-undefined=object()
 
 class cmd(basecmd):
+    _undefined=object()
     _ax = None
     _fig = None
     @classmethod
@@ -30,7 +30,7 @@ class cmd(basecmd):
         mpl.add_argument('-r', '--rcparam', '--rc', nargs='+', default=[], type=yaml_load, help='YAML dictionary with RC configuration')
 
         fig = parser.add_argument_group(title='figure', description='Figure modification parameters')
-        fig.add_argument('-f', '--figure', nargs='?', default=undefined, type=yaml_load, help='create new figure', metavar='kwargs')
+        fig.add_argument('-f', '--figure', nargs='?', default=cls._undefined, type=yaml_load, help='create new figure', metavar='kwargs')
 
         axis = parser.add_argument_group(title='axis', description='Axis modification parameters')
         axis.add_argument('-t', '--title', help='axis title')
@@ -38,7 +38,7 @@ class cmd(basecmd):
         axis.add_argument('--ylabel', '--yl', help='y label')
         axis.add_argument('--ylim', nargs='+', type=float, help='Y limits')
         axis.add_argument('--xlim', nargs='+', type=float, help='X limits')
-        axis.add_argument('--legend', nargs='?', default=undefined, help='legend (optional: position)')
+        axis.add_argument('--legend', nargs='?', default=cls._undefined, help='legend (optional: position)')
         axis.add_argument('--scale', nargs=2, help='axis scale', metavar=('axis', 'scale'))
 
         axis.add_argument('-g', '--grid', action='store_true', help='draw grid')
@@ -98,7 +98,7 @@ class cmd(basecmd):
     def configure_figure(self):
         from matplotlib import pyplot as plt
 
-        if self.opts.figure is not undefined:
+        if self.opts.figure is not self._undefined:
             if not self.opts.figure:
                 self.opts.figure={}
             plt.figure(**self.opts.figure)
@@ -139,7 +139,7 @@ class cmd(basecmd):
         if self.opts.minor_ticks:
             self.ax.minorticks_on()
 
-        if self.opts.legend is not undefined:
+        if self.opts.legend is not self._undefined:
             if self.opts.legend:
                 self.ax.legend(self.opts.legend)
             else:
