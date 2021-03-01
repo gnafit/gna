@@ -149,7 +149,7 @@ Unlike in case of histograms, the output does not contain the information about 
                     --define Mu             central=5 fixed=True label='Signal rate' \
               -- exp --ns peak exampleexp --range 0 10 -N 100 \
               -- plot-spectrum -p peak/peak --vs peak/x \
-                               -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
+              -- mpl -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
                                --grid -s
 
 ..

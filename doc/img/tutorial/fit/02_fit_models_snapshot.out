@@ -14,33 +14,34 @@ Variables in namespace 'peak':
   Width                         =        0.2 │         0.5±       0.005 [free]         │ Peak 0 width
 Write graph to: output/tutorial_img/fit/02_fit_models_snapshot_graph.png
 Fit result:${
-  cpu : 0.010508,
+  cpu : 0.0237910239957273,
   errors : [21.044786843888083, 89.87411551001028, 0.019925689550693886, 0.021573688772678953],
   errorsdict : ${
     peak : ${
-      BackgroundRate : 21.0447868439,
-      Mu : 89.87411551,
-      E0 : 0.0199256895507,
-      Width : 0.0215736887727,
+      BackgroundRate : 21.044786843888083,
+      E0 : 0.019925689550693886,
+      Mu : 89.87411551001028,
+      Width : 0.021573688772678953,
     },
   },
-  fun : 4.65335462203e-08,
+  fun : 4.6533546220329065e-08,
   maxcv : 0.01,
   names : ['peak.BackgroundRate', 'peak.Mu', 'peak.E0', 'peak.Width'],
   nfev : 166,
   npars : 4,
   success : True,
-  wall : 0.0105438232422,
+  wall : 0.023801803588867188,
   x : [1000.000584000211, 1999.989446718792, 2.0000031405938894, 0.4999998136336317],
   xdict : ${
     peak : ${
-      BackgroundRate : 1000.000584,
-      Mu : 1999.98944672,
-      E0 : 2.00000314059,
-      Width : 0.499999813634,
+      BackgroundRate : 1000.000584000211,
+      E0 : 2.0000031405938894,
+      Mu : 1999.989446718792,
+      Width : 0.4999998136336317,
     },
   },
 }
+
 Save output file: output/tutorial_img/fit/02_fit_models_snapshot.yaml
 Variables in namespace 'peak':
   BackgroundRate                =       1000 │        1000±           5 [free]         │ Flat background rate 0
