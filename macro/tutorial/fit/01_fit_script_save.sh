@@ -40,5 +40,5 @@ OUT=$OUTPUT/01_fit_models.out
       -- spectrum -p peak_MC/spectrum -l 'Monte-Carlo' --plot-type errorbar \
       -- spectrum -p peak_f/spectrum -l 'Best fit model' \
       -- mpl --xlabel 'Energy, MeV' --ylabel entries --grid \
-                -o output/fit_01.pdf -o $FIG2 \
+             -o $FIG2 \
       > $OUT
