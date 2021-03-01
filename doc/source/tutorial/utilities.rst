@@ -10,7 +10,7 @@ converts the python list of strings to ``std::vector<std::string>``:
 
 .. literalinclude:: ../../../macro/tutorial/basic/00_stdvector.py
     :linenos:
-    :lines: 4-
+    :lines: 3-
     :emphasize-lines: 3
     :caption: :download:`00_stdvector.py <../../../macro/tutorial/basic/00_stdvector.py>`
 
