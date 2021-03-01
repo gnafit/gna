@@ -42,7 +42,7 @@ Here is the code:
 
 .. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
     :linenos:
-    :lines: 2-33
+    :lines: 2-
     :caption: :download:`exampleexp.py <../../../macro/tutorial/ui/experiments/exampleexp.py>`
 
 Let us go through it method by method. First of all, the experiment definition should contain a class `exp` that
@@ -50,7 +50,7 @@ inherits from `gna.exp.baseexp`. Class initializer has two arguments local names
 
 .. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
     :linenos:
-    :lines: 7-12
+    :lines: 7-13
     :emphasize-lines: 1-3
 
 Both arguments should be passed to the parent class initializer. Afterwards the user may do whatever he wants to define
@@ -64,7 +64,7 @@ In order to define the command line parsing behaviour the user must define class
 
 .. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
     :linenos:
-    :lines: 14-18
+    :lines: 15-19
 
 The `parser` is an instance of the `Argparser <https://docs.python.org/2/howto/argparse.html>`_ python module. See
 Argparser `documentation <https://docs.python.org/2/howto/argparse.html>`_ for reference. The basic syntax is quite self
@@ -99,7 +99,7 @@ The actual computational chain is defined in the `build()` method.
 
 .. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
     :linenos:
-    :lines: 20-29
+    :lines: 21-30
     :emphasize-lines: 8-10
 
 First half checks that all the necessary variables are present in the namespace. Than we define energy axis as instance
@@ -110,7 +110,7 @@ And the last method adds the outputs as observables to the current namespace: `x
 
 .. literalinclude:: ../../../macro/tutorial/ui/experiments/exampleexp.py
     :linenos:
-    :lines: 31-33
+    :lines: 32-34
 
 As the namespace is shared across the modules, the observables are accessible for other commands, including
 `plot-spectrum`, `minimizer` or `fit`.
