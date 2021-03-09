@@ -40,7 +40,7 @@ def GNAObject__print(self, **kwargs):
 
 @patchROOTClass(classes, 'printtransformations')
 def GNAObject__printtransformations(self, **kwargs):
-    printl(str(self))
+    printl(GNAObject____str__(self))
     if self.transformations.size():
         with nextlevel():
             for i, t in enumerate(self.transformations.values()):

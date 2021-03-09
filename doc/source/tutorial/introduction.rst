@@ -60,5 +60,5 @@ Each input and output has methods ``data()`` and ``datatype()``:
 
 Each output's data may be accessed via function call: `trans.output()` works the same way as `trans.output.data()`.
 
-Let us no see the actual code examples.
+Let us now see the actual code examples.
 

@@ -14,8 +14,8 @@ axis.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/03_matshow.py
     :linenos:
-    :lines: 4-26,29
-    :emphasize-lines: 22
+    :lines: 4-24,27
+    :emphasize-lines: 20
     :caption: :download:`03_matshow.py <../../../macro/tutorial/plotting/03_matshow.py>`
 
 .. figure:: ../../img/tutorial/plotting/03_matshow.png
@@ -60,8 +60,8 @@ Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 4-34,58
-    :emphasize-lines: 29
+    :lines: 4-31,56
+    :emphasize-lines: 27
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_pcolorfast.png
@@ -78,7 +78,7 @@ The second method ``plot_imshow()`` is using
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 43
+    :lines: 41
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_imshow.png
@@ -91,11 +91,11 @@ The second method ``plot_imshow()`` is using
 matshow
 +++++++
 
-The relevant plot, produced by the ``plot_matshow()`` may be found below.
+The relevant plot produced by the ``plot_matshow()`` may be found below.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot_equal.py
     :linenos:
-    :lines: 54
+    :lines: 52
     :caption: :download:`06_hist2d_plot_equal.py <../../../macro/tutorial/plotting/06_hist2d_plot_equal.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_equal_matshow.png
@@ -117,8 +117,8 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
 .. literalinclude:: ../../../macro/tutorial/plotting/06_hist2d_plot.py
    :linenos:
-   :lines: 4-37,47
-   :emphasize-lines: 29
+   :lines: 4-31,45
+   :emphasize-lines: 27
    :caption: :download:`06_hist2d_plot.py <../../../macro/tutorial/plotting/06_hist2d_plot.py>`
 
 .. figure:: ../../img/tutorial/plotting/06_hist2d_plot_pcolormesh.png
@@ -126,3 +126,4 @@ We will use a Gaussian with width 150 for X and 0.1 for Y.
 
    2d histogram with variable binning.
 
+In addition, the method ``plot_pcolor()`` can be used.

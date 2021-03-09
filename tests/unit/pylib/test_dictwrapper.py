@@ -277,7 +277,8 @@ def test_dictwrapper_09_walk():
     keys = [k for k, v in dw.walkitems()]
     assert keys==keys0
 
-    assert [(k,v) for k, v in dw.walkitems('a')] == [(('a',), 1)]
+    assert [(k,v) for k, v in dw.walkitems('a', appendstartkey=True)] == [(('a',), 1)]
+    assert [(k,v) for k, v in dw.walkitems('a', appendstartkey=False)] == [((), 1)]
     assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=True)] == [(('d','e'), 4)]
     assert [(k,v) for k, v in dw.walkitems('d', appendstartkey=False)] == [(('e',), 4)]
     assert [(k,v) for k, v in dw.walkitems(('f','g'), appendstartkey=True)] == [(('f','g', 'h'), 5)]

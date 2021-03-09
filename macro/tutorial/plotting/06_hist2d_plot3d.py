@@ -17,7 +17,7 @@ X, Y = np.meshgrid(cx, cy, indexing='ij')
 narray = np.exp(-0.5*(X-cx[15])**2/150.0**2 - 0.5*(Y-cy[20])**2/0.10**2)
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 
 from mpl_toolkits.mplot3d import Axes3D
@@ -46,7 +46,7 @@ savefig(tutorial_image_name('png', suffix='bar3d'))
 
 fig = plt.figure()
 ax = plt.subplot( 111, projection='3d' )
-ax.set_title( 'bar3d' )
+ax.set_title( 'wireframe' )
 ax.minorticks_on()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )

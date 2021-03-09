@@ -13,7 +13,7 @@ yerr   = np.ones_like(narray)*20
 edges  = np.linspace(1.0, 40.0, nbins+1)
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist = C.Histogram(edges, narray)
 
 fig = plt.figure(figsize=(12, 5))

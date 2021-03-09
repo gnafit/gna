@@ -27,7 +27,7 @@ The first example goes as follows:
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_a.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 51-52, 55-58, 68-71
+    :emphasize-lines: 50-51, 54-57, 67-70
     :caption: :download:`04_graph_topology_a.py <../../../macro/tutorial/complex/04_graph_topology_a.py>`
 
 It produces the following graph.
@@ -48,7 +48,7 @@ when the transformation their functions are executed. This will help us track th
 They are created with the following commands:
 
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_a.py
-    :lines: 58-61
+    :lines: 57-60
 
 The first argument defines the name which will be printed to the output, the second argument is a delay :math:`D`. The
 transformation function will sleep for :math:`D` seconds if executed. The debug transformation has the same number of
@@ -58,7 +58,7 @@ The integrators are created with the following lines:
 
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_a.py
     :linenos:
-    :lines: 71-74
+    :lines: 70-73
 
 At first we simply save the first integrator for later use (labels and binding). Then we bind the output of first debug
 transformation to the input of the integrator via `add_input(output)` method. The second instance of the integrator is
@@ -84,7 +84,7 @@ each of them has an input bound to the output of the function (through the debug
 After the computational graph is constructed let us access the output of each last transformation twice:
 
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_a.py
-    :lines: 85,89,94,98
+    :lines: 84,88,93,97
 
 Here is the corresponding terminal output:
 
@@ -118,7 +118,7 @@ access no execution happens.
 Next we change the value of :math:`k_1` coefficient, that affects the branch 1 via cosine:
 
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_a.py
-    :lines: 104
+    :lines: 103
 
 and repeat the procedure of reading data from both branches twice. Here is the result:
 
@@ -153,7 +153,7 @@ The code for the second example is mostly identical to the previous one so we on
 
 .. literalinclude:: ../../../macro/tutorial/complex/04_graph_topology_b.py
     :linenos:
-    :lines: 71-73
+    :lines: 70-72
     :caption: :download:`04_graph_topology_b.py <../../../macro/tutorial/complex/04_graph_topology_b.py>`
 
 These lines represent the binding of the integrator inputs. As we do not create the second integration here, both

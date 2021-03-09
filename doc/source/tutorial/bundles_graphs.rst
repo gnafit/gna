@@ -38,7 +38,7 @@ At first let us create a draft bundle `detector_eres`.
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 16,21,28,29
+    :emphasize-lines: 14,19,26,27
     :caption: :download:`detector_eres_ex01.py <../../../macro/tutorial/bundles/detector_eres_ex01.py>`
 
 The method `define_variables()` is called to define th variables similarly to the :ref:`tutorial on a bundle for
@@ -49,20 +49,20 @@ Let us now look at the second method `build()` that creates a part of the comput
 
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
-    :lines: 13-32
+    :lines: 11-30
     :emphasize-lines: 7,12,19,20
 
 We start from iterating over major indices combinations:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
-    :lines: 13-17
+    :lines: 11-15
 
 On each iteration we make a list of parameter names to be passed to the energy resolution constructor
 
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
-    :lines: 19
+    :lines: 17
 
 The namespace is passed to ensure that energy resolution refers to the correct parameters. Here is the contents of the
 `EnergyResolution` object:
@@ -84,7 +84,7 @@ bind the inputs and outputs, but rather to provide them to later use we declare 
 
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
-    :lines: 24
+    :lines: 22
 
 The signature is `set_input('name', nidx, input, argument_number)`. The output will be located in the
 `bundle.context.inputs.eres_matrix`. The full path after `bundle.context.inputs` will be defined by the major index
@@ -95,7 +95,7 @@ We then iterate over each minor index,
 
 .. literalinclude:: ../../../macro/tutorial/bundles/detector_eres_ex01.py
     :linenos:
-    :lines: 26-32
+    :lines: 24-30
     :emphasize-lines: 6-7
 
 add a new input/output pair and declare the input/output pair with methods `set_input()` and `set_output()`.
@@ -121,14 +121,14 @@ After executing the bundle let us make an input:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres.py
     :linenos:
-    :lines: 36-44
+    :lines: 35-43
 
 Here we defined a histogram for energy between 0 and 12 MeV with three peaks: at 1 MeV, 6 MeV and 10 MeV. The histogram
 output is then bind to the inputs as follows:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres.py
     :linenos:
-    :lines: 48-50
+    :lines: 47-49
 
 The last line prints the contents of the context:
 
@@ -162,7 +162,7 @@ When empty multi-index is provided the resulting graph looks as follows:
     The resulting graph of the energy resolution bundle for the case of empty index.
 
 It contains the `matrix` transformation, which is defined by the histogram binning. The matrix is then used to smear the
-histogram via `smar` transformation. As it is noted in the  :Ref:`EnergyResolution`, the input of the `matrix` is used
+histogram via `smear` transformation. As it is noted in the  :Ref:`EnergyResolution`, the input of the `matrix` is used
 only to define the matrix shape: it does not read the histogram and does not propagate the taint flag.
 
 The example produces the following plot:
@@ -194,7 +194,7 @@ Let us look at the configuration in more details. First of all we defined indice
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 18-20
+    :lines: 17-19
 
 We assume that there are three detectors `D1`, `D2` and `D3` with same energy resolution parameters. In the same time,
 each of the detectors has two zones `z1` and `z2` with own parameters. The zone index `z` is thus major while the
@@ -203,7 +203,7 @@ detector index `d` is minor. The parameters configuration contains a value and u
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 26-38
+    :lines: 25-37
 
 One may see that there are parameters for more zones in the configuration, but only ones, defined by indices, will be
 read.
@@ -213,7 +213,7 @@ dictionary `names` in the bundle configuration:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 21-23
+    :lines: 20-22
 
 Here we have defined a new name `smearing_matrix` for the `eres_matrix`. Name substitutions are realized by the GNA.
 
@@ -249,14 +249,14 @@ a separate histogram for each detector with the peaks in the different positions
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 52-77
+    :lines: 51-76
 
 We bind the first histogram to the `matrix` input. Each histogram `hist1`, `hist2` and `hist3` is the binded to all the
 inputs of detectors `D1`, `D2` and `D3` respectively.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/05_bundle_eres_upd.py
     :linenos:
-    :lines: 85-88
+    :lines: 84-87
 
 We have used `nestsed=True` key that returns all the values in all the nested dictionaries regardless of the structure.
 The full graph now looks as follows:

@@ -11,7 +11,7 @@ narray = np.arange(nbinsx*nbinsy).reshape(nbinsx, nbinsy)
 narray = narray**2 * narray[::-1,::-1]**2
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edgesx` and `edgesy`
+# and edges, stored in `edgesx` and `edgesy`
 hist = C.Histogram2d(edgesx, edgesy, narray)
 hist.print()
 print()

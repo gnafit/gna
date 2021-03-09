@@ -12,10 +12,10 @@ parray.print()
 print()
 
 # Print list of transformations
-print('Transformations:', parray.transformations.keys())
+print('Transformations:', list(parray.transformations.keys()))
 
 # Print list of outputs
-print('Outputs:', parray.points.outputs.keys())
+print('Outputs:', list(parray.points.outputs.keys()))
 print()
 
 # Access the output `points` of transformation `points` of the object `parray`

@@ -4,7 +4,7 @@ Fitting with GNA
 We now will discuss how to fit a model using GNA UI. The minimal GNA setup, required to perform a fit includes a set of
 items. Each item is usually defined by its own UI module.
 
-The model
+The model 
   An output, that depends on the minimization parameters. It will be fit to data.
 
     + The model usually comes with a set of parameters: free, constrained and fixed.
