@@ -25,7 +25,7 @@ follows:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 4-
+    :lines: 3-
     :caption: :download:`parameters_ex02.py <../../../macro/tutorial/bundles/parameters_ex02.py>`
 
 .. note::
@@ -36,7 +36,7 @@ We start iterating over major indices and for each iteration request a value fro
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 16-21
+    :lines: 14-19
     :emphasize-lines: 1,2,4
 
 In a special case of 0 dimensions, `current_values()` return empty tuple. In this case we expect `pars` to contain a
@@ -46,7 +46,7 @@ The next few lines
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 23-25
+    :lines: 21-23
 
 implement the loop over minor indices. We create a combined index `it` and use it to produce a formatted label.
 
@@ -54,7 +54,7 @@ And as the last action we define a parameter:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 27
+    :lines: 25
 
 The `reqparameter()` method is similar to the environments `reqparameter()`, described :ref:`previously
 <tutorial_parameters_def>`. The main difference as it takes current iteration of multi index to properly format the name.
@@ -71,14 +71,14 @@ The first one has the following configuration:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 10-45
+    :lines: 11-45
     :caption: :download:`04_bundle_parameters_multiple.py <../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py>`
 
 Now in the `bundle` configuration we have specified indices:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 20-24
+    :lines: 18-22
 
 We have also defined the order of the keys to be `{source}.{name}.{detector}`.
 
@@ -86,13 +86,13 @@ The bundle will create parameters with name `rate0` and the following label:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 27,29
+    :lines: 25,27
 
 The parameters' values and uncertainties are specified further:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 31-44
+    :lines: 29-42
 
 As soon as have taken out `uncertainty` and `mode` specification, all the parameters will have the uncertainty of 1%.
 
@@ -100,7 +100,7 @@ Let us now execute the bundle and print the namespace contents.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 46,47
+    :lines: 44,45
 
 Note, that we have specified, that the bundle used predefined namespace instead of the global one. And the output is
 here:
@@ -123,7 +123,7 @@ Let us now slightly tweak the previous example by adding and extra index and set
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 52-77
+    :lines: 50-75
     :emphasize-lines: 7,9,12
 
 We have also provided a special format for label to include new index. As one can see, each of the 6 permutations of the
@@ -158,8 +158,8 @@ Let us double check the setup by passing the 0d index.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:
-    :lines: 84-
-    :emphasize-lines: 7
+    :lines: 82-
+    :emphasize-lines: 9
 
 As we have printed the whole namespace it not contains the parameters from all the examples in their own namespaces. The
 last line represents the 0d case as defined by the configuration:

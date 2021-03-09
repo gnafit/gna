@@ -72,7 +72,7 @@ fig = plt.figure()
 gs = gridspec.GridSpec(nrows=4, ncols=1, hspace=0.0)
 ax = plt.subplot(gs[:3,0])
 ax.minorticks_on()
-# ax.grid()
+
 ax.set_ylabel( 'f(x)' )
 ax.set_title(r'$a\,\sin(x)+b\,\sin(kx)$')
 
@@ -82,7 +82,7 @@ integrator.hist.hist.plot_bar(label='integral: numerical', divide=2, shift=0)
 ax.bar(bar_left, integral_a, bar_width, label='integral: analytical', align='edge')
 
 # Freeze axis limits and draw bin edges
-ax.autoscale(enable=False, axis='y')
+ax.autoscale(enable=True, axis='y')
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 
@@ -98,7 +98,7 @@ diff = integral_n-integral_a
 ax.bar(x_edges[:-1], diff/diff_factor, bar_width*2.0, align='edge')
 
 # Freeze axis limits and draw bin edges
-ax.autoscale(enable=False, axis='y')
+ax.autoscale(enable=True, axis='y')
 ymin, ymax = ax.get_ylim()
 ax.vlines(integrator.points.xedges.data(), ymin, ymax, linestyle='--', alpha=0.4, linewidth=0.5)
 

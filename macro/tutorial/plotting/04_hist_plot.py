@@ -12,7 +12,7 @@ narray = np.arange(nbins)**2 * np.arange(nbins)[::-1]**2
 edges  = np.linspace(1.0, 40.0, nbins+1)
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist = C.Histogram(edges, narray)
 
 fig = plt.figure(figsize=(12, 5))
@@ -22,7 +22,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
-plt.ticklabel_format(style='sci', axis='y', scilimits=(2,2))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(-2,2), useMathText=True)
 
 hist.hist.hist.plot_hist(label='histogram 1')
 
@@ -34,7 +34,7 @@ ax.minorticks_on()
 ax.grid()
 ax.set_xlabel( 'x label' )
 ax.set_ylabel( 'y label' )
-plt.ticklabel_format(style='sci', axis='y', scilimits=(2,2))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(-2,2), useMathText=True)
 
 hist.hist.hist.plot_bar(label='histogram 1 (bar)', alpha=0.6)
 

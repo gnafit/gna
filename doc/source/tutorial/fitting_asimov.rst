@@ -131,8 +131,8 @@ The result of the fitting is:
 As soon as the model contains no fluctuations, the function at the minimum is consistent with zero:
 :math:`\chi^2_\text{min}\lesssim10^{-8}`.
 
-Also, the `fit` module have saved readable version of the result to the file :download:`01_fit_models.yaml
-<../../img/tutorial/fit/01_fit_models.yaml>` in the YAML format, which can be later loaded back into python.
+Also, the `fit` module have saved readable version of the result to the file :download:`fit_01.yaml
+<../../img/tutorial/fit/fit_01.yaml>` in the YAML format, which can be later loaded back into python.
 
 The full version of the command is below:
 

@@ -10,7 +10,7 @@ usage example in the following macro:
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 13-18,39-41
+    :emphasize-lines: 12-17,38-40
     :caption: :download:`07_graphviz.py <../../../macro/tutorial/plotting/07_graphviz.py>`
 
 Here we are using an example, similar to the one in the :ref:`Sum tutorial <tutorial_sum>`. It implements the following
@@ -26,30 +26,30 @@ transformation. The corresponding graph may be found below.
 .. figure:: ../../img/tutorial/plotting/07_graphviz.png
     :align: center
 
-    Example computational graph representing :math:`R_{ij} = S_{ij} \sum\limits_{k=1}^5 P_k`.
+    Example computational graph representing :math:`R_{ij} = S_{ij} \sum\limits_{k=1}^5 P_{ij}^k`.
 
 Let us now look at how the graph is done. First of all proper labels should be introduced for nodes (transformations)
 and, optionally, edges (inputs and outputs). This is done by the method ``setLabel(label)``. First of all it is applied
-to each :math:`P_k`:
+to each :math:`P_{ij}^k`:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 16-17
+    :lines: 15-16
 
 The label may contain multiple lines. Here we used python format_ function (see `pyformat.info`_ for tutorial). Then we
 add labels for the sum, product and scale:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 18-20
+    :lines: 17-19
 
 Finally, we add label for the output:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 21
+    :lines: 20
 
 Now, there is enough information to plot the graph with ``savegraph(transformation, filename)`` function:
 
 .. literalinclude:: ../../../macro/tutorial/plotting/07_graphviz.py
-    :lines: 42-44
+    :lines: 41-43
 
 The first argument is transformation, output or list of transformations and outputs. The file format is either `.dot`,
 or an image format (`.png`, `.pdf`). 

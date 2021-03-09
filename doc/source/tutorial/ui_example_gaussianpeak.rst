@@ -28,7 +28,8 @@ We will use multi-line commands for better readability. Note, that `\\` at the e
 
     ./gna -- \
           -- gaussianpeak --name peak \
-          -- plot-spectrum -p peak/spectrum  -s
+          -- plot-spectrum -p peak/spectrum \  
+          -- mpl -s
 
 The module `plot-spectrum` adds the output to the figure after `-p <name>` option. Argument `-s` enables `plot-spectrum`
 to show the window with plotted figure after execution. The command will produce the following plot.
@@ -46,7 +47,8 @@ Both modules have options, that enable us to control the parameters. Let us defi
 
     ./gna -- \
           -- gaussianpeak --name peak --Emin 0 --Emax 5 --nbins 200 \
-          -- plot-spectrum -p peak/spectrum -t 'Gaussian Peak' -l 'Peak 1' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' -s
+          -- plot-spectrum -p peak/spectrum -l 'Peak 1' \
+          -- mpl -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' -s
 
 The modified command produces now annotated plot:
 
@@ -65,9 +67,10 @@ Also let us save the graph of the example model. The `graphviz` module reads the
   ./gna -- \
         -- gaussianpeak --name peak --Emin 0 --Emax 5 --nbins 200 --print \
         -- graphviz peak/spectrum -o output/gna_ui_graph.pdf \
-        -- plot_spectrum -p peak/spectrum -l 'Peak 1' --ylim 0.0\
-                         -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
-                         -s --latex -o output/gna_ui_figure.pdf
+        -- plot_spectrum -p peak/spectrum -l 'Peak 1' \
+        -- mpl --ylim 0.0 -t 'Gaussian Peak' \
+               --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
+               -s --latex -o output/gna_ui_figure.pdf
 
 The model is represented by the following graph:
 
@@ -148,9 +151,10 @@ The following command line lower the background rate twice, moves the peak posit
               --define peak.E0             central=6   fixed=True label='Peak position' \
               --define peak.Width          central=2   fixed=True label='Peak width' \
         -- gaussianpeak --name peak --Emin 0 --Emax 12 --nbins 480 --print \
-        -- plot_spectrum -p peak/spectrum -l 'Peak 1' --ylim 0.0\
-                         -t 'Gaussian Peak' --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
-                         -s
+        -- plot_spectrum -p peak/spectrum -l 'Peak 1' \
+        -- mpl --ylim 0.0 -t 'Gaussian Peak' \
+               --xlabel 'Energy, MeV' --ylabel '$dN/dE$' \
+               -s
 
 The command produces the following plot:
 

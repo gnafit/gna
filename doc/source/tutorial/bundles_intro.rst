@@ -1,7 +1,7 @@
 .. _bundles_configuration:
 
-Bundles configuration and seach path
-''''''''''''''''''''''''''''''''''''
+Bundles configuration and search path
+'''''''''''''''''''''''''''''''''''''
 
 Bundle classes are loaded automatically. The default bundle search path is ``pylib/gna/bundle/``. The bundle search path
 is a configured option, which is defined in the configuration file ``config/gna/gnacfg.py``:

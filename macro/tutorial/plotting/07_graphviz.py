@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from gna.tutorial import tutorial_image_name, savegraph
+from tutorial import tutorial_image_name, savegraph
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np

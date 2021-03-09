@@ -22,7 +22,7 @@ We start from defining the bin edges. 10 segments, 11 bin edges from 1 to 11.
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 12-17
+    :lines: 11-16
 
 When creating the ``Points`` instance we pass the `labels` argument. If `labels` is a string it is used to label the
 first transformation. In case `labels` is a list or tuple, it is used to label first transformations one by one.
@@ -32,13 +32,13 @@ matrix). The points may be not ordered. In the following example we shuffle them
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 19-22
+    :lines: 18-21
 
 For the sake of illustration we define saw-like function :math:`y_0=f(x_j)`:
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 24-29
+    :lines: 23-28
 
 Let us then define two target functions :math:`y_1 = p_1 y_0` and :math:`y_2 = p_2 y_0`, where :math:`p_1` and
 :math:`p_2` are arrays of the same shape as :math:`y_0`.
@@ -47,26 +47,26 @@ We define :math:`p_1` and :math:`p_2` as two sets of parameters each equal to 1 
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 31-36
+    :lines: 30-35
 
 We then use ``VarArray`` transformation, that collects the variables by name and stores them into the array.
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 39-43
+    :lines: 38-42
 
 The arrays are then multiplied in an element-wise manner by :math:`y_0`:
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 46-47
+    :lines: 45-46
 
 Now we have all the ingredients to initialize the interpolator. In the example there presented two was: automatic and
 manual. The automatic way is similar to a way integrators are initialized, most of the bindings are done internally:
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 66-68
+    :lines: 65-67
 
 Here were have initialized the interpolator with coarse :math:`x` edges and fine :math:`z` values. The object contains
 two transformations. Transformation `insegment` determines which segment each of values of :math:`z` belongs to. It also
@@ -105,7 +105,7 @@ Instead of using the automatic binding, one may bind the transformations manuall
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 53-63
+    :lines: 52-62
 
 Here we are using the syntax, explained :ref:`earlier <tutorial_binding_syntax>`. We pass coarse :math:`x` edges to the
 inputs of `insegment` and `interp`, then we do the same for fine :math:`z` values (`points`). Then we pass outputs
@@ -120,7 +120,7 @@ curve we set each odd parameter to 2 to compensate the saw-like structure.
 
 .. literalinclude:: ../../../macro/tutorial/complex/05_interpolation.py
     :linenos:
-    :lines: 74-75
+    :lines: 73-74
 
 After plotting `y1` and `y2` let us set each even :math:`p_1` to 0.5 and plot again. The result may be found on the
 picture below.

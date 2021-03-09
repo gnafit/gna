@@ -101,7 +101,7 @@ The procedure of performing the numerical integration is actually very similar t
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
     :linenos:
     :lines: 4-
-    :emphasize-lines: 34,37,42,46
+    :emphasize-lines: 33,36,41,45
     :caption: :download:`03_integral2d.py <../../../macro/tutorial/complex/03_integral2d.py>`
 
 The code produces the following graph. The sampler now produces two arrays for :math:`x` and :math:`y`:, which are then
@@ -116,13 +116,13 @@ integrator, which computes the histogram.
 At first we create a 2d histogram to be used to define the bins:
 
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
-    :lines: 37
+    :lines: 36
 
 Then initialize 2d Gauss-Legendre integrator by providing number of bins and integration order(s) for each dimension and
 bind the histogram defining the bin edges.
 
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
-    :lines: 40-41
+    :lines: 39-40
 
 An alternative way with bin edges passed as arguments reads as follows
 
@@ -155,13 +155,13 @@ These meshes are then passed to the ``WeightedSum`` to be added with weights :ma
 is passed to the sine object.
 
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
-    :lines: 45-46
+    :lines: 44-45
 
 These two lines implement the function :eq:`integral_2d_function`. The output of this function is passed to the
 integrator:
 
 .. literalinclude:: ../../../macro/tutorial/complex/03_integral2d.py
-    :lines: 49
+    :lines: 48
 
 That is it. Then the output `integrator.hist.hist` contains the 2d histogram with integrated function, which may be
 plotted:

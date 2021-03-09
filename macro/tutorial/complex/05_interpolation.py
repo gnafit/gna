@@ -36,10 +36,10 @@ for ns in (pars1, pars2):
 
 # Initialize transformations for scales
 with pars1:
-    varray1=C.VarArray(pars1.keys(), labels='Scales 1\n(p1)')
+    varray1=C.VarArray(list(pars1.keys()), labels='Scales 1\n(p1)')
 
 with pars2:
-    varray2=C.VarArray(pars2.keys(), labels='Scales 2\n(p2)')
+    varray2=C.VarArray(list(pars2.keys()), labels='Scales 2\n(p2)')
 
 # Make two products: y0 scaled by varray1 and varray2
 y1 = C.Product([varray1.single(), y0.single()], labels='p1*y')
@@ -70,7 +70,7 @@ else:
 interpolator.print()
 
 # Change each second parameter for second curve
-for par in pars2.values()[1::2]:
+for par in list(pars2.values())[1::2]:
     par.set(2.0)
 
 # Print parameters
@@ -85,12 +85,12 @@ y0.points.points.plot_vs(edges.single(), '--', label='Original function')
 interp1.plot_vs(points.single(), 's', label='Interpolation (scale 1)', markerfacecolor='none')
 interp2.plot_vs(points.single(), '^', label='Interpolation (scale 2)', markerfacecolor='none')
 
-for par in pars1.values()[::2]:
+for par in list(pars1.values())[::2]:
     par.set(0.50)
 
 interp1.plot_vs(points.single(), 'v', label='Interpolation (scale 1, modified)', markerfacecolor='none')
 
-ax.autoscale(enable=False, axis='y')
+ax.autoscale(enable=True, axis='y')
 ymin, ymax = ax.get_ylim()
 ax.vlines(edges_data, ymin, ymax, linestyle='--', label='Segment edges', alpha=0.5, linewidth=0.5)
 

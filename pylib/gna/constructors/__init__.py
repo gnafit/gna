@@ -177,7 +177,7 @@ def Bins(array, *args, **kwargs):
         raise Exception( 'Edges should be 1d array' )
     return R.Bins( a, a.size-1, *args, **kwargs )
 
-def OscProb3(*args):
+def OscProb3(*args, **kwargs):
     """OscProb3 wrapper
 
     Aguments:
@@ -191,7 +191,7 @@ def OscProb3(*args):
         args = list(args)
         args[4] = stdvector(args[4])
 
-    return R.GNA.GNAObjectTemplates.OscProb3T(context.current_precision())(*args)
+    return R.GNA.GNAObjectTemplates.OscProb3T(context.current_precision())(*args, **kwargs)
 
 #
 # Construct integrators

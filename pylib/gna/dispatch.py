@@ -43,6 +43,7 @@ def loadcmdclass(modules, name):
     cls = getattr(module, name, None)
     if not cls:
         cls = getattr(module, 'cmd')
+    cls.__cmd__=name
 
     if not cls.__doc__ and module.__doc__:
         cls.__doc__=module.__doc__
@@ -72,7 +73,7 @@ def listmodules(modules, printdoc=False):
         try:
             module=loadmodule(modules, modname)
         except Exception as e:
-            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.message, namelen=namelen))
+            print('{}{:<{namelen}s} from ... BROKEN: {}'.format(eoffset, modname_print, e.msg, namelen=namelen))
         else:
             pyname = module.__file__
             if module.__file__.endswith('.pyc'):
@@ -131,7 +132,7 @@ def run():
                 except HelpDisplayed:
                     pass
                 except:
-                    print('Unable to print help item , sorry')
+                    print('Unable to print help item, sorry')
 
             print()
             exit=True
@@ -140,7 +141,31 @@ def run():
         sys.exit(0)
 
     for (cmdcls, parser), args in cmdtriples:
-        opts = parser.parse_args(args, namespace=LazyNamespace())
-        obj = cmdcls(env, opts)
-        obj.init()
-        obj.run()
+        try:
+            opts = parser.parse_args(args, namespace=LazyNamespace())
+        except:
+            print(f'An exception occured during arguments parsing ({cmdcls.__cmd__})')
+            raise
+        try:
+            obj = cmdcls(env, opts)
+        except HelpDisplayed:
+            break
+        except:
+            print(f'An exception occured during instantiation ({cmdcls.__cmd__})')
+            raise
+
+        try:
+            obj.init()
+        except HelpDisplayed:
+            break
+        except:
+            print(f'An exception occured during init ({cmdcls.__cmd__})')
+            raise
+
+        try:
+            obj.run()
+        except HelpDisplayed:
+            break
+        except:
+            print(f'An exception occured during run ({cmdcls.__cmd__})')
+            raise

@@ -8,6 +8,7 @@ class exp(baseexp):
     def __init__(self, namespace, opts):
         baseexp.__init__(self, namespace, opts)
 
+    def init(self):
         self.build()
         self.register()
 
@@ -31,4 +32,3 @@ class exp(baseexp):
     def register(self):
         self.namespace.addobservable('x', self.points.points.points)
         self.namespace.addobservable(self.opts.name, self.model.rate.rate)
-

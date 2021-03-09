@@ -9,7 +9,7 @@ narray = np.arange(nbins)**2 * np.arange(nbins)[::-1]**2
 edges  = np.linspace(1.0, 7.0, nbins+1)
 
 # Create a histogram instance with data, stored in `narray`
-# and edges, sotred in `edges`
+# and edges, stored in `edges`
 hist = C.Histogram(edges, narray)
 hist.print()
 print()
