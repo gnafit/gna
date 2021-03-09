@@ -18,4 +18,7 @@ Gallery of various graphs, generated based on GNA models.
      - 09.2019
      - :download:`svg <../img/graph_gallery/dayabay_2019.09.svg>`
        :download:`pdf <../img/graph_gallery/dayabay_2019.09.pdf>`
-
+   * - Combined JUNO+TAO model 4
+     - 03.2021
+     - :download:`svg <../img/graph_gallery/junotao_model_2021.03.svg>`
+       :download:`pdf <../img/graph_gallery/junotao_model_2021.03.pdf>`
