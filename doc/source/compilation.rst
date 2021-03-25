@@ -9,8 +9,8 @@ You must have the following libraries installed prior to compilation:
 * `Boost <http://www.boost.org/>`_, at least 1.40.0;
 * `Eigen <http://eigen.tuxfamily.org/>`_ at least 3.2;
 * `CMake <http://www.cmake.org/>`_  at least 3.5;
-* `ROOT <http://root.cern.ch/>`_, at least 6.06 built with Python2
-  bindings support and C++14 standard enabled. The branch 6.08 is more preffered for now since ROOT is
+* `ROOT <http://root.cern.ch/>`_, at least 6.06 built with Python3
+  bindings support and C++17 standard enabled. The branch 6.08 is more preferred for now since ROOT is
   able to generate bindings following GCC5 ABI.
 * `GSL <http://www.gnu.org/software/gsl/>`_
 * `hdf5 <https://www.hdfgroup.org/HDF5/>`_, at least 1.8.14
@@ -43,7 +43,7 @@ In Arch:
 
     sudo pacman -S boost hdf5 eigen gsl cmake
 
-You also need Python 2.7 and modern C++14-compatible compiler (GCC or clang).
+You also need Python 2.7 and modern C++17-compatible compiler (GCC or clang).
 
 Python requirements
 -------------------
