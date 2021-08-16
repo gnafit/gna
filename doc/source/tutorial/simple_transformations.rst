@@ -181,8 +181,8 @@ The :ref:`Histogram` transformation stores a 1-dimensional histogrammed data. It
 The work flow for a histogram is very similar to the one of the array. The object has a single transformation `hist`
 with a single output `hist`.
 
-The main difference is that ``DataType`` of the histogram now has histogram edges defined. On the line 19
-`datatype.edges` C++ vector is accessed and converted to to the python list.
+The main difference is that ``DataType`` of the histogram now has definite histogram edges . On the line 19
+`datatype.edges` C++ vector is accessed and converted to the python list.
 
 The code produces the following output:
 
