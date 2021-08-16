@@ -14,7 +14,7 @@ hist = C.Histogram(edges, narray)
 hist.print()
 print()
 
-# Access the output `points` of transformation `points` of the object `parray`
+# Access the output `points` of transformation `points` of the object `narray`
 print('Output:', hist.hist.hist)
 # Access and print relevant DataType
 datatype = hist.hist.hist.datatype()
