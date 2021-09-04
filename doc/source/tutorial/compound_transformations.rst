@@ -25,7 +25,7 @@ The ``Sum`` object is created without arguments:
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
     :lines: 11
 
-It may have any number of inputs. Each input is binded with method ``add(output)``, as it is done in:
+It may have some inputs. Each input is binded with method ``add(output)``, as it is done in:
 
 .. literalinclude:: ../../../macro/tutorial/compound/01_compound_sum.py
     :lines: 15
@@ -181,7 +181,7 @@ The example script prints the inputs and outputs for each case:
     [30. 35. 40. 45.]
     [50. 55. 60. 65.]]
 
-See that in case three the names of the inputs are defined as user has specified.
+See that in case three names of the inputs are defined as user has specified.
 
 .. _tutorial_product:
 
@@ -316,7 +316,7 @@ or when there is a single transformation in the object:
     :linenos:
     :lines: 39-42
 
-The short version may go either on the left hand side, rite hand side or both sides of the expression.
+The short version may go either on the left hand side, the right hand side or both sides of the expression.
 
 More then one inputs may be passed. In this case the output is connected to each of the inputs, like this:
 

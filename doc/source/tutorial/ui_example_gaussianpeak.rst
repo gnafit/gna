@@ -18,7 +18,7 @@ registered in the output as:
 
     Add observable: peak/spectrum
 
-This output now may be used from the other modules. For example, we may plot it with `plot-spectrum` module:
+This output now may be used from the other modules. For example, we may plot it with `plot-spectrum` module.
 
 We will use multi-line commands for better readability. Note, that `\\` at the end of each line should have no spaces afterwards.
 

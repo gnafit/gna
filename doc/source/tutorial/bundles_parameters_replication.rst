@@ -3,7 +3,7 @@
 Replicating parameters
 ''''''''''''''''''''''
 
-The previous example with reading a set of parameters from the dictionary does not itself too much functionality. Let us
+The previous example with reading a set of parameters from the dictionary does not do itself too much functionality. Let us
 now use the feature of multi dimensional indexing, described in :ref:`tutorial_indexing`.
 
 The bundle specification
@@ -119,7 +119,7 @@ here:
 Major and minor indices
 +++++++++++++++++++++++
 
-Let us now slightly tweak the previous example by adding and extra index and setting it to be minor.
+Let us now slightly tweak the previous example by adding an extra index and setting it to be minor.
 
 .. literalinclude:: ../../../macro/tutorial/bundles/04_bundle_parameters_multiple.py
     :linenos:

@@ -36,7 +36,7 @@ Statistics
   Statistics uses an Analysis as input.
 
 Minimizer
-  A minimizer instance to be used to minimize the value of the Statistics. At the present time the Minuit minimizer is
+  A minimizer instance will be used to minimize the value of the Statistics. At the present time the Minuit minimizer is
   used from ROOT.
 
 .. note::
