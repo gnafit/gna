@@ -7,7 +7,7 @@ import numpy as np
 n, n1, n2 = 12, 3, 4
 points_list = [ C.Points(np.arange(i, i+n).reshape(n1, n2)) for i in range(5) ]
 
-# Create sum instance
+# Create a sum instance
 tsum = R.Sum()
 
 for i, p in enumerate(points_list):
@@ -22,7 +22,7 @@ tsum.print()
 print()
 
 
-# Access the cacluation result:
+# Access the calcuation result:
 print('Sum result:')
 print(tsum.sum.sum.data())
 
