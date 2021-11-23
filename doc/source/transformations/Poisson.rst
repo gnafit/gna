@@ -48,6 +48,6 @@ There are two ways to deal with it. By default the program uses natural logarith
 It also can be used the following approximation
 
 .. math::
-  \log(x!) \approx x log(x)
+  \log(x!) \approx x log(x) - x
 
 You have to add ``--ln-approx`` parameter in python script to apply it.

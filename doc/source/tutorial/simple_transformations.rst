@@ -182,7 +182,7 @@ The work flow for a histogram is very similar to the one of the array. The objec
 with a single output `hist`.
 
 The main difference is that ``DataType`` of the histogram now has histogram edges defined. On the line 19
-`datatype.edges` C++ vector is accessed and converted to to the python list.
+`datatype.edges` C++ vector is accessed and converted to the python list.
 
 The code produces the following output:
 
@@ -240,4 +240,3 @@ The code produces the following output:
      [2742336. 2579236. 2414916. 2250000. 2085136. 1920996. 1758276. 1597696.]
      [1440000. 1285956. 1136356.  992016.  853776.  722500.  599076.  484416.]
      [ 379456.  285156.  202500.  132496.   76176.   34596.    8836.       0.]]
-

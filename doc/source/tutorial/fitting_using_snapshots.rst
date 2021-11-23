@@ -1,4 +1,4 @@
-Using snapshot UI to to make MC
+Using snapshot UI to make MC
 """""""""""""""""""""""""""""""
 
 When the model contains a lot of elements and parameters it becomes inconvenient to create multiple copies of the model.

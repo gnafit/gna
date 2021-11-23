@@ -4,7 +4,7 @@ Fitting with GNA
 We now will discuss how to fit a model using GNA UI. The minimal GNA setup, required to perform a fit includes a set of
 items. Each item is usually defined by its own UI module.
 
-The model 
+The model
   An output, that depends on the minimization parameters. It will be fit to data.
 
     + The model usually comes with a set of parameters: free, constrained and fixed.
@@ -36,7 +36,7 @@ Statistics
   Statistics uses an Analysis as input.
 
 Minimizer
-  A minimizer instance to be used to minimize the value of the Statistics. At the present time the Minuit minimizer is
+  A minimizer instance will be used to minimize the value of the Statistics. At the present time the Minuit minimizer is
   used from ROOT.
 
 .. note::
@@ -48,5 +48,3 @@ Minimizer
 
     fitting_asimov
     fitting_using_snapshots
-
-

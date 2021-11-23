@@ -18,7 +18,7 @@ registered in the output as:
 
     Add observable: peak/spectrum
 
-This output now may be used from the other modules. For example, we may plot it with `plot-spectrum` module:
+This output now may be used from the other modules. For example, we may plot it with `plot-spectrum` module.
 
 We will use multi-line commands for better readability. Note, that `\\` at the end of each line should have no spaces afterwards.
 
@@ -28,7 +28,7 @@ We will use multi-line commands for better readability. Note, that `\\` at the e
 
     ./gna -- \
           -- gaussianpeak --name peak \
-          -- plot-spectrum -p peak/spectrum \  
+          -- plot-spectrum -p peak/spectrum \
           -- mpl -s
 
 The module `plot-spectrum` adds the output to the figure after `-p <name>` option. Argument `-s` enables `plot-spectrum`
@@ -162,4 +162,3 @@ The command produces the following plot:
     :align: center
 
     The spectrum, created by the `gaussianpeak` module with modified parameters.
-

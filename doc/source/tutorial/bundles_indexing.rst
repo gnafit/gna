@@ -154,7 +154,7 @@ The order of the indices is kept to the order of the initialization.
 3d case and name position
 '''''''''''''''''''''''''
 
-For 3d case we will introduce the indices `z`, `s` and `d`. Where `s` is used for sources, `d`. Consider the case when
+For 3d case we will introduce the indices `z`, `s` and `d`. Where `s` is used for sources, `d` is used for detectors. Consider the case when
 we want to create several clones of the same model, the `z` will be used to index them. In this case we also would like
 so that the variables and outputs of the same models were stored together. This may be achieved by putting the name
 after the clone index:
@@ -409,4 +409,3 @@ The complete code for this example may be found below:
     :linenos:
     :lines: 3-
     :caption: :download:`01_indexing.py <../../../macro/tutorial/bundles/01_indexing.py>`
-
