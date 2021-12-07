@@ -21,6 +21,14 @@ Acknowledgements
    :alt: Assosiation of Young Scientists and Specialists
    :target: http://www.omus.jinr.ru
 
+.. |mipt| image:: ../img/logo/mipt_eng_base_png.png
+   :alt: Moscow Institute of Physics and Technology
+   :target: https://mipt.ru/
+
+.. |dgap| image:: ../img/logo/2_FOPF_color.png
+   :alt: DGAP
+   :target: http://mipt.jinr.ru/en
+
 .. |msu| image:: ../img/logo/msu-logo.png
    :alt: Moscow State University
    :target: https://www.msu.ru/en
@@ -76,24 +84,32 @@ The GNA development is partially supported by the Russian Foundation for Basic R
     - 16-32-00801 mol_a
     - 18-32-00935 mol_a
 
-and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+The GNA development is partially supported by the Russian Science Foundation (`RSCF <https://rscf.ru/en/>`_) under grant agreement:
+    - 21-42-00023
+
+
+and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_) under grant agreements:
     - 14-202-02
     - 15-202-04
     - 17-202-09
     - 18-202-08
+    - 21-202-10
+
 
 Universities
 ^^^^^^^^^^^^
 
 .. list-table::
-   :widths: 23 23 23
+   :widths: 23 23 23 23
    :align: center
 
    * - |msu|
      - |spbu|
      - |isu|
+     - |mipt|
    * - |msu-phys|
      - |spbu-apmath|
      - |isu-physdep|
+     - |dgap|
 
-Students and alumni of MSU, SPBU and ISU have contributed to the development of GNA.
+Students and alumni of MSU, MIPT, SPBU and ISU have contributed to the development of GNA.
