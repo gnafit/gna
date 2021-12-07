@@ -34,3 +34,4 @@ Contents
    gallery
    authors
    acknowledgements
+   useful_links
