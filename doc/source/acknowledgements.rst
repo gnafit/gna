@@ -3,7 +3,7 @@ Acknowledgements
 
 .. |jinr| image:: ../img/logo/jinr_logo.png
    :alt: Joint Institute for Nuclear Research
-   :target: http://www.jinr.ru/main-en/
+   :target: https://www.jinr.ru/main-en/
 
 .. |dlnp| image:: ../img/logo/DLNP_1_tr.png
    :alt: Dzhelepov Laboratory of Nuclear Problems
@@ -15,7 +15,11 @@ Acknowledgements
 
 .. |rfbr| image:: ../img/logo/rfbr_eng_25.png
    :alt: Russian Foundation for Basic Research
-   :target: http://www.rfbr.ru/rffi/eng
+   :target: https://www.rfbr.ru/rffi/eng
+
+.. |rsf| image:: ../img/logo/RSF_vertical.png
+   :alt: Russian Science Foundation
+   :target: https://www.rscf.ru/
 
 .. |ayss| image:: ../img/logo/AYSS-logo_tr.png
    :alt: Assosiation of Young Scientists and Specialists
@@ -35,15 +39,15 @@ Acknowledgements
 
 .. |msu-phys| image:: ../img/logo/sign-physfak-msu-tr.png
    :alt: Faculty of Physics of Moscow State University
-   :target: http://www.phys.msu.ru/eng/
+   :target: https://www.phys.msu.ru/eng/
 
 .. |spbu| image:: ../img/logo/spbu-logo.png
    :alt: Saint Petersburg University
-   :target: http://english.spbu.ru
+   :target: https://english.spbu.ru
 
 .. |spbu-apmath| image:: ../img/logo/apmath-logo-en-tr.png
    :alt: Faculty of Applied Mathematics and Control Processes
-   :target: http://www.apmath.spbu.ru/en/
+   :target: https://www.apmath.spbu.ru/en/
 
 .. |isu| image:: ../img/logo/isu-logo.png
    :alt: Irkutsk State University
@@ -72,28 +76,33 @@ Funding
 ^^^^^^^
 
 .. list-table::
-    :widths: 14 10
+    :widths: 18 10 10
     :align: center
 
-    * - |rfbr|
+    * - |rsf|
+      - |rfbr|
       - |ayss|
 
-The GNA development is partially supported by the Russian Foundation for Basic Research (`RFBR <http://www.rfbr.ru/rffi/eng>`_):
-    - 14-02-91166 a
-    - 16-02-01026 a
-    - 16-32-00801 mol_a
-    - 18-32-00935 mol_a
 
-The GNA development is partially supported by the Russian Science Foundation (`RSCF <https://rscf.ru/en/>`_) under grant agreement:
-    - 21-42-00023
+The GNA development is currently supported by the Russian Science Foundation (`RSCF <https://rscf.ru/en/>`_) under the grant agreement:
+    - **21-42-00023**
+and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_) under the grant agreements:
+    - **21-202-10**
 
+Past grants
+***********
 
-and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_) under grant agreements:
-    - 14-202-02
-    - 15-202-04
-    - 17-202-09
-    - 18-202-08
-    - 21-202-10
+The GNA development was partially supported by
+    - Russian Foundation for Basic Research (`RFBR <http://www.rfbr.ru/rffi/eng>`_):
+        * **14-02-91166 a**, 2014-2015
+        * **16-02-01026 a**, 2016-2018
+        * **16-32-00801 mol_a**, 2016
+        * **18-32-00935 mol_a**, 2018-2019
+    - Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_):
+        * **14-202-02**, 2014
+        * **15-202-04**, 2015
+        * **17-202-09**, 2017
+        * **18-202-08**, 2018
 
 
 Universities
@@ -104,12 +113,12 @@ Universities
    :align: center
 
    * - |msu|
+     - |mipt|
      - |spbu|
      - |isu|
-     - |mipt|
    * - |msu-phys|
+     - |dgap|
      - |spbu-apmath|
      - |isu-physdep|
-     - |dgap|
 
 Students and alumni of MSU, MIPT, SPBU and ISU have contributed to the development of GNA.
