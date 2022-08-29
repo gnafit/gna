@@ -36,7 +36,7 @@ We start iterating over major indices and for each iteration request a value fro
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 14-19
+    :lines: 12-17
     :emphasize-lines: 1,2,4
 
 In a special case of 0 dimensions, `current_values()` return empty tuple. In this case we expect `pars` to contain a
@@ -46,7 +46,7 @@ The next few lines
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 21-23
+    :lines: 19-20
 
 implement the loop over minor indices. We create a combined index `it` and use it to produce a formatted label.
 
@@ -54,7 +54,7 @@ And as the last action we define a parameter:
 
 .. literalinclude:: ../../../macro/tutorial/bundles/parameters_ex02.py
     :linenos:
-    :lines: 25
+    :lines: 23
 
 The `reqparameter()` method is similar to the environments `reqparameter()`, described :ref:`previously
 <tutorial_parameters_def>`. The main difference as it takes current iteration of multi index to properly format the name.

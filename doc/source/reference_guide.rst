@@ -24,6 +24,15 @@ Cheat sheet
    making_sense
    cheatsheet/*
 
+UI modules
+---------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   ui_modules/*
+
 Python modules
 ---------------
 
