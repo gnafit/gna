@@ -1,7 +1,7 @@
 .. _tutorial:
 
-Tutorial (Under construction)
------------------------------
+Tutorial
+--------
 
 .. toctree::
    :numbered:
