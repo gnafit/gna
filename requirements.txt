@@ -10,3 +10,4 @@ Sphinx
 sphinxcontrib-websupport
 sphinx-rtd-theme
 sphinxcontrib-plantuml
+iminuit
