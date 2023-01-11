@@ -57,9 +57,9 @@ current user:
 
 .. code-block:: bash
 
-    pip2 install --user -r requirements.txt
+    pip install --user -r requirements.txt
 
-`pip`, or on some systems `pip2` will install only the packages, that are missing in the system.
+`pip` will install only the packages, that are missing in the system.
 
 Setting ROOT environment
 ------------------------
