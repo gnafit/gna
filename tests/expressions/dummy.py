@@ -5,7 +5,6 @@ R.GNAObject
 from gna.bundle import execute_bundles
 from gna.env import env
 from gna.configurator import NestedDict, uncertain
-from collections import OrderedDict
 
 cfg = NestedDict(
     bundle = 'dummy',

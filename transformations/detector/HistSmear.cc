@@ -1,14 +1,17 @@
 #include <boost/math/constants/constants.hpp>
 #include "HistSmear.hh"
 #include "TypesFunctions.hh"
+#include "fmt/format.h"
 
 #ifdef GNA_CUDA_SUPPORT
 #include "cuElementary.hh"
 #include "DataLocation.hh"
 #endif
 
+using GNA::SquareMatrixType;
 
-HistSmear::HistSmear(bool upper) {
+HistSmear::HistSmear(SquareMatrixType matrix_type) {
+  bool upper = matrix_type==SquareMatrixType::UpperTriangular;
   transformation_("smear")
       .input("Ntrue")
       .input("SmearMatrix")
@@ -17,7 +20,8 @@ HistSmear::HistSmear(bool upper) {
       .types([](TypesFunctionArgs fargs) {
                auto& args=fargs.args;
                if (args[1].shape[0] != args[0].shape[0]) {
-                 throw args.error(args[0], "SmearMatrix is not consistent with data vector");
+                   auto msg = fmt::format("SmearMatrix is not consistent with data vector: {0}x{1} vs {2}", args[1].shape[0], args[1].shape[1], args[0].shape[0] );
+                   throw args.error(args[0], msg);
                }
              })
        .func( upper ? &HistSmear::calcSmearUpper : &HistSmear::calcSmear )

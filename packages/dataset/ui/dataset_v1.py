@@ -1,5 +1,6 @@
 """Dataset initialization (v1). Configures the dataset for an experiment."""
 
+import argparse
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
 import numpy as np
@@ -8,6 +9,21 @@ from itertools import chain
 from gna.dataset import Dataset
 from gna.parameters.parameter_loader import get_parameters, get_uncertainties
 from gna import constructors as C
+
+class RavelAndStripSpace(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        dest = getattr(namespace, self.dest)
+        sanitized = self.__strip_spaces(values)
+        if dest:
+            dest.extend(sanitized)
+        else:
+            setattr(namespace,self.dest, sanitized)
+
+    def __strip_spaces(self, inputs):
+        ret = []
+        for inp in inputs:
+            ret.extend(inp.split(" "))
+        return ret
 
 class cmd(basecmd):
     pull_vararray, pull_centrals, pull_sigmas2, pull_covariance = None, None, None, None
@@ -22,7 +38,8 @@ class cmd(basecmd):
         name.add_argument('-n', '--name', dest='name1', help='dataset name', metavar='dataset')
 
         pull = parser.add_mutually_exclusive_group()
-        pull.add_argument('--pull', action='append', help='Parameters to be added as pull terms')
+        pull.add_argument('--pull', nargs='*', action=RavelAndStripSpace, help='Parameters to be added as pull terms')
+        pull.add_argument('--pull-groups', nargs='+', help='Parameter groups to be added as pull terms')
 
         parser.add_argument('--theory-data', '--td', nargs=2, action='append',
                             metavar=('THEORY', 'DATA'),
@@ -33,6 +50,7 @@ class cmd(basecmd):
 
         parser.add_argument('--error-type', choices=['pearson', 'neyman'],
                             default='pearson', help='The type of statistical errors to be used with --td')
+        parser.add_argument('--variable-error', action='store_true', help='permit variable error')
         parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode')
 
     def run(self):
@@ -41,12 +59,15 @@ class cmd(basecmd):
         if self.opts.verbose:
             print("Dataset '{}' with:".format(self.opts.name))
 
-        if self.opts.pull:
+        if self.opts.pull or self.opts.pull_groups:
             self.load_pulls(dataset)
 
         self.snapshots = dict()
         for theory_path, data_path in self.opts.theory_data:
-            theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+            try:
+                theory, data = env.future['spectra', theory_path], env.future['spectra', data_path]
+            except KeyError:
+                theory, data = env.future['spectra', theory_path], env.future['data_spectra', data_path]
             data.data()
 
             if self.opts.verbose:
@@ -58,7 +79,7 @@ class cmd(basecmd):
             elif self.opts.error_type == 'pearson':
                 error=theory.single()
 
-            if not error.getTaintflag().frozen():
+            if not self.opts.variable_error and not error.getTaintflag().frozen():
                 snapshot = self.snapshots[error] = C.Snapshot(error, labels='Snapshot: stat errors')
                 snapshot.single().touch()
                 error = snapshot
@@ -87,7 +108,14 @@ class cmd(basecmd):
         #
 
         # Get list of UncertainParameter objects, drop free and fixed
-        pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
+        if self.opts.pull:
+            pull_pars = get_parameters(self.opts.pull, drop_fixed=True, drop_free=True)
+        else:
+            pull_pars_dict={}
+            for group in self.opts.pull_groups:
+                upd = self.env.future['parameter_groups', group].unwrap()
+                pull_pars_dict.update(upd)
+            pull_pars = list(pull_pars_dict.values())
         variables = [par.getVariable() for par in pull_pars]
         sigmas, centrals, covariance = get_uncertainties(pull_pars)
         npars = len(pull_pars)

@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as N
-from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
@@ -13,7 +11,7 @@ class reactor_anu_freemodel_v01(TransformationBundleLegacy):
 
         self.edges = self.shared.reactor_anu_edges.data()
 
-        self.bundles=OrderedDict( self=self )
+        self.bundles=dict( self=self )
 
     def build(self):
         with self.common_namespace:

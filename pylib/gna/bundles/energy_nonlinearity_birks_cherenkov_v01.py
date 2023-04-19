@@ -8,7 +8,6 @@ from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
 from gna.configurator import NestedDict
-from collections import OrderedDict
 from gna.bundle import TransformationBundle
 from gna.context import entryContext
 
@@ -43,6 +42,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         file.Close()
 
     def build(self):
+        propagate_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('fill_matrix', False) else R.GNA.DataPropagation.Ignore
         with entryContext(subgraph='LSNL'):
             self.init_data()
 
@@ -149,7 +149,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
         #
         # Hist Smear
         #
-        self.pm_histsmear = C.HistNonlinearity(self.cfg.get('fill_matrix', False), labels=('Nonlinearity matrix', 'Nonlinearity smearing'))
+        self.pm_histsmear = C.HistNonlinearity(propagate_matrix, labels=('Nonlinearity matrix', 'Nonlinearity smearing'))
         self.pm_histsmear.set_range(-0.5, 20.0)
         self.positron_model_scaled_full >> self.pm_histsmear.matrix.EdgesModified
 
@@ -178,7 +178,7 @@ class energy_nonlinearity_birks_cherenkov_v01(TransformationBundle):
             self.doubleme = 2*emass.value()
             ns.defparameter("ngamma", central=2.0, fixed=True, label='Number of e+e- annihilation gammas')
 
-            labels=OrderedDict([
+            labels=dict([
                 ( 'birks.Kb0', 'Kb0=1' ),
                 ( 'birks.Kb1', "Birk's 1st constant (E')" ),
                 ( 'birks.Kb2', "Birk's 2nd constant (E'')" ),

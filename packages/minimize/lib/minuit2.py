@@ -1,5 +1,5 @@
 import ROOT
-from packages.minimize.lib.minuit_base import MinuitBase
+from minimize.lib.minuit_base import MinuitBase
 
 TMinuit2 = ROOT.Minuit2.Minuit2Minimizer
 

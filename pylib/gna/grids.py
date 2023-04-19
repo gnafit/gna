@@ -1,5 +1,4 @@
 import argparse
-from collections import OrderedDict
 from itertools import product, islice, chain, repeat
 
 import numpy as np
@@ -52,7 +51,7 @@ class PointSet(object):
 
     @classmethod
     def fromgrids(cls, opts):
-        gridparams = OrderedDict()
+        gridparams = dict()
         for par, gridtype, griddesc in opts.grids:
             if not isinstance(par, ROOT.GaussianParameter("double")):
                 raise TypeError("{} is not independent parameter, nop possible to scan over it".format(par.name()))
@@ -85,7 +84,7 @@ class PointSet(object):
     @classmethod
     def decomposed(cls, opts):
         cast = float
-        grids = OrderedDict()
+        grids = dict()
         for pname, gridtype, griddesc in opts.grids:
             start = griddesc[0]
             startval = cast(start)

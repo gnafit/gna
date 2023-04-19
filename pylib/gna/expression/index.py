@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import itertools as I
-from collections import OrderedDict
 from gna.expression.printl import *
 from gna.grouping import Groups
 import numpy as N
@@ -65,7 +64,7 @@ class Index(object):
         name = slave['name']
         map = slave['map']
         if isinstance(map, (list,tuple)):
-            map=OrderedDict(map)
+            map=dict(map)
         variants = list(map.keys())
 
         self.slave = Index(short, name, variants, master=self)
@@ -143,7 +142,7 @@ class Index(object):
 class NIndex(object):
     name_position=0
     def __init__(self, *indices, **kwargs):
-        self.indices = OrderedDict()
+        self.indices = dict()
 
         self.slaveof={}
         self.masterof={}
@@ -176,6 +175,9 @@ class NIndex(object):
 
         if kwargs:
             raise Exception('Unparsed kwargs: {:s}'.format(kwargs))
+
+    def clone(self):
+        return NIndex(*(Index(i) for i in self.indices.values()), order=self.order, name_position=self.name_position)
 
     @classmethod
     def fromlist(cls, lst):
@@ -254,6 +256,7 @@ class NIndex(object):
         return self.make_inheritor(self, ignore=list(other.indices.keys()))
 
     def arrange(self, order, name_position=0):
+        self.name_position = name_position
         if order:
             if order=='sorted':
                 self.order = sorted(self.order_initial)
@@ -267,7 +270,7 @@ class NIndex(object):
 
         self.order_indices=list((name for name in self.order if name in self.indices))
 
-        self.indices = OrderedDict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
+        self.indices = dict([(k, self.indices[k]) for k in self.order_indices if k in self.indices])
 
     # def __str__(self):
         # return ', '.join( self.indices.keys() )

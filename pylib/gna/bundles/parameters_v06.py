@@ -1,4 +1,3 @@
-
 """Parameters v06 bundle
 Implements a set of parameters, defined via
 - dictionary
@@ -6,8 +5,11 @@ Implements a set of parameters, defined via
 - yaml file (as dictionary)
 
 Based on: parameters_v05
+
 Implements:
 - Indices
+   + major: the distinct value is read from the configuration
+   + minor: replicas
 - Separate uncertainty
 """
 
@@ -16,12 +18,12 @@ from gna.bundle.bundle import *
 import numpy as N
 from gna import constructors as C
 from tools.cfg_load import cfg_parse
-from collections import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 from tools.dictwrapper import DictWrapper
 
 class parameters_v06(TransformationBundle):
     covmat, corrmat = None, None
-    skip = ['meta', 'uncertainty', 'uncertainty_mode']
+    skip = ['meta', 'uncertainty', 'uncertainty_mode', 'state']
     def __init__(self, *args, **kwargs):
         self._par_container = []
         TransformationBundle.__init__(self, *args, **kwargs)
@@ -30,6 +32,10 @@ class parameters_v06(TransformationBundle):
 
         if 'state' in self.cfg and not self.cfg.state in ('fixed', 'free'):
             raise ValueError('Invalid state: '+self.cfg.state)
+
+        nsname = self.cfg.get('namespace')
+        if nsname:
+            self.namespace = self.namespace(nsname)
 
     @classmethod
     def _provides(cls, cfg):
@@ -50,9 +56,15 @@ class parameters_v06(TransformationBundle):
             names.extend(tuple(map(sepuncfmt.format, names)))
 
         if cfg.get('objectize'):
-            return names, names
+            onames = tuple(names)
         else:
-            return names, ()
+            onames = ()
+
+        nsname = cfg.get('namespace')
+        if nsname:
+            names = tuple('.'.join((nsname, n)) for n in names)
+
+        return names, onames
 
     def get_parameter_kwargs(self, pars, name, idx, state, uncertainty_common, uncertainty_mode_common):
         kwargs=dict()
@@ -147,7 +159,7 @@ class parameters_v06(TransformationBundle):
         objectize = self.cfg.get('objectize')
         skip = list(self.cfg.get('skip', ()))+self.skip
 
-        state = self.cfg.get('state', None)
+        state = self.cfg.get('state', 'fixed')
         uncertainty_common = pars.get('uncertainty', None)
         uncertainty_mode_common = pars.get('uncertainty_mode', 'absolute')
         for name in pars.keys():
@@ -158,13 +170,13 @@ class parameters_v06(TransformationBundle):
                 major_values = it_major.current_values()
                 kwargspar=self.get_parameter_kwargs(pars, name, major_values, state=state, uncertainty_common=uncertainty_common, uncertainty_mode_common=uncertainty_mode_common)
 
+                if name in labels:
+                    kwargspar['label'] = labels[name]
+
+                scalename, kwargsscale = self.get_scale_kwargs(name, kwargspar)
+
                 for it_minor in self.nidx_minor:
                     it=it_major+it_minor
-
-                    if name in labels:
-                        kwargspar['label'] = labels[name]
-
-                    scalename, kwargsscale = self.get_scale_kwargs(name, kwargspar)
 
                     if kwargsscale:
                         scalepar = self.reqparameter(scalename, it, **kwargsscale)

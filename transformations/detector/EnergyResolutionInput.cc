@@ -5,11 +5,12 @@
 #include <fmt/format.h>
 #include <string.h>
 
-constexpr double pi = boost::math::constants::pi<double>();
+constexpr double one_div_root_two_pi = boost::math::constants::one_div_root_two_pi<double>();
 
 using namespace TypeClasses;
+using GNA::DataPropagation;
 
-EnergyResolutionInput::EnergyResolutionInput(bool propagate_matrix) :
+EnergyResolutionInput::EnergyResolutionInput(DataPropagation propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
   transformation_("matrix")
@@ -27,11 +28,10 @@ HistSmearSparse(propagate_matrix)
 }
 
 double EnergyResolutionInput::resolution(double Etrue, double Erec, double RelSigma) const noexcept {
-  static const double twopisqr = std::sqrt(2*pi);
   const double sigma = Etrue * RelSigma;
   const double reldiff = (Etrue - Erec)/sigma;
 
-  return std::exp(-0.5*pow(reldiff, 2))/(twopisqr*sigma);
+  return one_div_root_two_pi*std::exp(-0.5*pow(reldiff, 2))/sigma;
 }
 
 void EnergyResolutionInput::calcMatrix(FunctionArgs& fargs) {
@@ -50,7 +50,6 @@ void EnergyResolutionInput::calcMatrix(FunctionArgs& fargs) {
   auto bin_center = [edges](size_t index){ return (edges[index+1] + edges[index])/2; };
   for (size_t etrue = 0; etrue < nbins; ++etrue) {
     auto Etrue   = bin_center(etrue);
-    auto dEtrue  = edges[etrue+1] - edges[etrue];
     auto relsigma=relsigmas[etrue];
 
     bool right_edge_reached{false};
@@ -58,7 +57,8 @@ void EnergyResolutionInput::calcMatrix(FunctionArgs& fargs) {
      * neighbor bins  */
     for (size_t erec = 0; erec < nbins; ++erec) {
       auto Erec = bin_center(erec);
-      auto rEvents = dEtrue*resolution(Etrue, Erec, relsigma);
+      auto dErec  = edges[erec+1] - edges[erec];
+      auto rEvents = dErec*resolution(Etrue, Erec, relsigma);
 
       if (rEvents < 1E-10) {
         if (right_edge_reached) {

@@ -28,7 +28,6 @@ from matplotlib import pyplot as P
 import numpy as N
 from mpl_tools import bindings
 from gna.labelfmt import formatter as L
-from collections import OrderedDict
 R.GNAObject
 
 #
@@ -38,7 +37,7 @@ if args.indices=='complete':
     indices = [
         ('s', 'site',        ['EH1', 'EH2', 'EH3']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
         ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
@@ -48,7 +47,7 @@ elif args.indices=='minimal':
     indices = [
         ('s', 'site',        ['EH1']),
         ('d', 'detector',    ['AD11'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',))]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11',))]))),
         ('r', 'reactor',     ['DB1']),
         ('i', 'isotope', ['U235']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
@@ -58,7 +57,7 @@ elif args.indices=='small':
     indices = [
         ('s', 'site',        ['EH1', 'EH2']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21',)) ]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21',)) ]))),
         'name',
         ('r', 'reactor',     ['DB1', 'LA1']),
         ('i', 'isotope', ['U235']),
@@ -95,7 +94,7 @@ groups=NestedDict(
             ])
         )
 
-lib = OrderedDict(
+lib = dict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
         # cspec_diff_reac         = dict(expr='sum:i'),

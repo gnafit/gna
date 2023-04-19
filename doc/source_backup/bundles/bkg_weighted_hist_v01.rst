@@ -136,7 +136,7 @@ supposed to be initialized beforehand.
                 bundle = 'root_histograms_v01',
                 filename   = 'filename.root',
                 format = 'hist_{}',
-                variants = OrderedDict([
+                variants = dict([
                     ( 'D1', 'G1_D1' ),
                     ( 'D2', 'G1_D2' ),
                     ( 'D3', 'G2_D3' ),

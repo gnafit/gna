@@ -17,9 +17,9 @@ public:
   const Eigen::ArrayXd& getWeights() { return m_weights; }
   const Eigen::ArrayXi& getOrders() { return m_orders; }
 protected:
-  IntegratorBase(int order, bool shared_edge=false);
-  IntegratorBase(size_t bins, int orders, double* edges=nullptr, bool shared_edge=false);
-  IntegratorBase(size_t bins, int* orders, double* edges=nullptr, bool shared_edge=false);
+  IntegratorBase(int order);
+  IntegratorBase(size_t bins, int orders, double* edges=nullptr);
+  IntegratorBase(size_t bins, int* orders, double* edges=nullptr);
 
   Eigen::ArrayXi m_orders;
   Eigen::ArrayXd m_weights;
@@ -37,6 +37,4 @@ private:
   void init_base(double* edges);
   void check_base(TypesFunctionArgs&);
   void integrate(FunctionArgs&);
-
-  size_t m_shared_edge{0};
 };

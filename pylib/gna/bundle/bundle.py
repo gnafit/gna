@@ -1,11 +1,10 @@
-
 from gna.env import namespace, env
 from gna.config import cfg
 from pkgutil import iter_modules
 from gna.configurator import NestedDict
 import re
-from collections import OrderedDict
 from gna.packages import iterate_module_paths
+from collections.abc import Mapping
 
 bundle_modules = None
 bundles = {}
@@ -22,7 +21,7 @@ def get_bundle(name):
         return bundles[name]
 
     if bundle_modules is None:
-        bundle_modules=OrderedDict([(lname, loader) for loader, lname, _ in iter_modules(cfg.bundlepaths)]) # TODO: deprecate
+        bundle_modules=dict([(lname, loader) for loader, lname, _ in iter_modules(cfg.bundlepaths)]) # TODO: deprecate
         bundle_modules.update([(lname, loader) for loader, lname, _ in iter_modules(iterate_module_paths('bundles'))])
 
     loader = bundle_modules.get( name )
@@ -37,7 +36,11 @@ def get_bundle(name):
 
     return bundle
 
-preprocess_mask = re.compile('^(.+?)(_(v\d\d))?$')
+def get_bundle_by_cfg(cfg):
+    bcfg = cfg['bundle']
+    return get_bundle((bcfg['name'], bcfg.get('version', None)))
+
+preprocess_mask = re.compile(r'^(.+?)(_(v\d\d))?$')
 def preprocess_bundle_cfg(cfg):
     """Check the 'bundle' field and expand it if needed"""
 
@@ -126,7 +129,7 @@ class TransformationBundleLegacy(object):
 
         self.common_namespace = kwargs.pop( 'common_namespace', self.shared.get('common_namespace', env.globalns) )
         namespaces=kwargs.pop('namespaces', self.shared.get('namespaces', None)) or [self.common_namespace]
-        self.namespaces = [ self.common_namespace(ns) if isinstance(ns, basestring) else ns for ns in namespaces ]
+        self.namespaces = [ self.common_namespace(ns) if isinstance(ns, str) else ns for ns in namespaces ]
 
         self.shared.setdefault('namespaces', self.namespaces)
         self.shared.setdefault('common_namespace', self.common_namespace)
@@ -246,8 +249,8 @@ class TransformationBundle(object):
         else:
             inputs  = context.inputs
             outputs = context.outputs
-            self.namespace = context.namespace()
-        self.context = NestedDict(inputs=inputs, outputs=outputs, objects={})
+            self.namespace = context.namespace
+        self.context = NestedDict(inputs=inputs, outputs=outputs, objects={}, namespace=self.namespace)
 
         self._debug = self.bundlecfg.get('debug', self._debug)
 
@@ -260,12 +263,21 @@ class TransformationBundle(object):
         names = bundlecfg.get('names')
         if not names:
              return lambda s: s
-        elif isinstance(names, (dict, NestedDict)):
+        elif isinstance(names, (Mapping, NestedDict)):
             return lambda s: names.get(s, s)
         elif callable(names):
             return names
+        elif isinstance(names, (list,tuple)):
+            try:
+                prefix, postfix = names
+            except ValueError:
+                pass
+            else:
+                return lambda s: prefix+s+postfix
+        elif isinstance(names, str):
+            return lambda s: s+names
 
-        cls.exception('option "names" should be a dictionary or a function, not {}'.format(type(names).__name__))
+        cls.exception('option "names" should be dictionary, function, pair (list, tuple) or a string, not {}'.format(type(names).__name__))
 
     def execute(self):
         """Calls sequentially the methods to define variables and build the computational chain."""
@@ -344,13 +356,14 @@ class TransformationBundle(object):
 
     def reqparameter(self, name, nidx, *args, **kwargs):
         label = kwargs.get('label', '')
+        namespace = kwargs.pop('namespace', self.namespace)
         if nidx is not None and '{' in label:
             kwargs['label'] = nidx.current_format(label)
 
         path = self.get_path(name, nidx, extra=kwargs.pop('extra', None))
         if self._debug:
             print('{name} requires parameter {par}'.format(name=type(self).__name__, par=path))
-        return self.namespace.reqparameter(path, *args, **kwargs)
+        return namespace.reqparameter(path, *args, **kwargs)
 
     def set_output(self, name, nidx, output, extra=None):
         path=self.get_path(name, nidx, extra=extra)

@@ -1,18 +1,37 @@
 #!/usr/bin/env python
 
-from packages.minimize.lib.base import MinimizerBase, FitResult
+from typing import List, Any, Mapping
+from collections import abc
+from copy import copy
+
 import ROOT
 import numpy as np
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    # do basic counting if tqdm is missing
+    def counting_mock(iterable, total):
+        for i, elem in enumerate(iterable):
+            print(f"{i}/{total}")
+            yield elem
+    tqdm = counting_mock
+
+from minimize.lib.base import MinimizerBase, FitResult
+
 
 class ScanMinimizer(MinimizerBase):
     _label           = 'ScanMinimizer'
     _results         = None
     _result_min      = None
     _result_improved = None
-    def __init__(self, statistic, minpars, gridpars, extraminimizerclass, extraminimizeropts={}, **kwargs):
+    def __init__(self, statistic, minpars, gridpars, extraminimizerclass,
+            extraminimizeropts={}, fixed_order=[], **kwargs):
+        self.verbose = kwargs.pop('verbose', False)
         MinimizerBase.__init__(self, statistic, minpars, **kwargs)
         self._extraminimizer = extraminimizerclass(statistic, minpars, **extraminimizeropts)
         self._grid = ParsGrid(minpars, gridpars)
+        self.fixed_order = fixed_order
 
     @property
     def label(self):
@@ -37,34 +56,56 @@ class ScanMinimizer(MinimizerBase):
         self.update_minimizable()
         self.parspecs.resetstatus()
 
+    def grid_scan(self, verbose:bool=False):
+        '''Return test statistic values in all points of the grid'''
+        self.setuppars()
+        self.update_minimizable()
+        grid_it = self._grid.progress_it() if self.verbose else iter(self._grid)
+        return [self._extraminimizer.fit() for it in grid_it ]
+
     def _scan(self):
+        '''Returns a 5-tuple:
+           - results of fit,
+           - test statistic value in each point,
+           - mask for successful fits,
+           - values of parameters on grid,
+           - names of scanned parameters'''
         results = ()
         funs = ()
         mask = ()
-        for i, step in enumerate(self._grid):
+        par_values = ()
+        grid_it = self._grid.progress_it() if self.verbose else iter(self._grid)
+        for i, step in enumerate(grid_it):
             res = self._extraminimizer.fit()
             results += res,
             funs += res['fun'],
             mask += not res['success'],
+            par_values += tuple((par.value for par in step))
+        par_names = tuple(par.name for par in step)
 
-        return results, funs, mask
+        return results, np.array(funs), np.array(mask), par_values, par_names
 
-    def _child_fit(self, profile_errors=None):
+    def _child_fit(self, **kwargs):
         self.setuppars()
         self.update_minimizable()
         with self.parspecs:
             with FitResult() as fr:
-                self._results, funs, mask = self._scan()
+                self._results, funs, mask, *_ = self._scan()
 
                 funs = np.ma.array(funs, mask=mask)
-                imin = np.argmin(funs)
+                if mask.any():
+                    funs[mask]=1.e100
+                if (~funs.mask).any():
+                    imin = np.argmin(funs)
+                else:
+                    imin=0
                 self._result_min = self._results[imin]
 
                 for parname in self._result_min['fixed']:
                     val = self._result_min['xdict'][parname]
                     self._parspecs[parname].value=val
 
-                self._result_improved = self._extraminimizer.fit(profile_errors=profile_errors)
+                self._result_improved = self._extraminimizer.fit(**kwargs)
 
         nfev = sum(r['nfev'] for r in self._results) + self._result_improved['nfev']
         fr.set(x=self._result_improved['x'], errors=self._result_improved['errors'], fun=self._result_improved['fun'],
@@ -72,7 +113,8 @@ class ScanMinimizer(MinimizerBase):
                minimizer=self.label, nfev=nfev,
                hess_inv = self._result_improved.get('hess_inv'),
                jac = self._result_improved.get('jac'),
-               errors_profile = self._result_improved.get('errors_profile', {})
+               errors_profile = self._result_improved.get('errors_profile', {}),
+               covariance = self._result_improved.get('covariance', {})
                )
         self._result = fr.result
         self.patchresult()
@@ -85,7 +127,7 @@ class ScanMinimizer(MinimizerBase):
         storage['result_min'] = self._result_min
         storage['result_improved'] = self._result_improved
 
-class ParOnGrid(object):
+class ParOnGrid:
     def __init__(self, minpar, grid):
         minpar.scanvalues = grid
         self.minpar = minpar
@@ -102,7 +144,7 @@ class ParOnGrid(object):
         self.minpar.fixed = fixed_save
         self.minpar.value = value_save
 
-class ParsGrid(object):
+class ParsGrid:
     def __init__(self, minpars, gridpars):
         self._minpars = minpars
         self._gridpars = gridpars
@@ -117,13 +159,21 @@ class ParsGrid(object):
             try:
                 # Replace parameter with minimizer parameter specification
                 minpar = self._minpars[grid['par']]
-                self._grid.append(ParOnGrid(minpar, grid['grid']))
+                if not any(minpar is par.minpar for par in self._grid):
+                    self._grid.append(ParOnGrid(minpar, grid['grid']))
             except KeyError:
                 raise Exception('Parameter {} is not in minimizable parameters'.format('.'.join(key)))
 
     def __iter__(self):
-        for step in product_it(*self._grid):
-            yield step
+        yield from product_it(*self._grid)
+
+    def progress_it(self):
+        '''Iterator with tqdm progress bar for easier track of progress during
+        scanning'''
+        # count total number of points in grid
+        total = np.prod([len(par.minpar.scanvalues) for par in self._grid])
+        yield from tqdm(product_it(*self._grid), total=total)
+
 
 def product_it(*args):
     n = len(args)

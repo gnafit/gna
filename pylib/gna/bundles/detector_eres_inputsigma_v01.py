@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -42,16 +41,19 @@ class detector_eres_inputsigma_v01(TransformationBundle):
 
     def read_data(self):
         from tools.data_load import read_object_auto
-        self.input = read_object_auto(self.cfg.filename, convertto='array')
+        self.input = read_object_auto(self.cfg.filename)
 
     def build(self):
         self.read_data()
 
-        expose_matrix = self.cfg.get('expose_matrix', False)
+        expose_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('expose_matrix', False) else R.GNA.DataPropagation.Ignore
         split_transformations = self.cfg.get('split_transformations', True)
 
+        energies = C.Points(self.input[0])
         sigmas = C.Points(self.input[1])
+        self.objects.append(energies)
         self.objects.append(sigmas)
+        self.set_output('eres_sigma_e', None, energies.points.points)
         self.set_output('eres_sigma', None, sigmas.points.points)
 
         self.objects = []

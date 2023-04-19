@@ -7,7 +7,7 @@ from gna.bindings import common
 
 # Create numpy arrays for 1d and 2d cases
 narray2 = np.arange(20).reshape(5,4)
-# Create a Points instances
+# Create a Points instance
 parray2 = C.Points(narray2)
 
 print('Data 2d:\n', parray2.points.points.data())

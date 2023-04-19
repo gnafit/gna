@@ -1,4 +1,3 @@
-
 import ROOT as R
 from gna.bindings import patchROOTClass
 import numpy as N
@@ -79,7 +78,7 @@ def DataType____eq__(self, other):
         edges1 = N.asanyarray(e1)
         edges2 = N.asanyarray(e2)
 
-        if not N.allclose(edges1, edges2, rtol=0, atol=1.e-14):
+        if not N.allclose(edges1, edges2, rtol=0, atol=1.e-13):
             return False
 
     return True

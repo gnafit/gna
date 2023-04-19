@@ -59,6 +59,7 @@ for i in range(n):
 mat/=mat.sum( axis=0 )
 pmat = C.Points( mat )
 
+smtype = R.GNA.SquareMatrixType.UpperTriangular if opts.triangular else R.GNA.SquareMatrixType.Any
 for eset in [
     [ [1.025], [3.025], [6.025], [9.025] ],
     [ [ 1.025, 5.025, 9.025 ] ],
@@ -69,7 +70,7 @@ for eset in [
         phist = singularities( e, edges )
 
         hist = C.Histogram( edges, phist )
-        esmear = R.HistSmear( opts.triangular )
+        esmear = R.HistSmear(smtype)
         esmear.smear.inputs.SmearMatrix( pmat.points )
         esmear.smear.inputs.Ntrue( hist.hist )
 

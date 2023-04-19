@@ -6,7 +6,6 @@ from gna.ui import basecmd, set_typed, append_typed
 from tools.argparse_utils import AppendSubparser
 import ROOT
 from gna.parameters.parameter_loader import get_parameters
-from collections import OrderedDict
 import time
 import numpy as np
 import itertools as I
@@ -70,8 +69,8 @@ class scancmd(basecmd):
 
         self.minimizer = self.opts.minimizer[0]
 
-        self.allpars  = OrderedDict([(par.qualifiedName(), par) for par in get_parameters(self.opts.pars, drop_fixed=True, drop_free=False, drop_constrained=False)])
-        self.scanpars = OrderedDict([(par.qualifiedName(), par) for par in get_parameters([par.parname for par in self.opts.variables])])
+        self.allpars  = dict([(par.qualifiedName(), par) for par in get_parameters(self.opts.pars, drop_fixed=True, drop_free=False, drop_constrained=False)])
+        self.scanpars = dict([(par.qualifiedName(), par) for par in get_parameters([par.parname for par in self.opts.variables])])
         self.otherpars = [par for (name, par) in self.allpars.items() if not name in self.scanpars.keys()]
 
         # scanpars = []

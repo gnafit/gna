@@ -125,6 +125,8 @@ void TypesFunctions::ifSameShapeOrSingle(TypesFunctionArgs& fargs) {
       auto msg = fmt::format("Transformation {0}: all inputs should have same shape or be of dimension 1, error on input {1}", args.name(), i);
       printf("Current data type: ");
       args[i].dump();
+      printf("Required data type: ");
+      dt.dump();
       throw args.error(args[i], msg);
     }
     dt = args[i];

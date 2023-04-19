@@ -5,7 +5,7 @@ from load import ROOT as R
 import numpy as N
 from gna import constructors as C
 from gna import context, bindings
-from collections import OrderedDict
+
 import gna.bindings.arrayview
 
 # @floatcopy(globals(), True)
@@ -22,7 +22,7 @@ def test_tree_manager(function_name):
 
         ns = gns('namespace2')
         ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
-        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=dict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
 
         ns = gns('namespace3')
         from gna.parameters.oscillation import reqparameters

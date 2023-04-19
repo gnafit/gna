@@ -1,4 +1,3 @@
-
 import ROOT as R
 
 def taint(entry):

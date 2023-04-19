@@ -8,7 +8,6 @@ from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
 from gna.configurator import NestedDict
-from collections import OrderedDict
 from gna.bundle import TransformationBundle
 
 class energy_nonlinearity_db_root_v02(TransformationBundle):
@@ -31,13 +30,14 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
         return ('escale', 'lsnl_weight'), ('lsnl', 'lsnl_component', 'lsnl_edges')
 
     def build_graphs( self, graphs ):
+        propagate_matrix = R.GNA.DataPropagation.Propagate if self.debug else R.GNA.DataPropagation.Ignore
         #
         # Interpolate curves on the default binning
         # (extrapolate as well)
         #
         self.newx_out = self.context.outputs[self.cfg.edges]
         newx = self.newx_out.data()
-        newy = OrderedDict()
+        newy = dict()
         for xy, name in zip(graphs, self.cfg.names):
             f = self.interpolate( xy, newx )
             newy[name]=f
@@ -70,7 +70,7 @@ class energy_nonlinearity_db_root_v02(TransformationBundle):
             for i, itd in enumerate(self.detector_idx.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
                 """Construct the nonlinearity calss"""
-                nonlin = R.HistNonlinearity(self.debug, labels=itd.current_format('NL matrix {autoindex}'))
+                nonlin = R.HistNonlinearity(propagate_matrix, labels=itd.current_format('NL matrix {autoindex}'))
                 try:
                     nonlin.set_range(*self.cfg.nonlin_range)
                 except KeyError:

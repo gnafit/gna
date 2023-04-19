@@ -1,5 +1,3 @@
-
-
 from gna.ui import basecmd
 import numpy as np
 import h5py

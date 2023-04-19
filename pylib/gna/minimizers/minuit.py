@@ -3,7 +3,6 @@ from argparse import Namespace
 import numpy as np
 import time
 from . import spec
-from collections import OrderedDict
 
 ROOT.TMinuitMinimizer.UseStaticMinuit(False)
 class Minuit(ROOT.TMinuitMinimizer):
@@ -14,7 +13,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         self.statistic = statistic
 
         self.pars = []
-        self.parsdict = OrderedDict()
+        self.parsdict = dict()
         self.spec = {}
         self.addpars(pars)
 
@@ -206,8 +205,8 @@ class Minuit(ROOT.TMinuitMinimizer):
 
     def _patchresult(self):
         names = [self.VariableName(i) for i in range(self.NDim())]
-        self.result.xdict      = OrderedDict(zip(names, (float(x) for x in self.result.x)))
-        self.result.errorsdict = OrderedDict(zip(names, (float(e) for e in self.result.errors)))
+        self.result.xdict      = dict(zip(names, (float(x) for x in self.result.x)))
+        self.result.errorsdict = dict(zip(names, (float(e) for e in self.result.errors)))
         self.result.names = names
         self.result.npars = int(self.NDim())
         self.result.nfev = int(self.result.nfev)
@@ -220,7 +219,7 @@ class Minuit(ROOT.TMinuitMinimizer):
         return res.fun
 
     def profile_errors(self, names, fitresult):
-        errs = fitresult.errors_profile = OrderedDict()
+        errs = fitresult.errors_profile = dict()
         if names:
             print('Caclulating statistics profile for:', end=' ')
         for name in names:

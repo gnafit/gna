@@ -1,4 +1,3 @@
-
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
@@ -6,7 +5,7 @@ from gna.env import env
 import re
 import inspect
 
-class VTContainer_v01(OrderedDict):
+class VTContainer_v01(dict):
     _order=None
     def __init__(self, *args, **kwargs):
         super(VTContainer_v01, self).__init__(*args, **kwargs)
@@ -28,7 +27,7 @@ class VTContainer_v01(OrderedDict):
         elif inspect.isclass(value) and issubclass(value, Operation):
             value.order=self._order
 
-        OrderedDict.__setitem__(self, key, value)
+        dict.__setitem__(self, key, value)
         return value
 
 class Expression_v01(object):
@@ -42,8 +41,8 @@ class Expression_v01(object):
         else:
             raise Exception('Unsupported expression: {!r}'.format(expression))
 
-        cexpr = re.compile('\s*#.*')
-        rexpr = re.compile('\n\s+')
+        cexpr = re.compile('\\s*#.*')
+        rexpr = re.compile('\n\\s+')
         self.expressions_raw = [ rexpr.sub('', cexpr.sub('', e)) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
@@ -139,8 +138,8 @@ class ItemProvider(object):
         self.cfg = cfg
         self.name=name
 
-        from gna.bundle.bundle import get_bundle
-        self.bundleclass = get_bundle((cfg.bundle.name, cfg.bundle.get('version', None)))
+        from gna.bundle.bundle import get_bundle_by_cfg
+        self.bundleclass = get_bundle_by_cfg(cfg)
 
         variables, objects = self.bundleclass.provides(self.cfg)
         self.items = variables+objects
@@ -157,7 +156,7 @@ class ItemProvider(object):
         self.bundle = self.bundleclass(self.cfg, **kwargs)
         self.bundle.execute()
 
-    def set_nidx(self, nidx):
+    def set_nidx(self, nidx, nidx_all):
         if nidx is None:
             printl_debug( 'indices: %s'%(self.name) )
             return
@@ -176,8 +175,9 @@ class ItemProvider(object):
             printl_debug('indices: %s[%s + %s]'%(self.name, str(predefined_nidx), str(nidx)))
             bundlecfg.nidx=predefined_nidx+nidx
 
+        bundlecfg.nidx_all=nidx_all
+
 class ExpressionContext_v01(object):
-    indices = None
     def __init__(self, bundles, ns=None, inputs=None, outputs=None):
         self.bundles = bundles
         self.outputs = NestedDict() if outputs is None else outputs
@@ -191,7 +191,7 @@ class ExpressionContext_v01(object):
             provider = ItemProvider(cfg, name)
             self.providers.update(provider.register_in())
 
-        self.required_bundles = OrderedDict()
+        self.required_bundles = dict()
 
     def __enter__(self):
         self.ns.__enter__()
@@ -221,7 +221,7 @@ class ExpressionContext_v01(object):
 
             self.required_bundles[name] = provider
 
-        provider.set_nidx(nidx)
+        provider.set_nidx(nidx, self.nindex)
 
         return self.required_bundles
 
@@ -272,7 +272,7 @@ class ExpressionContext_v01(object):
         printl_debug('get {}'.format(type), name, key)
 
         ret = source.get(key, None)
-        if not ret:
+        if ret is None:
             raise Exception('Failed to get {} {}[{}]'.format(type, name, nidx, clone))
 
         if isinstance(ret, NestedDict):

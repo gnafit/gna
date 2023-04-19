@@ -1,6 +1,4 @@
-
 import string
-from collections import OrderedDict
 import itertools as I
 
 from gna.configurator import configurator
@@ -57,7 +55,7 @@ class LFormatter(string.Formatter):
 
 class ndict(object):
     def __init__(self, dicts=None):
-        self.dicts = OrderedDict()
+        self.dicts = dict()
 
         if dicts:
             self.dicts.update( dicts )

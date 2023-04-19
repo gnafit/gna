@@ -28,7 +28,6 @@ from matplotlib import pyplot as P
 import numpy as N
 from mpl_tools import bindings
 from gna.labelfmt import formatter as L
-from collections import OrderedDict
 R.GNAObject
 
 #
@@ -53,7 +52,7 @@ elif args.indices=='minimal':
 else:
     raise Exception('Unsupported indices '+args.indices)
 
-lib = OrderedDict(
+lib = dict(
         cspec_diff              = dict(expr='anuspec*ibd_xsec*jacobian*oscprob',
                                        label='anu count rate\n{isotope}@{reactor}->{detector} ({component})'),
         # cspec_diff_reac         = dict(expr='sum:i'),

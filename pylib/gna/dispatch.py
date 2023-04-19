@@ -6,7 +6,6 @@ from gna.env import env
 import gna.ui
 from gna.config import cfg
 from gna.packages import iterate_module_paths
-from collections import OrderedDict
 
 class HelpDisplayed(Exception):
     pass
@@ -29,7 +28,7 @@ def arggroups(argv):
         yield argv[start:end]
 
 def getmodules():
-    modules = OrderedDict()
+    modules = dict()
     modules.update([(name, loader) for loader, name, _ in iter_modules(cfg.pkgpaths)]) # Deprecate
     modules.update([(name, loader) for loader, name, _ in iter_modules(iterate_module_paths('ui'))])
     return modules
@@ -38,7 +37,9 @@ def loadmodule(modules, name):
     loader = modules[name]
     return loader.find_module(name).load_module(name)
 
-def loadcmdclass(modules, name):
+def loadcmdclass(name):
+    global modules
+    name = name.replace('-', '_')
     module=loadmodule(modules, name)
     cls = getattr(module, name, None)
     if not cls:
@@ -93,12 +94,14 @@ def listmodules(modules, printdoc=False):
                 print()
 
 
+modules=None
 def run():
     """Execute command line in 3 steps:
         - Collect relevant classes, parsers and options
         - Test if any option has a help option: print help
         - Execute classes
     """
+    global modules
     modules = getmodules()
 
     cmdtriples = []
@@ -118,7 +121,7 @@ def run():
             msg = 'unknown module %s' % name
             raise Exception(msg)
 
-        cmdtriples.append((loadcmdclass(modules, name), group))
+        cmdtriples.append((loadcmdclass(name), group))
 
     exit=False
     for (cmdcls, parser), args in cmdtriples:

@@ -5,7 +5,6 @@
 from load import ROOT as R
 from matplotlib import pyplot as P
 import numpy as N
-from gna.converters import convert
 import itertools as I
 from mpl_tools.helpers import savefig, add_colorbar
 import gna.constructors as C

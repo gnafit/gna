@@ -309,7 +309,7 @@ class OSelect1(TCall, metaclass=OperationMeta):
             return self.name
 
         cname = TCall.guessname(self, lib=lib)
-        newname='{}:{}|{}'.format(self.operation, self._indices_to_replace[1].ident(), cname)
+        newname='{}:{}|{}'.format(self.operation, self._index_to_reduce.current, cname)
 
         label=None
 
@@ -343,7 +343,11 @@ class OSelect1(TCall, metaclass=OperationMeta):
                 for freeidx in self.nindex.iterate():
                     idxin = freeidx + self._nindex_to_reduce
                     output = self.objects[0].get_output(idxin, context)
+                    if output is None:
+                        raise Exception('Failed to select output')
                     context.set_output(output, self.name, freeidx)
+
+        self.inputs_connected = True
 
 def bracket(obj):
     obj.expandable = False

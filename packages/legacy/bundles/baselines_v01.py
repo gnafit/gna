@@ -1,10 +1,8 @@
-
 from load import ROOT as R
 import numpy as np
 import gna.constructors as C
 from gna.bundle import *
 from gna.configurator import NestedDict
-from collections import OrderedDict
 import itertools
 
 Units = R.NeutrinoUnits
@@ -40,7 +38,7 @@ class baselines_v01(TransformationBundleLegacy):
                 except:
                    print('Unable to open or parse file {}'.format(source) )
                    raise
-            elif isinstance(source, (NestedDict, OrderedDict, dict)):
+            elif isinstance(source, (NestedDict, dict)):
                 return source
             else:
                 raise Exception("Wrong type of data source {}".format(type(source)))

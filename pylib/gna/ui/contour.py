@@ -1,4 +1,3 @@
-
 from gna.ui import basecmd, set_typed
 
 import argparse

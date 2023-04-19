@@ -289,6 +289,143 @@ namespace TypeClasses{
     };
 
     template<typename FloatType>
+    class PassTypePriorityT : public TypeClassT<FloatType> {
+    private:
+        using BaseClass = TypeClassT<FloatType>;
+        using SelfClass = PassTypePriorityT<FloatType>;
+
+    public:
+        using TypesFunctionArgs = typename BaseClass::TypesFunctionArgs;
+
+        PassTypePriorityT(Range argsrange, Range retsrange, bool prefer_hist=true, bool prefer_nonsingular=true) :
+            m_argsrange(argsrange),
+            m_retsrange(retsrange),
+            m_prefer_hist(prefer_hist),
+            m_prefer_nonsingular(prefer_nonsingular)
+            { }
+        PassTypePriorityT(const SelfClass& other) = default;
+
+        void processTypes(TypesFunctionArgs& fargs){
+            /* Cases:
+               - 1P - singular Points
+               - 1H - singular Hist
+               - NP/ND - nonsingular Points/Hist
+               - pp - prefer points (true)
+               - ph - prefer hist (true)
+             Set current:
+             | Current \ Next | 1P | 1H | NP | NH       |
+             |----------------|----|----|----|----------|
+             | 1P             | x  | ph | pn | pn or ph |
+             | 1H             | x  | x  | pn | pn       |
+             | NP             | x  | x  | x  | ph       |
+             | NH             | x  | x  | x  | x        |
+             |----------------|----|----|----|----------|
+             Do not set current (inverse):
+             | Current \ Next | 1P | 1H  | NP  | NH          |
+             |----------------|----|-----|-----|-------------|
+             | 1P             | v  | !ph | !pn | !pn and !ph |
+             | 1H             | v  | v   | !pn | !pn         |
+             | NP             | v  | v   | v   | !ph         |
+             | NH             | v  | v   | v   | v           |
+             |----------------|----|-----|-----|-------------|
+             Loop to next, state before current is updated:
+             |---------|----------|
+             | Current | Loop if  |
+             |---------|----------|
+             | 1P      | pn or ph |
+             | 1H      | pn or ph |
+             | NP      | ph       |
+             | NH      | x        |
+             |---------|----------|
+             */
+            auto& args = fargs.args;
+            DataType const * currentType=&args[m_argsrange.getBeginAbs(args.size())];
+            DataType const * nextType;
+            for(auto aidx: m_argsrange.iterate(args.size())){
+                auto current_ishist = currentType->kind==DataKind::Hist;
+                auto current_isnonsingular = currentType->size()>1;
+                if(current_ishist){// is Hist
+                    if(current_isnonsingular || !m_prefer_nonsingular) {
+                        break;
+                    }
+                }
+                else{// is Points
+                    if(current_isnonsingular){ // non singular
+                        if (!m_prefer_hist){
+                            break;
+                        }
+                    }
+                    else{ // singular
+                        if (!m_prefer_hist && !m_prefer_nonsingular){
+                            break;
+                        }
+                    }
+                }
+
+                nextType=&args[aidx];
+                auto next_ishist = nextType->kind==DataKind::Hist;
+                auto next_isnonsingular = nextType->size()>1;
+
+                if(current_ishist==next_ishist && current_isnonsingular==next_isnonsingular){
+                    continue;
+                }
+                if(current_isnonsingular && !next_isnonsingular){
+                    continue;
+                }
+                if(current_ishist && !next_isnonsingular){
+                    continue;
+                }
+                if(!m_prefer_nonsingular){
+                    if(current_ishist){
+                        continue;
+                    }
+                    if(!current_isnonsingular){
+                        if(!next_ishist){
+                            continue;
+                        }
+                        if(!current_isnonsingular && next_isnonsingular){
+                            if(next_ishist && !m_prefer_hist){
+                                continue;
+                            }
+                            if(next_ishist){
+                                continue;
+                            }
+                        }
+
+                    }
+                }
+                if(!m_prefer_hist && current_isnonsingular==next_isnonsingular && !current_ishist && next_ishist){
+                    continue;
+                }
+                currentType = nextType;
+            }
+            auto& rets = fargs.rets;
+            for(auto ridx: m_retsrange.iterateSafe(rets.size())){
+                rets[ridx]=*currentType;
+            }
+        }
+
+        void dump(){
+            fmt::print("TypeClass pass type with priority");
+            if(m_prefer_nonsingular){
+                fmt::print(" [nonsingular]");
+            }
+            if(m_prefer_hist){
+                fmt::print(" [hist]");
+            }
+            fmt::print(": args ");
+            m_argsrange.dump();
+            fmt::print(" rets ");
+            m_retsrange.dump();
+        }
+    private:
+        Range m_argsrange;
+        Range m_retsrange;
+        bool m_prefer_hist;
+        bool m_prefer_nonsingular;
+    };
+
+    template<typename FloatType>
     class SetPointsT : public TypeClassT<FloatType> {
     private:
         using BaseClass = TypeClassT<FloatType>;

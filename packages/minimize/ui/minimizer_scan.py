@@ -1,10 +1,12 @@
 """Initializes a hybrid minimizer which does a raster scan over a part of the variables."""
+from typing import Mapping, List, Any
+from collections import abc
 
 import ROOT
 from gna.ui import basecmd, set_typed
-from packages.minimize.lib import minimizers
-from packages.minimize.lib.minpars import MinPars
-from packages.minimize.lib.scanminimizer import ScanMinimizer
+from minimize.lib import minimizers
+from minimize.lib.minpars import MinPars
+from minimize.lib.scanminimizer import ScanMinimizer
 
 class minimizer_scan(basecmd):
     @classmethod
@@ -22,10 +24,28 @@ class minimizer_scan(basecmd):
         parser.add_argument('-v', '--verbose', action='count', default=0, help='increase verbosity level')
 
     def init(self):
+        def extract_names(obj: Mapping[str, Any], level=0) -> List[str]:
+            names = []
+            for key, val in obj.items():
+                if isinstance(val, abc.Mapping):
+                    recurse = [".".join((key, name)) for name in extract_names(val)]
+                    names.extend(recurse)
+                else:
+                    names.append(key)
+            return names
+        def strip_internal(name: str)->str:
+            for stub in ['.par', '.grid']:
+                if name.endswith(stub):
+                    return name[:-len(stub)]
+
+
         self.statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())
         self.minpars = self.env.future['parameter_groups'][self.opts.pargroup]
-        self.minpars = MinPars(self.minpars, check=self.opts.statistic)
         self.gridpars = self.env.future['pargrid'][self.opts.pargrid]
+        gridpar_names = [strip_internal(name) for name in extract_names(self.gridpars.unwrap())]
+        gridpar_names = list(dict.fromkeys(gridpar_names))
+
+        self.minpars = MinPars(self.minpars, check=self.opts.statistic)
 
         if self.minpars._skippars:
             print('Minimizer {}: skip {} parameters not affecting the function'.format(self.opts.name, len(self.minpars._skippars)))
@@ -39,8 +59,9 @@ class minimizer_scan(basecmd):
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
         minimizerclass = minimizers[self.opts.type]
-        self.minimizer = ScanMinimizer(self.statistic, self.minpars, self.gridpars, minimizerclass, name=self.opts.name)
-
+        self.minimizer = ScanMinimizer(self.statistic, self.minpars, self.gridpars, minimizerclass,
+                                       name=self.opts.name, fixed_order=gridpar_names,
+                                       verbose=bool(self.opts.verbose))
         self.env.future[('minimizer', self.opts.name)] = self.minimizer
 
     __tldr__ =  """\

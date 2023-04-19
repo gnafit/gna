@@ -5,6 +5,8 @@
 
 //#define DEBUG_ENL
 
+using GNA::DataPropagation;
+
 #ifdef DEBUG_ENL
 #define  DEBUG(...) do {                                      \
     printf(__VA_ARGS__);                                      \
@@ -13,7 +15,7 @@
 #define  DEBUG(...)
 #endif
 
-HistNonlinearity::HistNonlinearity(bool propagate_matrix) :
+HistNonlinearity::HistNonlinearity(DataPropagation propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
   transformation_("matrix")
@@ -122,7 +124,7 @@ void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
                  *next_bin_mod, *next_bin_mod==*std::next(cur_proj_to_orig) ? "=":" ", *std::next(cur_proj_to_orig),
                  weight, full_width, weight==0.0 ? "*" : "" );
           #endif
-          m_sparse_cache.insert(i_proj, i_bin_mod) = weight;
+          m_sparse_cache.insert(i_proj, i_bin_mod)=weight;
 
           cur_edge = next_edge;
           std::advance(cur_proj_to_orig, 1); i_proj++;
@@ -142,6 +144,7 @@ void HistNonlinearity::calcMatrix(FunctionArgs& fargs) {
   }
   DEBUG("\n");
 
+  m_sparse_cache.makeCompressed();
   if ( m_propagate_matrix )
     fargs.rets[0].mat = m_sparse_cache;
 }

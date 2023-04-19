@@ -1,4 +1,3 @@
-
 from gna.bindings import patchROOTClass, provided_precisions
 import ROOT as R
 

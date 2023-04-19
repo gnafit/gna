@@ -35,7 +35,7 @@ tsum_add_input.print()
 print()
 
 
-# Access the cacluation result:
+# Access the calcuation result:
 print('Results:')
 print(tsum_constructor.sum.sum.data())
 print()

@@ -167,7 +167,7 @@ public:
   }
 
   bool isFixed() const noexcept { return this->m_fixed; }
-  void setFixed() noexcept { this->m_fixed = true; }
+  void setFixed(bool fixed=true) noexcept { this->m_fixed = fixed; }
 
   bool isFree() const noexcept { return this->m_free; }
   void setFree(bool free=true) noexcept { this->m_free = free; }
@@ -246,6 +246,21 @@ public:
     }
   }
 
+  void setCorrelation(GaussianParameter<T>& other, T cor) {
+#ifdef COVARIANCE_DEBUG
+    fmt::print("Correlation of parameters {0} and {1} is set to {2}",
+               this->name(), other.name(), cor);
+#endif
+    if (cor>1.0 || cor<-1.0){
+      throw std::runtime_error(fmt::format("Invalid correlation value {} for {} and {}", cor, this->name(), other.name()));
+    }
+    if (&other == this) {
+      return;
+    }
+    auto cov = cor * this->sigma() * other.sigma();
+    this->m_covariances[&other] = cov;
+    other.updateCovariance(*this, cov);
+  }
 
   void updateCovariance(GaussianParameter<T>& other, T cov) {
 #ifdef COVARIANCE_DEBUG
@@ -262,7 +277,7 @@ public:
       return search->second;
     } else  {
 #ifdef COVARIANCE_DEBUG
-      fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
+      fmt::print("Parameters {0} and {1} are not correlated", this->name(), other.name());
 #endif
       return static_cast<T>(0.);
     }
@@ -275,7 +290,7 @@ public:
       return search->second / (this->sigma() * other.sigma());
     } else  {
 #ifdef COVARIANCE_DEBUG
-      fmt::print("Parameters {0} and {1} are not covariated", this->name(), other.name());
+      fmt::print("Parameters {0} and {1} are not correlated", this->name(), other.name());
 #endif
       return static_cast<T>(0.);
     }

@@ -16,9 +16,7 @@ import time
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument( '--graph' )
-parser.add_argument( '-p', '--precision', default='double', choices=['float', 'double'] )
 args = parser.parse_args()
-print('Precision:', args.precision)
 
 ROOT.GNAObject
 
@@ -29,36 +27,32 @@ ns = env.ns("")
 from_nu = ROOT.Neutrino.ae()
 to_nu = ROOT.Neutrino.ae()
 
-ndata=950
 modecos = False # default
 
 clabels = [ 'P | &#8710;m12', 'P | &#8710;m13', 'P | &#8710;m23' ]
 E_arr = N.arange(1.0, 10.0, 0.001)  #array energy (МеV)
 
-with context.set_context(manager=ndata, precision=args.precision) as manager:
-    ns.defparameter("L", central=52,sigma=0) #kilometre
-    gna.parameters.oscillation.reqparameters_reactor(ns, dm='23')
-    pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
+ns.defparameter("L", central=52,sigma=0) #kilometre
+gna.parameters.oscillation.reqparameters_reactor(ns, dm='23')
+pmnsexpr = C.OscProbPMNSExpressions(from_nu, to_nu, modecos, ns=ns)
+ns.materializeexpressions()
+ns.printparameters(labels=True)
+
+E = C.Points(E_arr, labels='Energy')
+
+with ns:
+    oscprob = C.OscProb3(from_nu, to_nu, 'L', modecos, labels=clabels)
+    unity = C.FillLike(1, labels='Unity')
+
+    E >> (unity.fill, oscprob.comp12, oscprob.comp13, oscprob.comp23)
+
+    ws = C.WeightedSum(weights, labels, labels='OscProb')
+    unity          >> ws.sum.comp0
+    oscprob.comp12 >> ws.sum.item12
+    oscprob.comp13 >> ws.sum.item13
+    oscprob.comp23 >> ws.sum.item23
+
     ns.materializeexpressions()
-    ns.printparameters(labels=True)
-
-    E = C.Points(E_arr, labels='Energy')
-
-    with ns:
-        oscprob = C.OscProb3(from_nu, to_nu, 'L', modecos, labels=clabels)
-        unity = C.FillLike(1, labels='Unity')
-
-        E >> (unity.fill, oscprob.comp12, oscprob.comp13, oscprob.comp23)
-
-        ws = C.WeightedSum(weights, labels, labels='OscProb')
-        unity          >> ws.sum.comp0
-        oscprob.comp12 >> ws.sum.item12
-        oscprob.comp13 >> ws.sum.item13
-        oscprob.comp23 >> ws.sum.item23
-
-        ns.materializeexpressions()
-        pars = tuple(par.getVariable() for (name,par) in ns.walknames())
-        manager.setVariables(C.stdvector(pars))
 
 if args.graph:
     from gna.graphviz import savegraph

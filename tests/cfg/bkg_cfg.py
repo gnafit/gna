@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 from gna.configurator import NestedDict, uncertain, uncertaindict
-from collections import OrderedDict
+
 from physlib import percent
 
 cfg = NestedDict()
 cfg.detectors = [ 'AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34' ]
-cfg.groups    = OrderedDict( [
+cfg.groups    = dict( [
                 ( 'EH1', ('AD11', 'AD12') ),
                 ( 'EH2', ('AD21', 'AD22') ),
                 ( 'EH3', ('AD31', 'AD32', 'AD33', 'AD34') ),
@@ -24,7 +24,7 @@ bkg.acc = NestedDict(
             bundle = 'root_histograms_v01',
             file   = 'data/dayabay/data_spectra/P15A_IHEP_data/data_IHEP_P15A_All.root',
             format = 'accidental_pred_{}',
-            variants = OrderedDict([
+            variants = dict([
                 ( 'AD11', 'EH1_AD1' ), ( 'AD12', 'EH1_AD2' ),
                 ( 'AD21', 'EH2_AD3' ), ( 'AD22', 'EH2_AD8' ),
                 ( 'AD31', 'EH3_AD4' ), ( 'AD32', 'EH3_AD5' ), ( 'AD33', 'EH3_AD6' ), ( 'AD34', 'EH3_AD7' ),

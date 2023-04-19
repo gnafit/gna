@@ -32,12 +32,9 @@ def test_logpoisson_v01(cls, approx, tmp_path):
     res = logpoisson.poisson.poisson.data()[0]
 
     if approx:
-        res_expected = 2.0*((theorya - dataa*N.log(theorya)).sum() + (dataa*N.log(dataa)).sum())
+        res_expected = 2.0*((theorya - dataa) + dataa*N.log(dataa/theorya)).sum()
     else:
         res_expected = 2.0*((theorya - dataa*N.log(theorya)).sum() + gammaln(dataa+1).sum())
 
-    assert N.isclose(res, res_expected)
-
-if __name__ == "__main__":
-    run_unittests(globals())
+    assert N.allclose(res, res_expected, atol=1.e-13, rtol=0)
 

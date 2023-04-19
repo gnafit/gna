@@ -1,11 +1,10 @@
-
 import ROOT as R
-from collections import deque, namedtuple, OrderedDict
+from collections import deque, namedtuple
 import numpy as N
 import types
 from gna.bindings import provided_precisions
 
-VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_entry', 'taints_entry', 'depends_var', 'taints_var'])
+VariableEntry = namedtuple('VariableEntry', ['fullname', 'variable', 'depends_entry', 'taints_entry', 'depends_var', 'taints_var', 'index', 'index_max'])
 
 class GraphWalker(object):
     def __init__(self, *args, **kwargs):
@@ -77,7 +76,7 @@ class GraphWalker(object):
         self.cache_entries=[]
         self.cache_sources=[]
         self.cache_sinks=[]
-        self.cache_variables=OrderedDict()
+        self.cache_variables=dict()
 
         self.cache_sources_open=[]
         self.cache_sinks_open=[]
@@ -121,13 +120,20 @@ class GraphWalker(object):
 
     def set_parameters(self, ns):
         from gna import env
-        self.cache_variables=OrderedDict()
-        for (name, par) in ns.walknames():
-            if isinstance(par, (str, env.ExpressionsEntry)):
-                continue
-            var = par.getVariable()
-            # print('walk', name, var.hash())
-            self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [])
+        self.cache_variables=dict()
+
+        prevname = None
+        for ns in ns.walknstree():
+            nmax=len(ns.storage)
+            for i, (pname, par) in enumerate(ns.storage.items()):
+
+                if isinstance(par, (str, env.ExpressionsEntry)):
+                    continue
+
+                name = f'{ns.path}.{pname}'
+                var = par.getVariable()
+                # print('walk', name, var.hash(), i)
+                self.cache_variables[var.hash()] = VariableEntry(name, var, [], [], [], [], i, nmax)
 
         for varentry in self.cache_variables.values():
             for transentry in self.cache_entries:
@@ -202,6 +208,8 @@ class GraphWalker(object):
         nbytes, nelements = 0, 0
         for sink in self.cache_sinks:
             data = sink.data
+            if not data:
+                continue
             size = data.type.size()
 
             esize = N.finfo(data.buffer.typecode).bits//8

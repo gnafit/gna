@@ -1,4 +1,3 @@
-
 from load import ROOT
 import numpy as N
 from gna.parameters import DiscreteParameter
@@ -8,6 +7,10 @@ from itertools import chain, tee, cycle
 import itertools
 
 from gna.bindings import patchROOTClass
+
+import re
+
+stripnumbers_regex = re.compile(r'^(.*\D)\d+$')
 
 try:
     import sys
@@ -135,7 +138,22 @@ def print_correlated_parameters(cor_store, correlations='short'):
         print_correlated_parameters_block(par_set, correlations)
         print("")
 
-def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=None, correlations='short'):
+def namespace_contains_similar_parameters(keys):
+    if len(keys)<1:
+        return False
+
+    match = stripnumbers_regex.match(keys[0])
+    if not match:
+        return False
+
+    substring=match.groups()[0]
+
+    if all(s.startswith(substring) for s in keys):
+        return True
+
+    return False
+
+def print_parameters(ns, *, recursive=True, labels=False, cor_storage=None, stats=None, correlations='short', strip_long=True):
     '''Pretty prints parameters in a given namespace. Prints parameters
     and then outputs covariance matrices for correlated pars. '''
     if cor_storage is None:
@@ -145,28 +163,45 @@ def print_parameters(ns, recursive=True, labels=False, cor_storage=None, stats=N
         top_level = False
 
     header = False
-    for name, var in ns.items():
-        if isinstance( ns.storage[name], str ):
-            print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
-            continue
-        if not isinstance( var, unctypes ):
-            continue
-        if not header:
-            print("Variables in namespace '{}':".format(colorize(ns.path, color=Fore.GREEN)))
-            header=True
 
+    large_group=False
+    strip_end=len(ns.storage)
+    strip_start=3
+    if strip_long and len(ns.storage)>=11:
+        names=list(ns.storage)
+        large_group=namespace_contains_similar_parameters(names)
+        strip_end-=strip_start
+
+    for i, (name, var) in enumerate(ns.items()):
         try:
             if var.isCorrelated():
                 cor_storage.add_to_store(var)
         except (AttributeError, TypeError):
             pass
 
+        varstats(var, stats)
+
+        if not header:
+            print("Variables in namespace '{}':".format(colorize(ns.path, color=Fore.GREEN)))
+            header=True
+        if large_group:
+            if i>=strip_start and i<strip_end:
+                if i==strip_start:
+                    npars = strip_end-strip_start
+                    print(f'  <...{npars} variables...>')
+                continue
+        if isinstance( ns.storage[name], str ):
+            print(u'  {name:30}-> {target}'.format( name=name, target=ns.storage[name] ))
+            continue
+        if not isinstance( var, unctypes ):
+            continue
+
         print(end='  ')
         print(var.__str__(labels=labels))
-        varstats(var, stats)
+
     if recursive:
         for sns in ns.namespaces.values():
-            print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats)
+            print_parameters(sns, recursive=recursive, labels=labels, cor_storage=cor_storage, stats=stats, strip_long=strip_long)
 
     if correlations and top_level:
         print_correlated_parameters(cor_storage, correlations)
@@ -315,7 +350,7 @@ def GaussianParameter__str( self, labels=False  ):
             s += Fore.LIGHTYELLOW_EX + freestr
         else:
             if fmt['central']:
-                s+=relsigmafmt.format(relsigma=fmt['sigma']/fmt['central']*100.0)
+                s+=relsigmafmt.format(relsigma=fmt['sigma']/N.fabs(fmt['central'])*100.0)
             else:
                 s+=' '*relsigma_len
 

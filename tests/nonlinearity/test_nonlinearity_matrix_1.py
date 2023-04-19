@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import load
+from load import ROOT as R
 from matplotlib import pyplot as plt
 import numpy as np
 from gna.env import env
@@ -150,11 +150,11 @@ pedges_m = C.Points(edges_m)
 pcenters = C.Points(centers)
 ntrue = C.Histogram(edges, np.ones(edges.size-1))
 
-nlA = C.HistNonlinearity(True)
+nlA = C.HistNonlinearity(R.GNA.DataPropagation.Propagate)
 nlA.set(ntrue.hist, pedges_m)
 nlA.add_input()
 
-# nlB = C.HistNonlinearityB(True)
+# nlB = C.HistNonlinearityB(R.GNA.DataPropagation.Propagate)
 # nlB.set(ntrue.hist, pcenters)
 # nlB.add_input()
 

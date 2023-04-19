@@ -1,47 +1,71 @@
 stages:
-    - build
-    - allure
-    - pages
+  - build
+  - tests
+  - allure
+  - pages
 
 build:
-    image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
-    stage: build
+  image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
+  stage: build
 
-    script:
+  script:
     - mkdir build
     - cd build
     - cmake -DCMAKE_CXX_STANDARD=17 ..
     - cmake --build . -- -j$(nproc --all)
-    - cd ..
-    - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH && export PYTHONPATH=$PWD/pylib:$PYTHONPATH
+  artifacts:
+    paths:
+      - build
+    expire_in: 60 minutes
+  only:
+    - master
+    - next-major-release
+    - merge_requests
+
+tests:
+  image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
+  stage: tests
+
+  script:
+    - pip install --user --requirement requirements.txt
+    - export LD_LIBRARY_PATH=$PWD/build:$LD_LIBRARY_PATH
+    - export PYTHONPATH=$PWD/pylib:$PYTHONPATH
+    - export PYTHONPATH=$PWD/packages:$PYTHONPATH
     - mkdir test_results
-    - pytest --alluredir=test_results
-    artifacts:
-        paths:
-            - test_results
-    only:
-        - master
-        - merge_requests
+    - mkdir test_shell_results
+    - pytest -n auto -m "not serial" --alluredir=test_results
+    - pytest -m "serial" --alluredir=test_results
+    - pytest -n auto ./tests/shell/test_shell_scripts.py --alluredir=test_shell_results
+  artifacts:
+    paths:
+      - test_results
+      - test_shell_results
+  needs:
+    - build
+  only:
+    - master
+    - next-major-release
+    - merge_requests
 
 allure:
-    stage: allure
-    image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
+  stage: allure
+  image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
 
-    script:
+  script:
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$ALLURE_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - sftp -b $BATCH_TRANSFER $ALLURE_USER@$ALLURE_SERVER
 
-    only:
+  only:
     - master
 
 pages:
-    image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
-    stage: pages
+  image: git.jinr.ru:5005/gna/gna-base-docker-image:latest
+  stage: pages
 
-    script:
+  script:
     - cd doc
     - make html
     - make doxygen
@@ -50,8 +74,8 @@ pages:
     - mkdir -p public/doxygen
     - cp -r doc/build/html/* public/
     - cp -r doc/doxygen/html/* public/doxygen/
-    artifacts:
-      paths:
+  artifacts:
+    paths:
       - public
-    only:
+  only:
     - master

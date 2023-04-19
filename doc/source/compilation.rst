@@ -117,7 +117,7 @@ it is working properly:
 
 .. code-block:: bash
 
-   python2 gna
+   python gna
 
 Bulding on MacOS
 ----------------

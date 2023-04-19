@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -7,9 +6,8 @@ from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 from gna.env import env, namespace
 from gna.configurator import NestedDict
-from collections import OrderedDict
 from gna.bundle import TransformationBundle
-from collections import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 class energy_nonlinearity_db_root_v03(TransformationBundle):
     """Detector energy nonlinearity parametrized via few curves (Daya Bay approach)
@@ -50,7 +48,7 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
         #
         self.newx_out = self.context.outputs[self.cfg.edges]
         newx = self.newx_out.data()
-        newy = OrderedDict()
+        newy = dict()
         for name, xy in graphs.items():
             f = self.interpolate( xy, newx )
             newy[name]=f
@@ -79,7 +77,7 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
             self.set_output('lsnl_component', itl, pts.single())
             self.context.objects[('curves', name)] = pts
 
-        expose_matrix = self.cfg.get('expose_matrix', False)
+        expose_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('expose_matrix', False) else R.GNA.DataPropagation.Ignore
         with self.namespace:
             for i, itd in enumerate(self.detector_idx.iterate()):
                 """Finally, original bin edges multiplied by the correction factor"""
@@ -117,16 +115,16 @@ class energy_nonlinearity_db_root_v03(TransformationBundle):
             raise IOError( 'Can not read ROOT file: '+self.cfg.filename )
 
         if isinstance(self.cfg.names, (Mapping, NestedDict)):
-            graphs = OrderedDict([(k, tfile.Get(v)) for k, v in self.cfg.names.items()])
+            graphs = dict([(k, tfile.Get(v)) for k, v in self.cfg.names.items()])
         elif isinstance(self.cfg.names, Iterable):
-            graphs = OrderedDict([(k, tfile.Get(k)) for k in self.cfg.names])
+            graphs = dict([(k, tfile.Get(k)) for k in self.cfg.names])
         else:
             raise self._exception('Invalid cfg.names option: not mapping and not iterable')
 
         if not all( graphs.values() ):
             raise IOError( 'Some objects were not read from file: '+self.cfg.filename )
 
-        graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
+        graphs = dict(map(self.get_buffers_auto, graphs.items()))
 
         ret = self.build_graphs( graphs )
 

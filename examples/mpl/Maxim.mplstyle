@@ -1,0 +1,21 @@
+#figure.figsize:        14,   4
+#figure.subplot.left:   0.125
+#figure.subplot.right:  0.9
+#figure.subplot.bottom: 0.11
+#figure.subplot.top:    0.88
+
+axes.formatter.limits:       -2, 2
+axes.formatter.use_mathtext: True
+
+axes.grid:           True
+xtick.minor.visible: True
+ytick.minor.visible: True
+xtick.top:           True
+ytick.right:         True
+
+errorbar.capsize: 2  
+lines.markerfacecolor: none 
+
+savefig.dpi: 300
+
+# vim: ft=conf

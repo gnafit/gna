@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as N
-from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
@@ -12,12 +10,12 @@ class reactor_anu_corr_v01(TransformationBundleLegacy):
         super(reactor_anu_corr_v01, self).__init__( *args, **kwargs )
 
         self.edges = self.shared.reactor_anu_edges.data()
-        self.bundles=OrderedDict( self=self )
+        self.bundles=dict( self=self )
 
         self.load_data()
 
     def build(self):
-        corrpars = OrderedDict()
+        corrpars = dict()
         for name, vars in self.corr_vars.items():
             with self.common_namespace:
                 corr_sigma_t = C.VarArray(vars, ns=self.common_namespace)
@@ -38,7 +36,7 @@ class reactor_anu_corr_v01(TransformationBundleLegacy):
     def define_variables(self):
         self.common_namespace.reqparameter( self.cfg.uncname, central=0.0, sigma=1.0, label='Correlated reactor anu spectrum correction (offset)'  )
 
-        self.corr_vars=OrderedDict()
+        self.corr_vars=dict()
         for ns in self.namespaces:
             isotope=ns.name
             corrfcn = interp1d( *self.uncertainties_corr[isotope] )
@@ -51,7 +49,7 @@ class reactor_anu_corr_v01(TransformationBundleLegacy):
                 var.setLabel('Correlated {} anu spectrum correction sigma for {} MeV'.format(isotope, en))
 
     def load_data(self):
-        self.uncertainties_corr = OrderedDict()
+        self.uncertainties_corr = dict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')

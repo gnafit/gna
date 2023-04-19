@@ -45,7 +45,7 @@ public:
   };
 
   struct Outputs: public OutputsBase,
-                 public SingleOutputT<SinkFloatType> {
+                  public SingleOutputT<SinkFloatType> {
   public:
     Outputs(SinksContainer &container)
       : OutputsBase(container) { }

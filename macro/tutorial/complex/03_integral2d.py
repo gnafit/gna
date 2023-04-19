@@ -40,7 +40,7 @@ integrator = R.Integrator2GL(x_nbins, x_orders, y_nbins, y_orders)
 integrator.points.edges(hist.hist.hist)
 int_points = integrator.points
 
-# Create integrable: a*sin(x) + b*cos(k*x)
+# Create integrable: sin(a*x+b*y)
 arg_t = C.WeightedSum( ['a', 'b'], [int_points.xmesh, int_points.ymesh] )
 sin_t = R.Sin(arg_t.sum.sum)
 

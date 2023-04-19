@@ -3,10 +3,6 @@
 import ROOT as R
 import numpy as N
 
-def get_bin_edges_hist1(h):
-    edges = N.array([h.GetBinLowEdge(i)+h.GetBinWidth(i) for i in range(h.GetNbinsX()+1)])
-    return edges
-
 def get_buffer_hist1( h, flows=False ):
     """Return TH1* histogram data buffer
     if flows=False, exclude underflow and overflow
@@ -42,7 +38,7 @@ def get_buffers_auto(obj):
     if isinstance(obj, R.TH2) and obj.GetDimension()==2:
         return get_buffers_hist2(obj)
     if isinstance(obj, (R.TMatrixD, R.TMatrixF)):
-        return get_buffer_matrix(obj)
+        return get_buffer_matrix(obj),
 
     raise TypeError('The object is not TH1/TH2/TGraph/TMatrixD/TMatrixF: {!s}'.format(obj))
 
@@ -188,13 +184,13 @@ def bind():
     """Bind functions to ROOT classes"""
     setattr( R.TH1, 'get_buffer',     get_buffer_hist1 )
     setattr( R.TH1, 'get_err_buffer', get_err_buffer_hist1 )
-    setattr( R.TH1, 'get_edges', get_bin_edges_hist1 )
 
     setattr( R.TH2, 'get_buffer',     get_buffer_hist2 )
     setattr( R.TH2, 'get_err_buffer', get_err_buffer_hist2 )
 
     setattr( R.TAxis, 'get_bin_edges',  get_bin_edges_axis )
     setattr( R.TAxis, 'get_bin_widths', get_bin_widths_axis )
+    setattr( R.TAxis, 'get_bin_centers', get_bin_centers_axis )
 
     setattr( R.TGraph,            'get_buffers',     get_buffers_graph )
     setattr( R.TGraphErrors,      'get_err_buffers', get_err_buffers_graph )

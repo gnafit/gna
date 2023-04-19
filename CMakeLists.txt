@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 
 include(cmake/ccache_support.cmake)
 
@@ -10,7 +10,20 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(compiler_selection)
 include(cuda_support)
 
+
 configure_file(core/config_vars.h.in ${CMAKE_BINARY_DIR}/generated/config_vars.h)
+
+set(BUILD_SHARED_LIBS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+include(add_fmt)
 
 add_subdirectory(core)
 add_subdirectory(transformations)
@@ -46,6 +59,7 @@ include_directories(
                     transformations/backgrounds/
                     transformations/base/
                     transformations/sum/
+                    transformations/array1d/
                     transformations/ratio/
                     transformations/calculus/
                     transformations/detector/
@@ -64,9 +78,6 @@ include_directories(
                     unittest/
                    )
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
 message(STATUS "Setting ${CMAKE_BUILD_TYPE} build")
 
 add_custom_target(cleanpyc ALL
@@ -88,19 +99,13 @@ if(LTO)
     check_ipo_supported(RESULT result OUTPUT output)
 endif()
 
-set(BUILD_SHARED_LIBS ON)
 
-set(CMAKE_CXX_EXTENSIONS OFF)
-if(NOT CMAKE_CXX_STANDARD)
-set(CMAKE_CXX_STANDARD 17)
-endif()
 message(STATUS "Compiling in C++${CMAKE_CXX_STANDARD} mode")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -Werror -Wall  -pedantic -pipe")
 
 include(compilation_opts)
 include(debug_opts)
 
-add_subdirectory(fmt)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 

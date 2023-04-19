@@ -8,17 +8,17 @@
 using namespace Eigen;
 using namespace std;
 
-IntegratorTrap::IntegratorTrap(int orders) : IntegratorBase(orders, true)
+IntegratorTrap::IntegratorTrap(int orders) : IntegratorBase(orders)
 {
   init_sampler();
 }
 
-IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges, true)
+IntegratorTrap::IntegratorTrap(size_t bins, int orders, double* edges) : IntegratorBase(bins, orders, edges)
 {
   init_sampler();
 }
 
-IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges, true)
+IntegratorTrap::IntegratorTrap(size_t bins, int* orders, double* edges) : IntegratorBase(bins, orders, edges)
 {
   init_sampler();
 }
@@ -42,19 +42,21 @@ void IntegratorTrap::sample(FunctionArgs& fargs) {
   size_t offset=0;
   for (size_t i = 0; i < static_cast<size_t>(m_orders.size()); ++i) {
     auto n=m_orders[i];
-    abscissa.segment(offset, n)=ArrayXd::LinSpaced(n, *edge_a, *edge_b);
+    if(n){
+      abscissa.segment(offset, n)=ArrayXd::LinSpaced(n, *edge_a, *edge_b);
 
-    auto swidth=samplewidths[i];
-    m_weights[offset]=swidth*0.5;
-    if(n>2) {
-      m_weights.segment(offset+1, n-2)=swidth;
+      auto swidth=samplewidths[i];
+
+      auto weights=m_weights.segment(offset, n);
+      weights[0]=weights[n-1]=swidth*0.5;
+      if(n>2) {
+        weights.segment(1, n-2)=swidth;
+      }
+      offset+=n;
     }
-
-    offset+=n-1;
     advance(edge_a, 1);
     advance(edge_b, 1);
   }
-  m_weights.tail(1)=samplewidths.tail(1)*0.5;
   rets.untaint();
   rets.freeze();
 }

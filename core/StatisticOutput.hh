@@ -9,6 +9,8 @@ public:
     virtual ~StatisticOutput() = default;
 
     double value() override { return m_output.data()[0]; }
+
+    OutputDescriptor output() { return m_output; }
 private:
     void validate() const;
 

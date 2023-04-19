@@ -1,4 +1,3 @@
-
 from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
@@ -26,6 +25,11 @@ def OutputDescriptor__print(self, **kwargs):
 @patchROOTClass(classes, 'single')
 def OutputDescriptor__single(self):
     return self
+
+@patchROOTClass(classes, 'fill')
+def OutputDescriptor__fill(self, arr):
+    arr = np.ascontiguousarray(arr, dtype='d').ravel(order='F')
+    return self.__fill_orig(arr.size, arr)
 
 @patchROOTClass(classes, '__rshift__')
 def OutputDescriptor______rshift__(output, inputs):

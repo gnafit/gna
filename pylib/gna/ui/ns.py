@@ -1,19 +1,13 @@
-"""
-Manage parameters and namespaces
-"""
-
-
+"""Manage parameters and namespaces"""
 
 from gna.ui import basecmd
 from importlib import import_module
-from gna.config import cfg
 from gna.parameters.covariance_helpers import CovarianceHandler
-from collections import OrderedDict
 
 undefined = ['undefined']
 
 def list_to_dict(lst):
-    return OrderedDict(item.split('=', 1) if '=' in item else (item, True) for item in lst)
+    return dict(item.split('=', 1) if '=' in item else (item, True) for item in lst)
 
 class cmd(basecmd):
     @classmethod
@@ -59,6 +53,7 @@ class cmd(basecmd):
 
         parser.add_argument('-p', '--print', nargs='?', default=undefined, help='print namespace')
         parser.add_argument('--label-length', type=int, default=True, help='label length')
+        parser.add_argument('--print-long', action='store_true', help='do not strip long lists')
 
     def init(self):
         if self.opts.name:
@@ -140,7 +135,7 @@ class cmd(basecmd):
 
         try:
             if self.opts.print is not undefined:
-                namespace(self.opts.print or '').printparameters(labels=self.opts.label_length)
+                namespace(self.opts.print or '').printparameters(labels=self.opts.label_length, strip_long=not self.opts.print_long)
         except Exception as e:
             print('Unable to print namespace "%s": %s'%(self.opts.print, e.message))
 
@@ -149,14 +144,14 @@ class cmd(basecmd):
 
     def dump(self, filename):
         assert self.opts.output.endswith('.yaml'), 'Expect output filename to end with .yaml'
-        data = OrderedDict()
+        data = dict()
         for fullname, par in self.namespace.walknames():
             path, name = fullname.rsplit('.', 1)
             try:
                 value = par.value()
             except:
                 value = '?'
-            datum = OrderedDict([('name', name), ('value', value)])
+            datum = dict([('name', name), ('value', value)])
 
             try:
                 datum['central'] = par.central()
@@ -180,7 +175,7 @@ class cmd(basecmd):
 
             sub = data
             for subname in path.split('.'):
-                sub = sub.setdefault(subname, OrderedDict())
+                sub = sub.setdefault(subname, dict())
 
             sub[name] = datum
 

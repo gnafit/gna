@@ -2,8 +2,7 @@
 
 import ROOT
 from gna.ui import basecmd
-from packages.parameters.lib.parameter_loader import get_parameters
-from collections import OrderedDict
+from parameters.lib.parameter_loader import get_parameters
 import numpy as np
 import argparse
 import warnings
@@ -28,20 +27,29 @@ class cmd(basecmd):
         parser.add_argument('--list', dest='grids', action=gridaction('list', env), default=[],
                             nargs='+', metavar=("PARAM", "VALUE"),
                             help='grid, specified via a list of values')
-        parser.add_argument('-v', '--verbose', action='count', help='be more verbose')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='be more verbose')
+        parser.add_argument('--segments', type=int, nargs=2,
+                            metavar=("NUMBER OF SEGMENTS", "CURRENT SEGMENT"),
+                            help='''Set segmentation of grid to allow parallel scanning of large grids''')
 
     def init(self):
         storage = self.env.future.child(('pargrid', self.opts.name.split('.')))
 
         if self.opts.verbose:
             print('Provide grids:')
-        for parname, par, grid, gridtype in self.opts.grids:
+        for i, (parname, par, grid, gridtype) in enumerate(self.opts.grids):
+            if i==0 and self.opts.segments:
+                num_seg, cur_seg = self.opts.segments
+                old_grid = grid
+                grid = np.array_split(old_grid, num_seg)[cur_seg]
+                if self.opts.verbose:
+                    print(f'  Splitting grid of {par} into {num_seg} segments, choosing {cur_seg} segment as grid')
             storage[parname] = dict(par=par, grid=grid)
 
             if self.opts.verbose:
-                print('  {}: {} of {} from {} to {} (incl)'.format(parname, gridtype, grid.size, grid[0], grid[-1]))
+                print(f'  {parname}: {gridtype} of {grid.size} from {grid[0]} to {grid[-1]} (incl)')
                 if self.opts.verbose>1:
-                    print('  {}: {!s}'.format(parname, grid))
+                    print(f'  {parname}: {grid!s}')
 
 
 class _AddGridActionBase(argparse.Action):
@@ -102,7 +110,7 @@ cmd.__tldr__ = """\
 
                 Generate a linear grid for the parameter 'E0':
                 ```sh
-                ./gna -- \\
+                ./gna \\
                     -- gaussianpeak --name peak \\
                     -- pargrid scangrid --linspace peak.E0 0.5 4.5 10 -vv
                 ```
@@ -118,7 +126,7 @@ cmd.__tldr__ = """\
 
                 Provide a list of grid values from a command line:
                 ```sh
-                ./gna -- \\
+                ./gna \\
                     -- gaussianpeak --name peak \\
                     -- pargrid scangrid --linspace peak.E0 1 2 8 -vv
                 ```

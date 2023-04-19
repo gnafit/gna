@@ -1,9 +1,7 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import *
-from collections import OrderedDict
 
 class detector_iav_db_root_v02(TransformationBundleLegacy):
     iavmatrix=None
@@ -59,7 +57,7 @@ class detector_iav_db_root_v02(TransformationBundleLegacy):
         if self.cfg.scale.central!=1.0:
             raise exception('IAV scale should be 1 by definition')
 
-        self.pars = OrderedDict()
+        self.pars = dict()
         idx = self.idx.get_subset('d')
         for it in idx.iterate():
             parname = it.current_format(name=self.cfg.parname)

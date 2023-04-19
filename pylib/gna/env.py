@@ -1,4 +1,5 @@
-from collections import defaultdict, deque, Mapping, OrderedDict
+from collections import defaultdict, deque, UserDict
+from collections.abc import Mapping
 from contextlib import contextmanager
 import ROOT
 import cppyy
@@ -10,7 +11,7 @@ expressionproviders = tuple(ROOT.GNA.GNAObjectTemplates.ExpressionsProviderT(p) 
 
 env = None
 
-class namespacedict(OrderedDict):
+class namespacedict(UserDict):
     def __init__(self, ns):
         super(namespacedict, self).__init__()
         self.ns = ns
@@ -79,7 +80,7 @@ class ExpressionsEntry(object):
         self.exprs.append(ExpressionWithBindings(self.ns, obj, expr, bindings))
 
     def get(self):
-        path = self.resolvepath({self}, OrderedDict())
+        path = self.resolvepath({self}, dict())
         if not path:
             names = [expr.expr.name() for expr in self.exprs]
             reqs = [var.name() for expr in self.exprs for var in list(expr.expr.sources.values())]
@@ -126,8 +127,8 @@ class namespace(Mapping):
         else:
             self.path = name
 
-        self.storage = OrderedDict()
-        self.observables = OrderedDict()
+        self.storage = dict()
+        self.observables = dict()
         self.observables_tags = defaultdict(set)
 
         self.rules = []
@@ -230,7 +231,7 @@ class namespace(Mapping):
             return ns.__getitem__(head)
 
         v = self.storage.get(head, *args)
-        if isinstance(v, basestring):
+        if isinstance(v, str):
             return env.nsview[v]
         return v
 
@@ -371,7 +372,7 @@ class namespace(Mapping):
     def walkobservables(self, internal=False):
         for ns in self.walknstree():
             for name, val in ns.observables.items():
-                if not internal and 'internal' in ns.observables_tags.get(name, OrderedDict()):
+                if not internal and 'internal' in ns.observables_tags.get(name, dict()):
                     continue
                 yield '{}/{}'.format(ns.path, name), val
 
@@ -465,7 +466,7 @@ class parametersview(object):
 
     @contextmanager
     def save(self, params):
-        oldvalues = OrderedDict()
+        oldvalues = dict()
         for p in params:
             if isinstance(p, str):
                 p = self[p]
@@ -498,7 +499,7 @@ class envpart(dict):
 
 class envparts(object):
     def __init__(self):
-        self.storage = OrderedDict()
+        self.storage = dict()
 
     def __getattr__(self, parttype):
         if not parttype in self.storage:
@@ -518,7 +519,7 @@ class _environment(object):
         self.parts = envparts()
 
         from tools.dictwrapper import DictWrapper
-        self.future = DictWrapper(OrderedDict(), split='.')
+        self.future = DictWrapper(dict(), split='.')
 
     def view(self, ns):
         if ns != self.globalns:
@@ -533,7 +534,7 @@ class _environment(object):
         else:
             ns.objs.append(obj)
         obj.currentns = self.nsview.currentns()
-        bindings = self._bindings+[kwargs.pop("bindings", OrderedDict())]
+        bindings = self._bindings+[kwargs.pop("bindings", dict())]
         if ns:
             ns.addexpressions(obj, bindings=bindings)
         if not kwargs.pop('bind', True):

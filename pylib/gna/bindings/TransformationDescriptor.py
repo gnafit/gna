@@ -1,6 +1,3 @@
-
-
-
 from gna.bindings import patchROOTClass, DataType, provided_precisions
 import ROOT as R
 from printing import printl, nextlevel
@@ -9,7 +6,8 @@ classes = [R.TransformationDescriptorT(ft, ft) for ft in provided_precisions]
 
 @patchROOTClass(classes, '__str__')
 def TransformationDescriptor____str__(self):
-    return '[trans] {}: {:d} input(s), {:d} output(s)'.format(self.name(), self.inputs.size(), self.outputs.size())
+    taintflag = self.tainted() and '*' or ''
+    return '[trans] {}{}: {:d} input(s), {:d} output(s)'.format(self.name(), taintflag, self.inputs.size(), self.outputs.size())
 
 @patchROOTClass(classes, 'print')
 def TransformationDescriptor__print(self, **kwargs):

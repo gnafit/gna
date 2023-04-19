@@ -5,7 +5,7 @@
 
 #include "ParametricLazy.hpp"
 
-IbdInteraction::IbdInteraction()
+void IbdInteraction::init()
 {
   m_pdg = new PDGVariables(this);
   m_pdg->variable_("ElectronMass");
@@ -23,4 +23,14 @@ IbdInteraction::IbdInteraction()
   const double J2MeV = 1./MeV2J;
   const double MeVfactor = 1.E-6*TMath::Hbar()/TMath::Qe();
   m_cmfactor = MeVfactor * pow(TMath::Hbar()*TMath::C()*J2MeV, 2) * 1.E4;
+}
+
+void IbdInteraction::dump(){
+  printf("pf: %f, ", PhaseFactor);
+  printf("g: %f, ", g);
+  printf("f: %f, ", f);
+  printf("f2: %f, ", f2);
+  printf("gsq: %f, ", gsq);
+  printf("fsq: %f, ", fsq);
+  printf("f2sq: %f\n", f2sq);
 }

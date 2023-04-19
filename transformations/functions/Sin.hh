@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GNAObject.hh"
-#include "Statistic.hh"
 
 /**
  * @brief Transformation to calculate the value of Sin(x)

@@ -50,5 +50,5 @@ public:
   void determineSegments(FunctionArgs& fargs);               ///< Function that determines segment belonging.
 
 private:
-  double m_tolerance{1.e-16};                                ///< Tolerance. If point is below left edge on less than m_tolerance, it is considered to belong to the bin anyway.
+  double m_tolerance{1.e-12};                                ///< Tolerance. If point is below left edge on less than m_tolerance, it is considered to belong to the bin anyway.
 };

@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
-from collections import OrderedDict
 from gna.bundle import *
 from gna.env import env
 from tools.root_helpers import TFileContext
@@ -17,6 +15,7 @@ class reactor_snf_spectra_v05(TransformationBundle):
     def __init__(self, *args, **kwargs):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(1, 1, 'major')
+        self.check_nidx_dim(0, 0, 'minor')
 
         self.snf_raw_data = dict()
         self._load_data()
@@ -78,6 +77,8 @@ class reactor_snf_spectra_v05(TransformationBundle):
 
             self.set_input('snf_correction', idx, (insegment.points, interpolator_trans.newx), argument_number=0)
             self.set_input('snf_correction', idx, (passthrough.single_input()), argument_number=1)
+
+            self.set_output('snf_correction_relative', idx, interpolator_trans.single())
 
             snap = C.Snapshot(passthrough.single(), labels='Snapshot of nominal spectra for SNF in {}'.format(reac))
             product = C.Product(outputs=[snap.single(), interpolator_trans.single()],

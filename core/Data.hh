@@ -143,7 +143,7 @@ struct DataType {
   std::vector<size_t> shape;                                   ///< Data dimensions.
 
   std::vector<double> edges = {};                              ///< Bin edges for 1D histogram.
-  std::vector<std::vector<double>> edgesNd = {{}};             ///< Bin edges for ND histogram. TODO: resolve redundancy of edges and edgesNd
+  std::vector<std::vector<double>> edgesNd = {};               ///< Bin edges for ND histogram. TODO: resolve redundancy of edges and edgesNd
   //std::pair<double, double> bounds = {
     //-std::numeric_limits<double>::infinity(),
      //std::numeric_limits<double>::infinity()
@@ -439,7 +439,13 @@ public:
       fprintf(stderr, ", bins Y == [%lu]", m_type.shape[1]);
     }
     for (size_t i = 0; i < m_type.edgesNd.size(); ++i) {
-      fprintf(stderr, ", Edges%i[%lu]", int(i), m_type.edgesNd[i].size());
+      auto& edges=m_type.edgesNd[i];
+      if(edges.size()>1){
+        fprintf(stderr, ", Edges%i[%lu] (%g->%g)", int(i), edges.size(), edges.front(), edges.back());
+      }
+      else{
+        fprintf(stderr, ", Edges%i[%lu]", int(i), edges.size());
+      }
     }
     fprintf(stderr, "\n");
   }
@@ -496,6 +502,7 @@ public:
    */
   DataType::Hist<T> &edges(const std::vector<double> &edges) {
     m_type.edges = edges;
+    m_type.edgesNd.resize(1);
     m_type.edgesNd[0]=m_type.edges;
     return bins(edges.size()-1);
   }
@@ -538,6 +545,7 @@ public:
    */
   DataType::Hist<T> &edges(size_t n, double* edges) {
     m_type.edges.assign(edges, edges+n);
+    m_type.edgesNd.resize(1);
     m_type.edgesNd[0]=m_type.edges;
     return bins(n-1);
   }
@@ -550,6 +558,7 @@ public:
    */
   DataType::Hist<T> &edges(size_t n, const double* edges) {
     m_type.edges.assign(edges, edges+n);
+    m_type.edgesNd.resize(1);
     m_type.edgesNd[0]=m_type.edges;
     return bins(n-1);
   }
@@ -710,7 +719,7 @@ private:
   /// the mechanism should be provided on the lavel of framework.
   friend class GNA::GNAObjectTemplates::ViewRearT<T>;
 public:
-  using ArrayType      = Eigen::Array<T, Eigen::Dynamic, 1> ;
+  using ArrayType      = Eigen::Array<T, Eigen::Dynamic, 1>;
   using VectorType     = Eigen::Matrix<T, Eigen::Dynamic, 1>;
   using Array2Type     = Eigen::Array<T, Eigen::Dynamic, Eigen::Dynamic>;
   using MatrixType     = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;

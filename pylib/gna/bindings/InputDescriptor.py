@@ -1,4 +1,3 @@
-
 from gna.bindings import patchROOTClass, DataType, provided_precisions, OutputDescriptor
 import ROOT as R
 from printing import printl, nextlevel

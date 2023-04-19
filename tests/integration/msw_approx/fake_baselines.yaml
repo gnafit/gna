@@ -1,0 +1,11 @@
+# Fake reactor baselines
+# Sources:
+#   - Yellow Book: arxiv.org/abs/1507.05613
+
+reactor_baseline:
+    YJ1: 52.5
+    YJ2: 52.6
+
+meta:
+    labels:
+        reactor_baselines: Fake distance between JUNO and {reactor}, km

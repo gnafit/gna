@@ -2,8 +2,6 @@
 
 from gna.ui import basecmd, append_typed, at_least
 import ROOT
-import numpy as np
-from itertools import chain
 from gna.dataset import Dataset
 from gna import constructors as C
 from gna.parameters.parameter_loader import get_parameters
@@ -31,19 +29,24 @@ class analysis_v1(basecmd):
         parser.add_argument('--cov-strict', action='store_true', help='raise exception in case there are skept parameters')
         parser.add_argument('-o', '--observables', nargs='+',
                             metavar='observable', help='observables (model) to be fitted')
-        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data')
-        parser.add_argument('-v', '--verbose', action='count', help='verbose mode')
+        parser.add_argument('--toymc', choices=['covariance', 'poisson', 'normal', 'normalStats', 'asimov'], help='use random sampling to variate the data/theory', metavar='fluct')
+        parser.add_argument('--toymc-source', choices=('data', 'theory'), default='theory', help='the source for the --toymc option', metavar='source')
+        parser.add_argument('-v', '--verbose', action='count', default=0, help='verbose mode')
+        parser.add_argument('--covariance-updater', metavar="HOOK_NAME",
+                            help='Name of hook that triggers covariance matrix update')
 
     def __extract_obs(self, obses):
         for obs in obses:
             if '/' in obs:
                 yield self.env.get(obs)
+            elif '.' in obs:
+                yield self.env.future[(obs)]
             else:
                 for param in get_parameters([obs], drop_fixed=True, drop_free=True):
                     yield param
 
     def run(self):
-        dataset = Dataset(bases=self.opts.datasets, desc=self.opts.name)
+        dataset = self.dataset = Dataset(bases=list(reversed(self.opts.datasets)), desc=self.opts.name)
 
         if self.opts.cov_parameters:
             try:
@@ -61,6 +64,7 @@ class analysis_v1(basecmd):
                     raise self._exception('Some parameters do not affect the model.')
         else:
             cov_parameters = []
+            skip_parameters = []
 
         if self.opts.observables:
             observables = list(self.__extract_obs(self.opts.observables))
@@ -71,9 +75,13 @@ class analysis_v1(basecmd):
             names = ', '.join((d.desc for d in self.opts.datasets))
             print("Analysis '{}' with: {}".format(self.opts.name, names), end='')
             if self.opts.cov_parameters:
-                print(' and {} parameters from {}'.format(len(cov_parameters), self.opts.cov_parameters))
+                print(f' and {len(cov_parameters)} parameters from {self.opts.cov_parameters}', end='')
+                if skip_parameters:
+                    print(f' (skip {len(skip_parameters)})')
             else:
                 print()
+            if self.opts.verbose>1 and cov_parameters:
+                print(' ', [p.qualifiedName() for p in cov_parameters])
 
         blocks = dataset.makeblocks(observables, cov_parameters)
 
@@ -92,10 +100,18 @@ class analysis_v1(basecmd):
                 add = toymc.add
             elif self.opts.toymc == 'asimov':
                 toymc = C.Snapshot()
-                add = lambda t, c: toymc.add_input(t)
+                add = lambda t, _: toymc.add_input(t)
+            else:
+                assert False
 
-            for block in blocks:
-                add(block.theory, block.cov)
+            if self.opts.toymc_source=='data':
+                for block in blocks:
+                    add(block.data, block.cov)
+            elif self.opts.toymc_source=='theory':
+                for block in blocks:
+                    add(block.theory, block.cov)
+            else:
+                assert False
 
             blocks = [ block._replace(data=toymc_out)
                       for (block, toymc_out) in zip(blocks, toymc.transformations.front().outputs.values()) ]
@@ -109,8 +125,16 @@ class analysis_v1(basecmd):
 
         storage = self.env.future.child(('analysis', self.opts.name))
         for i, block in enumerate(blocks):
-            i = str(i)
-            storage[i] = dict(theory=block.theory, data=block.data, L=block.cov.single())
+            istr = str(i)
+
+            covbase = dataset.predictions[i].covbase.covbase
+            storage[istr] = dict(theory=block.theory, data=block.data, L=block.cov.single(), covbase=covbase)
+
+        update_covariance_set = self.env.future.setdefault(('hooks', self.opts.name, 'covariance'), self.update_covariance)
+        assert self.update_covariance==update_covariance_set, 'May not overwrite covariance hook'
+
+    def update_covariance(self):
+        self.dataset.reset_errors()
 
 def par_influences(parameter, observables):
     for observable in observables:

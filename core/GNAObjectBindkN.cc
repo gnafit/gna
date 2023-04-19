@@ -2,11 +2,11 @@
 
 GNAObjectBindkN::GNAObjectBindkN(const std::string& transformation, const std::vector<std::string>& inputs,
                 const std::string& output,
-                size_t transformation_offset, size_t input_offset, size_t output_offset) :
+                size_t transformation_offset, size_t input_offset, int output_offset) :
 m_transformation_name(transformation), m_input_names(inputs), m_output_name(output),
-m_transformation_offset(transformation_offset), m_input_offset(input_offset), m_output_offset(output_offset)
+m_transformation_offset(transformation_offset), m_input_offset(input_offset)
 {
-  /* code */
+  set_output_offset(output_offset);
 }
 
 std::string GNAObjectBindkN::new_transformation_name(const std::string& name){

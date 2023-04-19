@@ -1,5 +1,3 @@
-
-
 from gna.ui import basecmd
 import ROOT
 import gna.constructors as C

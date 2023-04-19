@@ -5,7 +5,7 @@ from load import ROOT as R
 import numpy as N
 from gna import constructors as C
 from gna import context, bindings
-from collections import OrderedDict
+
 import gna.bindings.arrayview
 
 @floatcopy(globals())
@@ -36,7 +36,7 @@ def test_variable_allocation(function_name):
         ns.defparameter('float1',   central=1, fixed=True, label='Float variable 1')
         ns.defparameter('float2',   central=2, fixed=True, label='Float variable 2')
         ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
-        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=dict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
 
     ns.printparameters(labels=True)
 
@@ -56,7 +56,7 @@ def test_variable_allocation1(function_name):
         ns.defparameter('float2',   central=2, fixed=True, label='Float variable 2')
         ns = gns('namespace2')
         ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
-        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=dict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
 
     ns = gns('namespace3')
     ns.defparameter('float3',   central=100, fixed=True, label='Float variable 3 (independent)')
@@ -79,7 +79,7 @@ def test_variable_allocation2(function_name):
         ns.defparameter('float2',   central=2, fixed=True, label='Float variable 2')
         ns = gns('namespace2')
         ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
-        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=dict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
 
     ns = gns('namespace3')
     ns.defparameter('float3',   central=100, fixed=True, label='Float variable 3 (independent)')
@@ -103,7 +103,7 @@ def test_variable_allocation_complex():
 
         ns = gns('namespace2')
         ns.defparameter('angle',    central=3, label='Angle parameter', type='uniformangle')
-        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=OrderedDict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
+        ns.defparameter('discrete', default='a', label='Discrete parameter', type='discrete', variants=dict([('a', 10.0), ('b', 20.0), ('c', 30.0)]))
 
         ns = gns('namespace3')
         from gna.parameters.oscillation import reqparameters

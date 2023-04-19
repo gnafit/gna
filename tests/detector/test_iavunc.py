@@ -62,7 +62,8 @@ ndiag = 4
 rd = R.RenormalizeDiag( ndiag, int(opts.offdiag), int(opts.upper) )
 rd.renorm.inmat( pmat.points )
 
-esmear = R.HistSmear( opts.upper )
+smtype = R.GNA.SquareMatrixType.UpperTriangular if opts.upper else R.GNA.SquareMatrixType.Any
+esmear = R.HistSmear(smtype)
 esmear.smear.inputs.SmearMatrix( rd.renorm )
 esmear.smear.inputs.Ntrue( hist.hist )
 

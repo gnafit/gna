@@ -8,7 +8,12 @@
 class PDGVariables;
 class IbdInteraction: public GNAObject {
 public:
-  IbdInteraction();
+  IbdInteraction() { init(); }
+  IbdInteraction(double a_PhaseFactor, double a_g, double a_f, double a_f2) :
+    PhaseFactor(a_PhaseFactor), g(a_g), f(a_f), f2(a_f2) { init(); }
+
+  void dump();
+
 protected:
   PDGVariables *m_pdg;
   dependant<double> m_threshold;
@@ -26,4 +31,7 @@ protected:
   const double gsq = g*g;
   const double fsq = f*f;
   const double f2sq = f2*f2;
+
+private:
+  void init();
 };

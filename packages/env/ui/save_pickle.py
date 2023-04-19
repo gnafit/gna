@@ -3,9 +3,8 @@
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
-from collections import OrderedDict
 import pickle
-from packages.env.lib.cwd import update_namespace_cwd
+from env.lib.cwd import update_namespace_cwd
 
 class cmd(basecmd):
     @classmethod
@@ -17,7 +16,7 @@ class cmd(basecmd):
     def init(self):
         update_namespace_cwd(self.opts, 'output')
         storage = self.env.future
-        data = DictWrapper(OrderedDict(), split='.')
+        data = DictWrapper(dict(), split='.')
         for path in self.opts.paths:
             try:
                 data[path] = storage[path].unwrap()

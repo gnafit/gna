@@ -1,9 +1,7 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
-from collections import OrderedDict
 
 class detector_iav_db_root_v03(TransformationBundle):
     iavmatrix=None
@@ -36,7 +34,7 @@ class detector_iav_db_root_v03(TransformationBundle):
 
             for itother in self.nidx_minor:
                 it = itdet+itother
-                esmear = R.HistSmear(True, labels=it.current_format('IAV effect \n{autoindex}')) # True for 'upper'
+                esmear = R.HistSmear(R.GNA.SquareMatrixType.UpperTriangular, labels=it.current_format('IAV effect \n{autoindex}'))
                 esmear.smear.inputs.SmearMatrix(renormdiag.renorm)
                 self.set_input('iav', it, esmear.smear.Ntrue, argument_number=0)
                 self.set_output('iav', it, esmear.single())
@@ -47,7 +45,7 @@ class detector_iav_db_root_v03(TransformationBundle):
 
     def build(self):
         from tools.data_load import read_object_auto
-        res = read_object_auto(self.cfg.filename, name=self.cfg.matrixname, convertto='array')
+        res = read_object_auto(self.cfg.filename, name=self.cfg.matrixname)
         if isinstance(res, tuple):
             self.iavmatrix = res[-1]
         else:

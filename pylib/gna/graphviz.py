@@ -1,12 +1,12 @@
-
 from gna.env import env
 import pygraphviz as G
 import ROOT as R
-from collections import OrderedDict
 from gna.configurator import NestedDict
+import numpy as np
 
 import re
 pattern = re.compile('^.*::([^:<]+)(T<[^>]*>)*$')
+ending_numbers_pattern = re.compile(r'^.*\D(\d+)$')
 
 def uid( obj1, obj2=None ):
     if obj2:
@@ -40,7 +40,8 @@ class GNADot(object):
         kwargs.setdefault('labelfontsize', 10)
         kwargs.setdefault('rankdir', 'LR')
         self.make_subgraphs = kwargs.get('subgraph', False)
-        self.joints = kwargs.pop('joints', False)
+        self._joints = kwargs.pop('joints', False)
+        self._print_sum = kwargs.pop('print_sum', False)
         ns = kwargs.pop('namespace', None)
 
         include_only=kwargs.pop('include_only', None)
@@ -52,11 +53,11 @@ class GNADot(object):
         self.write = self.graph.write
         self.draw = self.graph.draw
 
-        self._entry_uids = OrderedDict()
+        self._entry_uids = dict()
 
         from gna.graph.walk import GraphWalker
         self.walker = GraphWalker(transformation, namespace=ns, include_only=include_only)
-        self.style=TreeStyle(self.walker)
+        self.style=TreeStyle(self.walker, print_sum=self._print_sum)
 
         self.walker.entry_do(self._action_entry)
         self.walker.source_open_do(self._action_source_open)
@@ -106,10 +107,35 @@ class GNADot(object):
         for i, sink in enumerate(entry.sinks):
             self._action_sink(sink, i, nsinks, graph=graph)
 
+    def _variable_longlist(self, varentry):
+        if varentry.index_max>11:
+            match = ending_numbers_pattern.match(varentry.variable.name())
+            if match:
+                num = int(match.groups()[0])
+                if abs(num-varentry.index)<2:
+                    # Allow base-1 numbering
+                    return True
+
+        return False
+
     def _action_variable(self, varentry):
         var=varentry.variable
+        varname = var.name()
         varid = self.entry_uid(var)
-        node = self.vargraph.add_node(varid, **self.style.node_attrs_var(varentry))
+
+        longlist=self._variable_longlist(varentry)
+        npars=None
+        index = varentry.index
+        if longlist:
+            strip_start=2
+            strip_end=varentry.index_max-strip_start
+            if index>=strip_start and index<strip_end:
+                if index==strip_start:
+                    npars = strip_end-strip_start
+                else:
+                    return
+
+        node = self.vargraph.add_node(varid, **self.style.node_attrs_var(varentry, skip_npars=npars))
 
         for entry in varentry.taints_entry:
             # print('plot entry', varentry.variable.name(), '->', entry.name, self.entry_uid(entry))
@@ -140,7 +166,7 @@ class GNADot(object):
             graph.add_node( sinkuid, shape='point', label='out' )
             graph.add_edge( self.entry_uid(sink.entry), sinkuid,
                             **self.style.edge_attrs(i, sink, nsinks=nsinks) )
-        elif sink.sources.size()==1 or not self.joints:
+        elif sink.sources.size()==1 or not self._joints:
             """In case there is only one connection draw it as is"""
             sinkuid = self.entry_uid(sink.entry)
             sametail=str(i) if nsinks<5 else None
@@ -155,7 +181,7 @@ class GNADot(object):
 
             sstyle=self.style.edge_attrs(i, sink, None, None, nsinks=nsinks)
             sstyle['arrowhead']='none'
-            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=0.5, **sstyle )
+            self.graph.add_edge( self.entry_uid(sink.entry), jointuid, weight=1.0, **sstyle )
             for j, source in enumerate(sink.sources):
                 isource = self._get_source_idx(source)
                 self.graph.add_edge( jointuid, self.entry_uid(source.entry),
@@ -169,8 +195,9 @@ class TreeStyle(object):
     staticcolor = 'azure3'
     gpupenwidth = 4
 
-    def __init__(self, walker):
+    def __init__(self, walker, **kwargs):
         self.walker=walker
+        self._print_sum = kwargs.get('print_sum')
 
         self.entry_features=dict()
 
@@ -185,13 +212,29 @@ class TreeStyle(object):
 
         features = NestedDict(static=False, gpu=False, label=attrs['_label'], frozen=entry.tainted.frozen())
 
-        def getdim(sink, offset=0):
+        def getkindim(sink, offset=0):
             if not sink.materialized():
-                return '?',
+                return '', ('?',)
 
-            return tuple('%i'%(d+offset) for d in sink.data.type.shape)
+            dt = sink.data.type
+            return 'UPH'[dt.kind], tuple('%i'%(d+offset) for d in dt.shape)
 
-        dim=None
+        if self._print_sum:
+            def getsum(entry):
+                sinks = entry.sinks
+                if len(sinks)!=1:
+                    return None
+                sink=sinks[0]
+                if not sink.materialized():
+                    return None
+                entry.touch()
+                buf = sink.data.buffer
+                buf = np.frombuffer(buf, count=sink.data.type.size(), dtype=buf.typecode)
+                return buf.sum(), (buf**2).sum()
+        else:
+            getsum=lambda entry: None
+
+        kind, dim='', None
 
         marks = {
                 'Sum':               '+',
@@ -212,7 +255,7 @@ class TreeStyle(object):
                 'FillLike':          'c',
                 'HistSmearSparse':   '@',
                 'HistSmear':         '@',
-                'HistEdges':         '\|.\|.\|',
+                'HistEdges':         r'\|.\|.\|',
                 'MatrixProduct':     '@',
                 'Snapshot':          r'\|o\|',
                 'MatrixProductDVDt': '@@t',
@@ -220,11 +263,13 @@ class TreeStyle(object):
                 'Jacobian':          u'J',
                 'Chi2':              u'χ²',
                 'CovariatedPrediction': 'V',
-                'Ratio':             u'÷'
+                'Ratio':             u'÷',
+                'Switch':            r'\>—',
+                'VarArray':          '→',
                 }
         if objectname in marks:
             mark = marks.get(objectname)
-            dim = getdim(entry.sinks.back())
+            kind, dim = getkindim(entry.sinks.back())
         else:
             mark = None
 
@@ -248,25 +293,37 @@ class TreeStyle(object):
                 mark='x'
                 features.static=True
                 if objectname.startswith('Integrator21'):
-                    dim = getdim(entry.sinks[3])
+                    kind, dim = getkindim(entry.sinks[3])
                 elif objectname.startswith('Integrator2'):
-                    dim = getdim(entry.sinks[4])
+                    kind, dim = getkindim(entry.sinks[4])
                 else:
-                    dim = getdim(entry.sinks[0])
+                    kind, dim = getkindim(entry.sinks[0])
             else:
                 mark='i'
-                dim = getdim(entry.sinks[0])
+                kind, dim = getkindim(entry.sinks[0])
+        elif objectname in ('InSegment',):
+            kind=''
+            dim1 = 'x'.join(getkindim(entry.sinks[0])[1])
+            dim2 = 'x'.join(getkindim(entry.sinks[1], 1)[1])
+            dim = u']∈['.join((dim1, dim2)),
         elif objectname.startswith('Interp'):
             mark='~'
-            dim = getdim(entry.sinks.back())
-        elif objectname in ('InSegment',):
-            dim1 = 'x'.join(getdim(entry.sinks[0]))
-            dim2 = 'x'.join(getdim(entry.sinks[1], 1))
-            dim = u']∈['.join((dim1, dim2)),
+            kind, dim = getkindim(entry.sinks.back())
+        else:
+            if not mark:
+                if entry.sinks.size()==1:
+                    mark=' '
+                else:
+                    mark='0th:'
+
+            if not entry.sinks.empty():
+                kind, dim = getkindim(entry.sinks.front())
 
         if entry.funcname=='gpu':
             features.gpu=True
 
+        features.sum=getsum(entry)
+        features.kind=kind
         features.dim=dim
         features.npars=npars
         features.mark=mark
@@ -280,21 +337,24 @@ class TreeStyle(object):
 
         return features
 
-    def node_attrs_var(self, varentry):
+    def node_attrs_var(self, varentry, skip_npars=None):
         ret=dict(shape='octagon', style='rounded', fontsize=10, color=self.varcolor, layer='variable')
         variable=varentry.variable
 
-        label=variable.name()
-        value = str(variable.value())
-        label+='='+value
+        if skip_npars is None:
+            label=variable.name()
+            path = varentry.fullname[:-len(label)-1]
+            value = str(variable.value())
+            label+='='+value
 
-        size=variable.values().size()
-        if size>1:
-            label='%s [%i]'%(label, size)
+            size=variable.values().size()
+            if size>1:
+                label='%s [%i]'%(label, size)
 
-        label='%s\n%s'%(label, varentry.fullname)
+            ret['label']=f'{label}\\n@{path}'
+        else:
+            ret['label']=f'<...~{skip_npars} variables...>'
 
-        ret['label']=label
         return ret
 
     def node_attrs(self, entry):
@@ -326,8 +386,10 @@ class TreeStyle(object):
             marks+='(%i)'%npars,
             marks='{%s}'%('|'.join(marks)),
         if dim:
-            marks+='[%s]'%('x'.join(dim)),
-            marks='{%s}'%('|'.join(marks)),
+            cmark=features.kind+'[%s]'%('x'.join(dim))
+            if features.sum is not None:
+                cmark+=u' Σ={:g} (²{:g})'.format(*features.sum)
+            marks='{%s}'%('|'.join(marks+(cmark,))),
         if marks:
             marks+=label,
             marks='{%s}'%('|'.join(marks)),

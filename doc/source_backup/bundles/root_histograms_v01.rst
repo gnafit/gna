@@ -95,7 +95,7 @@ Optional options:
             # formattable histogram name to read
             format = 'hist_{self}',
             # variants to pass to the format (dictionary)
-            variants = OrderedDict([
+            variants = dict([
                 ( 'D1', 'G1_D1' ),
                 ( 'D2', 'G1_D2' ),
                 ( 'D3', 'G2_D3' ),

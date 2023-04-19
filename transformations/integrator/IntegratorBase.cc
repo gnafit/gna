@@ -8,37 +8,29 @@
 using namespace Eigen;
 using namespace std;
 
-IntegratorBase::IntegratorBase(int order, bool shared_edge) :
+IntegratorBase::IntegratorBase(int order) :
 GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
-m_order(static_cast<size_t>(order)),
-m_shared_edge(static_cast<size_t>(shared_edge))
+m_order(static_cast<size_t>(order))
 {
 }
 
-IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges, bool shared_edge) :
+IntegratorBase::IntegratorBase(size_t bins, int orders, double* edges) :
 GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
-m_orders(bins),
-m_shared_edge(static_cast<size_t>(shared_edge))
+m_orders(bins)
 {
     m_orders.setConstant(orders);
     init_base(edges);
 }
 
-IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges, bool shared_edge) :
+IntegratorBase::IntegratorBase(size_t bins, int *orders, double* edges) :
 GNAObjectBind1N<double>("hist", "f", "hist", 1, 0, 0),
-m_orders(Map<const ArrayXi>(orders, bins)),
-m_shared_edge(static_cast<size_t>(shared_edge))
+m_orders(Map<const ArrayXi>(orders, bins))
 {
     init_base(edges);
 }
 
 void IntegratorBase::init_base(double* edges) {
-    if(m_shared_edge){
-        m_weights.resize(m_orders.sum()-m_orders.size()+m_shared_edge);
-    }
-    else{
-        m_weights.resize(m_orders.sum());
-    }
+    m_weights.resize(m_orders.sum());
     if(edges){
         m_edges=Map<const ArrayXd>(edges, m_orders.size()+1);
     }
@@ -65,14 +57,9 @@ void IntegratorBase::check_base(TypesFunctionArgs& fargs){
         throw fargs.args.error(fargs.args[0], "inconsistent function size");
     }
 
-    if((m_orders<(1+m_shared_edge)).any()){
+    if((m_orders<0).any() && !(m_orders==0).all()){
         std::cerr<<m_orders<<std::endl;
-        if(m_shared_edge){
-          throw std::runtime_error("All integration orders should be >=2");
-        }
-        else{
-          throw std::runtime_error("All integration orders should be >=1");
-        }
+        throw std::runtime_error("All integration orders should be >=0, at least one >0");
     }
 }
 
@@ -86,13 +73,13 @@ void IntegratorBase::integrate(FunctionArgs& fargs){
         auto* data = prod.data();
         auto* order = m_orders.data();
         for (int i = 0; i < m_orders.size(); ++i) {
+            if(*order){
             auto* data_next=std::next(data, *order);
             *ret = std::accumulate(data, data_next, 0.0);
-            if(m_shared_edge){
-                data=prev(data_next);
+                data=data_next;
             }
             else{
-                data=data_next;
+                *ret = 0.0;
             }
             advance(order,1);
             advance(ret,1);

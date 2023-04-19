@@ -1,6 +1,7 @@
 #include "ProductBC.hh"
 #include "GNAObject.hh"
 #include "TypesFunctions.hh"
+#include "TypeClasses.hh"
 
 namespace GNA {
   namespace GNAObjectTemplates {
@@ -8,7 +9,8 @@ namespace GNA {
     ProductBCT<FloatType>::ProductBCT() {
       this->transformation_("product")
         .output("product")
-        .types(TypesFunctions::ifSameShapeOrSingle, TypesFunctions::passNonSingle<0,0>)
+        .types(TypesFunctions::ifSameShapeOrSingle)
+        .types(new TypeClasses::PassTypePriorityT<FloatType>({0,-1}, {0,0}))
         .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
@@ -35,7 +37,7 @@ namespace GNA {
               ret*=factor;
             }
           })
-    	;
+        ;
     }
 
     /**

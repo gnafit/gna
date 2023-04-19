@@ -33,6 +33,9 @@ namespace GNA {
       // Mass splitting 31 for given orderings
       variable<FloatType> DeltaMSq13NO;
       variable<FloatType> DeltaMSq13IO;
+      // Mass splitting 32 for given orderings
+      variable<FloatType> DeltaMSq23NO;
+      variable<FloatType> DeltaMSq23IO;
       // Neutrino mass ordering
       variable<FloatType> Alpha;
       // Sines (squared) of mixing agles
@@ -76,6 +79,9 @@ namespace GNA {
           // Mass splitting 31 for given orderings
           .add(&DeltaMSq13NO, "DeltaMSq13NO")
           .add(&DeltaMSq13IO, "DeltaMSq13IO")
+          // Mass splitting 32 for given orderings
+          .add(&DeltaMSq23NO, "DeltaMSq23NO")
+          .add(&DeltaMSq23IO, "DeltaMSq23IO")
           // Effective mass splittings
           .add(&DeltaMSqEE, "DeltaMSqEE")
           .add(&DeltaMSqMM, "DeltaMSqMM")
@@ -135,7 +141,7 @@ namespace GNA {
                {&DeltaMSq13, &Alpha, &DeltaMSq12}, [&]() {
                  return DeltaMSq13.value() - Alpha.value()*DeltaMSq12.value();
                }, "|Δm²₂₃|=|Δm²₁₃|-α|Δm²₁₂|")
-          // 13 for fixed ordering
+          // 13 for fixed ordering, based on 23
           .add(&DeltaMSq13NO,
                {&DeltaMSq23, &DeltaMSq12}, [&]() {
                  return DeltaMSq23.value() + DeltaMSq12.value();
@@ -144,6 +150,15 @@ namespace GNA {
                {&DeltaMSq23, &DeltaMSq12}, [&]() {
                  return DeltaMSq23.value() - DeltaMSq12.value();
                }, "|Δm²₁₃|(IO)=|Δm²₂₃|-|Δm²₁₂|")
+          // 23 for fixed ordering, based on 13
+          .add(&DeltaMSq23NO,
+               {&DeltaMSq13, &DeltaMSq12}, [&]() {
+                 return DeltaMSq13.value() - DeltaMSq12.value();
+               }, "|Δm²₂₃|(NO)=|Δm²₁₃|-|Δm²₁₂|")
+          .add(&DeltaMSq23IO,
+               {&DeltaMSq13, &DeltaMSq12}, [&]() {
+                 return DeltaMSq13.value() + DeltaMSq12.value();
+               }, "|Δm²₂₃|(IO)=|Δm²₁₃|+|Δm²₁₂|")
           // ee from 23
           .add(&DeltaMSqEE,
                {&DeltaMSq23, &Alpha, &CosSq12, &DeltaMSq12}, [&]() {

@@ -2,6 +2,7 @@
 
 from matplotlib import pyplot as P
 import numpy as N
+from collections.abc import Mapping
 
 def plot_hist(lims, height, *args, **kwargs):
     """Plot histogram with lines. Like bar(), but without lines between bars."""
@@ -46,9 +47,11 @@ def plot_hist_errorbar(lims, Y, yerr=None, *args, **kwargs):
     if scale is None or Yerr is None:
         pass
     elif scale=='width':
-        Yerr/=width
+        Yerr=Yerr/width
+        Y=Y/width
     else:
-        Yerr*=scale
+        Yerr=Yerr*scale
+        Y=Y*scale
 
     kwargs.setdefault('fmt', 'none')
 
@@ -73,6 +76,46 @@ def plot_bar( lims, height, *args, **kwargs ):
     Plotter = kwargs.pop('axis', P)
 
     return Plotter.bar(left, height, widths, *args, **kwargs )
+
+def savefig(name, *args, **kwargs):
+    """Save fig and print output filename"""
+    close = kwargs.pop('close', False)
+    separator = kwargs.pop('sep', False)
+    filenames = ()
+    if name:
+        if isinstance(name, list):
+            for n in name:
+                filenames+=savefig( n, *args, **kwargs.copy() )
+        else:
+            suffix = kwargs.pop( 'suffix', None )
+            addext = kwargs.pop( 'addext', [] )
+            if suffix:
+                from os.path import splitext
+                basename, ext = splitext( name )
+
+                if not isinstance(suffix, str):
+                    suffix = '_'.join(suffix)
+
+                name = basename+suffix+ext
+
+            P.savefig( name, *args, **kwargs )
+            print( 'Save figure', name )
+            filenames+=name,
+
+            if addext:
+                if not isinstance(addext, list):
+                    addext = [ addext ]
+                from os import path
+                basename, extname = path.splitext( name )
+                for ext in addext:
+                    name = '%s.%s'%( basename, ext )
+                    P.savefig( name, *args, **kwargs )
+                    print( 'Save figure', name )
+                    filenames+=name,
+    if close:
+        P.close()
+
+    return filenames
 
 def add_colorbar( colormapable, **kwargs ):
     """Add a colorbar to the axis with height aligned to the axis"""
@@ -109,6 +152,7 @@ def add_colorbar( colormapable, **kwargs ):
     return cbar
 
 def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
+    """Add a colorbar to the 3d axis with height aligned to the axis"""
     cbaropt.setdefault('aspect', 4)
     cbaropt.setdefault('shrink', 0.5)
 
@@ -121,43 +165,64 @@ def add_colorbar_3d(res, cbaropt={}, mappable=None, cmap=None):
 
     return res, cbar
 
-def savefig(name, *args, **kwargs):
-    """Save fig and print output filename"""
-    close = kwargs.pop('close', False)
-    separator = kwargs.pop('sep', False)
-    if name:
-        if isinstance(name, list):
-            for n in name:
-                savefig( n, *args, **kwargs.copy() )
-        else:
-            suffix = kwargs.pop( 'suffix', None )
-            addext = kwargs.pop( 'addext', [] )
-            if suffix:
-                from os.path import splitext
-                basename, ext = splitext( name )
+def _colorbar_or_not(res, cbaropt):
+    if not cbaropt:
+        return res
 
-                if not isinstance(suffix, str):
-                    suffix = '_'.join(suffix)
+    if not isinstance(cbaropt, Mapping):
+        cbaropt = {}
 
-                name = basename+suffix+ext
+    cbar = add_colorbar(res, **cbaropt)
 
-            P.savefig( name, *args, **kwargs )
-            print( 'Save figure', name )
+    return res, cbar
 
-            if addext:
-                if not isinstance(addext, list):
-                    addext = [ addext ]
-                from os import path
-                basename, extname = path.splitext( name )
-                for ext in addext:
-                    name = '%s.%s'%( basename, ext )
-                    print( 'Save figure', name )
-                    P.savefig( name, *args, **kwargs )
-    if close:
-        P.close()
+def _colorbar_or_not_3d(res, cbaropt, mappable=None, cmap=None):
+    if not cbaropt:
+        return res
+
+    if not isinstance(cbaropt, Mapping):
+        cbaropt = {}
+
+    cbaropt.setdefault('aspect', 4)
+    cbaropt.setdefault('shrink', 0.5)
+
+    if mappable is None:
+        cbar = P.colorbar(res, **cbaropt)
+    else:
+        colourMap = P.cm.ScalarMappable()
+        colourMap.set_array(mappable)
+        cbar = P.colorbar(colourMap, **cbaropt)
+
+    return res, cbar
 
 def add_to_labeled_items(o, l, ax=None):
     ax = ax or P.gca()
     ocurrent, lcurrent = ax.get_legend_handles_labels()
     ocurrent.append( o )
     lcurrent.append( l )
+
+def _patch_with_colorbar(fcn, mode3d=False):
+    '''Patch pyplot.function or ax.method by adding a "colorbar" option'''
+    returner = mode3d and _colorbar_or_not_3d or _colorbar_or_not
+    if isinstance(fcn, str):
+        def newfcn(*args, **kwargs):
+            colorbar=kwargs.pop('colorbar', None)
+            ax = P.gca()
+            actual_fcn = getattr(ax, fcn)
+            res = actual_fcn(*args, **kwargs)
+            return returner(res, colorbar)
+    else:
+        def newfcn(*args, **kwargs):
+            colorbar=kwargs.pop('colorbar', None)
+            res = fcn(*args, **kwargs)
+            return returner(res, colorbar)
+
+    return newfcn
+
+
+pcolorfast = _patch_with_colorbar('pcolorfast')
+pcolor     = _patch_with_colorbar(P.pcolor)
+pcolormesh = _patch_with_colorbar(P.pcolormesh)
+imshow     = _patch_with_colorbar(P.imshow)
+matshow    = _patch_with_colorbar(P.matshow)
+plot_surface = _patch_with_colorbar('plot_surface', mode3d=True)

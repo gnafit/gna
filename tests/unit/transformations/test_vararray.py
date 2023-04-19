@@ -24,13 +24,13 @@ def test_vararray_v01(function_name):
     print('Python array:', values)
     print('Array:', res)
 
-    assert N.allclose(values, res)
+    assert N.allclose(values, res, atol=0, rtol=0)
 
     for i, (val, name) in enumerate(enumerate(names, 2)):
         ns[name].set(val)
         values[i]=val
         res=va.vararray.points.data()
-        assert N.allclose(values, res)
+        assert N.allclose(values, res, atol=0, rtol=0)
 
 @floatcopy(globals(), True)
 def test_vararray_v02(function_name):
@@ -50,13 +50,13 @@ def test_vararray_v02(function_name):
     print('Python array:', values)
     print('Array:', res)
 
-    assert N.allclose(values, res)
+    assert N.allclose(values, res, atol=0, rtol=0)
 
     for i, (val, name) in enumerate(enumerate(names, 2)):
         ns[name].set(val)
         values[i]=val
         res=va.vararray.points.data()
-        assert N.allclose(values, res)
+        assert N.allclose(values, res, atol=0, rtol=0)
 
 if __name__ == '__main__':
     run_unittests(globals())

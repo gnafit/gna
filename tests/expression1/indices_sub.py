@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 from gna.expression import *
-from collections import OrderedDict
 
-idx = Index('t', 'test', ('a', 'b', 'c', 'd'), sub=dict(short='s', name='sub', map=OrderedDict(A=('a'), B=('b', 'c', 'd'))))
+idx = Index('t', 'test', ('a', 'b', 'c', 'd'), sub=dict(short='s', name='sub', map=dict(A=('a'), B=('b', 'c', 'd'))))
 idx2 = Index('o', 'other', ('1', '2', '3', '4'))
 idx_sub = idx.sub
 print('idx:', idx )

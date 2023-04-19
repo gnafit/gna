@@ -52,7 +52,7 @@ phist = N.ones(edges.size-1)
 
 hist = C.Histogram(edges, phist)
 edges_o = R.HistEdges(hist)
-eres = R.EnergyResolution(True)
+eres = R.EnergyResolution(R.GNA.DataPropagation.Propagate)
 eres.matrix.Edges( hist )
 eres.smear.Ntrue( hist )
 smeared = eres.smear.Nrec.data()

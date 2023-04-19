@@ -2,8 +2,12 @@
 
 import ROOT
 from gna.ui import basecmd, set_typed
-from packages.minimize.lib import minimizers
-from packages.minimize.lib.minpars import MinPars
+from minimize.lib import minimizers
+from minimize.lib.minpars import MinPars
+import yaml
+
+def yaml_load(s):
+    return yaml.load(s, Loader=yaml.Loader) or {}
 
 class minimizer_v1(basecmd):
     @classmethod
@@ -11,18 +15,27 @@ class minimizer_v1(basecmd):
         parser.add_argument('name', help='Minimizer name')
         parser.add_argument('statistic', action=set_typed(env.parts.statistic), help='Statistic name',
                                          metavar='statmodule')
-        parser.add_argument('pargroup', help='Parameters group to minimize')
+        parser.add_argument('pargroups', nargs='+', default=[], help='Parameters groups to minimize with')
 
-        parser.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit2',
+        minimizer = parser.add_argument_group(title='minimizer')
+        minimizer.add_argument('-t', '--type', choices=minimizers.keys(), default='minuit2',
                                     help='Minimizer type {%(choices)s}', metavar='minimizer')
+        minimizer.add_argument('--minopts', type=yaml_load, help='Options to pass to the minimizer')
 
         parser.add_argument('-s', '--strict', action='store_true', help='raise exception if some parameters are skipped')
         parser.add_argument('-v', '--verbose', action='count', default=0, help='increase verbosity level')
 
+        parser.add_argument('--initial-value', default='central', choices=('central', 'value'), help='define what initial value to use')
+
     def init(self):
-        self.statistic = ROOT.StatisticOutput(self.opts.statistic.transformations.back().outputs.back())
-        self.minpars = self.env.future['parameter_groups'][self.opts.pargroup]
-        self.minpars = MinPars(self.minpars, check=self.opts.statistic)
+        output = self.opts.statistic.transformations.back().outputs.back()
+        self.statistic = ROOT.StatisticOutput(output)
+        self.minpars={}
+        for pargroup in self.opts.pargroups:
+            self.minpars.update(self.env.future['parameter_groups', pargroup].unwrap())
+
+        initial_central = self.opts.initial_value=='central'
+        self.minpars = MinPars(self.minpars, check=self.statistic.output(), initial_central=initial_central)
         if self.minpars._skippars:
             print('Minimizer {}: skip {} parameters not affecting the function'.format(self.opts.name, len(self.minpars._skippars)))
 
@@ -34,7 +47,11 @@ class minimizer_v1(basecmd):
                 print('Skip {} parameters:'.format(len(self.minpars._skippars)), [p.qualifiedName() for p in self.minpars._skippars])
             print('Minimizer {} parameters:'.format(self.opts.name))
             self.minpars.dump()
-        self.minimizer = minimizers[self.opts.type](self.statistic, self.minpars, name=self.opts.name)
+
+        minopts = {'minimizable_verbose': self.opts.verbose>2}
+        if self.opts.minopts:
+            minopts.update(self.opts.minopts)
+        self.minimizer = minimizers[self.opts.type](self.statistic, self.minpars, name=self.opts.name, **minopts)
 
         self.env.future[('minimizer', self.opts.name)] = self.minimizer
 

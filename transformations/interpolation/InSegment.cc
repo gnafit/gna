@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
-using std::lower_bound;
+using std::upper_bound;
 using std::next;
 using std::advance;
 using std::prev;
@@ -46,6 +46,13 @@ void InSegment::determineSegments(FunctionArgs& fargs){
   auto  edge_last= next(edge_first, nedges-1);           /// the last edge.
   auto  edge_end = next(edge_first, nedges);             /// the end of the edges array.
 
+  if(edges_a[nedges-1]==edges_a[nedges-2]){
+    throw std::runtime_error("InSegment: may not have the last segement X repeated");
+  }
+  if(edges_a[0]==edges_a[1]){
+    throw std::runtime_error("InSegment: may not have the first segement X repeated");
+  }
+
   auto nbins = nedges-1;
   fargs.rets[1].x=edges_a.tail(nbins) - edges_a.head(nbins); /// Determine bin widths.
 
@@ -58,19 +65,19 @@ void InSegment::determineSegments(FunctionArgs& fargs){
     if (*point<*edge_first-m_tolerance){                 /// Check if the point below the lower limit
       *insegment = -1;
     }
-    else if (*point>*edge_last-m_tolerance){             /// Check if the point is above the upper limit
-      if(*point<*edge_last+m_tolerance)                  /// If the point on the last edge, assign it to the last bin
+    else if (*point>(*edge_last-m_tolerance)){           /// Check if the point is above the upper limit
+      if(*point<(*edge_last+m_tolerance))                /// If the point on the last edge, assign it to the last bin
         *insegment = static_cast<double>(nedges-2);
       else{
         *insegment = static_cast<double>(nedges-1);      /// Otherwise assign it to the overflow
       }
     }
     else{
-      auto seg_next = lower_bound(edge_first, edge_end, *point); /// Find edge, that is greater or equal the current point.
-      auto seg = prev(seg_next);                                 /// Fund the current bin
-      if(seg_next<edge_end && fabs(*point-*seg_next)<m_tolerance){ /// If the point is below the next bin edge on less-then-tolerance
-        seg=seg_next;                                            /// Assign the point to the next bin
-      }
+      auto seg_next = upper_bound(edge_first, edge_end, *point); /// Find edge, that is greater the current point.
+      auto seg = prev(seg_next);                                 /// Find the current bin
+      //if(seg_next<edge_end && fabs(*point-*seg_next)<m_tolerance){ /// If the point is below the next bin edge on less-then-tolerance
+        //seg=seg_next;                                            /// Assign the point to the next bin
+      //}
       *insegment = static_cast<double>(distance(edge_first, seg)); /// Store the data
     }
 

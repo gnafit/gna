@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as N
-from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
@@ -12,12 +10,12 @@ class reactor_anu_uncorr_v01(TransformationBundleLegacy):
         super(reactor_anu_uncorr_v01, self).__init__( *args, **kwargs )
 
         self.edges = self.shared.reactor_anu_edges.data()
-        self.bundles=OrderedDict( self=self )
+        self.bundles=dict( self=self )
 
         self.load_data()
 
     def build(self):
-        uncpars = OrderedDict()
+        uncpars = dict()
         for name, vars in self.uncorr_vars.items():
             with self.common_namespace:
                 uncpar_t = C.VarArray(vars, ns=self.common_namespace)
@@ -29,7 +27,7 @@ class reactor_anu_uncorr_v01(TransformationBundleLegacy):
             self.outputs[name]             = uncpar_t.single()
 
     def define_variables(self):
-        self.uncorr_vars=OrderedDict()
+        self.uncorr_vars=dict()
         for ns in self.namespaces:
             isotope = ns.name
             uncfcn = interp1d( *self.uncertainties_uncorr[isotope] )
@@ -42,7 +40,7 @@ class reactor_anu_uncorr_v01(TransformationBundleLegacy):
                 var.setLabel('Uncorrelated {} anu spectrum correction for {} MeV'.format(isotope, en))
 
     def load_data(self):
-        self.uncertainties_uncorr = OrderedDict()
+        self.uncertainties_uncorr = dict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')

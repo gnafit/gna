@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as N
@@ -7,7 +6,6 @@ from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph
 from gna.env import env, namespace
 from gna.configurator import NestedDict
-from collections import OrderedDict
 from gna.bundle import *
 
 class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
@@ -30,7 +28,7 @@ class detector_nonlinearity_db_root_v02(TransformationBundleLegacy):
         #
         self.newx_out = self.context.outputs[self.cfg.edges]
         newx = self.newx_out.data()
-        newy = OrderedDict()
+        newy = dict()
         for xy, name in zip(graphs, self.cfg.names):
             f = interpolate( xy, newx )
             newy[name]=f

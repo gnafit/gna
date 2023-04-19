@@ -1,9 +1,8 @@
-
 from load import ROOT as R
 import numpy as np
 import gna.constructors as C
 from gna.bundle import *
-from collections import OrderedDict, Iterable
+from collections.abc import Iterable
 import itertools
 from tools.cfg_load import cfg_parse
 

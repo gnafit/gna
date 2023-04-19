@@ -8,7 +8,7 @@ from gna.bindings import common
 # Create numpy arrays for 1d and 2d cases
 narray1 = np.arange(5, 10)
 narray2 = np.arange(5, 20).reshape(5,3)
-# Create a Points instances
+# Create Points instances
 parray1 = C.Points(narray1)
 parray2 = C.Points(narray2)
 

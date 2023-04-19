@@ -9,6 +9,7 @@ set(TRANSFORMATION_SOURCES
   transformations/base/ViewHistBased.cc
   transformations/base/Concat.cc
   transformations/base/ConditionalProduct.cc
+  transformations/base/Switch.cc
   transformations/base/Product.cc
   transformations/base/ProductBC.cc
   transformations/base/Snapshot.cc
@@ -22,13 +23,18 @@ set(TRANSFORMATION_SOURCES
   transformations/sum/WeightedSum.cc
   transformations/sum/WeightedSumSq.cc
   transformations/sum/WeightedSumP.cc
+  transformations/sum/SumMatOrDiag.cc
   # Ratios
   transformations/ratio/NormalizedConvolution.cc
   transformations/ratio/Convolution.cc
   transformations/ratio/PolyRatio.cc
   transformations/ratio/Ratio.cc
   transformations/ratio/RatioBC.cc
+  # Array 1d
+  transformations/array1d/Monotonize.cc
   # Calculus
+  transformations/calculus/ArrayGradient2p.cc
+  transformations/calculus/ArrayGradient3p.cc
   transformations/calculus/Derivative.cc
   transformations/calculus/Jacobian.cc
   # Detector effects
@@ -36,17 +42,26 @@ set(TRANSFORMATION_SOURCES
   transformations/detector/C14Spectrum.cc
   transformations/detector/EnergyResolution.cc
   transformations/detector/EnergyResolutionInput.cc
+  transformations/detector/EnergyResolutionInputs.cc
+  transformations/detector/EnergyResolutionErfInput.cc
+  transformations/detector/EnergyResolutionErfInputs.cc
+  transformations/detector/EnergyResolutionSigmaRelABC.cc
   transformations/detector/HistNonlinearity.cc
   transformations/detector/HistNonlinearityB.cc
+  transformations/detector/HistNonlinearityC.cc
+  transformations/detector/HistNonlinearityD.cc
   transformations/detector/HistSmear.cc
   transformations/detector/HistSmearSparse.cc
   transformations/detector/Cherenkov_Borexino.cc
   # Functions
   transformations/functions/SelfPower.cc
   transformations/functions/Exp.cc
+  transformations/functions/Sqrt.cc
   transformations/functions/Sin.cc
   transformations/functions/Cos.cc
   transformations/functions/Inverse.cc
+  transformations/functions/TransformationTF1.cc
+  transformations/functions/TransformationTF2.cc
   # Histograms
   transformations/hist/Bins.cc
   transformations/hist/HistEdges.cc
@@ -54,15 +69,20 @@ set(TRANSFORMATION_SOURCES
   transformations/hist/HistEdgesLinear.cc
   transformations/base/PointsToHist.cc
   transformations/hist/Rebin.cc
+  transformations/hist/Rebin2.cc
   transformations/hist/RebinN.cc
+  transformations/detector/RebinInput.cc
   # Integration
   transformations/integrator/GSLSamplerGL.cc
-  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/SamplerRect.cc
   transformations/integrator/Integrator21Base.cc
-  transformations/integrator/Integrator2Base.cc
-  transformations/integrator/IntegratorGL.cc
   transformations/integrator/Integrator21GL.cc
+  transformations/integrator/Integrator21Rect.cc
+  transformations/integrator/Integrator2Base.cc
   transformations/integrator/Integrator2GL.cc
+  transformations/integrator/Integrator2Rect.cc
+  transformations/integrator/IntegratorBase.cc
+  transformations/integrator/IntegratorGL.cc
   transformations/integrator/IntegratorRect.cc
   transformations/integrator/IntegratorTrap.cc
   # Interpolation
@@ -80,7 +100,9 @@ set(TRANSFORMATION_SOURCES
   transformations/linalg/Normalize.cc
   transformations/linalg/RenormalizeDiag.cc
   transformations/linalg/MatrixProduct.cc
+  transformations/linalg/MatVecProduct.cc
   transformations/linalg/MatrixProductDVDt.cc
+  transformations/linalg/MatrixRelToAbs.cc
   transformations/linalg/Transpose.cc
   # Neutrino physics
   transformations/neutrino/EvisToEe.cc
@@ -91,8 +113,11 @@ set(TRANSFORMATION_SOURCES
   transformations/neutrino/OscillationVariables.cc
   transformations/neutrino/OscProb2nu.cc
   transformations/neutrino/OscProbMatterUniform.cc
+  transformations/neutrino/OscProbConstantDensity.cc
   transformations/neutrino/OscProbPMNS.cc
   transformations/neutrino/OscProb3.cc
+  transformations/neutrino/OscProb3ApproxMSW.cc
+  transformations/neutrino/PsurEEMSWKhan.cc
   transformations/neutrino/OscProbPMNSDecoh.cc
   transformations/neutrino/PDGVariables.cc
   transformations/neutrino/PMNSVariables.cc
@@ -101,6 +126,7 @@ set(TRANSFORMATION_SOURCES
   transformations/neutrino/ReactorNorm.cc
   transformations/neutrino/ReactorSpectrumUncertainty.cc
   transformations/neutrino/Units.cc
+  transformations/neutrino/DensityConversion.cc
   # Statistics
   transformations/stats/Chi2.cc
   transformations/stats/CovarianceToyMC.cc
@@ -110,11 +136,15 @@ set(TRANSFORMATION_SOURCES
   transformations/stats/NormalStatsToyMC.cc
   transformations/stats/Poisson.cc
   transformations/stats/LogPoissonSplit.cc
+  transformations/stats/Chi2CNPStat.cc
+  transformations/stats/LogProdDiag.cc
   transformations/stats/PoissonToyMC.cc
   transformations/stats/ParCovMatrix.cc
   # Variables manipulation
+  transformations/var/ParCenters.cc
   transformations/var/VarArray.cc
   transformations/var/VarArrayPreallocated.cc
+  transformations/var/ParArrayInput.cc
   transformations/var/VarDiff.cc
   transformations/var/VarProduct.cc
   transformations/var/VarSum.cc
@@ -123,6 +153,7 @@ set(TRANSFORMATION_SOURCES
   transformations/backgrounds/GeoNeutrinoFluxNormed.cc
   # Debug transformations
   transformations/debug/Identity.cc
+  transformations/debug/IdentityVerbose.cc
   transformations/debug/DebugTransformation.cc
   transformations/debug/Dummy.cc
   transformations/debug/DummyType.cc
@@ -148,6 +179,7 @@ set(TRANSFORMATION_HEADERS
   ViewRear.hh
   ViewHistBased.hh
   ConditionalProduct.hh
+  Switch.hh
   Product.hh
   ProductBC.hh
   Snapshot.hh
@@ -161,13 +193,18 @@ set(TRANSFORMATION_HEADERS
   WeightedSum.hh
   WeightedSumSq.hh
   WeightedSumP.hh
+  SumMatOrDiag.hh
   # Ratios
   Convolution.hh
   NormalizedConvolution.hh
   PolyRatio.hh
   Ratio.hh
   RatioBC.hh
+  # Array1d
+  Monotonize.hh
   # Calculus
+  ArrayGradient2p.hh
+  ArrayGradient3p.hh
   Derivative.hh
   Jacobian.hh
   # Detector effects
@@ -177,17 +214,23 @@ set(TRANSFORMATION_HEADERS
   HistEdgesLinear.hh
   InSegment.hh
   SegmentWise.hh
-  InterpExpo.hh
+  # Interpolation
+  FixedPointScale.hh
+  InterpBase.hh
   InterpConst.hh
+  InterpExpo.hh
   InterpLinear.hh
   InterpLog.hh
   InterpLogx.hh
-  FixedPointScale.hh
+  InterpStrategy.hh
+  #
   Covmat.hh
   Cholesky.hh
   Chi2.hh
   Poisson.hh
   LogPoissonSplit.hh
+  Chi2CNPStat.hh
+  LogProdDiag.hh
   Normalize.hh
   CovarianceToyMC.hh
   NormalToyMC.hh
@@ -196,28 +239,38 @@ set(TRANSFORMATION_HEADERS
   # Functions
   Inverse.hh
   Exp.hh
+  Sqrt.hh
   Sin.hh
   Cos.hh
   SelfPower.hh
+  TransformationTF1.hh
+  TransformationTF2.hh
   # Histogram
   Rebin.hh
+  Rebin2.hh
   RebinN.hh
+  RebinInput.hh
   PointsToHist.hh
+  ParCenters.hh
   VarArray.hh
   VarArrayPreallocated.hh
+  ParArrayInput.hh
   VarProduct.hh
   VarSum.hh
   VarDiff.hh
   ArraySum.hh
-  Minimizable.hh
   Neutrino.hh
   Units.hh
+  DensityConversion.hh
   OscillationVariables.hh
   PMNSVariables.hh
   OscProbPMNSVariables.hh
   OscProb2nu.hh
   OscProbPMNS.hh
   OscProb3.hh
+  OscProb3ApproxMSW.hh
+  OscProbConstantDensity.hh
+  PsurEEMSWKhan.hh
   OscProbPMNSDecoh.hh
   OscProbMatterUniform.hh
   EvisToEe.hh
@@ -227,27 +280,42 @@ set(TRANSFORMATION_HEADERS
   ReactorNorm.hh
   ReactorGroup.hh
   ReactorSpectrumUncertainty.hh
-  IntegratorBase.hh
+  # Integrators
+  GSLSamplerGL.hh
+  SamplerRect.hh
   Integrator21Base.hh
+  Integrator21GL.hh
+  Integrator21Rect.hh
   Integrator2Base.hh
+  Integrator2GL.hh
+  Integrator2Rect.hh
+  IntegratorBase.hh
+  IntegratorGL.hh
   IntegratorRect.hh
   IntegratorTrap.hh
-  GSLSamplerGL.hh
-  GaussLegendre.hh
-  GaussLegendre2d.hh
+  # Detector effects and misc
   EnergyResolution.hh
   EnergyResolutionInput.hh
+  EnergyResolutionInputs.hh
+  EnergyResolutionErfInput.hh
+  EnergyResolutionErfInputs.hh
+  EnergyResolutionSigmaRelABC.hh
   EnergyResolutionC.hh
   HistNonlinearity.hh
   HistNonlinearityB.hh
+  HistNonlinearityC.hh
+  HistNonlinearityD.hh
   Cherenkov_Borexino.hh
+  HistSmearEnums.hh
   HistSmear.hh
   HistSmearSparse.hh
   RenormalizeDiag.hh
   C14Spectrum.hh
   ParCovMatrix.hh
   MatrixProduct.hh
+  MatVecProduct.hh
   MatrixProductDVDt.hh
+  MatrixRelToAbs.hh
   Transpose.hh
   GeoNeutrinoFluxNormed.hh
   # Debug
@@ -255,14 +323,12 @@ set(TRANSFORMATION_HEADERS
   Dummy.hh
   DummyType.hh
   Identity.hh
+  IdentityVerbose.hh
   TrialMultiFunc.hh
   # Legacy
-  IntegratorGL.hh
-  Integrator21GL.hh
-  Integrator2GL.hh
   InterpExpoSorted.hh
   LinearInterpolator.hh
-  InterpStrategy.hh
-  InterpBase.hh
+  GaussLegendre.hh
+  GaussLegendre2d.hh
   PARENT_SCOPE
 )

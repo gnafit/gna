@@ -1,8 +1,6 @@
-
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
-from collections import OrderedDict
 import numpy as N
 import ROOT as R
 
@@ -43,7 +41,7 @@ class exp(baseexp):
         self.nidx = [
             ('s', 'site',        ['EH1', 'EH2', 'EH3']),
             ('d', 'detector',    self.detectors,
-                                 dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                                 dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
             ('r', 'reactor',     self.reactors),
             ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
@@ -582,7 +580,7 @@ class exp(baseexp):
             ns.addobservable("lsnl.{0}".format(ad), outputs.lsnl[ad])
             ns.addobservable("eres.{}".format(ad), outputs.eres[ad])
             ns.addobservable("{0}".format(ad), outputs.rebin[ad])
-            ns.addobservable("final_concat", outputs.concat_total)
+        ns.addobservable("final_concat", outputs.concat_total)
 
     def print_stats(self):
         from gna.graph import GraphWalker, report, taint, taint_dummy
@@ -699,13 +697,13 @@ class exp(baseexp):
         self.formula_back = [
                 'observation_noeffects=norm_bf*conversion_factor*nprotons_nominal*eres()',
                 'observation=rebin| ibd + bkg',
-                'total=concat[d]| observation'
+                'concat_total=concat[d]| observation'
                 ]
 
 
     def define_labels(self):
         self.libs = {
-                'dyboscar': OrderedDict(
+                'dyboscar': dict(
                         anue_produced_iso       = dict(expr='power_livetime_factor*anuspec',
                                                        label='Total number of anue produced for {isotope} in {reactor}@{detector}'),
                         anue_produced_total     = dict(expr='sum:i|anue_produced_iso',
@@ -786,7 +784,7 @@ class exp(baseexp):
                         eres_cw           = dict(expr='eres*pmns'),
                         ),
 
-                'simple': OrderedDict(
+                'simple': dict(
                         dyboscar_iav = dict(expr=('dyboscar_iav', 'dyboscar_iav[d]| raw_spectra_dyboscar[d]()'), label='IAV for dyboscar pred'),
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),

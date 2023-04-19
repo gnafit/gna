@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 from scipy.interpolate import interp1d
 import numpy as np
@@ -7,9 +6,8 @@ from gna.converters import convert
 from mpl_tools.root2numpy import get_buffers_graph_or_hist1
 from gna.env import env, namespace
 from gna.configurator import NestedDict
-from collections import OrderedDict
 from gna.bundle import TransformationBundle
-from collections import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
     """Detector energy nonlinearity parametrized via few curves (Daya Bay approach)
@@ -144,7 +142,7 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
 
         interp_evis.interp.interp >> (interp_deq_devis.insegment.points, interp_deq_devis.interp.newx)
 
-        expose_matrix = self.cfg.get('expose_matrix', False)
+        expose_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('expose_matrix', False) else R.GNA.DataPropagation.Ignore
         for i, itd in enumerate(self.detector_idx.iterate()):
             """Finally, original bin edges multiplied by the correction factor"""
             """Construct the nonlinearity calss"""
@@ -183,9 +181,9 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             raise IOError( 'Can not read ROOT file: '+self.cfg.filename )
 
         if isinstance(self.cfg.names, (Mapping, NestedDict)):
-            graphs = OrderedDict([(k, tfile.Get(v)) for k, v in self.cfg.names.items()])
+            graphs = dict([(k, tfile.Get(v)) for k, v in self.cfg.names.items()])
         elif isinstance(self.cfg.names, Iterable):
-            graphs = OrderedDict([(k, tfile.Get(k)) for k in self.cfg.names])
+            graphs = dict([(k, tfile.Get(k)) for k in self.cfg.names])
         else:
             raise self._exception('Invalid cfg.names option: not mapping and not iterable')
 
@@ -200,19 +198,19 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             k, (x, y) = kxy
             return k, np.gradient(y, x[1]-x[0])
 
-        graphs = OrderedDict(map(self.get_buffers_auto, graphs.items()))
+        graphs = dict(map(self.get_buffers_auto, graphs.items()))
         self.check_same_x(graphs)
         self.make_diff(graphs)
         graphs = self.supersample(graphs)
         list(map(mult, graphs.values()))
-        gradients = OrderedDict(map(grad, graphs.items()))
+        gradients = dict(map(grad, graphs.items()))
 
         tfile.Close()
         return graphs, gradients
 
     def make_diff(self, graphs):
         names = self.cfg.names
-        if isinstance(names, (dict,NestedDict)):
+        if isinstance(names, (Mapping,NestedDict)):
             names = list(names.keys())
         nom, others = names[0], names[1:]
 
@@ -228,9 +226,9 @@ class energy_nonlinearity_db_root_subst_v01(TransformationBundle):
             return graphs
         assert isinstance(times, int)
 
-        newgraphs = OrderedDict()
+        newgraphs = dict()
 
-        x = graphs.values()[0][0]
+        x = list(graphs.values())[0][0]
         nbins = len(x)-1
         newnbins = nbins*times
         newx = np.linspace(x[0], x[-1], newnbins+1)

@@ -3,6 +3,7 @@ import numpy as np
 import gna.constructors as C
 from gna.bundle import TransformationBundle
 from gna.configurator import NestedDict
+from collections.abc import Mapping
 
 class integral_2d1d_v05(TransformationBundle):
     """2d integral based on Integrator21GL v05
@@ -115,7 +116,7 @@ class integral_2d1d_v05(TransformationBundle):
         needadd = False
         for name, label in instances.items():
             noindex = False
-            if isinstance(label, (dict, NestedDict)):
+            if isinstance(label, (Mapping, NestedDict)):
                 noindex = label.get('noindex')
                 label = label.get('label')
 

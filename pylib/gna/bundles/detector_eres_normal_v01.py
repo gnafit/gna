@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -26,7 +25,7 @@ class detector_eres_normal_v01(TransformationBundle):
         return (cfg.parameter,), ('eres_matrix', 'eres')
 
     def build(self):
-        expose_matrix = self.cfg.get('expose_matrix', False)
+        expose_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('expose_matrix', False) else R.GNA.DataPropagation.Ignore
         split_transformations = self.cfg.get('split_transformations', True)
 
         self.objects = []

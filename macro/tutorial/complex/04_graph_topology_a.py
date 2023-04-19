@@ -59,13 +59,13 @@ dbg2a = R.DebugTransformation('before int2', 1.0)
 dbg1b = R.DebugTransformation('after int1', 1.0)
 dbg2b = R.DebugTransformation('after int2', 1.0)
 
-# Conect inputs (debug 1)
+# Connect inputs (debug 1)
 print('Connect to inputs')
 dbg1a.add_input(fcn1.sum.sum)
 dbg2a.add_input(fcn2.sum.sum)
 print()
 
-# Conect outputs (debug 1) to the integrators
+# Connect outputs (debug 1) to the integrators
 print('Connect outputs')
 int1 = integrator.transformations.back()
 integrator.add_input(dbg1a.debug.target)
@@ -98,7 +98,7 @@ dbg2b.debug.target.data()
 print('    <no functions executed>')
 print()
 
-# Change paramter k1 which affects only the first integrand
+# Change parameter k1 which affects only the first integrand
 print('Change k1')
 p1k.set(9)
 

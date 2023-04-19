@@ -1,5 +1,3 @@
-
-
 from gna.configurator import uncertain
 
 debug=False

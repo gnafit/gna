@@ -4,12 +4,12 @@
 #include <fmt/format.h>
 #include "final_act.hh"
 
-using std::min;
 using std::max;
+using GNA::DataPropagation;
 
 //#define DEBUG_ENLB
 
-HistNonlinearityB::HistNonlinearityB(bool propagate_matrix) :
+HistNonlinearityB::HistNonlinearityB(GNA::DataPropagation propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
     transformation_("matrix")
@@ -49,10 +49,11 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
 } while (0);
 #define DEBUG_ITERATION()                                     \
         printf(                                               \
-              "orig %3zu %6.2f->%6.2f "                       \
-              "proj %6.2f->%6.2f "                            \
-              "mod %3zu %6.2f->%6.2f "                        \
-              "mod_proj %6.2f->%6.2f "                        \
+              "iter "                                         \
+              "orig %3zu %7.3f->%7.3f "                       \
+              "proj %7.3f->%7.3f "                            \
+              "mod %3zu %7.3f->%7.3f "                        \
+              "mod_proj %7.3f->%7.3f "                        \
               "\n"                                            \
               ,                                               \
               orig_idx, *orig_left,      *orig_right,         \
@@ -63,9 +64,10 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
 
 #define DEBUG_STEP_ORIG()                                     \
         printf(                                               \
-              "orig %3zu %6.2f->%6.2f "                       \
-              "proj %6.2f->%6.2f "                            \
-              "width %6.2f "                                  \
+              "step "                                         \
+              "orig %3zu %7.3f->%7.3f "                       \
+              "proj %7.3f->%7.3f "                            \
+              "width %7.3f "                                  \
               "to end %td "                                   \
               "\n"                                            \
               ,                                               \
@@ -77,9 +79,10 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
 
 #define DEBUG_STEP_MOD()                                      \
         printf(                                               \
+              "step "                                         \
               "                                            "  \
-              "mod %3zu %6.2f->%6.2f "                        \
-              "mod_proj %6.2f->%6.2f "                        \
+              "mod %3zu %7.3f->%7.3f "                        \
+              "mod_proj %7.3f->%7.3f "                        \
               "to end %td "                                   \
               "\n"                                            \
               ,                                               \
@@ -89,11 +92,12 @@ void HistNonlinearityB::getEdges(TypesFunctionArgs& fargs) {
               );
 #define DEBUG_WEIGHT()                                        \
         printf(                                               \
-              "current  %6.2f->%6.2f weight %6.2f "            \
+              "current  %7.3f->%7.3f weight %7.3f "           \
               "exit orig %i exit mod %i"                      \
               "\n"                                            \
               ,                                               \
-              left, right, weight, exit_orig, exit_mod        \
+              left, right, weight,                            \
+              exit_orig, exit_mod                             \
               );
 #else
 #define  DEBUG(...)
@@ -244,14 +248,14 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
          };
 
     auto sync_mod_proj_left = [&mod_idx, &mod_left, &mod_right,
-                               mod_proj_start,
+                               mod_start, mod_proj_start,
                                &mod_proj_left, &mod_proj_right,
                                &check_range_mod]() -> bool
          {
              mod_proj_left = mod_proj_right - 1u;
              mod_idx       = mod_proj_left-mod_proj_start;
 
-             mod_left += mod_proj_left-mod_proj_start;
+             mod_left  = mod_start + mod_idx;
              mod_right = mod_left + 1u;
 
              return check_range_mod();
@@ -265,6 +269,7 @@ void HistNonlinearityB::calcMatrix(FunctionArgs& fargs) {
 
     // Fill the matrix at return
     final_act _f([&fargs, this](){
+        this->m_sparse_cache.makeCompressed();
         if ( this->m_propagate_matrix )
             fargs.rets[0].mat = this->m_sparse_cache;
     });

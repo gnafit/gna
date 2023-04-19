@@ -2,10 +2,13 @@
 
 #include "GNAObject.hh"
 #include "config_vars.h"
+
+#include "HistSmearEnums.hh"
+
 class HistSmear: public GNASingleObject,
                  public TransformationBind<HistSmear> {
 public:
-  HistSmear( bool upper=false );
+  HistSmear(GNA::SquareMatrixType matrix_type=GNA::SquareMatrixType::Any);
 
 private:
   void calcSmear(FunctionArgs fargs);

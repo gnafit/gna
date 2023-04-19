@@ -11,7 +11,7 @@ from gna.env import env
 from gna.labelfmt import formatter as L
 from scipy.stats import norm
 import os
-from gna.unittest import *
+from gna.unittest import allure_attach_file, savegraph
 
 from gna.converters import convert
 
@@ -73,7 +73,7 @@ def test_energyresolution_v01(tmp_path):
             hist = C.Histogram( edges, phist )
             edges_o = R.HistEdges(hist)
             with ns:
-                eres = C.EnergyResolution(weights, True)
+                eres = C.EnergyResolution(weights, R.GNA.DataPropagation.Propagate)
             eres.matrix.Edges( hist )
             eres.smear.Ntrue( hist )
 
@@ -107,10 +107,10 @@ def test_energyresolution_v01(tmp_path):
             ax.legend()
 
             path = os.path.join(str(tmp_path), 'eres_test_{:02d}.png'.format(i))
-            savefig(path, density=300)
+            savefig(path, dpi=300)
             allure_attach_file(path)
 
-            plt.close()
+            plt.close('all')
 
     smeared = eres.smear.Nrec.data()
 
@@ -123,9 +123,9 @@ def test_energyresolution_v01(tmp_path):
 
     ax.plot( x, y*100. )
     path = os.path.join(str(tmp_path), 'eres_sigma.png')
-    savefig(path, density=300)
+    savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     fig = plt.figure()
     ax = plt.subplot( 111 )
@@ -133,30 +133,33 @@ def test_energyresolution_v01(tmp_path):
     ax.grid()
     ax.set_xlabel( '' )
     ax.set_ylabel( '' )
-    ax.set_title( 'Energy resolution convertsion matrix (class)' )
+    ax.set_title( 'Energy resolution convertsion matrix' )
 
-    mat = convert(eres.getDenseMatrix(), 'matrix')
+    # mat = convert(eres.getDenseMatrix(), 'matrix')
+    mat = eres.matrix.FakeMatrix.data()
     mat = np.ma.array( mat, mask= mat==0.0 )
     c = ax.matshow( mat, extent=[ edges[0], edges[-1], edges[-1], edges[0] ] )
     add_colorbar( c )
 
-    path = os.path.join(str(tmp_path), 'eres_matc.png')
-    savefig(path, density=300)
-    allure_attach_file(path)
-    plt.close()
-
-    fig = plt.figure()
-    ax = plt.subplot( 111 )
-    ax.minorticks_on()
-    ax.grid()
-    ax.set_xlabel( '' )
-    ax.set_ylabel( '' )
-    ax.set_title( 'Energy resolution convertsion matrix (trans)' )
-
-    eres.matrix.FakeMatrix.plot_matshow(colorbar=True, mask=0.0, extent=[edges[0], edges[-1], edges[-1], edges[0]])
-
     path = os.path.join(str(tmp_path), 'eres_mat.png')
-    savefig(path, density=300)
+    savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
+
+    # fig = plt.figure()
+    # ax = plt.subplot( 111 )
+    # ax.minorticks_on()
+    # ax.grid()
+    # ax.set_xlabel( '' )
+    # ax.set_ylabel( '' )
+    # ax.set_title( 'Energy resolution convertsion matrix (trans)' )
+    #
+    # eres.matrix.FakeMatrix.plot_matshow(colorbar=True, mask=0.0, extent=[edges[0], edges[-1], edges[-1], edges[0]])
+    #
+    # path = os.path.join(str(tmp_path), 'eres_mat.png')
+    # savefig(path, dpi=300)
+    # allure_attach_file(path)
+    plt.close('all')
+
+    print()
 

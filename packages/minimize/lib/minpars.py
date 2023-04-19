@@ -1,15 +1,14 @@
 import ROOT
 import numpy as np
-from collections import OrderedDict
 
 class MinPar(object):
-    def __init__(self, base, par, **kwargs):
+    def __init__(self, base, par, *, initial_central: bool=True, **kwargs):
         assert base is not None
 
         self._base = base
         self._par  = par
 
-        self.setup(**kwargs)
+        self.setup(initial_central=initial_central, **kwargs)
 
     def __str__(self):
         return '{name:<25} {_value:8}, limits=[{_vmin}, {_vmax}]' \
@@ -18,7 +17,7 @@ class MinPar(object):
                '  step={_step}' \
                ''.format(**self.__dict__)
 
-    def setup(self, **kwargs):
+    def setup(self, *, initial_central: bool=True, **kwargs):
         self.name  = self._par.qualifiedName()
         self.fixed = kwargs.pop('fixed', self._par.isFixed())
         limits = self._par.limits()
@@ -35,7 +34,10 @@ class MinPar(object):
 
         value = kwargs.pop('value', None)
         if value is None:
-            self.value = self._par.central()
+            if initial_central:
+                self.value = self._par.central()
+            else:
+                self.value = self._par.value()
         else:
             self.value = value
 
@@ -118,14 +120,16 @@ class MinPar(object):
         # No need to modify the base as it does not affect the minimization behaviour (it is just a flag)
 
 class MinPars(object):
-    def __init__(self, pars, check):
-        self._specs=OrderedDict()
-        self._parmap=OrderedDict()
+    _initial_central = True
+    def __init__(self, pars, check, *, initial_central: bool=True):
+        self._specs={}
+        self._parmap={}
         self._modified=True
         self._resized=True
+        self._initial_central = initial_central
 
         self._skippars=[]
-        for k, v in pars.items():
+        for _, v in pars.items():
             if v.influences(check):
                 self.addpar(v)
             else:
@@ -135,7 +139,7 @@ class MinPars(object):
         return str(self._specs)
 
     def dump(self):
-        for i, (k, v) in enumerate(self._specs.items()):
+        for i, (_, v) in enumerate(self._specs.items()):
             print('% 3d'%i, v)
 
     def parspec(self, idx):
@@ -164,6 +168,9 @@ class MinPars(object):
 
     def specs(self):
         return self._specs.values()
+
+    def values(self):
+        return [par.value for par in self._specs.values()]
 
     def items(self):
         return self._specs.items()
@@ -211,7 +218,7 @@ class MinPars(object):
         if name in self._specs or par in self._specs.values():
             raise Exception('The parameter {} added twice'.format(name))
 
-        spec = self._specs[name] = MinPar(self, par, **kwargs)
+        spec = self._specs[name] = MinPar(self, par, initial_central=self._initial_central, **kwargs)
         self._parmap[par] = spec
 
         self.modified=True

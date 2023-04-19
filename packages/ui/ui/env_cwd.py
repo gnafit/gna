@@ -1,7 +1,7 @@
 """Set GNA working directory."""
 
 from gna.ui import basecmd
-from packages.env.lib.cwd import set_cwd, set_prefix, get_processed_paths
+from env.lib.cwd import set_cwd, set_prefix, get_processed_paths
 
 class cmd(basecmd):
     @classmethod

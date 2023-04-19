@@ -1,4 +1,3 @@
-
 u"""Change global parameters of the matplotlib"""
 
 from gna.ui import basecmd

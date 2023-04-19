@@ -1,7 +1,6 @@
 import ROOT
 import numpy as np
-from packages.minimize.lib.base import MinimizerBase, FitResult
-from collections import OrderedDict
+from minimize.lib.base import MinimizerBase, FitResult
 
 class MinuitBase(MinimizerBase):
     _label = 'TMinuit?'
@@ -58,7 +57,7 @@ class MinuitBase(MinimizerBase):
         # for i, par in enumerate(self.parspecs):
             # self.setuppar(i, par, spec.get(par, {}))
 
-    def _child_fit(self, profile_errors=[]):
+    def _child_fit(self, profile_errors=[], covariance=False):
         assert self.parspecs
 
         self.setuppars()
@@ -76,15 +75,20 @@ class MinuitBase(MinimizerBase):
             self._result = fr.result
             self.patchresult()
 
+            if covariance:
+                cov, status=self.get_covmatrix()
+                self._result['covariance']={'matrix': cov, 'status': status}
+
             if profile_errors:
                 self.profile_errors(profile_errors, self.result)
 
         return self.result
 
     def profile_errors(self, names, fitresult):
-        errs = fitresult['errors_profile'] = OrderedDict()
+        errs = fitresult['errors_profile'] = dict()
+        statuses = fitresult['errors_profile_status'] = dict()
         if names:
-            print('Caclulating statistics profile for:', end=' ')
+            print('Caclulating profile error for:', end=' ')
         for name in names:
             if isinstance(name, int):
                 idx = name
@@ -92,8 +96,9 @@ class MinuitBase(MinimizerBase):
             else:
                 idx = self.result['names'].index(name)
             print(name, end=', ')
-            left, right = self.get_profile_error(idx=idx)
-            errs[name] = [left.tolist(), right.tolist()]
+            status, (left, right) = self.get_profile_error(idx=idx)
+            errs[name] = [left, right]
+            statuses[name] = status
 
     def get_profile_error(self, name=None, idx=None, verbose=False):
         if idx==None:
@@ -107,13 +112,32 @@ class MinuitBase(MinimizerBase):
 
         low, up = np.zeros( 1, dtype='d' ), np.zeros( 1, dtype='d' )
         try:
-            self.GetMinosError( idx, low, up )
+            ret = self.GetMinosError( idx, low, up )
         except:
+            ret = False
+
+        minosstatus = (self.Status()%100)//10
+
+        if not ret:
             print( 'Minuit error!' )
-            return [ 0.0, 0.0 ]
+            return minosstatus, [ 0.0, 0.0 ]
 
         print( ':', low[0], up[0] )
-        return [ low[0], up[0] ]
+        return minosstatus, [ low[0].tolist(), up[0].tolist() ]
+
+    def get_covmatrix(self, verbose=False):
+        n = self.NDim()
+
+        if verbose:
+            print( '    calculating covariance matrix...' )
+
+        covmatrix = np.zeros((n, n), dtype='d')
+        self.GetCovMatrix(covmatrix.ravel())
+        if verbose:
+            print( covmatrix )
+        status = self.CovMatrixStatus()
+
+        return covmatrix, status
 
 StatusCodes = {
         0: 'Minimization converged',

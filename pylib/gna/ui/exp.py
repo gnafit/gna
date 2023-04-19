@@ -6,11 +6,10 @@ import argparse
 import os.path
 from pkgutil import iter_modules
 from gna.config import cfg
-from collections import OrderedDict
 from gna.packages import iterate_module_paths
 from gna.dispatch import HelpDisplayed
 
-expmodules = OrderedDict([(name, loader) for loader, name, _ in iter_modules(cfg.experimentpaths)])
+expmodules = dict([(name, loader) for loader, name, _ in iter_modules(cfg.experimentpaths)])
 expmodules.update([(name, loader) for loader, name, _ in iter_modules(iterate_module_paths('experiments'))])
 
 class cmd(basecmd):
@@ -22,7 +21,7 @@ class cmd(basecmd):
         group.add_argument('-e', '--exp', nargs='*', default=(), help='experiment to load')
         group.add_argument('-L', '--list-experiments', action='store_true', help='list available experiments')
         parser.add_argument('expargs', nargs=argparse.REMAINDER, help='arguments to pass to the experiment')
-        parser.add_argument('--ns', help='namespace')
+        parser.add_argument('--ns', required=True, help='namespace')
         parser.add_argument('-h', '--help', action='store_true', help='print help')
         cls.parser=parser
 
