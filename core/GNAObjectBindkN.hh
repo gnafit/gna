@@ -2,13 +2,14 @@
 
 #include "GNAObject.hh"
 #include <vector>
+#include <limits>
 
 class GNAObjectBindkN: public GNAObjectT<double,double> {
 public:
     GNAObjectBindkN(const std::string& transformation,
                     const std::vector<std::string>& inputs,
                     const std::string& output,
-                    size_t transformation_offsset, size_t input_offset, size_t output_offset);
+                    size_t transformation_offsset, size_t input_offset, int output_offset);
 
     virtual TransformationDescriptor add_transformation(const std::string& name="");
 
@@ -19,10 +20,11 @@ public:
     void add_inputs(SingleOutput* output1, SingleOutput* output2)                        { return add_inputs(SingleOutputsContainer({output1, output2})); }
     void add_inputs(SingleOutput* output1, SingleOutput* output2, SingleOutput* output3) { return add_inputs(SingleOutputsContainer({output1, output2, output3})); }
 
+    bool has_open_inputs()  { return m_open_inputs>0; }
 protected:
     void set_transformation_offset(size_t offset) { m_transformation_offset=offset; }
     void set_input_offset(size_t offset)          { m_input_offset=offset; }
-    void set_output_offset(size_t offset)         { m_output_offset=offset; }
+    void set_output_offset(int offset)            { m_output_offset = offset>=0 ? offset : std::numeric_limits<int>::max(); }
 
     std::string new_transformation_name(const std::string& name);
 

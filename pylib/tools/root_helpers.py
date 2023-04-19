@@ -6,6 +6,10 @@ class TFileContext(object):
         self.filename = filename
         self.mode = mode
 
+    @staticmethod
+    def type(mode='read'):
+        return lambda filename: TFileContext(filename, mode)
+
     def __enter__(self):
         self.file = R.TFile(self.filename, self.mode)
         if self.file.IsZombie():

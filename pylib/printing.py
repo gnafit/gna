@@ -1,5 +1,3 @@
-
-
 printlevel = 0
 singlemargin = '    '
 marginflag = False

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from load import ROOT as R
-import numpy as N
+import numpy as np
 from gna import constructors as C
 from gna.bindings import common
-from matplotlib import pyplot as P
+from matplotlib import pyplot as plt
 from mpl_tools.helpers import savefig, add_to_labeled_items, plot_hist
 from gna.graphviz import savegraph
 from gna.env import env
@@ -21,9 +21,9 @@ def main(opts):
             nidx=[ ('r', 'reference', ['R1', 'R2']) ],
             major=[],
             ),
-        stopping_power='stoppingpower.txt',
+        stopping_power='data/data_juno/energy_model/2019_birks_cherenkov_v01/stoppingpower.txt',
         annihilation_electrons=dict(
-            file='input/hgamma2e.root',
+            file='data/data_juno/energy_model/2019_birks_cherenkov_v01/hgamma2e.root',
             histogram='hgamma2e_1KeV',
             scale=1.0/50000 # event simulated
             ),
@@ -62,18 +62,20 @@ def main(opts):
     ns.printparameters(labels=True)
     print()
     normE = ns['normalizationEnergy'].value()
+    Npescint=ns['Npescint']
+    kC=ns['kC']
 
     #
     # Input bins
     #
-    evis_edges_full_input = N.arange(0.0, 12.0+1.e-6, 0.025)
+    evis_edges_full_input = np.arange(0.0, 12.0+1.e-6, 0.001)
     evis_edges_full_hist = C.Histogram(evis_edges_full_input, labels='Evis bin edges')
     evis_edges_full_hist >> quench.context.inputs.evis_edges_hist['00']
 
     #
     # HistNonLinearity transformation
     #
-    reference_histogram1_input = N.zeros(evis_edges_full_input.size-1)
+    reference_histogram1_input = np.zeros(evis_edges_full_input.size-1)
     reference_histogram2_input = reference_histogram1_input.copy()
     reference_histogram1_input+=1.0
     # reference_histogram2_input[[10, 20, 50, 100, 200, 300, 400]]=1.0
@@ -89,24 +91,36 @@ def main(opts):
     #
     # Plots and tests
     #
+    savefig_old=savefig
     if opts.output and opts.output.endswith('.pdf'):
         pdfpages = PdfPages(opts.output)
         pdfpagesfilename=opts.output
-        savefig_old=savefig
         pdf=pdfpages.__enter__()
-        def savefig(*args, **kwargs):
-            if opts.individual and args and args[0]:
-                savefig_old(*args, **kwargs)
-            pdf.savefig()
     else:
         pdf = None
         pdfpagesfilename = ''
+        pdfpages = None
+    def savefig(*args, **kwargs):
+        close = kwargs.pop('close', False)
+        if opts.individual and args and args[0]:
+            savefig_old(*args, **kwargs)
+        if pdf:
+            pdf.savefig()
+
+        if close:
+            plt.close()
+
+
+    birks_emin = quench.birks_e_p.single().data()[0]
+    lsnl_e = quench.histoffset.histedges.points_truncated.data()
+    lsnl_y = quench.positron_model_relative.data()
+    lsnl_min_i = lsnl_y.argmin()
 
     #
     # Plots and tests
     #
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
@@ -114,15 +128,20 @@ def main(opts):
     ax.set_title( 'Stopping power' )
 
     quench.birks_quenching_p.points.points.plot_vs(quench.birks_e_p.points.points, '-', markerfacecolor='none', markersize=2.0, label='input')
+    ax.axvline(birks_emin, ls='--', label='Extrapolation boundary')
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
     ax.legend(loc='upper right')
     savefig(opts.output, suffix='_spower')
 
+    ax.set_xlim(0., 2.0)
+    savefig(opts.output, suffix='_spower_zoom')
+
     ax.set_xlim(left=0.001)
     ax.set_xscale('log')
-    savefig(opts.output, suffix='_spower_log')
+    savefig(opts.output, suffix='_spower_log', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
@@ -133,6 +152,8 @@ def main(opts):
     # birks_integrand_interpolated.plot_vs(integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
     lines=quench.birks_integrand_interpolated.plot_vs(quench.integrator_ekin.points.x,   '-', alpha=0.5, markerfacecolor='none', markersize=2.0, label='interpolated')
     quench.birks_integrand_interpolated.plot_vs(quench.integrator_ekin.points.x, 'o', alpha=0.5, color='black', markersize=0.6)
+    ax.axvline(birks_emin, ls='--', label='Extrapolation boundary')
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
     ax.legend(loc='lower right')
 
     savefig()
@@ -141,10 +162,10 @@ def main(opts):
     ax.set_ylim(bottom=0.3)
     # ax.set_yscale('log')
     ax.set_xscale('log')
-    savefig(opts.output, suffix='_spower_int')
+    savefig(opts.output, suffix='_spower_int', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
@@ -152,6 +173,9 @@ def main(opts):
     ax.set_title( "Birk's integral (bin by bin)" )
 
     quench.birks_integral.plot_hist()
+    ax.axvline(birks_emin, ls='--', label='Extrapolation boundary')
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
+    ax.legend(loc='lower right')
 
     savefig()
 
@@ -160,10 +184,10 @@ def main(opts):
     # ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim(auto=True)
-    savefig(opts.output, suffix='_spower_intc')
+    savefig(opts.output, suffix='_spower_intc', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
@@ -172,11 +196,17 @@ def main(opts):
     #  birks_accumulator.reduction.out.plot_vs(integrator_evis.transformations.hist, '-', markerfacecolor='none', markersize=2.0, label='partial sum')
     quench.birks_accumulator.reduction.plot_vs(quench.histoffset.histedges.points_offset)
     ax.plot([0.0, 12.0], [0.0, 12.0], '--', alpha=0.5)
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
+    ax.legend()
 
     savefig(opts.output, suffix='_birks_evis')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    ax.set_xlim(-0.1, 0.2)
+    ax.set_ylim(-0.1, 0.2)
+    savefig(opts.output, suffix='_birks_evis_zoom', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
@@ -190,16 +220,18 @@ def main(opts):
 
     ax.set_xlim(1.e-3, 2.0)
     ax.set_xscale('log')
-    savefig()
+    savefig(close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
     ax.set_ylabel( 'Npe' )
     ax.set_title( 'Cherenkov photons' )
     quench.cherenkov.cherenkov.ch_npe.plot_vs(quench.histoffset.histedges.points_offset)
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
+    ax.legend()
 
     savefig(opts.output, suffix='_cherenkov_npe')
 
@@ -209,10 +241,10 @@ def main(opts):
 
     ax.set_xlim(0.0, 2.0)
     # ax.set_ylim(0.0, 200.0)
-    savefig()
+    savefig(close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -220,10 +252,10 @@ def main(opts):
     ax.set_title( 'Electron model' )
     quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_offset)
 
-    savefig(opts.output, suffix='_electron')
+    savefig(opts.output, suffix='_electron', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -236,10 +268,10 @@ def main(opts):
 
     ax.legend(loc='upper left')
 
-    savefig(opts.output, suffix='_electron_lowe')
+    savefig(opts.output, suffix='_electron_lowe', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -249,31 +281,139 @@ def main(opts):
 
     savefig(opts.output, suffix='_total_npe')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    ax.set_xlim(0.9, 1.2)
+    ax.set_ylim(1000, 1500)
+    savefig(opts.output, suffix='_total_npe_zoom', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Evis, MeV' )
+    ax.set_title( 'Energy models comparison' )
+    kC.push(0)
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_offset, label='Electron: Birks')
+    kC.pop()
+    Npescint.push(0)
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_offset, label='Electron: Cherenkov')
+    Npescint.pop()
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_offset, label='Electron: total')
+    ls = quench.positron_model.plot_vs(quench.histoffset.histedges.points_offset, label=f'Positron: total (electron + {annihilation_gamma_evis:.2f} Npe) vs Ekin', linestyle='--')
+    quench.positron_model.plot_vs(quench.histoffset.histedges.points_truncated, label=f'Positron: total (electron + {annihilation_gamma_evis:.2f} Npe)', color=ls[0].get_color())
+    ax.axvline(quench.doubleme, linestyle='--', label='$2m_e$')
+    ax.axvline(lsnl_e[lsnl_min_i]-quench.doubleme, ls='--', label='minimum location $-2m_e$', linewidth=1, color='red')
+    ax.legend(fontsize='x-small')
+
+    savefig(opts.output, suffix='_comparison')
+
+    ax.set_xlim(-0.05, 1.2)
+    ax.set_ylim(-100, 4000)
+    savefig(opts.output, suffix='_comparison_zoom', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'E, MeV' )
+    ax.set_ylabel( 'Evis, MeV' )
+    ax.set_title( 'Energy models comparison' )
+    kC.push(0)
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_truncated, '-', label='Electron: Birks vs E+$2m_e$', markerfacecolor='none', markersize=2.0)
+    kC.pop()
+    Npescint.push(0)
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_truncated, label='Electron: Cherenkov vs vs E+$2m_e$')
+    Npescint.pop()
+    quench.electron_model.single().plot_vs(quench.histoffset.histedges.points_truncated, label='Electron: total vs E+$2m_e$')
+    quench.positron_model.plot_vs(quench.histoffset.histedges.points_truncated, label=f'Positron: total (electron + {annihilation_gamma_evis:.2f} Npe)')
+    ax.axvline(quench.doubleme, linestyle='--', label='$2m_e$')
+    ax.axvline(lsnl_e[lsnl_min_i], ls='--', label='minimum location', linewidth=1, color='red')
+    ax.legend(fontsize='x-small')
+
+    savefig(opts.output, suffix='_comparison1')
+
+    ax.set_xlim(0.9, 1.2)
+    ax.set_ylim(-50, 1500)
+    savefig(opts.output, suffix='_comparison1_zoom')
+
+    ax.set_xlim(1.01, 1.1)
+    ax.set_ylim(-10, 40)
+    savefig(opts.output, suffix='_comparison1_zoom1', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis, MeV' )
     ax.set_title( 'Positron energy model' )
     quench.positron_model_scaled.plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
-    quench.positron_model_scaled_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
+    # quench.positron_model_scaled_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
+    ax.plot([0.0, 12.0], [0.0, 12.0], '--', linewidth=1.0, color='black', label='equal')
     ax.vlines(normE, 0.0, normE, linestyle=':')
     ax.hlines(normE, 0.0, normE, linestyle=':')
-    ax.legend(loc='upper left')
+    ax.axvline(quench.doubleme, linestyle='--', label='$2m_e$', linewidth=1)
+    ax.axvline(lsnl_e[lsnl_min_i], ls='--', label='minimum', linewidth=1, color='red')
+    ax.legend(loc='lower right')
 
     savefig(opts.output, suffix='_total')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    ax.set_xlim(0.9, 1.2)
+    ax.set_ylim(0.9, 1.2)
+    savefig(opts.output, suffix='_total_zoom')
+
+    ax.set_xlim(1.01, 1.05)
+    ax.set_ylim(0.9, 0.95)
+
+    x, y = lsnl_e[lsnl_min_i], quench.positron_model_scaled.data()[lsnl_min_i]
+    step=[-0.1, 0.1]
+    ax.plot(x+step, y+step, '--', color='cyan', linewidth=0.8, label='diag')
+    ax.legend(loc='lower right')
+    savefig(opts.output, suffix='_total_zoom1', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
+    ax.minorticks_on()
+    ax.grid()
+    ax.set_xlabel( 'Edep, MeV' )
+    ax.set_ylabel( 'Evis, MeV' )
+    ax.set_title( 'Positron energy model derivative' )
+    lsnl_abs = quench.positron_model_scaled.data()
+
+    widths = lsnl_e[1:]-lsnl_e[:-1]
+    centers = 0.5*(lsnl_e[1:]+lsnl_e[:-1])
+    diff = (lsnl_abs[1:]-lsnl_abs[:-1])/widths
+
+    ax.plot(centers, diff, label='derivative')
+    ax.plot(lsnl_e, lsnl_abs/lsnl_e, label='Evis/Edep')
+
+    ax.axvline(quench.doubleme, linestyle='--', label='$2m_e$', linewidth=1)
+    ax.axvline(lsnl_e[lsnl_min_i], ls='--', label='minimum', linewidth=1, color='red')
+    ax.legend(loc='lower right')
+
+    savefig(opts.output, suffix='_total_derivative')
+
+
+    ax.set_xlim(0.9, 1.2)
+    ax.set_ylim(0.6, 1.05)
+    savefig(opts.output, suffix='_total_derivative_zoom')
+
+    ax.set_xlim(1.01, 1.1)
+    ax.set_ylim(0.7, 1.)
+    savefig(opts.output, suffix='_total_derivative_zoom1', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'Edep, MeV' )
     ax.set_ylabel( 'Evis/Edep' )
     ax.set_title( 'Positron energy nonlineairty' )
     quench.positron_model_relative.single().plot_vs(quench.histoffset.histedges.points_truncated, label='definition range')
-    quench.positron_model_relative_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
+    # quench.positron_model_relative_full.plot_vs(quench.histoffset.histedges.points, '--', linewidth=1., label='full range', zorder=0.5)
     ax.vlines(normE, 0.0, 1.0, linestyle=':')
+    ax.axvline(quench.doubleme, linestyle='--', label='$2m_e$', linewidth=1)
+    ax.vlines(lsnl_e[lsnl_min_i], 0, lsnl_y[lsnl_min_i], ls='--', label='minimum', linewidth=1, color='red')
 
     ax.legend(loc='lower right')
     ax.set_ylim(0.85, 1.1)
@@ -283,8 +423,12 @@ def main(opts):
     ax.set_xlim(0.75, 3)
     savefig(opts.output, suffix='_total_relative1')
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    ax.set_xlim(0.9, 1.2)
+    ax.set_ylim(0.89, 0.915)
+    savefig(opts.output, suffix='_total_relative2', close=True)
+
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel('Etrue, MeV')
@@ -300,10 +444,10 @@ def main(opts):
 
     ax.set_xlim(0.8, 3.0)
     ax.set_ylim(3.0, 0.8)
-    savefig(opts.output, suffix='_matrix_zoom')
+    savefig(opts.output, suffix='_matrix_zoom', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -315,10 +459,10 @@ def main(opts):
 
     ax.legend(loc='upper right')
 
-    savefig(opts.output, suffix='_refsmear1')
+    savefig(opts.output, suffix='_refsmear1', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -334,11 +478,11 @@ def main(opts):
 
     ax.legend(loc='upper right')
 
-    savefig(opts.output, suffix='_matrix_projections')
+    savefig(opts.output, suffix='_matrix_projections', close=True)
 
     if opts.mapping:
-        fig = P.figure()
-        ax = P.subplot( 111 )
+        fig = plt.figure()
+        ax = plt.subplot( 111 )
         ax.minorticks_on()
         ax.grid()
         ax.set_xlabel( 'E, MeV' )
@@ -355,8 +499,8 @@ def main(opts):
         ax.axvline(1.022, linestyle='--', linewidth=1.0)
         ax.axvline(12.0, linestyle='--', linewidth=1.0)
 
-        fig = P.figure()
-        ax = P.subplot( 111 )
+        fig = plt.figure()
+        ax = plt.subplot( 111 )
         ax.minorticks_on()
         # ax.grid()
         ax.set_xlabel( 'E, MeV' )
@@ -379,10 +523,10 @@ def main(opts):
 
         # ax.legend(loc='upper right')
 
-        savefig(opts.output, suffix='_mapping_bins')
+        savefig(opts.output, suffix='_mapping_bins', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -395,10 +539,10 @@ def main(opts):
 
     ax.legend(loc='upper right')
 
-    savefig(opts.output, suffix='_refsmear2')
+    savefig(opts.output, suffix='_refsmear2', close=True)
 
-    fig = P.figure()
-    ax = P.subplot( 111 )
+    fig = plt.figure()
+    ax = plt.subplot( 111 )
     ax.minorticks_on()
     ax.grid()
     ax.set_xlabel( 'E, MeV' )
@@ -411,7 +555,7 @@ def main(opts):
 
     ax.set_yscale('linear')
     ax.set_xlim(0.0, 0.1)
-    savefig(opts.output, suffix='_annihilation_electrons_lin')
+    savefig(opts.output, suffix='_annihilation_electrons_lin', close=True)
 
     if pdfpages:
         pdfpages.__exit__(None,None,None)
@@ -420,7 +564,7 @@ def main(opts):
     savegraph(quench.histoffset.histedges.points_truncated, opts.graph, namespace=ns)
 
     if opts.show:
-        P.show()
+        plt.show()
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

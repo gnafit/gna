@@ -1,4 +1,3 @@
-
 """Oscillation probability Pee bundle v01.
 
 Based on oscprob_v05. Updates:
@@ -9,7 +8,6 @@ Based on oscprob_v05. Updates:
 from load import ROOT as R
 import gna.constructors as C
 from gna.bundle import TransformationBundle
-from collections import OrderedDict
 
 class oscprob_ee_v01(TransformationBundle):
     def __init__(self, *args, **kwargs):
@@ -76,4 +74,3 @@ class oscprob_ee_v01(TransformationBundle):
 
     def define_variables(self):
         pass
-

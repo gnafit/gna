@@ -22,7 +22,7 @@ from matplotlib import pyplot as P
 import numpy as N
 from mpl_tools import bindings
 from gna.labelfmt import formatter as L
-from collections import OrderedDict
+
 R.GNAObject
 
 #
@@ -33,7 +33,7 @@ if args.mode=='complete':
         ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
         ('r', 'reactor',     ['DB1', 'DB2', 'LA1', 'LA2', 'LA3', 'LA4']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
         ('s', 'site',        ['EH1', 'EH2', 'EH3']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -43,7 +43,7 @@ elif args.mode=='minimal':
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1']),
         ('d', 'detector',    ['AD11', 'AD21'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11',)), ('EH2', ('AD21',))]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11',)), ('EH2', ('AD21',))]))),
         ('s', 'site',        ['EH1', 'EH2']),
         ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -53,7 +53,7 @@ elif args.mode=='small':
         ('i', 'isotope', ['U235']),
         ('r', 'reactor',     ['DB1', 'LA1']),
         ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22'],
-                             dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')) ]))),
+                             dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')) ]))),
         ('s', 'site',        ['EH1', 'EH2']),
         ('c', 'component',   ['comp0', 'comp12']),
         ('l', 'lsnl_component', ['nominal', 'pull0', 'pull1', 'pull2', 'pull3'] )
@@ -88,7 +88,7 @@ groups=NestedDict(
             ])
         )
 
-lib = OrderedDict(
+lib = dict(
         # Accidentals
         acc_num_bf        = dict(expr='acc_norm*bkg_rate_acc*efflivetime',             label='Acc num {detector}\n(best fit)}'),
         bkg_acc           = dict(expr='acc_num_bf*bkg_spectrum_acc',                   label='Acc {detector}\n(w: {weight_label})'),

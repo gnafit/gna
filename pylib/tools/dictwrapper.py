@@ -1,5 +1,5 @@
 from tools.classwrapper import ClassWrapper
-from collections import OrderedDict, Iterable, MutableMapping
+from collections.abc import Iterable, MutableMapping
 import inspect
 
 class DictWrapper(ClassWrapper):
@@ -12,7 +12,7 @@ class DictWrapper(ClassWrapper):
     """
     _split = None
     _parent = None
-    _type = OrderedDict
+    _type = dict
     def __new__(cls, dic, *args, **kwargs):
         if not isinstance(dic, (MutableMapping, DictWrapper)):
             return dic
@@ -30,6 +30,12 @@ class DictWrapper(ClassWrapper):
             self._parent = parent
             self._split = parent._split
             self._types = parent._types
+
+    def __eq__(self, other):
+        if isinstance(other, DictWrapper):
+            return self._obj==other._obj
+
+        return self._obj==other
 
     @property
     def _(self):
@@ -119,8 +125,8 @@ class DictWrapper(ClassWrapper):
         key, rest=self.splitkey(key)
 
         if not rest:
-            self.setdefault(key, value)
-            return
+            ret=self._obj.setdefault(key, value)
+            return self._wrapobject(ret)
 
         if key in self:
             sub = self.__getattr__('get')(key)
@@ -129,14 +135,14 @@ class DictWrapper(ClassWrapper):
             sub = self._wrapobject(sub)
             # # cfg._set_parent( self )
 
-        sub.setdefault(rest, value)
+        return sub.setdefault(rest, value)
 
     def set(self, key, value):
         key, rest=self.splitkey(key)
 
         if not rest:
             self._obj[key] = value
-            return
+            return value #TODO: wrap
 
         if key in self:
             sub = self.__getattr__('get')(key)
@@ -145,7 +151,7 @@ class DictWrapper(ClassWrapper):
             sub = self._wrapobject(sub)
             # # cfg._set_parent( self )
 
-        sub.set(rest, value)
+        return sub.set(rest, value)
 
     __setitem__= set
 
@@ -180,10 +186,21 @@ class DictWrapper(ClassWrapper):
 
         return new
 
-    def walkitems(self, startfromkey=(), appendstartkey=False):
+    def walkitems(self, startfromkey=(), *, appendstartkey=False, maxdepth=None):
         v0 = self[startfromkey]
         k0 = tuple(self.iterkey(startfromkey))
-        if not isinstance(v0, self._wrapper_class):
+        startdepth=len(k0)
+
+        if maxdepth is None:
+            nextdepth=None
+        else:
+            maxdepth-=startdepth
+
+            nextdepth=maxdepth-1
+            if nextdepth<0:
+                nextdepth=0
+
+        if maxdepth==0 or not isinstance(v0, self._wrapper_class):
             if appendstartkey:
                 yield k0, v0
             else:
@@ -196,7 +213,7 @@ class DictWrapper(ClassWrapper):
         for k, v in v0.items():
             k = k,
             if isinstance(v, self._wrapper_class):
-                for k1, v1 in v.walkitems():
+                for k1, v1 in v.walkitems(maxdepth=nextdepth):
                     yield k0+k+k1, v1
             else:
                 yield k0+k, v
@@ -212,12 +229,12 @@ class DictWrapper(ClassWrapper):
         if yieldself:
             yield (), self
 
-    def walkkeys(self, startfromkey=()):
-        for k, v in self.walkitems(startfromkey):
+    def walkkeys(self, *args, **kwargs):
+        for k, v in self.walkitems(*args, **kwargs):
             yield k
 
-    def walkvalues(self, startfromkey=()):
-        for k, v in self.walkitems(startfromkey):
+    def walkvalues(self, *args, **kwargs):
+        for k, v in self.walkitems(*args, **kwargs):
             yield v
 
     def visit(self, visitor, parentkey=()):

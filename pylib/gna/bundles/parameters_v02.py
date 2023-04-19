@@ -1,4 +1,3 @@
-
 """Parameters v02 bundle
 
 Implements a set of parameters. It is extended implementation of the Parameters v01 bundle.

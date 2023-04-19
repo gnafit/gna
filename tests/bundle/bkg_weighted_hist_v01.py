@@ -9,7 +9,6 @@ from gna.bundle import execute_bundles
 from gna.env import env, findname
 from matplotlib import pyplot as P
 from mpl_tools.helpers import plot_hist, plot_bar
-from collections import OrderedDict
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -60,7 +59,7 @@ bkg.bkg1 = NestedDict(
             bundle = 'root_histograms_v01',
             filename   = cfg.filename,
             format = 'hist_{self}',
-            variants = OrderedDict([
+            variants = dict([
                 ( 'D1', 'G1_D1' ),
                 ( 'D2', 'G1_D2' ),
                 ( 'D3', 'G2_D3' ),

@@ -36,8 +36,8 @@ TransformationDescriptor InterpBase::add_transformation(const std::string& name)
     .types(TypesFunctions::ifPoints<1>, TypesFunctions::if1d<1>)            /// x is an 1d array
     .types(TypesFunctions::ifPoints<2>, TypesFunctions::ifSameShape2<0,2>)  /// segment index is of shape of newx
     .types(TypesFunctions::ifPoints<3>, TypesFunctions::if1d<3>)            /// widths is an 1d array
-    .types(TypesFunctions::ifSame2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
-    .types(TypesFunctions::ifPoints<4>, TypesFunctions::if1d<4>)            /// y is an 1d array
+    .types(TypesFunctions::ifSameShape2<1,4>, TypesFunctions::ifBinsEdges<3,1>)
+    .types(TypesFunctions::if1d<4>)            /// y is an 1d array
     .types(TypesFunctions::ifSameInRange<4,-1,true>, TypesFunctions::passToRange<0,0,-1,true>)
     .func(&InterpBase::do_interpolate)
     ;
@@ -125,23 +125,31 @@ void InterpBase::do_interpolate(FunctionArgs& fargs){
       auto idx = static_cast<size_t>(*insegment);
       if( *insegment<0 ) {                                                  /// underflow
         switch (m_underflow_strategy) {
-            case (Strategy::Constant):
-                *result = m_fill_value;
-                break;
             case (Strategy::Extrapolate):
                 idx = 0u;
-                *result = interpolation_formula_below(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
+                *result = interpolation_formula_below(x_buffer[0],  y_buffer[0], k_buffer[0], *point);
+                break;
+            case (Strategy::NearestEdge):
+                idx = 0u;
+                *result = interpolation_formula_below(x_buffer[0],  y_buffer[0], k_buffer[0], x_buffer[0]);
+                break;
+            case (Strategy::Constant):
+                *result = m_fill_value;
                 break;
         }
       }
       else if( *insegment>=nseg ) {                                         /// overflow
         switch (m_overflow_strategy) {
-            case (Strategy::Constant):
-                *result = m_fill_value;
-                break;
             case (Strategy::Extrapolate):
                 idx = nseg-1u;
                 *result = interpolation_formula_above(x_buffer[idx],  y_buffer[idx], k_buffer[idx], *point);
+                break;
+            case (Strategy::NearestEdge):
+                idx = nseg-1u;
+                *result = interpolation_formula_above(x_buffer[idx],  y_buffer[idx], k_buffer[idx], x_buffer[nseg]);
+                break;
+            case (Strategy::Constant):
+                *result = m_fill_value;
                 break;
         }
       } else {                                                              /// interpolation in definition range

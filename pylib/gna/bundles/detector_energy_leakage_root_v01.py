@@ -1,9 +1,7 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
-from collections import OrderedDict
 
 class detector_energy_leakage_root_v01(TransformationBundle):
     """Energy distortion due to the energy leakage v01, defined via a histogram from a ROOT file
@@ -81,7 +79,7 @@ class detector_energy_leakage_root_v01(TransformationBundle):
 
             for itother in self.nidx_minor:
                 it = itdet+itother
-                esmear = R.HistSmear(True, labels=it.current_format('{{Eleak effect|{autoindex}}}')) # True for 'upper'
+                esmear = R.HistSmear(R.GNA.SquareMatrixType.UpperTriangular, labels=it.current_format('{{Eleak effect|{autoindex}}}'))
                 matinput >> esmear.smear.inputs.SmearMatrix
                 self.set_input('eleak', it, esmear.smear.Ntrue, argument_number=0)
                 self.set_output('eleak', it, esmear.single())
@@ -90,7 +88,7 @@ class detector_energy_leakage_root_v01(TransformationBundle):
 
     def build(self):
         from tools.data_load import read_object_auto
-        res = read_object_auto(self.cfg.filename, name=self.cfg.matrixname, convertto='array')
+        res = read_object_auto(self.cfg.filename, name=self.cfg.matrixname)
         if isinstance(res, tuple):
             self.eleak_matrix = res[-1]
         else:

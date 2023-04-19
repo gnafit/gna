@@ -1,4 +1,3 @@
-
 """Detector energy resolution
 
 implements 1-parameter energy resolution for a detector with multiple zones
@@ -31,7 +30,7 @@ class detector_multieres_stats_v01(TransformationBundle):
         return (cfg.parameter,), ('eres_matrix', 'eres')
 
     def build(self):
-        expose_matrix = self.cfg.get('expose_matrix', False)
+        expose_matrix = R.GNA.DataPropagation.Propagate if self.cfg.get('expose_matrix', False) else R.GNA.DataPropagation.Ignore
         split_transformations = self.cfg.get('split_transformations', True)
 
         self.objects = []

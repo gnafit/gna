@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
@@ -23,8 +22,8 @@ class rebin_v05(TransformationBundle):
         edges = self.cfg.edges
         hist = C.Histogram(edges, labels='Rebin edges spec')
         points = C.Points(edges, labels='Rebin edges spec')
-        self.set_output('rebin_hist', None, hist)
-        self.set_output('rebin_points', None, points)
+        self.set_output('rebin_hist', None, hist.hist.hist)
+        self.set_output('rebin_points', None, points.points.points)
 
         self.objects = [hist, points]
         for name, label in self.cfg.instances.items():

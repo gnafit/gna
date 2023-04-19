@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from gna.expression.simple import *
+import colorama
 
 class IndexedContainer(object):
     objects = None
@@ -127,7 +128,12 @@ class IndexedContainer(object):
                                 inputs = inputs,
                             for input in inputs:
                                 if not input.materialized(): #Fixme: should be configurable
-                                    output >> input
+
+                                    try:
+                                        output >> input
+                                    except:
+                                        print(colorama.Fore.RED+f'Unable to bind {self.name}: {output.name()} >> {input.name()}'+colorama.Style.NORMAL)
+                                        raise
 
 class VProduct(IndexedContainer, Variable):
     def __init__(self, name, *objects, **kwargs):
@@ -234,11 +240,11 @@ class TCall(IndexedContainer, Transformation):
         targs = list(targs) + list(kwargs.pop('targs', ()))
 
         objects = []
-        for arg in targs:
+        for iarg, arg in enumerate(targs):
             if isinstance(arg, str):
                 arg = Transformation(arg)
             elif not isinstance(arg, Transformation):
-                raise Exception('Arguments argument should be another Transformation')
+                raise Exception(f'Argument {iarg} ({arg.name}) of {name} should be another Transformation')
             objects.append(arg)
 
         IndexedContainer.__init__(self, *objects)

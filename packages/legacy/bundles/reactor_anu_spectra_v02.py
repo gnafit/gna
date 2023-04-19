@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as N
-from collections import OrderedDict
 from gna.bundle import *
 from scipy.interpolate import interp1d
 
@@ -82,7 +80,7 @@ class reactor_anu_spectra_v02(TransformationBundleLegacy):
 
     def load_data(self):
         """Read raw input spectra"""
-        self.spectra_raw = OrderedDict()
+        self.spectra_raw = dict()
         dtype = [ ('enu', 'd'), ('yield', 'd') ]
         if self.debug:
             print('Load files:')
@@ -96,8 +94,8 @@ class reactor_anu_spectra_v02(TransformationBundleLegacy):
             print( 'Bin edges:', self.model_edges )
 
         """Compute the values of spectra on the parametrization"""
-        self.spectra=OrderedDict()
-        self.shared.reactor_anu_fcn=OrderedDict()
+        self.spectra=dict()
+        self.shared.reactor_anu_fcn=dict()
         fcns = self.shared.reactor_anu_fcn
         for name, (x, y) in self.spectra_raw.items():
             f = interp1d( x, N.log(y), bounds_error=True )

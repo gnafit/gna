@@ -84,10 +84,8 @@ Funding
       - |ayss|
 
 
-The GNA development is currently supported by the Russian Science Foundation (`RSCF <https://rscf.ru/en/>`_) under the grant agreement:
+The GNA development is partially supported by the Russian Science Foundation (`RSCF <https://rscf.ru/en/>`_) under the grant agreement:
     - **21-42-00023**
-and by Association of Young Scientists and Specialists of JINR (`AYSS <http://omus.jinr.ru>`_) under the grant agreements:
-    - **21-202-10**
 
 Past grants
 ***********
@@ -103,6 +101,7 @@ The GNA development was partially supported by
         * **15-202-04**, 2015
         * **17-202-09**, 2017
         * **18-202-08**, 2018
+        * **21-202-10**, 2021
 
 
 Universities
@@ -116,9 +115,11 @@ Universities
      - |mipt|
      - |spbu|
      - |isu|
+     - |mipt|
    * - |msu-phys|
      - |dgap|
      - |spbu-apmath|
      - |isu-physdep|
+     - |dgap|
 
 Students and alumni of MSU, MIPT, SPBU and ISU have contributed to the development of GNA.

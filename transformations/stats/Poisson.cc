@@ -44,22 +44,14 @@ double addOneInLnGamma(double in)
   return TMath::LnGamma(in + 1);
 }
 
-double lnFactorialApprox(double x)
-{
-  if (!(x == 0.0 || x == 1.0))
-  {
-    return x * std::log(x);
-  }
-  else
-    return 0;
-}
-
 void Poisson::calcPoissonApprox(FunctionArgs fargs) {
   /***************************************************************************
    *       Formula: log of Poisson
    *
    *        -2 * ln(Poisson) =
-   *            -2 * sum(data_i * log(theory_j) -  theory_j  - ln data_i! )
+   *          = -2 * sum(data_i * log(theory_i) -  theory_i  - ln data_i! ) ≈
+   *          ≈ -2 * sum(data_i * log(theory_i/data_i) + data_i - theory_i) =
+   *          = -2 ln(Poisson(data_i|theory_i)/Poisson(data_i|data_i))
    *
    ****************************************************************************/
   auto& args=fargs.args;
@@ -68,9 +60,9 @@ void Poisson::calcPoissonApprox(FunctionArgs fargs) {
   for (size_t i = 0; i < args.size(); i+=2) {
     auto& theory=args[i+0].arr;
     auto& data=args[i+1].arr;
-    res += (data*theory.log() - theory - data.unaryExpr(&lnFactorialApprox)).sum();
+    res += (data*(data/theory).log() + (theory-data)).sum();
   }
-  fargs.rets[0].arr(0) = -2*res;
+  fargs.rets[0].arr(0) = 2*res;
 }
 
 void Poisson::calcPoisson(FunctionArgs fargs) {

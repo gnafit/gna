@@ -35,7 +35,7 @@ tproduct_add_input.print()
 print()
 
 
-# Access the cacluation result:
+# Access the calcuation result:
 print('Results:')
 print(tproduct_constructor.product.product.data())
 print()

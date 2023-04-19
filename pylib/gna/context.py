@@ -1,6 +1,4 @@
-
 from load import ROOT as R
-from collections import OrderedDict
 
 _current_precision = 'double'
 _current_precision_short = 'double'
@@ -62,7 +60,7 @@ class cuda(object):
 
 class entryContext(object):
     def __init__(self, *args, **kwargs):
-        self.attrs = OrderedDict(*args, **kwargs)
+        self.attrs = dict(*args, **kwargs)
 
     def __enter__(self):
         pusher = R.TransformationTypes.TransformationContext.pushAttr

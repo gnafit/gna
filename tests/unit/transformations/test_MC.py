@@ -12,15 +12,21 @@ from gna.bindings import common
 import os
 from argparse import Namespace
 
+# def savefig(*args, **kwargs): pass
+
 class MCTestData(object):
     mcdata = None
     corrmat = None
+    covmat_L = None
     figures = tuple()
     correlation  = 0.95
     syst_unc_rel = 2
     nsigma = 4
-    PoissonTreshold = {0.1: [1, 11, 10], 100.0: [18, 18, 19],
-            10000.0: [19, 19, 19]}
+    PoissonThreshold = {
+        0.1: [1, 11, 10],
+        100.0: [18, 18, 19],
+        10000.0: [19, 19, 19]
+    }
     def __init__(self, data, mctype, **info):
         self.info     = Namespace(**info)
         self.info.index = str(self.info.index)
@@ -42,7 +48,7 @@ class MCTestData(object):
         self.prepare_inputs()
 
     def prepare_inputs(self):
-        if self.mctype=='NormalToyMC':
+        if self.mctype in ('NormalToyMC', 'CovarianceToyMCdiag'):
             self.input_err = C.Points(self.err_stat)
             self.inputs = (self.hist, self.input_err)
         elif self.mctype=='CovarianceToyMC':
@@ -51,10 +57,15 @@ class MCTestData(object):
             self.inputs = (self.hist,)
 
     def prepare_corrmatrix(self):
-        self.corrmat = np.full(self.shape2, self.correlation, dtype='d')
-        part = self.data.size//2
-        self.corrmat[:part, part:] = -self.corrmat[:part, part:]
-        self.corrmat[part:, :part] = -self.corrmat[part:, :part]
+        # self.corrmat = np.full(self.shape2, self.correlation, dtype='d')
+        # part = self.data.size//2
+        # self.corrmat[:part, part:] = -self.corrmat[:part, part:]
+        # self.corrmat[part:, :part] = -self.corrmat[part:, :part]
+
+        self.corrmat = np.eye(self.data.size, dtype='d')
+        for i in range(2,5):
+            for j in range(i+1, 5):
+                self.corrmat[j,i] = self.corrmat[i,j] = self.correlation
 
         np.fill_diagonal(self.corrmat, 1.0)
 
@@ -79,7 +90,7 @@ class MCTestData(object):
         if self.corrmat is None:
             self.mcdiff_norm = self.mcdiff/self.err_stat
         else:
-            self.mcdiff_norm = np.dot(self.covmat_L_inv, self.mcdiff)
+            self.mcdiff_norm = self.covmat_L_inv@self.mcdiff
 
     def plot(self, tmp_path):
         assert self.mcdata is not None
@@ -93,9 +104,6 @@ class MCTestData(object):
         self.figures += fig,
 
         return fig
-
-    def close(self):
-        list(map(plt.close, self.figures))
 
     def savefig(self, *args):
         path = '_'.join((self.tmp_path,)+tuple(args))+'.png'
@@ -126,15 +134,32 @@ class MCTestData(object):
         ax.set_ylabel( '' )
         ax.set_title('Check diff {index}, input {}, scale {scale}'.format(self.mctype, **self.info.__dict__))
 
-        plot_hist_errorbar(self.edges, self.mcdiff, self.err_stat, label='raw difference')
         plot_hist_errorbar(self.edges, self.mcdiff_norm, 1.0, label='normalized uncorrelated')
+
+        ax.legend()
+
+        self.savefig('diff_norm', self.info.index)
+
+        ax.set_ylim(-4,5)
+        self.savefig('diff_norm_zoom', self.info.index)
+
+        fig = self.figure()
+        ax = plt.subplot( 111 )
+        ax.minorticks_on()
+        ax.grid()
+        ax.set_xlabel( '' )
+        ax.set_ylabel( '' )
+        ax.set_title('Check diff {index}, input {}, scale {scale}'.format(self.mctype, **self.info.__dict__))
+
+        plot_hist_errorbar(self.edges, self.mcdiff, self.err_stat, label='raw difference')
 
         ax.legend()
 
         self.savefig('diff', self.info.index)
 
-        ax.set_ylim(-4,4)
-        self.savefig('diff_zoom', self.info.index)
+        # ax.set_ylim(-1,1)
+        # self.savefig('diff_norm_zoom', self.info.index)
+
 
     def matshow(self, mat, title, suffix):
         fig = self.figure()
@@ -173,48 +198,79 @@ class MCTestData(object):
             chi2_diff = chi2 - self.data.size
             assert chi2_diff < self.nsigma*(2.0*self.data.size)**0.5
 
+            diff_norm_abs=np.fabs(self.mcdiff_norm)
+            n1 = (diff_norm_abs>1).sum()
+            n2 = (diff_norm_abs>2).sum()
+            n3 = (diff_norm_abs>3).sum()
+            assert n1<self.data.size*0.6
+            assert n2<self.data.size*0.06+1
+            assert n3==0
+
+        if self.covmat_L is not None:
+            cm_again = self.covmat_L @ self.covmat_L.T
+
+            assert np.allclose(cm_again, self.covmat_full, atol=1.e-9, rtol=0)
+
     def check_nextSample(self):
+        index = int(self.info.index)
+        if index>0:
+            output_index=0
+            threshold_index=index-1
+        else:
+            threshold_index=-index-1
+            output_index=-index-1
+
         mcobject = self.mcobject
-        self.first_data = np.array([mc.data().copy() for mc in
-            list(mcobject.transformations[0].outputs.values())])
+        self.first_data = mcobject.transformations[0].outputs[output_index].data().copy()
         self.mcobject.nextSample()
-        self.second_data = np.array([mc.data().copy() for mc in
-            list(mcobject.transformations[0].outputs.values())])
+        self.second_data = mcobject.transformations[0].outputs[output_index].data().copy()
         self.mcdiff_nextSample = self.first_data - self.second_data
+
         if self.mctype=='Snapshot':
             assert (self.mcdiff_nextSample==0).all()
         elif self.mctype=='PoissonToyMC':
-            _, scale = [val for val in list(vars(self.info).values())]
-            assert ((self.mcdiff_nextSample!=0).sum(axis=1)
-                    > self.PoissonTreshold[scale]).all()
+            scale=self.info.scale
+            threshold = self.PoissonThreshold[scale][threshold_index]
+            assert (self.mcdiff_nextSample!=0).sum()>threshold
         else:
             assert (self.mcdiff_nextSample!=0).all()
 
 
 @pytest.mark.parametrize('scale', [0.1, 100.0, 10000.0])
-@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC'])
-def test_mc(mc, scale, tmp_path):
+@pytest.mark.parametrize('mc', ['Snapshot', 'PoissonToyMC', 'NormalStatsToyMC', 'NormalToyMC', 'CovarianceToyMC', 'CovarianceToyMCdiag'])
+@pytest.mark.parametrize('datanum', [0, 1, 2, 'all'])
+# @pytest.mark.parametrize('scale', [10000.0])
+# @pytest.mark.parametrize('mc', ['CovarianceToyMC'])
+def test_mc(mc, scale, datanum, tmp_path):
     R.GNA.Random.seed( 3 ) # With 4 sigma acceptance level failures do happen. Fix the random seed to guarantee the correct behaviour.
     size = 20
     data1 = np.ones(size, dtype='d')*scale
     data2 = (1.0+np.arange(size, dtype='d'))*scale
     data3 = (size - np.arange(size, dtype='d'))*scale
+    data = (data1, data2, data3)
 
-    mcdata_v = tuple(MCTestData(data, mc, index=i, scale=scale) for i, data in enumerate((data1, data2, data3)))
+    if datanum=='all':
+        mcdata_v = tuple(MCTestData(data, mc, index=-i-1, scale=scale) for i, data in enumerate(data))
+    else:
+        mcdata_v = (MCTestData(data[datanum], mc, index=datanum+1, scale=scale),)
 
-    MCclass = getattr(C, mc)
+    classes = {'CovarianceToyMCdiag': lambda: C.CovarianceToyMC(True, 1)}
+    MCclass = classes.get(mc) or getattr(C, mc)
     mcobject = MCclass()
 
     for mcdata in mcdata_v:
         mcobject.add_inputs(*mcdata.inputs)
 
-    mcobject.printtransformations()
+    # mcobject.printtransformations()
 
     list(map(lambda o_out: MCTestData.set_mc(o_out[0], mcobject, o_out[1]), list(zip(mcdata_v, list(mcobject.transformations[0].outputs.values())))))
 
     tmp_path = os.path.join(str(tmp_path), '_'.join((mc, str(int(scale)))) )
     list(map(lambda o: MCTestData.plot(o, tmp_path), mcdata_v))
 
-    list(map(MCTestData.close, mcdata_v))
     list(map(MCTestData.check_nextSample, mcdata_v))
     list(map(MCTestData.check_stats, mcdata_v))
+
+    # plt.show()
+    plt.close('all')
+

@@ -58,7 +58,7 @@ class exp(baseexp):
 
         if self.opts.with_eres:
             with self.namespace:
-                 eres = ROOT.EnergyResolution(True, labels='Energy\nresolution')
+                 eres = ROOT.EnergyResolution(ROOT.GNA.DataPropagation.Propagate, labels='Energy\nresolution')
             peak_sum.sum >> eres.matrix.Edges
             peak_sum.sum >> eres.smear.Ntrue
             self.namespace.addobservable("spectrum_with_eres", eres.smear.Nrec)

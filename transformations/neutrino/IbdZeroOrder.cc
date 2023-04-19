@@ -10,7 +10,7 @@
 
 constexpr double pi = boost::math::constants::pi<double>();
 
-IbdZeroOrder::IbdZeroOrder()
+void IbdZeroOrder::init()
 {
   transformation_("Enu")
     .input("Ee")
@@ -20,10 +20,6 @@ IbdZeroOrder::IbdZeroOrder()
     .input("Ee")
     .output("xsec")
     .func(&IbdZeroOrder::calcXsec);
-}
-
-IbdZeroOrder::IbdZeroOrder(bool useEnu): IbdZeroOrder() {
-    this->useEnu = useEnu;
 }
 
 void IbdZeroOrder::calcEnu(FunctionArgs fargs) {

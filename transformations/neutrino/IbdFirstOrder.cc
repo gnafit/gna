@@ -14,13 +14,15 @@ const double pi = boost::math::constants::pi<double>();
 
 using namespace Eigen;
 
-IbdFirstOrder::IbdFirstOrder()
+void IbdFirstOrder::init()
 {
   transformation_("Enu")
     .input("Ee")
     .input("ctheta")
-    .types(TypesFunctions::toMatrix<0,1,0>)
+    .types(TypesFunctions::toMatrix<0,1,0>,TypesFunctions::toMatrix<0,1,1>,TypesFunctions::toMatrix<0,1,2>)
     .output("Enu")
+    .output("Ee_mesh")
+    .output("ctheta_mesh")
     .func(&IbdFirstOrder::calc_Enu);
   transformation_("xsec")
     .input("Enu")
@@ -42,6 +44,7 @@ IbdFirstOrder::IbdFirstOrder()
     ElectronMass2 = mkdep(Pow(p->ElectronMass, 2));
     NeutronMass2 = mkdep(Pow(p->NeutronMass, 2));
     ProtonMass2 = mkdep(Pow(p->ProtonMass, 2));
+    Enu_threshold = mkdep(0.5 * (NeutronMass2 / (p->ProtonMass - p->ElectronMass) - p->ProtonMass + p->ElectronMass));
 
     y2 = mkdep((Pow(m_DeltaNP, 2)-ElectronMass2)*0.5);
   }
@@ -58,9 +61,12 @@ void IbdFirstOrder::calc_Enu(FunctionArgs fargs) {
   ArrayXd Ee0 = Ee + (NeutronMass2-ProtonMass2-ElectronMass2)/m_pdg->ProtonMass*0.5;
   ArrayXXd corr = (1.0-(1.0-(Ve.matrix()*ctheta.matrix().transpose()).array()).colwise()*r).inverse();
   fargs.rets[0].arr2d = corr.colwise()*Ee0;
+  fargs.rets[1].arr2d.colwise() = Ee;
+  fargs.rets[2].arr2d.rowwise() = ctheta.transpose();
 }
 
 double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
+  if (Eneu < Enu_threshold) return 0.0;
   double Ee0 = Eneu - m_DeltaNP;
   if ( Ee0<=m_pdg->ElectronMass ) return 0.0;
   double pe0 = std::sqrt(Ee0*Ee0 - ElectronMass2);
@@ -89,7 +95,6 @@ double IbdFirstOrder::Xsec(double Eneu, double ctheta) {
 
 void IbdFirstOrder::calc_Xsec(FunctionArgs fargs) {
   const auto &Eneu = fargs.args[0].arr2d;
-  const auto &ctheta = fargs.args[1].x;
   auto &xsec = fargs.rets[0].arr2d;
 
   const double MeV2J = 1.E6 * TMath::Qe();
@@ -97,9 +102,22 @@ void IbdFirstOrder::calc_Xsec(FunctionArgs fargs) {
 
   const double MeV2cm = pow(TMath::Hbar()*TMath::C()*J2MeV, 2) * 1.E4;
 
-  for (int i = 0; i < Eneu.rows(); ++i) {
-    for (int j = 0; j < Eneu.cols(); ++j) {
-      xsec(i, j) = MeV2cm * Xsec(Eneu(i, j), ctheta(j));
+  const auto &ctheta_arg = fargs.args[1];
+  size_t ndim = ctheta_arg.type.shape.size();
+  if(ndim==2u){
+    const auto &ctheta = fargs.args[1].arr2d;
+    for (int i = 0; i < Eneu.rows(); ++i) {
+      for (int j = 0; j < Eneu.cols(); ++j) {
+        xsec(i, j) = MeV2cm * Xsec(Eneu(i, j), ctheta(i, j));
+      }
+    }
+  }
+  else{
+    const auto &ctheta = fargs.args[1].x;
+    for (int i = 0; i < Eneu.rows(); ++i) {
+      for (int j = 0; j < Eneu.cols(); ++j) {
+        xsec(i, j) = MeV2cm * Xsec(Eneu(i, j), ctheta(j));
+      }
     }
   }
 }

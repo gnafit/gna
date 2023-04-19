@@ -16,7 +16,7 @@ hist = C.Histogram2d(edgesx, edgesy, narray)
 hist.print()
 print()
 
-# Access the output `points` of transformation `points` of the object `parray`
+# Access the output `hist` of transformation `hist` of the object `hist`
 print('Output:', hist.hist.hist)
 # Access and print relevant DataType
 datatype = hist.hist.hist.datatype()

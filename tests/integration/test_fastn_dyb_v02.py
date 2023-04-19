@@ -5,7 +5,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pytest
 import allure
-from collections import OrderedDict
 
 from load import ROOT as R
 
@@ -26,7 +25,7 @@ def test_snf_spectrum_expression(tmp_path):
     indices = [
             ('s', 'site',        ['EH1', 'EH2', 'EH3']),
             ('d', 'detector',    ['AD11', 'AD12', 'AD21', 'AD22', 'AD31', 'AD32', 'AD33', 'AD34'],
-                                 dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                                 dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
         ]
 
     expr = ['evis_edges()',

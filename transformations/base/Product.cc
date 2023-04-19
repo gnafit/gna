@@ -15,7 +15,7 @@ namespace GNA {
     ProductT<FloatType>::ProductT() {
       this->transformation_("product")
         .output("product")
-        .types(new CheckSameTypesT<FloatType>({0,-1}, "shape"), new PassTypeT<FloatType>(0, {0,0}))
+        .types(new CheckSameTypesT<FloatType>({0,-1}, "shape"), new PassTypePriorityT<FloatType>({0,-1}, {0,0}))
         .func([](typename GNAObjectT<FloatType,FloatType>::FunctionArgs& fargs) {
             auto& args=fargs.args;
             auto& ret=fargs.rets[0].x;
@@ -27,7 +27,7 @@ namespace GNA {
 #ifdef GNA_CUDA_SUPPORT
         .func("gpu", &ProductT<FloatType>::product_ongpu, DataLocation::Device)
 #endif
-    	;
+        ;
     }
 
     /**
@@ -66,11 +66,11 @@ namespace GNA {
 #ifdef GNA_CUDA_SUPPORT
     template<typename FloatType>
     void ProductT<FloatType>::product_ongpu(FunctionArgs& fargs) {
-    	fargs.args.touch();
-    	auto& gpuargs=fargs.gpu;
-    	auto** source=gpuargs->args;
+        fargs.args.touch();
+        auto& gpuargs=fargs.gpu;
+        auto** source=gpuargs->args;
         auto** dest  =gpuargs->rets;
-    	cuproduct(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
+        cuproduct(source, dest, gpuargs->nargs, fargs.args[0].arr.size());
     }
 #endif
   }

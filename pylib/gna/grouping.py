@@ -1,6 +1,5 @@
-
-from collections import OrderedDict
 from itertools import chain
+from collections import UserDict
 
 class Groups(object):
     """Helper class to manage groups with following abilities:
@@ -8,12 +7,12 @@ class Groups(object):
         - may determine the group of an item
         - may return a list with items of a single group or all the items from all the groups
 
-        The class uses OrderedDict for storage and thus keeps the order.
+        The class uses UserDict for storage and thus keeps the order.
     """
     def __init__(self, groups):
         """groups - dict like object with key : [item1, item2, ...] pairs"""
-        self.groups = OrderedDict(groups)
-        self.match = OrderedDict()
+        self.groups = dict(groups)
+        self.match = dict()
         for groups, keylist in self.groups.items():
             for key in keylist:
                 self.match[key] = groups
@@ -58,7 +57,7 @@ class Categories(object):
     """A set of Groups instances"""
     def __init__(self, groups, recursive=False):
         self.recursive = recursive
-        self.__categories__ = OrderedDict([ (k, Groups(g)) for k, g in groups.items() ])
+        self.__categories__ = dict([ (k, Groups(g)) for k, g in groups.items() ])
 
     def __contains__(self, item, recursive=None):
         """Checks if the item belongs at least to the one of groupings"""
@@ -94,7 +93,7 @@ class Categories(object):
                     if not newgroup.samegroup( groupitems ):
                         continue
                     res.append( newgroup[groupitems[0]] )
-            return list(OrderedDict.fromkeys(res))
+            return list(dict.fromkeys(res))
         return res
 
     def categories(self, item):
@@ -108,14 +107,14 @@ class Categories(object):
                     if not newgroup.samegroup( groupitems ):
                         continue
                     res.append( newcat )
-            return list(OrderedDict.fromkeys(res))
+            return list(dict.fromkeys(res))
         return res
 
     def items(self, item):
         return self.itemdict(item).items()
 
     def itemdict(self, item):
-        res = OrderedDict([ (cat, group[item]) for cat, group in self.__categories__.items() if item in group ])
+        res = dict([ (cat, group[item]) for cat, group in self.__categories__.items() if item in group ])
         if self.recursive:
             for cat, group in self.__categories__.items():
                 if not group.hasgroup(item):
@@ -129,7 +128,7 @@ class Categories(object):
 
     def format(self, item, fmt, **kwargs):
         if isinstance(fmt, str):
-            kwargs = OrderedDict([('self', item)]+list(self.itemdict(item).items())+list(kwargs.items()))
+            kwargs = dict([('self', item)]+list(self.itemdict(item).items())+list(kwargs.items()))
             return fmt.format(**kwargs)
 
         return type(fmt)(self.format(item, s, **kwargs) for s in fmt)
@@ -137,8 +136,8 @@ class Categories(object):
     def format_splitjoin(self, item, fmt, sep='.', filter=(''), prepend='', **kwargs):
         return sep.join(s for s in self.format(item, prepend.split(sep)+fmt.split(sep), **kwargs) if not s in filter)
 
-class GroupedDict(OrderedDict):
-    """OrderedDict implementation with:
+class GroupedDict(UserDict):
+    """UserDict implementation with:
         - if key is present the behaviour is regular
         - if key is missing, checks if key belongs to a group and uses group name instead of key"""
     def __init__(self, groups, *args, **kwargs):
@@ -151,7 +150,7 @@ class GroupedDict(OrderedDict):
 
     def __contains__(self, key):
         """Checks if key or its group present in dictionary"""
-        contains = super(OrderedDict, self).__contains__
+        contains = super(UserDict, self).__contains__
         return contains(key) or key in self.groups and contains(self.groups.group(key))
 
     def __missing__(self, key):
@@ -175,8 +174,8 @@ class GroupedDict(OrderedDict):
         for group, key in self.groups.items():
             yield self[group]
 
-class CatDict(OrderedDict):
-    """OrderedDict implementation with:
+class CatDict(UserDict):
+    """UserDict implementation with:
         - if key is present the behaviour is regular
         - if key is missing, checks if key belongs to a group and uses group name instead of key"""
     def __init__(self, categories, *args, **kwargs):

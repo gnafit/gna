@@ -1,8 +1,9 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
+from gna.configurator import StripNestedDict
+from schema import Schema, Or, Optional, Use, And
 
 class conditional_product_v01(TransformationBundle):
     """Conditional product bundle
@@ -29,7 +30,18 @@ class conditional_product_v01(TransformationBundle):
         TransformationBundle.__init__(self, *args, **kwargs)
         self.check_nidx_dim(0, 0, 'major')
 
+        self.vcfg = self._validator.validate(StripNestedDict(self.cfg))
+
         self.varname = self.get_globalname('condition')
+
+    _validator = Schema({
+            'bundle': object,
+            'instances': {str: Or(str, None)},
+            Optional('nprod', default=1): int,
+            Optional('ninputs', default=2): int,
+            Optional('default', default=1.0): And(Or(int, float), Use(float)),
+            Optional('condlabel', default='Condiction for a product'): str,
+        })
 
     @staticmethod
     def _provides(cfg):
@@ -37,9 +49,9 @@ class conditional_product_v01(TransformationBundle):
 
     def build(self):
         self.objects = []
-        instances = self.cfg['instances']
-        nprod   = self.cfg.get('nprod', 1)
-        ninputs = self.cfg.get('ninputs', 2)
+        instances = self.vcfg['instances']
+        nprod   = self.vcfg['nprod']
+        ninputs = self.vcfg['ninputs']
         for name, label in instances.items():
             if label is None:
                 label = 'Conditional product | {autoindex}'
@@ -55,7 +67,7 @@ class conditional_product_v01(TransformationBundle):
                 self.set_output(name, it, cprod.product.product)
 
     def define_variables(self):
-        label   = self.cfg.get('condlabel', 'Condiction for a product')
-        central = self.cfg.get('default', 1.0)
+        label   = self.vcfg['condlabel']
+        central = self.vcfg['default']
         self.reqparameter(self.varname, None, central=central, fixed=True, label=label)
 

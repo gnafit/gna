@@ -156,18 +156,20 @@ def ConditionalProduct(nprod, condition, outputs=None, **kwargs):
 
     return R.ConditionalProduct(*args, **kwargs)
 
+"""Construct Switch object from list of SingleOutputs"""
+def Switch(switchvar, outputs=None, **kwargs):
+    args=(switchvar,)
+    if outputs is not None:
+        args=args+(OutputDescriptors(outputs),)
+
+    return R.Switch(*args, **kwargs)
+
 """Construct Product object from list of SingleOutputs"""
 def ProductBC(outputs=None, **kwargs):
     if outputs is None:
         return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(**kwargs)
 
     return R.GNA.GNAObjectTemplates.ProductBCT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
-
-"""Construct Product object from list of SingleOutputs"""
-def Exp(outputs=None, **kwargs):
-    if outputs is None:
-        return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(**kwargs)
-    return R.GNA.GNAObjectTemplates.ExpT(context.current_precision())(OutputDescriptors(outputs), **kwargs)
 
 """Construct Bins object from numpy array"""
 def Bins(array, *args, **kwargs):

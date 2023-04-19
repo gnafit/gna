@@ -11,11 +11,11 @@
  * HistNonlinearityB projects the shifted bins on the original binning
  */
 class HistNonlinearityB: public HistSmearSparse,
-                        public TransformationBind<HistNonlinearityB> {
+                         public TransformationBind<HistNonlinearityB> {
 public:
   using TransformationBind<HistNonlinearityB>::transformation_;
 
-  HistNonlinearityB(bool propagate_matrix=false);
+  HistNonlinearityB(GNA::DataPropagation propagate_matrix=GNA::DataPropagation::Ignore);
 
   void set(SingleOutput& orig, SingleOutput& orig_proj, SingleOutput& mod_proj);
 

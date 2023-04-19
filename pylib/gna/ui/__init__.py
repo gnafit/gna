@@ -1,5 +1,6 @@
 import argparse
 from gna.env import PartNotFoundError
+from collections.abc import Mapping
 
 def _expandprefix(prefix, allowed):
     matches = [k for k in allowed if k.startswith(prefix)]
@@ -106,8 +107,18 @@ class basecmd(object):
         pass
 
     def __init__(self, env, opts):
+        if isinstance(opts, Mapping):
+            self.opts = argparse.Namespace(**opts)
+        elif isinstance(opts, list):
+            parser = argparse.ArgumentParser()
+            self.initparser(parser, env)
+            self.opts = parser.parse_args(opts)
+        elif isinstance(opts, argparse.Namespace):
+            self.opts = opts
+        else:
+            raise Exception('basecmd: Invalid opts')
+
         self.env = env
-        self.opts = opts
 
     def init(self):
         pass

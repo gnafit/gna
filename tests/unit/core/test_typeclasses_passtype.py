@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-
 from load import ROOT as R
 from gna.unittest import *
 from gna import constructors as C

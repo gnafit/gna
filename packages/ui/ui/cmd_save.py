@@ -6,20 +6,24 @@ The command then may be repeated and should produce the same output.
 
 from gna.ui import basecmd
 import pipes
-from packages.env.lib.cwd import update_namespace_cwd
+from env.lib.cwd import update_namespace_cwd, get_path
 from sys import argv
 
-class cmd(basecmd):
+class cmd_save(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('output', nargs='*', help='filename to save cmd')
         parser.add_argument('-v', '--verbose', action='store_true', help='print the command line')
 
+        redirect = parser.add_mutually_exclusive_group()
+        redirect.add_argument('-r', '--redirect', action='store_true', help='add redirection')
+        redirect.add_argument('-t', '--tee', action='store_true', help='add redirection via tee')
+
     def init(self):
         update_namespace_cwd(self.opts, 'output')
         self.level  = 0
         cmd = argv[0]
-        opts = argv[1:]
+        opts = list(argv[1:])
 
         self.out = cmd
 
@@ -27,11 +31,20 @@ class cmd(basecmd):
         for opt in opts:
             self.append(opt)
 
+        if self.opts.redirect or self.opts.tee:
+            outname = get_path('stdout.out')
+            errname = get_path('stderr.out')
+
+            if self.opts.redirect:
+                self.out+=(f'\\\n2>{errname} >{outname}')
+            else:
+                self.out+=(f'\\\n2>{errname} | tee {outname}')
+
         if self.opts.verbose:
             print('Command line:')
             print(self.out)
 
-        header = '#!/usr/bin/bash\n\n'
+        header = '#!/bin/bash\n\n'
         if self.opts.output:
             for opath in self.opts.output:
                 with open(opath, 'w') as f:
@@ -49,6 +62,11 @@ class cmd(basecmd):
             self.newline()
 
         self.out+=pipes.quote(opt)+' '
+
+    @classmethod
+    def call(cls, output: str, verbose: bool=True, redirect: bool=True, tee: bool=True):
+        instance = cls(env=None, opts={'output': (output,), 'verbose': verbose, 'redirect': redirect, 'tee': tee})
+        instance.init()
 
     __tldr__ = """\
                The main argument is the output file name to save the command.

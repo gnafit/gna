@@ -2,7 +2,7 @@
 
 from os.path import join, exists, isdir
 from os import makedirs, access, W_OK
-from collections import Iterable
+from collections.abc import Iterable
 
 _cwd = ''
 _prefix = ''

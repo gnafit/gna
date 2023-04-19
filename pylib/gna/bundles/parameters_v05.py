@@ -1,4 +1,3 @@
-
 """Parameters v05 bundle
 Implements a set of unrelated parameters.
 
@@ -12,7 +11,7 @@ from gna.bundle.bundle import *
 import numpy as N
 from gna import constructors as C
 from tools.cfg_load import cfg_parse
-from collections import Iterable
+from collections.abc import Iterable
 
 class parameters_v05(TransformationBundle):
     covmat, corrmat = None, None

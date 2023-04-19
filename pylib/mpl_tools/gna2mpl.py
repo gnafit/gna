@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 from load import ROOT as R
+from matplotlib import pyplot as plt
 import numpy as N
 from . import root2numpy as R2N
 from mpl_tools import helpers
+from mpl_tools.helpers import _colorbar_or_not, _colorbar_or_not_3d
 from matplotlib import pyplot as P
 from gna.bindings import DataType, provided_precisions
 
@@ -49,6 +51,10 @@ def plot_points( output, *args, **kwargs ):
 
     Plotter = kwargs.pop('axis', P)
 
+    index = kwargs.pop("index", False)
+    if index:
+        lims = N.array([i for i, _ in enumerate(lims)])
+
     return Plotter.plot(points, *args, **kwargs )
 
 def plot_vs_points(outputy, outputx, *args, **kwargs):
@@ -60,18 +66,34 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
     returns pyplot.plot() result
     """
     fcn = kwargs.pop('fcn', None)
-    if isinstance(outputx, (N.ndarray, list)):
-        pointsx=outputx
-    else:
-        pointsx=outputx.data().copy()
-
-    if isinstance(outputy, (N.ndarray, list)):
-        pointsy=outputy
-    else:
-        pointsy=outputy.data().copy()
+    pointsx = get_array(outputx)
+    pointsy = get_array(outputy)
 
     if kwargs.pop('transpose', False):
         pointsx, pointsy=pointsx.T, pointsy.T
+
+    if fcn:
+        pointsx, pointsy = fcn(pointsx, pointsy)
+
+    ratio=kwargs.pop('ratio', None)
+    logratio=kwargs.pop('logratio', None)
+    if ratio is not None:
+        outputy1 = ratio
+    elif logratio is not None:
+        outputy1 = logratio
+    else:
+        outputy1 = None
+
+    if outputy1 is not None:
+        ifSameType(outputy, outputy1)
+        pointsy1 = get_array(outputy1)
+        if fcn:
+            _, pointsy1 = fcn(pointsx, pointsy1)
+        mask = (pointsy==0.0)*(pointsy1==0.0)
+        pointsy/=pointsy1
+        pointsy[mask]=1.0
+        if logratio is not None:
+            pointsy=N.log(pointsy)
 
     Plotter = kwargs.pop('axis', P)
     ravel = kwargs.pop('ravel', False)
@@ -83,25 +105,33 @@ def plot_vs_points(outputy, outputx, *args, **kwargs):
         pointsx=pointsx[asort]
         pointsy=pointsy[asort]
 
-    if fcn:
-        pointsx, pointsy = fcn(pointsx, pointsy)
-
     return Plotter.plot(pointsx, pointsy, *args, **kwargs )
 
 def vs_plot_points(outputx, outputy, *args, **kwargs):
     return plot_vs_points(outputy, outputx, *args, **kwargs)
 
-def get_1d_data(output, scale=None):
-    ifNd(output, 1)
+def get_array(output):
+    if isinstance(output, (N.ndarray, list)):
+        return N.asanyarray(output)
 
-    buf = output.single().data().copy()
+    return output.data().copy()
 
-    dtype=output.datatype()
-    if dtype.kind==2:
+def get_1d_data(output, scale=None, allow_diagonal=False, sqrt=False):
+    dtype = output.datatype()
+    ndim = dtype.shape.size()
+
+    if ndim==1:
+        buf = output.single().data().copy()
+    elif ndim==2 and allow_diagonal:
+        buf = output.single().data().diagonal().copy()
+    else:
+        raise Exception('Output is supposed to be {}: '.format(allow_diagonal and '1d/2d' or '1d')+str(dtype))
+
+    if ndim==1 and dtype.kind==2:
         lims = N.array(dtype.edges)
         width = lims[1:] - lims[:-1]
     else:
-        lims = N.arange(dtype.shape[0]+1, dtype='d')
+        lims = N.arange(buf.size+1, dtype='d')
         width = 1.0
 
     if scale is None:
@@ -113,9 +143,12 @@ def get_1d_data(output, scale=None):
     else:
         raise Exception('Unsupported scale:', scale)
 
+    if sqrt:
+        buf = buf**0.5
+
     return buf, lims, width
 
-def plot_hist(output, *args, **kwargs):
+def plot_hist(output, *args, allow_diagonal=False, **kwargs):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
@@ -127,35 +160,39 @@ def plot_hist(output, *args, **kwargs):
     returns pyplot.plot() result
     """
     scale = kwargs.pop('scale', None)
-    height, lims, _ = get_1d_data(output, scale=scale)
+    sqrt = kwargs.pop('sqrt', False)
+    height, lims, _ = get_1d_data(output, scale=scale, allow_diagonal=allow_diagonal, sqrt=sqrt)
 
     diff=kwargs.pop('diff', None)
     if diff is not None:
         ifSameType(output, diff)
-        height1, lims1, _ = get_1d_data(diff, scale)
+        height1, _, _ = get_1d_data(diff, scale, allow_diagonal=allow_diagonal, sqrt=sqrt)
 
         height-=height1
 
     ratio=kwargs.pop('ratio', None)
+    logratio=kwargs.pop('logratio', None)
     if ratio is not None:
         ifSameType(output, ratio)
-        height1, lims1, _ = get_1d_data(ratio, scale)
-
+        height1, _, _ = get_1d_data(ratio, scale, allow_diagonal=allow_diagonal, sqrt=sqrt)
+        mask = (height==0.0)*(height1==0.0)
         height/=height1
-        height[N.isnan(height)]=1.0
-
-    offset_ratio=kwargs.pop('offset_ratio', None)
-    if offset_ratio is not None:
-        ifSameType(output, offset_ratio)
-        height1, lims1, _ = get_1d_data(offset_ratio, scale)
-
+        height[mask]=1.0
+    elif logratio is not None:
+        ifSameType(output, logratio)
+        height1, _, _ = get_1d_data(logratio, scale, allow_diagonal=allow_diagonal, sqrt=sqrt)
+        mask = (height==0.0)*(height1==0.0)
         height/=height1
-        height-=1.0
-        height[N.isnan(height)]=0.0
+        height[mask]=1.0
+        height=N.log(height)
+
+    index = kwargs.pop("index", False)
+    if index:
+        lims = N.array([i for i, _ in enumerate(lims)])
 
     return helpers.plot_hist(lims, height, *args, **kwargs)
 
-def plot_hist_centers(output, *args, **kwargs):
+def plot_hist_centers(output, *args, allow_diagonal=False, **kwargs):
     """Plot 1-dimensinal output using pyplot.plot
 
     executes pyplot.plot(x, y, *args, **kwargs) with first two arguments overridden
@@ -166,14 +203,20 @@ def plot_hist_centers(output, *args, **kwargs):
 
     returns pyplot.plot() result
     """
-    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale', None))
+    sqrt = kwargs.pop('sqrt', False)
+
+    height, lims, _ = get_1d_data(output, scale=kwargs.pop('scale', None), allow_diagonal=allow_diagonal, sqrt=sqrt)
     centers = (lims[1:] + lims[:-1])*0.5
 
     Plotter = kwargs.pop('axis', P)
 
+    index = kwargs.pop("index", False)
+    if index:
+        lims = N.array([i for i, _ in enumerate(lims)])
+
     return Plotter.plot(centers, height, *args, **kwargs )
 
-def bar_hist( output, *args, **kwargs ):
+def bar_hist( output, *args, allow_diagonal=False, **kwargs ):
     """Plot 1-dimensinal histogram using pyplot.bar
 
     executes pyplot.bar(left, height, width, *args, **kwargs) with first two arguments overridden
@@ -188,8 +231,9 @@ def bar_hist( output, *args, **kwargs ):
     """
     divide = kwargs.pop( 'divide', None )
     shift  = kwargs.pop( 'shift', 0 )
+    sqrt = kwargs.pop('sqrt', False)
 
-    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale', None))
+    height, lims, width = get_1d_data(output, scale=kwargs.pop('scale', None), allow_diagonal=allow_diagonal, sqrt=sqrt)
     left  = lims[:-1]
 
     if divide:
@@ -199,9 +243,14 @@ def bar_hist( output, *args, **kwargs ):
     kwargs.setdefault( 'align', 'edge' )
     Plotter = kwargs.pop('axis', P)
 
+    index = kwargs.pop("index", False)
+    if index:
+        left = N.array([i for i, _ in enumerate(left)])
+        width = N.ones(left.shape)
+
     return Plotter.bar( left, height, width, *args, **kwargs )
 
-def errorbar_hist(output, yerr=None, *args, **kwargs):
+def errorbar_hist(output, yerr=None, *args, allow_diagonal=False, **kwargs):
     """Plot 1-dimensinal histogram using pyplot.errorbar
 
     executes pyplot.errorbar(x, y, yerr, xerr, *args, **kwargs) with x, y and xerr overridden
@@ -213,9 +262,15 @@ def errorbar_hist(output, yerr=None, *args, **kwargs):
 
     returns pyplot.errorbar() result
     """
-    Y, lims, width = get_1d_data(output)
+    sqrt = kwargs.pop('sqrt', False)
 
-    return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs )
+    Y, lims, _ = get_1d_data(output, allow_diagonal=allow_diagonal, sqrt=sqrt)
+
+    index = kwargs.pop("index", False)
+    if index:
+        lims = N.array([i for i, _ in enumerate(lims)])
+
+    return helpers.plot_hist_errorbar(lims, Y, yerr, *args, **kwargs)
 
 def get_2d_buffer(output, transpose=False, mask=None, preprocess=None):
     if isinstance(output, N.ndarray):
@@ -273,110 +328,46 @@ def get_2d_data_eq(output, kwargs):
 
     return buf, xw, xedges, yw, yedges
 
-def colorbar_or_not(res, cbaropt):
-    if not cbaropt:
-        return res
-
-    if not isinstance(cbaropt, dict):
-        cbaropt = {}
-
-    cbar = helpers.add_colorbar(res, **cbaropt)
-
-    return res, cbar
-
-def colorbar_or_not_3d(res, cbaropt, mappable=None, cmap=None):
-    if not cbaropt:
-        return res
-
-    if not isinstance(cbaropt, dict):
-        cbaropt = {}
-
-    cbaropt.setdefault('aspect', 4)
-    cbaropt.setdefault('shrink', 0.5)
-
-    if mappable is None:
-        cbar = P.colorbar(res, **cbaropt)
-    else:
-        colourMap = P.cm.ScalarMappable()
-        colourMap.set_array(mappable)
-        cbar = P.colorbar(colourMap, **cbaropt)
-
-    return res, cbar
-
 def pcolorfast(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
     buf, xe, xedges, yw, yedges = get_2d_data_eq(output, kwargs)
-    colorbar  = kwargs.pop( 'colorbar', None )
     x = [yedges[0], yedges[-1]]
     y = [xedges[0], xedges[-1]]
-
-    ax = P.gca()
-    res = ax.pcolorfast( x, y, buf, *args, **kwargs )
-
-    return colorbar_or_not(res, colorbar)
+    return helpers.pcolorfast(x, y, buf, *args, **kwargs)
 
 def pcolormesh(output, *args, **kwargs):
     buf, xedges, yedges = get_2d_data(output, kwargs)
-    colorbar  = kwargs.pop( 'colorbar', None )
-
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
-
-    res = P.pcolormesh(x, y, buf, *args, **kwargs)
-
-    return colorbar_or_not(res, colorbar)
+    return helpers.pcolormesh(x, y, buf, *args, **kwargs)
 
 def pcolor(output, *args, **kwargs):
     buf, xedges, yedges = get_2d_data(output, kwargs)
-    colorbar  = kwargs.pop( 'colorbar', None )
-
     x, y = N.meshgrid(xedges, yedges, indexing='ij')
-
-    res = P.pcolor(x, y, buf, *args, **kwargs)
-
-    return colorbar_or_not(res, colorbar)
+    return helpers.pcolor(x, y, buf, *args, **kwargs)
 
 def imshow(output, *args, **kwargs):
     kwargs['transpose'] = ~kwargs.get('transpose', False)
     buf, xe, xedges, yw, yedges = get_2d_data_eq(output, kwargs)
-    colorbar  = kwargs.pop( 'colorbar', None )
-
     extent = [ yedges[0], yedges[-1], xedges[0], xedges[-1] ]
     kwargs.setdefault( 'origin', 'lower' )
     kwargs.setdefault( 'extent', extent )
-
-    res = P.imshow(buf, *args, **kwargs)
-
-    return colorbar_or_not(res, colorbar)
+    return helpers.imshow(buf, *args, **kwargs)
 
 def matshow(output, *args, **kwargs):
     """Plot matrix using pyplot.matshow"""
     ifNd(output, 2)
-
     mask = kwargs.pop( 'mask', None )
     preprocess = kwargs.pop( 'preprocess', None )
-    colorbar = kwargs.pop( 'colorbar', None )
     kwargs.setdefault( 'fignum', False )
-
     buf = get_2d_buffer(output, transpose=kwargs.pop('transpose', False), mask=mask, preprocess=preprocess)
-
-    res = P.matshow(buf, **kwargs)
-
-    return colorbar_or_not(res, colorbar)
+    return helpers.matshow(buf, **kwargs)
 
 def surface(output, *args, **kwargs):
     Z, xedges, yedges = get_2d_data(output, kwargs)
-
     xc=(xedges[1:]+xedges[:-1])*0.5
     yc=(yedges[1:]+yedges[:-1])*0.5
-
     X, Y = N.meshgrid(xc, yc, indexing='ij')
-
-    colorbar = kwargs.pop('colorbar', False)
-
-    ax = P.gca()
-    res = ax.plot_surface(X, Y, Z, *args, **kwargs)
-
-    return colorbar_or_not_3d(res, colorbar)
+    return helpers.plot_surface(X, Y, Z, *args, **kwargs)
 
 def apply_colors(buf, kwargs, colorsname):
     cmap = kwargs.pop('cmap', False)
@@ -416,7 +407,7 @@ def wireframe(output, *args, **kwargs):
         res = ax.plot_surface(X, Y, Z, **kwargs)
         res.set_facecolor((0, 0, 0, 0))
 
-        return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
+        return _colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 
     res = ax.plot_wireframe(X, Y, Z, *args, **kwargs)
     return res
@@ -440,7 +431,7 @@ def wireframe_points_vs(output, xmesh, ymesh, *args, **kwargs):
         res = ax.plot_surface(X, Y, Z, **kwargs)
         res.set_facecolor((0, 0, 0, 0))
 
-        return colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
+        return _colorbar_or_not_3d(res, colorbar, Z, cmap=cmap)
 
     res = ax.plot_wireframe(X, Y, Z, *args, **kwargs)
     return res
@@ -471,7 +462,7 @@ def bar3d(output, *args, **kwargs):
     ax = P.gca()
     res = ax.bar3d(X, Y, Z, Xw, Yw, Zw, *args, **kwargs)
 
-    return colorbar_or_not_3d(res, colorbar, Zw, cmap=cmap)
+    return _colorbar_or_not_3d(res, colorbar, Zw, cmap=cmap)
 
 def bind():
     for p in provided_precisions:

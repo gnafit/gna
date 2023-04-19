@@ -3,6 +3,7 @@ from argparse import REMAINDER
 from gna.dispatch import getmodules, loadcmdclass
 import textwrap
 import re
+from collections.abc import Mapping
 
 class help(basecmd):
     """Print help on a command
@@ -22,7 +23,7 @@ class help(basecmd):
             print("UI module '{}' not found".format(name))
             return
 
-        cls, _ = loadcmdclass(modules, name)
+        cls, _ = loadcmdclass(name)
 
         if not cls.__doc__:
             print("UI module '{}' provides no docstring".format(name))
@@ -35,7 +36,7 @@ class help(basecmd):
         tldr = getattr(cls, '__tldr__', None)
         if isinstance(tldr, str):
             print_tldr(name, '', tldr)
-        elif isinstance(tldr, dict):
+        elif isinstance(tldr, Mapping):
             print_tldr(name, '', tldr.get(''))
             trystr = None
             for arg in tuple(self.opts.args):
@@ -46,9 +47,11 @@ class help(basecmd):
 
                 print_tldr(name, trystr, tldr.get(trystr))
 
+
 regex_codeblock_header = re.compile('((\n|^).*\n```[a-zA-Z]+\n)')
 regex_codeblock_start = re.compile('\n```[a-zA-Z]+\n')
 regex_codeblock_end = re.compile('\n```\n')
+
 def print_tldr(command, arg, tldr):
     if not tldr:
         return

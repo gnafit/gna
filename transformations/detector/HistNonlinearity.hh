@@ -15,7 +15,7 @@ class HistNonlinearity: public HistSmearSparse,
 public:
   using TransformationBind<HistNonlinearity>::transformation_;
 
-  HistNonlinearity(bool propagate_matrix=false);
+  HistNonlinearity(GNA::DataPropagation propagate_matrix=GNA::DataPropagation::Ignore);
 
   void set(SingleOutput& bin_edges, SingleOutput& bin_edges_modified);
 
@@ -23,7 +23,6 @@ public:
   double get_range_min() { return m_range_min; }
   double get_range_max() { return m_range_max; }
 private:
-  void calcSmear(FunctionArgs& fargs);
   void calcMatrix(FunctionArgs& fargs);
   void getEdges(TypesFunctionArgs& fargs);
 

@@ -3,9 +3,8 @@
 from gna.ui import basecmd
 from pprint import pprint
 from tools.dictwrapper import DictWrapper
-from collections import OrderedDict
 from load import ROOT as R
-from packages.env.lib.cwd import update_namespace_cwd
+from env.lib.cwd import update_namespace_cwd
 
 class cmd(basecmd):
     @classmethod

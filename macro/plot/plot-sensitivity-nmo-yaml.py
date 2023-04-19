@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from yaml import load, Loader
 from mpl_tools.helpers import savefig
 import numpy as np
+from collections.abc import Mapping
 
 import itertools as I
 import inspect
@@ -52,14 +53,14 @@ def bars_relative(labels, values, y=None, height=0.9, **kwargs):
             return None
 
     features = kwargs.pop('features', None)
-    if isinstance(features, dict):
+    if isinstance(features, Mapping):
         def get_feature(i):
             return features.get(i, {})
     elif isinstance(features, list):
         def get_feature(i):
             try:
                 ret = features[i]
-                if not isinstance(ret, dict):
+                if not isinstance(ret, Mapping):
                     return {}
                 return {}
             except:

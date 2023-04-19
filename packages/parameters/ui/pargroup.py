@@ -1,10 +1,8 @@
 """Select a group of parameters for the minimization and other purposes."""
 
-
 import ROOT
 from gna.ui import basecmd
-from packages.parameters.lib.parameter_loader import get_parameters
-from collections import OrderedDict
+from parameters.lib.parameter_loader import get_parameters
 import warnings
 
 class cmd(basecmd):
@@ -16,27 +14,32 @@ class cmd(basecmd):
         parser.add_argument('-n', '--name', dest='name', help='Parameters group name')
         parser.add_argument('-p', '--pars', dest='pars', nargs='*', help='Parameters to store')
 
+        parser.add_argument('--ns', help='Root namespace')
+
         parser.add_argument('-v', '--verbose', action='count', default=0, help='verbose mode')
 
-        filter1 = parser.add_argument_group(title='Filter', description='Arguments to filter the list of parameters')
+        filter = parser.add_argument_group(title='Filter', description='Arguments to filter the list of parameters')
         choices = ['free', 'constrained', 'fixed']
-        filter1.add_argument('-m', '--modes', nargs='+', default=['free', 'constrained'], choices=choices, help='Parameters to take')
+        filter.add_argument('-m', '--modes', nargs='+', default=['free', 'constrained'], choices=choices, help='Parameters to take')
 
-        filter1.add_argument('-x', '--exclude', nargs='*', default=[], help='parameters to exclude (pattern in fullname)')
-        filter1.add_argument('-i', '--include', nargs='*', default=None, help='parameters to include, exclusive (pattern in fullname)')
+        filter.add_argument('-x', '--exclude', nargs='*', default=[], help='parameters to exclude (pattern in fullname)')
+        filter.add_argument('-i', '--include', nargs='*', default=None, help='parameters to include, exclusive (pattern in fullname)')
+        filter.add_argument('-a', '--affect', help='select only parameters that affect the output')
 
     def init(self):
         if self.opts.verbose>1:
             print('Loading parameter group {}:'.format(self.opts.name), ', '.join(self.opts.modes))
 
-        self.loaded_parameters = OrderedDict((par.qualifiedName(), par) for par
-                                             in get_parameters(self.opts.pars,
+        getparargs = dict(
                                                  drop_fixed       = 'fixed' not in self.opts.modes,
                                                  drop_free        = 'free'  not in self.opts.modes,
                                                  drop_constrained = 'constrained' not in self.opts.modes,
                                                  )
-                                             )
-        self.loaded_parameters = OrderedDict(filter(self._keep_parameter, self.loaded_parameters.items()))
+        if self.opts.ns:
+            getparargs['namespace']=self.env.globalns(self.opts.ns)
+        self.loaded_parameters = { par.qualifiedName(): par for par in get_parameters(self.opts.pars, **getparargs) }
+        self.loaded_parameters = dict(filter(self._keep_parameter, self.loaded_parameters.items()))
+        self._check_parameters_affect_target()
 
         self.env.future[('parameter_groups', self.opts.name)] = self.loaded_parameters
 
@@ -44,6 +47,18 @@ class cmd(basecmd):
             print('Loaded parameters group {}, count {}: '.format(self.opts.name, len(self.loaded_parameters)))
         if self.opts.verbose>1:
             print(list(self.loaded_parameters.keys()))
+
+    def _check_parameters_affect_target(self):
+        if not self.opts.affect:
+            return
+
+        target = self.env.future['spectra', self.opts.affect]
+
+        def keeppar(namepar):
+            name, par = namepar
+            return par.influences(target)
+
+        self.loaded_parameters = dict(filter(keeppar, self.loaded_parameters.items()))
 
     def _keep_parameter(self, namepar):
         name, par = namepar

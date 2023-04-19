@@ -1,4 +1,3 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C

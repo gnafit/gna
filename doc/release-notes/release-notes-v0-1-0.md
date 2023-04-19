@@ -810,7 +810,7 @@ Create a minimizer and do a fit of a function `stats` and a group of parameters 
     -- analysis-v1 --name analysis --datasets peak \
     -- stats stats --chi2 analysis \
     -- pargroup minpars peak_f -vv \
-    -- minimizer-v1 min stats minpars -vv \
+    -- minimizer-v1 min stats minpars -t scipy -vv \
     -- fit-v1 min \
     -- env-print fitresult.min
 ```

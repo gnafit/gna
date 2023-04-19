@@ -1,9 +1,7 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import *
-from collections import OrderedDict
 import h5py as H
 
 class dayabay_livetime_hdf_v01(TransformationBundleLegacy):
@@ -16,7 +14,7 @@ class dayabay_livetime_hdf_v01(TransformationBundleLegacy):
         self.init_data()
 
     def init_data(self):
-        self.data = OrderedDict()
+        self.data = dict()
         with H.File(self.cfg.file, 'r') as f:
             self.info = f['info'][0]
 

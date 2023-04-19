@@ -1,13 +1,12 @@
-
 """configurator class allows to load any python file by its filename
 and store the contents in a namespace
 namespace elements are accessible throught both key access or member acess"""
 
 import runpy
 from os import path
-from collections import OrderedDict
 from weakref import WeakKeyDictionary
 import numpy
+from typing import Any
 
 meta = WeakKeyDictionary()
 init_globals = dict( percent=0.01, numpy=numpy )
@@ -41,20 +40,18 @@ def process_key(key):
 class NestedDict(object):
     __parent__ = None
     def __init__(self, iterable=None, **kwargs):
-        super(NestedDict, self).__setattr__('__storage__', OrderedDict())
+        super(NestedDict, self).__setattr__('__storage__', dict())
 
         meta[self] = dict()
 
         if iterable:
-            if isinstance(iterable, dict):
-                iterable = sorted(iterable.items())
-            self.__import__(OrderedDict(iterable))
+            self.__import__(dict(iterable))
 
         if kwargs:
-            self.__import__(OrderedDict(sorted(kwargs.items())))
+            self.__import__(kwargs)
 
     def __repr__(self):
-        return self.__storage__.__repr__().replace('OrderedDict(', 'NestedDict(', 1)
+        return self.__storage__.__repr__().replace('{', 'NestedDict{', 1)
 
     def __str__(self, margin='', nested=False, width=None):
         if not self.__bool__():
@@ -117,7 +114,7 @@ class NestedDict(object):
 
         raise KeyError( "Failed to determine own key in the parent dictionary" )
 
-    def get(self, key, *args, **kwargs):
+    def get(self, key, *args, **kwargs) -> Any:
         key, rest=process_key(key)
         if rest:
             sub = self.__storage__.get(key)
@@ -140,7 +137,7 @@ class NestedDict(object):
                     raise Exception('The field "{}" is expected to be of type {}, not {}'.format(key, types.__name__, type(obj).__name__))
         return obj
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         key, rest=process_key(key)
         if rest:
             return self.__storage__.__getitem__(key).__getitem__( rest )
@@ -150,7 +147,7 @@ class NestedDict(object):
 
         try:
             return self.__storage__.__getitem__(key)
-        except KeyError as e:
+        except KeyError:
             if meta[self].get('createmissing', False):
                 return self(key)
 
@@ -421,7 +418,7 @@ def uncertaindict(*args, **kwargs):
             common[s]=kwargs.pop(s)
         else:
             missing.append(s)
-    res  = OrderedDict( *args, **kwargs )
+    res  = dict( *args, **kwargs )
 
     for k, v in res.items():
         kcommon = common.copy()
@@ -435,6 +432,12 @@ def uncertaindict(*args, **kwargs):
         res[k] = uncertain( **kcommon )
 
     return res
+
+def StripNestedDict(nd):
+    if not isinstance(nd, NestedDict):
+        return nd
+
+    return {k: StripNestedDict(v) for k, v in nd.items()}
 
 init_globals['load'] = configurator
 init_globals['uncertain'] = uncertain

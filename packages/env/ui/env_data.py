@@ -12,10 +12,11 @@ from gna.env import env
 
 def unpack(output):
     dtype = output.datatype()
-    if dtype.kind==2:
-        return unpack_hist(output, dtype)
-    elif dtype.kind==1:
-        return unpack_points(output, dtype)
+    if dtype:
+        if dtype.kind==2:
+            return unpack_hist(output, dtype)
+        elif dtype.kind==1:
+            return unpack_points(output, dtype)
 
     raise ValueError('Uninitialized output')
 
@@ -63,6 +64,7 @@ class cmd(basecmd):
     def initparser(cls, parser, env):
         parser.add_argument('-s', '--root-source', default=(), help='root namespace to copy from')
         parser.add_argument('-t', '--root-target', default=(), help='root namespace to copy to')
+        parser.add_argument('-C', '--copy-as-is', nargs=2, action='append', default=[], help='Data to read and address to write, no conversion', metavar=('from', 'to'))
         parser.add_argument('-c', '--copy', nargs='+', action='append', default=[], help='Data to read and address to write', metavar=('from', 'to'))
         parser.add_argument('-g', '--copy-graph', nargs='+', action='append', default=[], help='Data to read (x,y) and address to write', metavar=('x', 'y'))
         parser.add_argument('-v', '--verbose', action='count', default=0, help='verbosity')
@@ -85,7 +87,7 @@ class cmd(basecmd):
             for key, obs in iterator:
                 try:
                     data = unpack(obs)
-                except ValueError:
+                except (ValueError, AttributeError):
                     print('Skipping unsupported object:', '.'.join(key))
                     continue
                 targetkey = (to,)+key
@@ -95,6 +97,11 @@ class cmd(basecmd):
                     print('  {}->{}'.format('.'.join((frmpath,)+key), '.'.join(targetkey)))
 
                 data.update(upd)
+
+        for frmpath, to in self.opts.copy_as_is:
+            target[to] = source[frmpath]
+            if self.opts.verbose:
+                print('  {}->{}'.format(frmpath, to))
 
         for copydef in self.opts.copy_graph:
             if len(copydef)<3:

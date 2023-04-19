@@ -1,5 +1,3 @@
-
-
 from gna.bundle.bundle import TransformationBundle
 
 class parameters_ex02(TransformationBundle):

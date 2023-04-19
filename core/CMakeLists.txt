@@ -131,5 +131,7 @@ set(CORE_HEADERS
   # others
   Statistic.hh
   StatisticOutput.hh
+  Minimizable.hh
+  MinimizableVerbose.hh
   PARENT_SCOPE
  )

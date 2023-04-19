@@ -1,25 +1,37 @@
 """Perform a fit using a predefined minimizer."""
 
-from gna.ui import basecmd, set_typed
 import pickle
 from pprint import pprint
+from gna.ui import basecmd
 
 class cmd(basecmd):
     @classmethod
     def initparser(cls, parser, env):
         parser.add_argument('minimizer', help='Minimizer to use', metavar='name')
+        parser.add_argument('-l', '--label', default=None, help='Label to use to write results instead of minimizer')
         parser.add_argument('-v', '--verbose', action='store_true', help='Print fit result to stdout')
         parser.add_argument('-s', '--set',     action='store_true', help='Set best fit parameters')
         parser.add_argument('-p', '--push',    action='store_true', help='Set (push) best fit parameters')
         parser.add_argument('--profile-errors', '-e', nargs='+', default=[], help='Calculate errors based on statistics profile')
+        parser.add_argument('--scan', nargs='+', default=[], help='Calculate profiles for parameters')
+        parser.add_argument('--covariance', '--cov', action='store_true', help='Estimate covariance matrix')
         parser.add_argument('--simulate', action='store_true', help='do nothing')
+        parser.add_argument('--ndf', type=lambda x: env.future["ndf"][x],
+                            help='Read NDF for given chi2 from env')
 
     def init(self):
         minimizer = self.env.future['minimizer'][self.opts.minimizer]
         if self.opts.simulate:
             return
 
-        result = self.result = minimizer.fit(profile_errors=self.opts.profile_errors)
+        kwargs = {}
+        if self.opts.profile_errors: kwargs['profile_errors']=self.opts.profile_errors
+        if self.opts.covariance: kwargs['covariance']=self.opts.covariance
+        if self.opts.scan: kwargs['scan']=self.opts.scan
+        result = self.result = minimizer.fit(**kwargs)
+
+        if self.opts.ndf:
+            result['ndf'] = self.opts.ndf
 
         if self.opts.set or self.opts.push:
             push = self.opts.push
@@ -35,11 +47,13 @@ class cmd(basecmd):
         if self.opts.verbose:
             self.print()
 
-        self.env.future.child('fitresult')[self.opts.minimizer] = result
+        label = self.opts.label or self.opts.minimizer
+        self.env.future.child('fitresult')[label] = result
         minimizer.saveresult(self.env.future.child('fitresults'))
 
     def print(self):
-        print('Fit result for {}:'.format(self.opts.minimizer))
+        label = self.opts.label and f' ({self.opts.label})' or ''
+        print('Fit result for {}{}:'.format(self.opts.minimizer, label))
         pprint(dict(self.result))
 
     __tldr__ =  """\

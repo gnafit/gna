@@ -10,7 +10,6 @@ using namespace Eigen;
 LogPoissonSplit::LogPoissonSplit(bool ln_approx) {
   transformation_("poisson_const")
     .output("const")
-    .types(new CheckSameTypesT<double>({0,-1}, "shape"))
     .types(&LogPoissonSplit::checkTypesConst)
     .func(ln_approx ? &LogPoissonSplit::calcPoissonConstApprox : &LogPoissonSplit::calcPoissonConst)
     ;
@@ -68,7 +67,7 @@ double lnFactorialStirling(double x)
 {
   if (!(x == 0.0 || x == 1.0))
   {
-    return x * std::log(x);
+    return x * std::log(x) - x;
   }
   else
     return 0;
@@ -98,7 +97,7 @@ void LogPoissonSplit::calcPoissonConstApprox(FunctionArgs fargs) {
    *        -2 * ln(Poisson) =
    *            -2 * sum(data_i * log(theory_j) -  theory_j  - ln data_i! )
    *
-   *       Compute: ln data_i! ≈ data_i ln data_i
+   *       Compute: ln data_i! ≈ data_i ln data_i - data_i
    *
    ****************************************************************************/
   auto& args=fargs.args;

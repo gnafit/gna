@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
-from collections import OrderedDict
 import gna.constructors as C
 from gna.configurator import NestedDict
 from gna.grouping import CatDict, Categories
@@ -16,7 +14,7 @@ class dayabay_fastn_v02(TransformationBundleLegacy):
         if self.idx.ndim()!=1:
             raise self.exception('Expect 1d indexing')
 
-        self.bindings=OrderedDict()
+        self.bindings=dict()
 
     def build(self):
         bins = self.context.outputs[self.cfg.bins].data()

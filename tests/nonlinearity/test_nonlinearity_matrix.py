@@ -70,7 +70,7 @@ matp = rescale_to_matrix_a( edges, edges_m, roundto=3 )
 pedges_m = C.Points( edges_m )
 ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
 
-nl = R.HistNonlinearity(True)
+nl = R.HistNonlinearity(R.GNA.DataPropagation.Propagate)
 nl.set(ntrue.hist, pedges_m)
 nl.add_input()
 

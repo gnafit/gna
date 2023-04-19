@@ -63,6 +63,8 @@ namespace TransformationTypes
 
     bool depends(changeable x) const;                                           ///< Check that Sink depends on a changeable.
 
+    size_t fill(size_t n, FloatType* data) const;                               ///< Fill the data from buffer. Returns number of written numbers.
+
 #ifdef GNA_CUDA_SUPPORT
     void requireGPU() { m_sink->requireGPU(); }                                 ///< Require output to be allocated on GPU.
 #endif

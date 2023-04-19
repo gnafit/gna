@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import gna.constructors as C
 import numpy as np
-from collections import OrderedDict
 from gna.bundle import *
 from gna.env import env
 from tools.data_load import read_object_auto

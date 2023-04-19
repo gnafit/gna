@@ -137,11 +137,13 @@ class Dataset(object):
             prediction.prediction_ready()
             par_covs.materialize()
             jac.jacobian.func(prediction.prediction)
-            self.jac = jac.jacobian
-            self.par_covs = covparameters
 
             product = ROOT.MatrixProductDVDt(jac.jacobian,  par_covs.unc_matrix)
             product.product.touch()
+
+            self.jacobians.append(jac)
+            self.par_covs.append(covparameters)
+            self.products.append(product)
 
             prediction.addSystematicCovMatrix(product.product)
         prediction.finalize()
@@ -169,6 +171,10 @@ class Dataset(object):
         what covariance matrix is going to be calculated.
         """
         blocks = []
+        self.predictions=[]
+        self.jacobians=[]
+        self.par_covs=[]
+        self.products=[]
         for i, obsblock in enumerate(self.sortobservables(observables, covparameters)):
             prediction = ROOT.CovariatedPrediction()
             for obs in obsblock:
@@ -178,19 +184,24 @@ class Dataset(object):
             if data is None:
                 raise Exception("no data constructed")
             prediction.cov.covbase(prediction.covbase.covbase)
-            self.prediction = prediction
+            self.predictions.append(prediction)
 
             if len(obsblock)>1:
-                blocks.append(Block(prediction.prediction, data, prediction.cov))
+                blocks.append(Block(prediction.prediction, data, prediction.cov.L))
             else:
-                blocks.append(Block(obsblock[0].single(), data, prediction.cov))
+                blocks.append(Block(obsblock[0].single(), data, prediction.cov.L))
+
         return blocks
 
     def reset_errors(self):
-        self.prediction.covbase.covbase.unfreeze()
-        self.prediction.covbase.covbase.data()
-        if self.jac:
-            self.jac.unfreeze()
-            self.jac.data()
-            self.jac.taint()
-        self.prediction.cov.touch()
+        for prediction in self.predictions:
+            prediction.covbase.covbase.unfreeze()
+
+        for jac in self.jacobians:
+            jac.jacobian.unfreeze()
+            jac.jacobian.touch()
+
+        for prediction in self.predictions:
+            prediction.covbase.covbase.unfreeze()
+            prediction.covbase.covbase.touch()
+            prediction.cov.touch()

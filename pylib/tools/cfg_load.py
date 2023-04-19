@@ -7,11 +7,23 @@ def cfg_load(filename, verbose=False):
         print('Loading dictionary from:', filename)
 
     if filename.endswith('.yaml'):
-        return yaml_load_file(filename)
+        res=yaml_load_file(filename)
     elif filename.endswith('.py'):
-        return pydict_load(filename)
+        res=pydict_load(filename)
+    elif filename.endswith('.pkl'):
+        import pickle
+        with open(filename, 'rb') as f:
+            res=pickle.load(f)
+    else:
+        raise ValueError('Invalid configuration file type: '+filename)
 
-    raise ValueError('Invalid configuration file type: '+filename)
+    if verbose>1:
+        import pprint
+        print('Loaded data:')
+        pprint.pprint(res)
+
+    return res
+
 
 def cfg_parse(filename_or_dict, verbose=False):
     """Load *.yaml or *.py file as dictionary. If the argument is dictionary - return it."""

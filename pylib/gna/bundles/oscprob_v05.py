@@ -1,4 +1,3 @@
-
 """Oscillation probability bundle v05.
 
 Updates since v04:
@@ -8,7 +7,6 @@ Updates since v04:
 from load import ROOT as R
 import gna.constructors as C
 from gna.bundle import TransformationBundle
-from collections import OrderedDict
 
 class oscprob_v05(TransformationBundle):
     def __init__(self, *args, **kwargs):
@@ -76,7 +74,8 @@ class oscprob_v05(TransformationBundle):
         otherpars = dict(
                 SinSq23 = 0.542,
                 )
-        labels = OrderedDict([
+        labels = dict([
+            ('DeltaMSq13', 'Mass splitting |Δm²₁₃|'),
             ('DeltaMSq23', 'Mass splitting |Δm²₂₃|'),
             ('DeltaMSq12', 'Mass splitting |Δm²₂₁|'),
             ('SinSqDouble13', 'Reactor mixing amplitude sin²2θ₁₃ '),
@@ -84,12 +83,19 @@ class oscprob_v05(TransformationBundle):
             ('SinSq23', 'Atmospheric mixing angle sin²θ₂₃'),
             ])
 
+        missing=-1
         for name, label in labels.items():
             if name in pars:
                 central, sigma = pars[name], None
                 free = True
+            elif name in ('DeltaMSq13', 'DeltaMSq23'):
+                missing+=1
+                continue
             else:
-                central, sigma = otherpars[name], None
+                try:
+                    central, sigma = otherpars[name], None
+                except KeyError:
+                    raise self.exception(f'Oscillation parameter {name} is not initialized')
                 free = False
             if isinstance(central, (tuple, list)):
                 central, sigma=central
@@ -98,6 +104,9 @@ class oscprob_v05(TransformationBundle):
                 ns_pmns.reqparameter(name, central=central, sigma=sigma, label=label)
             else:
                 ns_pmns.reqparameter(name, central=central, free=free, fixed=not free, label=label)
+
+        if missing:
+            raise self.exception('Either DeltaMSq13 or DeltaMSq23 should be initialized')
 
         ns_pmns.reqparameter('Alpha', type='discrete', default='normal', variants={'normal': 1.0, 'inverted': -1.0}, label='Neutrino mass ordering α')
         ns_pmns.reqparameter('Delta', type='uniformangle', central=0.0, fixed=True, label='CP violation phase δ(CP)')
@@ -120,4 +129,3 @@ class oscprob_v05(TransformationBundle):
 
         for i, vname in enumerate(names):
             ns_pmns[vname].setLabel('Psur(ee) weight %i: %s '%(i, vname))
-

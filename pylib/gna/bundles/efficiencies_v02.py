@@ -1,9 +1,7 @@
-
 from load import ROOT as R
 import numpy as N
 import gna.constructors as C
 from gna.bundle import TransformationBundle
-from collections import OrderedDict
 
 class efficiencies_v02(TransformationBundle):
     mode = 'correlated' # 'uncorrelated'

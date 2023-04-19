@@ -1,11 +1,9 @@
-
 from gna.exp import baseexp
 from gna.configurator import uncertaindict, uncertain, NestedDict
 from gna.expression.index import NIndex
 from gna.expression.expression_v01 import Expression_v01, ExpressionContext_v01
 from gna.bundle import execute_bundles
 
-from collections import OrderedDict
 from itertools import chain
 import numpy as N
 import ROOT as R
@@ -29,7 +27,7 @@ class exp(baseexp):
                             'allow suppression of Li/He background')
 
     def init(self):
-        self.formula = OrderedDict()
+        self.formula = dict()
 
         self.init_nidx()
         self.define_topology()
@@ -50,7 +48,7 @@ class exp(baseexp):
         self.nidx = [
             ('s', 'site',        ['EH1', 'EH2', 'EH3']),
             ('d', 'detector',    self.detectors,
-                                 dict(short='s', name='site', map=OrderedDict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
+                                 dict(short='s', name='site', map=dict([('EH1', ('AD11', 'AD12')), ('EH2', ('AD21', 'AD22')), ('EH3', ('AD31', 'AD32', 'AD33', 'AD34'))]))),
             ('r', 'reactor',     self.reactors),
             ('i', 'isotope',     ['U235', 'U238', 'Pu239', 'Pu241']),
             ('c', 'component',   ['comp0', 'comp12', 'comp13', 'comp23']),
@@ -665,12 +663,12 @@ class exp(baseexp):
         else:
              self.formula['observation'] = [
                      'observation=rebin| ibd + bkg',
-                     'total= concat[d]| observation'
+                     'concat_total=concat[d]| observation'
                 ]
 
 
     def define_labels(self):
-        self.libs =  OrderedDict(
+        self.libs =  dict(
                       eper_ff_var  = dict(expr='eper_fission[i]*fission_fraction_corr[i,r]',label='Product of energy per fission to fission fraction'),
                         eff_corrected_unosc_spectra = dict(expr=('norm_bf * unoscillated_spectra_d', 'eff_corrected_unosc_spectra'),
                                                            label='Eff corrected unosc spectra'),

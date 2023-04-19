@@ -64,10 +64,10 @@ void Integrator21Base::check_base(TypesFunctionArgs& fargs){
                                );
     }
 
-    if((m_xorders<1).any() || m_yorder<1){
+    if((m_xorders<0).any() || m_yorder<1){
         std::cerr<<"X orders: "<<m_xorders<<std::endl;
         std::cerr<<"Y order: "<<m_yorder<<std::endl;
-        throw std::runtime_error("All integration orders should be >=1");
+        throw std::runtime_error("All integration orders should be X>=0, Y>=1");
     }
 }
 
@@ -83,9 +83,14 @@ void Integrator21Base::integrate(FunctionArgs& fargs){
       auto* data_start = prod.data();
       for (size_t i = 0; i < static_cast<size_t>(m_xorders.size()); ++i) {
           size_t n = m_xorders[i];
-          auto* data_end=std::next(data_start, n);
-          ret(i) = std::accumulate(data_start, data_end, 0.0);
-          data_start=data_end;
+          if(n){
+            auto* data_end=std::next(data_start, n);
+            ret(i) = std::accumulate(data_start, data_end, 0.0);
+            data_start=data_end;
+          }
+          else{
+            ret(i) = 0.0;
+          }
       }
     }
 }

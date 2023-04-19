@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
 from scipy.optimize import minimize
-from packages.minimize.lib.base import MinimizerBase, FitResult
-import ROOT
+from minimize.lib.base import MinimizerBase, FitResult
 import numpy as np
+from typing import Optional
 
 class SciPyMinimizer(MinimizerBase):
-    _label       = 'scipy'
-    _method      = 'BFGS'
-    _kwargs      = None
-    def __init__(self, statistic, minpars, method=None, **kwargs):
+    _label: str       = 'scipy'
+    _method: str      = 'BFGS'
+    _kwargs: dict     = {}
+    _scipy_opts: dict = {}
+    def __init__(self, statistic, minpars, *, method: Optional[str]=None, scipy_opts: dict={}, **kwargs):
         MinimizerBase.__init__(self, statistic, minpars, **kwargs)
         if method:
             self._method = method
+        self._scipy_opts = scipy_opts
 
     @property
     def kwargs(self):
@@ -51,24 +53,35 @@ class SciPyMinimizer(MinimizerBase):
 
         self.parspecs.resetstatus()
 
+        self._kwargs.update(self._scipy_opts)
+
     def call(self, args0):
         """Evaluate the function for a given set of values"""
         args = np.ascontiguousarray(args0, dtype='d')
         return self._minimizable.DoEval(args)
 
-    def _child_fit(self, profile_errors=None):
-        assert not profile_errors
+    def _child_fit(self, **kwargs):
+        assert not kwargs
 
         self.setuppars()
         with self.parspecs:
             with FitResult() as fr:
                 self._res = minimize(self.call, **self._kwargs)
 
-        fr.set(x=self._res.x, errors=None, fun=self._res.fun,
+        try:
+            hess_inv = self._res.hess_inv
+        except AttributeError:
+            hess_inv = None
+
+        try:
+            jac = self._res.jac
+        except AttributeError:
+            jac = None
+        fr.set(x=self._res.x, errors=None, fun=float(self._res.fun),
                success=self._res.success, message=self._res.message,
                minimizer=self.label, nfev=self._res.nit,
-               hess_inv = self._res.hess_inv,
-               jac = self._res.jac
+               hess_inv = hess_inv,
+               jac = jac
                 )
         self._result = fr.result
         self.patchresult()

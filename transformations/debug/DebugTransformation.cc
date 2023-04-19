@@ -98,6 +98,9 @@ void DebugTransformation::function(FunctionArgs& fargs){
         fmtprint<>(name, sleep_message_post, sleep_seconds, true);
     }
 
+    if(emit_calculation_error){
+        throw rets.error("Test calculation error");
+    }
 }
 
 

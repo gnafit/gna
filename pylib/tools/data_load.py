@@ -1,4 +1,3 @@
-
 from os.path import splitext
 import ROOT as R
 from tools.root_helpers import TFileContext
@@ -14,10 +13,11 @@ def read_root(filename, name, **kwargs):
         if not o:
             raise IOError("Can not read object `{}` from file `{}`"%(name, filename) )
 
-        return get_buffers_auto(o)
+        return tuple(o.copy() for o in get_buffers_auto(o))
 
 def read_dat(filename, **kwargs):
-    return np.loadtxt(filename, unpack=True)
+    kwargs.setdefault('unpack', True)
+    return np.loadtxt(filename, **kwargs)
 
 # def read_object_hdf5(filename, names, *args, **kwargs):
     # pass

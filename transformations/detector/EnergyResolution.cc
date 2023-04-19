@@ -6,13 +6,14 @@
 
 constexpr double pi = boost::math::constants::pi<double>();
 
+using GNA::DataPropagation;
 
-EnergyResolution::EnergyResolution(bool propagate_matrix) :
+EnergyResolution::EnergyResolution(DataPropagation propagate_matrix) :
 EnergyResolution({"Eres_a" , "Eres_b" , "Eres_c"}, propagate_matrix){
 
 }
 
-EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, bool propagate_matrix) :
+EnergyResolution::EnergyResolution(const std::vector<std::string>& pars, DataPropagation propagate_matrix) :
 HistSmearSparse(propagate_matrix)
 {
   if(pars.size()!=3u){
@@ -63,14 +64,14 @@ void EnergyResolution::calcMatrix(FunctionArgs& fargs) {
   auto bin_center = [edges](size_t index){ return (edges[index+1] + edges[index])/2; };
   for (size_t etrue = 0; etrue < bins; ++etrue) {
     double Etrue = bin_center(etrue);
-    double dEtrue = edges[etrue+1] - edges[etrue];
 
     bool right_edge_reached{false};
     /* precalculating probabilities for events in given bin to leak to
      * neighbor bins  */
     for (size_t erec = 0; erec < bins; ++erec) {
       double Erec = bin_center(erec);
-      double rEvents = dEtrue*resolution(Etrue, Erec);
+      double dErec = edges[erec+1] - edges[erec];
+      double rEvents = dErec*resolution(Etrue, Erec);
 
       if (rEvents < 1E-10) {
         if (right_edge_reached) {

@@ -1,4 +1,3 @@
-
 import inspect
 
 class ClassWrapper(object):

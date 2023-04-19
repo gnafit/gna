@@ -5,7 +5,6 @@ from gna.configurator import NestedDict
 from gna.bundle import execute_bundles
 from gna.env import env
 from matplotlib import pyplot as P
-from collections import OrderedDict
 
 cfg = NestedDict()
 cfg.filename = 'output/sample_hists.root'
@@ -32,7 +31,7 @@ cfg.spectra3 = NestedDict(
         bundle = 'root_histograms_v01',
         filename = cfg.filename,
         format = 'hist_{self}',
-        variants = OrderedDict([
+        variants = dict([
             ( 'D1', 'G1_D1' ),
             ( 'D2', 'G1_D2' ),
             ( 'D3', 'G2_D3' ),

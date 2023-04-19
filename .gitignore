@@ -6,8 +6,9 @@ doc/doxygen
 # Other folders
 legacy/
 data
-inputs
+input_data
 output
+plot_sens_delta/
 
 # Local configuration files and folders
 config_local
@@ -25,6 +26,8 @@ matplotlibrc
 \#*
 .\#*
 .cache
+**/.ipynb_checkpoints/*
+.idea/
 
 # vim
 UltiSnips/*
@@ -52,6 +55,9 @@ tags
 *.pyc
 *.o
 compile_commands.json
+*.ipynb
 
 # Various specific scripts
 doc/makerst
+.clangd
+.vimcache

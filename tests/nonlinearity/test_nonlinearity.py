@@ -77,7 +77,7 @@ ev = [ 1.025, 2.025, 3.025, 5.025, 6.025, 9.025 ]
 phist = singularities( ev, edges )
 hist = C.Histogram( edges, phist )
 
-nl = R.HistNonlinearity()
+nl = R.HistNonlinearity(R.GNA.DataPropagation.Propagate)
 nl.print()
 
 nl.set(hist.hist, pedges_m.points)
@@ -112,7 +112,8 @@ ax1.set_xlabel( 'Source bins' )
 ax1.set_ylabel( 'Target bins' )
 ax1.set_title( 'Energy non-linearity matrix' )
 
-mat = convert(nl.getDenseMatrix(), 'matrix')
+# mat = convert(nl.getDenseMatrix(), 'matrix')
+mat = nl.matrix.FakeMatrix.data()
 print( 'Col sum', mat.sum(axis=0) )
 
 mat = N.ma.array( mat, mask= mat==0.0 )

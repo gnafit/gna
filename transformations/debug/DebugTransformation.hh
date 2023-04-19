@@ -28,5 +28,7 @@ public:
 
     size_t count_function=0;
     size_t count_types=0;
+
+    bool emit_calculation_error=false;
 };
 

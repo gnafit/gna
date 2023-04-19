@@ -71,7 +71,7 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
     path = os.path.join(str(tmp_path), suffix+'_covbase.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     fig = plt.figure()
     ax = plt.subplot(111, xlabel='X', ylabel='Y', title='Covariance matrix full')
@@ -82,7 +82,7 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
     path = os.path.join(str(tmp_path), suffix+'_cov.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph([Data.single(),Cp.covbase.covbase], path, verbose=False)
@@ -110,7 +110,7 @@ def test_covariated_prediction(syst1, syst2, tmp_path):
     path = os.path.join(str(tmp_path), suffix+'_L.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     assert (data==data_o).all()
 
@@ -175,7 +175,7 @@ def test_covariated_prediction_blocks(tmp_path):
     path = os.path.join(str(tmp_path), suffix+'_covbase.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     path = os.path.join(str(tmp_path), suffix+'_graph.png')
     savegraph([Cp.prediction,Cp.covbase.covbase], path, verbose=False)
@@ -195,7 +195,7 @@ def test_covariated_prediction_blocks(tmp_path):
     path = os.path.join(str(tmp_path), suffix+'_L.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
+    plt.close('all')
 
     assert (fulldata==data_o).all()
     assert (fullcovmat==covbase_o).all()

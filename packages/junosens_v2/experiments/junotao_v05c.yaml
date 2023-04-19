@@ -1,0 +1,297 @@
+#
+# Control
+#
+livetime:
+    expr: 'daq_years*seconds_in_year'
+    label: JUNO livetime, s
+#
+# Reactor part
+#
+powerlivetime_factor:
+    expr:
+      - 'conversion_factor*fission_fractions_scale*global_norm*thermal_power_nominal*thermal_power_scale'
+      - 'conversion_factor*fission_fractions_scale*thermal_power_correction*thermal_power_nominal*thermal_power_scale'
+      - 'conversion_factor*fission_fractions_scale*thermal_power_nominal*thermal_power_scale'
+    label: 'Power/Livetime/Mass factor, nominal'
+power_factor_snf:
+    expr:
+      - 'conversion_factor*duty_cycle*thermal_power_nominal'
+      - 'conversion_factor*thermal_power_correction*thermal_power_nominal'
+      - 'conversion_factor*thermal_power_nominal'
+    label: 'Power factor for SNF'
+livetime_factor_snf:
+    expr: 'efflivetime*snf_norm*target_protons'
+    label: 'Livetime/mass factor for SNF, b.fit'
+baselineweight_switch:
+    expr: 'baselineweight*reactor_active_norm'
+    label: 'Baselineweight (toggle) for {reactor}-\>{detector}'
+detector_reactor_factor:
+    expr:
+      - baselineweight*duty_cycle*efflivetime*target_protons
+      - baselineweight*efflivetime*target_protons
+    label: 'Baselineweight*efflivetime*nprotons (JUNO)'
+detector_reactor_factor_tao:
+    expr:
+      - baselineweight_tao*duty_cycle_tao*efflivetime_tao*target_protons_tao
+      - baselineweight_tao*efflivetime_tao*target_protons_tao
+    label: 'Baselineweight*efflivetime*nprotons (TAO)'
+energy_per_fission_fraction:
+    expr: 'fission_fractions_nominal*isotope_weight'
+    label: Fractional energy per fission
+energy_per_fission_avg:
+  expr: 'energy_per_fission_avg'
+  label: 'Average energy per fission at {reactor}'
+ff_power_snf:
+  expr: 'fission_fractions_nominal*power_factor_snf'
+  label: Product of nominal fission fractions and power for SNF for {isotope} at {reactor}
+#
+# Reactor spectrum
+#
+reac_spectrum_oscillated:
+  expr:
+  - 'anuspec_rd*oscprob_msw_approx'
+  - 'anuspec_rd*oscprob_full'
+  - 'anuspec_rd_full*oscprob_full'
+  - 'anuspec_rd_full*oscprob_msw_approx'
+  label: 'Reactor spectrum osc. {reactor}-\>{detector}'
+anuspec_rd:
+  expr:
+  - sum:i|anuspec_weighted
+  - sum:i|anuspec_weighted_offeq
+  - sum:i|anuspec_equilib_ri
+  label: '{{Antineutrino spectrum|{reactor}}}'
+anuspec_rd_switch:
+  expr: 'anuspec_rd*reactor_active_norm'
+  label: '{{Antineutrino spectrum|{reactor}}}'
+anuspec_rd_full:
+  expr: 'anuspec_rd_switch+snf_in_reac'
+  label: '{{Antineutrino spectrum+SNF|{reactor}}}'
+anuspec_weighted:
+  expr: 'anuspec*power_livetime_factor'
+  label: '{{Antineutrino spectrum|{reactor}.{isotope}-\>{detector}}}'
+anuspec_weighted_offeq:
+  expr:
+  - anuspec*offeq_correction*power_livetime_factor
+  - offeq_correction*power_livetime_factor
+  - DistortSpectrum*power_livetime_factor
+  label: '{{Antineutrino spectrum (+offeq)|{reactor}.{isotope}}}'
+anuspec_tao:
+  expr: "anuspec_rd_full_tao*detector_reactor_factor_tao"
+  label: Antineutrino spectrum from TS1 at TAO
+countrate_tao:
+  expr: "anuspec_tao*cross_section"
+  label: Reactor antineutrino spectrum at TAO
+snf_spectrum_isotope:
+  expr: "snf_plf_daily*anuspec_unc_corrected"
+  label: Nominal SNF spectrum for {isotope} at {reactor}
+nominal_spec_reac:
+  expr: "sum|snf_plf_daily*anuspec_unc_corrected"
+  label: Nominal SNF spectrum at {reactor}
+snf_plf_daily:
+  expr: 'snf_plf_daily'
+  label: '{{Power-livetime factor for SNF (~nu/s)|{reactor}.{isotope}}}'
+#
+# Backgrounds
+#
+acc_num:
+    expr: 'acc_rate*acc_rate_norm*days_in_second*livetime'
+    label: Number of accidentals (b.fit) at JUNO
+fastn_num:
+    expr: 'days_in_second*livetime*fastn_rate*fastn_rate_norm'
+    label: Number of fast neutrons (b.fit) at JUNO
+alphan_num:
+    expr: 'alphan_rate*alphan_rate_norm*days_in_second*livetime'
+    label: Number of alpha-n (b.fit) at JUNO
+alphan_shape_correction:
+    expr: 'alphan*alphan_bin2bin'
+    label: Alpha-n bin2bin shape correction  at JUNO
+lihe_num:
+    expr: 'days_in_second*livetime*lihe_rate*lihe_rate_norm'
+    label: Number of 9Li/8He (b.fit) at JUNO
+lihe_bin2bin_abs:
+    expr: 'lihe_bin2bin*lihe_tao'
+    label: ⁹Li/⁸He bin2bin unc (TAO)
+lihe_bin2bin:
+    expr: "lihe*lihe_bin2bin"
+    label: ⁹Li/⁸He bin2bin shape uncertainty at JUNO
+geonu_num:
+    expr: 'days_in_second*livetime*geonu_rate*geonu_rate_norm'
+    label: Number of Geo nu events (b.fit) at JUNO
+geonu_Th232_spectrum_tot:
+    expr: 'frac_Th232*geonu_Th232_spectrum'
+    label: Geonu Th232 total spectrum at JUNO
+geonu_U238_spectrum_tot:
+    expr: 'frac_U238*geonu_U238_spectrum'
+    label: Geonu U238 total spectrum at JUNO
+geonu_spectrum:
+    expr: geonu_Th232_spectrum_tot+geonu_U238_spectrum_tot
+    label: Total geo nu spectrum at JUNO
+geonu_bin2bin:
+    expr: "geonu*geonu_bin2bin"
+    label: Geo-nu bin2bin shape correction at JUNO
+acc_num_tao:
+    expr: 'acc_rate_norm_tao*acc_rate_tao*days_in_second*livetime_tao'
+    label: Number of accidentals (b.fit) at TAO
+fastn_num_tao:
+    expr: 'days_in_second*livetime_tao*fastn_rate_tao*fastn_rate_norm_tao'
+    label: Number of fast neutrons (b.fit) at TAO
+fastn_bin2bin_abs:
+    expr: 'fastn_shape_unc_rel*fastn_spectrum_tao'
+    label: Fast neutron bin2bin unc (TAO)
+fastn_bin2bin:
+    expr: "fastn*fastn_bin2bin"
+    label: "Fast neutron bin2bin shape correction at JUNO"
+total_bkg:
+    expr: "bkg_juno"
+    label: "Total background at JUNO"
+lihe_num_tao:
+    expr: 'days_in_second*livetime_tao*lihe_rate_tao*lihe_rate_norm_tao'
+    label: Number of 9Li/8He (b.fit) at TAO
+variance_tao_norm:
+    expr: 'bkgbin_tao_widths*sumsq_snapshot_tao'
+    label: TAO variance, normalized to bin width
+bkg_shape_variance_tao:
+    expr: bkg_shape_variance_tao
+    label: TAO variance
+#
+# Oscillation probability
+#
+oscprob_weighted:
+  expr: 'oscprob*pmns'
+oscprob_full:
+  expr: 'sum:c|oscprob_weighted'
+  label: 'anue survival probability|{reactor}-\>{detector}|weight: {weight_label}'
+#
+# Spectrum and oscillations
+#
+cspec_diff:
+  expr: 'anuspec*ibd_xsec*jacobian*oscprob'
+  label: 'anu count rate | {isotope}@{reactor}-\>{detector} ({component})'
+cspec_diff_reac_l:
+  expr: 'baselineweight*cspec_diff_reac'
+cspec_diff_det_weighted:
+  expr: 'pmns*cspec_diff_det'
+#
+# Detector stage
+#
+norm_juno_full:
+  expr: 'norm_juno*norm_reac'
+  label: 'Total JUNO norm'
+norm_tao_full:
+  expr: 'norm_reac*norm_tao'
+  label: 'Total TAO norm'
+anue_spectrum_scale_shape_corrected:
+  expr: 'anue_spectrum_scale*rebin'
+  label: 'JUNO final, spectrum shape corrected'
+reac_spectrum_at_detector:
+  expr:
+  - 'baselineweight_switch*reac_spectrum_oscillated'
+  - 'baselineweight*reac_spectrum_oscillated'
+  - 'detector_reactor_factor*reac_spectrum_oscillated'
+  label: '{reactor} spectrum at {detector}'
+observable_spectrum_reac:
+  expr:
+  - 'ibd_xsec_rescaled*reac_spectrum_at_detector'
+  - 'cross_section*reac_spectrum_at_detector'
+  label: 'Observable spectrum from {reactor} at {detector}'
+observable_spectrum:
+  expr: 'sum:r|observable_spectrum_reac'
+  label: 'Observable spectrum at {detector}'
+observation_ibd:
+  expr: norm*rebin
+  label: 'Observable spectrum at JUNO'
+#
+# Variance
+#
+anue_shape_var:
+  expr: 'anue_bin2bin_unc_rel*anue_bin2bin_unc_rel*ibd_juno_all*ibd_juno_all'
+  label: 'anue spectrum shape variance at JUNO'
+bkg_shape_variance:
+    expr: "bin_width_factor*bkgbin_widths*sumsq_snapshot"
+    label: "Background shape variance at JUNO"
+bkg_shape_var:
+    expr: "bkgbin_widths*sumsq_snapshot"
+    label: "Unscaled bkg shape variance at JUNO"
+variance_juno:
+  expr: 'ibd_juno_all+anue_shape_var+bkg_shape_var'
+#
+# LSNL
+#
+lsnl_coarse_i:
+  expr: 'lsnl_component_y*lsnl_weight'
+  label: LSNL part {autoindex} JUNO
+lsnl_coarse_tao_i:
+  expr: 'lsnl_component_y_tao*lsnl_weight_tao'
+  label: LSNL part {autoindex} TAO
+##
+## Energy resolution
+##
+eres_sigmarel_corrected:
+  expr: sigma_correction_fine*eres_sigmarel
+  label: σ rel (corrected)
+eres_weighted:
+  expr: 'subdetector_fraction*eres'
+  label: '{{Fractional observed spectrum {subdetector}|weight: {weight_label}}}'
+#
+# Others
+#
+ibd:
+  expr:
+  - 'eres'
+  - 'sum:c|eres_weighted'
+  label: 'Observed IBD spectrum | {detector}'
+ibd_noeffects:
+  expr: 'kinint2_juno'
+  label: 'Observed IBD spectrum (no effects) | {detector}'
+ibd_noeffects_bf:
+  expr: 'kinint2_juno*shape_norm'
+  label: 'Observed IBD spectrum (best fit, no effects) | {detector}'
+fission_fractions:
+  expr: 'fission_fractions[r,i]()'
+  label: "Fission fraction for {isotope} at {reactor}"
+energy_per_fission_weight:
+  expr: 'energy_per_fission_weight'
+  label: "Weighted energy_per_fission for {isotope} at {reactor}"
+energy_per_fission_weighted:
+  expr: 'energy_per_fission*fission_fractions'
+  label: "{{Energy per fission for {isotope} | weighted with fission fraction at {reactor}}}"
+power_livetime_factor:
+  expr: 'power_livetime_factor'
+  label: '{{Power-livetime factor (~nu/s)|{reactor}.{isotope}}}'
+numerator:
+  expr: 'numerator'
+  label: '{{Power-livetime factor (~MW)|{reactor}.{isotope}}}'
+power_livetime_scale:
+  expr: 'eff*livetime*thermal_power_scale*thermal_power_nominal*conversion_factor*target_protons'
+  label: '{{Power-livetime factor (~MW)| {reactor}.{isotope}}}'
+countrate_rd:
+  expr:
+  - 'anuspec_rd*ibd_xsec*jacobian*oscprob_full'
+  - 'anuspec_rd*ibd_xsec*oscprob_full'
+  label: 'Countrate {reactor}-\>{detector}'
+ibd_xsec_rescaled:
+  expr: 'ibd_xsec*jacobian'
+  label: IBD cross section vs Evis
+countrate_weighted:
+  expr: 'baselineweight*countrate_rd'
+countrate:
+  expr: 'sum:r|countrate_weighted'
+  label: '{{Count rate at {detector}|weight: {weight_label}}}'
+observation:
+  expr: 'bkg_juno+ibd'
+  label: 'Total observed spectrum | {detector}'
+iso_spectrum_w:
+  expr: 'kinint2_juno*power_livetime_factor'
+reac_spectrum:
+  expr: 'sum:i|iso_spectrum_w'
+reac_spectrum_w:
+  expr: 'baselineweight*reac_spectrum'
+ad_spectrum_c:
+  expr: 'sum:r|reac_spectrum_w'
+ad_spectrum_cw:
+  expr: 'pmns*ad_spectrum_c'
+ad_spectrum_w:
+  expr: 'sum:c|ad_spectrum_cw'
+eres_cw:
+  expr: 'eres*pmns'
+

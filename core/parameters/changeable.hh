@@ -171,6 +171,9 @@ public:
     }
   }
   bool depends(changeable other) const {
+    if(frozen()){
+      return false;
+    }
     if(*this==other){
       return true;
     }
@@ -180,6 +183,9 @@ public:
     while (!queue.empty()) {
       changeable current = queue.front();
       queue.pop_front();
+      if(current.frozen()){
+        continue;
+      }
       references &emitters = current.m_hdr->emitters;
       if (emitters.has(other)) {
         return true;
@@ -247,8 +253,6 @@ public:
   void assign(changeable other) {
     m_hdr = other.m_hdr;
   }
-protected:
-  changeable() = default;
   void notify() const {
     for (auto& observer: m_hdr->observers) {
       if (observer.isnull()) {
@@ -257,6 +261,8 @@ protected:
       observer.taint();
     }
   }
+protected:
+  changeable() = default;
   template <typename T>
   void initdeps(T deps) {
     DPRINTF("subscribing to %i deps", int(deps.size()));

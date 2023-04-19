@@ -14,17 +14,14 @@ from load import ROOT as R
 
 def unpack(output, *args, **kwargs):
     dtype = output.datatype()
-    ndim  = len(dtype.shape)
-    if dtype.kind==2:
+    if dtype:
+        ndim  = len(dtype.shape)
         if ndim==1:
             return unpack_hist1(output, dtype, *args, **kwargs)
-        # elif ndim==2:
-            # return unpack_hist2(output, dtype, *args, **kwargs)
+        elif ndim==2:
+            return unpack_hist2(output, dtype, *args, **kwargs)
         else:
             raise ValueError('Invalid histogram dimension '+str(ndim))
-    elif dtype.kind==1:
-        # return unpack_points(output, dtype, *args, **kwargs)
-        raise ValueError('Saving TArray is not implemented')
 
     raise ValueError('Uninitialized output')
 
@@ -36,22 +33,36 @@ def set_axes(obj, kwargs):
     if ylabel:
         obj.GetYaxis().SetTitle(ylabel)
 
+def get_axes_args(dtype, axis: int, need_array: bool=False) -> tuple:
+    nbins = dtype.shape[axis]
+    if dtype.edgesNd.empty():
+        if need_array:
+            return nbins, np.arange(nbins+1)-0.5
+        else:
+            return nbins, -0.5, nbins+0.5
+
+    edges = np.array(dtype.edgesNd[axis], dtype='d')
+    if need_array:
+        return nbins, edges
+
+    widths = edges[1:]-edges[:-1]
+    rel_offsets = np.fabs(widths-widths[0])/widths.max()
+    equal_widths = (rel_offsets<1.e-9).all()
+    if equal_widths:
+        return edges.size-1, edges[0], edges[-1]
+
+    return edges.size-1, edges
+
 def unpack_hist1(output, dtype, kwargs={}):
     dtype = dtype or output.datatype()
     data = output.data()
 
-    edges = np.array(dtype.edgesNd[0], dtype='d')
-    widths = edges[1:]-edges[:-1]
-    rel_offsets = np.fabs(widths-widths[0])/widths.max()
+    args = get_axes_args(dtype, 0)
 
     name  = kwargs.pop('name', '')
     title = kwargs.pop('label', kwargs.pop('title', ''))
 
-    if (rel_offsets<1.e-9).all():
-        # Constant width histogram
-        hist = R.TH1D(name, title, edges.size-1, edges[0], edges[-1])
-    else:
-        hist = R.TH1D(name, title, edges.size-1, edges)
+    hist = R.TH1D(name, title, *args)
 
     buffer = root2numpy.get_buffer_hist1(hist)
     buffer[:] = data
@@ -61,6 +72,35 @@ def unpack_hist1(output, dtype, kwargs={}):
 
     if kwargs:
         raise Exception('Unparsed options in extra arguments for TH1D')
+
+    return hist
+
+def unpack_hist2(output, dtype, kwargs={}):
+    dtype = dtype or output.datatype()
+    data = output.data()
+
+    argsX = get_axes_args(dtype, 0)
+    argsY = get_axes_args(dtype, 1)
+    if len(argsX)!=len(argsY):
+        if len(argsX)<len(argsY):
+            argsX = get_axes_args(dtype, 0, need_array=True)
+        if len(argsX)>len(argsY):
+            argsY = get_axes_args(dtype, 1, need_array=True)
+    args = argsX+argsY
+
+    name  = kwargs.pop('name', '')
+    title = kwargs.pop('label', kwargs.pop('title', ''))
+
+    hist = R.TH2D(name, title, *args)
+
+    buffer = root2numpy.get_buffer_hist2(hist)
+    buffer[:] = data
+    hist.SetEntries(data.sum())
+
+    set_axes(hist, kwargs)
+
+    if kwargs:
+        raise Exception('Unparsed options in extra arguments for TH2D')
 
     return hist
 
@@ -115,7 +155,7 @@ class cmd(basecmd):
                 try:
                     data = unpack(obs, kwargs)
                 except ValueError:
-                    print('Skipping unsupported object:', '.'.join(key))
+                    print('Skipping unsupported object {} of type {}'.format('.'.join(key), str(obs.datatype())))
                     continue
                 targetkey = (to,)+key
                 target[targetkey] = data

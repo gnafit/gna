@@ -2,36 +2,49 @@ from gna.env import env
 from gna.config import cfg
 import ROOT
 import numpy as np
+import fnmatch as fn
 
 ParameterDouble = ROOT.Parameter("double")
 def __is_independent(par):
     return isinstance(par, ParameterDouble)
 
-def get_parameters(params, drop_fixed=True, drop_free=True, drop_constrained=False):
-    special_chars = list('*?[]!')
-    pars = []
+__special_chars = list('*?[]!')
+
+def get_parameters(params, *, drop_fixed=True, drop_free=True, drop_constrained=False,
+                   namespace=env.globalns, recursive=True):
+    pargroups = []
     for candidate in params:
+        cpars = []
+        pargroups.append(cpars)
         if __is_independent(candidate):
-            pars.append(candidate)
+            cpars.append(candidate)
             continue
-        if any(char in candidate for char in special_chars):
-            import fnmatch as fn
+        if any(char in candidate for char in __special_chars):
             matched_names = fn.filter((_[0] for _ in env.globalns.walknames()), candidate)
             matched_pars = map(env.get, matched_names)
-            pars.extend(matched_pars)
+            cpars.extend([p for p in matched_pars if __is_independent(p)])
             continue
         try:
-            par = env.pars[candidate]
-            pars.append(par)
+            par = namespace[candidate]
+            if __is_independent(par):
+                cpars.append(par)
         except KeyError:
-            par_namespace = env.ns(candidate)
+            par_namespace = namespace(candidate)
             if par_namespace is not env.globalns:
                 independent_pars  = [par for _, par in par_namespace.walknames()
                                      if __is_independent(par)]
+                cpars.extend(independent_pars)
             else:
-                independent_pars = [env.globalns.get(candidate)]
+                par = env.globalns.get(candidate)
+                if __is_independent(par):
+                    cpars.append(candidate)
 
-            pars.extend(independent_pars)
+    pars = []
+    for candidate, pargroup in zip(params, pargroups):
+        if not pargroup:
+            raise Exception(f'Getting {candidate!s} yielded no parameters!')
+
+        pars.extend(pargroup)
 
     if drop_fixed:
         pars = [par for par in pars if not par.isFixed()]
@@ -40,33 +53,7 @@ def get_parameters(params, drop_fixed=True, drop_free=True, drop_constrained=Fal
         pars = [par for par in pars if not par.isFree()]
 
     if drop_constrained:
-        pars = [par for par in pars if par.isFree()]
+        pars = [par for par in pars if par.isFree() or par.isFixed()]
 
     return pars
 
-def get_uncertainties(parlist):
-    npars = len(parlist)
-    centrals, sigmas = np.zeros(npars, dtype='d'), np.zeros(npars, dtype='d')
-    correlations = False
-
-    for i, par in enumerate(parlist):
-        centrals[i]=par.central()
-        sigmas[i]=par.sigma()
-        correlations = correlations or par.isCorrelated()
-
-    if correlations:
-        # In case there are correlations:
-        # - create covariance matrix
-        # - fill the diagonal it with the value of sigma**2
-        # - fill the off-diagonal elements with covarainces
-        # - create Points, representing the covariance matrix
-        covariance = np.diag(sigmas**2)
-        for i in range(npars):
-            for j in range(i):
-                pari, parj = parlist[i], parlist[j]
-                cov = pari.getCovariance(parj)
-                covariance[i,j]=covariance[j,i]=cov
-
-        return sigmas, centrals, covariance
-
-    return sigmas, centrals, correlations

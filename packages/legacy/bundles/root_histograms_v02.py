@@ -1,8 +1,6 @@
-
 from load import ROOT as R
 import numpy as N
 from gna.env import env, namespace
-from collections import OrderedDict
 from mpl_tools.root2numpy import get_buffer_hist1, get_bin_edges_axis
 from gna.constructors import Histogram
 from gna.configurator import NestedDict

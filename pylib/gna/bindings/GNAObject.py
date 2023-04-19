@@ -1,4 +1,3 @@
-
 from gna.bindings import patchROOTClass, DataType, provided_precisions
 from gna.bindings import DataType
 import ROOT as R
@@ -12,7 +11,7 @@ for ft in provided_precisions:
     classes_single.append(R.GNASingleObjectT(ft, ft))
     classes_single.append(R.SingleOutputT(ft))
 
-@patchROOTClass(classes+classes_single, '__getattr__')
+@patchROOTClass(classes+classes_single[:1], '__getattr__')
 def GNAObject____getattr__(self, attr):
     try:
         return self[attr]

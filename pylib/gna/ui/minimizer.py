@@ -28,13 +28,15 @@ class cmd(basecmd):
         loaded_parameters = get_parameters(self.opts.par, drop_fixed=True, drop_free=False, drop_constrained=self.opts.drop_constrained)
         statistic_parameters = []
         for par in loaded_parameters:
-            if par.influences(self.opts.statistic.transformations.back()):
+            if par.influences(self.opts.statistic.transformations.back().inputs.front().output()):
                 statistic_parameters.append(par)
             elif cfg.debug_par_fetching:
-                warnings.warn("parameter {} doesn't influence the statistic and is being dropped".format(par.name()))
+                warnings.warn("parameter {} doesn't influence the statistic and is being dropped".format(par.qualifiedName()))
             else:
                 continue
 
+        if len(statistic_parameters) == 0:
+            print("No parameters loaded to minimizer {}".format(self.opts.name))
         minimizer.addpars(statistic_parameters)
 
         if self.opts.spec is not None:

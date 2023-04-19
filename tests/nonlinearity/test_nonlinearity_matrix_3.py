@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import load
+from load import ROOT as R
 from matplotlib import pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -157,7 +157,7 @@ for step in (1.0, 0.5, 0.1):
     Mod_proj = C.Points(mod_proj)
     ntrue = C.Histogram(orig, np.ones(orig.size-1))
 
-    nlB = C.HistNonlinearityB(True)
+    nlB = C.HistNonlinearityB(R.GNA.DataPropagation.Propagate)
     nlB.set(ntrue.hist, Orig_proj, Mod_proj)
     nlB.add_input()
 

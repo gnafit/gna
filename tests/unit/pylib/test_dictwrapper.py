@@ -1,6 +1,5 @@
 from tools.dictwrapper import DictWrapper, DictWrapperVisitorDemostrator
 import pytest
-from collections import OrderedDict
 
 def test_dictwrapper_01():
     dw = DictWrapper({})
@@ -175,7 +174,7 @@ def test_dictwrapper_03(split):
 
 
 def test_dictwrapper_04_visitor():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
 
@@ -198,14 +197,14 @@ def test_dictwrapper_04_visitor():
     assert v.values==values0
 
 def test_dictwrapper_05_visitor():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
 
     dw.visit(DictWrapperVisitorDemostrator())
 
 def test_dictwrapper_06_inheritance():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5, i=6)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5, i=6)))])
     dct['z.z.z'] = 0
 
     class DictWrapperA(DictWrapper):
@@ -227,7 +226,7 @@ def test_dictwrapper_06_inheritance():
     assert dw['f'].depth()==2
 
 def test_dictwrapper_07_delete():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct)
 
@@ -245,7 +244,7 @@ def test_dictwrapper_07_delete():
     assert ('f', 'g') in dw
 
 def test_dictwrapper_08_create():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z.z.z'] = 0
     dw = DictWrapper(dct, split='.')
 
@@ -256,21 +255,34 @@ def test_dictwrapper_08_create():
     assert dw['child'].unwrap()=={}
 
 def test_dictwrapper_09_dictcopy():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dct['z'] = {}
     dw = DictWrapper(dct, split='.')
 
     dw1 = dw.deepcopy()
     for i, (k, v) in enumerate(dw1.walkdicts()):
-        print(i, k)
+        # print(i, k)
         assert k in dw
         assert v._obj==dw[k]._obj
         assert v._obj is not dw[k]._obj
         assert type(v._obj) is type(dw[k]._obj)
     assert i==2
 
+def test_dictwrapper_09_walkitems():
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('c1', dict(i=dict(j=dict(k=dict(l=6))))), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct['z'] = {}
+    dw = DictWrapper(dct, split='.')
+
+    imaxlist=[5, 0, 6, 5, 5, 5, 5, 5, 5]
+    for imax, maxdepth in zip(imaxlist, [None]+list(range(9))):
+        i=0
+        for i, (k, v) in enumerate(dw.walkitems(maxdepth=maxdepth)):
+            # print(i, k, v)
+            assert maxdepth is None or len(k)<=maxdepth
+        assert i==imax
+
 def test_dictwrapper_09_walk():
-    dct = OrderedDict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
+    dct = dict([('a', 1), ('b', 2), ('c', 3), ('d', dict(e=4)), ('f', dict(g=dict(h=5)))])
     dw = DictWrapper(dct)
 
     keys0 = [ ('a',), ('b', ), ('c',), ('d', 'e'), ('f', 'g', 'h') ]
@@ -304,3 +316,26 @@ def test_dictwrapper_11_iterkey():
     assert [1]==list(dw.iterkey(1))
     assert [1.0]==list(dw.iterkey(1.0))
 
+def test_dictwrapper_setdefault_01():
+    d = dict(a=dict(b=dict(key='value')))
+    dw = DictWrapper(d)
+
+    newdict = dict(newkey='newvalue')
+
+    sd1 = dw.setdefault(('a','b'), newdict)
+    assert isinstance(sd1, DictWrapper)
+    assert sd1._obj==d['a']['b']
+
+    sd2 = dw.setdefault(('a','c'), newdict)
+    assert isinstance(sd2, DictWrapper)
+    assert sd2._obj==newdict
+
+def test_dictwrapper_eq_01():
+    d = dict(a=dict(b=dict(key='value')))
+    dw = DictWrapper(d)
+
+    assert dw['a']==d['a']
+    assert d['a']==dw['a']
+    assert dw['a']!=d
+    assert dw['a']==dw['a']
+    assert dw['a'] is not dw['a']

@@ -1,4 +1,3 @@
-
 from gna.configurator import NestedDict
 from gna.expression.preparse import open_fcn
 from gna.expression.operation import *
@@ -6,7 +5,7 @@ from gna.env import env
 import re
 import inspect
 
-class VTContainer(OrderedDict):
+class VTContainer(dict):
     _order=None
     def __init__(self, *args, **kwargs):
         super(VTContainer, self).__init__(*args, **kwargs)
@@ -28,7 +27,7 @@ class VTContainer(OrderedDict):
         elif inspect.isclass(value) and issubclass(value, Operation):
             value.order=self._order
 
-        OrderedDict.__setitem__(self, key, value)
+        dict.__setitem__(self, key, value)
         return value
 
 class Expression(object):
@@ -42,8 +41,8 @@ class Expression(object):
         else:
             raise Exception('Unsupported expression: {!r}'.format(expression))
 
-        cexpr = re.compile('\s*#.*')
-        rexpr = re.compile('\n\s+')
+        cexpr = re.compile('\\s*#.*')
+        rexpr = re.compile('\n\\s+')
         self.expressions_raw = [ rexpr.sub('', cexpr.sub('', e)) for e in self.expressions_raw ]
         self.expressions = [open_fcn(expr) for expr in self.expressions_raw]
 
@@ -118,7 +117,7 @@ class ExpressionContext(object):
     indices = None
     def __init__(self, cfg, ns=None, inputs=None, outputs=None):
         self.executed_bundles = []
-        self.required = OrderedDict()
+        self.required = dict()
 
         self.cfg = cfg
         self.outputs = NestedDict() if outputs is None else outputs

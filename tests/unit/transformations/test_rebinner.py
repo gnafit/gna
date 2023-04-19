@@ -3,45 +3,74 @@
 from matplotlib import pyplot as plt
 import numpy as N
 from load import ROOT as R
-from gna.env import env
-from mpl_tools.helpers import savefig, plot_hist, add_colorbar
-from gna.converters import convert
-from argparse import ArgumentParser
+from mpl_tools.helpers import savefig, plot_hist
 import gna.constructors as C
-import sys
 import os
-from gna.unittest import *
+from gna.unittest import allure_attach_file
+import pytest
 
-def test_rebinner(tmp_path):
+@pytest.mark.parametrize('mode', ('static', 'inputstatic', 'inputdynamic'))
+def test_rebinner(mode, tmp_path):
     edges   = N.array( [ 0.0, 0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
     edges_m = N.array( [      0.1, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
 
-    ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
-    rebin = R.Rebin( edges_m.size, edges_m, 3 )
-    ntrue >> rebin.rebin.histin
+    histin = C.Histogram(edges, N.ones( edges.size-1 ) )
 
-    olddata = ntrue.data()
+    matrixavailable = False
+    pointsin, matrixt, histout = None, None, None
+    if mode=='static':
+        rebin = R.Rebin(edges_m.size, edges_m, 3)
+        histin >> rebin.rebin.histin
+    else:
+        matrixavailable = True
+        if mode=='inputstatic':
+            rebin = R.RebinInput(3, R.GNA.DataMutability.Static, R.GNA.DataPropagation.Propagate)
+            histin >> rebin.matrix.EdgesIn
+        elif mode=='inputdynamic':
+            rebin = R.RebinInput(3, R.GNA.DataMutability.Dynamic, R.GNA.DataPropagation.Propagate)
+            pointsin = C.Points(edges)
+            pointsin >> rebin.matrix.EdgesIn
+        else:
+            assert False
+
+        histout = C.Histogram(edges_m)
+        histout.hist.hist >> rebin.matrix.HistEdgesOut
+
+        histin >> rebin.rebin.histin
+
+        matrixt = rebin.matrix
+
+    rebin.printtransformations()
+    olddata = histin.data()
     newdata = rebin.rebin.histout.data()
 
-    mat = convert(rebin.getDenseMatrix(), 'matrix')
+    assert matrixt is None or not matrixt.tainted()
+    assert not rebin.rebin.tainted()
 
-    if "pytest" not in sys.modules:
-        print( mat )
+    histin.hist.taint()
+    assert matrixt is None or not matrixt.tainted()
+    assert rebin.rebin.tainted()
+    rebin.rebin.touch()
 
-    prj = mat.sum(axis=0)
-    assert ((prj==1.0) + (prj==0.0)).all(), "Not matching results after rebin"
+    if histout:
+        histout.hist.taint()
+        assert not matrixt.tainted()
+        assert not rebin.rebin.tainted()
 
-    #
-    # Plot spectra
-    #
-    print( ((prj==1.0) + (prj==0.0)).all() and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m' )
-    fig = plt.figure()
+    if pointsin:
+        pointsin.points.taint()
+        assert matrixt.tainted()
+        assert rebin.rebin.tainted()
+
+    rebin.rebin.touch()
+
+    plt.figure()
     ax = plt.subplot( 111 )
     ax.minorticks_on()
     # ax.grid()
     ax.set_xlabel( 'X axis' )
     ax.set_ylabel( 'Y axis' )
-    ax.set_title( 'Rebinner' )
+    ax.set_title( f'Rebinner ({mode})' )
 
     ax.vlines( edges, 0.0, 4.0, linestyle='--', linewidth=0.5 )
     plot_hist( edges, olddata, label='before' )
@@ -52,34 +81,61 @@ def test_rebinner(tmp_path):
     path = os.path.join(str(tmp_path), 'rebinner_hist.png')
     savefig(path, dpi=300)
     allure_attach_file(path)
-    plt.close()
 
-    #
-    # Plot matrix
-    #
-    fig = plt.figure()
-    ax = plt.subplot( 111 )
-    ax.minorticks_on()
-    # ax.grid()
-    ax.set_xlabel( 'Source bins' )
-    ax.set_ylabel( 'Target bins' )
-    ax.set_title( 'Rebinning matrix' )
+    if matrixavailable:
+        mat = rebin.matrix.FakeMatrix.data()
+        prj = mat.sum(axis=0)
+        status = ((prj==1.0) + (prj==0.0)).all()
+        print(status and '\033[32mOK!' or '\033[31mFAIL!', '\033[0m')
+        assert status, "Not matching results after rebin"
 
-    c = ax.matshow( N.ma.array(mat, mask=mat==0.0), extent=[edges[0], edges[-1], edges_m[-1], edges_m[0]] )
-    # add_colorbar( c )
+        mat_masked = N.ma.array(mat, mask=mat==0.0)
 
-    path = os.path.join(str(tmp_path), 'rebinner_matrix.png')
-    savefig(path, dpi=300)
-    allure_attach_file(path)
-    plt.close()
+        #
+        # Plot matrix
+        #
+        fig = plt.figure()
+        ax = plt.subplot( 111 )
+        ax.minorticks_on()
+        # ax.grid()
+        ax.set_xlabel( 'Source bins' )
+        ax.set_ylabel( 'Target bins' )
+        ax.set_title( f'Rebinning matrix ({mode})' )
+
+        ax.matshow( mat_masked, extent=[edges[0], edges[-1], edges_m[-1], edges_m[0]] )
+
+        path = os.path.join(str(tmp_path), 'rebinner_matrix.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+
+        fig = plt.figure()
+        ax = plt.subplot( 111 )
+        ax.minorticks_on()
+        # ax.grid()
+        ax.set_xlabel( 'Source bins' )
+        ax.set_ylabel( 'Target bins' )
+        ax.set_title( f'Rebinning matrix ({mode})' )
+
+        ax.set_ylim(edges[-1], edges[0])
+
+        ax.vlines( edges, edges_m[0], edges_m[-1], linestyle='--', linewidth=0.5, color='gray' )
+        ax.hlines( edges_m, edges[0], edges[-1], linestyle='--', linewidth=0.5, color='gray' )
+
+        ax.pcolorfast(edges, edges_m, mat_masked)
+
+        path = os.path.join(str(tmp_path), 'rebinner_matrix_1.png')
+        savefig(path, dpi=300)
+        allure_attach_file(path)
+    # plt.show()
+    plt.close('all')
 
 # def test_rebinner_exception(tmp_path):
     # edges   = N.array( [ 0.0, 0.1,  1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.0 ], dtype='d' )
     # edges_m = N.array( [      0.11, 1.2,      3.4, 4.5,           7.8      ], dtype='d' )
 
-    # ntrue = C.Histogram(edges, N.ones( edges.size-1 ) )
+    # histin = C.Histogram(edges, N.ones( edges.size-1 ) )
     # rebin = R.Rebin( edges_m.size, edges_m, 3 )
     # try:
-        # ntrue >> rebin.rebin.histin
+        # histin >> rebin.rebin.histin
     # except Exception as e:
         # import IPython; IPython.embed()

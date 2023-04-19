@@ -24,6 +24,7 @@ parser.add_argument( '-o', '--output', help='path to dump figures')
 parser.add_argument('-d', '--differential_xsec', action='store_true',
                     help='Plot differential cross section')
 parser.add_argument('-i', '--dyboscar-input', help='Path to inputs from dyboscar')
+parser.add_argument('-m', '--use-mesh', action='store_true', help='use ctheta mesh instead of a vector')
 
 args = parser.parse_args()
 
@@ -55,7 +56,10 @@ Enue.points.points >> ibd.xsec.Ee
 Enue.points.points >> econv.Ee.Evis
 
 Enue_first.points.points >> ibd_first.xsec.Enu
-ctheta.points.points >> ibd_first.xsec.ctheta
+if args.use_mesh:
+    ibd_first.Ee.ctheta_mesh >> ibd_first.xsec.ctheta
+else:
+    ctheta.points.points >> ibd_first.xsec.ctheta
 
 Enue.points.points >> ibd_first.Enu.Ee
 ctheta.points.points >> ibd_first.Enu.ctheta
@@ -65,6 +69,18 @@ ibd_first.Enu.Enu >> ibd_first.jacobian.Enu
 ctheta.points.points >> ibd_first.jacobian.ctheta
 
 Evis_edges = C.Points(np.linspace(0.0, 12.0, 1201, dtype='d'))
+
+#
+# Print data
+#
+eem = ibd_first.Enu.Ee_mesh()
+ctm = ibd_first.Enu.ctheta_mesh()
+
+print('Ee mesh:', eem.shape)
+print(eem)
+
+print('ctheta mesh:', ctm.shape)
+print(ctm)
 
 #
 # Do some plots

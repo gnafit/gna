@@ -1,4 +1,3 @@
-
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,6 +26,9 @@ class cmd(basecmd):
         parser.add_argument('--mask', action='store_true',
                              help="Mask zeros from covariance matrix")
 
+        parser.add_argument('-t', '--title', default='', help='title addition')
+        parser.add_argument('--limits', type=float, nargs=2, help='vmin and vmax')
+
     def init(self):
         if self.opts.fit_input:
             self.from_fit()
@@ -48,28 +50,40 @@ class cmd(basecmd):
 
 
     def from_graph(self):
-        chol_blocks = (np.tril(block.cov.data()) for block in self.opts.analysis)
+        chol_blocks = []
+        for i, block in enumerate(self.opts.analysis):
+            data = block.cov.data()
+            if len(data.shape)==1:
+                data = np.diag(data)
+            else:
+                data = np.tril(data)
+            chol_blocks.append(data)
+
         matrix_stack = [np.matmul(chol, chol.T) for chol in chol_blocks]
         self.covmat = self.make_blocked_matrix(matrix_stack)
-        sdiag = np.diagonal(covmat)**0.5
-        self.cormat = covmat/sdiag/sdiag[:,None]
+        sdiag = np.diagonal(self.covmat)**0.5
+        self.cormat = self.covmat/sdiag/sdiag[:,None]
 
     def plot_matrices(self):
         if self.opts.cmap:
             plt.set_cmap(self.opts.cmap)
 
+        kwargs={}
+        if self.opts.limits:
+            kwargs['vmin'], kwargs['vmax'] = self.opts.limits
+
         fig, ax = plt.subplots()
-        im = ax.matshow(self.covmat)
+        im = ax.matshow(self.covmat, **kwargs)
         ax.minorticks_on()
         cbar = fig.colorbar(im)
-        plt.title("Covariance matrix")
+        plt.title("Covariance matrix "+self.opts.title)
 
         savefig(self.opts.savefig, suffix='_cov')
         fig, ax = plt.subplots()
         im = ax.matshow(self.cormat)
         ax.minorticks_on()
         cbar = fig.colorbar(im)
-        plt.title("Correlation matrix")
+        plt.title("Correlation matrix "+self.opts.title)
 
         savefig(self.opts.savefig, suffix='_cor')
 

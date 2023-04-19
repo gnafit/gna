@@ -58,6 +58,43 @@ void TransformationTypes::OutputHandleT<FloatType>::dump() const {
   m_sink->entry->dump(0);
 }
 
+/**
+ * @brief Fill the data from buffer.
+ *
+ * Fills n elements of the data array. If n>n_max, fills n_max.
+ * Notifies the subscribers, but keeps the entry not tainted.
+ *
+ * @param n -- number of elements to write.
+ * @param data -- input data.
+ * @return -- number of elements written.
+ */
+template<typename FloatType>
+size_t TransformationTypes::OutputHandleT<FloatType>::fill(size_t n, FloatType* data) const {
+  if(!m_sink->materialized()){
+    return 0;
+  }
+  auto* entry=m_sink->entry;
+
+  // Ensure entry is up-to-date and not tainted
+  entry->touch_global();
+
+  // Save the frozen state and freeze as the entry should not propagate the taintflag manually
+  // Will raise exception if entry is tainted
+  entry->tainted.freeze();
+  entry->tainted.taint();
+
+  auto& target=*m_sink->data;
+  size_t n_writable=std::min(n, target.type.size());
+  if(n_writable){
+    target.x.head(n_writable) = typename Data<FloatType>::ArrayViewType(data, n_writable);
+  }
+
+  // Notify descendants
+  m_sink->entry->tainted.notify();
+
+  return n_writable;
+}
+
 template class TransformationTypes::OutputHandleT<double>;
 #ifdef PROVIDE_SINGLE_PRECISION
   template class TransformationTypes::OutputHandleT<float>;

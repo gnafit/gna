@@ -1,4 +1,3 @@
-
 import time
 
 def timeit(fcn, n=1, dummy=None, pre=None, pre_dummy=None):

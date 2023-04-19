@@ -36,4 +36,3 @@ void IntegratorGL::sample(FunctionArgs& fargs){
   rets.untaint();
   rets.freeze();
 }
-

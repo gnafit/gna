@@ -4,7 +4,7 @@ from load import ROOT as R
 import numpy as np
 
 """Construct Histogram object from two arrays (edges and data) or from TH1"""
-def Histogram(arg1, arg2=None, *args, **kwargs):
+def Histogram(arg1, arg2=None, /, *args, **kwargs):
     if arg2 is None:
         if isinstance(arg1, R.TH1):
             edges = arg1.GetXaxis().get_bin_edges().astype('d')
@@ -22,7 +22,7 @@ def Histogram(arg1, arg2=None, *args, **kwargs):
     return R.Histogram(data.size, edges, data, *args, **kwargs)
 
 """Construct Histogram2d object from two arrays: edges and data"""
-def Histogram2d(arg1, arg2=None, arg3=None, *args, **kwargs):
+def Histogram2d(arg1, arg2=None, arg3=None, /, *args, **kwargs):
     if arg2 is None and arg3 is None:
         if isinstance(arg1, R.TH2):
             xedges = arg1.GetXaxis().get_bin_edges().astype('d')

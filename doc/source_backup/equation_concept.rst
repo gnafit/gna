@@ -3,7 +3,7 @@ Subsubsection name
 
 .. code-block:: python
 
-    indices = OrderedDict()
+    indices = dict()
     incices['b'] = [ 'acc', 'lihe', 'fastn', 'amc', 'alphan' ]
     indices['c'] = [ 'comp'+str(i) for i in range (1, 4) ]
     indices['i'] = [ 'U5', 'U8', 'Pu9', 'Pu1' ]

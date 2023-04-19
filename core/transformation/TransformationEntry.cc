@@ -57,15 +57,15 @@ EntryT<SourceFloatType,SinkFloatType>::EntryT(const std::string &name, const Bas
 //template<typename SourceFloatType, typename SinkFloatType>
 //EntryT<SourceFloatType,SinkFloatType>::EntryT(const EntryT<SourceFloatType,SinkFloatType> &other, const BaseT<SourceFloatType,SinkFloatType> *parent)
   //: name(other.name), attrs(other.attrs), parent(parent),
-    //sources(other.sources.size()), sinks(other.sinks.size()),
+    //sources(other.sources.size()), sinks(other.sinks.size()), storages(other.storages.size()),
     //mapping(other.mapping),
-    //fun(), typefuns(), typeclasses(), tainted(other.name.c_str()),
+    //fun(other.fun), typefuns(), typeclasses(), functions(),
+    //tainted(), typestainted(), finalized(other.finalized),
     //functionargs(new FunctionArgsType(this)),
     //m_tmanager(other.m_tmanager)
 //{
   //initSourcesSinks(other.sources, other.sinks);
 //}
-
 
 /**
  * @brief Destructor.

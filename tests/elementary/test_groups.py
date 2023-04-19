@@ -1,28 +1,28 @@
 #!/usr/bin/env python
 
 from gna.grouping import *
-from collections import OrderedDict
 
-dets = OrderedDict( [
+
+dets = dict( [
     ('AD11', 1), ('AD12', 2),
     ('AD21', 3), ('AD22', 8),
     ('AD31', 4), ('AD32', 5),
     ('AD33', 6), ('AD33', 7)
     ] )
 
-sites = OrderedDict( [
+sites = dict( [
     ('EH1', 'A'),
     ('EH2', 'B'),
     ('EH3', 'C')
     ] )
 
-groups = OrderedDict( [
+groups = dict( [
     ( 'EH1', ('AD11', 'AD12') ),
     ( 'EH2', ('AD21', 'AD22') ),
     ( 'EH3', ('AD31', 'AD32', 'AD33', 'AD34') ),
     ] )
 
-cat = Categories(OrderedDict(
+cat = Categories(dict(
         site=groups,
         exp ={ '': dets.keys() },
         det ={ d: (d,) for d in dets.keys() }
