@@ -9,7 +9,7 @@ RenormalizeDiag::RenormalizeDiag(size_t ndiag, Target target, Mode mode, const c
 
   auto memberFun = dispatchFunction(target, mode);
   if (memberFun == nullptr) {
-      throw std::runtime_error((fmt::format("Can't dispatch the function in RenormalizeDiag! Passed target {0} and mode {1}", target, mode)));
+      throw std::runtime_error((fmt::format("Can't dispatch the function in RenormalizeDiag! Passed target {0} and mode {1}", (int)target, (int)mode)));
   }
 
   transformation_("renorm")
