@@ -145,12 +145,15 @@ class cmd(basecmd):
             if len(copydef)<2:
                 raise Exception('Invalid number of `copy` arguments: '+str(len(copydef)))
             (frmpath, to), extra = copydef[:2], copydef[2:]
+            kwargs0={}
+            for eitem in extra:
+                kwargs0.update(yaml_load(eitem))
             try:
                 iterator = source.walkitems(startfromkey=frmpath)
             except KeyError:
                 raise Exception('Invalid path: '+str(frmpath))
             for key, obs in iterator:
-                kwargs = yaml_load(extra)
+                kwargs=kwargs0.copy()
                 kwargs.setdefault('name', to.rsplit('.', 1)[-1])
                 try:
                     data = unpack(obs, kwargs)
